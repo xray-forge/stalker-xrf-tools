@@ -1,4 +1,4 @@
-use crate::spawn::alife_spawns_chunk::ALifeSpawnsChunk;
+use crate::spawn::alife_spawns_chunk::ALifeObjectsChunk;
 use crate::spawn::artefact_spawns_chunk::ArtefactSpawnsChunk;
 use crate::spawn::chunk::Chunk;
 use crate::spawn::graphs_chunk::GraphsChunk;
@@ -14,7 +14,7 @@ pub struct SpawnFile {
   pub size: u64,
   pub chunks: Vec<Chunk>,
   pub header: HeaderChunk,
-  pub alife_spawn: ALifeSpawnsChunk,
+  pub alife_spawn: ALifeObjectsChunk,
   pub artefact_spawn: ArtefactSpawnsChunk,
   pub patrols: PatrolsChunk,
   pub graphs: GraphsChunk,
@@ -45,8 +45,8 @@ impl SpawnFile {
       None => None,
     };
 
-    let alife_spawns: Option<ALifeSpawnsChunk> = match chunks.get(1) {
-      Some(chunk) => ALifeSpawnsChunk::from_chunk(&mut file, &chunk),
+    let alife_spawns: Option<ALifeObjectsChunk> = match chunks.get(1) {
+      Some(chunk) => ALifeObjectsChunk::from_chunk(&mut file, &chunk),
       None => None,
     };
 

@@ -1,89 +1,69 @@
-use crate::spawn::chunk::{Chunk, ChunkIterator};
+use crate::spawn::chunk::{Chunk, ChunkIterator, ChunkSliceIterator};
+use crate::spawn::data::alife_object::AlifeObject;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
+use std::fmt;
 
-#[derive(Debug)]
-pub struct ALifeSpawnsChunk {
+pub struct ALifeObjectsChunk {
   pub id: u32,
-  pub count: u32,
+  pub objects: Vec<AlifeObject>,
 }
 
 /// ALife spawns chunk contains3 children entries.
 /// 1 - count of objects
 /// 2 - vertices
 /// 3 - edges
-impl ALifeSpawnsChunk {
+impl ALifeObjectsChunk {
   /// Read spawns chunk by position descriptor.
-  pub fn from_chunk(file: &FileSlice, chunk: &Chunk) -> Option<ALifeSpawnsChunk> {
+  pub fn from_chunk(file: &FileSlice, chunk: &Chunk) -> Option<ALifeObjectsChunk> {
     let mut file: FileSlice = chunk.in_slice(file);
+    let mut objects: Vec<AlifeObject> = Vec::new();
 
-    let count: u32 = Self::read_entities_count(&mut file);
-    let parsed_vertices_count: u32 = Self::read_vertices(&mut file);
+    log::info!(
+      "Parsing alife spawns chunk, {:?} -> {:?}",
+      file.start_pos(),
+      file.end_pos()
+    );
 
-    Self::read_edges(&mut file);
+    let (mut count_slice, _) = Chunk::open_by_index(&mut file, 0).unwrap();
+    let count: u32 = count_slice.read_u32::<LittleEndian>().unwrap();
+
+    let (objects_slice, _) = Chunk::open_by_index(&mut file, 1).unwrap();
+    for (mut object_slice, _) in ChunkSliceIterator::new(&mut objects_slice.clone()) {
+      objects.push(AlifeObject::from_file(&mut object_slice))
+    }
+
+    Self::advance_placeholder_chunk(&mut file);
 
     log::info!("Parsed alife spawns chunk, {count} objects processed");
 
-    assert_eq!(count, parsed_vertices_count);
+    assert_eq!(objects.len(), count as usize);
     assert_eq!(file.cursor_pos(), file.end_pos());
 
-    return Some(ALifeSpawnsChunk {
+    return Some(ALifeObjectsChunk {
       id: chunk.id,
-      count,
+      objects,
     });
   }
 
-  fn read_entities_count(file: &mut FileSlice) -> u32 {
-    let (mut base_slice, _) = Chunk::open_by_index(file, 0).unwrap();
-    base_slice.read_u32::<LittleEndian>().unwrap()
-  }
-
-  fn read_vertices(file: &mut FileSlice) -> u32 {
-    let (vertices_slice, _) = Chunk::open_by_index(file, 1).unwrap();
-    let mut parsed_vertices_count: u32 = 0;
-
-    for it in ChunkIterator::new(&mut vertices_slice.clone()) {
-      let mut vertex_slice: FileSlice = it.in_slice(&vertices_slice);
-
-      let (mut vertex_id_slice, _) =
-        Chunk::open_by_index(&mut vertex_slice, 0).expect("Expected vertex ID chunk to exist.");
-
-      let vertex_id: u16 = vertex_id_slice.read_u16::<LittleEndian>().unwrap();
-
-      let (mut vertex_data_slice, _) =
-        Chunk::open_by_index(&mut vertex_slice, 1).expect("Expected vertex ID chunk to exist.");
-
-      Self::read_object_data(&mut vertex_data_slice);
-
-      // todo: Collect object data here.
-
-      parsed_vertices_count += 1;
-    }
-
-    parsed_vertices_count
-  }
-
-  fn read_object_data(file: &mut FileSlice) -> () {
-    let (mut id_slice, _) =
-      Chunk::open_by_index(file, 1).expect("Expected id chunk to exist in object definition.");
-
-    let id: u32 = id_slice.read_u32::<LittleEndian>().unwrap();
-
-    let (mut data_slice, data_chunk) =
-      Chunk::open_by_index(file, 0).expect("Expected data chunk to exist in object definition.");
-
-    let data_length: u16 = data_slice.read_u16::<LittleEndian>().unwrap();
-
-    assert_eq!(data_length as u32 + 2, data_chunk.size);
-
-    // todo: Parse object.
-  }
-
-  fn read_edges(file: &mut FileSlice) -> () {
+  /// Empty chunk declared as placeholder, unknown purpose.
+  fn advance_placeholder_chunk(file: &mut FileSlice) -> () {
     let (edges_slice, _) = Chunk::open_by_index(file, 2).unwrap();
 
-    if !edges_slice.is_empty() {
-      panic!("Parsing of edges in spawn chunk is not implemented.");
-    }
+    assert!(
+      edges_slice.is_empty(),
+      "Parsing of edges in spawn chunk is not implemented."
+    )
+  }
+}
+
+impl fmt::Debug for ALifeObjectsChunk {
+  fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(
+      formatter,
+      "ALifeObjectsChunk {{ id: {}, objects: Vector[{}] }}",
+      self.id,
+      self.objects.len(),
+    )
   }
 }
