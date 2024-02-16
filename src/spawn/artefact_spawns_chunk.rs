@@ -18,13 +18,13 @@ impl ArtefactSpawnsChunk {
 
     let count: u32 = file.read_u32::<LittleEndian>().unwrap();
 
-    log::info!("Parsing artefacts {count} | {:?}", chunk.size / 20);
+    log::info!("Parsing artefacts: {count}, {:?}", chunk.size / 20);
 
     assert_eq!(count, chunk.size / 20);
 
     // Parsing CLevelPoint structure, 20 bytes per one.
     for _ in 0..count {
-      let position: Vector3d = read_f32_vector(&mut file);
+      let position: Vector3d = read_f32_vector::<LittleEndian>(&mut file);
       let level_vertex_id: u32 = file.read_u32::<LittleEndian>().unwrap();
       let distance: f32 = file.read_f32::<LittleEndian>().unwrap();
 
@@ -32,10 +32,13 @@ impl ArtefactSpawnsChunk {
     }
 
     log::info!(
-      "Parsed artefacts spawns {:?} / {:?}",
+      "Parsed artefacts spawns {:?} / {:?}, {:?} bytes",
       file.cursor_pos(),
-      file.end_pos()
+      file.end_pos(),
+      file.end_pos() - file.start_pos()
     );
+
+    assert_eq!(file.cursor_pos(), file.end_pos());
 
     return Some(ArtefactSpawnsChunk {
       id: chunk.id,

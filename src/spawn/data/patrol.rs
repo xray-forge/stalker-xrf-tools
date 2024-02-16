@@ -1,5 +1,6 @@
 use crate::spawn::chunk::{Chunk, ChunkSliceIterator};
 use crate::spawn::chunk_utils::{read_f32_vector, read_null_terminated_string};
+use crate::spawn::types::Vector3d;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 use std::io::Read;
@@ -115,7 +116,7 @@ pub struct PatrolPoint {
 impl PatrolPoint {
   pub fn from_file(file: &mut FileSlice) -> PatrolPoint {
     let name: String = read_null_terminated_string(file);
-    let position: (f32, f32, f32) = read_f32_vector(file);
+    let position: Vector3d = read_f32_vector::<LittleEndian>(file);
     let flags: u32 = file.read_u32::<LittleEndian>().unwrap();
     let level_vertex_id: u32 = file.read_u32::<LittleEndian>().unwrap();
     let game_vertex_id: u16 = file.read_u16::<LittleEndian>().unwrap();

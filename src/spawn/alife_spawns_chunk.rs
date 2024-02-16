@@ -25,6 +25,7 @@ impl ALifeSpawnsChunk {
     log::info!("Parsed alife spawns chunk, {count} objects processed");
 
     assert_eq!(count, parsed_vertices_count);
+    assert_eq!(file.cursor_pos(), file.end_pos());
 
     return Some(ALifeSpawnsChunk {
       id: chunk.id,

@@ -14,14 +14,23 @@ impl PatrolsChunk {
   pub fn from_chunk(file: &mut FileSlice, chunk: &Chunk) -> Option<PatrolsChunk> {
     let mut file: FileSlice = chunk.in_slice(file);
 
-    log::info!("Parsing patrols");
+    log::info!(
+      "Parsing patrols: {:?} -> {:?}",
+      file.start_pos(),
+      file.end_pos()
+    );
 
     let count: u32 = Self::read_patrols_count(&mut file);
     let patrols: Vec<Patrol> = Self::read_patrols(&mut file, count);
 
-    log::info!("Parsed patrols: {:?} / {count}", patrols.len());
+    log::info!(
+      "Parsed patrols: {:?} / {count}, {:?} bytes",
+      patrols.len(),
+      file.end_pos() - file.start_pos()
+    );
 
     assert_eq!(count, patrols.len() as u32);
+    assert_eq!(file.cursor_pos(), file.end_pos());
 
     return Some(PatrolsChunk {
       id: chunk.id,

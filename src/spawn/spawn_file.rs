@@ -22,19 +22,23 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   pub fn from_path(path: &PathBuf) -> Result<SpawnFile, String> {
-    log::info!("Parsing spawn file: {:?}", path.as_path());
-
     let file: File = File::open(path).unwrap();
     let size: u64 = file.metadata().unwrap().len();
-
     let mut file: FileSlice = FileSlice::new(file);
+
+    log::info!(
+      "Parsing spawn file: {:?}, 0 -> {:?}",
+      path.as_path(),
+      file.end_pos()
+    );
+
     let chunks: Vec<Chunk> = Chunk::read_all(&mut file);
 
-    if chunks.len() != 5 {
-      return Err(String::from(
-        "Unexpected chunks count in spawn file root, expected 5.",
-      ));
-    }
+    assert_eq!(
+      chunks.len(),
+      5,
+      "Unexpected chunks count in spawn file root, expected 5."
+    );
 
     let header: Option<HeaderChunk> = match chunks.get(0) {
       Some(chunk) => HeaderChunk::from_chunk(&mut file, &chunk),

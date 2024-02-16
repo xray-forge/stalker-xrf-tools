@@ -1,18 +1,28 @@
-use crate::spawn::types::Vector3d;
-use byteorder::{LittleEndian, ReadBytesExt};
+use crate::spawn::types::{U8v4, Vector3d};
+use byteorder::{ByteOrder, ReadBytesExt};
 use fileslice::FileSlice;
 use std::io::{Read, Seek, SeekFrom};
 
 /// Read three float values.
-pub fn read_f32_vector(file: &mut FileSlice) -> Vector3d<f32> {
+pub fn read_f32_vector<T: ByteOrder>(file: &mut FileSlice) -> Vector3d<f32> {
   (
-    file.read_f32::<LittleEndian>().unwrap(),
-    file.read_f32::<LittleEndian>().unwrap(),
-    file.read_f32::<LittleEndian>().unwrap(),
+    file.read_f32::<T>().unwrap(),
+    file.read_f32::<T>().unwrap(),
+    file.read_f32::<T>().unwrap(),
   )
 }
 
-/// Read three float values.
+/// Read four bytes in natural order.
+pub fn read_u8v4(file: &mut FileSlice) -> U8v4 {
+  (
+    file.read_u8().unwrap(),
+    file.read_u8().unwrap(),
+    file.read_u8().unwrap(),
+    file.read_u8().unwrap(),
+  )
+}
+
+/// Read null terminated string from file bytes.
 pub fn read_null_terminated_string(file: &mut FileSlice) -> String {
   let offset: u64 = file.seek(SeekFrom::Current(0)).unwrap();
   let mut buffer: Vec<u8> = Vec::new();

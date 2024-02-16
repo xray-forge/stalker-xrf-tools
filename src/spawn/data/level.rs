@@ -15,7 +15,7 @@ pub struct Level {
 impl Level {
   pub fn from_file(file: &mut FileSlice) -> Level {
     let name: String = read_null_terminated_string(file);
-    let offset: Vector3d = read_f32_vector(file);
+    let offset: Vector3d = read_f32_vector::<LittleEndian>(file);
     let id: u8 = file.read_u8().unwrap();
     let section: String = read_null_terminated_string(file);
     let guid: u128 = file.read_u128::<LittleEndian>().unwrap();

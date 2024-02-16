@@ -17,17 +17,24 @@ impl HeaderChunk {
   pub fn from_chunk(file: &mut FileSlice, chunk: &Chunk) -> Option<HeaderChunk> {
     let mut file: FileSlice = chunk.in_slice(file);
 
+    log::info!(
+      "Parsing header chunk, {:?} -> {:?}",
+      file.start_pos(),
+      file.end_pos()
+    );
+
     let version: u32 = file.read_u32::<LittleEndian>().unwrap();
     let guid: u128 = file.read_u128::<LittleEndian>().unwrap();
     let graph_guid: u128 = file.read_u128::<LittleEndian>().unwrap();
     let count: u32 = file.read_u32::<LittleEndian>().unwrap();
     let level_count: u32 = file.read_u32::<LittleEndian>().unwrap();
 
-    if file.cursor_pos() == file.end_pos() {
-      log::info!("Header chunk successfully parsed");
-    } else {
-      log::warn!("Header parser skipped some data");
-    }
+    log::info!(
+      "Parsed header chunk, {:?} bytes",
+      file.end_pos() - file.start_pos()
+    );
+
+    assert_eq!(file.cursor_pos(), file.end_pos());
 
     return Some(HeaderChunk {
       id: chunk.id,
