@@ -1,5 +1,5 @@
 use crate::spawn::types::{U8v4, Vector3d};
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 use std::io::{Read, Seek, SeekFrom};
 
@@ -20,6 +20,34 @@ pub fn read_u8v4(file: &mut FileSlice) -> U8v4 {
     file.read_u8().unwrap(),
     file.read_u8().unwrap(),
   )
+}
+
+/// Read shape data.
+pub fn read_shape_description(file: &mut FileSlice) -> Vec<f32> {
+  let mut shape: Vec<f32> = Vec::new();
+  let count: u8 = file.read_u8().unwrap();
+
+  assert_eq!(count, 1, "Single shape description expected.");
+
+  for _ in 0..count {
+    let shape_type: u8 = file.read_u8().unwrap();
+
+    match shape_type {
+      0 => {
+        for _ in 0..4 {
+          shape.push(file.read_f32::<LittleEndian>().unwrap())
+        }
+      }
+      1 => {
+        for _ in 0..12 {
+          shape.push(file.read_f32::<LittleEndian>().unwrap())
+        }
+      }
+      _ => panic!("Unexpected shape type provided"),
+    }
+  }
+
+  shape
 }
 
 /// Read null terminated string from file bytes.

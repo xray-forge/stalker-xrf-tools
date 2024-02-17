@@ -1,7 +1,9 @@
 use crate::spawn::chunk::Chunk;
 use crate::spawn::chunk_utils::{read_f32_vector, read_null_terminated_string};
 use crate::spawn::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
-use crate::spawn::data::metadata::ClsId;
+use crate::spawn::data::alife::alife_object_breakable::AlifeObjectBreakable;
+use crate::spawn::data::alife::alife_object_climable::AlifeObjectClimable;
+use crate::spawn::data::meta::{AlifeClass, ClsId};
 use crate::spawn::types::Vector3d;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
@@ -53,6 +55,7 @@ impl AlifeObject {
 
     let section: String = read_null_terminated_string(&mut spawn_slice);
     let clsid: ClsId = ClsId::from_section(&section);
+    let class: AlifeClass = AlifeClass::from_cls_id(&clsid);
     let name: String = read_null_terminated_string(&mut spawn_slice);
     let script_game_id: u8 = spawn_slice.read_u8().unwrap();
     let script_rp: u8 = spawn_slice.read_u8().unwrap();
@@ -88,9 +91,9 @@ impl AlifeObject {
       spawn_slice.end_pos() - spawn_slice.cursor_pos()
     );
 
-    // todo: Parse inherited object data.
-    // todo: Parse inherited object data.
-    // todo: Parse inherited object data.
+    assert_ne!(class, AlifeClass::Unknown);
+
+    Self::read_inherited_spawn_data(&mut spawn_slice, &class);
 
     Self::assert_update_data(file);
 
@@ -111,6 +114,18 @@ impl AlifeObject {
       cse_abstract_unknown,
       script_version,
       spawn_id,
+    }
+  }
+
+  fn read_inherited_spawn_data(file: &mut FileSlice, alife_class: &AlifeClass) -> () {
+    match alife_class {
+      AlifeClass::CseAlifeObjectBreakable => {
+        AlifeObjectBreakable::from_file(file);
+      }
+      AlifeClass::CseAlifeObjectClimable => {
+        AlifeObjectClimable::from_file(file);
+      }
+      _ => {}
     }
   }
 

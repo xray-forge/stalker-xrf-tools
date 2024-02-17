@@ -1,5 +1,6 @@
-pub mod alife_object;
+pub mod alife;
 pub mod level;
-pub mod metadata;
+pub mod map;
+pub mod meta;
 pub mod patrol;
 pub mod vertex;
