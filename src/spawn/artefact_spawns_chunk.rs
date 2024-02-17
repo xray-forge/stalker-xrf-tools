@@ -1,6 +1,6 @@
 use crate::spawn::chunk::Chunk;
-use crate::spawn::chunk_utils::read_f32_vector;
 use crate::spawn::types::Vector3d;
+use crate::spawn::utils::read_f32_vector;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 use std::fmt;

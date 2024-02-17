@@ -39,20 +39,20 @@ impl PatrolsChunk {
   }
 
   fn read_patrols_count(file: &mut FileSlice) -> u32 {
-    let (mut base_slice, base_chunk) = Chunk::open_by_index(file, 0).unwrap();
+    let mut base_chunk: Chunk = Chunk::read_by_index(file, 0).unwrap();
 
     assert_eq!(base_chunk.size, 4);
 
-    base_slice.read_u32::<LittleEndian>().unwrap()
+    base_chunk.file.read_u32::<LittleEndian>().unwrap()
   }
 
   fn read_patrols(file: &mut FileSlice, count: u32) -> Vec<Patrol> {
     let mut patrols: Vec<Patrol> = Vec::new();
     let mut index: u32 = 0;
 
-    let (mut patrols_slice, _) = Chunk::open_by_index(file, 1).unwrap();
+    let mut patrols_chunk: Chunk = Chunk::read_by_index(file, 1).unwrap();
 
-    for (mut slice, _) in ChunkSliceIterator::new(&mut patrols_slice) {
+    for (mut slice, _) in ChunkSliceIterator::new(&mut patrols_chunk.file) {
       patrols.push(Patrol::read(&mut slice));
       index += 1;
     }

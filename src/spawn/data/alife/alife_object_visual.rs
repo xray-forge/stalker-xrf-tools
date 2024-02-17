@@ -1,5 +1,5 @@
-use crate::spawn::chunk_utils::read_null_terminated_string;
 use crate::spawn::data::alife::alife_object_abstract::AlifeObjectAbstract;
+use crate::spawn::utils::read_null_terminated_string;
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
 

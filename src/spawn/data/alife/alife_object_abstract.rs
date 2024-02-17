@@ -1,4 +1,4 @@
-use crate::spawn::chunk_utils::read_null_terminated_string;
+use crate::spawn::utils::read_null_terminated_string;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 

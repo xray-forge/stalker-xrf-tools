@@ -1,4 +1,4 @@
-use crate::spawn::types::{U8v4, Vector3d};
+use crate::spawn::types::{U32Bytes, Vector3d};
 use byteorder::{ByteOrder, LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 use std::io::{Read, Seek, SeekFrom};
@@ -13,7 +13,7 @@ pub fn read_f32_vector<T: ByteOrder>(file: &mut FileSlice) -> Vector3d<f32> {
 }
 
 /// Read four bytes in natural order.
-pub fn read_u8v4(file: &mut FileSlice) -> U8v4 {
+pub fn read_u32_bytes(file: &mut FileSlice) -> U32Bytes {
   (
     file.read_u8().unwrap(),
     file.read_u8().unwrap(),

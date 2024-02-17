@@ -1,6 +1,6 @@
 use crate::spawn::chunk::{Chunk, ChunkSliceIterator};
-use crate::spawn::chunk_utils::{read_f32_vector, read_null_terminated_string};
 use crate::spawn::types::Vector3d;
+use crate::spawn::utils::{read_f32_vector, read_null_terminated_string};
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 use std::io::Read;
@@ -16,11 +16,11 @@ impl Patrol {
   pub fn read(file: &mut FileSlice) -> Patrol {
     let name: String = Self::read_name(file);
 
-    let (mut data_slice, _) = Chunk::open_by_index(file, 1).unwrap();
+    let mut data_chunk: Chunk = Chunk::read_by_index(file, 1).unwrap();
 
-    let points_count: u32 = Self::read_points_count(&mut data_slice);
-    let points: Vec<PatrolPoint> = Self::read_points(&mut data_slice);
-    let links: Vec<PatrolLink> = Self::read_links(&mut data_slice);
+    let points_count: u32 = Self::read_points_count(&mut data_chunk.file);
+    let points: Vec<PatrolPoint> = Self::read_points(&mut data_chunk.file);
+    let links: Vec<PatrolLink> = Self::read_links(&mut data_chunk.file);
 
     assert_eq!(points_count, points.len() as u32);
 
@@ -32,10 +32,10 @@ impl Patrol {
   }
 
   fn read_name(file: &mut FileSlice) -> String {
-    let (mut name_slice, name_chunk) = Chunk::open_by_index(file, 0).unwrap();
+    let mut name_chunk: Chunk = Chunk::read_by_index(file, 0).unwrap();
 
     let mut patrol_name: String = String::new();
-    name_slice.read_to_string(&mut patrol_name).unwrap();
+    name_chunk.file.read_to_string(&mut patrol_name).unwrap();
 
     assert_eq!(patrol_name.len(), name_chunk.size as usize);
 
@@ -43,29 +43,31 @@ impl Patrol {
   }
 
   fn read_points_count(file: &mut FileSlice) -> u32 {
-    let (mut points_count_slice, points_count_chunk) = Chunk::open_by_index(file, 0).unwrap();
+    let mut points_count_chunk: Chunk = Chunk::read_by_index(file, 0).unwrap();
 
     assert_eq!(points_count_chunk.size, 4);
 
-    points_count_slice.read_u32::<LittleEndian>().unwrap()
+    points_count_chunk.file.read_u32::<LittleEndian>().unwrap()
   }
 
   fn read_points(file: &mut FileSlice) -> Vec<PatrolPoint> {
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut index: u32 = 0;
 
-    let (mut points_slice, _) = Chunk::open_by_index(file, 1).unwrap();
+    let mut points_chunk: Chunk = Chunk::read_by_index(file, 1).unwrap();
 
-    for (mut point_slice, _) in ChunkSliceIterator::new(&mut points_slice) {
-      let (mut point_index_slice, point_index_chunk) =
-        Chunk::open_by_index(&mut point_slice, 0).unwrap();
+    for (mut point_slice, _) in ChunkSliceIterator::new(&mut points_chunk.file) {
+      let mut point_index_chunk: Chunk = Chunk::read_by_index(&mut point_slice, 0).unwrap();
 
       assert_eq!(point_index_chunk.size, 4);
-      assert_eq!(index, point_index_slice.read_u32::<LittleEndian>().unwrap());
+      assert_eq!(
+        index,
+        point_index_chunk.file.read_u32::<LittleEndian>().unwrap()
+      );
 
-      let (mut point_data_slice, _) = Chunk::open_by_index(&mut point_slice, 1).unwrap();
+      let mut point_data_chunk: Chunk = Chunk::read_by_index(&mut point_slice, 1).unwrap();
 
-      points.push(PatrolPoint::from_file(&mut point_data_slice));
+      points.push(PatrolPoint::from_file(&mut point_data_chunk.file));
 
       index += 1;
     }
@@ -76,18 +78,18 @@ impl Patrol {
   fn read_links(file: &mut FileSlice) -> Vec<PatrolLink> {
     let mut links: Vec<PatrolLink> = Vec::new();
 
-    let (mut links_slice, links_chunk) = Chunk::open_by_index(file, 2).unwrap();
+    let mut links_chunk: Chunk = Chunk::read_by_index(file, 2).unwrap();
 
     if links_chunk.size > 0 {
       let mut index: u32 = 0;
-      let from: u32 = links_slice.read_u32::<LittleEndian>().unwrap();
-      let count: u32 = links_slice.read_u32::<LittleEndian>().unwrap();
+      let from: u32 = links_chunk.file.read_u32::<LittleEndian>().unwrap();
+      let count: u32 = links_chunk.file.read_u32::<LittleEndian>().unwrap();
 
       let mut link: PatrolLink = PatrolLink::new(from);
 
       for _ in 0..count {
-        let to: u32 = links_slice.read_u32::<LittleEndian>().unwrap();
-        let weight: f32 = links_slice.read_f32::<LittleEndian>().unwrap();
+        let to: u32 = links_chunk.file.read_u32::<LittleEndian>().unwrap();
+        let weight: f32 = links_chunk.file.read_f32::<LittleEndian>().unwrap();
 
         link.links.push((to, weight));
         index += 1;

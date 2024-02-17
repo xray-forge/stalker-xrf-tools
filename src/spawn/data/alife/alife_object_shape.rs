@@ -1,5 +1,5 @@
-use crate::spawn::chunk_utils::read_shape_description;
 use crate::spawn::data::alife::alife_object_abstract::AlifeObjectAbstract;
+use crate::spawn::utils::read_shape_description;
 use fileslice::FileSlice;
 
 pub struct AlifeObjectShape {

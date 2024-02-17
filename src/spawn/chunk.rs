@@ -15,6 +15,7 @@ pub struct Chunk {
   pub size: u32,
   pub position: u64,
   pub is_compressed: bool,
+  pub file: FileSlice,
 }
 
 impl Chunk {
@@ -31,11 +32,6 @@ impl Chunk {
     }
 
     None
-  }
-
-  /// Navigates to chunk with index and provides chunk file slice.
-  pub fn open_by_index(file: &mut FileSlice, index: u32) -> Option<(FileSlice, Chunk)> {
-    Self::read_by_index(file, index).and_then(|chunk| Some((chunk.in_slice(file), chunk)))
   }
 }
 
@@ -86,11 +82,17 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
     let chunk_size: u32 = chunk_size.unwrap();
 
     return if self.index == chunk_id & (!CFS_COMPRESS_MARK) {
+      let position: u64 = self.file.seek(SeekFrom::Current(0)).unwrap();
+      let mut file: FileSlice = self.file.slice(position..(position + chunk_size as u64));
+
+      file.seek(SeekFrom::Start(0)).unwrap();
+
       let chunk = Chunk {
         id: chunk_id,
         is_compressed: chunk_id & CFS_COMPRESS_MARK == 1,
         size: chunk_size,
         position: self.file.seek(SeekFrom::Current(0)).unwrap(),
+        file,
       };
 
       if chunk.is_compressed {

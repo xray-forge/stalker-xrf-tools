@@ -1,5 +1,5 @@
-use crate::spawn::chunk_utils::{read_f32_vector, read_null_terminated_string};
 use crate::spawn::types::Vector3d;
+use crate::spawn::utils::{read_f32_vector, read_null_terminated_string};
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 
