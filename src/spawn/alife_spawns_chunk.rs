@@ -1,4 +1,4 @@
-use crate::spawn::chunk::{Chunk, ChunkIterator, ChunkSliceIterator};
+use crate::spawn::chunk::{Chunk, ChunkSliceIterator};
 use crate::spawn::data::alife_object::AlifeObject;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;

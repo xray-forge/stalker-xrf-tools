@@ -48,6 +48,7 @@ impl Chunk {
     return slice;
   }
 
+  #[allow(dead_code)]
   pub fn read_children(&self, file: &FileSlice) -> Vec<Chunk> {
     ChunkIterator::new(&mut file.slice(self.position..(self.position + self.size as u64)))
       .into_iter()
