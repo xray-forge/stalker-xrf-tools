@@ -3,6 +3,8 @@ use crate::data::alife::alife_graph_point::AlifeGraphPoint;
 use crate::data::alife::alife_object_anomalous_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
+use crate::data::alife::alife_object_item::AlifeObjectItem;
+use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
 use crate::data::alife::alife_object_physic::AlifeObjectPhysic;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
@@ -97,6 +99,14 @@ impl AlifeClass {
       AlifeClass::CseAlifeObjectPhysic => {
         let object: AlifeObjectPhysic = AlifeObjectPhysic::from_chunk(chunk);
         AlifeObjectPhysic::verify(chunk);
+      }
+      AlifeClass::CseAlifeItem => {
+        let object: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
+        AlifeObjectItem::verify(chunk);
+      }
+      AlifeClass::CseAlifeItemAmmo => {
+        let object: AlifeObjectItemAmmo = AlifeObjectItemAmmo::from_chunk(chunk);
+        AlifeObjectItemAmmo::verify(chunk);
       }
       _ => {
         log::warn!("Not implemented parser for: {:?}", alife_class)
