@@ -26,5 +26,5 @@ fn main() -> () {
 
   let spawn_file: SpawnFile = SpawnFile::from_path(&arguments.path).unwrap();
 
-  log::info!("Spawn file: {:?}", spawn_file);
+  log::info!("Spawn file: {:?}", spawn_file,);
 }
