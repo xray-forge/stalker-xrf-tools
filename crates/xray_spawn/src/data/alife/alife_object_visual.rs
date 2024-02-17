@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+use crate::data::alife_object::AlifeObjectInherited;
 use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectVisual {
@@ -8,8 +9,8 @@ pub struct AlifeObjectVisual {
   pub visual_flags: u8,
 }
 
-impl AlifeObjectVisual {
-  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectVisual {
+impl AlifeObjectInherited<AlifeObjectVisual> for AlifeObjectVisual {
+  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectVisual {
     let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
 
     let visual_name: String = chunk.read_null_terminated_string().unwrap();

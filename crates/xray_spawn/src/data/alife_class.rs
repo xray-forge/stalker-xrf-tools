@@ -2,6 +2,8 @@ use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_graph_point::AlifeGraphPoint;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
+use crate::data::alife::alife_smart_cover::AlifeSmartCover;
+use crate::data::alife_object::AlifeObjectInherited;
 use enum_map::Enum;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
@@ -60,6 +62,9 @@ pub enum AlifeClass {
 }
 
 impl AlifeClass {
+  /// Read custom save data based on serialized clsid.
+  /// Represents STATE_Read of each separate object in xray implementation.
+  /// Additionally should respect script extension.
   pub fn read_by_class(chunk: &mut Chunk, alife_class: &AlifeClass) -> () {
     match alife_class {
       AlifeClass::CseAlifeObjectBreakable => {
@@ -71,7 +76,12 @@ impl AlifeClass {
       AlifeClass::CseAlifeGraphPoint => {
         AlifeGraphPoint::from_chunk(chunk);
       }
-      _ => {}
+      AlifeClass::SeSmartCover => {
+        AlifeSmartCover::from_chunk(chunk);
+      }
+      _ => {
+        log::warn!("Not implemented parser for: {:?}", alife_class)
+      }
     }
   }
 }

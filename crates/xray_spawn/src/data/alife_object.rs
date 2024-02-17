@@ -49,6 +49,7 @@ impl AlifeObject {
 
     assert_eq!(data_length as u32 + 2, spawn_chunk.size);
 
+    // todo: Is it net packet action id?
     let dummy: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
     assert_eq!(dummy, 1);
@@ -129,5 +130,17 @@ impl AlifeObject {
     assert_eq!(data_length as u32 + 2, update_chunk.size);
     assert_eq!(update_size, 0);
     assert_eq!(chunk.read_bytes_remain(), 0);
+  }
+}
+
+pub trait AlifeObjectInherited<T> {
+  fn from_chunk(chunk: &mut Chunk) -> T;
+
+  fn verify(chunk: &Chunk) -> () {
+    assert_eq!(
+      chunk.read_bytes_remain(),
+      0,
+      "Expected all data to be read from chunk."
+    );
   }
 }

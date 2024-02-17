@@ -127,11 +127,13 @@ impl Chunk {
     let shape_type: u8 = self.read_u8()?;
 
     match shape_type {
+      // Sphere -> vector3d + radius.
       0 => {
         for _ in 0..4 {
           shape.push(self.read_f32::<T>()?)
         }
       }
+      // Rect -> 4 vector3d.
       1 => {
         for _ in 0..12 {
           shape.push(self.read_f32::<T>()?)

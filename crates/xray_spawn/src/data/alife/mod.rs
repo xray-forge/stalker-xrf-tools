@@ -2,5 +2,8 @@ pub mod alife_graph_point;
 pub mod alife_object_abstract;
 pub mod alife_object_breakable;
 pub mod alife_object_climable;
+pub mod alife_object_dynamic;
 pub mod alife_object_shape;
+pub mod alife_object_smart_cover;
 pub mod alife_object_visual;
+pub mod alife_smart_cover;
