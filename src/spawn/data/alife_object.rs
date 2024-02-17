@@ -1,8 +1,6 @@
 use crate::spawn::chunk::Chunk;
 use crate::spawn::chunk_utils::{read_f32_vector, read_null_terminated_string};
 use crate::spawn::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
-use crate::spawn::data::alife::alife_object_breakable::AlifeObjectBreakable;
-use crate::spawn::data::alife::alife_object_climable::AlifeObjectClimable;
 use crate::spawn::data::meta::{AlifeClass, ClsId};
 use crate::spawn::types::Vector3d;
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -93,7 +91,7 @@ impl AlifeObject {
 
     assert_ne!(class, AlifeClass::Unknown);
 
-    Self::read_inherited_spawn_data(&mut spawn_slice, &class);
+    AlifeClass::read_by_class(&mut spawn_slice, &class);
 
     Self::assert_update_data(file);
 
@@ -114,18 +112,6 @@ impl AlifeObject {
       cse_abstract_unknown,
       script_version,
       spawn_id,
-    }
-  }
-
-  fn read_inherited_spawn_data(file: &mut FileSlice, alife_class: &AlifeClass) -> () {
-    match alife_class {
-      AlifeClass::CseAlifeObjectBreakable => {
-        AlifeObjectBreakable::from_file(file);
-      }
-      AlifeClass::CseAlifeObjectClimable => {
-        AlifeObjectClimable::from_file(file);
-      }
-      _ => {}
     }
   }
 

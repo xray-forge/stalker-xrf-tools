@@ -1,21 +1,16 @@
-use crate::spawn::chunk_utils::{read_null_terminated_string, read_shape_description};
-use byteorder::{LittleEndian, ReadBytesExt};
+use crate::spawn::chunk_utils::read_null_terminated_string;
+use crate::spawn::data::alife::alife_object_shape::AlifeObjectShape;
 use fileslice::FileSlice;
 
-pub struct AlifeObjectClimable {}
+pub struct AlifeObjectClimable {
+  pub base: AlifeObjectShape,
+  pub game_material: String,
+}
 
 impl AlifeObjectClimable {
   pub fn from_file(file: &mut FileSlice) -> AlifeObjectClimable {
-    let game_vertex_id: u16 = file.read_u16::<LittleEndian>().unwrap();
-    let distance: f32 = file.read_f32::<LittleEndian>().unwrap();
-    let direct_control: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let level_vertex_id: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let flags: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let custom_data: String = read_null_terminated_string(file);
-    let story_id: i32 = file.read_i32::<LittleEndian>().unwrap();
-    let spawn_story_id: i32 = file.read_i32::<LittleEndian>().unwrap();
+    let base: AlifeObjectShape = AlifeObjectShape::from_file(file);
 
-    let shapes: Vec<f32> = read_shape_description(file);
     let game_material: String = read_null_terminated_string(file);
 
     assert_eq!(
@@ -24,6 +19,9 @@ impl AlifeObjectClimable {
       "Expected all data to be read from chunk."
     );
 
-    AlifeObjectClimable {}
+    AlifeObjectClimable {
+      base,
+      game_material,
+    }
   }
 }

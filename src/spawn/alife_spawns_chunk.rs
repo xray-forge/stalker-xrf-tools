@@ -1,5 +1,5 @@
 use crate::spawn::chunk::{Chunk, ChunkSliceIterator};
-use crate::spawn::data::alife::alife_object::AlifeObject;
+use crate::spawn::data::alife_object::AlifeObject;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
 use std::fmt;

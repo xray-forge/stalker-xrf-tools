@@ -1,7 +1,10 @@
 #![allow(dead_code)]
 
+use crate::spawn::data::alife::alife_object_breakable::AlifeObjectBreakable;
+use crate::spawn::data::alife::alife_object_climable::AlifeObjectClimable;
 use crate::spawn::data::map::{CLS_ID_TO_CLASS, SECTION_TO_CLS_ID};
 use enum_map::Enum;
+use fileslice::FileSlice;
 use std::ops::Index;
 
 /// todo: Add script to parse system ini and read all the data from ini/txt file instead.
@@ -173,5 +176,17 @@ pub enum AlifeClass {
 impl AlifeClass {
   pub fn from_cls_id(cls_id: &ClsId) -> AlifeClass {
     CLS_ID_TO_CLASS.index(cls_id.clone()).clone()
+  }
+
+  pub fn read_by_class(file: &mut FileSlice, alife_class: &AlifeClass) -> () {
+    match alife_class {
+      AlifeClass::CseAlifeObjectBreakable => {
+        AlifeObjectBreakable::from_file(file);
+      }
+      AlifeClass::CseAlifeObjectClimable => {
+        AlifeObjectClimable::from_file(file);
+      }
+      _ => {}
+    }
   }
 }
