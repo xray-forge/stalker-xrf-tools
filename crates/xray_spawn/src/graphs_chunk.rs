@@ -41,7 +41,7 @@ impl GraphsChunk {
     }
 
     for _ in 0..vertex_count {
-      vertices.push(Vertex::from_file(&mut chunk));
+      vertices.push(Vertex::from_chunk(&mut chunk));
     }
 
     log::info!(

@@ -7,7 +7,7 @@ pub struct AlifeObjectClimable {
 }
 
 impl AlifeObjectClimable {
-  pub fn from_file(chunk: &mut Chunk) -> AlifeObjectClimable {
+  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectClimable {
     let base: AlifeObjectShape = AlifeObjectShape::from_chunk(chunk);
 
     let game_material: String = chunk.read_null_terminated_string().unwrap();

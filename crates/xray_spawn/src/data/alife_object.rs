@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
-use crate::data::meta::{AlifeClass, ClsId};
+use crate::data::alife_class::AlifeClass;
+use crate::data::cls_id::ClsId;
 use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 

@@ -65,7 +65,7 @@ impl Patrol {
 
       let mut point_data_chunk: Chunk = point_chunk.read_child_by_index(1).unwrap();
 
-      points.push(PatrolPoint::from_file(&mut point_data_chunk));
+      points.push(PatrolPoint::from_chunk(&mut point_data_chunk));
 
       index += 1;
     }
@@ -113,7 +113,7 @@ pub struct PatrolPoint {
 }
 
 impl PatrolPoint {
-  pub fn from_file(chunk: &mut Chunk) -> PatrolPoint {
+  pub fn from_chunk(chunk: &mut Chunk) -> PatrolPoint {
     let name: String = chunk.read_null_terminated_string().unwrap();
     let position: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
     let flags: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
