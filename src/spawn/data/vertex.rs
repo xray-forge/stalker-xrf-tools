@@ -1,7 +1,6 @@
-use crate::spawn::types::{U32Bytes, Vector3d};
-use crate::spawn::utils::{read_f32_vector, read_u32_bytes};
-use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
+use crate::spawn::chunk::Chunk;
+use crate::spawn::types::{SpawnByteOrder, U32Bytes, Vector3d};
+use byteorder::ReadBytesExt;
 
 #[derive(Debug)]
 pub struct Vertex {
@@ -17,16 +16,16 @@ pub struct Vertex {
 }
 
 impl Vertex {
-  pub fn from_file(file: &mut FileSlice) -> Vertex {
-    let level_point: Vector3d = read_f32_vector::<LittleEndian>(file);
-    let game_point: Vector3d = read_f32_vector::<LittleEndian>(file);
-    let level_id: u8 = file.read_u8().unwrap();
-    let level_vertex_id: u32 = file.read_u24::<LittleEndian>().unwrap();
-    let vertex_type: U32Bytes = read_u32_bytes(file);
-    let edge_offset: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let level_point_offset: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let edge_count: u8 = file.read_u8().unwrap();
-    let level_point_count: u8 = file.read_u8().unwrap();
+  pub fn from_file(chunk: &mut Chunk) -> Vertex {
+    let level_point: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let game_point: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let level_id: u8 = chunk.read_u8().unwrap();
+    let level_vertex_id: u32 = chunk.read_u24::<SpawnByteOrder>().unwrap();
+    let vertex_type: U32Bytes = chunk.read_u32_bytes().unwrap();
+    let edge_offset: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let level_point_offset: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let edge_count: u8 = chunk.read_u8().unwrap();
+    let level_point_count: u8 = chunk.read_u8().unwrap();
 
     Vertex {
       level_point,

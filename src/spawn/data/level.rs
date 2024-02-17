@@ -1,7 +1,6 @@
-use crate::spawn::types::Vector3d;
-use crate::spawn::utils::{read_f32_vector, read_null_terminated_string};
-use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
+use crate::spawn::chunk::Chunk;
+use crate::spawn::types::{SpawnByteOrder, Vector3d};
+use byteorder::ReadBytesExt;
 
 #[derive(Debug)]
 pub struct Level {
@@ -13,12 +12,12 @@ pub struct Level {
 }
 
 impl Level {
-  pub fn from_file(file: &mut FileSlice) -> Level {
-    let name: String = read_null_terminated_string(file);
-    let offset: Vector3d = read_f32_vector::<LittleEndian>(file);
-    let id: u8 = file.read_u8().unwrap();
-    let section: String = read_null_terminated_string(file);
-    let guid: u128 = file.read_u128::<LittleEndian>().unwrap();
+  pub fn from_chunk(chunk: &mut Chunk) -> Level {
+    let name: String = chunk.read_null_terminated_string().unwrap();
+    let offset: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let id: u8 = chunk.read_u8().unwrap();
+    let section: String = chunk.read_null_terminated_string().unwrap();
+    let guid: u128 = chunk.read_u128::<SpawnByteOrder>().unwrap();
 
     Level {
       id,

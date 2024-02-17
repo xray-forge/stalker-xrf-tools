@@ -25,10 +25,10 @@ impl ALifeObjectsChunk {
       file.end_pos()
     );
 
-    let mut count_chunk: Chunk = Chunk::read_by_index(&mut file, 0).unwrap();
+    let mut count_chunk: Chunk = Chunk::read_by_index_old(&mut file, 0).unwrap();
     let count: u32 = count_chunk.file.read_u32::<LittleEndian>().unwrap();
 
-    let mut objects_chunk: Chunk = Chunk::read_by_index(&mut file, 1).unwrap();
+    let objects_chunk: Chunk = Chunk::read_by_index_old(&mut file, 1).unwrap();
     for (mut object_slice, _) in ChunkSliceIterator::new(&mut objects_chunk.file.clone()) {
       objects.push(AlifeObject::from_file(&mut object_slice))
     }
@@ -48,7 +48,7 @@ impl ALifeObjectsChunk {
 
   /// Empty chunk declared as placeholder, unknown purpose.
   fn advance_placeholder_chunk(file: &mut FileSlice) -> () {
-    let edges_chunk: Chunk = Chunk::read_by_index(file, 2).unwrap();
+    let edges_chunk: Chunk = Chunk::read_by_index_old(file, 2).unwrap();
 
     assert!(
       edges_chunk.file.is_empty(),

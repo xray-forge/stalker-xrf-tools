@@ -1,6 +1,6 @@
 use crate::spawn::chunk::Chunk;
-use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
+use crate::spawn::types::SpawnByteOrder;
+use byteorder::ReadBytesExt;
 
 #[derive(Debug)]
 pub struct HeaderChunk {
@@ -14,27 +14,21 @@ pub struct HeaderChunk {
 
 impl HeaderChunk {
   /// Read header chunk by position descriptor.
-  pub fn from_chunk(file: &mut FileSlice, chunk: &Chunk) -> Option<HeaderChunk> {
-    let mut file: FileSlice = chunk.in_slice(file);
-
+  pub fn from_chunk(mut chunk: Chunk) -> Option<HeaderChunk> {
     log::info!(
       "Parsing header chunk, {:?} -> {:?}",
-      file.start_pos(),
-      file.end_pos()
+      chunk.start_pos(),
+      chunk.end_pos()
     );
 
-    let version: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let guid: u128 = file.read_u128::<LittleEndian>().unwrap();
-    let graph_guid: u128 = file.read_u128::<LittleEndian>().unwrap();
-    let count: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let level_count: u32 = file.read_u32::<LittleEndian>().unwrap();
+    let version: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let guid: u128 = chunk.read_u128::<SpawnByteOrder>().unwrap();
+    let graph_guid: u128 = chunk.read_u128::<SpawnByteOrder>().unwrap();
+    let count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let level_count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
 
-    log::info!(
-      "Parsed header chunk, {:?} bytes",
-      file.end_pos() - file.start_pos()
-    );
-
-    assert_eq!(file.cursor_pos(), file.end_pos());
+    log::info!("Parsed header chunk, {:?} bytes", chunk.read_bytes_len());
+    assert_eq!(chunk.read_bytes_remain(), 0);
 
     return Some(HeaderChunk {
       id: chunk.id,

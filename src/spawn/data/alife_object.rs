@@ -29,19 +29,19 @@ pub struct AlifeObject {
 impl AlifeObject {
   pub fn from_file(file: &mut FileSlice) -> AlifeObject {
     let mut id_chunk: Chunk =
-      Chunk::read_by_index(file, 0).expect("Expected vertex ID chunk to exist.");
+      Chunk::read_by_index_old(file, 0).expect("Expected vertex ID chunk to exist.");
 
     let _id: u16 = id_chunk.file.read_u16::<LittleEndian>().unwrap();
 
     let mut vertex_data_chunk: Chunk =
-      Chunk::read_by_index(file, 1).expect("Expected vertex data chunk to exist.");
+      Chunk::read_by_index_old(file, 1).expect("Expected vertex data chunk to exist.");
 
     Self::read_object_data(&mut vertex_data_chunk.file)
   }
 
   fn read_object_data(file: &mut FileSlice) -> AlifeObject {
-    let mut spawn_chunk: Chunk =
-      Chunk::read_by_index(file, 0).expect("Expected data chunk to exist in object definition.");
+    let mut spawn_chunk: Chunk = Chunk::read_by_index_old(file, 0)
+      .expect("Expected data chunk to exist in object definition.");
 
     let data_length: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
 
@@ -117,8 +117,8 @@ impl AlifeObject {
 
   /// Validate that read data is correct and does not contain update information.
   fn assert_update_data(file: &mut FileSlice) -> () {
-    let mut update_chunk: Chunk =
-      Chunk::read_by_index(file, 1).expect("Expected data chunk to exist in object definition.");
+    let mut update_chunk: Chunk = Chunk::read_by_index_old(file, 1)
+      .expect("Expected data chunk to exist in object definition.");
 
     let data_length: u16 = update_chunk.file.read_u16::<LittleEndian>().unwrap();
     let update_size: u16 = update_chunk.file.read_u16::<LittleEndian>().unwrap();

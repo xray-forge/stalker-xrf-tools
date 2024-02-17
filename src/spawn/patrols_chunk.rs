@@ -1,7 +1,7 @@
-use crate::spawn::chunk::{Chunk, ChunkSliceIterator};
+use crate::spawn::chunk::{Chunk, ChunkIterator};
 use crate::spawn::data::patrol::Patrol;
-use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
+use crate::spawn::types::SpawnByteOrder;
+use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct PatrolsChunk {
@@ -11,26 +11,24 @@ pub struct PatrolsChunk {
 
 impl PatrolsChunk {
   /// Read patrols chunk by position descriptor.
-  pub fn from_chunk(file: &mut FileSlice, chunk: &Chunk) -> Option<PatrolsChunk> {
-    let mut file: FileSlice = chunk.in_slice(file);
-
+  pub fn from_chunk(mut chunk: Chunk) -> Option<PatrolsChunk> {
     log::info!(
       "Parsing patrols: {:?} -> {:?}",
-      file.start_pos(),
-      file.end_pos()
+      chunk.start_pos(),
+      chunk.end_pos()
     );
 
-    let count: u32 = Self::read_patrols_count(&mut file);
-    let patrols: Vec<Patrol> = Self::read_patrols(&mut file, count);
+    let count: u32 = Self::read_patrols_count(&mut chunk);
+    let patrols: Vec<Patrol> = Self::read_patrols(&mut chunk, count);
 
     log::info!(
       "Parsed patrols: {:?} / {count}, {:?} bytes",
       patrols.len(),
-      file.end_pos() - file.start_pos()
+      chunk.read_bytes_len()
     );
 
+    assert_eq!(chunk.read_bytes_remain(), 0);
     assert_eq!(count, patrols.len() as u32);
-    assert_eq!(file.cursor_pos(), file.end_pos());
 
     return Some(PatrolsChunk {
       id: chunk.id,
@@ -38,22 +36,21 @@ impl PatrolsChunk {
     });
   }
 
-  fn read_patrols_count(file: &mut FileSlice) -> u32 {
-    let mut base_chunk: Chunk = Chunk::read_by_index(file, 0).unwrap();
+  fn read_patrols_count(chunk: &mut Chunk) -> u32 {
+    let mut base_chunk: Chunk = chunk.read_by_index(0).unwrap();
 
     assert_eq!(base_chunk.size, 4);
 
-    base_chunk.file.read_u32::<LittleEndian>().unwrap()
+    base_chunk.read_u32::<SpawnByteOrder>().unwrap()
   }
 
-  fn read_patrols(file: &mut FileSlice, count: u32) -> Vec<Patrol> {
+  fn read_patrols(chunk: &mut Chunk, count: u32) -> Vec<Patrol> {
+    let mut patrols_chunk: Chunk = chunk.read_by_index(1).unwrap();
     let mut patrols: Vec<Patrol> = Vec::new();
     let mut index: u32 = 0;
 
-    let mut patrols_chunk: Chunk = Chunk::read_by_index(file, 1).unwrap();
-
-    for (mut slice, _) in ChunkSliceIterator::new(&mut patrols_chunk.file) {
-      patrols.push(Patrol::read(&mut slice));
+    for mut patrol_chunk in ChunkIterator::new(&mut patrols_chunk.file) {
+      patrols.push(Patrol::from_chunk(&mut patrol_chunk));
       index += 1;
     }
 

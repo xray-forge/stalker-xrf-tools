@@ -9,6 +9,14 @@ use std::fs::File;
 use std::path::PathBuf;
 
 /// Descriptor of generic spawn file used by xray game engine.
+///
+/// Root level chunks by ID:
+/// 0 - header
+/// 1 - alife spawns
+/// 2 - alife objects
+/// 3 - patrols
+/// 4 - game graphs
+///
 #[derive(Debug)]
 pub struct SpawnFile {
   pub size: u64,
@@ -41,7 +49,7 @@ impl SpawnFile {
     );
 
     let header: Option<HeaderChunk> = match chunks.get(0) {
-      Some(chunk) => HeaderChunk::from_chunk(&mut file, &chunk),
+      Some(chunk) => HeaderChunk::from_chunk(chunk.clone()),
       None => None,
     };
 
@@ -56,12 +64,12 @@ impl SpawnFile {
     };
 
     let patrols: Option<PatrolsChunk> = match chunks.get(3) {
-      Some(chunk) => PatrolsChunk::from_chunk(&mut file, &chunk),
+      Some(chunk) => PatrolsChunk::from_chunk(chunk.clone()),
       None => None,
     };
 
     let graphs: Option<GraphsChunk> = match chunks.get(4) {
-      Some(chunk) => GraphsChunk::from_chunk(&mut file, &chunk),
+      Some(chunk) => GraphsChunk::from_chunk(chunk.clone()),
       None => None,
     };
 

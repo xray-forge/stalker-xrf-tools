@@ -2,7 +2,6 @@ use crate::spawn::chunk::Chunk;
 use crate::spawn::data::level::Level;
 use crate::spawn::data::vertex::Vertex;
 use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
 use std::fmt;
 
 pub struct GraphsChunk {
@@ -19,38 +18,35 @@ pub struct GraphsChunk {
 
 impl GraphsChunk {
   /// Read patrols chunk by position descriptor.
-  pub fn from_chunk(file: &mut FileSlice, chunk: &Chunk) -> Option<GraphsChunk> {
-    let mut file: FileSlice = chunk.in_slice(file);
-
+  pub fn from_chunk(mut chunk: Chunk) -> Option<GraphsChunk> {
     log::info!(
       "Parsing level graphs, {:?} -> {:?}",
-      file.start_pos(),
-      file.end_pos()
+      chunk.start_pos(),
+      chunk.end_pos()
     );
 
-    let version: u8 = file.read_u8().unwrap();
-    let vertex_count: u16 = file.read_u16::<LittleEndian>().unwrap();
-    let edge_count: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let point_count: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let guid: u128 = file.read_u128::<LittleEndian>().unwrap();
-    let level_count: u8 = file.read_u8().unwrap();
+    let version: u8 = chunk.read_u8().unwrap();
+    let vertex_count: u16 = chunk.read_u16::<LittleEndian>().unwrap();
+    let edge_count: u32 = chunk.read_u32::<LittleEndian>().unwrap();
+    let point_count: u32 = chunk.read_u32::<LittleEndian>().unwrap();
+    let guid: u128 = chunk.read_u128::<LittleEndian>().unwrap();
+    let level_count: u8 = chunk.read_u8().unwrap();
 
     let mut levels: Vec<Level> = Vec::new();
     let mut vertices: Vec<Vertex> = Vec::new();
 
     for _ in 0..level_count {
-      levels.push(Level::from_file(&mut file))
+      levels.push(Level::from_chunk(&mut chunk))
     }
 
     for _ in 0..vertex_count {
-      vertices.push(Vertex::from_file(&mut file));
+      vertices.push(Vertex::from_file(&mut chunk));
     }
 
     log::info!(
-      "Parsed graphs v{version}, {:?} / {:?}, {:?} left",
-      file.cursor_pos(),
-      file.end_pos(),
-      file.end_pos() - file.cursor_pos()
+      "Parsed graphs v{version}, {:?} processed, {:?} left",
+      chunk.read_bytes_len(),
+      chunk.read_bytes_remain()
     );
 
     assert_eq!(levels.len(), level_count as usize);

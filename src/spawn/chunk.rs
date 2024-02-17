@@ -1,15 +1,13 @@
 use crate::spawn::constants::CFS_COMPRESS_MARK;
-use byteorder::{LittleEndian, ReadBytesExt};
+use crate::spawn::types::{U32Bytes, Vector3d};
+use byteorder::{ByteOrder, LittleEndian, ReadBytesExt};
+use bytes::Bytes;
 use fileslice::FileSlice;
-use std::io::{Seek, SeekFrom};
+use parquet::file::reader::{ChunkReader, Length};
+use std::io;
+use std::io::{Read, Seek, SeekFrom};
 
-/// Root level chunks by ID:
-/// 0 - header
-/// 1 - alife spawns
-/// 2 - alife objects
-/// 3 - patrols
-/// 4 - game graphs
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Chunk {
   pub id: u32,
   pub size: u32,
@@ -24,7 +22,7 @@ impl Chunk {
   }
 
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_by_index(file: &mut FileSlice, index: u32) -> Option<Chunk> {
+  pub fn read_by_index_old(file: &mut FileSlice, index: u32) -> Option<Chunk> {
     for (iteration, chunk) in ChunkIterator::new(file).enumerate() {
       if index as usize == iteration {
         return Some(chunk);
@@ -36,6 +34,40 @@ impl Chunk {
 }
 
 impl Chunk {
+  pub fn start_pos(&self) -> u64 {
+    self.file.start_pos()
+  }
+
+  pub fn end_pos(&self) -> u64 {
+    self.file.end_pos()
+  }
+
+  #[allow(dead_code)]
+  pub fn cursor_pos(&self) -> u64 {
+    self.file.cursor_pos()
+  }
+
+  pub fn read_bytes_len(&self) -> u64 {
+    self.file.cursor_pos() - self.file.start_pos()
+  }
+
+  pub fn read_bytes_remain(&self) -> u64 {
+    self.file.end_pos() - self.file.cursor_pos()
+  }
+}
+
+impl Chunk {
+  /// Navigates to chunk with index and constructs chunk representation.
+  pub fn read_by_index(&mut self, index: u32) -> Option<Chunk> {
+    for (iteration, chunk) in ChunkIterator::new(&mut self.file).enumerate() {
+      if index as usize == iteration {
+        return Some(chunk);
+      }
+    }
+
+    None
+  }
+
   pub fn in_slice(&self, file: &FileSlice) -> FileSlice {
     let mut slice: FileSlice = file.slice(self.position..(self.position + self.size as u64));
 
@@ -49,6 +81,83 @@ impl Chunk {
     ChunkIterator::new(&mut file.slice(self.position..(self.position + self.size as u64)))
       .into_iter()
       .collect()
+  }
+
+  #[allow(dead_code)]
+  pub fn reset(&mut self) -> io::Result<u64> {
+    self.file.seek(SeekFrom::Start(0))
+  }
+}
+
+impl Chunk {
+  /// Read three float values.
+  pub fn read_f32_vector<T: ByteOrder>(&mut self) -> io::Result<Vector3d<f32>> {
+    Ok((
+      self.read_f32::<T>()?,
+      self.read_f32::<T>()?,
+      self.read_f32::<T>()?,
+    ))
+  }
+
+  pub fn read_u32_bytes(&mut self) -> io::Result<U32Bytes> {
+    Ok((
+      self.read_u8()?,
+      self.read_u8()?,
+      self.read_u8()?,
+      self.read_u8()?,
+    ))
+  }
+
+  /// Read null terminated string from file bytes.
+  pub fn read_null_terminated_string(&mut self) -> io::Result<String> {
+    let offset: u64 = self.file.seek(SeekFrom::Current(0))?;
+    let mut buffer: Vec<u8> = Vec::new();
+
+    self.file.read_to_end(&mut buffer)?;
+
+    if let Some(position) = buffer.iter().position(|&x| x == 0x00) {
+      let value: String =
+        String::from_utf8(buffer[..position].to_vec()).expect("Correct string read.");
+
+      // Put seek right after string - length plus zero terminator.
+      self
+        .file
+        .seek(SeekFrom::Start(offset + value.len() as u64 + 1))
+        .expect("Correct object seek movement.");
+
+      return Ok(value);
+    } else {
+      panic!("No null terminator found in file");
+    }
+  }
+}
+
+impl Length for Chunk {
+  fn len(&self) -> u64 {
+    self.file.end_pos() - self.file.start_pos()
+  }
+}
+
+impl ChunkReader for Chunk {
+  type T = FileSlice;
+
+  fn get_read(&self, start: u64) -> parquet::errors::Result<FileSlice> {
+    Ok(self.file.slice(start..self.file.end_pos()))
+  }
+
+  fn get_bytes(&self, start: u64, length: usize) -> parquet::errors::Result<Bytes> {
+    let mut buf = vec![0; length];
+    self
+      .file
+      .slice(start..(start + length as u64))
+      .read_exact(&mut buf)?;
+    Ok(buf.into())
+  }
+}
+
+impl Read for Chunk {
+  fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    return self.file.read(buf);
   }
 }
 
