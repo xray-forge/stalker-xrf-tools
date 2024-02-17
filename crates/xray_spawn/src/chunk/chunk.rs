@@ -2,8 +2,11 @@ use crate::chunk::iterator::ChunkIterator;
 use crate::data::shape::Shape;
 use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt};
+use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
+use std::borrow::Cow;
 use std::io::{Read, Seek, SeekFrom};
+use std::string::FromUtf8Error;
 use std::{fmt, io};
 
 #[derive(Clone)]
@@ -108,13 +111,29 @@ impl Chunk {
     self.file.read_to_end(&mut buffer)?;
 
     if let Some(position) = buffer.iter().position(|&x| x == 0x00) {
-      let value: String =
-        String::from_utf8(buffer[..position].to_vec()).expect("Correct string read.");
+      let slice: &[u8] = &buffer[..position];
+      let value: Result<String, FromUtf8Error> = String::from_utf8(slice.to_vec());
+      let value: String = match value {
+        Ok(it) => it,
+        Err(_) => {
+          let (transforemed, _encoding_used, had_errors) = WINDOWS_1251.decode(slice);
+
+          if had_errors {
+            panic!("Unexpected errors when coverting windows-1251 string data.");
+          }
+
+          // Retry with windows 1251 conversion:
+          match transforemed {
+            Cow::Borrowed(value) => String::from(value),
+            Cow::Owned(value) => value,
+          }
+        }
+      };
 
       // Put seek right after string - length plus zero terminator.
       self
         .file
-        .seek(SeekFrom::Start(offset + value.len() as u64 + 1))
+        .seek(SeekFrom::Start(offset + position as u64 + 1))
         .expect("Correct object seek movement.");
 
       return Ok(value);
@@ -128,7 +147,7 @@ impl Chunk {
     let mut shapes: Vec<Shape> = Vec::new();
     let count: u8 = self.read_u8().expect("Count flag to be read.");
 
-    for index in 0..count {
+    for _ in 0..count {
       match self.read_u8().expect("Shape type to be read.") {
         0 => shapes.push(Shape::Sphere(self.read_sphere::<T>()?)),
         1 => shapes.push(Shape::Box(self.read_matrix::<T>()?)),

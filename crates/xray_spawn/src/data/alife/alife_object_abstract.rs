@@ -10,8 +10,8 @@ pub struct AlifeObjectAbstract {
   pub level_vertex_id: u32,
   pub flags: u32,
   pub custom_data: String,
-  pub story_id: i32,
-  pub spawn_story_id: i32,
+  pub story_id: u32,
+  pub spawn_story_id: u32,
 }
 
 impl AlifeObjectInherited<AlifeObjectAbstract> for AlifeObjectAbstract {
@@ -22,8 +22,8 @@ impl AlifeObjectInherited<AlifeObjectAbstract> for AlifeObjectAbstract {
     let level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let flags: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let custom_data: String = chunk.read_null_terminated_string().unwrap();
-    let story_id: i32 = chunk.read_i32::<SpawnByteOrder>().unwrap();
-    let spawn_story_id: i32 = chunk.read_i32::<SpawnByteOrder>().unwrap();
+    let story_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let spawn_story_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
 
     AlifeObjectAbstract {
       game_vertex_id,

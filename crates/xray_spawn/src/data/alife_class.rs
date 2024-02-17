@@ -3,6 +3,7 @@ use crate::data::alife::alife_graph_point::AlifeGraphPoint;
 use crate::data::alife::alife_object_anomalous_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
+use crate::data::alife::alife_object_physic::AlifeObjectPhysic;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife_object::AlifeObjectInherited;
@@ -71,15 +72,15 @@ impl AlifeClass {
     match alife_class {
       AlifeClass::CseAlifeObjectBreakable => {
         let object: AlifeObjectBreakable = AlifeObjectBreakable::from_chunk(chunk);
-        AlifeSmartCover::verify(chunk);
+        AlifeObjectBreakable::verify(chunk);
       }
       AlifeClass::CseAlifeObjectClimable => {
         let object: AlifeObjectClimable = AlifeObjectClimable::from_chunk(chunk);
-        AlifeSmartCover::verify(chunk);
+        AlifeObjectClimable::verify(chunk);
       }
       AlifeClass::CseAlifeGraphPoint => {
         let object: AlifeGraphPoint = AlifeGraphPoint::from_chunk(chunk);
-        AlifeSmartCover::verify(chunk);
+        AlifeGraphPoint::verify(chunk);
       }
       AlifeClass::SeSmartCover => {
         let object: AlifeSmartCover = AlifeSmartCover::from_chunk(chunk);
@@ -87,11 +88,15 @@ impl AlifeClass {
       }
       AlifeClass::SeZoneAnom => {
         let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::from_chunk(chunk);
-        AlifeSmartCover::verify(chunk);
+        AlifeObjectAnomalyZone::verify(chunk);
       }
       AlifeClass::CseAlifeSpaceRestrictor => {
         let object: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
-        AlifeSmartCover::verify(chunk);
+        AlifeObjectSpaceRestrictor::verify(chunk);
+      }
+      AlifeClass::CseAlifeObjectPhysic => {
+        let object: AlifeObjectPhysic = AlifeObjectPhysic::from_chunk(chunk);
+        AlifeObjectPhysic::verify(chunk);
       }
       _ => {
         log::warn!("Not implemented parser for: {:?}", alife_class)
