@@ -1,6 +1,7 @@
 use crate::spawn::chunk::Chunk;
 use crate::spawn::chunk_utils::{read_f32_vector, read_null_terminated_string};
 use crate::spawn::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
+use crate::spawn::data::metadata::ClsId;
 use crate::spawn::types::Vector3d;
 use byteorder::{LittleEndian, ReadBytesExt};
 use fileslice::FileSlice;
@@ -9,6 +10,7 @@ use fileslice::FileSlice;
 pub struct AlifeObject {
   pub id: u16,
   pub section: String,
+  pub clsid: ClsId,
   pub name: String,
   pub script_game_id: u8,
   pub script_rp: u8,
@@ -50,6 +52,7 @@ impl AlifeObject {
     assert_eq!(dummy, 1);
 
     let section: String = read_null_terminated_string(&mut spawn_slice);
+    let clsid: ClsId = ClsId::from_section(&section);
     let name: String = read_null_terminated_string(&mut spawn_slice);
     let script_game_id: u8 = spawn_slice.read_u8().unwrap();
     let script_rp: u8 = spawn_slice.read_u8().unwrap();
@@ -94,6 +97,7 @@ impl AlifeObject {
     AlifeObject {
       id,
       section,
+      clsid,
       name,
       script_game_id,
       script_rp,
