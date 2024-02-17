@@ -25,8 +25,6 @@ impl AlifeObjectInherited<AlifeSmartCover> for AlifeSmartCover {
       loopholes.push(SmartCoverLoophole { name, enabled })
     }
 
-    Self::verify(chunk);
-
     AlifeSmartCover {
       base,
       last_description,

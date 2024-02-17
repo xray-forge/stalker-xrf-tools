@@ -34,7 +34,7 @@ impl ArtefactSpawnsChunk {
       chunk.read_bytes_remain(),
     );
 
-    assert_eq!(chunk.read_bytes_remain(), 0);
+    assert!(chunk.is_ended());
 
     return Some(ArtefactSpawnsChunk {
       index: chunk.index,

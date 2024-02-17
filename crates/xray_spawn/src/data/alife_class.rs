@@ -3,6 +3,7 @@ use crate::data::alife::alife_graph_point::AlifeGraphPoint;
 use crate::data::alife::alife_object_anomalous_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
+use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife_object::AlifeObjectInherited;
 use enum_map::Enum;
@@ -69,19 +70,28 @@ impl AlifeClass {
   pub fn read_by_class(chunk: &mut Chunk, alife_class: &AlifeClass) -> () {
     match alife_class {
       AlifeClass::CseAlifeObjectBreakable => {
-        AlifeObjectBreakable::from_chunk(chunk);
+        let object: AlifeObjectBreakable = AlifeObjectBreakable::from_chunk(chunk);
+        AlifeSmartCover::verify(chunk);
       }
       AlifeClass::CseAlifeObjectClimable => {
-        AlifeObjectClimable::from_chunk(chunk);
+        let object: AlifeObjectClimable = AlifeObjectClimable::from_chunk(chunk);
+        AlifeSmartCover::verify(chunk);
       }
       AlifeClass::CseAlifeGraphPoint => {
-        AlifeGraphPoint::from_chunk(chunk);
+        let object: AlifeGraphPoint = AlifeGraphPoint::from_chunk(chunk);
+        AlifeSmartCover::verify(chunk);
       }
       AlifeClass::SeSmartCover => {
-        AlifeSmartCover::from_chunk(chunk);
+        let object: AlifeSmartCover = AlifeSmartCover::from_chunk(chunk);
+        AlifeSmartCover::verify(chunk);
       }
       AlifeClass::SeZoneAnom => {
-        AlifeObjectAnomalyZone::from_chunk(chunk);
+        let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::from_chunk(chunk);
+        AlifeSmartCover::verify(chunk);
+      }
+      AlifeClass::CseAlifeSpaceRestrictor => {
+        let object: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
+        AlifeSmartCover::verify(chunk);
       }
       _ => {
         log::warn!("Not implemented parser for: {:?}", alife_class)

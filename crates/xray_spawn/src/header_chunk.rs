@@ -28,7 +28,8 @@ impl HeaderChunk {
     let level_count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
 
     log::info!("Parsed header chunk, {:?} bytes", chunk.read_bytes_len());
-    assert_eq!(chunk.read_bytes_remain(), 0);
+
+    assert!(chunk.is_ended());
 
     return Some(HeaderChunk {
       index: chunk.index,

@@ -28,7 +28,7 @@ impl PatrolsChunk {
       chunk.read_bytes_len()
     );
 
-    assert_eq!(chunk.read_bytes_remain(), 0);
+    assert!(chunk.is_ended());
     assert_eq!(count, patrols.len() as u32);
 
     return Some(PatrolsChunk {

@@ -14,8 +14,6 @@ impl AlifeObjectInherited<AlifeObjectBreakable> for AlifeObjectBreakable {
     let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
     let health: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
 
-    Self::verify(chunk);
-
     AlifeObjectBreakable { base, health }
   }
 }

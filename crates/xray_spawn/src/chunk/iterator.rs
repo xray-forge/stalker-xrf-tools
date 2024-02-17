@@ -12,6 +12,7 @@ pub struct ChunkIterator<'lifetime> {
 }
 
 impl<'lifetime> ChunkIterator<'lifetime> {
+  // todo: Replace with chunk based approach.
   pub fn new(file: &mut FileSlice) -> ChunkIterator {
     file.seek(SeekFrom::Start(0)).unwrap();
 

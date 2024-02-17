@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -9,6 +10,7 @@ pub struct AlifeObjectAnomalyZone {
   pub offline_interactive_radius: f32,
   pub artefact_spawn_count: u16,
   pub artefact_position_offset: u32,
+  pub last_spawn_time: Option<Time>,
 }
 
 impl AlifeObjectInherited<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
@@ -19,16 +21,19 @@ impl AlifeObjectInherited<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
     let artefact_spawn_count: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let artefact_position_offset: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
 
-    // Unknown value - even oxray omits it after first verification with read-write cycle.
-    let _dummy: u8 = chunk.read_u8().unwrap();
-
-    // Self::verify(chunk);
+    // Last spawn time for artefacts, legacy approach:
+    let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
+      None
+    } else {
+      Time::from_chunk(chunk)
+    };
 
     AlifeObjectAnomalyZone {
       base,
       offline_interactive_radius,
       artefact_spawn_count,
       artefact_position_offset,
+      last_spawn_time,
     }
   }
 }

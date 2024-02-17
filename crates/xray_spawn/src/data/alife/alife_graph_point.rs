@@ -20,8 +20,6 @@ impl AlifeObjectInherited<AlifeGraphPoint> for AlifeGraphPoint {
     let location2: u8 = chunk.read_u8().unwrap();
     let location3: u8 = chunk.read_u8().unwrap();
 
-    Self::verify(chunk);
-
     AlifeGraphPoint {
       connection_point_name,
       connection_level_name,

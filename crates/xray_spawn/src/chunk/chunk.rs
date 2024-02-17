@@ -38,6 +38,11 @@ impl Chunk {
     self.file.cursor_pos()
   }
 
+  /// Get current position of the chunk seek.
+  pub fn is_ended(&self) -> bool {
+    self.file.cursor_pos() == self.file.end_pos()
+  }
+
   /// Get summary of bytes read from chunk based on current seek position.
   pub fn read_bytes_len(&self) -> u64 {
     self.file.cursor_pos() - self.file.start_pos()
@@ -120,21 +125,18 @@ impl Chunk {
 
   /// Read shape data.
   pub fn read_shape_description<T: ByteOrder>(&mut self) -> io::Result<Vec<Shape>> {
-    let mut shape: Vec<Shape> = Vec::new();
-    let count: u8 = self.read_u8()?;
-    let shape_type: u8 = self.read_u8()?;
+    let mut shapes: Vec<Shape> = Vec::new();
+    let count: u8 = self.read_u8().expect("Count flag to be read.");
 
-    for _ in 0..count {
-      match shape_type {
-        // Sphere.
-        0 => shape.push(Shape::Sphere(self.read_sphere::<T>()?)),
-        // Box.
-        1 => shape.push(Shape::Box(self.read_matrix::<T>()?)),
+    for index in 0..count {
+      match self.read_u8().expect("Shape type to be read.") {
+        0 => shapes.push(Shape::Sphere(self.read_sphere::<T>()?)),
+        1 => shapes.push(Shape::Box(self.read_matrix::<T>()?)),
         _ => panic!("Unexpected shape type provided"),
       }
     }
 
-    Ok(shape)
+    Ok(shapes)
   }
 
   pub fn read_sphere<T: ByteOrder>(&mut self) -> io::Result<Sphere3d> {

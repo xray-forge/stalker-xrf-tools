@@ -13,8 +13,6 @@ impl AlifeObjectInherited<AlifeObjectClimable> for AlifeObjectClimable {
 
     let game_material: String = chunk.read_null_terminated_string().unwrap();
 
-    Self::verify(chunk);
-
     AlifeObjectClimable {
       base,
       game_material,

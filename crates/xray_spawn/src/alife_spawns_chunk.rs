@@ -26,7 +26,7 @@ impl ALifeObjectsChunk {
     );
 
     let mut count_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
-    let count: u32 = count_chunk.file.read_u32::<SpawnByteOrder>().unwrap();
+    let count: u32 = count_chunk.read_u32::<SpawnByteOrder>().unwrap();
 
     let objects_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
     for mut object_chunk in ChunkIterator::new(&mut objects_chunk.file.clone()) {
