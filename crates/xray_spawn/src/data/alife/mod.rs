@@ -1,4 +1,8 @@
 pub mod alife_graph_point;
+pub mod alife_item_weapon;
+pub mod alife_item_weapon_magazined;
+pub mod alife_item_weapon_magazined_wgl;
+pub mod alife_item_weapon_shotgun;
 pub mod alife_object_abstract;
 pub mod alife_object_anomalous_zone;
 pub mod alife_object_breakable;
@@ -7,6 +11,8 @@ pub mod alife_object_custom_zone;
 pub mod alife_object_dynamic;
 pub mod alife_object_item;
 pub mod alife_object_item_ammo;
+pub mod alife_object_item_artefact;
+pub mod alife_object_item_grenade;
 pub mod alife_object_physic;
 pub mod alife_object_shape;
 pub mod alife_object_skeleton;
