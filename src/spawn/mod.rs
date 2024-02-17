@@ -8,4 +8,3 @@ pub mod header_chunk;
 pub mod patrols_chunk;
 pub mod spawn_file;
 pub mod types;
-pub mod utils;

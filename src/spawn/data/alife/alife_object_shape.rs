@@ -1,6 +1,6 @@
+use crate::spawn::chunk::Chunk;
 use crate::spawn::data::alife::alife_object_abstract::AlifeObjectAbstract;
-use crate::spawn::utils::read_shape_description;
-use fileslice::FileSlice;
+use crate::spawn::types::SpawnByteOrder;
 
 pub struct AlifeObjectShape {
   pub base: AlifeObjectAbstract,
@@ -8,10 +8,10 @@ pub struct AlifeObjectShape {
 }
 
 impl AlifeObjectShape {
-  pub fn from_file(file: &mut FileSlice) -> AlifeObjectShape {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_file(file);
+  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectShape {
+    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
 
-    let shapes: Vec<f32> = read_shape_description(file);
+    let shapes: Vec<f32> = chunk.read_shape_description::<SpawnByteOrder>().unwrap();
 
     AlifeObjectShape { base, shapes }
   }

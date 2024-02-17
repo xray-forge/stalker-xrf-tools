@@ -1,6 +1,6 @@
 use crate::spawn::constants::CFS_COMPRESS_MARK;
-use crate::spawn::types::{U32Bytes, Vector3d};
-use byteorder::{ByteOrder, LittleEndian, ReadBytesExt};
+use crate::spawn::types::{SpawnByteOrder, U32Bytes, Vector3d};
+use byteorder::{ByteOrder, ReadBytesExt};
 use bytes::Bytes;
 use fileslice::FileSlice;
 use parquet::file::reader::{ChunkReader, Length};
@@ -17,19 +17,8 @@ pub struct Chunk {
 }
 
 impl Chunk {
-  pub fn read_all(file: &mut FileSlice) -> Vec<Chunk> {
+  pub fn read_all_children(file: &mut FileSlice) -> Vec<Chunk> {
     ChunkIterator::new(file).into_iter().collect()
-  }
-
-  /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_by_index_old(file: &mut FileSlice, index: u32) -> Option<Chunk> {
-    for (iteration, chunk) in ChunkIterator::new(file).enumerate() {
-      if index as usize == iteration {
-        return Some(chunk);
-      }
-    }
-
-    None
   }
 }
 
@@ -66,14 +55,6 @@ impl Chunk {
     }
 
     None
-  }
-
-  pub fn in_slice(&self, file: &FileSlice) -> FileSlice {
-    let mut slice: FileSlice = file.slice(self.position..(self.position + self.size as u64));
-
-    slice.seek(SeekFrom::Start(0)).unwrap();
-
-    return slice;
   }
 
   #[allow(dead_code)]
@@ -130,6 +111,32 @@ impl Chunk {
       panic!("No null terminator found in file");
     }
   }
+
+  /// Read shape data.
+  pub fn read_shape_description<T: ByteOrder>(&mut self) -> io::Result<Vec<f32>> {
+    let mut shape: Vec<f32> = Vec::new();
+    let count: u8 = self.read_u8()?;
+
+    assert_eq!(count, 1, "Single shape description expected.");
+
+    let shape_type: u8 = self.read_u8()?;
+
+    match shape_type {
+      0 => {
+        for _ in 0..4 {
+          shape.push(self.read_f32::<T>()?)
+        }
+      }
+      1 => {
+        for _ in 0..12 {
+          shape.push(self.read_f32::<T>()?)
+        }
+      }
+      _ => panic!("Unexpected shape type provided"),
+    }
+
+    Ok(shape)
+  }
 }
 
 impl Length for Chunk {
@@ -180,8 +187,8 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
   type Item = Chunk;
 
   fn next(&mut self) -> Option<Chunk> {
-    let chunk_type = self.file.read_u32::<LittleEndian>();
-    let chunk_size = self.file.read_u32::<LittleEndian>();
+    let chunk_type = self.file.read_u32::<SpawnByteOrder>();
+    let chunk_size = self.file.read_u32::<SpawnByteOrder>();
 
     if chunk_type.is_err() || chunk_size.is_err() {
       return None;
@@ -221,33 +228,5 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
     } else {
       None
     };
-  }
-}
-
-/// Iterates over slice and chunk for provided file entry.
-#[derive(Debug)]
-pub struct ChunkSliceIterator<'lifetime> {
-  pub base: ChunkIterator<'lifetime>,
-}
-
-impl<'lifetime> ChunkSliceIterator<'lifetime> {
-  pub fn new(file: &mut FileSlice) -> ChunkSliceIterator {
-    return ChunkSliceIterator {
-      base: ChunkIterator::new(file),
-    };
-  }
-}
-
-/// Iterates over chunk and read child chunks.
-impl<'lifetime> Iterator for ChunkSliceIterator<'lifetime> {
-  type Item = (FileSlice, Chunk);
-
-  fn next(&mut self) -> Option<(FileSlice, Chunk)> {
-    let next: Option<Chunk> = self.base.next();
-
-    match next {
-      Some(chunk) => Some((chunk.in_slice(self.base.file), chunk)),
-      None => None,
-    }
   }
 }

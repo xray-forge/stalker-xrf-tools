@@ -1,10 +1,8 @@
 use crate::spawn::chunk::Chunk;
 use crate::spawn::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
 use crate::spawn::data::meta::{AlifeClass, ClsId};
-use crate::spawn::types::Vector3d;
-use crate::spawn::utils::{read_f32_vector, read_null_terminated_string};
-use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
+use crate::spawn::types::{SpawnByteOrder, Vector3d};
+use byteorder::ReadBytesExt;
 
 /// Generic abstract alife object.
 pub struct AlifeObject {
@@ -27,47 +25,50 @@ pub struct AlifeObject {
 }
 
 impl AlifeObject {
-  pub fn from_file(file: &mut FileSlice) -> AlifeObject {
-    let mut id_chunk: Chunk =
-      Chunk::read_by_index_old(file, 0).expect("Expected vertex ID chunk to exist.");
+  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObject {
+    let mut id_chunk: Chunk = chunk
+      .read_by_index(0)
+      .expect("Expected vertex ID chunk to exist.");
 
-    let _id: u16 = id_chunk.file.read_u16::<LittleEndian>().unwrap();
+    let _id: u16 = id_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
-    let mut vertex_data_chunk: Chunk =
-      Chunk::read_by_index_old(file, 1).expect("Expected vertex data chunk to exist.");
+    let mut vertex_data_chunk: Chunk = chunk
+      .read_by_index(1)
+      .expect("Expected vertex data chunk to exist.");
 
-    Self::read_object_data(&mut vertex_data_chunk.file)
+    Self::read_object_data(&mut vertex_data_chunk)
   }
 
-  fn read_object_data(file: &mut FileSlice) -> AlifeObject {
-    let mut spawn_chunk: Chunk = Chunk::read_by_index_old(file, 0)
+  fn read_object_data(chunk: &mut Chunk) -> AlifeObject {
+    let mut spawn_chunk: Chunk = chunk
+      .read_by_index(0)
       .expect("Expected data chunk to exist in object definition.");
 
-    let data_length: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
+    let data_length: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
     assert_eq!(data_length as u32 + 2, spawn_chunk.size);
 
-    let dummy: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
+    let dummy: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
     assert_eq!(dummy, 1);
 
-    let section: String = read_null_terminated_string(&mut spawn_chunk.file);
+    let section: String = spawn_chunk.read_null_terminated_string().unwrap();
     let clsid: ClsId = ClsId::from_section(&section);
     let class: AlifeClass = AlifeClass::from_cls_id(&clsid);
-    let name: String = read_null_terminated_string(&mut spawn_chunk.file);
-    let script_game_id: u8 = spawn_chunk.file.read_u8().unwrap();
-    let script_rp: u8 = spawn_chunk.file.read_u8().unwrap();
-    let position: Vector3d = read_f32_vector::<LittleEndian>(&mut spawn_chunk.file);
-    let direction: Vector3d = read_f32_vector::<LittleEndian>(&mut spawn_chunk.file);
-    let respawn_time: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let id: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let parent_id: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let phantom_id: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let script_flags: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
+    let name: String = spawn_chunk.read_null_terminated_string().unwrap();
+    let script_game_id: u8 = spawn_chunk.read_u8().unwrap();
+    let script_rp: u8 = spawn_chunk.read_u8().unwrap();
+    let position: Vector3d = spawn_chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let direction: Vector3d = spawn_chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let respawn_time: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let id: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let parent_id: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let phantom_id: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let script_flags: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
     let version: u16 = if script_flags & FLAG_SPAWN_DESTROY_ON_SPAWN == 0 {
       0
     } else {
-      spawn_chunk.file.read_u16::<LittleEndian>().unwrap()
+      spawn_chunk.read_u16::<SpawnByteOrder>().unwrap()
     };
 
     assert!(
@@ -75,25 +76,25 @@ impl AlifeObject {
       "Unexpected version of alife object in spawn file."
     );
 
-    let cse_abstract_unknown: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let script_version: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let client_data_size: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
+    let cse_abstract_unknown: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let script_version: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let client_data_size: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
     assert_eq!(client_data_size, 0); // Or read client data?
 
-    let spawn_id: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let extended_size: u16 = spawn_chunk.file.read_u16::<LittleEndian>().unwrap();
+    let spawn_id: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let extended_size: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
     assert_eq!(
       extended_size as u64 - 2,
-      spawn_chunk.file.end_pos() - spawn_chunk.file.cursor_pos()
+      spawn_chunk.end_pos() - spawn_chunk.cursor_pos()
     );
 
     assert_ne!(class, AlifeClass::Unknown);
 
-    AlifeClass::read_by_class(&mut spawn_chunk.file, &class);
+    AlifeClass::read_by_class(&mut spawn_chunk, &class);
 
-    Self::assert_update_data(file);
+    Self::assert_update_data(chunk);
 
     AlifeObject {
       id,
@@ -116,15 +117,16 @@ impl AlifeObject {
   }
 
   /// Validate that read data is correct and does not contain update information.
-  fn assert_update_data(file: &mut FileSlice) -> () {
-    let mut update_chunk: Chunk = Chunk::read_by_index_old(file, 1)
+  fn assert_update_data(chunk: &mut Chunk) -> () {
+    let mut update_chunk: Chunk = chunk
+      .read_by_index(1)
       .expect("Expected data chunk to exist in object definition.");
 
-    let data_length: u16 = update_chunk.file.read_u16::<LittleEndian>().unwrap();
-    let update_size: u16 = update_chunk.file.read_u16::<LittleEndian>().unwrap();
+    let data_length: u16 = update_chunk.file.read_u16::<SpawnByteOrder>().unwrap();
+    let update_size: u16 = update_chunk.file.read_u16::<SpawnByteOrder>().unwrap();
 
     assert_eq!(data_length as u32 + 2, update_chunk.size);
     assert_eq!(update_size, 0);
-    assert_eq!(file.cursor_pos(), file.end_pos());
+    assert_eq!(chunk.read_bytes_remain(), 0);
   }
 }

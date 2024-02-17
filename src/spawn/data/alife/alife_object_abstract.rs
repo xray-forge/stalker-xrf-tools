@@ -1,6 +1,6 @@
-use crate::spawn::utils::read_null_terminated_string;
-use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
+use crate::spawn::chunk::Chunk;
+use crate::spawn::types::SpawnByteOrder;
+use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectAbstract {
   pub game_vertex_id: u16,
@@ -14,15 +14,15 @@ pub struct AlifeObjectAbstract {
 }
 
 impl AlifeObjectAbstract {
-  pub fn from_file(file: &mut FileSlice) -> AlifeObjectAbstract {
-    let game_vertex_id: u16 = file.read_u16::<LittleEndian>().unwrap();
-    let distance: f32 = file.read_f32::<LittleEndian>().unwrap();
-    let direct_control: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let level_vertex_id: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let flags: u32 = file.read_u32::<LittleEndian>().unwrap();
-    let custom_data: String = read_null_terminated_string(file);
-    let story_id: i32 = file.read_i32::<LittleEndian>().unwrap();
-    let spawn_story_id: i32 = file.read_i32::<LittleEndian>().unwrap();
+  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectAbstract {
+    let game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let distance: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
+    let direct_control: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let flags: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let custom_data: String = chunk.read_null_terminated_string().unwrap();
+    let story_id: i32 = chunk.read_i32::<SpawnByteOrder>().unwrap();
+    let spawn_story_id: i32 = chunk.read_i32::<SpawnByteOrder>().unwrap();
 
     AlifeObjectAbstract {
       game_vertex_id,

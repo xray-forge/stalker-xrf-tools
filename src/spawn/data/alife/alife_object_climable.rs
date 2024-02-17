@@ -1,6 +1,5 @@
+use crate::spawn::chunk::Chunk;
 use crate::spawn::data::alife::alife_object_shape::AlifeObjectShape;
-use crate::spawn::utils::read_null_terminated_string;
-use fileslice::FileSlice;
 
 pub struct AlifeObjectClimable {
   pub base: AlifeObjectShape,
@@ -8,14 +7,14 @@ pub struct AlifeObjectClimable {
 }
 
 impl AlifeObjectClimable {
-  pub fn from_file(file: &mut FileSlice) -> AlifeObjectClimable {
-    let base: AlifeObjectShape = AlifeObjectShape::from_file(file);
+  pub fn from_file(chunk: &mut Chunk) -> AlifeObjectClimable {
+    let base: AlifeObjectShape = AlifeObjectShape::from_chunk(chunk);
 
-    let game_material: String = read_null_terminated_string(file);
+    let game_material: String = chunk.read_null_terminated_string().unwrap();
 
     assert_eq!(
-      file.cursor_pos(),
-      file.end_pos(),
+      chunk.read_bytes_remain(),
+      0,
       "Expected all data to be read from chunk."
     );
 

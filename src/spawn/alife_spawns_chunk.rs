@@ -1,7 +1,7 @@
-use crate::spawn::chunk::{Chunk, ChunkSliceIterator};
+use crate::spawn::chunk::{Chunk, ChunkIterator};
 use crate::spawn::data::alife_object::AlifeObject;
-use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
+use crate::spawn::types::SpawnByteOrder;
+use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct ALifeObjectsChunk {
@@ -15,30 +15,29 @@ pub struct ALifeObjectsChunk {
 /// 3 - edges
 impl ALifeObjectsChunk {
   /// Read spawns chunk by position descriptor.
-  pub fn from_chunk(file: &FileSlice, chunk: &Chunk) -> Option<ALifeObjectsChunk> {
-    let mut file: FileSlice = chunk.in_slice(file);
+  pub fn from_chunk(mut chunk: Chunk) -> Option<ALifeObjectsChunk> {
     let mut objects: Vec<AlifeObject> = Vec::new();
 
     log::info!(
       "Parsing alife spawns chunk, {:?} -> {:?}",
-      file.start_pos(),
-      file.end_pos()
+      chunk.start_pos(),
+      chunk.end_pos()
     );
 
-    let mut count_chunk: Chunk = Chunk::read_by_index_old(&mut file, 0).unwrap();
-    let count: u32 = count_chunk.file.read_u32::<LittleEndian>().unwrap();
+    let mut count_chunk: Chunk = chunk.read_by_index(0).unwrap();
+    let count: u32 = count_chunk.file.read_u32::<SpawnByteOrder>().unwrap();
 
-    let objects_chunk: Chunk = Chunk::read_by_index_old(&mut file, 1).unwrap();
-    for (mut object_slice, _) in ChunkSliceIterator::new(&mut objects_chunk.file.clone()) {
-      objects.push(AlifeObject::from_file(&mut object_slice))
+    let objects_chunk: Chunk = chunk.read_by_index(1).unwrap();
+    for mut object_chunk in ChunkIterator::new(&mut objects_chunk.file.clone()) {
+      objects.push(AlifeObject::from_chunk(&mut object_chunk))
     }
 
-    Self::advance_placeholder_chunk(&mut file);
+    Self::advance_placeholder_chunk(&mut chunk);
 
     log::info!("Parsed alife spawns chunk, {count} objects processed");
 
     assert_eq!(objects.len(), count as usize);
-    assert_eq!(file.cursor_pos(), file.end_pos());
+    assert_eq!(chunk.read_bytes_remain(), 0);
 
     return Some(ALifeObjectsChunk {
       id: chunk.id,
@@ -47,11 +46,12 @@ impl ALifeObjectsChunk {
   }
 
   /// Empty chunk declared as placeholder, unknown purpose.
-  fn advance_placeholder_chunk(file: &mut FileSlice) -> () {
-    let edges_chunk: Chunk = Chunk::read_by_index_old(file, 2).unwrap();
+  fn advance_placeholder_chunk(chunk: &mut Chunk) -> () {
+    let edges_chunk: Chunk = chunk.read_by_index(2).unwrap();
 
-    assert!(
-      edges_chunk.file.is_empty(),
+    assert_eq!(
+      edges_chunk.read_bytes_remain(),
+      0,
       "Parsing of edges in spawn chunk is not implemented."
     )
   }

@@ -1,6 +1,6 @@
+use crate::spawn::chunk::Chunk;
 use crate::spawn::data::alife::alife_object_visual::AlifeObjectVisual;
 use byteorder::{LittleEndian, ReadBytesExt};
-use fileslice::FileSlice;
 
 pub struct AlifeObjectBreakable {
   pub base: AlifeObjectVisual,
@@ -8,13 +8,13 @@ pub struct AlifeObjectBreakable {
 }
 
 impl AlifeObjectBreakable {
-  pub fn from_file(file: &mut FileSlice) -> AlifeObjectBreakable {
-    let base: AlifeObjectVisual = AlifeObjectVisual::from_file(file);
-    let health: f32 = file.read_f32::<LittleEndian>().unwrap();
+  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectBreakable {
+    let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
+    let health: f32 = chunk.read_f32::<LittleEndian>().unwrap();
 
     assert_eq!(
-      file.cursor_pos(),
-      file.end_pos(),
+      chunk.read_bytes_remain(),
+      0,
       "Expected all data to be read from chunk."
     );
 

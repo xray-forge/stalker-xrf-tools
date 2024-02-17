@@ -1,7 +1,6 @@
+use crate::spawn::chunk::Chunk;
 use crate::spawn::data::alife::alife_object_abstract::AlifeObjectAbstract;
-use crate::spawn::utils::read_null_terminated_string;
 use byteorder::ReadBytesExt;
-use fileslice::FileSlice;
 
 pub struct AlifeObjectVisual {
   pub base: AlifeObjectAbstract,
@@ -10,11 +9,11 @@ pub struct AlifeObjectVisual {
 }
 
 impl AlifeObjectVisual {
-  pub fn from_file(file: &mut FileSlice) -> AlifeObjectVisual {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_file(file);
+  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectVisual {
+    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
 
-    let visual_name: String = read_null_terminated_string(file);
-    let visual_flags: u8 = file.read_u8().unwrap();
+    let visual_name: String = chunk.read_null_terminated_string().unwrap();
+    let visual_flags: u8 = chunk.read_u8().unwrap();
 
     AlifeObjectVisual {
       base,

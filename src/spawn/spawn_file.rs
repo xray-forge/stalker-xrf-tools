@@ -40,7 +40,7 @@ impl SpawnFile {
       file.end_pos()
     );
 
-    let chunks: Vec<Chunk> = Chunk::read_all(&mut file);
+    let chunks: Vec<Chunk> = Chunk::read_all_children(&mut file);
 
     assert_eq!(
       chunks.len(),
@@ -54,12 +54,12 @@ impl SpawnFile {
     };
 
     let alife_spawns: Option<ALifeObjectsChunk> = match chunks.get(1) {
-      Some(chunk) => ALifeObjectsChunk::from_chunk(&mut file, &chunk),
+      Some(chunk) => ALifeObjectsChunk::from_chunk(chunk.clone()),
       None => None,
     };
 
     let artefact_spawns: Option<ArtefactSpawnsChunk> = match chunks.get(2) {
-      Some(chunk) => ArtefactSpawnsChunk::from_chunk(&mut file, &chunk),
+      Some(chunk) => ArtefactSpawnsChunk::from_chunk(chunk.clone()),
       None => None,
     };
 
