@@ -5,4 +5,6 @@ pub mod cls_id;
 pub mod level;
 pub mod map;
 pub mod patrol;
+pub mod shape;
+pub mod time;
 pub mod vertex;

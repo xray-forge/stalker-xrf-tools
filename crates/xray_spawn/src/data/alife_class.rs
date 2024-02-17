@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_graph_point::AlifeGraphPoint;
+use crate::data::alife::alife_object_anomalous_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
@@ -54,7 +55,7 @@ pub enum AlifeClass {
   SeSmartCover,
   SeSmartTerrain,
   SeStalker,
-  SeZoneAnom,
+  SeZoneAnom, // cse_anomalous_zone
   SeZoneTorrid,
   SeZoneVisual,
   SimSquadScripted,
@@ -78,6 +79,9 @@ impl AlifeClass {
       }
       AlifeClass::SeSmartCover => {
         AlifeSmartCover::from_chunk(chunk);
+      }
+      AlifeClass::SeZoneAnom => {
+        AlifeObjectAnomalyZone::from_chunk(chunk);
       }
       _ => {
         log::warn!("Not implemented parser for: {:?}", alife_class)

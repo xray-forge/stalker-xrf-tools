@@ -1,5 +1,6 @@
 use crate::chunk::iterator::ChunkIterator;
-use crate::types::{U32Bytes, Vector3d};
+use crate::data::shape::Shape;
+use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt};
 use fileslice::FileSlice;
 use std::io::{Read, Seek, SeekFrom};
@@ -118,31 +119,38 @@ impl Chunk {
   }
 
   /// Read shape data.
-  pub fn read_shape_description<T: ByteOrder>(&mut self) -> io::Result<Vec<f32>> {
-    let mut shape: Vec<f32> = Vec::new();
+  pub fn read_shape_description<T: ByteOrder>(&mut self) -> io::Result<Vec<Shape>> {
+    let mut shape: Vec<Shape> = Vec::new();
     let count: u8 = self.read_u8()?;
-
-    assert_eq!(count, 1, "Single shape description expected.");
-
     let shape_type: u8 = self.read_u8()?;
 
-    match shape_type {
-      // Sphere -> vector3d + radius.
-      0 => {
-        for _ in 0..4 {
-          shape.push(self.read_f32::<T>()?)
-        }
+    for _ in 0..count {
+      match shape_type {
+        // Sphere.
+        0 => shape.push(Shape::Sphere(self.read_sphere::<T>()?)),
+        // Box.
+        1 => shape.push(Shape::Box(self.read_matrix::<T>()?)),
+        _ => panic!("Unexpected shape type provided"),
       }
-      // Rect -> 4 vector3d.
-      1 => {
-        for _ in 0..12 {
-          shape.push(self.read_f32::<T>()?)
-        }
-      }
-      _ => panic!("Unexpected shape type provided"),
     }
 
     Ok(shape)
+  }
+
+  pub fn read_sphere<T: ByteOrder>(&mut self) -> io::Result<Sphere3d> {
+    let center: Vector3d = self.read_f32_vector::<T>()?;
+    let radius: f32 = self.read_f32::<T>()?;
+
+    Ok((center, radius))
+  }
+
+  pub fn read_matrix<T: ByteOrder>(&mut self) -> io::Result<Matrix3d> {
+    Ok((
+      self.read_f32_vector::<T>()?,
+      self.read_f32_vector::<T>()?,
+      self.read_f32_vector::<T>()?,
+      self.read_f32_vector::<T>()?,
+    ))
   }
 }
 
