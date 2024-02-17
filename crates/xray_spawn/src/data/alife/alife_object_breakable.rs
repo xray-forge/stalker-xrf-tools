@@ -1,6 +1,6 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectBreakable {

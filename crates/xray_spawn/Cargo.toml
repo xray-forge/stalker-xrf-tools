@@ -1,14 +1,13 @@
 [package]
-name = "stalker-xrf-cli"
+name = "xray_spawn"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+path = "src/lib.rs"
 
 [dependencies]
 byteorder = "1.4.3"
-bytes = "1.5.0"
-clap = { version = "4.5.0", features = ["derive"] }
 enum-map = "2.7.3"
 env_logger = "0.11.1"
 fileslice = "0.4.0"
@@ -16,4 +15,4 @@ lazy_static = "1.4.0"
 log = "0.4.20"
 parquet = "50.0.0"
 phf = { version = "0.11.2", features = ["macros"]}
-xray_spawn = { path = "crates/xray_spawn" }
+bytes = "1.5.0"

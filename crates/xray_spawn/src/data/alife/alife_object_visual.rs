@@ -1,5 +1,5 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::data::alife::alife_object_abstract::AlifeObjectAbstract;
+use crate::chunk::chunk::Chunk;
+use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectVisual {

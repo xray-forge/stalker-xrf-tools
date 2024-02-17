@@ -1,6 +1,6 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::chunk::constants::CFS_COMPRESS_MARK;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::chunk::constants::CFS_COMPRESS_MARK;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
 use std::io::{Seek, SeekFrom};
@@ -41,7 +41,7 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
       file.seek(SeekFrom::Start(0)).unwrap();
 
       let chunk = Chunk {
-        id: chunk_id,
+        index: chunk_id,
         is_compressed: chunk_id & CFS_COMPRESS_MARK == 1,
         size: chunk_size,
         position: self.file.seek(SeekFrom::Current(0)).unwrap(),

@@ -1,5 +1,5 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectAbstract {

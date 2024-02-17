@@ -1,12 +1,12 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::chunk::iterator::ChunkIterator;
-use crate::spawn::data::alife_object::AlifeObject;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::chunk::iterator::ChunkIterator;
+use crate::data::alife_object::AlifeObject;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct ALifeObjectsChunk {
-  pub id: u32,
+  pub index: u32,
   pub objects: Vec<AlifeObject>,
 }
 
@@ -41,7 +41,7 @@ impl ALifeObjectsChunk {
     assert_eq!(chunk.read_bytes_remain(), 0);
 
     return Some(ALifeObjectsChunk {
-      id: chunk.id,
+      index: chunk.index,
       objects,
     });
   }
@@ -62,8 +62,8 @@ impl fmt::Debug for ALifeObjectsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "ALifeObjectsChunk {{ id: {}, objects: Vector[{}] }}",
-      self.id,
+      "ALifeObjectsChunk {{ index: {}, objects: Vector[{}] }}",
+      self.index,
       self.objects.len(),
     )
   }

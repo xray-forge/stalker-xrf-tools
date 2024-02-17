@@ -1,6 +1,6 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::chunk::iterator::ChunkIterator;
-use crate::spawn::types::{SpawnByteOrder, Vector3d};
+use crate::chunk::chunk::Chunk;
+use crate::chunk::iterator::ChunkIterator;
+use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 use std::io::Read;
 

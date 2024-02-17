@@ -1,12 +1,12 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::chunk::iterator::ChunkIterator;
-use crate::spawn::data::patrol::Patrol;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::chunk::iterator::ChunkIterator;
+use crate::data::patrol::Patrol;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct PatrolsChunk {
-  id: u32,
+  index: u32,
   patrols: Vec<Patrol>,
 }
 
@@ -32,7 +32,7 @@ impl PatrolsChunk {
     assert_eq!(count, patrols.len() as u32);
 
     return Some(PatrolsChunk {
-      id: chunk.id,
+      index: chunk.index,
       patrols,
     });
   }
@@ -65,8 +65,8 @@ impl fmt::Debug for PatrolsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "PatrolsChunk {{ id: {}, patrols: Vector[{}] }}",
-      self.id,
+      "PatrolsChunk {{ index: {}, patrols: Vector[{}] }}",
+      self.index,
       self.patrols.len(),
     )
   }

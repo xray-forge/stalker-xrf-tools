@@ -1,13 +1,13 @@
-use crate::spawn::chunk::iterator::ChunkIterator;
-use crate::spawn::types::{U32Bytes, Vector3d};
+use crate::chunk::iterator::ChunkIterator;
+use crate::types::{U32Bytes, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt};
 use fileslice::FileSlice;
-use std::io;
 use std::io::{Read, Seek, SeekFrom};
+use std::{fmt, io};
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Chunk {
-  pub id: u32,
+  pub index: u32,
   pub size: u32,
   pub position: u64,
   pub is_compressed: bool,
@@ -141,5 +141,15 @@ impl Chunk {
     }
 
     Ok(shape)
+  }
+}
+
+impl fmt::Debug for Chunk {
+  fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(
+      formatter,
+      "Chunk {{ index: {}, size: {}, position: {}, is_compressed: {} }}",
+      self.index, self.size, self.position, self.is_compressed
+    )
   }
 }

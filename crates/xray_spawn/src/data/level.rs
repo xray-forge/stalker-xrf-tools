@@ -1,5 +1,5 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::types::{SpawnByteOrder, Vector3d};
+use crate::chunk::chunk::Chunk;
+use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 
 #[derive(Debug)]

@@ -1,6 +1,6 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::data::alife::alife_object_abstract::AlifeObjectAbstract;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+use crate::types::SpawnByteOrder;
 
 pub struct AlifeObjectShape {
   pub base: AlifeObjectAbstract,

@@ -1,9 +1,8 @@
 mod setup;
-mod spawn;
 
 use crate::setup::setup_logger;
-use crate::spawn::spawn_file::SpawnFile;
 use clap::Parser;
+use xray_spawn::spawn_file::SpawnFile;
 
 #[derive(Parser)]
 struct Arguments {

@@ -1,12 +1,12 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::data::level::Level;
-use crate::spawn::data::vertex::Vertex;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::data::level::Level;
+use crate::data::vertex::Vertex;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct GraphsChunk {
-  pub id: u32,
+  pub index: u32,
   pub version: u8,
   pub vertex_count: u16,
   pub edge_count: u32,
@@ -55,7 +55,7 @@ impl GraphsChunk {
     // todo: assert_eq!(file.cursor_pos(), file.end_pos());
 
     return Some(GraphsChunk {
-      id: chunk.id,
+      index: chunk.index,
       version,
       levels,
       vertices,
@@ -72,9 +72,9 @@ impl fmt::Debug for GraphsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "GraphsChunk {{ id: {}, version: {}, vertex_count: {}, edge_count: {}, point_count: {},\
+      "GraphsChunk {{ index: {}, version: {}, vertex_count: {}, edge_count: {}, point_count: {},\
        guid: {}, size: {}, levels: Vector[{}], vertices: Vector[{}] }}",
-      self.id,
+      self.index,
       self.version,
       self.vertex_count,
       self.edge_count,

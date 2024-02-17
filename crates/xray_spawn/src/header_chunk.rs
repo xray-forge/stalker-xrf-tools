@@ -1,10 +1,10 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::types::SpawnByteOrder;
+use crate::chunk::chunk::Chunk;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
 #[derive(Debug)]
 pub struct HeaderChunk {
-  pub id: u32,
+  pub index: u32,
   pub version: u32,
   pub guid: u128,
   pub graph_guid: u128,
@@ -31,7 +31,7 @@ impl HeaderChunk {
     assert_eq!(chunk.read_bytes_remain(), 0);
 
     return Some(HeaderChunk {
-      id: chunk.id,
+      index: chunk.index,
       version,
       guid,
       graph_guid,

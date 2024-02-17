@@ -1,4 +1,4 @@
-use crate::spawn::data::meta::{AlifeClass, ClsId};
+use crate::data::meta::{AlifeClass, ClsId};
 use enum_map::{enum_map, EnumMap};
 use lazy_static::lazy_static;
 use phf::phf_map;

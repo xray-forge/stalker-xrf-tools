@@ -1,10 +1,10 @@
-use crate::spawn::chunk::chunk::Chunk;
-use crate::spawn::types::{SpawnByteOrder, Vector3d};
+use crate::chunk::chunk::Chunk;
+use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct ArtefactSpawnsChunk {
-  pub id: u32,
+  pub index: u32,
   pub nodes: Vec<ArtefactSpawnPoint>,
 }
 
@@ -37,7 +37,7 @@ impl ArtefactSpawnsChunk {
     assert_eq!(chunk.read_bytes_remain(), 0);
 
     return Some(ArtefactSpawnsChunk {
-      id: chunk.id,
+      index: chunk.index,
       nodes,
     });
   }
@@ -47,8 +47,8 @@ impl fmt::Debug for ArtefactSpawnsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "ArtefactSpawnsChunk {{ id: {}, nodes: Vector[{}] }}",
-      self.id,
+      "ArtefactSpawnsChunk {{ index: {}, nodes: Vector[{}] }}",
+      self.index,
       self.nodes.len()
     )
   }

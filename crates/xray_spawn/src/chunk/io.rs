@@ -1,4 +1,4 @@
-use crate::spawn::chunk::chunk::Chunk;
+use crate::chunk::chunk::Chunk;
 use bytes::Bytes;
 use fileslice::FileSlice;
 use parquet::file::reader::{ChunkReader, Length};
