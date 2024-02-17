@@ -1,4 +1,4 @@
-use crate::spawn::chunk::Chunk;
+use crate::spawn::chunk::chunk::Chunk;
 use crate::spawn::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 

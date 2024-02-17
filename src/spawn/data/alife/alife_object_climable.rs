@@ -1,4 +1,4 @@
-use crate::spawn::chunk::Chunk;
+use crate::spawn::chunk::chunk::Chunk;
 use crate::spawn::data::alife::alife_object_shape::AlifeObjectShape;
 
 pub struct AlifeObjectClimable {

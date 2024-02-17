@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::spawn::chunk::Chunk;
+use crate::spawn::chunk::chunk::Chunk;
 use crate::spawn::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::spawn::data::alife::alife_object_climable::AlifeObjectClimable;
 use crate::spawn::data::map::{CLS_ID_TO_CLASS, SECTION_TO_CLS_ID};

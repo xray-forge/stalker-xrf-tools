@@ -1,6 +1,6 @@
 use crate::spawn::alife_spawns_chunk::ALifeObjectsChunk;
 use crate::spawn::artefact_spawns_chunk::ArtefactSpawnsChunk;
-use crate::spawn::chunk::Chunk;
+use crate::spawn::chunk::chunk::Chunk;
 use crate::spawn::graphs_chunk::GraphsChunk;
 use crate::spawn::header_chunk::HeaderChunk;
 use crate::spawn::patrols_chunk::PatrolsChunk;
@@ -40,7 +40,7 @@ impl SpawnFile {
       file.end_pos()
     );
 
-    let chunks: Vec<Chunk> = Chunk::read_all_children(&mut file);
+    let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut file);
 
     assert_eq!(
       chunks.len(),
@@ -75,7 +75,7 @@ impl SpawnFile {
 
     Ok(SpawnFile {
       size,
-      chunks: chunks,
+      chunks,
       header: header.expect("Unexpected header signature in spawn file."),
       alife_spawn: alife_spawns.expect("Unexpected alife spawns signature in spawn file."),
       artefact_spawn: artefact_spawns.expect("Unexpected artefact spawns signature in spawn file."),

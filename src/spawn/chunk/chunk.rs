@@ -1,9 +1,7 @@
-use crate::spawn::constants::CFS_COMPRESS_MARK;
-use crate::spawn::types::{SpawnByteOrder, U32Bytes, Vector3d};
+use crate::spawn::chunk::iterator::ChunkIterator;
+use crate::spawn::types::{U32Bytes, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt};
-use bytes::Bytes;
 use fileslice::FileSlice;
-use parquet::file::reader::{ChunkReader, Length};
 use std::io;
 use std::io::{Read, Seek, SeekFrom};
 
@@ -17,29 +15,34 @@ pub struct Chunk {
 }
 
 impl Chunk {
-  pub fn read_all_children(file: &mut FileSlice) -> Vec<Chunk> {
+  /// Read all chunk descriptors from file and put seek into the end.
+  pub fn read_all_from_file(file: &mut FileSlice) -> Vec<Chunk> {
     ChunkIterator::new(file).into_iter().collect()
   }
 }
 
 impl Chunk {
+  /// Get start position of the chunk seek.
   pub fn start_pos(&self) -> u64 {
     self.file.start_pos()
   }
 
+  /// Get end position of the chunk seek.
   pub fn end_pos(&self) -> u64 {
     self.file.end_pos()
   }
 
-  #[allow(dead_code)]
+  /// Get current position of the chunk seek.
   pub fn cursor_pos(&self) -> u64 {
     self.file.cursor_pos()
   }
 
+  /// Get summary of bytes read from chunk based on current seek position.
   pub fn read_bytes_len(&self) -> u64 {
     self.file.cursor_pos() - self.file.start_pos()
   }
 
+  /// Get summary of bytes remaining based on current seek position.
   pub fn read_bytes_remain(&self) -> u64 {
     self.file.end_pos() - self.file.cursor_pos()
   }
@@ -47,7 +50,7 @@ impl Chunk {
 
 impl Chunk {
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_by_index(&mut self, index: u32) -> Option<Chunk> {
+  pub fn read_child_by_index(&mut self, index: u32) -> Option<Chunk> {
     for (iteration, chunk) in ChunkIterator::new(&mut self.file).enumerate() {
       if index as usize == iteration {
         return Some(chunk);
@@ -57,15 +60,17 @@ impl Chunk {
     None
   }
 
+  /// Get list of all child chunks in current chunk.
   #[allow(dead_code)]
-  pub fn read_children(&self, file: &FileSlice) -> Vec<Chunk> {
+  pub fn read_all_children(&self, file: &FileSlice) -> Vec<Chunk> {
     ChunkIterator::new(&mut file.slice(self.position..(self.position + self.size as u64)))
       .into_iter()
       .collect()
   }
 
+  /// Reset seek position in chunk file.
   #[allow(dead_code)]
-  pub fn reset(&mut self) -> io::Result<u64> {
+  pub fn reset_pos(&mut self) -> io::Result<u64> {
     self.file.seek(SeekFrom::Start(0))
   }
 }
@@ -136,97 +141,5 @@ impl Chunk {
     }
 
     Ok(shape)
-  }
-}
-
-impl Length for Chunk {
-  fn len(&self) -> u64 {
-    self.file.end_pos() - self.file.start_pos()
-  }
-}
-
-impl ChunkReader for Chunk {
-  type T = FileSlice;
-
-  fn get_read(&self, start: u64) -> parquet::errors::Result<FileSlice> {
-    Ok(self.file.slice(start..self.file.end_pos()))
-  }
-
-  fn get_bytes(&self, start: u64, length: usize) -> parquet::errors::Result<Bytes> {
-    let mut buf = vec![0; length];
-    self
-      .file
-      .slice(start..(start + length as u64))
-      .read_exact(&mut buf)?;
-    Ok(buf.into())
-  }
-}
-
-impl Read for Chunk {
-  fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-    return self.file.read(buf);
-  }
-}
-
-#[derive(Debug)]
-pub struct ChunkIterator<'lifetime> {
-  pub index: u32,
-  pub file: &'lifetime mut FileSlice,
-}
-
-impl<'lifetime> ChunkIterator<'lifetime> {
-  pub fn new(file: &mut FileSlice) -> ChunkIterator {
-    file.seek(SeekFrom::Start(0)).unwrap();
-
-    return ChunkIterator { index: 0, file };
-  }
-}
-
-/// Iterates over chunk and read child chunks.
-impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
-  type Item = Chunk;
-
-  fn next(&mut self) -> Option<Chunk> {
-    let chunk_type = self.file.read_u32::<SpawnByteOrder>();
-    let chunk_size = self.file.read_u32::<SpawnByteOrder>();
-
-    if chunk_type.is_err() || chunk_size.is_err() {
-      return None;
-    }
-
-    let chunk_id: u32 = chunk_type.unwrap();
-    let chunk_size: u32 = chunk_size.unwrap();
-
-    return if self.index == chunk_id & (!CFS_COMPRESS_MARK) {
-      let position: u64 = self.file.seek(SeekFrom::Current(0)).unwrap();
-      let mut file: FileSlice = self.file.slice(position..(position + chunk_size as u64));
-
-      file.seek(SeekFrom::Start(0)).unwrap();
-
-      let chunk = Chunk {
-        id: chunk_id,
-        is_compressed: chunk_id & CFS_COMPRESS_MARK == 1,
-        size: chunk_size,
-        position: self.file.seek(SeekFrom::Current(0)).unwrap(),
-        file,
-      };
-
-      if chunk.is_compressed {
-        panic!("Parsing not implemented compressed chunk.");
-      }
-
-      // Rewind for next iteration.
-      self
-        .file
-        .seek(SeekFrom::Current(chunk_size as i64))
-        .unwrap();
-
-      // Iterate to next item.
-      self.index += 1;
-
-      Some(chunk)
-    } else {
-      None
-    };
   }
 }

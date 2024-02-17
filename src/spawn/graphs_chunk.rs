@@ -1,7 +1,8 @@
-use crate::spawn::chunk::Chunk;
+use crate::spawn::chunk::chunk::Chunk;
 use crate::spawn::data::level::Level;
 use crate::spawn::data::vertex::Vertex;
-use byteorder::{LittleEndian, ReadBytesExt};
+use crate::spawn::types::SpawnByteOrder;
+use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct GraphsChunk {
@@ -26,10 +27,10 @@ impl GraphsChunk {
     );
 
     let version: u8 = chunk.read_u8().unwrap();
-    let vertex_count: u16 = chunk.read_u16::<LittleEndian>().unwrap();
-    let edge_count: u32 = chunk.read_u32::<LittleEndian>().unwrap();
-    let point_count: u32 = chunk.read_u32::<LittleEndian>().unwrap();
-    let guid: u128 = chunk.read_u128::<LittleEndian>().unwrap();
+    let vertex_count: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let edge_count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let point_count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let guid: u128 = chunk.read_u128::<SpawnByteOrder>().unwrap();
     let level_count: u8 = chunk.read_u8().unwrap();
 
     let mut levels: Vec<Level> = Vec::new();

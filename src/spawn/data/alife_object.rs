@@ -1,4 +1,4 @@
-use crate::spawn::chunk::Chunk;
+use crate::spawn::chunk::chunk::Chunk;
 use crate::spawn::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
 use crate::spawn::data::meta::{AlifeClass, ClsId};
 use crate::spawn::types::{SpawnByteOrder, Vector3d};
@@ -27,13 +27,13 @@ pub struct AlifeObject {
 impl AlifeObject {
   pub fn from_chunk(chunk: &mut Chunk) -> AlifeObject {
     let mut id_chunk: Chunk = chunk
-      .read_by_index(0)
+      .read_child_by_index(0)
       .expect("Expected vertex ID chunk to exist.");
 
     let _id: u16 = id_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
     let mut vertex_data_chunk: Chunk = chunk
-      .read_by_index(1)
+      .read_child_by_index(1)
       .expect("Expected vertex data chunk to exist.");
 
     Self::read_object_data(&mut vertex_data_chunk)
@@ -41,7 +41,7 @@ impl AlifeObject {
 
   fn read_object_data(chunk: &mut Chunk) -> AlifeObject {
     let mut spawn_chunk: Chunk = chunk
-      .read_by_index(0)
+      .read_child_by_index(0)
       .expect("Expected data chunk to exist in object definition.");
 
     let data_length: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -119,7 +119,7 @@ impl AlifeObject {
   /// Validate that read data is correct and does not contain update information.
   fn assert_update_data(chunk: &mut Chunk) -> () {
     let mut update_chunk: Chunk = chunk
-      .read_by_index(1)
+      .read_child_by_index(1)
       .expect("Expected data chunk to exist in object definition.");
 
     let data_length: u16 = update_chunk.file.read_u16::<SpawnByteOrder>().unwrap();

@@ -1,4 +1,5 @@
-use crate::spawn::chunk::{Chunk, ChunkIterator};
+use crate::spawn::chunk::chunk::Chunk;
+use crate::spawn::chunk::iterator::ChunkIterator;
 use crate::spawn::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 use std::io::Read;
@@ -14,7 +15,7 @@ impl Patrol {
   pub fn from_chunk(chunk: &mut Chunk) -> Patrol {
     let name: String = Self::read_name(chunk);
 
-    let mut data_chunk: Chunk = chunk.read_by_index(1).unwrap();
+    let mut data_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
 
     let points_count: u32 = Self::read_points_count(&mut data_chunk);
     let points: Vec<PatrolPoint> = Self::read_points(&mut data_chunk);
@@ -30,7 +31,7 @@ impl Patrol {
   }
 
   fn read_name(chunk: &mut Chunk) -> String {
-    let mut name_chunk: Chunk = chunk.read_by_index(0).unwrap();
+    let mut name_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
     let mut patrol_name: String = String::new();
 
     name_chunk.read_to_string(&mut patrol_name).unwrap();
@@ -41,7 +42,7 @@ impl Patrol {
   }
 
   fn read_points_count(chunk: &mut Chunk) -> u32 {
-    let mut points_count_chunk: Chunk = chunk.read_by_index(0).unwrap();
+    let mut points_count_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
 
     assert_eq!(points_count_chunk.size, 4);
 
@@ -49,12 +50,12 @@ impl Patrol {
   }
 
   fn read_points(chunk: &mut Chunk) -> Vec<PatrolPoint> {
-    let mut points_chunk: Chunk = chunk.read_by_index(1).unwrap();
+    let mut points_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut index: u32 = 0;
 
     for mut point_chunk in ChunkIterator::new(&mut points_chunk.file) {
-      let mut point_index_chunk: Chunk = point_chunk.read_by_index(0).unwrap();
+      let mut point_index_chunk: Chunk = point_chunk.read_child_by_index(0).unwrap();
 
       assert_eq!(point_index_chunk.size, 4);
       assert_eq!(
@@ -62,7 +63,7 @@ impl Patrol {
         point_index_chunk.read_u32::<SpawnByteOrder>().unwrap()
       );
 
-      let mut point_data_chunk: Chunk = point_chunk.read_by_index(1).unwrap();
+      let mut point_data_chunk: Chunk = point_chunk.read_child_by_index(1).unwrap();
 
       points.push(PatrolPoint::from_file(&mut point_data_chunk));
 
@@ -73,7 +74,7 @@ impl Patrol {
   }
 
   fn read_links(chunk: &mut Chunk) -> Vec<PatrolLink> {
-    let mut links_chunk: Chunk = chunk.read_by_index(2).unwrap();
+    let mut links_chunk: Chunk = chunk.read_child_by_index(2).unwrap();
     let mut links: Vec<PatrolLink> = Vec::new();
 
     if links_chunk.size > 0 {

@@ -1,4 +1,5 @@
-use crate::spawn::chunk::{Chunk, ChunkIterator};
+use crate::spawn::chunk::chunk::Chunk;
+use crate::spawn::chunk::iterator::ChunkIterator;
 use crate::spawn::data::patrol::Patrol;
 use crate::spawn::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
@@ -37,7 +38,7 @@ impl PatrolsChunk {
   }
 
   fn read_patrols_count(chunk: &mut Chunk) -> u32 {
-    let mut base_chunk: Chunk = chunk.read_by_index(0).unwrap();
+    let mut base_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
 
     assert_eq!(base_chunk.size, 4);
 
@@ -45,7 +46,7 @@ impl PatrolsChunk {
   }
 
   fn read_patrols(chunk: &mut Chunk, count: u32) -> Vec<Patrol> {
-    let mut patrols_chunk: Chunk = chunk.read_by_index(1).unwrap();
+    let mut patrols_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
     let mut patrols: Vec<Patrol> = Vec::new();
     let mut index: u32 = 0;
 

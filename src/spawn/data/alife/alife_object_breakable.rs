@@ -1,6 +1,7 @@
-use crate::spawn::chunk::Chunk;
+use crate::spawn::chunk::chunk::Chunk;
 use crate::spawn::data::alife::alife_object_visual::AlifeObjectVisual;
-use byteorder::{LittleEndian, ReadBytesExt};
+use crate::spawn::types::SpawnByteOrder;
+use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectBreakable {
   pub base: AlifeObjectVisual,
@@ -10,7 +11,7 @@ pub struct AlifeObjectBreakable {
 impl AlifeObjectBreakable {
   pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectBreakable {
     let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
-    let health: f32 = chunk.read_f32::<LittleEndian>().unwrap();
+    let health: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
 
     assert_eq!(
       chunk.read_bytes_remain(),

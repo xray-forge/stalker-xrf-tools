@@ -1,4 +1,5 @@
-use crate::spawn::chunk::{Chunk, ChunkIterator};
+use crate::spawn::chunk::chunk::Chunk;
+use crate::spawn::chunk::iterator::ChunkIterator;
 use crate::spawn::data::alife_object::AlifeObject;
 use crate::spawn::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
@@ -24,10 +25,10 @@ impl ALifeObjectsChunk {
       chunk.end_pos()
     );
 
-    let mut count_chunk: Chunk = chunk.read_by_index(0).unwrap();
+    let mut count_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
     let count: u32 = count_chunk.file.read_u32::<SpawnByteOrder>().unwrap();
 
-    let objects_chunk: Chunk = chunk.read_by_index(1).unwrap();
+    let objects_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
     for mut object_chunk in ChunkIterator::new(&mut objects_chunk.file.clone()) {
       objects.push(AlifeObject::from_chunk(&mut object_chunk))
     }
@@ -47,7 +48,7 @@ impl ALifeObjectsChunk {
 
   /// Empty chunk declared as placeholder, unknown purpose.
   fn advance_placeholder_chunk(chunk: &mut Chunk) -> () {
-    let edges_chunk: Chunk = chunk.read_by_index(2).unwrap();
+    let edges_chunk: Chunk = chunk.read_child_by_index(2).unwrap();
 
     assert_eq!(
       edges_chunk.read_bytes_remain(),
