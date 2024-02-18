@@ -21,7 +21,7 @@ impl ArtefactSpawnsChunk {
 
     // Parsing CLevelPoint structure, 20 bytes per one.
     for _ in 0..count {
-      let position: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+      let position: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
       let level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
       let distance: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
 

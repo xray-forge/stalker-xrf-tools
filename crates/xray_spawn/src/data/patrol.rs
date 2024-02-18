@@ -115,7 +115,7 @@ pub struct PatrolPoint {
 impl PatrolPoint {
   pub fn from_chunk(chunk: &mut Chunk) -> PatrolPoint {
     let name: String = chunk.read_null_terminated_string().unwrap();
-    let position: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let position: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
     let flags: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();

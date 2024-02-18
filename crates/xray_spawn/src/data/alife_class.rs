@@ -1,16 +1,21 @@
 use crate::chunk::chunk::Chunk;
+use crate::data::alife::alife_actor::AlifeActor;
 use crate::data::alife::alife_graph_point::AlifeGraphPoint;
 use crate::data::alife::alife_level_changer::AlifeLevelChanger;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
 use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
+use crate::data::alife::alife_object_helicopter::AlifeObjectHelicopter;
 use crate::data::alife::alife_object_inventory_box::AlifeObjectInventoryBox;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
 use crate::data::alife::alife_object_item_artefact::AlifeItemArtefact;
+use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
+use crate::data::alife::alife_object_item_detector::AlifeObjectItemDetector;
 use crate::data::alife::alife_object_item_explosive::AlifeObjectItemExplosive;
 use crate::data::alife::alife_object_item_grenade::AlifeObjectItemGrenade;
+use crate::data::alife::alife_object_item_helmet::AlifeObjectItemHelmet;
 use crate::data::alife::alife_object_item_pda::AlifeObjectItemPda;
 use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
 use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
@@ -86,6 +91,10 @@ impl AlifeClass {
   /// Additionally should respect script extension.
   pub fn read_by_class(chunk: &mut Chunk, alife_class: &AlifeClass) -> () {
     match alife_class {
+      AlifeClass::SeActor => {
+        let object: AlifeActor = AlifeActor::from_chunk(chunk);
+        AlifeActor::verify(chunk);
+      }
       AlifeClass::CseAlifeObjectBreakable => {
         let object: AlifeObjectBreakable = AlifeObjectBreakable::from_chunk(chunk);
         AlifeObjectBreakable::verify(chunk);
@@ -130,6 +139,10 @@ impl AlifeClass {
         let object: AlifeObjectPhysic = AlifeObjectPhysic::from_chunk(chunk);
         AlifeObjectPhysic::verify(chunk);
       }
+      AlifeClass::CseAlifeHelicopter => {
+        let object: AlifeObjectHelicopter = AlifeObjectHelicopter::from_chunk(chunk);
+        AlifeObjectHelicopter::verify(chunk);
+      }
       AlifeClass::CseAlifeInventoryBox => {
         let object: AlifeObjectInventoryBox = AlifeObjectInventoryBox::from_chunk(chunk);
         AlifeObjectInventoryBox::verify(chunk);
@@ -165,6 +178,18 @@ impl AlifeClass {
       AlifeClass::CseAlifeItemWeapon => {
         let object: AlifeObjectItemWeapon = AlifeObjectItemWeapon::from_chunk(chunk);
         AlifeObjectItemWeapon::verify(chunk);
+      }
+      AlifeClass::CseAlifeItemDetector => {
+        let object: AlifeObjectItemDetector = AlifeObjectItemDetector::from_chunk(chunk);
+        AlifeObjectItemDetector::verify(chunk);
+      }
+      AlifeClass::CseAlifeItemHelmet => {
+        let object: AlifeObjectItemHelmet = AlifeObjectItemHelmet::from_chunk(chunk);
+        AlifeObjectItemHelmet::verify(chunk);
+      }
+      AlifeClass::CseAlifeItemCustomOutfit => {
+        let object: AlifeObjectItemCustomOutfit = AlifeObjectItemCustomOutfit::from_chunk(chunk);
+        AlifeObjectItemCustomOutfit::verify(chunk);
       }
       AlifeClass::CseAlifeItemWeaponShotgun => {
         let object: AlifeObjectItemWeaponShotgun = AlifeObjectItemWeaponShotgun::from_chunk(chunk);

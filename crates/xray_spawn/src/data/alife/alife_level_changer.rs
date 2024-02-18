@@ -24,8 +24,8 @@ impl AlifeObjectInherited<AlifeLevelChanger> for AlifeLevelChanger {
 
     let dest_game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let dest_level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let dest_position: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
-    let dest_direction: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let dest_position: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
+    let dest_direction: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
     let angle_y: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
     let dest_level_name: String = chunk.read_null_terminated_string().unwrap();
     let dest_graph_point: String = chunk.read_null_terminated_string().unwrap();

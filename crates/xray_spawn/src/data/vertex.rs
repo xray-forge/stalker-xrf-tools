@@ -17,8 +17,8 @@ pub struct Vertex {
 
 impl Vertex {
   pub fn from_chunk(chunk: &mut Chunk) -> Vertex {
-    let level_point: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
-    let game_point: Vector3d = chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let level_point: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
+    let game_point: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
     let level_id: u8 = chunk.read_u8().unwrap();
     let level_vertex_id: u32 = chunk.read_u24::<SpawnByteOrder>().unwrap();
     let vertex_type: U32Bytes = chunk.read_u32_bytes().unwrap();

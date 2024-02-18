@@ -91,7 +91,7 @@ impl Chunk {
 
 impl Chunk {
   /// Read three float values.
-  pub fn read_f32_vector<T: ByteOrder>(&mut self) -> io::Result<Vector3d<f32>> {
+  pub fn read_f32_3d_vector<T: ByteOrder>(&mut self) -> io::Result<Vector3d<f32>> {
     Ok((
       self.read_f32::<T>()?,
       self.read_f32::<T>()?,
@@ -106,6 +106,18 @@ impl Chunk {
       self.read_u8()?,
       self.read_u8()?,
     ))
+  }
+
+  /// Read serialized vector from chunk, where u32 count N is followed by N u16 entries.
+  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> io::Result<Vec<u16>> {
+    let mut vector: Vec<u16> = Vec::new();
+    let count: u32 = self.read_u32::<T>()?;
+
+    for _ in 0..count {
+      vector.push(self.read_u16::<T>()?)
+    }
+
+    Ok(vector)
   }
 
   /// Read null terminated string from file bytes.
@@ -164,7 +176,7 @@ impl Chunk {
   }
 
   pub fn read_sphere<T: ByteOrder>(&mut self) -> io::Result<Sphere3d> {
-    let center: Vector3d = self.read_f32_vector::<T>()?;
+    let center: Vector3d = self.read_f32_3d_vector::<T>()?;
     let radius: f32 = self.read_f32::<T>()?;
 
     Ok((center, radius))
@@ -172,10 +184,10 @@ impl Chunk {
 
   pub fn read_matrix<T: ByteOrder>(&mut self) -> io::Result<Matrix3d> {
     Ok((
-      self.read_f32_vector::<T>()?,
-      self.read_f32_vector::<T>()?,
-      self.read_f32_vector::<T>()?,
-      self.read_f32_vector::<T>()?,
+      self.read_f32_3d_vector::<T>()?,
+      self.read_f32_3d_vector::<T>()?,
+      self.read_f32_3d_vector::<T>()?,
+      self.read_f32_3d_vector::<T>()?,
     ))
   }
 }

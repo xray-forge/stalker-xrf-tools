@@ -60,8 +60,8 @@ impl AlifeObject {
     let name: String = spawn_chunk.read_null_terminated_string().unwrap();
     let script_game_id: u8 = spawn_chunk.read_u8().unwrap();
     let script_rp: u8 = spawn_chunk.read_u8().unwrap();
-    let position: Vector3d = spawn_chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
-    let direction: Vector3d = spawn_chunk.read_f32_vector::<SpawnByteOrder>().unwrap();
+    let position: Vector3d = spawn_chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
+    let direction: Vector3d = spawn_chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
     let respawn_time: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
     let id: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
     let parent_id: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
