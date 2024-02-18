@@ -31,15 +31,16 @@ impl SpawnFile {
   pub fn from_path(path: &PathBuf) -> Result<SpawnFile, String> {
     let file: File = File::open(path).expect("Expected existing file to be provided for parsing.");
     let size: u64 = file.metadata().unwrap().len();
-    let mut file: FileSlice = FileSlice::new(file);
+
+    let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file));
 
     log::info!(
       "Parsing spawn file: {:?}, 0 -> {:?}",
       path.as_path(),
-      file.end_pos()
+      root_chunk.end_pos()
     );
 
-    let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut file);
+    let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
 
     assert_eq!(
       chunks.len(),
@@ -71,6 +72,8 @@ impl SpawnFile {
       Some(chunk) => GraphsChunk::from_chunk(chunk.clone()),
       None => None,
     };
+
+    assert!(root_chunk.is_ended(), "Expected whole file to be read.");
 
     Ok(SpawnFile {
       size,

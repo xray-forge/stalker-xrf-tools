@@ -12,12 +12,11 @@ impl ArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
   pub fn from_chunk(mut chunk: Chunk) -> Option<ArtefactSpawnsChunk> {
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
-
     let count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
 
     log::info!("Parsing artefacts: {count}, {:?}", chunk.size / 20);
 
-    assert_eq!(count, chunk.size / 20);
+    assert_eq!(count as u64, chunk.size / 20);
 
     // Parsing CLevelPoint structure, 20 bytes per one.
     for _ in 0..count {

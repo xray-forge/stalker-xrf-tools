@@ -1,4 +1,4 @@
-use crate::chunk::iterator::ChunkIterator;
+use crate::chunk::iterator::FileChunkIterator;
 use crate::data::shape::Shape;
 use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt};
@@ -12,7 +12,7 @@ use std::{fmt, io};
 #[derive(Clone)]
 pub struct Chunk {
   pub index: u32,
-  pub size: u32,
+  pub size: u64,
   pub position: u64,
   pub is_compressed: bool,
   pub file: FileSlice,
@@ -20,8 +20,18 @@ pub struct Chunk {
 
 impl Chunk {
   /// Read all chunk descriptors from file and put seek into the end.
-  pub fn read_all_from_file(file: &mut FileSlice) -> Vec<Chunk> {
-    ChunkIterator::new(file).into_iter().collect()
+  pub fn read_all_from_file(chunk: &mut Chunk) -> Vec<Chunk> {
+    FileChunkIterator::new(chunk).into_iter().collect()
+  }
+
+  pub fn from_file(file: FileSlice) -> Chunk {
+    Chunk {
+      index: 0,
+      size: file.len() as u64,
+      position: file.start_pos(),
+      is_compressed: false,
+      file: file,
+    }
   }
 }
 
@@ -65,7 +75,7 @@ impl Chunk {
 impl Chunk {
   /// Navigates to chunk with index and constructs chunk representation.
   pub fn read_child_by_index(&mut self, index: u32) -> Option<Chunk> {
-    for (iteration, chunk) in ChunkIterator::new(&mut self.file).enumerate() {
+    for (iteration, chunk) in FileChunkIterator::new(self).enumerate() {
       if index as usize == iteration {
         return Some(chunk);
       }
@@ -76,8 +86,8 @@ impl Chunk {
 
   /// Get list of all child chunks in current chunk.
   #[allow(dead_code)]
-  pub fn read_all_children(&self, file: &FileSlice) -> Vec<Chunk> {
-    ChunkIterator::new(&mut file.slice(self.position..(self.position + self.size as u64)))
+  pub fn read_all_children(&self, chunk: &Chunk) -> Vec<Chunk> {
+    FileChunkIterator::new(&mut chunk.clone())
       .into_iter()
       .collect()
   }

@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::chunk::iterator::ChunkIterator;
+use crate::chunk::iterator::FileChunkIterator;
 use crate::data::alife_object_base::AlifeObjectBase;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
@@ -28,8 +28,8 @@ impl ALifeObjectsChunk {
     let mut count_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
     let count: u32 = count_chunk.read_u32::<SpawnByteOrder>().unwrap();
 
-    let objects_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
-    for mut object_chunk in ChunkIterator::new(&mut objects_chunk.file.clone()) {
+    let mut objects_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
+    for mut object_chunk in FileChunkIterator::new(&mut objects_chunk) {
       objects.push(AlifeObjectBase::from_chunk(&mut object_chunk))
     }
 

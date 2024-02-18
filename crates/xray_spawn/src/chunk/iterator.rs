@@ -5,28 +5,30 @@ use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
 use std::io::{Seek, SeekFrom};
 
+/// Iterate over chunks in provided file slice.
+/// Mutates parent object to keep track of what was read during execution.
 #[derive(Debug)]
-pub struct ChunkIterator<'lifetime> {
+pub struct FileChunkIterator<'lifetime> {
   pub index: u32,
-  pub file: &'lifetime mut FileSlice,
+  pub chunk: &'lifetime mut Chunk,
 }
 
-impl<'lifetime> ChunkIterator<'lifetime> {
+impl<'lifetime> FileChunkIterator<'lifetime> {
   // todo: Replace with chunk based approach.
-  pub fn new(file: &mut FileSlice) -> ChunkIterator {
-    file.seek(SeekFrom::Start(0)).unwrap();
+  pub fn new(chunk: &mut Chunk) -> FileChunkIterator {
+    chunk.file.seek(SeekFrom::Start(0)).unwrap();
 
-    return ChunkIterator { index: 0, file };
+    return FileChunkIterator { index: 0, chunk };
   }
 }
 
 /// Iterates over chunk and read child chunks.
-impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
+impl<'lifetime> Iterator for FileChunkIterator<'lifetime> {
   type Item = Chunk;
 
   fn next(&mut self) -> Option<Chunk> {
-    let chunk_type = self.file.read_u32::<SpawnByteOrder>();
-    let chunk_size = self.file.read_u32::<SpawnByteOrder>();
+    let chunk_type = self.chunk.read_u32::<SpawnByteOrder>();
+    let chunk_size = self.chunk.read_u32::<SpawnByteOrder>();
 
     if chunk_type.is_err() || chunk_size.is_err() {
       return None;
@@ -36,16 +38,19 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
     let chunk_size: u32 = chunk_size.unwrap();
 
     return if self.index == chunk_id & (!CFS_COMPRESS_MARK) {
-      let position: u64 = self.file.seek(SeekFrom::Current(0)).unwrap();
-      let mut file: FileSlice = self.file.slice(position..(position + chunk_size as u64));
+      let position: u64 = self.chunk.file.seek(SeekFrom::Current(0)).unwrap();
+      let mut file: FileSlice = self
+        .chunk
+        .file
+        .slice(position..(position + chunk_size as u64));
 
       file.seek(SeekFrom::Start(0)).unwrap();
 
       let chunk = Chunk {
         index: chunk_id,
         is_compressed: chunk_id & CFS_COMPRESS_MARK == 1,
-        size: chunk_size,
-        position: self.file.seek(SeekFrom::Current(0)).unwrap(),
+        size: chunk_size as u64,
+        position: self.chunk.file.seek(SeekFrom::Current(0)).unwrap(),
         file,
       };
 
@@ -55,6 +60,7 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
 
       // Rewind for next iteration.
       self
+        .chunk
         .file
         .seek(SeekFrom::Current(chunk_size as i64))
         .unwrap();

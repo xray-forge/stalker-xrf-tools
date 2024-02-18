@@ -48,7 +48,7 @@ impl AlifeObjectBase {
 
     let data_length: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
 
-    assert_eq!(data_length as u32 + 2, spawn_chunk.size);
+    assert_eq!(data_length as u64 + 2, spawn_chunk.size);
 
     // todo: Is it net packet action id?
     let dummy: u16 = spawn_chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -130,7 +130,7 @@ impl AlifeObjectBase {
     let data_length: u16 = update_chunk.file.read_u16::<SpawnByteOrder>().unwrap();
     let update_size: u16 = update_chunk.file.read_u16::<SpawnByteOrder>().unwrap();
 
-    assert_eq!(data_length as u32 + 2, update_chunk.size);
+    assert_eq!(data_length as u64 + 2, update_chunk.size);
     assert_eq!(update_size, 0);
     assert_eq!(chunk.read_bytes_remain(), 0);
   }
