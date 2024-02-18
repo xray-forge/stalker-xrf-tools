@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -14,7 +14,7 @@ pub struct AlifeObjectAbstract {
   pub spawn_story_id: u32,
 }
 
-impl AlifeObjectInherited<AlifeObjectAbstract> for AlifeObjectAbstract {
+impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectAbstract {
     let game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let distance: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();

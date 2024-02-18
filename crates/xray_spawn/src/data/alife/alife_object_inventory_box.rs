@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectInventoryBox {
@@ -10,7 +10,7 @@ pub struct AlifeObjectInventoryBox {
   pub tip: String,
 }
 
-impl AlifeObjectInherited<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
+impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectInventoryBox {
     let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
 
@@ -26,3 +26,5 @@ impl AlifeObjectInherited<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectInventoryBox {}

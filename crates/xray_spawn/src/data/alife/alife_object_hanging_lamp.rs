@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -31,7 +31,7 @@ pub struct AlifeObjectHangingLamp {
   pub volumetric_distance: f32,
 }
 
-impl AlifeObjectInherited<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
+impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectHangingLamp {
     let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::from_chunk(chunk);
@@ -87,3 +87,5 @@ impl AlifeObjectInherited<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectHangingLamp {}

@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
@@ -11,7 +11,7 @@ pub struct AlifeObjectSpaceRestrictor {
   pub restrictor_type: u8,
 }
 
-impl AlifeObjectInherited<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
+impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectSpaceRestrictor {
     let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
 
@@ -25,3 +25,5 @@ impl AlifeObjectInherited<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestri
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectSpaceRestrictor {}

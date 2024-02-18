@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 
 pub struct AlifeZoneVisual {
   pub base: AlifeObjectAnomalyZone,
@@ -10,7 +10,7 @@ pub struct AlifeZoneVisual {
   pub attack_animation: String,
 }
 
-impl AlifeObjectInherited<AlifeZoneVisual> for AlifeZoneVisual {
+impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   fn from_chunk(chunk: &mut Chunk) -> AlifeZoneVisual {
     let base: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::from_chunk(chunk);
     let visual: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
@@ -35,3 +35,5 @@ impl AlifeObjectInherited<AlifeZoneVisual> for AlifeZoneVisual {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeZoneVisual {}

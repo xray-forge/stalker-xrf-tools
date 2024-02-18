@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -14,7 +14,7 @@ pub struct AlifeSmartTerrain {
   pub staying_objects_count: u8,
 }
 
-impl AlifeObjectInherited<AlifeSmartTerrain> for AlifeSmartTerrain {
+impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   fn from_chunk(chunk: &mut Chunk) -> AlifeSmartTerrain {
     let base: AlifeSmartZone = AlifeSmartZone::from_chunk(chunk);
 
@@ -77,3 +77,5 @@ impl AlifeObjectInherited<AlifeSmartTerrain> for AlifeSmartTerrain {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeSmartTerrain {}

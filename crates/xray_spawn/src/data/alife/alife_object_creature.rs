@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -16,7 +16,7 @@ pub struct AlifeObjectCreature {
   pub game_death_time: u64,
 }
 
-impl AlifeObjectInherited<AlifeObjectCreature> for AlifeObjectCreature {
+impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectCreature {
     let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
 

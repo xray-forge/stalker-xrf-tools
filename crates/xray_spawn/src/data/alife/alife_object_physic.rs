@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -13,7 +13,7 @@ pub struct AlifeObjectPhysic {
   pub fixed_bones: String,
 }
 
-impl AlifeObjectInherited<AlifeObjectPhysic> for AlifeObjectPhysic {
+impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectPhysic {
     let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::from_chunk(chunk);
@@ -31,3 +31,5 @@ impl AlifeObjectInherited<AlifeObjectPhysic> for AlifeObjectPhysic {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectPhysic {}

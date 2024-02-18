@@ -1,6 +1,6 @@
 pub mod alife;
 pub mod alife_class;
-pub mod alife_object;
+pub mod alife_object_base;
 pub mod cls_id;
 pub mod level;
 pub mod map;

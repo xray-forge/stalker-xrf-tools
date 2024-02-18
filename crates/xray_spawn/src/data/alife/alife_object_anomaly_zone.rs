@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
@@ -13,7 +13,7 @@ pub struct AlifeObjectAnomalyZone {
   pub last_spawn_time: Option<Time>,
 }
 
-impl AlifeObjectInherited<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
+impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectAnomalyZone {
     let base: AlifeObjectCustomZone = AlifeObjectCustomZone::from_chunk(chunk);
 
@@ -37,3 +37,5 @@ impl AlifeObjectInherited<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectAnomalyZone {}

@@ -20,7 +20,6 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub struct SpawnFile {
   pub size: u64,
-  pub chunks: Vec<Chunk>,
   pub header: HeaderChunk,
   pub alife_spawn: ALifeObjectsChunk,
   pub artefact_spawn: ArtefactSpawnsChunk,
@@ -30,7 +29,7 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   pub fn from_path(path: &PathBuf) -> Result<SpawnFile, String> {
-    let file: File = File::open(path).unwrap();
+    let file: File = File::open(path).expect("Expected existing file to be provided for parsing.");
     let size: u64 = file.metadata().unwrap().len();
     let mut file: FileSlice = FileSlice::new(file);
 
@@ -75,7 +74,6 @@ impl SpawnFile {
 
     Ok(SpawnFile {
       size,
-      chunks,
       header: header.expect("Unexpected header signature in spawn file."),
       alife_spawn: alife_spawns.expect("Unexpected alife spawns signature in spawn file."),
       artefact_spawn: artefact_spawns.expect("Unexpected artefact spawns signature in spawn file."),

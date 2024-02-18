@@ -5,8 +5,8 @@ use crate::data::cls_id::ClsId;
 use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 
-/// Generic abstract alife object.
-pub struct AlifeObject {
+/// Generic abstract alife object base.
+pub struct AlifeObjectBase {
   pub id: u16,
   pub section: String,
   pub clsid: ClsId,
@@ -23,10 +23,11 @@ pub struct AlifeObject {
   pub cse_abstract_unknown: u16,
   pub script_version: u16,
   pub spawn_id: u16,
+  pub inherited: Box<dyn AlifeObjectGeneric>,
 }
 
-impl AlifeObject {
-  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObject {
+impl AlifeObjectBase {
+  pub fn from_chunk(chunk: &mut Chunk) -> AlifeObjectBase {
     let mut id_chunk: Chunk = chunk
       .read_child_by_index(0)
       .expect("Expected vertex ID chunk to exist.");
@@ -40,7 +41,7 @@ impl AlifeObject {
     Self::read_object_data(&mut vertex_data_chunk)
   }
 
-  fn read_object_data(chunk: &mut Chunk) -> AlifeObject {
+  fn read_object_data(chunk: &mut Chunk) -> AlifeObjectBase {
     let mut spawn_chunk: Chunk = chunk
       .read_child_by_index(0)
       .expect("Expected data chunk to exist in object definition.");
@@ -94,11 +95,12 @@ impl AlifeObject {
 
     assert_ne!(class, AlifeClass::Unknown);
 
-    AlifeClass::read_by_class(&mut spawn_chunk, &class);
+    let inherited: Box<dyn AlifeObjectGeneric> =
+      AlifeClass::read_by_class(&mut spawn_chunk, &class);
 
     Self::assert_update_data(chunk);
 
-    AlifeObject {
+    AlifeObjectBase {
       id,
       section,
       clsid,
@@ -115,6 +117,7 @@ impl AlifeObject {
       cse_abstract_unknown,
       script_version,
       spawn_id,
+      inherited,
     }
   }
 
@@ -133,7 +136,7 @@ impl AlifeObject {
   }
 }
 
-pub trait AlifeObjectInherited<T> {
+pub trait AlifeObjectInheritedReader<T> {
   fn from_chunk(chunk: &mut Chunk) -> T;
 
   fn verify(chunk: &Chunk) -> () {
@@ -144,3 +147,5 @@ pub trait AlifeObjectInherited<T> {
     );
   }
 }
+
+pub trait AlifeObjectGeneric {}

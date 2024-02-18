@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run unpack raw gamedata" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="run --package stalker-xrf-cli --bin stalker-xrf-cli unpack F:\Documents\Projects\gamedata_raw\spawns\all.spawn " />
+    <option name="command" value="run --package stalker-xrf-cli --bin stalker-xrf-cli -- unpack-spawn -p F:\Documents\Projects\gamedata_raw\spawns\all.spawn " />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />
@@ -9,7 +9,7 @@
     <option name="allFeatures" value="false" />
     <option name="withSudo" value="false" />
     <option name="buildTarget" value="REMOTE" />
-    <option name="backtrace" value="SHORT" />
+    <option name="backtrace" value="FULL" />
     <option name="isRedirectInput" value="false" />
     <option name="redirectInputPath" value="" />
     <method v="2">

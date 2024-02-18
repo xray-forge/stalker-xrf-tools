@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_actor::AlifeObjectActor;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectGeneric;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -9,7 +10,7 @@ pub struct AlifeActor {
   pub start_position_filled: u8,
 }
 
-impl AlifeObjectInherited<AlifeActor> for AlifeActor {
+impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
   fn from_chunk(chunk: &mut Chunk) -> AlifeActor {
     let base: AlifeObjectActor = AlifeObjectActor::from_chunk(chunk);
 
@@ -27,3 +28,5 @@ impl AlifeObjectInherited<AlifeActor> for AlifeActor {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeActor {}

@@ -6,8 +6,8 @@ use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct PatrolsChunk {
-  index: u32,
-  patrols: Vec<Patrol>,
+  pub chunk: Chunk,
+  pub patrols: Vec<Patrol>,
 }
 
 impl PatrolsChunk {
@@ -31,10 +31,7 @@ impl PatrolsChunk {
     assert!(chunk.is_ended());
     assert_eq!(count, patrols.len() as u32);
 
-    return Some(PatrolsChunk {
-      index: chunk.index,
-      patrols,
-    });
+    return Some(PatrolsChunk { chunk, patrols });
   }
 
   fn read_patrols_count(chunk: &mut Chunk) -> u32 {
@@ -65,8 +62,8 @@ impl fmt::Debug for PatrolsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "PatrolsChunk {{ index: {}, patrols: Vector[{}] }}",
-      self.index,
+      "PatrolsChunk {{ chunk: {:?}, patrols: Vector[{}] }}",
+      self.chunk,
       self.patrols.len(),
     )
   }

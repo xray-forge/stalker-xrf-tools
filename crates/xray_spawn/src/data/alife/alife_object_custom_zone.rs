@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -13,7 +13,7 @@ pub struct AlifeObjectCustomZone {
   pub m_start_time_shift: u32,
 }
 
-impl AlifeObjectInherited<AlifeObjectCustomZone> for AlifeObjectCustomZone {
+impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectCustomZone {
     let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
 

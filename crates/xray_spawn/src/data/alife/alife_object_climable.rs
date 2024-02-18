@@ -1,13 +1,13 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_shape::AlifeObjectShape;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 
 pub struct AlifeObjectClimable {
   pub base: AlifeObjectShape,
   pub game_material: String,
 }
 
-impl AlifeObjectInherited<AlifeObjectClimable> for AlifeObjectClimable {
+impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectClimable {
     let base: AlifeObjectShape = AlifeObjectShape::from_chunk(chunk);
 
@@ -19,3 +19,5 @@ impl AlifeObjectInherited<AlifeObjectClimable> for AlifeObjectClimable {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectClimable {}

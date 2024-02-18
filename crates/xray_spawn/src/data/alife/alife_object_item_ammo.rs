@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -9,7 +9,7 @@ pub struct AlifeObjectItemAmmo {
   pub ammo_left: u16,
 }
 
-impl AlifeObjectInherited<AlifeObjectItemAmmo> for AlifeObjectItemAmmo {
+impl AlifeObjectInheritedReader<AlifeObjectItemAmmo> for AlifeObjectItemAmmo {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectItemAmmo {
     let base: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
 
@@ -18,3 +18,5 @@ impl AlifeObjectInherited<AlifeObjectItemAmmo> for AlifeObjectItemAmmo {
     AlifeObjectItemAmmo { base, ammo_left }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectItemAmmo {}

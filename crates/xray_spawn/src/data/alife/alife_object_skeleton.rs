@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::constants::FLAG_SKELETON_SAVED_DATA;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -10,7 +10,7 @@ pub struct AlifeObjectSkeleton {
   pub source_id: u16,
 }
 
-impl AlifeObjectInherited<AlifeObjectSkeleton> for AlifeObjectSkeleton {
+impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectSkeleton {
     let name: String = chunk.read_null_terminated_string().unwrap();
     let flags: u8 = chunk.read_u8().unwrap();

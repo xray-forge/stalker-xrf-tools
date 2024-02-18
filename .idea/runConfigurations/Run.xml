@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="run --package stalker-xrf-spawn-cli --bin stalker-xrf-spawn-cli" />
+    <option name="command" value="run --package stalker-xrf-cli --bin stalker-xrf-cli" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />

@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use byteorder::ReadBytesExt;
 
 /// Represents script extension of base server smart cover class.
@@ -10,7 +10,7 @@ pub struct AlifeSmartCover {
   pub loopholes: Vec<SmartCoverLoophole>,
 }
 
-impl AlifeObjectInherited<AlifeSmartCover> for AlifeSmartCover {
+impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   fn from_chunk(chunk: &mut Chunk) -> AlifeSmartCover {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::from_chunk(chunk);
 
@@ -37,3 +37,5 @@ pub struct SmartCoverLoophole {
   pub name: String,
   pub enabled: u8,
 }
+
+impl AlifeObjectGeneric for AlifeSmartCover {}

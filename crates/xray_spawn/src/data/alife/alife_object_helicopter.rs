@@ -2,7 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 
 pub struct AlifeObjectHelicopter {
   pub base: AlifeObjectVisual,
@@ -12,7 +12,7 @@ pub struct AlifeObjectHelicopter {
   pub engine_sound: String,
 }
 
-impl AlifeObjectInherited<AlifeObjectHelicopter> for AlifeObjectHelicopter {
+impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectHelicopter {
     let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
     let motion: AlifeObjectMotion = AlifeObjectMotion::from_chunk(chunk);
@@ -30,3 +30,5 @@ impl AlifeObjectInherited<AlifeObjectHelicopter> for AlifeObjectHelicopter {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectHelicopter {}

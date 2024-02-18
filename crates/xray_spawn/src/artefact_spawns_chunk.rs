@@ -4,7 +4,7 @@ use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct ArtefactSpawnsChunk {
-  pub index: u32,
+  pub chunk: Chunk,
   pub nodes: Vec<ArtefactSpawnPoint>,
 }
 
@@ -36,10 +36,7 @@ impl ArtefactSpawnsChunk {
 
     assert!(chunk.is_ended());
 
-    return Some(ArtefactSpawnsChunk {
-      index: chunk.index,
-      nodes,
-    });
+    return Some(ArtefactSpawnsChunk { chunk, nodes });
   }
 }
 
@@ -47,8 +44,8 @@ impl fmt::Debug for ArtefactSpawnsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "ArtefactSpawnsChunk {{ index: {}, nodes: Vector[{}] }}",
-      self.index,
+      "ArtefactSpawnsChunk {{ chunk: {:?}, nodes: Vector[{}] }}",
+      self.chunk,
       self.nodes.len()
     )
   }

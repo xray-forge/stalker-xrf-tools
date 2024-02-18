@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 
@@ -18,7 +18,7 @@ pub struct AlifeLevelChanger {
   pub hint: String,
 }
 
-impl AlifeObjectInherited<AlifeLevelChanger> for AlifeLevelChanger {
+impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
   fn from_chunk(chunk: &mut Chunk) -> AlifeLevelChanger {
     let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
 
@@ -55,3 +55,5 @@ impl AlifeObjectInherited<AlifeLevelChanger> for AlifeLevelChanger {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeLevelChanger {}

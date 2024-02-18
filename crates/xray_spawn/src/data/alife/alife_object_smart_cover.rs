@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
@@ -16,7 +16,7 @@ pub struct AlifeObjectSmartCover {
   pub can_fire: u8,
 }
 
-impl AlifeObjectInherited<AlifeObjectSmartCover> for AlifeObjectSmartCover {
+impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectSmartCover {
     let base: AlifeObjectDynamic = AlifeObjectDynamic::from_chunk(chunk);
 

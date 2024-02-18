@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 
@@ -9,7 +9,7 @@ pub struct AlifeObjectShape {
   pub shape: Vec<Shape>,
 }
 
-impl AlifeObjectInherited<AlifeObjectShape> for AlifeObjectShape {
+impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectShape {
     let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
 

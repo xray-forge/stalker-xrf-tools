@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
@@ -16,7 +16,7 @@ pub struct AlifeObjectTraderAbstract {
   pub dead_body_closed: u8,
 }
 
-impl AlifeObjectInherited<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
+impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectTraderAbstract {
     let money: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let specific_character: String = chunk.read_null_terminated_string().unwrap();

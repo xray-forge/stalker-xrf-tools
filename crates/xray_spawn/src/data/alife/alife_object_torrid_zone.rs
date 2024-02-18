@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use crate::data::time::Time;
 use byteorder::ReadBytesExt;
 
@@ -11,7 +11,7 @@ pub struct AlifeObjectTorridZone {
   pub last_spawn_time: Option<Time>,
 }
 
-impl AlifeObjectInherited<AlifeObjectTorridZone> for AlifeObjectTorridZone {
+impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
   fn from_chunk(chunk: &mut Chunk) -> AlifeObjectTorridZone {
     let base: AlifeObjectCustomZone = AlifeObjectCustomZone::from_chunk(chunk);
     let motion: AlifeObjectMotion = AlifeObjectMotion::from_chunk(chunk);
@@ -30,3 +30,5 @@ impl AlifeObjectInherited<AlifeObjectTorridZone> for AlifeObjectTorridZone {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeObjectTorridZone {}

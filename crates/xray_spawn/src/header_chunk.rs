@@ -4,7 +4,7 @@ use byteorder::ReadBytesExt;
 
 #[derive(Debug)]
 pub struct HeaderChunk {
-  pub index: u32,
+  pub chunk: Chunk,
   pub version: u32,
   pub guid: u128,
   pub graph_guid: u128,
@@ -32,7 +32,7 @@ impl HeaderChunk {
     assert!(chunk.is_ended());
 
     return Some(HeaderChunk {
-      index: chunk.index,
+      chunk,
       version,
       guid,
       graph_guid,

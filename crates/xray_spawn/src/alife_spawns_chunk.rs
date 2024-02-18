@@ -1,13 +1,13 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
-use crate::data::alife_object::AlifeObject;
+use crate::data::alife_object_base::AlifeObjectBase;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 use std::fmt;
 
 pub struct ALifeObjectsChunk {
-  pub index: u32,
-  pub objects: Vec<AlifeObject>,
+  pub chunk: Chunk,
+  pub objects: Vec<AlifeObjectBase>,
 }
 
 /// ALife spawns chunk contains3 children entries.
@@ -17,7 +17,7 @@ pub struct ALifeObjectsChunk {
 impl ALifeObjectsChunk {
   /// Read spawns chunk by position descriptor.
   pub fn from_chunk(mut chunk: Chunk) -> Option<ALifeObjectsChunk> {
-    let mut objects: Vec<AlifeObject> = Vec::new();
+    let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
     log::info!(
       "Parsing alife spawns chunk, {:?} -> {:?}",
@@ -30,7 +30,7 @@ impl ALifeObjectsChunk {
 
     let objects_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
     for mut object_chunk in ChunkIterator::new(&mut objects_chunk.file.clone()) {
-      objects.push(AlifeObject::from_chunk(&mut object_chunk))
+      objects.push(AlifeObjectBase::from_chunk(&mut object_chunk))
     }
 
     Self::advance_placeholder_chunk(&mut chunk);
@@ -40,10 +40,7 @@ impl ALifeObjectsChunk {
     assert_eq!(objects.len(), count as usize);
     assert_eq!(chunk.read_bytes_remain(), 0);
 
-    return Some(ALifeObjectsChunk {
-      index: chunk.index,
-      objects,
-    });
+    return Some(ALifeObjectsChunk { chunk, objects });
   }
 
   /// Empty chunk declared as placeholder, unknown purpose.
@@ -62,8 +59,8 @@ impl fmt::Debug for ALifeObjectsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "ALifeObjectsChunk {{ index: {}, objects: Vector[{}] }}",
-      self.index,
+      "ALifeObjectsChunk {{ chunk: {:?}, objects: Vector[{}] }}",
+      self.chunk,
       self.objects.len(),
     )
   }

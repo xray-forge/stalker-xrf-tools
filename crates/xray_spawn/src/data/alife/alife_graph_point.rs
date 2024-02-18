@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::data::alife_object::AlifeObjectInherited;
+use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use byteorder::ReadBytesExt;
 
 pub struct AlifeGraphPoint {
@@ -11,7 +11,7 @@ pub struct AlifeGraphPoint {
   pub location3: u8,
 }
 
-impl AlifeObjectInherited<AlifeGraphPoint> for AlifeGraphPoint {
+impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   fn from_chunk(chunk: &mut Chunk) -> AlifeGraphPoint {
     let connection_point_name: String = chunk.read_null_terminated_string().unwrap();
     let connection_level_name: String = chunk.read_null_terminated_string().unwrap();
@@ -30,3 +30,5 @@ impl AlifeObjectInherited<AlifeGraphPoint> for AlifeGraphPoint {
     }
   }
 }
+
+impl AlifeObjectGeneric for AlifeGraphPoint {}
