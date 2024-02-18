@@ -6,39 +6,14 @@ use byteorder::ReadBytesExt;
 
 pub struct AlifeSmartTerrain {
   pub base: AlifeSmartZone,
+  pub arriving_objects_count: u8,
+  pub object_job_descriptors_count: u8,
+  pub dead_objects_infos_count: u8,
+  pub smart_terrain_actor_control: u8,
+  pub respawn_point: u8,
+  pub staying_objects_count: u8,
 }
 
-/*
-{ name => 'arriving_npc',			type => 'l8u16v',	default => [] },
-  { name => 'npc_info',				type => 'npc_info',		default => [] },
-  { name => 'dead_times',				type => 'times',	default => [] },
-  { name => 'is_base_on_actor_control',	type => 'u8',		default => 0 },
-
-if ($_[0]->{is_base_on_actor_control} == 1) {
-        $_[1]->set_save_marker($_[0], 'load', 0, 'CBaseOnActorControl') if $_[0]->{version} > 123;
-        $_[1]->unpack_properties($_[0], (cs_cop_properties_info)[4..5]);
-        $_[1]->set_save_marker($_[0], 'load', 1, 'CBaseOnActorControl') if $_[0]->{version} > 123;
-      }
-  { name => 'status',					type => 'u8',		default => 0 },
-  { name => 'alarm_time',				type => 'CTime', default => 0},
-
-  { name => 'is_respawn_point',		type => 'u8',		default => 0 },
-
-if ($_[0]->{is_respawn_point} == 1) {
-      $_[1]->unpack_properties($_[0], (cs_cop_properties_info)[7]);
-      if ($_[0]->{script_version} > 11) {
-        $_[1]->unpack_properties($_[0], (cs_cop_properties_info)[8]);
-      }
-    }
-    $_[1]->unpack_properties($_[0], (cs_cop_properties_info)[9]);
-
-  { name => 'respawn_count',			type => 'l8szbv',		default => [] },
-  { name => 'last_respawn_update',	type => 'complex_time', default => 0},
-  { name => 'population',				type => 'u8',		default => 0 },
-
-
-  + save mark
- */
 impl AlifeObjectInherited<AlifeSmartTerrain> for AlifeSmartTerrain {
   fn from_chunk(chunk: &mut Chunk) -> AlifeSmartTerrain {
     let base: AlifeSmartZone = AlifeSmartZone::from_chunk(chunk);
@@ -60,7 +35,7 @@ impl AlifeObjectInherited<AlifeSmartTerrain> for AlifeSmartTerrain {
     let dead_objects_infos_count: u8 = chunk.read_u8().unwrap();
 
     assert_eq!(
-      object_job_descriptors_count, 0,
+      dead_objects_infos_count, 0,
       "Unexpected dead objects in smart terrain."
     );
 
@@ -91,6 +66,14 @@ impl AlifeObjectInherited<AlifeSmartTerrain> for AlifeSmartTerrain {
       "Unexpected data provided with smart terrain save."
     );
 
-    AlifeSmartTerrain { base }
+    AlifeSmartTerrain {
+      base,
+      arriving_objects_count,
+      object_job_descriptors_count,
+      dead_objects_infos_count,
+      smart_terrain_actor_control,
+      respawn_point,
+      staying_objects_count,
+    }
   }
 }

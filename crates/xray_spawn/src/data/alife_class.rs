@@ -4,7 +4,8 @@ use crate::data::alife::alife_item_weapon::AlifeItemWeapon;
 use crate::data::alife::alife_item_weapon_magazined::AlifeItemWeaponMagazined;
 use crate::data::alife::alife_item_weapon_magazined_wgl::AlifeItemWeaponMagazinedWgl;
 use crate::data::alife::alife_item_weapon_shotgun::AlifeItemWeaponShotgun;
-use crate::data::alife::alife_object_anomalous_zone::AlifeObjectAnomalyZone;
+use crate::data::alife::alife_level_changer::AlifeLevelChanger;
+use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
 use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
@@ -12,10 +13,12 @@ use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
 use crate::data::alife::alife_object_item_artefact::AlifeItemArtefact;
 use crate::data::alife::alife_object_item_grenade::AlifeObjectItemGrenade;
+use crate::data::alife::alife_object_item_pda::AlifeObjectItemPda;
 use crate::data::alife::alife_object_physic::AlifeObjectPhysic;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
+use crate::data::alife::alive_zone_visual::AlifeZoneVisual;
 use crate::data::alife_class::AlifeClass::CseAlifeItemArtefact;
 use crate::data::alife_object::AlifeObjectInherited;
 use enum_map::Enum;
@@ -101,13 +104,21 @@ impl AlifeClass {
         let object: AlifeSmartCover = AlifeSmartCover::from_chunk(chunk);
         AlifeSmartCover::verify(chunk);
       }
-      AlifeClass::SeZoneAnom => {
+      AlifeClass::SeZoneAnom | AlifeClass::CseAlifeAnomalousZone => {
         let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::from_chunk(chunk);
         AlifeObjectAnomalyZone::verify(chunk);
       }
       AlifeClass::SeSmartTerrain => {
         let object: AlifeSmartTerrain = AlifeSmartTerrain::from_chunk(chunk);
         AlifeSmartTerrain::verify(chunk);
+      }
+      AlifeClass::SeLevelChanger => {
+        let object: AlifeLevelChanger = AlifeLevelChanger::from_chunk(chunk);
+        AlifeLevelChanger::verify(chunk);
+      }
+      AlifeClass::SeZoneVisual => {
+        let object: AlifeZoneVisual = AlifeZoneVisual::from_chunk(chunk);
+        AlifeZoneVisual::verify(chunk);
       }
       AlifeClass::CseAlifeObjectPhysic => {
         let object: AlifeObjectPhysic = AlifeObjectPhysic::from_chunk(chunk);
@@ -120,6 +131,10 @@ impl AlifeClass {
       AlifeClass::CseAlifeItem => {
         let object: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
         AlifeObjectItem::verify(chunk);
+      }
+      AlifeClass::CseAlifeItemPda => {
+        let object: AlifeObjectItemPda = AlifeObjectItemPda::from_chunk(chunk);
+        AlifeObjectItemPda::verify(chunk);
       }
       AlifeClass::CseAlifeItemAmmo => {
         let object: AlifeObjectItemAmmo = AlifeObjectItemAmmo::from_chunk(chunk);

@@ -41,9 +41,14 @@ impl Chunk {
     self.file.cursor_pos()
   }
 
-  /// Get current position of the chunk seek.
+  /// Whether chunk is ended and contains no more data to read.
   pub fn is_ended(&self) -> bool {
     self.file.cursor_pos() == self.file.end_pos()
+  }
+
+  /// Whether chunk contains data to read.
+  pub fn has_data(&self) -> bool {
+    self.file.cursor_pos() < self.file.end_pos()
   }
 
   /// Get summary of bytes read from chunk based on current seek position.
