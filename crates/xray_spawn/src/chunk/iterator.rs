@@ -8,22 +8,22 @@ use std::io::{Seek, SeekFrom};
 /// Iterate over chunks in provided file slice.
 /// Mutates parent object to keep track of what was read during execution.
 #[derive(Debug)]
-pub struct FileChunkIterator<'lifetime> {
+pub struct ChunkIterator<'lifetime> {
   pub index: u32,
   pub chunk: &'lifetime mut Chunk,
 }
 
-impl<'lifetime> FileChunkIterator<'lifetime> {
+impl<'lifetime> ChunkIterator<'lifetime> {
   // todo: Replace with chunk based approach.
-  pub fn new(chunk: &mut Chunk) -> FileChunkIterator {
+  pub fn new(chunk: &mut Chunk) -> ChunkIterator {
     chunk.file.seek(SeekFrom::Start(0)).unwrap();
 
-    return FileChunkIterator { index: 0, chunk };
+    return ChunkIterator { index: 0, chunk };
   }
 }
 
 /// Iterates over chunk and read child chunks.
-impl<'lifetime> Iterator for FileChunkIterator<'lifetime> {
+impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
   type Item = Chunk;
 
   fn next(&mut self) -> Option<Chunk> {

@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::chunk::iterator::FileChunkIterator;
+use crate::chunk::iterator::ChunkIterator;
 use crate::data::patrol::Patrol;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
@@ -47,7 +47,7 @@ impl PatrolsChunk {
     let mut patrols: Vec<Patrol> = Vec::new();
     let mut index: u32 = 0;
 
-    for mut patrol_chunk in FileChunkIterator::new(&mut patrols_chunk) {
+    for mut patrol_chunk in ChunkIterator::new(&mut patrols_chunk) {
       patrols.push(Patrol::from_chunk(&mut patrol_chunk));
       index += 1;
     }

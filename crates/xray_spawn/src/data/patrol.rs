@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::chunk::iterator::FileChunkIterator;
+use crate::chunk::iterator::ChunkIterator;
 use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::ReadBytesExt;
 use std::io::Read;
@@ -54,7 +54,7 @@ impl Patrol {
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut index: u32 = 0;
 
-    for mut point_chunk in FileChunkIterator::new(&mut points_chunk) {
+    for mut point_chunk in ChunkIterator::new(&mut points_chunk) {
       let mut point_index_chunk: Chunk = point_chunk.read_child_by_index(0).unwrap();
 
       assert_eq!(point_index_chunk.size, 4);
