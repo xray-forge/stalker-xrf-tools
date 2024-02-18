@@ -7,6 +7,7 @@ use crate::data::alife::alife_item_weapon_shotgun::AlifeItemWeaponShotgun;
 use crate::data::alife::alife_object_anomalous_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
+use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
 use crate::data::alife::alife_object_item_artefact::AlifeItemArtefact;
@@ -106,6 +107,10 @@ impl AlifeClass {
       AlifeClass::CseAlifeObjectPhysic => {
         let object: AlifeObjectPhysic = AlifeObjectPhysic::from_chunk(chunk);
         AlifeObjectPhysic::verify(chunk);
+      }
+      AlifeClass::CseAlifeObjectHangingLamp => {
+        let object: AlifeObjectHangingLamp = AlifeObjectHangingLamp::from_chunk(chunk);
+        AlifeObjectHangingLamp::verify(chunk)
       }
       AlifeClass::CseAlifeItem => {
         let object: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);

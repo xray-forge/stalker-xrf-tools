@@ -9,6 +9,7 @@ pub mod alife_object_breakable;
 pub mod alife_object_climable;
 pub mod alife_object_custom_zone;
 pub mod alife_object_dynamic;
+pub mod alife_object_hanging_lamp;
 pub mod alife_object_item;
 pub mod alife_object_item_ammo;
 pub mod alife_object_item_artefact;
