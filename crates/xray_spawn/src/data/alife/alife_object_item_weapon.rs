@@ -4,7 +4,7 @@ use crate::data::alife_object::AlifeObjectInherited;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
-pub struct AlifeItemWeapon {
+pub struct AlifeObjectItemWeapon {
   pub base: AlifeObjectItem,
   pub ammo_current: u16,
   pub ammo_elapsed: u16,
@@ -14,8 +14,8 @@ pub struct AlifeItemWeapon {
   pub elapsed_grenades: u8,
 }
 
-impl AlifeObjectInherited<AlifeItemWeapon> for AlifeItemWeapon {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeItemWeapon {
+impl AlifeObjectInherited<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
+  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeapon {
     let base: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
 
     let ammo_current: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -25,7 +25,7 @@ impl AlifeObjectInherited<AlifeItemWeapon> for AlifeItemWeapon {
     let ammo_type: u8 = chunk.read_u8().unwrap();
     let elapsed_grenades: u8 = chunk.read_u8().unwrap();
 
-    AlifeItemWeapon {
+    AlifeObjectItemWeapon {
       base,
       ammo_current,
       ammo_elapsed,

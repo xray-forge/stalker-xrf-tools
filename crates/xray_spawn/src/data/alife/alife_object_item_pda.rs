@@ -8,7 +8,7 @@ pub struct AlifeObjectItemPda {
   pub base: AlifeObjectItem,
   pub owner: u16,
   pub character: String,
-  pub info_protion: String,
+  pub info_portion: String,
 }
 
 impl AlifeObjectInherited<AlifeObjectItemPda> for AlifeObjectItemPda {
@@ -23,7 +23,7 @@ impl AlifeObjectInherited<AlifeObjectItemPda> for AlifeObjectItemPda {
       base,
       owner,
       character,
-      info_protion: "".to_string(),
+      info_portion,
     }
   }
 }
