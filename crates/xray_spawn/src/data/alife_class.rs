@@ -15,6 +15,7 @@ use crate::data::alife::alife_object_item_grenade::AlifeObjectItemGrenade;
 use crate::data::alife::alife_object_physic::AlifeObjectPhysic;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
+use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife_class::AlifeClass::CseAlifeItemArtefact;
 use crate::data::alife_object::AlifeObjectInherited;
 use enum_map::Enum;
@@ -92,6 +93,10 @@ impl AlifeClass {
         let object: AlifeGraphPoint = AlifeGraphPoint::from_chunk(chunk);
         AlifeGraphPoint::verify(chunk);
       }
+      AlifeClass::CseAlifeSpaceRestrictor => {
+        let object: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
+        AlifeObjectSpaceRestrictor::verify(chunk);
+      }
       AlifeClass::SeSmartCover => {
         let object: AlifeSmartCover = AlifeSmartCover::from_chunk(chunk);
         AlifeSmartCover::verify(chunk);
@@ -100,9 +105,9 @@ impl AlifeClass {
         let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::from_chunk(chunk);
         AlifeObjectAnomalyZone::verify(chunk);
       }
-      AlifeClass::CseAlifeSpaceRestrictor => {
-        let object: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
-        AlifeObjectSpaceRestrictor::verify(chunk);
+      AlifeClass::SeSmartTerrain => {
+        let object: AlifeSmartTerrain = AlifeSmartTerrain::from_chunk(chunk);
+        AlifeSmartTerrain::verify(chunk);
       }
       AlifeClass::CseAlifeObjectPhysic => {
         let object: AlifeObjectPhysic = AlifeObjectPhysic::from_chunk(chunk);

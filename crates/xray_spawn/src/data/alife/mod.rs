@@ -21,3 +21,5 @@ pub mod alife_object_smart_cover;
 pub mod alife_object_space_restrictor;
 pub mod alife_object_visual;
 pub mod alife_smart_cover;
+pub mod alife_smart_terrain;
+pub mod alife_smart_zone;
