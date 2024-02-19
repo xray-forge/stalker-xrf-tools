@@ -69,7 +69,7 @@ mod tests {
   #[test]
   fn test_read_empty_chunk() {
     let chunk: Chunk = Chunk::from_file(
-      open_test_resource_as_slice(String::from("empty_nested_single.chunk")).unwrap(),
+      open_test_resource_as_slice(String::from("chunks/empty_nested_single.chunk")).unwrap(),
     )
     .unwrap()
     .read_child_by_index(0)
@@ -98,7 +98,8 @@ mod tests {
 
     let bytes_written: usize = writer
       .flush_chunk::<SpawnByteOrder>(
-        &mut overwrite_test_resource_as_file(String::from("header/header_simple.chunk")).unwrap(),
+        &mut overwrite_test_resource_as_file(String::from("chunks/header/header_simple.chunk"))
+          .unwrap(),
         0,
       )
       .unwrap();
@@ -106,7 +107,7 @@ mod tests {
     assert_eq!(bytes_written, 44);
 
     let file: FileSlice =
-      open_test_resource_as_slice(String::from("header/header_simple.chunk")).unwrap();
+      open_test_resource_as_slice(String::from("chunks/header/header_simple.chunk")).unwrap();
 
     assert_eq!(file.bytes_remaining(), 52);
 

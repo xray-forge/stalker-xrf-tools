@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
-use crate::types::{SpawnByteOrder, Vector3d};
-use byteorder::ReadBytesExt;
+use crate::types::Vector3d;
+use byteorder::{ByteOrder, ReadBytesExt};
 
 #[derive(Debug)]
 pub struct Level {
@@ -12,12 +12,12 @@ pub struct Level {
 }
 
 impl Level {
-  pub fn from_chunk(chunk: &mut Chunk) -> Level {
+  pub fn from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> Level {
     let name: String = chunk.read_null_terminated_string().unwrap();
-    let offset: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
+    let offset: Vector3d = chunk.read_f32_3d_vector::<T>().unwrap();
     let id: u8 = chunk.read_u8().unwrap();
     let section: String = chunk.read_null_terminated_string().unwrap();
-    let guid: u128 = chunk.read_u128::<SpawnByteOrder>().unwrap();
+    let guid: u128 = chunk.read_u128::<T>().unwrap();
 
     Level {
       id,

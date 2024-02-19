@@ -1,7 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
+use crate::data::alife::alife_object_inherited_reader::{
+  AlifeObjectGeneric, AlifeObjectInheritedReader,
+};
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 
 pub struct AlifeZoneVisual {
   pub base: AlifeObjectAnomalyZone,

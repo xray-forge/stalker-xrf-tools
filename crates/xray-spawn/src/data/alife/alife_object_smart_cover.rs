@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
-use crate::data::alife_object_base::AlifeObjectInheritedReader;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;

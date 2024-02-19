@@ -1,6 +1,8 @@
 use crate::chunk::chunk::Chunk;
+use crate::data::alife::alife_object_inherited_reader::{
+  AlifeObjectGeneric, AlifeObjectInheritedReader,
+};
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectInventoryBox {

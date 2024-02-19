@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
 use crate::data::alife_object_base::AlifeObjectBase;
-use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
 use std::fmt;
 
 pub struct ALifeObjectsChunk {
@@ -16,7 +15,7 @@ pub struct ALifeObjectsChunk {
 /// 3 - edges
 impl ALifeObjectsChunk {
   /// Read spawns chunk by position descriptor.
-  pub fn from_chunk(mut chunk: Chunk) -> Option<ALifeObjectsChunk> {
+  pub fn from_chunk<T: ByteOrder>(mut chunk: Chunk) -> Option<ALifeObjectsChunk> {
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
     log::info!(
@@ -26,11 +25,11 @@ impl ALifeObjectsChunk {
     );
 
     let mut count_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
-    let count: u32 = count_chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let count: u32 = count_chunk.read_u32::<T>().unwrap();
 
     let mut objects_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
     for mut object_chunk in ChunkIterator::new(&mut objects_chunk) {
-      objects.push(AlifeObjectBase::from_chunk(&mut object_chunk))
+      objects.push(AlifeObjectBase::from_chunk::<T>(&mut object_chunk))
     }
 
     Self::advance_placeholder_chunk(&mut chunk);

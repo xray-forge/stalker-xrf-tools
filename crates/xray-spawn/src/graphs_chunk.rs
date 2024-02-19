@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::level::Level;
 use crate::data::vertex::Vertex;
-use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
 use std::fmt;
 
 pub struct GraphsChunk {
@@ -19,7 +18,7 @@ pub struct GraphsChunk {
 
 impl GraphsChunk {
   /// Read patrols chunk by position descriptor.
-  pub fn from_chunk(mut chunk: Chunk) -> Option<GraphsChunk> {
+  pub fn from_chunk<T: ByteOrder>(mut chunk: Chunk) -> Option<GraphsChunk> {
     log::info!(
       "Parsing level graphs, {:?} -> {:?}",
       chunk.start_pos(),
@@ -27,21 +26,21 @@ impl GraphsChunk {
     );
 
     let version: u8 = chunk.read_u8().unwrap();
-    let vertex_count: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
-    let edge_count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let point_count: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let guid: u128 = chunk.read_u128::<SpawnByteOrder>().unwrap();
+    let vertex_count: u16 = chunk.read_u16::<T>().unwrap();
+    let edge_count: u32 = chunk.read_u32::<T>().unwrap();
+    let point_count: u32 = chunk.read_u32::<T>().unwrap();
+    let guid: u128 = chunk.read_u128::<T>().unwrap();
     let level_count: u8 = chunk.read_u8().unwrap();
 
     let mut levels: Vec<Level> = Vec::new();
     let mut vertices: Vec<Vertex> = Vec::new();
 
     for _ in 0..level_count {
-      levels.push(Level::from_chunk(&mut chunk))
+      levels.push(Level::from_chunk::<T>(&mut chunk))
     }
 
     for _ in 0..vertex_count {
-      vertices.push(Vertex::from_chunk(&mut chunk));
+      vertices.push(Vertex::from_chunk::<T>(&mut chunk));
     }
 
     log::info!(

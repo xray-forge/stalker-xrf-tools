@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
-use crate::types::{SpawnByteOrder, U32Bytes, Vector3d};
-use byteorder::ReadBytesExt;
+use crate::types::{U32Bytes, Vector3d};
+use byteorder::{ByteOrder, ReadBytesExt};
 
 #[derive(Debug)]
 pub struct Vertex {
@@ -16,14 +16,14 @@ pub struct Vertex {
 }
 
 impl Vertex {
-  pub fn from_chunk(chunk: &mut Chunk) -> Vertex {
-    let level_point: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
-    let game_point: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
+  pub fn from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> Vertex {
+    let level_point: Vector3d = chunk.read_f32_3d_vector::<T>().unwrap();
+    let game_point: Vector3d = chunk.read_f32_3d_vector::<T>().unwrap();
     let level_id: u8 = chunk.read_u8().unwrap();
-    let level_vertex_id: u32 = chunk.read_u24::<SpawnByteOrder>().unwrap();
+    let level_vertex_id: u32 = chunk.read_u24::<T>().unwrap();
     let vertex_type: U32Bytes = chunk.read_u32_bytes().unwrap();
-    let edge_offset: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let level_point_offset: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let edge_offset: u32 = chunk.read_u32::<T>().unwrap();
+    let level_point_offset: u32 = chunk.read_u32::<T>().unwrap();
     let edge_count: u8 = chunk.read_u8().unwrap();
     let level_point_count: u8 = chunk.read_u8().unwrap();
 

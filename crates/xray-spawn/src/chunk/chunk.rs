@@ -226,7 +226,7 @@ mod tests {
 
   #[test]
   fn test_read_empty_file() {
-    let file: FileSlice = open_test_resource_as_slice(String::from("empty")).unwrap();
+    let file: FileSlice = open_test_resource_as_slice(String::from("chunks/empty")).unwrap();
 
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 0);
@@ -247,7 +247,7 @@ mod tests {
   #[test]
   fn test_read_empty_chunk() {
     let file: FileSlice =
-      open_test_resource_as_slice(String::from("empty_nested_single.chunk")).unwrap();
+      open_test_resource_as_slice(String::from("chunks/empty_nested_single.chunk")).unwrap();
 
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 8);
@@ -263,14 +263,14 @@ mod tests {
   #[test]
   fn test_read_empty_children() {
     let file: FileSlice =
-      open_test_resource_as_slice(String::from("empty_nested_single.chunk")).unwrap();
+      open_test_resource_as_slice(String::from("chunks/empty_nested_single.chunk")).unwrap();
     let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
     assert_eq!(chunks.first().unwrap().size, 0);
 
     let file: FileSlice =
-      open_test_resource_as_slice(String::from("empty_nested_five.chunk")).unwrap();
+      open_test_resource_as_slice(String::from("chunks/empty_nested_five.chunk")).unwrap();
     let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");
@@ -284,14 +284,14 @@ mod tests {
   #[test]
   fn test_read_dummy_children() {
     let file: FileSlice =
-      open_test_resource_as_slice(String::from("dummy_nested_single.chunk")).unwrap();
+      open_test_resource_as_slice(String::from("chunks/dummy_nested_single.chunk")).unwrap();
     let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
     assert_eq!(chunks.first().unwrap().size, 8);
 
     let file: FileSlice =
-      open_test_resource_as_slice(String::from("dummy_nested_five.chunk")).unwrap();
+      open_test_resource_as_slice(String::from("chunks/dummy_nested_five.chunk")).unwrap();
     let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");

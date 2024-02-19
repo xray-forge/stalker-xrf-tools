@@ -7,6 +7,9 @@ use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
 use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
 use crate::data::alife::alife_object_helicopter::AlifeObjectHelicopter;
+use crate::data::alife::alife_object_inherited_reader::{
+  AlifeObjectGeneric, AlifeObjectInheritedReader,
+};
 use crate::data::alife::alife_object_inventory_box::AlifeObjectInventoryBox;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
@@ -27,7 +30,6 @@ use crate::data::alife::alife_object_torrid_zone::AlifeObjectTorridZone;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
-use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use enum_map::Enum;
 
 #[derive(Clone, Debug, Enum, PartialEq)]

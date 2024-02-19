@@ -1,6 +1,8 @@
 use crate::chunk::chunk::Chunk;
+use crate::data::alife::alife_object_inherited_reader::{
+  AlifeObjectGeneric, AlifeObjectInheritedReader,
+};
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
-use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 use byteorder::ReadBytesExt;
 
 /// Represents script extension of base server smart cover class.

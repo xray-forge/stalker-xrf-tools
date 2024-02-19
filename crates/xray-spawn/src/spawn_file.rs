@@ -4,7 +4,7 @@ use crate::chunk::chunk::Chunk;
 use crate::graphs_chunk::GraphsChunk;
 use crate::header_chunk::HeaderChunk;
 use crate::patrols_chunk::PatrolsChunk;
-use crate::types::SpawnByteOrder;
+use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use std::fs::File;
 use std::path::PathBuf;
@@ -29,7 +29,7 @@ pub struct SpawnFile {
 }
 
 impl SpawnFile {
-  pub fn from_path(path: &PathBuf) -> Result<SpawnFile, String> {
+  pub fn from_path<T: ByteOrder>(path: &PathBuf) -> Result<SpawnFile, String> {
     let file: File = File::open(path).expect("Expected existing file to be provided for parsing.");
     let size: u64 = file.metadata().unwrap().len();
 
@@ -49,28 +49,27 @@ impl SpawnFile {
       "Unexpected chunks count in spawn file root, expected 5."
     );
 
-    let header: HeaderChunk = HeaderChunk::read_from_chunk::<SpawnByteOrder>(
-      chunks.get(0).expect("Header chunk to exist.").clone(),
-    )
-    .expect("Header chunk to be read.");
+    let header: HeaderChunk =
+      HeaderChunk::read_from_chunk::<T>(chunks.get(0).expect("Header chunk to exist.").clone())
+        .expect("Header chunk to be read.");
 
     let alife_spawns: Option<ALifeObjectsChunk> = match chunks.get(1) {
-      Some(chunk) => ALifeObjectsChunk::from_chunk(chunk.clone()),
+      Some(chunk) => ALifeObjectsChunk::from_chunk::<T>(chunk.clone()),
       None => None,
     };
 
     let artefact_spawns: Option<ArtefactSpawnsChunk> = match chunks.get(2) {
-      Some(chunk) => ArtefactSpawnsChunk::from_chunk(chunk.clone()),
+      Some(chunk) => ArtefactSpawnsChunk::from_chunk::<T>(chunk.clone()),
       None => None,
     };
 
     let patrols: Option<PatrolsChunk> = match chunks.get(3) {
-      Some(chunk) => PatrolsChunk::from_chunk(chunk.clone()),
+      Some(chunk) => PatrolsChunk::from_chunk::<T>(chunk.clone()),
       None => None,
     };
 
     let graphs: Option<GraphsChunk> = match chunks.get(4) {
-      Some(chunk) => GraphsChunk::from_chunk(chunk.clone()),
+      Some(chunk) => GraphsChunk::from_chunk::<T>(chunk.clone()),
       None => None,
     };
 

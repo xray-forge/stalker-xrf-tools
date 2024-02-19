@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
 use xray_spawn::spawn_file::SpawnFile;
+use xray_spawn::types::SpawnByteOrder;
 
 /// Unpack provided *.spawn file and validate it.
 pub fn unpack_spawn_file(matches: &ArgMatches) {
@@ -10,7 +11,7 @@ pub fn unpack_spawn_file(matches: &ArgMatches) {
 
   log::info!("Starting parsing spawn file in, target path {:?}", path);
 
-  let spawn_file: SpawnFile = SpawnFile::from_path(path).unwrap();
+  let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::from_path::<SpawnByteOrder>(path).unwrap());
 
   log::info!("Spawn file: {:?}", spawn_file);
 }

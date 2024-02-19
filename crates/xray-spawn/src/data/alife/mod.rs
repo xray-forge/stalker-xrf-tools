@@ -11,6 +11,7 @@ pub mod alife_object_custom_zone;
 pub mod alife_object_dynamic;
 pub mod alife_object_hanging_lamp;
 pub mod alife_object_helicopter;
+pub mod alife_object_inherited_reader;
 pub mod alife_object_inventory_box;
 pub mod alife_object_item;
 pub mod alife_object_item_ammo;

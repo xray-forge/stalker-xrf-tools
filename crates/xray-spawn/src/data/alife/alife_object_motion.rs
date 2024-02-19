@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::data::alife_object_base::AlifeObjectInheritedReader;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 
 pub struct AlifeObjectMotion {
   pub motion_name: String,

@@ -1,7 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_actor::AlifeObjectActor;
-use crate::data::alife_object_base::AlifeObjectGeneric;
-use crate::data::alife_object_base::AlifeObjectInheritedReader;
+use crate::data::alife::alife_object_inherited_reader::{
+  AlifeObjectGeneric, AlifeObjectInheritedReader,
+};
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 

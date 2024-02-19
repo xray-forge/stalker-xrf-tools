@@ -1,6 +1,8 @@
 use crate::chunk::chunk::Chunk;
+use crate::data::alife::alife_object_inherited_reader::{
+  AlifeObjectGeneric, AlifeObjectInheritedReader,
+};
 use crate::data::alife::alife_object_item::AlifeObjectItem;
-use crate::data::alife_object_base::{AlifeObjectGeneric, AlifeObjectInheritedReader};
 
 pub struct AlifeObjectItemCustomOutfit {
   pub base: AlifeObjectItem,
