@@ -1,5 +1,5 @@
 use fileslice::FileSlice;
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::PathBuf;
 
@@ -28,6 +28,37 @@ pub fn open_test_resource_as_slice(resource_path: String) -> io::Result<FileSlic
 
   match File::open(path.clone()) {
     Ok(file) => Ok(FileSlice::new(file)),
+    Err(error) => Err(io::Error::new(
+      error.kind(),
+      format!("Failed to open test asset {:?}", path),
+    )),
+  }
+}
+
+/// Open file from test resources.
+pub fn open_test_resource_as_file(resource_path: String) -> io::Result<File> {
+  let path: PathBuf = get_test_resource_path(resource_path);
+
+  match File::open(path.clone()) {
+    Ok(file) => Ok(file),
+    Err(error) => Err(io::Error::new(
+      error.kind(),
+      format!("Failed to open test asset {:?}", path),
+    )),
+  }
+}
+
+/// Create and open file from test resources, overwrite existing one.
+pub fn overwrite_test_resource_as_file(resource_path: String) -> io::Result<File> {
+  let path: PathBuf = get_test_resource_path(resource_path);
+
+  match OpenOptions::new()
+    .create(true)
+    .write(true)
+    .truncate(true)
+    .open(path.clone())
+  {
+    Ok(file) => Ok(file),
     Err(error) => Err(io::Error::new(
       error.kind(),
       format!("Failed to open test asset {:?}", path),

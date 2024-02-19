@@ -4,6 +4,7 @@ use crate::chunk::chunk::Chunk;
 use crate::graphs_chunk::GraphsChunk;
 use crate::header_chunk::HeaderChunk;
 use crate::patrols_chunk::PatrolsChunk;
+use crate::types::SpawnByteOrder;
 use fileslice::FileSlice;
 use std::fs::File;
 use std::path::PathBuf;
@@ -48,9 +49,10 @@ impl SpawnFile {
       "Unexpected chunks count in spawn file root, expected 5."
     );
 
-    let header: HeaderChunk =
-      HeaderChunk::from_chunk(chunks.get(0).expect("Header chunk to exist.").clone())
-        .expect("Header chunk to be read.");
+    let header: HeaderChunk = HeaderChunk::read_from_chunk::<SpawnByteOrder>(
+      chunks.get(0).expect("Header chunk to exist.").clone(),
+    )
+    .expect("Header chunk to be read.");
 
     let alife_spawns: Option<ALifeObjectsChunk> = match chunks.get(1) {
       Some(chunk) => ALifeObjectsChunk::from_chunk(chunk.clone()),
