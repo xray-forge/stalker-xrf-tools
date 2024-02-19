@@ -1,1 +1,1 @@
-pub const CFS_COMPRESS_MARK: u32 = 1u32 << 31u32;
+pub const CFS_COMPRESS_MARK: u32 = 1 << 31;

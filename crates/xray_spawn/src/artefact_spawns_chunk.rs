@@ -35,7 +35,7 @@ impl ArtefactSpawnsChunk {
 
     assert!(chunk.is_ended());
 
-    return Some(ArtefactSpawnsChunk { chunk, nodes });
+    Some(ArtefactSpawnsChunk { chunk, nodes })
   }
 }
 

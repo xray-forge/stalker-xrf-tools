@@ -32,7 +32,7 @@ impl SpawnFile {
     let file: File = File::open(path).expect("Expected existing file to be provided for parsing.");
     let size: u64 = file.metadata().unwrap().len();
 
-    let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file));
+    let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file)).unwrap();
 
     log::info!(
       "Parsing spawn file: {:?}, 0 -> {:?}",
@@ -48,10 +48,9 @@ impl SpawnFile {
       "Unexpected chunks count in spawn file root, expected 5."
     );
 
-    let header: Option<HeaderChunk> = match chunks.get(0) {
-      Some(chunk) => HeaderChunk::from_chunk(chunk.clone()),
-      None => None,
-    };
+    let header: HeaderChunk =
+      HeaderChunk::from_chunk(chunks.get(0).expect("Header chunk to exist.").clone())
+        .expect("Header chunk to be read.");
 
     let alife_spawns: Option<ALifeObjectsChunk> = match chunks.get(1) {
       Some(chunk) => ALifeObjectsChunk::from_chunk(chunk.clone()),
@@ -77,7 +76,7 @@ impl SpawnFile {
 
     Ok(SpawnFile {
       size,
-      header: header.expect("Unexpected header signature in spawn file."),
+      header,
       alife_spawn: alife_spawns.expect("Unexpected alife spawns signature in spawn file."),
       artefact_spawn: artefact_spawns.expect("Unexpected artefact spawns signature in spawn file."),
       patrols: patrols.expect("Unexpected patrols signature in spawn file."),

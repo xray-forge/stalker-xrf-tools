@@ -1,3 +1,4 @@
+use crate::chunk::interface::ChunkDataSource;
 use crate::chunk::iterator::ChunkIterator;
 use crate::data::shape::Shape;
 use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
@@ -10,28 +11,35 @@ use std::string::FromUtf8Error;
 use std::{fmt, io};
 
 #[derive(Clone)]
-pub struct Chunk {
+pub struct Chunk<T: ChunkDataSource = FileSlice> {
   pub index: u32,
   pub size: u64,
   pub position: u64,
   pub is_compressed: bool,
-  pub file: FileSlice,
+  pub file: Box<T>,
 }
 
 impl Chunk {
   /// Read all chunk descriptors from file and put seek into the end.
   pub fn read_all_from_file(chunk: &mut Chunk) -> Vec<Chunk> {
-    ChunkIterator::new(chunk).into_iter().collect()
+    ChunkIterator::new(chunk).collect()
   }
 
-  pub fn from_file(file: FileSlice) -> Chunk {
-    Chunk {
+  pub fn from_file(file: FileSlice) -> io::Result<Chunk> {
+    if file.is_empty() {
+      return Err(io::Error::new(
+        io::ErrorKind::InvalidInput,
+        "Trying to create chunk from empty file.",
+      ));
+    }
+
+    Ok(Chunk {
       index: 0,
       size: file.len() as u64,
       position: file.start_pos(),
       is_compressed: false,
-      file,
-    }
+      file: Box::new(file),
+    })
   }
 }
 
@@ -85,9 +93,8 @@ impl Chunk {
   }
 
   /// Get list of all child chunks in current chunk.
-  #[allow(dead_code)]
-  pub fn read_all_children(&self, chunk: &Chunk) -> Vec<Chunk> {
-    ChunkIterator::new(&mut chunk.clone()).into_iter().collect()
+  pub fn read_all_children(&self) -> Vec<Chunk> {
+    ChunkIterator::new(&mut self.clone()).collect()
   }
 
   /// Reset seek position in chunk file.
@@ -207,5 +214,84 @@ impl fmt::Debug for Chunk {
       "Chunk {{ index: {}, size: {}, position: {}, is_compressed: {} }}",
       self.index, self.size, self.position, self.is_compressed
     )
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::chunk::chunk::Chunk;
+  use crate::test::utils::open_test_resource_as_slice;
+  use fileslice::FileSlice;
+  use std::io;
+
+  #[test]
+  fn test_read_empty_file() {
+    let file: FileSlice = open_test_resource_as_slice(String::from("empty")).unwrap();
+
+    assert_eq!(file.start_pos(), 0);
+    assert_eq!(file.end_pos(), 0);
+
+    let result: io::Result<Chunk> = Chunk::from_file(file);
+
+    assert!(
+      result.is_err(),
+      "File should be empty and fail to read data."
+    );
+    assert_eq!(
+      result.unwrap_err().kind(),
+      io::ErrorKind::InvalidInput,
+      "Expect input error."
+    );
+  }
+
+  #[test]
+  fn test_read_empty_chunk() {
+    let file: FileSlice =
+      open_test_resource_as_slice(String::from("empty_nested_single.chunk")).unwrap();
+
+    assert_eq!(file.start_pos(), 0);
+    assert_eq!(file.end_pos(), 8);
+
+    let chunk: Chunk = Chunk::from_file(file)
+      .unwrap()
+      .read_child_by_index(0)
+      .unwrap();
+
+    assert!(chunk.is_ended(), "Expect empty chunk.");
+  }
+
+  #[test]
+  fn test_read_children() {
+    let chunks: Vec<Chunk> = Chunk::from_file(
+      open_test_resource_as_slice(String::from("empty_nested_single.chunk")).unwrap(),
+    )
+    .unwrap()
+    .read_all_children();
+
+    assert_eq!(chunks.len(), 1, "Expect single chunk.");
+
+    let chunks: Vec<Chunk> = Chunk::from_file(
+      open_test_resource_as_slice(String::from("dummy_nested_single.chunk")).unwrap(),
+    )
+    .unwrap()
+    .read_all_children();
+
+    assert_eq!(chunks.len(), 1, "Expect single chunk.");
+
+    let chunks: Vec<Chunk> = Chunk::from_file(
+      open_test_resource_as_slice(String::from("empty_nested_five.chunk")).unwrap(),
+    )
+    .unwrap()
+    .read_all_children();
+
+    assert_eq!(chunks.len(), 5, "Expect five chunks.");
+
+    let chunks: Vec<Chunk> = Chunk::from_file(
+      open_test_resource_as_slice(String::from("dummy_nested_five.chunk")).unwrap(),
+    )
+    .unwrap()
+    .read_all_children();
+
+    assert_eq!(chunks.len(), 5, "Expect five chunks.");
   }
 }

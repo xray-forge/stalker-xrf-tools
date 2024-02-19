@@ -31,7 +31,7 @@ impl PatrolsChunk {
     assert!(chunk.is_ended());
     assert_eq!(count, patrols.len() as u32);
 
-    return Some(PatrolsChunk { chunk, patrols });
+    Some(PatrolsChunk { chunk, patrols })
   }
 
   fn read_patrols_count(chunk: &mut Chunk) -> u32 {

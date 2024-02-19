@@ -54,7 +54,7 @@ impl GraphsChunk {
     assert_eq!(vertices.len(), vertex_count as usize);
     // todo: assert_eq!(file.cursor_pos(), file.end_pos());
 
-    return Some(GraphsChunk {
+    Some(GraphsChunk {
       chunk,
       version,
       levels,
@@ -64,7 +64,7 @@ impl GraphsChunk {
       point_count,
       guid,
       size: 4096,
-    });
+    })
   }
 }
 

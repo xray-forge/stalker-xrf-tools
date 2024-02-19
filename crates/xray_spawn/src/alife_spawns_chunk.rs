@@ -40,11 +40,11 @@ impl ALifeObjectsChunk {
     assert_eq!(objects.len(), count as usize);
     assert_eq!(chunk.read_bytes_remain(), 0);
 
-    return Some(ALifeObjectsChunk { chunk, objects });
+    Some(ALifeObjectsChunk { chunk, objects })
   }
 
   /// Empty chunk declared as placeholder, unknown purpose.
-  fn advance_placeholder_chunk(chunk: &mut Chunk) -> () {
+  fn advance_placeholder_chunk(chunk: &mut Chunk) {
     let edges_chunk: Chunk = chunk.read_child_by_index(2).unwrap();
 
     assert_eq!(
