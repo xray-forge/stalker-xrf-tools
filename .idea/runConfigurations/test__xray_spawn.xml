@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run unpack raw gamedata" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="run --package stalker-xrf-cli --bin stalker-xrf-cli -- unpack-spawn -p F:\Documents\Projects\gamedata_raw\spawns\all.spawn " />
+  <configuration default="false" name="test: xray-spawn" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="test">
+    <option name="command" value="test --package xray-spawn" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />
