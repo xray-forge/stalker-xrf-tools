@@ -168,7 +168,7 @@ impl Chunk {
         .seek(SeekFrom::Start(offset + position as u64 + 1))
         .expect("Correct object seek movement.");
 
-      return Ok(value);
+      Ok(value)
     } else {
       panic!("No null terminator found in file");
     }
@@ -261,37 +261,44 @@ mod tests {
   }
 
   #[test]
-  fn test_read_children() {
-    let chunks: Vec<Chunk> = Chunk::from_file(
-      open_test_resource_as_slice(String::from("empty_nested_single.chunk")).unwrap(),
-    )
-    .unwrap()
-    .read_all_children();
+  fn test_read_empty_children() {
+    let file: FileSlice =
+      open_test_resource_as_slice(String::from("empty_nested_single.chunk")).unwrap();
+    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
+    assert_eq!(chunks.first().unwrap().size, 0);
 
-    let chunks: Vec<Chunk> = Chunk::from_file(
-      open_test_resource_as_slice(String::from("dummy_nested_single.chunk")).unwrap(),
-    )
-    .unwrap()
-    .read_all_children();
+    let file: FileSlice =
+      open_test_resource_as_slice(String::from("empty_nested_five.chunk")).unwrap();
+    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
+
+    assert_eq!(chunks.len(), 5, "Expect five chunks.");
+    assert_eq!(chunks.get(0).unwrap().size, 0);
+    assert_eq!(chunks.get(1).unwrap().size, 0);
+    assert_eq!(chunks.get(2).unwrap().size, 0);
+    assert_eq!(chunks.get(3).unwrap().size, 0);
+    assert_eq!(chunks.get(4).unwrap().size, 0);
+  }
+
+  #[test]
+  fn test_read_dummy_children() {
+    let file: FileSlice =
+      open_test_resource_as_slice(String::from("dummy_nested_single.chunk")).unwrap();
+    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
+    assert_eq!(chunks.first().unwrap().size, 8);
 
-    let chunks: Vec<Chunk> = Chunk::from_file(
-      open_test_resource_as_slice(String::from("empty_nested_five.chunk")).unwrap(),
-    )
-    .unwrap()
-    .read_all_children();
-
-    assert_eq!(chunks.len(), 5, "Expect five chunks.");
-
-    let chunks: Vec<Chunk> = Chunk::from_file(
-      open_test_resource_as_slice(String::from("dummy_nested_five.chunk")).unwrap(),
-    )
-    .unwrap()
-    .read_all_children();
+    let file: FileSlice =
+      open_test_resource_as_slice(String::from("dummy_nested_five.chunk")).unwrap();
+    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");
+    assert_eq!(chunks.get(0).unwrap().size, 8);
+    assert_eq!(chunks.get(1).unwrap().size, 24);
+    assert_eq!(chunks.get(2).unwrap().size, 16);
+    assert_eq!(chunks.get(3).unwrap().size, 0);
+    assert_eq!(chunks.get(4).unwrap().size, 40);
   }
 }

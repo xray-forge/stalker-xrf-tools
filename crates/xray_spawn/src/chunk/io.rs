@@ -29,6 +29,6 @@ impl ChunkReader for Chunk {
 
 impl Read for Chunk {
   fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-    return self.file.read(buf);
+    self.file.read(buf)
   }
 }
