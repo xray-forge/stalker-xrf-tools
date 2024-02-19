@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
-use crate::types::Vector3d;
+use crate::data::patrol_link::PatrolLink;
+use crate::data::patrol_point::PatrolPoint;
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::io::Read;
 
@@ -52,19 +53,16 @@ impl Patrol {
   fn read_points<T: ByteOrder>(chunk: &mut Chunk) -> Vec<PatrolPoint> {
     let mut points_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
     let mut points: Vec<PatrolPoint> = Vec::new();
-    let mut index: u32 = 0;
 
-    for mut point_chunk in ChunkIterator::new(&mut points_chunk) {
+    for (index, mut point_chunk) in ChunkIterator::new(&mut points_chunk).enumerate() {
       let mut point_index_chunk: Chunk = point_chunk.read_child_by_index(0).unwrap();
 
       assert_eq!(point_index_chunk.size, 4);
-      assert_eq!(index, point_index_chunk.read_u32::<T>().unwrap());
+      assert_eq!(index, point_index_chunk.read_u32::<T>().unwrap() as usize);
 
       let mut point_data_chunk: Chunk = point_chunk.read_child_by_index(1).unwrap();
 
       points.push(PatrolPoint::from_chunk::<T>(&mut point_data_chunk));
-
-      index += 1;
     }
 
     points
@@ -97,47 +95,5 @@ impl Patrol {
     assert_eq!(chunk.read_bytes_remain(), 0);
 
     links
-  }
-}
-
-#[derive(Debug)]
-pub struct PatrolPoint {
-  pub name: String,
-  pub position: (f32, f32, f32),
-  pub flags: u32,
-  pub level_vertex_id: u32,
-  pub game_vertex_id: u16,
-}
-
-impl PatrolPoint {
-  pub fn from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> PatrolPoint {
-    let name: String = chunk.read_null_terminated_string().unwrap();
-    let position: Vector3d = chunk.read_f32_3d_vector::<T>().unwrap();
-    let flags: u32 = chunk.read_u32::<T>().unwrap();
-    let level_vertex_id: u32 = chunk.read_u32::<T>().unwrap();
-    let game_vertex_id: u16 = chunk.read_u16::<T>().unwrap();
-
-    PatrolPoint {
-      name,
-      position,
-      flags,
-      level_vertex_id,
-      game_vertex_id,
-    }
-  }
-}
-
-#[derive(Debug)]
-pub struct PatrolLink {
-  pub index: u32,
-  pub links: Vec<(u32, f32)>,
-}
-
-impl PatrolLink {
-  pub fn new(index: u32) -> PatrolLink {
-    PatrolLink {
-      index,
-      links: Vec::new(),
-    }
   }
 }

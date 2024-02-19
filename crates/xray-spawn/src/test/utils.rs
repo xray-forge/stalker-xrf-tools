@@ -1,7 +1,7 @@
 use fileslice::FileSlice;
 use std::fs::{File, OpenOptions};
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Get absolute resources directory.
 pub fn get_resources_path() -> PathBuf {
@@ -20,6 +20,27 @@ pub fn get_test_resource_path(resource_path: String) -> PathBuf {
   path.push(resource_path);
 
   path
+}
+
+/// Get relative path to chunk resource.
+pub fn get_test_chunk_file_sub_dir(file: &str, resource: String) -> String {
+  let mut path: PathBuf = PathBuf::new();
+
+  path.push("chunks");
+  path.push(Path::new(file).file_stem().unwrap());
+  path.push(resource);
+
+  path.into_os_string().into_string().unwrap()
+}
+
+/// Get relative path to chunk resource.
+pub fn get_test_chunk_sub_dir(resource: String) -> String {
+  let mut path: PathBuf = PathBuf::new();
+
+  path.push("chunks");
+  path.push(resource);
+
+  path.into_os_string().into_string().unwrap()
 }
 
 /// Open file from test resources as slice.
