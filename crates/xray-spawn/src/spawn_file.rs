@@ -35,11 +35,19 @@ impl SpawnFile {
 
     let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file)).unwrap();
 
-    log::info!("Parsing spawn file: {:?}, 0 -> {:?}", path.as_path(), root_chunk.end_pos());
+    log::info!(
+      "Parsing spawn file: {:?}, 0 -> {:?}",
+      path.as_path(),
+      root_chunk.end_pos()
+    );
 
     let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
 
-    assert_eq!(chunks.len(), 5, "Unexpected chunks count in spawn file root, expected 5.");
+    assert_eq!(
+      chunks.len(),
+      5,
+      "Unexpected chunks count in spawn file root, expected 5."
+    );
 
     let header: HeaderChunk =
       HeaderChunk::read_from_chunk::<T>(chunks.get(0).expect("Header chunk to exist.").clone())

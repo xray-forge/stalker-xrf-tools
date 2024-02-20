@@ -30,7 +30,11 @@ impl PatrolPoint {
       points.push(PatrolPoint::read_from_chunk::<T>(&mut point_points_chunk)?);
     }
 
-    assert_eq!(chunk.read_bytes_remain(), 0, "Chunk data should be read for patrol points list.");
+    assert_eq!(
+      chunk.read_bytes_remain(),
+      0,
+      "Chunk data should be read for patrol points list."
+    );
 
     Ok(points)
   }
@@ -43,7 +47,11 @@ impl PatrolPoint {
     let level_vertex_id: u32 = chunk.read_u32::<T>().unwrap();
     let game_vertex_id: u16 = chunk.read_u16::<T>().unwrap();
 
-    assert_eq!(chunk.read_bytes_remain(), 0, "Chunk data should be read for patrol point.");
+    assert_eq!(
+      chunk.read_bytes_remain(),
+      0,
+      "Chunk data should be read for patrol point."
+    );
 
     Ok(PatrolPoint {
       name,

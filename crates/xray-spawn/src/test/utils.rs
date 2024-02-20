@@ -49,9 +49,10 @@ pub fn open_test_resource_as_slice(resource_path: String) -> io::Result<FileSlic
 
   match File::open(path.clone()) {
     Ok(file) => Ok(FileSlice::new(file)),
-    Err(error) => {
-      Err(io::Error::new(error.kind(), format!("Failed to open test asset {:?}", path)))
-    }
+    Err(error) => Err(io::Error::new(
+      error.kind(),
+      format!("Failed to open test asset {:?}", path),
+    )),
   }
 }
 
@@ -61,9 +62,10 @@ pub fn open_test_resource_as_file(resource_path: String) -> io::Result<File> {
 
   match File::open(path.clone()) {
     Ok(file) => Ok(file),
-    Err(error) => {
-      Err(io::Error::new(error.kind(), format!("Failed to open test asset {:?}", path)))
-    }
+    Err(error) => Err(io::Error::new(
+      error.kind(),
+      format!("Failed to open test asset {:?}", path),
+    )),
   }
 }
 
@@ -80,8 +82,9 @@ pub fn overwrite_test_resource_as_file(resource_path: String) -> io::Result<File
     .open(path.clone())
   {
     Ok(file) => Ok(file),
-    Err(error) => {
-      Err(io::Error::new(error.kind(), format!("Failed to open test asset {:?}", path)))
-    }
+    Err(error) => Err(io::Error::new(
+      error.kind(),
+      format!("Failed to open test asset {:?}", path),
+    )),
   }
 }

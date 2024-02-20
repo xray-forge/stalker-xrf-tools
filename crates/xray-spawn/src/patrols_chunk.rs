@@ -11,7 +11,11 @@ pub struct PatrolsChunk {
 impl PatrolsChunk {
   /// Read patrols chunk by position descriptor.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<PatrolsChunk> {
-    log::info!("Parsing patrols: {:?} -> {:?}", chunk.start_pos(), chunk.end_pos());
+    log::info!(
+      "Parsing patrols: {:?} -> {:?}",
+      chunk.start_pos(),
+      chunk.end_pos()
+    );
 
     let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
     let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
@@ -24,7 +28,11 @@ impl PatrolsChunk {
     assert_eq!(count, patrols.len() as u32);
     assert!(chunk.is_ended());
 
-    log::info!("Parsed patrols: {:?} / {count}, {:?} bytes", patrols.len(), chunk.read_bytes_len());
+    log::info!(
+      "Parsed patrols: {:?} / {count}, {:?} bytes",
+      patrols.len(),
+      chunk.read_bytes_len()
+    );
 
     Ok(PatrolsChunk { chunk, patrols })
   }

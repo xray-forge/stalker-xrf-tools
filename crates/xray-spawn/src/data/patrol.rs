@@ -26,7 +26,11 @@ impl Patrol {
     }
 
     assert_eq!(read_patrols_count, count);
-    assert_eq!(chunk.read_bytes_remain(), 0, "Chunk data should be read for patrols list.");
+    assert_eq!(
+      chunk.read_bytes_remain(),
+      0,
+      "Chunk data should be read for patrols list."
+    );
 
     Ok(patrols)
   }
@@ -48,7 +52,11 @@ impl Patrol {
     let links: Vec<PatrolLink> = PatrolLink::read_list_from_chunk::<T>(&mut links_chunk)?;
 
     assert_eq!(points_count, points.len() as u32);
-    assert_eq!(chunk.read_bytes_remain(), 0, "Chunk data should be read for patrol.");
+    assert_eq!(
+      chunk.read_bytes_remain(),
+      0,
+      "Chunk data should be read for patrol."
+    );
 
     Ok(Patrol {
       name,

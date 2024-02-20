@@ -22,19 +22,31 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
 
     let arriving_objects_count: u8 = chunk.read_u8().unwrap();
 
-    assert_eq!(arriving_objects_count, 0, "Unexpected arriving objects in smart terrain.");
+    assert_eq!(
+      arriving_objects_count, 0,
+      "Unexpected arriving objects in smart terrain."
+    );
 
     let object_job_descriptors_count: u8 = chunk.read_u8().unwrap();
 
-    assert_eq!(object_job_descriptors_count, 0, "Unexpected job objects in smart terrain.");
+    assert_eq!(
+      object_job_descriptors_count, 0,
+      "Unexpected job objects in smart terrain."
+    );
 
     let dead_objects_infos_count: u8 = chunk.read_u8().unwrap();
 
-    assert_eq!(dead_objects_infos_count, 0, "Unexpected dead objects in smart terrain.");
+    assert_eq!(
+      dead_objects_infos_count, 0,
+      "Unexpected dead objects in smart terrain."
+    );
 
     let smart_terrain_actor_control: u8 = chunk.read_u8().unwrap();
 
-    assert_eq!(smart_terrain_actor_control, 0, "Unexpected smart terrain actor control.");
+    assert_eq!(
+      smart_terrain_actor_control, 0,
+      "Unexpected smart terrain actor control."
+    );
 
     let respawn_point: u8 = chunk.read_u8().unwrap();
 
@@ -44,11 +56,17 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
 
     let staying_objects_count: u8 = chunk.read_u8().unwrap();
 
-    assert_eq!(staying_objects_count, 0, "Unexpected smart terrain staying objects.");
+    assert_eq!(
+      staying_objects_count, 0,
+      "Unexpected smart terrain staying objects."
+    );
 
     let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
 
-    assert_eq!(save_marker, 6, "Unexpected data provided with smart terrain save.");
+    assert_eq!(
+      save_marker, 6,
+      "Unexpected data provided with smart terrain save."
+    );
 
     AlifeSmartTerrain {
       base,

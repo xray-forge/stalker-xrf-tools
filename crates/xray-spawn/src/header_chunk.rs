@@ -15,7 +15,11 @@ pub struct HeaderChunk {
 impl HeaderChunk {
   /// Read header chunk by position descriptor.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<HeaderChunk> {
-    log::info!("Parsing header chunk, {:?} -> {:?}", chunk.start_pos(), chunk.end_pos());
+    log::info!(
+      "Parsing header chunk, {:?} -> {:?}",
+      chunk.start_pos(),
+      chunk.end_pos()
+    );
 
     let version: u32 = chunk.read_u32::<T>()?;
     let guid: u128 = chunk.read_u128::<T>()?;

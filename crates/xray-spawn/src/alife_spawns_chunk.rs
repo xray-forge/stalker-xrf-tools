@@ -18,7 +18,11 @@ impl ALifeObjectsChunk {
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<ALifeObjectsChunk> {
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
-    log::info!("Parsing alife spawns chunk, {:?} -> {:?}", chunk.start_pos(), chunk.end_pos());
+    log::info!(
+      "Parsing alife spawns chunk, {:?} -> {:?}",
+      chunk.start_pos(),
+      chunk.end_pos()
+    );
 
     let mut count_chunk: Chunk = chunk.read_child_by_index(0)?;
     let count: u32 = count_chunk.read_u32::<T>().unwrap();

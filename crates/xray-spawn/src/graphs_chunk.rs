@@ -19,7 +19,11 @@ pub struct GraphsChunk {
 impl GraphsChunk {
   /// Read patrols chunk by position descriptor.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> Option<GraphsChunk> {
-    log::info!("Parsing level graphs, {:?} -> {:?}", chunk.start_pos(), chunk.end_pos());
+    log::info!(
+      "Parsing level graphs, {:?} -> {:?}",
+      chunk.start_pos(),
+      chunk.end_pos()
+    );
 
     let version: u8 = chunk.read_u8().unwrap();
     let vertex_count: u16 = chunk.read_u16::<T>().unwrap();

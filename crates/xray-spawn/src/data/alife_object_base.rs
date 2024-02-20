@@ -70,7 +70,10 @@ impl AlifeObjectBase {
       spawn_chunk.read_u16::<T>().unwrap()
     };
 
-    assert!(version > 120, "Unexpected version of alife object in spawn file.");
+    assert!(
+      version > 120,
+      "Unexpected version of alife object in spawn file."
+    );
 
     let cse_abstract_unknown: u16 = spawn_chunk.read_u16::<T>().unwrap();
     let script_version: u16 = spawn_chunk.read_u16::<T>().unwrap();
@@ -81,7 +84,10 @@ impl AlifeObjectBase {
     let spawn_id: u16 = spawn_chunk.read_u16::<T>().unwrap();
     let extended_size: u16 = spawn_chunk.read_u16::<T>().unwrap();
 
-    assert_eq!(extended_size as u64 - 2, spawn_chunk.end_pos() - spawn_chunk.cursor_pos());
+    assert_eq!(
+      extended_size as u64 - 2,
+      spawn_chunk.end_pos() - spawn_chunk.cursor_pos()
+    );
 
     assert_ne!(class, AlifeClass::Unknown);
 

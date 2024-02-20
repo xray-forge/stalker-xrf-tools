@@ -18,7 +18,10 @@ impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
     let start_position_filled: u8 = chunk.read_u8().unwrap();
     let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
 
-    assert_eq!(save_marker, 1, "Unexpected save data for actor object provided.");
+    assert_eq!(
+      save_marker, 1,
+      "Unexpected save data for actor object provided."
+    );
 
     AlifeActor {
       base,

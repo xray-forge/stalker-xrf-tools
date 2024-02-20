@@ -37,7 +37,10 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
     let hint: String = chunk.read_null_terminated_string().unwrap();
     let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
 
-    assert_eq!(save_marker, 26, "Unexpected script data provided for level changer.");
+    assert_eq!(
+      save_marker, 26,
+      "Unexpected script data provided for level changer."
+    );
 
     AlifeLevelChanger {
       base,
