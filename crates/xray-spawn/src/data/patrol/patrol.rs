@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
-use crate::data::patrol_link::PatrolLink;
-use crate::data::patrol_point::PatrolPoint;
+use crate::data::patrol::patrol_link::PatrolLink;
+use crate::data::patrol::patrol_point::PatrolPoint;
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::io;
 
@@ -26,9 +26,8 @@ impl Patrol {
     }
 
     assert_eq!(read_patrols_count, count);
-    assert_eq!(
-      chunk.read_bytes_remain(),
-      0,
+    assert!(
+      chunk.is_ended(),
       "Chunk data should be read for patrols list."
     );
 
@@ -52,11 +51,7 @@ impl Patrol {
     let links: Vec<PatrolLink> = PatrolLink::read_list_from_chunk::<T>(&mut links_chunk)?;
 
     assert_eq!(points_count, points.len() as u32);
-    assert_eq!(
-      chunk.read_bytes_remain(),
-      0,
-      "Chunk data should be read for patrol."
-    );
+    assert!(chunk.is_ended(), "Chunk data should be read for patrol.");
 
     Ok(Patrol {
       name,

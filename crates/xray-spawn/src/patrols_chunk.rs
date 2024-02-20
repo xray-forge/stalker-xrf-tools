@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::data::patrol::Patrol;
+use crate::data::patrol::patrol::Patrol;
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::{fmt, io};
 

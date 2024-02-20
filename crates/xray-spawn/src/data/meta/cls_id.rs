@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use crate::data::alife_class::AlifeClass;
-use crate::data::map::{CLS_ID_TO_CLASS, SECTION_TO_CLS_ID};
+use crate::data::meta::alife_class::AlifeClass;
+use crate::data::meta::map::{CLS_ID_TO_CLASS, SECTION_TO_CLS_ID};
 use enum_map::Enum;
 use std::ops::Index;
 

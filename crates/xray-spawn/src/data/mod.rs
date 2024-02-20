@@ -1,12 +1,9 @@
 pub mod alife;
-pub mod alife_class;
 pub mod alife_object_base;
-pub mod cls_id;
+pub mod artefact_spawn_point;
 pub mod level;
-pub mod map;
+pub mod meta;
 pub mod patrol;
-pub mod patrol_link;
-pub mod patrol_point;
 pub mod shape;
 pub mod time;
 pub mod vertex;

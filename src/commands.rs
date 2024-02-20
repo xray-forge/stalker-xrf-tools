@@ -11,7 +11,8 @@ pub fn unpack_spawn_file(matches: &ArgMatches) {
 
   log::info!("Starting parsing spawn file in, target path {:?}", path);
 
-  let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::from_path::<SpawnByteOrder>(path).unwrap());
+  let spawn_file: Box<SpawnFile> =
+    Box::new(SpawnFile::read_from_path::<SpawnByteOrder>(path).unwrap());
 
   log::info!("Spawn file: {:?}", spawn_file);
 }

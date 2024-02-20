@@ -1,8 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectGeneric;
-use crate::data::alife_class::AlifeClass;
-use crate::data::cls_id::ClsId;
+use crate::data::meta::alife_class::AlifeClass;
+use crate::data::meta::cls_id::ClsId;
 use crate::types::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::io;
@@ -126,7 +126,7 @@ impl AlifeObjectBase {
 
     assert_eq!(data_length as u64 + 2, update_chunk.size);
     assert_eq!(update_size, 0);
-    assert_eq!(chunk.read_bytes_remain(), 0);
+    assert!(chunk.is_ended());
 
     Ok(())
   }

@@ -37,7 +37,7 @@ impl ALifeObjectsChunk {
     log::info!("Parsed alife spawns chunk, {count} objects processed");
 
     assert_eq!(objects.len(), count as usize);
-    assert_eq!(chunk.read_bytes_remain(), 0);
+    assert!(chunk.is_ended());
 
     Ok(ALifeObjectsChunk { chunk, objects })
   }

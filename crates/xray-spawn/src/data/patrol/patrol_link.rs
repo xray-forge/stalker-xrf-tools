@@ -62,7 +62,7 @@ impl PatrolLink {
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::patrol_link::PatrolLink;
+  use crate::data::patrol::patrol_link::PatrolLink;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };

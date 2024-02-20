@@ -22,7 +22,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
     let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
       None
     } else {
-      Time::read_from_chunk(chunk)
+      Time::read_from_chunk(chunk).unwrap()
     };
 
     AlifeObjectTorridZone {

@@ -7,6 +7,7 @@ use crate::patrols_chunk::PatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use std::fs::File;
+use std::io;
 use std::path::PathBuf;
 
 /// Descriptor of generic spawn file used by xray game engine.
@@ -29,17 +30,17 @@ pub struct SpawnFile {
 }
 
 impl SpawnFile {
-  pub fn from_path<T: ByteOrder>(path: &PathBuf) -> Result<SpawnFile, String> {
-    let file: File = File::open(path).expect("Expected existing file to be provided for parsing.");
-    let size: u64 = file.metadata().unwrap().len();
+  /// Read spawn file from provided path.
+  pub fn read_from_path<T: ByteOrder>(path: &PathBuf) -> io::Result<SpawnFile> {
+    Self::read_from_file::<T>(File::open(path)?)
+  }
 
+  /// Read spawn file from file.
+  pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<SpawnFile> {
+    let size: u64 = file.metadata()?.len();
     let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file)).unwrap();
 
-    log::info!(
-      "Parsing spawn file: {:?}, 0 -> {:?}",
-      path.as_path(),
-      root_chunk.end_pos()
-    );
+    log::info!("Parsing spawn file: 0 -> {:?}", size);
 
     let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
 
@@ -58,19 +59,21 @@ impl SpawnFile {
     )
     .expect("Alife spawns chunk to be read.");
 
-    let artefact_spawns: Option<ArtefactSpawnsChunk> = match chunks.get(2) {
-      Some(chunk) => ArtefactSpawnsChunk::read_from_chunk::<T>(chunk.clone()),
-      None => None,
-    };
+    let artefact_spawn: ArtefactSpawnsChunk = ArtefactSpawnsChunk::read_from_chunk::<T>(
+      chunks
+        .get(2)
+        .expect("Artefact spawns chunk to exist.")
+        .clone(),
+    )
+    .expect("Artefact spawns chunk to exist.");
 
     let patrols: PatrolsChunk =
       PatrolsChunk::read_from_chunk::<T>(chunks.get(3).expect("Patrol chunk to exist.").clone())
         .expect("Patrols chunk to be read.");
 
-    let graphs: Option<GraphsChunk> = match chunks.get(4) {
-      Some(chunk) => GraphsChunk::read_from_chunk::<T>(chunk.clone()),
-      None => None,
-    };
+    let graphs: GraphsChunk =
+      GraphsChunk::read_from_chunk::<T>(chunks.get(4).expect("Level chunk to exist.").clone())
+        .expect("Level chunk to be read");
 
     assert!(root_chunk.is_ended(), "Expected whole file to be read.");
 
@@ -78,9 +81,9 @@ impl SpawnFile {
       size,
       header,
       alife_spawn,
-      artefact_spawn: artefact_spawns.expect("Unexpected artefact spawns signature in spawn file."),
+      artefact_spawn,
       patrols,
-      graphs: graphs.expect("Unexpected graphs signature in spawn file."),
+      graphs,
     })
   }
 }

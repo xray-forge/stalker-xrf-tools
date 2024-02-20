@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
+use std::io;
 
 pub struct Time {
   pub year: u8,
@@ -13,21 +14,21 @@ pub struct Time {
 }
 
 impl Time {
-  pub fn read_from_chunk(chunk: &mut Chunk) -> Option<Time> {
-    let has_time: u8 = chunk.read_u8().unwrap();
+  pub fn read_from_chunk(chunk: &mut Chunk) -> io::Result<Option<Time>> {
+    let has_time: u8 = chunk.read_u8()?;
 
     if has_time == 0 {
-      None
+      Ok(None)
     } else {
-      let year: u8 = chunk.read_u8().unwrap();
-      let month: u8 = chunk.read_u8().unwrap();
-      let day: u8 = chunk.read_u8().unwrap();
-      let hour: u8 = chunk.read_u8().unwrap();
-      let minute: u8 = chunk.read_u8().unwrap();
-      let second: u8 = chunk.read_u8().unwrap();
-      let millis: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
+      let year: u8 = chunk.read_u8()?;
+      let month: u8 = chunk.read_u8()?;
+      let day: u8 = chunk.read_u8()?;
+      let hour: u8 = chunk.read_u8()?;
+      let minute: u8 = chunk.read_u8()?;
+      let second: u8 = chunk.read_u8()?;
+      let millis: u16 = chunk.read_u16::<SpawnByteOrder>()?;
 
-      Some(Time {
+      Ok(Some(Time {
         year,
         month,
         day,
@@ -35,7 +36,7 @@ impl Time {
         minute,
         second,
         millis,
-      })
+      }))
     }
   }
 }

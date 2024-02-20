@@ -24,15 +24,15 @@ impl PatrolPoint {
       let mut point_points_chunk: Chunk = point_chunk.read_child_by_index(1).unwrap();
 
       assert_eq!(index, point_index_chunk.read_u32::<T>()? as usize);
-      assert_eq!(point_index_chunk.read_bytes_remain(), 0);
-      assert_eq!(point_chunk.read_bytes_remain(), 0);
 
       points.push(PatrolPoint::read_from_chunk::<T>(&mut point_points_chunk)?);
+
+      assert!(point_index_chunk.is_ended());
+      assert!(point_chunk.is_ended());
     }
 
-    assert_eq!(
-      chunk.read_bytes_remain(),
-      0,
+    assert!(
+      chunk.is_ended(),
       "Chunk data should be read for patrol points list."
     );
 
@@ -47,9 +47,8 @@ impl PatrolPoint {
     let level_vertex_id: u32 = chunk.read_u32::<T>().unwrap();
     let game_vertex_id: u16 = chunk.read_u16::<T>().unwrap();
 
-    assert_eq!(
-      chunk.read_bytes_remain(),
-      0,
+    assert!(
+      chunk.is_ended(),
       "Chunk data should be read for patrol point."
     );
 
@@ -78,7 +77,7 @@ impl PatrolPoint {
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::patrol_point::PatrolPoint;
+  use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -122,7 +121,10 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 40 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file).unwrap().read_child_by_index(0)?;
+    let mut chunk: Chunk = Chunk::from_file(file)
+      .unwrap()
+      .read_child_by_index(0)
+      .unwrap();
 
     let point: PatrolPoint = PatrolPoint::read_from_chunk::<SpawnByteOrder>(&mut chunk).unwrap();
 
