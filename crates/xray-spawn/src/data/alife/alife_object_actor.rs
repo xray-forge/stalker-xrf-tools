@@ -14,10 +14,10 @@ pub struct AlifeObjectActor {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectActor {
-    let base: AlifeObjectCreature = AlifeObjectCreature::from_chunk(chunk);
-    let trader: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract::from_chunk(chunk);
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectActor {
+    let base: AlifeObjectCreature = AlifeObjectCreature::read_from_chunk(chunk);
+    let trader: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract::read_from_chunk(chunk);
+    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk(chunk);
 
     let holder_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
 

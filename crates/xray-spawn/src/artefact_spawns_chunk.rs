@@ -10,7 +10,7 @@ pub struct ArtefactSpawnsChunk {
 
 impl ArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
-  pub fn from_chunk<T: ByteOrder>(mut chunk: Chunk) -> Option<ArtefactSpawnsChunk> {
+  pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> Option<ArtefactSpawnsChunk> {
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = chunk.read_u32::<T>().unwrap();
 

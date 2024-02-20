@@ -7,8 +7,8 @@ pub struct AlifeObjectDynamic {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectDynamic> for AlifeObjectDynamic {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectDynamic {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectDynamic {
+    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk(chunk);
 
     AlifeObjectDynamic { base }
   }

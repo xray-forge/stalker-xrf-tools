@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
-use crate::chunk::iterator::ChunkIterator;
 use crate::data::patrol::Patrol;
 use byteorder::{ByteOrder, ReadBytesExt};
-use std::fmt;
+use std::{fmt, io};
 
 pub struct PatrolsChunk {
   pub chunk: Chunk,
@@ -11,49 +10,23 @@ pub struct PatrolsChunk {
 
 impl PatrolsChunk {
   /// Read patrols chunk by position descriptor.
-  pub fn from_chunk<T: ByteOrder>(mut chunk: Chunk) -> Option<PatrolsChunk> {
-    log::info!(
-      "Parsing patrols: {:?} -> {:?}",
-      chunk.start_pos(),
-      chunk.end_pos()
-    );
+  pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<PatrolsChunk> {
+    log::info!("Parsing patrols: {:?} -> {:?}", chunk.start_pos(), chunk.end_pos());
 
-    let count: u32 = Self::read_patrols_count::<T>(&mut chunk);
-    let patrols: Vec<Patrol> = Self::read_patrols::<T>(&mut chunk, count);
+    let mut meta_chunk: Chunk = chunk.read_child_by_index(0).expect("Meta chunk to exist");
+    let mut data_chunk: Chunk = chunk.read_child_by_index(1).expect("Data chunk to exist");
 
-    log::info!(
-      "Parsed patrols: {:?} / {count}, {:?} bytes",
-      patrols.len(),
-      chunk.read_bytes_len()
-    );
+    assert_eq!(meta_chunk.size, 4);
 
-    assert!(chunk.is_ended());
+    let count: u32 = meta_chunk.read_u32::<T>()?;
+    let patrols: Vec<Patrol> = Patrol::read_list_from_chunk::<T>(&mut data_chunk, count)?;
+
     assert_eq!(count, patrols.len() as u32);
+    assert!(chunk.is_ended());
 
-    Some(PatrolsChunk { chunk, patrols })
-  }
+    log::info!("Parsed patrols: {:?} / {count}, {:?} bytes", patrols.len(), chunk.read_bytes_len());
 
-  fn read_patrols_count<T: ByteOrder>(chunk: &mut Chunk) -> u32 {
-    let mut base_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
-
-    assert_eq!(base_chunk.size, 4);
-
-    base_chunk.read_u32::<T>().unwrap()
-  }
-
-  fn read_patrols<T: ByteOrder>(chunk: &mut Chunk, count: u32) -> Vec<Patrol> {
-    let mut patrols_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
-    let mut patrols: Vec<Patrol> = Vec::new();
-    let mut index: u32 = 0;
-
-    for mut patrol_chunk in ChunkIterator::new(&mut patrols_chunk) {
-      patrols.push(Patrol::from_chunk::<T>(&mut patrol_chunk));
-      index += 1;
-    }
-
-    assert_eq!(index, count);
-
-    patrols
+    Ok(PatrolsChunk { chunk, patrols })
   }
 }
 

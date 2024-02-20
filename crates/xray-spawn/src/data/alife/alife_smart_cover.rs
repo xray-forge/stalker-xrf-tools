@@ -13,8 +13,8 @@ pub struct AlifeSmartCover {
 }
 
 impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeSmartCover {
-    let base: AlifeObjectSmartCover = AlifeObjectSmartCover::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeSmartCover {
+    let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read_from_chunk(chunk);
 
     let last_description: String = chunk.read_null_terminated_string().unwrap();
     let count: u8 = chunk.read_u8().unwrap();

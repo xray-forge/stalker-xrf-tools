@@ -9,8 +9,8 @@ pub struct AlifeObjectItemWeaponMagazined {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazined> for AlifeObjectItemWeaponMagazined {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeaponMagazined {
-    let base: AlifeObjectItemWeapon = AlifeObjectItemWeapon::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeaponMagazined {
+    let base: AlifeObjectItemWeapon = AlifeObjectItemWeapon::read_from_chunk(chunk);
 
     AlifeObjectItemWeaponMagazined { base }
   }

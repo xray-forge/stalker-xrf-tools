@@ -12,7 +12,7 @@ pub struct Level {
 }
 
 impl Level {
-  pub fn from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> Level {
+  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> Level {
     let name: String = chunk.read_null_terminated_string().unwrap();
     let offset: Vector3d = chunk.read_f32_3d_vector::<T>().unwrap();
     let id: u8 = chunk.read_u8().unwrap();

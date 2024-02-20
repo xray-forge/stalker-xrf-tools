@@ -17,8 +17,8 @@ pub struct AlifeObjectItemWeapon {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeapon {
-    let base: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeapon {
+    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk(chunk);
 
     let ammo_current: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let ammo_elapsed: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();

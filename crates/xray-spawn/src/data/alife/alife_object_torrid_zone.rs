@@ -14,15 +14,15 @@ pub struct AlifeObjectTorridZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectTorridZone {
-    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::from_chunk(chunk);
-    let motion: AlifeObjectMotion = AlifeObjectMotion::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectTorridZone {
+    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk(chunk);
+    let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk(chunk);
 
     // Last spawn time for artefacts, legacy approach:
     let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
       None
     } else {
-      Time::from_chunk(chunk)
+      Time::read_from_chunk(chunk)
     };
 
     AlifeObjectTorridZone {

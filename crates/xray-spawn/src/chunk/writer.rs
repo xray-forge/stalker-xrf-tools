@@ -1,3 +1,4 @@
+use crate::types::Vector3d;
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::fs::File;
 use std::io;
@@ -23,6 +24,20 @@ impl ChunkWriter {
 
   pub fn bytes_written(&self) -> usize {
     self.buffer.len()
+  }
+
+  /// Write null terminated string.
+  pub fn write_null_terminated_string(&mut self, value: &String) -> io::Result<usize> {
+    Ok(self.write(value.as_bytes())? + self.write(&[0u8])?)
+  }
+
+  /// Write three float values.
+  pub fn write_f32_3d_vector<T: ByteOrder>(&mut self, value: &Vector3d<f32>) -> io::Result<()> {
+    self.write_f32::<T>(value.0)?;
+    self.write_f32::<T>(value.1)?;
+    self.write_f32::<T>(value.2)?;
+
+    Ok(())
   }
 }
 

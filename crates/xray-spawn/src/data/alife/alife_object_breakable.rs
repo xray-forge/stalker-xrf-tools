@@ -12,8 +12,8 @@ pub struct AlifeObjectBreakable {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectBreakable {
-    let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectBreakable {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
     let health: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
 
     AlifeObjectBreakable { base, health }

@@ -17,7 +17,7 @@ pub struct AlifeObjectTraderAbstract {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectTraderAbstract {
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectTraderAbstract {
     let money: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let specific_character: String = chunk.read_null_terminated_string().unwrap();
     let trader_flags: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();

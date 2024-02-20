@@ -7,8 +7,8 @@ pub struct AlifeSmartZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeSmartZone {
-    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeSmartZone {
+    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk(chunk);
 
     AlifeSmartZone { base }
   }

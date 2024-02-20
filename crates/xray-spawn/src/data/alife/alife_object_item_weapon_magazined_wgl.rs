@@ -11,8 +11,9 @@ pub struct AlifeObjectItemWeaponMagazinedWgl {
 impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
   for AlifeObjectItemWeaponMagazinedWgl
 {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeaponMagazinedWgl {
-    let base: AlifeObjectItemWeaponMagazined = AlifeObjectItemWeaponMagazined::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeaponMagazinedWgl {
+    let base: AlifeObjectItemWeaponMagazined =
+      AlifeObjectItemWeaponMagazined::read_from_chunk(chunk);
 
     AlifeObjectItemWeaponMagazinedWgl { base }
   }

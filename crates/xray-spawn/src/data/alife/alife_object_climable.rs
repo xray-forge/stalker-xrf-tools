@@ -10,8 +10,8 @@ pub struct AlifeObjectClimable {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectClimable {
-    let base: AlifeObjectShape = AlifeObjectShape::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectClimable {
+    let base: AlifeObjectShape = AlifeObjectShape::read_from_chunk(chunk);
 
     let game_material: String = chunk.read_null_terminated_string().unwrap();
 

@@ -14,8 +14,8 @@ pub struct AlifeObjectItemPda {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectItemPda {
-    let base: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemPda {
+    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk(chunk);
 
     let owner: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let character: String = chunk.read_null_terminated_string().unwrap();

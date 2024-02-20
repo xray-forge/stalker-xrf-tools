@@ -10,8 +10,8 @@ pub struct AlifeObjectShape {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectShape {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectShape {
+    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk(chunk);
 
     let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>().unwrap();
 

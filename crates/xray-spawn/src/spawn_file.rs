@@ -35,41 +35,32 @@ impl SpawnFile {
 
     let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file)).unwrap();
 
-    log::info!(
-      "Parsing spawn file: {:?}, 0 -> {:?}",
-      path.as_path(),
-      root_chunk.end_pos()
-    );
+    log::info!("Parsing spawn file: {:?}, 0 -> {:?}", path.as_path(), root_chunk.end_pos());
 
     let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
 
-    assert_eq!(
-      chunks.len(),
-      5,
-      "Unexpected chunks count in spawn file root, expected 5."
-    );
+    assert_eq!(chunks.len(), 5, "Unexpected chunks count in spawn file root, expected 5.");
 
     let header: HeaderChunk =
       HeaderChunk::read_from_chunk::<T>(chunks.get(0).expect("Header chunk to exist.").clone())
         .expect("Header chunk to be read.");
 
     let alife_spawns: Option<ALifeObjectsChunk> = match chunks.get(1) {
-      Some(chunk) => ALifeObjectsChunk::from_chunk::<T>(chunk.clone()),
+      Some(chunk) => ALifeObjectsChunk::read_from_chunk::<T>(chunk.clone()),
       None => None,
     };
 
     let artefact_spawns: Option<ArtefactSpawnsChunk> = match chunks.get(2) {
-      Some(chunk) => ArtefactSpawnsChunk::from_chunk::<T>(chunk.clone()),
+      Some(chunk) => ArtefactSpawnsChunk::read_from_chunk::<T>(chunk.clone()),
       None => None,
     };
 
-    let patrols: Option<PatrolsChunk> = match chunks.get(3) {
-      Some(chunk) => PatrolsChunk::from_chunk::<T>(chunk.clone()),
-      None => None,
-    };
+    let patrols: PatrolsChunk =
+      PatrolsChunk::read_from_chunk::<T>(chunks.get(3).expect("Patrol chunk to exist.").clone())
+        .expect("Patrols chunk to be read.");
 
     let graphs: Option<GraphsChunk> = match chunks.get(4) {
-      Some(chunk) => GraphsChunk::from_chunk::<T>(chunk.clone()),
+      Some(chunk) => GraphsChunk::read_from_chunk::<T>(chunk.clone()),
       None => None,
     };
 
@@ -80,7 +71,7 @@ impl SpawnFile {
       header,
       alife_spawn: alife_spawns.expect("Unexpected alife spawns signature in spawn file."),
       artefact_spawn: artefact_spawns.expect("Unexpected artefact spawns signature in spawn file."),
-      patrols: patrols.expect("Unexpected patrols signature in spawn file."),
+      patrols,
       graphs: graphs.expect("Unexpected graphs signature in spawn file."),
     })
   }

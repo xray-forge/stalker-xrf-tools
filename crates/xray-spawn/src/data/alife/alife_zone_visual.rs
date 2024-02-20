@@ -13,9 +13,9 @@ pub struct AlifeZoneVisual {
 }
 
 impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeZoneVisual {
-    let base: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::from_chunk(chunk);
-    let visual: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeZoneVisual {
+    let base: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read_from_chunk(chunk);
+    let visual: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
 
     let idle_animation: String = chunk
       .has_data()

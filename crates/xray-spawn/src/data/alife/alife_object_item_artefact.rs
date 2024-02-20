@@ -9,8 +9,8 @@ pub struct AlifeItemArtefact {
 }
 
 impl AlifeObjectInheritedReader<AlifeItemArtefact> for AlifeItemArtefact {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeItemArtefact {
-    let base: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeItemArtefact {
+    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk(chunk);
 
     AlifeItemArtefact { base }
   }

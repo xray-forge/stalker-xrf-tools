@@ -15,7 +15,7 @@ pub struct AlifeObjectAbstract {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectAbstract {
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectAbstract {
     let game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let distance: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
     let direct_control: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();

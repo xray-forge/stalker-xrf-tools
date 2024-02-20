@@ -14,8 +14,8 @@ pub struct AlifeObjectSpaceRestrictor {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectSpaceRestrictor {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectSpaceRestrictor {
+    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk(chunk);
 
     let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>().unwrap();
     let restrictor_type: u8 = chunk.read_u8().unwrap();

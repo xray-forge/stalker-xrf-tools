@@ -11,7 +11,7 @@ pub struct AlifeObjectSkeleton {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectSkeleton {
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectSkeleton {
     let name: String = chunk.read_null_terminated_string().unwrap();
     let flags: u8 = chunk.read_u8().unwrap();
     let source_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();

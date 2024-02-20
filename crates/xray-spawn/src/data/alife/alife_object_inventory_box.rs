@@ -13,8 +13,8 @@ pub struct AlifeObjectInventoryBox {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectInventoryBox {
-    let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectInventoryBox {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
 
     let can_take: u8 = chunk.read_u8().unwrap();
     let is_closed: u8 = chunk.read_u8().unwrap();

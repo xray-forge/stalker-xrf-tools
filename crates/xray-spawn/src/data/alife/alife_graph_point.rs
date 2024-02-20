@@ -14,7 +14,7 @@ pub struct AlifeGraphPoint {
 }
 
 impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeGraphPoint {
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeGraphPoint {
     let connection_point_name: String = chunk.read_null_terminated_string().unwrap();
     let connection_level_name: String = chunk.read_null_terminated_string().unwrap();
     let location0: u8 = chunk.read_u8().unwrap();

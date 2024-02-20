@@ -34,9 +34,9 @@ pub struct AlifeObjectHangingLamp {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectHangingLamp {
-    let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectHangingLamp {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
+    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk(chunk);
 
     let main_color: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let main_brightness: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();

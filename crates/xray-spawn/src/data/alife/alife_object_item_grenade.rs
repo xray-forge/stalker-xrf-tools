@@ -9,8 +9,8 @@ pub struct AlifeObjectItemGrenade {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItemGrenade> for AlifeObjectItemGrenade {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectItemGrenade {
-    let base: AlifeObjectItem = AlifeObjectItem::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemGrenade {
+    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk(chunk);
 
     AlifeObjectItemGrenade { base }
   }

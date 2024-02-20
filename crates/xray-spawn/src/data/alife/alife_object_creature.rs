@@ -17,8 +17,8 @@ pub struct AlifeObjectCreature {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectCreature {
-    let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectCreature {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
 
     let team: u8 = chunk.read_u8().unwrap();
     let squad: u8 = chunk.read_u8().unwrap();

@@ -15,10 +15,10 @@ pub struct AlifeObjectHelicopter {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectHelicopter {
-    let base: AlifeObjectVisual = AlifeObjectVisual::from_chunk(chunk);
-    let motion: AlifeObjectMotion = AlifeObjectMotion::from_chunk(chunk);
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectHelicopter {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
+    let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk(chunk);
+    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk(chunk);
 
     let startup_animation: String = chunk.read_null_terminated_string().unwrap();
     let engine_sound: String = chunk.read_null_terminated_string().unwrap();

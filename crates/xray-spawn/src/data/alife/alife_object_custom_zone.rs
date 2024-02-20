@@ -14,8 +14,8 @@ pub struct AlifeObjectCustomZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectCustomZone {
-    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectCustomZone {
+    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk(chunk);
 
     let max_power: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
     let owner_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();

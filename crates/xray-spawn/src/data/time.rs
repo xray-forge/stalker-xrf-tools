@@ -13,7 +13,7 @@ pub struct Time {
 }
 
 impl Time {
-  pub fn from_chunk(chunk: &mut Chunk) -> Option<Time> {
+  pub fn read_from_chunk(chunk: &mut Chunk) -> Option<Time> {
     let has_time: u8 = chunk.read_u8().unwrap();
 
     if has_time == 0 {

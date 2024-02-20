@@ -10,8 +10,8 @@ pub struct AlifeObjectVisual {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectVisual {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectVisual {
+    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk(chunk);
 
     let visual_name: String = chunk.read_null_terminated_string().unwrap();
     let visual_flags: u8 = chunk.read_u8().unwrap();

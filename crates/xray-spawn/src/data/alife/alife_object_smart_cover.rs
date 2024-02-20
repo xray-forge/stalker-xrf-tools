@@ -17,8 +17,8 @@ pub struct AlifeObjectSmartCover {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectSmartCover {
-    let base: AlifeObjectDynamic = AlifeObjectDynamic::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectSmartCover {
+    let base: AlifeObjectDynamic = AlifeObjectDynamic::read_from_chunk(chunk);
 
     let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>().unwrap();
     let description: String = chunk.read_null_terminated_string().unwrap();

@@ -16,8 +16,8 @@ pub struct AlifeObjectAnomalyZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
-  fn from_chunk(chunk: &mut Chunk) -> AlifeObjectAnomalyZone {
-    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::from_chunk(chunk);
+  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectAnomalyZone {
+    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk(chunk);
 
     let offline_interactive_radius: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
     let artefact_spawn_count: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -27,7 +27,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
     let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
       None
     } else {
-      Time::from_chunk(chunk)
+      Time::read_from_chunk(chunk)
     };
 
     AlifeObjectAnomalyZone {
