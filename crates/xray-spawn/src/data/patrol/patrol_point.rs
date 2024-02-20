@@ -5,6 +5,7 @@ use crate::types::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
+/// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Debug)]
 pub struct PatrolPoint {
   pub name: String,
@@ -61,6 +62,16 @@ impl PatrolPoint {
     })
   }
 
+  /// Write list of patrol points into chunk writer.
+  pub fn write_list<T: ByteOrder>(
+    points: &Vec<PatrolPoint>,
+    writer: &mut ChunkWriter,
+  ) -> io::Result<()> {
+    todo!("Implement writer.");
+
+    Ok(())
+  }
+
   /// Write patrol point data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_null_terminated_string(&self.name)?;
@@ -101,7 +112,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 40);
 
     let bytes_written: usize = writer
-      .flush_chunk::<SpawnByteOrder>(
+      .flush_chunk_into_file::<SpawnByteOrder>(
         &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
           file!(),
           String::from("patrol_point_simple.chunk"),

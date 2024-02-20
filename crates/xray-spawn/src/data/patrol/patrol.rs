@@ -1,10 +1,23 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
+/// Patrols list is represented by list of chunks containing patrol chunk.
+/// 0...N, where N is chunk.
+///
+/// `CPatrolPathStorage::load`, `CPatrolPath::load_raw` in xray codebase.
+///
+/// Patrol chunk has the following structure:
+/// 0 - metadata
+///   - name
+/// 1 - data
+///   0 - points count
+///   1 - patrol points
+///   2 - patrol points links
 #[derive(Debug)]
 pub struct Patrol {
   pub name: String,
@@ -13,6 +26,7 @@ pub struct Patrol {
 }
 
 impl Patrol {
+  /// Read chunk as list of patrol chunks.
   pub fn read_list_from_chunk<T: ByteOrder>(
     chunk: &mut Chunk,
     count: u32,
@@ -34,6 +48,7 @@ impl Patrol {
     Ok(patrols)
   }
 
+  /// Read chunk as patrol.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Patrol> {
     let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
     let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
@@ -58,5 +73,25 @@ impl Patrol {
       points,
       links,
     })
+  }
+
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    let mut meta_writer: ChunkWriter = ChunkWriter::new();
+    let mut data_writer: ChunkWriter = ChunkWriter::new();
+
+    let mut point_count_writer: ChunkWriter = ChunkWriter::new();
+    let mut points_writer: ChunkWriter = ChunkWriter::new();
+    let mut links_writer: ChunkWriter = ChunkWriter::new();
+
+    meta_writer.write_null_terminated_string(&self.name)?;
+
+    point_count_writer.write_u32::<T>(self.points.len() as u32)?;
+
+    PatrolPoint::write_list::<T>(&self.points, &mut points_writer)?;
+    PatrolLink::write_list::<T>(&self.links, &mut links_writer)?;
+
+    todo!("Implement writer.");
+
+    Ok(())
   }
 }

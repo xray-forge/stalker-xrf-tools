@@ -13,15 +13,33 @@ impl ChunkWriter {
     ChunkWriter { buffer: Vec::new() }
   }
 
-  pub fn flush_chunk<T: ByteOrder>(&mut self, file: &mut File, index: u32) -> io::Result<usize> {
+  /// Flush all the written data as chunk into the file.
+  pub fn flush_chunk_into_file<T: ByteOrder>(
+    &mut self,
+    file: &mut File,
+    index: u32,
+  ) -> io::Result<usize> {
     self.buffer.flush().unwrap();
 
     file.write_u32::<T>(index).unwrap();
     file.write_u32::<T>(self.buffer.len() as u32)?;
-
     file.write(self.buffer.as_slice())
   }
 
+  /// Flush all the written data as chunk into the file.
+  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, index: u32) -> io::Result<Vec<u8>> {
+    self.buffer.flush().unwrap();
+
+    let mut buffer: Vec<u8> = Vec::new();
+
+    buffer.write_u32::<T>(index).unwrap();
+    buffer.write_u32::<T>(self.buffer.len() as u32)?;
+    buffer.write(self.buffer.as_slice())?;
+
+    Ok(buffer)
+  }
+
+  /// Get count of bytes written into internal buffer.
   pub fn bytes_written(&self) -> usize {
     self.buffer.len()
   }

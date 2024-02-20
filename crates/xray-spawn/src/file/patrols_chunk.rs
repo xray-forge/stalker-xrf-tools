@@ -3,6 +3,7 @@ use crate::data::patrol::patrol::Patrol;
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::{fmt, io};
 
+/// `CPatrolPathStorage::load` in xray.
 pub struct PatrolsChunk {
   pub chunk: Chunk,
   pub patrols: Vec<Patrol>,

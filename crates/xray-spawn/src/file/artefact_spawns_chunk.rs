@@ -100,7 +100,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 44);
 
     let bytes_written: usize = writer
-      .flush_chunk::<SpawnByteOrder>(
+      .flush_chunk_into_file::<SpawnByteOrder>(
         &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
           file!(),
           String::from("artefact_spawns_simple.chunk"),
