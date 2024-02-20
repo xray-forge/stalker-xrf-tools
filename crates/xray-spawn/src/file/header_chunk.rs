@@ -29,7 +29,7 @@ impl HeaderChunk {
 
     log::info!("Parsed header chunk, {:?} bytes", chunk.read_bytes_len());
 
-    assert!(chunk.is_ended());
+    assert!(chunk.is_ended(), "Expect header chunk to be ended.");
 
     Ok(HeaderChunk {
       version,
@@ -60,7 +60,7 @@ impl HeaderChunk {
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
-  use crate::header_chunk::HeaderChunk;
+  use crate::file::header_chunk::HeaderChunk;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, get_test_chunk_sub_dir, open_test_resource_as_slice,
     overwrite_test_resource_as_file,

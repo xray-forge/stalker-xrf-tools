@@ -4,7 +4,10 @@ pub trait AlifeObjectInheritedReader<T> {
   fn read_from_chunk(chunk: &mut Chunk) -> T;
 
   fn verify(chunk: &Chunk) {
-    assert!(chunk.is_ended(), "Expected all data to be read from chunk.");
+    assert!(
+      chunk.is_ended(),
+      "Expected inherited alife object data chunk to be ended."
+    );
   }
 }
 

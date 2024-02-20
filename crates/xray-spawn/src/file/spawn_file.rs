@@ -1,9 +1,9 @@
-use crate::alife_spawns_chunk::ALifeObjectsChunk;
-use crate::artefact_spawns_chunk::ArtefactSpawnsChunk;
 use crate::chunk::chunk::Chunk;
-use crate::graphs_chunk::GraphsChunk;
-use crate::header_chunk::HeaderChunk;
-use crate::patrols_chunk::PatrolsChunk;
+use crate::file::alife_spawns_chunk::ALifeObjectsChunk;
+use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
+use crate::file::graphs_chunk::GraphsChunk;
+use crate::file::header_chunk::HeaderChunk;
+use crate::file::patrols_chunk::PatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use std::fs::File;
@@ -75,7 +75,7 @@ impl SpawnFile {
       GraphsChunk::read_from_chunk::<T>(chunks.get(4).expect("Level chunk to exist.").clone())
         .expect("Level chunk to be read");
 
-    assert!(root_chunk.is_ended(), "Expected whole file to be read.");
+    assert!(root_chunk.is_ended(), "Expected spawn file to be ended.");
 
     Ok(SpawnFile {
       size,

@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_spawn::spawn_file::SpawnFile;
+use xray_spawn::file::spawn_file::SpawnFile;
 use xray_spawn::types::SpawnByteOrder;
 
 /// Unpack provided *.spawn file and validate it.
