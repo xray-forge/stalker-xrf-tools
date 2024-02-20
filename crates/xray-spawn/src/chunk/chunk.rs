@@ -107,20 +107,11 @@ impl Chunk {
 impl Chunk {
   /// Read three float values.
   pub fn read_f32_3d_vector<T: ByteOrder>(&mut self) -> io::Result<Vector3d<f32>> {
-    Ok((
-      self.read_f32::<T>()?,
-      self.read_f32::<T>()?,
-      self.read_f32::<T>()?,
-    ))
+    Ok((self.read_f32::<T>()?, self.read_f32::<T>()?, self.read_f32::<T>()?))
   }
 
   pub fn read_u32_bytes(&mut self) -> io::Result<U32Bytes> {
-    Ok((
-      self.read_u8()?,
-      self.read_u8()?,
-      self.read_u8()?,
-      self.read_u8()?,
-    ))
+    Ok((self.read_u8()?, self.read_u8()?, self.read_u8()?, self.read_u8()?))
   }
 
   /// Read serialized vector from chunk, where u32 count N is followed by N u16 entries.
@@ -233,15 +224,8 @@ mod tests {
 
     let result: io::Result<Chunk> = Chunk::from_file(file);
 
-    assert!(
-      result.is_err(),
-      "File should be empty and fail to read data."
-    );
-    assert_eq!(
-      result.unwrap_err().kind(),
-      io::ErrorKind::InvalidInput,
-      "Expect input error."
-    );
+    assert!(result.is_err(), "File should be empty and fail to read data.");
+    assert_eq!(result.unwrap_err().kind(), io::ErrorKind::InvalidInput, "Expect input error.");
   }
 
   #[test]
@@ -273,10 +257,9 @@ mod tests {
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
     assert_eq!(chunks.first().unwrap().size, 0);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_sub_dir(String::from(
-      "empty_nested_five.chunk",
-    )))
-    .unwrap();
+    let file: FileSlice =
+      open_test_resource_as_slice(get_test_chunk_sub_dir(String::from("empty_nested_five.chunk")))
+        .unwrap();
     let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");
