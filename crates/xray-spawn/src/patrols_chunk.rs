@@ -13,8 +13,8 @@ impl PatrolsChunk {
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<PatrolsChunk> {
     log::info!("Parsing patrols: {:?} -> {:?}", chunk.start_pos(), chunk.end_pos());
 
-    let mut meta_chunk: Chunk = chunk.read_child_by_index(0).expect("Meta chunk to exist");
-    let mut data_chunk: Chunk = chunk.read_child_by_index(1).expect("Data chunk to exist");
+    let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
+    let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
 
     assert_eq!(meta_chunk.size, 4);
 

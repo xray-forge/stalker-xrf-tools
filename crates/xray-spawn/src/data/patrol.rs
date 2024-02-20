@@ -32,12 +32,12 @@ impl Patrol {
   }
 
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Patrol> {
-    let mut meta_chunk: Chunk = chunk.read_child_by_index(0).unwrap();
-    let mut data_chunk: Chunk = chunk.read_child_by_index(1).unwrap();
+    let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
+    let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
 
-    let mut point_count_chunk: Chunk = data_chunk.read_child_by_index(0).unwrap();
-    let mut points_chunk: Chunk = data_chunk.read_child_by_index(1).unwrap();
-    let mut links_chunk: Chunk = data_chunk.read_child_by_index(2).unwrap();
+    let mut point_count_chunk: Chunk = data_chunk.read_child_by_index(0)?;
+    let mut points_chunk: Chunk = data_chunk.read_child_by_index(1)?;
+    let mut links_chunk: Chunk = data_chunk.read_child_by_index(2)?;
 
     let name: String = meta_chunk.read_null_terminated_string()?;
 

@@ -5,6 +5,7 @@ use crate::data::alife_class::AlifeClass;
 use crate::data::cls_id::ClsId;
 use crate::types::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 /// Generic abstract alife object base.
 pub struct AlifeObjectBase {
@@ -28,24 +29,18 @@ pub struct AlifeObjectBase {
 }
 
 impl AlifeObjectBase {
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> AlifeObjectBase {
-    let mut id_chunk: Chunk = chunk
-      .read_child_by_index(0)
-      .expect("Expected vertex ID chunk to exist.");
+  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectBase> {
+    let mut id_chunk: Chunk = chunk.read_child_by_index(0)?;
 
     let _id: u16 = id_chunk.read_u16::<T>().unwrap();
 
-    let mut vertex_data_chunk: Chunk = chunk
-      .read_child_by_index(1)
-      .expect("Expected vertex data chunk to exist.");
+    let mut vertex_data_chunk: Chunk = chunk.read_child_by_index(1)?;
 
     Self::read_object_data::<T>(&mut vertex_data_chunk)
   }
 
-  fn read_object_data<T: ByteOrder>(chunk: &mut Chunk) -> AlifeObjectBase {
-    let mut spawn_chunk: Chunk = chunk
-      .read_child_by_index(0)
-      .expect("Expected data chunk to exist in object definition.");
+  fn read_object_data<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectBase> {
+    let mut spawn_chunk: Chunk = chunk.read_child_by_index(0)?;
 
     let data_length: u16 = spawn_chunk.read_u16::<T>().unwrap();
 
@@ -93,9 +88,9 @@ impl AlifeObjectBase {
     let inherited: Box<dyn AlifeObjectGeneric> =
       AlifeClass::read_by_class(&mut spawn_chunk, &class);
 
-    Self::assert_update_data::<T>(chunk);
+    Self::assert_update_data::<T>(chunk)?;
 
-    AlifeObjectBase {
+    Ok(AlifeObjectBase {
       id,
       section,
       clsid,
@@ -113,14 +108,12 @@ impl AlifeObjectBase {
       script_version,
       spawn_id,
       inherited,
-    }
+    })
   }
 
   /// Validate that read data is correct and does not contain update information.
-  fn assert_update_data<T: ByteOrder>(chunk: &mut Chunk) {
-    let mut update_chunk: Chunk = chunk
-      .read_child_by_index(1)
-      .expect("Expected data chunk to exist in object definition.");
+  fn assert_update_data<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<()> {
+    let mut update_chunk: Chunk = chunk.read_child_by_index(1)?;
 
     let data_length: u16 = update_chunk.file.read_u16::<T>().unwrap();
     let update_size: u16 = update_chunk.file.read_u16::<T>().unwrap();
@@ -128,5 +121,7 @@ impl AlifeObjectBase {
     assert_eq!(data_length as u64 + 2, update_chunk.size);
     assert_eq!(update_size, 0);
     assert_eq!(chunk.read_bytes_remain(), 0);
+
+    Ok(())
   }
 }

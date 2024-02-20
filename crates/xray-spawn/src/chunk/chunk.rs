@@ -82,14 +82,17 @@ impl Chunk {
 
 impl Chunk {
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_child_by_index(&mut self, index: u32) -> Option<Chunk> {
+  pub fn read_child_by_index(&mut self, index: u32) -> io::Result<Chunk> {
     for (iteration, chunk) in ChunkIterator::new(self).enumerate() {
       if index as usize == iteration {
-        return Some(chunk);
+        return Ok(chunk);
       }
     }
 
-    None
+    Err(io::Error::new(
+      io::ErrorKind::InvalidInput,
+      String::from("Attempt to read chunk with index out of bonds."),
+    ))
   }
 
   /// Get list of all child chunks in current chunk.

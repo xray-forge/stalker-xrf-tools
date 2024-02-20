@@ -45,10 +45,10 @@ impl SpawnFile {
       HeaderChunk::read_from_chunk::<T>(chunks.get(0).expect("Header chunk to exist.").clone())
         .expect("Header chunk to be read.");
 
-    let alife_spawns: Option<ALifeObjectsChunk> = match chunks.get(1) {
-      Some(chunk) => ALifeObjectsChunk::read_from_chunk::<T>(chunk.clone()),
-      None => None,
-    };
+    let alife_spawn: ALifeObjectsChunk = ALifeObjectsChunk::read_from_chunk::<T>(
+      chunks.get(1).expect("Alife spawns chunk to exist.").clone(),
+    )
+    .expect("Alife spawns chunk to be read.");
 
     let artefact_spawns: Option<ArtefactSpawnsChunk> = match chunks.get(2) {
       Some(chunk) => ArtefactSpawnsChunk::read_from_chunk::<T>(chunk.clone()),
@@ -69,7 +69,7 @@ impl SpawnFile {
     Ok(SpawnFile {
       size,
       header,
-      alife_spawn: alife_spawns.expect("Unexpected alife spawns signature in spawn file."),
+      alife_spawn,
       artefact_spawn: artefact_spawns.expect("Unexpected artefact spawns signature in spawn file."),
       patrols,
       graphs: graphs.expect("Unexpected graphs signature in spawn file."),
