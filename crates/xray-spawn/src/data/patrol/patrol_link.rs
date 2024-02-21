@@ -93,6 +93,8 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrol_link() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_vertex_simple.chunk"));
 
     let link: PatrolLink = PatrolLink {
       index: 1000,
@@ -104,19 +106,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 32);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-        file!(),
-        String::from("patrol_vertex_simple.chunk"),
-      ))?,
+      &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
     assert_eq!(bytes_written, 32);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("patrol_vertex_simple.chunk"),
-    ))?;
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 32 + 8);
 
@@ -134,6 +130,8 @@ mod tests {
   #[test]
   fn test_read_write_list_of_patrol_links() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_vertex_list.chunk"));
 
     let links: Vec<PatrolLink> = vec![
       PatrolLink {
@@ -151,19 +149,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 48);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-        file!(),
-        String::from("patrol_vertex_list.chunk"),
-      ))?,
+      &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
     assert_eq!(bytes_written, 48);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("patrol_vertex_list.chunk"),
-    ))?;
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 48 + 8);
 

@@ -11,3 +11,9 @@ pub const FLAG_SKELETON_ACTIVE: u8 = 1;
 pub const FLAG_SKELETON_SPAWN_COPY: u8 = 2;
 pub const FLAG_SKELETON_SAVED_DATA: u8 = 4;
 pub const FLAG_SKELETON_NOT_SAVE: u8 = 8;
+
+// Graph related chunk sizing.
+pub const DEFAULT_LEVEL_BLOCK_SIZE: usize = 4096;
+pub const DEFAULT_VERTEX_BLOCK_SIZE: usize = 42;
+pub const DEFAULT_EDGE_BLOCK_SIZE: usize = 6;
+pub const DEFAULT_POINT_BLOCK_SIZE: usize = 20;

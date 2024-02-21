@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct HeaderChunk {
   pub version: u32,
   pub guid: u128,
@@ -70,70 +70,57 @@ mod tests {
   use std::io;
 
   #[test]
-  fn test_read_empty_chunk() {
-    let chunk: Chunk = Chunk::from_file(
-      open_test_resource_as_slice(get_test_chunk_sub_dir(String::from(
-        "empty_nested_single.chunk",
-      )))
-      .unwrap(),
-    )
-    .unwrap()
-    .read_child_by_index(0)
-    .unwrap();
+  fn test_read_empty_chunk() -> io::Result<()> {
+    let chunk: Chunk = Chunk::from_file(open_test_resource_as_slice(&get_test_chunk_sub_dir(
+      &String::from("empty_nested_single.chunk"),
+    ))?)?
+    .read_child_by_index(0)?;
 
     let header: io::Result<HeaderChunk> = HeaderChunk::read_from_chunk::<SpawnByteOrder>(chunk);
 
     assert!(header.is_err(), "Expected failure with empty chunk.");
+
+    Ok(())
   }
 
   #[test]
-  fn test_read_write_simple_header() {
+  fn test_read_write_simple_header() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("header_simple.chunk"));
 
-    HeaderChunk {
+    let header: HeaderChunk = HeaderChunk {
       version: 20,
       guid: 2u128.pow(127),
       graph_guid: 2u128.pow(64),
       count: 5050,
       level_count: 12,
-    }
-    .write::<SpawnByteOrder>(&mut writer)
-    .unwrap();
+    };
+
+    header.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 44);
 
-    let bytes_written: usize = writer
-      .flush_chunk_into_file::<SpawnByteOrder>(
-        &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-          file!(),
-          String::from("header_simple.chunk"),
-        ))
-        .unwrap(),
-        0,
-      )
-      .unwrap();
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_resource_as_file(&filename)?,
+      0,
+    )?;
 
     assert_eq!(bytes_written, 44);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("header_simple.chunk"),
-    ))
-    .unwrap();
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 52);
 
-    let chunk: Chunk = Chunk::from_file(file)
-      .unwrap()
+    let chunk: Chunk = Chunk::from_file(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let header: HeaderChunk = HeaderChunk::read_from_chunk::<SpawnByteOrder>(chunk).unwrap();
+    assert_eq!(
+      HeaderChunk::read_from_chunk::<SpawnByteOrder>(chunk)?,
+      header
+    );
 
-    assert_eq!(header.version, 20);
-    assert_eq!(header.guid, 2u128.pow(127));
-    assert_eq!(header.graph_guid, 2u128.pow(64));
-    assert_eq!(header.count, 5050);
-    assert_eq!(header.level_count, 12);
+    Ok(())
   }
 }

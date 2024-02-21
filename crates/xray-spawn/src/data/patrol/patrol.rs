@@ -140,6 +140,8 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_simple.chunk"));
 
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name"),
@@ -170,19 +172,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 210);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-        file!(),
-        String::from("patrol_simple.chunk"),
-      ))?,
+      &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
     assert_eq!(bytes_written, 210);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("patrol_simple.chunk"),
-    ))?;
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 210 + 8);
 
@@ -197,6 +193,7 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrols_list() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String = get_test_chunk_file_sub_dir(file!(), &String::from("patrol_list.chunk"));
 
     let patrols: Vec<Patrol> = vec![
       Patrol {
@@ -252,19 +249,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 430);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-        file!(),
-        String::from("patrol_list.chunk"),
-      ))?,
+      &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
     assert_eq!(bytes_written, 430);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("patrol_list.chunk"),
-    ))?;
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 

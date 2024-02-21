@@ -228,8 +228,8 @@ mod tests {
   use std::io;
 
   #[test]
-  fn test_read_empty_file() {
-    let file: FileSlice = open_test_resource_as_slice(String::from("chunks/empty")).unwrap();
+  fn test_read_empty_file() -> io::Result<()> {
+    let file: FileSlice = open_test_resource_as_slice(&String::from("chunks/empty"))?;
 
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 0);
@@ -245,42 +245,37 @@ mod tests {
       io::ErrorKind::InvalidInput,
       "Expect input error."
     );
+
+    Ok(())
   }
 
   #[test]
-  fn test_read_empty_chunk() {
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_sub_dir(String::from(
-      "empty_nested_single.chunk",
-    )))
-    .unwrap();
+  fn test_read_empty_chunk() -> io::Result<()> {
+    let filename: String = get_test_chunk_sub_dir(&String::from("empty_nested_single.chunk"));
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 8);
 
-    let chunk: Chunk = Chunk::from_file(file)
-      .unwrap()
-      .read_child_by_index(0)
-      .unwrap();
+    let chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
 
     assert!(chunk.is_ended(), "Expect empty chunk.");
+
+    Ok(())
   }
 
   #[test]
-  fn test_read_empty_children() {
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_sub_dir(String::from(
-      "empty_nested_single.chunk",
-    )))
-    .unwrap();
-    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
+  fn test_read_empty_children() -> io::Result<()> {
+    let filename: String = get_test_chunk_sub_dir(&String::from("empty_nested_single.chunk"));
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
     assert_eq!(chunks.first().unwrap().size, 0);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_sub_dir(String::from(
-      "empty_nested_five.chunk",
-    )))
-    .unwrap();
-    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
+    let filename: String = get_test_chunk_sub_dir(&String::from("empty_nested_five.chunk"));
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");
     assert_eq!(chunks.get(0).unwrap().size, 0);
@@ -288,22 +283,22 @@ mod tests {
     assert_eq!(chunks.get(2).unwrap().size, 0);
     assert_eq!(chunks.get(3).unwrap().size, 0);
     assert_eq!(chunks.get(4).unwrap().size, 0);
+
+    Ok(())
   }
 
   #[test]
-  fn test_read_dummy_children() {
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_sub_dir(String::from(
-      "dummy_nested_single.chunk",
-    )))
-    .unwrap();
-    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
+  fn test_read_dummy_children() -> io::Result<()> {
+    let filename: String = get_test_chunk_sub_dir(&String::from("dummy_nested_single.chunk"));
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
     assert_eq!(chunks.first().unwrap().size, 8);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(String::from("chunks/dummy_nested_five.chunk")).unwrap();
-    let chunks: Vec<Chunk> = Chunk::from_file(file).unwrap().read_all_children();
+    let filename: String = get_test_chunk_sub_dir(&String::from("dummy_nested_five.chunk"));
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");
     assert_eq!(chunks.get(0).unwrap().size, 8);
@@ -311,5 +306,7 @@ mod tests {
     assert_eq!(chunks.get(2).unwrap().size, 16);
     assert_eq!(chunks.get(3).unwrap().size, 0);
     assert_eq!(chunks.get(4).unwrap().size, 40);
+
+    Ok(())
   }
 }

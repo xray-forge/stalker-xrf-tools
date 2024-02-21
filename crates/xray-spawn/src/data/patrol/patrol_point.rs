@@ -113,6 +113,8 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_point_simple.chunk"));
 
     let point: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-name"),
@@ -127,19 +129,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 40);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-        file!(),
-        String::from("patrol_point_simple.chunk"),
-      ))?,
+      &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
     assert_eq!(bytes_written, 40);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("patrol_point_simple.chunk"),
-    ))?;
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 40 + 8);
 
@@ -155,6 +151,8 @@ mod tests {
   #[test]
   fn test_read_write_list_of_patrol_points() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_point_list.chunk"));
 
     let points: Vec<PatrolPoint> = vec![
       PatrolPoint {
@@ -178,19 +176,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 140);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-        file!(),
-        String::from("patrol_point_list.chunk"),
-      ))?,
+      &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
     assert_eq!(bytes_written, 140);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("patrol_point_list.chunk"),
-    ))?;
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 140 + 8);
 

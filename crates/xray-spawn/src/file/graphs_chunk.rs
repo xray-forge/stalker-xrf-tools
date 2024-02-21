@@ -1,23 +1,21 @@
 use crate::chunk::chunk::Chunk;
-use crate::data::level::Level;
-use crate::data::vertex::Vertex;
-use byteorder::{ByteOrder, ReadBytesExt};
+use crate::data::graph::graph_edge::GraphEdge;
+use crate::data::graph::graph_header::GraphHeader;
+use crate::data::graph::graph_level::GraphLevel;
+use crate::data::graph::graph_level_point::GraphLevelPoint;
+use crate::data::graph::graph_vertex::GraphVertex;
+use byteorder::ByteOrder;
 use std::{fmt, io};
 
+/// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 pub struct GraphsChunk {
-  pub chunk: Chunk,
-  pub version: u8,
-  pub vertex_count: u16,
-  pub edge_count: u32,
-  pub point_count: u32,
-  pub guid: u128,
-  pub size: u32,
-  pub levels: Vec<Level>,
-  pub vertices: Vec<Vertex>,
+  pub header: GraphHeader,
+  pub levels: Vec<GraphLevel>,
+  pub vertices: Vec<GraphVertex>,
 }
 
 impl GraphsChunk {
-  /// Read patrols chunk by position descriptor.
+  /// Read graphs chunk by position descriptor.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<GraphsChunk> {
     log::info!(
       "Parsing level graphs, {:?} -> {:?}",
@@ -25,44 +23,44 @@ impl GraphsChunk {
       chunk.end_pos()
     );
 
-    let version: u8 = chunk.read_u8()?;
-    let vertex_count: u16 = chunk.read_u16::<T>()?;
-    let edge_count: u32 = chunk.read_u32::<T>()?;
-    let point_count: u32 = chunk.read_u32::<T>()?;
-    let guid: u128 = chunk.read_u128::<T>()?;
-    let level_count: u8 = chunk.read_u8()?;
+    let header: GraphHeader = GraphHeader::read_from_chunk::<T>(&mut chunk)?;
 
-    let mut levels: Vec<Level> = Vec::new();
-    let mut vertices: Vec<Vertex> = Vec::new();
+    let mut levels: Vec<GraphLevel> = Vec::new();
+    let mut vertices: Vec<GraphVertex> = Vec::new();
+    let mut edges: Vec<GraphEdge> = Vec::new();
+    let mut points: Vec<GraphLevelPoint> = Vec::new();
 
-    for _ in 0..level_count {
-      levels.push(Level::read_from_chunk::<T>(&mut chunk)?)
+    for _ in 0..header.level_count {
+      levels.push(GraphLevel::read_from_chunk::<T>(&mut chunk)?)
     }
 
-    for _ in 0..vertex_count {
-      vertices.push(Vertex::read_from_chunk::<T>(&mut chunk)?);
+    for _ in 0..header.vertex_count {
+      vertices.push(GraphVertex::read_from_chunk::<T>(&mut chunk)?);
+    }
+
+    for _ in 0..header.edge_count {
+      edges.push(GraphEdge::read_from_chunk::<T>(&mut chunk)?);
+    }
+
+    for _ in 0..header.point_count {
+      points.push(GraphLevelPoint::read_from_chunk::<T>(&mut chunk)?);
     }
 
     log::info!(
-      "Parsed graphs ver {version}, {:?} processed, {:?} left",
+      "Parsed graphs ver {:?}, {:?} processed, {:?} left",
+      header.version,
       chunk.read_bytes_len(),
       chunk.read_bytes_remain()
     );
 
-    assert_eq!(levels.len(), level_count as usize);
-    assert_eq!(vertices.len(), vertex_count as usize);
+    assert_eq!(levels.len(), header.level_count as usize);
+    assert_eq!(vertices.len(), header.vertex_count as usize);
     // todo: assert_eq!(file.cursor_pos(), file.end_pos());
 
     Ok(GraphsChunk {
-      chunk,
-      version,
+      header,
       levels,
       vertices,
-      vertex_count,
-      edge_count,
-      point_count,
-      guid,
-      size: 4096,
     })
   }
 }
@@ -71,15 +69,8 @@ impl fmt::Debug for GraphsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "GraphsChunk {{ chunk: {:?}, version: {}, vertex_count: {}, edge_count: {}, point_count: {},\
-       guid: {}, size: {}, levels: Vector[{}], vertices: Vector[{}] }}",
-      self.chunk,
-      self.version,
-      self.vertex_count,
-      self.edge_count,
-      self.point_count,
-      self.guid,
-      self.size,
+      "GraphsChunk {{ header: {:?}, levels: Vector[{}], vertices: Vector[{}] }}",
+      self.header,
       self.levels.len(),
       self.vertices.len(),
     )

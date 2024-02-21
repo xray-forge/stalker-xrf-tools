@@ -79,6 +79,8 @@ mod tests {
   #[test]
   fn test_read_write_simple_artefact_spawn_point() {
     let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("artefact_spawns_simple.chunk"));
 
     ArtefactSpawnsChunk {
       nodes: vec![
@@ -101,22 +103,14 @@ mod tests {
 
     let bytes_written: usize = writer
       .flush_chunk_into_file::<SpawnByteOrder>(
-        &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-          file!(),
-          String::from("artefact_spawns_simple.chunk"),
-        ))
-        .unwrap(),
+        &mut overwrite_test_resource_as_file(&filename).unwrap(),
         0,
       )
       .unwrap();
 
     assert_eq!(bytes_written, 44);
 
-    let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
-      file!(),
-      String::from("artefact_spawns_simple.chunk"),
-    ))
-    .unwrap();
+    let file: FileSlice = open_test_resource_as_slice(&filename).unwrap();
 
     assert_eq!(file.bytes_remaining(), 44 + 8);
 

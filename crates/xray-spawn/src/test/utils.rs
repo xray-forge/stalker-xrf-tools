@@ -13,7 +13,7 @@ pub fn get_resources_path() -> PathBuf {
 }
 
 /// Get absolute path to provided test resource.
-pub fn get_test_resource_path(resource_path: String) -> PathBuf {
+pub fn get_test_resource_path(resource_path: &String) -> PathBuf {
   let mut path: PathBuf = get_resources_path();
 
   path.push("tests");
@@ -23,7 +23,7 @@ pub fn get_test_resource_path(resource_path: String) -> PathBuf {
 }
 
 /// Get relative path to chunk resource.
-pub fn get_test_chunk_file_sub_dir(file: &str, resource: String) -> String {
+pub fn get_test_chunk_file_sub_dir(file: &str, resource: &String) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push("chunks");
@@ -34,7 +34,7 @@ pub fn get_test_chunk_file_sub_dir(file: &str, resource: String) -> String {
 }
 
 /// Get relative path to chunk resource.
-pub fn get_test_chunk_sub_dir(resource: String) -> String {
+pub fn get_test_chunk_sub_dir(resource: &String) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push("chunks");
@@ -44,7 +44,7 @@ pub fn get_test_chunk_sub_dir(resource: String) -> String {
 }
 
 /// Open file from test resources as slice.
-pub fn open_test_resource_as_slice(resource_path: String) -> io::Result<FileSlice> {
+pub fn open_test_resource_as_slice(resource_path: &String) -> io::Result<FileSlice> {
   let path: PathBuf = get_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
@@ -57,7 +57,7 @@ pub fn open_test_resource_as_slice(resource_path: String) -> io::Result<FileSlic
 }
 
 /// Open file from test resources.
-pub fn open_test_resource_as_file(resource_path: String) -> io::Result<File> {
+pub fn open_test_resource_as_file(resource_path: &String) -> io::Result<File> {
   let path: PathBuf = get_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
@@ -70,7 +70,7 @@ pub fn open_test_resource_as_file(resource_path: String) -> io::Result<File> {
 }
 
 /// Create and open file from test resources, overwrite existing one.
-pub fn overwrite_test_resource_as_file(resource_path: String) -> io::Result<File> {
+pub fn overwrite_test_resource_as_file(resource_path: &String) -> io::Result<File> {
   let path: PathBuf = get_test_resource_path(resource_path);
 
   std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
