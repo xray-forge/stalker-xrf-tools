@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct PatrolLink {
   pub index: u32,
   pub links: Vec<(u32, f32)>,
@@ -88,55 +88,53 @@ mod tests {
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use std::io;
 
   #[test]
-  fn test_read_write_simple_patrol_link() {
+  fn test_read_write_simple_patrol_link() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    PatrolLink {
+    let link: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
-    }
-    .write::<SpawnByteOrder>(&mut writer)
-    .unwrap();
+    };
+
+    link.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 32);
 
-    let bytes_written: usize = writer
-      .flush_chunk_into_file::<SpawnByteOrder>(
-        &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-          file!(),
-          String::from("patrol_vertex_simple.chunk"),
-        ))
-        .unwrap(),
-        0,
-      )
-      .unwrap();
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
+        file!(),
+        String::from("patrol_vertex_simple.chunk"),
+      ))?,
+      0,
+    )?;
 
     assert_eq!(bytes_written, 32);
 
     let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
       file!(),
       String::from("patrol_vertex_simple.chunk"),
-    ))
-    .unwrap();
+    ))?;
 
     assert_eq!(file.bytes_remaining(), 32 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)
-      .unwrap()
+    let mut chunk: Chunk = Chunk::from_file(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let link: PatrolLink = PatrolLink::read_from_chunk::<SpawnByteOrder>(&mut chunk).unwrap();
+    let read_link: PatrolLink = PatrolLink::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
 
-    assert_eq!(link.index, 1000);
-    assert_eq!(link.links.len(), 3);
+    assert_eq!(read_link, link);
+
+    Ok(())
   }
 
   #[test]
-  fn test_read_write_list_of_patrol_links() {
+  fn test_read_write_list_of_patrol_links() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
+
     let links: Vec<PatrolLink> = vec![
       PatrolLink {
         index: 1000,
@@ -148,52 +146,36 @@ mod tests {
       },
     ];
 
-    PatrolLink::write_list::<SpawnByteOrder>(&links, &mut writer).unwrap();
+    PatrolLink::write_list::<SpawnByteOrder>(&links, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 48);
 
-    let bytes_written: usize = writer
-      .flush_chunk_into_file::<SpawnByteOrder>(
-        &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
-          file!(),
-          String::from("patrol_vertex_list.chunk"),
-        ))
-        .unwrap(),
-        0,
-      )
-      .unwrap();
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_resource_as_file(get_test_chunk_file_sub_dir(
+        file!(),
+        String::from("patrol_vertex_list.chunk"),
+      ))?,
+      0,
+    )?;
 
     assert_eq!(bytes_written, 48);
 
     let file: FileSlice = open_test_resource_as_slice(get_test_chunk_file_sub_dir(
       file!(),
       String::from("patrol_vertex_list.chunk"),
-    ))
-    .unwrap();
+    ))?;
 
     assert_eq!(file.bytes_remaining(), 48 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)
-      .unwrap()
+    let mut chunk: Chunk = Chunk::from_file(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
     let from_file: Vec<PatrolLink> =
-      PatrolLink::read_list_from_chunk::<SpawnByteOrder>(&mut chunk).unwrap();
+      PatrolLink::read_list_from_chunk::<SpawnByteOrder>(&mut chunk)?;
 
-    assert_eq!(from_file.len(), 2);
+    assert_eq!(from_file, links);
 
-    assert_eq!(from_file.get(0).unwrap().index, 1000);
-    assert_eq!(from_file.get(0).unwrap().links.len(), 3);
-    assert_eq!(
-      *from_file.get(0).unwrap().links.get(0).unwrap(),
-      (10u32, 1.5f32)
-    );
-    assert_eq!(*from_file.get(0).unwrap().links.get(1).unwrap(), (11, 2.5));
-    assert_eq!(*from_file.get(0).unwrap().links.get(2).unwrap(), (12, 3.5));
-
-    assert_eq!(from_file.get(1).unwrap().index, 1001);
-    assert_eq!(from_file.get(1).unwrap().links.len(), 1);
-    assert_eq!(*from_file.get(1).unwrap().links.get(0).unwrap(), (20, 1.5));
+    Ok(())
   }
 }

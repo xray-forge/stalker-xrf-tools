@@ -19,22 +19,25 @@ impl ChunkWriter {
     file: &mut File,
     index: u32,
   ) -> io::Result<usize> {
-    self.buffer.flush().unwrap();
+    self.buffer.flush()?;
 
-    file.write_u32::<T>(index).unwrap();
+    file.write_u32::<T>(index)?;
     file.write_u32::<T>(self.buffer.len() as u32)?;
     file.write(self.buffer.as_slice())
   }
 
   /// Flush all the written data as chunk into the file.
-  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, index: u32) -> io::Result<Vec<u8>> {
-    self.buffer.flush().unwrap();
+  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, index: usize) -> io::Result<Vec<u8>> {
+    self.buffer.flush()?;
 
     let mut buffer: Vec<u8> = Vec::new();
 
-    buffer.write_u32::<T>(index).unwrap();
+    buffer.write_u32::<T>(index as u32)?;
     buffer.write_u32::<T>(self.buffer.len() as u32)?;
-    buffer.write(self.buffer.as_slice())?;
+
+    let bytes_written: usize = buffer.write(self.buffer.as_slice())?;
+
+    assert_eq!(bytes_written, self.buffer.len());
 
     Ok(buffer)
   }
