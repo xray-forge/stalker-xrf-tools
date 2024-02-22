@@ -7,7 +7,7 @@ use std::io;
 use std::io::Write;
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PatrolPoint {
   pub name: String,
   pub position: Vector3d,

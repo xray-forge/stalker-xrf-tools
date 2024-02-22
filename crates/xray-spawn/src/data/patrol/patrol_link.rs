@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PatrolLink {
   pub index: u32,
   pub links: Vec<(u32, f32)>,

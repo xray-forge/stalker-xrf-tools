@@ -19,7 +19,7 @@ use std::io::Write;
 ///   0 - points count
 ///   1 - patrol points
 ///   2 - patrol points links
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Patrol {
   pub name: String,
   pub points: Vec<PatrolPoint>,

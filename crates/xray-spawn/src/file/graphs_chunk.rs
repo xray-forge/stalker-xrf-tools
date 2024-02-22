@@ -12,6 +12,8 @@ pub struct GraphsChunk {
   pub header: GraphHeader,
   pub levels: Vec<GraphLevel>,
   pub vertices: Vec<GraphVertex>,
+  pub edges: Vec<GraphEdge>,
+  pub points: Vec<GraphLevelPoint>,
 }
 
 impl GraphsChunk {
@@ -61,6 +63,8 @@ impl GraphsChunk {
       header,
       levels,
       vertices,
+      edges,
+      points,
     })
   }
 }
