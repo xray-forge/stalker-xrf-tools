@@ -1,4 +1,4 @@
-use crate::types::Vector3d;
+use crate::types::{U32Bytes, Vector3d};
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::fs::File;
 use std::io;
@@ -57,6 +57,16 @@ impl ChunkWriter {
     self.write_f32::<T>(value.0)?;
     self.write_f32::<T>(value.1)?;
     self.write_f32::<T>(value.2)?;
+
+    Ok(())
+  }
+
+  /// Write 4 bytes value as 4 separate byte entries.
+  pub fn write_u32_bytes(&mut self, value: &U32Bytes) -> io::Result<()> {
+    self.write_u8(value.0)?;
+    self.write_u8(value.1)?;
+    self.write_u8(value.2)?;
+    self.write_u8(value.3)?;
 
     Ok(())
   }
