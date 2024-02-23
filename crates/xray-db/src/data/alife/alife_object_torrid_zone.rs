@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
@@ -21,10 +22,10 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
     let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
 
     // Last spawn time for artefacts, legacy approach:
-    let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
+    let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8()? == 0 {
       None
     } else {
-      Some(Time::read_from_chunk::<SpawnByteOrder>(chunk).unwrap())
+      Some(Time::read_from_chunk::<SpawnByteOrder>(chunk)?)
     };
 
     Ok(AlifeObjectTorridZone {
@@ -32,6 +33,10 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
       motion,
       last_spawn_time,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -17,6 +18,10 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazined> for AlifeObjectI
     let base: AlifeObjectItemWeapon = AlifeObjectItemWeapon::read_from_chunk::<T>(chunk)?;
 
     Ok(AlifeObjectItemWeaponMagazined { base })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

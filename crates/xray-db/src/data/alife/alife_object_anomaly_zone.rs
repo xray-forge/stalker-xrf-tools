@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
@@ -20,15 +21,15 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAnomalyZone> {
     let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?;
 
-    let offline_interactive_radius: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let artefact_spawn_count: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
-    let artefact_position_offset: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let offline_interactive_radius: f32 = chunk.read_f32::<SpawnByteOrder>()?;
+    let artefact_spawn_count: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let artefact_position_offset: u32 = chunk.read_u32::<SpawnByteOrder>()?;
 
     // Last spawn time for artefacts, legacy approach:
-    let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
+    let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8()? == 0 {
       None
     } else {
-      Some(Time::read_from_chunk::<SpawnByteOrder>(chunk).unwrap())
+      Some(Time::read_from_chunk::<SpawnByteOrder>(chunk)?)
     };
 
     Ok(AlifeObjectAnomalyZone {
@@ -38,6 +39,10 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
       artefact_position_offset,
       last_spawn_time,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

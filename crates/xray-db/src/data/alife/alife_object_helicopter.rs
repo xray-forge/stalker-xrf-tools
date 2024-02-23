@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -22,8 +23,8 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
     let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
-    let startup_animation: String = chunk.read_null_terminated_string().unwrap();
-    let engine_sound: String = chunk.read_null_terminated_string().unwrap();
+    let startup_animation: String = chunk.read_null_terminated_string()?;
+    let engine_sound: String = chunk.read_null_terminated_string()?;
 
     Ok(AlifeObjectHelicopter {
       base,
@@ -32,6 +33,10 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
       startup_animation,
       engine_sound,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

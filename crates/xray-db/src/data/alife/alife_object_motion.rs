@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use byteorder::ByteOrder;
 use std::io;
@@ -12,5 +13,9 @@ impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
     let motion_name: String = chunk.read_null_terminated_string()?;
 
     Ok(AlifeObjectMotion { motion_name })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }

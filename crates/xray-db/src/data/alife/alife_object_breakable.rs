@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -18,6 +19,10 @@ impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
     let health: f32 = chunk.read_f32::<SpawnByteOrder>()?;
 
     Ok(AlifeObjectBreakable { base, health })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

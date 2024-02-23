@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -16,12 +17,12 @@ pub struct AlifeGraphPoint {
 
 impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeGraphPoint> {
-    let connection_point_name: String = chunk.read_null_terminated_string().unwrap();
-    let connection_level_name: String = chunk.read_null_terminated_string().unwrap();
-    let location0: u8 = chunk.read_u8().unwrap();
-    let location1: u8 = chunk.read_u8().unwrap();
-    let location2: u8 = chunk.read_u8().unwrap();
-    let location3: u8 = chunk.read_u8().unwrap();
+    let connection_point_name: String = chunk.read_null_terminated_string()?;
+    let connection_level_name: String = chunk.read_null_terminated_string()?;
+    let location0: u8 = chunk.read_u8()?;
+    let location1: u8 = chunk.read_u8()?;
+    let location2: u8 = chunk.read_u8()?;
+    let location3: u8 = chunk.read_u8()?;
 
     Ok(AlifeGraphPoint {
       connection_point_name,
@@ -31,6 +32,10 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
       location2,
       location3,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

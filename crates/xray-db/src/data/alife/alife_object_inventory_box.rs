@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -17,9 +18,9 @@ impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventor
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectInventoryBox> {
     let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
 
-    let can_take: u8 = chunk.read_u8().unwrap();
-    let is_closed: u8 = chunk.read_u8().unwrap();
-    let tip: String = chunk.read_null_terminated_string().unwrap();
+    let can_take: u8 = chunk.read_u8()?;
+    let is_closed: u8 = chunk.read_u8()?;
+    let tip: String = chunk.read_null_terminated_string()?;
 
     Ok(AlifeObjectInventoryBox {
       base,
@@ -27,6 +28,10 @@ impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventor
       is_closed,
       tip,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

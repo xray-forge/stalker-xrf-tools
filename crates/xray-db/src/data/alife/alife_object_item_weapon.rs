@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -21,12 +22,12 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemWeapon> {
     let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
 
-    let ammo_current: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
-    let ammo_elapsed: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
-    let weapon_state: u8 = chunk.read_u8().unwrap();
-    let addon_flags: u8 = chunk.read_u8().unwrap();
-    let ammo_type: u8 = chunk.read_u8().unwrap();
-    let elapsed_grenades: u8 = chunk.read_u8().unwrap();
+    let ammo_current: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let ammo_elapsed: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let weapon_state: u8 = chunk.read_u8()?;
+    let addon_flags: u8 = chunk.read_u8()?;
+    let ammo_type: u8 = chunk.read_u8()?;
+    let elapsed_grenades: u8 = chunk.read_u8()?;
 
     Ok(AlifeObjectItemWeapon {
       base,
@@ -37,6 +38,10 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
       ammo_type,
       elapsed_grenades,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

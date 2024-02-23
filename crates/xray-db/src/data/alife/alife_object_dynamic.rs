@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use byteorder::ByteOrder;
@@ -13,5 +14,9 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamic> for AlifeObjectDynamic {
     let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk::<T>(chunk)?;
 
     Ok(AlifeObjectDynamic { base })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }

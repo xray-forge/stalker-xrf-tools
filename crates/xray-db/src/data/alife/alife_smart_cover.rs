@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -17,13 +18,13 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeSmartCover> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read_from_chunk::<T>(chunk)?;
 
-    let last_description: String = chunk.read_null_terminated_string().unwrap();
-    let count: u8 = chunk.read_u8().unwrap();
+    let last_description: String = chunk.read_null_terminated_string()?;
+    let count: u8 = chunk.read_u8()?;
     let mut loopholes: Vec<SmartCoverLoophole> = Vec::new();
 
     for _ in 0..count {
-      let name: String = chunk.read_null_terminated_string().unwrap();
-      let enabled: u8 = chunk.read_u8().unwrap();
+      let name: String = chunk.read_null_terminated_string()?;
+      let enabled: u8 = chunk.read_u8()?;
 
       loopholes.push(SmartCoverLoophole { name, enabled })
     }
@@ -33,6 +34,10 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
       last_description,
       loopholes,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

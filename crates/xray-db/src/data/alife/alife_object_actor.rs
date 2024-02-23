@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_creature::AlifeObjectCreature;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
@@ -19,7 +20,7 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
     let trader: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract::read_from_chunk::<T>(chunk)?;
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
-    let holder_id: u16 = chunk.read_u16::<T>().unwrap();
+    let holder_id: u16 = chunk.read_u16::<T>()?;
 
     Ok(AlifeObjectActor {
       base,
@@ -27,5 +28,9 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
       skeleton,
       holder_id,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }

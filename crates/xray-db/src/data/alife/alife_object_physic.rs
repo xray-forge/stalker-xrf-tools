@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
@@ -21,9 +22,9 @@ impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
     let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
-    let physic_type: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let mass: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let fixed_bones: String = chunk.read_null_terminated_string().unwrap();
+    let physic_type: u32 = chunk.read_u32::<SpawnByteOrder>()?;
+    let mass: f32 = chunk.read_f32::<SpawnByteOrder>()?;
+    let fixed_bones: String = chunk.read_null_terminated_string()?;
 
     Ok(AlifeObjectPhysic {
       base,
@@ -32,6 +33,10 @@ impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
       mass,
       fixed_bones,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 

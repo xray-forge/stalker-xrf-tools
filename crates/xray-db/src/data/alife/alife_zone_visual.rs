@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
@@ -22,14 +23,12 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
     let idle_animation: String = chunk
       .has_data()
       .then(|| chunk.read_null_terminated_string().unwrap())
-      .or(Some(String::new()))
-      .unwrap();
+      .unwrap_or(String::new());
 
     let attack_animation: String = chunk
       .has_data()
       .then(|| chunk.read_null_terminated_string().unwrap())
-      .or(Some(String::new()))
-      .unwrap();
+      .unwrap_or(String::new());
 
     Ok(AlifeZoneVisual {
       base,
@@ -37,6 +36,10 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
       idle_animation,
       attack_animation,
     })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    todo!("Implement write operation");
   }
 }
 
