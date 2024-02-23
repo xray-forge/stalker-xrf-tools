@@ -78,10 +78,10 @@ mod tests {
   use fileslice::FileSlice;
 
   #[test]
-  fn test_read_write_simple_artefact_spawn_point() {
+  fn test_read_write_artefact_spawn_point() {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("artefact_spawns_simple.chunk"));
+      get_test_chunk_file_sub_dir(file!(), &String::from("artefact_spawns.chunk"));
 
     ArtefactSpawnsChunk {
       nodes: vec![
