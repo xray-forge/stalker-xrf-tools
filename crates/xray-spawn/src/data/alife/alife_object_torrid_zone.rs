@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::{
 };
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::time::Time;
+use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 
 pub struct AlifeObjectTorridZone {
@@ -22,7 +23,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
     let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
       None
     } else {
-      Time::read_from_chunk(chunk).unwrap()
+      Some(Time::read_from_chunk::<SpawnByteOrder>(chunk).unwrap())
     };
 
     AlifeObjectTorridZone {

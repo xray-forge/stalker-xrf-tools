@@ -27,7 +27,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
     let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
       None
     } else {
-      Time::read_from_chunk(chunk).unwrap()
+      Some(Time::read_from_chunk::<SpawnByteOrder>(chunk).unwrap())
     };
 
     AlifeObjectAnomalyZone {

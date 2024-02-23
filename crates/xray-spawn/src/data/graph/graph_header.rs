@@ -7,7 +7,7 @@ use std::io;
 pub struct GraphHeader {
   pub version: u8,
   pub vertex_count: u16,
-  pub edge_count: u32,
+  pub edges_count: u32,
   pub point_count: u32,
   pub guid: u128,
   pub level_count: u8,
@@ -18,7 +18,7 @@ impl GraphHeader {
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphHeader> {
     let version: u8 = chunk.read_u8()?;
     let vertex_count: u16 = chunk.read_u16::<T>()?;
-    let edge_count: u32 = chunk.read_u32::<T>()?;
+    let edges_count: u32 = chunk.read_u32::<T>()?;
     let point_count: u32 = chunk.read_u32::<T>()?;
     let guid: u128 = chunk.read_u128::<T>()?;
     let level_count: u8 = chunk.read_u8()?;
@@ -26,7 +26,7 @@ impl GraphHeader {
     Ok(GraphHeader {
       version,
       vertex_count,
-      edge_count,
+      edges_count,
       point_count,
       guid,
       level_count,
@@ -37,7 +37,7 @@ impl GraphHeader {
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u8(self.version)?;
     writer.write_u16::<T>(self.vertex_count)?;
-    writer.write_u32::<T>(self.edge_count)?;
+    writer.write_u32::<T>(self.edges_count)?;
     writer.write_u32::<T>(self.point_count)?;
     writer.write_u128::<T>(self.guid)?;
     writer.write_u8(self.level_count)?;
@@ -66,7 +66,7 @@ mod tests {
     let header: GraphHeader = GraphHeader {
       version: 16,
       vertex_count: 4000,
-      edge_count: 230_250,
+      edges_count: 230_250,
       point_count: 600_500,
       guid: 4321,
       level_count: 5,

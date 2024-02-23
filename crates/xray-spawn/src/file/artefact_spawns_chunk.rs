@@ -43,6 +43,7 @@ impl ArtefactSpawnsChunk {
     Ok(ArtefactSpawnsChunk { nodes })
   }
 
+  /// Write artefact spawns.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u32::<T>(self.nodes.len() as u32)?;
 

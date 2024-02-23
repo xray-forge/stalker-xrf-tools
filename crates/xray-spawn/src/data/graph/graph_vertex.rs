@@ -23,7 +23,7 @@ impl GraphVertex {
     let level_point: Vector3d = chunk.read_f32_3d_vector::<T>()?;
     let game_point: Vector3d = chunk.read_f32_3d_vector::<T>()?;
     let level_id: u8 = chunk.read_u8()?;
-    let level_vertex_id: u32 = chunk.read_u32::<T>()?;
+    let level_vertex_id: u32 = chunk.read_u24::<T>()?;
     let vertex_type: U32Bytes = chunk.read_u32_bytes()?;
     let edge_offset: u32 = chunk.read_u32::<T>()?;
     let level_point_offset: u32 = chunk.read_u32::<T>()?;
@@ -48,7 +48,7 @@ impl GraphVertex {
     writer.write_f32_3d_vector::<T>(&self.level_point)?;
     writer.write_f32_3d_vector::<T>(&self.game_point)?;
     writer.write_u8(self.level_id)?;
-    writer.write_u32::<T>(self.level_vertex_id)?;
+    writer.write_u24::<T>(self.level_vertex_id)?;
     writer.write_u32_bytes(&self.vertex_type)?;
     writer.write_u32::<T>(self.edge_offset)?;
     writer.write_u32::<T>(self.level_point_offset)?;
@@ -90,19 +90,19 @@ mod tests {
 
     vertex.write::<SpawnByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 43);
+    assert_eq!(writer.bytes_written(), 42);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
       &mut overwrite_test_resource_as_file(&get_test_chunk_file_sub_dir(file!(), &filename))?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 43);
+    assert_eq!(bytes_written, 42);
 
     let file: FileSlice =
       open_test_resource_as_slice(&get_test_chunk_file_sub_dir(file!(), &filename))?;
 
-    assert_eq!(file.bytes_remaining(), 43 + 8);
+    assert_eq!(file.bytes_remaining(), 42 + 8);
 
     let mut chunk: Chunk = Chunk::from_file(file)?
       .read_child_by_index(0)

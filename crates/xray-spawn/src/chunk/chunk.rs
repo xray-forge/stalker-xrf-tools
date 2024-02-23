@@ -208,6 +208,14 @@ impl Chunk {
       self.read_f32_3d_vector::<T>()?,
     ))
   }
+
+  pub fn read_bytes(&mut self, count: usize) -> io::Result<Vec<u8>> {
+    let mut buffer: Vec<u8> = vec![0; count];
+
+    self.read_exact(&mut buffer)?;
+
+    Ok(buffer)
+  }
 }
 
 impl fmt::Debug for Chunk {
