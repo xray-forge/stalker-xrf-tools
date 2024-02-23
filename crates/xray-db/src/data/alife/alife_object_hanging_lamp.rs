@@ -4,8 +4,8 @@ use crate::data::alife::alife_object_inherited_reader::{
 };
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectHangingLamp {
   pub base: AlifeObjectVisual,
@@ -34,35 +34,35 @@ pub struct AlifeObjectHangingLamp {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectHangingLamp {
-    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectHangingLamp> {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
+    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
-    let main_color: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let main_brightness: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let color_animator: String = chunk.read_null_terminated_string().unwrap();
-    let main_range: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let light_flags: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
-    let startup_animation: String = chunk.read_null_terminated_string().unwrap();
-    let fixed_bones: String = chunk.read_null_terminated_string().unwrap();
-    let health: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
+    let main_color: u32 = chunk.read_u32::<T>()?;
+    let main_brightness: f32 = chunk.read_f32::<T>()?;
+    let color_animator: String = chunk.read_null_terminated_string()?;
+    let main_range: f32 = chunk.read_f32::<T>()?;
+    let light_flags: u16 = chunk.read_u16::<T>()?;
+    let startup_animation: String = chunk.read_null_terminated_string()?;
+    let fixed_bones: String = chunk.read_null_terminated_string()?;
+    let health: f32 = chunk.read_f32::<T>()?;
 
-    let virtual_size: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let ambient_radius: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let ambient_power: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let ambient_texture: String = chunk.read_null_terminated_string().unwrap();
-    let light_texture: String = chunk.read_null_terminated_string().unwrap();
-    let light_bone: String = chunk.read_null_terminated_string().unwrap();
-    let spot_cone_angle: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let glow_texture: String = chunk.read_null_terminated_string().unwrap();
-    let glow_radius: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
+    let virtual_size: f32 = chunk.read_f32::<T>()?;
+    let ambient_radius: f32 = chunk.read_f32::<T>()?;
+    let ambient_power: f32 = chunk.read_f32::<T>()?;
+    let ambient_texture: String = chunk.read_null_terminated_string()?;
+    let light_texture: String = chunk.read_null_terminated_string()?;
+    let light_bone: String = chunk.read_null_terminated_string()?;
+    let spot_cone_angle: f32 = chunk.read_f32::<T>()?;
+    let glow_texture: String = chunk.read_null_terminated_string()?;
+    let glow_radius: f32 = chunk.read_f32::<T>()?;
 
-    let light_ambient_bone: String = chunk.read_null_terminated_string().unwrap();
-    let volumetric_quality: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let volumetric_intensity: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let volumetric_distance: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
+    let light_ambient_bone: String = chunk.read_null_terminated_string()?;
+    let volumetric_quality: f32 = chunk.read_f32::<T>()?;
+    let volumetric_intensity: f32 = chunk.read_f32::<T>()?;
+    let volumetric_distance: f32 = chunk.read_f32::<T>()?;
 
-    AlifeObjectHangingLamp {
+    Ok(AlifeObjectHangingLamp {
       base,
       skeleton,
       main_color,
@@ -86,7 +86,7 @@ impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLa
       volumetric_quality,
       volumetric_intensity,
       volumetric_distance,
-    }
+    })
   }
 }
 

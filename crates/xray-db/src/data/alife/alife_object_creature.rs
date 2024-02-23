@@ -2,7 +2,8 @@ use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectCreature {
   pub base: AlifeObjectVisual,
@@ -17,8 +18,8 @@ pub struct AlifeObjectCreature {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectCreature {
-    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectCreature> {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
 
     let team: u8 = chunk.read_u8().unwrap();
     let squad: u8 = chunk.read_u8().unwrap();
@@ -31,7 +32,7 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
     let killer_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let game_death_time: u64 = chunk.read_u64::<SpawnByteOrder>().unwrap();
 
-    AlifeObjectCreature {
+    Ok(AlifeObjectCreature {
       base,
       team,
       squad,
@@ -41,6 +42,6 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
       dynamic_in_restrictions,
       killer_id,
       game_death_time,
-    }
+    })
   }
 }

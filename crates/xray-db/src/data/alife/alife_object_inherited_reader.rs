@@ -1,7 +1,9 @@
 use crate::chunk::chunk::Chunk;
+use byteorder::ByteOrder;
+use std::io;
 
 pub trait AlifeObjectInheritedReader<T> {
-  fn read_from_chunk(chunk: &mut Chunk) -> T;
+  fn read_from_chunk<B: ByteOrder>(chunk: &mut Chunk) -> io::Result<T>;
 
   fn verify(chunk: &Chunk) {
     assert!(

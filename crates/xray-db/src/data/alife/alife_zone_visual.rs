@@ -4,6 +4,8 @@ use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+use byteorder::ByteOrder;
+use std::io;
 
 pub struct AlifeZoneVisual {
   pub base: AlifeObjectAnomalyZone,
@@ -13,9 +15,9 @@ pub struct AlifeZoneVisual {
 }
 
 impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeZoneVisual {
-    let base: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read_from_chunk(chunk);
-    let visual: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeZoneVisual> {
+    let base: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?;
+    let visual: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
 
     let idle_animation: String = chunk
       .has_data()
@@ -29,12 +31,12 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
       .or(Some(String::new()))
       .unwrap();
 
-    AlifeZoneVisual {
+    Ok(AlifeZoneVisual {
       base,
       visual,
       idle_animation,
       attack_animation,
-    }
+    })
   }
 }
 

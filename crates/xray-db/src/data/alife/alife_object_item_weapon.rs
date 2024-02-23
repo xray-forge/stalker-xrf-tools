@@ -4,7 +4,8 @@ use crate::data::alife::alife_object_inherited_reader::{
 };
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectItemWeapon {
   pub base: AlifeObjectItem,
@@ -17,8 +18,8 @@ pub struct AlifeObjectItemWeapon {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeapon {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemWeapon> {
+    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
 
     let ammo_current: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let ammo_elapsed: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -27,7 +28,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
     let ammo_type: u8 = chunk.read_u8().unwrap();
     let elapsed_grenades: u8 = chunk.read_u8().unwrap();
 
-    AlifeObjectItemWeapon {
+    Ok(AlifeObjectItemWeapon {
       base,
       ammo_current,
       ammo_elapsed,
@@ -35,7 +36,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
       addon_flags,
       ammo_type,
       elapsed_grenades,
-    }
+    })
   }
 }
 

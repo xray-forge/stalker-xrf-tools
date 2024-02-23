@@ -1,14 +1,16 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use byteorder::ByteOrder;
+use std::io;
 
 pub struct AlifeObjectMotion {
   pub motion_name: String,
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectMotion {
-    let motion_name: String = chunk.read_null_terminated_string().unwrap();
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectMotion> {
+    let motion_name: String = chunk.read_null_terminated_string()?;
 
-    AlifeObjectMotion { motion_name }
+    Ok(AlifeObjectMotion { motion_name })
   }
 }

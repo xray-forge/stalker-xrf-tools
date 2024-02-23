@@ -4,7 +4,8 @@ use crate::data::alife::alife_object_inherited_reader::{
 };
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectItemPda {
   pub base: AlifeObjectItem,
@@ -14,19 +15,19 @@ pub struct AlifeObjectItemPda {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemPda {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemPda> {
+    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
 
     let owner: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
     let character: String = chunk.read_null_terminated_string().unwrap();
     let info_portion: String = chunk.read_null_terminated_string().unwrap();
 
-    AlifeObjectItemPda {
+    Ok(AlifeObjectItemPda {
       base,
       owner,
       character,
       info_portion,
-    }
+    })
   }
 }
 

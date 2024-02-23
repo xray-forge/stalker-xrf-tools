@@ -5,7 +5,8 @@ use crate::data::alife::alife_object_inherited_reader::{
 };
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectAnomalyZone {
   pub base: AlifeObjectCustomZone,
@@ -16,8 +17,8 @@ pub struct AlifeObjectAnomalyZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectAnomalyZone {
-    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAnomalyZone> {
+    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?;
 
     let offline_interactive_radius: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
     let artefact_spawn_count: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -30,13 +31,13 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
       Some(Time::read_from_chunk::<SpawnByteOrder>(chunk).unwrap())
     };
 
-    AlifeObjectAnomalyZone {
+    Ok(AlifeObjectAnomalyZone {
       base,
       offline_interactive_radius,
       artefact_spawn_count,
       artefact_position_offset,
       last_spawn_time,
-    }
+    })
   }
 }
 

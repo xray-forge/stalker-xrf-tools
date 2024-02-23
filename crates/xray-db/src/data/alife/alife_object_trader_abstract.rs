@@ -1,7 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectTraderAbstract {
   pub money: u32,
@@ -17,7 +18,7 @@ pub struct AlifeObjectTraderAbstract {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectTraderAbstract {
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectTraderAbstract> {
     let money: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let specific_character: String = chunk.read_null_terminated_string().unwrap();
     let trader_flags: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
@@ -29,7 +30,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
     let dead_body_can_take: u8 = chunk.read_u8().unwrap();
     let dead_body_closed: u8 = chunk.read_u8().unwrap();
 
-    AlifeObjectTraderAbstract {
+    Ok(AlifeObjectTraderAbstract {
       money,
       specific_character,
       trader_flags,
@@ -40,6 +41,6 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
       character_name,
       dead_body_can_take,
       dead_body_closed,
-    }
+    })
   }
 }

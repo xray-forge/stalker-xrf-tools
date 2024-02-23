@@ -6,7 +6,8 @@ use crate::data::alife::alife_object_inherited_reader::{
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectTorridZone {
   pub base: AlifeObjectCustomZone,
@@ -15,9 +16,9 @@ pub struct AlifeObjectTorridZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectTorridZone {
-    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk(chunk);
-    let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectTorridZone> {
+    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?;
+    let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
 
     // Last spawn time for artefacts, legacy approach:
     let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8().unwrap() == 0 {
@@ -26,11 +27,11 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
       Some(Time::read_from_chunk::<SpawnByteOrder>(chunk).unwrap())
     };
 
-    AlifeObjectTorridZone {
+    Ok(AlifeObjectTorridZone {
       base,
       motion,
       last_spawn_time,
-    }
+    })
   }
 }
 

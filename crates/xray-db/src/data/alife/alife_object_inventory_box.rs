@@ -3,7 +3,8 @@ use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectInventoryBox {
   pub base: AlifeObjectVisual,
@@ -13,19 +14,19 @@ pub struct AlifeObjectInventoryBox {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectInventoryBox {
-    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectInventoryBox> {
+    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
 
     let can_take: u8 = chunk.read_u8().unwrap();
     let is_closed: u8 = chunk.read_u8().unwrap();
     let tip: String = chunk.read_null_terminated_string().unwrap();
 
-    AlifeObjectInventoryBox {
+    Ok(AlifeObjectInventoryBox {
       base,
       can_take,
       is_closed,
       tip,
-    }
+    })
   }
 }
 

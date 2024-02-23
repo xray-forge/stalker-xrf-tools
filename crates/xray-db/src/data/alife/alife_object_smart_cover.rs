@@ -3,7 +3,8 @@ use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectSmartCover {
   pub base: AlifeObjectDynamic,
@@ -17,8 +18,8 @@ pub struct AlifeObjectSmartCover {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectSmartCover {
-    let base: AlifeObjectDynamic = AlifeObjectDynamic::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSmartCover> {
+    let base: AlifeObjectDynamic = AlifeObjectDynamic::read_from_chunk::<T>(chunk)?;
 
     let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>().unwrap();
     let description: String = chunk.read_null_terminated_string().unwrap();
@@ -28,7 +29,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
     let is_combat_cover: u8 = chunk.read_u8().unwrap();
     let can_fire: u8 = chunk.read_u8().unwrap();
 
-    AlifeObjectSmartCover {
+    Ok(AlifeObjectSmartCover {
       base,
       shape,
       description,
@@ -37,6 +38,6 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
       exit_min_enemy_distance,
       is_combat_cover,
       can_fire,
-    }
+    })
   }
 }

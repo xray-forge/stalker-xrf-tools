@@ -2,7 +2,8 @@ use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectCustomZone {
   pub base: AlifeObjectSpaceRestrictor,
@@ -14,8 +15,8 @@ pub struct AlifeObjectCustomZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectCustomZone {
-    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectCustomZone> {
+    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?;
 
     let max_power: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
     let owner_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
@@ -23,13 +24,13 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
     let disabled_time: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
     let m_start_time_shift: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
 
-    AlifeObjectCustomZone {
+    Ok(AlifeObjectCustomZone {
       base,
       max_power,
       owner_id,
       enabled_time,
       disabled_time,
       m_start_time_shift,
-    }
+    })
   }
 }

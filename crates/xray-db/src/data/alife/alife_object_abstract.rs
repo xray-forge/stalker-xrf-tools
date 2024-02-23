@@ -1,8 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
+/// Generic alife object abstraction data.
 pub struct AlifeObjectAbstract {
   pub game_vertex_id: u16,
   pub distance: f32,
@@ -15,17 +16,17 @@ pub struct AlifeObjectAbstract {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectAbstract {
-    let game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
-    let distance: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let direct_control: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let flags: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAbstract> {
+    let game_vertex_id: u16 = chunk.read_u16::<T>().unwrap();
+    let distance: f32 = chunk.read_f32::<T>().unwrap();
+    let direct_control: u32 = chunk.read_u32::<T>().unwrap();
+    let level_vertex_id: u32 = chunk.read_u32::<T>().unwrap();
+    let flags: u32 = chunk.read_u32::<T>().unwrap();
     let custom_data: String = chunk.read_null_terminated_string().unwrap();
-    let story_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let spawn_story_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let story_id: u32 = chunk.read_u32::<T>().unwrap();
+    let spawn_story_id: u32 = chunk.read_u32::<T>().unwrap();
 
-    AlifeObjectAbstract {
+    Ok(AlifeObjectAbstract {
       game_vertex_id,
       distance,
       direct_control,
@@ -34,6 +35,6 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
       custom_data,
       story_id,
       spawn_story_id,
-    }
+    })
   }
 }

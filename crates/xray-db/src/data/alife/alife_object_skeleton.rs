@@ -2,7 +2,8 @@ use crate::chunk::chunk::Chunk;
 use crate::constants::FLAG_SKELETON_SAVED_DATA;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeObjectSkeleton {
   pub name: String,
@@ -11,7 +12,7 @@ pub struct AlifeObjectSkeleton {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectSkeleton {
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSkeleton> {
     let name: String = chunk.read_null_terminated_string().unwrap();
     let flags: u8 = chunk.read_u8().unwrap();
     let source_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -20,10 +21,10 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
       todo!("Extend skeleton parsing to include bones.")
     }
 
-    AlifeObjectSkeleton {
+    Ok(AlifeObjectSkeleton {
       name,
       flags,
       source_id,
-    }
+    })
   }
 }

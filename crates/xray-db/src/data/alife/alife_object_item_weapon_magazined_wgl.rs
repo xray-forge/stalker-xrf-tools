@@ -3,6 +3,8 @@ use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
 use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
+use byteorder::ByteOrder;
+use std::io;
 
 pub struct AlifeObjectItemWeaponMagazinedWgl {
   pub base: AlifeObjectItemWeaponMagazined,
@@ -11,11 +13,13 @@ pub struct AlifeObjectItemWeaponMagazinedWgl {
 impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
   for AlifeObjectItemWeaponMagazinedWgl
 {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeObjectItemWeaponMagazinedWgl {
+  fn read_from_chunk<T: ByteOrder>(
+    chunk: &mut Chunk,
+  ) -> io::Result<AlifeObjectItemWeaponMagazinedWgl> {
     let base: AlifeObjectItemWeaponMagazined =
-      AlifeObjectItemWeaponMagazined::read_from_chunk(chunk);
+      AlifeObjectItemWeaponMagazined::read_from_chunk::<T>(chunk)?;
 
-    AlifeObjectItemWeaponMagazinedWgl { base }
+    Ok(AlifeObjectItemWeaponMagazinedWgl { base })
   }
 }
 

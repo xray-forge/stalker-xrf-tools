@@ -4,7 +4,8 @@ use crate::data::alife::alife_object_inherited_reader::{
   AlifeObjectGeneric, AlifeObjectInheritedReader,
 };
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeActor {
   pub base: AlifeObjectActor,
@@ -12,8 +13,8 @@ pub struct AlifeActor {
 }
 
 impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeActor {
-    let base: AlifeObjectActor = AlifeObjectActor::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeActor> {
+    let base: AlifeObjectActor = AlifeObjectActor::read_from_chunk::<T>(chunk)?;
 
     let start_position_filled: u8 = chunk.read_u8().unwrap();
     let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
@@ -23,10 +24,10 @@ impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
       "Unexpected save data for actor object provided."
     );
 
-    AlifeActor {
+    Ok(AlifeActor {
       base,
       start_position_filled,
-    }
+    })
   }
 }
 

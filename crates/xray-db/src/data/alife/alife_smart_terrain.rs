@@ -4,7 +4,8 @@ use crate::data::alife::alife_object_inherited_reader::{
 };
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
 use crate::types::SpawnByteOrder;
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeSmartTerrain {
   pub base: AlifeSmartZone,
@@ -17,8 +18,8 @@ pub struct AlifeSmartTerrain {
 }
 
 impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeSmartTerrain {
-    let base: AlifeSmartZone = AlifeSmartZone::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeSmartTerrain> {
+    let base: AlifeSmartZone = AlifeSmartZone::read_from_chunk::<T>(chunk)?;
 
     let arriving_objects_count: u8 = chunk.read_u8().unwrap();
 
@@ -68,7 +69,7 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
       "Unexpected data provided with smart terrain save."
     );
 
-    AlifeSmartTerrain {
+    Ok(AlifeSmartTerrain {
       base,
       arriving_objects_count,
       object_job_descriptors_count,
@@ -76,7 +77,7 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
       smart_terrain_actor_control,
       respawn_point,
       staying_objects_count,
-    }
+    })
   }
 }
 

@@ -92,7 +92,7 @@ impl AlifeObjectBase {
     assert_ne!(class, AlifeClass::Unknown);
 
     let inherited: Box<dyn AlifeObjectGeneric> =
-      AlifeClass::read_by_class(&mut spawn_chunk, &class);
+      AlifeClass::read_by_class::<T>(&mut spawn_chunk, &class)?;
 
     Self::assert_update_data::<T>(chunk)?;
 

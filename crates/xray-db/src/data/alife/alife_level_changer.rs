@@ -4,7 +4,8 @@ use crate::data::alife::alife_object_inherited_reader::{
 };
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::types::{SpawnByteOrder, Vector3d};
-use byteorder::ReadBytesExt;
+use byteorder::{ByteOrder, ReadBytesExt};
+use std::io;
 
 pub struct AlifeLevelChanger {
   pub base: AlifeObjectSpaceRestrictor,
@@ -21,28 +22,28 @@ pub struct AlifeLevelChanger {
 }
 
 impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
-  fn read_from_chunk(chunk: &mut Chunk) -> AlifeLevelChanger {
-    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk(chunk);
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeLevelChanger> {
+    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?;
 
-    let dest_game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
-    let dest_level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>().unwrap();
-    let dest_position: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
-    let dest_direction: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>().unwrap();
-    let angle_y: f32 = chunk.read_f32::<SpawnByteOrder>().unwrap();
-    let dest_level_name: String = chunk.read_null_terminated_string().unwrap();
-    let dest_graph_point: String = chunk.read_null_terminated_string().unwrap();
-    let silent_mode: u8 = chunk.read_u8().unwrap();
+    let dest_game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let dest_level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>()?;
+    let dest_position: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>()?;
+    let dest_direction: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>()?;
+    let angle_y: f32 = chunk.read_f32::<SpawnByteOrder>()?;
+    let dest_level_name: String = chunk.read_null_terminated_string()?;
+    let dest_graph_point: String = chunk.read_null_terminated_string()?;
+    let silent_mode: u8 = chunk.read_u8()?;
 
-    let enabled: u8 = chunk.read_u8().unwrap();
-    let hint: String = chunk.read_null_terminated_string().unwrap();
-    let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>().unwrap();
+    let enabled: u8 = chunk.read_u8()?;
+    let hint: String = chunk.read_null_terminated_string()?;
+    let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>()?;
 
     assert_eq!(
       save_marker, 26,
       "Unexpected script data provided for level changer."
     );
 
-    AlifeLevelChanger {
+    Ok(AlifeLevelChanger {
       base,
       dest_game_vertex_id,
       dest_level_vertex_id,
@@ -54,7 +55,7 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
       silent_mode,
       enabled,
       hint,
-    }
+    })
   }
 }
 
