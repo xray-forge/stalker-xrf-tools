@@ -16,7 +16,7 @@ pub struct AlifeObjectItem {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItem> for AlifeObjectItem {
-  /// Write alife item object data into the chunk.
+  /// Read alife item object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItem> {
     let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
 
@@ -32,6 +32,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItem> for AlifeObjectItem {
     })
   }
 
+  /// Write item data into the writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write::<T>(writer)?;
 
