@@ -64,7 +64,7 @@ mod tests {
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_creature.chunk"));
+      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_item.chunk"));
 
     let object: AlifeObjectItem = AlifeObjectItem {
       base: AlifeObjectVisual {

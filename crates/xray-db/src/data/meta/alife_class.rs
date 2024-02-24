@@ -13,7 +13,7 @@ use crate::data::alife::alife_object_inherited_reader::{
 use crate::data::alife::alife_object_inventory_box::AlifeObjectInventoryBox;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
-use crate::data::alife::alife_object_item_artefact::AlifeItemArtefact;
+use crate::data::alife::alife_object_item_artefact::AlifeObjectItemArtefact;
 use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
 use crate::data::alife::alife_object_item_detector::AlifeObjectItemDetector;
 use crate::data::alife::alife_object_item_explosive::AlifeObjectItemExplosive;
@@ -201,8 +201,8 @@ impl AlifeClass {
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemArtefact => {
-        let object: AlifeItemArtefact = AlifeItemArtefact::read_from_chunk::<T>(chunk)?;
-        AlifeItemArtefact::verify(chunk);
+        let object: AlifeObjectItemArtefact = AlifeObjectItemArtefact::read_from_chunk::<T>(chunk)?;
+        AlifeObjectItemArtefact::verify(chunk);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemWeapon => {
