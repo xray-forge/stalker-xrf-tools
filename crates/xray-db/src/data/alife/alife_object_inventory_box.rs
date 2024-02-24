@@ -7,6 +7,7 @@ use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::io;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectInventoryBox {
   pub base: AlifeObjectVisual,
   pub can_take: u8,

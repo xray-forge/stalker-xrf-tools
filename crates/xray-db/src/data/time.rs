@@ -15,6 +15,31 @@ pub struct Time {
 }
 
 impl Time {
+  /// Read optional time object from the chunk.
+  pub fn read_optional_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Option<Time>> {
+    if chunk.read_u8()? == 1 {
+      Ok(Some(Time::read_from_chunk::<T>(chunk)?))
+    } else {
+      Ok(None)
+    }
+  }
+
+  /// Write optional time object into the writer.
+  pub fn write_optional<T: ByteOrder>(
+    time: &Option<Time>,
+    writer: &mut ChunkWriter,
+  ) -> io::Result<()> {
+    if time.is_some() {
+      writer.write_u8(1)?;
+
+      time.as_ref().unwrap().write::<T>(writer)?;
+    } else {
+      writer.write_u8(0)?;
+    }
+
+    Ok(())
+  }
+
   /// Read time object from chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Time> {
     let year: u8 = chunk.read_u8()?;

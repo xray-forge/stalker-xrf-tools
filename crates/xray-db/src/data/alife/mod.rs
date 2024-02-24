@@ -36,6 +36,7 @@ pub mod alife_object_torrid_zone;
 pub mod alife_object_trader_abstract;
 pub mod alife_object_visual;
 pub mod alife_smart_cover;
+mod alife_smart_cover_loophole;
 pub mod alife_smart_terrain;
 pub mod alife_smart_zone;
 pub mod alife_zone_visual;

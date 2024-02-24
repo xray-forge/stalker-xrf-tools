@@ -19,6 +19,7 @@ pub struct AlifeObjectAnomalyZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
+  /// Read anomaly zone object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAnomalyZone> {
     let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?;
 
@@ -42,6 +43,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
     })
   }
 
+  /// Write anomaly zone object data into the writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write::<T>(writer)?;
 
