@@ -53,7 +53,6 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
-  use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
   use crate::data::alife::alife_object_item_pda::AlifeObjectItemPda;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
