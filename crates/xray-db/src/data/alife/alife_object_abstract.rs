@@ -1,10 +1,11 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
 /// Generic alife object abstraction data.
+#[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectAbstract {
   pub game_vertex_id: u16,
   pub distance: f32,
@@ -40,7 +41,72 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
     })
   }
 
+  /// Write abstract object data into the writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    writer.write_u16::<T>(self.game_vertex_id)?;
+    writer.write_f32::<T>(self.distance)?;
+    writer.write_u32::<T>(self.direct_control)?;
+    writer.write_u32::<T>(self.level_vertex_id)?;
+    writer.write_u32::<T>(self.flags)?;
+    writer.write_null_terminated_string(&self.custom_data)?;
+    writer.write_u32::<T>(self.story_id)?;
+    writer.write_u32::<T>(self.spawn_story_id)?;
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::chunk::chunk::Chunk;
+  use crate::chunk::writer::ChunkWriter;
+  use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::test::utils::{
+    get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+  };
+  use crate::types::SpawnByteOrder;
+  use fileslice::FileSlice;
+  use std::io;
+
+  #[test]
+  fn test_read_write_object() -> io::Result<()> {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_abstract.chunk"));
+
+    let object: AlifeObjectAbstract = AlifeObjectAbstract {
+      game_vertex_id: 1001,
+      distance: 65.25,
+      direct_control: 412421,
+      level_vertex_id: 66231,
+      flags: 33,
+      custom_data: String::from("custom_data"),
+      story_id: 400,
+      spawn_story_id: 25,
+    };
+
+    object.write::<SpawnByteOrder>(&mut writer)?;
+
+    assert_eq!(writer.bytes_written(), 38);
+
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    assert_eq!(bytes_written, 38);
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+
+    assert_eq!(file.bytes_remaining(), 38 + 8);
+
+    let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
+    let read_object: AlifeObjectAbstract =
+      AlifeObjectAbstract::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+
+    assert_eq!(read_object, object);
+
     Ok(())
   }
 }

@@ -1,4 +1,5 @@
-use crate::types::{U32Bytes, Vector3d};
+use crate::data::shape::Shape;
+use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::fs::File;
 use std::io;
@@ -67,6 +68,42 @@ impl ChunkWriter {
     self.write_u8(value.1)?;
     self.write_u8(value.2)?;
     self.write_u8(value.3)?;
+
+    Ok(())
+  }
+
+  /// Write shapes data.
+  pub fn write_shape_description<T: ByteOrder>(&mut self, shapes: &Vec<Shape>) -> io::Result<()> {
+    self.write_u8(shapes.len() as u8)?;
+
+    for shape in shapes {
+      match shape {
+        Shape::Sphere(sphere_object) => {
+          self.write_u8(0)?;
+          self.write_sphere::<T>(sphere_object)?;
+        }
+        Shape::Box(box_object) => {
+          self.write_u8(1)?;
+          self.write_matrix::<T>(box_object)?;
+        }
+      }
+    }
+
+    Ok(())
+  }
+
+  pub fn write_sphere<T: ByteOrder>(&mut self, sphere: &Sphere3d) -> io::Result<()> {
+    self.write_f32_3d_vector::<T>(&sphere.0)?;
+    self.write_f32::<T>(sphere.1)?;
+
+    Ok(())
+  }
+
+  pub fn write_matrix<T: ByteOrder>(&mut self, matrix: &Matrix3d) -> io::Result<()> {
+    self.write_f32_3d_vector::<T>(&matrix.0)?;
+    self.write_f32_3d_vector::<T>(&matrix.1)?;
+    self.write_f32_3d_vector::<T>(&matrix.2)?;
+    self.write_f32_3d_vector::<T>(&matrix.3)?;
 
     Ok(())
   }
