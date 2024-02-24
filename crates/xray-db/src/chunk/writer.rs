@@ -107,6 +107,17 @@ impl ChunkWriter {
 
     Ok(())
   }
+
+  /// Write serialized vector into vector, where u32 count N is followed by N u16 entries.
+  pub fn write_u16_vector<T: ByteOrder>(&mut self, vector: &Vec<u16>) -> io::Result<()> {
+    self.write_u32::<T>(vector.len() as u32)?;
+
+    for it in vector {
+      self.write_u16::<T>(*it)?;
+    }
+
+    Ok(())
+  }
 }
 
 impl Write for ChunkWriter {
