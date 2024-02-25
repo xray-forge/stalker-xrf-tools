@@ -9,6 +9,7 @@ use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use byteorder::ByteOrder;
 use std::io;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectHelicopter {
   pub base: AlifeObjectVisual,
   pub skeleton: AlifeObjectSkeleton,
@@ -18,6 +19,7 @@ pub struct AlifeObjectHelicopter {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
+  /// Read helicopter data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectHelicopter> {
     let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
     let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
@@ -35,9 +37,92 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
     })
   }
 
+  /// Write helicopter data into the chunk.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    todo!("Implement write operation");
+    self.base.write::<T>(writer)?;
+    self.motion.write::<T>(writer)?;
+    self.skeleton.write::<T>(writer)?;
+
+    writer.write_null_terminated_string(&self.startup_animation)?;
+    writer.write_null_terminated_string(&self.engine_sound)?;
+
+    Ok(())
   }
 }
 
 impl AlifeObjectGeneric for AlifeObjectHelicopter {}
+
+#[cfg(test)]
+mod tests {
+  use crate::chunk::chunk::Chunk;
+  use crate::chunk::writer::ChunkWriter;
+  use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_helicopter::AlifeObjectHelicopter;
+  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::alife::alife_object_motion::AlifeObjectMotion;
+  use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+  use crate::test::utils::{
+    get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+  };
+  use crate::types::SpawnByteOrder;
+  use fileslice::FileSlice;
+  use std::io;
+
+  #[test]
+  fn test_read_write_object() -> io::Result<()> {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_helicopter.chunk"));
+
+    let object: AlifeObjectHelicopter = AlifeObjectHelicopter {
+      base: AlifeObjectVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 6432,
+          distance: 243.53,
+          direct_control: 25364,
+          level_vertex_id: 3541,
+          flags: 43,
+          custom_data: String::from("custom-data"),
+          story_id: 64353,
+          spawn_story_id: 2533,
+        },
+        visual_name: String::from("visual-name"),
+        visual_flags: 43,
+      },
+      skeleton: AlifeObjectSkeleton {
+        name: String::from("skeleton-name"),
+        flags: 0,
+        source_id: 235,
+      },
+      motion: AlifeObjectMotion {
+        motion_name: String::from("motion-name"),
+      },
+      startup_animation: String::from("startup-animation"),
+      engine_sound: String::from("engine-sound"),
+    };
+
+    object.write::<SpawnByteOrder>(&mut writer)?;
+
+    assert_eq!(writer.bytes_written(), 111);
+
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    assert_eq!(bytes_written, 111);
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+
+    assert_eq!(file.bytes_remaining(), 111 + 8);
+
+    let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
+    let read_object: AlifeObjectHelicopter =
+      AlifeObjectHelicopter::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+
+    assert_eq!(read_object, object);
+
+    Ok(())
+  }
+}
