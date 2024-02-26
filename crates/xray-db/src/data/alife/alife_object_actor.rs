@@ -1,9 +1,11 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_creature::AlifeObjectCreature;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
+use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
@@ -31,14 +33,18 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
       holder_id,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectActor {
+  type Order = SpawnByteOrder;
 
   /// Write object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
-    self.trader.write::<T>(writer)?;
-    self.skeleton.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
+    self.trader.write(writer)?;
+    self.skeleton.write(writer)?;
 
-    writer.write_u16::<T>(self.holder_id)?;
+    writer.write_u16::<Self::Order>(self.holder_id)?;
 
     Ok(())
   }
@@ -51,7 +57,9 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_actor::AlifeObjectActor;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::alife::alife_object_inherited_reader::{
+    AlifeObjectGeneric, AlifeObjectInheritedReader,
+  };
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
@@ -113,7 +121,7 @@ mod tests {
       holder_id: 0,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 185);
 

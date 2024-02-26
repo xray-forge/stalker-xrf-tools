@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -46,9 +47,13 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
       dead_body_closed,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
+  type Order = SpawnByteOrder;
 
   /// Write trader data into the chunk.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u32::<SpawnByteOrder>(self.money)?;
     writer.write_null_terminated_string(&self.specific_character)?;
     writer.write_u32::<SpawnByteOrder>(self.trader_flags)?;
@@ -68,7 +73,9 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::alife::alife_object_inherited_reader::{
+    AlifeObjectGeneric, AlifeObjectInheritedReader,
+  };
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -96,7 +103,7 @@ mod tests {
       dead_body_closed: 0,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 57);
 

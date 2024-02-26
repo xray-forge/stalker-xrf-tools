@@ -1,10 +1,10 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
 
@@ -39,11 +39,15 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
       attack_animation,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeZoneVisual {
+  type Order = SpawnByteOrder;
 
   /// Write visual zone data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
-    self.visual.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
+    self.visual.write(writer)?;
 
     writer.write_null_terminated_string(&self.idle_animation)?;
     writer.write_null_terminated_string(&self.attack_animation)?;
@@ -52,8 +56,6 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   }
 }
 
-impl AlifeObjectGeneric for AlifeZoneVisual {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
@@ -61,6 +63,7 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
@@ -142,7 +145,7 @@ mod tests {
       attack_animation: String::from("attack_animation"),
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 228);
 

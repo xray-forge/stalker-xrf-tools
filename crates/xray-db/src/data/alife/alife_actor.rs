@@ -1,9 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_actor::AlifeObjectActor;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
@@ -34,19 +33,21 @@ impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
       save_marker,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeActor {
+  type Order = SpawnByteOrder;
 
   /// Write object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
     writer.write_u8(self.start_position_filled)?;
-    writer.write_u16::<T>(self.save_marker)?;
+    writer.write_u16::<Self::Order>(self.save_marker)?;
 
     Ok(())
   }
 }
-
-impl AlifeObjectGeneric for AlifeActor {}
 
 #[cfg(test)]
 mod tests {
@@ -56,7 +57,9 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_actor::AlifeObjectActor;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::alife::alife_object_inherited_reader::{
+    AlifeObjectGeneric, AlifeObjectInheritedReader,
+  };
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
@@ -121,7 +124,7 @@ mod tests {
       save_marker: 1,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 196);
 

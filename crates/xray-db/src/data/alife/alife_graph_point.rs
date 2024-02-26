@@ -1,8 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
@@ -35,9 +35,13 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
       location3,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeGraphPoint {
+  type Order = SpawnByteOrder;
 
   /// Write graph point data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_null_terminated_string(&self.connection_point_name)?;
     writer.write_null_terminated_string(&self.connection_level_name)?;
     writer.write_u8(self.location0)?;
@@ -49,13 +53,12 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   }
 }
 
-impl AlifeObjectGeneric for AlifeGraphPoint {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_graph_point::AlifeGraphPoint;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -79,7 +82,7 @@ mod tests {
       location3: 3,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 26);
 

@@ -1,7 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
 
@@ -17,10 +19,14 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamic> for AlifeObjectDynamic {
 
     Ok(AlifeObjectDynamic { base })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectDynamic {
+  type Order = SpawnByteOrder;
 
   /// Write dynamic object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
     Ok(())
   }
@@ -32,6 +38,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -59,7 +66,7 @@ mod tests {
       },
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 38);
 

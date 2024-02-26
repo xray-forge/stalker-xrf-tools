@@ -6,7 +6,7 @@ use enum_map::Enum;
 use std::ops::Index;
 
 /// todo: Add script to parse system ini and read all the data from ini/txt file instead.
-#[derive(Clone, Debug, Enum)]
+#[derive(Clone, Debug, Enum, PartialEq)]
 pub enum ClsId {
   AiCrow,
   AiFleG,

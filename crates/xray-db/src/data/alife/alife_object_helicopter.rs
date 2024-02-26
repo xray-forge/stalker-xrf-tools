@@ -1,11 +1,11 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
 
@@ -36,12 +36,16 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
       engine_sound,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectHelicopter {
+  type Order = SpawnByteOrder;
 
   /// Write helicopter data into the chunk.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
-    self.motion.write::<T>(writer)?;
-    self.skeleton.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
+    self.motion.write(writer)?;
+    self.skeleton.write(writer)?;
 
     writer.write_null_terminated_string(&self.startup_animation)?;
     writer.write_null_terminated_string(&self.engine_sound)?;
@@ -50,13 +54,12 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
   }
 }
 
-impl AlifeObjectGeneric for AlifeObjectHelicopter {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_helicopter::AlifeObjectHelicopter;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
@@ -102,7 +105,7 @@ mod tests {
       engine_sound: String::from("engine-sound"),
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 111);
 

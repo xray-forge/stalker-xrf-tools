@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::FLAG_SKELETON_SAVED_DATA;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -30,12 +31,16 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
       source_id,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectSkeleton {
+  type Order = SpawnByteOrder;
 
   /// Write skeleton data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_null_terminated_string(&self.name)?;
     writer.write_u8(self.flags)?;
-    writer.write_u16::<T>(self.source_id)?;
+    writer.write_u16::<Self::Order>(self.source_id)?;
 
     Ok(())
   }
@@ -66,7 +71,7 @@ mod tests {
       source_id: 753,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 13);
 

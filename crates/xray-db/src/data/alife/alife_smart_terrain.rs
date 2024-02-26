@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -84,10 +83,14 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
       save_marker,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeSmartTerrain {
+  type Order = SpawnByteOrder;
 
   /// Write smart terrain data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
     writer.write_u8(self.arriving_objects_count)?;
     writer.write_u8(self.object_job_descriptors_count)?;
@@ -95,20 +98,20 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
     writer.write_u8(self.smart_terrain_actor_control)?;
     writer.write_u8(self.respawn_point)?;
     writer.write_u8(self.staying_objects_count)?;
-    writer.write_u16::<T>(self.save_marker)?;
+    writer.write_u16::<Self::Order>(self.save_marker)?;
 
     Ok(())
   }
 }
-
-impl AlifeObjectGeneric for AlifeSmartTerrain {}
 
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::alife::alife_object_inherited_reader::{
+    AlifeObjectGeneric, AlifeObjectInheritedReader,
+  };
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
   use crate::data::alife::alife_smart_zone::AlifeSmartZone;
@@ -160,7 +163,7 @@ mod tests {
       save_marker: 6,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 114);
 

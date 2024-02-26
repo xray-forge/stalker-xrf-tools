@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
@@ -47,21 +48,25 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
       game_death_time,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectCreature {
+  type Order = SpawnByteOrder;
 
   /// Write alife creature object data into the chunk.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
     writer.write_u8(self.team)?;
     writer.write_u8(self.squad)?;
     writer.write_u8(self.group)?;
-    writer.write_f32::<T>(self.health)?;
+    writer.write_f32::<Self::Order>(self.health)?;
 
-    writer.write_u16_vector::<T>(&self.dynamic_out_restrictions)?;
-    writer.write_u16_vector::<T>(&self.dynamic_in_restrictions)?;
+    writer.write_u16_vector::<Self::Order>(&self.dynamic_out_restrictions)?;
+    writer.write_u16_vector::<Self::Order>(&self.dynamic_in_restrictions)?;
 
-    writer.write_u16::<T>(self.killer_id)?;
-    writer.write_u64::<T>(self.game_death_time)?;
+    writer.write_u16::<Self::Order>(self.killer_id)?;
+    writer.write_u64::<Self::Order>(self.game_death_time)?;
 
     Ok(())
   }
@@ -73,6 +78,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
@@ -113,7 +119,7 @@ mod tests {
       game_death_time: 0,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 87);
 

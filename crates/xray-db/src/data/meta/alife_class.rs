@@ -5,11 +5,10 @@ use crate::data::alife::alife_level_changer::AlifeLevelChanger;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
 use crate::data::alife::alife_object_climable::AlifeObjectClimable;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
 use crate::data::alife::alife_object_helicopter::AlifeObjectHelicopter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_inventory_box::AlifeObjectInventoryBox;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
@@ -30,6 +29,7 @@ use crate::data::alife::alife_object_torrid_zone::AlifeObjectTorridZone;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
+use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use enum_map::Enum;
 use std::io;
@@ -92,11 +92,11 @@ pub enum AlifeClass {
 impl AlifeClass {
   /// Read custom save data based on serialized clsid.
   /// Represents STATE_Read of each separate object in xray implementation.
-  /// Additionally should respect script extension.
+  /// Additionally, should respect script extension.
   pub fn read_by_class<T: ByteOrder>(
     chunk: &mut Chunk,
     alife_class: &AlifeClass,
-  ) -> io::Result<Box<dyn AlifeObjectGeneric>> {
+  ) -> io::Result<Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>> {
     match alife_class {
       AlifeClass::SeActor => {
         let object: AlifeActor = AlifeActor::read_from_chunk::<T>(chunk)?;

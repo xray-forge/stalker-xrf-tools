@@ -10,7 +10,7 @@ use std::io::{Read, Seek, SeekFrom};
 use std::string::FromUtf8Error;
 use std::{fmt, io};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Chunk<T: ChunkDataSource = FileSlice> {
   pub index: u32,
   pub size: u64,

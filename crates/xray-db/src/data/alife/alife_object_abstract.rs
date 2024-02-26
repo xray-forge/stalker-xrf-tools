@@ -1,6 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
@@ -40,17 +42,21 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
       spawn_story_id,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectAbstract {
+  type Order = SpawnByteOrder;
 
   /// Write abstract object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_u16::<T>(self.game_vertex_id)?;
-    writer.write_f32::<T>(self.distance)?;
-    writer.write_u32::<T>(self.direct_control)?;
-    writer.write_u32::<T>(self.level_vertex_id)?;
-    writer.write_u32::<T>(self.flags)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    writer.write_u16::<Self::Order>(self.game_vertex_id)?;
+    writer.write_f32::<Self::Order>(self.distance)?;
+    writer.write_u32::<Self::Order>(self.direct_control)?;
+    writer.write_u32::<Self::Order>(self.level_vertex_id)?;
+    writer.write_u32::<Self::Order>(self.flags)?;
     writer.write_null_terminated_string(&self.custom_data)?;
-    writer.write_u32::<T>(self.story_id)?;
-    writer.write_u32::<T>(self.spawn_story_id)?;
+    writer.write_u32::<Self::Order>(self.story_id)?;
+    writer.write_u32::<Self::Order>(self.spawn_story_id)?;
 
     Ok(())
   }
@@ -61,6 +67,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -86,7 +93,7 @@ mod tests {
       spawn_story_id: 25,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 38);
 

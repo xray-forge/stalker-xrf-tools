@@ -1,10 +1,10 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
+use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
@@ -38,10 +38,14 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
       loopholes,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeSmartCover {
+  type Order = SpawnByteOrder;
 
   /// Write smart cover data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
     writer.write_null_terminated_string(&self.last_description)?;
     writer.write_u8(self.loopholes.len() as u8)?;
@@ -55,14 +59,13 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   }
 }
 
-impl AlifeObjectGeneric for AlifeSmartCover {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
   use crate::data::shape::Shape;
@@ -109,7 +112,7 @@ mod tests {
       can_fire: 1,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 131);
 

@@ -1,6 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
 
@@ -16,9 +18,13 @@ impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
 
     Ok(AlifeObjectMotion { motion_name })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectMotion {
+  type Order = SpawnByteOrder;
 
   /// Write motion object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_null_terminated_string(&self.motion_name)?;
 
     Ok(())
@@ -29,7 +35,9 @@ impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::alife::alife_object_inherited_reader::{
+    AlifeObjectGeneric, AlifeObjectInheritedReader,
+  };
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -48,7 +56,7 @@ mod tests {
       motion_name: String::from("motion-name"),
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 12);
 

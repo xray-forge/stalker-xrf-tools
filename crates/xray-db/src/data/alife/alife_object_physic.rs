@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
@@ -36,27 +35,30 @@ impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
       fixed_bones,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectPhysic {
+  type Order = SpawnByteOrder;
 
   /// Write alife physic object into the chunk.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
-    self.skeleton.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
+    self.skeleton.write(writer)?;
 
-    writer.write_u32::<T>(self.physic_type)?;
-    writer.write_f32::<T>(self.mass)?;
+    writer.write_u32::<Self::Order>(self.physic_type)?;
+    writer.write_f32::<Self::Order>(self.mass)?;
     writer.write_null_terminated_string(&self.fixed_bones)?;
 
     Ok(())
   }
 }
 
-impl AlifeObjectGeneric for AlifeObjectPhysic {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_physic::AlifeObjectPhysic;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
@@ -99,7 +101,7 @@ mod tests {
       fixed_bones: String::from("fixed-bones"),
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 88);
 

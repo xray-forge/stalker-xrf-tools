@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -23,18 +22,20 @@ impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
 
     Ok(AlifeObjectBreakable { base, health })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectBreakable {
+  type Order = SpawnByteOrder;
 
   /// Write alife breakable object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
-    writer.write_f32::<T>(self.health)?;
+    writer.write_f32::<Self::Order>(self.health)?;
 
     Ok(())
   }
 }
-
-impl AlifeObjectGeneric for AlifeObjectBreakable {}
 
 #[cfg(test)]
 mod tests {
@@ -42,6 +43,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
@@ -75,7 +77,7 @@ mod tests {
       health: 1.0,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 55);
 

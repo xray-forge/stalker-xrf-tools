@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
@@ -22,12 +23,16 @@ impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
 
     Ok(AlifeObjectShape { base, shape })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectShape {
+  type Order = SpawnByteOrder;
 
   /// Write shape object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
-    writer.write_shape_description::<T>(&self.shape)?;
+    writer.write_shape_description::<Self::Order>(&self.shape)?;
 
     Ok(())
   }
@@ -38,6 +43,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
   use crate::data::shape::Shape;
@@ -76,7 +82,7 @@ mod tests {
       ],
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 105);
 

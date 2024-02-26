@@ -1,12 +1,10 @@
 use crate::chunk::chunk::Chunk;
-use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use byteorder::ByteOrder;
 use std::io;
 
-pub trait AlifeObjectInheritedReader<T> {
+pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric> {
   fn read_from_chunk<B: ByteOrder>(chunk: &mut Chunk) -> io::Result<T>;
-
-  fn write<B: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()>;
 
   fn verify(chunk: &Chunk) {
     assert!(
@@ -15,5 +13,3 @@ pub trait AlifeObjectInheritedReader<T> {
     );
   }
 }
-
-pub trait AlifeObjectGeneric {}

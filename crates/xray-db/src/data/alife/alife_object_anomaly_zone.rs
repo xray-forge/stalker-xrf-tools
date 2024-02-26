@@ -1,9 +1,8 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -42,18 +41,26 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
       last_spawn_time,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectAnomalyZone {
+  type Order = SpawnByteOrder;
 
   /// Write anomaly zone object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
-    writer.write_f32::<T>(self.offline_interactive_radius)?;
-    writer.write_u16::<T>(self.artefact_spawn_count)?;
-    writer.write_u32::<T>(self.artefact_position_offset)?;
+    writer.write_f32::<Self::Order>(self.offline_interactive_radius)?;
+    writer.write_u16::<Self::Order>(self.artefact_spawn_count)?;
+    writer.write_u32::<Self::Order>(self.artefact_position_offset)?;
 
     if self.last_spawn_time.is_some() {
       writer.write_u8(1)?;
-      self.last_spawn_time.as_ref().unwrap().write::<T>(writer)?;
+      self
+        .last_spawn_time
+        .as_ref()
+        .unwrap()
+        .write::<Self::Order>(writer)?;
     } else {
       writer.write_u8(0)?;
     }
@@ -62,8 +69,6 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
   }
 }
 
-impl AlifeObjectGeneric for AlifeObjectAnomalyZone {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
@@ -71,6 +76,7 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::shape::Shape;
@@ -132,7 +138,7 @@ mod tests {
       }),
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 134);
 

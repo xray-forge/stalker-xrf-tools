@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -61,29 +60,31 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
       save_marker,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeLevelChanger {
+  type Order = SpawnByteOrder;
 
   /// Write object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
-    writer.write_u16::<T>(self.dest_game_vertex_id)?;
-    writer.write_u32::<T>(self.dest_level_vertex_id)?;
-    writer.write_f32_3d_vector::<T>(&self.dest_position)?;
-    writer.write_f32_3d_vector::<T>(&self.dest_direction)?;
-    writer.write_f32::<T>(self.angle_y)?;
+    writer.write_u16::<Self::Order>(self.dest_game_vertex_id)?;
+    writer.write_u32::<Self::Order>(self.dest_level_vertex_id)?;
+    writer.write_f32_3d_vector::<Self::Order>(&self.dest_position)?;
+    writer.write_f32_3d_vector::<Self::Order>(&self.dest_direction)?;
+    writer.write_f32::<Self::Order>(self.angle_y)?;
     writer.write_null_terminated_string(&self.dest_level_name)?;
     writer.write_null_terminated_string(&self.dest_graph_point)?;
     writer.write_u8(self.silent_mode)?;
 
     writer.write_u8(self.enabled)?;
     writer.write_null_terminated_string(&self.hint)?;
-    writer.write_u16::<T>(self.save_marker)?;
+    writer.write_u16::<Self::Order>(self.save_marker)?;
 
     Ok(())
   }
 }
-
-impl AlifeObjectGeneric for AlifeLevelChanger {}
 
 #[cfg(test)]
 mod tests {
@@ -91,6 +92,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_level_changer::AlifeLevelChanger;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::shape::Shape;
@@ -143,7 +145,7 @@ mod tests {
       save_marker: 26,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 177);
 

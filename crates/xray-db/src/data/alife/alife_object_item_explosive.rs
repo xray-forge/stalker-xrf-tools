@@ -1,9 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
+use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
 
@@ -19,23 +19,27 @@ impl AlifeObjectInheritedReader<AlifeObjectItemExplosive> for AlifeObjectItemExp
 
     Ok(AlifeObjectItemExplosive { base })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectItemExplosive {
+  type Order = SpawnByteOrder;
 
   /// Write item data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
     Ok(())
   }
 }
-
-impl AlifeObjectGeneric for AlifeObjectItemExplosive {}
 
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::alife::alife_object_inherited_reader::{
+    AlifeObjectGeneric, AlifeObjectInheritedReader,
+  };
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_explosive::AlifeObjectItemExplosive;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
@@ -73,7 +77,7 @@ mod tests {
       },
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 50);
 

@@ -1,10 +1,10 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
@@ -91,47 +91,50 @@ impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLa
       volumetric_distance,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectHangingLamp {
+  type Order = SpawnByteOrder;
 
   /// Write skeleton data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
-    self.skeleton.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
+    self.skeleton.write(writer)?;
 
-    writer.write_u32::<T>(self.main_color)?;
-    writer.write_f32::<T>(self.main_brightness)?;
+    writer.write_u32::<Self::Order>(self.main_color)?;
+    writer.write_f32::<Self::Order>(self.main_brightness)?;
     writer.write_null_terminated_string(&self.color_animator)?;
-    writer.write_f32::<T>(self.main_range)?;
-    writer.write_u16::<T>(self.light_flags)?;
+    writer.write_f32::<Self::Order>(self.main_range)?;
+    writer.write_u16::<Self::Order>(self.light_flags)?;
     writer.write_null_terminated_string(&self.startup_animation)?;
     writer.write_null_terminated_string(&self.fixed_bones)?;
-    writer.write_f32::<T>(self.health)?;
+    writer.write_f32::<Self::Order>(self.health)?;
 
-    writer.write_f32::<T>(self.virtual_size)?;
-    writer.write_f32::<T>(self.ambient_radius)?;
-    writer.write_f32::<T>(self.ambient_power)?;
+    writer.write_f32::<Self::Order>(self.virtual_size)?;
+    writer.write_f32::<Self::Order>(self.ambient_radius)?;
+    writer.write_f32::<Self::Order>(self.ambient_power)?;
     writer.write_null_terminated_string(&self.ambient_texture)?;
     writer.write_null_terminated_string(&self.light_texture)?;
     writer.write_null_terminated_string(&self.light_bone)?;
-    writer.write_f32::<T>(self.spot_cone_angle)?;
+    writer.write_f32::<Self::Order>(self.spot_cone_angle)?;
     writer.write_null_terminated_string(&self.glow_texture)?;
-    writer.write_f32::<T>(self.glow_radius)?;
+    writer.write_f32::<Self::Order>(self.glow_radius)?;
 
     writer.write_null_terminated_string(&self.light_ambient_bone)?;
-    writer.write_f32::<T>(self.volumetric_quality)?;
-    writer.write_f32::<T>(self.volumetric_intensity)?;
-    writer.write_f32::<T>(self.volumetric_distance)?;
+    writer.write_f32::<Self::Order>(self.volumetric_quality)?;
+    writer.write_f32::<Self::Order>(self.volumetric_intensity)?;
+    writer.write_f32::<Self::Order>(self.volumetric_distance)?;
 
     Ok(())
   }
 }
-
-impl AlifeObjectGeneric for AlifeObjectHangingLamp {}
 
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
@@ -192,7 +195,7 @@ mod tests {
       volumetric_distance: 3.1,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 234);
 

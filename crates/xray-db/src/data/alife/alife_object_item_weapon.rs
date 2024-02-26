@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -41,13 +40,17 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
       elapsed_grenades,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectItemWeapon {
+  type Order = SpawnByteOrder;
 
   /// Write item data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
-    writer.write_u16::<T>(self.ammo_current)?;
-    writer.write_u16::<T>(self.ammo_elapsed)?;
+    writer.write_u16::<Self::Order>(self.ammo_current)?;
+    writer.write_u16::<Self::Order>(self.ammo_elapsed)?;
     writer.write_u8(self.weapon_state)?;
     writer.write_u8(self.addon_flags)?;
     writer.write_u8(self.ammo_type)?;
@@ -57,13 +60,12 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
   }
 }
 
-impl AlifeObjectGeneric for AlifeObjectItemWeapon {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
@@ -108,7 +110,7 @@ mod tests {
       elapsed_grenades: 0,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 62);
 

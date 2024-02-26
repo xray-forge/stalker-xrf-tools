@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::types::SpawnByteOrder;
@@ -35,15 +36,19 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
       start_time_shift,
     })
   }
+}
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+impl AlifeObjectGeneric for AlifeObjectCustomZone {
+  type Order = SpawnByteOrder;
 
-    writer.write_f32::<T>(self.max_power)?;
-    writer.write_u32::<T>(self.owner_id)?;
-    writer.write_u32::<T>(self.enabled_time)?;
-    writer.write_u32::<T>(self.disabled_time)?;
-    writer.write_u32::<T>(self.start_time_shift)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
+
+    writer.write_f32::<Self::Order>(self.max_power)?;
+    writer.write_u32::<Self::Order>(self.owner_id)?;
+    writer.write_u32::<Self::Order>(self.enabled_time)?;
+    writer.write_u32::<Self::Order>(self.disabled_time)?;
+    writer.write_u32::<Self::Order>(self.start_time_shift)?;
 
     Ok(())
   }
@@ -55,6 +60,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::shape::Shape;
@@ -101,7 +107,7 @@ mod tests {
       start_time_shift: 300,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 126);
 

@@ -1,9 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_shape::AlifeObjectShape;
+use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
 
@@ -25,10 +25,14 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
       game_material,
     })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectClimable {
+  type Order = SpawnByteOrder;
 
   /// Write climable object data into the chunk.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
     writer.write_null_terminated_string(&self.game_material)?;
 
@@ -36,14 +40,13 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   }
 }
 
-impl AlifeObjectGeneric for AlifeObjectClimable {}
-
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_climable::AlifeObjectClimable;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
   use crate::data::shape::Shape;
@@ -85,7 +88,7 @@ mod tests {
       game_material: String::from("dest-material"),
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 119);
 

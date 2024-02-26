@@ -1,8 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_inherited_reader::{
-  AlifeObjectGeneric, AlifeObjectInheritedReader,
-};
+use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -23,24 +22,27 @@ impl AlifeObjectInheritedReader<AlifeObjectItemAmmo> for AlifeObjectItemAmmo {
 
     Ok(AlifeObjectItemAmmo { base, ammo_left })
   }
+}
+
+impl AlifeObjectGeneric for AlifeObjectItemAmmo {
+  type Order = SpawnByteOrder;
 
   /// Write item data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.base.write::<T>(writer)?;
+  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+    self.base.write(writer)?;
 
-    writer.write_u16::<T>(self.ammo_left)?;
+    writer.write_u16::<Self::Order>(self.ammo_left)?;
 
     Ok(())
   }
 }
-
-impl AlifeObjectGeneric for AlifeObjectItemAmmo {}
 
 #[cfg(test)]
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_ammo::AlifeObjectItemAmmo;
@@ -65,11 +67,11 @@ mod tests {
             game_vertex_id: 1003,
             distance: 65.25,
             direct_control: 412242,
-            level_vertex_id: 61853223,
+            level_vertex_id: 463752354,
             flags: 40,
             custom_data: String::from("custom_data"),
-            story_id: 512,
-            spawn_story_id: 33,
+            story_id: 2563,
+            spawn_story_id: 413,
           },
           visual_name: String::from("cdef"),
           visual_flags: 33,
@@ -80,7 +82,7 @@ mod tests {
       ammo_left: 12,
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    object.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 54);
 
