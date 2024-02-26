@@ -1,5 +1,5 @@
 use crate::chunk::chunk::Chunk;
-use crate::file::alife_spawns_chunk::ALifeObjectsChunk;
+use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
 use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
 use crate::file::graphs_chunk::GraphsChunk;
 use crate::file::header_chunk::HeaderChunk;
@@ -23,7 +23,7 @@ use std::path::PathBuf;
 pub struct SpawnFile {
   pub size: u64,
   pub header: HeaderChunk,
-  pub alife_spawn: ALifeObjectsChunk,
+  pub alife_spawn: ALifeSpawnsChunk,
   pub artefact_spawn: ArtefactSpawnsChunk,
   pub patrols: PatrolsChunk,
   pub graphs: GraphsChunk,
@@ -54,7 +54,7 @@ impl SpawnFile {
       HeaderChunk::read_from_chunk::<T>(chunks.get(0).expect("Header chunk to exist.").clone())
         .expect("Header chunk to be read.");
 
-    let alife_spawn: ALifeObjectsChunk = ALifeObjectsChunk::read_from_chunk::<T>(
+    let alife_spawn: ALifeSpawnsChunk = ALifeSpawnsChunk::read_from_chunk::<T>(
       chunks.get(1).expect("Alife spawns chunk to exist.").clone(),
     )
     .expect("Alife spawns chunk to be read.");

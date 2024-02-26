@@ -40,7 +40,6 @@ pub struct AlifeObjectBase {
 
 impl AlifeObjectBase {
   /// Read generic alife object data from the chunk.
-  #[inline(never)]
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectBase> {
     let mut index_chunk: Chunk = chunk.read_child_by_index(0)?;
 
@@ -226,7 +225,7 @@ mod tests {
   use std::io;
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object_base() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_base.chunk"));
@@ -251,21 +250,21 @@ mod tests {
       script_version: 10,
       client_data_size: 0,
       spawn_id: 2354,
-      inherited_size: 39,
+      inherited_size: 61,
       inherited: Box::new(AlifeObjectItemCustomOutfit {
         base: AlifeObjectItem {
           base: AlifeObjectVisual {
             base: AlifeObjectAbstract {
               game_vertex_id: 12434,
               distance: 124.33,
-              direct_control: 0,
-              level_vertex_id: 0,
+              direct_control: 624345,
+              level_vertex_id: 48528,
               flags: 34,
-              custom_data: "".to_string(),
-              story_id: 0,
-              spawn_story_id: 0,
+              custom_data: String::from("custom-data"),
+              story_id: 523,
+              spawn_story_id: 2865268,
             },
-            visual_name: "".to_string(),
+            visual_name: String::from("visual-name"),
             visual_flags: 0,
           },
           condition: 1.0,
@@ -279,18 +278,18 @@ mod tests {
 
     object.write::<SpawnByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 181);
+    assert_eq!(writer.bytes_written(), 203);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
       &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 181);
+    assert_eq!(bytes_written, 203);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 181 + 8);
+    assert_eq!(file.bytes_remaining(), 203 + 8);
 
     let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectBase =
