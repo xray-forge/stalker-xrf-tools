@@ -17,12 +17,6 @@ pub struct ALifeSpawnsChunk {
 impl ALifeSpawnsChunk {
   /// Read spawns chunk by position descriptor from the chunk.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<ALifeSpawnsChunk> {
-    log::info!(
-      "Parsing alife spawns chunk, {:?} -> {:?}",
-      chunk.start_pos(),
-      chunk.end_pos()
-    );
-
     let mut count_chunk: Chunk = chunk.read_child_by_index(0)?;
     let mut objects_chunk: Chunk = chunk.read_child_by_index(1)?;
     let edges_chunk: Chunk = chunk.read_child_by_index(2)?;
@@ -46,7 +40,7 @@ impl ALifeSpawnsChunk {
     );
     assert!(chunk.is_ended(), "Expect alife spawns chunk to be ended.");
 
-    log::info!("Parsed alife spawns chunk, {count} objects processed");
+    log::info!("Parsed alife spawns chunk, {:?} bytes", chunk.size);
 
     Ok(ALifeSpawnsChunk { objects })
   }
@@ -74,6 +68,11 @@ impl ALifeSpawnsChunk {
     writer.write_all(count_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
     writer.write_all(objects_writer.flush_chunk_into_buffer::<T>(1)?.as_slice())?;
     writer.write_all(vertex_writer.flush_chunk_into_buffer::<T>(2)?.as_slice())?;
+
+    log::info!(
+      "Written alife spawns chunk, {:?} bytes",
+      writer.bytes_written()
+    );
 
     Ok(())
   }

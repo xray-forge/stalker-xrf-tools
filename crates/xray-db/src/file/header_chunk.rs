@@ -15,12 +15,6 @@ pub struct HeaderChunk {
 impl HeaderChunk {
   /// Read header chunk by position descriptor.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<HeaderChunk> {
-    log::info!(
-      "Parsing header chunk, {:?} -> {:?}",
-      chunk.start_pos(),
-      chunk.end_pos()
-    );
-
     let version: u32 = chunk.read_u32::<T>()?;
     let guid: u128 = chunk.read_u128::<T>()?;
     let graph_guid: u128 = chunk.read_u128::<T>()?;
@@ -42,8 +36,6 @@ impl HeaderChunk {
 
   /// Write header data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    log::info!("Writing header chunk",);
-
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid)?;
     writer.write_u128::<T>(self.graph_guid)?;

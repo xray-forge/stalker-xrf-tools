@@ -14,12 +14,6 @@ pub struct PatrolsChunk {
 impl PatrolsChunk {
   /// Read patrols list from the chunk.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<PatrolsChunk> {
-    log::info!(
-      "Parsing patrols: {:?} -> {:?}",
-      chunk.start_pos(),
-      chunk.end_pos()
-    );
-
     let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
     let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
 
@@ -31,11 +25,7 @@ impl PatrolsChunk {
     assert_eq!(count, patrols.len() as u32);
     assert!(chunk.is_ended());
 
-    log::info!(
-      "Parsed patrols: {:?} / {count}, {:?} bytes",
-      patrols.len(),
-      chunk.read_bytes_len()
-    );
+    log::info!("Parsed patrols, bytes {:?}", chunk.read_bytes_len());
 
     Ok(PatrolsChunk { patrols })
   }
@@ -50,6 +40,8 @@ impl PatrolsChunk {
 
     writer.write_all(meta_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
     writer.write_all(data_writer.flush_chunk_into_buffer::<T>(1)?.as_slice())?;
+
+    log::info!("Written patrols chunk, {:?} bytes", writer.bytes_written());
 
     Ok(())
   }

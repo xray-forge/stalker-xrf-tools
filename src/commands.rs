@@ -14,7 +14,9 @@ pub fn unpack_spawn_file(matches: &ArgMatches) {
   let spawn_file: Box<SpawnFile> =
     Box::new(SpawnFile::read_from_path::<SpawnByteOrder>(path).unwrap());
 
-  log::info!("Spawn file: {:?}", spawn_file);
+  spawn_file
+    .write_to_path::<SpawnByteOrder>(&PathBuf::from("test.spawn"))
+    .expect("Correctly written spawn file");
 }
 
 /// Pack *.spawn file based on provided arguments.

@@ -25,12 +25,6 @@ pub struct GraphsChunk {
 impl GraphsChunk {
   /// Read graphs chunk by position descriptor.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<GraphsChunk> {
-    log::info!(
-      "Parsing level graphs, {:?} -> {:?}",
-      chunk.start_pos(),
-      chunk.end_pos()
-    );
-
     let mut levels: Vec<GraphLevel> = Vec::new();
     let mut vertices: Vec<GraphVertex> = Vec::new();
     let mut edges: Vec<GraphEdge> = Vec::new();
@@ -67,10 +61,9 @@ impl GraphsChunk {
     }
 
     log::info!(
-      "Parsed graphs ver {:?}, {:?} processed, {:?} left",
+      "Parsed graphs ver {:?}, {:?} bytes",
       header.version,
       chunk.read_bytes_len(),
-      chunk.read_bytes_remain()
     );
 
     assert_eq!(levels.len(), header.level_count as usize);
@@ -117,6 +110,8 @@ impl GraphsChunk {
       writer.write_u32::<T>(table_writer.bytes_written() as u32 + 4)?;
       writer.write_all(&table_writer.buffer)?;
     }
+
+    log::info!("Written graphs chunk, {:?} bytes", writer.bytes_written());
 
     Ok(())
   }

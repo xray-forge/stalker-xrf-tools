@@ -1,4 +1,5 @@
 use crate::chunk::chunk::Chunk;
+use crate::chunk::writer::ChunkWriter;
 use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
 use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
 use crate::file::graphs_chunk::GraphsChunk;
@@ -6,7 +7,7 @@ use crate::file::header_chunk::HeaderChunk;
 use crate::file::patrols_chunk::PatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::PathBuf;
 
@@ -21,7 +22,6 @@ use std::path::PathBuf;
 ///
 #[derive(Debug)]
 pub struct SpawnFile {
-  pub size: u64,
   pub header: HeaderChunk,
   pub alife_spawn: ALifeSpawnsChunk,
   pub artefact_spawn: ArtefactSpawnsChunk,
@@ -37,10 +37,7 @@ impl SpawnFile {
 
   /// Read spawn file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<SpawnFile> {
-    let size: u64 = file.metadata()?.len();
     let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file)).unwrap();
-
-    log::info!("Parsing spawn file: 0 -> {:?}", size);
 
     let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
 
@@ -78,12 +75,54 @@ impl SpawnFile {
     assert!(root_chunk.is_ended(), "Expected spawn file to be ended.");
 
     Ok(SpawnFile {
-      size,
       header,
       alife_spawn,
       artefact_spawn,
       patrols,
       graphs,
     })
+  }
+
+  /// Write spawn file data to the file by provided path.
+  pub fn write_to_path<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+    std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
+
+    let mut file: File = match OpenOptions::new()
+      .create(true)
+      .write(true)
+      .truncate(true)
+      .open(path.clone())
+    {
+      Ok(file) => Ok(file),
+      Err(error) => Err(io::Error::new(
+        error.kind(),
+        format!("Failed to open file for all-spawn creation {:?}", path),
+      )),
+    }?;
+
+    self.write_to_file::<T>(&mut file)
+  }
+
+  /// Write spawn file data to the file.
+  pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> io::Result<()> {
+    let mut header_writer: ChunkWriter = ChunkWriter::new();
+    let mut alife_writer: ChunkWriter = ChunkWriter::new();
+    let mut artefacts_writer: ChunkWriter = ChunkWriter::new();
+    let mut patrols_writer: ChunkWriter = ChunkWriter::new();
+    let mut graphs_writer: ChunkWriter = ChunkWriter::new();
+
+    self.header.write::<T>(&mut header_writer)?;
+    self.alife_spawn.write::<T>(&mut alife_writer)?;
+    self.artefact_spawn.write::<T>(&mut artefacts_writer)?;
+    self.patrols.write::<T>(&mut patrols_writer)?;
+    self.graphs.write::<T>(&mut graphs_writer)?;
+
+    header_writer.flush_chunk_into_file::<T>(file, 0)?;
+    alife_writer.flush_chunk_into_file::<T>(file, 1)?;
+    artefacts_writer.flush_chunk_into_file::<T>(file, 2)?;
+    patrols_writer.flush_chunk_into_file::<T>(file, 3)?;
+    graphs_writer.flush_chunk_into_file::<T>(file, 4)?;
+
+    Ok(())
   }
 }

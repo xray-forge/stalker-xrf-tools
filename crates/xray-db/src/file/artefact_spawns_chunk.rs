@@ -13,12 +13,6 @@ pub struct ArtefactSpawnsChunk {
 impl ArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<ArtefactSpawnsChunk> {
-    log::info!(
-      "Parsing artefacts chunk, {:?} -> {:?}",
-      chunk.start_pos(),
-      chunk.end_pos(),
-    );
-
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = chunk.read_u32::<T>()?;
 
@@ -35,9 +29,8 @@ impl ArtefactSpawnsChunk {
     );
 
     log::info!(
-      "Parsed artefacts spawns: {:?} processed, {:?} remain",
+      "Parsed artefacts spawns: {:?} bytes",
       chunk.read_bytes_len(),
-      chunk.read_bytes_remain(),
     );
 
     Ok(ArtefactSpawnsChunk { nodes })
@@ -50,6 +43,11 @@ impl ArtefactSpawnsChunk {
     for node in &self.nodes {
       node.write::<T>(writer)?;
     }
+
+    log::info!(
+      "Written artefact spawns chunk, {:?} bytes",
+      writer.bytes_written()
+    );
 
     Ok(())
   }
