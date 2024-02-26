@@ -37,9 +37,8 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_inherited_reader::{
-    AlifeObjectGeneric, AlifeObjectInheritedReader,
-  };
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_explosive::AlifeObjectItemExplosive;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;

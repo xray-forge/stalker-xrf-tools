@@ -73,9 +73,8 @@ impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::alife::alife_object_inherited_reader::{
-    AlifeObjectGeneric, AlifeObjectInheritedReader,
-  };
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -92,31 +91,31 @@ mod tests {
 
     let object: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract {
       money: 1453,
-      specific_character: String::from("specific_character"),
+      specific_character: String::from("specific-character"),
       trader_flags: 33,
-      character_profile: "".to_string(),
+      character_profile: String::from("character-profile"),
       community_index: 4,
       rank: 211,
       reputation: 300,
-      character_name: String::from("character_name"),
+      character_name: String::from("character-name"),
       dead_body_can_take: 1,
       dead_body_closed: 0,
     };
 
     object.write(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 57);
+    assert_eq!(writer.bytes_written(), 74);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
       &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 57);
+    assert_eq!(bytes_written, 74);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 57 + 8);
+    assert_eq!(file.bytes_remaining(), 74 + 8);
 
     let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectTraderAbstract =

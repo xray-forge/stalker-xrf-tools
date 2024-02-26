@@ -109,9 +109,8 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_inherited_reader::{
-    AlifeObjectGeneric, AlifeObjectInheritedReader,
-  };
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
   use crate::data::alife::alife_smart_zone::AlifeSmartZone;

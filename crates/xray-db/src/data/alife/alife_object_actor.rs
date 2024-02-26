@@ -57,9 +57,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_actor::AlifeObjectActor;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
-  use crate::data::alife::alife_object_inherited_reader::{
-    AlifeObjectGeneric, AlifeObjectInheritedReader,
-  };
+  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
