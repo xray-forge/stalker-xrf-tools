@@ -16,5 +16,5 @@ fn main() {
     Some(("verify-spawn", matches)) => verify_spawn_file(matches),
     Some(("format-ltx", matches)) => format_ltx(matches),
     _ => panic!("Unexpected cli command provided, check --help for details."),
-  };
+  }
 }

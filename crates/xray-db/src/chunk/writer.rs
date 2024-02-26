@@ -60,7 +60,7 @@ impl ChunkWriter {
 
   /// Write null terminated windows encoded string.
   pub fn write_null_terminated_win_string(&mut self, value: &String) -> io::Result<usize> {
-    let (transformed, _encoding_used, had_errors) = WINDOWS_1251.encode(value);
+    let (transformed, _, had_errors) = WINDOWS_1251.encode(value);
 
     if had_errors {
       panic!("Unexpected errors when encoding windows-1251 string data.");

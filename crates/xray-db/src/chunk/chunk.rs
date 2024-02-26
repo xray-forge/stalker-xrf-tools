@@ -146,7 +146,7 @@ impl Chunk {
 
     if let Some(position) = buffer.iter().position(|&x| x == 0x00) {
       let slice: &[u8] = &buffer[..position];
-      let (transformed, _encoding_used, had_errors) = WINDOWS_1251.decode(slice);
+      let (transformed, _, had_errors) = WINDOWS_1251.decode(slice);
 
       if had_errors {
         panic!("Unexpected errors when decoding windows-1251 string data.");

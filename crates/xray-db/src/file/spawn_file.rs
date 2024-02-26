@@ -47,30 +47,27 @@ impl SpawnFile {
       "Unexpected chunks count in spawn file root, expected 5."
     );
 
+    let header_chunk: Chunk = chunks.get(0).expect("Header chunk to exist.").clone();
+    let alife_chunk: Chunk = chunks.get(1).expect("Alife chunk to exist.").clone();
+    let artefacts_chunk: Chunk = chunks.get(2).expect("Artefacts chunk to exist.").clone();
+    let patrols_chunk: Chunk = chunks.get(3).expect("Patrols chunk to exist.").clone();
+    let graphs_chunk: Chunk = chunks.get(4).expect("Graphs chunk to exist.").clone();
+
     let header: HeaderChunk =
-      HeaderChunk::read_from_chunk::<T>(chunks.get(0).expect("Header chunk to exist.").clone())
-        .expect("Header chunk to be read.");
+      HeaderChunk::read_from_chunk::<T>(header_chunk).expect("Header chunk to be read.");
 
-    let alife_spawn: ALifeSpawnsChunk = ALifeSpawnsChunk::read_from_chunk::<T>(
-      chunks.get(1).expect("Alife spawns chunk to exist.").clone(),
-    )
-    .expect("Alife spawns chunk to be read.");
+    let alife_spawn: ALifeSpawnsChunk =
+      ALifeSpawnsChunk::read_from_chunk::<T>(alife_chunk).expect("Alife spawns chunk to be read.");
 
-    let artefact_spawn: ArtefactSpawnsChunk = ArtefactSpawnsChunk::read_from_chunk::<T>(
-      chunks
-        .get(2)
-        .expect("Artefact spawns chunk to exist.")
-        .clone(),
-    )
-    .expect("Artefact spawns chunk to exist.");
+    let artefact_spawn: ArtefactSpawnsChunk =
+      ArtefactSpawnsChunk::read_from_chunk::<T>(artefacts_chunk)
+        .expect("Artefact spawns chunk to exist.");
 
     let patrols: PatrolsChunk =
-      PatrolsChunk::read_from_chunk::<T>(chunks.get(3).expect("Patrol chunk to exist.").clone())
-        .expect("Patrols chunk to be read.");
+      PatrolsChunk::read_from_chunk::<T>(patrols_chunk).expect("Patrols chunk to be read.");
 
     let graphs: GraphsChunk =
-      GraphsChunk::read_from_chunk::<T>(chunks.get(4).expect("Level chunk to exist.").clone())
-        .expect("Level chunk to be read");
+      GraphsChunk::read_from_chunk::<T>(graphs_chunk).expect("Level chunk to be read");
 
     assert!(root_chunk.is_ended(), "Expected spawn file to be ended.");
 
