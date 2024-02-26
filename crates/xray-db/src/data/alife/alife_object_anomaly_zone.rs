@@ -3,7 +3,6 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
@@ -14,7 +13,6 @@ pub struct AlifeObjectAnomalyZone {
   pub offline_interactive_radius: f32,
   pub artefact_spawn_count: u16,
   pub artefact_position_offset: u32,
-  pub last_spawn_time: Option<Time>,
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
@@ -26,19 +24,11 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
     let artefact_spawn_count: u16 = chunk.read_u16::<SpawnByteOrder>()?;
     let artefact_position_offset: u32 = chunk.read_u32::<SpawnByteOrder>()?;
 
-    // Last spawn time for artefacts, legacy approach:
-    let last_spawn_time: Option<Time> = if chunk.is_ended() || chunk.read_u8()? == 0 {
-      None
-    } else {
-      Some(Time::read_from_chunk::<SpawnByteOrder>(chunk)?)
-    };
-
     Ok(AlifeObjectAnomalyZone {
       base,
       offline_interactive_radius,
       artefact_spawn_count,
       artefact_position_offset,
-      last_spawn_time,
     })
   }
 }
@@ -53,17 +43,6 @@ impl AlifeObjectGeneric for AlifeObjectAnomalyZone {
     writer.write_f32::<Self::Order>(self.offline_interactive_radius)?;
     writer.write_u16::<Self::Order>(self.artefact_spawn_count)?;
     writer.write_u32::<Self::Order>(self.artefact_position_offset)?;
-
-    if self.last_spawn_time.is_some() {
-      writer.write_u8(1)?;
-      self
-        .last_spawn_time
-        .as_ref()
-        .unwrap()
-        .write::<Self::Order>(writer)?;
-    } else {
-      writer.write_u8(0)?;
-    }
 
     Ok(())
   }
@@ -80,7 +59,6 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::shape::Shape;
-  use crate::data::time::Time;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -127,31 +105,22 @@ mod tests {
       offline_interactive_radius: -3231.1,
       artefact_spawn_count: 3,
       artefact_position_offset: 5,
-      last_spawn_time: Some(Time {
-        year: 12,
-        month: 11,
-        day: 4,
-        hour: 21,
-        minute: 30,
-        second: 10,
-        millis: 550,
-      }),
     };
 
     object.write(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 134);
+    assert_eq!(writer.bytes_written(), 125);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
       &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 134);
+    assert_eq!(bytes_written, 125);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 134 + 8);
+    assert_eq!(file.bytes_remaining(), 125 + 8);
 
     let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectAnomalyZone =

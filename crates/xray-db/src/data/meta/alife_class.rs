@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::data::alife::alife_actor::AlifeActor;
+use crate::data::alife::alife_anomalous_zone::AlifeAnomalousZone;
 use crate::data::alife::alife_graph_point::AlifeGraphPoint;
 use crate::data::alife::alife_level_changer::AlifeLevelChanger;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
@@ -129,9 +130,14 @@ impl AlifeClass {
         AlifeSmartCover::verify(chunk);
         Ok(Box::new(object))
       }
-      AlifeClass::SeZoneAnom | AlifeClass::CseAlifeAnomalousZone => {
+      AlifeClass::CseAlifeAnomalousZone => {
         let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?;
         AlifeObjectAnomalyZone::verify(chunk);
+        Ok(Box::new(object))
+      }
+      AlifeClass::SeZoneAnom => {
+        let object: AlifeAnomalousZone = AlifeAnomalousZone::read_from_chunk::<T>(chunk)?;
+        AlifeAnomalousZone::verify(chunk);
         Ok(Box::new(object))
       }
       AlifeClass::SeZoneTorrid => {

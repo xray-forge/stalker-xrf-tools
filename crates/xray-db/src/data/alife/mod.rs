@@ -1,4 +1,5 @@
 pub mod alife_actor;
+pub mod alife_anomalous_zone;
 pub mod alife_graph_point;
 pub mod alife_level_changer;
 pub mod alife_object_abstract;
