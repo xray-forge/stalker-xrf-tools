@@ -57,11 +57,11 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_actor::AlifeObjectActor;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
+  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
-  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -77,7 +77,7 @@ mod tests {
 
     let object: AlifeObjectActor = AlifeObjectActor {
       base: AlifeObjectCreature {
-        base: AlifeObjectVisual {
+        base: AlifeObjectDynamicVisual {
           base: AlifeObjectAbstract {
             game_vertex_id: 620,
             distance: 42.25,

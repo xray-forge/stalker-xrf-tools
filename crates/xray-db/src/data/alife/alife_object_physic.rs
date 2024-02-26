@@ -1,16 +1,16 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectPhysic {
-  pub base: AlifeObjectVisual,
+  pub base: AlifeObjectDynamicVisual,
   pub skeleton: AlifeObjectSkeleton,
   pub physic_type: u32,
   pub mass: f32,
@@ -20,7 +20,7 @@ pub struct AlifeObjectPhysic {
 impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
   /// Read alife physic object from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectPhysic> {
-    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
+    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
     let physic_type: u32 = chunk.read_u32::<SpawnByteOrder>()?;
@@ -58,11 +58,11 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_physic::AlifeObjectPhysic;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -77,7 +77,7 @@ mod tests {
       get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_physic.chunk"));
 
     let object: AlifeObjectPhysic = AlifeObjectPhysic {
-      base: AlifeObjectVisual {
+      base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 35794,
           distance: 25.23,

@@ -1,22 +1,22 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectBreakable {
-  pub base: AlifeObjectVisual,
+  pub base: AlifeObjectDynamicVisual,
   pub health: f32,
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   /// Read alife breakable object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectBreakable> {
-    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
+    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
 
     let health: f32 = chunk.read_f32::<SpawnByteOrder>()?;
 
@@ -43,9 +43,9 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
+  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -60,7 +60,7 @@ mod tests {
       get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_breakable.chunk"));
 
     let object: AlifeObjectBreakable = AlifeObjectBreakable {
-      base: AlifeObjectVisual {
+      base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 3200,
           distance: 50.0,

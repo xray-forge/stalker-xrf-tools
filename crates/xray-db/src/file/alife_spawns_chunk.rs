@@ -93,10 +93,10 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::data::alife_object_base::AlifeObjectBase;
   use crate::data::meta::cls_id::ClsId;
   use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
@@ -172,7 +172,7 @@ mod tests {
           inherited_size: 61,
           inherited: Box::new(AlifeObjectItemCustomOutfit {
             base: AlifeObjectItem {
-              base: AlifeObjectVisual {
+              base: AlifeObjectDynamicVisual {
                 base: AlifeObjectAbstract {
                   game_vertex_id: 43543,
                   distance: 523.33,

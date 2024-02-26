@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
@@ -14,6 +15,7 @@ pub struct AlifeZoneVisual {
   pub visual: AlifeObjectVisual,
   pub idle_animation: String,
   pub attack_animation: String,
+  pub last_spawn_time: Option<Time>,
 }
 
 impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
@@ -32,11 +34,14 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
       .then(|| chunk.read_null_terminated_string().unwrap())
       .unwrap_or(String::new());
 
+    let last_spawn_time: Option<Time> = Time::read_optional_from_chunk::<T>(chunk)?;
+
     Ok(AlifeZoneVisual {
       base,
       visual,
       idle_animation,
       attack_animation,
+      last_spawn_time,
     })
   }
 }
@@ -51,6 +56,8 @@ impl AlifeObjectGeneric for AlifeZoneVisual {
 
     writer.write_null_terminated_string(&self.idle_animation)?;
     writer.write_null_terminated_string(&self.attack_animation)?;
+
+    Time::write_optional::<Self::Order>(&self.last_spawn_time, writer)?;
 
     Ok(())
   }
@@ -128,37 +135,28 @@ mod tests {
         }),
       },
       visual: AlifeObjectVisual {
-        base: AlifeObjectAbstract {
-          game_vertex_id: 65535,
-          distance: 25.0,
-          direct_control: 1,
-          level_vertex_id: 2414,
-          flags: 33,
-          custom_data: String::from("custom_data"),
-          story_id: 214,
-          spawn_story_id: 123,
-        },
         visual_name: String::from("visual_name"),
         visual_flags: 36,
       },
       idle_animation: String::from("idle_animation"),
       attack_animation: String::from("attack_animation"),
+      last_spawn_time: None,
     };
 
     object.write(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 228);
+    assert_eq!(writer.bytes_written(), 191);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
       &mut overwrite_test_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 228);
+    assert_eq!(bytes_written, 191);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 228 + 8);
+    assert_eq!(file.bytes_remaining(), 191 + 8);
 
     let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
     let read_object: AlifeZoneVisual =

@@ -1,17 +1,17 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectHelicopter {
-  pub base: AlifeObjectVisual,
+  pub base: AlifeObjectDynamicVisual,
   pub skeleton: AlifeObjectSkeleton,
   pub motion: AlifeObjectMotion,
   pub startup_animation: String,
@@ -21,7 +21,7 @@ pub struct AlifeObjectHelicopter {
 impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
   /// Read helicopter data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectHelicopter> {
-    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
+    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
     let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
@@ -59,12 +59,12 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_helicopter::AlifeObjectHelicopter;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -79,7 +79,7 @@ mod tests {
       get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_helicopter.chunk"));
 
     let object: AlifeObjectHelicopter = AlifeObjectHelicopter {
-      base: AlifeObjectVisual {
+      base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 6432,
           distance: 243.53,

@@ -1,32 +1,44 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
-use byteorder::ByteOrder;
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct AlifeObjectItemDetector {
-  pub base: AlifeObjectItem,
+pub struct AlifeObjectDynamicVisual {
+  pub base: AlifeObjectAbstract,
+  pub visual_name: String,
+  pub visual_flags: u8,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectItemDetector> for AlifeObjectItemDetector {
-  /// Read alife item object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemDetector> {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
+impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamicVisual {
+  /// Read visual object data from the chunk.
+  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectDynamicVisual> {
+    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk::<T>(chunk)?;
 
-    Ok(AlifeObjectItemDetector { base })
+    let visual_name: String = chunk.read_null_terminated_string()?;
+    let visual_flags: u8 = chunk.read_u8()?;
+
+    Ok(AlifeObjectDynamicVisual {
+      base,
+      visual_name,
+      visual_flags,
+    })
   }
 }
 
-impl AlifeObjectGeneric for AlifeObjectItemDetector {
+impl AlifeObjectGeneric for AlifeObjectDynamicVisual {
   type Order = SpawnByteOrder;
 
-  /// Write item data into the writer.
+  /// Write visual alife object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
+
+    writer.write_null_terminated_string(&self.visual_name)?;
+    writer.write_u8(self.visual_flags)?;
 
     Ok(())
   }
@@ -40,8 +52,6 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-  use crate::data::alife::alife_object_item::AlifeObjectItem;
-  use crate::data::alife::alife_object_item_detector::AlifeObjectItemDetector;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -53,27 +63,21 @@ mod tests {
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_item_detector.chunk"));
+      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_dynamic_visual.chunk"));
 
-    let object: AlifeObjectItemDetector = AlifeObjectItemDetector {
-      base: AlifeObjectItem {
-        base: AlifeObjectDynamicVisual {
-          base: AlifeObjectAbstract {
-            game_vertex_id: 1005,
-            distance: 34.12,
-            direct_control: 6627,
-            level_vertex_id: 55313,
-            flags: 45,
-            custom_data: String::from("custom_data"),
-            story_id: 475,
-            spawn_story_id: 128,
-          },
-          visual_name: String::from("efg"),
-          visual_flags: 33,
-        },
-        condition: 0.4,
-        upgrades_count: 0,
+    let object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
+      base: AlifeObjectAbstract {
+        game_vertex_id: 1001,
+        distance: 65.25,
+        direct_control: 412421,
+        level_vertex_id: 66231,
+        flags: 33,
+        custom_data: String::from("custom_data"),
+        story_id: 400,
+        spawn_story_id: 25,
       },
+      visual_name: String::from("visual-name"),
+      visual_flags: 33,
     };
 
     object.write(&mut writer)?;
@@ -92,8 +96,8 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 51 + 8);
 
     let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectItemDetector =
-      AlifeObjectItemDetector::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_object: AlifeObjectDynamicVisual =
+      AlifeObjectDynamicVisual::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
 
     assert_eq!(read_object, object);
 

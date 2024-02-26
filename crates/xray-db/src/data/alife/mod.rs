@@ -9,6 +9,7 @@ pub mod alife_object_climable;
 pub mod alife_object_creature;
 pub mod alife_object_custom_zone;
 pub mod alife_object_dynamic;
+pub mod alife_object_dynamic_visual;
 pub mod alife_object_generic;
 pub mod alife_object_hanging_lamp;
 pub mod alife_object_helicopter;

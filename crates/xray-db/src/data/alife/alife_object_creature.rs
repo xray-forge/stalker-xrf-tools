@@ -1,15 +1,15 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectCreature {
-  pub base: AlifeObjectVisual,
+  pub base: AlifeObjectDynamicVisual,
   pub team: u8,
   pub squad: u8,
   pub group: u8,
@@ -23,7 +23,7 @@ pub struct AlifeObjectCreature {
 impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   /// Read alife creature object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectCreature> {
-    let base: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
+    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
 
     let team: u8 = chunk.read_u8()?;
     let squad: u8 = chunk.read_u8()?;
@@ -78,9 +78,9 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
+  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -95,7 +95,7 @@ mod tests {
       get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_creature.chunk"));
 
     let object: AlifeObjectCreature = AlifeObjectCreature {
-      base: AlifeObjectVisual {
+      base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 1001,
           distance: 65.25,

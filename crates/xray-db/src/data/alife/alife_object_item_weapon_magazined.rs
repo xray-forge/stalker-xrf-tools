@@ -39,13 +39,13 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
   use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
   use crate::data::alife::alife_object_item_weapon_magazined_wgl::AlifeObjectItemWeaponMagazinedWgl;
-  use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -65,7 +65,7 @@ mod tests {
       base: AlifeObjectItemWeaponMagazined {
         base: AlifeObjectItemWeapon {
           base: AlifeObjectItem {
-            base: AlifeObjectVisual {
+            base: AlifeObjectDynamicVisual {
               base: AlifeObjectAbstract {
                 game_vertex_id: 5232,
                 distance: 53.1213,
