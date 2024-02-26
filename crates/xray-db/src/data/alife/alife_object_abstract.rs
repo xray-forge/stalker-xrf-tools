@@ -27,7 +27,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
     let direct_control: u32 = chunk.read_u32::<T>()?;
     let level_vertex_id: u32 = chunk.read_u32::<T>()?;
     let flags: u32 = chunk.read_u32::<T>()?;
-    let custom_data: String = chunk.read_null_terminated_string()?;
+    let custom_data: String = chunk.read_null_terminated_win_string()?;
     let story_id: u32 = chunk.read_u32::<T>()?;
     let spawn_story_id: u32 = chunk.read_u32::<T>()?;
 
@@ -54,7 +54,7 @@ impl AlifeObjectGeneric for AlifeObjectAbstract {
     writer.write_u32::<Self::Order>(self.direct_control)?;
     writer.write_u32::<Self::Order>(self.level_vertex_id)?;
     writer.write_u32::<Self::Order>(self.flags)?;
-    writer.write_null_terminated_string(&self.custom_data)?;
+    writer.write_null_terminated_win_string(&self.custom_data)?;
     writer.write_u32::<Self::Order>(self.story_id)?;
     writer.write_u32::<Self::Order>(self.spawn_story_id)?;
 

@@ -26,12 +26,12 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
 
     let idle_animation: String = chunk
       .has_data()
-      .then(|| chunk.read_null_terminated_string().unwrap())
+      .then(|| chunk.read_null_terminated_win_string().unwrap())
       .unwrap_or(String::new());
 
     let attack_animation: String = chunk
       .has_data()
-      .then(|| chunk.read_null_terminated_string().unwrap())
+      .then(|| chunk.read_null_terminated_win_string().unwrap())
       .unwrap_or(String::new());
 
     let last_spawn_time: Option<Time> = Time::read_optional_from_chunk::<T>(chunk)?;
@@ -54,8 +54,8 @@ impl AlifeObjectGeneric for AlifeZoneVisual {
     self.base.write(writer)?;
     self.visual.write(writer)?;
 
-    writer.write_null_terminated_string(&self.idle_animation)?;
-    writer.write_null_terminated_string(&self.attack_animation)?;
+    writer.write_null_terminated_win_string(&self.idle_animation)?;
+    writer.write_null_terminated_win_string(&self.attack_animation)?;
 
     Time::write_optional::<Self::Order>(&self.last_spawn_time, writer)?;
 

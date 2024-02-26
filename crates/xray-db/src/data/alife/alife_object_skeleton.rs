@@ -17,7 +17,7 @@ pub struct AlifeObjectSkeleton {
 impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   /// Read skeleton data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSkeleton> {
-    let name: String = chunk.read_null_terminated_string()?;
+    let name: String = chunk.read_null_terminated_win_string()?;
     let flags: u8 = chunk.read_u8()?;
     let source_id: u16 = chunk.read_u16::<SpawnByteOrder>()?;
 
@@ -38,7 +38,7 @@ impl AlifeObjectGeneric for AlifeObjectSkeleton {
 
   /// Write skeleton data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_null_terminated_string(&self.name)?;
+    writer.write_null_terminated_win_string(&self.name)?;
     writer.write_u8(self.flags)?;
     writer.write_u16::<Self::Order>(self.source_id)?;
 

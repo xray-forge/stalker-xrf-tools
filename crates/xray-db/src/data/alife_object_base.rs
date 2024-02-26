@@ -57,10 +57,10 @@ impl AlifeObjectBase {
 
     assert_eq!(net_action, 1); // todo: Constant for action ID.
 
-    let section: String = spawn_chunk.read_null_terminated_string()?;
+    let section: String = spawn_chunk.read_null_terminated_win_string()?;
     let clsid: ClsId = ClsId::from_section(&section);
     let class: AlifeClass = AlifeClass::from_cls_id(&clsid);
-    let name: String = spawn_chunk.read_null_terminated_string()?;
+    let name: String = spawn_chunk.read_null_terminated_win_string()?;
     let script_game_id: u8 = spawn_chunk.read_u8()?;
     let script_rp: u8 = spawn_chunk.read_u8()?;
     let position: Vector3d = spawn_chunk.read_f32_3d_vector::<T>()?;
@@ -158,8 +158,8 @@ impl AlifeObjectBase {
 
     object_data_writer.write_u16::<T>(self.net_action)?;
 
-    object_data_writer.write_null_terminated_string(&self.section)?;
-    object_data_writer.write_null_terminated_string(&self.name)?;
+    object_data_writer.write_null_terminated_win_string(&self.section)?;
+    object_data_writer.write_null_terminated_win_string(&self.name)?;
     object_data_writer.write_u8(self.script_game_id)?;
     object_data_writer.write_u8(self.script_rp)?;
     object_data_writer.write_f32_3d_vector::<T>(&self.position)?;

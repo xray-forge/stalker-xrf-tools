@@ -26,7 +26,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
     let base: AlifeObjectDynamic = AlifeObjectDynamic::read_from_chunk::<T>(chunk)?;
 
     let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>()?;
-    let description: String = chunk.read_null_terminated_string()?;
+    let description: String = chunk.read_null_terminated_win_string()?;
     let hold_position_time: f32 = chunk.read_f32::<SpawnByteOrder>()?;
     let enter_min_enemy_distance: f32 = chunk.read_f32::<SpawnByteOrder>()?;
     let exit_min_enemy_distance: f32 = chunk.read_f32::<SpawnByteOrder>()?;
@@ -54,7 +54,7 @@ impl AlifeObjectGeneric for AlifeObjectSmartCover {
     self.base.write(writer)?;
 
     writer.write_shape_description::<Self::Order>(&self.shape)?;
-    writer.write_null_terminated_string(&self.description)?;
+    writer.write_null_terminated_win_string(&self.description)?;
     writer.write_f32::<Self::Order>(self.hold_position_time)?;
     writer.write_f32::<Self::Order>(self.enter_min_enemy_distance)?;
     writer.write_f32::<Self::Order>(self.exit_min_enemy_distance)?;

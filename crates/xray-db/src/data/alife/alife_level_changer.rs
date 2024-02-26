@@ -32,12 +32,12 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
     let dest_position: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>()?;
     let dest_direction: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>()?;
     let angle_y: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let dest_level_name: String = chunk.read_null_terminated_string()?;
-    let dest_graph_point: String = chunk.read_null_terminated_string()?;
+    let dest_level_name: String = chunk.read_null_terminated_win_string()?;
+    let dest_graph_point: String = chunk.read_null_terminated_win_string()?;
     let silent_mode: u8 = chunk.read_u8()?;
 
     let enabled: u8 = chunk.read_u8()?;
-    let hint: String = chunk.read_null_terminated_string()?;
+    let hint: String = chunk.read_null_terminated_win_string()?;
     let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>()?;
 
     assert_eq!(
@@ -74,12 +74,12 @@ impl AlifeObjectGeneric for AlifeLevelChanger {
     writer.write_f32_3d_vector::<Self::Order>(&self.dest_position)?;
     writer.write_f32_3d_vector::<Self::Order>(&self.dest_direction)?;
     writer.write_f32::<Self::Order>(self.angle_y)?;
-    writer.write_null_terminated_string(&self.dest_level_name)?;
-    writer.write_null_terminated_string(&self.dest_graph_point)?;
+    writer.write_null_terminated_win_string(&self.dest_level_name)?;
+    writer.write_null_terminated_win_string(&self.dest_graph_point)?;
     writer.write_u8(self.silent_mode)?;
 
     writer.write_u8(self.enabled)?;
-    writer.write_null_terminated_string(&self.hint)?;
+    writer.write_null_terminated_win_string(&self.hint)?;
     writer.write_u16::<Self::Order>(self.save_marker)?;
 
     Ok(())

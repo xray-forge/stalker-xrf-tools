@@ -7,7 +7,6 @@ use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
 use std::borrow::Cow;
 use std::io::{Read, Seek, SeekFrom};
-use std::string::FromUtf8Error;
 use std::{fmt, io};
 
 #[derive(Clone, PartialEq)]
@@ -138,31 +137,25 @@ impl Chunk {
     Ok(vector)
   }
 
-  /// Read null terminated string from file bytes.
-  pub fn read_null_terminated_string(&mut self) -> io::Result<String> {
-    let offset: u64 = self.file.seek(SeekFrom::Current(0))?;
+  /// Read null terminated windows encoded string from file bytes.
+  pub fn read_null_terminated_win_string(&mut self) -> io::Result<String> {
+    let offset: u64 = self.file.stream_position()?;
     let mut buffer: Vec<u8> = Vec::new();
 
     self.file.read_to_end(&mut buffer)?;
 
     if let Some(position) = buffer.iter().position(|&x| x == 0x00) {
       let slice: &[u8] = &buffer[..position];
-      let value: Result<String, FromUtf8Error> = String::from_utf8(slice.to_vec());
-      let value: String = match value {
-        Ok(it) => it,
-        Err(_) => {
-          let (transforemed, _encoding_used, had_errors) = WINDOWS_1251.decode(slice);
+      let (transformed, _encoding_used, had_errors) = WINDOWS_1251.decode(slice);
 
-          if had_errors {
-            panic!("Unexpected errors when coverting windows-1251 string data.");
-          }
+      if had_errors {
+        panic!("Unexpected errors when decoding windows-1251 string data.");
+      }
 
-          // Retry with windows 1251 conversion:
-          match transforemed {
-            Cow::Borrowed(value) => String::from(value),
-            Cow::Owned(value) => value,
-          }
-        }
+      // Try with windows 1251 conversion:
+      let value: String = match transformed {
+        Cow::Borrowed(value) => String::from(value),
+        Cow::Owned(value) => value,
       };
 
       // Put seek right after string - length plus zero terminator.

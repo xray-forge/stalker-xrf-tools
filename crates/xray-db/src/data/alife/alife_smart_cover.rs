@@ -21,12 +21,12 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeSmartCover> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read_from_chunk::<T>(chunk)?;
 
-    let last_description: String = chunk.read_null_terminated_string()?;
+    let last_description: String = chunk.read_null_terminated_win_string()?;
     let count: u8 = chunk.read_u8()?;
     let mut loopholes: Vec<AlifeSmartCoverLoophole> = Vec::new();
 
     for _ in 0..count {
-      let name: String = chunk.read_null_terminated_string()?;
+      let name: String = chunk.read_null_terminated_win_string()?;
       let enabled: u8 = chunk.read_u8()?;
 
       loopholes.push(AlifeSmartCoverLoophole { name, enabled })
@@ -47,11 +47,11 @@ impl AlifeObjectGeneric for AlifeSmartCover {
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_null_terminated_string(&self.last_description)?;
+    writer.write_null_terminated_win_string(&self.last_description)?;
     writer.write_u8(self.loopholes.len() as u8)?;
 
     for loophole in &self.loopholes {
-      writer.write_null_terminated_string(&loophole.name)?;
+      writer.write_null_terminated_win_string(&loophole.name)?;
       writer.write_u8(loophole.enabled)?;
     }
 

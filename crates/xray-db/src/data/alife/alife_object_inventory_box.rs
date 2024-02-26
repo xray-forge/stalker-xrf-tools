@@ -22,7 +22,7 @@ impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventor
 
     let can_take: u8 = chunk.read_u8()?;
     let is_closed: u8 = chunk.read_u8()?;
-    let tip: String = chunk.read_null_terminated_string()?;
+    let tip: String = chunk.read_null_terminated_win_string()?;
 
     Ok(AlifeObjectInventoryBox {
       base,
@@ -42,7 +42,7 @@ impl AlifeObjectGeneric for AlifeObjectInventoryBox {
 
     writer.write_u8(self.can_take)?;
     writer.write_u8(self.is_closed)?;
-    writer.write_null_terminated_string(&self.tip)?;
+    writer.write_null_terminated_win_string(&self.tip)?;
 
     Ok(())
   }

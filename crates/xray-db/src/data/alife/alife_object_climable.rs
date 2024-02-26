@@ -18,7 +18,7 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectClimable> {
     let base: AlifeObjectShape = AlifeObjectShape::read_from_chunk::<T>(chunk)?;
 
-    let game_material: String = chunk.read_null_terminated_string()?;
+    let game_material: String = chunk.read_null_terminated_win_string()?;
 
     Ok(AlifeObjectClimable {
       base,
@@ -34,7 +34,7 @@ impl AlifeObjectGeneric for AlifeObjectClimable {
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_null_terminated_string(&self.game_material)?;
+    writer.write_null_terminated_win_string(&self.game_material)?;
 
     Ok(())
   }

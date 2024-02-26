@@ -14,7 +14,7 @@ pub struct AlifeObjectMotion {
 impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
   /// Read motion object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectMotion> {
-    let motion_name: String = chunk.read_null_terminated_string()?;
+    let motion_name: String = chunk.read_null_terminated_win_string()?;
 
     Ok(AlifeObjectMotion { motion_name })
   }
@@ -25,7 +25,7 @@ impl AlifeObjectGeneric for AlifeObjectMotion {
 
   /// Write motion object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_null_terminated_string(&self.motion_name)?;
+    writer.write_null_terminated_win_string(&self.motion_name)?;
 
     Ok(())
   }

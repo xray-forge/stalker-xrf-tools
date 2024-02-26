@@ -19,13 +19,14 @@ pub struct AlifeObjectPhysic {
 
 impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
   /// Read alife physic object from the chunk.
+  #[inline(never)]
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectPhysic> {
     let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
     let physic_type: u32 = chunk.read_u32::<SpawnByteOrder>()?;
     let mass: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let fixed_bones: String = chunk.read_null_terminated_string()?;
+    let fixed_bones: String = chunk.read_null_terminated_win_string()?;
 
     Ok(AlifeObjectPhysic {
       base,
@@ -47,7 +48,7 @@ impl AlifeObjectGeneric for AlifeObjectPhysic {
 
     writer.write_u32::<Self::Order>(self.physic_type)?;
     writer.write_f32::<Self::Order>(self.mass)?;
-    writer.write_null_terminated_string(&self.fixed_bones)?;
+    writer.write_null_terminated_win_string(&self.fixed_bones)?;
 
     Ok(())
   }

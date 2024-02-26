@@ -16,10 +16,10 @@ pub struct GraphLevel {
 
 impl GraphLevel {
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphLevel> {
-    let name: String = chunk.read_null_terminated_string()?;
+    let name: String = chunk.read_null_terminated_win_string()?;
     let offset: Vector3d = chunk.read_f32_3d_vector::<T>()?;
     let id: u8 = chunk.read_u8()?;
-    let section: String = chunk.read_null_terminated_string()?;
+    let section: String = chunk.read_null_terminated_win_string()?;
     let guid: u128 = chunk.read_u128::<T>()?;
 
     Ok(GraphLevel {
@@ -33,10 +33,10 @@ impl GraphLevel {
 
   /// Write graph level data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_null_terminated_string(&self.name)?;
+    writer.write_null_terminated_win_string(&self.name)?;
     writer.write_f32_3d_vector::<T>(&self.offset)?;
     writer.write_u8(self.id)?;
-    writer.write_null_terminated_string(&self.section)?;
+    writer.write_null_terminated_win_string(&self.section)?;
     writer.write_u128::<T>(self.guid)?;
 
     Ok(())

@@ -43,7 +43,7 @@ impl PatrolPoint {
 
   /// Read patrol point data from chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<PatrolPoint> {
-    let name: String = chunk.read_null_terminated_string()?;
+    let name: String = chunk.read_null_terminated_win_string()?;
     let position: Vector3d = chunk.read_f32_3d_vector::<T>()?;
     let flags: u32 = chunk.read_u32::<T>()?;
     let level_vertex_id: u32 = chunk.read_u32::<T>()?;
@@ -88,7 +88,7 @@ impl PatrolPoint {
 
   /// Write patrol point data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_null_terminated_string(&self.name)?;
+    writer.write_null_terminated_win_string(&self.name)?;
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;
     writer.write_u32::<T>(self.level_vertex_id)?;

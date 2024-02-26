@@ -19,8 +19,8 @@ pub struct AlifeGraphPoint {
 impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   /// Read graph point data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeGraphPoint> {
-    let connection_point_name: String = chunk.read_null_terminated_string()?;
-    let connection_level_name: String = chunk.read_null_terminated_string()?;
+    let connection_point_name: String = chunk.read_null_terminated_win_string()?;
+    let connection_level_name: String = chunk.read_null_terminated_win_string()?;
     let location0: u8 = chunk.read_u8()?;
     let location1: u8 = chunk.read_u8()?;
     let location2: u8 = chunk.read_u8()?;
@@ -42,8 +42,8 @@ impl AlifeObjectGeneric for AlifeGraphPoint {
 
   /// Write graph point data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_null_terminated_string(&self.connection_point_name)?;
-    writer.write_null_terminated_string(&self.connection_level_name)?;
+    writer.write_null_terminated_win_string(&self.connection_point_name)?;
+    writer.write_null_terminated_win_string(&self.connection_level_name)?;
     writer.write_u8(self.location0)?;
     writer.write_u8(self.location1)?;
     writer.write_u8(self.location2)?;

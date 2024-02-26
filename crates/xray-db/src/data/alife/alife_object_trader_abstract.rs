@@ -24,13 +24,13 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
   /// Read trader data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectTraderAbstract> {
     let money: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let specific_character: String = chunk.read_null_terminated_string()?;
+    let specific_character: String = chunk.read_null_terminated_win_string()?;
     let trader_flags: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let character_profile: String = chunk.read_null_terminated_string()?;
+    let character_profile: String = chunk.read_null_terminated_win_string()?;
     let community_index: u32 = chunk.read_u32::<SpawnByteOrder>()?;
     let rank: u32 = chunk.read_u32::<SpawnByteOrder>()?;
     let reputation: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let character_name: String = chunk.read_null_terminated_string()?;
+    let character_name: String = chunk.read_null_terminated_win_string()?;
     let dead_body_can_take: u8 = chunk.read_u8()?;
     let dead_body_closed: u8 = chunk.read_u8()?;
 
@@ -55,13 +55,13 @@ impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
   /// Write trader data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u32::<SpawnByteOrder>(self.money)?;
-    writer.write_null_terminated_string(&self.specific_character)?;
+    writer.write_null_terminated_win_string(&self.specific_character)?;
     writer.write_u32::<SpawnByteOrder>(self.trader_flags)?;
-    writer.write_null_terminated_string(&self.character_profile)?;
+    writer.write_null_terminated_win_string(&self.character_profile)?;
     writer.write_u32::<SpawnByteOrder>(self.community_index)?;
     writer.write_u32::<SpawnByteOrder>(self.rank)?;
     writer.write_u32::<SpawnByteOrder>(self.reputation)?;
-    writer.write_null_terminated_string(&self.character_name)?;
+    writer.write_null_terminated_win_string(&self.character_name)?;
     writer.write_u8(self.dead_body_can_take)?;
     writer.write_u8(self.dead_body_closed)?;
 

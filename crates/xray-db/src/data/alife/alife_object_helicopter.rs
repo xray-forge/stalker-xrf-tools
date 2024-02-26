@@ -25,8 +25,8 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
     let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
     let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
 
-    let startup_animation: String = chunk.read_null_terminated_string()?;
-    let engine_sound: String = chunk.read_null_terminated_string()?;
+    let startup_animation: String = chunk.read_null_terminated_win_string()?;
+    let engine_sound: String = chunk.read_null_terminated_win_string()?;
 
     Ok(AlifeObjectHelicopter {
       base,
@@ -47,8 +47,8 @@ impl AlifeObjectGeneric for AlifeObjectHelicopter {
     self.motion.write(writer)?;
     self.skeleton.write(writer)?;
 
-    writer.write_null_terminated_string(&self.startup_animation)?;
-    writer.write_null_terminated_string(&self.engine_sound)?;
+    writer.write_null_terminated_win_string(&self.startup_animation)?;
+    writer.write_null_terminated_win_string(&self.engine_sound)?;
 
     Ok(())
   }

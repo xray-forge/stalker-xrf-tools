@@ -43,24 +43,24 @@ impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLa
 
     let main_color: u32 = chunk.read_u32::<T>()?;
     let main_brightness: f32 = chunk.read_f32::<T>()?;
-    let color_animator: String = chunk.read_null_terminated_string()?;
+    let color_animator: String = chunk.read_null_terminated_win_string()?;
     let main_range: f32 = chunk.read_f32::<T>()?;
     let light_flags: u16 = chunk.read_u16::<T>()?;
-    let startup_animation: String = chunk.read_null_terminated_string()?;
-    let fixed_bones: String = chunk.read_null_terminated_string()?;
+    let startup_animation: String = chunk.read_null_terminated_win_string()?;
+    let fixed_bones: String = chunk.read_null_terminated_win_string()?;
     let health: f32 = chunk.read_f32::<T>()?;
 
     let virtual_size: f32 = chunk.read_f32::<T>()?;
     let ambient_radius: f32 = chunk.read_f32::<T>()?;
     let ambient_power: f32 = chunk.read_f32::<T>()?;
-    let ambient_texture: String = chunk.read_null_terminated_string()?;
-    let light_texture: String = chunk.read_null_terminated_string()?;
-    let light_bone: String = chunk.read_null_terminated_string()?;
+    let ambient_texture: String = chunk.read_null_terminated_win_string()?;
+    let light_texture: String = chunk.read_null_terminated_win_string()?;
+    let light_bone: String = chunk.read_null_terminated_win_string()?;
     let spot_cone_angle: f32 = chunk.read_f32::<T>()?;
-    let glow_texture: String = chunk.read_null_terminated_string()?;
+    let glow_texture: String = chunk.read_null_terminated_win_string()?;
     let glow_radius: f32 = chunk.read_f32::<T>()?;
 
-    let light_ambient_bone: String = chunk.read_null_terminated_string()?;
+    let light_ambient_bone: String = chunk.read_null_terminated_win_string()?;
     let volumetric_quality: f32 = chunk.read_f32::<T>()?;
     let volumetric_intensity: f32 = chunk.read_f32::<T>()?;
     let volumetric_distance: f32 = chunk.read_f32::<T>()?;
@@ -103,24 +103,24 @@ impl AlifeObjectGeneric for AlifeObjectHangingLamp {
 
     writer.write_u32::<Self::Order>(self.main_color)?;
     writer.write_f32::<Self::Order>(self.main_brightness)?;
-    writer.write_null_terminated_string(&self.color_animator)?;
+    writer.write_null_terminated_win_string(&self.color_animator)?;
     writer.write_f32::<Self::Order>(self.main_range)?;
     writer.write_u16::<Self::Order>(self.light_flags)?;
-    writer.write_null_terminated_string(&self.startup_animation)?;
-    writer.write_null_terminated_string(&self.fixed_bones)?;
+    writer.write_null_terminated_win_string(&self.startup_animation)?;
+    writer.write_null_terminated_win_string(&self.fixed_bones)?;
     writer.write_f32::<Self::Order>(self.health)?;
 
     writer.write_f32::<Self::Order>(self.virtual_size)?;
     writer.write_f32::<Self::Order>(self.ambient_radius)?;
     writer.write_f32::<Self::Order>(self.ambient_power)?;
-    writer.write_null_terminated_string(&self.ambient_texture)?;
-    writer.write_null_terminated_string(&self.light_texture)?;
-    writer.write_null_terminated_string(&self.light_bone)?;
+    writer.write_null_terminated_win_string(&self.ambient_texture)?;
+    writer.write_null_terminated_win_string(&self.light_texture)?;
+    writer.write_null_terminated_win_string(&self.light_bone)?;
     writer.write_f32::<Self::Order>(self.spot_cone_angle)?;
-    writer.write_null_terminated_string(&self.glow_texture)?;
+    writer.write_null_terminated_win_string(&self.glow_texture)?;
     writer.write_f32::<Self::Order>(self.glow_radius)?;
 
-    writer.write_null_terminated_string(&self.light_ambient_bone)?;
+    writer.write_null_terminated_win_string(&self.light_ambient_bone)?;
     writer.write_f32::<Self::Order>(self.volumetric_quality)?;
     writer.write_f32::<Self::Order>(self.volumetric_intensity)?;
     writer.write_f32::<Self::Order>(self.volumetric_distance)?;

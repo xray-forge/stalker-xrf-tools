@@ -58,7 +58,7 @@ impl Patrol {
     let mut points_chunk: Chunk = data_chunk.read_child_by_index(1)?;
     let mut links_chunk: Chunk = data_chunk.read_child_by_index(2)?;
 
-    let name: String = meta_chunk.read_null_terminated_string()?;
+    let name: String = meta_chunk.read_null_terminated_win_string()?;
 
     assert_eq!(name.len() + 1, meta_chunk.size as usize); // Count null termination char.
 
@@ -105,7 +105,7 @@ impl Patrol {
     let mut points_writer: ChunkWriter = ChunkWriter::new();
     let mut links_writer: ChunkWriter = ChunkWriter::new();
 
-    meta_writer.write_null_terminated_string(&self.name)?;
+    meta_writer.write_null_terminated_win_string(&self.name)?;
 
     point_count_writer.write_u32::<T>(self.points.len() as u32)?;
 

@@ -19,7 +19,7 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamic
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectDynamicVisual> {
     let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk::<T>(chunk)?;
 
-    let visual_name: String = chunk.read_null_terminated_string()?;
+    let visual_name: String = chunk.read_null_terminated_win_string()?;
     let visual_flags: u8 = chunk.read_u8()?;
 
     Ok(AlifeObjectDynamicVisual {
@@ -37,7 +37,7 @@ impl AlifeObjectGeneric for AlifeObjectDynamicVisual {
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_null_terminated_string(&self.visual_name)?;
+    writer.write_null_terminated_win_string(&self.visual_name)?;
     writer.write_u8(self.visual_flags)?;
 
     Ok(())

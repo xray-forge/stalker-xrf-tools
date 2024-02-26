@@ -1,6 +1,8 @@
 use crate::data::shape::Shape;
 use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
 use byteorder::{ByteOrder, WriteBytesExt};
+use encoding_rs::WINDOWS_1251;
+use std::borrow::Cow;
 use std::fs::File;
 use std::io;
 use std::io::Write;
@@ -56,9 +58,21 @@ impl ChunkWriter {
     self.buffer.len()
   }
 
-  /// Write null terminated string.
-  pub fn write_null_terminated_string(&mut self, value: &String) -> io::Result<usize> {
-    Ok(self.write(value.as_bytes())? + self.write(&[0u8])?)
+  /// Write null terminated windows encoded string.
+  pub fn write_null_terminated_win_string(&mut self, value: &String) -> io::Result<usize> {
+    let (transformed, _encoding_used, had_errors) = WINDOWS_1251.encode(value);
+
+    if had_errors {
+      panic!("Unexpected errors when encoding windows-1251 string data.");
+    }
+
+    // Try with windows 1251 conversion:
+    let value = match transformed {
+      Cow::Borrowed(value) => value.to_vec(),
+      Cow::Owned(value) => value,
+    };
+
+    Ok(self.write(&value)? + self.write(&[0u8])?)
   }
 
   /// Write three float values.

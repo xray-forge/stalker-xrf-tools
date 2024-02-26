@@ -20,8 +20,8 @@ impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
     let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
 
     let owner: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-    let character: String = chunk.read_null_terminated_string()?;
-    let info_portion: String = chunk.read_null_terminated_string()?;
+    let character: String = chunk.read_null_terminated_win_string()?;
+    let info_portion: String = chunk.read_null_terminated_win_string()?;
 
     Ok(AlifeObjectItemPda {
       base,
@@ -40,8 +40,8 @@ impl AlifeObjectGeneric for AlifeObjectItemPda {
     self.base.write(writer)?;
 
     writer.write_u16::<Self::Order>(self.owner)?;
-    writer.write_null_terminated_string(&self.character)?;
-    writer.write_null_terminated_string(&self.info_portion)?;
+    writer.write_null_terminated_win_string(&self.character)?;
+    writer.write_null_terminated_win_string(&self.info_portion)?;
 
     Ok(())
   }

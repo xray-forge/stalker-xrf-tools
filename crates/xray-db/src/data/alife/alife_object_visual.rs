@@ -15,7 +15,7 @@ pub struct AlifeObjectVisual {
 impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
   /// Read visual object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectVisual> {
-    let visual_name: String = chunk.read_null_terminated_string()?;
+    let visual_name: String = chunk.read_null_terminated_win_string()?;
     let visual_flags: u8 = chunk.read_u8()?;
 
     Ok(AlifeObjectVisual {
@@ -30,7 +30,7 @@ impl AlifeObjectGeneric for AlifeObjectVisual {
 
   /// Write visual alife object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_null_terminated_string(&self.visual_name)?;
+    writer.write_null_terminated_win_string(&self.visual_name)?;
     writer.write_u8(self.visual_flags)?;
 
     Ok(())
