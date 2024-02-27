@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -66,6 +67,22 @@ impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
     writer.write_u8(self.dead_body_closed)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("money", self.money.to_string())
+      .set("specific_character", &self.specific_character)
+      .set("trader_flags", self.trader_flags.to_string())
+      .set("character_profile", &self.character_profile)
+      .set("community_index", self.community_index.to_string())
+      .set("rank", self.rank.to_string())
+      .set("reputation", self.reputation.to_string())
+      .set("character_name", &self.character_name)
+      .set("dead_body_can_take", self.dead_body_can_take.to_string())
+      .set("dead_body_closed", self.dead_body_closed.to_string());
   }
 }
 

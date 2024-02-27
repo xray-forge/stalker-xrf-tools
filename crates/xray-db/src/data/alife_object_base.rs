@@ -234,6 +234,8 @@ impl AlifeObjectBase {
       .set("spawn_id", self.script_version.to_string())
       .set("index", self.index.to_string());
 
+    self.inherited.export(&section, ini);
+
     // todo: Write inherited data.
     // todo: Write update data.
   }

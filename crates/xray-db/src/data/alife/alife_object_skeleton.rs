@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -43,6 +44,15 @@ impl AlifeObjectGeneric for AlifeObjectSkeleton {
     writer.write_u16::<Self::Order>(self.source_id)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("name", &self.name)
+      .set("flags", self.flags.to_string())
+      .set("source_id", self.source_id.to_string());
   }
 }
 

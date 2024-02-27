@@ -7,6 +7,7 @@ use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -47,6 +48,17 @@ impl AlifeObjectGeneric for AlifeObjectActor {
     writer.write_u16::<Self::Order>(self.holder_id)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+    self.trader.export(section, ini);
+    self.skeleton.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("holder_id", self.holder_id.to_string());
   }
 }
 

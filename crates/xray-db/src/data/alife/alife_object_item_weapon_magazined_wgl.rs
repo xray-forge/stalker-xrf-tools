@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -34,6 +35,11 @@ impl AlifeObjectGeneric for AlifeObjectItemWeaponMagazinedWgl {
     self.base.write(writer)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
   }
 }
 

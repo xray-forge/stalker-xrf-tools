@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -45,6 +46,26 @@ impl AlifeObjectGeneric for AlifeObjectAnomalyZone {
     writer.write_u32::<Self::Order>(self.artefact_position_offset)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set(
+        "offline_interactive_radius",
+        self.offline_interactive_radius.to_string(),
+      )
+      .set(
+        "artefact_spawn_count",
+        self.artefact_spawn_count.to_string(),
+      )
+      .set(
+        "artefact_position_offset",
+        self.artefact_position_offset.to_string(),
+      );
   }
 }
 

@@ -73,6 +73,10 @@ impl Time {
 
     Ok(())
   }
+
+  pub fn to_string(&self) -> String {
+    String::from("todo")
+  }
 }
 
 #[cfg(test)]

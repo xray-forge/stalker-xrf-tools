@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 /// Generic alife object abstraction data.
@@ -59,6 +60,20 @@ impl AlifeObjectGeneric for AlifeObjectAbstract {
     writer.write_u32::<Self::Order>(self.spawn_story_id)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("game_vertex_id", self.game_vertex_id.to_string())
+      .set("distance", self.distance.to_string())
+      .set("direct_control", self.direct_control.to_string())
+      .set("level_vertex_id", self.level_vertex_id.to_string())
+      .set("flags", self.flags.to_string())
+      .set("custom_data", &self.custom_data)
+      .set("story_id", self.story_id.to_string())
+      .set("spawn_story_id", self.spawn_story_id.to_string());
   }
 }
 

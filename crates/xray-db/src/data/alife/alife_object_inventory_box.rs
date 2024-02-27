@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -45,6 +46,17 @@ impl AlifeObjectGeneric for AlifeObjectInventoryBox {
     writer.write_null_terminated_win_string(&self.tip)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("can_take", self.can_take.to_string())
+      .set("is_closed", self.is_closed.to_string())
+      .set("tip", &self.tip);
   }
 }
 

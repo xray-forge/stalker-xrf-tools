@@ -6,6 +6,7 @@ use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestricto
 use crate::data::vector_3d::Vector3d;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -84,6 +85,28 @@ impl AlifeObjectGeneric for AlifeLevelChanger {
     writer.write_u16::<Self::Order>(self.save_marker)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("dest_game_vertex_id", self.dest_game_vertex_id.to_string())
+      .set(
+        "dest_level_vertex_id",
+        self.dest_level_vertex_id.to_string(),
+      )
+      .set("dest_position", self.dest_position.to_string())
+      .set("dest_direction", self.dest_direction.to_string())
+      .set("angle_y", self.angle_y.to_string())
+      .set("dest_level_name", self.dest_level_name.to_string())
+      .set("dest_graph_point", self.dest_graph_point.to_string())
+      .set("silent_mode", self.silent_mode.to_string())
+      .set("enabled", self.enabled.to_string())
+      .set("hint", self.hint.to_string())
+      .set("save_marker", self.save_marker.to_string());
   }
 }
 

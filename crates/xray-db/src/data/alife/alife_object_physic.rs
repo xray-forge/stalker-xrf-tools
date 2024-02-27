@@ -6,6 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -51,6 +52,18 @@ impl AlifeObjectGeneric for AlifeObjectPhysic {
     writer.write_null_terminated_win_string(&self.fixed_bones)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+    self.skeleton.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("physic_type", self.physic_type.to_string())
+      .set("mass", self.mass.to_string())
+      .set("fixed_bones", &self.fixed_bones);
   }
 }
 

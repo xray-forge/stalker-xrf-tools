@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -50,6 +51,18 @@ impl AlifeObjectGeneric for AlifeGraphPoint {
     writer.write_u8(self.location3)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("connection_point_name", &self.connection_point_name)
+      .set("connection_level_name", &self.connection_level_name)
+      .set("location0", self.location0.to_string())
+      .set("location1", self.location1.to_string())
+      .set("location2", self.location2.to_string())
+      .set("location3", self.location3.to_string());
   }
 }
 

@@ -7,6 +7,7 @@ use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -51,6 +52,18 @@ impl AlifeObjectGeneric for AlifeObjectHelicopter {
     writer.write_null_terminated_win_string(&self.engine_sound)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+    self.motion.export(section, ini);
+    self.skeleton.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("max_power", &self.startup_animation)
+      .set("owner_id", &self.engine_sound);
   }
 }
 

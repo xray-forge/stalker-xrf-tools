@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -57,6 +58,20 @@ impl AlifeObjectGeneric for AlifeObjectItemWeapon {
     writer.write_u8(self.elapsed_grenades)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("ammo_current", self.ammo_current.to_string())
+      .set("ammo_elapsed", self.ammo_elapsed.to_string())
+      .set("weapon_state", self.weapon_state.to_string())
+      .set("addon_flags", self.addon_flags.to_string())
+      .set("ammo_type", self.ammo_type.to_string())
+      .set("elapsed_grenades", self.elapsed_grenades.to_string());
   }
 }
 

@@ -179,7 +179,7 @@ impl GraphsChunk {
     )?;
 
     // Export cross-tables as separate chunk file.
-    let mut lct_file: File = create_export_file(&path.join("graphs_cross_tables.lct"))?;
+    let mut gct_file: File = create_export_file(&path.join("graphs_cross_tables.gct"))?;
     let mut cross_tables_writer: ChunkWriter = ChunkWriter::new();
 
     for (index, cross_table) in self.cross_tables.iter().enumerate() {
@@ -189,7 +189,7 @@ impl GraphsChunk {
       cross_tables_writer.write_all(&cross_table_writer.flush_chunk_into_buffer::<T>(index)?)?;
     }
 
-    cross_tables_writer.flush_raw_into_file(&mut lct_file)?;
+    cross_tables_writer.flush_raw_into_file(&mut gct_file)?;
 
     log::info!("Exported graphs chunk");
 

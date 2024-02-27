@@ -6,6 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -126,6 +127,39 @@ impl AlifeObjectGeneric for AlifeObjectHangingLamp {
     writer.write_f32::<Self::Order>(self.volumetric_distance)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+    self.skeleton.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("main_color", self.main_color.to_string())
+      .set("main_brightness", self.main_brightness.to_string())
+      .set("color_animator", &self.color_animator)
+      .set("main_range", self.main_range.to_string())
+      .set("light_flags", self.light_flags.to_string())
+      .set("startup_animation", &self.startup_animation)
+      .set("fixed_bones", &self.fixed_bones)
+      .set("health", self.health.to_string())
+      .set("virtual_size", self.virtual_size.to_string())
+      .set("ambient_radius", self.ambient_radius.to_string())
+      .set("ambient_power", self.ambient_power.to_string())
+      .set("ambient_texture", &self.ambient_texture)
+      .set("light_texture", &self.light_texture)
+      .set("light_bone", &self.light_bone)
+      .set("spot_cone_angle", self.spot_cone_angle.to_string())
+      .set("glow_texture", &self.glow_texture)
+      .set("glow_radius", self.glow_radius.to_string())
+      .set("light_ambient_bone", &self.light_ambient_bone)
+      .set("volumetric_quality", self.volumetric_quality.to_string())
+      .set(
+        "volumetric_intensity",
+        self.volumetric_intensity.to_string(),
+      )
+      .set("volumetric_distance", self.volumetric_distance.to_string());
   }
 }
 

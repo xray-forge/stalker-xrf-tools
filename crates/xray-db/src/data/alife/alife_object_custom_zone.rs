@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -51,6 +52,19 @@ impl AlifeObjectGeneric for AlifeObjectCustomZone {
     writer.write_u32::<Self::Order>(self.start_time_shift)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("max_power", self.max_power.to_string())
+      .set("owner_id", self.owner_id.to_string())
+      .set("enabled_time", self.enabled_time.to_string())
+      .set("disabled_time", self.disabled_time.to_string())
+      .set("start_time_shift", self.start_time_shift.to_string());
   }
 }
 
