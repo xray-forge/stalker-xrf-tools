@@ -4,9 +4,8 @@ use crate::data::patrol::patrol::Patrol;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
-use std::fs::File;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::{fmt, io};
 
 /// `CPatrolPathStorage::load` in xray engine.
@@ -52,42 +51,54 @@ impl PatrolsChunk {
 
   /// Export patrols data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let patrols_path: PathBuf = path.join("patrols.ltx");
-
-    let mut file: File = create_export_file(&patrols_path)?;
-    let mut config: Ini = Ini::new();
+    let mut patrols_config: Ini = Ini::new();
+    let mut patrol_points_config: Ini = Ini::new();
+    let mut patrol_links_config: Ini = Ini::new();
 
     for patrol in &self.patrols {
-      config
+      patrols_config
         .with_section(Some(&patrol.name))
-        .set("type", "patrol")
         .set("name", &patrol.name)
-        .set("points_count", patrol.points.len().to_string())
+        .set(
+          "points",
+          patrol
+            .points
+            .iter()
+            .map(|it| it.name.clone())
+            .collect::<Vec<_>>()
+            .join(","),
+        )
         .set("links_count", patrol.links.len().to_string());
 
-      // todo: Create linking section.
-      for (index, point) in patrol.points.iter().enumerate() {
-        config
-          .with_section(Some(format!("{}_point_{}", patrol.name, index)))
-          .set("type", "point")
-          .set("name", &point.name)
-          .set("flags", point.flags.to_string())
-          .set("position", point.position.to_string())
-          .set("level_vertex_id", point.level_vertex_id.to_string())
-          .set("game_vertex_id", point.game_vertex_id.to_string());
+      for point in &patrol.points {
+        point.export(
+          &format!("{}.{}", patrol.name, point.name),
+          &mut patrol_points_config,
+        );
       }
 
-      // todo: Create linking section.
       for (index, link) in patrol.links.iter().enumerate() {
-        config
-          .with_section(Some(format!("{}_link_{}", patrol.name, index)))
-          .set("type", "link")
-          .set("index", link.index.to_string())
-          .set("count", link.links.len().to_string()); // todo: Links list.
+        link.export(
+          &format!("{}.{}", patrol.name, index),
+          &mut patrol_links_config,
+        );
       }
     }
 
-    export_ini_to_file(&config, &mut file)?;
+    export_ini_to_file(
+      &patrols_config,
+      &mut create_export_file(&path.join("patrols.ltx"))?,
+    )?;
+
+    export_ini_to_file(
+      &patrol_points_config,
+      &mut create_export_file(&path.join("patrol_points.ltx"))?,
+    )?;
+
+    export_ini_to_file(
+      &patrol_links_config,
+      &mut create_export_file(&path.join("patrol_links.ltx"))?,
+    )?;
 
     log::info!("Exported patrols chunk");
 

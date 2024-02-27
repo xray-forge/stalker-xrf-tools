@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -38,7 +39,7 @@ impl PatrolLink {
     let mut vertices: Vec<(u32, f32)> = Vec::new();
 
     for _ in 0..count {
-      let to: u32 = chunk.read_u32::<T>()?;
+      let to: u32 = chunk.read_u32::<T>()?; // from->to in u16.
       let weight: f32 = chunk.read_f32::<T>()?;
 
       vertices.push((to, weight));
@@ -75,6 +76,21 @@ impl PatrolLink {
     }
 
     Ok(())
+  }
+
+  /// Export patrol link data into ini.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("index", self.index.to_string())
+      .set("count", self.links.len().to_string());
+
+    for (index, (from, weight)) in self.links.iter().enumerate() {
+      ini
+        .with_section(Some(section))
+        .set(format!("from.{index}"), from.to_string())
+        .set(format!("weight.{index}"), weight.to_string());
+    }
   }
 }
 

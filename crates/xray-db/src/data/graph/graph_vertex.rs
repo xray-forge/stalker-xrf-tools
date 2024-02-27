@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
+use crate::export::file_export::export_vector_to_string;
 use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
@@ -68,11 +69,19 @@ impl GraphVertex {
       .set("game_point", self.game_point.to_string())
       .set("level_id", self.level_id.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
-      .set("vertex_type", self.vertex_type.0.to_string()) // todo: Write bytes.
       .set("edge_offset", self.edge_offset.to_string())
       .set("level_point_offset", self.level_point_offset.to_string())
       .set("edge_count", self.edge_count.to_string())
-      .set("level_point_count", self.level_point_count.to_string());
+      .set("level_point_count", self.level_point_count.to_string())
+      .set(
+        "vertex_type",
+        export_vector_to_string(&vec![
+          self.vertex_type.0,
+          self.vertex_type.1,
+          self.vertex_type.2,
+          self.vertex_type.3,
+        ]),
+      );
   }
 }
 

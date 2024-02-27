@@ -42,7 +42,7 @@ impl AlifeObjectGeneric for AlifeObjectShape {
   fn export(&self, section: &String, ini: &mut Ini) {
     self.base.export(section, ini);
 
-    ini.with_section(Some(section)).set("shape", "todo"); // todo: Write shape.
+    Shape::export_shapes(&self.shape, section, ini);
   }
 }
 

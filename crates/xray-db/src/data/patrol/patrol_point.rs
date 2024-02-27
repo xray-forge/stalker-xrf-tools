@@ -3,6 +3,7 @@ use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 use std::io::Write;
 
@@ -95,6 +96,17 @@ impl PatrolPoint {
     writer.write_u16::<T>(self.game_vertex_id)?;
 
     Ok(())
+  }
+
+  /// Export patrol point data into ini.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("name", &self.name)
+      .set("flags", self.flags.to_string())
+      .set("position", self.position.to_string())
+      .set("level_vertex_id", self.level_vertex_id.to_string())
+      .set("game_vertex_id", self.game_vertex_id.to_string());
   }
 }
 
