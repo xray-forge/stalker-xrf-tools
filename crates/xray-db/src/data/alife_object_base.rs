@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::constants::FLAG_SPAWN_DESTROY_ON_SPAWN;
+use crate::constants::{FLAG_SPAWN_DESTROY_ON_SPAWN, NET_ACTION_SPAWN};
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
@@ -57,7 +57,7 @@ impl AlifeObjectBase {
 
     let net_action: u16 = spawn_chunk.read_u16::<T>()?;
 
-    assert_eq!(net_action, 1); // todo: Constant for action ID.
+    assert_eq!(net_action, NET_ACTION_SPAWN);
 
     let section: String = spawn_chunk.read_null_terminated_win_string()?;
     let clsid: ClsId = ClsId::from_section(&section);
@@ -236,7 +236,6 @@ impl AlifeObjectBase {
 
     self.inherited.export(&section, ini);
 
-    // todo: Write inherited data.
     // todo: Write update data.
   }
 }

@@ -6,6 +6,7 @@ use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 /// Represents script extension of base server smart cover class.
@@ -56,6 +57,25 @@ impl AlifeObjectGeneric for AlifeSmartCover {
     }
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("last_description", &self.last_description)
+      .set("loopholes", self.loopholes.len().to_string())
+      .set(
+        "loopholes",
+        self
+          .loopholes
+          .iter()
+          .map(|loophole| format!("{},{}", loophole.name, loophole.enabled))
+          .collect::<Vec<_>>()
+          .join(","),
+      );
   }
 }
 

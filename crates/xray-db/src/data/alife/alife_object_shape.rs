@@ -6,6 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -35,6 +36,13 @@ impl AlifeObjectGeneric for AlifeObjectShape {
     writer.write_shape_description::<Self::Order>(&self.shape)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini.with_section(Some(section)).set("shape", "todo"); // todo: Write shape.
   }
 }
 

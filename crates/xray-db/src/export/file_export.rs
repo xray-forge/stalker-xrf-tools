@@ -1,4 +1,5 @@
 use ini::{Ini, WriteOption};
+use std::fmt::Display;
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::Path;
@@ -28,4 +29,13 @@ pub fn export_ini_to_file(ini: &Ini, file: &mut File) -> io::Result<()> {
       ..Default::default()
     },
   )
+}
+
+/// Export ini file content to provided file.
+pub fn export_vector_to_string<T: Display>(vector: &Vec<T>) -> String {
+  vector
+    .iter()
+    .map(|x| x.to_string())
+    .collect::<Vec<_>>()
+    .join(",")
 }

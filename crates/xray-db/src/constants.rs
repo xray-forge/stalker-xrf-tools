@@ -17,3 +17,6 @@ pub const DEFAULT_LEVEL_BLOCK_SIZE: usize = 4096;
 pub const DEFAULT_VERTEX_BLOCK_SIZE: usize = 42;
 pub const DEFAULT_EDGE_BLOCK_SIZE: usize = 6;
 pub const DEFAULT_POINT_BLOCK_SIZE: usize = 20;
+
+pub const NET_ACTION_UPDATE: u16 = 0;
+pub const NET_ACTION_SPAWN: u16 = 1;

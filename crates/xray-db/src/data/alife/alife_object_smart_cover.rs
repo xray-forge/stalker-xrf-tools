@@ -6,6 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -62,6 +63,32 @@ impl AlifeObjectGeneric for AlifeObjectSmartCover {
     writer.write_u8(self.can_fire)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("description", &self.description)
+      .set("hold_position_time", self.hold_position_time.to_string())
+      .set(
+        "enter_min_enemy_distance",
+        self.enter_min_enemy_distance.to_string(),
+      )
+      .set(
+        "exit_min_enemy_distance",
+        self.exit_min_enemy_distance.to_string(),
+      )
+      .set(
+        "exit_min_enemy_distance",
+        self.exit_min_enemy_distance.to_string(),
+      )
+      .set("is_combat_cover", self.is_combat_cover.to_string())
+      .set("can_fire", self.can_fire.to_string());
+
+    Shape::export_shapes(&self.shape, section, ini);
   }
 }
 

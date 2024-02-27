@@ -3,8 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_export::export_vector_to_string;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -69,6 +71,28 @@ impl AlifeObjectGeneric for AlifeObjectCreature {
     writer.write_u64::<Self::Order>(self.game_death_time)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("team", self.team.to_string())
+      .set("squad", self.squad.to_string())
+      .set("group", self.group.to_string())
+      .set("health", self.health.to_string())
+      .set(
+        "dynamic_out_restrictions",
+        &export_vector_to_string(&self.dynamic_out_restrictions),
+      )
+      .set(
+        "dynamic_in_restrictions",
+        &export_vector_to_string(&self.dynamic_in_restrictions),
+      )
+      .set("killer_id", self.killer_id.to_string())
+      .set("game_death_time", self.killer_id.to_string());
   }
 }
 

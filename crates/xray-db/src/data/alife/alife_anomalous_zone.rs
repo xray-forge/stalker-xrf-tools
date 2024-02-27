@@ -6,6 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -37,6 +38,16 @@ impl AlifeObjectGeneric for AlifeAnomalousZone {
     Time::write_optional::<Self::Order>(&self.last_spawn_time, writer)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+
+    ini.with_section(Some(section)).set(
+      "last_spawn_time",
+      &Time::export_to_string(&self.last_spawn_time),
+    );
   }
 }
 

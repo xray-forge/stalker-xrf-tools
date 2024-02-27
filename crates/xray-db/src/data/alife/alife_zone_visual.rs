@@ -7,6 +7,7 @@ use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -60,6 +61,21 @@ impl AlifeObjectGeneric for AlifeZoneVisual {
     Time::write_optional::<Self::Order>(&self.last_spawn_time, writer)?;
 
     Ok(())
+  }
+
+  /// Export object data into ini file.
+  fn export(&self, section: &String, ini: &mut Ini) {
+    self.base.export(section, ini);
+    self.visual.export(section, ini);
+
+    ini
+      .with_section(Some(section))
+      .set("idle_animation", &self.idle_animation)
+      .set("attack_animation", &self.attack_animation)
+      .set(
+        "last_spawn_time",
+        &Time::export_to_string(&self.last_spawn_time),
+      );
   }
 }
 

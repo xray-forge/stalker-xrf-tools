@@ -9,7 +9,5 @@ pub trait AlifeObjectGeneric: Debug + Send {
 
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()>;
 
-  fn export(&self, _: &String, _: &mut Ini) {
-    // todo;
-  }
+  fn export(&self, _: &String, _: &mut Ini);
 }

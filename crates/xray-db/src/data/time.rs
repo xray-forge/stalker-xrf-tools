@@ -74,8 +74,17 @@ impl Time {
     Ok(())
   }
 
+  /// Cast optional time object to serialized string.
+  pub fn export_to_string(time: &Option<Time>) -> String {
+    time.as_ref().map_or(String::from("nil"), |t| t.to_string())
+  }
+
+  /// Cast time object to serialized string.
   pub fn to_string(&self) -> String {
-    String::from("todo")
+    String::from(format!(
+      "{},{},{},{},{},{},{}",
+      self.year, self.minute, self.day, self.hour, self.minute, self.second, self.millis
+    ))
   }
 }
 
