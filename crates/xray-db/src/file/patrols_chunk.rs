@@ -1,10 +1,12 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
-use crate::export::file_export::create_export_file;
+use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
+use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{fmt, io};
 
 /// `CPatrolPathStorage::load` in xray engine.
@@ -49,10 +51,38 @@ impl PatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
-    let patrols_path: PathBuf = path.clone().join("patrols.ltx");
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+    let patrols_path: PathBuf = path.join("patrols.ltx");
 
-    create_export_file(&patrols_path)?;
+    let mut file: File = create_export_file(&patrols_path)?;
+    let mut config: Ini = Ini::new();
+
+    for patrol in &self.patrols {
+      config
+        .with_section(Some(&patrol.name))
+        .set("name", &patrol.name)
+        .set("points_count", patrol.points.len().to_string())
+        .set("links_count", patrol.links.len().to_string());
+
+      for (index, point) in patrol.points.iter().enumerate() {
+        config
+          .with_section(Some(format!("{}_point_{}", patrol.name, index)))
+          .set("name", &point.name)
+          .set("flags", point.flags.to_string())
+          .set("position", point.position.0.to_string()) // todo: Full pos.
+          .set("level_vertex_id", point.level_vertex_id.to_string())
+          .set("game_vertex_id", point.game_vertex_id.to_string());
+      }
+
+      for (index, link) in patrol.links.iter().enumerate() {
+        config
+          .with_section(Some(format!("{}_link_{}", patrol.name, index)))
+          .set("index", link.index.to_string())
+          .set("count", link.links.len().to_string()); // todo: Links list.
+      }
+    }
+
+    export_ini_to_file(&config, &mut file)?;
 
     log::info!("Exported patrols chunk, {:?}", patrols_path);
 

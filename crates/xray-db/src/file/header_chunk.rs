@@ -1,9 +1,11 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::export::file_export::create_export_file;
+use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
+use std::fs::File;
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, PartialEq)]
 pub struct HeaderChunk {
@@ -50,10 +52,21 @@ impl HeaderChunk {
   }
 
   /// Export header data into provided path.
-  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
-    let header_path: PathBuf = path.clone().join("header.ltx");
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+    let header_path: PathBuf = path.join("header.ltx");
 
-    create_export_file(&header_path)?;
+    let mut file: File = create_export_file(&header_path)?;
+    let mut config: Ini = Ini::new();
+
+    config
+      .with_general_section()
+      .set("version", self.version.to_string())
+      .set("guid", self.guid.to_string())
+      .set("graph_guid", self.graph_guid.to_string())
+      .set("count", self.count.to_string())
+      .set("level_count", self.level_count.to_string());
+
+    export_ini_to_file(&config, &mut file)?;
 
     log::info!("Exported header chunk, {:?}", header_path);
 
