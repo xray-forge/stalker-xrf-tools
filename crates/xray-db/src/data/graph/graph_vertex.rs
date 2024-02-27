@@ -2,6 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::types::{U32Bytes, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -56,6 +57,21 @@ impl GraphVertex {
     writer.write_u8(self.level_point_count)?;
 
     Ok(())
+  }
+
+  /// Export graph vertex data into ini.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("level_point", self.level_point.0.to_string()) // todo: Write vector.
+      .set("game_point", self.game_point.0.to_string()) // todo: Write vector.
+      .set("level_id", self.level_id.to_string())
+      .set("level_vertex_id", self.level_vertex_id.to_string())
+      .set("vertex_type", self.vertex_type.0.to_string()) // todo: Write bytes.
+      .set("edge_offset", self.edge_offset.to_string())
+      .set("level_point_offset", self.level_point_offset.to_string())
+      .set("edge_count", self.edge_count.to_string())
+      .set("level_point_count", self.level_point_count.to_string());
   }
 }
 

@@ -1,9 +1,11 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
-use crate::export::file_export::create_export_file;
+use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use std::path::PathBuf;
+use ini::Ini;
+use std::fs::File;
+use std::path::{Path, PathBuf};
 use std::{fmt, io};
 
 /// Artefacts spawns chunks.
@@ -55,12 +57,19 @@ impl ArtefactSpawnsChunk {
   }
 
   /// Export artefact spawns data into provided path.
-  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
-    let artefact_spawns_path: PathBuf = path.clone().join("artefact_spawns.ltx");
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+    let artefact_spawns_path: PathBuf = path.join("artefact_spawns.ltx");
 
-    create_export_file(&artefact_spawns_path)?;
+    let mut file: File = create_export_file(&artefact_spawns_path)?;
+    let mut config: Ini = Ini::new();
 
-    log::info!("Exported artefact spawns chunk, {:?}", artefact_spawns_path);
+    for (index, node) in self.nodes.iter().enumerate() {
+      node.export(&index.to_string(), &mut config);
+    }
+
+    export_ini_to_file(&config, &mut file)?;
+
+    log::info!("Exported artefact spawns chunk");
 
     Ok(())
   }

@@ -2,6 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::types::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Debug, PartialEq)]
@@ -25,13 +26,22 @@ impl ArtefactSpawnPoint {
     })
   }
 
-  /// Write spawn point data into the writer.
+  /// Write artefact spawn point data into the writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 
     Ok(())
+  }
+
+  /// Export artefact spawn point data into ini.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("distance", self.distance.to_string())
+      .set("position", self.position.0.to_string()) // todo: Write vector.
+      .set("level_vertex_id", self.level_vertex_id.to_string());
   }
 }
 

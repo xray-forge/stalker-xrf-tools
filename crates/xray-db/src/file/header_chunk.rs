@@ -68,7 +68,7 @@ impl HeaderChunk {
 
     export_ini_to_file(&config, &mut file)?;
 
-    log::info!("Exported header chunk, {:?}", header_path);
+    log::info!("Exported header chunk");
 
     Ok(())
   }

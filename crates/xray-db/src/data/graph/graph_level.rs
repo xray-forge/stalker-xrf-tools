@@ -2,6 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::types::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 /// `GameGraph::SLevel::load` in xray codebase.
@@ -40,6 +41,17 @@ impl GraphLevel {
     writer.write_u128::<T>(self.guid)?;
 
     Ok(())
+  }
+
+  /// Export graph level data into ini.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("name", &self.name)
+      .set("section", &self.section)
+      .set("offset", self.offset.0.to_string()) // todo: Write vector.
+      .set("id", self.id.to_string())
+      .set("guid", self.guid.to_string());
   }
 }
 

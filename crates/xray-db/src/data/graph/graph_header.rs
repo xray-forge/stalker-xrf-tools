@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -43,6 +44,18 @@ impl GraphHeader {
     writer.write_u8(self.level_count)?;
 
     Ok(())
+  }
+
+  /// Export graph header data into level ini.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("version", self.version.to_string())
+      .set("vertex_count", self.vertex_count.to_string())
+      .set("edges_count", self.edges_count.to_string())
+      .set("point_count", self.point_count.to_string())
+      .set("level_count", self.level_count.to_string())
+      .set("guid", self.guid.to_string());
   }
 }
 

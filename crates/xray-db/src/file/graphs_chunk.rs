@@ -7,10 +7,11 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
-use crate::export::file_export::create_export_file;
+use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, WriteBytesExt};
+use ini::Ini;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::Path;
 use std::{fmt, io};
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
@@ -119,12 +120,64 @@ impl GraphsChunk {
   }
 
   /// Export graphs data into provided path.
-  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
-    let graphs_path: PathBuf = path.clone().join("graphs.ltx");
+  /// Constructs many files with contained data.
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+    let mut graphs_header_config: Ini = Ini::new();
 
-    create_export_file(&graphs_path)?;
+    self
+      .header
+      .export(&String::from("header"), &mut graphs_header_config);
 
-    log::info!("Exported graphs chunk, {:?}", graphs_path);
+    export_ini_to_file(
+      &graphs_header_config,
+      &mut create_export_file(&path.join("graphs_header.ltx"))?,
+    )?;
+
+    let mut graphs_level_config: Ini = Ini::new();
+
+    for (index, level) in self.levels.iter().enumerate() {
+      level.export(&index.to_string(), &mut graphs_level_config);
+    }
+
+    export_ini_to_file(
+      &graphs_level_config,
+      &mut create_export_file(&path.join("graphs_levels.ltx"))?,
+    )?;
+
+    let mut graphs_vertices_config: Ini = Ini::new();
+
+    for (index, vertex) in self.vertices.iter().enumerate() {
+      vertex.export(&index.to_string(), &mut graphs_vertices_config);
+    }
+
+    export_ini_to_file(
+      &graphs_vertices_config,
+      &mut create_export_file(&path.join("graphs_vertices.ltx"))?,
+    )?;
+
+    let mut graphs_points_config: Ini = Ini::new();
+
+    for (index, point) in self.points.iter().enumerate() {
+      point.export(&index.to_string(), &mut graphs_points_config);
+    }
+
+    export_ini_to_file(
+      &graphs_points_config,
+      &mut create_export_file(&path.join("graphs_points.ltx"))?,
+    )?;
+
+    let mut graphs_edges_config: Ini = Ini::new();
+
+    for (index, edge) in self.edges.iter().enumerate() {
+      edge.export(&index.to_string(), &mut graphs_edges_config);
+    }
+
+    export_ini_to_file(
+      &graphs_edges_config,
+      &mut create_export_file(&path.join("graphs_edges.ltx"))?,
+    )?;
+
+    log::info!("Exported graphs chunk");
 
     Ok(())
   }

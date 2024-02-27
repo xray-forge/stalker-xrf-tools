@@ -60,13 +60,16 @@ impl PatrolsChunk {
     for patrol in &self.patrols {
       config
         .with_section(Some(&patrol.name))
+        .set("type", "patrol")
         .set("name", &patrol.name)
         .set("points_count", patrol.points.len().to_string())
         .set("links_count", patrol.links.len().to_string());
 
+      // todo: Create linking section.
       for (index, point) in patrol.points.iter().enumerate() {
         config
           .with_section(Some(format!("{}_point_{}", patrol.name, index)))
+          .set("type", "point")
           .set("name", &point.name)
           .set("flags", point.flags.to_string())
           .set("position", point.position.0.to_string()) // todo: Full pos.
@@ -74,9 +77,11 @@ impl PatrolsChunk {
           .set("game_vertex_id", point.game_vertex_id.to_string());
       }
 
+      // todo: Create linking section.
       for (index, link) in patrol.links.iter().enumerate() {
         config
           .with_section(Some(format!("{}_link_{}", patrol.name, index)))
+          .set("type", "link")
           .set("index", link.index.to_string())
           .set("count", link.links.len().to_string()); // todo: Links list.
       }
@@ -84,7 +89,7 @@ impl PatrolsChunk {
 
     export_ini_to_file(&config, &mut file)?;
 
-    log::info!("Exported patrols chunk, {:?}", patrols_path);
+    log::info!("Exported patrols chunk");
 
     Ok(())
   }

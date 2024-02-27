@@ -6,6 +6,7 @@ use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
 use crate::types::{SpawnByteOrder, Vector3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 use std::io::Write;
 
@@ -204,6 +205,36 @@ impl AlifeObjectBase {
     writer.write_all(data_writer.flush_chunk_into_buffer::<T>(1)?.as_slice())?;
 
     Ok(())
+  }
+
+  /// Export alife object data into ini file.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("index", self.index.to_string())
+      .set("id", self.id.to_string())
+      .set("net_action", self.net_action.to_string())
+      .set("section", &self.section)
+      .set("name", &self.name)
+      .set("script_game_id", self.script_game_id.to_string())
+      .set("script_rp", self.script_rp.to_string())
+      .set("position", self.position.0.to_string()) // todo: Write vector.
+      .set("direction", self.position.0.to_string()) // todo: Write vector.
+      .set("respawn_time", self.respawn_time.to_string())
+      .set("parent_id", self.parent_id.to_string())
+      .set("phantom_id", self.phantom_id.to_string())
+      .set("script_flags", self.script_flags.to_string())
+      .set("version", self.version.to_string())
+      .set(
+        "cse_abstract_unknown",
+        self.cse_abstract_unknown.to_string(),
+      )
+      .set("script_version", self.script_version.to_string())
+      .set("spawn_id", self.script_version.to_string())
+      .set("index", self.index.to_string());
+
+    // todo: Write inherited data.
+    // todo: Write update data.
   }
 }
 

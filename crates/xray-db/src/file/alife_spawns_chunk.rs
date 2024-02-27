@@ -2,10 +2,12 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife_object_base::AlifeObjectBase;
-use crate::export::file_export::create_export_file;
+use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
+use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{fmt, io};
 
 /// ALife spawns chunk has the following structure:
@@ -80,12 +82,19 @@ impl ALifeSpawnsChunk {
   }
 
   /// Export alife spawns data into provided path.
-  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
-    let patrols_path: PathBuf = path.clone().join("alife_spawns.ltx");
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+    let alife_spawns_path: PathBuf = path.join("alife_spawns.ltx");
 
-    create_export_file(&patrols_path)?;
+    let mut file: File = create_export_file(&alife_spawns_path)?;
+    let mut config: Ini = Ini::new();
 
-    log::info!("Exported alife spawns chunk, {:?}", patrols_path);
+    for object in &self.objects {
+      object.export(&object.index.to_string(), &mut config);
+    }
+
+    export_ini_to_file(&config, &mut file)?;
+
+    log::info!("Exported alife spawns chunk");
 
     Ok(())
   }

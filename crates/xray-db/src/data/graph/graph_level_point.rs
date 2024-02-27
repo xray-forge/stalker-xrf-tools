@@ -2,6 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::types::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -32,6 +33,15 @@ impl GraphLevelPoint {
     writer.write_f32::<T>(self.distance)?;
 
     Ok(())
+  }
+
+  /// Export graph level point data into ini.
+  pub fn export(&self, section: &String, ini: &mut Ini) {
+    ini
+      .with_section(Some(section))
+      .set("position", self.position.0.to_string()) // todo: Write vector.
+      .set("level_vertex_id", self.level_vertex_id.to_string())
+      .set("distance", self.distance.to_string());
   }
 }
 
