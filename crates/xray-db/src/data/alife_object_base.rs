@@ -1,10 +1,13 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::constants::{FLAG_SPAWN_DESTROY_ON_SPAWN, NET_ACTION_SPAWN};
+use crate::constants::{
+  FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
+};
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
+use crate::export::file_export::export_bytes_to_windows_1251_string;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
@@ -29,14 +32,12 @@ pub struct AlifeObjectBase {
   pub phantom_id: u16,
   pub script_flags: u16,
   pub version: u16,
-  pub cse_abstract_unknown: u16,
+  pub game_type: u16,
   pub script_version: u16,
   pub client_data_size: u16,
   pub spawn_id: u16,
   pub inherited_size: u16,
   pub inherited: Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>,
-  pub update_data_length: u16,
-  pub update_size: u16,
   pub update_data: Vec<u8>, // todo: Parse.
 }
 
@@ -79,11 +80,11 @@ impl AlifeObjectBase {
     };
 
     assert!(
-      version > 120,
+      version > MINIMAL_SUPPORTED_SPAWN_VERSION,
       "Unexpected version of alife object in spawn file, flag is {script_flags}."
     );
 
-    let cse_abstract_unknown: u16 = spawn_chunk.read_u16::<T>()?;
+    let game_type: u16 = spawn_chunk.read_u16::<T>()?;
     let script_version: u16 = spawn_chunk.read_u16::<T>()?;
     let client_data_size: u16 = spawn_chunk.read_u16::<T>()?;
 
@@ -132,14 +133,12 @@ impl AlifeObjectBase {
       phantom_id,
       script_flags,
       version,
-      cse_abstract_unknown,
+      game_type,
       script_version,
       client_data_size,
       spawn_id,
       inherited_size,
       inherited,
-      update_data_length,
-      update_size,
       update_data,
     })
   }
@@ -172,7 +171,7 @@ impl AlifeObjectBase {
     object_data_writer.write_u16::<T>(self.phantom_id)?;
     object_data_writer.write_u16::<T>(self.script_flags)?;
     object_data_writer.write_u16::<T>(self.version)?;
-    object_data_writer.write_u16::<T>(self.cse_abstract_unknown)?;
+    object_data_writer.write_u16::<T>(self.game_type)?;
     object_data_writer.write_u16::<T>(self.script_version)?;
     object_data_writer.write_u16::<T>(self.client_data_size)?;
     object_data_writer.write_u16::<T>(self.spawn_id)?;
@@ -226,17 +225,17 @@ impl AlifeObjectBase {
       .set("phantom_id", self.phantom_id.to_string())
       .set("script_flags", self.script_flags.to_string())
       .set("version", self.version.to_string())
-      .set(
-        "cse_abstract_unknown",
-        self.cse_abstract_unknown.to_string(),
-      )
+      .set("cse_abstract_unknown", self.game_type.to_string())
       .set("script_version", self.script_version.to_string())
       .set("spawn_id", self.script_version.to_string())
       .set("index", self.index.to_string());
 
     self.inherited.export(&section, ini);
 
-    // todo: Write update data.
+    ini.with_section(Some(section)).set(
+      "update_data",
+      &export_bytes_to_windows_1251_string(&self.update_data),
+    );
   }
 }
 
@@ -280,7 +279,7 @@ mod tests {
       phantom_id: 0,
       script_flags: 33,
       version: 128,
-      cse_abstract_unknown: 1,
+      game_type: 1,
       script_version: 10,
       client_data_size: 0,
       spawn_id: 2354,
@@ -305,8 +304,6 @@ mod tests {
           upgrades_count: 0,
         },
       }),
-      update_data_length: 19,
-      update_size: 0,
       update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     };
 
@@ -344,16 +341,11 @@ mod tests {
     assert_eq!(read_object.phantom_id, object.phantom_id);
     assert_eq!(read_object.script_flags, object.script_flags);
     assert_eq!(read_object.version, object.version);
-    assert_eq!(
-      read_object.cse_abstract_unknown,
-      object.cse_abstract_unknown
-    );
+    assert_eq!(read_object.game_type, object.game_type);
     assert_eq!(read_object.script_version, object.script_version);
     assert_eq!(read_object.client_data_size, object.client_data_size);
     assert_eq!(read_object.spawn_id, object.spawn_id);
     assert_eq!(read_object.inherited_size, object.inherited_size);
-    assert_eq!(read_object.update_data_length, object.update_data_length);
-    assert_eq!(read_object.update_size, object.update_size);
     assert_eq!(read_object.update_data, object.update_data);
 
     Ok(())
