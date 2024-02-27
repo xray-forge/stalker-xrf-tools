@@ -80,7 +80,7 @@ pub fn unpack_spawn_file(matches: &ArgMatches) -> io::Result<()> {
 
   log::info!("Read spawn file took: {:?}ms", read_duration.as_millis());
   log::info!(
-    "Unpack spawn file took: {:?}ms",
+    "Export spawn file took: {:?}ms",
     unpack_duration.as_millis()
   );
 

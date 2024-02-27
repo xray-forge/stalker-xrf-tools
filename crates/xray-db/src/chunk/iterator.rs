@@ -74,7 +74,7 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
   }
 }
 
-/// Iterate over data in chunk slice, which is stored like [size][content][size][content].
+/// Iterate over data in chunk slice, which is stored like (size)(content)(size)(content).
 #[derive(Debug)]
 pub struct ChunkSizePackedIterator<'lifetime> {
   pub index: u32,

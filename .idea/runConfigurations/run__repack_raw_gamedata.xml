@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="run: repack raw gamedata" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="run">
-    <option name="command" value="run --package stalker-xrf-tool --bin stalker-xrf-tool -- repack-spawn -p F:\Documents\Projects\gamedata_raw\spawns\all.spawn -d .\target\assets\output.spawn" />
+    <option name="command" value="run --package stalker-xrf-tools --bin stalker-xrf-tools -- repack-spawn -p F:\Documents\Projects\gamedata_raw\spawns\all.spawn -d .\target\assets\output.spawn" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />
