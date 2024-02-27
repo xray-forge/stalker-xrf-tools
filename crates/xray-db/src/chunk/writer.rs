@@ -30,6 +30,12 @@ impl ChunkWriter {
     file.write(self.buffer.as_slice())
   }
 
+  /// Flush all the written data as raw buffer into file.
+  pub fn flush_raw_into_file(&mut self, file: &mut File) -> io::Result<()> {
+    self.buffer.flush()?;
+    file.write_all(self.buffer.as_slice())
+  }
+
   /// Flush all the written data as chunk into the file.
   pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, index: usize) -> io::Result<Vec<u8>> {
     self.buffer.flush()?;

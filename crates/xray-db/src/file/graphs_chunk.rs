@@ -10,6 +10,7 @@ use crate::data::graph::graph_vertex::GraphVertex;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, WriteBytesExt};
 use ini::Ini;
+use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::{fmt, io};
@@ -176,6 +177,19 @@ impl GraphsChunk {
       &graphs_edges_config,
       &mut create_export_file(&path.join("graphs_edges.ltx"))?,
     )?;
+
+    // Export cross-tables as separate chunk file.
+    let mut lct_file: File = create_export_file(&path.join("graphs_cross_tables.lct"))?;
+    let mut cross_tables_writer: ChunkWriter = ChunkWriter::new();
+
+    for (index, cross_table) in self.cross_tables.iter().enumerate() {
+      let mut cross_table_writer: ChunkWriter = ChunkWriter::new();
+
+      cross_table.write::<T>(&mut cross_table_writer)?;
+      cross_tables_writer.write_all(&cross_table_writer.flush_chunk_into_buffer::<T>(index)?)?;
+    }
+
+    cross_tables_writer.flush_raw_into_file(&mut lct_file)?;
 
     log::info!("Exported graphs chunk");
 
