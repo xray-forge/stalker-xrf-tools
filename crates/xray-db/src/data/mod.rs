@@ -6,3 +6,4 @@ pub mod meta;
 pub mod patrol;
 pub mod shape;
 pub mod time;
+pub mod vector_3d;

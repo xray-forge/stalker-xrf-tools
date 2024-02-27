@@ -1,13 +1,13 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::types::Vector3d;
+use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
 use std::io;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ArtefactSpawnPoint {
-  pub position: (f32, f32, f32),
+  pub position: Vector3d,
   pub level_vertex_id: u32,
   pub distance: f32,
 }
@@ -40,7 +40,7 @@ impl ArtefactSpawnPoint {
     ini
       .with_section(Some(section))
       .set("distance", self.distance.to_string())
-      .set("position", self.position.0.to_string()) // todo: Write vector.
+      .set("position", self.position.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string());
   }
 }
@@ -50,6 +50,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -63,7 +64,7 @@ mod tests {
     let filename: String =
       get_test_chunk_file_sub_dir(file!(), &String::from("artefact_spawn_point_simple.chunk"));
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
-      position: (10.5, 20.3, -40.5),
+      position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,
       distance: 500.55,
     };

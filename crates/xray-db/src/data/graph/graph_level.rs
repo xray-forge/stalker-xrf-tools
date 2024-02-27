@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::types::Vector3d;
+use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
 use std::io;
@@ -49,7 +49,7 @@ impl GraphLevel {
       .with_section(Some(section))
       .set("name", &self.name)
       .set("section", &self.section)
-      .set("offset", self.offset.0.to_string()) // todo: Write vector.
+      .set("offset", self.offset.to_string())
       .set("id", self.id.to_string())
       .set("guid", self.guid.to_string());
   }
@@ -60,6 +60,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level::GraphLevel;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -77,7 +78,7 @@ mod tests {
       name: String::from("test-level"),
       section: String::from("test-level-section"),
       guid: 4000060000,
-      offset: (0.5, 5.55, -1.5),
+      offset: Vector3d::new(0.5, 5.55, -1.5),
     };
 
     level.write::<SpawnByteOrder>(&mut writer)?;

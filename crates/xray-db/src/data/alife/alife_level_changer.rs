@@ -3,7 +3,8 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-use crate::types::{SpawnByteOrder, Vector3d};
+use crate::data::vector_3d::Vector3d;
+use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 
@@ -12,8 +13,8 @@ pub struct AlifeLevelChanger {
   pub base: AlifeObjectSpaceRestrictor,
   pub dest_game_vertex_id: u16,
   pub dest_level_vertex_id: u32,
-  pub dest_position: Vector3d,
-  pub dest_direction: Vector3d,
+  pub dest_position: Vector3d<f32>,
+  pub dest_direction: Vector3d<f32>,
   pub angle_y: f32,
   pub dest_level_name: String,
   pub dest_graph_point: String,
@@ -96,6 +97,7 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::shape::Shape;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -122,20 +124,20 @@ mod tests {
           spawn_story_id: 213,
         },
         shape: vec![
-          Shape::Sphere(((4.5, 0.5, 11.5), 1.0)),
+          Shape::Sphere((Vector3d::new(4.5, 0.5, 11.5), 1.0)),
           Shape::Box((
-            (1.5, 2.5, 73.1),
-            (5.1, 3.2, 2.3),
-            (1.0, 3.0, 6.4),
-            (9.2, 3.3, 3.0),
+            Vector3d::new(1.5, 2.5, 73.1),
+            Vector3d::new(5.1, 3.2, 2.3),
+            Vector3d::new(1.0, 3.0, 6.4),
+            Vector3d::new(9.2, 3.3, 3.0),
           )),
         ],
         restrictor_type: 3,
       },
       dest_game_vertex_id: 312,
       dest_level_vertex_id: 3312,
-      dest_position: (4.0, 3.0, 2.0),
-      dest_direction: (1.0, 2.0, 3.0),
+      dest_position: Vector3d::new(4.0, 3.0, 2.0),
+      dest_direction: Vector3d::new(1.0, 2.0, 3.0),
       angle_y: 35.0,
       dest_level_name: String::from("dest-level"),
       dest_graph_point: String::from("dest-graph-point"),

@@ -1,6 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::types::Vector3d;
+use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
 use std::io;
@@ -39,7 +39,7 @@ impl GraphLevelPoint {
   pub fn export(&self, section: &String, ini: &mut Ini) {
     ini
       .with_section(Some(section))
-      .set("position", self.position.0.to_string()) // todo: Write vector.
+      .set("position", self.position.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
       .set("distance", self.distance.to_string());
   }
@@ -50,6 +50,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -63,7 +64,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let point: GraphLevelPoint = GraphLevelPoint {
-      position: (10.5, 11.6, 12.7),
+      position: Vector3d::new(10.5, 11.6, 12.7),
       distance: 400.50,
       level_vertex_id: 8000,
     };

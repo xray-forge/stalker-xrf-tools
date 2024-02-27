@@ -1,6 +1,5 @@
+use crate::data::vector_3d::Vector3d;
 use byteorder::LittleEndian;
-
-pub type Vector3d<T = f32> = (T, T, T);
 
 pub type Sphere3d<T = f32> = (Vector3d<T>, T);
 

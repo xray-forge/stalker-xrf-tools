@@ -130,6 +130,7 @@ mod tests {
   use crate::data::patrol::patrol::Patrol;
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -148,14 +149,14 @@ mod tests {
       points: vec![
         PatrolPoint {
           name: String::from("patrol-point-1"),
-          position: (7.5, -2.3, -100.0),
+          position: Vector3d::new(7.5, -2.3, -100.0),
           flags: 33,
           level_vertex_id: 63463634,
           game_vertex_id: 555,
         },
         PatrolPoint {
           name: String::from("patrol-point-2"),
-          position: (2.5, -5.3, 3.0),
+          position: Vector3d::new(2.5, -5.3, 3.0),
           flags: 64,
           level_vertex_id: 5500,
           game_vertex_id: 666,
@@ -201,14 +202,14 @@ mod tests {
         points: vec![
           PatrolPoint {
             name: String::from("patrol-point-1"),
-            position: (1.5, -2.3, 1.0),
+            position: Vector3d::new(1.5, -2.3, 1.0),
             flags: 33,
             level_vertex_id: 250,
             game_vertex_id: 555,
           },
           PatrolPoint {
             name: String::from("patrol-point-2"),
-            position: (2.5, -5.3, 3.0),
+            position: Vector3d::new(2.5, -5.3, 3.0),
             flags: 64,
             level_vertex_id: 5500,
             game_vertex_id: 666,
@@ -224,14 +225,14 @@ mod tests {
         points: vec![
           PatrolPoint {
             name: String::from("patrol-point-1"),
-            position: (7.5, -4.3, 3.0),
+            position: Vector3d::new(7.5, -4.3, 3.0),
             flags: 1,
             level_vertex_id: 601,
             game_vertex_id: 541,
           },
           PatrolPoint {
             name: String::from("patrol-point-2"),
-            position: (2.5, -5.3, 3.0),
+            position: Vector3d::new(2.5, -5.3, 3.0),
             flags: 0,
             level_vertex_id: 600,
             game_vertex_id: 542,

@@ -50,6 +50,7 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
   use crate::data::shape::Shape;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -76,12 +77,12 @@ mod tests {
           spawn_story_id: 0,
         },
         shape: vec![
-          Shape::Sphere(((54.5, 0.5, 11.5), 1.0)),
+          Shape::Sphere((Vector3d::new(54.5, 0.5, 11.5), 1.0)),
           Shape::Box((
-            (51.5, 2.5, 73.1),
-            (55.1, 3.2, 2.3),
-            (51.0, 3.0, 6.4),
-            (59.2, 3.3, 3.0),
+            Vector3d::new(51.5, 2.5, 73.1),
+            Vector3d::new(55.1, 3.2, 2.3),
+            Vector3d::new(51.0, 3.0, 6.4),
+            Vector3d::new(59.2, 3.3, 3.0),
           )),
         ],
       },

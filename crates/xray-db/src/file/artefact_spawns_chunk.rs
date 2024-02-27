@@ -10,6 +10,7 @@ use std::{fmt, io};
 
 /// Artefacts spawns chunks.
 /// Is single plain chunk with nodes list in it.
+#[derive(Clone, PartialEq)]
 pub struct ArtefactSpawnsChunk {
   pub nodes: Vec<ArtefactSpawnPoint>,
 }
@@ -90,6 +91,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
+  use crate::data::vector_3d::Vector3d;
   use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -103,22 +105,22 @@ mod tests {
     let filename: String =
       get_test_chunk_file_sub_dir(file!(), &String::from("artefact_spawns.chunk"));
 
-    ArtefactSpawnsChunk {
+    let spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk {
       nodes: vec![
         ArtefactSpawnPoint {
-          position: (55.5, 44.4, -33.3),
+          position: Vector3d::new(55.5, 44.4, -33.3),
           level_vertex_id: 255,
           distance: 450.30,
         },
         ArtefactSpawnPoint {
-          position: (-21.0, 13.5, -4.0),
+          position: Vector3d::new(-21.0, 13.5, -4.0),
           level_vertex_id: 13,
           distance: 25.11,
         },
       ],
-    }
-    .write::<SpawnByteOrder>(&mut writer)
-    .unwrap();
+    };
+
+    spawns.write::<SpawnByteOrder>(&mut writer).unwrap();
 
     assert_eq!(writer.bytes_written(), 44);
 
@@ -140,21 +142,9 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let artefact_spawns: ArtefactSpawnsChunk =
+    let read_spawns: ArtefactSpawnsChunk =
       ArtefactSpawnsChunk::read_from_chunk::<SpawnByteOrder>(chunk).unwrap();
 
-    assert_eq!(artefact_spawns.nodes.len(), 2);
-
-    assert_eq!(artefact_spawns.nodes.get(0).unwrap().position.0, 55.5);
-    assert_eq!(artefact_spawns.nodes.get(0).unwrap().position.1, 44.4);
-    assert_eq!(artefact_spawns.nodes.get(0).unwrap().position.2, -33.3);
-    assert_eq!(artefact_spawns.nodes.get(0).unwrap().level_vertex_id, 255);
-    assert_eq!(artefact_spawns.nodes.get(0).unwrap().distance, 450.30);
-
-    assert_eq!(artefact_spawns.nodes.get(1).unwrap().position.0, -21.0);
-    assert_eq!(artefact_spawns.nodes.get(1).unwrap().position.1, 13.5);
-    assert_eq!(artefact_spawns.nodes.get(1).unwrap().position.2, -4.0);
-    assert_eq!(artefact_spawns.nodes.get(1).unwrap().level_vertex_id, 13);
-    assert_eq!(artefact_spawns.nodes.get(1).unwrap().distance, 25.11);
+    assert_eq!(read_spawns, spawns);
   }
 }

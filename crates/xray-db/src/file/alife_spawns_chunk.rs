@@ -121,6 +121,7 @@ mod tests {
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife_object_base::AlifeObjectBase;
   use crate::data::meta::cls_id::ClsId;
+  use crate::data::vector_3d::Vector3d;
   use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -180,8 +181,8 @@ mod tests {
           name: String::from("test-outfit-object"),
           script_game_id: 2,
           script_rp: 3,
-          position: (1.4, 2.0, 3.0),
-          direction: (3.0, 2.5, 1.0),
+          position: Vector3d::new(1.4, 2.0, 3.0),
+          direction: Vector3d::new(3.0, 2.5, 1.0),
           respawn_time: 50000,
           parent_id: 2143,
           phantom_id: 0,
@@ -225,8 +226,8 @@ mod tests {
           name: String::from("test-restrictor-object"),
           script_game_id: 5,
           script_rp: 52,
-          position: (1.0, 2.0, 4.0),
-          direction: (5.0, 2.0, 1.0),
+          position: Vector3d::new(1.0, 2.0, 4.0),
+          direction: Vector3d::new(5.0, 2.0, 1.0),
           respawn_time: 50000,
           parent_id: 2463,
           phantom_id: 0,

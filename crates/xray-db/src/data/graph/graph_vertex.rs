@@ -1,14 +1,15 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::types::{U32Bytes, Vector3d};
+use crate::data::vector_3d::Vector3d;
+use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GraphVertex {
-  pub level_point: Vector3d,
-  pub game_point: Vector3d,
+  pub level_point: Vector3d<f32>,
+  pub game_point: Vector3d<f32>,
   pub level_id: u8,
   pub level_vertex_id: u32,
   pub vertex_type: U32Bytes,
@@ -63,8 +64,8 @@ impl GraphVertex {
   pub fn export(&self, section: &String, ini: &mut Ini) {
     ini
       .with_section(Some(section))
-      .set("level_point", self.level_point.0.to_string()) // todo: Write vector.
-      .set("game_point", self.game_point.0.to_string()) // todo: Write vector.
+      .set("level_point", self.level_point.to_string())
+      .set("game_point", self.game_point.to_string())
       .set("level_id", self.level_id.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
       .set("vertex_type", self.vertex_type.0.to_string()) // todo: Write bytes.
@@ -80,6 +81,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_vertex::GraphVertex;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -93,8 +95,8 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let vertex: GraphVertex = GraphVertex {
-      level_point: (10.5, 11.6, 12.3),
-      game_point: (0.5, -4.0, 1000.0),
+      level_point: Vector3d::new(10.5, 11.6, 12.3),
+      game_point: Vector3d::new(0.5, -4.0, 1000.0),
       level_id: 255,
       level_vertex_id: 4000,
       vertex_type: (1, 2, 3, 4),

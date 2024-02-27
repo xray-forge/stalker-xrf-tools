@@ -64,6 +64,7 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::shape::Shape;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -90,12 +91,12 @@ mod tests {
           spawn_story_id: 254,
         },
         shape: vec![
-          Shape::Sphere(((2.5, 3.5, 1.5), 1.0)),
+          Shape::Sphere((Vector3d::new(2.5, 3.5, 1.5), 1.0)),
           Shape::Box((
-            (1.1, 1.1, 3.1),
-            (1.1, 2.2, 3.3),
-            (4.0, 5.0, 6.4),
-            (9.2, 8.3, 7.0),
+            Vector3d::new(1.1, 1.1, 3.1),
+            Vector3d::new(1.1, 2.2, 3.3),
+            Vector3d::new(4.0, 5.0, 6.4),
+            Vector3d::new(9.2, 8.3, 7.0),
           )),
         ],
         restrictor_type: 3,

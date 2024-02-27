@@ -1,7 +1,8 @@
 use crate::chunk::interface::ChunkDataSource;
 use crate::chunk::iterator::ChunkIterator;
 use crate::data::shape::Shape;
-use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
+use crate::data::vector_3d::Vector3d;
+use crate::types::{Matrix3d, Sphere3d, U32Bytes};
 use byteorder::{ByteOrder, ReadBytesExt};
 use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
@@ -109,11 +110,7 @@ impl Chunk {
 impl Chunk {
   /// Read three float values.
   pub fn read_f32_3d_vector<T: ByteOrder>(&mut self) -> io::Result<Vector3d<f32>> {
-    Ok((
-      self.read_f32::<T>()?,
-      self.read_f32::<T>()?,
-      self.read_f32::<T>()?,
-    ))
+    Vector3d::read_from_chunk::<T>(self)
   }
 
   pub fn read_u32_bytes(&mut self) -> io::Result<U32Bytes> {

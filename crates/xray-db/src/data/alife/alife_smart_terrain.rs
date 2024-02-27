@@ -115,6 +115,7 @@ mod tests {
   use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
   use crate::data::alife::alife_smart_zone::AlifeSmartZone;
   use crate::data::shape::Shape;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -142,12 +143,12 @@ mod tests {
             spawn_story_id: 25,
           },
           shape: vec![
-            Shape::Sphere(((3.5, -2.5, 11.5), 1.0)),
+            Shape::Sphere((Vector3d::new(3.5, -2.5, 11.5), 1.0)),
             Shape::Box((
-              (1.5, 1.1, 73.1),
-              (5.1, 2.2, 3.3),
-              (4.0, 6.0, 2.4),
-              (9.2, 4.3, 3.0),
+              Vector3d::new(1.5, 1.1, 73.1),
+              Vector3d::new(5.1, 2.2, 3.3),
+              Vector3d::new(4.0, 6.0, 2.4),
+              Vector3d::new(9.2, 4.3, 3.0),
             )),
           ],
           restrictor_type: 2,

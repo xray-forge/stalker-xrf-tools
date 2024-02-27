@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
-use crate::types::Vector3d;
+use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
 use std::io::Write;
@@ -10,7 +10,7 @@ use std::io::Write;
 #[derive(Clone, Debug, PartialEq)]
 pub struct PatrolPoint {
   pub name: String,
-  pub position: Vector3d,
+  pub position: Vector3d<f32>,
   pub flags: u32,
   pub level_vertex_id: u32,
   pub game_vertex_id: u16,
@@ -103,6 +103,7 @@ mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol_point::PatrolPoint;
+  use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
@@ -118,7 +119,7 @@ mod tests {
 
     let point: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-name"),
-      position: (1.5, -2.3, 1.0),
+      position: Vector3d::new(1.5, -2.3, 1.0),
       flags: 33,
       level_vertex_id: 4500,
       game_vertex_id: 555,
@@ -157,14 +158,14 @@ mod tests {
     let points: Vec<PatrolPoint> = vec![
       PatrolPoint {
         name: String::from("patrol-point-name-1"),
-        position: (1.5, -2.3, 1.0),
+        position: Vector3d::new(1.5, -2.3, 1.0),
         flags: 33,
         level_vertex_id: 7304,
         game_vertex_id: 55,
       },
       PatrolPoint {
         name: String::from("patrol-point-name-2"),
-        position: (2.25, 4.3, 1.5),
+        position: Vector3d::new(2.25, 4.3, 1.5),
         flags: 64,
         level_vertex_id: 8415,
         game_vertex_id: 66,

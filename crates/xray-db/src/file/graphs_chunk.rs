@@ -205,6 +205,7 @@ mod tests {
   use crate::data::graph::graph_level::GraphLevel;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::graph::graph_vertex::GraphVertex;
+  use crate::data::vector_3d::Vector3d;
   use crate::file::graphs_chunk::GraphsChunk;
   use crate::test::utils::{
     get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
@@ -281,20 +282,20 @@ mod tests {
           name: String::from("test-level-1"),
           section: String::from("test-level-section-1"),
           guid: 4000060000,
-          offset: (2.5, 4.55, -6.5),
+          offset: Vector3d::new(2.5, 4.55, -6.5),
         },
         GraphLevel {
           id: 26,
           name: String::from("test-level"),
           section: String::from("test-level-section"),
           guid: 5000060000,
-          offset: (3.5, 5.55, -7.5),
+          offset: Vector3d::new(3.5, 5.55, -7.5),
         },
       ],
       vertices: vec![
         GraphVertex {
-          level_point: (10.5, 11.6, 12.3),
-          game_point: (0.5, -4.0, 1000.0),
+          level_point: Vector3d::new(12.5, 11.6, 12.3),
+          game_point: Vector3d::new(1.5, -4.0, 1000.0),
           level_id: 255,
           level_vertex_id: 4000,
           vertex_type: (1, 2, 3, 4),
@@ -304,8 +305,8 @@ mod tests {
           level_point_count: 253,
         },
         GraphVertex {
-          level_point: (43.5, 15.6, 0.3),
-          game_point: (0.5, -4.0, 44.0),
+          level_point: Vector3d::new(43.5, 15.6, 0.3),
+          game_point: Vector3d::new(0.5, -4.0, 44.0),
           level_id: 255,
           level_vertex_id: 3000,
           vertex_type: (4, 2, 4, 4),
@@ -335,17 +336,17 @@ mod tests {
       ],
       points: vec![
         GraphLevelPoint {
-          position: (1.5, 11.6, 12.7),
+          position: Vector3d::new(1.5, 11.6, 12.7),
           distance: 100.50,
           level_vertex_id: 8000,
         },
         GraphLevelPoint {
-          position: (2.5, 11.6, 12.7),
+          position: Vector3d::new(2.5, 11.6, 12.7),
           distance: 200.50,
           level_vertex_id: 8001,
         },
         GraphLevelPoint {
-          position: (3.5, 11.6, 12.7),
+          position: Vector3d::new(3.5, 11.6, 12.7),
           distance: 300.50,
           level_vertex_id: 8002,
         },

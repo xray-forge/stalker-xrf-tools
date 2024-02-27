@@ -1,5 +1,6 @@
 use crate::data::shape::Shape;
-use crate::types::{Matrix3d, Sphere3d, U32Bytes, Vector3d};
+use crate::data::vector_3d::Vector3d;
+use crate::types::{Matrix3d, Sphere3d, U32Bytes};
 use byteorder::{ByteOrder, WriteBytesExt};
 use encoding_rs::WINDOWS_1251;
 use std::borrow::Cow;
@@ -77,11 +78,7 @@ impl ChunkWriter {
 
   /// Write three float values.
   pub fn write_f32_3d_vector<T: ByteOrder>(&mut self, value: &Vector3d<f32>) -> io::Result<()> {
-    self.write_f32::<T>(value.0)?;
-    self.write_f32::<T>(value.1)?;
-    self.write_f32::<T>(value.2)?;
-
-    Ok(())
+    value.write::<T>(self)
   }
 
   /// Write 4 bytes value as 4 separate byte entries.
