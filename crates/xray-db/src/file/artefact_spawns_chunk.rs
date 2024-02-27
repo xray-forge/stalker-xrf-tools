@@ -1,7 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
+use crate::export::file_export::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use std::path::PathBuf;
 use std::{fmt, io};
 
 /// Artefacts spawns chunks.
@@ -48,6 +50,17 @@ impl ArtefactSpawnsChunk {
       "Written artefact spawns chunk, {:?} bytes",
       writer.bytes_written()
     );
+
+    Ok(())
+  }
+
+  /// Export artefact spawns data into provided path.
+  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+    let artefact_spawns_path: PathBuf = path.clone().join("artefact_spawns.ltx");
+
+    create_export_file(&artefact_spawns_path)?;
+
+    log::info!("Exported artefact spawns chunk, {:?}", artefact_spawns_path);
 
     Ok(())
   }

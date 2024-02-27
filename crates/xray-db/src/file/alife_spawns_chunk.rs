@@ -2,8 +2,10 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife_object_base::AlifeObjectBase;
+use crate::export::file_export::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io::Write;
+use std::path::PathBuf;
 use std::{fmt, io};
 
 /// ALife spawns chunk has the following structure:
@@ -73,6 +75,17 @@ impl ALifeSpawnsChunk {
       "Written alife spawns chunk, {:?} bytes",
       writer.bytes_written()
     );
+
+    Ok(())
+  }
+
+  /// Export alife spawns data into provided path.
+  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+    let patrols_path: PathBuf = path.clone().join("alife_spawns.ltx");
+
+    create_export_file(&patrols_path)?;
+
+    log::info!("Exported alife spawns chunk, {:?}", patrols_path);
 
     Ok(())
   }

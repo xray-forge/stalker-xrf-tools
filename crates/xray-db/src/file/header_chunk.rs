@@ -1,7 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::export::file_export::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
+use std::path::PathBuf;
 
 #[derive(Debug, PartialEq)]
 pub struct HeaderChunk {
@@ -43,6 +45,17 @@ impl HeaderChunk {
     writer.write_u32::<T>(self.level_count)?;
 
     log::info!("Written header chunk, {:?} bytes", writer.bytes_written());
+
+    Ok(())
+  }
+
+  /// Export header data into provided path.
+  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+    let header_path: PathBuf = path.clone().join("header.ltx");
+
+    create_export_file(&header_path)?;
+
+    log::info!("Exported header chunk, {:?}", header_path);
 
     Ok(())
   }

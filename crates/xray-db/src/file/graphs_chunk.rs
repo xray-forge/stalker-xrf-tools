@@ -7,8 +7,10 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
+use crate::export::file_export::create_export_file;
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::io::Write;
+use std::path::PathBuf;
 use std::{fmt, io};
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
@@ -112,6 +114,17 @@ impl GraphsChunk {
     }
 
     log::info!("Written graphs chunk, {:?} bytes", writer.bytes_written());
+
+    Ok(())
+  }
+
+  /// Export graphs data into provided path.
+  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+    let graphs_path: PathBuf = path.clone().join("graphs.ltx");
+
+    create_export_file(&graphs_path)?;
+
+    log::info!("Exported graphs chunk, {:?}", graphs_path);
 
     Ok(())
   }

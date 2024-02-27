@@ -1,4 +1,4 @@
-use clap::{value_parser, Arg, Command};
+use clap::{value_parser, Arg, ArgAction, Command};
 use std::env;
 use std::path::PathBuf;
 
@@ -34,6 +34,26 @@ pub fn setup_cli() -> Command {
         ),
     )
     .subcommand(
+      Command::new("repack-spawn")
+        .about("Command to repack provided *.spawn into another file.")
+        .arg(
+          Arg::new("path")
+            .help("Path to *.spawn file.")
+            .short('p')
+            .long("path")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("dest")
+            .help("Path to resulting *.spawn file.")
+            .short('d')
+            .long("dest")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        ),
+    )
+    .subcommand(
       Command::new("unpack-spawn")
         .about("Command to unpack provided *.spawn into separate files.")
         .arg(
@@ -43,6 +63,22 @@ pub fn setup_cli() -> Command {
             .long("path")
             .required(true)
             .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("dest")
+            .help("Path to folder for exporting.")
+            .short('d')
+            .long("dest")
+            .default_value("unpacked")
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("force")
+            .help("Whether existing unpacked data should be pruned if destination folder exists.")
+            .short('f')
+            .long("force")
+            .required(false)
+            .action(ArgAction::SetTrue),
         ),
     )
     .subcommand(

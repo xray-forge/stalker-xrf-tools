@@ -1,11 +1,13 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
+use crate::export::file_export::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io::Write;
+use std::path::PathBuf;
 use std::{fmt, io};
 
-/// `CPatrolPathStorage::load` in xray.
+/// `CPatrolPathStorage::load` in xray engine.
 #[derive(Clone, PartialEq)]
 pub struct PatrolsChunk {
   pub patrols: Vec<Patrol>,
@@ -42,6 +44,17 @@ impl PatrolsChunk {
     writer.write_all(data_writer.flush_chunk_into_buffer::<T>(1)?.as_slice())?;
 
     log::info!("Written patrols chunk, {:?} bytes", writer.bytes_written());
+
+    Ok(())
+  }
+
+  /// Export patrols data into provided path.
+  pub fn export<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+    let patrols_path: PathBuf = path.clone().join("patrols.ltx");
+
+    create_export_file(&patrols_path)?;
+
+    log::info!("Exported patrols chunk, {:?}", patrols_path);
 
     Ok(())
   }

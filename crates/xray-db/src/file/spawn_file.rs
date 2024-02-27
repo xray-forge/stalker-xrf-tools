@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::export::file_export::create_export_file;
 use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
 use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
 use crate::file::graphs_chunk::GraphsChunk;
@@ -7,9 +8,9 @@ use crate::file::header_chunk::HeaderChunk;
 use crate::file::patrols_chunk::PatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
-use std::fs::{File, OpenOptions};
-use std::io;
+use std::fs::File;
 use std::path::PathBuf;
+use std::{fs, io};
 
 /// Descriptor of generic spawn file used by xray game engine.
 ///
@@ -82,22 +83,21 @@ impl SpawnFile {
 
   /// Write spawn file data to the file by provided path.
   pub fn write_to_path<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
-    std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
+    fs::create_dir_all(path.parent().expect("Parent directory"))?;
+    self.write_to_file::<T>(&mut create_export_file(&path)?)
+  }
 
-    let mut file: File = match OpenOptions::new()
-      .create(true)
-      .write(true)
-      .truncate(true)
-      .open(path.clone())
-    {
-      Ok(file) => Ok(file),
-      Err(error) => Err(io::Error::new(
-        error.kind(),
-        format!("Failed to open file for all-spawn creation {:?}", path),
-      )),
-    }?;
+  /// Export unpacked alife spawn file into provided path.
+  pub fn export_to_path<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+    fs::create_dir_all(path)?;
 
-    self.write_to_file::<T>(&mut file)
+    self.header.export::<T>(path)?;
+    self.alife_spawn.export::<T>(path)?;
+    self.artefact_spawn.export::<T>(path)?;
+    self.patrols.export::<T>(path)?;
+    self.graphs.export::<T>(path)?;
+
+    Ok(())
   }
 
   /// Write spawn file data to the file.
