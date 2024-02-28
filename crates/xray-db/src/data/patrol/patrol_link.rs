@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -76,6 +76,46 @@ impl PatrolLink {
     }
 
     Ok(())
+  }
+
+  /// Import patrol point link from ini config.
+  pub fn import(section: &str, config: &Ini) -> io::Result<PatrolLink> {
+    let props: &Properties = config
+      .section(Some(section))
+      .expect(format!("Patrol point link {section} should be defined in ltx file.").as_str());
+
+    let index: u32 = props
+      .get("index")
+      .expect("'index' to be in patrol link section")
+      .parse::<u32>()
+      .expect("'index' to be valid u32");
+
+    let count: usize = props
+      .get("count")
+      .expect("'count' to be in patrol link section")
+      .parse::<usize>()
+      .expect("'count' to be valid usize");
+
+    let mut links: Vec<(u32, f32)> = Vec::new();
+
+    for link in 0..count {
+      links.push((
+        props
+          .get(format!("from.{link}"))
+          .expect(&format!("'from.{link}' to be in patrol link section"))
+          .parse::<u32>()
+          .expect(&format!("'from.{link}' to be valid u32")),
+        props
+          .get(format!("weight.{link}"))
+          .expect(&format!("'weight.{link}' to be in patrol link section"))
+          .parse::<f32>()
+          .expect(&format!("'weight.{link}' to be valid f32")),
+      ))
+    }
+
+    assert_eq!(links.len(), count);
+
+    Ok(PatrolLink { index, links })
   }
 
   /// Export patrol link data into ini.

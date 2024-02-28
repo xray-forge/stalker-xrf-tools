@@ -4,6 +4,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use ini::{Ini, Properties};
 use std::io;
 use std::io::Write;
 
@@ -118,6 +119,97 @@ impl Patrol {
 
     writer.write_all(&meta_writer.flush_chunk_into_buffer::<T>(0)?)?;
     writer.write_all(&data_writer.flush_chunk_into_buffer::<T>(1)?)?;
+
+    Ok(())
+  }
+
+  /// Import patrols data from provided path.
+  pub fn import(
+    section: &str,
+    patrols_config: &Ini,
+    patrol_points_config: &Ini,
+    patrol_links_config: &Ini,
+  ) -> io::Result<Patrol> {
+    let props: &Properties = patrols_config
+      .section(Some(section))
+      .expect(format!("Patrol section {section} should be defined in ltx file.").as_str());
+
+    let name: String = props
+      .get("name")
+      .expect("'name' to be in patrol section")
+      .parse::<String>()
+      .expect("'name' to be valid string");
+
+    let points_list: String = props
+      .get("points")
+      .expect("'points' to be in patrol section")
+      .parse::<String>()
+      .expect("'points' to be valid string");
+
+    let links_count: usize = props
+      .get("links_count")
+      .expect("'links_count' to be in patrol section")
+      .parse::<usize>()
+      .expect("'links_count' to be valid usize");
+
+    let mut points: Vec<PatrolPoint> = Vec::new();
+    let mut links: Vec<PatrolLink> = Vec::new();
+
+    for section in points_list.split(",").map(|it| it.trim()) {
+      points.push(PatrolPoint::import(
+        &format!("{}.{}", name, section),
+        patrol_points_config,
+      )?);
+    }
+
+    for index in 0..links_count {
+      links.push(PatrolLink::import(
+        &format!("{}.{}", name, index),
+        patrol_links_config,
+      )?);
+    }
+
+    assert_eq!(links.len(), links_count);
+
+    Ok(Patrol {
+      name,
+      points,
+      links,
+    })
+  }
+
+  /// Export patrol data into ltx config files.
+  /// Creates separate files for patrols, points and links.
+  pub fn export<T: ByteOrder>(
+    &self,
+    patrols_config: &mut Ini,
+    patrol_points_config: &mut Ini,
+    patrol_links_config: &mut Ini,
+  ) -> io::Result<()> {
+    patrols_config
+      .with_section(Some(&self.name))
+      .set("name", &self.name)
+      .set(
+        "points",
+        self
+          .points
+          .iter()
+          .map(|it| it.name.clone())
+          .collect::<Vec<_>>()
+          .join(","),
+      )
+      .set("links_count", self.links.len().to_string());
+
+    for point in &self.points {
+      point.export(
+        &format!("{}.{}", self.name, point.name),
+        patrol_points_config,
+      );
+    }
+
+    for (index, link) in self.links.iter().enumerate() {
+      link.export(&format!("{}.{}", self.name, index), patrol_links_config);
+    }
 
     Ok(())
   }

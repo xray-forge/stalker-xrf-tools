@@ -3,7 +3,7 @@ use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 use std::io::Write;
 
@@ -98,9 +98,44 @@ impl PatrolPoint {
     Ok(())
   }
 
+  /// Import patrol point data from ini config.
+  pub fn import(section: &str, config: &Ini) -> io::Result<PatrolPoint> {
+    let props: &Properties = config
+      .section(Some(section))
+      .expect(format!("Patrol point section {section} should be defined in ltx file.").as_str());
+
+    Ok(PatrolPoint {
+      name: props
+        .get("name")
+        .expect("'name' to be in patrol point section")
+        .parse::<String>()
+        .expect("'name' to be valid string"),
+      position: props
+        .get("position")
+        .expect("'position' to be in patrol point section")
+        .parse::<Vector3d>()
+        .expect("'position' to be valid 3d vector"),
+      flags: props
+        .get("flags")
+        .expect("'flags' to be in patrol point section")
+        .parse::<u32>()
+        .expect("'flags' to be valid u32"),
+      level_vertex_id: props
+        .get("level_vertex_id")
+        .expect("'level_vertex_id' to be in patrol point section")
+        .parse::<u32>()
+        .expect("'level_vertex_id' to be valid u32"),
+      game_vertex_id: props
+        .get("game_vertex_id")
+        .expect("'game_vertex_id' to be in patrol point section")
+        .parse::<u16>()
+        .expect("'game_vertex_id' to be valid u16"),
+    })
+  }
+
   /// Export patrol point data into ini.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
-    ini
+  pub fn export(&self, section: &String, config: &mut Ini) {
+    config
       .with_section(Some(section))
       .set("name", &self.name)
       .set("flags", self.flags.to_string())

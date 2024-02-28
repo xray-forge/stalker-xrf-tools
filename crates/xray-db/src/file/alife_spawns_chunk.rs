@@ -82,7 +82,7 @@ impl ALifeSpawnsChunk {
   }
 
   /// Import alife spawns data from provided path.
-  pub fn import(path: &Path) -> io::Result<ALifeSpawnsChunk> {
+  pub fn import(_: &Path) -> io::Result<ALifeSpawnsChunk> {
     Ok(ALifeSpawnsChunk { objects: vec![] })
   }
 
@@ -193,7 +193,7 @@ mod tests {
           phantom_id: 0,
           script_flags: 33,
           version: 128,
-          cse_abstract_unknown: 1,
+          game_type: 1,
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
@@ -218,8 +218,6 @@ mod tests {
               upgrades_count: 0,
             },
           }),
-          update_data_length: 19,
-          update_size: 0,
           update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         },
         AlifeObjectBase {
@@ -238,7 +236,7 @@ mod tests {
           phantom_id: 0,
           script_flags: 33,
           version: 128,
-          cse_abstract_unknown: 1,
+          game_type: 1,
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
@@ -257,8 +255,6 @@ mod tests {
             shape: vec![],
             restrictor_type: 0,
           }),
-          update_data_length: 11,
-          update_size: 0,
           update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8],
         },
       ],
@@ -305,13 +301,11 @@ mod tests {
       assert_eq!(object.phantom_id, another.phantom_id);
       assert_eq!(object.script_flags, another.script_flags);
       assert_eq!(object.version, another.version);
-      assert_eq!(object.cse_abstract_unknown, another.cse_abstract_unknown);
+      assert_eq!(object.game_type, another.game_type);
       assert_eq!(object.script_version, another.script_version);
       assert_eq!(object.client_data_size, another.client_data_size);
       assert_eq!(object.spawn_id, another.spawn_id);
       assert_eq!(object.inherited_size, another.inherited_size);
-      assert_eq!(object.update_data_length, another.update_data_length);
-      assert_eq!(object.update_size, another.update_size);
       assert_eq!(object.update_data, another.update_data);
     }
 

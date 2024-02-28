@@ -121,7 +121,7 @@ impl GraphsChunk {
   }
 
   /// Import graphs data from provided path.
-  pub fn import(path: &Path) -> io::Result<GraphsChunk> {
+  pub fn import(_: &Path) -> io::Result<GraphsChunk> {
     Ok(GraphsChunk {
       header: GraphHeader {
         version: 0,

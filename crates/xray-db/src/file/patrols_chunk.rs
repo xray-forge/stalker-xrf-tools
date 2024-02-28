@@ -2,6 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
+use crate::export::file_import::open_ini_config;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
 use std::io::Write;
@@ -51,7 +52,24 @@ impl PatrolsChunk {
 
   /// Import patrols data from provided path.
   pub fn import(path: &Path) -> io::Result<PatrolsChunk> {
-    Ok(PatrolsChunk { patrols: vec![] })
+    let patrols_config: Ini = open_ini_config(&path.join("patrols.ltx"))?;
+    let patrol_points_config: Ini = open_ini_config(&path.join("patrol_points.ltx"))?;
+    let patrol_links_config: Ini = open_ini_config(&path.join("patrol_links.ltx"))?;
+
+    let mut patrols: Vec<Patrol> = Vec::new();
+
+    for section in patrols_config.sections() {
+      if section.is_some() {
+        patrols.push(Patrol::import(
+          section.unwrap(),
+          &patrols_config,
+          &patrol_points_config,
+          &patrol_links_config,
+        )?);
+      }
+    }
+
+    Ok(PatrolsChunk { patrols })
   }
 
   /// Export patrols data into provided path.
@@ -61,33 +79,11 @@ impl PatrolsChunk {
     let mut patrol_links_config: Ini = Ini::new();
 
     for patrol in &self.patrols {
-      patrols_config
-        .with_section(Some(&patrol.name))
-        .set("name", &patrol.name)
-        .set(
-          "points",
-          patrol
-            .points
-            .iter()
-            .map(|it| it.name.clone())
-            .collect::<Vec<_>>()
-            .join(","),
-        )
-        .set("links_count", patrol.links.len().to_string());
-
-      for point in &patrol.points {
-        point.export(
-          &format!("{}.{}", patrol.name, point.name),
-          &mut patrol_points_config,
-        );
-      }
-
-      for (index, link) in patrol.links.iter().enumerate() {
-        link.export(
-          &format!("{}.{}", patrol.name, index),
-          &mut patrol_links_config,
-        );
-      }
+      patrol.export::<T>(
+        &mut patrols_config,
+        &mut patrol_points_config,
+        &mut patrol_links_config,
+      )?;
     }
 
     export_ini_to_file(
