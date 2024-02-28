@@ -57,6 +57,11 @@ impl ArtefactSpawnsChunk {
     Ok(())
   }
 
+  /// Import artefact spawns data from provided path.
+  pub fn import(path: &Path) -> io::Result<ArtefactSpawnsChunk> {
+    Ok(ArtefactSpawnsChunk { nodes: vec![] })
+  }
+
   /// Export artefact spawns data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     let artefact_spawns_path: PathBuf = path.join("artefact_spawns.ltx");

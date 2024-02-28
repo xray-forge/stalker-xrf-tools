@@ -120,6 +120,25 @@ impl GraphsChunk {
     Ok(())
   }
 
+  /// Import graphs data from provided path.
+  pub fn import(path: &Path) -> io::Result<GraphsChunk> {
+    Ok(GraphsChunk {
+      header: GraphHeader {
+        version: 0,
+        vertex_count: 0,
+        edges_count: 0,
+        point_count: 0,
+        guid: 0,
+        level_count: 0,
+      },
+      levels: vec![],
+      vertices: vec![],
+      edges: vec![],
+      points: vec![],
+      cross_tables: vec![],
+    })
+  }
+
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {

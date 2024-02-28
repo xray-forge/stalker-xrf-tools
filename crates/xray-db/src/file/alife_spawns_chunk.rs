@@ -81,6 +81,11 @@ impl ALifeSpawnsChunk {
     Ok(())
   }
 
+  /// Import alife spawns data from provided path.
+  pub fn import(path: &Path) -> io::Result<ALifeSpawnsChunk> {
+    Ok(ALifeSpawnsChunk { objects: vec![] })
+  }
+
   /// Export alife spawns data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     let alife_spawns_path: PathBuf = path.join("alife_spawns.ltx");

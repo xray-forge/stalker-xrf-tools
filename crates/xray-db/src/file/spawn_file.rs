@@ -10,7 +10,7 @@ use crate::file::patrols_chunk::PatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 /// Descriptor of generic spawn file used by xray game engine.
@@ -88,35 +88,13 @@ impl SpawnFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path<T: ByteOrder>(_: &PathBuf) -> io::Result<SpawnFile> {
-    // todo: Correct import from ini files.
-
+  pub fn import_from_path<T: ByteOrder>(path: &Path) -> io::Result<SpawnFile> {
     Ok(SpawnFile {
-      header: HeaderChunk {
-        version: 0,
-        guid: 0,
-        graph_guid: 0,
-        count: 0,
-        level_count: 0,
-      },
-      alife_spawn: ALifeSpawnsChunk { objects: vec![] },
-      artefact_spawn: ArtefactSpawnsChunk { nodes: vec![] },
-      patrols: PatrolsChunk { patrols: vec![] },
-      graphs: GraphsChunk {
-        header: GraphHeader {
-          version: 0,
-          vertex_count: 0,
-          edges_count: 0,
-          point_count: 0,
-          guid: 0,
-          level_count: 0,
-        },
-        levels: vec![],
-        vertices: vec![],
-        edges: vec![],
-        points: vec![],
-        cross_tables: vec![],
-      },
+      header: HeaderChunk::import(path)?,
+      alife_spawn: ALifeSpawnsChunk::import(path)?,
+      artefact_spawn: ArtefactSpawnsChunk::import(path)?,
+      patrols: PatrolsChunk::import(path)?,
+      graphs: GraphsChunk::import(path)?,
     })
   }
 

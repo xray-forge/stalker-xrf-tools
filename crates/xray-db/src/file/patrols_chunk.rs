@@ -49,6 +49,11 @@ impl PatrolsChunk {
     Ok(())
   }
 
+  /// Import patrols data from provided path.
+  pub fn import(path: &Path) -> io::Result<PatrolsChunk> {
+    Ok(PatrolsChunk { patrols: vec![] })
+  }
+
   /// Export patrols data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     let mut patrols_config: Ini = Ini::new();

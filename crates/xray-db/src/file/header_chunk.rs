@@ -18,6 +18,7 @@ pub struct HeaderChunk {
 
 impl HeaderChunk {
   /// Read header chunk by position descriptor.
+  /// Parses binary data into header chunk representation object.
   pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<HeaderChunk> {
     let version: u32 = chunk.read_u32::<T>()?;
     let guid: u128 = chunk.read_u128::<T>()?;
@@ -39,6 +40,7 @@ impl HeaderChunk {
   }
 
   /// Write header data into chunk writer.
+  /// Writes header data in binary format to provided writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid)?;
@@ -51,7 +53,55 @@ impl HeaderChunk {
     Ok(())
   }
 
+  /// Import header data from provided path.
+  /// Parse exported ini files and populate correct spawn file.
+  pub fn import(path: &Path) -> io::Result<HeaderChunk> {
+    let config: Ini = match Ini::load_from_file(path.join("header.ltx")) {
+      Ok(ini) => ini,
+      Err(error) => {
+        return Err(io::Error::new(
+          io::ErrorKind::InvalidInput,
+          error.to_string(),
+        ))
+      }
+    };
+
+    Ok(HeaderChunk {
+      version: config
+        .general_section()
+        .get("version")
+        .expect("'version' to be in header config")
+        .parse::<u32>()
+        .expect("'version' to be valid u32"),
+      guid: config
+        .general_section()
+        .get("guid")
+        .expect("'guid' to be in header config")
+        .parse::<u128>()
+        .expect("'guid' to be valid u128"),
+      graph_guid: config
+        .general_section()
+        .get("graph_guid")
+        .expect("'graph_guid' to be in header config")
+        .parse::<u128>()
+        .expect("'graph_guid' to be valid u128"),
+      count: config
+        .general_section()
+        .get("count")
+        .expect("'count' to be in header config")
+        .parse::<u32>()
+        .expect("'count' to be valid u32"),
+      level_count: config
+        .general_section()
+        .get("level_count")
+        .expect("'level_count' to be in header config")
+        .parse::<u32>()
+        .expect("Level count to be valid u32"),
+    })
+  }
+
   /// Export header data into provided path.
+  /// Creates ltx file config with header chunk description.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     let header_path: PathBuf = path.join("header.ltx");
 
