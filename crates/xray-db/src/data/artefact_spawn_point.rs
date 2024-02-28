@@ -2,7 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -33,6 +33,27 @@ impl ArtefactSpawnPoint {
     writer.write_f32::<T>(self.distance)?;
 
     Ok(())
+  }
+
+  /// Import artefact spawn point data from ini section.
+  pub fn import(props: &Properties) -> io::Result<ArtefactSpawnPoint> {
+    Ok(ArtefactSpawnPoint {
+      position: props
+        .get("position")
+        .expect("'position' to be in artefact spawn")
+        .parse::<Vector3d>()
+        .expect("'position' to be valid f32 3d vector"),
+      level_vertex_id: props
+        .get("level_vertex_id")
+        .expect("'level_vertex_id' to be in artefact spawn")
+        .parse::<u32>()
+        .expect("'level_vertex_id' to be valid f32"),
+      distance: props
+        .get("distance")
+        .expect("'distance' to be in artefact spawn")
+        .parse::<f32>()
+        .expect("'distance' to be valid f32"),
+    })
   }
 
   /// Export artefact spawn point data into ini.

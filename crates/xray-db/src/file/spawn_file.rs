@@ -1,6 +1,5 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::graph::graph_header::GraphHeader;
 use crate::export::file_export::create_export_file;
 use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
 use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;

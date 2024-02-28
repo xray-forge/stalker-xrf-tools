@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
+use crate::export::file_import::open_ini_config;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
 use std::fs::File;
@@ -40,7 +41,7 @@ impl HeaderChunk {
   }
 
   /// Write header data into chunk writer.
-  /// Writes header data in binary format to provided writer.
+  /// Writes header data in binary format.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid)?;
@@ -54,17 +55,9 @@ impl HeaderChunk {
   }
 
   /// Import header data from provided path.
-  /// Parse exported ini files and populate correct spawn file.
+  /// Parse ini files and populate spawn file.
   pub fn import(path: &Path) -> io::Result<HeaderChunk> {
-    let config: Ini = match Ini::load_from_file(path.join("header.ltx")) {
-      Ok(ini) => ini,
-      Err(error) => {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidInput,
-          error.to_string(),
-        ))
-      }
-    };
+    let config: Ini = open_ini_config(&path.join("header.ltx"))?;
 
     Ok(HeaderChunk {
       version: config
@@ -96,7 +89,7 @@ impl HeaderChunk {
         .get("level_count")
         .expect("'level_count' to be in header config")
         .parse::<u32>()
-        .expect("Level count to be valid u32"),
+        .expect("'level_count' to be valid u32"),
     })
   }
 
