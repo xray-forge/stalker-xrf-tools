@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::graph::graph_header::GraphHeader;
 use crate::export::file_export::create_export_file;
 use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
 use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
@@ -20,7 +21,6 @@ use std::{fs, io};
 /// 2 - alife objects
 /// 3 - patrols
 /// 4 - game graphs
-///
 #[derive(Debug)]
 pub struct SpawnFile {
   pub header: HeaderChunk,
@@ -85,6 +85,39 @@ impl SpawnFile {
   pub fn write_to_path<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
     self.write_to_file::<T>(&mut create_export_file(&path)?)
+  }
+
+  /// Read spawn file from provided path.
+  pub fn import_from_path<T: ByteOrder>(_: &PathBuf) -> io::Result<SpawnFile> {
+    // todo: Correct import from ini files.
+
+    Ok(SpawnFile {
+      header: HeaderChunk {
+        version: 0,
+        guid: 0,
+        graph_guid: 0,
+        count: 0,
+        level_count: 0,
+      },
+      alife_spawn: ALifeSpawnsChunk { objects: vec![] },
+      artefact_spawn: ArtefactSpawnsChunk { nodes: vec![] },
+      patrols: PatrolsChunk { patrols: vec![] },
+      graphs: GraphsChunk {
+        header: GraphHeader {
+          version: 0,
+          vertex_count: 0,
+          edges_count: 0,
+          point_count: 0,
+          guid: 0,
+          level_count: 0,
+        },
+        levels: vec![],
+        vertices: vec![],
+        edges: vec![],
+        points: vec![],
+        cross_tables: vec![],
+      },
+    })
   }
 
   /// Export unpacked alife spawn file into provided path.
