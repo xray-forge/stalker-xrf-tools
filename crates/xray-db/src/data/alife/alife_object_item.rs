@@ -19,18 +19,18 @@ pub struct AlifeObjectItem {
 impl AlifeObjectInheritedReader<AlifeObjectItem> for AlifeObjectItem {
   /// Read alife item object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItem> {
-    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
+    let object: AlifeObjectItem = AlifeObjectItem {
+      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
+      condition: chunk.read_f32::<SpawnByteOrder>()?,
+      upgrades_count: chunk.read_u32::<SpawnByteOrder>()?,
+    };
 
-    let condition: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let upgrades_count: u32 = chunk.read_u32::<SpawnByteOrder>()?;
+    assert_eq!(
+      object.upgrades_count, 0,
+      "Unexpected upgraded item provided"
+    );
 
-    assert_eq!(upgrades_count, 0, "Unexpected upgraded item provided");
-
-    Ok(AlifeObjectItem {
-      base,
-      condition,
-      upgrades_count,
-    })
+    Ok(object)
   }
 
   /// Import alife item object data from ini config section.
@@ -63,7 +63,8 @@ impl AlifeObjectGeneric for AlifeObjectItem {
     ini
       .with_section(Some(section))
       .set("condition", self.condition.to_string())
-      .set("is_closed", self.upgrades_count.to_string());
+      .set("is_closed", self.upgrades_count.to_string())
+      .set("upgrades_count", self.upgrades_count.to_string());
   }
 }
 

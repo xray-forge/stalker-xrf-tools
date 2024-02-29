@@ -45,7 +45,10 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
       visual: AlifeObjectVisual::import(props)?,
       idle_animation: read_ini_field("idle_animation", props)?,
       attack_animation: read_ini_field("attack_animation", props)?,
-      last_spawn_time: None, // todo: Implement correct time reading.
+      last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
+        "last_spawn_time",
+        props,
+      )?)?,
     })
   }
 }

@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::time::Time;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
@@ -28,7 +29,10 @@ impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   fn import(props: &Properties) -> io::Result<AlifeAnomalousZone> {
     Ok(AlifeAnomalousZone {
       base: AlifeObjectAnomalyZone::import(props)?,
-      last_spawn_time: None, // todo: Read actual time object.
+      last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
+        "last_spawn_time",
+        props,
+      )?)?,
     })
   }
 }

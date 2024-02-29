@@ -33,6 +33,7 @@ use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use enum_map::Enum;
+use ini::Properties;
 use std::io;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
@@ -254,5 +255,52 @@ impl AlifeClass {
         panic!("Not implemented parser for: {:?}", alife_class)
       }
     }
+  }
+
+  /// Import custom save data based on serialized clsid.
+  pub fn import_by_class(
+    alife_class: &AlifeClass,
+    props: &Properties,
+  ) -> io::Result<Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>> {
+    Ok(match alife_class {
+      AlifeClass::SeActor => Box::new(AlifeActor::import(props)?),
+      AlifeClass::CseAlifeObjectBreakable => Box::new(AlifeObjectBreakable::import(props)?),
+      AlifeClass::CseAlifeObjectClimable => Box::new(AlifeObjectClimable::import(props)?),
+      AlifeClass::CseAlifeGraphPoint => Box::new(AlifeGraphPoint::import(props)?),
+      AlifeClass::CseAlifeSpaceRestrictor => Box::new(AlifeObjectSpaceRestrictor::import(props)?),
+      AlifeClass::SeSmartCover => Box::new(AlifeSmartCover::import(props)?),
+      AlifeClass::CseAlifeAnomalousZone => Box::new(AlifeObjectAnomalyZone::import(props)?),
+      AlifeClass::SeZoneAnom => Box::new(AlifeAnomalousZone::import(props)?),
+      AlifeClass::SeZoneTorrid => Box::new(AlifeObjectTorridZone::import(props)?),
+      AlifeClass::SeSmartTerrain => Box::new(AlifeSmartTerrain::import(props)?),
+      AlifeClass::SeLevelChanger => Box::new(AlifeLevelChanger::import(props)?),
+      AlifeClass::SeZoneVisual => Box::new(AlifeZoneVisual::import(props)?),
+      AlifeClass::CseAlifeObjectPhysic => Box::new(AlifeObjectPhysic::import(props)?),
+      AlifeClass::CseAlifeHelicopter => Box::new(AlifeObjectHelicopter::import(props)?),
+      AlifeClass::CseAlifeInventoryBox => Box::new(AlifeObjectInventoryBox::import(props)?),
+      AlifeClass::CseAlifeObjectHangingLamp => Box::new(AlifeObjectHangingLamp::import(props)?),
+      AlifeClass::CseAlifeItem => Box::new(AlifeObjectItem::import(props)?),
+      AlifeClass::CseAlifeItemExplosive => Box::new(AlifeObjectItemExplosive::import(props)?),
+      AlifeClass::CseAlifeItemPda => Box::new(AlifeObjectItemPda::import(props)?),
+      AlifeClass::CseAlifeItemAmmo => Box::new(AlifeObjectItemAmmo::import(props)?),
+      AlifeClass::CseAlifeItemGrenade => Box::new(AlifeObjectItemGrenade::import(props)?),
+      AlifeClass::CseAlifeItemArtefact => Box::new(AlifeObjectItemArtefact::import(props)?),
+      AlifeClass::CseAlifeItemWeapon => Box::new(AlifeObjectItemWeapon::import(props)?),
+      AlifeClass::CseAlifeItemDetector => Box::new(AlifeObjectItemDetector::import(props)?),
+      AlifeClass::CseAlifeItemHelmet => Box::new(AlifeObjectItemHelmet::import(props)?),
+      AlifeClass::CseAlifeItemCustomOutfit => Box::new(AlifeObjectItemCustomOutfit::import(props)?),
+      AlifeClass::CseAlifeItemWeaponShotgun => {
+        Box::new(AlifeObjectItemWeaponShotgun::import(props)?)
+      }
+      AlifeClass::CseAlifeItemWeaponMagazined => {
+        Box::new(AlifeObjectItemWeaponMagazined::import(props)?)
+      }
+      AlifeClass::CseAlifeItemWeaponMagazinedWGl => {
+        Box::new(AlifeObjectItemWeaponMagazinedWgl::import(props)?)
+      }
+      _ => {
+        panic!("Not implemented parser for: {:?}", alife_class)
+      }
+    })
   }
 }

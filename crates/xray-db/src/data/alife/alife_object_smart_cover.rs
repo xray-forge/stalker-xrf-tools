@@ -41,7 +41,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
   fn import(props: &Properties) -> io::Result<AlifeObjectSmartCover> {
     Ok(AlifeObjectSmartCover {
       base: AlifeObjectDynamic::import(props)?,
-      shape: vec![], // todo: Read shape correctly.
+      shape: Shape::import_shapes(props)?,
       description: read_ini_field("description", props)?,
       hold_position_time: read_ini_field("hold_position_time", props)?,
       enter_min_enemy_distance: read_ini_field("enter_min_enemy_distance", props)?,

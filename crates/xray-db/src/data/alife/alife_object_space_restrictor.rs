@@ -31,7 +31,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
   fn import(props: &Properties) -> io::Result<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract::import(props)?,
-      shape: vec![], // todo: Read shape
+      shape: Shape::import_shapes(props)?,
       restrictor_type: read_ini_field("restrictor_type", props)?,
     })
   }

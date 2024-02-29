@@ -4,7 +4,6 @@ use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
 };
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
@@ -210,12 +209,13 @@ impl AlifeObjectBase {
   /// Import alife object data from ini file section.
   pub fn import(props: &Properties) -> io::Result<AlifeObjectBase> {
     let section: String = read_ini_field("section", props)?;
+    let clsid: ClsId = ClsId::from_section(&section);
 
     Ok(AlifeObjectBase {
       index: read_ini_field("index", props)?,
       id: read_ini_field("id", props)?,
       net_action: read_ini_field("net_action", props)?,
-      clsid: ClsId::from_section(&section),
+      clsid: clsid.clone(),
       section,
       name: read_ini_field("name", props)?,
       script_game_id: read_ini_field("script_game_id", props)?,
@@ -231,11 +231,7 @@ impl AlifeObjectBase {
       script_version: read_ini_field("script_version", props)?,
       client_data_size: read_ini_field("client_data_size", props)?,
       spawn_id: read_ini_field("spawn_id", props)?,
-      // todo: Actual object.
-      inherited: Box::new(AlifeObjectVisual {
-        visual_name: "".to_string(),
-        visual_flags: 0,
-      }), // todo: Read
+      inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), props)?,
       update_data: vec![], // todo: Read
     })
   }

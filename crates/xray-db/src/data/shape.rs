@@ -1,5 +1,7 @@
+use crate::export::file_import::read_ini_field;
 use crate::types::{Matrix3d, Sphere3d};
-use ini::Ini;
+use ini::{Ini, Properties};
+use std::io;
 
 /// Shape enumeration stored in alife objects descriptors.
 #[derive(Clone, Debug, PartialEq)]
@@ -9,7 +11,44 @@ pub enum Shape {
 }
 
 impl Shape {
-  pub fn export_shapes(shapes: &Vec<Shape>, section: &str, ini: &mut Ini) {
+  /// Import shape objects from ini config file.
+  pub fn import_shapes(props: &Properties) -> io::Result<Vec<Shape>> {
+    let mut shapes: Vec<Shape> = Vec::new();
+    let count: usize = read_ini_field("shapes_count", props)?;
+
+    for index in 0..count {
+      let prefix: String = format!("shape.{index}");
+      let shape_type: String = read_ini_field(&format!("{prefix}.type"), props)?;
+
+      match shape_type.as_str() {
+        "sphere" => {
+          shapes.push(Shape::Sphere((
+            read_ini_field(&format!("{prefix}.center"), props)?,
+            read_ini_field(&format!("{prefix}.radius"), props)?,
+          )));
+        }
+        "box" => {
+          shapes.push(Shape::Box((
+            read_ini_field(&format!("{prefix}.a"), props)?,
+            read_ini_field(&format!("{prefix}.b"), props)?,
+            read_ini_field(&format!("{prefix}.c"), props)?,
+            read_ini_field(&format!("{prefix}.d"), props)?,
+          )));
+        }
+        _ => {
+          return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            format!("Failed to parsed unknown type shape - {shape_type}"),
+          ))
+        }
+      }
+    }
+
+    Ok(shapes)
+  }
+
+  /// Export shapes object to target ini file section.
+  pub fn export_shapes(shapes: &[Shape], section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("shapes_count", shapes.len().to_string());

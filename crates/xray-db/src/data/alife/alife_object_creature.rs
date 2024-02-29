@@ -4,7 +4,7 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_export::export_vector_to_string;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::{import_vector_from_string, read_ini_field};
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
@@ -47,8 +47,14 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
       squad: read_ini_field("squad", props)?,
       group: read_ini_field("group", props)?,
       health: read_ini_field("health", props)?,
-      dynamic_out_restrictions: vec![], // todo: Read correctly.
-      dynamic_in_restrictions: vec![],  // todo: Read correctly.
+      dynamic_out_restrictions: import_vector_from_string(&read_ini_field::<String>(
+        "dynamic_out_restrictions",
+        props,
+      )?)?,
+      dynamic_in_restrictions: import_vector_from_string(&read_ini_field::<String>(
+        "dynamic_in_restrictions",
+        props,
+      )?)?,
       killer_id: read_ini_field("killer_id", props)?,
       game_death_time: read_ini_field("game_death_time", props)?,
     })

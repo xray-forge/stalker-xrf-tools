@@ -23,9 +23,12 @@ pub fn open_binary_file(path: &Path) -> io::Result<File> {
 }
 
 /// Export ini file content to provided file.
-#[allow(dead_code)]
 pub fn import_vector_from_string<T: FromStr>(value: &str) -> io::Result<Vec<T>> {
   let mut vector: Vec<T> = Vec::new();
+
+  if value.trim().is_empty() {
+    return Ok(vector);
+  }
 
   for it in value.split(',') {
     vector.push(match it.trim().parse::<T>() {

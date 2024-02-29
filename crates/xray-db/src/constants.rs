@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+pub const NIL: &str = "nil";
+
 pub const MINIMAL_SUPPORTED_SPAWN_VERSION: u16 = 120;
 
 pub const FLAG_SPAWN_ENABLED: u16 = 1;

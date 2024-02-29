@@ -28,7 +28,7 @@ impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   fn import(props: &Properties) -> io::Result<AlifeObjectShape> {
     Ok(AlifeObjectShape {
       base: AlifeObjectAbstract::import(props)?,
-      shape: vec![], // todo: Read shape data from ini config.
+      shape: Shape::import_shapes(props)?,
     })
   }
 }

@@ -1,7 +1,9 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::constants::NIL;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::io;
+use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Time {
@@ -12,6 +14,11 @@ pub struct Time {
   pub minute: u8,
   pub second: u8,
   pub millis: u16,
+}
+
+#[derive(Debug)]
+pub enum TimeError {
+  ParsingError(String),
 }
 
 impl Time {
@@ -76,7 +83,24 @@ impl Time {
 
   /// Cast optional time object to serialized string.
   pub fn export_to_string(time: &Option<Time>) -> String {
-    time.as_ref().map_or(String::from("nil"), |t| t.to_string())
+    time.as_ref().map_or(String::from(NIL), |t| t.to_string())
+  }
+
+  /// Import optional time from string value.
+  pub fn import_from_string(s: &str) -> io::Result<Option<Time>> {
+    if s.trim() == NIL {
+      return Ok(None);
+    }
+
+    Ok(match Time::from_str(s) {
+      Ok(time) => Some(time),
+      Err(_) => {
+        return Err(io::Error::new(
+          io::ErrorKind::InvalidInput,
+          "Failed to parse time",
+        ))
+      }
+    })
   }
 
   /// Cast time object to serialized string.
@@ -85,6 +109,58 @@ impl Time {
       "{},{},{},{},{},{},{}",
       self.year, self.minute, self.day, self.hour, self.minute, self.second, self.millis
     ))
+  }
+}
+
+impl FromStr for Time {
+  type Err = TimeError;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    let parts: Vec<&str> = s.split(',').map(|it| it.trim()).collect();
+
+    if parts.len() != 7 {
+      return Err(TimeError::ParsingError(String::from(
+        "Failed to parse time object from string",
+      )));
+    }
+
+    Ok(Time {
+      year: parts[0]
+        .parse()
+        .or(Err(TimeError::ParsingError(String::from(
+          "Failed to parse year value",
+        ))))?,
+      month: parts[1]
+        .parse()
+        .or(Err(TimeError::ParsingError(String::from(
+          "Failed to parse month value",
+        ))))?,
+      day: parts[2]
+        .parse()
+        .or(Err(TimeError::ParsingError(String::from(
+          "Failed to parse day value",
+        ))))?,
+      hour: parts[3]
+        .parse()
+        .or(Err(TimeError::ParsingError(String::from(
+          "Failed to parse hour value",
+        ))))?,
+      minute: parts[4]
+        .parse()
+        .or(Err(TimeError::ParsingError(String::from(
+          "Failed to parse minute value",
+        ))))?,
+      second: parts[5]
+        .parse()
+        .or(Err(TimeError::ParsingError(String::from(
+          "Failed to parse second value",
+        ))))?,
+      millis: parts[6]
+        .parse()
+        .or(Err(TimeError::ParsingError(String::from(
+          "Failed to parse millis value",
+        ))))?,
+    })
   }
 }
 

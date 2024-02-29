@@ -67,8 +67,8 @@ impl AlifeObjectGeneric for AlifeObjectHelicopter {
 
     ini
       .with_section(Some(section))
-      .set("max_power", &self.startup_animation)
-      .set("owner_id", &self.engine_sound);
+      .set("startup_animation", &self.startup_animation)
+      .set("engine_sound", &self.engine_sound);
   }
 }
 
