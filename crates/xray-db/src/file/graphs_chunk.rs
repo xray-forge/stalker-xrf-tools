@@ -64,7 +64,7 @@ impl GraphsChunk {
     assert_eq!(edges.len(), header.edges_count as usize);
     assert_eq!(points.len(), header.point_count as usize);
     assert_eq!(cross_tables.len(), header.level_count as usize);
-    assert!(chunk.is_ended(), "Expect graphs chunk to be ended.");
+    assert!(chunk.is_ended(), "Expect graphs chunk to be ended");
 
     Ok(GraphsChunk {
       header,
@@ -138,6 +138,8 @@ impl GraphsChunk {
 
     let cross_tables: Vec<GraphCrossTable> =
       GraphCrossTable::import_list::<T>(open_binary_file(&path.join("graphs_cross_tables.gct"))?)?;
+
+    log::info!("Imported graphs chunk");
 
     Ok(GraphsChunk {
       header,

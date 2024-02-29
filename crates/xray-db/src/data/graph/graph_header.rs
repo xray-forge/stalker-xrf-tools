@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
 use std::io;
@@ -17,20 +18,13 @@ pub struct GraphHeader {
 impl GraphHeader {
   /// Read header data from the chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphHeader> {
-    let version: u8 = chunk.read_u8()?;
-    let vertex_count: u16 = chunk.read_u16::<T>()?;
-    let edges_count: u32 = chunk.read_u32::<T>()?;
-    let point_count: u32 = chunk.read_u32::<T>()?;
-    let guid: u128 = chunk.read_u128::<T>()?;
-    let level_count: u8 = chunk.read_u8()?;
-
     Ok(GraphHeader {
-      version,
-      vertex_count,
-      edges_count,
-      point_count,
-      guid,
-      level_count,
+      version: chunk.read_u8()?,
+      vertex_count: chunk.read_u16::<T>()?,
+      edges_count: chunk.read_u32::<T>()?,
+      point_count: chunk.read_u32::<T>()?,
+      guid: chunk.read_u128::<T>()?,
+      level_count: chunk.read_u8()?,
     })
   }
 
@@ -50,39 +44,15 @@ impl GraphHeader {
   pub fn import(config: &Ini) -> io::Result<GraphHeader> {
     let props: &Properties = config
       .section(Some("header"))
-      .expect(format!("Graph section 'header' should be defined in ltx file.").as_str());
+      .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
 
     Ok(GraphHeader {
-      version: props
-        .get("version")
-        .expect("'version' to be in graph header section")
-        .parse::<u8>()
-        .expect("'version' to be valid u8"),
-      vertex_count: props
-        .get("vertex_count")
-        .expect("'vertex_count' to be in graph header section")
-        .parse::<u16>()
-        .expect("'vertex_count' to be valid u8"),
-      edges_count: props
-        .get("edges_count")
-        .expect("'edges_count' to be in graph header section")
-        .parse::<u32>()
-        .expect("'edges_count' to be valid u32"),
-      point_count: props
-        .get("point_count")
-        .expect("'point_count' to be in graph header section")
-        .parse::<u32>()
-        .expect("'point_count' to be valid u32"),
-      level_count: props
-        .get("level_count")
-        .expect("'level_count' to be in graph header section")
-        .parse::<u8>()
-        .expect("'level_count' to be valid u8"),
-      guid: props
-        .get("guid")
-        .expect("'guid' to be in graph header section")
-        .parse::<u128>()
-        .expect("'guid' to be valid u128"),
+      version: read_ini_field("version", props)?,
+      vertex_count: read_ini_field("vertex_count", props)?,
+      edges_count: read_ini_field("edges_count", props)?,
+      point_count: read_ini_field("point_count", props)?,
+      level_count: read_ini_field("level_count", props)?,
+      guid: read_ini_field("guid", props)?,
     })
   }
 

@@ -29,7 +29,7 @@ pub fn unpack_spawn_file(matches: &ArgMatches) -> io::Result<()> {
   if destination.exists() && destination.is_dir() {
     return Err(io::Error::new(
       io::ErrorKind::AlreadyExists,
-      "Unpack output directory already exists, use --force to prune destination folder.",
+      "Unpack output directory already exists, use --force to prune destination folder",
     ));
   }
 

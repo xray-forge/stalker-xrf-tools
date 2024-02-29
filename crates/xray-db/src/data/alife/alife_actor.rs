@@ -25,7 +25,7 @@ impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
 
     assert_eq!(
       save_marker, 1,
-      "Unexpected save data for actor object provided."
+      "Unexpected save data for actor object provided"
     );
 
     Ok(AlifeActor {

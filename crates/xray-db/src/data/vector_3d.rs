@@ -34,10 +34,6 @@ impl Vector3d<f32> {
 
     Ok(())
   }
-
-  pub fn to_string(&self) -> String {
-    format!("{},{},{}", self.x, self.y, self.z)
-  }
 }
 
 impl Display for Vector3d<f32> {

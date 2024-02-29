@@ -21,12 +21,13 @@ impl PatrolsChunk {
     let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
     let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
 
-    assert_eq!(meta_chunk.size, 4);
-
     let count: u32 = meta_chunk.read_u32::<T>()?;
     let patrols: Vec<Patrol> = Patrol::read_list_from_chunk::<T>(&mut data_chunk, count)?;
 
     assert_eq!(count, patrols.len() as u32);
+
+    assert!(meta_chunk.is_ended());
+    assert!(data_chunk.is_ended());
     assert!(chunk.is_ended());
 
     log::info!("Parsed patrols, bytes {:?}", chunk.read_bytes_len());
@@ -68,6 +69,8 @@ impl PatrolsChunk {
         )?);
       }
     }
+
+    log::info!("Imported patrols chunk");
 
     Ok(PatrolsChunk { patrols })
   }

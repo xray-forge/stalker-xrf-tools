@@ -29,10 +29,7 @@ impl ArtefactSpawnsChunk {
 
     assert_eq!(nodes.len() as u64, count as u64);
 
-    assert!(
-      chunk.is_ended(),
-      "Expect artefact spawns chunk to be ended."
-    );
+    assert!(chunk.is_ended(), "Expect artefact spawns chunk to be ended");
 
     log::info!(
       "Parsed artefacts spawns: {:?} bytes",
@@ -70,6 +67,8 @@ impl ArtefactSpawnsChunk {
         nodes.push(ArtefactSpawnPoint::import(props)?);
       }
     }
+
+    log::info!("Imported artefact spawns chunk");
 
     Ok(ArtefactSpawnsChunk { nodes })
   }

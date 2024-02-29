@@ -23,7 +23,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
     let source_id: u16 = chunk.read_u16::<SpawnByteOrder>()?;
 
     if flags & FLAG_SKELETON_SAVED_DATA != 0 {
-      todo!("Extend skeleton parsing to include bones.")
+      todo!("Extend skeleton parsing to include bones")
     }
 
     Ok(AlifeObjectSkeleton {

@@ -47,7 +47,7 @@ pub fn export_bytes_to_windows_1251_string(buffer: &Vec<u8>) -> String {
   let (transformed, _, had_errors) = WINDOWS_1251.decode(buffer);
 
   if had_errors {
-    panic!("Unexpected errors when decoding windows-1251 string data.");
+    panic!("Unexpected errors when decoding windows-1251 string data");
   }
 
   // Try with windows 1251 conversion:

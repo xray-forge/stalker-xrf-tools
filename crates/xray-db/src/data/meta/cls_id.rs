@@ -108,11 +108,11 @@ pub enum ClsId {
 }
 
 impl ClsId {
-  pub fn from_section(section: &String) -> ClsId {
+  pub fn from_section(section: &str) -> ClsId {
     SECTION_TO_CLS_ID
-      .get(section.as_str())
+      .get(section)
       .cloned()
-      .expect("Unexpected section provided for clsid matching.")
+      .expect("Unexpected section provided for clsid matching")
   }
 }
 

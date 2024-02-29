@@ -10,7 +10,7 @@ pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric> {
   fn verify(chunk: &Chunk) {
     assert!(
       chunk.is_ended(),
-      "Expected inherited alife object data chunk to be ended."
+      "Expected inherited alife object data chunk to be ended"
     );
   }
 }

@@ -1,5 +1,6 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
 use std::io;
@@ -13,12 +14,9 @@ pub struct GraphEdge {
 impl GraphEdge {
   /// Read edge from chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphEdge> {
-    let game_vertex_id: u16 = chunk.read_u16::<T>()?;
-    let distance: f32 = chunk.read_f32::<T>()?;
-
     Ok(GraphEdge {
-      game_vertex_id,
-      distance,
+      game_vertex_id: chunk.read_u16::<T>()?,
+      distance: chunk.read_f32::<T>()?,
     })
   }
 
@@ -32,23 +30,16 @@ impl GraphEdge {
 
   /// Import graph edge from ini file.
   pub fn import(section: &str, config: &Ini) -> io::Result<GraphEdge> {
-    let props: &Properties = config.section(Some(section)).expect(
-      format!("Graph section '{section}' should be defined in level point ltx file.").as_str(),
-    );
+    let props: &Properties = config.section(Some(section)).unwrap_or_else(|| {
+      panic!("Graph section '{section}' should be defined in level point ltx file")
+    });
 
     Ok(GraphEdge {
-      game_vertex_id: props
-        .get("game_vertex_id")
-        .expect("'game_vertex_id' to be in graph config")
-        .parse::<u16>()
-        .expect("'game_vertex_id' to be valid u16"),
-      distance: props
-        .get("distance")
-        .expect("'distance' to be in graph config")
-        .parse::<f32>()
-        .expect("'distance' to be valid f32"),
+      game_vertex_id: read_ini_field("game_vertex_id", props)?,
+      distance: read_ini_field("distance", props)?,
     })
   }
+
   /// Export graph edge data into ini.
   pub fn export(&self, section: &String, ini: &mut Ini) {
     ini

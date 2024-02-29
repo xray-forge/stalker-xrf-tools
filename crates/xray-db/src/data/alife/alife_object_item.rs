@@ -23,7 +23,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItem> for AlifeObjectItem {
     let condition: f32 = chunk.read_f32::<SpawnByteOrder>()?;
     let upgrades_count: u32 = chunk.read_u32::<SpawnByteOrder>()?;
 
-    assert_eq!(upgrades_count, 0, "Unexpected upgraded item provided.");
+    assert_eq!(upgrades_count, 0, "Unexpected upgraded item provided");
 
     Ok(AlifeObjectItem {
       base,

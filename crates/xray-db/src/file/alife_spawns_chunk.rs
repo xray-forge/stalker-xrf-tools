@@ -33,16 +33,13 @@ impl ALifeSpawnsChunk {
     }
 
     assert_eq!(objects.len(), count as usize);
-    assert!(count_chunk.is_ended(), "Expect count chunk to be ended.");
-    assert!(
-      objects_chunk.is_ended(),
-      "Expect objects chunk to be ended."
-    );
+    assert!(count_chunk.is_ended(), "Expect count chunk to be ended");
+    assert!(objects_chunk.is_ended(), "Expect objects chunk to be ended");
     assert!(
       edges_chunk.is_ended(),
-      "Parsing of edges in spawn chunk is not implemented."
+      "Parsing of edges in spawn chunk is not implemented"
     );
-    assert!(chunk.is_ended(), "Expect alife spawns chunk to be ended.");
+    assert!(chunk.is_ended(), "Expect alife spawns chunk to be ended");
 
     log::info!("Parsed alife spawns chunk, {:?} bytes", chunk.size);
 
@@ -83,6 +80,8 @@ impl ALifeSpawnsChunk {
 
   /// Import alife spawns data from provided path.
   pub fn import(_: &Path) -> io::Result<ALifeSpawnsChunk> {
+    log::info!("Imported alife spawns chunk");
+
     Ok(ALifeSpawnsChunk { objects: vec![] })
   }
 

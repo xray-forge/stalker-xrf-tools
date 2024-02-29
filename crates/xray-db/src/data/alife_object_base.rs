@@ -81,7 +81,7 @@ impl AlifeObjectBase {
 
     assert!(
       version > MINIMAL_SUPPORTED_SPAWN_VERSION,
-      "Unexpected version of alife object in spawn file, flag is {script_flags}."
+      "Unexpected version of alife object in spawn file, flag is {script_flags}"
     );
 
     let game_type: u16 = spawn_chunk.read_u16::<T>()?;

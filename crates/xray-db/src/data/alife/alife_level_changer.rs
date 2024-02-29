@@ -44,7 +44,7 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
 
     assert_eq!(
       save_marker, 26,
-      "Unexpected script data provided for level changer."
+      "Unexpected script data provided for level changer"
     );
 
     Ok(AlifeLevelChanger {

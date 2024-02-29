@@ -29,7 +29,7 @@ pub fn pack_spawn_file(matches: &ArgMatches) -> io::Result<()> {
   if destination.exists() && destination.is_file() {
     return Err(io::Error::new(
       io::ErrorKind::AlreadyExists,
-      "Pack output file already exists, use --force to prune destination.",
+      "Pack output file already exists, use --force to prune destination",
     ));
   }
 

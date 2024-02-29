@@ -54,7 +54,7 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
       };
 
       if chunk.is_compressed {
-        panic!("Parsing not implemented compressed chunk.");
+        panic!("Parsing not implemented compressed chunk");
       }
 
       // Rewind for next iteration.

@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
+use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
 use std::io;
@@ -18,18 +19,12 @@ pub struct GraphLevel {
 impl GraphLevel {
   /// Read graph level data from the chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphLevel> {
-    let name: String = chunk.read_null_terminated_win_string()?;
-    let offset: Vector3d = chunk.read_f32_3d_vector::<T>()?;
-    let id: u8 = chunk.read_u8()?;
-    let section: String = chunk.read_null_terminated_win_string()?;
-    let guid: u128 = chunk.read_u128::<T>()?;
-
     Ok(GraphLevel {
-      name,
-      offset,
-      id,
-      section,
-      guid,
+      name: chunk.read_null_terminated_win_string()?,
+      offset: chunk.read_f32_3d_vector::<T>()?,
+      id: chunk.read_u8()?,
+      section: chunk.read_null_terminated_win_string()?,
+      guid: chunk.read_u128::<T>()?,
     })
   }
 
@@ -48,40 +43,20 @@ impl GraphLevel {
   pub fn import(section: &str, config: &Ini) -> io::Result<GraphLevel> {
     let props: &Properties = config
       .section(Some(section))
-      .expect(format!("Graph section {section} should be defined in ltx file.").as_str());
+      .unwrap_or_else(|| panic!("Graph section {section} should be defined in ltx file"));
 
     Ok(GraphLevel {
-      name: props
-        .get("name")
-        .expect("'name' to be in graph config")
-        .parse::<String>()
-        .expect("'name' to be valid string"),
-      offset: props
-        .get("offset")
-        .expect("'offset' to be in graph config")
-        .parse::<Vector3d>()
-        .expect("'offset' to be valid Vector3d"),
-      id: props
-        .get("id")
-        .expect("'id' to be in graph config")
-        .parse::<u8>()
-        .expect("'id' to be valid u8"),
-      section: props
-        .get("section")
-        .expect("'section' to be in graph config")
-        .parse::<String>()
-        .expect("'section' to be valid string"),
-      guid: props
-        .get("guid")
-        .expect("'guid' to be in graph config")
-        .parse::<u128>()
-        .expect("'guid' to be valid u128"),
+      name: read_ini_field("name", props)?,
+      offset: read_ini_field("offset", props)?,
+      id: read_ini_field("id", props)?,
+      section: read_ini_field("section", props)?,
+      guid: read_ini_field("guid", props)?,
     })
   }
 
   /// Export graph level data into ini.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
-    ini
+  pub fn export(&self, section: &String, config: &mut Ini) {
+    config
       .with_section(Some(section))
       .set("name", &self.name)
       .set("section", &self.section)

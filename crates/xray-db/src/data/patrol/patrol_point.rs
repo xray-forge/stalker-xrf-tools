@@ -2,6 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
+use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
 use std::io;
@@ -36,7 +37,7 @@ impl PatrolPoint {
 
     assert!(
       chunk.is_ended(),
-      "Chunk data should be read for patrol points list."
+      "Chunk data should be read for patrol points list"
     );
 
     Ok(points)
@@ -44,24 +45,20 @@ impl PatrolPoint {
 
   /// Read patrol point data from chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<PatrolPoint> {
-    let name: String = chunk.read_null_terminated_win_string()?;
-    let position: Vector3d = chunk.read_f32_3d_vector::<T>()?;
-    let flags: u32 = chunk.read_u32::<T>()?;
-    let level_vertex_id: u32 = chunk.read_u32::<T>()?;
-    let game_vertex_id: u16 = chunk.read_u16::<T>()?;
+    let point: PatrolPoint = PatrolPoint {
+      name: chunk.read_null_terminated_win_string()?,
+      position: chunk.read_f32_3d_vector::<T>()?,
+      flags: chunk.read_u32::<T>()?,
+      level_vertex_id: chunk.read_u32::<T>()?,
+      game_vertex_id: chunk.read_u16::<T>()?,
+    };
 
     assert!(
       chunk.is_ended(),
-      "Chunk data should be read for patrol point."
+      "Chunk data should be read for patrol point"
     );
 
-    Ok(PatrolPoint {
-      name,
-      position,
-      flags,
-      level_vertex_id,
-      game_vertex_id,
-    })
+    Ok(point)
   }
 
   /// Write list of patrol points into chunk writer.
@@ -102,34 +99,14 @@ impl PatrolPoint {
   pub fn import(section: &str, config: &Ini) -> io::Result<PatrolPoint> {
     let props: &Properties = config
       .section(Some(section))
-      .expect(format!("Patrol point section {section} should be defined in ltx file.").as_str());
+      .unwrap_or_else(|| panic!("Patrol point section {section} should be defined in ltx file"));
 
     Ok(PatrolPoint {
-      name: props
-        .get("name")
-        .expect("'name' to be in patrol point section")
-        .parse::<String>()
-        .expect("'name' to be valid string"),
-      position: props
-        .get("position")
-        .expect("'position' to be in patrol point section")
-        .parse::<Vector3d>()
-        .expect("'position' to be valid 3d vector"),
-      flags: props
-        .get("flags")
-        .expect("'flags' to be in patrol point section")
-        .parse::<u32>()
-        .expect("'flags' to be valid u32"),
-      level_vertex_id: props
-        .get("level_vertex_id")
-        .expect("'level_vertex_id' to be in patrol point section")
-        .parse::<u32>()
-        .expect("'level_vertex_id' to be valid u32"),
-      game_vertex_id: props
-        .get("game_vertex_id")
-        .expect("'game_vertex_id' to be in patrol point section")
-        .parse::<u16>()
-        .expect("'game_vertex_id' to be valid u16"),
+      name: read_ini_field("name", props)?,
+      position: read_ini_field("position", props)?,
+      flags: read_ini_field("flags", props)?,
+      level_vertex_id: read_ini_field("level_vertex_id", props)?,
+      game_vertex_id: read_ini_field("game_vertex_id", props)?,
     })
   }
 

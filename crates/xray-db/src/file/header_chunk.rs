@@ -1,12 +1,11 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
-use crate::export::file_import::open_ini_config;
+use crate::export::file_import::{open_ini_config, read_ini_field};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
-use std::fs::File;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 #[derive(Debug, PartialEq)]
 pub struct HeaderChunk {
@@ -29,7 +28,7 @@ impl HeaderChunk {
 
     log::info!("Parsed header chunk, {:?} bytes", chunk.read_bytes_len());
 
-    assert!(chunk.is_ended(), "Expect header chunk to be ended.");
+    assert!(chunk.is_ended(), "Expect header chunk to be ended");
 
     Ok(HeaderChunk {
       version,
@@ -60,43 +59,20 @@ impl HeaderChunk {
     let config: Ini = open_ini_config(&path.join("header.ltx"))?;
     let props: &Properties = config
       .section(Some("header"))
-      .expect(format!("Patrol section 'header' should be defined in ltx file.").as_str());
+      .expect("Patrol section 'header' should be defined in ltx file");
 
     Ok(HeaderChunk {
-      version: props
-        .get("version")
-        .expect("'version' to be in header config")
-        .parse::<u32>()
-        .expect("'version' to be valid u32"),
-      guid: props
-        .get("guid")
-        .expect("'guid' to be in header config")
-        .parse::<u128>()
-        .expect("'guid' to be valid u128"),
-      graph_guid: props
-        .get("graph_guid")
-        .expect("'graph_guid' to be in header config")
-        .parse::<u128>()
-        .expect("'graph_guid' to be valid u128"),
-      count: props
-        .get("count")
-        .expect("'count' to be in header config")
-        .parse::<u32>()
-        .expect("'count' to be valid u32"),
-      level_count: props
-        .get("level_count")
-        .expect("'level_count' to be in header config")
-        .parse::<u32>()
-        .expect("'level_count' to be valid u32"),
+      version: read_ini_field("version", props)?,
+      guid: read_ini_field("guid", props)?,
+      graph_guid: read_ini_field("graph_guid", props)?,
+      count: read_ini_field("count", props)?,
+      level_count: read_ini_field("level_count", props)?,
     })
   }
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let header_path: PathBuf = path.join("header.ltx");
-
-    let mut file: File = create_export_file(&header_path)?;
     let mut config: Ini = Ini::new();
 
     config
@@ -107,7 +83,7 @@ impl HeaderChunk {
       .set("count", self.count.to_string())
       .set("level_count", self.level_count.to_string());
 
-    export_ini_to_file(&config, &mut file)?;
+    export_ini_to_file(&config, &mut create_export_file(&path.join("header.ltx"))?)?;
 
     log::info!("Exported header chunk");
 
@@ -137,7 +113,7 @@ mod tests {
 
     let header: io::Result<HeaderChunk> = HeaderChunk::read_from_chunk::<SpawnByteOrder>(chunk);
 
-    assert!(header.is_err(), "Expected failure with empty chunk.");
+    assert!(header.is_err(), "Expected failure with empty chunk");
 
     Ok(())
   }

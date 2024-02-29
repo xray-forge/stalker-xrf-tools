@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_export::export_vector_to_string;
-use crate::export::file_import::import_sized_vector_from_string;
+use crate::export::file_import::{read_ini_field, read_ini_u32_bytes_field};
 use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
@@ -25,26 +25,16 @@ pub struct GraphVertex {
 impl GraphVertex {
   /// Read graph vertex data from the chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphVertex> {
-    let level_point: Vector3d = chunk.read_f32_3d_vector::<T>()?;
-    let game_point: Vector3d = chunk.read_f32_3d_vector::<T>()?;
-    let level_id: u8 = chunk.read_u8()?;
-    let level_vertex_id: u32 = chunk.read_u24::<T>()?;
-    let vertex_type: U32Bytes = chunk.read_u32_bytes()?;
-    let edge_offset: u32 = chunk.read_u32::<T>()?;
-    let level_point_offset: u32 = chunk.read_u32::<T>()?;
-    let edge_count: u8 = chunk.read_u8()?;
-    let level_point_count: u8 = chunk.read_u8()?;
-
     Ok(GraphVertex {
-      level_point,
-      game_point,
-      level_id,
-      level_vertex_id,
-      vertex_type,
-      edge_offset,
-      level_point_offset,
-      edge_count,
-      level_point_count,
+      level_point: chunk.read_f32_3d_vector::<T>()?,
+      game_point: chunk.read_f32_3d_vector::<T>()?,
+      level_id: chunk.read_u8()?,
+      level_vertex_id: chunk.read_u24::<T>()?,
+      vertex_type: chunk.read_u32_bytes()?,
+      edge_offset: chunk.read_u32::<T>()?,
+      level_point_offset: chunk.read_u32::<T>()?,
+      edge_count: chunk.read_u8()?,
+      level_point_count: chunk.read_u8()?,
     })
   }
 
@@ -65,68 +55,20 @@ impl GraphVertex {
 
   /// Import graph vertex from ini file.
   pub fn import(section: &str, config: &Ini) -> io::Result<GraphVertex> {
-    let props: &Properties = config.section(Some(section)).expect(
-      format!("Graph section '{section}' should be defined in graph vertex ltx file.").as_str(),
-    );
-
-    let vertex_type: Vec<u8> = import_sized_vector_from_string(
-      4,
-      &props
-        .get("vertex_type")
-        .expect("'vertex_type' to be in graph config")
-        .parse::<String>()
-        .expect("'vertex_type' to be valid u32"),
-    )?;
-
-    let vertex_type: U32Bytes = (
-      vertex_type.get(0).unwrap().clone(),
-      vertex_type.get(1).unwrap().clone(),
-      vertex_type.get(2).unwrap().clone(),
-      vertex_type.get(3).unwrap().clone(),
-    );
+    let props: &Properties = config.section(Some(section)).unwrap_or_else(|| {
+      panic!("Graph section '{section}' should be defined in graph vertex ltx file")
+    });
 
     Ok(GraphVertex {
-      level_point: props
-        .get("level_point")
-        .expect("'level_point' to be in graph config")
-        .parse::<Vector3d>()
-        .expect("'level_point' to be valid Vector3d"),
-      game_point: props
-        .get("game_point")
-        .expect("'game_point' to be in graph config")
-        .parse::<Vector3d>()
-        .expect("'game_point' to be valid Vector3d"),
-      level_id: props
-        .get("level_id")
-        .expect("'level_id' to be in graph config")
-        .parse::<u8>()
-        .expect("'level_id' to be valid u8"),
-      level_vertex_id: props
-        .get("level_vertex_id")
-        .expect("'level_vertex_id' to be in graph config")
-        .parse::<u32>()
-        .expect("'level_vertex_id' to be valid u32"),
-      vertex_type,
-      edge_offset: props
-        .get("edge_offset")
-        .expect("'edge_offset' to be in graph config")
-        .parse::<u32>()
-        .expect("'edge_offset' to be valid u32"),
-      level_point_offset: props
-        .get("level_point_offset")
-        .expect("'level_point_offset' to be in graph config")
-        .parse::<u32>()
-        .expect("'level_point_offset' to be valid u32"),
-      edge_count: props
-        .get("edge_count")
-        .expect("'edge_count' to be in graph config")
-        .parse::<u8>()
-        .expect("'edge_count' to be valid u8"),
-      level_point_count: props
-        .get("level_point_count")
-        .expect("'level_point_count' to be in graph config")
-        .parse::<u8>()
-        .expect("'level_point_count' to be valid u8"),
+      level_point: read_ini_field("level_point", props)?,
+      game_point: read_ini_field("game_point", props)?,
+      level_id: read_ini_field("level_id", props)?,
+      level_vertex_id: read_ini_field("level_vertex_id", props)?,
+      vertex_type: read_ini_u32_bytes_field("vertex_type", props)?,
+      edge_offset: read_ini_field("edge_offset", props)?,
+      level_point_offset: read_ini_field("level_point_offset", props)?,
+      edge_count: read_ini_field("edge_count", props)?,
+      level_point_count: read_ini_field("level_point_count", props)?,
     })
   }
 

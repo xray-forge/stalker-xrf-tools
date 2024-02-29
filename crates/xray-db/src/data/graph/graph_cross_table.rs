@@ -28,7 +28,7 @@ impl GraphCrossTable {
 
       assert!(
         cross_table_chunk.is_ended(),
-        "Expect cross table chunk to be ended."
+        "Expect cross table chunk to be ended"
       );
     }
 
@@ -94,7 +94,7 @@ impl GraphCrossTable {
 
       assert!(
         cross_table_chunk.is_ended(),
-        "Expect cross table chunk to be ended."
+        "Expect cross table chunk to be ended"
       );
     }
 

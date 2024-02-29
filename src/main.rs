@@ -19,7 +19,7 @@ fn main() {
     Some(("pack-spawn", matches)) => pack_spawn_file(matches).unwrap(),
     Some(("unpack-archive", matches)) => unpack_archive(matches),
     Some(("format-ltx", matches)) => format_ltx(matches),
-    _ => panic!("Unexpected cli command provided, check --help for details."),
+    _ => panic!("Unexpected cli command provided, check --help for details"),
   };
 }
 

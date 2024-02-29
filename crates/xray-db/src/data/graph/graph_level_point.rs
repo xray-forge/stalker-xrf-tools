@@ -1,6 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
+use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
 use std::io;
@@ -15,14 +16,10 @@ pub struct GraphLevelPoint {
 impl GraphLevelPoint {
   /// Read level point from chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphLevelPoint> {
-    let position: Vector3d = chunk.read_f32_3d_vector::<T>()?;
-    let level_vertex_id: u32 = chunk.read_u32::<T>()?;
-    let distance: f32 = chunk.read_f32::<T>()?;
-
     Ok(GraphLevelPoint {
-      position,
-      level_vertex_id,
-      distance,
+      position: chunk.read_f32_3d_vector::<T>()?,
+      level_vertex_id: chunk.read_u32::<T>()?,
+      distance: chunk.read_f32::<T>()?,
     })
   }
 
@@ -37,26 +34,14 @@ impl GraphLevelPoint {
 
   /// Import graph level point from ini file.
   pub fn import(section: &str, config: &Ini) -> io::Result<GraphLevelPoint> {
-    let props: &Properties = config.section(Some(section)).expect(
-      format!("Graph section '{section}' should be defined in level point ltx file.").as_str(),
-    );
+    let props: &Properties = config.section(Some(section)).unwrap_or_else(|| {
+      panic!("Graph section '{section}' should be defined in level point ltx file")
+    });
 
     Ok(GraphLevelPoint {
-      position: props
-        .get("position")
-        .expect("'position' to be in graph config")
-        .parse::<Vector3d>()
-        .expect("'position' to be valid Vector3d"),
-      level_vertex_id: props
-        .get("level_vertex_id")
-        .expect("'level_vertex_id' to be in graph config")
-        .parse::<u32>()
-        .expect("'level_vertex_id' to be valid u32"),
-      distance: props
-        .get("distance")
-        .expect("'distance' to be in graph config")
-        .parse::<f32>()
-        .expect("'distance' to be valid f32"),
+      position: read_ini_field("position", props)?,
+      level_vertex_id: read_ini_field("level_vertex_id", props)?,
+      distance: read_ini_field("distance", props)?,
     })
   }
 

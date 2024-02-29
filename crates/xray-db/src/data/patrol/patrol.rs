@@ -3,6 +3,7 @@ use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
+use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
 use std::io;
@@ -44,7 +45,7 @@ impl Patrol {
     assert_eq!(read_patrols_count, count);
     assert!(
       chunk.is_ended(),
-      "Chunk data should be read for patrols list."
+      "Chunk data should be read for patrols list"
     );
 
     Ok(patrols)
@@ -68,7 +69,7 @@ impl Patrol {
     let links: Vec<PatrolLink> = PatrolLink::read_list_from_chunk::<T>(&mut links_chunk)?;
 
     assert_eq!(points_count, points.len() as u32);
-    assert!(chunk.is_ended(), "Expect patrol chunk to be ended.");
+    assert!(chunk.is_ended(), "Expect patrol chunk to be ended");
 
     Ok(Patrol {
       name,
@@ -132,25 +133,11 @@ impl Patrol {
   ) -> io::Result<Patrol> {
     let props: &Properties = patrols_config
       .section(Some(section))
-      .expect(format!("Patrol section {section} should be defined in ltx file.").as_str());
+      .unwrap_or_else(|| panic!("Patrol section {section} should be defined in ltx file"));
 
-    let name: String = props
-      .get("name")
-      .expect("'name' to be in patrol section")
-      .parse::<String>()
-      .expect("'name' to be valid string");
-
-    let points_list: String = props
-      .get("points")
-      .expect("'points' to be in patrol section")
-      .parse::<String>()
-      .expect("'points' to be valid string");
-
-    let links_count: usize = props
-      .get("links_count")
-      .expect("'links_count' to be in patrol section")
-      .parse::<usize>()
-      .expect("'links_count' to be valid usize");
+    let name: String = read_ini_field("name", props)?;
+    let points_list: String = read_ini_field("points", props)?;
+    let links_count: usize = read_ini_field("links_count", props)?;
 
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut links: Vec<PatrolLink> = Vec::new();
@@ -195,7 +182,7 @@ impl Patrol {
           .points
           .iter()
           .map(|it| it.name.clone())
-          .collect::<Vec<_>>()
+          .collect::<Vec<String>>()
           .join(","),
       )
       .set("links_count", self.links.len().to_string());
