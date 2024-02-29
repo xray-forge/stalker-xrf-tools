@@ -172,7 +172,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 32 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?
+    let mut chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
@@ -215,7 +215,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 48 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?
+    let mut chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

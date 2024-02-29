@@ -100,7 +100,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 106 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
+    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeSmartZone =
       AlifeSmartZone::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
 

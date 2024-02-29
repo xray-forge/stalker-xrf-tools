@@ -1,4 +1,5 @@
 use ini::Ini;
+use std::fs::File;
 use std::io;
 use std::path::Path;
 
@@ -12,4 +13,9 @@ pub fn open_ini_config(path: &Path) -> io::Result<Ini> {
       error.to_string(),
     )),
   }
+}
+
+/// Try opening binary data storing file.
+pub fn open_binary_file(path: &Path) -> io::Result<File> {
+  File::open(path)
 }

@@ -37,7 +37,7 @@ impl SpawnFile {
 
   /// Read spawn file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<SpawnFile> {
-    let mut root_chunk: Chunk = Chunk::from_file(FileSlice::new(file)).unwrap();
+    let mut root_chunk: Chunk = Chunk::from_slice(FileSlice::new(file)).unwrap();
 
     let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
 
@@ -93,7 +93,7 @@ impl SpawnFile {
       alife_spawn: ALifeSpawnsChunk::import(path)?,
       artefact_spawn: ArtefactSpawnsChunk::import(path)?,
       patrols: PatrolsChunk::import(path)?,
-      graphs: GraphsChunk::import(path)?,
+      graphs: GraphsChunk::import::<T>(path)?,
     })
   }
 

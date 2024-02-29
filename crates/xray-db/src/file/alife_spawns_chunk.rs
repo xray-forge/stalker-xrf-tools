@@ -158,7 +158,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
-    let chunk: Chunk = Chunk::from_file(file)?
+    let chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
@@ -275,7 +275,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 419 + 8);
 
-    let chunk: Chunk = Chunk::from_file(file)?
+    let chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

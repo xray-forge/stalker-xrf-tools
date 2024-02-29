@@ -2,7 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -33,6 +33,31 @@ impl GraphLevelPoint {
     writer.write_f32::<T>(self.distance)?;
 
     Ok(())
+  }
+
+  /// Import graph level point from ini file.
+  pub fn import(section: &str, config: &Ini) -> io::Result<GraphLevelPoint> {
+    let props: &Properties = config.section(Some(section)).expect(
+      format!("Graph section '{section}' should be defined in level point ltx file.").as_str(),
+    );
+
+    Ok(GraphLevelPoint {
+      position: props
+        .get("position")
+        .expect("'position' to be in graph config")
+        .parse::<Vector3d>()
+        .expect("'position' to be valid Vector3d"),
+      level_vertex_id: props
+        .get("level_vertex_id")
+        .expect("'level_vertex_id' to be in graph config")
+        .parse::<u32>()
+        .expect("'level_vertex_id' to be valid u32"),
+      distance: props
+        .get("distance")
+        .expect("'distance' to be in graph config")
+        .parse::<f32>()
+        .expect("'distance' to be valid f32"),
+    })
   }
 
   /// Export graph level point data into ini.
@@ -85,7 +110,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 20 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?
+    let mut chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

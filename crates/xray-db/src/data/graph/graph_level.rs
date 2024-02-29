@@ -2,7 +2,7 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 /// `GameGraph::SLevel::load` in xray codebase.
@@ -16,6 +16,7 @@ pub struct GraphLevel {
 }
 
 impl GraphLevel {
+  /// Read graph level data from the chunk.
   pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphLevel> {
     let name: String = chunk.read_null_terminated_win_string()?;
     let offset: Vector3d = chunk.read_f32_3d_vector::<T>()?;
@@ -41,6 +42,41 @@ impl GraphLevel {
     writer.write_u128::<T>(self.guid)?;
 
     Ok(())
+  }
+
+  /// Import patrols data from provided path.
+  pub fn import(section: &str, config: &Ini) -> io::Result<GraphLevel> {
+    let props: &Properties = config
+      .section(Some(section))
+      .expect(format!("Graph section {section} should be defined in ltx file.").as_str());
+
+    Ok(GraphLevel {
+      name: props
+        .get("name")
+        .expect("'name' to be in graph config")
+        .parse::<String>()
+        .expect("'name' to be valid string"),
+      offset: props
+        .get("offset")
+        .expect("'offset' to be in graph config")
+        .parse::<Vector3d>()
+        .expect("'offset' to be valid Vector3d"),
+      id: props
+        .get("id")
+        .expect("'id' to be in graph config")
+        .parse::<u8>()
+        .expect("'id' to be valid u8"),
+      section: props
+        .get("section")
+        .expect("'section' to be in graph config")
+        .parse::<String>()
+        .expect("'section' to be valid string"),
+      guid: props
+        .get("guid")
+        .expect("'guid' to be in graph config")
+        .parse::<u128>()
+        .expect("'guid' to be valid u128"),
+    })
   }
 
   /// Export graph level data into ini.
@@ -97,7 +133,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 59 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?
+    let mut chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

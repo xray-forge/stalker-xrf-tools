@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
 use crate::export::file_import::open_ini_config;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::fs::File;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -58,34 +58,32 @@ impl HeaderChunk {
   /// Parse ini files and populate spawn file.
   pub fn import(path: &Path) -> io::Result<HeaderChunk> {
     let config: Ini = open_ini_config(&path.join("header.ltx"))?;
+    let props: &Properties = config
+      .section(Some("header"))
+      .expect(format!("Patrol section 'header' should be defined in ltx file.").as_str());
 
     Ok(HeaderChunk {
-      version: config
-        .general_section()
+      version: props
         .get("version")
         .expect("'version' to be in header config")
         .parse::<u32>()
         .expect("'version' to be valid u32"),
-      guid: config
-        .general_section()
+      guid: props
         .get("guid")
         .expect("'guid' to be in header config")
         .parse::<u128>()
         .expect("'guid' to be valid u128"),
-      graph_guid: config
-        .general_section()
+      graph_guid: props
         .get("graph_guid")
         .expect("'graph_guid' to be in header config")
         .parse::<u128>()
         .expect("'graph_guid' to be valid u128"),
-      count: config
-        .general_section()
+      count: props
         .get("count")
         .expect("'count' to be in header config")
         .parse::<u32>()
         .expect("'count' to be valid u32"),
-      level_count: config
-        .general_section()
+      level_count: props
         .get("level_count")
         .expect("'level_count' to be in header config")
         .parse::<u32>()
@@ -102,7 +100,7 @@ impl HeaderChunk {
     let mut config: Ini = Ini::new();
 
     config
-      .with_general_section()
+      .with_section(Some("header"))
       .set("version", self.version.to_string())
       .set("guid", self.guid.to_string())
       .set("graph_guid", self.graph_guid.to_string())
@@ -132,7 +130,7 @@ mod tests {
 
   #[test]
   fn test_read_empty_chunk() -> io::Result<()> {
-    let chunk: Chunk = Chunk::from_file(open_test_resource_as_slice(&get_test_chunk_sub_dir(
+    let chunk: Chunk = Chunk::from_slice(open_test_resource_as_slice(&get_test_chunk_sub_dir(
       &String::from("empty_nested_single.chunk"),
     ))?)?
     .read_child_by_index(0)?;
@@ -173,7 +171,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 52);
 
-    let chunk: Chunk = Chunk::from_file(file)?
+    let chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

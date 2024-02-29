@@ -275,7 +275,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 210 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
+    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
     let read_patrol: Patrol = Patrol::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
 
     assert_eq!(read_patrol, patrol);
@@ -352,7 +352,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
+    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
     let read_patrols: Vec<Patrol> = Patrol::read_list_from_chunk::<SpawnByteOrder>(&mut chunk, 2)?;
 
     assert_eq!(read_patrols, patrols);

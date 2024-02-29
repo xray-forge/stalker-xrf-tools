@@ -1,5 +1,4 @@
 use crate::chunk::chunk::Chunk;
-use crate::chunk::iterator::ChunkSizePackedIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::graph::graph_cross_table::GraphCrossTable;
 use crate::data::graph::graph_edge::GraphEdge;
@@ -8,10 +7,9 @@ use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
-use byteorder::{ByteOrder, WriteBytesExt};
+use crate::export::file_import::{open_binary_file, open_ini_config};
+use byteorder::ByteOrder;
 use ini::Ini;
-use std::fs::File;
-use std::io::Write;
 use std::path::Path;
 use std::{fmt, io};
 
@@ -33,7 +31,6 @@ impl GraphsChunk {
     let mut vertices: Vec<GraphVertex> = Vec::new();
     let mut edges: Vec<GraphEdge> = Vec::new();
     let mut points: Vec<GraphLevelPoint> = Vec::new();
-    let mut cross_tables: Vec<GraphCrossTable> = Vec::new();
 
     let header: GraphHeader = GraphHeader::read_from_chunk::<T>(&mut chunk)?;
 
@@ -53,16 +50,8 @@ impl GraphsChunk {
       points.push(GraphLevelPoint::read_from_chunk::<T>(&mut chunk)?);
     }
 
-    for mut cross_table_chunk in ChunkSizePackedIterator::new(&mut chunk) {
-      cross_tables.push(GraphCrossTable::read_from_chunk::<T>(
-        &mut cross_table_chunk,
-      )?);
-
-      assert!(
-        cross_table_chunk.is_ended(),
-        "Expect cross table chunk to be ended."
-      );
-    }
+    let cross_tables: Vec<GraphCrossTable> =
+      GraphCrossTable::read_list_from_chunk::<T>(&mut chunk)?;
 
     log::info!(
       "Parsed graphs ver {:?}, {:?} bytes",
@@ -107,13 +96,7 @@ impl GraphsChunk {
       point.write::<T>(writer)?;
     }
 
-    for table in &self.cross_tables {
-      let mut table_writer: ChunkWriter = ChunkWriter::new();
-
-      table.write::<T>(&mut table_writer)?;
-      writer.write_u32::<T>(table_writer.bytes_written() as u32 + 4)?;
-      writer.write_all(&table_writer.buffer)?;
-    }
+    GraphCrossTable::write_list::<T>(&self.cross_tables, writer)?;
 
     log::info!("Written graphs chunk, {:?} bytes", writer.bytes_written());
 
@@ -121,21 +104,48 @@ impl GraphsChunk {
   }
 
   /// Import graphs data from provided path.
-  pub fn import(_: &Path) -> io::Result<GraphsChunk> {
+  pub fn import<T: ByteOrder>(path: &Path) -> io::Result<GraphsChunk> {
+    let header: GraphHeader =
+      GraphHeader::import(&open_ini_config(&path.join("graphs_header.ltx"))?)?;
+
+    let levels_config: Ini = open_ini_config(&path.join("graphs_levels.ltx"))?;
+    let mut levels: Vec<GraphLevel> = Vec::new();
+
+    for index in 0..header.level_count {
+      levels.push(GraphLevel::import(&index.to_string(), &levels_config)?);
+    }
+
+    let vertices_config: Ini = open_ini_config(&path.join("graphs_vertices.ltx"))?;
+    let mut vertices: Vec<GraphVertex> = Vec::new();
+
+    for index in 0..header.vertex_count {
+      vertices.push(GraphVertex::import(&index.to_string(), &vertices_config)?);
+    }
+
+    let points_config: Ini = open_ini_config(&path.join("graphs_points.ltx"))?;
+    let mut points: Vec<GraphLevelPoint> = Vec::new();
+
+    for index in 0..header.point_count {
+      points.push(GraphLevelPoint::import(&index.to_string(), &points_config)?);
+    }
+
+    let edges_config: Ini = open_ini_config(&path.join("graphs_edges.ltx"))?;
+    let mut edges: Vec<GraphEdge> = Vec::new();
+
+    for index in 0..header.edges_count {
+      edges.push(GraphEdge::import(&index.to_string(), &edges_config)?);
+    }
+
+    let cross_tables: Vec<GraphCrossTable> =
+      GraphCrossTable::import_list::<T>(open_binary_file(&path.join("graphs_cross_tables.gct"))?)?;
+
     Ok(GraphsChunk {
-      header: GraphHeader {
-        version: 0,
-        vertex_count: 0,
-        edges_count: 0,
-        point_count: 0,
-        guid: 0,
-        level_count: 0,
-      },
-      levels: vec![],
-      vertices: vec![],
-      edges: vec![],
-      points: vec![],
-      cross_tables: vec![],
+      header,
+      levels,
+      vertices,
+      edges,
+      points,
+      cross_tables,
     })
   }
 
@@ -197,18 +207,10 @@ impl GraphsChunk {
       &mut create_export_file(&path.join("graphs_edges.ltx"))?,
     )?;
 
-    // Export cross-tables as separate chunk file.
-    let mut gct_file: File = create_export_file(&path.join("graphs_cross_tables.gct"))?;
-    let mut cross_tables_writer: ChunkWriter = ChunkWriter::new();
-
-    for (index, cross_table) in self.cross_tables.iter().enumerate() {
-      let mut cross_table_writer: ChunkWriter = ChunkWriter::new();
-
-      cross_table.write::<T>(&mut cross_table_writer)?;
-      cross_tables_writer.write_all(&cross_table_writer.flush_chunk_into_buffer::<T>(index)?)?;
-    }
-
-    cross_tables_writer.flush_raw_into_file(&mut gct_file)?;
+    GraphCrossTable::export_list::<T>(
+      &self.cross_tables,
+      &mut create_export_file(&path.join("graphs_cross_tables.gct"))?,
+    )?;
 
     log::info!("Exported graphs chunk");
 
@@ -284,7 +286,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
-    let chunk: Chunk = Chunk::from_file(file)?
+    let chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
@@ -420,7 +422,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
-    let chunk: Chunk = Chunk::from_file(file)?
+    let chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

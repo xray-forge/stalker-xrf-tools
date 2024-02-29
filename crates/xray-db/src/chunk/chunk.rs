@@ -7,6 +7,7 @@ use byteorder::{ByteOrder, ReadBytesExt};
 use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
 use std::borrow::Cow;
+use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::{fmt, io};
 
@@ -25,7 +26,13 @@ impl Chunk {
     ChunkIterator::new(chunk).collect()
   }
 
-  pub fn from_file(file: FileSlice) -> io::Result<Chunk> {
+  /// Create chunk based on whole file.
+  pub fn from_file(file: File) -> io::Result<Chunk> {
+    Self::from_slice(FileSlice::new(file))
+  }
+
+  /// Create chunk based on file slice boundaries.
+  pub fn from_slice(file: FileSlice) -> io::Result<Chunk> {
     if file.is_empty() {
       return Err(io::Error::new(
         io::ErrorKind::InvalidInput,
@@ -232,7 +239,7 @@ mod tests {
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 0);
 
-    let result: io::Result<Chunk> = Chunk::from_file(file);
+    let result: io::Result<Chunk> = Chunk::from_slice(file);
 
     assert!(
       result.is_err(),
@@ -255,7 +262,7 @@ mod tests {
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 8);
 
-    let chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
+    let chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
 
     assert!(chunk.is_ended(), "Expect empty chunk.");
 
@@ -266,14 +273,14 @@ mod tests {
   fn test_read_empty_children() -> io::Result<()> {
     let filename: String = get_test_chunk_sub_dir(&String::from("empty_nested_single.chunk"));
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
+    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
     assert_eq!(chunks.first().unwrap().size, 0);
 
     let filename: String = get_test_chunk_sub_dir(&String::from("empty_nested_five.chunk"));
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
+    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");
     assert_eq!(chunks.get(0).unwrap().size, 0);
@@ -289,14 +296,14 @@ mod tests {
   fn test_read_dummy_children() -> io::Result<()> {
     let filename: String = get_test_chunk_sub_dir(&String::from("dummy_nested_single.chunk"));
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
+    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk.");
     assert_eq!(chunks.first().unwrap().size, 8);
 
     let filename: String = get_test_chunk_sub_dir(&String::from("dummy_nested_five.chunk"));
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_file(file)?.read_all_children();
+    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks.");
     assert_eq!(chunks.get(0).unwrap().size, 8);

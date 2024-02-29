@@ -1,7 +1,7 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -30,6 +30,25 @@ impl GraphEdge {
     Ok(())
   }
 
+  /// Import graph edge from ini file.
+  pub fn import(section: &str, config: &Ini) -> io::Result<GraphEdge> {
+    let props: &Properties = config.section(Some(section)).expect(
+      format!("Graph section '{section}' should be defined in level point ltx file.").as_str(),
+    );
+
+    Ok(GraphEdge {
+      game_vertex_id: props
+        .get("game_vertex_id")
+        .expect("'game_vertex_id' to be in graph config")
+        .parse::<u16>()
+        .expect("'game_vertex_id' to be valid u16"),
+      distance: props
+        .get("distance")
+        .expect("'distance' to be in graph config")
+        .parse::<f32>()
+        .expect("'distance' to be valid f32"),
+    })
+  }
   /// Export graph edge data into ini.
   pub fn export(&self, section: &String, ini: &mut Ini) {
     ini
@@ -77,7 +96,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 6 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?
+    let mut chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

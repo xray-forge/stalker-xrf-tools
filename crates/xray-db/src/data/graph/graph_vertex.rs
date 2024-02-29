@@ -1,10 +1,11 @@
 use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
+
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_export::export_vector_to_string;
 use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -59,6 +60,57 @@ impl GraphVertex {
     writer.write_u8(self.level_point_count)?;
 
     Ok(())
+  }
+
+  /// Import graph vertex from ini file.
+  pub fn import(section: &str, config: &Ini) -> io::Result<GraphVertex> {
+    let props: &Properties = config.section(Some(section)).expect(
+      format!("Graph section '{section}' should be defined in graph vertex ltx file.").as_str(),
+    );
+
+    Ok(GraphVertex {
+      level_point: props
+        .get("level_point")
+        .expect("'level_point' to be in graph config")
+        .parse::<Vector3d>()
+        .expect("'level_point' to be valid Vector3d"),
+      game_point: props
+        .get("game_point")
+        .expect("'game_point' to be in graph config")
+        .parse::<Vector3d>()
+        .expect("'game_point' to be valid Vector3d"),
+      level_id: props
+        .get("level_id")
+        .expect("'level_id' to be in graph config")
+        .parse::<u8>()
+        .expect("'level_id' to be valid u8"),
+      level_vertex_id: props
+        .get("level_vertex_id")
+        .expect("'level_vertex_id' to be in graph config")
+        .parse::<u32>()
+        .expect("'level_vertex_id' to be valid u32"),
+      vertex_type: (0, 0, 0, 0), // todo: Parse whole vector of 4 numbers
+      edge_offset: props
+        .get("edge_offset")
+        .expect("'edge_offset' to be in graph config")
+        .parse::<u32>()
+        .expect("'edge_offset' to be valid u32"),
+      level_point_offset: props
+        .get("level_point_offset")
+        .expect("'level_point_offset' to be in graph config")
+        .parse::<u32>()
+        .expect("'level_point_offset' to be valid u32"),
+      edge_count: props
+        .get("edge_count")
+        .expect("'edge_count' to be in graph config")
+        .parse::<u8>()
+        .expect("'edge_count' to be valid u8"),
+      level_point_count: props
+        .get("level_point_count")
+        .expect("'level_point_count' to be in graph config")
+        .parse::<u8>()
+        .expect("'level_point_count' to be valid u8"),
+    })
   }
 
   /// Export graph vertex data into ini.
@@ -131,7 +183,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 42 + 8);
 
-    let mut chunk: Chunk = Chunk::from_file(file)?
+    let mut chunk: Chunk = Chunk::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 

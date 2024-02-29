@@ -154,7 +154,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 44 + 8);
 
-    let chunk: Chunk = Chunk::from_file(file)
+    let chunk: Chunk = Chunk::from_slice(file)
       .unwrap()
       .read_child_by_index(0)
       .expect("0 index chunk to exist");

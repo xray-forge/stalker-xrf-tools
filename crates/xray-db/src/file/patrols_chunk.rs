@@ -205,7 +205,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 450 + 8);
 
-    let chunk: Chunk = Chunk::from_file(file)?.read_child_by_index(0)?;
+    let chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
     let read_patrols_chunk: PatrolsChunk = PatrolsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
 
     assert_eq!(read_patrols_chunk, patrols_chunk);
