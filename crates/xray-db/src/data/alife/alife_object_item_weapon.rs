@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -22,23 +23,27 @@ pub struct AlifeObjectItemWeapon {
 impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
   /// Read alife item object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemWeapon> {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
-
-    let ammo_current: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-    let ammo_elapsed: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-    let weapon_state: u8 = chunk.read_u8()?;
-    let addon_flags: u8 = chunk.read_u8()?;
-    let ammo_type: u8 = chunk.read_u8()?;
-    let elapsed_grenades: u8 = chunk.read_u8()?;
-
     Ok(AlifeObjectItemWeapon {
-      base,
-      ammo_current,
-      ammo_elapsed,
-      weapon_state,
-      addon_flags,
-      ammo_type,
-      elapsed_grenades,
+      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
+      ammo_current: chunk.read_u16::<SpawnByteOrder>()?,
+      ammo_elapsed: chunk.read_u16::<SpawnByteOrder>()?,
+      weapon_state: chunk.read_u8()?,
+      addon_flags: chunk.read_u8()?,
+      ammo_type: chunk.read_u8()?,
+      elapsed_grenades: chunk.read_u8()?,
+    })
+  }
+
+  /// Import alife weapon item object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectItemWeapon> {
+    Ok(AlifeObjectItemWeapon {
+      base: AlifeObjectItem::import(props)?,
+      ammo_current: read_ini_field("ammo_current", props)?,
+      ammo_elapsed: read_ini_field("ammo_elapsed", props)?,
+      weapon_state: read_ini_field("weapon_state", props)?,
+      addon_flags: read_ini_field("addon_flags", props)?,
+      ammo_type: read_ini_field("ammo_type", props)?,
+      elapsed_grenades: read_ini_field("elapsed_grenades", props)?,
     })
   }
 }

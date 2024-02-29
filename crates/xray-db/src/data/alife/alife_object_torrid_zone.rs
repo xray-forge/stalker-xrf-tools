@@ -7,7 +7,7 @@ use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -20,15 +20,19 @@ pub struct AlifeObjectTorridZone {
 impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
   /// Read zone object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectTorridZone> {
-    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?;
-    let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
-
-    let last_spawn_time: Option<Time> = Time::read_optional_from_chunk::<T>(chunk)?;
-
     Ok(AlifeObjectTorridZone {
-      base,
-      motion,
-      last_spawn_time,
+      base: AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?,
+      motion: AlifeObjectMotion::read_from_chunk::<T>(chunk)?,
+      last_spawn_time: Time::read_optional_from_chunk::<T>(chunk)?,
+    })
+  }
+
+  /// Import torrid zone object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectTorridZone> {
+    Ok(AlifeObjectTorridZone {
+      base: AlifeObjectCustomZone::import(props)?,
+      motion: AlifeObjectMotion::import(props)?,
+      last_spawn_time: None, // todo: Read actual time object.
     })
   }
 }

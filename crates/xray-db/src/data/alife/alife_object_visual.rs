@@ -2,9 +2,10 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -16,12 +17,17 @@ pub struct AlifeObjectVisual {
 impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
   /// Read visual object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectVisual> {
-    let visual_name: String = chunk.read_null_terminated_win_string()?;
-    let visual_flags: u8 = chunk.read_u8()?;
-
     Ok(AlifeObjectVisual {
-      visual_name,
-      visual_flags,
+      visual_name: chunk.read_null_terminated_win_string()?,
+      visual_flags: chunk.read_u8()?,
+    })
+  }
+
+  /// Import visual object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectVisual> {
+    Ok(AlifeObjectVisual {
+      visual_name: read_ini_field("visual_name", props)?,
+      visual_flags: read_ini_field("visual_flags", props)?,
     })
   }
 }

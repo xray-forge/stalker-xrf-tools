@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::time::Time;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,12 +18,17 @@ pub struct AlifeAnomalousZone {
 impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   /// Read anomalous zone object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeAnomalousZone> {
-    let base: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?;
-    let last_spawn_time: Option<Time> = Time::read_optional_from_chunk::<T>(chunk)?;
-
     Ok(AlifeAnomalousZone {
-      base,
-      last_spawn_time,
+      base: AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?,
+      last_spawn_time: Time::read_optional_from_chunk::<T>(chunk)?,
+    })
+  }
+
+  /// Import anomalous zone object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeAnomalousZone> {
+    Ok(AlifeAnomalousZone {
+      base: AlifeObjectAnomalyZone::import(props)?,
+      last_spawn_time: None, // todo: Read actual time object.
     })
   }
 }

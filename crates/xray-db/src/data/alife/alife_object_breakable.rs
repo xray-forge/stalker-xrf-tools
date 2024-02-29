@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -17,11 +18,18 @@ pub struct AlifeObjectBreakable {
 impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   /// Read alife breakable object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectBreakable> {
-    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeObjectBreakable {
+      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
+      health: chunk.read_f32::<SpawnByteOrder>()?,
+    })
+  }
 
-    let health: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-
-    Ok(AlifeObjectBreakable { base, health })
+  /// Import alife breakable object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectBreakable> {
+    Ok(AlifeObjectBreakable {
+      base: AlifeObjectDynamicVisual::import(props)?,
+      health: read_ini_field("health", props)?,
+    })
   }
 }
 

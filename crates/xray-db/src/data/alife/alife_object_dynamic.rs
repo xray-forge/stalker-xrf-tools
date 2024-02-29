@@ -5,7 +5,7 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -16,9 +16,16 @@ pub struct AlifeObjectDynamic {
 impl AlifeObjectInheritedReader<AlifeObjectDynamic> for AlifeObjectDynamic {
   /// Read dynamic object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectDynamic> {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeObjectDynamic {
+      base: AlifeObjectAbstract::read_from_chunk::<T>(chunk)?,
+    })
+  }
 
-    Ok(AlifeObjectDynamic { base })
+  /// Import dynamic object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectDynamic> {
+    Ok(AlifeObjectDynamic {
+      base: AlifeObjectAbstract::import(props)?,
+    })
   }
 }
 

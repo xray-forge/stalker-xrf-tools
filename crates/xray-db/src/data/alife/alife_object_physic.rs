@@ -4,9 +4,10 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -20,21 +21,24 @@ pub struct AlifeObjectPhysic {
 
 impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
   /// Read alife physic object from the chunk.
-  #[inline(never)]
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectPhysic> {
-    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
-
-    let physic_type: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let mass: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let fixed_bones: String = chunk.read_null_terminated_win_string()?;
-
     Ok(AlifeObjectPhysic {
-      base,
-      skeleton,
-      physic_type,
-      mass,
-      fixed_bones,
+      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
+      skeleton: AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?,
+      physic_type: chunk.read_u32::<SpawnByteOrder>()?,
+      mass: chunk.read_f32::<SpawnByteOrder>()?,
+      fixed_bones: chunk.read_null_terminated_win_string()?,
+    })
+  }
+
+  /// Import alife physic object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectPhysic> {
+    Ok(AlifeObjectPhysic {
+      base: AlifeObjectDynamicVisual::import(props)?,
+      skeleton: AlifeObjectSkeleton::import(props)?,
+      physic_type: read_ini_field("physic_type", props)?,
+      mass: read_ini_field("mass", props)?,
+      fixed_bones: read_ini_field("fixed_bones", props)?,
     })
   }
 }

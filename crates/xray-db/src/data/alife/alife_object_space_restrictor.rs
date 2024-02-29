@@ -4,9 +4,10 @@ use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -17,16 +18,21 @@ pub struct AlifeObjectSpaceRestrictor {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
+  /// Read generic space restrictor data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSpaceRestrictor> {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk::<T>(chunk)?;
-
-    let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>()?;
-    let restrictor_type: u8 = chunk.read_u8()?;
-
     Ok(AlifeObjectSpaceRestrictor {
-      base,
-      shape,
-      restrictor_type,
+      base: AlifeObjectAbstract::read_from_chunk::<T>(chunk)?,
+      shape: chunk.read_shape_description::<SpawnByteOrder>()?,
+      restrictor_type: chunk.read_u8()?,
+    })
+  }
+
+  /// Import generic space restrictor data from the chunk.
+  fn import(props: &Properties) -> io::Result<AlifeObjectSpaceRestrictor> {
+    Ok(AlifeObjectSpaceRestrictor {
+      base: AlifeObjectAbstract::import(props)?,
+      shape: vec![], // todo: Read shape
+      restrictor_type: read_ini_field("restrictor_type", props)?,
     })
   }
 }

@@ -4,9 +4,10 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 /// Represents script extension of base server smart cover class.
@@ -37,6 +38,15 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
       base,
       last_description,
       loopholes,
+    })
+  }
+
+  /// Import smart cover data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeSmartCover> {
+    Ok(AlifeSmartCover {
+      base: AlifeObjectSmartCover::import(props)?,
+      last_description: read_ini_field("last_description", props)?,
+      loopholes: vec![], // todo: Read actual loopholes.
     })
   }
 }

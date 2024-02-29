@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,17 +20,21 @@ pub struct AlifeObjectInventoryBox {
 impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
   /// Read inventory object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectInventoryBox> {
-    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
-
-    let can_take: u8 = chunk.read_u8()?;
-    let is_closed: u8 = chunk.read_u8()?;
-    let tip: String = chunk.read_null_terminated_win_string()?;
-
     Ok(AlifeObjectInventoryBox {
-      base,
-      can_take,
-      is_closed,
-      tip,
+      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
+      can_take: chunk.read_u8()?,
+      is_closed: chunk.read_u8()?,
+      tip: chunk.read_null_terminated_win_string()?,
+    })
+  }
+
+  /// Import alife inventory box object from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectInventoryBox> {
+    Ok(AlifeObjectInventoryBox {
+      base: AlifeObjectDynamicVisual::import(props)?,
+      can_take: read_ini_field("can_take", props)?,
+      is_closed: read_ini_field("is_closed", props)?,
+      tip: read_ini_field("tip", props)?,
     })
   }
 }

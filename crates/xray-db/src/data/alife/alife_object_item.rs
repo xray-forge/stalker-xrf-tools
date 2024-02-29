@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -29,6 +30,15 @@ impl AlifeObjectInheritedReader<AlifeObjectItem> for AlifeObjectItem {
       base,
       condition,
       upgrades_count,
+    })
+  }
+
+  /// Import alife item object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectItem> {
+    Ok(AlifeObjectItem {
+      base: AlifeObjectDynamicVisual::import(props)?,
+      condition: read_ini_field("condition", props)?,
+      upgrades_count: read_ini_field("upgrades_count", props)?,
     })
   }
 }

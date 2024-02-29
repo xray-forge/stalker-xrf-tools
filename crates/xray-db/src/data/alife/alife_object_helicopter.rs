@@ -5,16 +5,17 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AlifeObjectHelicopter {
   pub base: AlifeObjectDynamicVisual,
-  pub skeleton: AlifeObjectSkeleton,
   pub motion: AlifeObjectMotion,
+  pub skeleton: AlifeObjectSkeleton,
   pub startup_animation: String,
   pub engine_sound: String,
 }
@@ -22,19 +23,23 @@ pub struct AlifeObjectHelicopter {
 impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
   /// Read helicopter data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectHelicopter> {
-    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
-    let motion: AlifeObjectMotion = AlifeObjectMotion::read_from_chunk::<T>(chunk)?;
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
-
-    let startup_animation: String = chunk.read_null_terminated_win_string()?;
-    let engine_sound: String = chunk.read_null_terminated_win_string()?;
-
     Ok(AlifeObjectHelicopter {
-      base,
-      skeleton,
-      motion,
-      startup_animation,
-      engine_sound,
+      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
+      motion: AlifeObjectMotion::read_from_chunk::<T>(chunk)?,
+      skeleton: AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?,
+      startup_animation: chunk.read_null_terminated_win_string()?,
+      engine_sound: chunk.read_null_terminated_win_string()?,
+    })
+  }
+
+  /// Import helicopter object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectHelicopter> {
+    Ok(AlifeObjectHelicopter {
+      base: AlifeObjectDynamicVisual::import(props)?,
+      skeleton: AlifeObjectSkeleton::import(props)?,
+      motion: AlifeObjectMotion::import(props)?,
+      startup_animation: read_ini_field("startup_animation", props)?,
+      engine_sound: read_ini_field("engine_sound", props)?,
     })
   }
 }

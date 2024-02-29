@@ -5,7 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -16,9 +16,15 @@ pub struct AlifeObjectItemExplosive {
 impl AlifeObjectInheritedReader<AlifeObjectItemExplosive> for AlifeObjectItemExplosive {
   /// Read alife item object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemExplosive> {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeObjectItemExplosive {
+      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
+    })
+  }
 
-    Ok(AlifeObjectItemExplosive { base })
+  fn import(props: &Properties) -> io::Result<AlifeObjectItemExplosive> {
+    Ok(AlifeObjectItemExplosive {
+      base: AlifeObjectItem::import(props)?,
+    })
   }
 }
 

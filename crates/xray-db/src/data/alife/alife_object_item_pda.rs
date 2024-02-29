@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -17,18 +18,23 @@ pub struct AlifeObjectItemPda {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
+  /// Read pda object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemPda> {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
-
-    let owner: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-    let character: String = chunk.read_null_terminated_win_string()?;
-    let info_portion: String = chunk.read_null_terminated_win_string()?;
-
     Ok(AlifeObjectItemPda {
-      base,
-      owner,
-      character,
-      info_portion,
+      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
+      owner: chunk.read_u16::<SpawnByteOrder>()?,
+      character: chunk.read_null_terminated_win_string()?,
+      info_portion: chunk.read_null_terminated_win_string()?,
+    })
+  }
+
+  /// Import pda object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectItemPda> {
+    Ok(AlifeObjectItemPda {
+      base: AlifeObjectItem::import(props)?,
+      owner: read_ini_field("owner", props)?,
+      character: read_ini_field("character", props)?,
+      info_portion: read_ini_field("info_portion", props)?,
     })
   }
 }

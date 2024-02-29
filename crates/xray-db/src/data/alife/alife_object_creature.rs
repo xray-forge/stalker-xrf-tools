@@ -4,9 +4,10 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_export::export_vector_to_string;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -25,29 +26,31 @@ pub struct AlifeObjectCreature {
 impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   /// Read alife creature object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectCreature> {
-    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
-
-    let team: u8 = chunk.read_u8()?;
-    let squad: u8 = chunk.read_u8()?;
-    let group: u8 = chunk.read_u8()?;
-    let health: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-
-    let dynamic_out_restrictions: Vec<u16> = chunk.read_u16_vector::<SpawnByteOrder>()?;
-    let dynamic_in_restrictions: Vec<u16> = chunk.read_u16_vector::<SpawnByteOrder>()?;
-
-    let killer_id: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-    let game_death_time: u64 = chunk.read_u64::<SpawnByteOrder>()?;
-
     Ok(AlifeObjectCreature {
-      base,
-      team,
-      squad,
-      group,
-      health,
-      dynamic_out_restrictions,
-      dynamic_in_restrictions,
-      killer_id,
-      game_death_time,
+      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
+      team: chunk.read_u8()?,
+      squad: chunk.read_u8()?,
+      group: chunk.read_u8()?,
+      health: chunk.read_f32::<T>()?,
+      dynamic_out_restrictions: chunk.read_u16_vector::<T>()?,
+      dynamic_in_restrictions: chunk.read_u16_vector::<T>()?,
+      killer_id: chunk.read_u16::<T>()?,
+      game_death_time: chunk.read_u64::<T>()?,
+    })
+  }
+
+  /// Import alife creature object from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectCreature> {
+    Ok(AlifeObjectCreature {
+      base: AlifeObjectDynamicVisual::import(props)?,
+      team: read_ini_field("team", props)?,
+      squad: read_ini_field("squad", props)?,
+      group: read_ini_field("group", props)?,
+      health: read_ini_field("health", props)?,
+      dynamic_out_restrictions: vec![], // todo: Read correctly.
+      dynamic_in_restrictions: vec![],  // todo: Read correctly.
+      killer_id: read_ini_field("killer_id", props)?,
+      game_death_time: read_ini_field("game_death_time", props)?,
     })
   }
 }

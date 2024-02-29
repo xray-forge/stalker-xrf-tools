@@ -4,9 +4,10 @@ use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -24,25 +25,29 @@ pub struct AlifeObjectSmartCover {
 impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
   /// Read smart cover object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSmartCover> {
-    let base: AlifeObjectDynamic = AlifeObjectDynamic::read_from_chunk::<T>(chunk)?;
-
-    let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>()?;
-    let description: String = chunk.read_null_terminated_win_string()?;
-    let hold_position_time: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let enter_min_enemy_distance: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let exit_min_enemy_distance: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let is_combat_cover: u8 = chunk.read_u8()?;
-    let can_fire: u8 = chunk.read_u8()?;
-
     Ok(AlifeObjectSmartCover {
-      base,
-      shape,
-      description,
-      hold_position_time,
-      enter_min_enemy_distance,
-      exit_min_enemy_distance,
-      is_combat_cover,
-      can_fire,
+      base: AlifeObjectDynamic::read_from_chunk::<T>(chunk)?,
+      shape: chunk.read_shape_description::<SpawnByteOrder>()?,
+      description: chunk.read_null_terminated_win_string()?,
+      hold_position_time: chunk.read_f32::<SpawnByteOrder>()?,
+      enter_min_enemy_distance: chunk.read_f32::<SpawnByteOrder>()?,
+      exit_min_enemy_distance: chunk.read_f32::<SpawnByteOrder>()?,
+      is_combat_cover: chunk.read_u8()?,
+      can_fire: chunk.read_u8()?,
+    })
+  }
+
+  /// Import smart cover object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectSmartCover> {
+    Ok(AlifeObjectSmartCover {
+      base: AlifeObjectDynamic::import(props)?,
+      shape: vec![], // todo: Read shape correctly.
+      description: read_ini_field("description", props)?,
+      hold_position_time: read_ini_field("hold_position_time", props)?,
+      enter_min_enemy_distance: read_ini_field("enter_min_enemy_distance", props)?,
+      exit_min_enemy_distance: read_ini_field("exit_min_enemy_distance", props)?,
+      is_combat_cover: read_ini_field("is_combat_cover", props)?,
+      can_fire: read_ini_field("can_fire", props)?,
     })
   }
 }

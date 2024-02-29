@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_shape::AlifeObjectShape;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -17,13 +18,17 @@ pub struct AlifeObjectClimable {
 impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   /// Read climable object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectClimable> {
-    let base: AlifeObjectShape = AlifeObjectShape::read_from_chunk::<T>(chunk)?;
-
-    let game_material: String = chunk.read_null_terminated_win_string()?;
-
     Ok(AlifeObjectClimable {
-      base,
-      game_material,
+      base: AlifeObjectShape::read_from_chunk::<T>(chunk)?,
+      game_material: chunk.read_null_terminated_win_string()?,
+    })
+  }
+
+  /// Import climable object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectClimable> {
+    Ok(AlifeObjectClimable {
+      base: AlifeObjectShape::import(props)?,
+      game_material: read_ini_field("game_material", props)?,
     })
   }
 }

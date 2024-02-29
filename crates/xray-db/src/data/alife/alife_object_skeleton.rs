@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::constants::FLAG_SKELETON_SAVED_DATA;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,18 +19,25 @@ pub struct AlifeObjectSkeleton {
 impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   /// Read skeleton data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSkeleton> {
-    let name: String = chunk.read_null_terminated_win_string()?;
-    let flags: u8 = chunk.read_u8()?;
-    let source_id: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let object = AlifeObjectSkeleton {
+      name: chunk.read_null_terminated_win_string()?,
+      flags: chunk.read_u8()?,
+      source_id: chunk.read_u16::<SpawnByteOrder>()?,
+    };
 
-    if flags & FLAG_SKELETON_SAVED_DATA != 0 {
+    if object.flags & FLAG_SKELETON_SAVED_DATA != 0 {
       todo!("Extend skeleton parsing to include bones")
     }
 
+    Ok(object)
+  }
+
+  /// Import skeleton data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectSkeleton> {
     Ok(AlifeObjectSkeleton {
-      name,
-      flags,
-      source_id,
+      name: read_ini_field("name", props)?,
+      flags: read_ini_field("flags", props)?,
+      source_id: read_ini_field("source_id", props)?,
     })
   }
 }

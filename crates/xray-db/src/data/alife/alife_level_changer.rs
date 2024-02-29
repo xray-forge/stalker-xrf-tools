@@ -4,9 +4,10 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::vector_3d::Vector3d;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -26,40 +27,46 @@ pub struct AlifeLevelChanger {
 }
 
 impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
+  /// Read alife level changer object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeLevelChanger> {
-    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?;
-
-    let dest_game_vertex_id: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-    let dest_level_vertex_id: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let dest_position: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>()?;
-    let dest_direction: Vector3d = chunk.read_f32_3d_vector::<SpawnByteOrder>()?;
-    let angle_y: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let dest_level_name: String = chunk.read_null_terminated_win_string()?;
-    let dest_graph_point: String = chunk.read_null_terminated_win_string()?;
-    let silent_mode: u8 = chunk.read_u8()?;
-
-    let enabled: u8 = chunk.read_u8()?;
-    let hint: String = chunk.read_null_terminated_win_string()?;
-    let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let object: AlifeLevelChanger = AlifeLevelChanger {
+      base: AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?,
+      dest_game_vertex_id: chunk.read_u16::<T>()?,
+      dest_level_vertex_id: chunk.read_u32::<T>()?,
+      dest_position: chunk.read_f32_3d_vector::<T>()?,
+      dest_direction: chunk.read_f32_3d_vector::<T>()?,
+      angle_y: chunk.read_f32::<T>()?,
+      dest_level_name: chunk.read_null_terminated_win_string()?,
+      dest_graph_point: chunk.read_null_terminated_win_string()?,
+      silent_mode: chunk.read_u8()?,
+      enabled: chunk.read_u8()?,
+      hint: chunk.read_null_terminated_win_string()?,
+      save_marker: chunk.read_u16::<T>()?,
+    };
 
     assert_eq!(
-      save_marker, 26,
+      object.save_marker, 26,
       "Unexpected script data provided for level changer"
     );
 
+    Ok(object)
+  }
+
+  /// Import alife level changer object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeLevelChanger> {
     Ok(AlifeLevelChanger {
-      base,
-      dest_game_vertex_id,
-      dest_level_vertex_id,
-      dest_position,
-      dest_direction,
-      angle_y,
-      dest_level_name,
-      dest_graph_point,
-      silent_mode,
-      enabled,
-      hint,
-      save_marker,
+      base: AlifeObjectSpaceRestrictor::import(props)?,
+      dest_game_vertex_id: read_ini_field("dest_game_vertex_id", props)?,
+      dest_level_vertex_id: read_ini_field("dest_level_vertex_id", props)?,
+      dest_position: read_ini_field("dest_position", props)?,
+      dest_direction: read_ini_field("dest_direction", props)?,
+      angle_y: read_ini_field("angle_y", props)?,
+      dest_level_name: read_ini_field("dest_level_name", props)?,
+      dest_graph_point: read_ini_field("dest_graph_point", props)?,
+      silent_mode: read_ini_field("silent_mode", props)?,
+      enabled: read_ini_field("enabled", props)?,
+      hint: read_ini_field("hint", props)?,
+      save_marker: read_ini_field("save_marker", props)?,
     })
   }
 }

@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_actor::AlifeObjectActor;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,20 +19,26 @@ pub struct AlifeActor {
 impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
   /// Read actor data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeActor> {
-    let base: AlifeObjectActor = AlifeObjectActor::read_from_chunk::<T>(chunk)?;
-
-    let start_position_filled: u8 = chunk.read_u8()?;
-    let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let object: AlifeActor = AlifeActor {
+      base: AlifeObjectActor::read_from_chunk::<T>(chunk)?,
+      start_position_filled: chunk.read_u8()?,
+      save_marker: chunk.read_u16::<SpawnByteOrder>()?,
+    };
 
     assert_eq!(
-      save_marker, 1,
+      object.save_marker, 1,
       "Unexpected save data for actor object provided"
     );
 
+    Ok(object)
+  }
+
+  /// Import actor data from ini file section.
+  fn import(props: &Properties) -> io::Result<AlifeActor> {
     Ok(AlifeActor {
-      base,
-      start_position_filled,
-      save_marker,
+      base: AlifeObjectActor::import(props)?,
+      start_position_filled: read_ini_field("start_position_filled", props)?,
+      save_marker: read_ini_field("save_marker", props)?,
     })
   }
 }

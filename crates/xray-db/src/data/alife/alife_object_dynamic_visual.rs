@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,15 +19,19 @@ pub struct AlifeObjectDynamicVisual {
 impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamicVisual {
   /// Read visual object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectDynamicVisual> {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk::<T>(chunk)?;
-
-    let visual_name: String = chunk.read_null_terminated_win_string()?;
-    let visual_flags: u8 = chunk.read_u8()?;
-
     Ok(AlifeObjectDynamicVisual {
-      base,
-      visual_name,
-      visual_flags,
+      base: AlifeObjectAbstract::read_from_chunk::<T>(chunk)?,
+      visual_name: chunk.read_null_terminated_win_string()?,
+      visual_flags: chunk.read_u8()?,
+    })
+  }
+
+  /// Import visual object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectDynamicVisual> {
+    Ok(AlifeObjectDynamicVisual {
+      base: AlifeObjectAbstract::import(props)?,
+      visual_name: read_ini_field("visual_name", props)?,
+      visual_flags: read_ini_field("visual_flags", props)?,
     })
   }
 }

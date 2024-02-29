@@ -4,9 +4,10 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -39,57 +40,59 @@ pub struct AlifeObjectHangingLamp {
 impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
   /// Read hanging lamp data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectHangingLamp> {
-    let base: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?;
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
-
-    let main_color: u32 = chunk.read_u32::<T>()?;
-    let main_brightness: f32 = chunk.read_f32::<T>()?;
-    let color_animator: String = chunk.read_null_terminated_win_string()?;
-    let main_range: f32 = chunk.read_f32::<T>()?;
-    let light_flags: u16 = chunk.read_u16::<T>()?;
-    let startup_animation: String = chunk.read_null_terminated_win_string()?;
-    let fixed_bones: String = chunk.read_null_terminated_win_string()?;
-    let health: f32 = chunk.read_f32::<T>()?;
-
-    let virtual_size: f32 = chunk.read_f32::<T>()?;
-    let ambient_radius: f32 = chunk.read_f32::<T>()?;
-    let ambient_power: f32 = chunk.read_f32::<T>()?;
-    let ambient_texture: String = chunk.read_null_terminated_win_string()?;
-    let light_texture: String = chunk.read_null_terminated_win_string()?;
-    let light_bone: String = chunk.read_null_terminated_win_string()?;
-    let spot_cone_angle: f32 = chunk.read_f32::<T>()?;
-    let glow_texture: String = chunk.read_null_terminated_win_string()?;
-    let glow_radius: f32 = chunk.read_f32::<T>()?;
-
-    let light_ambient_bone: String = chunk.read_null_terminated_win_string()?;
-    let volumetric_quality: f32 = chunk.read_f32::<T>()?;
-    let volumetric_intensity: f32 = chunk.read_f32::<T>()?;
-    let volumetric_distance: f32 = chunk.read_f32::<T>()?;
-
     Ok(AlifeObjectHangingLamp {
-      base,
-      skeleton,
-      main_color,
-      main_brightness,
-      color_animator,
-      main_range,
-      light_flags,
-      startup_animation,
-      fixed_bones,
-      health,
-      virtual_size,
-      ambient_radius,
-      ambient_power,
-      ambient_texture,
-      light_texture,
-      light_bone,
-      spot_cone_angle,
-      glow_texture,
-      glow_radius,
-      light_ambient_bone,
-      volumetric_quality,
-      volumetric_intensity,
-      volumetric_distance,
+      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
+      skeleton: AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?,
+      main_color: chunk.read_u32::<T>()?,
+      main_brightness: chunk.read_f32::<T>()?,
+      color_animator: chunk.read_null_terminated_win_string()?,
+      main_range: chunk.read_f32::<T>()?,
+      light_flags: chunk.read_u16::<T>()?,
+      startup_animation: chunk.read_null_terminated_win_string()?,
+      fixed_bones: chunk.read_null_terminated_win_string()?,
+      health: chunk.read_f32::<T>()?,
+      virtual_size: chunk.read_f32::<T>()?,
+      ambient_radius: chunk.read_f32::<T>()?,
+      ambient_power: chunk.read_f32::<T>()?,
+      ambient_texture: chunk.read_null_terminated_win_string()?,
+      light_texture: chunk.read_null_terminated_win_string()?,
+      light_bone: chunk.read_null_terminated_win_string()?,
+      spot_cone_angle: chunk.read_f32::<T>()?,
+      glow_texture: chunk.read_null_terminated_win_string()?,
+      glow_radius: chunk.read_f32::<T>()?,
+      light_ambient_bone: chunk.read_null_terminated_win_string()?,
+      volumetric_quality: chunk.read_f32::<T>()?,
+      volumetric_intensity: chunk.read_f32::<T>()?,
+      volumetric_distance: chunk.read_f32::<T>()?,
+    })
+  }
+
+  /// Import alife hanging lamp object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectHangingLamp> {
+    Ok(AlifeObjectHangingLamp {
+      base: AlifeObjectDynamicVisual::import(props)?,
+      skeleton: AlifeObjectSkeleton::import(props)?,
+      main_color: read_ini_field("main_color", props)?,
+      main_brightness: read_ini_field("main_brightness", props)?,
+      color_animator: read_ini_field("color_animator", props)?,
+      main_range: read_ini_field("main_range", props)?,
+      light_flags: read_ini_field("light_flags", props)?,
+      startup_animation: read_ini_field("startup_animation", props)?,
+      fixed_bones: read_ini_field("fixed_bones", props)?,
+      health: read_ini_field("health", props)?,
+      virtual_size: read_ini_field("virtual_size", props)?,
+      ambient_radius: read_ini_field("ambient_radius", props)?,
+      ambient_power: read_ini_field("ambient_power", props)?,
+      ambient_texture: read_ini_field("ambient_texture", props)?,
+      light_texture: read_ini_field("light_texture", props)?,
+      light_bone: read_ini_field("light_bone", props)?,
+      spot_cone_angle: read_ini_field("spot_cone_angle", props)?,
+      glow_texture: read_ini_field("glow_texture", props)?,
+      glow_radius: read_ini_field("glow_radius", props)?,
+      light_ambient_bone: read_ini_field("light_ambient_bone", props)?,
+      volumetric_quality: read_ini_field("volumetric_quality", props)?,
+      volumetric_intensity: read_ini_field("volumetric_intensity", props)?,
+      volumetric_distance: read_ini_field("volumetric_distance", props)?,
     })
   }
 }

@@ -2,9 +2,10 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -24,28 +25,33 @@ pub struct AlifeObjectTraderAbstract {
 impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
   /// Read trader data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectTraderAbstract> {
-    let money: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let specific_character: String = chunk.read_null_terminated_win_string()?;
-    let trader_flags: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let character_profile: String = chunk.read_null_terminated_win_string()?;
-    let community_index: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let rank: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let reputation: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let character_name: String = chunk.read_null_terminated_win_string()?;
-    let dead_body_can_take: u8 = chunk.read_u8()?;
-    let dead_body_closed: u8 = chunk.read_u8()?;
-
     Ok(AlifeObjectTraderAbstract {
-      money,
-      specific_character,
-      trader_flags,
-      character_profile,
-      community_index,
-      rank,
-      reputation,
-      character_name,
-      dead_body_can_take,
-      dead_body_closed,
+      money: chunk.read_u32::<SpawnByteOrder>()?,
+      specific_character: chunk.read_null_terminated_win_string()?,
+      trader_flags: chunk.read_u32::<SpawnByteOrder>()?,
+      character_profile: chunk.read_null_terminated_win_string()?,
+      community_index: chunk.read_u32::<SpawnByteOrder>()?,
+      rank: chunk.read_u32::<SpawnByteOrder>()?,
+      reputation: chunk.read_u32::<SpawnByteOrder>()?,
+      character_name: chunk.read_null_terminated_win_string()?,
+      dead_body_can_take: chunk.read_u8()?,
+      dead_body_closed: chunk.read_u8()?,
+    })
+  }
+
+  /// Import trader data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectTraderAbstract> {
+    Ok(AlifeObjectTraderAbstract {
+      money: read_ini_field("money", props)?,
+      specific_character: read_ini_field("specific_character", props)?,
+      trader_flags: read_ini_field("trader_flags", props)?,
+      character_profile: read_ini_field("character_profile", props)?,
+      community_index: read_ini_field("community_index", props)?,
+      rank: read_ini_field("rank", props)?,
+      reputation: read_ini_field("reputation", props)?,
+      character_name: read_ini_field("character_name", props)?,
+      dead_body_can_take: read_ini_field("dead_body_can_take", props)?,
+      dead_body_closed: read_ini_field("dead_body_closed", props)?,
     })
   }
 }

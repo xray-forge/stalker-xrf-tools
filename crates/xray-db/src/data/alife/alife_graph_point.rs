@@ -2,15 +2,17 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AlifeGraphPoint {
   pub connection_point_name: String,
   pub connection_level_name: String,
+  // todo: Use U32Bytes?
   pub location0: u8,
   pub location1: u8,
   pub location2: u8,
@@ -20,20 +22,25 @@ pub struct AlifeGraphPoint {
 impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   /// Read graph point data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeGraphPoint> {
-    let connection_point_name: String = chunk.read_null_terminated_win_string()?;
-    let connection_level_name: String = chunk.read_null_terminated_win_string()?;
-    let location0: u8 = chunk.read_u8()?;
-    let location1: u8 = chunk.read_u8()?;
-    let location2: u8 = chunk.read_u8()?;
-    let location3: u8 = chunk.read_u8()?;
-
     Ok(AlifeGraphPoint {
-      connection_point_name,
-      connection_level_name,
-      location0,
-      location1,
-      location2,
-      location3,
+      connection_point_name: chunk.read_null_terminated_win_string()?,
+      connection_level_name: chunk.read_null_terminated_win_string()?,
+      location0: chunk.read_u8()?,
+      location1: chunk.read_u8()?,
+      location2: chunk.read_u8()?,
+      location3: chunk.read_u8()?,
+    })
+  }
+
+  /// Import graph data from ini file section.
+  fn import(props: &Properties) -> io::Result<AlifeGraphPoint> {
+    Ok(AlifeGraphPoint {
+      connection_point_name: read_ini_field("connection_point_name", props)?,
+      connection_level_name: read_ini_field("connection_point_name", props)?,
+      location0: read_ini_field("location0", props)?,
+      location1: read_ini_field("location1", props)?,
+      location2: read_ini_field("location2", props)?,
+      location3: read_ini_field("location3", props)?,
     })
   }
 }

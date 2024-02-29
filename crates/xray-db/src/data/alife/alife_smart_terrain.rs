@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -82,6 +83,20 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
       respawn_point,
       staying_objects_count,
       save_marker,
+    })
+  }
+
+  /// Import alife smart terrain data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeSmartTerrain> {
+    Ok(AlifeSmartTerrain {
+      base: AlifeSmartZone::import(props)?,
+      arriving_objects_count: read_ini_field("arriving_objects_count", props)?,
+      object_job_descriptors_count: read_ini_field("object_job_descriptors_count", props)?,
+      dead_objects_infos_count: read_ini_field("dead_objects_infos_count", props)?,
+      smart_terrain_actor_control: read_ini_field("smart_terrain_actor_control", props)?,
+      respawn_point: read_ini_field("respawn_point", props)?,
+      staying_objects_count: read_ini_field("staying_objects_count", props)?,
+      save_marker: read_ini_field("save_marker", props)?,
     })
   }
 }

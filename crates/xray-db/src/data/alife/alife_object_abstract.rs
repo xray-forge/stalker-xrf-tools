@@ -2,9 +2,10 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 /// Generic alife object abstraction data.
@@ -23,24 +24,29 @@ pub struct AlifeObjectAbstract {
 impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   /// Read generic alife object base data from the file.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAbstract> {
-    let game_vertex_id: u16 = chunk.read_u16::<T>()?;
-    let distance: f32 = chunk.read_f32::<T>()?;
-    let direct_control: u32 = chunk.read_u32::<T>()?;
-    let level_vertex_id: u32 = chunk.read_u32::<T>()?;
-    let flags: u32 = chunk.read_u32::<T>()?;
-    let custom_data: String = chunk.read_null_terminated_win_string()?;
-    let story_id: u32 = chunk.read_u32::<T>()?;
-    let spawn_story_id: u32 = chunk.read_u32::<T>()?;
-
     Ok(AlifeObjectAbstract {
-      game_vertex_id,
-      distance,
-      direct_control,
-      level_vertex_id,
-      flags,
-      custom_data,
-      story_id,
-      spawn_story_id,
+      game_vertex_id: chunk.read_u16::<T>()?,
+      distance: chunk.read_f32::<T>()?,
+      direct_control: chunk.read_u32::<T>()?,
+      level_vertex_id: chunk.read_u32::<T>()?,
+      flags: chunk.read_u32::<T>()?,
+      custom_data: chunk.read_null_terminated_win_string()?,
+      story_id: chunk.read_u32::<T>()?,
+      spawn_story_id: chunk.read_u32::<T>()?,
+    })
+  }
+
+  /// Import generic alife object base data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectAbstract> {
+    Ok(AlifeObjectAbstract {
+      game_vertex_id: read_ini_field("game_vertex_id", props)?,
+      distance: read_ini_field("distance", props)?,
+      direct_control: read_ini_field("direct_control", props)?,
+      level_vertex_id: read_ini_field("level_vertex_id", props)?,
+      flags: read_ini_field("flags", props)?,
+      custom_data: read_ini_field("custom_data", props)?,
+      story_id: read_ini_field("story_id", props)?,
+      spawn_story_id: read_ini_field("spawn_story_id", props)?,
     })
   }
 }

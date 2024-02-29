@@ -5,9 +5,10 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -21,17 +22,21 @@ pub struct AlifeObjectActor {
 impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
   /// Read actor data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectActor> {
-    let base: AlifeObjectCreature = AlifeObjectCreature::read_from_chunk::<T>(chunk)?;
-    let trader: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract::read_from_chunk::<T>(chunk)?;
-    let skeleton: AlifeObjectSkeleton = AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?;
-
-    let holder_id: u16 = chunk.read_u16::<T>()?;
-
     Ok(AlifeObjectActor {
-      base,
-      trader,
-      skeleton,
-      holder_id,
+      base: AlifeObjectCreature::read_from_chunk::<T>(chunk)?,
+      trader: AlifeObjectTraderAbstract::read_from_chunk::<T>(chunk)?,
+      skeleton: AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?,
+      holder_id: chunk.read_u16::<T>()?,
+    })
+  }
+
+  /// Import actor data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectActor> {
+    Ok(AlifeObjectActor {
+      base: AlifeObjectCreature::import(props)?,
+      trader: AlifeObjectTraderAbstract::import(props)?,
+      skeleton: AlifeObjectSkeleton::import(props)?,
+      holder_id: read_ini_field("holder_id", props)?,
     })
   }
 }

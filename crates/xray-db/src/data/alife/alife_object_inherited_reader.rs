@@ -6,11 +6,11 @@ use std::io;
 
 /// Generic trait describing possibility to read object data from chunk.
 pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric> {
+  /// Read alife object data from chunk reader.
   fn read_from_chunk<B: ByteOrder>(chunk: &mut Chunk) -> io::Result<T>;
 
-  fn import<B: ByteOrder>(_: &Properties) {
-    // todo;
-  }
+  /// Import alife object data from generic ini properties section.
+  fn import(props: &Properties) -> io::Result<T>;
 
   fn verify(chunk: &Chunk) {
     assert!(

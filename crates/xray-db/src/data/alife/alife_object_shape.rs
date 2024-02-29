@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,11 +18,18 @@ pub struct AlifeObjectShape {
 impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   /// Read shape object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectShape> {
-    let base: AlifeObjectAbstract = AlifeObjectAbstract::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeObjectShape {
+      base: AlifeObjectAbstract::read_from_chunk::<T>(chunk)?,
+      shape: chunk.read_shape_description::<SpawnByteOrder>()?,
+    })
+  }
 
-    let shape: Vec<Shape> = chunk.read_shape_description::<SpawnByteOrder>()?;
-
-    Ok(AlifeObjectShape { base, shape })
+  /// Import alife shape object data from ini config.
+  fn import(props: &Properties) -> io::Result<AlifeObjectShape> {
+    Ok(AlifeObjectShape {
+      base: AlifeObjectAbstract::import(props)?,
+      shape: vec![], // todo: Read shape data from ini config.
+    })
   }
 }
 

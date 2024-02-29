@@ -5,9 +5,10 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::data::time::Time;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -22,27 +23,29 @@ pub struct AlifeZoneVisual {
 impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   /// Read visual zone data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeZoneVisual> {
-    let base: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?;
-    let visual: AlifeObjectVisual = AlifeObjectVisual::read_from_chunk::<T>(chunk)?;
-
-    let idle_animation: String = chunk
-      .has_data()
-      .then(|| chunk.read_null_terminated_win_string().unwrap())
-      .unwrap_or(String::new());
-
-    let attack_animation: String = chunk
-      .has_data()
-      .then(|| chunk.read_null_terminated_win_string().unwrap())
-      .unwrap_or(String::new());
-
-    let last_spawn_time: Option<Time> = Time::read_optional_from_chunk::<T>(chunk)?;
-
     Ok(AlifeZoneVisual {
-      base,
-      visual,
-      idle_animation,
-      attack_animation,
-      last_spawn_time,
+      base: AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?,
+      visual: AlifeObjectVisual::read_from_chunk::<T>(chunk)?,
+      idle_animation: chunk
+        .has_data()
+        .then(|| chunk.read_null_terminated_win_string().unwrap())
+        .unwrap_or(String::new()),
+      attack_animation: chunk
+        .has_data()
+        .then(|| chunk.read_null_terminated_win_string().unwrap())
+        .unwrap_or(String::new()),
+      last_spawn_time: Time::read_optional_from_chunk::<T>(chunk)?,
+    })
+  }
+
+  /// Import visual zone data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeZoneVisual> {
+    Ok(AlifeZoneVisual {
+      base: AlifeObjectAnomalyZone::import(props)?,
+      visual: AlifeObjectVisual::import(props)?,
+      idle_animation: read_ini_field("idle_animation", props)?,
+      attack_animation: read_ini_field("attack_animation", props)?,
+      last_spawn_time: None, // todo: Implement correct time reading.
     })
   }
 }

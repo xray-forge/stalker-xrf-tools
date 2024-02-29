@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,22 +20,27 @@ pub struct AlifeObjectCustomZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
+  /// Read alife custom zone object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectCustomZone> {
-    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?;
-
-    let max_power: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let owner_id: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let enabled_time: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let disabled_time: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-    let start_time_shift: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-
     Ok(AlifeObjectCustomZone {
-      base,
-      max_power,
-      owner_id,
-      enabled_time,
-      disabled_time,
-      start_time_shift,
+      base: AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?,
+      max_power: chunk.read_f32::<SpawnByteOrder>()?,
+      owner_id: chunk.read_u32::<SpawnByteOrder>()?,
+      enabled_time: chunk.read_u32::<SpawnByteOrder>()?,
+      disabled_time: chunk.read_u32::<SpawnByteOrder>()?,
+      start_time_shift: chunk.read_u32::<SpawnByteOrder>()?,
+    })
+  }
+
+  /// Import alife custom zone object data from ini config section..
+  fn import(props: &Properties) -> io::Result<AlifeObjectCustomZone> {
+    Ok(AlifeObjectCustomZone {
+      base: AlifeObjectSpaceRestrictor::import(props)?,
+      max_power: read_ini_field("max_power", props)?,
+      owner_id: read_ini_field("owner_id", props)?,
+      enabled_time: read_ini_field("enabled_time", props)?,
+      disabled_time: read_ini_field("disabled_time", props)?,
+      start_time_shift: read_ini_field("start_time_shift", props)?,
     })
   }
 }
@@ -42,6 +48,7 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
 impl AlifeObjectGeneric for AlifeObjectCustomZone {
   type Order = SpawnByteOrder;
 
+  /// Write custom zone object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 

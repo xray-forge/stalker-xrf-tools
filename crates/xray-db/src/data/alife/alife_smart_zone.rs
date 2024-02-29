@@ -5,7 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -14,10 +14,18 @@ pub struct AlifeSmartZone {
 }
 
 impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
+  /// Read generic alife smart zone object from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeSmartZone> {
-    let base: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeSmartZone {
+      base: AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?,
+    })
+  }
 
-    Ok(AlifeSmartZone { base })
+  /// Import generic alife smart zone object from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeSmartZone> {
+    Ok(AlifeSmartZone {
+      base: AlifeObjectSpaceRestrictor::import(props)?,
+    })
   }
 }
 

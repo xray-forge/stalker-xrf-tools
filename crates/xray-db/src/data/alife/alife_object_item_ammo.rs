@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -17,11 +18,18 @@ pub struct AlifeObjectItemAmmo {
 impl AlifeObjectInheritedReader<AlifeObjectItemAmmo> for AlifeObjectItemAmmo {
   /// Read alife item object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemAmmo> {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeObjectItemAmmo {
+      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
+      ammo_left: chunk.read_u16::<SpawnByteOrder>()?,
+    })
+  }
 
-    let ammo_left: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-
-    Ok(AlifeObjectItemAmmo { base, ammo_left })
+  /// Import alife ammo item data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectItemAmmo> {
+    Ok(AlifeObjectItemAmmo {
+      base: AlifeObjectItem::import(props)?,
+      ammo_left: read_ini_field("ammo_left", props)?,
+    })
   }
 }
 

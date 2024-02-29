@@ -5,7 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -16,9 +16,16 @@ pub struct AlifeObjectItemHelmet {
 impl AlifeObjectInheritedReader<AlifeObjectItemHelmet> for AlifeObjectItemHelmet {
   /// Read alife item object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemHelmet> {
-    let base: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeObjectItemHelmet {
+      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
+    })
+  }
 
-    Ok(AlifeObjectItemHelmet { base })
+  /// Import alife item object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectItemHelmet> {
+    Ok(AlifeObjectItemHelmet {
+      base: AlifeObjectItem::import(props)?,
+    })
   }
 }
 

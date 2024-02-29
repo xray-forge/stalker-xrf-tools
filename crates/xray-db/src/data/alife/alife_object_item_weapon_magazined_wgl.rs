@@ -5,7 +5,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -20,10 +20,16 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
   fn read_from_chunk<T: ByteOrder>(
     chunk: &mut Chunk,
   ) -> io::Result<AlifeObjectItemWeaponMagazinedWgl> {
-    let base: AlifeObjectItemWeaponMagazined =
-      AlifeObjectItemWeaponMagazined::read_from_chunk::<T>(chunk)?;
+    Ok(AlifeObjectItemWeaponMagazinedWgl {
+      base: AlifeObjectItemWeaponMagazined::read_from_chunk::<T>(chunk)?,
+    })
+  }
 
-    Ok(AlifeObjectItemWeaponMagazinedWgl { base })
+  /// Read magazined weapon with launcher from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectItemWeaponMagazinedWgl> {
+    Ok(AlifeObjectItemWeaponMagazinedWgl {
+      base: AlifeObjectItemWeaponMagazined::import(props)?,
+    })
   }
 }
 

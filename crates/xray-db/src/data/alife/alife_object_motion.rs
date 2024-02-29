@@ -2,9 +2,10 @@ use crate::chunk::chunk::Chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -15,9 +16,16 @@ pub struct AlifeObjectMotion {
 impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
   /// Read motion object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectMotion> {
-    let motion_name: String = chunk.read_null_terminated_win_string()?;
+    Ok(AlifeObjectMotion {
+      motion_name: chunk.read_null_terminated_win_string()?,
+    })
+  }
 
-    Ok(AlifeObjectMotion { motion_name })
+  /// Import motion object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectMotion> {
+    Ok(AlifeObjectMotion {
+      motion_name: read_ini_field("motion_name", props)?,
+    })
   }
 }
 

@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,17 +20,21 @@ pub struct AlifeObjectAnomalyZone {
 impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
   /// Read anomaly zone object data from the chunk.
   fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAnomalyZone> {
-    let base: AlifeObjectCustomZone = AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?;
-
-    let offline_interactive_radius: f32 = chunk.read_f32::<SpawnByteOrder>()?;
-    let artefact_spawn_count: u16 = chunk.read_u16::<SpawnByteOrder>()?;
-    let artefact_position_offset: u32 = chunk.read_u32::<SpawnByteOrder>()?;
-
     Ok(AlifeObjectAnomalyZone {
-      base,
-      offline_interactive_radius,
-      artefact_spawn_count,
-      artefact_position_offset,
+      base: AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?,
+      offline_interactive_radius: chunk.read_f32::<SpawnByteOrder>()?,
+      artefact_spawn_count: chunk.read_u16::<SpawnByteOrder>()?,
+      artefact_position_offset: chunk.read_u32::<SpawnByteOrder>()?,
+    })
+  }
+
+  /// Import anomaly zone object data from ini config section.
+  fn import(props: &Properties) -> io::Result<AlifeObjectAnomalyZone> {
+    Ok(AlifeObjectAnomalyZone {
+      base: AlifeObjectCustomZone::import(props)?,
+      offline_interactive_radius: read_ini_field("offline_interactive_radius", props)?,
+      artefact_spawn_count: read_ini_field("artefact_spawn_count", props)?,
+      artefact_position_offset: read_ini_field("artefact_position_offset", props)?,
     })
   }
 }
