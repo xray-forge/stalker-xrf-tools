@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_export::export_vector_to_string;
+use crate::export::file_import::import_sized_vector_from_string;
 use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
@@ -68,6 +69,22 @@ impl GraphVertex {
       format!("Graph section '{section}' should be defined in graph vertex ltx file.").as_str(),
     );
 
+    let vertex_type: Vec<u8> = import_sized_vector_from_string(
+      4,
+      &props
+        .get("vertex_type")
+        .expect("'vertex_type' to be in graph config")
+        .parse::<String>()
+        .expect("'vertex_type' to be valid u32"),
+    )?;
+
+    let vertex_type: U32Bytes = (
+      vertex_type.get(0).unwrap().clone(),
+      vertex_type.get(1).unwrap().clone(),
+      vertex_type.get(2).unwrap().clone(),
+      vertex_type.get(3).unwrap().clone(),
+    );
+
     Ok(GraphVertex {
       level_point: props
         .get("level_point")
@@ -89,7 +106,7 @@ impl GraphVertex {
         .expect("'level_vertex_id' to be in graph config")
         .parse::<u32>()
         .expect("'level_vertex_id' to be valid u32"),
-      vertex_type: (0, 0, 0, 0), // todo: Parse whole vector of 4 numbers
+      vertex_type,
       edge_offset: props
         .get("edge_offset")
         .expect("'edge_offset' to be in graph config")
