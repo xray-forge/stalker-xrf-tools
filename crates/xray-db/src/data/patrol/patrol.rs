@@ -220,8 +220,7 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_simple.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "patrol_simple.chunk");
 
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name"),
@@ -273,7 +272,7 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrols_list() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_chunk_file_sub_dir(file!(), &String::from("patrol_list.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "patrol_list.chunk");
 
     let patrols: Vec<Patrol> = vec![
       Patrol {

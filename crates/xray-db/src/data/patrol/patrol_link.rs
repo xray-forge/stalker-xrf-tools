@@ -103,7 +103,7 @@ impl PatrolLink {
   }
 
   /// Export patrol link data into ini.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("index", self.index.to_string())
@@ -133,8 +133,7 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrol_link() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_vertex_simple.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "patrol_vertex_simple.chunk");
 
     let link: PatrolLink = PatrolLink {
       index: 1000,
@@ -170,8 +169,7 @@ mod tests {
   #[test]
   fn test_read_write_list_of_patrol_links() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("patrol_vertex_list.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "patrol_vertex_list.chunk");
 
     let links: Vec<PatrolLink> = vec![
       PatrolLink {

@@ -9,7 +9,7 @@ pub enum Shape {
 }
 
 impl Shape {
-  pub fn export_shapes(shapes: &Vec<Shape>, section: &String, ini: &mut Ini) {
+  pub fn export_shapes(shapes: &Vec<Shape>, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("shapes_count", shapes.len().to_string());

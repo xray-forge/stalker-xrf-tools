@@ -24,10 +24,10 @@ pub fn open_binary_file(path: &Path) -> io::Result<File> {
 
 /// Export ini file content to provided file.
 #[allow(dead_code)]
-pub fn import_vector_from_string<T: FromStr>(value: &String) -> io::Result<Vec<T>> {
+pub fn import_vector_from_string<T: FromStr>(value: &str) -> io::Result<Vec<T>> {
   let mut vector: Vec<T> = Vec::new();
 
-  for it in value.split(",") {
+  for it in value.split(',') {
     vector.push(match it.trim().parse::<T>() {
       Ok(v) => v,
       _ => {
@@ -43,10 +43,7 @@ pub fn import_vector_from_string<T: FromStr>(value: &String) -> io::Result<Vec<T
 }
 
 /// Export ini file content to provided file.
-pub fn import_sized_vector_from_string<T: FromStr>(
-  size: usize,
-  value: &String,
-) -> io::Result<Vec<T>> {
+pub fn import_sized_vector_from_string<T: FromStr>(size: usize, value: &str) -> io::Result<Vec<T>> {
   let mut vector: Vec<T> = Vec::new();
 
   for (index, it) in value.split(",").enumerate() {

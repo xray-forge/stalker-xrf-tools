@@ -208,7 +208,7 @@ impl AlifeObjectBase {
   }
 
   /// Export alife object data into ini file.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("index", self.index.to_string())
@@ -230,7 +230,7 @@ impl AlifeObjectBase {
       .set("spawn_id", self.script_version.to_string())
       .set("index", self.index.to_string());
 
-    self.inherited.export(&section, ini);
+    self.inherited.export(section, ini);
 
     ini.with_section(Some(section)).set(
       "update_data",
@@ -260,8 +260,7 @@ mod tests {
   #[test]
   fn test_read_write_object_base() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_base.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "alife_object_base.chunk");
 
     let object: AlifeObjectBase = AlifeObjectBase {
       index: 10,

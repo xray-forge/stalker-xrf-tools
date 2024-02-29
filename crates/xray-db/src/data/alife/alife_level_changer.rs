@@ -88,7 +88,7 @@ impl AlifeObjectGeneric for AlifeLevelChanger {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &String, ini: &mut Ini) {
+  fn export(&self, section: &str, ini: &mut Ini) {
     self.base.export(section, ini);
 
     ini
@@ -131,8 +131,7 @@ mod tests {
   #[test]
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_level_changer.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "alife_level_changer.chunk");
 
     let object: AlifeLevelChanger = AlifeLevelChanger {
       base: AlifeObjectSpaceRestrictor {

@@ -42,7 +42,7 @@ impl ArtefactSpawnPoint {
   }
 
   /// Export artefact spawn point data into ini.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("distance", self.distance.to_string())
@@ -68,7 +68,7 @@ mod tests {
   fn test_read_write_simple_artefact_spawn_point() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("artefact_spawn_point_simple.chunk"));
+      get_test_chunk_file_sub_dir(file!(), "artefact_spawn_point_simple.chunk");
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,

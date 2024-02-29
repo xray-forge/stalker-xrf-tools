@@ -12,6 +12,11 @@ pub struct Vector3d<T = f32> {
   pub z: T,
 }
 
+#[derive(Debug)]
+pub enum Vector3dError {
+  ParsingError(String),
+}
+
 impl Vector3d<f32> {
   pub fn new(x: f32, y: f32, z: f32) -> Vector3d {
     Vector3d { x, y, z }
@@ -38,13 +43,8 @@ impl Vector3d<f32> {
 
 impl Display for Vector3d<f32> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "{}", format!("{},{},{}", self.x, self.y, self.z))
+    write!(f, "{},{},{}", self.x, self.y, self.z)
   }
-}
-
-#[derive(Debug)]
-pub enum Vector3dError {
-  ParsingError(String),
 }
 
 impl FromStr for Vector3d<f32> {

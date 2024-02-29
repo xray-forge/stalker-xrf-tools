@@ -46,7 +46,7 @@ impl GraphLevelPoint {
   }
 
   /// Export graph level point data into ini.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("position", self.position.to_string())

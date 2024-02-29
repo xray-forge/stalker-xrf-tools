@@ -41,7 +41,7 @@ impl GraphEdge {
   }
 
   /// Export graph edge data into ini.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("game_vertex_id", self.game_vertex_id.to_string())

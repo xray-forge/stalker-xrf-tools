@@ -139,8 +139,7 @@ mod tests {
   #[test]
   fn test_read_write_patrols_chunk() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("patrols_list.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "patrols_list.chunk");
 
     let patrols_chunk: PatrolsChunk = PatrolsChunk {
       patrols: vec![

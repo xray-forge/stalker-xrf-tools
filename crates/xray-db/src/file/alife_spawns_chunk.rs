@@ -5,9 +5,8 @@ use crate::data::alife_object_base::AlifeObjectBase;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
-use std::fs::File;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::{fmt, io};
 
 /// ALife spawns chunk has the following structure:
@@ -87,16 +86,16 @@ impl ALifeSpawnsChunk {
 
   /// Export alife spawns data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let alife_spawns_path: PathBuf = path.join("alife_spawns.ltx");
-
-    let mut file: File = create_export_file(&alife_spawns_path)?;
     let mut config: Ini = Ini::new();
 
     for object in &self.objects {
       object.export(&object.index.to_string(), &mut config);
     }
 
-    export_ini_to_file(&config, &mut file)?;
+    export_ini_to_file(
+      &config,
+      &mut create_export_file(&path.join("alife_spawns.ltx"))?,
+    )?;
 
     log::info!("Exported alife spawns chunk");
 
@@ -137,8 +136,7 @@ mod tests {
   #[test]
   fn test_read_write_empty_spawns_chunk() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_spawns_empty.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "alife_spawns_empty.chunk");
 
     let spawns: ALifeSpawnsChunk = ALifeSpawnsChunk { objects: vec![] };
 
@@ -171,8 +169,7 @@ mod tests {
   #[test]
   fn test_read_write_few_spawns_chunk() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_spawns.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "alife_spawns.chunk");
 
     let spawns: ALifeSpawnsChunk = ALifeSpawnsChunk {
       objects: vec![

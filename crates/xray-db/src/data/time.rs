@@ -103,7 +103,7 @@ mod tests {
   #[test]
   fn test_read_write_time_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_chunk_file_sub_dir(file!(), &String::from("time.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "time.chunk");
 
     let time: Time = Time {
       year: 22,

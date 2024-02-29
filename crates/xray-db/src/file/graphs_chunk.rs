@@ -156,9 +156,7 @@ impl GraphsChunk {
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     let mut graphs_header_config: Ini = Ini::new();
 
-    self
-      .header
-      .export(&String::from("header"), &mut graphs_header_config);
+    self.header.export("header", &mut graphs_header_config);
 
     export_ini_to_file(
       &graphs_header_config,

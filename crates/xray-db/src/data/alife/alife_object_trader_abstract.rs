@@ -70,7 +70,7 @@ impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &String, ini: &mut Ini) {
+  fn export(&self, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("money", self.money.to_string())
@@ -104,7 +104,7 @@ mod tests {
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_trader_abstract.chunk"));
+      get_test_chunk_file_sub_dir(file!(), "alife_object_trader_abstract.chunk");
 
     let object: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract {
       money: 1453,

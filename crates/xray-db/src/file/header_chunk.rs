@@ -107,7 +107,7 @@ mod tests {
   #[test]
   fn test_read_empty_chunk() -> io::Result<()> {
     let chunk: Chunk = Chunk::from_slice(open_test_resource_as_slice(&get_test_chunk_sub_dir(
-      &String::from("empty_nested_single.chunk"),
+      "empty_nested_single.chunk",
     ))?)?
     .read_child_by_index(0)?;
 
@@ -121,8 +121,7 @@ mod tests {
   #[test]
   fn test_read_write_simple_header() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("header_simple.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "header_simple.chunk");
 
     let header: HeaderChunk = HeaderChunk {
       version: 20,

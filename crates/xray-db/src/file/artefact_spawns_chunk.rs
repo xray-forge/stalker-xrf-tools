@@ -118,8 +118,7 @@ mod tests {
   #[test]
   fn test_read_write_artefact_spawn_point() {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("artefact_spawns.chunk"));
+    let filename: String = get_test_chunk_file_sub_dir(file!(), "artefact_spawns.chunk");
 
     let spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk {
       nodes: vec![

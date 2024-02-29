@@ -45,7 +45,7 @@ impl AlifeObjectGeneric for AlifeObjectDynamicVisual {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &String, ini: &mut Ini) {
+  fn export(&self, section: &str, ini: &mut Ini) {
     self.base.export(section, ini);
 
     ini
@@ -74,7 +74,7 @@ mod tests {
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
-      get_test_chunk_file_sub_dir(file!(), &String::from("alife_object_dynamic_visual.chunk"));
+      get_test_chunk_file_sub_dir(file!(), "alife_object_dynamic_visual.chunk");
 
     let object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract {

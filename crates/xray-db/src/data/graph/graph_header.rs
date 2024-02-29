@@ -57,7 +57,7 @@ impl GraphHeader {
   }
 
   /// Export graph header data into level ini.
-  pub fn export(&self, section: &String, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ini) {
     ini
       .with_section(Some(section))
       .set("version", self.version.to_string())
