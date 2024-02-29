@@ -4,13 +4,15 @@ use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
 };
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_export::export_bytes_to_windows_1251_string;
+use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
+use ini::{Ini, Properties};
 use std::io;
 use std::io::Write;
 
@@ -36,7 +38,6 @@ pub struct AlifeObjectBase {
   pub script_version: u16,
   pub client_data_size: u16,
   pub spawn_id: u16,
-  pub inherited_size: u16,
   pub inherited: Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>,
   pub update_data: Vec<u8>, // todo: Parse.
 }
@@ -137,7 +138,6 @@ impl AlifeObjectBase {
       script_version,
       client_data_size,
       spawn_id,
-      inherited_size,
       inherited,
       update_data,
     })
@@ -207,6 +207,39 @@ impl AlifeObjectBase {
     Ok(())
   }
 
+  /// Import alife object data from ini file section.
+  pub fn import(props: &Properties) -> io::Result<AlifeObjectBase> {
+    let section: String = read_ini_field("section", props)?;
+
+    Ok(AlifeObjectBase {
+      index: read_ini_field("index", props)?,
+      id: read_ini_field("id", props)?,
+      net_action: read_ini_field("net_action", props)?,
+      clsid: ClsId::from_section(&section),
+      section,
+      name: read_ini_field("name", props)?,
+      script_game_id: read_ini_field("script_game_id", props)?,
+      script_rp: read_ini_field("script_rp", props)?,
+      position: read_ini_field("position", props)?,
+      direction: read_ini_field("direction", props)?,
+      respawn_time: read_ini_field("respawn_time", props)?,
+      parent_id: read_ini_field("parent_id", props)?,
+      phantom_id: read_ini_field("phantom_id", props)?,
+      script_flags: read_ini_field("script_flags", props)?,
+      version: read_ini_field("version", props)?,
+      game_type: read_ini_field("game_type", props)?,
+      script_version: read_ini_field("script_version", props)?,
+      client_data_size: read_ini_field("client_data_size", props)?,
+      spawn_id: read_ini_field("spawn_id", props)?,
+      // todo: Actual object.
+      inherited: Box::new(AlifeObjectVisual {
+        visual_name: "".to_string(),
+        visual_flags: 0,
+      }), // todo: Read
+      update_data: vec![], // todo: Read
+    })
+  }
+
   /// Export alife object data into ini file.
   pub fn export(&self, section: &str, ini: &mut Ini) {
     ini
@@ -225,8 +258,9 @@ impl AlifeObjectBase {
       .set("phantom_id", self.phantom_id.to_string())
       .set("script_flags", self.script_flags.to_string())
       .set("version", self.version.to_string())
-      .set("cse_abstract_unknown", self.game_type.to_string())
+      .set("game_type", self.game_type.to_string())
       .set("script_version", self.script_version.to_string())
+      .set("client_data_size", self.client_data_size.to_string())
       .set("spawn_id", self.script_version.to_string())
       .set("index", self.index.to_string());
 
@@ -282,7 +316,6 @@ mod tests {
       script_version: 10,
       client_data_size: 0,
       spawn_id: 2354,
-      inherited_size: 61,
       inherited: Box::new(AlifeObjectItemCustomOutfit {
         base: AlifeObjectItem {
           base: AlifeObjectDynamicVisual {
@@ -344,7 +377,6 @@ mod tests {
     assert_eq!(read_object.script_version, object.script_version);
     assert_eq!(read_object.client_data_size, object.client_data_size);
     assert_eq!(read_object.spawn_id, object.spawn_id);
-    assert_eq!(read_object.inherited_size, object.inherited_size);
     assert_eq!(read_object.update_data, object.update_data);
 
     Ok(())

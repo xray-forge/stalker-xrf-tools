@@ -3,6 +3,7 @@ use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife_object_base::AlifeObjectBase;
 use crate::export::file_export::{create_export_file, export_ini_to_file};
+use crate::export::file_import::open_ini_config;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
 use std::io::Write;
@@ -78,10 +79,19 @@ impl ALifeSpawnsChunk {
   }
 
   /// Import alife spawns data from provided path.
-  pub fn import(_: &Path) -> io::Result<ALifeSpawnsChunk> {
+  pub fn import(path: &Path) -> io::Result<ALifeSpawnsChunk> {
+    let config: Ini = open_ini_config(&path.join("alife_spawns.ltx"))?;
+    let mut objects: Vec<AlifeObjectBase> = Vec::new();
+
+    for (section, props) in config.iter() {
+      if section.is_some() {
+        objects.push(AlifeObjectBase::import(props)?);
+      }
+    }
+
     log::info!("Imported alife spawns chunk");
 
-    Ok(ALifeSpawnsChunk { objects: vec![] })
+    Ok(ALifeSpawnsChunk { objects })
   }
 
   /// Export alife spawns data into provided path.
@@ -193,7 +203,6 @@ mod tests {
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
-          inherited_size: 61,
           inherited: Box::new(AlifeObjectItemCustomOutfit {
             base: AlifeObjectItem {
               base: AlifeObjectDynamicVisual {
@@ -236,7 +245,6 @@ mod tests {
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
-          inherited_size: 42,
           inherited: Box::new(AlifeObjectSpaceRestrictor {
             base: AlifeObjectAbstract {
               game_vertex_id: 5473,
@@ -301,7 +309,6 @@ mod tests {
       assert_eq!(object.script_version, another.script_version);
       assert_eq!(object.client_data_size, another.client_data_size);
       assert_eq!(object.spawn_id, another.spawn_id);
-      assert_eq!(object.inherited_size, another.inherited_size);
       assert_eq!(object.update_data, another.update_data);
     }
 
