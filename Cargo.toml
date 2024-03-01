@@ -2,5 +2,6 @@
 resolver = "2"
 members = [
   "bin/xrf-cli-tool",
+  "bin/xrf-ui-tool/src-tauri",
   "crates/xray-db"
 ]
