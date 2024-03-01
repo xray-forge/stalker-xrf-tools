@@ -39,7 +39,6 @@ pub fn open_ini_config(path: &Path) -> io::Result<Ini> {
     ParseOption {
       enabled_escape: false,
       enabled_quote: false,
-      ..Default::default()
     },
   ) {
     Ok(ini) => Ok(ini),

@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 /// Export ini file content to provided file.
-pub fn export_vector_to_string<T: Display>(vector: &Vec<T>) -> String {
+pub fn export_vector_to_string<T: Display>(vector: &[T]) -> String {
   vector
     .iter()
     .map(|x| x.to_string())

@@ -70,9 +70,9 @@ impl SpawnFile {
   }
 
   /// Write spawn file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
-    self.write_to_file::<T>(&mut create_export_file(&path)?)
+    self.write_to_file::<T>(&mut create_export_file(path)?)
   }
 
   /// Write spawn file data to the file.

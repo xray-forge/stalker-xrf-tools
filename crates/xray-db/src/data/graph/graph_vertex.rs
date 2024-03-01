@@ -86,7 +86,7 @@ impl GraphVertex {
       .set("level_point_count", self.level_point_count.to_string())
       .set(
         "vertex_type",
-        export_vector_to_string(&vec![
+        export_vector_to_string(&[
           self.vertex_type.0,
           self.vertex_type.1,
           self.vertex_type.2,

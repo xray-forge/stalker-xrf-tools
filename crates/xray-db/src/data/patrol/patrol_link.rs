@@ -81,9 +81,9 @@ impl PatrolLink {
 
   /// Import patrol point link from ini config.
   pub fn import(section: &str, config: &Ini) -> io::Result<PatrolLink> {
-    let props: &Properties = config.section(Some(section)).expect(&format!(
-      "Patrol point link '{section}' should be defined in ltx file"
-    ));
+    let props: &Properties = config
+      .section(Some(section))
+      .unwrap_or_else(|| panic!("Patrol point link '{section}' should be defined in ltx file"));
 
     let index: u32 = read_ini_field("index", props)?;
     let count: usize = read_ini_field("count", props)?;

@@ -2,6 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::NIL;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use std::fmt::{Display, Formatter};
 use std::io;
 use std::str::FromStr;
 
@@ -102,13 +103,15 @@ impl Time {
       }
     })
   }
+}
 
-  /// Cast time object to serialized string.
-  pub fn to_string(&self) -> String {
-    String::from(format!(
+impl Display for Time {
+  fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    write!(
+      formatter,
       "{},{},{},{},{},{},{}",
       self.year, self.minute, self.day, self.hour, self.minute, self.second, self.millis
-    ))
+    )
   }
 }
 

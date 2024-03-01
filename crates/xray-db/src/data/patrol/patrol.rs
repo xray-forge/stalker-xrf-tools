@@ -76,20 +76,13 @@ impl Patrol {
   }
 
   /// Write list of patrols into chunk writer.
-  pub fn write_list<T: ByteOrder>(
-    patrols: &Vec<Patrol>,
-    writer: &mut ChunkWriter,
-  ) -> io::Result<()> {
+  pub fn write_list<T: ByteOrder>(patrols: &[Patrol], writer: &mut ChunkWriter) -> io::Result<()> {
     for (index, patrol) in patrols.iter().enumerate() {
       let mut patrol_writer: ChunkWriter = ChunkWriter::new();
 
       patrol.write::<T>(&mut patrol_writer)?;
 
-      writer.write_all(
-        patrol_writer
-          .flush_chunk_into_buffer::<T>(index)?
-          .as_slice(),
-      )?;
+      writer.write_all(&patrol_writer.flush_chunk_into_buffer::<T>(index)?)?;
     }
 
     Ok(())
@@ -139,7 +132,7 @@ impl Patrol {
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut links: Vec<PatrolLink> = Vec::new();
 
-    for section in points_list.split(",").map(|it| it.trim()) {
+    for section in points_list.split(',').map(|it| it.trim()) {
       points.push(PatrolPoint::import(
         &format!("{}.{}", name, section),
         patrol_points_config,

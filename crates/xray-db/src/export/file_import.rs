@@ -30,7 +30,7 @@ pub fn import_vector_from_string<T: FromStr>(value: &str) -> io::Result<Vec<T>> 
 pub fn import_sized_vector_from_string<T: FromStr>(size: usize, value: &str) -> io::Result<Vec<T>> {
   let mut vector: Vec<T> = Vec::new();
 
-  for (index, it) in value.split(",").enumerate() {
+  for (index, it) in value.split(',').enumerate() {
     vector.push(match it.trim().parse::<T>() {
       Ok(v) => v,
       _ => {
@@ -66,7 +66,7 @@ pub fn read_ini_field<T: FromStr>(field: &str, props: &Properties) -> io::Result
   Ok(
     match props
       .get(field)
-      .expect(&format!("'{field}' to be in ini"))
+      .unwrap_or_else(|| panic!("'{field}' to be in ini"))
       .parse::<T>()
     {
       Ok(value) => value,
@@ -90,9 +90,9 @@ pub fn read_ini_u32_bytes_field(field: &str, props: &Properties) -> io::Result<U
     import_sized_vector_from_string(4, &read_ini_field::<String>(field, props)?)?;
 
   Ok((
-    vertex_type.get(0).unwrap().clone(),
-    vertex_type.get(1).unwrap().clone(),
-    vertex_type.get(2).unwrap().clone(),
-    vertex_type.get(3).unwrap().clone(),
+    *vertex_type.get(0).unwrap(),
+    *vertex_type.get(1).unwrap(),
+    *vertex_type.get(2).unwrap(),
+    *vertex_type.get(3).unwrap(),
   ))
 }

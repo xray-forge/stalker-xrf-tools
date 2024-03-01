@@ -42,8 +42,8 @@ impl Vector3d<f32> {
 }
 
 impl Display for Vector3d<f32> {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "{},{},{}", self.x, self.y, self.z)
+  fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(formatter, "{},{},{}", self.x, self.y, self.z)
   }
 }
 

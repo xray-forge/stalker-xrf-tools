@@ -47,7 +47,7 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
 
       let reader: ChunkReader = ChunkReader {
         index: chunk_id,
-        is_compressed: chunk_id & CFS_COMPRESS_MARK == 1,
+        is_compressed: chunk_id & CFS_COMPRESS_MARK != 0,
         size: chunk_size as u64,
         position: self.reader.file.stream_position().unwrap(),
         file: Box::new(file),

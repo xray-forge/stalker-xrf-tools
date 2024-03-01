@@ -63,7 +63,7 @@ impl PatrolPoint {
 
   /// Write list of patrol points into chunk writer.
   pub fn write_list<T: ByteOrder>(
-    points: &Vec<PatrolPoint>,
+    points: &[PatrolPoint],
     writer: &mut ChunkWriter,
   ) -> io::Result<()> {
     for (index, point) in points.iter().enumerate() {
