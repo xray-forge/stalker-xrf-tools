@@ -19,3 +19,4 @@ bytes = "1.5.0"
 encoding_rs = { version = "0.8.33", features = ['alloc', 'fast-legacy-encode']}
 mockall = "0.12.1"
 rust-ini = "0.20.0"
+base64 = "0.21.7"

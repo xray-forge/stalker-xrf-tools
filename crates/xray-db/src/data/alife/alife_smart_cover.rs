@@ -46,7 +46,10 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
     Ok(AlifeSmartCover {
       base: AlifeObjectSmartCover::import(props)?,
       last_description: read_ini_field("last_description", props)?,
-      loopholes: vec![], // todo: Read actual loopholes.
+      loopholes: AlifeSmartCoverLoophole::string_to_list(&read_ini_field::<String>(
+        "loopholes",
+        props,
+      )?)?,
     })
   }
 }
@@ -79,12 +82,7 @@ impl AlifeObjectGeneric for AlifeSmartCover {
       .set("loopholes", self.loopholes.len().to_string())
       .set(
         "loopholes",
-        self
-          .loopholes
-          .iter()
-          .map(|loophole| format!("{},{}", loophole.name, loophole.enabled))
-          .collect::<Vec<_>>()
-          .join(","),
+        AlifeSmartCoverLoophole::list_to_string(&self.loopholes),
       );
   }
 }
