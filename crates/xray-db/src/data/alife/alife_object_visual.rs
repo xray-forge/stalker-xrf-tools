@@ -59,11 +59,15 @@ mod tests {
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::assertions::files_are_equal_by_path;
   use crate::test::utils::{
-    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_test_resource_path, get_test_sample_file_sub_dir, open_test_resource_as_slice,
+    overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
   use std::io;
 
   #[test]
@@ -96,6 +100,58 @@ mod tests {
       AlifeObjectVisual::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
 
     assert_eq!(read_object, object);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let first: AlifeObjectVisual = AlifeObjectVisual {
+      visual_name: String::from("visual-name-example"),
+      visual_flags: 33,
+    };
+
+    let second: AlifeObjectVisual = AlifeObjectVisual {
+      visual_name: String::from(""),
+      visual_flags: 33,
+    };
+
+    let exported_filename: String = get_test_sample_file_sub_dir(file!(), "exported.ini");
+    let mut exported: Ini = Ini::new();
+
+    first.export("first", &mut exported);
+    second.export("second", &mut exported);
+
+    export_ini_to_file(
+      &exported,
+      &mut overwrite_test_resource_as_file(&exported_filename)?,
+    )?;
+
+    let source: Ini = open_ini_config(&get_test_resource_path(&exported_filename))?;
+
+    let read_first: AlifeObjectVisual =
+      AlifeObjectVisual::import(source.section(Some("first")).unwrap())?;
+    let read_second: AlifeObjectVisual =
+      AlifeObjectVisual::import(source.section(Some("second")).unwrap())?;
+
+    assert_eq!(read_first, first);
+    assert_eq!(read_second, second);
+
+    let imported_filename: String = get_test_sample_file_sub_dir(file!(), "imported.ini");
+    let mut imported: Ini = Ini::new();
+
+    read_first.export("first", &mut imported);
+    read_second.export("second", &mut imported);
+
+    export_ini_to_file(
+      &imported,
+      &mut overwrite_test_resource_as_file(&imported_filename)?,
+    )?;
+
+    assert!(files_are_equal_by_path(
+      get_test_resource_path(&exported_filename),
+      get_test_resource_path(&imported_filename)
+    )?);
 
     Ok(())
   }
