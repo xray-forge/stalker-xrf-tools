@@ -14,7 +14,7 @@ use std::{fs, io};
 
 /// Descriptor of generic spawn file used by xray game engine.
 ///
-/// Root level chunks by ID:
+/// Root level samples by ID:
 /// 0 - header
 /// 1 - alife spawns
 /// 2 - alife objects

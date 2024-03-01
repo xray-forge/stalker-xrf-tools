@@ -65,7 +65,7 @@ mod tests {
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::test::utils::{
-    get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -74,7 +74,7 @@ mod tests {
   #[test]
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_chunk_file_sub_dir(file!(), "alife_object_breakable.chunk");
+    let filename: String = get_test_sample_file_sub_dir(file!(), "alife_object_breakable.chunk");
 
     let object: AlifeObjectBreakable = AlifeObjectBreakable {
       base: AlifeObjectDynamicVisual {

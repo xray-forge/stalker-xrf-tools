@@ -91,17 +91,21 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::assertions::files_are_equal_by_path;
   use crate::test::utils::{
-    get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_test_resource_path, get_test_sample_file_sub_dir, open_test_resource_as_slice,
+    overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
   use std::io;
 
   #[test]
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_chunk_file_sub_dir(file!(), "alife_object_abstract.chunk");
+    let filename: String = get_test_sample_file_sub_dir(file!(), "alife_object_abstract.chunk");
 
     let object: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1001,
@@ -134,6 +138,70 @@ mod tests {
       AlifeObjectAbstract::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
 
     assert_eq!(read_object, object);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let first: AlifeObjectAbstract = AlifeObjectAbstract {
+      game_vertex_id: 1001,
+      distance: 65.25,
+      direct_control: 412421,
+      level_vertex_id: 66231,
+      flags: 33,
+      custom_data: String::from("[custom_data_section] field1 = 1\r\n field2 = 2\r\n"),
+      story_id: 400,
+      spawn_story_id: 25,
+    };
+
+    let second: AlifeObjectAbstract = AlifeObjectAbstract {
+      game_vertex_id: 1002,
+      distance: 23.376,
+      direct_control: 421,
+      level_vertex_id: 75486,
+      flags: 6,
+      custom_data: String::from(""),
+      story_id: 2345,
+      spawn_story_id: 255,
+    };
+
+    let exported_filename: String = get_test_sample_file_sub_dir(file!(), "exported.ini");
+    let mut exported: Ini = Ini::new();
+
+    first.export("first", &mut exported);
+    second.export("second", &mut exported);
+
+    export_ini_to_file(
+      &exported,
+      &mut overwrite_test_resource_as_file(&exported_filename)?,
+    )?;
+
+    let source: Ini = open_ini_config(&get_test_resource_path(&exported_filename))?;
+
+    let read_first: AlifeObjectAbstract =
+      AlifeObjectAbstract::import(source.section(Some("first")).unwrap())?;
+    let read_second: AlifeObjectAbstract =
+      AlifeObjectAbstract::import(source.section(Some("second")).unwrap())?;
+
+    assert_eq!(read_first, first);
+    assert_eq!(read_second, second);
+
+    let imported_filename: String = get_test_sample_file_sub_dir(file!(), "imported.ini");
+    let mut imported: Ini = Ini::new();
+
+    read_first.export("first", &mut imported);
+    read_second.export("second", &mut imported);
+
+    export_ini_to_file(
+      &imported,
+      &mut overwrite_test_resource_as_file(&imported_filename)?,
+    )?;
+
+    assert!(files_are_equal_by_path(
+      get_test_resource_path(&exported_filename),
+      get_test_resource_path(&imported_filename)
+    )?);
 
     Ok(())
   }

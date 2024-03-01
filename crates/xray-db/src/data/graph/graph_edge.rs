@@ -55,7 +55,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_edge::GraphEdge;
   use crate::test::utils::{
-    get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -76,14 +76,14 @@ mod tests {
     assert_eq!(writer.bytes_written(), 6);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_test_chunk_file_sub_dir(file!(), &filename))?,
+      &mut overwrite_test_resource_as_file(&get_test_sample_file_sub_dir(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 6);
 
     let file: FileSlice =
-      open_test_resource_as_slice(&get_test_chunk_file_sub_dir(file!(), &filename))?;
+      open_test_resource_as_slice(&get_test_sample_file_sub_dir(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 6 + 8);
 

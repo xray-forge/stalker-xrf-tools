@@ -22,22 +22,22 @@ pub fn get_test_resource_path(resource_path: &str) -> PathBuf {
   path
 }
 
-/// Get relative path to chunk resource.
-pub fn get_test_chunk_file_sub_dir(file: &str, resource: &str) -> String {
+/// Get relative path to sample resource.
+pub fn get_test_sample_file_sub_dir(file: &str, resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
-  path.push("chunks");
+  path.push("samples");
   path.push(Path::new(file).file_stem().unwrap());
   path.push(resource);
 
   path.into_os_string().into_string().unwrap()
 }
 
-/// Get relative path to chunk resource.
-pub fn get_test_chunk_sub_dir(resource: &str) -> String {
+/// Get relative path to sample resource.
+pub fn get_test_sample_sub_dir(resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
-  path.push("chunks");
+  path.push("samples");
   path.push(resource);
 
   path.into_os_string().into_string().unwrap()

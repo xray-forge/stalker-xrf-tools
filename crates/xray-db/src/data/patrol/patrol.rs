@@ -9,7 +9,7 @@ use ini::{Ini, Properties};
 use std::io;
 use std::io::Write;
 
-/// Patrols list is represented by list of chunks containing patrol chunk.
+/// Patrols list is represented by list of samples containing patrol chunk.
 /// 0...N, where N is chunk.
 ///
 /// `CPatrolPathStorage::load`, `CPatrolPath::load_raw` in xray codebase.
@@ -29,7 +29,7 @@ pub struct Patrol {
 }
 
 impl Patrol {
-  /// Read chunk as list of patrol chunks.
+  /// Read chunk as list of patrol samples.
   pub fn read_list_from_chunk<T: ByteOrder>(
     chunk: &mut Chunk,
     count: u32,
@@ -211,7 +211,7 @@ mod tests {
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::test::utils::{
-    get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -220,7 +220,7 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_chunk_file_sub_dir(file!(), "patrol_simple.chunk");
+    let filename: String = get_test_sample_file_sub_dir(file!(), "patrol_simple.chunk");
 
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name"),
@@ -272,7 +272,7 @@ mod tests {
   #[test]
   fn test_read_write_simple_patrols_list() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_chunk_file_sub_dir(file!(), "patrol_list.chunk");
+    let filename: String = get_test_sample_file_sub_dir(file!(), "patrol_list.chunk");
 
     let patrols: Vec<Patrol> = vec![
       Patrol {

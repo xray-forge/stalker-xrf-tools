@@ -7,7 +7,7 @@ use ini::Ini;
 use std::path::Path;
 use std::{fmt, io};
 
-/// Artefacts spawns chunks.
+/// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
 #[derive(Clone, PartialEq)]
 pub struct ArtefactSpawnsChunk {
@@ -109,7 +109,7 @@ mod tests {
   use crate::data::vector_3d::Vector3d;
   use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
   use crate::test::utils::{
-    get_test_chunk_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -117,7 +117,7 @@ mod tests {
   #[test]
   fn test_read_write_artefact_spawn_point() {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_chunk_file_sub_dir(file!(), "artefact_spawns.chunk");
+    let filename: String = get_test_sample_file_sub_dir(file!(), "artefact_spawns.chunk");
 
     let spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk {
       nodes: vec![

@@ -5,7 +5,7 @@ use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
 use std::io::{Seek, SeekFrom};
 
-/// Iterate over chunks in provided file slice.
+/// Iterate over samples in provided file slice.
 /// Mutates parent object to keep track of what was read during execution.
 #[derive(Debug)]
 pub struct ChunkIterator<'lifetime> {
@@ -21,7 +21,7 @@ impl<'lifetime> ChunkIterator<'lifetime> {
   }
 }
 
-/// Iterates over chunk and read child chunks.
+/// Iterates over chunk and read child samples.
 impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
   type Item = Chunk;
 
