@@ -94,6 +94,18 @@ pub fn setup_commands() -> Command {
         ),
     )
     .subcommand(
+      Command::new("info-spawn")
+        .about("Command to print information about provided *.spawn file")
+        .arg(
+          Arg::new("path")
+            .help("Path to *.spawn file")
+            .short('p')
+            .long("path")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        ),
+    )
+    .subcommand(
       Command::new("format-ltx")
         .about("Command to format ltx and ini files")
         .arg(

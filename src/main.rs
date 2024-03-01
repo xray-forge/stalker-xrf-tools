@@ -1,6 +1,7 @@
 mod commands;
 
 use crate::commands::format_ltx::format_ltx;
+use crate::commands::info_spawn_file::info_spawn_file;
 use crate::commands::pack_spawn_file::pack_spawn_file;
 use crate::commands::repack_spawn_file::repack_spawn_file;
 use crate::commands::setup::setup_commands;
@@ -14,6 +15,7 @@ fn main() {
 
   match setup_commands().get_matches().subcommand() {
     Some(("verify-spawn", matches)) => verify_spawn_file(matches),
+    Some(("info-spawn", matches)) => info_spawn_file(matches),
     Some(("unpack-spawn", matches)) => unpack_spawn_file(matches).unwrap(),
     Some(("repack-spawn", matches)) => repack_spawn_file(matches).unwrap(),
     Some(("pack-spawn", matches)) => pack_spawn_file(matches).unwrap(),

@@ -70,6 +70,15 @@ impl SpawnFile {
       GraphsChunk::read_from_chunk::<T>(graphs_chunk).expect("Level chunk to be read");
 
     assert!(root_chunk.is_ended(), "Expected spawn file to be ended");
+    assert_eq!(
+      header.objects_count,
+      alife_spawn.objects.len() as u32,
+      "Expected correct objects count"
+    );
+    assert_eq!(
+      header.level_count, graphs.header.level_count as u32,
+      "Expected correct level count"
+    );
 
     Ok(SpawnFile {
       header,

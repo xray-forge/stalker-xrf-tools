@@ -1,4 +1,5 @@
 pub mod format_ltx;
+pub mod info_spawn_file;
 pub mod pack_spawn_file;
 pub mod repack_spawn_file;
 pub mod setup;

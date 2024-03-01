@@ -19,10 +19,7 @@ pub fn repack_spawn_file(matches: &ArgMatches) -> io::Result<()> {
   log::info!("Repack into {:?}", destination);
 
   let started_at: Instant = Instant::now();
-
-  let spawn_file: Box<SpawnFile> =
-    Box::new(SpawnFile::read_from_path::<SpawnByteOrder>(path).unwrap());
-
+  let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path).unwrap();
   let read_duration: Duration = started_at.elapsed();
 
   spawn_file

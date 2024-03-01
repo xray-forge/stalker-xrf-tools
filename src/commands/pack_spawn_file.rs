@@ -34,10 +34,7 @@ pub fn pack_spawn_file(matches: &ArgMatches) -> io::Result<()> {
   }
 
   let started_at: Instant = Instant::now();
-
-  let spawn_file: Box<SpawnFile> =
-    Box::new(SpawnFile::import_from_path::<SpawnByteOrder>(path).unwrap());
-
+  let spawn_file: SpawnFile = SpawnFile::import_from_path::<SpawnByteOrder>(path).unwrap();
   let read_duration: Duration = started_at.elapsed();
 
   spawn_file.write_to_path::<SpawnByteOrder>(destination)?;

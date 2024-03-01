@@ -33,6 +33,16 @@ pub fn get_test_sample_file_sub_dir(file: &str, resource: &str) -> String {
   path.into_os_string().into_string().unwrap()
 }
 
+/// Get relative path to sample resource of current test file.
+pub fn get_test_sample_file_directory(file: &str) -> String {
+  let mut path: PathBuf = PathBuf::new();
+
+  path.push("samples");
+  path.push(Path::new(file).file_stem().unwrap());
+
+  path.into_os_string().into_string().unwrap()
+}
+
 /// Get relative path to sample resource.
 pub fn get_test_sample_sub_dir(resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
