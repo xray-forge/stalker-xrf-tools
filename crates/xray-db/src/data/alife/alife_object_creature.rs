@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -25,17 +25,17 @@ pub struct AlifeObjectCreature {
 
 impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   /// Read alife creature object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectCreature> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectCreature> {
     Ok(AlifeObjectCreature {
-      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
-      team: chunk.read_u8()?,
-      squad: chunk.read_u8()?,
-      group: chunk.read_u8()?,
-      health: chunk.read_f32::<T>()?,
-      dynamic_out_restrictions: chunk.read_u16_vector::<T>()?,
-      dynamic_in_restrictions: chunk.read_u16_vector::<T>()?,
-      killer_id: chunk.read_u16::<T>()?,
-      game_death_time: chunk.read_u64::<T>()?,
+      base: AlifeObjectDynamicVisual::read::<T>(reader)?,
+      team: reader.read_u8()?,
+      squad: reader.read_u8()?,
+      group: reader.read_u8()?,
+      health: reader.read_f32::<T>()?,
+      dynamic_out_restrictions: reader.read_u16_vector::<T>()?,
+      dynamic_in_restrictions: reader.read_u16_vector::<T>()?,
+      killer_id: reader.read_u16::<T>()?,
+      game_death_time: reader.read_u64::<T>()?,
     })
   }
 
@@ -107,7 +107,7 @@ impl AlifeObjectGeneric for AlifeObjectCreature {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
@@ -166,9 +166,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 87 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectCreature =
-      AlifeObjectCreature::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectCreature::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

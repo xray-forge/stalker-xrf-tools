@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -22,13 +22,13 @@ pub struct AlifeObjectHelicopter {
 
 impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
   /// Read helicopter data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectHelicopter> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectHelicopter> {
     Ok(AlifeObjectHelicopter {
-      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
-      motion: AlifeObjectMotion::read_from_chunk::<T>(chunk)?,
-      skeleton: AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?,
-      startup_animation: chunk.read_null_terminated_win_string()?,
-      engine_sound: chunk.read_null_terminated_win_string()?,
+      base: AlifeObjectDynamicVisual::read::<T>(reader)?,
+      motion: AlifeObjectMotion::read::<T>(reader)?,
+      skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
+      startup_animation: reader.read_null_terminated_win_string()?,
+      engine_sound: reader.read_null_terminated_win_string()?,
     })
   }
 
@@ -74,7 +74,7 @@ impl AlifeObjectGeneric for AlifeObjectHelicopter {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -137,9 +137,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 111 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectHelicopter =
-      AlifeObjectHelicopter::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectHelicopter::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

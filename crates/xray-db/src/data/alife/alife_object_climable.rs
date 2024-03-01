@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -17,10 +17,10 @@ pub struct AlifeObjectClimable {
 
 impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   /// Read climable object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectClimable> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectClimable> {
     Ok(AlifeObjectClimable {
-      base: AlifeObjectShape::read_from_chunk::<T>(chunk)?,
-      game_material: chunk.read_null_terminated_win_string()?,
+      base: AlifeObjectShape::read::<T>(reader)?,
+      game_material: reader.read_null_terminated_win_string()?,
     })
   }
 
@@ -57,7 +57,7 @@ impl AlifeObjectGeneric for AlifeObjectClimable {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_climable::AlifeObjectClimable;
@@ -118,9 +118,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 119 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectClimable =
-      AlifeObjectClimable::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectClimable::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

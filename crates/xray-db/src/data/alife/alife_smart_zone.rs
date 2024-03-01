@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -15,9 +15,9 @@ pub struct AlifeSmartZone {
 
 impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
   /// Read generic alife smart zone object from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeSmartZone> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeSmartZone> {
     Ok(AlifeSmartZone {
-      base: AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?,
+      base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
     })
   }
 
@@ -46,7 +46,7 @@ impl AlifeObjectGeneric for AlifeSmartZone {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -107,9 +107,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 106 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeSmartZone =
-      AlifeSmartZone::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeSmartZone = AlifeSmartZone::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

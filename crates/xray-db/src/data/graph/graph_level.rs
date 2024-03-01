@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
@@ -18,13 +18,13 @@ pub struct GraphLevel {
 
 impl GraphLevel {
   /// Read graph level data from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphLevel> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphLevel> {
     Ok(GraphLevel {
-      name: chunk.read_null_terminated_win_string()?,
-      offset: chunk.read_f32_3d_vector::<T>()?,
-      id: chunk.read_u8()?,
-      section: chunk.read_null_terminated_win_string()?,
-      guid: chunk.read_u128::<T>()?,
+      name: reader.read_null_terminated_win_string()?,
+      offset: reader.read_f32_3d_vector::<T>()?,
+      id: reader.read_u8()?,
+      section: reader.read_null_terminated_win_string()?,
+      guid: reader.read_u128::<T>()?,
     })
   }
 
@@ -68,7 +68,7 @@ impl GraphLevel {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level::GraphLevel;
   use crate::data::vector_3d::Vector3d;
@@ -108,11 +108,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 59 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_level: GraphLevel = GraphLevel::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_level: GraphLevel = GraphLevel::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_level, level);
 

@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -13,19 +13,19 @@ pub struct PatrolLink {
 
 impl PatrolLink {
   /// Read links from chunk file.
-  pub fn read_list_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Vec<PatrolLink>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<PatrolLink>> {
     let mut links: Vec<PatrolLink> = Vec::new();
 
-    while chunk.has_data() {
-      links.push(PatrolLink::read_from_chunk::<T>(chunk)?);
+    while reader.has_data() {
+      links.push(PatrolLink::read::<T>(reader)?);
     }
 
-    if chunk.read_bytes_remain() > 0 {
+    if reader.read_bytes_remain() > 0 {
       log::warn!("Data to read remains in patrol link")
     }
 
     assert!(
-      chunk.is_ended(),
+      reader.is_ended(),
       "Chunk data should be read for patrol links"
     );
 
@@ -33,15 +33,15 @@ impl PatrolLink {
   }
 
   /// Read patrol link from chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<PatrolLink> {
-    let index: u32 = chunk.read_u32::<T>()?;
-    let count: u32 = chunk.read_u32::<T>()?;
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<PatrolLink> {
+    let index: u32 = reader.read_u32::<T>()?;
+    let count: u32 = reader.read_u32::<T>()?;
 
     let mut vertices: Vec<(u32, f32)> = Vec::new();
 
     for _ in 0..count {
-      let to: u32 = chunk.read_u32::<T>()?; // from->to in u16.
-      let weight: f32 = chunk.read_f32::<T>()?;
+      let to: u32 = reader.read_u32::<T>()?; // from->to in u16.
+      let weight: f32 = reader.read_f32::<T>()?;
 
       vertices.push((to, weight));
     }
@@ -120,7 +120,7 @@ impl PatrolLink {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::test::utils::{
@@ -155,11 +155,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 32 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_link: PatrolLink = PatrolLink::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_link: PatrolLink = PatrolLink::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_link, link);
 
@@ -197,12 +197,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 48 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let from_file: Vec<PatrolLink> =
-      PatrolLink::read_list_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let from_file: Vec<PatrolLink> = PatrolLink::read_list::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(from_file, links);
 

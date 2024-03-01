@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -24,16 +24,16 @@ pub struct AlifeObjectAbstract {
 
 impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   /// Read generic alife object base data from the file.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAbstract> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectAbstract> {
     Ok(AlifeObjectAbstract {
-      game_vertex_id: chunk.read_u16::<T>()?,
-      distance: chunk.read_f32::<T>()?,
-      direct_control: chunk.read_u32::<T>()?,
-      level_vertex_id: chunk.read_u32::<T>()?,
-      flags: chunk.read_u32::<T>()?,
-      custom_data: chunk.read_null_terminated_win_string()?,
-      story_id: chunk.read_u32::<T>()?,
-      spawn_story_id: chunk.read_u32::<T>()?,
+      game_vertex_id: reader.read_u16::<T>()?,
+      distance: reader.read_f32::<T>()?,
+      direct_control: reader.read_u32::<T>()?,
+      level_vertex_id: reader.read_u32::<T>()?,
+      flags: reader.read_u32::<T>()?,
+      custom_data: reader.read_null_terminated_win_string()?,
+      story_id: reader.read_u32::<T>()?,
+      spawn_story_id: reader.read_u32::<T>()?,
     })
   }
 
@@ -86,7 +86,7 @@ impl AlifeObjectGeneric for AlifeObjectAbstract {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -133,9 +133,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 38 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectAbstract =
-      AlifeObjectAbstract::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectAbstract::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

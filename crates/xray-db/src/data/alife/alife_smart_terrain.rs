@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -23,51 +23,51 @@ pub struct AlifeSmartTerrain {
 
 impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   /// Read alife smart terrain data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeSmartTerrain> {
-    let base: AlifeSmartZone = AlifeSmartZone::read_from_chunk::<T>(chunk)?;
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeSmartTerrain> {
+    let base: AlifeSmartZone = AlifeSmartZone::read::<T>(reader)?;
 
-    let arriving_objects_count: u8 = chunk.read_u8()?;
+    let arriving_objects_count: u8 = reader.read_u8()?;
 
     assert_eq!(
       arriving_objects_count, 0,
       "Unexpected arriving objects in smart terrain"
     );
 
-    let object_job_descriptors_count: u8 = chunk.read_u8()?;
+    let object_job_descriptors_count: u8 = reader.read_u8()?;
 
     assert_eq!(
       object_job_descriptors_count, 0,
       "Unexpected job objects in smart terrain"
     );
 
-    let dead_objects_infos_count: u8 = chunk.read_u8()?;
+    let dead_objects_infos_count: u8 = reader.read_u8()?;
 
     assert_eq!(
       dead_objects_infos_count, 0,
       "Unexpected dead objects in smart terrain"
     );
 
-    let smart_terrain_actor_control: u8 = chunk.read_u8()?;
+    let smart_terrain_actor_control: u8 = reader.read_u8()?;
 
     assert_eq!(
       smart_terrain_actor_control, 0,
       "Unexpected smart terrain actor control"
     );
 
-    let respawn_point: u8 = chunk.read_u8()?;
+    let respawn_point: u8 = reader.read_u8()?;
 
     if respawn_point != 0 {
       panic!("Not expected respawn point handler")
     }
 
-    let staying_objects_count: u8 = chunk.read_u8()?;
+    let staying_objects_count: u8 = reader.read_u8()?;
 
     assert_eq!(
       staying_objects_count, 0,
       "Unexpected smart terrain staying objects"
     );
 
-    let save_marker: u16 = chunk.read_u16::<SpawnByteOrder>()?;
+    let save_marker: u16 = reader.read_u16::<SpawnByteOrder>()?;
 
     assert_eq!(
       save_marker, 6,
@@ -152,7 +152,7 @@ impl AlifeObjectGeneric for AlifeSmartTerrain {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -223,9 +223,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 114 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeSmartTerrain =
-      AlifeSmartTerrain::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeSmartTerrain = AlifeSmartTerrain::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

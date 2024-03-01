@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -24,18 +24,18 @@ pub struct AlifeObjectTraderAbstract {
 
 impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
   /// Read trader data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectTraderAbstract> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectTraderAbstract> {
     Ok(AlifeObjectTraderAbstract {
-      money: chunk.read_u32::<SpawnByteOrder>()?,
-      specific_character: chunk.read_null_terminated_win_string()?,
-      trader_flags: chunk.read_u32::<SpawnByteOrder>()?,
-      character_profile: chunk.read_null_terminated_win_string()?,
-      community_index: chunk.read_u32::<SpawnByteOrder>()?,
-      rank: chunk.read_u32::<SpawnByteOrder>()?,
-      reputation: chunk.read_u32::<SpawnByteOrder>()?,
-      character_name: chunk.read_null_terminated_win_string()?,
-      dead_body_can_take: chunk.read_u8()?,
-      dead_body_closed: chunk.read_u8()?,
+      money: reader.read_u32::<SpawnByteOrder>()?,
+      specific_character: reader.read_null_terminated_win_string()?,
+      trader_flags: reader.read_u32::<SpawnByteOrder>()?,
+      character_profile: reader.read_null_terminated_win_string()?,
+      community_index: reader.read_u32::<SpawnByteOrder>()?,
+      rank: reader.read_u32::<SpawnByteOrder>()?,
+      reputation: reader.read_u32::<SpawnByteOrder>()?,
+      character_name: reader.read_null_terminated_win_string()?,
+      dead_body_can_take: reader.read_u8()?,
+      dead_body_closed: reader.read_u8()?,
     })
   }
 
@@ -94,7 +94,7 @@ impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -140,9 +140,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 74 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectTraderAbstract =
-      AlifeObjectTraderAbstract::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectTraderAbstract::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

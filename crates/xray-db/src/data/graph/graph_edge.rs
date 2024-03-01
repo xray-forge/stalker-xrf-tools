@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -13,10 +13,10 @@ pub struct GraphEdge {
 
 impl GraphEdge {
   /// Read edge from chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphEdge> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphEdge> {
     Ok(GraphEdge {
-      game_vertex_id: chunk.read_u16::<T>()?,
-      distance: chunk.read_f32::<T>()?,
+      game_vertex_id: reader.read_u16::<T>()?,
+      distance: reader.read_f32::<T>()?,
     })
   }
 
@@ -51,7 +51,7 @@ impl GraphEdge {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_edge::GraphEdge;
   use crate::test::utils::{
@@ -87,11 +87,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 6 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_edge: GraphEdge = GraphEdge::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_edge: GraphEdge = GraphEdge::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_edge, edge);
 

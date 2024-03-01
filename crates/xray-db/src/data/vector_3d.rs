@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::fmt::Display;
@@ -23,11 +23,11 @@ impl Vector3d<f32> {
   }
 
   /// Read vector coordinates from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Vector3d<f32>> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vector3d<f32>> {
     Ok(Vector3d {
-      x: chunk.read_f32::<T>()?,
-      y: chunk.read_f32::<T>()?,
-      z: chunk.read_f32::<T>()?,
+      x: reader.read_f32::<T>()?,
+      y: reader.read_f32::<T>()?,
+      z: reader.read_f32::<T>()?,
     })
   }
 

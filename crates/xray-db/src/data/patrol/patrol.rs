@@ -1,5 +1,5 @@
-use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
@@ -30,21 +30,18 @@ pub struct Patrol {
 
 impl Patrol {
   /// Read chunk as list of patrol samples.
-  pub fn read_list_from_chunk<T: ByteOrder>(
-    chunk: &mut Chunk,
-    count: u32,
-  ) -> io::Result<Vec<Patrol>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, count: u32) -> io::Result<Vec<Patrol>> {
     let mut read_patrols_count: u32 = 0;
     let mut patrols: Vec<Patrol> = Vec::new();
 
-    for mut patrol_chunk in ChunkIterator::new(chunk) {
-      patrols.push(Patrol::read_from_chunk::<T>(&mut patrol_chunk)?);
+    for mut patrol_reader in ChunkIterator::new(reader) {
+      patrols.push(Patrol::read::<T>(&mut patrol_reader)?);
       read_patrols_count += 1;
     }
 
     assert_eq!(read_patrols_count, count);
     assert!(
-      chunk.is_ended(),
+      reader.is_ended(),
       "Chunk data should be read for patrols list"
     );
 
@@ -52,24 +49,24 @@ impl Patrol {
   }
 
   /// Read chunk as patrol.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Patrol> {
-    let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
-    let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Patrol> {
+    let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
+    let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
-    let mut point_count_chunk: Chunk = data_chunk.read_child_by_index(0)?;
-    let mut points_chunk: Chunk = data_chunk.read_child_by_index(1)?;
-    let mut links_chunk: Chunk = data_chunk.read_child_by_index(2)?;
+    let mut point_count_reader: ChunkReader = data_reader.read_child_by_index(0)?;
+    let mut points_reader: ChunkReader = data_reader.read_child_by_index(1)?;
+    let mut links_reader: ChunkReader = data_reader.read_child_by_index(2)?;
 
-    let name: String = meta_chunk.read_null_terminated_win_string()?;
+    let name: String = meta_reader.read_null_terminated_win_string()?;
 
-    assert_eq!(name.len() + 1, meta_chunk.size as usize); // Count null termination char.
+    assert_eq!(name.len() + 1, meta_reader.size as usize); // Count null termination char.
 
-    let points_count: u32 = point_count_chunk.read_u32::<T>()?;
-    let points: Vec<PatrolPoint> = PatrolPoint::read_list_from_chunk::<T>(&mut points_chunk)?;
-    let links: Vec<PatrolLink> = PatrolLink::read_list_from_chunk::<T>(&mut links_chunk)?;
+    let points_count: u32 = point_count_reader.read_u32::<T>()?;
+    let points: Vec<PatrolPoint> = PatrolPoint::read_list::<T>(&mut points_reader)?;
+    let links: Vec<PatrolLink> = PatrolLink::read_list::<T>(&mut links_reader)?;
 
     assert_eq!(points_count, points.len() as u32);
-    assert!(chunk.is_ended(), "Expect patrol chunk to be ended");
+    assert!(reader.is_ended(), "Expect patrol chunk to be ended");
 
     Ok(Patrol {
       name,
@@ -204,7 +201,7 @@ impl Patrol {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol::Patrol;
   use crate::data::patrol::patrol_link::PatrolLink;
@@ -261,8 +258,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 210 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrol: Patrol = Patrol::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_patrol: Patrol = Patrol::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_patrol, patrol);
 
@@ -338,8 +335,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrols: Vec<Patrol> = Patrol::read_list_from_chunk::<SpawnByteOrder>(&mut chunk, 2)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_patrols: Vec<Patrol> = Patrol::read_list::<SpawnByteOrder>(&mut reader, 2)?;
 
     assert_eq!(read_patrols, patrols);
 

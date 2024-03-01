@@ -1,5 +1,5 @@
-use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
@@ -20,23 +20,23 @@ pub struct PatrolPoint {
 
 impl PatrolPoint {
   /// Read points from chunk file.
-  pub fn read_list_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Vec<PatrolPoint>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<PatrolPoint>> {
     let mut points: Vec<PatrolPoint> = Vec::new();
 
-    for (index, mut point_chunk) in ChunkIterator::new(chunk).enumerate() {
-      let mut index_chunk: Chunk = point_chunk.read_child_by_index(0)?;
-      let mut points_chunk: Chunk = point_chunk.read_child_by_index(1)?;
+    for (index, mut point_reader) in ChunkIterator::new(reader).enumerate() {
+      let mut index_reader: ChunkReader = point_reader.read_child_by_index(0)?;
+      let mut points_reader: ChunkReader = point_reader.read_child_by_index(1)?;
 
-      assert_eq!(index, index_chunk.read_u32::<T>()? as usize);
+      assert_eq!(index, index_reader.read_u32::<T>()? as usize);
 
-      points.push(PatrolPoint::read_from_chunk::<T>(&mut points_chunk)?);
+      points.push(PatrolPoint::read::<T>(&mut points_reader)?);
 
-      assert!(index_chunk.is_ended());
-      assert!(point_chunk.is_ended());
+      assert!(index_reader.is_ended());
+      assert!(point_reader.is_ended());
     }
 
     assert!(
-      chunk.is_ended(),
+      reader.is_ended(),
       "Chunk data should be read for patrol points list"
     );
 
@@ -44,17 +44,17 @@ impl PatrolPoint {
   }
 
   /// Read patrol point data from chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<PatrolPoint> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<PatrolPoint> {
     let point: PatrolPoint = PatrolPoint {
-      name: chunk.read_null_terminated_win_string()?,
-      position: chunk.read_f32_3d_vector::<T>()?,
-      flags: chunk.read_u32::<T>()?,
-      level_vertex_id: chunk.read_u32::<T>()?,
-      game_vertex_id: chunk.read_u16::<T>()?,
+      name: reader.read_null_terminated_win_string()?,
+      position: reader.read_f32_3d_vector::<T>()?,
+      flags: reader.read_u32::<T>()?,
+      level_vertex_id: reader.read_u32::<T>()?,
+      game_vertex_id: reader.read_u16::<T>()?,
     };
 
     assert!(
-      chunk.is_ended(),
+      reader.is_ended(),
       "Chunk data should be read for patrol point"
     );
 
@@ -124,7 +124,7 @@ impl PatrolPoint {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
@@ -163,9 +163,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 40 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    let read_point: PatrolPoint = PatrolPoint::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_point: PatrolPoint = PatrolPoint::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_point, point);
 
@@ -209,10 +209,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 140 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    let read_points: Vec<PatrolPoint> =
-      PatrolPoint::read_list_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_points: Vec<PatrolPoint> = PatrolPoint::read_list::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(points, read_points);
 

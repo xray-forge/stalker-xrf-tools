@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -22,15 +22,15 @@ pub struct AlifeObjectItemWeapon {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
   /// Read alife item object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemWeapon> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectItemWeapon> {
     Ok(AlifeObjectItemWeapon {
-      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
-      ammo_current: chunk.read_u16::<SpawnByteOrder>()?,
-      ammo_elapsed: chunk.read_u16::<SpawnByteOrder>()?,
-      weapon_state: chunk.read_u8()?,
-      addon_flags: chunk.read_u8()?,
-      ammo_type: chunk.read_u8()?,
-      elapsed_grenades: chunk.read_u8()?,
+      base: AlifeObjectItem::read::<T>(reader)?,
+      ammo_current: reader.read_u16::<SpawnByteOrder>()?,
+      ammo_elapsed: reader.read_u16::<SpawnByteOrder>()?,
+      weapon_state: reader.read_u8()?,
+      addon_flags: reader.read_u8()?,
+      ammo_type: reader.read_u8()?,
+      elapsed_grenades: reader.read_u8()?,
     })
   }
 
@@ -82,7 +82,7 @@ impl AlifeObjectGeneric for AlifeObjectItemWeapon {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -144,9 +144,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 62 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectItemWeapon =
-      AlifeObjectItemWeapon::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectItemWeapon::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

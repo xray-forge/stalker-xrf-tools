@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -15,9 +15,9 @@ pub struct AlifeObjectItemWeaponShotgun {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemWeaponShotgun> for AlifeObjectItemWeaponShotgun {
   /// Read shotgun object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemWeaponShotgun> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectItemWeaponShotgun> {
     Ok(AlifeObjectItemWeaponShotgun {
-      base: AlifeObjectItemWeapon::read_from_chunk::<T>(chunk)?,
+      base: AlifeObjectItemWeapon::read::<T>(reader)?,
     })
   }
 
@@ -47,7 +47,7 @@ impl AlifeObjectGeneric for AlifeObjectItemWeaponShotgun {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -113,9 +113,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 67 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectItemWeaponShotgun =
-      AlifeObjectItemWeaponShotgun::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectItemWeaponShotgun::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

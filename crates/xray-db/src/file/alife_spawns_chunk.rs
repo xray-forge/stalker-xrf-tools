@@ -1,5 +1,5 @@
-use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkIterator;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife_object_base::AlifeObjectBase;
 use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
@@ -19,28 +19,31 @@ pub struct ALifeSpawnsChunk {
 
 impl ALifeSpawnsChunk {
   /// Read spawns chunk by position descriptor from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<ALifeSpawnsChunk> {
-    let mut count_chunk: Chunk = chunk.read_child_by_index(0)?;
-    let mut objects_chunk: Chunk = chunk.read_child_by_index(1)?;
-    let edges_chunk: Chunk = chunk.read_child_by_index(2)?;
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ALifeSpawnsChunk> {
+    let mut count_reader: ChunkReader = reader.read_child_by_index(0)?;
+    let mut objects_reader: ChunkReader = reader.read_child_by_index(1)?;
+    let edges_reader: ChunkReader = reader.read_child_by_index(2)?;
 
-    let count: u32 = count_chunk.read_u32::<T>()?;
+    let count: u32 = count_reader.read_u32::<T>()?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
-    for mut object_chunk in ChunkIterator::new(&mut objects_chunk) {
-      objects.push(AlifeObjectBase::read_from_chunk::<T>(&mut object_chunk)?)
+    for mut object_reader in ChunkIterator::new(&mut objects_reader) {
+      objects.push(AlifeObjectBase::read::<T>(&mut object_reader)?)
     }
 
     assert_eq!(objects.len(), count as usize);
-    assert!(count_chunk.is_ended(), "Expect count chunk to be ended");
-    assert!(objects_chunk.is_ended(), "Expect objects chunk to be ended");
+    assert!(count_reader.is_ended(), "Expect count chunk to be ended");
     assert!(
-      edges_chunk.is_ended(),
+      objects_reader.is_ended(),
+      "Expect objects chunk to be ended"
+    );
+    assert!(
+      edges_reader.is_ended(),
       "Parsing of edges in spawn chunk is not implemented"
     );
-    assert!(chunk.is_ended(), "Expect alife spawns chunk to be ended");
+    assert!(reader.is_ended(), "Expect alife spawns chunk to be ended");
 
-    log::info!("Parsed alife spawns chunk, {:?} bytes", chunk.size);
+    log::info!("Parsed alife spawns chunk, {:?} bytes", reader.size);
 
     Ok(ALifeSpawnsChunk { objects })
   }
@@ -124,7 +127,7 @@ impl fmt::Debug for ALifeSpawnsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -163,11 +166,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
-    let chunk: Chunk = Chunk::from_slice(file)?
+    let reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: ALifeSpawnsChunk = ALifeSpawnsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
+    let read_spawns: ALifeSpawnsChunk = ALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_spawns.objects.len(), spawns.objects.len());
 
@@ -276,11 +279,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 419 + 8);
 
-    let chunk: Chunk = Chunk::from_slice(file)?
+    let reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: ALifeSpawnsChunk = ALifeSpawnsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
+    let read_spawns: ALifeSpawnsChunk = ALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_spawns.objects.len(), spawns.objects.len());
 

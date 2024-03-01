@@ -12,7 +12,7 @@ use std::io::{Read, Seek, SeekFrom};
 use std::{fmt, io};
 
 #[derive(Clone, PartialEq)]
-pub struct Chunk<T: ChunkDataSource = FileSlice> {
+pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
   pub index: u32,
   pub size: u64,
   pub position: u64,
@@ -20,19 +20,19 @@ pub struct Chunk<T: ChunkDataSource = FileSlice> {
   pub file: Box<T>,
 }
 
-impl Chunk {
+impl ChunkReader {
   /// Read all chunk descriptors from file and put seek into the end.
-  pub fn read_all_from_file(chunk: &mut Chunk) -> Vec<Chunk> {
-    ChunkIterator::new(chunk).collect()
+  pub fn read_all_from_file(reader: &mut ChunkReader) -> Vec<ChunkReader> {
+    ChunkIterator::new(reader).collect()
   }
 
   /// Create chunk based on whole file.
-  pub fn from_file(file: File) -> io::Result<Chunk> {
+  pub fn from_file(file: File) -> io::Result<ChunkReader> {
     Self::from_slice(FileSlice::new(file))
   }
 
   /// Create chunk based on file slice boundaries.
-  pub fn from_slice(file: FileSlice) -> io::Result<Chunk> {
+  pub fn from_slice(file: FileSlice) -> io::Result<ChunkReader> {
     if file.is_empty() {
       return Err(io::Error::new(
         io::ErrorKind::InvalidInput,
@@ -40,7 +40,7 @@ impl Chunk {
       ));
     }
 
-    Ok(Chunk {
+    Ok(ChunkReader {
       index: 0,
       size: file.len() as u64,
       position: file.start_pos(),
@@ -50,7 +50,7 @@ impl Chunk {
   }
 }
 
-impl Chunk {
+impl ChunkReader {
   /// Get start position of the chunk seek.
   pub fn start_pos(&self) -> u64 {
     self.file.start_pos()
@@ -87,9 +87,9 @@ impl Chunk {
   }
 }
 
-impl Chunk {
+impl ChunkReader {
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_child_by_index(&mut self, index: u32) -> io::Result<Chunk> {
+  pub fn read_child_by_index(&mut self, index: u32) -> io::Result<ChunkReader> {
     for (iteration, chunk) in ChunkIterator::new(self).enumerate() {
       if index as usize == iteration {
         return Ok(chunk);
@@ -103,7 +103,7 @@ impl Chunk {
   }
 
   /// Get list of all child samples in current chunk.
-  pub fn read_all_children(&self) -> Vec<Chunk> {
+  pub fn read_all_children(&self) -> Vec<ChunkReader> {
     ChunkIterator::new(&mut self.clone()).collect()
   }
 
@@ -114,10 +114,10 @@ impl Chunk {
   }
 }
 
-impl Chunk {
+impl ChunkReader {
   /// Read three float values.
   pub fn read_f32_3d_vector<T: ByteOrder>(&mut self) -> io::Result<Vector3d<f32>> {
-    Vector3d::read_from_chunk::<T>(self)
+    Vector3d::read::<T>(self)
   }
 
   pub fn read_u32_bytes(&mut self) -> io::Result<U32Bytes> {
@@ -215,7 +215,7 @@ impl Chunk {
   }
 }
 
-impl fmt::Debug for Chunk {
+impl fmt::Debug for ChunkReader {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
@@ -227,7 +227,7 @@ impl fmt::Debug for Chunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::test::utils::{get_test_sample_sub_dir, open_test_resource_as_slice};
   use fileslice::FileSlice;
   use std::io;
@@ -239,7 +239,7 @@ mod tests {
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 0);
 
-    let result: io::Result<Chunk> = Chunk::from_slice(file);
+    let result: io::Result<ChunkReader> = ChunkReader::from_slice(file);
 
     assert!(
       result.is_err(),
@@ -262,9 +262,9 @@ mod tests {
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 8);
 
-    let chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert!(chunk.is_ended(), "Expect empty chunk");
+    assert!(reader.is_ended(), "Expect empty chunk");
 
     Ok(())
   }
@@ -273,14 +273,14 @@ mod tests {
   fn test_read_empty_children() -> io::Result<()> {
     let filename: String = get_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 0);
 
     let filename: String = get_test_sample_sub_dir("empty_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks.get(0).unwrap().size, 0);
@@ -296,14 +296,14 @@ mod tests {
   fn test_read_dummy_children() -> io::Result<()> {
     let filename: String = get_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 8);
 
     let filename: String = get_test_sample_sub_dir("dummy_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<Chunk> = Chunk::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks.get(0).unwrap().size, 8);

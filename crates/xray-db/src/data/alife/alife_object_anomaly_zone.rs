@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -19,12 +19,12 @@ pub struct AlifeObjectAnomalyZone {
 
 impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
   /// Read anomaly zone object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectAnomalyZone> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectAnomalyZone> {
     Ok(AlifeObjectAnomalyZone {
-      base: AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?,
-      offline_interactive_radius: chunk.read_f32::<SpawnByteOrder>()?,
-      artefact_spawn_count: chunk.read_u16::<SpawnByteOrder>()?,
-      artefact_position_offset: chunk.read_u32::<SpawnByteOrder>()?,
+      base: AlifeObjectCustomZone::read::<T>(reader)?,
+      offline_interactive_radius: reader.read_f32::<SpawnByteOrder>()?,
+      artefact_spawn_count: reader.read_u16::<SpawnByteOrder>()?,
+      artefact_position_offset: reader.read_u32::<SpawnByteOrder>()?,
     })
   }
 
@@ -76,7 +76,7 @@ impl AlifeObjectGeneric for AlifeObjectAnomalyZone {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
@@ -148,9 +148,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 125 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectAnomalyZone =
-      AlifeObjectAnomalyZone::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectAnomalyZone::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

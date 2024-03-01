@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file::create_export_file;
 use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
@@ -37,8 +37,8 @@ impl SpawnFile {
 
   /// Read spawn file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<SpawnFile> {
-    let mut root_chunk: Chunk = Chunk::from_slice(FileSlice::new(file)).unwrap();
-    let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
+    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file)).unwrap();
+    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
 
     assert_eq!(
       chunks.len(),
@@ -48,11 +48,11 @@ impl SpawnFile {
 
     let spawn_file: SpawnFile = {
       SpawnFile {
-        header: HeaderChunk::read_from_chunk::<T>(chunks.get(0).unwrap().clone())?,
-        alife_spawn: ALifeSpawnsChunk::read_from_chunk::<T>(chunks.get(1).unwrap().clone())?,
-        artefact_spawn: ArtefactSpawnsChunk::read_from_chunk::<T>(chunks.get(2).unwrap().clone())?,
-        patrols: PatrolsChunk::read_from_chunk::<T>(chunks.get(3).unwrap().clone())?,
-        graphs: GraphsChunk::read_from_chunk::<T>(chunks.get(4).unwrap().clone())?,
+        header: HeaderChunk::read::<T>(chunks.get(0).unwrap().clone())?,
+        alife_spawn: ALifeSpawnsChunk::read::<T>(chunks.get(1).unwrap().clone())?,
+        artefact_spawn: ArtefactSpawnsChunk::read::<T>(chunks.get(2).unwrap().clone())?,
+        patrols: PatrolsChunk::read::<T>(chunks.get(3).unwrap().clone())?,
+        graphs: GraphsChunk::read::<T>(chunks.get(4).unwrap().clone())?,
       }
     };
 

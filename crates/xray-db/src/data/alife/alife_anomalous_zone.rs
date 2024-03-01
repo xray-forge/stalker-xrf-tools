@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -18,10 +18,10 @@ pub struct AlifeAnomalousZone {
 
 impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   /// Read anomalous zone object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeAnomalousZone> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeAnomalousZone> {
     Ok(AlifeAnomalousZone {
-      base: AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?,
-      last_spawn_time: Time::read_optional_from_chunk::<T>(chunk)?,
+      base: AlifeObjectAnomalyZone::read::<T>(reader)?,
+      last_spawn_time: Time::read_optional::<T>(reader)?,
     })
   }
 
@@ -62,7 +62,7 @@ impl AlifeObjectGeneric for AlifeAnomalousZone {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_anomalous_zone::AlifeAnomalousZone;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
@@ -147,9 +147,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 145 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeAnomalousZone =
-      AlifeAnomalousZone::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeAnomalousZone = AlifeAnomalousZone::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

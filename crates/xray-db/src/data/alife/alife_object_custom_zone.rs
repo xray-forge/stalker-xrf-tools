@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -21,14 +21,14 @@ pub struct AlifeObjectCustomZone {
 
 impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
   /// Read alife custom zone object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectCustomZone> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectCustomZone> {
     Ok(AlifeObjectCustomZone {
-      base: AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?,
-      max_power: chunk.read_f32::<SpawnByteOrder>()?,
-      owner_id: chunk.read_u32::<SpawnByteOrder>()?,
-      enabled_time: chunk.read_u32::<SpawnByteOrder>()?,
-      disabled_time: chunk.read_u32::<SpawnByteOrder>()?,
-      start_time_shift: chunk.read_u32::<SpawnByteOrder>()?,
+      base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
+      max_power: reader.read_f32::<SpawnByteOrder>()?,
+      owner_id: reader.read_u32::<SpawnByteOrder>()?,
+      enabled_time: reader.read_u32::<SpawnByteOrder>()?,
+      disabled_time: reader.read_u32::<SpawnByteOrder>()?,
+      start_time_shift: reader.read_u32::<SpawnByteOrder>()?,
     })
   }
 
@@ -77,7 +77,7 @@ impl AlifeObjectGeneric for AlifeObjectCustomZone {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
@@ -143,9 +143,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 126 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectCustomZone =
-      AlifeObjectCustomZone::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectCustomZone::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

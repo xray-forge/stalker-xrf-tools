@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -22,19 +22,19 @@ pub struct AlifeZoneVisual {
 
 impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   /// Read visual zone data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeZoneVisual> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeZoneVisual> {
     Ok(AlifeZoneVisual {
-      base: AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?,
-      visual: AlifeObjectVisual::read_from_chunk::<T>(chunk)?,
-      idle_animation: chunk
+      base: AlifeObjectAnomalyZone::read::<T>(reader)?,
+      visual: AlifeObjectVisual::read::<T>(reader)?,
+      idle_animation: reader
         .has_data()
-        .then(|| chunk.read_null_terminated_win_string().unwrap())
+        .then(|| reader.read_null_terminated_win_string().unwrap())
         .unwrap_or(String::new()),
-      attack_animation: chunk
+      attack_animation: reader
         .has_data()
-        .then(|| chunk.read_null_terminated_win_string().unwrap())
+        .then(|| reader.read_null_terminated_win_string().unwrap())
         .unwrap_or(String::new()),
-      last_spawn_time: Time::read_optional_from_chunk::<T>(chunk)?,
+      last_spawn_time: Time::read_optional::<T>(reader)?,
     })
   }
 
@@ -87,7 +87,7 @@ impl AlifeObjectGeneric for AlifeZoneVisual {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
@@ -170,9 +170,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 182 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeZoneVisual =
-      AlifeZoneVisual::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeZoneVisual = AlifeZoneVisual::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

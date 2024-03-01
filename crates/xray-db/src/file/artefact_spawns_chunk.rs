@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
 use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
@@ -17,22 +17,25 @@ pub struct ArtefactSpawnsChunk {
 impl ArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<ArtefactSpawnsChunk> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ArtefactSpawnsChunk> {
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
-    let count: u32 = chunk.read_u32::<T>()?;
+    let count: u32 = reader.read_u32::<T>()?;
 
     // Parsing CLevelPoint structure, 20 bytes per one.
     for _ in 0..count {
-      nodes.push(ArtefactSpawnPoint::read_from_chunk::<T>(&mut chunk)?);
+      nodes.push(ArtefactSpawnPoint::read::<T>(&mut reader)?);
     }
 
     assert_eq!(nodes.len() as u64, count as u64);
 
-    assert!(chunk.is_ended(), "Expect artefact spawns chunk to be ended");
+    assert!(
+      reader.is_ended(),
+      "Expect artefact spawns chunk to be ended"
+    );
 
     log::info!(
       "Parsed artefacts spawns: {:?} bytes",
-      chunk.read_bytes_len(),
+      reader.read_bytes_len(),
     );
 
     Ok(ArtefactSpawnsChunk { nodes })
@@ -103,7 +106,7 @@ impl fmt::Debug for ArtefactSpawnsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
@@ -149,13 +152,12 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 44 + 8);
 
-    let chunk: Chunk = Chunk::from_slice(file)
+    let reader: ChunkReader = ChunkReader::from_slice(file)
       .unwrap()
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: ArtefactSpawnsChunk =
-      ArtefactSpawnsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
+    let read_spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_spawns, spawns);
 

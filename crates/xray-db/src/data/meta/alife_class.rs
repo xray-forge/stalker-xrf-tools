@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::data::alife::alife_actor::AlifeActor;
 use crate::data::alife::alife_anomalous_zone::AlifeAnomalousZone;
 use crate::data::alife::alife_graph_point::AlifeGraphPoint;
@@ -96,159 +96,155 @@ impl AlifeClass {
   /// Represents STATE_Read of each separate object in xray implementation.
   /// Additionally, should respect script extension.
   pub fn read_by_class<T: ByteOrder>(
-    chunk: &mut Chunk,
+    reader: &mut ChunkReader,
     alife_class: &AlifeClass,
   ) -> io::Result<Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>> {
     match alife_class {
       AlifeClass::SeActor => {
-        let object: AlifeActor = AlifeActor::read_from_chunk::<T>(chunk)?;
-        AlifeActor::verify(chunk);
+        let object: AlifeActor = AlifeActor::read::<T>(reader)?;
+        AlifeActor::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeObjectBreakable => {
-        let object: AlifeObjectBreakable = AlifeObjectBreakable::read_from_chunk::<T>(chunk)?;
-        AlifeObjectBreakable::verify(chunk);
+        let object: AlifeObjectBreakable = AlifeObjectBreakable::read::<T>(reader)?;
+        AlifeObjectBreakable::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeObjectClimable => {
-        let object: AlifeObjectClimable = AlifeObjectClimable::read_from_chunk::<T>(chunk)?;
-        AlifeObjectClimable::verify(chunk);
+        let object: AlifeObjectClimable = AlifeObjectClimable::read::<T>(reader)?;
+        AlifeObjectClimable::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeGraphPoint => {
-        let object: AlifeGraphPoint = AlifeGraphPoint::read_from_chunk::<T>(chunk)?;
-        AlifeGraphPoint::verify(chunk);
+        let object: AlifeGraphPoint = AlifeGraphPoint::read::<T>(reader)?;
+        AlifeGraphPoint::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeSpaceRestrictor => {
-        let object: AlifeObjectSpaceRestrictor =
-          AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?;
-        AlifeObjectSpaceRestrictor::verify(chunk);
+        let object: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read::<T>(reader)?;
+        AlifeObjectSpaceRestrictor::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::SeSmartCover => {
-        let object: AlifeSmartCover = AlifeSmartCover::read_from_chunk::<T>(chunk)?;
-        AlifeSmartCover::verify(chunk);
+        let object: AlifeSmartCover = AlifeSmartCover::read::<T>(reader)?;
+        AlifeSmartCover::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeAnomalousZone => {
-        let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read_from_chunk::<T>(chunk)?;
-        AlifeObjectAnomalyZone::verify(chunk);
+        let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read::<T>(reader)?;
+        AlifeObjectAnomalyZone::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::SeZoneAnom => {
-        let object: AlifeAnomalousZone = AlifeAnomalousZone::read_from_chunk::<T>(chunk)?;
-        AlifeAnomalousZone::verify(chunk);
+        let object: AlifeAnomalousZone = AlifeAnomalousZone::read::<T>(reader)?;
+        AlifeAnomalousZone::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::SeZoneTorrid => {
-        let object: AlifeObjectTorridZone = AlifeObjectTorridZone::read_from_chunk::<T>(chunk)?;
-        AlifeObjectTorridZone::verify(chunk);
+        let object: AlifeObjectTorridZone = AlifeObjectTorridZone::read::<T>(reader)?;
+        AlifeObjectTorridZone::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::SeSmartTerrain => {
-        let object: AlifeSmartTerrain = AlifeSmartTerrain::read_from_chunk::<T>(chunk)?;
-        AlifeSmartTerrain::verify(chunk);
+        let object: AlifeSmartTerrain = AlifeSmartTerrain::read::<T>(reader)?;
+        AlifeSmartTerrain::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::SeLevelChanger => {
-        let object: AlifeLevelChanger = AlifeLevelChanger::read_from_chunk::<T>(chunk)?;
-        AlifeLevelChanger::verify(chunk);
+        let object: AlifeLevelChanger = AlifeLevelChanger::read::<T>(reader)?;
+        AlifeLevelChanger::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::SeZoneVisual => {
-        let object: AlifeZoneVisual = AlifeZoneVisual::read_from_chunk::<T>(chunk)?;
-        AlifeZoneVisual::verify(chunk);
+        let object: AlifeZoneVisual = AlifeZoneVisual::read::<T>(reader)?;
+        AlifeZoneVisual::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeObjectPhysic => {
-        let object: AlifeObjectPhysic = AlifeObjectPhysic::read_from_chunk::<T>(chunk)?;
-        AlifeObjectPhysic::verify(chunk);
+        let object: AlifeObjectPhysic = AlifeObjectPhysic::read::<T>(reader)?;
+        AlifeObjectPhysic::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeHelicopter => {
-        let object: AlifeObjectHelicopter = AlifeObjectHelicopter::read_from_chunk::<T>(chunk)?;
-        AlifeObjectHelicopter::verify(chunk);
+        let object: AlifeObjectHelicopter = AlifeObjectHelicopter::read::<T>(reader)?;
+        AlifeObjectHelicopter::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeInventoryBox => {
-        let object: AlifeObjectInventoryBox = AlifeObjectInventoryBox::read_from_chunk::<T>(chunk)?;
-        AlifeObjectInventoryBox::verify(chunk);
+        let object: AlifeObjectInventoryBox = AlifeObjectInventoryBox::read::<T>(reader)?;
+        AlifeObjectInventoryBox::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeObjectHangingLamp => {
-        let object: AlifeObjectHangingLamp = AlifeObjectHangingLamp::read_from_chunk::<T>(chunk)?;
-        AlifeObjectHangingLamp::verify(chunk);
+        let object: AlifeObjectHangingLamp = AlifeObjectHangingLamp::read::<T>(reader)?;
+        AlifeObjectHangingLamp::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItem => {
-        let object: AlifeObjectItem = AlifeObjectItem::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItem::verify(chunk);
+        let object: AlifeObjectItem = AlifeObjectItem::read::<T>(reader)?;
+        AlifeObjectItem::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemExplosive => {
-        let object: AlifeObjectItemExplosive =
-          AlifeObjectItemExplosive::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemExplosive::verify(chunk);
+        let object: AlifeObjectItemExplosive = AlifeObjectItemExplosive::read::<T>(reader)?;
+        AlifeObjectItemExplosive::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemPda => {
-        let object: AlifeObjectItemPda = AlifeObjectItemPda::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemPda::verify(chunk);
+        let object: AlifeObjectItemPda = AlifeObjectItemPda::read::<T>(reader)?;
+        AlifeObjectItemPda::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemAmmo => {
-        let object: AlifeObjectItemAmmo = AlifeObjectItemAmmo::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemAmmo::verify(chunk);
+        let object: AlifeObjectItemAmmo = AlifeObjectItemAmmo::read::<T>(reader)?;
+        AlifeObjectItemAmmo::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemGrenade => {
-        let object: AlifeObjectItemGrenade = AlifeObjectItemGrenade::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemGrenade::verify(chunk);
+        let object: AlifeObjectItemGrenade = AlifeObjectItemGrenade::read::<T>(reader)?;
+        AlifeObjectItemGrenade::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemArtefact => {
-        let object: AlifeObjectItemArtefact = AlifeObjectItemArtefact::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemArtefact::verify(chunk);
+        let object: AlifeObjectItemArtefact = AlifeObjectItemArtefact::read::<T>(reader)?;
+        AlifeObjectItemArtefact::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemWeapon => {
-        let object: AlifeObjectItemWeapon = AlifeObjectItemWeapon::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemWeapon::verify(chunk);
+        let object: AlifeObjectItemWeapon = AlifeObjectItemWeapon::read::<T>(reader)?;
+        AlifeObjectItemWeapon::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemDetector => {
-        let object: AlifeObjectItemDetector = AlifeObjectItemDetector::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemDetector::verify(chunk);
+        let object: AlifeObjectItemDetector = AlifeObjectItemDetector::read::<T>(reader)?;
+        AlifeObjectItemDetector::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemHelmet => {
-        let object: AlifeObjectItemHelmet = AlifeObjectItemHelmet::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemHelmet::verify(chunk);
+        let object: AlifeObjectItemHelmet = AlifeObjectItemHelmet::read::<T>(reader)?;
+        AlifeObjectItemHelmet::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemCustomOutfit => {
-        let object: AlifeObjectItemCustomOutfit =
-          AlifeObjectItemCustomOutfit::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemCustomOutfit::verify(chunk);
+        let object: AlifeObjectItemCustomOutfit = AlifeObjectItemCustomOutfit::read::<T>(reader)?;
+        AlifeObjectItemCustomOutfit::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemWeaponShotgun => {
-        let object: AlifeObjectItemWeaponShotgun =
-          AlifeObjectItemWeaponShotgun::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemWeaponShotgun::verify(chunk);
+        let object: AlifeObjectItemWeaponShotgun = AlifeObjectItemWeaponShotgun::read::<T>(reader)?;
+        AlifeObjectItemWeaponShotgun::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemWeaponMagazined => {
         let object: AlifeObjectItemWeaponMagazined =
-          AlifeObjectItemWeaponMagazined::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemWeaponMagazined::verify(chunk);
+          AlifeObjectItemWeaponMagazined::read::<T>(reader)?;
+        AlifeObjectItemWeaponMagazined::verify(reader);
         Ok(Box::new(object))
       }
       AlifeClass::CseAlifeItemWeaponMagazinedWGl => {
         let object: AlifeObjectItemWeaponMagazinedWgl =
-          AlifeObjectItemWeaponMagazinedWgl::read_from_chunk::<T>(chunk)?;
-        AlifeObjectItemWeaponMagazinedWgl::verify(chunk);
+          AlifeObjectItemWeaponMagazinedWgl::read::<T>(reader)?;
+        AlifeObjectItemWeaponMagazinedWgl::verify(reader);
         Ok(Box::new(object))
       }
       _ => {

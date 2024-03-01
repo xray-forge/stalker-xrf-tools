@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
 use crate::export::file_import::read_ini_field;
@@ -19,18 +19,18 @@ pub struct HeaderChunk {
 impl HeaderChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<HeaderChunk> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<HeaderChunk> {
     let header: HeaderChunk = HeaderChunk {
-      version: chunk.read_u32::<T>()?,
-      guid: chunk.read_u128::<T>()?,
-      graph_guid: chunk.read_u128::<T>()?,
-      objects_count: chunk.read_u32::<T>()?,
-      level_count: chunk.read_u32::<T>()?,
+      version: reader.read_u32::<T>()?,
+      guid: reader.read_u128::<T>()?,
+      graph_guid: reader.read_u128::<T>()?,
+      objects_count: reader.read_u32::<T>()?,
+      level_count: reader.read_u32::<T>()?,
     };
 
-    log::info!("Parsed header chunk, {:?} bytes", chunk.read_bytes_len());
+    log::info!("Parsed header chunk, {:?} bytes", reader.read_bytes_len());
 
-    assert!(chunk.is_ended(), "Expect header chunk to be ended");
+    assert!(reader.is_ended(), "Expect header chunk to be ended");
 
     Ok(header)
   }
@@ -89,7 +89,7 @@ impl HeaderChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::file::header_chunk::HeaderChunk;
   use crate::test::utils::{
@@ -103,12 +103,12 @@ mod tests {
 
   #[test]
   fn test_read_empty_chunk() -> io::Result<()> {
-    let chunk: Chunk = Chunk::from_slice(open_test_resource_as_slice(&get_test_sample_sub_dir(
-      "empty_nested_single.chunk",
-    ))?)?
+    let reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
+      &get_test_sample_sub_dir("empty_nested_single.chunk"),
+    )?)?
     .read_child_by_index(0)?;
 
-    let header: io::Result<HeaderChunk> = HeaderChunk::read_from_chunk::<SpawnByteOrder>(chunk);
+    let header: io::Result<HeaderChunk> = HeaderChunk::read::<SpawnByteOrder>(reader);
 
     assert!(header.is_err(), "Expected failure with empty chunk");
 
@@ -142,14 +142,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 52);
 
-    let chunk: Chunk = Chunk::from_slice(file)?
+    let reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      HeaderChunk::read_from_chunk::<SpawnByteOrder>(chunk)?,
-      header
-    );
+    assert_eq!(HeaderChunk::read::<SpawnByteOrder>(reader)?, header);
 
     Ok(())
   }

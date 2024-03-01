@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::NIL;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -23,9 +23,9 @@ pub enum TimeError {
 
 impl Time {
   /// Read optional time object from the chunk.
-  pub fn read_optional_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Option<Time>> {
-    if chunk.read_u8()? == 1 {
-      Ok(Some(Time::read_from_chunk::<T>(chunk)?))
+  pub fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Option<Time>> {
+    if reader.read_u8()? == 1 {
+      Ok(Some(Time::read::<T>(reader)?))
     } else {
       Ok(None)
     }
@@ -48,14 +48,14 @@ impl Time {
   }
 
   /// Read time object from chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Time> {
-    let year: u8 = chunk.read_u8()?;
-    let month: u8 = chunk.read_u8()?;
-    let day: u8 = chunk.read_u8()?;
-    let hour: u8 = chunk.read_u8()?;
-    let minute: u8 = chunk.read_u8()?;
-    let second: u8 = chunk.read_u8()?;
-    let millis: u16 = chunk.read_u16::<T>()?;
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Time> {
+    let year: u8 = reader.read_u8()?;
+    let month: u8 = reader.read_u8()?;
+    let day: u8 = reader.read_u8()?;
+    let hour: u8 = reader.read_u8()?;
+    let minute: u8 = reader.read_u8()?;
+    let second: u8 = reader.read_u8()?;
+    let millis: u16 = reader.read_u16::<T>()?;
 
     Ok(Time {
       year,
@@ -166,7 +166,7 @@ impl FromStr for Time {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::time::Time;
   use crate::test::utils::{
@@ -206,8 +206,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 8 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_time: Time = Time::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_time: Time = Time::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_time, time);
 

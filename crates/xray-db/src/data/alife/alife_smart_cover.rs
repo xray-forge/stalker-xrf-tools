@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -20,16 +20,16 @@ pub struct AlifeSmartCover {
 
 impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   /// Read smart cover data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeSmartCover> {
-    let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read_from_chunk::<T>(chunk)?;
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeSmartCover> {
+    let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read::<T>(reader)?;
 
-    let last_description: String = chunk.read_null_terminated_win_string()?;
-    let count: u8 = chunk.read_u8()?;
+    let last_description: String = reader.read_null_terminated_win_string()?;
+    let count: u8 = reader.read_u8()?;
     let mut loopholes: Vec<AlifeSmartCoverLoophole> = Vec::new();
 
     for _ in 0..count {
-      let name: String = chunk.read_null_terminated_win_string()?;
-      let enabled: u8 = chunk.read_u8()?;
+      let name: String = reader.read_null_terminated_win_string()?;
+      let enabled: u8 = reader.read_u8()?;
 
       loopholes.push(AlifeSmartCoverLoophole { name, enabled })
     }
@@ -89,7 +89,7 @@ impl AlifeObjectGeneric for AlifeSmartCover {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
@@ -155,9 +155,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 131 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectSmartCover =
-      AlifeObjectSmartCover::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectSmartCover::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

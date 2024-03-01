@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -19,11 +19,11 @@ pub struct AlifeObjectSpaceRestrictor {
 
 impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
   /// Read generic space restrictor data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSpaceRestrictor> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
-      base: AlifeObjectAbstract::read_from_chunk::<T>(chunk)?,
-      shape: chunk.read_shape_description::<SpawnByteOrder>()?,
-      restrictor_type: chunk.read_u8()?,
+      base: AlifeObjectAbstract::read::<T>(reader)?,
+      shape: reader.read_shape_description::<SpawnByteOrder>()?,
+      restrictor_type: reader.read_u8()?,
     })
   }
 
@@ -63,7 +63,7 @@ impl AlifeObjectGeneric for AlifeObjectSpaceRestrictor {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -125,9 +125,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 106 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectSpaceRestrictor =
-      AlifeObjectSpaceRestrictor::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectSpaceRestrictor::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

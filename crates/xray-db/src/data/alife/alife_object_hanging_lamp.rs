@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -39,31 +39,31 @@ pub struct AlifeObjectHangingLamp {
 
 impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
   /// Read hanging lamp data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectHangingLamp> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectHangingLamp> {
     Ok(AlifeObjectHangingLamp {
-      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
-      skeleton: AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?,
-      main_color: chunk.read_u32::<T>()?,
-      main_brightness: chunk.read_f32::<T>()?,
-      color_animator: chunk.read_null_terminated_win_string()?,
-      main_range: chunk.read_f32::<T>()?,
-      light_flags: chunk.read_u16::<T>()?,
-      startup_animation: chunk.read_null_terminated_win_string()?,
-      fixed_bones: chunk.read_null_terminated_win_string()?,
-      health: chunk.read_f32::<T>()?,
-      virtual_size: chunk.read_f32::<T>()?,
-      ambient_radius: chunk.read_f32::<T>()?,
-      ambient_power: chunk.read_f32::<T>()?,
-      ambient_texture: chunk.read_null_terminated_win_string()?,
-      light_texture: chunk.read_null_terminated_win_string()?,
-      light_bone: chunk.read_null_terminated_win_string()?,
-      spot_cone_angle: chunk.read_f32::<T>()?,
-      glow_texture: chunk.read_null_terminated_win_string()?,
-      glow_radius: chunk.read_f32::<T>()?,
-      light_ambient_bone: chunk.read_null_terminated_win_string()?,
-      volumetric_quality: chunk.read_f32::<T>()?,
-      volumetric_intensity: chunk.read_f32::<T>()?,
-      volumetric_distance: chunk.read_f32::<T>()?,
+      base: AlifeObjectDynamicVisual::read::<T>(reader)?,
+      skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
+      main_color: reader.read_u32::<T>()?,
+      main_brightness: reader.read_f32::<T>()?,
+      color_animator: reader.read_null_terminated_win_string()?,
+      main_range: reader.read_f32::<T>()?,
+      light_flags: reader.read_u16::<T>()?,
+      startup_animation: reader.read_null_terminated_win_string()?,
+      fixed_bones: reader.read_null_terminated_win_string()?,
+      health: reader.read_f32::<T>()?,
+      virtual_size: reader.read_f32::<T>()?,
+      ambient_radius: reader.read_f32::<T>()?,
+      ambient_power: reader.read_f32::<T>()?,
+      ambient_texture: reader.read_null_terminated_win_string()?,
+      light_texture: reader.read_null_terminated_win_string()?,
+      light_bone: reader.read_null_terminated_win_string()?,
+      spot_cone_angle: reader.read_f32::<T>()?,
+      glow_texture: reader.read_null_terminated_win_string()?,
+      glow_radius: reader.read_f32::<T>()?,
+      light_ambient_bone: reader.read_null_terminated_win_string()?,
+      volumetric_quality: reader.read_f32::<T>()?,
+      volumetric_intensity: reader.read_f32::<T>()?,
+      volumetric_distance: reader.read_f32::<T>()?,
     })
   }
 
@@ -168,7 +168,7 @@ impl AlifeObjectGeneric for AlifeObjectHangingLamp {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -246,9 +246,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 234 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectHangingLamp =
-      AlifeObjectHangingLamp::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectHangingLamp::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

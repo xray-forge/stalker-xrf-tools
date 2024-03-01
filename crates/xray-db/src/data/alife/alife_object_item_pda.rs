@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -19,12 +19,12 @@ pub struct AlifeObjectItemPda {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
   /// Read pda object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemPda> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectItemPda> {
     Ok(AlifeObjectItemPda {
-      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
-      owner: chunk.read_u16::<SpawnByteOrder>()?,
-      character: chunk.read_null_terminated_win_string()?,
-      info_portion: chunk.read_null_terminated_win_string()?,
+      base: AlifeObjectItem::read::<T>(reader)?,
+      owner: reader.read_u16::<SpawnByteOrder>()?,
+      character: reader.read_null_terminated_win_string()?,
+      info_portion: reader.read_null_terminated_win_string()?,
     })
   }
 
@@ -67,7 +67,7 @@ impl AlifeObjectGeneric for AlifeObjectItemPda {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -126,9 +126,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 78 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectItemPda =
-      AlifeObjectItemPda::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeObjectItemPda = AlifeObjectItemPda::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -28,20 +28,20 @@ pub struct AlifeLevelChanger {
 
 impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
   /// Read alife level changer object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeLevelChanger> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeLevelChanger> {
     let object: AlifeLevelChanger = AlifeLevelChanger {
-      base: AlifeObjectSpaceRestrictor::read_from_chunk::<T>(chunk)?,
-      dest_game_vertex_id: chunk.read_u16::<T>()?,
-      dest_level_vertex_id: chunk.read_u32::<T>()?,
-      dest_position: chunk.read_f32_3d_vector::<T>()?,
-      dest_direction: chunk.read_f32_3d_vector::<T>()?,
-      angle_y: chunk.read_f32::<T>()?,
-      dest_level_name: chunk.read_null_terminated_win_string()?,
-      dest_graph_point: chunk.read_null_terminated_win_string()?,
-      silent_mode: chunk.read_u8()?,
-      enabled: chunk.read_u8()?,
-      hint: chunk.read_null_terminated_win_string()?,
-      save_marker: chunk.read_u16::<T>()?,
+      base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
+      dest_game_vertex_id: reader.read_u16::<T>()?,
+      dest_level_vertex_id: reader.read_u32::<T>()?,
+      dest_position: reader.read_f32_3d_vector::<T>()?,
+      dest_direction: reader.read_f32_3d_vector::<T>()?,
+      angle_y: reader.read_f32::<T>()?,
+      dest_level_name: reader.read_null_terminated_win_string()?,
+      dest_graph_point: reader.read_null_terminated_win_string()?,
+      silent_mode: reader.read_u8()?,
+      enabled: reader.read_u8()?,
+      hint: reader.read_null_terminated_win_string()?,
+      save_marker: reader.read_u16::<T>()?,
     };
 
     assert_eq!(
@@ -119,7 +119,7 @@ impl AlifeObjectGeneric for AlifeLevelChanger {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_level_changer::AlifeLevelChanger;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
@@ -191,9 +191,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 177 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeLevelChanger =
-      AlifeLevelChanger::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeLevelChanger = AlifeLevelChanger::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

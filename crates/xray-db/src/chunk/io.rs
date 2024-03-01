@@ -1,16 +1,16 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use bytes::Bytes;
 use fileslice::FileSlice;
-use parquet::file::reader::{ChunkReader, Length};
+use parquet::file::reader::{ChunkReader as ParquetChunkReader, Length};
 use std::io::Read;
 
-impl Length for Chunk {
+impl Length for ChunkReader {
   fn len(&self) -> u64 {
     self.file.end_pos() - self.file.start_pos()
   }
 }
 
-impl ChunkReader for Chunk {
+impl ParquetChunkReader for ChunkReader {
   type T = FileSlice;
 
   fn get_read(&self, start: u64) -> parquet::errors::Result<FileSlice> {
@@ -27,7 +27,7 @@ impl ChunkReader for Chunk {
   }
 }
 
-impl Read for Chunk {
+impl Read for ChunkReader {
   fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
     self.file.read(buf)
   }

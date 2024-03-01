@@ -1,5 +1,5 @@
-use crate::chunk::chunk::Chunk;
 use crate::chunk::constants::CFS_COMPRESS_MARK;
+use crate::chunk::reader::ChunkReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
@@ -10,24 +10,24 @@ use std::io::{Seek, SeekFrom};
 #[derive(Debug)]
 pub struct ChunkIterator<'lifetime> {
   pub index: u32,
-  pub chunk: &'lifetime mut Chunk,
+  pub reader: &'lifetime mut ChunkReader,
 }
 
 impl<'lifetime> ChunkIterator<'lifetime> {
-  pub fn new(chunk: &mut Chunk) -> ChunkIterator {
-    chunk.file.seek(SeekFrom::Start(0)).unwrap();
+  pub fn new(reader: &mut ChunkReader) -> ChunkIterator {
+    reader.file.seek(SeekFrom::Start(0)).unwrap();
 
-    ChunkIterator { index: 0, chunk }
+    ChunkIterator { index: 0, reader }
   }
 }
 
 /// Iterates over chunk and read child samples.
 impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
-  type Item = Chunk;
+  type Item = ChunkReader;
 
-  fn next(&mut self) -> Option<Chunk> {
-    let chunk_type = self.chunk.read_u32::<SpawnByteOrder>();
-    let chunk_size = self.chunk.read_u32::<SpawnByteOrder>();
+  fn next(&mut self) -> Option<ChunkReader> {
+    let chunk_type = self.reader.read_u32::<SpawnByteOrder>();
+    let chunk_size = self.reader.read_u32::<SpawnByteOrder>();
 
     if chunk_type.is_err() || chunk_size.is_err() {
       return None;
@@ -37,29 +37,29 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
     let chunk_size: u32 = chunk_size.unwrap();
 
     if self.index == chunk_id {
-      let position: u64 = self.chunk.file.stream_position().unwrap();
+      let position: u64 = self.reader.file.stream_position().unwrap();
       let mut file: FileSlice = self
-        .chunk
+        .reader
         .file
         .slice(position..(position + chunk_size as u64));
 
       file.seek(SeekFrom::Start(0)).unwrap();
 
-      let chunk = Chunk {
+      let reader: ChunkReader = ChunkReader {
         index: chunk_id,
         is_compressed: chunk_id & CFS_COMPRESS_MARK == 1,
         size: chunk_size as u64,
-        position: self.chunk.file.stream_position().unwrap(),
+        position: self.reader.file.stream_position().unwrap(),
         file: Box::new(file),
       };
 
-      if chunk.is_compressed {
+      if reader.is_compressed {
         panic!("Parsing not implemented compressed chunk");
       }
 
       // Rewind for next iteration.
       self
-        .chunk
+        .reader
         .file
         .seek(SeekFrom::Current(chunk_size as i64))
         .unwrap();
@@ -67,7 +67,7 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
       // Iterate to next item.
       self.index += 1;
 
-      Some(chunk)
+      Some(reader)
     } else {
       None
     }
@@ -79,52 +79,52 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
 pub struct ChunkSizePackedIterator<'lifetime> {
   pub index: u32,
   pub next_seek: u64,
-  pub chunk: &'lifetime mut Chunk,
+  pub reader: &'lifetime mut ChunkReader,
 }
 
 impl<'lifetime> ChunkSizePackedIterator<'lifetime> {
-  pub fn new(chunk: &mut Chunk) -> ChunkSizePackedIterator {
+  pub fn new(reader: &mut ChunkReader) -> ChunkSizePackedIterator {
     ChunkSizePackedIterator {
       index: 0,
-      next_seek: chunk.file.stream_position().unwrap(),
-      chunk,
+      next_seek: reader.file.stream_position().unwrap(),
+      reader,
     }
   }
 }
 
 impl<'lifetime> Iterator for ChunkSizePackedIterator<'lifetime> {
-  type Item = Chunk;
+  type Item = ChunkReader;
 
-  fn next(&mut self) -> Option<Chunk> {
-    let current: u64 = self.chunk.file.stream_position().unwrap();
+  fn next(&mut self) -> Option<ChunkReader> {
+    let current: u64 = self.reader.file.stream_position().unwrap();
 
     if current > self.next_seek {
       panic!("Unexpected iteration over chunk packed data, previous iteration moved seek too far")
-    } else if self.chunk.is_ended() {
+    } else if self.reader.is_ended() {
       return None;
     }
 
     let current: u64 = self.next_seek;
 
-    self.chunk.file.seek(SeekFrom::Start(current)).unwrap();
+    self.reader.file.seek(SeekFrom::Start(current)).unwrap();
 
-    let chunk_size: u32 = self.chunk.read_u32::<SpawnByteOrder>().unwrap();
+    let chunk_size: u32 = self.reader.read_u32::<SpawnByteOrder>().unwrap();
 
     self.index += 1;
     self.next_seek = self
-      .chunk
+      .reader
       .file
       .seek(SeekFrom::Start(current + chunk_size as u64))
       .unwrap();
 
-    Some(Chunk {
+    Some(ChunkReader {
       index: self.index,
       is_compressed: false,
       size: chunk_size as u64,
-      position: self.chunk.file.stream_position().unwrap(),
+      position: self.reader.file.stream_position().unwrap(),
       file: Box::new(
         self
-          .chunk
+          .reader
           .file
           .slice(current + 4..(current + chunk_size as u64)),
       ),

@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -15,9 +15,9 @@ pub struct AlifeObjectMotion {
 
 impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
   /// Read motion object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectMotion> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectMotion> {
     Ok(AlifeObjectMotion {
-      motion_name: chunk.read_null_terminated_win_string()?,
+      motion_name: reader.read_null_terminated_win_string()?,
     })
   }
 
@@ -49,7 +49,7 @@ impl AlifeObjectGeneric for AlifeObjectMotion {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -85,9 +85,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 12 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectMotion =
-      AlifeObjectMotion::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeObjectMotion = AlifeObjectMotion::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

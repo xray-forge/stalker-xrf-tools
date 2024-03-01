@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -21,14 +21,14 @@ pub struct AlifeGraphPoint {
 
 impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   /// Read graph point data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeGraphPoint> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeGraphPoint> {
     Ok(AlifeGraphPoint {
-      connection_point_name: chunk.read_null_terminated_win_string()?,
-      connection_level_name: chunk.read_null_terminated_win_string()?,
-      location0: chunk.read_u8()?,
-      location1: chunk.read_u8()?,
-      location2: chunk.read_u8()?,
-      location3: chunk.read_u8()?,
+      connection_point_name: reader.read_null_terminated_win_string()?,
+      connection_level_name: reader.read_null_terminated_win_string()?,
+      location0: reader.read_u8()?,
+      location1: reader.read_u8()?,
+      location2: reader.read_u8()?,
+      location3: reader.read_u8()?,
     })
   }
 
@@ -75,7 +75,7 @@ impl AlifeObjectGeneric for AlifeGraphPoint {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_graph_point::AlifeGraphPoint;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -116,9 +116,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 26 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeGraphPoint =
-      AlifeGraphPoint::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeGraphPoint = AlifeGraphPoint::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

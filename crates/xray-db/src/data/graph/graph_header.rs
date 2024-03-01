@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -17,14 +17,14 @@ pub struct GraphHeader {
 
 impl GraphHeader {
   /// Read header data from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphHeader> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphHeader> {
     Ok(GraphHeader {
-      version: chunk.read_u8()?,
-      vertex_count: chunk.read_u16::<T>()?,
-      edges_count: chunk.read_u32::<T>()?,
-      point_count: chunk.read_u32::<T>()?,
-      guid: chunk.read_u128::<T>()?,
-      level_count: chunk.read_u8()?,
+      version: reader.read_u8()?,
+      vertex_count: reader.read_u16::<T>()?,
+      edges_count: reader.read_u32::<T>()?,
+      point_count: reader.read_u32::<T>()?,
+      guid: reader.read_u128::<T>()?,
+      level_count: reader.read_u8()?,
     })
   }
 
@@ -71,7 +71,7 @@ impl GraphHeader {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_header::GraphHeader;
   use crate::test::utils::{
@@ -111,11 +111,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_header: GraphHeader = GraphHeader::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_header: GraphHeader = GraphHeader::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_header, header);
 

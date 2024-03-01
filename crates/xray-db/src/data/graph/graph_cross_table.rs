@@ -1,5 +1,5 @@
-use crate::chunk::chunk::Chunk;
 use crate::chunk::iterator::ChunkSizePackedIterator;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use std::fs::File;
@@ -18,13 +18,11 @@ pub struct GraphCrossTable {
 
 impl GraphCrossTable {
   /// Read cross tables list data from the chunk.
-  pub fn read_list_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<Vec<GraphCrossTable>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<GraphCrossTable>> {
     let mut cross_tables: Vec<GraphCrossTable> = Vec::new();
 
-    for mut cross_table_chunk in ChunkSizePackedIterator::new(chunk) {
-      cross_tables.push(GraphCrossTable::read_from_chunk::<T>(
-        &mut cross_table_chunk,
-      )?);
+    for mut cross_table_chunk in ChunkSizePackedIterator::new(reader) {
+      cross_tables.push(GraphCrossTable::read::<T>(&mut cross_table_chunk)?);
 
       assert!(
         cross_table_chunk.is_ended(),
@@ -36,13 +34,13 @@ impl GraphCrossTable {
   }
 
   /// Read cross table data from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphCrossTable> {
-    let version: u32 = chunk.read_u32::<T>()?;
-    let nodes_count: u32 = chunk.read_u32::<T>()?;
-    let vertex_count: u32 = chunk.read_u32::<T>()?;
-    let level_guid: u128 = chunk.read_u128::<T>()?;
-    let game_guid: u128 = chunk.read_u128::<T>()?;
-    let data: Vec<u8> = chunk.read_bytes(chunk.read_bytes_remain() as usize)?;
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphCrossTable> {
+    let version: u32 = reader.read_u32::<T>()?;
+    let nodes_count: u32 = reader.read_u32::<T>()?;
+    let vertex_count: u32 = reader.read_u32::<T>()?;
+    let level_guid: u128 = reader.read_u128::<T>()?;
+    let game_guid: u128 = reader.read_u128::<T>()?;
+    let data: Vec<u8> = reader.read_bytes(reader.read_bytes_remain() as usize)?;
 
     Ok(GraphCrossTable {
       version,
@@ -87,13 +85,11 @@ impl GraphCrossTable {
   pub fn import_list<T: ByteOrder>(file: File) -> io::Result<Vec<GraphCrossTable>> {
     let mut cross_tables: Vec<GraphCrossTable> = Vec::new();
 
-    for mut cross_table_chunk in ChunkSizePackedIterator::new(&mut Chunk::from_file(file)?) {
-      cross_tables.push(GraphCrossTable::read_from_chunk::<T>(
-        &mut cross_table_chunk,
-      )?);
+    for mut cross_table_reader in ChunkSizePackedIterator::new(&mut ChunkReader::from_file(file)?) {
+      cross_tables.push(GraphCrossTable::read::<T>(&mut cross_table_reader)?);
 
       assert!(
-        cross_table_chunk.is_ended(),
+        cross_table_reader.is_ended(),
         "Expect cross table chunk to be ended"
       );
     }
@@ -124,7 +120,7 @@ impl GraphCrossTable {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
   use crate::test::utils::{
@@ -164,12 +160,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 55 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_cross_table: GraphCrossTable =
-      GraphCrossTable::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_cross_table: GraphCrossTable = GraphCrossTable::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_cross_table, cross_table);
 

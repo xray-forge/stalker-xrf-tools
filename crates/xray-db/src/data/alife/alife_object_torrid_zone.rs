@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -20,11 +20,11 @@ pub struct AlifeObjectTorridZone {
 
 impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
   /// Read zone object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectTorridZone> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectTorridZone> {
     Ok(AlifeObjectTorridZone {
-      base: AlifeObjectCustomZone::read_from_chunk::<T>(chunk)?,
-      motion: AlifeObjectMotion::read_from_chunk::<T>(chunk)?,
-      last_spawn_time: Time::read_optional_from_chunk::<T>(chunk)?,
+      base: AlifeObjectCustomZone::read::<T>(reader)?,
+      motion: AlifeObjectMotion::read::<T>(reader)?,
+      last_spawn_time: Time::read_optional::<T>(reader)?,
     })
   }
 
@@ -68,7 +68,7 @@ impl AlifeObjectGeneric for AlifeObjectTorridZone {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
@@ -141,9 +141,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 81 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectTorridZone =
-      AlifeObjectTorridZone::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectTorridZone::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

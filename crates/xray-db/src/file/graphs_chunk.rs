@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::graph::graph_cross_table::GraphCrossTable;
 use crate::data::graph::graph_edge::GraphEdge;
@@ -27,37 +27,36 @@ pub struct GraphsChunk {
 
 impl GraphsChunk {
   /// Read graphs chunk by position descriptor.
-  pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<GraphsChunk> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<GraphsChunk> {
     let mut levels: Vec<GraphLevel> = Vec::new();
     let mut vertices: Vec<GraphVertex> = Vec::new();
     let mut edges: Vec<GraphEdge> = Vec::new();
     let mut points: Vec<GraphLevelPoint> = Vec::new();
 
-    let header: GraphHeader = GraphHeader::read_from_chunk::<T>(&mut chunk)?;
+    let header: GraphHeader = GraphHeader::read::<T>(&mut reader)?;
 
     for _ in 0..header.level_count {
-      levels.push(GraphLevel::read_from_chunk::<T>(&mut chunk)?)
+      levels.push(GraphLevel::read::<T>(&mut reader)?)
     }
 
     for _ in 0..header.vertex_count {
-      vertices.push(GraphVertex::read_from_chunk::<T>(&mut chunk)?);
+      vertices.push(GraphVertex::read::<T>(&mut reader)?);
     }
 
     for _ in 0..header.edges_count {
-      edges.push(GraphEdge::read_from_chunk::<T>(&mut chunk)?);
+      edges.push(GraphEdge::read::<T>(&mut reader)?);
     }
 
     for _ in 0..header.point_count {
-      points.push(GraphLevelPoint::read_from_chunk::<T>(&mut chunk)?);
+      points.push(GraphLevelPoint::read::<T>(&mut reader)?);
     }
 
-    let cross_tables: Vec<GraphCrossTable> =
-      GraphCrossTable::read_list_from_chunk::<T>(&mut chunk)?;
+    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::read_list::<T>(&mut reader)?;
 
     log::info!(
       "Parsed graphs ver {:?}, {:?} bytes",
       header.version,
-      chunk.read_bytes_len(),
+      reader.read_bytes_len(),
     );
 
     assert_eq!(levels.len(), header.level_count as usize);
@@ -65,7 +64,7 @@ impl GraphsChunk {
     assert_eq!(edges.len(), header.edges_count as usize);
     assert_eq!(points.len(), header.point_count as usize);
     assert_eq!(cross_tables.len(), header.level_count as usize);
-    assert!(chunk.is_ended(), "Expect graphs chunk to be ended");
+    assert!(reader.is_ended(), "Expect graphs chunk to be ended");
 
     Ok(GraphsChunk {
       header,
@@ -243,7 +242,7 @@ impl fmt::Debug for GraphsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
   use crate::data::graph::graph_edge::GraphEdge;
@@ -296,11 +295,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
-    let chunk: Chunk = Chunk::from_slice(file)?
+    let reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: GraphsChunk = GraphsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
+    let read_graphs_chunk: GraphsChunk = GraphsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_graphs_chunk, graphs_chunk);
 
@@ -431,11 +430,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
-    let chunk: Chunk = Chunk::from_slice(file)?
+    let reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: GraphsChunk = GraphsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
+    let read_graphs_chunk: GraphsChunk = GraphsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_graphs_chunk, graphs_chunk);
 

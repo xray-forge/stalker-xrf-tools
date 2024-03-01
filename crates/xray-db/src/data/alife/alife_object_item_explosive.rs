@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
@@ -15,9 +15,9 @@ pub struct AlifeObjectItemExplosive {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemExplosive> for AlifeObjectItemExplosive {
   /// Read alife item object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectItemExplosive> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectItemExplosive> {
     Ok(AlifeObjectItemExplosive {
-      base: AlifeObjectItem::read_from_chunk::<T>(chunk)?,
+      base: AlifeObjectItem::read::<T>(reader)?,
     })
   }
 
@@ -46,7 +46,7 @@ impl AlifeObjectGeneric for AlifeObjectItemExplosive {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -103,9 +103,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 50 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectItemExplosive =
-      AlifeObjectItemExplosive::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectItemExplosive::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

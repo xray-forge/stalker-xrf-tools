@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
@@ -15,11 +15,11 @@ pub struct ArtefactSpawnPoint {
 
 impl ArtefactSpawnPoint {
   /// Read artefact spawn point from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<ArtefactSpawnPoint> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ArtefactSpawnPoint> {
     Ok(ArtefactSpawnPoint {
-      position: chunk.read_f32_3d_vector::<T>()?,
-      level_vertex_id: chunk.read_u32::<T>()?,
-      distance: chunk.read_f32::<T>()?,
+      position: reader.read_f32_3d_vector::<T>()?,
+      level_vertex_id: reader.read_u32::<T>()?,
+      distance: reader.read_f32::<T>()?,
     })
   }
 
@@ -53,7 +53,7 @@ impl ArtefactSpawnPoint {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
@@ -89,12 +89,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 20 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_point: ArtefactSpawnPoint =
-      ArtefactSpawnPoint::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_point: ArtefactSpawnPoint = ArtefactSpawnPoint::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_point, point);
 

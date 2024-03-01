@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 
 use crate::data::vector_3d::Vector3d;
@@ -24,17 +24,17 @@ pub struct GraphVertex {
 
 impl GraphVertex {
   /// Read graph vertex data from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<GraphVertex> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphVertex> {
     Ok(GraphVertex {
-      level_point: chunk.read_f32_3d_vector::<T>()?,
-      game_point: chunk.read_f32_3d_vector::<T>()?,
-      level_id: chunk.read_u8()?,
-      level_vertex_id: chunk.read_u24::<T>()?,
-      vertex_type: chunk.read_u32_bytes()?,
-      edge_offset: chunk.read_u32::<T>()?,
-      level_point_offset: chunk.read_u32::<T>()?,
-      edge_count: chunk.read_u8()?,
-      level_point_count: chunk.read_u8()?,
+      level_point: reader.read_f32_3d_vector::<T>()?,
+      game_point: reader.read_f32_3d_vector::<T>()?,
+      level_id: reader.read_u8()?,
+      level_vertex_id: reader.read_u24::<T>()?,
+      vertex_type: reader.read_u32_bytes()?,
+      edge_offset: reader.read_u32::<T>()?,
+      level_point_offset: reader.read_u32::<T>()?,
+      edge_count: reader.read_u8()?,
+      level_point_count: reader.read_u8()?,
     })
   }
 
@@ -98,7 +98,7 @@ impl GraphVertex {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::data::vector_3d::Vector3d;
@@ -142,11 +142,11 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 42 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_vertex: GraphVertex = GraphVertex::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let read_vertex: GraphVertex = GraphVertex::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_vertex, vertex);
 

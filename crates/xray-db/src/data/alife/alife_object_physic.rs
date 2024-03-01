@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -21,13 +21,13 @@ pub struct AlifeObjectPhysic {
 
 impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
   /// Read alife physic object from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectPhysic> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectPhysic> {
     Ok(AlifeObjectPhysic {
-      base: AlifeObjectDynamicVisual::read_from_chunk::<T>(chunk)?,
-      skeleton: AlifeObjectSkeleton::read_from_chunk::<T>(chunk)?,
-      physic_type: chunk.read_u32::<SpawnByteOrder>()?,
-      mass: chunk.read_f32::<SpawnByteOrder>()?,
-      fixed_bones: chunk.read_null_terminated_win_string()?,
+      base: AlifeObjectDynamicVisual::read::<T>(reader)?,
+      skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
+      physic_type: reader.read_u32::<SpawnByteOrder>()?,
+      mass: reader.read_f32::<SpawnByteOrder>()?,
+      fixed_bones: reader.read_null_terminated_win_string()?,
     })
   }
 
@@ -73,7 +73,7 @@ impl AlifeObjectGeneric for AlifeObjectPhysic {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -133,9 +133,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 88 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectPhysic =
-      AlifeObjectPhysic::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeObjectPhysic = AlifeObjectPhysic::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

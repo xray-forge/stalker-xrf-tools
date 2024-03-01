@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
 use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
@@ -16,20 +16,20 @@ pub struct PatrolsChunk {
 
 impl PatrolsChunk {
   /// Read patrols list from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(mut chunk: Chunk) -> io::Result<PatrolsChunk> {
-    let mut meta_chunk: Chunk = chunk.read_child_by_index(0)?;
-    let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<PatrolsChunk> {
+    let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
+    let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
-    let count: u32 = meta_chunk.read_u32::<T>()?;
-    let patrols: Vec<Patrol> = Patrol::read_list_from_chunk::<T>(&mut data_chunk, count)?;
+    let count: u32 = meta_reader.read_u32::<T>()?;
+    let patrols: Vec<Patrol> = Patrol::read_list::<T>(&mut data_reader, count)?;
 
     assert_eq!(count, patrols.len() as u32);
 
-    assert!(meta_chunk.is_ended());
-    assert!(data_chunk.is_ended());
-    assert!(chunk.is_ended());
+    assert!(meta_reader.is_ended());
+    assert!(data_reader.is_ended());
+    assert!(reader.is_ended());
 
-    log::info!("Parsed patrols, bytes {:?}", chunk.read_bytes_len());
+    log::info!("Parsed patrols, bytes {:?}", reader.read_bytes_len());
 
     Ok(PatrolsChunk { patrols })
   }
@@ -121,7 +121,7 @@ impl fmt::Debug for PatrolsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol::Patrol;
   use crate::data::patrol::patrol_link::PatrolLink;
@@ -205,8 +205,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 450 + 8);
 
-    let chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrols_chunk: PatrolsChunk = PatrolsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
+    let reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_patrols_chunk: PatrolsChunk = PatrolsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_patrols_chunk, patrols_chunk);
 

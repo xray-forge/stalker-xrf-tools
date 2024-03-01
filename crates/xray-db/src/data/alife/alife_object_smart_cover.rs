@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
@@ -24,16 +24,16 @@ pub struct AlifeObjectSmartCover {
 
 impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
   /// Read smart cover object data from the chunk.
-  fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectSmartCover> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectSmartCover> {
     Ok(AlifeObjectSmartCover {
-      base: AlifeObjectDynamic::read_from_chunk::<T>(chunk)?,
-      shape: chunk.read_shape_description::<SpawnByteOrder>()?,
-      description: chunk.read_null_terminated_win_string()?,
-      hold_position_time: chunk.read_f32::<SpawnByteOrder>()?,
-      enter_min_enemy_distance: chunk.read_f32::<SpawnByteOrder>()?,
-      exit_min_enemy_distance: chunk.read_f32::<SpawnByteOrder>()?,
-      is_combat_cover: chunk.read_u8()?,
-      can_fire: chunk.read_u8()?,
+      base: AlifeObjectDynamic::read::<T>(reader)?,
+      shape: reader.read_shape_description::<SpawnByteOrder>()?,
+      description: reader.read_null_terminated_win_string()?,
+      hold_position_time: reader.read_f32::<SpawnByteOrder>()?,
+      enter_min_enemy_distance: reader.read_f32::<SpawnByteOrder>()?,
+      exit_min_enemy_distance: reader.read_f32::<SpawnByteOrder>()?,
+      is_combat_cover: reader.read_u8()?,
+      can_fire: reader.read_u8()?,
     })
   }
 
@@ -99,7 +99,7 @@ impl AlifeObjectGeneric for AlifeObjectSmartCover {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
@@ -165,9 +165,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 136 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectSmartCover =
-      AlifeObjectSmartCover::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+      AlifeObjectSmartCover::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

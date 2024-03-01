@@ -1,4 +1,4 @@
-use crate::chunk::chunk::Chunk;
+use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
@@ -43,40 +43,40 @@ pub struct AlifeObjectBase {
 
 impl AlifeObjectBase {
   /// Read generic alife object data from the chunk.
-  pub fn read_from_chunk<T: ByteOrder>(chunk: &mut Chunk) -> io::Result<AlifeObjectBase> {
-    let mut index_chunk: Chunk = chunk.read_child_by_index(0)?;
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectBase> {
+    let mut index_reader: ChunkReader = reader.read_child_by_index(0)?;
 
-    let index: u16 = index_chunk.read_u16::<T>()?;
+    let index: u16 = index_reader.read_u16::<T>()?;
 
-    let mut data_chunk: Chunk = chunk.read_child_by_index(1)?;
-    let mut spawn_chunk: Chunk = data_chunk.read_child_by_index(0)?;
-    let mut update_chunk: Chunk = data_chunk.read_child_by_index(1)?;
+    let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
+    let mut spawn_reader: ChunkReader = data_reader.read_child_by_index(0)?;
+    let mut update_reader: ChunkReader = data_reader.read_child_by_index(1)?;
 
-    let data_length: u16 = spawn_chunk.read_u16::<T>()?;
+    let data_length: u16 = spawn_reader.read_u16::<T>()?;
 
-    assert_eq!(data_length as u64 + 2, spawn_chunk.size);
+    assert_eq!(data_length as u64 + 2, spawn_reader.size);
 
-    let net_action: u16 = spawn_chunk.read_u16::<T>()?;
+    let net_action: u16 = spawn_reader.read_u16::<T>()?;
 
     assert_eq!(net_action, NET_ACTION_SPAWN);
 
-    let section: String = spawn_chunk.read_null_terminated_win_string()?;
+    let section: String = spawn_reader.read_null_terminated_win_string()?;
     let clsid: ClsId = ClsId::from_section(&section);
     let class: AlifeClass = AlifeClass::from_cls_id(&clsid);
-    let name: String = spawn_chunk.read_null_terminated_win_string()?;
-    let script_game_id: u8 = spawn_chunk.read_u8()?;
-    let script_rp: u8 = spawn_chunk.read_u8()?;
-    let position: Vector3d = spawn_chunk.read_f32_3d_vector::<T>()?;
-    let direction: Vector3d = spawn_chunk.read_f32_3d_vector::<T>()?;
-    let respawn_time: u16 = spawn_chunk.read_u16::<T>()?;
-    let id: u16 = spawn_chunk.read_u16::<T>()?;
-    let parent_id: u16 = spawn_chunk.read_u16::<T>()?;
-    let phantom_id: u16 = spawn_chunk.read_u16::<T>()?;
-    let script_flags: u16 = spawn_chunk.read_u16::<T>()?;
+    let name: String = spawn_reader.read_null_terminated_win_string()?;
+    let script_game_id: u8 = spawn_reader.read_u8()?;
+    let script_rp: u8 = spawn_reader.read_u8()?;
+    let position: Vector3d = spawn_reader.read_f32_3d_vector::<T>()?;
+    let direction: Vector3d = spawn_reader.read_f32_3d_vector::<T>()?;
+    let respawn_time: u16 = spawn_reader.read_u16::<T>()?;
+    let id: u16 = spawn_reader.read_u16::<T>()?;
+    let parent_id: u16 = spawn_reader.read_u16::<T>()?;
+    let phantom_id: u16 = spawn_reader.read_u16::<T>()?;
+    let script_flags: u16 = spawn_reader.read_u16::<T>()?;
     let version: u16 = if script_flags & FLAG_SPAWN_DESTROY_ON_SPAWN == 0 {
       0
     } else {
-      spawn_chunk.read_u16::<T>()?
+      spawn_reader.read_u16::<T>()?
     };
 
     assert!(
@@ -84,38 +84,39 @@ impl AlifeObjectBase {
       "Unexpected version of alife object in spawn file, flag is {script_flags}"
     );
 
-    let game_type: u16 = spawn_chunk.read_u16::<T>()?;
-    let script_version: u16 = spawn_chunk.read_u16::<T>()?;
-    let client_data_size: u16 = spawn_chunk.read_u16::<T>()?;
+    let game_type: u16 = spawn_reader.read_u16::<T>()?;
+    let script_version: u16 = spawn_reader.read_u16::<T>()?;
+    let client_data_size: u16 = spawn_reader.read_u16::<T>()?;
 
     assert_eq!(client_data_size, 0); // Or read client data?
 
-    let spawn_id: u16 = spawn_chunk.read_u16::<T>()?;
-    let inherited_size: u16 = spawn_chunk.read_u16::<T>()?;
+    let spawn_id: u16 = spawn_reader.read_u16::<T>()?;
+    let inherited_size: u16 = spawn_reader.read_u16::<T>()?;
 
     assert_eq!(
       inherited_size as u64 - 2,
-      spawn_chunk.end_pos() - spawn_chunk.cursor_pos()
+      spawn_reader.end_pos() - spawn_reader.cursor_pos()
     );
 
     assert_ne!(class, AlifeClass::Unknown);
 
     let inherited: Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>> =
-      AlifeClass::read_by_class::<T>(&mut spawn_chunk, &class)?;
+      AlifeClass::read_by_class::<T>(&mut spawn_reader, &class)?;
 
-    let update_data_length: u16 = update_chunk.file.read_u16::<T>()?;
-    let update_size: u16 = update_chunk.file.read_u16::<T>()?;
+    let update_data_length: u16 = update_reader.file.read_u16::<T>()?;
+    let update_size: u16 = update_reader.file.read_u16::<T>()?;
 
-    assert_eq!(update_data_length as u64 + 2, update_chunk.size);
+    assert_eq!(update_data_length as u64 + 2, update_reader.size);
     assert_eq!(update_size, 0);
 
-    let update_data: Vec<u8> = update_chunk.read_bytes(update_chunk.read_bytes_remain() as usize)?;
+    let update_data: Vec<u8> =
+      update_reader.read_bytes(update_reader.read_bytes_remain() as usize)?;
 
-    assert!(index_chunk.is_ended());
-    assert!(data_chunk.is_ended());
-    assert!(spawn_chunk.is_ended());
-    assert!(update_chunk.is_ended());
-    assert!(chunk.is_ended());
+    assert!(index_reader.is_ended());
+    assert!(data_reader.is_ended());
+    assert!(spawn_reader.is_ended());
+    assert!(update_reader.is_ended());
+    assert!(reader.is_ended());
 
     Ok(AlifeObjectBase {
       index,
@@ -270,7 +271,7 @@ impl AlifeObjectBase {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::chunk::Chunk;
+  use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -349,9 +350,8 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 203 + 8);
 
-    let mut chunk: Chunk = Chunk::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectBase =
-      AlifeObjectBase::read_from_chunk::<SpawnByteOrder>(&mut chunk)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_object: AlifeObjectBase = AlifeObjectBase::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object.index, object.index);
     assert_eq!(read_object.id, object.id);
