@@ -6,8 +6,9 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
-use crate::export::file_export::{create_export_file, export_ini_to_file};
-use crate::export::file_import::{open_binary_file, open_ini_config};
+use crate::export::file::{
+  create_export_file, export_ini_to_file, open_binary_file, open_ini_config,
+};
 use byteorder::ByteOrder;
 use ini::Ini;
 use std::path::Path;
@@ -174,6 +175,8 @@ impl GraphsChunk {
       &mut create_export_file(&path.join("graphs_levels.ltx"))?,
     )?;
 
+    log::info!("Exported graph levels");
+
     let mut graphs_vertices_config: Ini = Ini::new();
 
     for (index, vertex) in self.vertices.iter().enumerate() {
@@ -184,6 +187,8 @@ impl GraphsChunk {
       &graphs_vertices_config,
       &mut create_export_file(&path.join("graphs_vertices.ltx"))?,
     )?;
+
+    log::info!("Exported graph vertices");
 
     let mut graphs_points_config: Ini = Ini::new();
 
@@ -196,6 +201,8 @@ impl GraphsChunk {
       &mut create_export_file(&path.join("graphs_points.ltx"))?,
     )?;
 
+    log::info!("Exported graph points");
+
     let mut graphs_edges_config: Ini = Ini::new();
 
     for (index, edge) in self.edges.iter().enumerate() {
@@ -207,10 +214,14 @@ impl GraphsChunk {
       &mut create_export_file(&path.join("graphs_edges.ltx"))?,
     )?;
 
+    log::info!("Exported graph edges");
+
     GraphCrossTable::export_list::<T>(
       &self.cross_tables,
       &mut create_export_file(&path.join("graphs_cross_tables.gct"))?,
     )?;
+
+    log::info!("Exported graph cross tables");
 
     log::info!("Exported graphs chunk");
 

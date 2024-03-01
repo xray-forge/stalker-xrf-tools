@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
+use crate::export::string::{string_from_base64, string_to_base64};
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
@@ -44,7 +45,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
       direct_control: read_ini_field("direct_control", props)?,
       level_vertex_id: read_ini_field("level_vertex_id", props)?,
       flags: read_ini_field("flags", props)?,
-      custom_data: read_ini_field("custom_data", props)?,
+      custom_data: string_from_base64(&read_ini_field::<String>("custom_data", props)?)?,
       story_id: read_ini_field("story_id", props)?,
       spawn_story_id: read_ini_field("spawn_story_id", props)?,
     })
@@ -77,7 +78,7 @@ impl AlifeObjectGeneric for AlifeObjectAbstract {
       .set("direct_control", self.direct_control.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
       .set("flags", self.flags.to_string())
-      .set("custom_data", &self.custom_data)
+      .set("custom_data", &string_to_base64(&self.custom_data))
       .set("story_id", self.story_id.to_string())
       .set("spawn_story_id", self.spawn_story_id.to_string());
   }

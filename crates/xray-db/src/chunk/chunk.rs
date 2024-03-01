@@ -158,7 +158,7 @@ impl Chunk {
 
       // Try with windows 1251 conversion:
       let value: String = match transformed {
-        Cow::Borrowed(value) => String::from(value),
+        Cow::Borrowed(value) => value.to_owned(),
         Cow::Owned(value) => value,
       };
 

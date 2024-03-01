@@ -8,7 +8,7 @@ use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
-use crate::export::string::{from_base64, to_base64};
+use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
@@ -232,7 +232,7 @@ impl AlifeObjectBase {
       client_data_size: read_ini_field("client_data_size", props)?,
       spawn_id: read_ini_field("spawn_id", props)?,
       inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), props)?,
-      update_data: from_base64(&read_ini_field::<String>("update_data", props)?)?,
+      update_data: bytes_from_base64(&read_ini_field::<String>("update_data", props)?)?,
     })
   }
 
@@ -264,7 +264,7 @@ impl AlifeObjectBase {
 
     ini
       .with_section(Some(section))
-      .set("update_data", to_base64(&self.update_data));
+      .set("update_data", bytes_to_base64(&self.update_data));
   }
 }
 

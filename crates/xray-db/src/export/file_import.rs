@@ -1,26 +1,7 @@
 use crate::types::U32Bytes;
-use ini::{Ini, Properties};
-use std::fs::File;
+use ini::Properties;
 use std::io;
-use std::path::Path;
 use std::str::FromStr;
-
-/// Try opening ini file.
-/// Map any ini reading operation errors as IO invalid input.
-pub fn open_ini_config(path: &Path) -> io::Result<Ini> {
-  match Ini::load_from_file(path) {
-    Ok(ini) => Ok(ini),
-    Err(error) => Err(io::Error::new(
-      io::ErrorKind::InvalidInput,
-      error.to_string(),
-    )),
-  }
-}
-
-/// Try opening binary data storing file.
-pub fn open_binary_file(path: &Path) -> io::Result<File> {
-  File::open(path)
-}
 
 /// Export ini file content to provided file.
 pub fn import_vector_from_string<T: FromStr>(value: &str) -> io::Result<Vec<T>> {
