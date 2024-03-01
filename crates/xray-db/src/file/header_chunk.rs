@@ -37,7 +37,7 @@ impl HeaderChunk {
 
   /// Write header data into chunk writer.
   /// Writes header data in binary format.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid)?;
     writer.write_u128::<T>(self.graph_guid)?;
@@ -46,7 +46,7 @@ impl HeaderChunk {
 
     log::info!("Written header chunk, {:?} bytes", writer.bytes_written());
 
-    Ok(())
+    Ok(writer)
   }
 
   /// Import header data from provided path.
@@ -91,17 +91,13 @@ impl HeaderChunk {
 mod tests {
   use crate::chunk::chunk::Chunk;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::export::file::{export_ini_to_file, open_ini_config};
   use crate::file::header_chunk::HeaderChunk;
-  use crate::test::assertions::files_are_equal_by_path;
   use crate::test::utils::{
     get_test_resource_path, get_test_sample_file_directory, get_test_sample_file_sub_dir,
     get_test_sample_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
-  use ini::Ini;
   use std::io;
   use std::path::Path;
 
@@ -121,7 +117,6 @@ mod tests {
 
   #[test]
   fn test_read_write_simple_header() -> io::Result<()> {
-    let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_test_sample_file_sub_dir(file!(), "header_simple.chunk");
 
     let header: HeaderChunk = HeaderChunk {
@@ -132,7 +127,7 @@ mod tests {
       level_count: 12,
     };
 
-    header.write::<SpawnByteOrder>(&mut writer)?;
+    let mut writer: ChunkWriter = header.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
     assert_eq!(writer.bytes_written(), 44);
 

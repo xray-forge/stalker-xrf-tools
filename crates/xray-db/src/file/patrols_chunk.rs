@@ -35,7 +35,7 @@ impl PatrolsChunk {
   }
 
   /// Write patrols data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -47,7 +47,7 @@ impl PatrolsChunk {
 
     log::info!("Written patrols chunk, {:?} bytes", writer.bytes_written());
 
-    Ok(())
+    Ok(writer)
   }
 
   /// Import patrols data from provided path.
@@ -137,7 +137,6 @@ mod tests {
 
   #[test]
   fn test_read_write_patrols_chunk() -> io::Result<()> {
-    let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_test_sample_file_sub_dir(file!(), "patrols_list.chunk");
 
     let patrols_chunk: PatrolsChunk = PatrolsChunk {
@@ -191,7 +190,7 @@ mod tests {
       ],
     };
 
-    patrols_chunk.write::<SpawnByteOrder>(&mut writer)?;
+    let mut writer: ChunkWriter = patrols_chunk.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
     assert_eq!(writer.bytes_written(), 450);
 

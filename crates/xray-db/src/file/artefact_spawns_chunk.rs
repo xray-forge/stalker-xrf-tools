@@ -40,11 +40,11 @@ impl ArtefactSpawnsChunk {
 
   /// Write artefact spawns into chunk writer.
   /// Writes artefact spawns data in binary format.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
     writer.write_u32::<T>(self.nodes.len() as u32)?;
 
     for node in &self.nodes {
-      node.write::<T>(writer)?;
+      node.write::<T>(&mut writer)?;
     }
 
     log::info!(
@@ -52,7 +52,7 @@ impl ArtefactSpawnsChunk {
       writer.bytes_written()
     );
 
-    Ok(())
+    Ok(writer)
   }
 
   /// Import artefact spawns data from provided path.
@@ -113,10 +113,10 @@ mod tests {
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use std::io;
 
   #[test]
-  fn test_read_write_artefact_spawn_point() {
-    let mut writer: ChunkWriter = ChunkWriter::new();
+  fn test_read_write_artefact_spawn_point() -> io::Result<()> {
     let filename: String = get_test_sample_file_sub_dir(file!(), "artefact_spawns.chunk");
 
     let spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk {
@@ -134,20 +134,18 @@ mod tests {
       ],
     };
 
-    spawns.write::<SpawnByteOrder>(&mut writer).unwrap();
+    let mut writer: ChunkWriter = spawns.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
     assert_eq!(writer.bytes_written(), 44);
 
-    let bytes_written: usize = writer
-      .flush_chunk_into_file::<SpawnByteOrder>(
-        &mut overwrite_test_resource_as_file(&filename).unwrap(),
-        0,
-      )
-      .unwrap();
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_resource_as_file(&filename).unwrap(),
+      0,
+    )?;
 
     assert_eq!(bytes_written, 44);
 
-    let file: FileSlice = open_test_resource_as_slice(&filename).unwrap();
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 44 + 8);
 
@@ -157,8 +155,10 @@ mod tests {
       .expect("0 index chunk to exist");
 
     let read_spawns: ArtefactSpawnsChunk =
-      ArtefactSpawnsChunk::read_from_chunk::<SpawnByteOrder>(chunk).unwrap();
+      ArtefactSpawnsChunk::read_from_chunk::<SpawnByteOrder>(chunk)?;
 
     assert_eq!(read_spawns, spawns);
+
+    Ok(())
   }
 }

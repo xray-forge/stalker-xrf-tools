@@ -46,7 +46,7 @@ impl ALifeSpawnsChunk {
   }
 
   /// Write alife chunk data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
     let mut count_writer: ChunkWriter = ChunkWriter::new();
     let mut objects_writer: ChunkWriter = ChunkWriter::new();
     let mut vertex_writer: ChunkWriter = ChunkWriter::new();
@@ -74,7 +74,7 @@ impl ALifeSpawnsChunk {
       writer.bytes_written()
     );
 
-    Ok(())
+    Ok(writer)
   }
 
   /// Import alife spawns data from provided path.
@@ -144,12 +144,11 @@ mod tests {
 
   #[test]
   fn test_read_write_empty_spawns_chunk() -> io::Result<()> {
-    let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_test_sample_file_sub_dir(file!(), "alife_spawns_empty.chunk");
 
     let spawns: ALifeSpawnsChunk = ALifeSpawnsChunk { objects: vec![] };
 
-    spawns.write::<SpawnByteOrder>(&mut writer)?;
+    let mut writer: ChunkWriter = spawns.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
     assert_eq!(writer.bytes_written(), 28);
 
@@ -177,7 +176,6 @@ mod tests {
 
   #[test]
   fn test_read_write_few_spawns_chunk() -> io::Result<()> {
-    let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_test_sample_file_sub_dir(file!(), "alife_spawns.chunk");
 
     let spawns: ALifeSpawnsChunk = ALifeSpawnsChunk {
@@ -263,7 +261,7 @@ mod tests {
       ],
     };
 
-    spawns.write::<SpawnByteOrder>(&mut writer)?;
+    let mut writer: ChunkWriter = spawns.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
     assert_eq!(writer.bytes_written(), 419);
 

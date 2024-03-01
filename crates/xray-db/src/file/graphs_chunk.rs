@@ -78,30 +78,30 @@ impl GraphsChunk {
   }
 
   /// Write whole graphs chunk into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    self.header.write::<T>(writer)?;
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
+    self.header.write::<T>(&mut writer)?;
 
     for level in &self.levels {
-      level.write::<T>(writer)?;
+      level.write::<T>(&mut writer)?;
     }
 
     for vertex in &self.vertices {
-      vertex.write::<T>(writer)?;
+      vertex.write::<T>(&mut writer)?;
     }
 
     for edge in &self.edges {
-      edge.write::<T>(writer)?;
+      edge.write::<T>(&mut writer)?;
     }
 
     for point in &self.points {
-      point.write::<T>(writer)?;
+      point.write::<T>(&mut writer)?;
     }
 
-    GraphCrossTable::write_list::<T>(&self.cross_tables, writer)?;
+    GraphCrossTable::write_list::<T>(&self.cross_tables, &mut writer)?;
 
     log::info!("Written graphs chunk, {:?} bytes", writer.bytes_written());
 
-    Ok(())
+    Ok(writer)
   }
 
   /// Import graphs data from provided path.
@@ -263,7 +263,6 @@ mod tests {
   #[test]
   fn test_read_write_empty_graphs_chunk() -> io::Result<()> {
     let filename: String = String::from("graphs_chunk_empty.chunk");
-    let mut writer: ChunkWriter = ChunkWriter::new();
 
     let graphs_chunk: GraphsChunk = GraphsChunk {
       header: GraphHeader {
@@ -281,7 +280,7 @@ mod tests {
       cross_tables: vec![],
     };
 
-    graphs_chunk.write::<SpawnByteOrder>(&mut writer)?;
+    let mut writer: ChunkWriter = graphs_chunk.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
     assert_eq!(writer.bytes_written(), 28);
 
@@ -311,7 +310,6 @@ mod tests {
   #[test]
   fn test_read_write_generic_graphs_chunk() -> io::Result<()> {
     let filename: String = String::from("graphs_chunk_generic.chunk");
-    let mut writer: ChunkWriter = ChunkWriter::new();
 
     let graphs_chunk: GraphsChunk = GraphsChunk {
       header: GraphHeader {
@@ -417,7 +415,7 @@ mod tests {
       ],
     };
 
-    graphs_chunk.write::<SpawnByteOrder>(&mut writer)?;
+    let mut writer: ChunkWriter = graphs_chunk.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
     assert_eq!(writer.bytes_written(), 430);
 

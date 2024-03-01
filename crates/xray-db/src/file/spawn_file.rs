@@ -38,7 +38,6 @@ impl SpawnFile {
   /// Read spawn file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<SpawnFile> {
     let mut root_chunk: Chunk = Chunk::from_slice(FileSlice::new(file)).unwrap();
-
     let chunks: Vec<Chunk> = Chunk::read_all_from_file(&mut root_chunk);
 
     assert_eq!(
@@ -47,52 +46,59 @@ impl SpawnFile {
       "Unexpected chunks count in spawn file root, expected 5"
     );
 
-    let header_chunk: Chunk = chunks.get(0).expect("Header chunk to exist").clone();
-    let alife_chunk: Chunk = chunks.get(1).expect("Alife chunk to exist").clone();
-    let artefacts_chunk: Chunk = chunks.get(2).expect("Artefacts chunk to exist").clone();
-    let patrols_chunk: Chunk = chunks.get(3).expect("Patrols chunk to exist").clone();
-    let graphs_chunk: Chunk = chunks.get(4).expect("Graphs chunk to exist").clone();
+    let spawn_file: SpawnFile = {
+      SpawnFile {
+        header: HeaderChunk::read_from_chunk::<T>(chunks.get(0).unwrap().clone())?,
+        alife_spawn: ALifeSpawnsChunk::read_from_chunk::<T>(chunks.get(1).unwrap().clone())?,
+        artefact_spawn: ArtefactSpawnsChunk::read_from_chunk::<T>(chunks.get(2).unwrap().clone())?,
+        patrols: PatrolsChunk::read_from_chunk::<T>(chunks.get(3).unwrap().clone())?,
+        graphs: GraphsChunk::read_from_chunk::<T>(chunks.get(4).unwrap().clone())?,
+      }
+    };
 
-    let header: HeaderChunk =
-      HeaderChunk::read_from_chunk::<T>(header_chunk).expect("Header chunk to be read");
-
-    let alife_spawn: ALifeSpawnsChunk =
-      ALifeSpawnsChunk::read_from_chunk::<T>(alife_chunk).expect("Alife spawns chunk to be read");
-
-    let artefact_spawn: ArtefactSpawnsChunk =
-      ArtefactSpawnsChunk::read_from_chunk::<T>(artefacts_chunk)
-        .expect("Artefact spawns chunk to exist");
-
-    let patrols: PatrolsChunk =
-      PatrolsChunk::read_from_chunk::<T>(patrols_chunk).expect("Patrols chunk to be read");
-
-    let graphs: GraphsChunk =
-      GraphsChunk::read_from_chunk::<T>(graphs_chunk).expect("Level chunk to be read");
-
-    assert!(root_chunk.is_ended(), "Expected spawn file to be ended");
     assert_eq!(
-      header.objects_count,
-      alife_spawn.objects.len() as u32,
+      spawn_file.header.objects_count,
+      spawn_file.alife_spawn.objects.len() as u32,
       "Expected correct objects count"
     );
     assert_eq!(
-      header.level_count, graphs.header.level_count as u32,
+      spawn_file.header.level_count, spawn_file.graphs.header.level_count as u32,
       "Expected correct level count"
     );
 
-    Ok(SpawnFile {
-      header,
-      alife_spawn,
-      artefact_spawn,
-      patrols,
-      graphs,
-    })
+    Ok(spawn_file)
   }
 
   /// Write spawn file data to the file by provided path.
   pub fn write_to_path<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
     self.write_to_file::<T>(&mut create_export_file(&path)?)
+  }
+
+  /// Write spawn file data to the file.
+  pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> io::Result<()> {
+    self
+      .header
+      .write::<T>(ChunkWriter::new())?
+      .flush_chunk_into_file::<T>(file, 0)?;
+    self
+      .alife_spawn
+      .write::<T>(ChunkWriter::new())?
+      .flush_chunk_into_file::<T>(file, 1)?;
+    self
+      .artefact_spawn
+      .write::<T>(ChunkWriter::new())?
+      .flush_chunk_into_file::<T>(file, 2)?;
+    self
+      .patrols
+      .write::<T>(ChunkWriter::new())?
+      .flush_chunk_into_file::<T>(file, 3)?;
+    self
+      .graphs
+      .write::<T>(ChunkWriter::new())?
+      .flush_chunk_into_file::<T>(file, 4)?;
+
+    Ok(())
   }
 
   /// Read spawn file from provided path.
@@ -115,29 +121,6 @@ impl SpawnFile {
     self.artefact_spawn.export::<T>(path)?;
     self.patrols.export::<T>(path)?;
     self.graphs.export::<T>(path)?;
-
-    Ok(())
-  }
-
-  /// Write spawn file data to the file.
-  pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> io::Result<()> {
-    let mut header_writer: ChunkWriter = ChunkWriter::new();
-    let mut alife_writer: ChunkWriter = ChunkWriter::new();
-    let mut artefacts_writer: ChunkWriter = ChunkWriter::new();
-    let mut patrols_writer: ChunkWriter = ChunkWriter::new();
-    let mut graphs_writer: ChunkWriter = ChunkWriter::new();
-
-    self.header.write::<T>(&mut header_writer)?;
-    self.alife_spawn.write::<T>(&mut alife_writer)?;
-    self.artefact_spawn.write::<T>(&mut artefacts_writer)?;
-    self.patrols.write::<T>(&mut patrols_writer)?;
-    self.graphs.write::<T>(&mut graphs_writer)?;
-
-    header_writer.flush_chunk_into_file::<T>(file, 0)?;
-    alife_writer.flush_chunk_into_file::<T>(file, 1)?;
-    artefacts_writer.flush_chunk_into_file::<T>(file, 2)?;
-    patrols_writer.flush_chunk_into_file::<T>(file, 3)?;
-    graphs_writer.flush_chunk_into_file::<T>(file, 4)?;
 
     Ok(())
   }
