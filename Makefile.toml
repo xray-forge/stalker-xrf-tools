@@ -10,6 +10,11 @@ args = ["test"]
 command = "cargo"
 args = ["fmt"]
 
+[tasks.format-check]
+workspace = false
+command = "cargo"
+args = ["fmt", "--all", "--", "--check"]
+
 [tasks.build-cli]
 workspace = false
 dependencies = [
