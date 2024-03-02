@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="test: xrf-cli-tool" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="test">
-    <option name="command" value="test --package xrf-cli-tool" />
+  <configuration default="false" name="test: xrf-cli" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="test">
+    <option name="command" value="test --package xrf-cli" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />

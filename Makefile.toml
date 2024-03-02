@@ -27,33 +27,33 @@ args = ["clippy"]
 description = "Build CLI application in debug mode."
 workspace = false
 dependencies = [
-  { name = "build", path = "bin/xrf-cli-tool" },
+  { name = "build", path = "bin/xrf-cli" },
 ]
 
 [tasks.build-cli-release]
 description = "Build CLI application in release mode."
 workspace = false
 dependencies = [
-  { name = "build-release", path = "bin/xrf-cli-tool" },
+  { name = "build-release", path = "bin/xrf-cli" },
 ]
 
 [tasks.build-application]
 description = "Build UI application in debug mode."
 workspace = false
 dependencies = [
-  { name = "build", path = "bin/xrf-ui-tool" },
+  { name = "build", path = "bin/xrf-application" },
 ]
 
 [tasks.build-application-release]
 description = "Build UI application in release mode."
 workspace = false
 dependencies = [
-  { name = "build-release", path = "bin/xrf-ui-tool" },
+  { name = "build-release", path = "bin/xrf-application" },
 ]
 
 [tasks.dev-application]
 description = "Run UI application backend and frontend in watch mode."
 workspace = false
 dependencies = [
-  { name = "dev", path = "bin/xrf-ui-tool" },
+  { name = "dev", path = "bin/xrf-application" },
 ]

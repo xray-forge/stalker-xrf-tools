@@ -1,6 +1,6 @@
 [tasks.setup]
 script = [
-  "cd ui",
+  "cd ../xrf-ui",
   "npm install"
 ]
 
@@ -9,7 +9,7 @@ command = "cargo"
 args = ["doc"]
 
 [tasks.build-ui]
-script = "npm run --prefix ui build"
+script = "npm run --prefix ../xrf-ui build"
 
 [tasks.build]
 command = "cargo"
@@ -32,4 +32,4 @@ args = ["run", "--no-default-features"]
 
 [tasks.serve-ui]
 command = "cargo"
-script = "npm run --prefix ui dev"
+script = "npm run --prefix ../xrf-ui dev"

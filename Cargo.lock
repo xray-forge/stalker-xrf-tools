@@ -4459,23 +4459,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "xrf-cli-tool"
-version = "0.1.0"
-dependencies = [
- "clap",
- "env_logger",
- "log",
- "xray-db",
-]
-
-[[package]]
-name = "xrf-ui-tool"
+name = "xrf-application"
 version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
+]
+
+[[package]]
+name = "xrf-cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "env_logger",
+ "log",
+ "xray-db",
 ]
 
 [[package]]

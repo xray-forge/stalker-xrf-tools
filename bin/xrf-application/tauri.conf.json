@@ -1,12 +1,12 @@
 {
   "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run --prefix xrf-ui dev",
+    "beforeBuildCommand": "npm run --prefix xrf-ui build",
     "devPath": "http://localhost:1420",
-    "distDir": "./ui/target"
+    "distDir": "../xrf-ui/target"
   },
   "package": {
-    "productName": "xrf-ui-tool",
+    "productName": "xrf-tools",
     "version": "0.0.0"
   },
   "tauri": {

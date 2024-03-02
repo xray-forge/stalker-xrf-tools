@@ -1,7 +1,7 @@
 [package]
-name = "xrf-ui-tool"
+name = "xrf-application"
 version = "0.1.0"
-description = "XRF development tools application"
+description = "XRF development tools"
 authors = ["Neloreck"]
 edition = "2021"
 
