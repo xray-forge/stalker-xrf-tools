@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 19.x ]
+        node-version: [ 20.x ]
 
     steps:
     - uses: davidB/rust-cargo-make@v1
@@ -32,6 +32,10 @@ jobs:
         cache-dependency-path: bin/xrf-ui/package-lock.json
 
     - uses: Swatinem/rust-cache@v2
+
+    - uses: dtolnay/install@master
+      with:
+        crate: tauri-cli
 
     - name: Run formatter
       run: cargo fmt --all -- --check
