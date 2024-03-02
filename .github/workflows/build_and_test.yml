@@ -33,8 +33,6 @@ jobs:
 
     - uses: Swatinem/rust-cache@v2
 
-      run: cargo install tauri-cli
-
     - name: Run formatter
       run: cargo fmt --all -- --check
 
@@ -51,6 +49,9 @@ jobs:
         name: xrf-cli
         path: target/release/xrf-cli.exe
         retention-days: 1
+
+    - name: Install tauri CLI
+      run: cargo install tauri-cli
 
     - name: Build application
       run: cargo make build-application-release
