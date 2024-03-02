@@ -22,3 +22,31 @@ Set of utility tools to assist with xray engine mods development and debugging.
 
 Description of commands and guide/doc should be implemented later. <br/>
 Description of UI application with dev tools.
+
+#### Spawn editor
+
+todo;
+
+#### Dialog editor
+
+todo;
+
+#### Icons editor
+
+todo;
+
+#### Translations editor
+
+todo;
+
+#### Effects and conditions explorer
+
+todo;
+
+#### Archive editor
+
+todo;
+
+#### Ltx validator
+
+todo;

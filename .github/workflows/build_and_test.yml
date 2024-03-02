@@ -9,19 +9,54 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-latest
+
+    strategy:
+      matrix:
+        node-version: [ 19.x ]
+
     steps:
     - uses: davidB/rust-cargo-make@v1
     - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: "npm"
+        cache-dependency-path: bin/xrf-ui/package-lock.json
+
     - uses: Swatinem/rust-cache@v2
 
-    - name: Build CLI
-      run: cargo make build-cli
+    - name: Run formatter
+      run: cargo fmt --all -- --check
 
     - name: Run xray-db tests
       run: cargo test --verbose -p xray-db
 
-    - name: Run formatter
-      run: cargo fmt --all -- --check
+    - name: Build CLI
+      run: cargo make build-cli-release
+
+    - name: Upload CLI build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        if-no-files-found: error
+        name: xrf-cli
+        path: target/release/xrf-cli.exe
+        retention-days: 1
+
+    - name: Build application
+      run: cargo make build-application-release
+
+    - name: Upload application build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        if-no-files-found: error
+        name: xrf-application
+        path: target/release/xrf-application.exe
+        retention-days: 1
