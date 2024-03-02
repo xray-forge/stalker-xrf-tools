@@ -6,7 +6,7 @@
     "distDir": "../xrf-ui/target"
   },
   "package": {
-    "productName": "xrf-tools",
+    "productName": "xrf-application",
     "version": "0.0.0"
   },
   "tauri": {

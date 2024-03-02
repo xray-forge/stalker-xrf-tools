@@ -2,8 +2,6 @@ import { Button, Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { ApplicationHeader } from "@/components/header/ApplicationHeader";
-
 export function RootPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
@@ -16,10 +14,8 @@ export function RootPage(): ReactElement {
       width={"100%"}
       height={"100%"}
     >
-      <ApplicationHeader />
-
-      <Button onClick={() => navigate("/archive_editor", { replace: true })}>Use archive tool</Button>
       <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Use spawn tool</Button>
+      <Button onClick={() => navigate("/archive_editor", { replace: true })}>Use archive tool</Button>
       <Button onClick={() => navigate("/dialog_editor", { replace: true })}>Use dialog tool</Button>
     </Grid>
   );
