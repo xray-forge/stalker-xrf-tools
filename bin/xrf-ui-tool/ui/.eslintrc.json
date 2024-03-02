@@ -181,8 +181,10 @@
       { "props": "always", "children": "never", "propElementValues": "always" }
     ],
     "react/jsx-key": "off",
+    "react/jsx-no-undef": "off",
     "react/no-unknown-property": "off",
     "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
     "semi": "error",
     "space-in-parens": ["error", "never"],
     "spaced-comment": ["error", "always"],
