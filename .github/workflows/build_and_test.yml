@@ -51,7 +51,7 @@ jobs:
         retention-days: 1
 
     - name: Install tauri CLI
-      run: cargo install tauri-cli
+      run: cargo install tauri-cli --version="1.5.10" --locked
 
     - name: Build application
       run: cargo make build-application-release
