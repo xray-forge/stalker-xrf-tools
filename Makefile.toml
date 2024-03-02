@@ -3,8 +3,8 @@ command = "cargo"
 args = ["clean"]
 
 [tasks.test]
-command = "cargo"
-args = ["test"]
+
+[tasks.doc]
 
 [tasks.format]
 command = "cargo"
@@ -14,6 +14,11 @@ args = ["fmt"]
 workspace = false
 command = "cargo"
 args = ["fmt", "--all", "--", "--check"]
+
+[tasks.lint]
+workspace = false
+command = "cargo"
+args = ["clippy"]
 
 [tasks.build-cli]
 workspace = false

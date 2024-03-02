@@ -4,6 +4,10 @@ script = [
   "npm install"
 ]
 
+[tasks.doc]
+command = "cargo"
+args = ["doc"]
+
 [tasks.build-ui]
 script = "npm run --prefix ui build"
 

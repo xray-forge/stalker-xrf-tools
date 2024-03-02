@@ -3,7 +3,7 @@
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
     "devPath": "http://localhost:1420",
-    "distDir": "./ui/dist"
+    "distDir": "./ui/target"
   },
   "package": {
     "productName": "xrf-ui-tool",
@@ -19,7 +19,7 @@
     },
     "windows": [
       {
-        "title": "xrf-ui-tool",
+        "title": "xrf tools",
         "width": 800,
         "height": 600
       }

@@ -1,5 +1,9 @@
 [tasks.setup]
 
+[tasks.doc]
+command = "cargo"
+args = ["doc"]
+
 [tasks.build]
 command = "cargo"
 args = ["build"]
