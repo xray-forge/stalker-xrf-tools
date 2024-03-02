@@ -33,9 +33,7 @@ jobs:
 
     - uses: Swatinem/rust-cache@v2
 
-    - uses: dtolnay/install@master
-      with:
-        crate: tauri-cli
+      run: cargo install tauri-cli
 
     - name: Run formatter
       run: cargo fmt --all -- --check
