@@ -8,7 +8,7 @@
 
 Set of utility tools to assist with xray engine mods development and debugging.
 
-### Commands
+### CLI tool commands
 
 - help
 - repack-spawn
@@ -20,4 +20,5 @@ Set of utility tools to assist with xray engine mods development and debugging.
 
 ### Todo
 
-Description of commands and guide/doc should be implemented later.
+Description of commands and guide/doc should be implemented later. <br/>
+Description of UI application with dev tools.

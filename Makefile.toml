@@ -1,0 +1,41 @@
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.format]
+command = "cargo"
+args = ["fmt"]
+
+[tasks.build-cli]
+workspace = false
+dependencies = [
+  { name = "build", path = "bin/xrf-cli-tool" },
+]
+
+[tasks.build-cli-release]
+workspace = false
+dependencies = [
+  { name = "build-release", path = "bin/xrf-cli-tool" },
+]
+
+[tasks.build-application]
+workspace = false
+dependencies = [
+  { name = "build", path = "bin/xrf-ui-tool" },
+]
+
+[tasks.build-application-release]
+workspace = false
+dependencies = [
+  { name = "build-release", path = "bin/xrf-ui-tool" },
+]
+
+[tasks.dev-application]
+workspace = false
+dependencies = [
+  { name = "dev", path = "bin/xrf-ui-tool" },
+]

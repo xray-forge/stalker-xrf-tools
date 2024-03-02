@@ -1,0 +1,23 @@
+[tasks.setup]
+script = [
+  "cd ui",
+  "npm install"
+]
+
+[tasks.build-ui]
+script = "npm run --prefix ui build"
+
+[tasks.build]
+command = "cargo"
+args = ["tauri", "build", "--debug"]
+dependencies = ["build-ui"]
+
+[tasks.build-release]
+command = "cargo"
+args = ["tauri", "build"]
+dependencies = ["setup", "build-ui"]
+
+[tasks.dev]
+command = "cargo"
+args = ["tauri", "dev"]
+dependencies = ["build-ui"]
