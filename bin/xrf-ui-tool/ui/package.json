@@ -10,10 +10,15 @@
     "format": "prettier --write \"**/*.(js|ts|tsx|md)\" \"!cli/bin/**/*\" && eslint . --ext .ts,.tsx,.js --fix"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.0",
+    "@fontsource/roboto": "^5.0.8",
+    "@mui/icons-material": "^5.15.11",
+    "@mui/material": "^5.15.11",
     "@tauri-apps/api": "^1",
+    "dreamstate": "^4.4.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "dreamstate": "^4.4.0"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1",
