@@ -7,44 +7,52 @@ args = ["clean"]
 [tasks.doc]
 
 [tasks.format]
+description = "Format rust codebase."
 command = "cargo"
 args = ["fmt"]
 
 [tasks.format-check]
+description = "Check format of rust codebase."
 workspace = false
 command = "cargo"
 args = ["fmt", "--all", "--", "--check"]
 
 [tasks.lint]
+description = "Lint rust codebase with clippy tool."
 workspace = false
 command = "cargo"
 args = ["clippy"]
 
 [tasks.build-cli]
+description = "Build CLI application in debug mode."
 workspace = false
 dependencies = [
   { name = "build", path = "bin/xrf-cli-tool" },
 ]
 
 [tasks.build-cli-release]
+description = "Build CLI application in release mode."
 workspace = false
 dependencies = [
   { name = "build-release", path = "bin/xrf-cli-tool" },
 ]
 
 [tasks.build-application]
+description = "Build UI application in debug mode."
 workspace = false
 dependencies = [
   { name = "build", path = "bin/xrf-ui-tool" },
 ]
 
 [tasks.build-application-release]
+description = "Build UI application in release mode."
 workspace = false
 dependencies = [
   { name = "build-release", path = "bin/xrf-ui-tool" },
 ]
 
 [tasks.dev-application]
+description = "Run UI application backend and frontend in watch mode."
 workspace = false
 dependencies = [
   { name = "dev", path = "bin/xrf-ui-tool" },

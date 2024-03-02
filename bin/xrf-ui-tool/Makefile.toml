@@ -25,3 +25,11 @@ dependencies = ["setup", "build-ui"]
 command = "cargo"
 args = ["tauri", "dev"]
 dependencies = ["build-ui"]
+
+[tasks.serve-backend]
+command = "cargo"
+args = ["run", "--no-default-features"]
+
+[tasks.serve-ui]
+command = "cargo"
+script = "npm run --prefix ui dev"

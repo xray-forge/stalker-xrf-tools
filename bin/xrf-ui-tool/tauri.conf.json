@@ -22,8 +22,8 @@
         "title": "xrf tools",
         "width": 800,
         "height": 600,
-        "min-width": 400,
-        "min-height": 400
+        "minWidth": 400,
+        "maxHeight": 400
       }
     ],
     "security": {
