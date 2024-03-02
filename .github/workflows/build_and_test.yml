@@ -11,15 +11,17 @@ env:
 
 jobs:
   build:
-
     runs-on: windows-latest
-
     steps:
     - uses: davidB/rust-cargo-make@v1
     - uses: actions/checkout@v3
+    - uses: Swatinem/rust-cache@v2
+
     - name: Build CLI
-      run: cargo make build-cli-release
-    - name: Run tests
-      run: cargo make test
+      run: cargo make build-cli
+
+    - name: Run xray-db tests
+      run: cargo test --verbose -p xray-db
+
     - name: Run formatter
       run: cargo fmt --all -- --check
