@@ -1,10 +1,12 @@
 import { ReactElement, useMemo } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { ArchiveEditorToolPage } from "@/pages/ArchiveEditorToolPage";
-import { DialogEditorToolPage } from "@/pages/DialogEditorToolPage";
-import { RootPage } from "@/pages/RootPage";
-import { SpawnFileToolPage } from "@/pages/SpawnFileToolPage";
+import { ArchiveEditor } from "@/applications/archive_editor/ArchiveEditor";
+import { DialogEditor } from "@/applications/dialog_editor/DialogEditor";
+import { IconEditor } from "@/applications/icon_editor/IconEditor";
+import { Root } from "@/applications/root/Root";
+import { SpawnEditor } from "@/applications/spawn_editor/SpawnEditor";
+import { NavigationError } from "@/core/components/NavigationError";
 
 export function ApplicationRouter(): ReactElement {
   const router = useMemo(
@@ -12,19 +14,27 @@ export function ApplicationRouter(): ReactElement {
       createBrowserRouter([
         {
           path: "/",
-          element: <RootPage />,
+          element: <Root />,
         },
         {
-          path: "spawn_editor",
-          element: <SpawnFileToolPage />,
+          path: "spawn_editor/*",
+          element: <SpawnEditor />,
         },
         {
-          path: "archive_editor",
-          element: <ArchiveEditorToolPage />,
+          path: "archive_editor/*",
+          element: <ArchiveEditor />,
         },
         {
-          path: "dialog_editor",
-          element: <DialogEditorToolPage />,
+          path: "dialog_editor/*",
+          element: <DialogEditor />,
+        },
+        {
+          path: "icon_editor/*",
+          element: <IconEditor />,
+        },
+        {
+          path: "*",
+          element: <NavigationError />,
         },
       ]),
     []

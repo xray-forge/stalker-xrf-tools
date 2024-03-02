@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 
 import { ApplicationProvider } from "@/ApplicationProvider";
 import { ApplicationRouter } from "@/ApplicationRouter";
-import { ThemeManager } from "@/store/theme";
+import { ThemeManager } from "@/core/store/theme";
 
 const GlobalProvider = createProvider([ThemeManager]);
 

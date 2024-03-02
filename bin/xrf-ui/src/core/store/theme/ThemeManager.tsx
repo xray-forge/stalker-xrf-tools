@@ -1,8 +1,8 @@
 import { PaletteMode, Theme } from "@mui/material";
-import { createTheme } from "@mui/material/styles";
 import { ContextManager } from "dreamstate";
 
 import { Logger } from "@/lib/logging";
+import { createApplicationTheme } from "@/lib/theme";
 
 export interface IThemeContext {
   themeActions: {
@@ -20,11 +20,7 @@ export class ThemeManager extends ContextManager<IThemeContext> {
     themeActions: {
       toggleTheme: this.toggleTheme.bind(this),
     },
-    theme: createTheme({
-      palette: {
-        mode: "dark",
-      },
-    }),
+    theme: createApplicationTheme("dark"),
   };
 
   public log: Logger = new Logger("thm");
@@ -53,7 +49,7 @@ export class ThemeManager extends ContextManager<IThemeContext> {
     const { theme } = this.context;
 
     const nextThemeMode: PaletteMode = theme.palette.mode === "light" ? "dark" : "light";
-    const nextTheme: Theme = createTheme({ palette: { mode: nextThemeMode } });
+    const nextTheme: Theme = createApplicationTheme(nextThemeMode);
 
     this.log.info("Toggle theme mode to:", nextThemeMode);
 
