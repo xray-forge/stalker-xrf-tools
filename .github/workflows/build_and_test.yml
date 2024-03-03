@@ -63,3 +63,38 @@ jobs:
         name: xrf-application
         path: target/release/xrf-application.exe
         retention-days: 1
+
+
+  upload-nightly:
+    if: ${{ github.ref_name == 'main' && github.event_name != 'pull_request' }}
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update nightly tag
+        uses: EndBug/latest-tag@latest
+        id: update-nightly-tag
+        with:
+          ref: nightly
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: xrf-cli
+
+      - name: Publish nightly cli build
+        if: ${{ steps.update-nightly-tag.outcome == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --clobber nightly xrf-cli.exe
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: xrf-application
+
+      - name: Publish nightly application build
+        if: ${{ steps.update-nightly-tag.outcome == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --clobber nightly xrf-application.exe
