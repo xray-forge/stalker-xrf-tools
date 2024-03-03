@@ -8,6 +8,8 @@ import { Logger } from "@/lib/logging";
 export interface ISpawnFileContext {
   spawnActions: {
     openSpawnFile: (path: string) => Promise<void>;
+    saveSpawnFile: (path: string) => Promise<void>;
+    exportSpawnFile: (path: string) => Promise<void>;
     closeSpawnFile: () => Promise<void>;
     resetSpawnFile: () => void;
   };
@@ -19,6 +21,8 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
   public context: ISpawnFileContext = {
     spawnActions: createActions({
       openSpawnFile: (path) => this.openSpawnFile(path),
+      saveSpawnFile: (path) => this.saveSpawnFile(path),
+      exportSpawnFile: (path) => this.exportSpawnFile(path),
       closeSpawnFile: () => this.closeSpawnFile(),
       resetSpawnFile: () => this.setContext({ spawnFile: createLoadable(null) }),
     }),
@@ -65,6 +69,42 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
       this.setContext({ spawnFile: createLoadable(null) });
     } catch (error) {
       this.log.error("Failed to close spawn file:", error);
+    }
+  }
+
+  public async exportSpawnFile(path: string): Promise<void> {
+    this.log.info("Exporting spawn file:", path);
+
+    this.assertSpawnFileIsOpen();
+
+    try {
+      this.setContext({ spawnFile: this.context.spawnFile.asLoading() });
+      await invoke(ECommand.EXPORT_SPAWN_FILE, { path });
+      this.setContext({ spawnFile: this.context.spawnFile.asReady() });
+    } catch (error) {
+      this.log.error("Failed to close spawn file:", error);
+      this.setContext({ spawnFile: this.context.spawnFile.asReady() });
+    }
+  }
+
+  public async saveSpawnFile(path: string): Promise<void> {
+    this.log.info("Saving spawn file:", path);
+
+    this.assertSpawnFileIsOpen();
+
+    try {
+      this.setContext({ spawnFile: this.context.spawnFile.asLoading() });
+      await invoke(ECommand.SAVE_SPAWN_FILE, { path });
+      this.setContext({ spawnFile: this.context.spawnFile.asReady() });
+    } catch (error) {
+      this.log.error("Failed to close spawn file:", error);
+      this.setContext({ spawnFile: this.context.spawnFile.asReady() });
+    }
+  }
+
+  public assertSpawnFileIsOpen(): asserts this is { context: { spawnFile: { value: unknown } } } {
+    if (this.context.spawnFile.value === null) {
+      throw new Error("Unexpected operation, spawn file is null.");
     }
   }
 }

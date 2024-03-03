@@ -43,7 +43,7 @@ jobs:
       run: cargo make build-cli-release
 
     - name: Upload CLI build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         if-no-files-found: error
         name: xrf-cli
@@ -79,7 +79,7 @@ jobs:
         with:
           ref: nightly
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: xrf-cli
 
@@ -89,7 +89,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload --clobber nightly xrf-cli.exe
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: xrf-application
 

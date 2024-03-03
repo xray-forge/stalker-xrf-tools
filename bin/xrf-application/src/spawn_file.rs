@@ -38,6 +38,45 @@ pub async fn open_spawn_file(
 }
 
 #[tauri::command]
+pub fn save_spawn_file(path: &str, state: tauri::State<'_, SpawnFileState>) -> Result<(), String> {
+  log::info!("Saving spawn file");
+
+  let lock = state.file.lock().unwrap();
+
+  if lock.is_some() {
+    let file: &SpawnFile = lock.as_ref().unwrap();
+
+    match file.write_to_path::<SpawnByteOrder>(Path::new(path)) {
+      Ok(_) => Ok(()),
+      Err(error) => Err(error.to_string()),
+    }
+  } else {
+    Err(String::from("No spawn file open for saving"))
+  }
+}
+
+#[tauri::command]
+pub async fn export_spawn_file(
+  path: &str,
+  state: tauri::State<'_, SpawnFileState>,
+) -> Result<(), String> {
+  log::info!("Saving spawn file");
+
+  let lock = state.file.lock().unwrap();
+
+  if lock.is_some() {
+    let file: &SpawnFile = lock.as_ref().unwrap();
+
+    match file.export_to_path::<SpawnByteOrder>(Path::new(path)) {
+      Ok(_) => Ok(()),
+      Err(error) => Err(error.to_string()),
+    }
+  } else {
+    Err(String::from("No spawn file open for saving"))
+  }
+}
+
+#[tauri::command]
 pub fn close_spawn_file(state: tauri::State<'_, SpawnFileState>) {
   log::info!("Closing spawn file");
 

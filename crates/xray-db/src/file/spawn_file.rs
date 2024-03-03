@@ -9,7 +9,7 @@ use crate::file::patrols_chunk::PatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::{fs, io};
 
 /// Descriptor of generic spawn file used by xray game engine.
@@ -113,7 +113,7 @@ impl SpawnFile {
   }
 
   /// Export unpacked alife spawn file into provided path.
-  pub fn export_to_path<T: ByteOrder>(&self, path: &PathBuf) -> io::Result<()> {
+  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     fs::create_dir_all(path)?;
 
     self.header.export::<T>(path)?;

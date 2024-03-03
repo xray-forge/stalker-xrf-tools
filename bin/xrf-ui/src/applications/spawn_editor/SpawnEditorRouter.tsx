@@ -17,7 +17,7 @@ export function SpawnEditorRouter(): ReactElement {
       <Route path={"/"} element={<SpawnEditorNavigatorPage />} />
 
       <Route
-        path={"editor"}
+        path={"editor/*"}
         element={
           <SpawnEditorProvider>
             <SpawnEditorPage />

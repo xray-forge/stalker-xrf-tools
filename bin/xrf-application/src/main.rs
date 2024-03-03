@@ -3,7 +3,10 @@
 
 mod spawn_file;
 
-use crate::spawn_file::{close_spawn_file, get_spawn_file, open_spawn_file, SpawnFileState};
+use crate::spawn_file::{
+  close_spawn_file, export_spawn_file, get_spawn_file, open_spawn_file, save_spawn_file,
+  SpawnFileState,
+};
 use std::env;
 use std::sync::{Arc, Mutex};
 
@@ -14,6 +17,8 @@ fn main() {
     .invoke_handler(tauri::generate_handler![
       get_spawn_file,
       open_spawn_file,
+      save_spawn_file,
+      export_spawn_file,
       close_spawn_file
     ])
     .manage(SpawnFileState {
