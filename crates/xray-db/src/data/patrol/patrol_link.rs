@@ -3,9 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PatrolLink {
   pub index: u32,
   pub links: Vec<(u32, f32)>,

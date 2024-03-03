@@ -6,6 +6,7 @@ use crate::data::patrol::patrol_point::PatrolPoint;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
 
@@ -21,7 +22,7 @@ use std::io::Write;
 ///   0 - points count
 ///   1 - patrol points
 ///   2 - patrol points links
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Patrol {
   pub name: String,
   pub points: Vec<PatrolPoint>,

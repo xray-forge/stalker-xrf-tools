@@ -8,16 +8,19 @@ resolver = "2"
 path = "src/lib.rs"
 
 [dependencies]
+base64 = "0.21.7"
 byteorder = "1.4.3"
+bytes = "1.5.0"
+encoding_rs = { version = "0.8.33", features = ['alloc', 'fast-legacy-encode']}
 enum-map = "2.7.3"
 env_logger = "0.11.1"
 fileslice = "0.4.0"
 lazy_static = "1.4.0"
 log = "0.4.20"
+mockall = "0.12.1"
 parquet = "50.0.0"
 phf = { version = "0.11.2", features = ["macros"]}
-bytes = "1.5.0"
-encoding_rs = { version = "0.8.33", features = ['alloc', 'fast-legacy-encode']}
-mockall = "0.12.1"
 rust-ini = "0.20.0"
-base64 = "0.21.7"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
+uuid = { version = "1.7.0", features = ["v4", "serde"] }

@@ -4,12 +4,13 @@ use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
 use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::{fmt, io};
 
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct ArtefactSpawnsChunk {
   pub nodes: Vec<ArtefactSpawnPoint>,
 }

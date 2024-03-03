@@ -1,11 +1,12 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::io;
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Vector3d<T = f32> {
   pub x: T,
   pub y: T,

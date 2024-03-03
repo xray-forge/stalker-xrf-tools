@@ -1,21 +1,11 @@
+use serde_json::{json, Value};
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use xray_db::file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
 
 pub struct SpawnFileState {
   pub file: Arc<Mutex<Option<SpawnFile>>>,
-}
-
-#[tauri::command]
-pub fn get_spawn_file(state: tauri::State<'_, SpawnFileState>) -> Option<String> {
-  let lock = state.file.lock().unwrap();
-
-  if (*lock).is_none() {
-    return None;
-  }
-
-  Some(String::from("existing"))
 }
 
 #[tauri::command]
@@ -60,7 +50,7 @@ pub async fn import_spawn_file(
 pub fn save_spawn_file(path: &str, state: tauri::State<'_, SpawnFileState>) -> Result<(), String> {
   log::info!("Saving spawn file");
 
-  let lock = state.file.lock().unwrap();
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
 
   if lock.is_some() {
     let file: &SpawnFile = lock.as_ref().unwrap();
@@ -81,7 +71,7 @@ pub async fn export_spawn_file(
 ) -> Result<(), String> {
   log::info!("Saving spawn file");
 
-  let lock = state.file.lock().unwrap();
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
 
   if lock.is_some() {
     let file: &SpawnFile = lock.as_ref().unwrap();
@@ -99,7 +89,61 @@ pub async fn export_spawn_file(
 pub fn close_spawn_file(state: tauri::State<'_, SpawnFileState>) {
   log::info!("Closing spawn file");
 
-  if state.file.lock().unwrap().is_some() {
-    *state.file.lock().unwrap() = None;
+  let mut lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
+
+  if lock.is_some() {
+    *lock = None;
   }
+}
+
+#[tauri::command]
+pub async fn get_spawn_file(
+  state: tauri::State<'_, SpawnFileState>,
+) -> Result<Option<String>, String> {
+  let lock = state.file.lock().unwrap();
+
+  if (*lock).is_none() {
+    return Ok(None);
+  }
+
+  Ok(Some(String::from("existing")))
+}
+
+#[tauri::command]
+pub async fn get_spawn_file_header(
+  state: tauri::State<'_, SpawnFileState>,
+) -> Result<Option<Value>, String> {
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
+
+  if lock.is_none() {
+    return Ok(None);
+  }
+
+  Ok(Some(json!(lock.as_ref().unwrap().header)))
+}
+
+#[tauri::command]
+pub async fn get_spawn_file_patrols(
+  state: tauri::State<'_, SpawnFileState>,
+) -> Result<Option<Value>, String> {
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
+
+  if lock.is_none() {
+    return Ok(None);
+  }
+
+  Ok(Some(json!(lock.as_ref().unwrap().patrols)))
+}
+
+#[tauri::command]
+pub async fn get_spawn_file_artefact_spawns(
+  state: tauri::State<'_, SpawnFileState>,
+) -> Result<Option<Value>, String> {
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
+
+  if lock.is_none() {
+    return Ok(None);
+  }
+
+  Ok(Some(json!(lock.as_ref().unwrap().artefact_spawn)))
 }

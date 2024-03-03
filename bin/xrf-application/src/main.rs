@@ -4,7 +4,8 @@
 mod spawn_file;
 
 use crate::spawn_file::{
-  close_spawn_file, export_spawn_file, get_spawn_file, import_spawn_file, open_spawn_file,
+  close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_artefact_spawns,
+  get_spawn_file_header, get_spawn_file_patrols, import_spawn_file, open_spawn_file,
   save_spawn_file, SpawnFileState,
 };
 use std::env;
@@ -16,6 +17,9 @@ fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       get_spawn_file,
+      get_spawn_file_header,
+      get_spawn_file_artefact_spawns,
+      get_spawn_file_patrols,
       open_spawn_file,
       save_spawn_file,
       import_spawn_file,

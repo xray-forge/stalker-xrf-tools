@@ -4,9 +4,10 @@ use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ArtefactSpawnPoint {
   pub position: Vector3d,
   pub level_vertex_id: u32,

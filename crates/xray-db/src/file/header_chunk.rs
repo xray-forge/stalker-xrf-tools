@@ -4,14 +4,16 @@ use crate::export::file::{create_export_file, export_ini_to_file, open_ini_confi
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 use std::path::Path;
+use uuid::Uuid;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct HeaderChunk {
   pub version: u32,
-  pub guid: u128,
-  pub graph_guid: u128,
+  pub guid: Uuid,
+  pub graph_guid: Uuid,
   pub objects_count: u32,
   pub level_count: u32,
 }
@@ -22,8 +24,8 @@ impl HeaderChunk {
   pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<HeaderChunk> {
     let header: HeaderChunk = HeaderChunk {
       version: reader.read_u32::<T>()?,
-      guid: reader.read_u128::<T>()?,
-      graph_guid: reader.read_u128::<T>()?,
+      guid: Uuid::from_u128(reader.read_u128::<T>()?),
+      graph_guid: Uuid::from_u128(reader.read_u128::<T>()?),
       objects_count: reader.read_u32::<T>()?,
       level_count: reader.read_u32::<T>()?,
     };
@@ -39,8 +41,8 @@ impl HeaderChunk {
   /// Writes header data in binary format.
   pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
     writer.write_u32::<T>(self.version)?;
-    writer.write_u128::<T>(self.guid)?;
-    writer.write_u128::<T>(self.graph_guid)?;
+    writer.write_u128::<T>(self.guid.as_u128())?;
+    writer.write_u128::<T>(self.graph_guid.as_u128())?;
     writer.write_u32::<T>(self.objects_count)?;
     writer.write_u32::<T>(self.level_count)?;
 
@@ -100,6 +102,7 @@ mod tests {
   use fileslice::FileSlice;
   use std::io;
   use std::path::Path;
+  use uuid::{uuid, Uuid};
 
   #[test]
   fn test_read_empty_chunk() -> io::Result<()> {
@@ -121,8 +124,8 @@ mod tests {
 
     let header: HeaderChunk = HeaderChunk {
       version: 20,
-      guid: 2u128.pow(127),
-      graph_guid: 2u128.pow(64),
+      guid: Uuid::from_u128(2u128.pow(127)),
+      graph_guid: Uuid::from_u128(2u128.pow(64)),
       objects_count: 5050,
       level_count: 12,
     };
@@ -155,8 +158,8 @@ mod tests {
   fn test_import_export_object() -> io::Result<()> {
     let header: HeaderChunk = HeaderChunk {
       version: 10,
-      guid: 284795912783782493,
-      graph_guid: 276845268795248675,
+      guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
+      graph_guid: uuid!("67e55023-10b1-426f-9247-bb680e5fe0c8"),
       objects_count: 550,
       level_count: 12,
     };

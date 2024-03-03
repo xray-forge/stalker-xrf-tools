@@ -17,6 +17,7 @@ export function SpawnEditor(): ReactElement {
       alignItems={"center"}
       direction={"row"}
       container={true}
+      flexWrap={"nowrap"}
       width={"100%"}
       height={"100%"}
     >
