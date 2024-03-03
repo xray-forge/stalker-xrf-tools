@@ -9,6 +9,7 @@ export interface ISpawnFileContext {
   spawnActions: {
     openSpawnFile: (path: string) => Promise<void>;
     saveSpawnFile: (path: string) => Promise<void>;
+    importSpawnFile: (path: string) => Promise<void>;
     exportSpawnFile: (path: string) => Promise<void>;
     closeSpawnFile: () => Promise<void>;
     resetSpawnFile: () => void;
@@ -22,6 +23,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
     spawnActions: createActions({
       openSpawnFile: (path) => this.openSpawnFile(path),
       saveSpawnFile: (path) => this.saveSpawnFile(path),
+      importSpawnFile: (path) => this.importSpawnFile(path),
       exportSpawnFile: (path) => this.exportSpawnFile(path),
       closeSpawnFile: () => this.closeSpawnFile(),
       resetSpawnFile: () => this.setContext({ spawnFile: createLoadable(null) }),
@@ -47,9 +49,9 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
   public async openSpawnFile(path: string): Promise<void> {
     this.log.info("Opening spawn file:", path);
 
-    this.setContext({ spawnFile: createLoadable(null, true) });
-
     try {
+      this.setContext({ spawnFile: createLoadable(null, true) });
+
       const response: unknown = await invoke(ECommand.OPEN_SPAWN_FILE, { path });
 
       this.log.info("Spawn file opened");
@@ -61,14 +63,20 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
     }
   }
 
-  public async closeSpawnFile(): Promise<void> {
-    this.log.info("Closing existing spawn file");
+  public async importSpawnFile(path: string): Promise<void> {
+    this.log.info("Importing spawn file:", path);
 
     try {
-      await invoke(ECommand.CLOSE_SPAWN_FILE);
-      this.setContext({ spawnFile: createLoadable(null) });
+      this.setContext({ spawnFile: createLoadable(null, true) });
+
+      const response: unknown = await invoke(ECommand.IMPORT_SPAWN_FILE, { path });
+
+      this.log.info("Spawn file imported");
+
+      this.setContext({ spawnFile: createLoadable(response, false) });
     } catch (error) {
-      this.log.error("Failed to close spawn file:", error);
+      this.log.error("Failed to import spawn file:", error);
+      this.setContext({ spawnFile: this.context.spawnFile.asReady() });
     }
   }
 
@@ -82,7 +90,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
       await invoke(ECommand.EXPORT_SPAWN_FILE, { path });
       this.setContext({ spawnFile: this.context.spawnFile.asReady() });
     } catch (error) {
-      this.log.error("Failed to close spawn file:", error);
+      this.log.error("Failed to export spawn file:", error);
       this.setContext({ spawnFile: this.context.spawnFile.asReady() });
     }
   }
@@ -97,8 +105,19 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
       await invoke(ECommand.SAVE_SPAWN_FILE, { path });
       this.setContext({ spawnFile: this.context.spawnFile.asReady() });
     } catch (error) {
-      this.log.error("Failed to close spawn file:", error);
+      this.log.error("Failed to save spawn file:", error);
       this.setContext({ spawnFile: this.context.spawnFile.asReady() });
+    }
+  }
+
+  public async closeSpawnFile(): Promise<void> {
+    this.log.info("Closing existing spawn file");
+
+    try {
+      await invoke(ECommand.CLOSE_SPAWN_FILE);
+      this.setContext({ spawnFile: createLoadable(null) });
+    } catch (error) {
+      this.log.error("Failed to close spawn file:", error);
     }
   }
 

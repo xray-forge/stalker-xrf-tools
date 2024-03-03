@@ -13,23 +13,18 @@ const SpawnEditorProvider = createProvider([SpawnFileManager]);
 
 export function SpawnEditorRouter(): ReactElement {
   return (
-    <Routes>
-      <Route path={"/"} element={<SpawnEditorNavigatorPage />} />
+    <SpawnEditorProvider>
+      <Routes>
+        <Route path={"/"} element={<SpawnEditorNavigatorPage />} />
 
-      <Route
-        path={"editor/*"}
-        element={
-          <SpawnEditorProvider>
-            <SpawnEditorPage />
-          </SpawnEditorProvider>
-        }
-      />
+        <Route path={"editor/*"} element={<SpawnEditorPage />} />
 
-      <Route path={"pack"} element={<SpawnEditorPackPage />} />
+        <Route path={"pack"} element={<SpawnEditorPackPage />} />
 
-      <Route path={"unpack"} element={<SpawnEditorUnpackPage />} />
+        <Route path={"unpack"} element={<SpawnEditorUnpackPage />} />
 
-      <Route path={"*"} element={<NavigationError />} />
-    </Routes>
+        <Route path={"*"} element={<NavigationError />} />
+      </Routes>
+    </SpawnEditorProvider>
   );
 }

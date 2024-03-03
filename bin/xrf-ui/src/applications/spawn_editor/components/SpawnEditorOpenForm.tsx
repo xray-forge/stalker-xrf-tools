@@ -1,8 +1,7 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
   Button,
-  ButtonGroup,
-  Card,
+  CircularProgress,
   FormHelperText,
   Grid,
   IconButton,
@@ -14,17 +13,16 @@ import {
 import { open } from "@tauri-apps/api/dialog";
 import { useManager } from "dreamstate";
 import { MouseEvent, ReactElement, RefObject, useCallback, useRef, useState } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
 
+import { SpawnBackButton } from "@/applications/spawn_editor/components/SpawnBackButton";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 
-export function SpawnSelectionForm({
+export function SpawnEditorOpenForm({
   spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
 }): ReactElement {
-  const log: Logger = useLogger("spawn-select");
-  const navigate: NavigateFunction = useNavigate();
+  const log: Logger = useLogger("spawn-open");
   const inputRef: RefObject<HTMLInputElement> = useRef(null);
 
   const [isSelecting, setIsSelecting] = useState(false);
@@ -74,10 +72,10 @@ export function SpawnSelectionForm({
       height={"100%"}
     >
       <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
-        <Typography>Select *.spawn file</Typography>
+        <Typography>Select *.spawn file to open</Typography>
       </Grid>
 
-      <Stack direction={"row"} spacing={2} minWidth={350}>
+      <Stack direction={"row"} spacing={2} marginBottom={2} minWidth={350}>
         <OutlinedInput
           ref={inputRef}
           size={"small"}
@@ -111,18 +109,9 @@ export function SpawnSelectionForm({
         </Grid>
       ) : null}
 
-      <Card sx={{ minWidth: 200, marginTop: 2 }}>
-        <Grid direction={"column"} container>
-          <ButtonGroup orientation={"vertical"}>
-            <Button
-              disabled={spawnFile.isLoading || isSelecting}
-              onClick={() => navigate("/spawn_editor", { replace: true })}
-            >
-              Back
-            </Button>
-          </ButtonGroup>
-        </Grid>
-      </Card>
+      {spawnFile.isLoading ? <CircularProgress size={24} /> : null}
+
+      <SpawnBackButton disabled={spawnFile.isLoading || isSelecting} />
     </Grid>
   );
 }

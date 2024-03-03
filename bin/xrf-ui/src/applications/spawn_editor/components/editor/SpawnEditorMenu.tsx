@@ -40,7 +40,7 @@ export function SpawnEditorMenu({
   }, [spawnActions, redirect]);
 
   const onCloseClicked = useCallback(() => {
-    navigate("general", { replace: true });
+    navigate("/spawn_editor", { replace: true });
 
     return spawnActions.closeSpawnFile();
   }, [spawnActions, redirect]);
