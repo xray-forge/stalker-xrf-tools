@@ -4,8 +4,8 @@
 mod spawn_file;
 
 use crate::spawn_file::{
-  close_spawn_file, export_spawn_file, get_spawn_file, open_spawn_file, save_spawn_file,
-  SpawnFileState,
+  close_spawn_file, export_spawn_file, get_spawn_file, import_spawn_file, open_spawn_file,
+  save_spawn_file, SpawnFileState,
 };
 use std::env;
 use std::sync::{Arc, Mutex};
@@ -18,6 +18,7 @@ fn main() {
       get_spawn_file,
       open_spawn_file,
       save_spawn_file,
+      import_spawn_file,
       export_spawn_file,
       close_spawn_file
     ])
