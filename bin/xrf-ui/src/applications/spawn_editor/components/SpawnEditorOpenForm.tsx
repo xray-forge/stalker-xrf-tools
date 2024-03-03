@@ -75,7 +75,7 @@ export function SpawnEditorOpenForm({
         <Typography>Select *.spawn file to open</Typography>
       </Grid>
 
-      <Stack direction={"row"} spacing={2} marginBottom={2} minWidth={350}>
+      <Stack direction={"row"} spacing={1} marginBottom={2} minWidth={350}>
         <OutlinedInput
           ref={inputRef}
           size={"small"}

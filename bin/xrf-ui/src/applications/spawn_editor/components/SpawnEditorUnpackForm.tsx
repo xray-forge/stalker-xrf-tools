@@ -131,7 +131,7 @@ export function SpawnEditorUnpackForm({
       </Grid>
 
       <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={2} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container item>
           <OutlinedInput
             ref={inputRef}
             size={"small"}
@@ -147,6 +147,7 @@ export function SpawnEditorUnpackForm({
                 </IconButton>
               </InputAdornment>
             }
+            sx={{ mb: 1 }}
             onClick={onSelectSpawnFileClicked}
           />
 

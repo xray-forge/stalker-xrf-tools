@@ -4,7 +4,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { NavigationFooter } from "@/core/components/NavigationFooter";
 
-export function Root(): ReactElement {
+export function ExportsViewer(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
@@ -17,18 +17,15 @@ export function Root(): ReactElement {
       height={"100%"}
     >
       <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
-        <Typography>XRF development tools</Typography>
+        <Typography>XRF exports viewer</Typography>
       </Grid>
 
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Spawn editor</Button>
-            <Button onClick={() => navigate("/archive_editor", { replace: true })}>Archive editor</Button>
-            <Button onClick={() => navigate("/dialog_editor", { replace: true })}>Dialog editor</Button>
-            <Button onClick={() => navigate("/icon_editor", { replace: true })}>Icon editor</Button>
-            <Button onClick={() => navigate("/configs_editor", { replace: true })}>Configs editor</Button>
-            <Button onClick={() => navigate("/exports_viewer", { replace: true })}>Exports viewer</Button>
+            <Button onClick={() => navigate("/exports_viewer/conditions", { replace: true })}>Conditions</Button>
+            <Button onClick={() => navigate("/exports_viewer/effects", { replace: true })}>Effects</Button>
+            <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>
       </Card>
