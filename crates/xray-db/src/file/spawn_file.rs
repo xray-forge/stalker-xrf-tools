@@ -31,7 +31,7 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   /// Read spawn file from provided path.
-  pub fn read_from_path<T: ByteOrder>(path: &PathBuf) -> io::Result<SpawnFile> {
+  pub fn read_from_path<T: ByteOrder>(path: &Path) -> io::Result<SpawnFile> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 

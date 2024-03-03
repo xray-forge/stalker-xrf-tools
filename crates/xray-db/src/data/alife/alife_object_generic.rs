@@ -4,7 +4,7 @@ use ini::Ini;
 use std::fmt::Debug;
 use std::io;
 
-pub trait AlifeObjectGeneric: Debug + Send {
+pub trait AlifeObjectGeneric: Debug + Send + Sync {
   type Order: ByteOrder;
 
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()>;

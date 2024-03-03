@@ -15,6 +15,11 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "dialog": {
+        "ask": true,
+        "confirm": true,
+        "open": true
       }
     },
     "windows": [

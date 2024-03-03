@@ -15,4 +15,8 @@ export class Logger {
   public info(...messages: Array<unknown>): void {
     window.console.info(`%c [${this.prefix}]`, Logger.PREFIX_COLOR, ...messages);
   }
+
+  public error(...messages: Array<unknown>): void {
+    window.console.error(`%c [${this.prefix}]`, Logger.PREFIX_COLOR, ...messages);
+  }
 }

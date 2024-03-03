@@ -4,7 +4,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { NavigationFooter } from "@/core/components/NavigationFooter";
 
-export function SpawnEditor(): ReactElement {
+export function SpawnEditorNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
@@ -23,7 +23,7 @@ export function SpawnEditor(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/spawn_editor/open", { replace: true })}>Open</Button>
+            <Button onClick={() => navigate("/spawn_editor/editor", { replace: true })}>Open</Button>
             <Button onClick={() => navigate("/spawn_editor/unpack", { replace: true })}>Unpack</Button>
             <Button onClick={() => navigate("/spawn_editor/pack", { replace: true })}>Pack</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>

@@ -40,6 +40,7 @@ export function SettingsModalButton(): ReactElement {
                 </InputAdornment>
               }
               label={"Project"}
+              readOnly
             />
           </FormControl>
 
@@ -56,6 +57,7 @@ export function SettingsModalButton(): ReactElement {
                 </InputAdornment>
               }
               label={"Configs"}
+              readOnly
             />
           </FormControl>
         </Grid>

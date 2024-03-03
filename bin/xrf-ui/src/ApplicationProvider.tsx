@@ -9,6 +9,7 @@ interface IApplicationProviderProps {
   themeContext?: IThemeContext;
   children: ReactNode;
 }
+
 export function ApplicationProvider({
   themeContext: { theme } = useManager(ThemeManager),
   children,

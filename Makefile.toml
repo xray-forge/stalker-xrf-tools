@@ -57,3 +57,17 @@ workspace = false
 dependencies = [
   { name = "dev", path = "bin/xrf-application" },
 ]
+
+[tasks.serve-backend]
+description = "Run UI application backend in watch mode."
+workspace = false
+dependencies = [
+  { name = "serve-backend", path = "bin/xrf-application" },
+]
+
+[tasks.serve-ui]
+description = "Run UI application frontend in watch mode."
+workspace = false
+dependencies = [
+  { name = "serve-ui", path = "bin/xrf-application" },
+]
