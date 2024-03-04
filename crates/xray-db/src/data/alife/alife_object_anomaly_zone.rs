@@ -7,9 +7,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectAnomalyZone {
   pub base: AlifeObjectCustomZone,
   pub offline_interactive_radius: f32,
@@ -22,9 +23,9 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectAnomalyZone> {
     Ok(AlifeObjectAnomalyZone {
       base: AlifeObjectCustomZone::read::<T>(reader)?,
-      offline_interactive_radius: reader.read_f32::<SpawnByteOrder>()?,
-      artefact_spawn_count: reader.read_u16::<SpawnByteOrder>()?,
-      artefact_position_offset: reader.read_u32::<SpawnByteOrder>()?,
+      offline_interactive_radius: reader.read_f32::<T>()?,
+      artefact_spawn_count: reader.read_u16::<T>()?,
+      artefact_position_offset: reader.read_u32::<T>()?,
     })
   }
 
@@ -39,16 +40,15 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectAnomalyZone {
-  type Order = SpawnByteOrder;
-
   /// Write anomaly zone object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_f32::<Self::Order>(self.offline_interactive_radius)?;
-    writer.write_u16::<Self::Order>(self.artefact_spawn_count)?;
-    writer.write_u32::<Self::Order>(self.artefact_position_offset)?;
+    writer.write_f32::<SpawnByteOrder>(self.offline_interactive_radius)?;
+    writer.write_u16::<SpawnByteOrder>(self.artefact_spawn_count)?;
+    writer.write_u32::<SpawnByteOrder>(self.artefact_position_offset)?;
 
     Ok(())
   }

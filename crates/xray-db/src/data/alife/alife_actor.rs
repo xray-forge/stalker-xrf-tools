@@ -7,9 +7,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeActor {
   pub base: AlifeObjectActor,
   pub start_position_filled: u8,
@@ -43,15 +44,14 @@ impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeActor {
-  type Order = SpawnByteOrder;
-
   /// Write object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
     writer.write_u8(self.start_position_filled)?;
-    writer.write_u16::<Self::Order>(self.save_marker)?;
+    writer.write_u16::<SpawnByteOrder>(self.save_marker)?;
 
     Ok(())
   }

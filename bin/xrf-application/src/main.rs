@@ -4,9 +4,10 @@
 mod spawn_file;
 
 use crate::spawn_file::{
-  close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_artefact_spawns,
-  get_spawn_file_header, get_spawn_file_patrols, import_spawn_file, open_spawn_file,
-  save_spawn_file, SpawnFileState,
+  close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_alife_spawns,
+  get_spawn_file_artefact_spawns, get_spawn_file_graphs, get_spawn_file_header,
+  get_spawn_file_patrols, has_spawn_file, import_spawn_file, open_spawn_file, save_spawn_file,
+  SpawnFileState,
 };
 use std::env;
 use std::sync::{Arc, Mutex};
@@ -16,10 +17,13 @@ fn main() {
 
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
+      has_spawn_file,
       get_spawn_file,
       get_spawn_file_header,
+      get_spawn_file_alife_spawns,
       get_spawn_file_artefact_spawns,
       get_spawn_file_patrols,
+      get_spawn_file_graphs,
       open_spawn_file,
       save_spawn_file,
       import_spawn_file,

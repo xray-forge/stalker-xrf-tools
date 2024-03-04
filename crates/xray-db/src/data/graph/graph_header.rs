@@ -3,15 +3,17 @@ use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
+use uuid::Uuid;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphHeader {
   pub version: u8,
   pub vertex_count: u16,
   pub edges_count: u32,
   pub point_count: u32,
-  pub guid: u128,
+  pub guid: Uuid,
   pub level_count: u8,
 }
 
@@ -23,7 +25,7 @@ impl GraphHeader {
       vertex_count: reader.read_u16::<T>()?,
       edges_count: reader.read_u32::<T>()?,
       point_count: reader.read_u32::<T>()?,
-      guid: reader.read_u128::<T>()?,
+      guid: Uuid::from_u128(reader.read_u128::<T>()?),
       level_count: reader.read_u8()?,
     })
   }
@@ -34,7 +36,7 @@ impl GraphHeader {
     writer.write_u16::<T>(self.vertex_count)?;
     writer.write_u32::<T>(self.edges_count)?;
     writer.write_u32::<T>(self.point_count)?;
-    writer.write_u128::<T>(self.guid)?;
+    writer.write_u128::<T>(self.guid.as_u128())?;
     writer.write_u8(self.level_count)?;
 
     Ok(())
@@ -80,6 +82,7 @@ mod tests {
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
+  use uuid::uuid;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
@@ -91,7 +94,7 @@ mod tests {
       vertex_count: 4000,
       edges_count: 230_250,
       point_count: 600_500,
-      guid: 4321,
+      guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
       level_count: 5,
     };
 

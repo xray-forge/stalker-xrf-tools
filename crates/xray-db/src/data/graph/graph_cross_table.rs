@@ -2,17 +2,20 @@ use crate::chunk::iterator::ChunkSizePackedIterator;
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io;
 use std::io::Write;
+use uuid::Uuid;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphCrossTable {
   pub version: u32,
   pub nodes_count: u32,
   pub vertex_count: u32,
-  pub level_guid: u128,
-  pub game_guid: u128,
+  pub level_guid: Uuid,
+  pub game_guid: Uuid,
+  #[serde(skip_serializing)]
   pub data: Vec<u8>,
 }
 
@@ -35,20 +38,13 @@ impl GraphCrossTable {
 
   /// Read cross table data from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphCrossTable> {
-    let version: u32 = reader.read_u32::<T>()?;
-    let nodes_count: u32 = reader.read_u32::<T>()?;
-    let vertex_count: u32 = reader.read_u32::<T>()?;
-    let level_guid: u128 = reader.read_u128::<T>()?;
-    let game_guid: u128 = reader.read_u128::<T>()?;
-    let data: Vec<u8> = reader.read_bytes(reader.read_bytes_remain() as usize)?;
-
     Ok(GraphCrossTable {
-      version,
-      nodes_count,
-      vertex_count,
-      level_guid,
-      game_guid,
-      data,
+      version: reader.read_u32::<T>()?,
+      nodes_count: reader.read_u32::<T>()?,
+      vertex_count: reader.read_u32::<T>()?,
+      level_guid: Uuid::from_u128(reader.read_u128::<T>()?),
+      game_guid: Uuid::from_u128(reader.read_u128::<T>()?),
+      data: reader.read_bytes(reader.read_bytes_remain() as usize)?,
     })
   }
 
@@ -74,8 +70,8 @@ impl GraphCrossTable {
     writer.write_u32::<T>(self.version)?;
     writer.write_u32::<T>(self.nodes_count)?;
     writer.write_u32::<T>(self.vertex_count)?;
-    writer.write_u128::<T>(self.level_guid)?;
-    writer.write_u128::<T>(self.game_guid)?;
+    writer.write_u128::<T>(self.level_guid.as_u128())?;
+    writer.write_u128::<T>(self.game_guid.as_u128())?;
     writer.write_all(&self.data)?;
 
     Ok(())
@@ -129,6 +125,7 @@ mod tests {
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
+  use uuid::uuid;
 
   #[test]
   fn test_read_write_cross_table() -> io::Result<()> {
@@ -139,8 +136,8 @@ mod tests {
       version: 16,
       nodes_count: 51,
       vertex_count: 4000,
-      level_guid: 7843,
-      game_guid: 83148127,
+      level_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
+      game_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
       data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     };
 

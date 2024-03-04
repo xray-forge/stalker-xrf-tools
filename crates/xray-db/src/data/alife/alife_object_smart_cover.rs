@@ -8,9 +8,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectSmartCover {
   pub base: AlifeObjectDynamic,
   pub shape: Vec<Shape>,
@@ -52,18 +53,17 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectSmartCover {
-  type Order = SpawnByteOrder;
-
   /// Write smart cover object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_shape_description::<Self::Order>(&self.shape)?;
+    writer.write_shape_description::<SpawnByteOrder>(&self.shape)?;
     writer.write_null_terminated_win_string(&self.description)?;
-    writer.write_f32::<Self::Order>(self.hold_position_time)?;
-    writer.write_f32::<Self::Order>(self.enter_min_enemy_distance)?;
-    writer.write_f32::<Self::Order>(self.exit_min_enemy_distance)?;
+    writer.write_f32::<SpawnByteOrder>(self.hold_position_time)?;
+    writer.write_f32::<SpawnByteOrder>(self.enter_min_enemy_distance)?;
+    writer.write_f32::<SpawnByteOrder>(self.exit_min_enemy_distance)?;
     writer.write_u8(self.is_combat_cover)?;
     writer.write_u8(self.can_fire)?;
 

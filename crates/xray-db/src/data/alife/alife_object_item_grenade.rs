@@ -3,12 +3,12 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
-use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemGrenade {
   pub base: AlifeObjectItem,
 }
@@ -29,9 +29,8 @@ impl AlifeObjectInheritedReader<AlifeObjectItemGrenade> for AlifeObjectItemGrena
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectItemGrenade {
-  type Order = SpawnByteOrder;
-
   /// Write item data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;

@@ -8,9 +8,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectPhysic {
   pub base: AlifeObjectDynamicVisual,
   pub skeleton: AlifeObjectSkeleton,
@@ -43,16 +44,15 @@ impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectPhysic {
-  type Order = SpawnByteOrder;
-
   /// Write alife physic object into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
     self.skeleton.write(writer)?;
 
-    writer.write_u32::<Self::Order>(self.physic_type)?;
-    writer.write_f32::<Self::Order>(self.mass)?;
+    writer.write_u32::<SpawnByteOrder>(self.physic_type)?;
+    writer.write_f32::<SpawnByteOrder>(self.mass)?;
     writer.write_null_terminated_win_string(&self.fixed_bones)?;
 
     Ok(())

@@ -6,6 +6,8 @@ export enum ECommand {
   EXPORT_SPAWN_FILE = "export_spawn_file",
   GET_SPAWN_FILE = "get_spawn_file",
   GET_SPAWN_FILE_HEADER = "get_spawn_file_header",
+  GET_SPAWN_FILE_ALIFE_SPAWNS = "get_spawn_file_alife_spawns",
   GET_SPAWN_FILE_ARTEFACT_SPAWNS = "get_spawn_file_artefact_spawns",
+  GET_SPAWN_FILE_GRAPHS = "get_spawn_file_graphs",
   GET_SPAWN_FILE_PATROLS = "get_spawn_file_patrols",
 }

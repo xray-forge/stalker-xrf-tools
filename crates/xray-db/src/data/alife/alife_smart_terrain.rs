@@ -7,9 +7,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartTerrain {
   pub base: AlifeSmartZone,
   pub arriving_objects_count: u8,
@@ -101,9 +102,8 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeSmartTerrain {
-  type Order = SpawnByteOrder;
-
   /// Write smart terrain data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
@@ -114,7 +114,7 @@ impl AlifeObjectGeneric for AlifeSmartTerrain {
     writer.write_u8(self.smart_terrain_actor_control)?;
     writer.write_u8(self.respawn_point)?;
     writer.write_u8(self.staying_objects_count)?;
-    writer.write_u16::<Self::Order>(self.save_marker)?;
+    writer.write_u16::<SpawnByteOrder>(self.save_marker)?;
 
     Ok(())
   }

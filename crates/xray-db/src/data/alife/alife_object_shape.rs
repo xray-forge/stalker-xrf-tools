@@ -7,9 +7,10 @@ use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectShape {
   pub base: AlifeObjectAbstract,
   pub shape: Vec<Shape>,
@@ -33,14 +34,13 @@ impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectShape {
-  type Order = SpawnByteOrder;
-
   /// Write shape object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_shape_description::<Self::Order>(&self.shape)?;
+    writer.write_shape_description::<SpawnByteOrder>(&self.shape)?;
 
     Ok(())
   }

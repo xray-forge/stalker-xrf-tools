@@ -9,14 +9,14 @@ use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{bytes_from_base64, bytes_to_base64};
-use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
 
 /// Generic abstract alife object base.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AlifeObjectBase {
   pub index: u16,
   pub id: u16,
@@ -37,7 +37,7 @@ pub struct AlifeObjectBase {
   pub script_version: u16,
   pub client_data_size: u16,
   pub spawn_id: u16,
-  pub inherited: Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>,
+  pub inherited: Box<dyn AlifeObjectGeneric>,
   pub update_data: Vec<u8>, // todo: Parse.
 }
 
@@ -100,7 +100,7 @@ impl AlifeObjectBase {
 
     assert_ne!(class, AlifeClass::Unknown);
 
-    let inherited: Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>> =
+    let inherited: Box<dyn AlifeObjectGeneric> =
       AlifeClass::read_by_class::<T>(&mut spawn_reader, &class)?;
 
     let update_data_length: u16 = update_reader.file.read_u16::<T>()?;

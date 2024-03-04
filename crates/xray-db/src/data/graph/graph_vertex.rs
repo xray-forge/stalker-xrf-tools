@@ -7,9 +7,10 @@ use crate::export::file_import::{read_ini_field, read_ini_u32_bytes_field};
 use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphVertex {
   pub level_point: Vector3d<f32>,
   pub game_point: Vector3d<f32>,

@@ -8,9 +8,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeLevelChanger {
   pub base: AlifeObjectSpaceRestrictor,
   pub dest_game_vertex_id: u16,
@@ -71,25 +72,24 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeLevelChanger {
-  type Order = SpawnByteOrder;
-
   /// Write object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_u16::<Self::Order>(self.dest_game_vertex_id)?;
-    writer.write_u32::<Self::Order>(self.dest_level_vertex_id)?;
-    writer.write_f32_3d_vector::<Self::Order>(&self.dest_position)?;
-    writer.write_f32_3d_vector::<Self::Order>(&self.dest_direction)?;
-    writer.write_f32::<Self::Order>(self.angle_y)?;
+    writer.write_u16::<SpawnByteOrder>(self.dest_game_vertex_id)?;
+    writer.write_u32::<SpawnByteOrder>(self.dest_level_vertex_id)?;
+    writer.write_f32_3d_vector::<SpawnByteOrder>(&self.dest_position)?;
+    writer.write_f32_3d_vector::<SpawnByteOrder>(&self.dest_direction)?;
+    writer.write_f32::<SpawnByteOrder>(self.angle_y)?;
     writer.write_null_terminated_win_string(&self.dest_level_name)?;
     writer.write_null_terminated_win_string(&self.dest_graph_point)?;
     writer.write_u8(self.silent_mode)?;
 
     writer.write_u8(self.enabled)?;
     writer.write_null_terminated_win_string(&self.hint)?;
-    writer.write_u16::<Self::Order>(self.save_marker)?;
+    writer.write_u16::<SpawnByteOrder>(self.save_marker)?;
 
     Ok(())
   }

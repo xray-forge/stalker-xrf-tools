@@ -3,12 +3,12 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
-use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemWeaponMagazinedWgl {
   pub base: AlifeObjectItemWeaponMagazined,
 }
@@ -31,9 +31,8 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectItemWeaponMagazinedWgl {
-  type Order = SpawnByteOrder;
-
   /// Write magazined weapon with launcher data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;

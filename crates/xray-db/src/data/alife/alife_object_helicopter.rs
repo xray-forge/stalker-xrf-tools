@@ -6,12 +6,12 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectHelicopter {
   pub base: AlifeObjectDynamicVisual,
   pub motion: AlifeObjectMotion,
@@ -44,9 +44,8 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectHelicopter {
-  type Order = SpawnByteOrder;
-
   /// Write helicopter data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;

@@ -3,12 +3,12 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartZone {
   pub base: AlifeObjectSpaceRestrictor,
 }
@@ -29,9 +29,8 @@ impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeSmartZone {
-  type Order = SpawnByteOrder;
-
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 

@@ -1,4 +1,4 @@
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Grid } from "@mui/material";
 import { useManager } from "dreamstate";
 import { ReactElement } from "react";
 
@@ -11,5 +11,9 @@ export function SpawnEditorPage({ spawnContext: { spawnFile, isReady } = useMana
     return spawnFile.value ? <SpawnEditor /> : <SpawnEditorOpenForm />;
   }
 
-  return <CircularProgress />;
+  return (
+    <Grid width={"100%"} height={"100%"} justifyContent={"center"} alignItems={"center"} container>
+      <CircularProgress />
+    </Grid>
+  );
 }

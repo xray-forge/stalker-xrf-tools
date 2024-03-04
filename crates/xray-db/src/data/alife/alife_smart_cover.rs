@@ -5,13 +5,13 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
 /// Represents script extension of base server smart cover class.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartCover {
   pub base: AlifeObjectSmartCover,
   pub last_description: String,
@@ -54,9 +54,8 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeSmartCover {
-  type Order = SpawnByteOrder;
-
   /// Write smart cover data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;

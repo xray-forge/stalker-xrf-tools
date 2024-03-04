@@ -30,7 +30,6 @@ use crate::data::alife::alife_object_torrid_zone::AlifeObjectTorridZone;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
-use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use enum_map::Enum;
 use ini::Properties;
@@ -98,7 +97,7 @@ impl AlifeClass {
   pub fn read_by_class<T: ByteOrder>(
     reader: &mut ChunkReader,
     alife_class: &AlifeClass,
-  ) -> io::Result<Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>> {
+  ) -> io::Result<Box<dyn AlifeObjectGeneric>> {
     match alife_class {
       AlifeClass::SeActor => {
         let object: AlifeActor = AlifeActor::read::<T>(reader)?;
@@ -257,7 +256,7 @@ impl AlifeClass {
   pub fn import_by_class(
     alife_class: &AlifeClass,
     props: &Properties,
-  ) -> io::Result<Box<dyn AlifeObjectGeneric<Order = SpawnByteOrder>>> {
+  ) -> io::Result<Box<dyn AlifeObjectGeneric>> {
     Ok(match alife_class {
       AlifeClass::SeActor => Box::new(AlifeActor::import(props)?),
       AlifeClass::CseAlifeObjectBreakable => Box::new(AlifeObjectBreakable::import(props)?),

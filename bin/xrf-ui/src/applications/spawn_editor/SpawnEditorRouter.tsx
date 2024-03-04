@@ -16,13 +16,9 @@ export function SpawnEditorRouter(): ReactElement {
     <SpawnEditorProvider>
       <Routes>
         <Route path={"/"} element={<SpawnEditorNavigatorPage />} />
-
         <Route path={"editor/*"} element={<SpawnEditorPage />} />
-
         <Route path={"pack"} element={<SpawnEditorPackPage />} />
-
         <Route path={"unpack"} element={<SpawnEditorUnpackPage />} />
-
         <Route path={"*"} element={<NavigationError />} />
       </Routes>
     </SpawnEditorProvider>

@@ -6,9 +6,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectTraderAbstract {
   pub money: u32,
   pub specific_character: String,
@@ -56,9 +57,8 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
-  type Order = SpawnByteOrder;
-
   /// Write trader data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u32::<SpawnByteOrder>(self.money)?;

@@ -7,9 +7,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemWeapon {
   pub base: AlifeObjectItem,
   pub ammo_current: u16,
@@ -48,15 +49,14 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectItemWeapon {
-  type Order = SpawnByteOrder;
-
   /// Write item data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_u16::<Self::Order>(self.ammo_current)?;
-    writer.write_u16::<Self::Order>(self.ammo_elapsed)?;
+    writer.write_u16::<SpawnByteOrder>(self.ammo_current)?;
+    writer.write_u16::<SpawnByteOrder>(self.ammo_elapsed)?;
     writer.write_u8(self.weapon_state)?;
     writer.write_u8(self.addon_flags)?;
     writer.write_u8(self.ammo_type)?;

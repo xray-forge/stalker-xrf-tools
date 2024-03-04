@@ -8,9 +8,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeAnomalousZone {
   pub base: AlifeObjectAnomalyZone,
   pub last_spawn_time: Option<Time>,
@@ -37,14 +38,13 @@ impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeAnomalousZone {
-  type Order = SpawnByteOrder;
-
   /// Write alife anomalous zone data to the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    Time::write_optional::<Self::Order>(&self.last_spawn_time, writer)?;
+    Time::write_optional::<SpawnByteOrder>(&self.last_spawn_time, writer)?;
 
     Ok(())
   }

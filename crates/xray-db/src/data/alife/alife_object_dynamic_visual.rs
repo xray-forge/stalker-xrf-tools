@@ -4,12 +4,12 @@ use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectDynamicVisual {
   pub base: AlifeObjectAbstract,
   pub visual_name: String,
@@ -36,9 +36,8 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamic
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectDynamicVisual {
-  type Order = SpawnByteOrder;
-
   /// Write visual alife object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;

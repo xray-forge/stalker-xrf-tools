@@ -12,16 +12,18 @@ pub struct SpawnFileState {
 pub async fn open_spawn_file(
   path: &str,
   state: tauri::State<'_, SpawnFileState>,
-) -> Result<String, String> {
+) -> Result<Value, String> {
   log::info!("Opening spawn file");
 
   match SpawnFile::read_from_path::<SpawnByteOrder>(Path::new(path)) {
     Ok(file) => {
       log::info!("Opened spawn file");
 
+      let json: Value = json!(file);
+
       *state.file.lock().unwrap() = Some(file);
 
-      Ok(String::from("Opened spawn file"))
+      Ok(json)
     }
     Err(_) => Err(String::from("Failed to open provided spawn file")),
   }
@@ -97,16 +99,21 @@ pub fn close_spawn_file(state: tauri::State<'_, SpawnFileState>) {
 }
 
 #[tauri::command]
+pub fn has_spawn_file(state: tauri::State<'_, SpawnFileState>) -> bool {
+  state.file.lock().unwrap().is_some()
+}
+
+#[tauri::command]
 pub async fn get_spawn_file(
   state: tauri::State<'_, SpawnFileState>,
-) -> Result<Option<String>, String> {
-  let lock = state.file.lock().unwrap();
+) -> Result<Option<Value>, String> {
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
 
   if (*lock).is_none() {
     return Ok(None);
   }
 
-  Ok(Some(String::from("existing")))
+  Ok(Some(json!(lock.as_ref().unwrap())))
 }
 
 #[tauri::command]
@@ -146,4 +153,30 @@ pub async fn get_spawn_file_artefact_spawns(
   }
 
   Ok(Some(json!(lock.as_ref().unwrap().artefact_spawn)))
+}
+
+#[tauri::command]
+pub async fn get_spawn_file_alife_spawns(
+  state: tauri::State<'_, SpawnFileState>,
+) -> Result<Option<Value>, String> {
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
+
+  if lock.is_none() {
+    return Ok(None);
+  }
+
+  Ok(Some(json!(lock.as_ref().unwrap().alife_spawn)))
+}
+
+#[tauri::command]
+pub async fn get_spawn_file_graphs(
+  state: tauri::State<'_, SpawnFileState>,
+) -> Result<Option<Value>, String> {
+  let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
+
+  if lock.is_none() {
+    return Ok(None);
+  }
+
+  Ok(Some(json!(lock.as_ref().unwrap().graphs)))
 }

@@ -4,6 +4,7 @@ import { ContextManager, createActions, createLoadable, Loadable } from "dreamst
 import { Optional } from "@/core/types/general";
 import { ECommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
+import { ISpawnFile } from "@/lib/spawn_file";
 
 export interface ISpawnFileContext {
   spawnActions: {
@@ -15,7 +16,7 @@ export interface ISpawnFileContext {
     resetSpawnFile: () => void;
   };
   isReady: boolean;
-  spawnFile: Loadable<Optional<unknown>>;
+  spawnFile: Loadable<Optional<ISpawnFile>>;
 }
 
 export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
@@ -35,13 +36,13 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
   public log: Logger = new Logger("spawn");
 
   public async onProvisionStarted(): Promise<void> {
-    const existing: unknown = await invoke(ECommand.GET_SPAWN_FILE);
+    const existing: ISpawnFile = await invoke(ECommand.GET_SPAWN_FILE);
 
     if (existing) {
-      this.log.info("Existing spawn file detected:", existing);
+      this.log.info("Existing spawn file detected");
       this.setContext({ spawnFile: createLoadable(existing), isReady: true });
     } else {
-      this.log.info("No existing spawn files:", existing);
+      this.log.info("No existing spawn file");
       this.setContext({ isReady: true });
     }
   }
@@ -52,9 +53,9 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
     try {
       this.setContext({ spawnFile: createLoadable(null, true) });
 
-      const response: unknown = await invoke(ECommand.OPEN_SPAWN_FILE, { path });
+      const response: ISpawnFile = await invoke(ECommand.OPEN_SPAWN_FILE, { path });
 
-      this.log.info("Spawn file opened");
+      this.log.info("Spawn file opened:", Object.keys(response));
 
       this.setContext({ spawnFile: createLoadable(response, false) });
     } catch (error) {
@@ -69,7 +70,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
     try {
       this.setContext({ spawnFile: createLoadable(null, true) });
 
-      const response: unknown = await invoke(ECommand.IMPORT_SPAWN_FILE, { path });
+      const response: ISpawnFile = await invoke(ECommand.IMPORT_SPAWN_FILE, { path });
 
       this.log.info("Spawn file imported");
 

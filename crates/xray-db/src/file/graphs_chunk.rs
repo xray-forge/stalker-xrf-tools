@@ -11,11 +11,12 @@ use crate::export::file::{
 };
 use byteorder::ByteOrder;
 use ini::Ini;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::{fmt, io};
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct GraphsChunk {
   pub header: GraphHeader,
   pub levels: Vec<GraphLevel>,
@@ -258,6 +259,7 @@ mod tests {
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
+  use uuid::uuid;
 
   #[test]
   fn test_read_write_empty_graphs_chunk() -> io::Result<()> {
@@ -269,7 +271,7 @@ mod tests {
         vertex_count: 0,
         edges_count: 0,
         point_count: 0,
-        guid: 4000,
+        guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
         level_count: 0,
       },
       levels: vec![],
@@ -316,7 +318,7 @@ mod tests {
         vertex_count: 2,
         edges_count: 4,
         point_count: 3,
-        guid: 4500,
+        guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
         level_count: 2,
       },
       levels: vec![
@@ -324,14 +326,14 @@ mod tests {
           id: 25,
           name: String::from("test-level-1"),
           section: String::from("test-level-section-1"),
-          guid: 4000060000,
+          guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
           offset: Vector3d::new(2.5, 4.55, -6.5),
         },
         GraphLevel {
           id: 26,
           name: String::from("test-level"),
           section: String::from("test-level-section"),
-          guid: 5000060000,
+          guid: uuid!("89e55023-10b1-426f-9247-bb680e5fe0c8"),
           offset: Vector3d::new(3.5, 5.55, -7.5),
         },
       ],
@@ -399,16 +401,16 @@ mod tests {
           version: 16,
           nodes_count: 51,
           vertex_count: 4000,
-          level_guid: 1231,
-          game_guid: 124,
+          level_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
+          game_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b8"),
           data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         },
         GraphCrossTable {
           version: 16,
           nodes_count: 4232,
           vertex_count: 3000,
-          level_guid: 235235,
-          game_guid: 423423,
+          level_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
+          game_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b8"),
           data: vec![1, 2, 3, 4, 5],
         },
       ],

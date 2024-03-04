@@ -3,10 +3,11 @@
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::map::{CLS_ID_TO_CLASS, SECTION_TO_CLS_ID};
 use enum_map::Enum;
+use serde::{Deserialize, Serialize};
 use std::ops::Index;
 
 /// todo: Add script to parse system ini and read all the data from ini/txt file instead.
-#[derive(Clone, Debug, Enum, PartialEq)]
+#[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize)]
 pub enum ClsId {
   AiCrow,
   AiFleG,

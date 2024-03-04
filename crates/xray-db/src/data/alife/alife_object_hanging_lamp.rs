@@ -8,9 +8,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectHangingLamp {
   pub base: AlifeObjectDynamicVisual,
   pub skeleton: AlifeObjectSkeleton,
@@ -97,37 +98,36 @@ impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLa
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectHangingLamp {
-  type Order = SpawnByteOrder;
-
   /// Write skeleton data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
     self.skeleton.write(writer)?;
 
-    writer.write_u32::<Self::Order>(self.main_color)?;
-    writer.write_f32::<Self::Order>(self.main_brightness)?;
+    writer.write_u32::<SpawnByteOrder>(self.main_color)?;
+    writer.write_f32::<SpawnByteOrder>(self.main_brightness)?;
     writer.write_null_terminated_win_string(&self.color_animator)?;
-    writer.write_f32::<Self::Order>(self.main_range)?;
-    writer.write_u16::<Self::Order>(self.light_flags)?;
+    writer.write_f32::<SpawnByteOrder>(self.main_range)?;
+    writer.write_u16::<SpawnByteOrder>(self.light_flags)?;
     writer.write_null_terminated_win_string(&self.startup_animation)?;
     writer.write_null_terminated_win_string(&self.fixed_bones)?;
-    writer.write_f32::<Self::Order>(self.health)?;
+    writer.write_f32::<SpawnByteOrder>(self.health)?;
 
-    writer.write_f32::<Self::Order>(self.virtual_size)?;
-    writer.write_f32::<Self::Order>(self.ambient_radius)?;
-    writer.write_f32::<Self::Order>(self.ambient_power)?;
+    writer.write_f32::<SpawnByteOrder>(self.virtual_size)?;
+    writer.write_f32::<SpawnByteOrder>(self.ambient_radius)?;
+    writer.write_f32::<SpawnByteOrder>(self.ambient_power)?;
     writer.write_null_terminated_win_string(&self.ambient_texture)?;
     writer.write_null_terminated_win_string(&self.light_texture)?;
     writer.write_null_terminated_win_string(&self.light_bone)?;
-    writer.write_f32::<Self::Order>(self.spot_cone_angle)?;
+    writer.write_f32::<SpawnByteOrder>(self.spot_cone_angle)?;
     writer.write_null_terminated_win_string(&self.glow_texture)?;
-    writer.write_f32::<Self::Order>(self.glow_radius)?;
+    writer.write_f32::<SpawnByteOrder>(self.glow_radius)?;
 
     writer.write_null_terminated_win_string(&self.light_ambient_bone)?;
-    writer.write_f32::<Self::Order>(self.volumetric_quality)?;
-    writer.write_f32::<Self::Order>(self.volumetric_intensity)?;
-    writer.write_f32::<Self::Order>(self.volumetric_distance)?;
+    writer.write_f32::<SpawnByteOrder>(self.volumetric_quality)?;
+    writer.write_f32::<SpawnByteOrder>(self.volumetric_intensity)?;
+    writer.write_f32::<SpawnByteOrder>(self.volumetric_distance)?;
 
     Ok(())
   }

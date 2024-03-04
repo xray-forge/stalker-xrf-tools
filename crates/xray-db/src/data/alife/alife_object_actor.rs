@@ -9,9 +9,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectActor {
   pub base: AlifeObjectCreature,
   pub trader: AlifeObjectTraderAbstract,
@@ -41,16 +42,15 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectActor {
-  type Order = SpawnByteOrder;
-
   /// Write object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
     self.trader.write(writer)?;
     self.skeleton.write(writer)?;
 
-    writer.write_u16::<Self::Order>(self.holder_id)?;
+    writer.write_u16::<SpawnByteOrder>(self.holder_id)?;
 
     Ok(())
   }

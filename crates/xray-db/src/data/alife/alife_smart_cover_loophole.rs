@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartCoverLoophole {
   pub name: String,
   pub enabled: u8,

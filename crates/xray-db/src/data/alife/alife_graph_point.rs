@@ -3,12 +3,12 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeGraphPoint {
   pub connection_point_name: String,
   pub connection_level_name: String,
@@ -45,9 +45,8 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeGraphPoint {
-  type Order = SpawnByteOrder;
-
   /// Write graph point data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_null_terminated_win_string(&self.connection_point_name)?;

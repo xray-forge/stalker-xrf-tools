@@ -7,9 +7,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectCustomZone {
   pub base: AlifeObjectSpaceRestrictor,
   pub max_power: f32,
@@ -45,18 +46,17 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectCustomZone {
-  type Order = SpawnByteOrder;
-
   /// Write custom zone object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_f32::<Self::Order>(self.max_power)?;
-    writer.write_u32::<Self::Order>(self.owner_id)?;
-    writer.write_u32::<Self::Order>(self.enabled_time)?;
-    writer.write_u32::<Self::Order>(self.disabled_time)?;
-    writer.write_u32::<Self::Order>(self.start_time_shift)?;
+    writer.write_f32::<SpawnByteOrder>(self.max_power)?;
+    writer.write_u32::<SpawnByteOrder>(self.owner_id)?;
+    writer.write_u32::<SpawnByteOrder>(self.enabled_time)?;
+    writer.write_u32::<SpawnByteOrder>(self.disabled_time)?;
+    writer.write_u32::<SpawnByteOrder>(self.start_time_shift)?;
 
     Ok(())
   }

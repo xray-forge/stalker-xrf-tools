@@ -7,9 +7,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectBreakable {
   pub base: AlifeObjectDynamicVisual,
   pub health: f32,
@@ -33,14 +34,13 @@ impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectBreakable {
-  type Order = SpawnByteOrder;
-
   /// Write alife breakable object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_f32::<Self::Order>(self.health)?;
+    writer.write_f32::<SpawnByteOrder>(self.health)?;
 
     Ok(())
   }

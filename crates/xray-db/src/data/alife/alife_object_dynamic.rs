@@ -3,12 +3,12 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectDynamic {
   pub base: AlifeObjectAbstract,
 }
@@ -29,9 +29,8 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamic> for AlifeObjectDynamic {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectDynamic {
-  type Order = SpawnByteOrder;
-
   /// Write dynamic object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;

@@ -2,13 +2,13 @@ import { Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
-import { SpawnEditorAlife } from "@/applications/spawn_editor/components/editor/SpawnEditorAlife";
-import { SpawnEditorArtefacts } from "@/applications/spawn_editor/components/editor/SpawnEditorArtefacts";
-import { SpawnEditorGeneral } from "@/applications/spawn_editor/components/editor/SpawnEditorGeneral";
-import { SpawnEditorGraphs } from "@/applications/spawn_editor/components/editor/SpawnEditorGraphs";
-import { SpawnEditorHeader } from "@/applications/spawn_editor/components/editor/SpawnEditorHeader";
+import { SpawnEditorAlife } from "@/applications/spawn_editor/components/editor/chunks/alife/SpawnEditorAlife";
+import { SpawnEditorArtefacts } from "@/applications/spawn_editor/components/editor/chunks/artefacts/SpawnEditorArtefacts";
+import { SpawnEditorGraphs } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphs";
+import { SpawnEditorHeader } from "@/applications/spawn_editor/components/editor/chunks/header/SpawnEditorHeader";
+import { SpawnEditorPatrols } from "@/applications/spawn_editor/components/editor/chunks/patrol/SpawnEditorPatrols";
+import { SpawnEditorGeneral } from "@/applications/spawn_editor/components/editor/chunks/SpawnEditorGeneral";
 import { SpawnEditorMenu } from "@/applications/spawn_editor/components/editor/SpawnEditorMenu";
-import { SpawnEditorPatrols } from "@/applications/spawn_editor/components/editor/SpawnEditorPatrols";
 
 export function SpawnEditor(): ReactElement {
   return (

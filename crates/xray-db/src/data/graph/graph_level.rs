@@ -4,16 +4,18 @@ use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
+use uuid::Uuid;
 
 /// `GameGraph::SLevel::load` in xray codebase.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphLevel {
   pub name: String,
   pub offset: Vector3d<f32>,
   pub id: u8,
   pub section: String,
-  pub guid: u128,
+  pub guid: Uuid,
 }
 
 impl GraphLevel {
@@ -24,7 +26,7 @@ impl GraphLevel {
       offset: reader.read_f32_3d_vector::<T>()?,
       id: reader.read_u8()?,
       section: reader.read_null_terminated_win_string()?,
-      guid: reader.read_u128::<T>()?,
+      guid: Uuid::from_u128(reader.read_u128::<T>()?),
     })
   }
 
@@ -34,7 +36,7 @@ impl GraphLevel {
     writer.write_f32_3d_vector::<T>(&self.offset)?;
     writer.write_u8(self.id)?;
     writer.write_null_terminated_win_string(&self.section)?;
-    writer.write_u128::<T>(self.guid)?;
+    writer.write_u128::<T>(self.guid.as_u128())?;
 
     Ok(())
   }
@@ -78,6 +80,7 @@ mod tests {
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
+  use uuid::uuid;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
@@ -88,7 +91,7 @@ mod tests {
       id: 255,
       name: String::from("test-level"),
       section: String::from("test-level-section"),
-      guid: 4000060000,
+      guid: uuid!("89e55023-10b1-426f-9247-bb680e5fe0b8"),
       offset: Vector3d::new(0.5, 5.55, -1.5),
     };
 

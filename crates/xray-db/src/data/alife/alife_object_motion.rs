@@ -3,12 +3,12 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectMotion {
   pub motion_name: String,
 }
@@ -29,9 +29,8 @@ impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectMotion {
-  type Order = SpawnByteOrder;
-
   /// Write motion object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_null_terminated_win_string(&self.motion_name)?;

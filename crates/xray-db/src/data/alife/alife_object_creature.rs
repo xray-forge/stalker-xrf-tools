@@ -8,9 +8,10 @@ use crate::export::file_import::{import_vector_from_string, read_ini_field};
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectCreature {
   pub base: AlifeObjectDynamicVisual,
   pub team: u8,
@@ -61,9 +62,8 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectCreature {
-  type Order = SpawnByteOrder;
-
   /// Write alife creature object data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
@@ -71,13 +71,13 @@ impl AlifeObjectGeneric for AlifeObjectCreature {
     writer.write_u8(self.team)?;
     writer.write_u8(self.squad)?;
     writer.write_u8(self.group)?;
-    writer.write_f32::<Self::Order>(self.health)?;
+    writer.write_f32::<SpawnByteOrder>(self.health)?;
 
-    writer.write_u16_vector::<Self::Order>(&self.dynamic_out_restrictions)?;
-    writer.write_u16_vector::<Self::Order>(&self.dynamic_in_restrictions)?;
+    writer.write_u16_vector::<SpawnByteOrder>(&self.dynamic_out_restrictions)?;
+    writer.write_u16_vector::<SpawnByteOrder>(&self.dynamic_in_restrictions)?;
 
-    writer.write_u16::<Self::Order>(self.killer_id)?;
-    writer.write_u64::<Self::Order>(self.game_death_time)?;
+    writer.write_u16::<SpawnByteOrder>(self.killer_id)?;
+    writer.write_u64::<SpawnByteOrder>(self.game_death_time)?;
 
     Ok(())
   }

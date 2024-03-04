@@ -1,12 +1,16 @@
 import { default as CloseIcon } from "@mui/icons-material/Close";
 import { default as CottageIcon } from "@mui/icons-material/Cottage";
 import { default as ImportExportIcon } from "@mui/icons-material/ImportExport";
-import { default as MemoryIcon } from "@mui/icons-material/Memory";
+import { default as LooksIcon3 } from "@mui/icons-material/Looks3";
+import { default as LooksIcon4 } from "@mui/icons-material/Looks4";
+import { default as LooksIcon5 } from "@mui/icons-material/Looks5";
+import { default as LooksIcon1 } from "@mui/icons-material/LooksOne";
+import { default as LooksIcon2 } from "@mui/icons-material/LooksTwo";
 import { default as SaveIcon } from "@mui/icons-material/Save";
 import { Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { dialog } from "@tauri-apps/api";
 import { useManager } from "dreamstate";
-import { ReactElement, useCallback } from "react";
+import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, redirect, useNavigate } from "react-router-dom";
 
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
@@ -16,6 +20,17 @@ export function SpawnEditorMenu({
   spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
 }): ReactElement {
   const navigate: NavigateFunction = useNavigate();
+
+  const sections: Array<[string, ReactElement]> = useMemo(
+    () => [
+      ["Header", <LooksIcon1 />],
+      ["Alife", <LooksIcon2 />],
+      ["Artefacts", <LooksIcon3 />],
+      ["Patrols", <LooksIcon4 />],
+      ["Graph", <LooksIcon5 />],
+    ],
+    []
+  );
 
   const onSaveClicked = useCallback(async () => {
     const path: Optional<string> = await dialog.save({
@@ -61,12 +76,10 @@ export function SpawnEditorMenu({
       <Divider />
 
       <List>
-        {["Header", "Alife", "Artefacts", "Patrols", "Graph"].map((text) => (
+        {sections.map(([text, icon]) => (
           <ListItem key={text} disablePadding>
             <ListItemButton onClick={() => navigate(text.toLowerCase(), { replace: true })}>
-              <ListItemIcon>
-                <MemoryIcon />
-              </ListItemIcon>
+              <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
           </ListItem>

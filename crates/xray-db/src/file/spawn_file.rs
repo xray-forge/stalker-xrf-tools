@@ -8,6 +8,7 @@ use crate::file::header_chunk::HeaderChunk;
 use crate::file::patrols_chunk::PatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
 use std::{fs, io};
@@ -20,7 +21,7 @@ use std::{fs, io};
 /// 2 - alife objects
 /// 3 - patrols
 /// 4 - game graphs
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SpawnFile {
   pub header: HeaderChunk,
   pub alife_spawn: ALifeSpawnsChunk,

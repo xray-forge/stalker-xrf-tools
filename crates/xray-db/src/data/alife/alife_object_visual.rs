@@ -3,12 +3,12 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectVisual {
   pub visual_name: String,
   pub visual_flags: u8,
@@ -32,9 +32,8 @@ impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectVisual {
-  type Order = SpawnByteOrder;
-
   /// Write visual alife object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_null_terminated_win_string(&self.visual_name)?;

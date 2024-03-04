@@ -5,6 +5,7 @@ use crate::data::alife_object_base::AlifeObjectBase;
 use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::Ini;
+use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
 use std::{fmt, io};
@@ -13,6 +14,7 @@ use std::{fmt, io};
 /// 0 - count
 /// 1 - objects
 /// 2 - edges
+#[derive(Serialize, Deserialize)]
 pub struct ALifeSpawnsChunk {
   pub objects: Vec<AlifeObjectBase>,
 }

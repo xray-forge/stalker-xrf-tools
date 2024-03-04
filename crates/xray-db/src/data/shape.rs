@@ -1,10 +1,11 @@
 use crate::export::file_import::read_ini_field;
 use crate::types::{Matrix3d, Sphere3d};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
 /// Shape enumeration stored in alife objects descriptors.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Shape {
   Sphere(Sphere3d),
   Box(Matrix3d),

@@ -54,7 +54,7 @@ export function SpawnEditorOpenForm({
     [onSelectSpawnFile]
   );
 
-  const onParseSpawnFile = useCallback(() => {
+  const onOpenSpawnFile = useCallback(() => {
     if (spawnPath) {
       spawnActions.openSpawnFile(spawnPath);
     } else {
@@ -97,7 +97,7 @@ export function SpawnEditorOpenForm({
         <Button
           variant={"contained"}
           disabled={!spawnPath || isSelecting || spawnFile.isLoading}
-          onClick={onParseSpawnFile}
+          onClick={onOpenSpawnFile}
         >
           Open
         </Button>

@@ -7,10 +7,11 @@ use crate::export::string::{string_from_base64, string_to_base64};
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
 /// Generic alife object abstraction data.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectAbstract {
   pub game_vertex_id: u16,
   pub distance: f32,
@@ -52,19 +53,18 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectAbstract {
-  type Order = SpawnByteOrder;
-
   /// Write abstract object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
-    writer.write_u16::<Self::Order>(self.game_vertex_id)?;
-    writer.write_f32::<Self::Order>(self.distance)?;
-    writer.write_u32::<Self::Order>(self.direct_control)?;
-    writer.write_u32::<Self::Order>(self.level_vertex_id)?;
-    writer.write_u32::<Self::Order>(self.flags)?;
+    writer.write_u16::<SpawnByteOrder>(self.game_vertex_id)?;
+    writer.write_f32::<SpawnByteOrder>(self.distance)?;
+    writer.write_u32::<SpawnByteOrder>(self.direct_control)?;
+    writer.write_u32::<SpawnByteOrder>(self.level_vertex_id)?;
+    writer.write_u32::<SpawnByteOrder>(self.flags)?;
     writer.write_null_terminated_win_string(&self.custom_data)?;
-    writer.write_u32::<Self::Order>(self.story_id)?;
-    writer.write_u32::<Self::Order>(self.spawn_story_id)?;
+    writer.write_u32::<SpawnByteOrder>(self.story_id)?;
+    writer.write_u32::<SpawnByteOrder>(self.spawn_story_id)?;
 
     Ok(())
   }

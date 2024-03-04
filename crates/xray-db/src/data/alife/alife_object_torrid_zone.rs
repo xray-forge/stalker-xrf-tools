@@ -9,9 +9,10 @@ use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use ini::{Ini, Properties};
+use serde::{Deserialize, Serialize};
 use std::io;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectTorridZone {
   pub base: AlifeObjectCustomZone,
   pub motion: AlifeObjectMotion,
@@ -41,15 +42,14 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
   }
 }
 
+#[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectTorridZone {
-  type Order = SpawnByteOrder;
-
   /// Write zone object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
     self.motion.write(writer)?;
 
-    Time::write_optional::<Self::Order>(&self.last_spawn_time, writer)?;
+    Time::write_optional::<SpawnByteOrder>(&self.last_spawn_time, writer)?;
 
     Ok(())
   }
