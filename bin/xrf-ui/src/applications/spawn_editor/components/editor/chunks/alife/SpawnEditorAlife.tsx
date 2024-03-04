@@ -35,7 +35,7 @@ export function SpawnEditorAlife({
       flexWrap={"nowrap"}
       container
     >
-      <Typography variant={"h5"}>Alife spawns</Typography>
+      <Typography variant={"h5"}>Alife</Typography>
       <Divider sx={{ margin: "16px 0" }} />
       <SpawnEditorAlifeObjectsTable objects={spawnFile.alifeSpawn.objects} />
     </Grid>

@@ -12,7 +12,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectBreakable {
+  #[serde(rename = "base")]
   pub base: AlifeObjectDynamicVisual,
+  #[serde(rename = "health")]
   pub health: f32,
 }
 

@@ -13,7 +13,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeAnomalousZone {
+  #[serde(rename = "base")]
   pub base: AlifeObjectAnomalyZone,
+  #[serde(rename = "lastSpawnTime")]
   pub last_spawn_time: Option<Time>,
 }
 

@@ -14,9 +14,13 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectActor {
+  #[serde(rename = "base")]
   pub base: AlifeObjectCreature,
+  #[serde(rename = "trader")]
   pub trader: AlifeObjectTraderAbstract,
+  #[serde(rename = "skeleton")]
   pub skeleton: AlifeObjectSkeleton,
+  #[serde(rename = "holderId")]
   pub holder_id: u16,
 }
 

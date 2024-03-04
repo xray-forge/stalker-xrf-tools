@@ -35,7 +35,7 @@ export function SpawnEditorArtefacts({
       flexWrap={"nowrap"}
       container
     >
-      <Typography variant={"h5"}>Artefact spawn nodes</Typography>
+      <Typography variant={"h5"}>Artefacts</Typography>
       <Divider sx={{ margin: "16px 0" }} />
       <SpawnEditorArtefactsNodesTable nodes={spawnFile.artefactSpawn.nodes} />
     </Grid>

@@ -13,8 +13,11 @@ use std::io;
 /// Represents script extension of base server smart cover class.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartCover {
+  #[serde(rename = "base")]
   pub base: AlifeObjectSmartCover,
+  #[serde(rename = "lastDescription")]
   pub last_description: String,
+  #[serde(rename = "loopholes")]
   pub loopholes: Vec<AlifeSmartCoverLoophole>,
 }
 

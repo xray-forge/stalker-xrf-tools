@@ -13,17 +13,29 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeLevelChanger {
+  #[serde(rename = "base")]
   pub base: AlifeObjectSpaceRestrictor,
+  #[serde(rename = "destGameVertexId")]
   pub dest_game_vertex_id: u16,
+  #[serde(rename = "destLevelVertexId")]
   pub dest_level_vertex_id: u32,
+  #[serde(rename = "destPosition")]
   pub dest_position: Vector3d<f32>,
+  #[serde(rename = "destDirection")]
   pub dest_direction: Vector3d<f32>,
+  #[serde(rename = "angleY")]
   pub angle_y: f32,
+  #[serde(rename = "destLevelName")]
   pub dest_level_name: String,
+  #[serde(rename = "destGraphPoint")]
   pub dest_graph_point: String,
+  #[serde(rename = "silentMode")]
   pub silent_mode: u8,
+  #[serde(rename = "enabled")]
   pub enabled: u8,
+  #[serde(rename = "hint")]
   pub hint: String,
+  #[serde(rename = "saveMarker")]
   pub save_marker: u16,
 }
 

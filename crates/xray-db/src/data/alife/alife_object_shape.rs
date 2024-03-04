@@ -12,7 +12,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectShape {
+  #[serde(rename = "base")]
   pub base: AlifeObjectAbstract,
+  #[serde(rename = "shape")]
   pub shape: Vec<Shape>,
 }
 

@@ -10,7 +10,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectVisual {
+  #[serde(rename = "visualName")]
   pub visual_name: String,
+  #[serde(rename = "visualFlags")]
   pub visual_flags: u8,
 }
 

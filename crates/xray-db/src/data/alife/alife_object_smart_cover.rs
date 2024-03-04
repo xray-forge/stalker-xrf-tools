@@ -13,13 +13,21 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectSmartCover {
+  #[serde(rename = "base")]
   pub base: AlifeObjectDynamic,
+  #[serde(rename = "shape")]
   pub shape: Vec<Shape>,
+  #[serde(rename = "description")]
   pub description: String,
+  #[serde(rename = "holdPositionTime")]
   pub hold_position_time: f32,
+  #[serde(rename = "enterMinEnemyDistance")]
   pub enter_min_enemy_distance: f32,
+  #[serde(rename = "exitMinEnemyDistance")]
   pub exit_min_enemy_distance: f32,
+  #[serde(rename = "isCombatCover")]
   pub is_combat_cover: u8,
+  #[serde(rename = "canFire")]
   pub can_fire: u8,
 }
 

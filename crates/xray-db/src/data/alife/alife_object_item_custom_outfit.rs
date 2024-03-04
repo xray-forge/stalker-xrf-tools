@@ -10,6 +10,7 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemCustomOutfit {
+  #[serde(rename = "base")]
   pub base: AlifeObjectItem,
 }
 

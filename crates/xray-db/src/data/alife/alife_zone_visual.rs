@@ -14,10 +14,15 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeZoneVisual {
+  #[serde(rename = "base")]
   pub base: AlifeObjectAnomalyZone,
+  #[serde(rename = "visual")]
   pub visual: AlifeObjectVisual,
+  #[serde(rename = "idleAnimation")]
   pub idle_animation: String,
+  #[serde(rename = "attackAnimation")]
   pub attack_animation: String,
+  #[serde(rename = "lastSpawnTime")]
   pub last_spawn_time: Option<Time>,
 }
 

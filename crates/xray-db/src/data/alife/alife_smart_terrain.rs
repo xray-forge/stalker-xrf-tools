@@ -12,13 +12,21 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartTerrain {
+  #[serde(rename = "base")]
   pub base: AlifeSmartZone,
+  #[serde(rename = "arrivingObjectsCount")]
   pub arriving_objects_count: u8,
+  #[serde(rename = "objectJobDescriptorsCount")]
   pub object_job_descriptors_count: u8,
+  #[serde(rename = "deadObjectsInfosCount")]
   pub dead_objects_infos_count: u8,
+  #[serde(rename = "smartTerrainActorControl")]
   pub smart_terrain_actor_control: u8,
+  #[serde(rename = "respawnPoint")]
   pub respawn_point: u8,
+  #[serde(rename = "stayingObjectsCount")]
   pub staying_objects_count: u8,
+  #[serde(rename = "saveMarker")]
   pub save_marker: u16,
 }
 

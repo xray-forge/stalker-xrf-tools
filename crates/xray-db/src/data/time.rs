@@ -9,12 +9,19 @@ use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Time {
+  #[serde(rename = "year")]
   pub year: u8,
+  #[serde(rename = "month")]
   pub month: u8,
+  #[serde(rename = "day")]
   pub day: u8,
+  #[serde(rename = "hour")]
   pub hour: u8,
+  #[serde(rename = "minute")]
   pub minute: u8,
+  #[serde(rename = "second")]
   pub second: u8,
+  #[serde(rename = "millis")]
   pub millis: u16,
 }
 

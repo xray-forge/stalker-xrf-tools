@@ -12,11 +12,17 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectCustomZone {
+  #[serde(rename = "base")]
   pub base: AlifeObjectSpaceRestrictor,
+  #[serde(rename = "maxPower")]
   pub max_power: f32,
+  #[serde(rename = "ownerId")]
   pub owner_id: u32,
+  #[serde(rename = "enabledTime")]
   pub enabled_time: u32,
+  #[serde(rename = "disabledTime")]
   pub disabled_time: u32,
+  #[serde(rename = "startTimeShift")]
   pub start_time_shift: u32,
 }
 

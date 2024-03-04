@@ -13,13 +13,21 @@ use std::io;
 /// Generic alife object abstraction data.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectAbstract {
+  #[serde(rename = "gameVertexId")]
   pub game_vertex_id: u16,
+  #[serde(rename = "distance")]
   pub distance: f32,
+  #[serde(rename = "directControl")]
   pub direct_control: u32,
+  #[serde(rename = "levelVertexId")]
   pub level_vertex_id: u32,
+  #[serde(rename = "flags")]
   pub flags: u32,
+  #[serde(rename = "customData")]
   pub custom_data: String,
+  #[serde(rename = "storyId")]
   pub story_id: u32,
+  #[serde(rename = "spawnStoryId")]
   pub spawn_story_id: u32,
 }
 

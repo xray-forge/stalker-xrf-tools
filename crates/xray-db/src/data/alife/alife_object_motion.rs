@@ -10,6 +10,7 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectMotion {
+  #[serde(rename = "motionName")]
   pub motion_name: String,
 }
 

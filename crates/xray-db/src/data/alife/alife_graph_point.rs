@@ -10,12 +10,18 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeGraphPoint {
+  #[serde(rename = "connectionPointName")]
   pub connection_point_name: String,
+  #[serde(rename = "connectionLevelName")]
   pub connection_level_name: String,
   // todo: Use U32Bytes?
+  #[serde(rename = "location0")]
   pub location0: u8,
+  #[serde(rename = "location1")]
   pub location1: u8,
+  #[serde(rename = "location2")]
   pub location2: u8,
+  #[serde(rename = "location3")]
   pub location3: u8,
 }
 

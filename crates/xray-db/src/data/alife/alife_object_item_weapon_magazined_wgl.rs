@@ -10,6 +10,7 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemWeaponMagazinedWgl {
+  #[serde(rename = "base")]
   pub base: AlifeObjectItemWeaponMagazined,
 }
 

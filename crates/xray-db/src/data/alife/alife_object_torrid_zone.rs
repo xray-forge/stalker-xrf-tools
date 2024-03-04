@@ -14,8 +14,11 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectTorridZone {
+  #[serde(rename = "base")]
   pub base: AlifeObjectCustomZone,
+  #[serde(rename = "motion")]
   pub motion: AlifeObjectMotion,
+  #[serde(rename = "lastSpawnTime")]
   pub last_spawn_time: Option<Time>,
 }
 

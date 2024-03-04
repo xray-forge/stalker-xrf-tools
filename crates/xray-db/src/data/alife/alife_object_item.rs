@@ -12,8 +12,11 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItem {
+  #[serde(rename = "base")]
   pub base: AlifeObjectDynamicVisual,
+  #[serde(rename = "condition")]
   pub condition: f32,
+  #[serde(rename = "upgradesCount")]
   pub upgrades_count: u32,
 }
 

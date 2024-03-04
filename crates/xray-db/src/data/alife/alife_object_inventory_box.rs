@@ -11,9 +11,13 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectInventoryBox {
+  #[serde(rename = "base")]
   pub base: AlifeObjectDynamicVisual,
+  #[serde(rename = "canTake")]
   pub can_take: u8,
+  #[serde(rename = "isClosed")]
   pub is_closed: u8,
+  #[serde(rename = "tip")]
   pub tip: String,
 }
 

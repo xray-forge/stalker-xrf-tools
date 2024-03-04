@@ -11,7 +11,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectClimable {
+  #[serde(rename = "base")]
   pub base: AlifeObjectShape,
+  #[serde(rename = "gameMaterial")]
   pub game_material: String,
 }
 

@@ -12,7 +12,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemAmmo {
+  #[serde(rename = "base")]
   pub base: AlifeObjectItem,
+  #[serde(rename = "ammoLeft")]
   pub ammo_left: u16,
 }
 

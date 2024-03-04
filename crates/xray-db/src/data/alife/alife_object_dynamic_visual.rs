@@ -11,8 +11,11 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectDynamicVisual {
+  #[serde(rename = "base")]
   pub base: AlifeObjectAbstract,
+  #[serde(rename = "visualName")]
   pub visual_name: String,
+  #[serde(rename = "visualFlags")]
   pub visual_flags: u8,
 }
 

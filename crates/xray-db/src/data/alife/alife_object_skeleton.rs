@@ -12,8 +12,11 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectSkeleton {
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "flags")]
   pub flags: u8,
+  #[serde(rename = "sourceId")]
   pub source_id: u16,
 }
 

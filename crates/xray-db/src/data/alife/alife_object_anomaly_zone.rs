@@ -12,9 +12,13 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectAnomalyZone {
+  #[serde(rename = "base")]
   pub base: AlifeObjectCustomZone,
+  #[serde(rename = "offlineInteractiveRadius")]
   pub offline_interactive_radius: f32,
+  #[serde(rename = "artefactSpawnCount")]
   pub artefact_spawn_count: u16,
+  #[serde(rename = "artefactPositionOffset")]
   pub artefact_position_offset: u32,
 }
 

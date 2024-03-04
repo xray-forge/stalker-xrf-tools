@@ -12,8 +12,11 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeActor {
+  #[serde(rename = "base")]
   pub base: AlifeObjectActor,
+  #[serde(rename = "startPositionFilled")]
   pub start_position_filled: u8,
+  #[serde(rename = "saveMarker")]
   pub save_marker: u16,
 }
 

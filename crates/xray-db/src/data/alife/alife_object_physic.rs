@@ -13,10 +13,15 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectPhysic {
+  #[serde(rename = "base")]
   pub base: AlifeObjectDynamicVisual,
+  #[serde(rename = "skeleton")]
   pub skeleton: AlifeObjectSkeleton,
+  #[serde(rename = "physicType")]
   pub physic_type: u32,
+  #[serde(rename = "mass")]
   pub mass: f32,
+  #[serde(rename = "fixedBones")]
   pub fixed_bones: String,
 }
 

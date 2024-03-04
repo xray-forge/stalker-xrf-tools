@@ -3,7 +3,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartCoverLoophole {
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "enabled")]
   pub enabled: u8,
 }
 
