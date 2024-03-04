@@ -86,7 +86,7 @@ mod tests {
   use crate::test::file::read_file_as_string;
   use crate::test::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_resource_as_file,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -117,7 +117,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 28);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
       ))?,
@@ -155,7 +155,7 @@ mod tests {
 
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_header.ini");
     let mut file: File =
-      overwrite_test_resource_as_file(config_path.to_str().expect("Valid path"))?;
+      overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ini: Ini = Ini::new();
 
     header.export(&mut ini);
@@ -179,10 +179,9 @@ mod tests {
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
     };
 
-    let mut file: File = overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
-      file!(),
-      "serialized.json",
-    ))?;
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+    )?;
 
     file.write_all(json!(header).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

@@ -75,7 +75,7 @@ mod tests {
   use crate::test::assertions::files_are_equal_by_path;
   use crate::test::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_resource_as_file,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -116,7 +116,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 106);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -183,7 +183,7 @@ mod tests {
 
     export_ini_to_file(
       &exported,
-      &mut overwrite_test_resource_as_file(&exported_filename)?,
+      &mut overwrite_test_relative_resource_as_file(&exported_filename)?,
     )?;
 
     let source: Ini = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
@@ -204,7 +204,7 @@ mod tests {
 
     export_ini_to_file(
       &imported,
-      &mut overwrite_test_resource_as_file(&imported_filename)?,
+      &mut overwrite_test_relative_resource_as_file(&imported_filename)?,
     )?;
 
     assert!(files_are_equal_by_path(

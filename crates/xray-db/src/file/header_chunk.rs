@@ -103,7 +103,7 @@ mod tests {
   use crate::test::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_directory,
     get_relative_test_sample_file_path, get_relative_test_sample_sub_dir,
-    open_test_resource_as_slice, overwrite_test_resource_as_file,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -145,7 +145,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 44);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -196,10 +196,9 @@ mod tests {
       levels_count: 31,
     };
 
-    let mut file: File = overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
-      file!(),
-      "serialized.json",
-    ))?;
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+    )?;
 
     file.write_all(json!(header).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

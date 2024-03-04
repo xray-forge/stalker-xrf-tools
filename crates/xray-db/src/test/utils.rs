@@ -85,7 +85,7 @@ pub fn open_test_resource_as_file(resource_path: &str) -> io::Result<File> {
 }
 
 /// Create and open file from test resources, overwrite existing one.
-pub fn overwrite_test_resource_as_file(resource_path: &str) -> io::Result<File> {
+pub fn overwrite_test_relative_resource_as_file(resource_path: &str) -> io::Result<File> {
   let path: PathBuf = get_absolute_test_resource_path(resource_path);
 
   std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
@@ -96,6 +96,25 @@ pub fn overwrite_test_resource_as_file(resource_path: &str) -> io::Result<File> 
     .truncate(true)
     .read(true)
     .open(path.clone())
+  {
+    Ok(file) => Ok(file),
+    Err(error) => Err(io::Error::new(
+      error.kind(),
+      format!("Failed to open test asset {:?}", path),
+    )),
+  }
+}
+
+/// Create and open file by path, overwrite existing one.
+pub fn overwrite_file(path: &Path) -> io::Result<File> {
+  std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
+
+  match OpenOptions::new()
+    .create(true)
+    .write(true)
+    .truncate(true)
+    .read(true)
+    .open(path)
   {
     Ok(file) => Ok(file),
     Err(error) => Err(io::Error::new(

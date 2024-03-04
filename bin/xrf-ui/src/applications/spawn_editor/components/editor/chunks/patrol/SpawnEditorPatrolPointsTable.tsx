@@ -14,8 +14,8 @@ export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolsTab
       { field: "patrol", headerName: "patrol", width: 300 },
       { field: "name", headerName: "name" },
       { field: "flags", headerName: "flags" },
-      { field: "level_vertex_id", headerName: "level_vertex_id", width: 120 },
-      { field: "game_vertex_id", headerName: "game_vertex_id", width: 120 },
+      { field: "levelVertexId", headerName: "level vertex id", width: 120 },
+      { field: "gameVertexId", headerName: "game vertex id", width: 120 },
       {
         field: "position",
         headerName: "position",

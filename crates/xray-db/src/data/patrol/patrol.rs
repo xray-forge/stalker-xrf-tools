@@ -24,8 +24,11 @@ use std::io::Write;
 ///   2 - patrol points links
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Patrol {
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "points")]
   pub points: Vec<PatrolPoint>,
+  #[serde(rename = "links")]
   pub links: Vec<PatrolLink>,
 }
 
@@ -160,12 +163,13 @@ impl Patrol {
   /// Creates separate files for patrols, points and links.
   pub fn export<T: ByteOrder>(
     &self,
+    section: &str,
     patrols_config: &mut Ini,
     patrol_points_config: &mut Ini,
     patrol_links_config: &mut Ini,
-  ) -> io::Result<()> {
+  ) {
     patrols_config
-      .with_section(Some(&self.name))
+      .with_section(Some(section))
       .set("name", &self.name)
       .set(
         "points",
@@ -188,8 +192,6 @@ impl Patrol {
     for (index, link) in self.links.iter().enumerate() {
       link.export(&format!("{}.{}", self.name, index), patrol_links_config);
     }
-
-    Ok(())
   }
 }
 
@@ -201,13 +203,20 @@ mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::file::read_file_as_string;
   use crate::test::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
 
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
@@ -243,7 +252,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 210);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -320,7 +329,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 430);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -334,6 +343,110 @@ mod tests {
     let read_patrols: Vec<Patrol> = Patrol::read_list::<SpawnByteOrder>(&mut reader, 2)?;
 
     assert_eq!(read_patrols, patrols);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let patrol: Patrol = Patrol {
+      name: String::from("patrol-name-exp"),
+      points: vec![
+        PatrolPoint {
+          name: String::from("patrol-point-1-exp"),
+          position: Vector3d::new(7.5, -2.42, -4.0),
+          flags: 53,
+          level_vertex_id: 2533,
+          game_vertex_id: 512,
+        },
+        PatrolPoint {
+          name: String::from("patrol-point-2-exp"),
+          position: Vector3d::new(4.5, -5.3, 4.5),
+          flags: 12,
+          level_vertex_id: 23421,
+          game_vertex_id: 5233,
+        },
+      ],
+      links: vec![PatrolLink {
+        index: 0,
+        links: vec![(22, 34.5), (24, 553.25)],
+      }],
+    };
+
+    let patrol_config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol.ini");
+    let points_config_path: &Path =
+      &get_absolute_test_sample_file_path(file!(), "patrol_points.ini");
+    let links_config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol_links.ini");
+
+    let mut patrol_file: File = overwrite_file(&patrol_config_path)?;
+    let mut points_file: File = overwrite_file(&points_config_path)?;
+    let mut links_file: File = overwrite_file(&links_config_path)?;
+
+    let mut patrol_ini: Ini = Ini::new();
+    let mut links_ini: Ini = Ini::new();
+    let mut points_ini: Ini = Ini::new();
+
+    patrol.export::<SpawnByteOrder>(
+      &patrol.name,
+      &mut patrol_ini,
+      &mut points_ini,
+      &mut links_ini,
+    );
+
+    export_ini_to_file(&patrol_ini, &mut patrol_file)?;
+    export_ini_to_file(&points_ini, &mut points_file)?;
+    export_ini_to_file(&links_ini, &mut links_file)?;
+
+    let read_point: Patrol = Patrol::import(
+      &patrol.name,
+      &open_ini_config(patrol_config_path)?,
+      &open_ini_config(points_config_path)?,
+      &open_ini_config(links_config_path)?,
+    )?;
+
+    assert_eq!(read_point, patrol);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize_object() -> io::Result<()> {
+    let patrol: Patrol = Patrol {
+      name: String::from("patrol-name-serde"),
+      points: vec![
+        PatrolPoint {
+          name: String::from("patrol-point-1-serde"),
+          position: Vector3d::new(4.5, -5.42, -3.2),
+          flags: 83,
+          level_vertex_id: 4657,
+          game_vertex_id: 457,
+        },
+        PatrolPoint {
+          name: String::from("patrol-point-2-serde"),
+          position: Vector3d::new(6.21, -5.34, 3.23),
+          flags: 53,
+          level_vertex_id: 6345,
+          game_vertex_id: 15211,
+        },
+      ],
+      links: vec![PatrolLink {
+        index: 0,
+        links: vec![(32, 34.5), (24, 53.25)],
+      }],
+    };
+
+    let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
+      file!(),
+      "serialized.json",
+    ))?;
+
+    file.write_all(json!(patrol).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(patrol, serde_json::from_str::<Patrol>(&serialized)?);
 
     Ok(())
   }

@@ -83,7 +83,7 @@ mod tests {
   use crate::test::file::read_file_as_string;
   use crate::test::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_resource_as_file,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -113,7 +113,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 59);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
       ))?,
@@ -150,7 +150,7 @@ mod tests {
 
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_level.ini");
     let mut file: File =
-      overwrite_test_resource_as_file(config_path.to_str().expect("Valid path"))?;
+      overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ini: Ini = Ini::new();
 
     level.export("graph_level", &mut ini);
@@ -173,10 +173,9 @@ mod tests {
       offset: Vector3d::new(0.25, 5.55, -1.5),
     };
 
-    let mut file: File = overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
-      file!(),
-      "serialized.json",
-    ))?;
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+    )?;
 
     file.write_all(json!(level).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

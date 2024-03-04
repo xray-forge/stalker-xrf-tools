@@ -8,7 +8,9 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PatrolLink {
+  #[serde(rename = "index")]
   pub index: u32,
+  #[serde(rename = "links")]
   pub links: Vec<(u32, f32)>,
 }
 
@@ -124,19 +126,25 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol_link::PatrolLink;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::file::read_file_as_string;
   use crate::test::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
 
   #[test]
   fn test_read_write_simple_patrol_link() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "patrol_vertex_simple.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_link_simple.chunk");
 
     let link: PatrolLink = PatrolLink {
       index: 1000,
@@ -148,7 +156,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 32);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -172,7 +180,7 @@ mod tests {
   #[test]
   fn test_read_write_list_of_patrol_links() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_vertex_list.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_link_list.chunk");
 
     let links: Vec<PatrolLink> = vec![
       PatrolLink {
@@ -190,7 +198,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 48);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -207,6 +215,50 @@ mod tests {
     let from_file: Vec<PatrolLink> = PatrolLink::read_list::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(from_file, links);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let link: PatrolLink = PatrolLink {
+      index: 1000,
+      links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
+    };
+
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol_link.ini");
+    let mut file: File = overwrite_file(&config_path)?;
+    let mut ini: Ini = Ini::new();
+
+    link.export("patrol_link", &mut ini);
+    export_ini_to_file(&ini, &mut file)?;
+
+    let read_point: PatrolLink = PatrolLink::import("patrol_link", &open_ini_config(config_path)?)?;
+
+    assert_eq!(read_point, link);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize_object() -> io::Result<()> {
+    let link: PatrolLink = PatrolLink {
+      index: 1000,
+      links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
+    };
+
+    let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
+      file!(),
+      "serialized.json",
+    ))?;
+
+    file.write_all(json!(link).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(link, serde_json::from_str::<PatrolLink>(&serialized)?);
 
     Ok(())
   }

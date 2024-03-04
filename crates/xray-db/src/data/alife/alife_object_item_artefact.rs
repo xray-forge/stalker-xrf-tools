@@ -56,7 +56,7 @@ mod tests {
   use crate::data::alife::alife_object_item_artefact::AlifeObjectItemArtefact;
   use crate::test::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_resource_as_file,
+    overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -94,7 +94,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 52);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 

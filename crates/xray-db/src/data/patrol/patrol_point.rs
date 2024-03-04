@@ -12,10 +12,15 @@ use std::io::Write;
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PatrolPoint {
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "position")]
   pub position: Vector3d<f32>,
+  #[serde(rename = "flags")]
   pub flags: u32,
+  #[serde(rename = "levelVertexId")]
   pub level_vertex_id: u32,
+  #[serde(rename = "gameVertexId")]
   pub game_vertex_id: u16,
 }
 
@@ -129,13 +134,20 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::file::read_file_as_string;
   use crate::test::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
 
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
@@ -155,7 +167,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 40);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -201,7 +213,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 140);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&filename)?,
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
@@ -216,6 +228,57 @@ mod tests {
     let read_points: Vec<PatrolPoint> = PatrolPoint::read_list::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(points, read_points);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let point: PatrolPoint = PatrolPoint {
+      name: String::from("patrol-point-exported"),
+      position: Vector3d::new(3.5, -2.3, 6.0),
+      flags: 73,
+      level_vertex_id: 26543,
+      game_vertex_id: 364,
+    };
+
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol_point.ini");
+    let mut file: File = overwrite_file(&config_path)?;
+    let mut ini: Ini = Ini::new();
+
+    point.export("patrol_point", &mut ini);
+    export_ini_to_file(&ini, &mut file)?;
+
+    let read_point: PatrolPoint =
+      PatrolPoint::import("patrol_point", &open_ini_config(config_path)?)?;
+
+    assert_eq!(read_point, point);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize_object() -> io::Result<()> {
+    let point: PatrolPoint = PatrolPoint {
+      name: String::from("patrol-point-serialized"),
+      position: Vector3d::new(5.5, -2.3, 6.0),
+      flags: 53,
+      level_vertex_id: 2351,
+      game_vertex_id: 321,
+    };
+
+    let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
+      file!(),
+      "serialized.json",
+    ))?;
+
+    file.write_all(json!(point).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(point, serde_json::from_str::<PatrolPoint>(&serialized)?);
 
     Ok(())
   }

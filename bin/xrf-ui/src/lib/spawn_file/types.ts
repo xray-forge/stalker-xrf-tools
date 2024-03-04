@@ -94,18 +94,12 @@ export interface IPatrol {
   links: Array<IPatrolLink>;
 }
 
-export interface IVector3d {
-  x: number;
-  y: number;
-  z: number;
-}
-
 export interface IPatrolPoint {
   name: string;
   position: IVector3d;
   flags: number;
-  level_vertex_id: number;
-  game_vertex_id: number;
+  levelVertexId: number;
+  gameVertexId: number;
 }
 
 export interface IPatrolLink {
@@ -135,4 +129,10 @@ export interface IAlifeObjectBase {
   spawn_id: number;
   update_data: unknown;
   version: number;
+}
+
+export interface IVector3d {
+  x: number;
+  y: number;
+  z: number;
 }
