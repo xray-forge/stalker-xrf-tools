@@ -11,8 +11,8 @@ interface ISpawnEditorArtefactsNodesTableProps {
 export function SpawnEditorArtefactsNodesTable({ nodes }: ISpawnEditorArtefactsNodesTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "index", headerName: "index" },
-      { field: "level_vertex_id", headerName: "level_vertex_id", width: 120 },
+      { field: "id", headerName: "id" },
+      { field: "levelVertexId", headerName: "level vertex id", width: 120 },
       { field: "distance", headerName: "distance", width: 172 },
       {
         field: "position",
@@ -27,11 +27,8 @@ export function SpawnEditorArtefactsNodesTable({ nodes }: ISpawnEditorArtefactsN
   const rows: GridRowsProp = useMemo(
     () =>
       nodes.map((it, index) => ({
+        ...it,
         id: index,
-        index: index,
-        position: it.position,
-        distance: it.distance,
-        level_vertex_id: it.level_vertex_id,
       })),
     [nodes]
   );

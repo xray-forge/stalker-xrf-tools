@@ -23,10 +23,15 @@ use std::{fs, io};
 /// 4 - game graphs
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SpawnFile {
+  #[serde(rename = "header")]
   pub header: HeaderChunk,
+  #[serde(rename = "alifeSpawn")]
   pub alife_spawn: ALifeSpawnsChunk,
+  #[serde(rename = "artefactSpawn")]
   pub artefact_spawn: ArtefactSpawnsChunk,
+  #[serde(rename = "patrols")]
   pub patrols: PatrolsChunk,
+  #[serde(rename = "graphs")]
   pub graphs: GraphsChunk,
 }
 

@@ -18,11 +18,17 @@ use std::{fmt, io};
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct GraphsChunk {
+  #[serde(rename = "header")]
   pub header: GraphHeader,
+  #[serde(rename = "levels")]
   pub levels: Vec<GraphLevel>,
+  #[serde(rename = "vertices")]
   pub vertices: Vec<GraphVertex>,
+  #[serde(rename = "edges")]
   pub edges: Vec<GraphEdge>,
+  #[serde(rename = "points")]
   pub points: Vec<GraphLevelPoint>,
+  #[serde(rename = "crossTables")]
   pub cross_tables: Vec<GraphCrossTable>,
 }
 

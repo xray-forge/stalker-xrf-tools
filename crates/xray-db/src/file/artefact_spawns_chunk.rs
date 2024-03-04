@@ -12,6 +12,7 @@ use std::{fmt, io};
 /// Is single plain chunk with nodes list in it.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct ArtefactSpawnsChunk {
+  #[serde(rename = "nodes")]
   pub nodes: Vec<ArtefactSpawnPoint>,
 }
 

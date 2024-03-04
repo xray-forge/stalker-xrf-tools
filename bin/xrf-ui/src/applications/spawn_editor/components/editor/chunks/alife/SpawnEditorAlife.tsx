@@ -37,7 +37,7 @@ export function SpawnEditorAlife({
     >
       <Typography variant={"h5"}>Alife spawns</Typography>
       <Divider sx={{ margin: "16px 0" }} />
-      <SpawnEditorAlifeObjectsTable objects={spawnFile.alife_spawn.objects} />
+      <SpawnEditorAlifeObjectsTable objects={spawnFile.alifeSpawn.objects} />
     </Grid>
   );
 }

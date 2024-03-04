@@ -18,26 +18,47 @@ use std::io::Write;
 /// Generic abstract alife object base.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AlifeObjectBase {
+  #[serde(rename = "index")]
   pub index: u16,
+  #[serde(rename = "id")]
   pub id: u16,
+  #[serde(rename = "netAction")]
   pub net_action: u16,
+  #[serde(rename = "section")]
   pub section: String,
+  #[serde(rename = "clsid")]
   pub clsid: ClsId,
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "scriptGameId")]
   pub script_game_id: u8,
+  #[serde(rename = "scriptRp")]
   pub script_rp: u8,
+  #[serde(rename = "position")]
   pub position: Vector3d,
+  #[serde(rename = "direction")]
   pub direction: Vector3d,
+  #[serde(rename = "respawnTime")]
   pub respawn_time: u16,
+  #[serde(rename = "parentId")]
   pub parent_id: u16,
+  #[serde(rename = "phantomId")]
   pub phantom_id: u16,
+  #[serde(rename = "scriptFlags")]
   pub script_flags: u16,
+  #[serde(rename = "version")]
   pub version: u16,
+  #[serde(rename = "gameType")]
   pub game_type: u16,
+  #[serde(rename = "scriptVersion")]
   pub script_version: u16,
+  #[serde(rename = "clientDataSize")]
   pub client_data_size: u16,
+  #[serde(rename = "spawnId")]
   pub spawn_id: u16,
+  #[serde(rename = "inherited")]
   pub inherited: Box<dyn AlifeObjectGeneric>,
+  #[serde(rename = "updateData")]
   pub update_data: Vec<u8>, // todo: Parse.
 }
 

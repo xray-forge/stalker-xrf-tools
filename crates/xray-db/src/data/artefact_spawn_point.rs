@@ -9,8 +9,11 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ArtefactSpawnPoint {
+  #[serde(rename = "position")]
   pub position: Vector3d,
+  #[serde(rename = "levelVertexId")]
   pub level_vertex_id: u32,
+  #[serde(rename = "distance")]
   pub distance: f32,
 }
 
@@ -58,24 +61,32 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::file::read_file_as_string;
   use crate::test::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
 
   #[test]
   fn test_read_write_simple_artefact_spawn_point() -> io::Result<()> {
-    let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "artefact_spawn_point_simple.chunk");
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,
       distance: 500.55,
     };
+
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_relative_test_sample_file_path(file!(), "artefact_spawn_point_simple.chunk");
 
     point.write::<SpawnByteOrder>(&mut writer)?;
 
@@ -101,6 +112,60 @@ mod tests {
     let read_point: ArtefactSpawnPoint = ArtefactSpawnPoint::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_point, point);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
+      position: Vector3d::new(11.5, 12.3, -10.5),
+      level_vertex_id: 1001,
+      distance: 6213.123,
+    };
+
+    let config_path: &Path =
+      &get_absolute_test_sample_file_path(file!(), "artefact_spawn_point.ini");
+    let mut file: File = overwrite_file(&config_path)?;
+    let mut ini: Ini = Ini::new();
+
+    point.export("artefact_spawn_point", &mut ini);
+    export_ini_to_file(&ini, &mut file)?;
+
+    let read_point: ArtefactSpawnPoint = ArtefactSpawnPoint::import(
+      &open_ini_config(config_path)?
+        .section(Some("artefact_spawn_point"))
+        .expect("0 point section"),
+    )?;
+
+    assert_eq!(read_point, point);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize_object() -> io::Result<()> {
+    let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
+      position: Vector3d::new(21.5, 22.3, -20.5),
+      level_vertex_id: 1001,
+      distance: 3452.123,
+    };
+
+    let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
+      file!(),
+      "serialized.json",
+    ))?;
+
+    file.write_all(json!(point).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(
+      point,
+      serde_json::from_str::<ArtefactSpawnPoint>(&serialized)?
+    );
 
     Ok(())
   }

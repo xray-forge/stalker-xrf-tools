@@ -12,22 +12,22 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
   const columns: Array<GridColDef> = useMemo(
     () => [
       { field: "index", headerName: "index" },
-      { field: "script_version", headerName: "script_version" },
+      { field: "scriptVersion", headerName: "script version" },
       { field: "version", headerName: "version" },
       { field: "clsid", headerName: "clsid" },
       { field: "name", headerName: "name", width: 200 },
       { field: "section", headerName: "section", width: 160 },
-      { field: "game_type", headerName: "game_type" },
-      { field: "script_game_id", headerName: "script_game_id" },
-      { field: "script_rp", headerName: "script_rp" },
-      { field: "respawn_time", headerName: "respawn_time" },
-      { field: "script_flags", headerName: "script_flags" },
-      { field: "inner_id", headerName: "id" },
-      { field: "spawn_id", headerName: "spawn_id" },
-      { field: "parent_id", headerName: "parent_id" },
-      { field: "phantom_id", headerName: "phantom_id" },
-      { field: "net_action", headerName: "net_action" },
-      { field: "client_data_size", headerName: "client_data_size" },
+      { field: "gameType", headerName: "game type" },
+      { field: "scriptGameId", headerName: "script game id" },
+      { field: "scriptRp", headerName: "script rp" },
+      { field: "respawnTime", headerName: "respawn time" },
+      { field: "scriptFlags", headerName: "script flags" },
+      { field: "innerId", headerName: "id" },
+      { field: "spawnId", headerName: "spawn id" },
+      { field: "parentId", headerName: "parent id" },
+      { field: "phantomId", headerName: "phantom id" },
+      { field: "netAction", headerName: "net action" },
+      { field: "clientDataSize", headerName: "client data size" },
       {
         field: "direction",
         headerName: "direction",
@@ -43,7 +43,7 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
         headerName: "inherited",
         valueGetter: (it) => (it.row.inherited ? JSON.stringify(it.row.inherited) : null),
       },
-      { field: "update_data", headerName: "update_data" },
+      { field: "updateData", headerName: "update data" },
     ],
     []
   );
@@ -53,7 +53,7 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
       objects.map((it) => ({
         ...it,
         id: it.index,
-        inner_id: it.id,
+        innerId: it.id,
       })),
     objects
   );

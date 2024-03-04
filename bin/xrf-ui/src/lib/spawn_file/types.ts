@@ -1,7 +1,7 @@
 export interface ISpawnFile {
   header: ISpawnFileHeaderChunk;
-  alife_spawn: ISpawnFileAlifeSpawnsChunk;
-  artefact_spawn: ISpawnFileArtefactSpawnsChunk;
+  alifeSpawn: ISpawnFileAlifeSpawnsChunk;
+  artefactSpawn: ISpawnFileArtefactSpawnsChunk;
   patrols: ISpawnFilePatrolsChunk;
   graphs: ISpawnFileGraphsChunk;
 }
@@ -29,7 +29,7 @@ export interface ISpawnFilePatrolsChunk {
 export interface ISpawnFileGraphsChunk {
   header: IGraphHeader;
   levels: Array<IGraphLevel>;
-  cross_tables: Array<IGraphCrossTable>;
+  crossTables: Array<IGraphCrossTable>;
   edges: Array<IGraphEdge>;
   points: Array<IGraphPoint>;
   vertices: Array<IGraphVertex>;
@@ -37,7 +37,7 @@ export interface ISpawnFileGraphsChunk {
 
 export interface IArtefactSpawnNode {
   position: IVector3d;
-  level_vertex_id: number;
+  levelVertexId: number;
   distance: number;
 }
 
@@ -108,26 +108,26 @@ export interface IPatrolLink {
 }
 
 export interface IAlifeObjectBase {
-  client_data_size: number;
+  clientDataSize: number;
   clsid: string;
   direction: IVector3d;
-  game_type: number;
+  gameType: number;
   id: number;
   index: number;
   inherited: unknown;
   name: string;
-  net_action: number;
-  parent_id: number;
-  phantom_id: number;
+  netAction: number;
+  parentId: number;
+  phantomId: number;
   position: IVector3d;
-  respawn_time: number;
-  script_flags: number;
-  script_game_id: number;
-  script_rp: number;
-  script_version: number;
+  respawnTime: number;
+  scriptFlags: number;
+  scriptGameId: number;
+  scriptRp: number;
+  scriptVersion: number;
   section: string;
-  spawn_id: number;
-  update_data: unknown;
+  spawnId: number;
+  updateData: unknown;
   version: number;
 }
 

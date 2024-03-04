@@ -38,7 +38,7 @@ export function SpawnEditorGraphs({
         return <SpawnEditorGraphVerticesTable vertices={spawnFile.graphs.vertices} />;
 
       case "cross_tables":
-        return <SpawnEditorGraphCrossTable crossTables={spawnFile.graphs.cross_tables} />;
+        return <SpawnEditorGraphCrossTable crossTables={spawnFile.graphs.crossTables} />;
 
       default:
         return <Grid>Unknown tab</Grid>;

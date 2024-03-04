@@ -37,7 +37,7 @@ export function SpawnEditorArtefacts({
     >
       <Typography variant={"h5"}>Artefact spawn nodes</Typography>
       <Divider sx={{ margin: "16px 0" }} />
-      <SpawnEditorArtefactsNodesTable nodes={spawnFile.artefact_spawn.nodes} />
+      <SpawnEditorArtefactsNodesTable nodes={spawnFile.artefactSpawn.nodes} />
     </Grid>
   );
 }
