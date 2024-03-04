@@ -23,7 +23,7 @@ pub fn info_spawn_file(matches: &ArgMatches) {
 
   log::info!("Version: {}", spawn_file.header.version);
   log::info!("GUID: {}", spawn_file.header.guid);
-  log::info!("Levels count: {}", spawn_file.header.level_count);
+  log::info!("Levels count: {}", spawn_file.header.levels_count);
   log::info!("Objects count: {}", spawn_file.header.objects_count);
 
   log::info!(
@@ -36,11 +36,11 @@ pub fn info_spawn_file(matches: &ArgMatches) {
   log::info!("Level version: {}", spawn_file.graphs.header.version);
   log::info!(
     "Level graph vertices: {}",
-    spawn_file.graphs.header.vertex_count
+    spawn_file.graphs.header.vertices_count
   );
   log::info!(
     "Level graph points: {}",
-    spawn_file.graphs.header.point_count
+    spawn_file.graphs.header.points_count
   );
   log::info!(
     "Level graph edges: {}",

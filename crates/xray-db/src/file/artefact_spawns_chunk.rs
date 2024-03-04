@@ -113,7 +113,8 @@ mod tests {
   use crate::data::vector_3d::Vector3d;
   use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
   use crate::test::utils::{
-    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -121,7 +122,7 @@ mod tests {
 
   #[test]
   fn test_read_write_artefact_spawn_point() -> io::Result<()> {
-    let filename: String = get_test_sample_file_sub_dir(file!(), "artefact_spawns.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "artefact_spawns.chunk");
 
     let spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk {
       nodes: vec![

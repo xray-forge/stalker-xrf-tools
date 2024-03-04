@@ -10,12 +10,17 @@ use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphCrossTable {
+  #[serde(rename = "version")]
   pub version: u32,
+  #[serde(rename = "nodesCount")]
   pub nodes_count: u32,
-  pub vertex_count: u32,
+  #[serde(rename = "verticesCount")]
+  pub vertices_count: u32,
+  #[serde(rename = "levelGuid")]
   pub level_guid: Uuid,
+  #[serde(rename = "gameGuid")]
   pub game_guid: Uuid,
-  #[serde(skip_serializing)]
+  #[serde(skip_serializing, default)] // Does not make sense for JSON.
   pub data: Vec<u8>,
 }
 
@@ -41,7 +46,7 @@ impl GraphCrossTable {
     Ok(GraphCrossTable {
       version: reader.read_u32::<T>()?,
       nodes_count: reader.read_u32::<T>()?,
-      vertex_count: reader.read_u32::<T>()?,
+      vertices_count: reader.read_u32::<T>()?,
       level_guid: Uuid::from_u128(reader.read_u128::<T>()?),
       game_guid: Uuid::from_u128(reader.read_u128::<T>()?),
       data: reader.read_bytes(reader.read_bytes_remain() as usize)?,
@@ -69,7 +74,7 @@ impl GraphCrossTable {
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     writer.write_u32::<T>(self.version)?;
     writer.write_u32::<T>(self.nodes_count)?;
-    writer.write_u32::<T>(self.vertex_count)?;
+    writer.write_u32::<T>(self.vertices_count)?;
     writer.write_u128::<T>(self.level_guid.as_u128())?;
     writer.write_u128::<T>(self.game_guid.as_u128())?;
     writer.write_all(&self.data)?;
@@ -119,12 +124,17 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
+  use crate::test::file::read_file_as_string;
   use crate::test::utils::{
-    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
   use uuid::uuid;
 
   #[test]
@@ -135,7 +145,7 @@ mod tests {
     let cross_table: GraphCrossTable = GraphCrossTable {
       version: 16,
       nodes_count: 51,
-      vertex_count: 4000,
+      vertices_count: 4000,
       level_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
       game_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
       data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -146,14 +156,17 @@ mod tests {
     assert_eq!(writer.bytes_written(), 55);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_test_sample_file_sub_dir(file!(), &filename))?,
+      &mut overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+        file!(),
+        &filename,
+      ))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 55);
 
     let file: FileSlice =
-      open_test_resource_as_slice(&get_test_sample_file_sub_dir(file!(), &filename))?;
+      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 55 + 8);
 
@@ -164,6 +177,36 @@ mod tests {
     let read_cross_table: GraphCrossTable = GraphCrossTable::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_cross_table, cross_table);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize_object() -> io::Result<()> {
+    let cross_table: GraphCrossTable = GraphCrossTable {
+      version: 24,
+      nodes_count: 436,
+      vertices_count: 26324,
+      level_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
+      game_guid: uuid!("89e55024-10b1-426f-9247-bb680e5fe0b8"),
+      data: vec![],
+    };
+
+    let mut file: File = overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialized.json",
+    ))?;
+
+    file.write_all(json!(cross_table).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(
+      cross_table,
+      serde_json::from_str::<GraphCrossTable>(&serialized)?
+    );
 
     Ok(())
   }

@@ -9,8 +9,11 @@ use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphLevelPoint {
+  #[serde(rename = "position")]
   pub position: Vector3d,
+  #[serde(rename = "levelVertexId")]
   pub level_vertex_id: u32,
+  #[serde(rename = "distance")]
   pub distance: f32,
 }
 
@@ -62,12 +65,20 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::vector_3d::Vector3d;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::file::read_file_as_string;
   use crate::test::utils::{
-    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
@@ -85,14 +96,17 @@ mod tests {
     assert_eq!(writer.bytes_written(), 20);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_test_sample_file_sub_dir(file!(), &filename))?,
+      &mut overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+        file!(),
+        &filename,
+      ))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 20);
 
     let file: FileSlice =
-      open_test_resource_as_slice(&get_test_sample_file_sub_dir(file!(), &filename))?;
+      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 20 + 8);
 
@@ -103,6 +117,54 @@ mod tests {
     let read_point: GraphLevelPoint = GraphLevelPoint::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_point, point);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let point: GraphLevelPoint = GraphLevelPoint {
+      position: Vector3d::new(66.5, 55.6, 88.7),
+      distance: 4235.50,
+      level_vertex_id: 236263,
+    };
+
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_level_point.ini");
+    let mut file: File =
+      overwrite_test_resource_as_file(config_path.to_str().expect("Valid path"))?;
+    let mut ini: Ini = Ini::new();
+
+    point.export("graph_level_point", &mut ini);
+    export_ini_to_file(&ini, &mut file)?;
+
+    let read_point: GraphLevelPoint =
+      GraphLevelPoint::import("graph_level_point", &open_ini_config(config_path)?)?;
+
+    assert_eq!(read_point, point);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize_object() -> io::Result<()> {
+    let point: GraphLevelPoint = GraphLevelPoint {
+      position: Vector3d::new(11.5, 11.6, 2.7),
+      distance: 321.50,
+      level_vertex_id: 5213,
+    };
+
+    let mut file: File = overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialized.json",
+    ))?;
+
+    file.write_all(json!(point).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(point, serde_json::from_str::<GraphLevelPoint>(&serialized)?);
 
     Ok(())
   }

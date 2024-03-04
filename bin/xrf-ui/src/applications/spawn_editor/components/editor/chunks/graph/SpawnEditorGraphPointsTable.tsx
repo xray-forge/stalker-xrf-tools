@@ -13,7 +13,7 @@ export function SpawnEditorGraphPointsTable({ points }: ISpawnEditorGraphPointsT
     () => [
       { field: "id", headerName: "id" },
       { field: "distance", headerName: "distance", width: 240 },
-      { field: "level_vertex_id", headerName: "level_vertex_id", width: 160 },
+      { field: "levelVertexId", headerName: "level vertex id", width: 160 },
     ],
     []
   );

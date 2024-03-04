@@ -4,7 +4,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 /// Get absolute resources directory.
-pub fn get_resources_path() -> PathBuf {
+pub fn get_absolute_resources_path() -> PathBuf {
   let mut path: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
   path.push("resources");
@@ -13,8 +13,8 @@ pub fn get_resources_path() -> PathBuf {
 }
 
 /// Get absolute path to provided test resource.
-pub fn get_test_resource_path(resource_path: &str) -> PathBuf {
-  let mut path: PathBuf = get_resources_path();
+pub fn get_absolute_test_resource_path(resource_path: &str) -> PathBuf {
+  let mut path: PathBuf = get_absolute_resources_path();
 
   path.push("tests");
   path.push(resource_path);
@@ -23,7 +23,7 @@ pub fn get_test_resource_path(resource_path: &str) -> PathBuf {
 }
 
 /// Get relative path to sample resource.
-pub fn get_test_sample_file_sub_dir(file: &str, resource: &str) -> String {
+pub fn get_relative_test_sample_file_path(file: &str, resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push("samples");
@@ -33,8 +33,13 @@ pub fn get_test_sample_file_sub_dir(file: &str, resource: &str) -> String {
   path.into_os_string().into_string().unwrap()
 }
 
+/// Get Absolute path to sample resource.
+pub fn get_absolute_test_sample_file_path(file: &str, resource: &str) -> PathBuf {
+  get_absolute_test_resource_path(&get_relative_test_sample_file_path(file, resource))
+}
+
 /// Get relative path to sample resource of current test file.
-pub fn get_test_sample_file_directory(file: &str) -> String {
+pub fn get_relative_test_sample_file_directory(file: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push("samples");
@@ -44,7 +49,7 @@ pub fn get_test_sample_file_directory(file: &str) -> String {
 }
 
 /// Get relative path to sample resource.
-pub fn get_test_sample_sub_dir(resource: &str) -> String {
+pub fn get_relative_test_sample_sub_dir(resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push("samples");
@@ -55,7 +60,7 @@ pub fn get_test_sample_sub_dir(resource: &str) -> String {
 
 /// Open file from test resources as slice.
 pub fn open_test_resource_as_slice(resource_path: &str) -> io::Result<FileSlice> {
-  let path: PathBuf = get_test_resource_path(resource_path);
+  let path: PathBuf = get_absolute_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(FileSlice::new(file)),
@@ -68,7 +73,7 @@ pub fn open_test_resource_as_slice(resource_path: &str) -> io::Result<FileSlice>
 
 /// Open file from test resources.
 pub fn open_test_resource_as_file(resource_path: &str) -> io::Result<File> {
-  let path: PathBuf = get_test_resource_path(resource_path);
+  let path: PathBuf = get_absolute_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(file),
@@ -81,7 +86,7 @@ pub fn open_test_resource_as_file(resource_path: &str) -> io::Result<File> {
 
 /// Create and open file from test resources, overwrite existing one.
 pub fn overwrite_test_resource_as_file(resource_path: &str) -> io::Result<File> {
-  let path: PathBuf = get_test_resource_path(resource_path);
+  let path: PathBuf = get_absolute_test_resource_path(resource_path);
 
   std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
 
@@ -89,6 +94,7 @@ pub fn overwrite_test_resource_as_file(resource_path: &str) -> io::Result<File> 
     .create(true)
     .write(true)
     .truncate(true)
+    .read(true)
     .open(path.clone())
   {
     Ok(file) => Ok(file),

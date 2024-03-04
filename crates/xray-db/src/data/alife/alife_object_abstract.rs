@@ -94,8 +94,8 @@ mod tests {
   use crate::export::file::{export_ini_to_file, open_ini_config};
   use crate::test::assertions::files_are_equal_by_path;
   use crate::test::utils::{
-    get_test_resource_path, get_test_sample_file_sub_dir, open_test_resource_as_slice,
-    overwrite_test_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -105,7 +105,8 @@ mod tests {
   #[test]
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_sample_file_sub_dir(file!(), "alife_object_abstract.chunk");
+    let filename: String =
+      get_relative_test_sample_file_path(file!(), "alife_object_abstract.chunk");
 
     let object: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1001,
@@ -166,7 +167,7 @@ mod tests {
       spawn_story_id: 255,
     };
 
-    let exported_filename: String = get_test_sample_file_sub_dir(file!(), "exported.ini");
+    let exported_filename: String = get_relative_test_sample_file_path(file!(), "exported.ini");
     let mut exported: Ini = Ini::new();
 
     first.export("first", &mut exported);
@@ -177,7 +178,7 @@ mod tests {
       &mut overwrite_test_resource_as_file(&exported_filename)?,
     )?;
 
-    let source: Ini = open_ini_config(&get_test_resource_path(&exported_filename))?;
+    let source: Ini = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
 
     let read_first: AlifeObjectAbstract =
       AlifeObjectAbstract::import(source.section(Some("first")).unwrap())?;
@@ -187,7 +188,7 @@ mod tests {
     assert_eq!(read_first, first);
     assert_eq!(read_second, second);
 
-    let imported_filename: String = get_test_sample_file_sub_dir(file!(), "imported.ini");
+    let imported_filename: String = get_relative_test_sample_file_path(file!(), "imported.ini");
     let mut imported: Ini = Ini::new();
 
     read_first.export("first", &mut imported);
@@ -199,8 +200,8 @@ mod tests {
     )?;
 
     assert!(files_are_equal_by_path(
-      get_test_resource_path(&exported_filename),
-      get_test_resource_path(&imported_filename)
+      get_absolute_test_resource_path(&exported_filename),
+      get_absolute_test_resource_path(&imported_filename)
     )?);
 
     Ok(())

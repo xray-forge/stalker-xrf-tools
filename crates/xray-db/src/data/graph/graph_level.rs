@@ -11,10 +11,15 @@ use uuid::Uuid;
 /// `GameGraph::SLevel::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphLevel {
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "offset")]
   pub offset: Vector3d<f32>,
+  #[serde(rename = "id")]
   pub id: u8,
+  #[serde(rename = "section")]
   pub section: String,
+  #[serde(rename = "guid")]
   pub guid: Uuid,
 }
 
@@ -74,12 +79,20 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level::GraphLevel;
   use crate::data::vector_3d::Vector3d;
+  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::test::file::read_file_as_string;
   use crate::test::utils::{
-    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use ini::Ini;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
   use uuid::uuid;
 
   #[test]
@@ -100,14 +113,17 @@ mod tests {
     assert_eq!(writer.bytes_written(), 59);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_test_sample_file_sub_dir(file!(), &filename))?,
+      &mut overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+        file!(),
+        &filename,
+      ))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 59);
 
     let file: FileSlice =
-      open_test_resource_as_slice(&get_test_sample_file_sub_dir(file!(), &filename))?;
+      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 59 + 8);
 
@@ -118,6 +134,57 @@ mod tests {
     let read_level: GraphLevel = GraphLevel::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_level, level);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_object() -> io::Result<()> {
+    let level: GraphLevel = GraphLevel {
+      id: 78,
+      name: String::from("test-level-exported"),
+      section: String::from("test-level-section"),
+      guid: uuid!("89e55023-10b1-426f-9247-bb680e5fe0a5"),
+      offset: Vector3d::new(0.25, 5.55, -1.5),
+    };
+
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_level.ini");
+    let mut file: File =
+      overwrite_test_resource_as_file(config_path.to_str().expect("Valid path"))?;
+    let mut ini: Ini = Ini::new();
+
+    level.export("graph_level", &mut ini);
+    export_ini_to_file(&ini, &mut file)?;
+
+    let read_level: GraphLevel = GraphLevel::import("graph_level", &open_ini_config(config_path)?)?;
+
+    assert_eq!(read_level, level);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize_object() -> io::Result<()> {
+    let level: GraphLevel = GraphLevel {
+      id: 243,
+      name: String::from("test-level-example"),
+      section: String::from("test-level-section"),
+      guid: uuid!("89e55023-10b1-426f-9247-bb680e5fe0b8"),
+      offset: Vector3d::new(0.25, 5.55, -1.5),
+    };
+
+    let mut file: File = overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialized.json",
+    ))?;
+
+    file.write_all(json!(level).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(level, serde_json::from_str::<GraphLevel>(&serialized)?);
 
     Ok(())
   }

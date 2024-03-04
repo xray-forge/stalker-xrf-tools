@@ -9,9 +9,9 @@ export interface ISpawnFile {
 export interface ISpawnFileHeaderChunk {
   version: number;
   guid: string;
-  graph_guid: string;
-  objects_count: number;
-  level_count: number;
+  graphGuid: string;
+  objectsCount: number;
+  levelsCount: number;
 }
 
 export interface ISpawnFileAlifeSpawnsChunk {
@@ -29,7 +29,7 @@ export interface ISpawnFilePatrolsChunk {
 export interface ISpawnFileGraphsChunk {
   header: IGraphHeader;
   levels: Array<IGraphLevel>;
-  cross_tables: Array<ICrossTable>;
+  cross_tables: Array<IGraphCrossTable>;
   edges: Array<IGraphEdge>;
   points: Array<IGraphPoint>;
   vertices: Array<IGraphVertex>;
@@ -42,15 +42,15 @@ export interface IArtefactSpawnNode {
 }
 
 export interface IGraphVertex {
-  edge_count: number;
-  edge_offset: number;
-  level_id: number;
-  level_point_count: number;
-  level_point_offset: number;
-  level_vertex_id: number;
-  vertex_type: [number, number, number, number];
-  game_point: IVector3d;
-  level_point: IVector3d;
+  edgesCount: number;
+  edgesOffset: number;
+  levelId: number;
+  levelPointCount: number;
+  levelPointOffset: number;
+  levelVertexId: number;
+  vertexType: [number, number, number, number];
+  gamePoint: IVector3d;
+  levelPoint: IVector3d;
 }
 
 export interface IGraphLevel {
@@ -63,29 +63,29 @@ export interface IGraphLevel {
 
 export interface IGraphPoint {
   distance: number;
-  level_vertex_id: number;
+  levelVertexId: number;
 }
 
 export interface IGraphHeader {
   guid: string;
-  edges_count: number;
-  level_count: number;
-  point_count: number;
+  edgesCount: number;
+  levelsCount: number;
+  pointsCount: number;
   version: number;
-  vertex_count: number;
+  verticesCount: number;
 }
 
-export interface ICrossTable {
+export interface IGraphCrossTable {
   version: number;
-  game_guid: string;
-  level_guid: string;
-  nodes_count: number;
-  vertex_count: number;
+  gameGuid: string;
+  levelGuid: string;
+  nodesCount: number;
+  vertexCount: number;
 }
 
 export interface IGraphEdge {
   distance: number;
-  game_vertex_id: number;
+  gameVertexId: number;
 }
 
 export interface IPatrol {

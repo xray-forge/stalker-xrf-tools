@@ -76,7 +76,8 @@ mod tests {
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_pda::AlifeObjectItemPda;
   use crate::test::utils::{
-    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -85,7 +86,8 @@ mod tests {
   #[test]
   fn test_read_write_object() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_test_sample_file_sub_dir(file!(), "alife_object_item_pda.chunk");
+    let filename: String =
+      get_relative_test_sample_file_path(file!(), "alife_object_item_pda.chunk");
 
     let object: AlifeObjectItemPda = AlifeObjectItemPda {
       base: AlifeObjectItem {

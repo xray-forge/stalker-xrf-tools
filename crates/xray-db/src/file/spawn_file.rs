@@ -63,7 +63,7 @@ impl SpawnFile {
       "Expected correct objects count"
     );
     assert_eq!(
-      spawn_file.header.level_count, spawn_file.graphs.header.level_count as u32,
+      spawn_file.header.levels_count, spawn_file.graphs.header.levels_count as u32,
       "Expected correct level count"
     );
 

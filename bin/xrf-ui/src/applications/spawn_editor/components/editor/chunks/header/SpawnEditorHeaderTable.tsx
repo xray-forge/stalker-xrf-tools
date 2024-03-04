@@ -12,10 +12,10 @@ export function SpawnEditorHeaderTable({ header }: ISpawnEditorHeaderTableProps)
   const columns: Array<GridColDef> = useMemo(
     () => [
       { field: "version", headerName: "version" },
-      { field: "objects_count", headerName: "objects_count" },
-      { field: "level_count", headerName: "level_count" },
-      { field: "guid", headerName: "guid" },
-      { field: "graph_guid", headerName: "graph_guid" },
+      { field: "objectsCount", headerName: "objects count" },
+      { field: "levelCount", headerName: "levels count" },
+      { field: "guid", headerName: "guid", width: 240 },
+      { field: "graphGuid", headerName: "graph guid", width: 240 },
     ],
     []
   );

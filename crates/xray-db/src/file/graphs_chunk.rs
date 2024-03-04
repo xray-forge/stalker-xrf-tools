@@ -36,11 +36,11 @@ impl GraphsChunk {
 
     let header: GraphHeader = GraphHeader::read::<T>(&mut reader)?;
 
-    for _ in 0..header.level_count {
+    for _ in 0..header.levels_count {
       levels.push(GraphLevel::read::<T>(&mut reader)?)
     }
 
-    for _ in 0..header.vertex_count {
+    for _ in 0..header.vertices_count {
       vertices.push(GraphVertex::read::<T>(&mut reader)?);
     }
 
@@ -48,7 +48,7 @@ impl GraphsChunk {
       edges.push(GraphEdge::read::<T>(&mut reader)?);
     }
 
-    for _ in 0..header.point_count {
+    for _ in 0..header.points_count {
       points.push(GraphLevelPoint::read::<T>(&mut reader)?);
     }
 
@@ -60,11 +60,11 @@ impl GraphsChunk {
       reader.read_bytes_len(),
     );
 
-    assert_eq!(levels.len(), header.level_count as usize);
-    assert_eq!(vertices.len(), header.vertex_count as usize);
+    assert_eq!(levels.len(), header.levels_count as usize);
+    assert_eq!(vertices.len(), header.vertices_count as usize);
     assert_eq!(edges.len(), header.edges_count as usize);
-    assert_eq!(points.len(), header.point_count as usize);
-    assert_eq!(cross_tables.len(), header.level_count as usize);
+    assert_eq!(points.len(), header.points_count as usize);
+    assert_eq!(cross_tables.len(), header.levels_count as usize);
     assert!(reader.is_ended(), "Expect graphs chunk to be ended");
 
     Ok(GraphsChunk {
@@ -112,21 +112,21 @@ impl GraphsChunk {
     let levels_config: Ini = open_ini_config(&path.join("graphs_levels.ltx"))?;
     let mut levels: Vec<GraphLevel> = Vec::new();
 
-    for index in 0..header.level_count {
+    for index in 0..header.levels_count {
       levels.push(GraphLevel::import(&index.to_string(), &levels_config)?);
     }
 
     let vertices_config: Ini = open_ini_config(&path.join("graphs_vertices.ltx"))?;
     let mut vertices: Vec<GraphVertex> = Vec::new();
 
-    for index in 0..header.vertex_count {
+    for index in 0..header.vertices_count {
       vertices.push(GraphVertex::import(&index.to_string(), &vertices_config)?);
     }
 
     let points_config: Ini = open_ini_config(&path.join("graphs_points.ltx"))?;
     let mut points: Vec<GraphLevelPoint> = Vec::new();
 
-    for index in 0..header.point_count {
+    for index in 0..header.points_count {
       points.push(GraphLevelPoint::import(&index.to_string(), &points_config)?);
     }
 
@@ -157,7 +157,7 @@ impl GraphsChunk {
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
     let mut graphs_header_config: Ini = Ini::new();
 
-    self.header.export("header", &mut graphs_header_config);
+    self.header.export(&mut graphs_header_config);
 
     export_ini_to_file(
       &graphs_header_config,
@@ -254,7 +254,8 @@ mod tests {
   use crate::data::vector_3d::Vector3d;
   use crate::file::graphs_chunk::GraphsChunk;
   use crate::test::utils::{
-    get_test_sample_file_sub_dir, open_test_resource_as_slice, overwrite_test_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_resource_as_file,
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
@@ -268,11 +269,11 @@ mod tests {
     let graphs_chunk: GraphsChunk = GraphsChunk {
       header: GraphHeader {
         version: 10,
-        vertex_count: 0,
+        vertices_count: 0,
         edges_count: 0,
-        point_count: 0,
+        points_count: 0,
         guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
-        level_count: 0,
+        levels_count: 0,
       },
       levels: vec![],
       vertices: vec![],
@@ -286,14 +287,17 @@ mod tests {
     assert_eq!(writer.bytes_written(), 28);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_test_sample_file_sub_dir(file!(), &filename))?,
+      &mut overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+        file!(),
+        &filename,
+      ))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 28);
 
     let file: FileSlice =
-      open_test_resource_as_slice(&get_test_sample_file_sub_dir(file!(), &filename))?;
+      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
@@ -315,11 +319,11 @@ mod tests {
     let graphs_chunk: GraphsChunk = GraphsChunk {
       header: GraphHeader {
         version: 12,
-        vertex_count: 2,
+        vertices_count: 2,
         edges_count: 4,
-        point_count: 3,
+        points_count: 3,
         guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
-        level_count: 2,
+        levels_count: 2,
       },
       levels: vec![
         GraphLevel {
@@ -344,10 +348,10 @@ mod tests {
           level_id: 255,
           level_vertex_id: 4000,
           vertex_type: (1, 2, 3, 4),
-          edge_offset: 540,
-          level_point_offset: 4000,
-          edge_count: 252,
-          level_point_count: 253,
+          edges_offset: 540,
+          level_points_offset: 4000,
+          edges_count: 252,
+          level_points_count: 253,
         },
         GraphVertex {
           level_point: Vector3d::new(43.5, 15.6, 0.3),
@@ -355,10 +359,10 @@ mod tests {
           level_id: 255,
           level_vertex_id: 3000,
           vertex_type: (4, 2, 4, 4),
-          edge_offset: 31,
-          level_point_offset: 623,
-          edge_count: 252,
-          level_point_count: 23,
+          edges_offset: 31,
+          level_points_offset: 623,
+          edges_count: 252,
+          level_points_count: 23,
         },
       ],
       edges: vec![
@@ -400,7 +404,7 @@ mod tests {
         GraphCrossTable {
           version: 16,
           nodes_count: 51,
-          vertex_count: 4000,
+          vertices_count: 4000,
           level_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
           game_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b8"),
           data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -408,7 +412,7 @@ mod tests {
         GraphCrossTable {
           version: 16,
           nodes_count: 4232,
-          vertex_count: 3000,
+          vertices_count: 3000,
           level_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b7"),
           game_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0b8"),
           data: vec![1, 2, 3, 4, 5],
@@ -421,14 +425,17 @@ mod tests {
     assert_eq!(writer.bytes_written(), 430);
 
     let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
-      &mut overwrite_test_resource_as_file(&get_test_sample_file_sub_dir(file!(), &filename))?,
+      &mut overwrite_test_resource_as_file(&get_relative_test_sample_file_path(
+        file!(),
+        &filename,
+      ))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 430);
 
     let file: FileSlice =
-      open_test_resource_as_slice(&get_test_sample_file_sub_dir(file!(), &filename))?;
+      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 

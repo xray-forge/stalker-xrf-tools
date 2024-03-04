@@ -13,10 +13,10 @@ export function SpawnEditorGraphHeaderTable({ header }: ISpawnEditorGraphHeaderT
     () => [
       { field: "guid", headerName: "guid", width: 240 },
       { field: "version", headerName: "version" },
-      { field: "level_count", headerName: "level_count" },
-      { field: "edges_count", headerName: "edges_count" },
-      { field: "point_count", headerName: "point_count" },
-      { field: "vertex_count", headerName: "vertex_count" },
+      { field: "levelsCount", headerName: "levels count" },
+      { field: "edgesCount", headerName: "edges count" },
+      { field: "pointsCount", headerName: "points count" },
+      { field: "verticesCount", headerName: "vertices count", width: 120 },
     ],
     []
   );

@@ -13,7 +13,7 @@ export function SpawnEditorGraphEdgesTable({ edges }: ISpawnEditorGraphEdgesTabl
     () => [
       { field: "id", headerName: "id" },
       { field: "distance", headerName: "distance", width: 240 },
-      { field: "game_vertex_id", headerName: "game_vertex_id", width: 160 },
+      { field: "gameVertexId", headerName: "game vertex id", width: 160 },
     ],
     []
   );

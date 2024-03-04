@@ -228,7 +228,7 @@ impl fmt::Debug for ChunkReader {
 #[cfg(test)]
 mod tests {
   use crate::chunk::reader::ChunkReader;
-  use crate::test::utils::{get_test_sample_sub_dir, open_test_resource_as_slice};
+  use crate::test::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
   use fileslice::FileSlice;
   use std::io;
 
@@ -256,7 +256,7 @@ mod tests {
 
   #[test]
   fn test_read_empty_chunk() -> io::Result<()> {
-    let filename: String = get_test_sample_sub_dir("empty_nested_single.chunk");
+    let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.start_pos(), 0);
@@ -271,14 +271,14 @@ mod tests {
 
   #[test]
   fn test_read_empty_children() -> io::Result<()> {
-    let filename: String = get_test_sample_sub_dir("empty_nested_single.chunk");
+    let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 0);
 
-    let filename: String = get_test_sample_sub_dir("empty_nested_five.chunk");
+    let filename: String = get_relative_test_sample_sub_dir("empty_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 
@@ -294,14 +294,14 @@ mod tests {
 
   #[test]
   fn test_read_dummy_children() -> io::Result<()> {
-    let filename: String = get_test_sample_sub_dir("dummy_nested_single.chunk");
+    let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 8);
 
-    let filename: String = get_test_sample_sub_dir("dummy_nested_five.chunk");
+    let filename: String = get_relative_test_sample_sub_dir("dummy_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
 

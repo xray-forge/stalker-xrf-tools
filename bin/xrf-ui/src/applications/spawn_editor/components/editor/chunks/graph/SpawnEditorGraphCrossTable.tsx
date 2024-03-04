@@ -2,25 +2,25 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
-import { ICrossTable } from "@/lib/spawn_file";
+import { IGraphCrossTable } from "@/lib/spawn_file";
 
 interface ISpawnEditorGraphCrossTableProps {
-  crossTables: Array<ICrossTable>;
+  crossTables: Array<IGraphCrossTable>;
 }
 
 export function SpawnEditorGraphCrossTable({ crossTables }: ISpawnEditorGraphCrossTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "game_guid", headerName: "game_guid", width: 240 },
-      { field: "level_guid", headerName: "level_guid", width: 240 },
+      { field: "gameGuid", headerName: "gam guid", width: 240 },
+      { field: "levelGuid", headerName: "level guid", width: 240 },
       { field: "version", headerName: "version" },
-      { field: "nodes_count", headerName: "nodes_count" },
-      { field: "vertex_count", headerName: "vertex_count" },
+      { field: "nodesCount", headerName: "nodes count" },
+      { field: "verticesCount", headerName: "vertices count", width: 120 },
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => crossTables.map((it) => ({ ...it, id: it.level_guid })), [crossTables]);
+  const rows: GridRowsProp = useMemo(() => crossTables.map((it) => ({ ...it, id: it.levelGuid })), [crossTables]);
 
   return (
     <DataGrid
