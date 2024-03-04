@@ -1,8 +1,7 @@
-import { DataGrid } from "@mui/x-data-grid";
-import { GridColDef } from "@mui/x-data-grid/models/colDef/gridColDef";
-import { GridRowsProp } from "@mui/x-data-grid/models/gridRows";
+import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
+import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
 import { IGraphVertex } from "@/lib/spawn_file";
 
 interface ISpawnEditorGraphVerticesTableProps {
@@ -36,5 +35,23 @@ export function SpawnEditorGraphVerticesTable({ vertices }: ISpawnEditorGraphVer
 
   const rows: GridRowsProp = useMemo(() => vertices.map((it, index) => ({ ...it, id: index })), [vertices]);
 
-  return <DataGrid rowHeight={24} rows={rows} columns={columns} />;
+  return (
+    <DataGrid
+      rowHeight={24}
+      rows={rows}
+      columns={columns}
+      sx={{
+        maxWidth: "100%",
+      }}
+      slots={{ toolbar: TableToolbar }}
+      slotProps={{
+        toolbar: {
+          showQuickFilter: true,
+        },
+      }}
+      initialState={{
+        pagination: { paginationModel: { pageSize: 50 } },
+      }}
+    />
+  );
 }

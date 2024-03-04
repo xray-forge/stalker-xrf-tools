@@ -1,5 +1,4 @@
 import { default as CloseIcon } from "@mui/icons-material/Close";
-import { default as CottageIcon } from "@mui/icons-material/Cottage";
 import { default as ImportExportIcon } from "@mui/icons-material/ImportExport";
 import { default as LooksIcon3 } from "@mui/icons-material/Looks3";
 import { default as LooksIcon4 } from "@mui/icons-material/Looks4";
@@ -62,19 +61,6 @@ export function SpawnEditorMenu({
 
   return (
     <Drawer variant={"permanent"} open={true} sx={{ height: "100%" }} PaperProps={{ sx: { position: "relative" } }}>
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate("general", { replace: true })}>
-            <ListItemIcon>
-              <CottageIcon />
-            </ListItemIcon>
-            <ListItemText primary={"General"} />
-          </ListItemButton>
-        </ListItem>
-      </List>
-
-      <Divider />
-
       <List>
         {sections.map(([text, icon]) => (
           <ListItem key={text} disablePadding>

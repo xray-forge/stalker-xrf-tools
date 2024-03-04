@@ -13,6 +13,26 @@ export function SpawnEditorPatrols({
 }): ReactElement {
   const [activeTab, , onActiveTabChange] = useTabState<string>("patrols");
 
+  const activeTable: ReactElement = useMemo(() => {
+    if (!spawnFile) {
+      return <Grid>No file</Grid>;
+    }
+
+    switch (activeTab) {
+      case "patrols":
+        return <SpawnEditorPatrolsTable patrols={spawnFile.patrols.patrols} />;
+
+      case "points":
+        return <SpawnEditorPatrolPointsTable patrols={spawnFile.patrols.patrols} />;
+
+      case "links":
+        return <SpawnEditorPatrolLinksTable patrols={spawnFile.patrols.patrols} />;
+
+      default:
+        return <Grid>Unknown tab</Grid>;
+    }
+  }, [activeTab, spawnFile?.patrols]);
+
   if (isLoading) {
     return (
       <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
@@ -28,22 +48,6 @@ export function SpawnEditorPatrols({
       </Grid>
     );
   }
-
-  const activeTable: ReactElement = useMemo(() => {
-    switch (activeTab) {
-      case "patrols":
-        return <SpawnEditorPatrolsTable patrols={spawnFile.patrols.patrols} />;
-
-      case "points":
-        return <SpawnEditorPatrolPointsTable patrols={spawnFile.patrols.patrols} />;
-
-      case "links":
-        return <SpawnEditorPatrolLinksTable patrols={spawnFile.patrols.patrols} />;
-
-      default:
-        return <Grid>Unknown tab</Grid>;
-    }
-  }, [activeTab, spawnFile.patrols]);
 
   return (
     <Grid

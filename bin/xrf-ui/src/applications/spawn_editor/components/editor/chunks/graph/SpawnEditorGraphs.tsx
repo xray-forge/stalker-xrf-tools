@@ -2,7 +2,7 @@ import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mu
 import { useManager } from "dreamstate";
 import { ReactElement, useMemo } from "react";
 
-import { SpawnEditorGraphCrossTablesTable } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphCrossTablesTable";
+import { SpawnEditorGraphCrossTable } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphCrossTable";
 import { SpawnEditorGraphEdgesTable } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphEdgesTable";
 import { SpawnEditorGraphHeaderTable } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphHeaderTable";
 import { SpawnEditorGraphLevelsTable } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphLevelsTable";
@@ -16,23 +16,11 @@ export function SpawnEditorGraphs({
 }): ReactElement {
   const [activeTab, , onActiveTabChange] = useTabState<string>("header");
 
-  if (isLoading) {
-    return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
-        <CircularProgress />
-      </Grid>
-    );
-  }
-
-  if (error || !spawnFile) {
-    return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
-        {error ? String(error) : "No value."}
-      </Grid>
-    );
-  }
-
   const activeTable: ReactElement = useMemo(() => {
+    if (!spawnFile) {
+      return <Grid>No file</Grid>;
+    }
+
     switch (activeTab) {
       case "header":
         return <SpawnEditorGraphHeaderTable header={spawnFile.graphs.header} />;
@@ -50,12 +38,28 @@ export function SpawnEditorGraphs({
         return <SpawnEditorGraphVerticesTable vertices={spawnFile.graphs.vertices} />;
 
       case "cross_tables":
-        return <SpawnEditorGraphCrossTablesTable crossTables={spawnFile.graphs.cross_tables} />;
+        return <SpawnEditorGraphCrossTable crossTables={spawnFile.graphs.cross_tables} />;
 
       default:
         return <Grid>Unknown tab</Grid>;
     }
-  }, [activeTab, spawnFile.graphs]);
+  }, [activeTab, spawnFile?.graphs]);
+
+  if (isLoading) {
+    return (
+      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+        <CircularProgress />
+      </Grid>
+    );
+  }
+
+  if (error || !spawnFile) {
+    return (
+      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+        {error ? String(error) : "No value."}
+      </Grid>
+    );
+  }
 
   return (
     <Grid width={"auto"} height={"100%"} direction={"column"} overflow={"auto"} p={2} flexGrow={1} container>

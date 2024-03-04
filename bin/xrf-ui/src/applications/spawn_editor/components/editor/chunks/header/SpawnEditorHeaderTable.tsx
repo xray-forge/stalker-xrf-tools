@@ -2,26 +2,25 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
-import { IGraphHeader } from "@/lib/spawn_file";
+import { ISpawnFileHeaderChunk } from "@/lib/spawn_file";
 
-interface ISpawnEditorGraphHeaderTableProps {
-  header: IGraphHeader;
+interface ISpawnEditorHeaderTableProps {
+  header: ISpawnFileHeaderChunk;
 }
 
-export function SpawnEditorGraphHeaderTable({ header }: ISpawnEditorGraphHeaderTableProps): ReactElement {
+export function SpawnEditorHeaderTable({ header }: ISpawnEditorHeaderTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "guid", headerName: "guid", width: 240 },
       { field: "version", headerName: "version" },
+      { field: "objects_count", headerName: "objects_count" },
       { field: "level_count", headerName: "level_count" },
-      { field: "edges_count", headerName: "edges_count" },
-      { field: "point_count", headerName: "point_count" },
-      { field: "vertex_count", headerName: "vertex_count" },
+      { field: "guid", headerName: "guid" },
+      { field: "graph_guid", headerName: "graph_guid" },
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => [{ ...header, id: header.guid }], [header]);
+  const rows: GridRowsProp = useMemo(() => [{ ...header, id: "main" }], []);
 
   return (
     <DataGrid

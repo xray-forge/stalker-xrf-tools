@@ -1,8 +1,7 @@
-import { DataGrid } from "@mui/x-data-grid";
-import { GridColDef } from "@mui/x-data-grid/models/colDef/gridColDef";
-import { GridRowsProp } from "@mui/x-data-grid/models/gridRows";
+import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
+import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
 import { IGraphPoint } from "@/lib/spawn_file";
 
 interface ISpawnEditorGraphPointsTableProps {
@@ -21,5 +20,23 @@ export function SpawnEditorGraphPointsTable({ points }: ISpawnEditorGraphPointsT
 
   const rows: GridRowsProp = useMemo(() => points.map((it, index) => ({ ...it, id: index })), [points]);
 
-  return <DataGrid rowHeight={24} rows={rows} columns={columns} />;
+  return (
+    <DataGrid
+      rowHeight={24}
+      rows={rows}
+      columns={columns}
+      sx={{
+        maxWidth: "100%",
+      }}
+      slots={{ toolbar: TableToolbar }}
+      slotProps={{
+        toolbar: {
+          showQuickFilter: true,
+        },
+      }}
+      initialState={{
+        pagination: { paginationModel: { pageSize: 50 } },
+      }}
+    />
+  );
 }

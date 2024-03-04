@@ -1,6 +1,4 @@
-import { DataGrid } from "@mui/x-data-grid";
-import { GridColDef } from "@mui/x-data-grid/models/colDef/gridColDef";
-import { GridRowsProp } from "@mui/x-data-grid/models/gridRows";
+import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
@@ -46,10 +44,13 @@ export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolsTab
 
   return (
     <DataGrid
-      slots={{ toolbar: TableToolbar }}
       rowHeight={24}
       rows={rows}
       columns={columns}
+      sx={{
+        maxWidth: "100%",
+      }}
+      slots={{ toolbar: TableToolbar }}
       slotProps={{
         toolbar: {
           showQuickFilter: true,

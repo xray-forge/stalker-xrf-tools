@@ -7,7 +7,6 @@ import { SpawnEditorArtefacts } from "@/applications/spawn_editor/components/edi
 import { SpawnEditorGraphs } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphs";
 import { SpawnEditorHeader } from "@/applications/spawn_editor/components/editor/chunks/header/SpawnEditorHeader";
 import { SpawnEditorPatrols } from "@/applications/spawn_editor/components/editor/chunks/patrol/SpawnEditorPatrols";
-import { SpawnEditorGeneral } from "@/applications/spawn_editor/components/editor/chunks/SpawnEditorGeneral";
 import { SpawnEditorMenu } from "@/applications/spawn_editor/components/editor/SpawnEditorMenu";
 
 export function SpawnEditor(): ReactElement {
@@ -24,13 +23,12 @@ export function SpawnEditor(): ReactElement {
       <SpawnEditorMenu />
 
       <Routes>
-        <Route path={"/"} element={<SpawnEditorGeneral />} />
-        <Route path={"/general"} element={<SpawnEditorGeneral />} />
         <Route path={"/header"} element={<SpawnEditorHeader />} />
         <Route path={"/alife"} element={<SpawnEditorAlife />} />
         <Route path={"/artefacts"} element={<SpawnEditorArtefacts />} />
         <Route path={"/patrols"} element={<SpawnEditorPatrols />} />
         <Route path={"/graph"} element={<SpawnEditorGraphs />} />
+        <Route path={"/*"} element={<SpawnEditorHeader />} />
       </Routes>
     </Grid>
   );
