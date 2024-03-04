@@ -6,9 +6,9 @@ use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
+use xray_ltx::{Ini, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemAmmo {

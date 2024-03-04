@@ -1,0 +1,19 @@
+[package]
+name = "xray-ltx"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+cfg-if = "1.0"
+unicase = { version = "2.6", optional = true }
+ordered-multimap = "0.7"
+
+[features]
+default = []
+inline-comment = []
+case-insensitive = ["unicase"]
+brackets-in-section-names = []

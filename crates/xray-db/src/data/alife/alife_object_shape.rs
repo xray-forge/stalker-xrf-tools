@@ -6,9 +6,9 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::shape::Shape;
 use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
+use xray_ltx::{Ini, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectShape {

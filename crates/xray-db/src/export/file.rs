@@ -1,7 +1,7 @@
-use ini::{EscapePolicy, Ini, ParseOption, WriteOption};
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::Path;
+use xray_ltx::{EscapePolicy, Ini, ParseOption, WriteOption};
 
 /// Create file for exporting by provided path.
 pub fn create_export_file(path: &Path) -> io::Result<File> {

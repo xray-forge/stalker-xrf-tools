@@ -1,7 +1,7 @@
 use crate::types::U32Bytes;
-use ini::Properties;
 use std::io;
 use std::str::FromStr;
+use xray_ltx::Properties;
 
 /// Export ini file content to provided file.
 pub fn import_vector_from_string<T: FromStr>(value: &str) -> io::Result<Vec<T>> {

@@ -7,9 +7,9 @@ use crate::data::shape::Shape;
 use crate::export::file_import::read_ini_field;
 use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
+use xray_ltx::{Ini, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectSpaceRestrictor {
@@ -82,8 +82,8 @@ mod tests {
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
-  use ini::Ini;
   use std::io;
+  use xray_ltx::Ini;
 
   #[test]
   fn test_read_write_object() -> io::Result<()> {

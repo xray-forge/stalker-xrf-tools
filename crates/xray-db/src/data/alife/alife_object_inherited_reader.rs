@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use byteorder::ByteOrder;
-use ini::Properties;
 use std::io;
+use xray_ltx::Properties;
 
 /// Generic trait describing possibility to read object data from chunk.
 pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric> {

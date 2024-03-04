@@ -6,9 +6,9 @@ use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
+use xray_ltx::{Ini, Properties};
 
 /// Represents script extension of base server smart cover class.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

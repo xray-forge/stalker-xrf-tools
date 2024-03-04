@@ -7,9 +7,9 @@ use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::export::file_import::read_ini_field;
 use byteorder::ByteOrder;
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
+use xray_ltx::{Ini, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectHelicopter {

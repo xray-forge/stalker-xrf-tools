@@ -10,10 +10,10 @@ use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
+use xray_ltx::{Ini, Properties};
 
 /// Generic abstract alife object base.
 #[derive(Debug, Serialize, Deserialize)]

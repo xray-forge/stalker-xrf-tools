@@ -3,11 +3,11 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
 use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::Ini;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
 use std::{fmt, io};
+use xray_ltx::Ini;
 
 /// `CPatrolPathStorage::load` in xray engine.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]

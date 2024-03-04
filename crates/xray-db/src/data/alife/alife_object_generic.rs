@@ -1,7 +1,7 @@
 use crate::chunk::writer::ChunkWriter;
-use ini::Ini;
 use std::fmt::Debug;
 use std::io;
+use xray_ltx::Ini;
 
 #[typetag::serde(tag = "type")]
 pub trait AlifeObjectGeneric: Debug + Send + Sync {

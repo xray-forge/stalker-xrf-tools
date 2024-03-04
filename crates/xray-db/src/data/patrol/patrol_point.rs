@@ -4,10 +4,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
+use xray_ltx::{Ini, Properties};
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -142,12 +142,12 @@ mod tests {
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
-  use ini::Ini;
   use serde_json::json;
   use std::fs::File;
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+  use xray_ltx::Ini;
 
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {

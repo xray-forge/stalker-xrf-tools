@@ -2,10 +2,10 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
 use uuid::Uuid;
+use xray_ltx::{Ini, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphHeader {
@@ -90,13 +90,13 @@ mod tests {
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
-  use ini::Ini;
   use serde_json::json;
   use std::fs::File;
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
+  use xray_ltx::Ini;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {

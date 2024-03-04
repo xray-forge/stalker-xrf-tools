@@ -32,8 +32,8 @@ use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
 use byteorder::ByteOrder;
 use enum_map::Enum;
-use ini::Properties;
 use std::io;
+use xray_ltx::Properties;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
 pub enum AlifeClass {

@@ -1,8 +1,8 @@
 use crate::export::file_import::read_ini_field;
 use crate::types::{Matrix3d, Sphere3d};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
+use xray_ltx::{Ini, Properties};
 
 /// Shape enumeration stored in alife objects descriptors.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

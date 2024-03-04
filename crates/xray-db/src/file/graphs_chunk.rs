@@ -10,10 +10,10 @@ use crate::export::file::{
   create_export_file, export_ini_to_file, open_binary_file, open_ini_config,
 };
 use byteorder::ByteOrder;
-use ini::Ini;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::{fmt, io};
+use xray_ltx::Ini;
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]

@@ -6,9 +6,9 @@ use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{read_ini_field, read_ini_u32_bytes_field};
 use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use ini::{Ini, Properties};
 use serde::{Deserialize, Serialize};
 use std::io;
+use xray_ltx::{Ini, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphVertex {
@@ -120,12 +120,12 @@ mod tests {
   };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
-  use ini::Ini;
   use serde_json::json;
   use std::fs::File;
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+  use xray_ltx::Ini;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
