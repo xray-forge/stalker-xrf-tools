@@ -13,7 +13,7 @@ use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::{fmt, io};
-use xray_ltx::Ini;
+use xray_ltx::Ltx;
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -115,28 +115,28 @@ impl GraphsChunk {
     let header: GraphHeader =
       GraphHeader::import(&open_ini_config(&path.join("graphs_header.ltx"))?)?;
 
-    let levels_config: Ini = open_ini_config(&path.join("graphs_levels.ltx"))?;
+    let levels_config: Ltx = open_ini_config(&path.join("graphs_levels.ltx"))?;
     let mut levels: Vec<GraphLevel> = Vec::new();
 
     for index in 0..header.levels_count {
       levels.push(GraphLevel::import(&index.to_string(), &levels_config)?);
     }
 
-    let vertices_config: Ini = open_ini_config(&path.join("graphs_vertices.ltx"))?;
+    let vertices_config: Ltx = open_ini_config(&path.join("graphs_vertices.ltx"))?;
     let mut vertices: Vec<GraphVertex> = Vec::new();
 
     for index in 0..header.vertices_count {
       vertices.push(GraphVertex::import(&index.to_string(), &vertices_config)?);
     }
 
-    let points_config: Ini = open_ini_config(&path.join("graphs_points.ltx"))?;
+    let points_config: Ltx = open_ini_config(&path.join("graphs_points.ltx"))?;
     let mut points: Vec<GraphLevelPoint> = Vec::new();
 
     for index in 0..header.points_count {
       points.push(GraphLevelPoint::import(&index.to_string(), &points_config)?);
     }
 
-    let edges_config: Ini = open_ini_config(&path.join("graphs_edges.ltx"))?;
+    let edges_config: Ltx = open_ini_config(&path.join("graphs_edges.ltx"))?;
     let mut edges: Vec<GraphEdge> = Vec::new();
 
     for index in 0..header.edges_count {
@@ -161,7 +161,7 @@ impl GraphsChunk {
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let mut graphs_header_config: Ini = Ini::new();
+    let mut graphs_header_config: Ltx = Ltx::new();
 
     self.header.export(&mut graphs_header_config);
 
@@ -170,7 +170,7 @@ impl GraphsChunk {
       &mut create_export_file(&path.join("graphs_header.ltx"))?,
     )?;
 
-    let mut graphs_level_config: Ini = Ini::new();
+    let mut graphs_level_config: Ltx = Ltx::new();
 
     for (index, level) in self.levels.iter().enumerate() {
       level.export(&index.to_string(), &mut graphs_level_config);
@@ -183,7 +183,7 @@ impl GraphsChunk {
 
     log::info!("Exported graph levels");
 
-    let mut graphs_vertices_config: Ini = Ini::new();
+    let mut graphs_vertices_config: Ltx = Ltx::new();
 
     for (index, vertex) in self.vertices.iter().enumerate() {
       vertex.export(&index.to_string(), &mut graphs_vertices_config);
@@ -196,7 +196,7 @@ impl GraphsChunk {
 
     log::info!("Exported graph vertices");
 
-    let mut graphs_points_config: Ini = Ini::new();
+    let mut graphs_points_config: Ltx = Ltx::new();
 
     for (index, point) in self.points.iter().enumerate() {
       point.export(&index.to_string(), &mut graphs_points_config);
@@ -209,7 +209,7 @@ impl GraphsChunk {
 
     log::info!("Exported graph points");
 
-    let mut graphs_edges_config: Ini = Ini::new();
+    let mut graphs_edges_config: Ltx = Ltx::new();
 
     for (index, edge) in self.edges.iter().enumerate() {
       edge.export(&index.to_string(), &mut graphs_edges_config);

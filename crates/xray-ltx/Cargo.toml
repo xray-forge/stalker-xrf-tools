@@ -14,4 +14,3 @@ ordered-multimap = "0.7"
 
 [features]
 default = []
-brackets-in-section-names = []

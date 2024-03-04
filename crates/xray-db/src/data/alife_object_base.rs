@@ -13,7 +13,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 /// Generic abstract alife object base.
 #[derive(Debug, Serialize, Deserialize)]
@@ -259,7 +259,7 @@ impl AlifeObjectBase {
   }
 
   /// Export alife object data into ini file.
-  pub fn export(&self, section: &str, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
       .with_section(Some(section))
       .set("index", self.index.to_string())

@@ -5,7 +5,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphLevelPoint {
@@ -37,7 +37,7 @@ impl GraphLevelPoint {
   }
 
   /// Import graph level point from ini file.
-  pub fn import(section: &str, config: &Ini) -> io::Result<GraphLevelPoint> {
+  pub fn import(section: &str, config: &Ltx) -> io::Result<GraphLevelPoint> {
     let props: &Properties = config.section(Some(section)).unwrap_or_else(|| {
       panic!("Graph section '{section}' should be defined in level point ltx file")
     });
@@ -50,7 +50,7 @@ impl GraphLevelPoint {
   }
 
   /// Export graph level point data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
       .with_section(Some(section))
       .set("position", self.position.to_string())
@@ -78,7 +78,7 @@ mod tests {
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
@@ -127,11 +127,11 @@ mod tests {
     };
 
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_level_point.ini");
-    let mut file: File = overwrite_file(&config_path)?;
-    let mut ini: Ini = Ini::new();
+    let mut file: File = overwrite_file(config_path)?;
+    let mut ltx: Ltx = Ltx::new();
 
-    point.export("graph_level_point", &mut ini);
-    export_ini_to_file(&ini, &mut file)?;
+    point.export("graph_level_point", &mut ltx);
+    export_ini_to_file(&ltx, &mut file)?;
 
     let read_point: GraphLevelPoint =
       GraphLevelPoint::import("graph_level_point", &open_ini_config(config_path)?)?;

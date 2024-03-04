@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
 use std::{fmt, io};
-use xray_ltx::Ini;
+use xray_ltx::Ltx;
 
 /// ALife spawns chunk has the following structure:
 /// 0 - count
@@ -84,7 +84,7 @@ impl ALifeSpawnsChunk {
 
   /// Import alife spawns data from provided path.
   pub fn import(path: &Path) -> io::Result<ALifeSpawnsChunk> {
-    let config: Ini = open_ini_config(&path.join("alife_spawns.ltx"))?;
+    let config: Ltx = open_ini_config(&path.join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
     for (section, props) in config.iter() {
@@ -100,7 +100,7 @@ impl ALifeSpawnsChunk {
 
   /// Export alife spawns data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let mut config: Ini = Ini::new();
+    let mut config: Ltx = Ltx::new();
 
     for object in &self.objects {
       object.export(&object.index.to_string(), &mut config);

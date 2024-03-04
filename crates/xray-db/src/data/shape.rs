@@ -2,7 +2,7 @@ use crate::export::file_import::read_ini_field;
 use crate::types::{Matrix3d, Sphere3d};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 /// Shape enumeration stored in alife objects descriptors.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -49,7 +49,7 @@ impl Shape {
   }
 
   /// Export shapes object to target ini file section.
-  pub fn export_shapes(shapes: &[Shape], section: &str, ini: &mut Ini) {
+  pub fn export_shapes(shapes: &[Shape], section: &str, ini: &mut Ltx) {
     ini
       .with_section(Some(section))
       .set("shapes_count", shapes.len().to_string());

@@ -6,7 +6,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::{fmt, io};
-use xray_ltx::Ini;
+use xray_ltx::Ltx;
 
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
@@ -63,7 +63,7 @@ impl ArtefactSpawnsChunk {
   /// Import artefact spawns data from provided path.
   /// Parse ini files and populate spawn file.
   pub fn import(path: &Path) -> io::Result<ArtefactSpawnsChunk> {
-    let config: Ini = open_ini_config(&path.join("artefact_spawns.ltx"))?;
+    let config: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
     for (section, props) in &config {
@@ -79,7 +79,7 @@ impl ArtefactSpawnsChunk {
 
   /// Export artefact spawns data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let mut config: Ini = Ini::new();
+    let mut config: Ltx = Ltx::new();
 
     for (index, node) in self.nodes.iter().enumerate() {
       node.export(&index.to_string(), &mut config);

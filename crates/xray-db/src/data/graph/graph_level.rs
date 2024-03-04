@@ -6,7 +6,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use uuid::Uuid;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 /// `GameGraph::SLevel::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -47,7 +47,7 @@ impl GraphLevel {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(section: &str, config: &Ini) -> io::Result<GraphLevel> {
+  pub fn import(section: &str, config: &Ltx) -> io::Result<GraphLevel> {
     let props: &Properties = config
       .section(Some(section))
       .unwrap_or_else(|| panic!("Graph section {section} should be defined in ltx file"));
@@ -62,7 +62,7 @@ impl GraphLevel {
   }
 
   /// Export graph level data into ini.
-  pub fn export(&self, section: &str, config: &mut Ini) {
+  pub fn export(&self, section: &str, config: &mut Ltx) {
     config
       .with_section(Some(section))
       .set("name", &self.name)
@@ -93,7 +93,7 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
@@ -151,10 +151,10 @@ mod tests {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_level.ini");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
-    let mut ini: Ini = Ini::new();
+    let mut ltx: Ltx = Ltx::new();
 
-    level.export("graph_level", &mut ini);
-    export_ini_to_file(&ini, &mut file)?;
+    level.export("graph_level", &mut ltx);
+    export_ini_to_file(&ltx, &mut file)?;
 
     let read_level: GraphLevel = GraphLevel::import("graph_level", &open_ini_config(config_path)?)?;
 

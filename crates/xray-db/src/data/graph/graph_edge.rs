@@ -4,7 +4,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphEdge {
@@ -32,7 +32,7 @@ impl GraphEdge {
   }
 
   /// Import graph edge from ini file.
-  pub fn import(section: &str, config: &Ini) -> io::Result<GraphEdge> {
+  pub fn import(section: &str, config: &Ltx) -> io::Result<GraphEdge> {
     let props: &Properties = config.section(Some(section)).unwrap_or_else(|| {
       panic!("Graph section '{section}' should be defined in level point ltx file")
     });
@@ -44,7 +44,7 @@ impl GraphEdge {
   }
 
   /// Export graph edge data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
       .with_section(Some(section))
       .set("game_vertex_id", self.game_vertex_id.to_string())
@@ -70,7 +70,7 @@ mod tests {
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
@@ -122,10 +122,10 @@ mod tests {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_edge.ini");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
-    let mut ini: Ini = Ini::new();
+    let mut ltx: Ltx = Ltx::new();
 
-    edge.export("graph_edge", &mut ini);
-    export_ini_to_file(&ini, &mut file)?;
+    edge.export("graph_edge", &mut ltx);
+    export_ini_to_file(&ltx, &mut file)?;
 
     let read_header: GraphEdge = GraphEdge::import("graph_edge", &open_ini_config(config_path)?)?;
 

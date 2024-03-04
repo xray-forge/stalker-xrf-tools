@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_ltx::Ini;
+use xray_ltx::Ltx;
 
 /// Lint ltx file or folder based on provided arguments.
 pub fn format_ltx(matches: &ArgMatches) {
@@ -10,7 +10,7 @@ pub fn format_ltx(matches: &ArgMatches) {
 
   log::info!("Starting format {:?}", path);
 
-  let ini: Ini = Ini::load_from_file(path).unwrap();
+  let ltx: Ltx = Ltx::load_from_file(path).unwrap();
 
-  log::info!("Read ini file: {}", ini.len())
+  log::info!("Read ini file: {}", ltx.len())
 }

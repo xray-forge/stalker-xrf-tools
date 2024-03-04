@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 /// Generic alife object abstraction data.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -78,7 +78,7 @@ impl AlifeObjectGeneric for AlifeObjectAbstract {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ini) {
+  fn export(&self, section: &str, ini: &mut Ltx) {
     ini
       .with_section(Some(section))
       .set("game_vertex_id", self.game_vertex_id.to_string())
@@ -108,7 +108,7 @@ mod tests {
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_object() -> io::Result<()> {
@@ -176,7 +176,7 @@ mod tests {
     };
 
     let exported_filename: String = get_relative_test_sample_file_path(file!(), "exported.ini");
-    let mut exported: Ini = Ini::new();
+    let mut exported: Ltx = Ltx::new();
 
     first.export("first", &mut exported);
     second.export("second", &mut exported);
@@ -186,7 +186,7 @@ mod tests {
       &mut overwrite_test_relative_resource_as_file(&exported_filename)?,
     )?;
 
-    let source: Ini = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
 
     let read_first: AlifeObjectAbstract =
       AlifeObjectAbstract::import(source.section(Some("first")).unwrap())?;
@@ -197,7 +197,7 @@ mod tests {
     assert_eq!(read_second, second);
 
     let imported_filename: String = get_relative_test_sample_file_path(file!(), "imported.ini");
-    let mut imported: Ini = Ini::new();
+    let mut imported: Ltx = Ltx::new();
 
     read_first.export("first", &mut imported);
     read_second.export("second", &mut imported);

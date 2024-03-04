@@ -8,7 +8,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 /// Represents script extension of base server smart cover class.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -75,7 +75,7 @@ impl AlifeObjectGeneric for AlifeSmartCover {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ini) {
+  fn export(&self, section: &str, ini: &mut Ltx) {
     self.base.export(section, ini);
 
     ini

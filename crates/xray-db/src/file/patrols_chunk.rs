@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
 use std::{fmt, io};
-use xray_ltx::Ini;
+use xray_ltx::Ltx;
 
 /// `CPatrolPathStorage::load` in xray engine.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -53,9 +53,9 @@ impl PatrolsChunk {
 
   /// Import patrols data from provided path.
   pub fn import(path: &Path) -> io::Result<PatrolsChunk> {
-    let patrols_config: Ini = open_ini_config(&path.join("patrols.ltx"))?;
-    let patrol_points_config: Ini = open_ini_config(&path.join("patrol_points.ltx"))?;
-    let patrol_links_config: Ini = open_ini_config(&path.join("patrol_links.ltx"))?;
+    let patrols_config: Ltx = open_ini_config(&path.join("patrols.ltx"))?;
+    let patrol_points_config: Ltx = open_ini_config(&path.join("patrol_points.ltx"))?;
+    let patrol_links_config: Ltx = open_ini_config(&path.join("patrol_links.ltx"))?;
 
     let mut patrols: Vec<Patrol> = Vec::new();
 
@@ -77,9 +77,9 @@ impl PatrolsChunk {
 
   /// Export patrols data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let mut patrols_config: Ini = Ini::new();
-    let mut patrol_points_config: Ini = Ini::new();
-    let mut patrol_links_config: Ini = Ini::new();
+    let mut patrols_config: Ltx = Ltx::new();
+    let mut patrol_points_config: Ltx = Ltx::new();
+    let mut patrol_links_config: Ltx = Ltx::new();
 
     for patrol in &self.patrols {
       patrol.export::<T>(

@@ -2,28 +2,28 @@ use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 use std::io;
 
-/// Error while parsing an INI document.
+/// Error while parsing an LTX document.
 #[derive(Debug)]
 pub enum LtxError {
   Io(io::Error),
-  Parse(ParseError),
+  Parse(LtxParseError),
 }
 
 /// Parse error.
 #[derive(Debug)]
-pub struct ParseError {
+pub struct LtxParseError {
   pub line: usize,
   pub col: usize,
   pub msg: String,
 }
 
-impl Display for ParseError {
+impl Display for LtxParseError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {
     write!(formatter, "{}:{} {}", self.line, self.col, self.msg)
   }
 }
 
-impl Error for ParseError {}
+impl Error for LtxParseError {}
 
 impl Display for LtxError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {

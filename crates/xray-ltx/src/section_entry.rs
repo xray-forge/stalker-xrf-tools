@@ -2,7 +2,7 @@ use crate::properties::Properties;
 use crate::property::SectionKey;
 use ordered_multimap::list_ordered_multimap::{Entry, OccupiedEntry, VacantEntry};
 
-/// A view into a vacant entry in a `Ini`.
+/// A view into a vacant entry in a `Ltx`.
 pub struct SectionVacantEntry<'a> {
   inner: VacantEntry<'a, SectionKey, Properties>,
 }
@@ -14,7 +14,7 @@ impl<'a> SectionVacantEntry<'a> {
   }
 }
 
-/// A view into a occupied entry in a `Ini`.
+/// A view into a occupied entry in a `Ltx`.
 pub struct SectionOccupiedEntry<'a> {
   inner: OccupiedEntry<'a, SectionKey, Properties>,
 }
@@ -39,7 +39,7 @@ impl<'a> SectionOccupiedEntry<'a> {
   }
 }
 
-/// A view into an `Ini`, which may either be vacant or occupied.
+/// A view into an `Ltx`, which may either be vacant or occupied.
 pub enum SectionEntry<'a> {
   Vacant(SectionVacantEntry<'a>),
   Occupied(SectionOccupiedEntry<'a>),

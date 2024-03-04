@@ -8,7 +8,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 /// Patrols list is represented by list of samples containing patrol chunk.
 /// 0...N, where N is chunk.
@@ -121,9 +121,9 @@ impl Patrol {
   /// Import patrols data from provided path.
   pub fn import(
     section: &str,
-    patrols_config: &Ini,
-    patrol_points_config: &Ini,
-    patrol_links_config: &Ini,
+    patrols_config: &Ltx,
+    patrol_points_config: &Ltx,
+    patrol_links_config: &Ltx,
   ) -> io::Result<Patrol> {
     let props: &Properties = patrols_config
       .section(Some(section))
@@ -164,9 +164,9 @@ impl Patrol {
   pub fn export<T: ByteOrder>(
     &self,
     section: &str,
-    patrols_config: &mut Ini,
-    patrol_points_config: &mut Ini,
-    patrol_links_config: &mut Ini,
+    patrols_config: &mut Ltx,
+    patrol_points_config: &mut Ltx,
+    patrol_links_config: &mut Ltx,
   ) {
     patrols_config
       .with_section(Some(section))
@@ -216,7 +216,7 @@ mod tests {
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
@@ -382,20 +382,20 @@ mod tests {
     let mut points_file: File = overwrite_file(&points_config_path)?;
     let mut links_file: File = overwrite_file(&links_config_path)?;
 
-    let mut patrol_ini: Ini = Ini::new();
-    let mut links_ini: Ini = Ini::new();
-    let mut points_ini: Ini = Ini::new();
+    let mut patrol_ltx: Ltx = Ltx::new();
+    let mut links_ltx: Ltx = Ltx::new();
+    let mut points_ltx: Ltx = Ltx::new();
 
     patrol.export::<SpawnByteOrder>(
       &patrol.name,
-      &mut patrol_ini,
-      &mut points_ini,
-      &mut links_ini,
+      &mut patrol_ltx,
+      &mut points_ltx,
+      &mut links_ltx,
     );
 
-    export_ini_to_file(&patrol_ini, &mut patrol_file)?;
-    export_ini_to_file(&points_ini, &mut points_file)?;
-    export_ini_to_file(&links_ini, &mut links_file)?;
+    export_ini_to_file(&patrol_ltx, &mut patrol_file)?;
+    export_ini_to_file(&points_ltx, &mut points_file)?;
+    export_ini_to_file(&links_ltx, &mut links_file)?;
 
     let read_point: Patrol = Patrol::import(
       &patrol.name,

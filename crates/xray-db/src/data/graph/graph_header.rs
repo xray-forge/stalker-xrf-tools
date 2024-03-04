@@ -5,7 +5,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use uuid::Uuid;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphHeader {
@@ -49,7 +49,7 @@ impl GraphHeader {
   }
 
   /// Import graph header from ini file.
-  pub fn import(config: &Ini) -> io::Result<GraphHeader> {
+  pub fn import(config: &Ltx) -> io::Result<GraphHeader> {
     let props: &Properties = config
       .section(Some("header"))
       .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
@@ -65,7 +65,7 @@ impl GraphHeader {
   }
 
   /// Export graph header data into level ini.
-  pub fn export(&self, ini: &mut Ini) {
+  pub fn export(&self, ini: &mut Ltx) {
     ini
       .with_section(Some("header"))
       .set("version", self.version.to_string())
@@ -96,7 +96,7 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_simple_graph_level_point() -> io::Result<()> {
@@ -156,10 +156,10 @@ mod tests {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_header.ini");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
-    let mut ini: Ini = Ini::new();
+    let mut ltx: Ltx = Ltx::new();
 
-    header.export(&mut ini);
-    export_ini_to_file(&ini, &mut file)?;
+    header.export(&mut ltx);
+    export_ini_to_file(&ltx, &mut file)?;
 
     let read_header: GraphHeader = GraphHeader::import(&open_ini_config(config_path)?)?;
 

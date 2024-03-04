@@ -1,4 +1,4 @@
-use crate::ini::Ini;
+use crate::ltx::Ltx;
 use crate::properties::Properties;
 use crate::property::{PropertyKey, SectionKey};
 use ordered_multimap::list_ordered_multimap::{IntoIter, Iter, IterMut};
@@ -183,7 +183,7 @@ impl DoubleEndedIterator for SectionIntoIter {
   }
 }
 
-impl<'a> Ini {
+impl<'a> Ltx {
   /// Immutable iterate though sections
   pub fn iter(&'a self) -> SectionIter<'a> {
     SectionIter {
@@ -205,7 +205,7 @@ impl<'a> Ini {
   }
 }
 
-impl<'a> IntoIterator for &'a Ini {
+impl<'a> IntoIterator for &'a Ltx {
   type IntoIter = SectionIter<'a>;
   type Item = (Option<&'a str>, &'a Properties);
 
@@ -214,7 +214,7 @@ impl<'a> IntoIterator for &'a Ini {
   }
 }
 
-impl<'a> IntoIterator for &'a mut Ini {
+impl<'a> IntoIterator for &'a mut Ltx {
   type IntoIter = SectionIterMut<'a>;
   type Item = (Option<&'a str>, &'a mut Properties);
 
@@ -223,7 +223,7 @@ impl<'a> IntoIterator for &'a mut Ini {
   }
 }
 
-impl IntoIterator for Ini {
+impl IntoIterator for Ltx {
   type IntoIter = SectionIntoIter;
   type Item = (SectionKey, Properties);
 

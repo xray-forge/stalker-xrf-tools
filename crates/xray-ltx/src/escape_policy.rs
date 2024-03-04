@@ -23,7 +23,7 @@ pub enum EscapePolicy {
   ReservedUnicode,
   /// Escape reserved symbols and all non-ASCII characters, including codepoints above U+FFFF.
   ReservedUnicodeExtended,
-  /// Escape everything that some INI implementations assume
+  /// Escape everything that some LTX implementations assume.
   Everything,
 }
 
@@ -77,7 +77,7 @@ impl EscapePolicy {
   }
 }
 
-// Escape non-INI characters.
+// Escape non-LTX characters.
 //
 // Common escape sequences: https://en.wikipedia.org/wiki/INI_file#Escape_characters
 //

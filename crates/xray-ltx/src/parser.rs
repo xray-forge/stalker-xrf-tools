@@ -1,13 +1,12 @@
-use crate::error::ParseError;
-use crate::ini::Ini;
+use crate::error::LtxParseError;
+use crate::ltx::Ltx;
 use crate::parse_option::ParseOption;
 use crate::properties::Properties;
 use crate::section_entry::SectionEntry;
-use cfg_if::cfg_if;
 use std::str::Chars;
 
-// Ini parser.
-pub struct Parser<'a> {
+// Ltx parser.
+pub struct LtxParser<'a> {
   ch: Option<char>,
   rdr: Chars<'a>,
   line: usize,
@@ -15,10 +14,10 @@ pub struct Parser<'a> {
   opt: ParseOption,
 }
 
-impl<'a> Parser<'a> {
+impl<'a> LtxParser<'a> {
   // Create a parser.
-  pub fn new(rdr: Chars<'a>, opt: ParseOption) -> Parser<'a> {
-    let mut p = Parser {
+  pub fn new(rdr: Chars<'a>, opt: ParseOption) -> LtxParser<'a> {
+    let mut p = LtxParser {
       ch: None,
       line: 0,
       col: 0,
@@ -48,8 +47,8 @@ impl<'a> Parser<'a> {
     }
   }
 
-  fn error<U, M: Into<String>>(&self, msg: M) -> Result<U, ParseError> {
-    Err(ParseError {
+  fn error<U, M: Into<String>>(&self, msg: M) -> Result<U, LtxParseError> {
+    Err(LtxParseError {
       line: self.line + 1,
       col: self.col + 1,
       msg: msg.into(),
@@ -76,9 +75,9 @@ impl<'a> Parser<'a> {
     }
   }
 
-  /// Parse the whole INI input.
-  pub fn parse(&mut self) -> Result<Ini, ParseError> {
-    let mut result = Ini::new();
+  /// Parse the whole LTX input.
+  pub fn parse(&mut self) -> Result<Ltx, LtxParseError> {
+    let mut result = Ltx::new();
     let mut curkey: String = "".into();
     let mut cursec: Option<String> = None;
 
@@ -155,7 +154,7 @@ impl<'a> Parser<'a> {
     &mut self,
     endpoint: &[Option<char>],
     check_inline_comment: bool,
-  ) -> Result<String, ParseError> {
+  ) -> Result<String, LtxParseError> {
     let mut result: String = String::new();
 
     while !endpoint.contains(&self.ch) {
@@ -237,52 +236,27 @@ impl<'a> Parser<'a> {
     Ok(result)
   }
 
-  fn parse_section(&mut self) -> Result<String, ParseError> {
-    cfg_if! {
-        if #[cfg(feature = "brackets-in-section-names")] {
-            // Skip [
-            self.bump();
-
-            let mut s = match self.parse_str_until(&[Some('\r'), Some('\n')], true) {
-                Ok(r) => r,
-                Err(err) => return Err(err)
-            };
-
-            // Deal with inline comment
-            if matches!(self.ch, Some('#') | Some(';')) {
-                self.parse_comment();
-            }
-
-            let tr = s.trim_end_matches(|c| c == ' ' || c == '\t');
-            if !tr.ends_with(']') {
-                return self.error("section must be ended with ']'");
-            }
-
-            s.truncate(tr.len() - 1);
-            Ok(s)
-        } else {
-            // Skip [
-            self.bump();
-            let sec = self.parse_str_until(&[Some(']')], false)?;
-            if let Some(']') = self.ch {
-                self.bump();
-            }
-
-            // Deal with inline comment
-            if matches!(self.ch, Some('#') | Some(';')) {
-                self.parse_comment();
-            }
-
-            Ok(sec)
-        }
+  fn parse_section(&mut self) -> Result<String, LtxParseError> {
+    // Skip [
+    self.bump();
+    let sec = self.parse_str_until(&[Some(']')], false)?;
+    if let Some(']') = self.ch {
+      self.bump();
     }
+
+    // Deal with inline comment
+    if matches!(self.ch, Some('#') | Some(';')) {
+      self.parse_comment();
+    }
+
+    Ok(sec)
   }
 
-  fn parse_key(&mut self) -> Result<String, ParseError> {
+  fn parse_key(&mut self) -> Result<String, LtxParseError> {
     self.parse_str_until(&[Some('='), Some(':')], false)
   }
 
-  fn parse_val(&mut self) -> Result<String, ParseError> {
+  fn parse_val(&mut self) -> Result<String, LtxParseError> {
     self.bump();
     // Issue #35: Allow empty value
     self.parse_whitespace_except_line_break();
@@ -310,7 +284,7 @@ impl<'a> Parser<'a> {
   }
 
   #[inline]
-  fn parse_str_until_eol(&mut self, check_inline_comment: bool) -> Result<String, ParseError> {
+  fn parse_str_until_eol(&mut self, check_inline_comment: bool) -> Result<String, LtxParseError> {
     let value: String =
       self.parse_str_until(&[Some('\n'), Some('\r'), None], check_inline_comment)?;
 

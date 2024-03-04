@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectShape {
@@ -48,7 +48,7 @@ impl AlifeObjectGeneric for AlifeObjectShape {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ini) {
+  fn export(&self, section: &str, ini: &mut Ltx) {
     self.base.export(section, ini);
 
     Shape::export_shapes(&self.shape, section, ini);

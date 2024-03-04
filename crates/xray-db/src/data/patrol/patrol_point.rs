@@ -7,7 +7,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -102,7 +102,7 @@ impl PatrolPoint {
   }
 
   /// Import patrol point data from ini config.
-  pub fn import(section: &str, config: &Ini) -> io::Result<PatrolPoint> {
+  pub fn import(section: &str, config: &Ltx) -> io::Result<PatrolPoint> {
     let props: &Properties = config
       .section(Some(section))
       .unwrap_or_else(|| panic!("Patrol point section {section} should be defined in ltx file"));
@@ -117,7 +117,7 @@ impl PatrolPoint {
   }
 
   /// Export patrol point data into ini.
-  pub fn export(&self, section: &str, config: &mut Ini) {
+  pub fn export(&self, section: &str, config: &mut Ltx) {
     config
       .with_section(Some(section))
       .set("name", &self.name)
@@ -147,7 +147,7 @@ mod tests {
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_simple_patrol_point() -> io::Result<()> {
@@ -244,10 +244,10 @@ mod tests {
 
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol_point.ini");
     let mut file: File = overwrite_file(&config_path)?;
-    let mut ini: Ini = Ini::new();
+    let mut ltx: Ltx = Ltx::new();
 
-    point.export("patrol_point", &mut ini);
-    export_ini_to_file(&ini, &mut file)?;
+    point.export("patrol_point", &mut ltx);
+    export_ini_to_file(&ltx, &mut file)?;
 
     let read_point: PatrolPoint =
       PatrolPoint::import("patrol_point", &open_ini_config(config_path)?)?;

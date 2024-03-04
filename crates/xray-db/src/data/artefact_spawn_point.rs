@@ -5,7 +5,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ini, Properties};
+use xray_ltx::{Ltx, Properties};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ArtefactSpawnPoint {
@@ -46,7 +46,7 @@ impl ArtefactSpawnPoint {
   }
 
   /// Export artefact spawn point data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ini) {
+  pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
       .with_section(Some(section))
       .set("distance", self.distance.to_string())
@@ -74,7 +74,7 @@ mod tests {
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_ltx::Ini;
+  use xray_ltx::Ltx;
 
   #[test]
   fn test_read_write_simple_artefact_spawn_point() -> io::Result<()> {
@@ -127,10 +127,10 @@ mod tests {
     let config_path: &Path =
       &get_absolute_test_sample_file_path(file!(), "artefact_spawn_point.ini");
     let mut file: File = overwrite_file(&config_path)?;
-    let mut ini: Ini = Ini::new();
+    let mut ltx: Ltx = Ltx::new();
 
-    point.export("artefact_spawn_point", &mut ini);
-    export_ini_to_file(&ini, &mut file)?;
+    point.export("artefact_spawn_point", &mut ltx);
+    export_ini_to_file(&ltx, &mut file)?;
 
     let read_point: ArtefactSpawnPoint = ArtefactSpawnPoint::import(
       &open_ini_config(config_path)?
