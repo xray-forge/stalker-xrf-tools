@@ -7,9 +7,11 @@ pub(crate) mod parse_option;
 pub(crate) mod parser;
 pub(crate) mod properties;
 pub(crate) mod property;
+pub(crate) mod reader;
 pub(crate) mod section_entry;
 pub(crate) mod section_setter;
 pub(crate) mod write_option;
+pub(crate) mod writer;
 
 pub use crate::escape_policy::EscapePolicy;
 pub use crate::ltx::Ltx;
