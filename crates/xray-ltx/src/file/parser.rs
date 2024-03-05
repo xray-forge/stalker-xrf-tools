@@ -1,6 +1,6 @@
 use crate::file::error::LtxParseError;
 use crate::file::section_entry::SectionEntry;
-use crate::{Ltx, ParseOption, Properties, ROOT_SECTION};
+use crate::{Ltx, ParseOptions, Properties, ROOT_SECTION};
 use std::str::Chars;
 
 // Ltx parser.
@@ -9,11 +9,11 @@ pub struct LtxParser<'a> {
   rdr: Chars<'a>,
   line: usize,
   col: usize,
-  opt: ParseOption,
+  opt: ParseOptions,
 }
 
 impl<'a> LtxParser<'a> {
-  pub fn new(rdr: Chars<'a>, opt: ParseOption) -> LtxParser<'a> {
+  pub fn new(rdr: Chars<'a>, opt: ParseOptions) -> LtxParser<'a> {
     let mut parser: LtxParser = LtxParser {
       ch: None,
       line: 0,
@@ -81,8 +81,8 @@ impl<'a> LtxParser<'a> {
     let mut includes_processed: bool = false;
 
     let mut ltx: Ltx = Ltx::new();
-    let mut current_key: String = "".into();
     let mut current_section: String = ROOT_SECTION.to_string();
+    let mut current_key: String = String::new();
 
     self.parse_whitespace();
 
@@ -93,7 +93,7 @@ impl<'a> LtxParser<'a> {
 
       match current_char {
         ';' => {
-          self.parse_comment();
+          self.parse_comment()?;
         }
 
         '#' => {
@@ -141,8 +141,8 @@ impl<'a> LtxParser<'a> {
         },
 
         '=' => {
-          if (current_key[..]).is_empty() {
-            return self.error("missing key");
+          if current_key[..].is_empty() {
+            return self.error("Missing key when parsing '=' in ltx file");
           }
 
           match self.parse_val() {
@@ -151,7 +151,8 @@ impl<'a> LtxParser<'a> {
 
               match ltx.entry(current_section.clone()) {
                 SectionEntry::Vacant(vacant_entry) => {
-                  let mut properties = Properties::new(); // cursec must be None (the General Section)
+                  let mut properties: Properties = Properties::new(); // cursec must be None (the General Section)
+
                   properties.insert(current_key, value);
                   vacant_entry.insert(properties);
                 }
@@ -229,7 +230,7 @@ impl<'a> LtxParser<'a> {
 
           match self.ch {
             Some(';') => {
-              // [space]#, [space]; starts an inline comment.
+              // [space]; starts an inline comment.
               break;
             }
             Some(_) => {
@@ -310,14 +311,14 @@ impl<'a> LtxParser<'a> {
 
     // Deal with inline comment
     if matches!(self.ch, Some(';')) {
-      self.parse_comment();
+      self.parse_comment()?;
     }
 
     Ok(sec)
   }
 
   fn parse_key(&mut self) -> Result<String, LtxParseError> {
-    self.parse_str_until(&[Some('=')], false)
+    self.parse_str_until(&[Some('='), Some('\n')], false)
   }
 
   fn parse_val(&mut self) -> Result<String, LtxParseError> {
@@ -379,7 +380,7 @@ impl<'a> LtxParser<'a> {
       self.parse_str_until(&[Some('\n'), Some('\r'), None], check_inline_comment)?;
 
     if check_inline_comment && matches!(self.ch, Some(';')) {
-      self.parse_comment();
+      self.parse_comment()?;
     }
 
     Ok(value)

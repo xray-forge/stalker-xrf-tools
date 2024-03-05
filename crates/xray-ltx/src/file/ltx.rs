@@ -192,8 +192,9 @@ mod test {
   use crate::file::error::LtxParseError;
   use crate::file::escape_policy::{escape_str, EscapePolicy};
   use crate::file::ltx::Ltx;
-  use crate::file::parse_option::ParseOption;
+  use crate::file::parse_options::ParseOptions;
   use crate::file::properties::Properties;
+  use std::string::ParseError;
 
   #[test]
   fn load_from_str_with_empty_general_section() {
@@ -276,7 +277,7 @@ mod test {
     let invalid_input: &str = "\n\\x";
     let ltx = Ltx::load_from_str_opt(
       invalid_input,
-      ParseOption {
+      ParseOptions {
         enabled_escape: true,
         ..Default::default()
       },
@@ -671,9 +672,9 @@ Exec = \"/path/to/exe with space\" arg
 
     let ltx: Ltx = Ltx::load_from_str_opt(
       input,
-      ParseOption {
+      ParseOptions {
         enabled_quote: false,
-        ..ParseOption::default()
+        ..ParseOptions::default()
       },
     )
     .unwrap();
@@ -759,12 +760,9 @@ foo = a
 
 [peer]
 foo = c
-
-[peer]
-foo = e
 ";
 
-    let ltx = Ltx::load_from_str(input);
+    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(

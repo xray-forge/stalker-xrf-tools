@@ -1,5 +1,5 @@
 use crate::file::escape_policy::escape_str;
-use crate::{EscapePolicy, Ltx, WriteOption, ROOT_SECTION};
+use crate::{EscapePolicy, Ltx, WriteOptions, ROOT_SECTION};
 use std::fs::OpenOptions;
 use std::io;
 use std::io::Write;
@@ -26,7 +26,11 @@ impl Ltx {
   }
 
   /// Write to a file with options
-  pub fn write_to_file_opt<P: AsRef<Path>>(&self, filename: P, opt: WriteOption) -> io::Result<()> {
+  pub fn write_to_file_opt<P: AsRef<Path>>(
+    &self,
+    filename: P,
+    opt: WriteOptions,
+  ) -> io::Result<()> {
     let mut file = OpenOptions::new()
       .write(true)
       .truncate(true)
@@ -44,7 +48,7 @@ impl Ltx {
   pub fn write_to_policy<W: Write>(&self, writer: &mut W, policy: EscapePolicy) -> io::Result<()> {
     self.write_to_opt(
       writer,
-      WriteOption {
+      WriteOptions {
         escape_policy: policy,
         ..Default::default()
       },
@@ -52,7 +56,7 @@ impl Ltx {
   }
 
   /// Write to a writer with options
-  pub fn write_to_opt<W: Write>(&self, writer: &mut W, option: WriteOption) -> io::Result<()> {
+  pub fn write_to_opt<W: Write>(&self, writer: &mut W, option: WriteOptions) -> io::Result<()> {
     let mut firstline = true;
 
     // Write include statements.
@@ -109,7 +113,7 @@ impl Ltx {
 #[cfg(test)]
 mod test {
   use crate::file::line_separator::{LineSeparator, DEFAULT_LINE_SEPARATOR};
-  use crate::{EscapePolicy, Ltx, WriteOption, ROOT_SECTION};
+  use crate::{EscapePolicy, Ltx, WriteOptions, ROOT_SECTION};
 
   #[test]
   fn preserve_order_write() {
@@ -142,7 +146,7 @@ a3 = n3
 
     let ltx: Ltx = Ltx::new();
 
-    let opt = WriteOption {
+    let opt = WriteOptions {
       line_separator: LineSeparator::CR,
       ..Default::default()
     };
@@ -171,7 +175,7 @@ a3 = n3
       ini
         .write_to_opt(
           &mut buf,
-          WriteOption {
+          WriteOptions {
             line_separator: LineSeparator::CR,
             kv_separator: "=",
             ..Default::default()
@@ -190,7 +194,7 @@ a3 = n3
       ini
         .write_to_opt(
           &mut buf,
-          WriteOption {
+          WriteOptions {
             line_separator: LineSeparator::CRLF,
             ..Default::default()
           },
@@ -208,7 +212,7 @@ a3 = n3
       ini
         .write_to_opt(
           &mut buf,
-          WriteOption {
+          WriteOptions {
             line_separator: LineSeparator::SystemDefault,
             ..Default::default()
           },
@@ -252,7 +256,7 @@ a3 = n3
     ini
       .write_to_opt(
         &mut buf,
-        WriteOption {
+        WriteOptions {
           kv_separator: "=",
           ..Default::default()
         },

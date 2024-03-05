@@ -1,7 +1,7 @@
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::Path;
-use xray_ltx::{EscapePolicy, Ltx, ParseOption, WriteOption};
+use xray_ltx::{EscapePolicy, Ltx, ParseOptions, WriteOptions};
 
 /// Create file for exporting by provided path.
 pub fn create_export_file(path: &Path) -> io::Result<File> {
@@ -23,7 +23,7 @@ pub fn create_export_file(path: &Path) -> io::Result<File> {
 pub fn export_ini_to_file(ini: &Ltx, file: &mut File) -> io::Result<()> {
   ini.write_to_opt(
     file,
-    WriteOption {
+    WriteOptions {
       escape_policy: EscapePolicy::Nothing,
       ..Default::default()
     },
@@ -35,7 +35,7 @@ pub fn export_ini_to_file(ini: &Ltx, file: &mut File) -> io::Result<()> {
 pub fn open_ini_config(path: &Path) -> io::Result<Ltx> {
   match Ltx::load_from_file_opt(
     path,
-    ParseOption {
+    ParseOptions {
       enabled_escape: false,
       enabled_quote: false,
     },

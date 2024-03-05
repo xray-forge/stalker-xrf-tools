@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_ltx::{EscapePolicy, Ltx, ParseOption, WriteOption};
+use xray_ltx::{EscapePolicy, Ltx, LtxError, ParseOptions, WriteOptions};
 
 /// Lint ltx file or folder based on provided arguments.
 pub fn format_ltx(matches: &ArgMatches) {
@@ -10,9 +10,9 @@ pub fn format_ltx(matches: &ArgMatches) {
 
   log::info!("Formatting ltx: {:?}", path);
 
-  let ltx = Ltx::load_from_file_opt(
+  let ltx: Result<Ltx, LtxError> = Ltx::load_from_file_opt(
     path,
-    ParseOption {
+    ParseOptions {
       enabled_escape: false,
       enabled_quote: false,
     },
@@ -31,7 +31,7 @@ pub fn format_ltx(matches: &ArgMatches) {
   ltx
     .write_to_file_opt(
       "test.ltx",
-      WriteOption {
+      WriteOptions {
         escape_policy: EscapePolicy::Nothing,
         ..Default::default()
       },
