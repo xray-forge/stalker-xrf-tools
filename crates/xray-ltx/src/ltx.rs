@@ -172,7 +172,7 @@ impl Default for Ltx {
   /// Creates a ltx instance with an empty general section. This allows [Ltx::general_section]
   /// and [Ltx::with_general_section] to be called without panicking.
   fn default() -> Self {
-    let mut result = Ltx {
+    let mut result: Ltx = Ltx {
       sections: Default::default(),
     };
 
@@ -512,18 +512,6 @@ mod test {
   }
 
   #[test]
-  fn sharp_comment() {
-    let input = "
-[section name]
-name = hello
-# abcdefg
-";
-
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(ltx.get_from(Some("section name"), "name").unwrap(), "hello");
-  }
-
-  #[test]
   fn iter() {
     let input = "
 [section name]
@@ -539,26 +527,33 @@ gender = mail ; abdddd
   }
 
   #[test]
-  fn colon() {
+  fn inherited() {
     let input = "
-[section name]
-name: hello
-gender : mail
+[section_name]: base1, base2, base3
+name = hello
+key = value ; comment
 ";
 
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(ltx.get_from(Some("section name"), "name").unwrap(), "hello");
-    assert_eq!(
-      ltx.get_from(Some("section name"), "gender").unwrap(),
-      "mail"
-    );
+
+    assert_eq!(ltx.get_from(Some("section_name"), "name").unwrap(), "hello");
+    assert_eq!(ltx.get_from(Some("section_name"), "key").unwrap(), "value");
+
+    let properties = ltx.section(Some("section_name")).expect("Existing section");
+
+    assert_eq!(properties.inherited.len(), 3);
+    assert!(!properties.inherits_section(Some("base0")));
+    assert!(properties.inherits_section(Some("base1")));
+    assert!(properties.inherits_section(Some("base2")));
+    assert!(properties.inherits_section(Some("base3")));
+    assert!(!properties.inherits_section(Some("base4")));
   }
 
   #[test]
   fn string() {
     let input: &str = "
 [section name]
-# This is a comment
+; This is a comment
 Key = \"Value\"
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
@@ -569,7 +564,7 @@ Key = \"Value\"
   fn string_multiline() {
     let input: &str = "
 [section name]
-# This is a comment
+; This is a comment
 Key = \"Value
 Otherline\"
 ";
@@ -584,7 +579,7 @@ Otherline\"
   fn string_comment() {
     let input: &str = "
 [section name]
-# This is a comment
+; This is a comment
 Key = \"Value   # This is not a comment ; at all\"
 Stuff = Other
 ";
@@ -599,7 +594,7 @@ Stuff = Other
   fn string_single() {
     let input: &str = "
 [section name]
-# This is a comment
+; This is a comment
 Key = 'Value'
 Stuff = Other
 ";
@@ -625,7 +620,7 @@ Comment[uk]=Доступ до Інтернету
   fn string_single_multiline() {
     let input = "
 [section name]
-# This is a comment
+; This is a comment
 Key = 'Value
 Otherline'
 Stuff = Other
@@ -641,7 +636,7 @@ Stuff = Other
   fn string_single_comment() {
     let input: &str = "
 [section name]
-# This is a comment
+; This is a comment
 Key = 'Value   # This is not a comment ; at all'
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();

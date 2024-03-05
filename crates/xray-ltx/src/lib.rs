@@ -6,7 +6,7 @@ pub(crate) mod ltx;
 pub(crate) mod parse_option;
 pub(crate) mod parser;
 pub(crate) mod properties;
-mod property;
+pub(crate) mod property;
 pub(crate) mod section_entry;
 pub(crate) mod section_setter;
 pub(crate) mod write_option;

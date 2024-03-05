@@ -1,11 +1,14 @@
 use crate::iterator::{PropertyIter, PropertyIterMut};
-use crate::property::{property_get_key, property_insert_key, PropertyKey};
+use crate::property::{
+  property_get_key, property_insert_key, section_key, PropertyKey, SectionKey,
+};
 use ordered_multimap::ListOrderedMultimap;
 use std::ops::Index;
 
 /// Properties type (key-value pairs).
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct Properties {
+  pub inherited: Vec<SectionKey>,
   pub data: ListOrderedMultimap<PropertyKey, String>,
 }
 
@@ -40,17 +43,35 @@ impl Properties {
   }
 
   /// Return true if property exist.
-  pub fn contains_key<S: AsRef<str>>(&self, s: S) -> bool {
-    self.data.contains_key(property_get_key!(s.as_ref()))
+  pub fn contains_key<S: AsRef<str>>(&self, key: S) -> bool {
+    self.data.contains_key(property_get_key!(key.as_ref()))
   }
 
   /// Insert (key, value) pair by replace.
-  pub fn insert<K, V>(&mut self, k: K, v: V)
+  pub fn insert<K, V>(&mut self, key: K, value: V)
   where
     K: Into<String>,
     V: Into<String>,
   {
-    self.data.insert(property_insert_key!(k.into()), v.into());
+    self
+      .data
+      .insert(property_insert_key!(key.into()), value.into());
+  }
+
+  /// Return true if section inherits another section.
+  pub fn inherits_section<S>(&self, section: Option<S>) -> bool
+  where
+    S: Into<String>,
+  {
+    self.inherited.contains(&section_key!(section))
+  }
+
+  /// Insert (key, value) pair by replace.
+  pub fn inherit<S>(&mut self, section: Option<S>)
+  where
+    S: Into<String>,
+  {
+    self.inherited.push(section_key!(section));
   }
 
   /// Append key with (key, value) pair.

@@ -14,7 +14,7 @@ impl<'a> SectionVacantEntry<'a> {
   }
 }
 
-/// A view into a occupied entry in a `Ltx`.
+/// A view into an occupied entry in a `Ltx`.
 pub struct SectionOccupiedEntry<'a> {
   inner: OccupiedEntry<'a, SectionKey, Properties>,
 }

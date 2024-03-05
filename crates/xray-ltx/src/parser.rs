@@ -15,7 +15,6 @@ pub struct LtxParser<'a> {
 }
 
 impl<'a> LtxParser<'a> {
-  // Create a parser.
   pub fn new(rdr: Chars<'a>, opt: ParseOption) -> LtxParser<'a> {
     let mut p = LtxParser {
       ch: None,
@@ -61,6 +60,7 @@ impl<'a> LtxParser<'a> {
       if !c.is_whitespace() && c != '\n' && c != '\t' && c != '\r' {
         break;
       }
+
       self.bump();
     }
   }
@@ -71,74 +71,108 @@ impl<'a> LtxParser<'a> {
       if (c == '\n' || c == '\r' || !c.is_whitespace()) && c != '\t' {
         break;
       }
+
       self.bump();
     }
   }
 
   /// Parse the whole LTX input.
   pub fn parse(&mut self) -> Result<Ltx, LtxParseError> {
-    let mut result = Ltx::new();
-    let mut curkey: String = "".into();
-    let mut cursec: Option<String> = None;
+    let mut ltx: Ltx = Ltx::new();
+    let mut current_key: String = "".into();
+    let mut current_section: Option<String> = None;
 
     self.parse_whitespace();
-    while let Some(cur_ch) = self.ch {
-      match cur_ch {
-        ';' | '#' => {
+
+    while let Some(current_char) = self.ch {
+      match current_char {
+        ';' => {
           self.parse_comment();
         }
+
         '[' => match self.parse_section() {
           Ok(sec) => {
-            let msec = sec[..].trim();
-            cursec = Some((*msec).to_string());
-            match result.entry(cursec.clone()) {
-              SectionEntry::Vacant(v) => {
-                v.insert(Default::default());
+            let member_section = sec[..].trim();
+
+            current_section = Some((*member_section).to_string());
+
+            match ltx.entry(current_section.clone()) {
+              SectionEntry::Vacant(vacant_entry) => {
+                vacant_entry.insert(Default::default());
               }
-              SectionEntry::Occupied(mut o) => {
-                o.append(Default::default());
+              SectionEntry::Occupied(mut occupied_entry) => {
+                occupied_entry.append(Default::default());
               }
             }
           }
-          Err(e) => return Err(e),
+          Err(error) => return Err(error),
         },
-        '=' | ':' => {
-          if (curkey[..]).is_empty() {
+
+        '=' => {
+          if (current_key[..]).is_empty() {
             return self.error("missing key");
           }
+
           match self.parse_val() {
-            Ok(val) => {
-              let mval = val[..].trim().to_owned();
-              match result.entry(cursec.clone()) {
-                SectionEntry::Vacant(v) => {
-                  // cursec must be None (the General Section)
-                  let mut prop = Properties::new();
-                  prop.insert(curkey, mval);
-                  v.insert(prop);
+            Ok(value) => {
+              let value: String = value[..].trim().to_owned();
+
+              match ltx.entry(current_section.clone()) {
+                SectionEntry::Vacant(vacant_entry) => {
+                  let mut properties = Properties::new(); // cursec must be None (the General Section)
+                  properties.insert(current_key, value);
+                  vacant_entry.insert(properties);
                 }
-                SectionEntry::Occupied(mut o) => {
+                SectionEntry::Occupied(mut occupied_entry) => {
                   // Insert into the last (current) section
-                  o.last_mut().append(curkey, mval);
+                  occupied_entry.last_mut().append(current_key, value);
                 }
               }
-              curkey = "".into();
+              current_key = String::new();
             }
-            Err(e) => return Err(e),
+            Err(error) => return Err(error),
           }
         }
+
+        ':' => match self.parse_val() {
+          Ok(value) => {
+            let value: String = value[..].trim().to_owned();
+
+            match ltx.entry(current_section.clone()) {
+              SectionEntry::Vacant(vacant_entry) => {
+                let mut properties: Properties = Properties::new();
+
+                for base_name in value.split(',').map(|it| it.trim()) {
+                  properties.inherit(Some(base_name));
+                }
+
+                vacant_entry.insert(properties);
+              }
+              SectionEntry::Occupied(mut occupied_entry) => {
+                let properties: &mut Properties = occupied_entry.last_mut();
+
+                for base_name in value.split(',').map(|it| it.trim()) {
+                  properties.inherit(Some(base_name));
+                }
+              }
+            }
+            current_key = "".into();
+          }
+          Err(error) => return Err(error),
+        },
+
         _ => match self.parse_key() {
           Ok(key) => {
-            let mkey: String = key[..].trim().to_owned();
-            curkey = mkey;
+            current_key = key[..].trim().to_owned();
           }
-          Err(e) => return Err(e),
+          Err(error) => return Err(error),
         },
       }
 
       self.parse_whitespace();
     }
 
-    Ok(result)
+    Ok(ltx)
   }
 
   fn parse_comment(&mut self) {
