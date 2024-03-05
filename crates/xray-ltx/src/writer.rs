@@ -187,6 +187,7 @@ a3 = n3
           &mut buf,
           WriteOption {
             line_separator: LineSeparator::CR,
+            kv_separator: "=",
             ..Default::default()
           },
         )
@@ -211,7 +212,7 @@ a3 = n3
         .unwrap();
 
       assert_eq!(
-        "[Section1]\r\nKey1=Value\r\nKey2=Value\r\n\r\n[Section2]\r\nKey1=Value\r\nKey2=Value\r\n",
+        "[Section1]\r\nKey1 = Value\r\nKey2 = Value\r\n\r\n[Section2]\r\nKey1 = Value\r\nKey2 = Value\r\n",
         str::from_utf8(&buf).unwrap()
       );
     }
@@ -230,12 +231,12 @@ a3 = n3
 
       if cfg!(windows) {
         assert_eq!(
-          "[Section1]\r\nKey1=Value\r\nKey2=Value\r\n\r\n[Section2]\r\nKey1=Value\r\nKey2=Value\r\n",
+          "[Section1]\r\nKey1 = Value\r\nKey2 = Value\r\n\r\n[Section2]\r\nKey1 = Value\r\nKey2 = Value\r\n",
           str::from_utf8(&buf).unwrap()
         );
       } else {
         assert_eq!(
-          "[Section1]\nKey1=Value\nKey2=Value\n\n[Section2]\nKey1=Value\nKey2=Value\n",
+          "[Section1]\nKey1 = Value\nKey2 = Value\n\n[Section2]\nKey1 = Value\nKey2 = Value\n",
           str::from_utf8(&buf).unwrap()
         );
       }
@@ -266,7 +267,7 @@ a3 = n3
       .write_to_opt(
         &mut buf,
         WriteOption {
-          kv_separator: " = ",
+          kv_separator: "=",
           ..Default::default()
         },
       )
@@ -276,7 +277,7 @@ a3 = n3
     if cfg!(windows) {
       assert_eq!(
         str::from_utf8(&buf).unwrap(),
-        "Key1 = Value\r\nKey2 = Value\r\n\r\n[Section1]\r\nKey1 = Value\r\nKey2 = Value\r\n\r\n[Section2]\r\nKey1 = Value\r\nKey2 = Value\r\n",
+        "Key1=Value\r\nKey2=Value\r\n\r\n[Section1]\r\nKey1=Value\r\nKey2=Value\r\n\r\n[Section2]\r\nKey1=Value\r\nKey2=Value\r\n",
       );
     } else {
       assert_eq!(
@@ -288,7 +289,7 @@ a3 = n3
 
   #[test]
   fn fix_issue64() {
-    let input = format!("some-key=åäö{}", DEFAULT_LINE_SEPARATOR);
+    let input = format!("some-key = åäö{}", DEFAULT_LINE_SEPARATOR);
 
     let conf = Ltx::load_from_str(&input).unwrap();
 

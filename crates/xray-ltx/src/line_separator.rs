@@ -20,7 +20,7 @@ static DEFAULT_LINE_SEPARATOR: &str = "\n";
 #[cfg(windows)]
 pub static DEFAULT_LINE_SEPARATOR: &str = "\r\n";
 
-pub static DEFAULT_KV_SEPARATOR: &str = "=";
+pub static DEFAULT_KV_SEPARATOR: &str = " = ";
 
 impl fmt::Display for LineSeparator {
   fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {

@@ -24,7 +24,6 @@ pub fn export_ini_to_file(ini: &Ltx, file: &mut File) -> io::Result<()> {
   ini.write_to_opt(
     file,
     WriteOption {
-      kv_separator: " = ",
       escape_policy: EscapePolicy::Nothing,
       ..Default::default()
     },

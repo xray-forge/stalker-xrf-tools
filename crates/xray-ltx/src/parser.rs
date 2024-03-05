@@ -204,13 +204,8 @@ impl<'a> LtxParser<'a> {
     Ok(ltx)
   }
 
-  fn parse_comment(&mut self) {
-    while let Some(c) = self.ch {
-      self.bump();
-      if c == '\n' {
-        break;
-      }
-    }
+  fn parse_comment(&mut self) -> Result<String, LtxParseError> {
+    self.parse_val()
   }
 
   fn parse_str_until(
@@ -308,7 +303,7 @@ impl<'a> LtxParser<'a> {
     }
 
     // Deal with inline comment
-    if matches!(self.ch, Some('#') | Some(';')) {
+    if matches!(self.ch, Some(';')) {
       self.parse_comment();
     }
 
@@ -316,7 +311,7 @@ impl<'a> LtxParser<'a> {
   }
 
   fn parse_key(&mut self) -> Result<String, LtxParseError> {
-    self.parse_str_until(&[Some('='), Some(':')], false)
+    self.parse_str_until(&[Some('=')], false)
   }
 
   fn parse_val(&mut self) -> Result<String, LtxParseError> {
