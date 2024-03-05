@@ -17,6 +17,7 @@ use unicase::UniCase;
 
 #[derive(Debug, Clone)]
 pub struct Ltx {
+  pub(crate) includes: Vec<String>,
   pub(crate) sections: ListOrderedMultimap<SectionKey, Properties>,
 }
 
@@ -90,6 +91,18 @@ impl Ltx {
 
   pub fn entry(&mut self, name: Option<String>) -> SectionEntry<'_> {
     SectionEntry::from(self.sections.entry(name.map(UniCase::from)))
+  }
+
+  pub fn include(&mut self, file: String) {
+    self.includes.push(file);
+  }
+
+  pub fn includes(&self, file: &String) -> bool {
+    self.includes.contains(file)
+  }
+
+  pub fn get_included(&self) -> &Vec<String> {
+    &self.includes
   }
 
   /// Clear all entries
@@ -173,6 +186,7 @@ impl Default for Ltx {
   /// and [Ltx::with_general_section] to be called without panicking.
   fn default() -> Self {
     let mut result: Ltx = Ltx {
+      includes: Default::default(),
       sections: Default::default(),
     };
 
@@ -547,6 +561,122 @@ key = value ; comment
     assert!(properties.inherits_section(Some("base2")));
     assert!(properties.inherits_section(Some("base3")));
     assert!(!properties.inherits_section(Some("base4")));
+  }
+
+  #[test]
+  fn includes() {
+    let input = "
+#include \"file1.ltx\"
+#include \"file2.ltx\"
+#include \"file3.ltx\"
+
+[section_name]: base1, base2
+name = hello
+key = value ; comment
+";
+
+    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+
+    assert_eq!(ltx.get_from(Some("section_name"), "name").unwrap(), "hello");
+    assert_eq!(ltx.get_from(Some("section_name"), "key").unwrap(), "value");
+
+    assert_eq!(ltx.get_included().len(), 3);
+    assert!(ltx.includes(&String::from("file1.ltx")));
+    assert!(ltx.includes(&String::from("file2.ltx")));
+    assert!(ltx.includes(&String::from("file3.ltx")));
+  }
+
+  #[test]
+  fn includes_no_duplicates() {
+    let input = "
+#include \"file1.ltx\"
+#include \"file1.ltx\"
+
+[section_name]: base1, base2
+name = hello
+";
+
+    let ltx = Ltx::load_from_str(input);
+
+    assert!(ltx.is_err());
+    assert_eq!(
+      ltx.unwrap_err().message,
+      "Failed to parse include statement in ltx file, including 'file1.ltx' more than once"
+    );
+  }
+
+  #[test]
+  fn includes_valid() {
+    let input = "
+#include
+
+[section_name]: base1, base2
+name = hello
+";
+
+    let ltx = Ltx::load_from_str(input);
+
+    assert!(ltx.is_err());
+    assert_eq!(
+      ltx.unwrap_err().message,
+      "Expected correct '#include \"config.ltx\"' statement, got '#include'"
+    );
+  }
+
+  #[test]
+  fn includes_only_ltx() {
+    let input = "
+#include \"file1.ini\"
+
+[section_name]: base1, base2
+name = hello
+";
+
+    let ltx = Ltx::load_from_str(input);
+
+    assert!(ltx.is_err());
+    assert_eq!(
+      ltx.unwrap_err().message,
+      "Included file should have .ltx extension, got 'file1.ini'"
+    );
+  }
+
+  #[test]
+  fn includes_empty() {
+    let input = "
+#include \"\"
+
+[section_name]: base1, base2
+name = hello
+";
+
+    let ltx = Ltx::load_from_str(input);
+
+    assert!(ltx.is_err());
+    assert_eq!(
+      ltx.unwrap_err().message,
+      "Expected valid file name in include statement, got empty file name"
+    );
+  }
+
+  #[test]
+  fn includes_not_in_header() {
+    let input = "
+#include \"file1.ltx\"
+
+[section_name]: base1, base2
+name = hello
+
+#include \"file2.ltx\"
+";
+
+    let ltx = Ltx::load_from_str(input);
+
+    assert!(ltx.is_err());
+    assert_eq!(
+      ltx.unwrap_err().message,
+      "Unexpected '#include' statement, all include statements should be part of config heading"
+    );
   }
 
   #[test]

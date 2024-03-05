@@ -14,12 +14,12 @@ pub enum LtxError {
 pub struct LtxParseError {
   pub line: usize,
   pub col: usize,
-  pub msg: String,
+  pub message: String,
 }
 
 impl Display for LtxParseError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {
-    write!(formatter, "{}:{} {}", self.line, self.col, self.msg)
+    write!(formatter, "{}:{} {}", self.line, self.col, self.message)
   }
 }
 

@@ -46,11 +46,11 @@ impl<'a> LtxParser<'a> {
     }
   }
 
-  fn error<U, M: Into<String>>(&self, msg: M) -> Result<U, LtxParseError> {
+  fn error<U, M: Into<String>>(&self, message: M) -> Result<U, LtxParseError> {
     Err(LtxParseError {
       line: self.line + 1,
       col: self.col + 1,
-      msg: msg.into(),
+      message: message.into(),
     })
   }
 
@@ -78,6 +78,8 @@ impl<'a> LtxParser<'a> {
 
   /// Parse the whole LTX input.
   pub fn parse(&mut self) -> Result<Ltx, LtxParseError> {
+    let mut includes_processed: bool = false;
+
     let mut ltx: Ltx = Ltx::new();
     let mut current_key: String = "".into();
     let mut current_section: Option<String> = None;
@@ -85,9 +87,35 @@ impl<'a> LtxParser<'a> {
     self.parse_whitespace();
 
     while let Some(current_char) = self.ch {
+      if !includes_processed {
+        includes_processed = current_char != '#';
+      }
+
       match current_char {
         ';' => {
           self.parse_comment();
+        }
+
+        '#' => {
+          if includes_processed {
+            return self.error(String::from(
+              "Unexpected '#include' statement, all include statements should be part of config heading",
+            ));
+          }
+
+          match self.parse_include() {
+            Ok(value) => {
+              if ltx.includes(&value) {
+                return self.error(format!(
+                  "Failed to parse include statement in ltx file, including '{}' more than once",
+                  &value
+                ));
+              } else {
+                ltx.include(value)
+              }
+            }
+            Err(error) => return Err(error),
+          }
         }
 
         '[' => match self.parse_section() {
@@ -134,6 +162,7 @@ impl<'a> LtxParser<'a> {
           }
         }
 
+        // Parsing of inherited sections.
         ':' => match self.parse_val() {
           Ok(value) => {
             let value: String = value[..].trim().to_owned();
@@ -156,7 +185,7 @@ impl<'a> LtxParser<'a> {
                 }
               }
             }
-            current_key = "".into();
+            current_key = String::new();
           }
           Err(error) => return Err(error),
         },
@@ -315,6 +344,32 @@ impl<'a> LtxParser<'a> {
       }
       _ => self.parse_str_until_eol(true),
     }
+  }
+
+  fn parse_include(&mut self) -> Result<String, LtxParseError> {
+    let value: String = self.parse_val()?[..].trim().to_owned();
+
+    if !value.starts_with("include \"") || !value.ends_with('\"') {
+      return self.error(format!(
+        "Expected correct '#include \"config.ltx\"' statement, got '#{value}'"
+      ));
+    }
+
+    let value: String = String::from(&value[9..value.len() - 1]);
+
+    if value.is_empty() {
+      return self.error(format!(
+        "Expected valid file name in include statement, got empty file name",
+      ));
+    }
+
+    if !value.ends_with(".ltx") {
+      return self.error(format!(
+        "Included file should have .ltx extension, got '{value}'",
+      ));
+    }
+
+    Ok(value)
   }
 
   #[inline]
