@@ -1,4 +1,4 @@
-use crate::ltx::Ltx;
+use crate::Ltx;
 
 /// A setter which could be used to set key-value pair in a specified section.
 pub struct SectionSetter<'a> {

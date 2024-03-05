@@ -1,7 +1,6 @@
-use crate::properties::Properties;
-use crate::section_entry::SectionEntry;
-use crate::section_setter::SectionSetter;
-use crate::ROOT_SECTION;
+use crate::file::section_entry::SectionEntry;
+use crate::file::section_setter::SectionSetter;
+use crate::{Properties, ROOT_SECTION};
 use ordered_multimap::ListOrderedMultimap;
 use std::ops::{Index, IndexMut};
 
@@ -31,10 +30,10 @@ impl Ltx {
   }
 
   /// Get the immutable general section
-  pub fn root_section(&self) -> &Properties {
+  pub fn root_section(&mut self) -> &Properties {
     self
-      .section(ROOT_SECTION)
-      .expect("There is no root section in this Ltx")
+      .entry(ROOT_SECTION.into())
+      .or_insert_with(Default::default)
   }
 
   /// Get the mutable general section
@@ -189,12 +188,12 @@ impl<'q> IndexMut<&'q str> for Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::error::LtxParseError;
-  use crate::escape_policy::{escape_str, EscapePolicy};
-  use crate::ltx::Ltx;
-  use crate::parse_option::ParseOption;
-  use crate::properties::Properties;
-  use crate::ROOT_SECTION;
+  use crate::file::constants::ROOT_SECTION;
+  use crate::file::error::LtxParseError;
+  use crate::file::escape_policy::{escape_str, EscapePolicy};
+  use crate::file::ltx::Ltx;
+  use crate::file::parse_option::ParseOption;
+  use crate::file::properties::Properties;
 
   #[test]
   fn load_from_str_with_empty_general_section() {
@@ -203,7 +202,7 @@ mod test {
     assert!(opt.is_ok());
 
     let mut output = opt.unwrap();
-    assert_eq!(output.len(), 2);
+    assert_eq!(output.len(), 1);
 
     assert!(output.root_section().is_empty());
     assert!(output.root_section_mut().is_empty());
@@ -213,6 +212,9 @@ mod test {
     let props2 = output.section("sec1").unwrap();
     assert_eq!(props2.len(), 1);
     assert_eq!(props2.get("key1"), Some("val1"));
+
+    // Root section added.
+    assert_eq!(output.len(), 2);
   }
 
   #[test]
@@ -247,7 +249,7 @@ mod test {
 
     let output = opt.unwrap();
     // there is always a general section
-    assert_eq!(output.len(), 3);
+    assert_eq!(output.len(), 2);
     assert!(output.section("sec1").is_some());
 
     let sec1 = output.section("sec1").unwrap();
@@ -298,7 +300,7 @@ mod test {
   fn iter() {
     let input = "
 [section name]
-name = hello # abcdefg
+name = hello
 gender = mail ; abdddd
 ";
 
@@ -727,7 +729,7 @@ x2 = n2
 x1 = n2
 x3 = n2
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let mut ltx: Ltx = Ltx::load_from_str(input).unwrap();
     let section: &Properties = ltx.root_section();
     let keys: Vec<&str> = section.iter().map(|(k, _)| k).collect();
     assert_eq!(keys, vec!["x2", "x1", "x3"]);
@@ -770,9 +772,6 @@ bar = f
 
     let mut iter = ltx.iter();
     // there is always an empty general section
-    let (k0, p0) = iter.next().unwrap();
-    assert_eq!(ROOT_SECTION, k0);
-    assert!(p0.is_empty());
     let (k1, p1) = iter.next().unwrap();
     assert_eq!("peer", k1);
     assert_eq!(Some("a"), p1.get("foo"));

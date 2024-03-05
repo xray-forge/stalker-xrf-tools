@@ -1,4 +1,4 @@
-use crate::iterator::{PropertyIter, PropertyIterMut};
+use crate::file::iterator::{PropertyIter, PropertyIterMut};
 use ordered_multimap::ListOrderedMultimap;
 use std::ops::Index;
 

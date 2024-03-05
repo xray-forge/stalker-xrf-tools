@@ -1,4 +1,4 @@
-use crate::properties::Properties;
+use crate::Properties;
 use ordered_multimap::list_ordered_multimap::{Entry, OccupiedEntry, VacantEntry};
 
 /// A view into a vacant entry in a `Ltx`.

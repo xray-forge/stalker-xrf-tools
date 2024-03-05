@@ -1,4 +1,4 @@
-use crate::escape_policy::escape_str;
+use crate::file::escape_policy::escape_str;
 use crate::{EscapePolicy, Ltx, WriteOption, ROOT_SECTION};
 use std::fs::OpenOptions;
 use std::io;
@@ -108,7 +108,7 @@ impl Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::line_separator::{LineSeparator, DEFAULT_LINE_SEPARATOR};
+  use crate::file::line_separator::{LineSeparator, DEFAULT_LINE_SEPARATOR};
   use crate::{EscapePolicy, Ltx, WriteOption, ROOT_SECTION};
 
   #[test]
@@ -125,7 +125,7 @@ a3 = n3
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     let mut buf = vec![];
     ltx.write_to(&mut buf).unwrap();
-    let new_data = Ltx::load_from_str(&String::from_utf8(buf).unwrap()).unwrap();
+    let mut new_data = Ltx::load_from_str(&String::from_utf8(buf).unwrap()).unwrap();
 
     let sec0 = new_data.root_section();
     let keys0: Vec<&str> = sec0.iter().map(|(k, _)| k).collect();

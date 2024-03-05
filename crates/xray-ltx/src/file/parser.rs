@@ -1,9 +1,6 @@
-use crate::error::LtxParseError;
-use crate::ltx::Ltx;
-use crate::parse_option::ParseOption;
-use crate::properties::Properties;
-use crate::section_entry::SectionEntry;
-use crate::ROOT_SECTION;
+use crate::file::error::LtxParseError;
+use crate::file::section_entry::SectionEntry;
+use crate::{Ltx, ParseOption, Properties, ROOT_SECTION};
 use std::str::Chars;
 
 // Ltx parser.
@@ -17,15 +14,17 @@ pub struct LtxParser<'a> {
 
 impl<'a> LtxParser<'a> {
   pub fn new(rdr: Chars<'a>, opt: ParseOption) -> LtxParser<'a> {
-    let mut p = LtxParser {
+    let mut parser: LtxParser = LtxParser {
       ch: None,
       line: 0,
       col: 0,
       rdr,
       opt,
     };
-    p.bump();
-    p
+
+    parser.bump();
+
+    parser
   }
 
   fn eof(&self) -> bool {
@@ -377,7 +376,7 @@ impl<'a> LtxParser<'a> {
     let value: String =
       self.parse_str_until(&[Some('\n'), Some('\r'), None], check_inline_comment)?;
 
-    if check_inline_comment && matches!(self.ch, Some('#') | Some(';')) {
+    if check_inline_comment && matches!(self.ch, Some(';')) {
       self.parse_comment();
     }
 

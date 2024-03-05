@@ -1,5 +1,5 @@
-use crate::escape_policy::EscapePolicy;
-use crate::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
+use crate::file::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
+use crate::EscapePolicy;
 
 #[derive(Debug, Clone)]
 pub struct WriteOption {

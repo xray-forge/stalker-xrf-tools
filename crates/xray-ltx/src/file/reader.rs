@@ -1,5 +1,5 @@
-use crate::error::{LtxError, LtxParseError};
-use crate::parser::LtxParser;
+use crate::file::error::{LtxError, LtxParseError};
+use crate::file::parser::LtxParser;
 use crate::{Ltx, ParseOption};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
