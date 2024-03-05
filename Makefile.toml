@@ -41,33 +41,33 @@ dependencies = [
 description = "Build UI application in debug mode."
 workspace = false
 dependencies = [
-  { name = "build", path = "bin/xrf-application" },
+  { name = "build", path = "bin/xrf-app" },
 ]
 
-[tasks.build-application-release]
+[tasks.build-app-release]
 description = "Build UI application in release mode."
 workspace = false
 dependencies = [
-  { name = "build-release", path = "bin/xrf-application" },
+  { name = "build-release", path = "bin/xrf-app" },
 ]
 
-[tasks.dev-application]
+[tasks.dev-app]
 description = "Run UI application backend and frontend in watch mode."
 workspace = false
 dependencies = [
-  { name = "dev", path = "bin/xrf-application" },
+  { name = "dev", path = "bin/xrf-app" },
 ]
 
 [tasks.serve-backend]
 description = "Run UI application backend in watch mode."
 workspace = false
 dependencies = [
-  { name = "serve-backend", path = "bin/xrf-application" },
+  { name = "serve-backend", path = "bin/xrf-app" },
 ]
 
 [tasks.serve-ui]
 description = "Run UI application frontend in watch mode."
 workspace = false
 dependencies = [
-  { name = "serve-ui", path = "bin/xrf-application" },
+  { name = "serve-ui", path = "bin/xrf-app" },
 ]

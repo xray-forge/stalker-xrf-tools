@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
   "bin/xrf-cli",
-  "bin/xrf-application",
+  "bin/xrf-app",
   "crates/xray-db",
   "crates/xray-ltx"
 ]

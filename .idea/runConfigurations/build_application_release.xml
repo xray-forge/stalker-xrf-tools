@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="build:application release" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="build">
-    <option name="command" value="make build-application-release" />
+    <option name="command" value="make build-app-release" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />

@@ -4529,7 +4529,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "xrf-application"
+name = "xrf-app"
 version = "0.1.0"
 dependencies = [
  "env_logger",
