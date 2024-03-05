@@ -161,7 +161,7 @@ impl AlifeObjectGeneric for AlifeObjectHangingLamp {
     self.skeleton.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("main_color", self.main_color.to_string())
       .set("main_brightness", self.main_brightness.to_string())
       .set("color_animator", &self.color_animator)

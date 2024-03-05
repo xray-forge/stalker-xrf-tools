@@ -1,3 +1,4 @@
+pub(crate) mod constants;
 pub(crate) mod error;
 pub(crate) mod escape_policy;
 pub(crate) mod iterator;
@@ -6,13 +7,13 @@ pub(crate) mod ltx;
 pub(crate) mod parse_option;
 pub(crate) mod parser;
 pub(crate) mod properties;
-pub(crate) mod property;
 pub(crate) mod reader;
 pub(crate) mod section_entry;
 pub(crate) mod section_setter;
 pub(crate) mod write_option;
 pub(crate) mod writer;
 
+pub use crate::constants::ROOT_SECTION;
 pub use crate::escape_policy::EscapePolicy;
 pub use crate::ltx::Ltx;
 pub use crate::parse_option::ParseOption;

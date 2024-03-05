@@ -69,7 +69,7 @@ impl AlifeObjectGeneric for AlifeObjectPhysic {
     self.skeleton.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("physic_type", self.physic_type.to_string())
       .set("mass", self.mass.to_string())
       .set("fixed_bones", &self.fixed_bones);

@@ -49,7 +49,7 @@ impl GraphLevel {
   /// Import patrols data from provided path.
   pub fn import(section: &str, config: &Ltx) -> io::Result<GraphLevel> {
     let props: &Properties = config
-      .section(Some(section))
+      .section(section)
       .unwrap_or_else(|| panic!("Graph section {section} should be defined in ltx file"));
 
     Ok(GraphLevel {
@@ -64,7 +64,7 @@ impl GraphLevel {
   /// Export graph level data into ini.
   pub fn export(&self, section: &str, config: &mut Ltx) {
     config
-      .with_section(Some(section))
+      .with_section(section)
       .set("name", &self.name)
       .set("section", &self.section)
       .set("offset", self.offset.to_string())

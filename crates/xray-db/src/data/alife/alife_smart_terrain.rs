@@ -132,7 +132,7 @@ impl AlifeObjectGeneric for AlifeSmartTerrain {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set(
         "arriving_objects_count",
         self.arriving_objects_count.to_string(),

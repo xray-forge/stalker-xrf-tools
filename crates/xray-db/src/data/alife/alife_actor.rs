@@ -64,7 +64,7 @@ impl AlifeObjectGeneric for AlifeActor {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set(
         "start_position_filled",
         self.start_position_filled.to_string(),

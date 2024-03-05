@@ -64,7 +64,7 @@ impl AlifeObjectGeneric for AlifeObjectItem {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("condition", self.condition.to_string())
       .set("is_closed", self.upgrades_count.to_string())
       .set("upgrades_count", self.upgrades_count.to_string());

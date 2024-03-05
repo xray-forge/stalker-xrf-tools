@@ -70,7 +70,7 @@ impl AlifeObjectGeneric for AlifeObjectHelicopter {
     self.skeleton.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("startup_animation", &self.startup_animation)
       .set("engine_sound", &self.engine_sound);
   }

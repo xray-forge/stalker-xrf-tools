@@ -79,7 +79,7 @@ impl AlifeObjectGeneric for AlifeSmartCover {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("last_description", &self.last_description)
       .set("loopholes", self.loopholes.len().to_string())
       .set(

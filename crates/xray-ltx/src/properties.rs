@@ -1,15 +1,12 @@
 use crate::iterator::{PropertyIter, PropertyIterMut};
-use crate::property::{
-  property_get_key, property_insert_key, section_key, PropertyKey, SectionKey,
-};
 use ordered_multimap::ListOrderedMultimap;
 use std::ops::Index;
 
 /// Properties type (key-value pairs).
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct Properties {
-  pub inherited: Vec<SectionKey>,
-  pub data: ListOrderedMultimap<PropertyKey, String>,
+  pub inherited: Vec<String>,
+  pub data: ListOrderedMultimap<String, String>,
 }
 
 impl Properties {
@@ -44,7 +41,7 @@ impl Properties {
 
   /// Return true if property exist.
   pub fn contains_key<S: AsRef<str>>(&self, key: S) -> bool {
-    self.data.contains_key(property_get_key!(key.as_ref()))
+    self.data.contains_key(key.as_ref())
   }
 
   /// Insert (key, value) pair by replace.
@@ -53,25 +50,23 @@ impl Properties {
     K: Into<String>,
     V: Into<String>,
   {
-    self
-      .data
-      .insert(property_insert_key!(key.into()), value.into());
+    self.data.insert(key.into(), value.into());
   }
 
   /// Return true if section inherits another section.
-  pub fn inherits_section<S>(&self, section: Option<S>) -> bool
+  pub fn inherits_section<S>(&self, section: S) -> bool
   where
     S: Into<String>,
   {
-    self.inherited.contains(&section_key!(section))
+    self.inherited.contains(&section.into())
   }
 
   /// Insert (key, value) pair by replace.
-  pub fn inherit<S>(&mut self, section: Option<S>)
+  pub fn inherit<S>(&mut self, section: S)
   where
     S: Into<String>,
   {
-    self.inherited.push(section_key!(section));
+    self.inherited.push(section.into());
   }
 
   /// Append key with (key, value) pair.
@@ -80,28 +75,22 @@ impl Properties {
     K: Into<String>,
     V: Into<String>,
   {
-    self.data.append(property_insert_key!(k.into()), v.into());
+    self.data.append(k.into(), v.into());
   }
 
   /// Get the first value associate with the key.
-  pub fn get<S: AsRef<str>>(&self, s: S) -> Option<&str> {
-    self
-      .data
-      .get(property_get_key!(s.as_ref()))
-      .map(|v| v.as_str())
+  pub fn get<S: Into<String>>(&self, s: S) -> Option<&str> {
+    self.data.get(&s.into()).map(|v| v.as_str())
   }
 
   /// Get all values associate with the key.
   pub fn get_all<S: AsRef<str>>(&self, s: S) -> impl DoubleEndedIterator<Item = &str> {
-    self
-      .data
-      .get_all(property_get_key!(s.as_ref()))
-      .map(|v| v.as_str())
+    self.data.get_all(s.as_ref()).map(|v| v.as_str())
   }
 
   /// Remove the property with the first value of the key.
   pub fn remove<S: AsRef<str>>(&mut self, s: S) -> Option<String> {
-    self.data.remove(property_get_key!(s.as_ref()))
+    self.data.remove(s.as_ref())
   }
 
   /// Remove the property with all values with the same key.
@@ -109,14 +98,11 @@ impl Properties {
     &mut self,
     s: S,
   ) -> impl DoubleEndedIterator<Item = String> + '_ {
-    self.data.remove_all(property_get_key!(s.as_ref()))
+    self.data.remove_all(s.as_ref())
   }
 
   pub fn get_mut<S: AsRef<str>>(&mut self, s: S) -> Option<&mut str> {
-    self
-      .data
-      .get_mut(property_get_key!(s.as_ref()))
-      .map(|v| v.as_mut_str())
+    self.data.get_mut(s.as_ref()).map(|v| v.as_mut_str())
   }
 }
 

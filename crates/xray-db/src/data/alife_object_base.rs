@@ -261,7 +261,7 @@ impl AlifeObjectBase {
   /// Export alife object data into ini file.
   pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("index", self.index.to_string())
       .set("id", self.id.to_string())
       .set("net_action", self.net_action.to_string())
@@ -285,7 +285,7 @@ impl AlifeObjectBase {
     self.inherited.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("update_data", bytes_to_base64(&self.update_data));
   }
 }

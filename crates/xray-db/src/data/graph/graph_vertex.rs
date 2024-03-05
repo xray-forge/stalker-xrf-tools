@@ -65,7 +65,7 @@ impl GraphVertex {
 
   /// Import graph vertex from ini file.
   pub fn import(section: &str, config: &Ltx) -> io::Result<GraphVertex> {
-    let props: &Properties = config.section(Some(section)).unwrap_or_else(|| {
+    let props: &Properties = config.section(section).unwrap_or_else(|| {
       panic!("Graph section '{section}' should be defined in graph vertex ltx file")
     });
 
@@ -85,7 +85,7 @@ impl GraphVertex {
   /// Export graph vertex data into ini.
   pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("level_point", self.level_point.to_string())
       .set("game_point", self.game_point.to_string())
       .set("level_id", self.level_id.to_string())

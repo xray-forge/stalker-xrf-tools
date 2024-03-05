@@ -33,7 +33,7 @@ impl GraphEdge {
 
   /// Import graph edge from ini file.
   pub fn import(section: &str, config: &Ltx) -> io::Result<GraphEdge> {
-    let props: &Properties = config.section(Some(section)).unwrap_or_else(|| {
+    let props: &Properties = config.section(section).unwrap_or_else(|| {
       panic!("Graph section '{section}' should be defined in level point ltx file")
     });
 
@@ -46,7 +46,7 @@ impl GraphEdge {
   /// Export graph edge data into ini.
   pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("game_vertex_id", self.game_vertex_id.to_string())
       .set("distance", self.distance.to_string());
   }

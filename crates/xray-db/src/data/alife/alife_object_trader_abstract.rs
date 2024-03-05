@@ -88,7 +88,7 @@ impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
   /// Export object data into ini file.
   fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("money", self.money.to_string())
       .set("specific_character", &self.specific_character)
       .set("trader_flags", self.trader_flags.to_string())

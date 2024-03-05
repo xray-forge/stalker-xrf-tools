@@ -104,7 +104,7 @@ impl PatrolPoint {
   /// Import patrol point data from ini config.
   pub fn import(section: &str, config: &Ltx) -> io::Result<PatrolPoint> {
     let props: &Properties = config
-      .section(Some(section))
+      .section(section)
       .unwrap_or_else(|| panic!("Patrol point section {section} should be defined in ltx file"));
 
     Ok(PatrolPoint {
@@ -119,7 +119,7 @@ impl PatrolPoint {
   /// Export patrol point data into ini.
   pub fn export(&self, section: &str, config: &mut Ltx) {
     config
-      .with_section(Some(section))
+      .with_section(section)
       .set("name", &self.name)
       .set("flags", self.flags.to_string())
       .set("position", self.position.to_string())

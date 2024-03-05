@@ -42,7 +42,7 @@ impl AlifeObjectGeneric for AlifeObjectMotion {
   /// Export object data into ini file.
   fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("motion_name", &self.motion_name);
   }
 }

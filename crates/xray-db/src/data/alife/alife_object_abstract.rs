@@ -80,7 +80,7 @@ impl AlifeObjectGeneric for AlifeObjectAbstract {
   /// Export object data into ini file.
   fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("game_vertex_id", self.game_vertex_id.to_string())
       .set("distance", self.distance.to_string())
       .set("direct_control", self.direct_control.to_string())
@@ -189,9 +189,9 @@ mod tests {
     let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
 
     let read_first: AlifeObjectAbstract =
-      AlifeObjectAbstract::import(source.section(Some("first")).unwrap())?;
+      AlifeObjectAbstract::import(source.section("first").unwrap())?;
     let read_second: AlifeObjectAbstract =
-      AlifeObjectAbstract::import(source.section(Some("second")).unwrap())?;
+      AlifeObjectAbstract::import(source.section("second").unwrap())?;
 
     assert_eq!(read_first, first);
     assert_eq!(read_second, second);

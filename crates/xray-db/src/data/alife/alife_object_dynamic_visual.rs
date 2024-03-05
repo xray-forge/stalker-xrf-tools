@@ -56,7 +56,7 @@ impl AlifeObjectGeneric for AlifeObjectDynamicVisual {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("visual_name", &self.visual_name)
       .set("visual_flags", self.visual_flags.to_string());
   }

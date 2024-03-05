@@ -111,7 +111,7 @@ impl AlifeObjectGeneric for AlifeLevelChanger {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("dest_game_vertex_id", self.dest_game_vertex_id.to_string())
       .set(
         "dest_level_vertex_id",

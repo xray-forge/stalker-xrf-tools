@@ -126,7 +126,7 @@ impl Patrol {
     patrol_links_config: &Ltx,
   ) -> io::Result<Patrol> {
     let props: &Properties = patrols_config
-      .section(Some(section))
+      .section(section)
       .unwrap_or_else(|| panic!("Patrol section {section} should be defined in ltx file"));
 
     let name: String = read_ini_field("name", props)?;
@@ -169,7 +169,7 @@ impl Patrol {
     patrol_links_config: &mut Ltx,
   ) {
     patrols_config
-      .with_section(Some(section))
+      .with_section(section)
       .set("name", &self.name)
       .set(
         "points",

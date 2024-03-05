@@ -77,7 +77,7 @@ impl AlifeObjectGeneric for AlifeObjectItemWeapon {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("ammo_current", self.ammo_current.to_string())
       .set("ammo_elapsed", self.ammo_elapsed.to_string())
       .set("weapon_state", self.weapon_state.to_string())

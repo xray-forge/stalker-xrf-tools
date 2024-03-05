@@ -66,7 +66,7 @@ impl AlifeObjectGeneric for AlifeObjectActor {
     self.skeleton.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("holder_id", self.holder_id.to_string());
   }
 }

@@ -8,8 +8,6 @@ license = "MIT"
 path = "src/lib.rs"
 
 [dependencies]
-cfg-if = "1.0"
-unicase = "2.7.0"
 ordered-multimap = "0.7"
 
 [features]

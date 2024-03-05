@@ -61,7 +61,7 @@ impl AlifeObjectGeneric for AlifeObjectInventoryBox {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("can_take", self.can_take.to_string())
       .set("is_closed", self.is_closed.to_string())
       .set("tip", &self.tip);

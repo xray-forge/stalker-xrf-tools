@@ -52,7 +52,7 @@ impl AlifeObjectGeneric for AlifeObjectBreakable {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("health", self.health.to_string());
   }
 }

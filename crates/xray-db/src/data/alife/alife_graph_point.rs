@@ -68,7 +68,7 @@ impl AlifeObjectGeneric for AlifeGraphPoint {
   /// Export object data into ini file.
   fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("connection_point_name", &self.connection_point_name)
       .set("connection_level_name", &self.connection_level_name)
       .set("location0", self.location0.to_string())

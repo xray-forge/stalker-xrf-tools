@@ -51,7 +51,7 @@ impl GraphHeader {
   /// Import graph header from ini file.
   pub fn import(config: &Ltx) -> io::Result<GraphHeader> {
     let props: &Properties = config
-      .section(Some("header"))
+      .section("header")
       .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
 
     Ok(GraphHeader {
@@ -67,7 +67,7 @@ impl GraphHeader {
   /// Export graph header data into level ini.
   pub fn export(&self, ini: &mut Ltx) {
     ini
-      .with_section(Some("header"))
+      .with_section("header")
       .set("version", self.version.to_string())
       .set("vertex_count", self.vertices_count.to_string())
       .set("edges_count", self.edges_count.to_string())

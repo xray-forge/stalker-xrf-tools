@@ -83,7 +83,7 @@ impl AlifeObjectGeneric for AlifeObjectSmartCover {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("description", &self.description)
       .set("hold_position_time", self.hold_position_time.to_string())
       .set(

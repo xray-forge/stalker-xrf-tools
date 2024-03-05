@@ -80,7 +80,7 @@ impl AlifeObjectGeneric for AlifeZoneVisual {
     self.visual.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("idle_animation", &self.idle_animation)
       .set("attack_animation", &self.attack_animation)
       .set(

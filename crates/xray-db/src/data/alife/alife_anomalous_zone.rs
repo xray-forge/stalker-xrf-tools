@@ -55,7 +55,7 @@ impl AlifeObjectGeneric for AlifeAnomalousZone {
   fn export(&self, section: &str, ini: &mut Ltx) {
     self.base.export(section, ini);
 
-    ini.with_section(Some(section)).set(
+    ini.with_section(section).set(
       "last_spawn_time",
       &Time::export_to_string(&self.last_spawn_time),
     );

@@ -60,7 +60,7 @@ impl AlifeObjectGeneric for AlifeObjectSkeleton {
   /// Export object data into ini file.
   fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("name", &self.name)
       .set("flags", self.flags.to_string())
       .set("source_id", self.source_id.to_string());

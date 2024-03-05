@@ -1,15 +1,14 @@
 use crate::properties::Properties;
-use crate::property::{section_key, SectionKey};
 use crate::section_entry::SectionEntry;
 use crate::section_setter::SectionSetter;
+use crate::ROOT_SECTION;
 use ordered_multimap::ListOrderedMultimap;
 use std::ops::{Index, IndexMut};
-use unicase::UniCase;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Ltx {
   pub(crate) includes: Vec<String>,
-  pub(crate) sections: ListOrderedMultimap<SectionKey, Properties>,
+  pub(crate) sections: ListOrderedMultimap<String, Properties>,
 }
 
 impl Ltx {
@@ -19,69 +18,66 @@ impl Ltx {
   }
 
   /// Set with a specified section, `None` is for the general section
-  pub fn with_section<S>(&mut self, section: Option<S>) -> SectionSetter
+  pub fn with_section<S>(&mut self, section: S) -> SectionSetter
   where
     S: Into<String>,
   {
-    SectionSetter::new(self, section.map(Into::into))
+    SectionSetter::new(self, section.into())
   }
 
-  /// Set with general section, a simple wrapper of `with_section(None::<String>)`
-  pub fn with_general_section(&mut self) -> SectionSetter {
-    self.with_section(None::<String>)
+  /// Set with general section, a simple wrapper of `with_section(ROOT_SECTION)`
+  pub fn with_root_section(&mut self) -> SectionSetter {
+    self.with_section(ROOT_SECTION)
   }
 
   /// Get the immutable general section
-  pub fn general_section(&self) -> &Properties {
+  pub fn root_section(&self) -> &Properties {
     self
-      .section(None::<String>)
-      .expect("There is no general section in this Ltx")
+      .section(ROOT_SECTION)
+      .expect("There is no root section in this Ltx")
   }
 
   /// Get the mutable general section
-  pub fn general_section_mut(&mut self) -> &mut Properties {
+  pub fn root_section_mut(&mut self) -> &mut Properties {
     self
-      .section_mut(None::<String>)
-      .expect("There is no general section in this Ltx")
+      .section_mut(ROOT_SECTION)
+      .expect("There is no root section in this Ltx")
   }
 
   /// Get a immutable section
-  pub fn section<S>(&self, name: Option<S>) -> Option<&Properties>
+  pub fn section<S>(&self, name: S) -> Option<&Properties>
   where
     S: Into<String>,
   {
-    self.sections.get(&section_key!(name))
+    self.sections.get(&name.into())
   }
 
   /// Get a mutable section
-  pub fn section_mut<S>(&mut self, name: Option<S>) -> Option<&mut Properties>
+  pub fn section_mut<S>(&mut self, name: S) -> Option<&mut Properties>
   where
     S: Into<String>,
   {
-    self.sections.get_mut(&section_key!(name))
+    self.sections.get_mut(&name.into())
   }
 
   /// Get all sections immutable with the same key
-  pub fn section_all<S>(&self, name: Option<S>) -> impl DoubleEndedIterator<Item = &Properties>
+  pub fn section_all<S>(&self, name: S) -> impl DoubleEndedIterator<Item = &Properties>
   where
     S: Into<String>,
   {
-    self.sections.get_all(&section_key!(name))
+    self.sections.get_all::<String>(&name.into())
   }
 
   /// Get all sections mutable with the same key
-  pub fn section_all_mut<S>(
-    &mut self,
-    name: Option<S>,
-  ) -> impl DoubleEndedIterator<Item = &mut Properties>
+  pub fn section_all_mut<S>(&mut self, name: S) -> impl DoubleEndedIterator<Item = &mut Properties>
   where
     S: Into<String>,
   {
-    self.sections.get_all_mut(&section_key!(name))
+    self.sections.get_all_mut(&name.into())
   }
 
-  pub fn entry(&mut self, name: Option<String>) -> SectionEntry<'_> {
-    SectionEntry::from(self.sections.entry(name.map(UniCase::from)))
+  pub fn entry(&mut self, name: String) -> SectionEntry<'_> {
+    SectionEntry::from(self.sections.entry(name))
   }
 
   pub fn include(&mut self, file: String) {
@@ -102,12 +98,12 @@ impl Ltx {
   }
 
   /// Iterate with sections
-  pub fn sections(&self) -> impl DoubleEndedIterator<Item = Option<&str>> {
-    self.sections.keys().map(|s| s.as_ref().map(AsRef::as_ref))
+  pub fn sections(&self) -> impl DoubleEndedIterator<Item = &str> {
+    self.sections.keys().map(|s| s.as_str())
   }
 
   /// Set key-value to a section
-  pub fn set_to<S>(&mut self, section: Option<S>, key: String, value: String)
+  pub fn set_to<S>(&mut self, section: S, key: String, value: String)
   where
     S: Into<String>,
   {
@@ -115,18 +111,18 @@ impl Ltx {
   }
 
   /// Get the first value from the sections with key
-  pub fn get_from<'a, S>(&'a self, section: Option<S>, key: &str) -> Option<&'a str>
+  pub fn get_from<S>(&self, section: S, key: &str) -> Option<&str>
   where
     S: Into<String>,
   {
     self
       .sections
-      .get(&section_key!(section))
+      .get(&section.into())
       .and_then(|prop| prop.get(key))
   }
 
   /// Get the first value from the sections with key, return the default value if it does not exist
-  pub fn get_from_or<'a, S>(&'a self, section: Option<S>, key: &str, default: &'a str) -> &'a str
+  pub fn get_from_or<'a, S>(&'a self, section: S, key: &str, default: &'a str) -> &'a str
   where
     S: Into<String>,
   {
@@ -134,27 +130,26 @@ impl Ltx {
   }
 
   /// Get the first mutable value from the sections with key
-  pub fn get_from_mut<'a, S>(&'a mut self, section: Option<S>, key: &str) -> Option<&'a mut str>
+  pub fn get_from_mut<S>(&mut self, section: S, key: &str) -> Option<&mut str>
   where
     S: Into<String>,
   {
     self
       .sections
-      .get_mut(&section_key!(section))
+      .get_mut(&section.into())
       .and_then(|prop| prop.get_mut(key))
   }
 
   /// Delete the first section with key, return the properties if it exists
-  pub fn delete<S>(&mut self, section: Option<S>) -> Option<Properties>
+  pub fn delete<S>(&mut self, section: S) -> Option<Properties>
   where
     S: Into<String>,
   {
-    let key = section_key!(section);
-    self.sections.remove(&key)
+    self.sections.remove(&section.into())
   }
 
   /// Delete the key from the section, return the value if key exists or None
-  pub fn delete_from<S>(&mut self, section: Option<S>, key: &str) -> Option<String>
+  pub fn delete_from<S>(&mut self, section: S, key: &str) -> Option<String>
   where
     S: Into<String>,
   {
@@ -172,46 +167,11 @@ impl Ltx {
   }
 }
 
-impl Default for Ltx {
-  /// Creates a ltx instance with an empty general section. This allows [Ltx::general_section]
-  /// and [Ltx::with_general_section] to be called without panicking.
-  fn default() -> Self {
-    let mut result: Ltx = Ltx {
-      includes: Default::default(),
-      sections: Default::default(),
-    };
-
-    result.sections.insert(None, Default::default());
-
-    result
-  }
-}
-
-impl<S: Into<String>> Index<Option<S>> for Ltx {
-  type Output = Properties;
-
-  fn index(&self, index: Option<S>) -> &Properties {
-    match self.section(index) {
-      Some(p) => p,
-      None => panic!("Section does not exist"),
-    }
-  }
-}
-
-impl<S: Into<String>> IndexMut<Option<S>> for Ltx {
-  fn index_mut(&mut self, index: Option<S>) -> &mut Properties {
-    match self.section_mut(index) {
-      Some(p) => p,
-      None => panic!("Section does not exist"),
-    }
-  }
-}
-
 impl<'q> Index<&'q str> for Ltx {
   type Output = Properties;
 
   fn index<'a>(&'a self, index: &'q str) -> &'a Properties {
-    match self.section(Some(index)) {
+    match self.section(index) {
       Some(p) => p,
       None => panic!("Section `{}` does not exist", index),
     }
@@ -220,7 +180,7 @@ impl<'q> Index<&'q str> for Ltx {
 
 impl<'q> IndexMut<&'q str> for Ltx {
   fn index_mut<'a>(&'a mut self, index: &'q str) -> &'a mut Properties {
-    match self.section_mut(Some(index)) {
+    match self.section_mut(index) {
       Some(p) => p,
       None => panic!("Section `{}` does not exist", index),
     }
@@ -234,6 +194,7 @@ mod test {
   use crate::ltx::Ltx;
   use crate::parse_option::ParseOption;
   use crate::properties::Properties;
+  use crate::ROOT_SECTION;
 
   #[test]
   fn load_from_str_with_empty_general_section() {
@@ -244,12 +205,12 @@ mod test {
     let mut output = opt.unwrap();
     assert_eq!(output.len(), 2);
 
-    assert!(output.general_section().is_empty());
-    assert!(output.general_section_mut().is_empty());
+    assert!(output.root_section().is_empty());
+    assert!(output.root_section_mut().is_empty());
 
-    let props1 = output.section(None::<String>).unwrap();
+    let props1 = output.section(ROOT_SECTION).unwrap();
     assert!(props1.is_empty());
-    let props2 = output.section(Some("sec1")).unwrap();
+    let props2 = output.section("sec1").unwrap();
     assert_eq!(props2.len(), 1);
     assert_eq!(props2.get("key1"), Some("val1"));
   }
@@ -261,8 +222,8 @@ mod test {
     assert!(opt.is_ok());
 
     let mut output = opt.unwrap();
-    assert!(output.general_section().is_empty());
-    assert!(output.general_section_mut().is_empty());
+    assert!(output.root_section().is_empty());
+    assert!(output.root_section_mut().is_empty());
     assert_eq!(output.len(), 1);
   }
 
@@ -273,8 +234,8 @@ mod test {
     assert!(opt.is_ok());
 
     let mut output = opt.unwrap();
-    assert!(output.general_section().is_empty());
-    assert!(output.general_section_mut().is_empty());
+    assert!(output.root_section().is_empty());
+    assert!(output.root_section_mut().is_empty());
     assert_eq!(output.len(), 1);
   }
 
@@ -287,9 +248,9 @@ mod test {
     let output = opt.unwrap();
     // there is always a general section
     assert_eq!(output.len(), 3);
-    assert!(output.section(Some("sec1")).is_some());
+    assert!(output.section("sec1").is_some());
 
-    let sec1 = output.section(Some("sec1")).unwrap();
+    let sec1 = output.section("sec1").unwrap();
     assert_eq!(sec1.len(), 2);
     let key1: String = "key1".into();
     assert!(sec1.contains_key(&key1));
@@ -358,17 +319,17 @@ key = value ; comment
 
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
 
-    assert_eq!(ltx.get_from(Some("section_name"), "name").unwrap(), "hello");
-    assert_eq!(ltx.get_from(Some("section_name"), "key").unwrap(), "value");
+    assert_eq!(ltx.get_from("section_name", "name").unwrap(), "hello");
+    assert_eq!(ltx.get_from("section_name", "key").unwrap(), "value");
 
-    let properties = ltx.section(Some("section_name")).expect("Existing section");
+    let properties = ltx.section("section_name").expect("Existing section");
 
     assert_eq!(properties.inherited.len(), 3);
-    assert!(!properties.inherits_section(Some("base0")));
-    assert!(properties.inherits_section(Some("base1")));
-    assert!(properties.inherits_section(Some("base2")));
-    assert!(properties.inherits_section(Some("base3")));
-    assert!(!properties.inherits_section(Some("base4")));
+    assert!(!properties.inherits_section("base0"));
+    assert!(properties.inherits_section("base1"));
+    assert!(properties.inherits_section("base2"));
+    assert!(properties.inherits_section("base3"));
+    assert!(!properties.inherits_section("base4"));
   }
 
   #[test]
@@ -385,8 +346,8 @@ key = value ; comment
 
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
 
-    assert_eq!(ltx.get_from(Some("section_name"), "name").unwrap(), "hello");
-    assert_eq!(ltx.get_from(Some("section_name"), "key").unwrap(), "value");
+    assert_eq!(ltx.get_from("section_name", "name").unwrap(), "hello");
+    assert_eq!(ltx.get_from("section_name", "key").unwrap(), "value");
 
     assert_eq!(ltx.get_included().len(), 3);
     assert!(ltx.includes(&String::from("file1.ltx")));
@@ -495,7 +456,7 @@ name = hello
 Key = \"Value\"
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(ltx.get_from(Some("section name"), "Key").unwrap(), "Value");
+    assert_eq!(ltx.get_from("section name", "Key").unwrap(), "Value");
   }
 
   #[test]
@@ -508,7 +469,7 @@ Otherline\"
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     assert_eq!(
-      ltx.get_from(Some("section name"), "Key").unwrap(),
+      ltx.get_from("section name", "Key").unwrap(),
       "Value\nOtherline"
     );
   }
@@ -523,7 +484,7 @@ Stuff = Other
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     assert_eq!(
-      ltx.get_from(Some("section name"), "Key").unwrap(),
+      ltx.get_from("section name", "Key").unwrap(),
       "Value   # This is not a comment ; at all"
     );
   }
@@ -537,19 +498,19 @@ Key = 'Value'
 Stuff = Other
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(ltx.get_from(Some("section name"), "Key").unwrap(), "Value");
+    assert_eq!(ltx.get_from("section name", "Key").unwrap(), "Value");
   }
 
   #[test]
   fn string_includes_quote() {
     let input: &str = "
-[Test]
+[test]
 Comment[tr]=İnternet'e erişin
 Comment[uk]=Доступ до Інтернету
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     assert_eq!(
-      ltx.get_from(Some("Test"), "Comment[tr]").unwrap(),
+      ltx.get_from("test", "Comment[tr]").unwrap(),
       "İnternet'e erişin"
     );
   }
@@ -565,7 +526,7 @@ Stuff = Other
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     assert_eq!(
-      ltx.get_from(Some("section name"), "Key").unwrap(),
+      ltx.get_from("section name", "Key").unwrap(),
       "Value\nOtherline"
     );
   }
@@ -579,7 +540,7 @@ Key = 'Value   # This is not a comment ; at all'
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     assert_eq!(
-      ltx.get_from(Some("section name"), "Key").unwrap(),
+      ltx.get_from("section name", "Key").unwrap(),
       "Value   # This is not a comment ; at all"
     );
   }
@@ -592,9 +553,9 @@ Key = 'Value   # This is not a comment ; at all'
 
     let output = opt.unwrap();
     assert_eq!(output.len(), 1);
-    assert!(output.section(None::<String>).is_some());
+    assert!(output.section(ROOT_SECTION).is_some());
 
-    let sec1 = output.section(None::<String>).unwrap();
+    let sec1 = output.section(ROOT_SECTION).unwrap();
     assert_eq!(sec1.len(), 2);
     let key1: String = "key1".into();
     assert!(sec1.contains_key(&key1));
@@ -614,8 +575,8 @@ Key = 'Value   # This is not a comment ; at all'
 
     let output = opt.unwrap();
     assert_eq!(output.len(), 1);
-    assert!(output.section(None::<String>).is_some());
-    let sec1 = output.section(None::<String>).unwrap();
+    assert!(output.section(ROOT_SECTION).is_some());
+    let sec1 = output.section(ROOT_SECTION).unwrap();
     assert_eq!(sec1.len(), 2);
     let key1: String = "key1".into();
     assert!(sec1.contains_key(&key1));
@@ -635,8 +596,8 @@ Key = 'Value   # This is not a comment ; at all'
 
     let output = opt.unwrap();
     assert_eq!(output.len(), 1);
-    assert!(output.section(None::<String>).is_some());
-    let sec1 = output.section(None::<String>).unwrap();
+    assert!(output.section(ROOT_SECTION).is_some());
+    let sec1 = output.section(ROOT_SECTION).unwrap();
     assert_eq!(sec1.len(), 2);
     let key1: String = "key1".into();
     assert!(sec1.contains_key(&key1));
@@ -653,7 +614,7 @@ Key = 'Value   # This is not a comment ; at all'
     let input: &str = "key1=val1\nkey2=val2\n";
     let opt = Ltx::load_from_str(input).unwrap();
 
-    let sec1 = opt.section(None::<String>).unwrap();
+    let sec1 = opt.section(ROOT_SECTION).unwrap();
 
     let key = "key1".to_owned();
     sec1.get(&key).unwrap();
@@ -667,7 +628,7 @@ Key = 'Value   # This is not a comment ; at all'
 
     let output = opt.unwrap();
     assert_eq!(output.len(), 1);
-    let sec = output.section(None::<String>).unwrap();
+    let sec = output.section(ROOT_SECTION).unwrap();
     assert_eq!(sec.len(), 1);
     assert!(sec.contains_key("path"));
     assert_eq!(&sec["path"], "C:\\Windows\\Some\\Folder\\");
@@ -676,12 +637,12 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn partial_quoting_double() {
     let input: &str = "
-[Section]
+[section]
 A=\"quote\" arg0
 B=b";
 
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let sec: &Properties = ltx.section(Some("Section")).unwrap();
+    let sec: &Properties = ltx.section("section").unwrap();
     assert_eq!(&sec["A"], "quote arg0");
     assert_eq!(&sec["B"], "b");
   }
@@ -689,12 +650,12 @@ B=b";
   #[test]
   fn partial_quoting_single() {
     let input = "
-[Section]
+[section]
 A='quote' arg0
 B=b";
 
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let section: &Properties = ltx.section(Some("Section")).unwrap();
+    let section: &Properties = ltx.section("section").unwrap();
     assert_eq!(&section["A"], "quote arg0");
     assert_eq!(&section["B"], "b");
   }
@@ -702,7 +663,7 @@ B=b";
   #[test]
   fn parse_without_quote() {
     let input = "
-[Desktop Entry]
+[desktop_entry]
 Exec = \"/path/to/exe with space\" arg
 ";
 
@@ -714,46 +675,49 @@ Exec = \"/path/to/exe with space\" arg
       },
     )
     .unwrap();
-    let sec = ltx.section(Some("Desktop Entry")).unwrap();
+    let sec = ltx.section("desktop_entry").unwrap();
     assert_eq!(&sec["Exec"], "\"/path/to/exe with space\" arg");
   }
 
   #[test]
-  fn case_insensitive() {
+  fn wrong_char_case() {
     let input = "
-[SecTION]
+[secTION]
 KeY=value
 ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let section = ltx.section(Some("section")).unwrap();
-    let val = section.get("key").unwrap();
-    assert_eq!("value", val);
+    let ltx = Ltx::load_from_str(input);
+
+    assert!(ltx.is_err());
+    assert_eq!(
+      ltx.unwrap_err().message,
+      "Only lowercase section names are allowed in ltx file, got 'secTION'"
+    );
   }
 
   #[test]
   fn preserve_order_section() {
     let input: &str = r"
 none2 = n2
-[SB]
+[sb]
 p2 = 2
-[SA]
+[sa]
 x2 = 2
-[SC]
+[sc]
 cd1 = x
-[xC]
+[xc]
 xd = x
         ";
 
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let keys: Vec<Option<&str>> = ltx.iter().map(|(k, _)| k).collect();
+    let keys: Vec<&str> = ltx.iter().map(|(k, _)| k).collect();
 
     assert_eq!(keys.len(), 5);
-    assert_eq!(keys[0], None);
-    assert_eq!(keys[1], Some("SB"));
-    assert_eq!(keys[2], Some("SA"));
-    assert_eq!(keys[3], Some("SC"));
-    assert_eq!(keys[4], Some("xC"));
+    assert_eq!(keys[0], ROOT_SECTION);
+    assert_eq!(keys[1], "sb");
+    assert_eq!(keys[2], "sa");
+    assert_eq!(keys[3], "sc");
+    assert_eq!(keys[4], "xc");
   }
 
   #[test]
@@ -764,7 +728,7 @@ x1 = n2
 x3 = n2
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let section: &Properties = ltx.general_section();
+    let section: &Properties = ltx.root_section();
     let keys: Vec<&str> = section.iter().map(|(k, _)| k).collect();
     assert_eq!(keys, vec!["x2", "x1", "x3"]);
   }
@@ -778,7 +742,7 @@ xb = n2
 a3 = n3
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let section: &Properties = ltx.section(Some("s")).unwrap();
+    let section: &Properties = ltx.section("s").unwrap();
     let keys: Vec<&str> = section.iter().map(|(k, _)| k).collect();
     assert_eq!(keys, vec!["x2", "xb", "a3"])
   }
@@ -788,37 +752,37 @@ a3 = n3
     // https://github.com/zonyitoo/rust-ini/issues/49
 
     let input = r"
-[Peer]
+[peer]
 foo = a
 bar = b
 
-[Peer]
+[peer]
 foo = c
 bar = d
 
-[Peer]
+[peer]
 foo = e
 bar = f
 ";
 
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(3, ltx.section_all(Some("Peer")).count());
+    assert_eq!(3, ltx.section_all("peer").count());
 
     let mut iter = ltx.iter();
     // there is always an empty general section
     let (k0, p0) = iter.next().unwrap();
-    assert_eq!(None, k0);
+    assert_eq!(ROOT_SECTION, k0);
     assert!(p0.is_empty());
     let (k1, p1) = iter.next().unwrap();
-    assert_eq!(Some("Peer"), k1);
+    assert_eq!("peer", k1);
     assert_eq!(Some("a"), p1.get("foo"));
     assert_eq!(Some("b"), p1.get("bar"));
     let (k2, p2) = iter.next().unwrap();
-    assert_eq!(Some("Peer"), k2);
+    assert_eq!("peer", k2);
     assert_eq!(Some("c"), p2.get("foo"));
     assert_eq!(Some("d"), p2.get("bar"));
     let (k3, p3) = iter.next().unwrap();
-    assert_eq!(Some("Peer"), k3);
+    assert_eq!("peer", k3);
     assert_eq!(Some("e"), p3.get("foo"));
     assert_eq!(Some("f"), p3.get("bar"));
 
@@ -829,8 +793,8 @@ bar = f
   fn new_has_empty_general_section() {
     let mut ltx: Ltx = Ltx::new();
 
-    assert!(ltx.general_section().is_empty());
-    assert!(ltx.general_section_mut().is_empty());
+    assert!(ltx.root_section().is_empty());
+    assert!(ltx.root_section_mut().is_empty());
     assert_eq!(ltx.len(), 1);
   }
 
@@ -843,17 +807,17 @@ bar = f
 
     // create a new configuration
     let mut conf = Ltx::new();
-    conf.with_section(Some(section)).set(key, value);
+    conf.with_section(section).set(key, value);
 
     // assert the value is the one expected
-    let v = conf.get_from(Some(section), key).unwrap();
+    let v = conf.get_from(section, key).unwrap();
     assert_eq!(v, value);
 
     // update the section/key with a new value
-    conf.set_to(Some(section), key.to_string(), new_value.to_string());
+    conf.set_to(section, key.to_string(), new_value.to_string());
 
     // assert the new value was set
-    let v = conf.get_from(Some(section), key).unwrap();
+    let v = conf.get_from(section, key).unwrap();
     assert_eq!(v, new_value);
   }
 
@@ -990,7 +954,7 @@ x3 = nb
 ";
 
     let mut str: Ltx = Ltx::load_from_str(input).unwrap();
-    let section: &mut Properties = str.general_section_mut();
+    let section: &mut Properties = str.root_section_mut();
     section.iter_mut().enumerate().for_each(|(i, (_, v))| {
       v.push_str(&i.to_string());
     });

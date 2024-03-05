@@ -111,7 +111,7 @@ mod test {
   #[test]
   fn load_from_file_with_bom() {
     let file_name = temp_dir().join("rust_ini_load_from_file_with_bom");
-    let file_content = b"\xEF\xBB\xBF[Test]Key=Value\n";
+    let file_content = b"\xEF\xBB\xBF[test]Key=Value\n";
 
     {
       let mut file = File::create(&file_name).expect("create");
@@ -119,14 +119,14 @@ mod test {
     }
 
     let ltx: Ltx = Ltx::load_from_file(&file_name).unwrap();
-    assert_eq!(ltx.get_from(Some("Test"), "Key"), Some("Value"));
+    assert_eq!(ltx.get_from("test", "Key"), Some("Value"));
   }
 
   #[test]
   fn load_from_file_without_bom() {
     let file_name = temp_dir().join("rust_ini_load_from_file_without_bom");
 
-    let file_content = b"[Test]Key=Value\n";
+    let file_content = b"[test]Key=Value\n";
 
     {
       let mut file = File::create(&file_name).expect("create");
@@ -134,7 +134,7 @@ mod test {
     }
 
     let ltx: Ltx = Ltx::load_from_file(&file_name).unwrap();
-    assert_eq!(ltx.get_from(Some("Test"), "Key"), Some("Value"));
+    assert_eq!(ltx.get_from("test", "Key"), Some("Value"));
   }
 
   #[test]

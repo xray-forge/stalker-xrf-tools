@@ -72,7 +72,7 @@ impl AlifeObjectGeneric for AlifeObjectCustomZone {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("max_power", self.max_power.to_string())
       .set("owner_id", self.owner_id.to_string())
       .set("enabled_time", self.enabled_time.to_string())

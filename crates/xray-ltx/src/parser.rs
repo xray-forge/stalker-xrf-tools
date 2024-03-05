@@ -3,6 +3,7 @@ use crate::ltx::Ltx;
 use crate::parse_option::ParseOption;
 use crate::properties::Properties;
 use crate::section_entry::SectionEntry;
+use crate::ROOT_SECTION;
 use std::str::Chars;
 
 // Ltx parser.
@@ -82,7 +83,7 @@ impl<'a> LtxParser<'a> {
 
     let mut ltx: Ltx = Ltx::new();
     let mut current_key: String = "".into();
-    let mut current_section: Option<String> = None;
+    let mut current_section: String = ROOT_SECTION.to_string();
 
     self.parse_whitespace();
 
@@ -120,9 +121,13 @@ impl<'a> LtxParser<'a> {
 
         '[' => match self.parse_section() {
           Ok(sec) => {
-            let member_section = sec[..].trim();
+            current_section = String::from(sec[..].trim());
 
-            current_section = Some((*member_section).to_string());
+            if current_section.chars().any(char::is_uppercase) {
+              return self.error(format!(
+                "Only lowercase section names are allowed in ltx file, got '{current_section}'"
+              ));
+            }
 
             match ltx.entry(current_section.clone()) {
               SectionEntry::Vacant(vacant_entry) => {
@@ -172,7 +177,7 @@ impl<'a> LtxParser<'a> {
                 let mut properties: Properties = Properties::new();
 
                 for base_name in value.split(',').map(|it| it.trim()) {
-                  properties.inherit(Some(base_name));
+                  properties.inherit(base_name);
                 }
 
                 vacant_entry.insert(properties);
@@ -181,7 +186,7 @@ impl<'a> LtxParser<'a> {
                 let properties: &mut Properties = occupied_entry.last_mut();
 
                 for base_name in value.split(',').map(|it| it.trim()) {
-                  properties.inherit(Some(base_name));
+                  properties.inherit(base_name);
                 }
               }
             }
@@ -353,7 +358,7 @@ impl<'a> LtxParser<'a> {
     let value: String = String::from(&value[9..value.len() - 1]);
 
     if value.is_empty() {
-      return self.error(format!(
+      return self.error(String::from(
         "Expected valid file name in include statement, got empty file name",
       ));
     }

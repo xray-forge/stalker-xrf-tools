@@ -96,7 +96,7 @@ impl AlifeObjectGeneric for AlifeObjectCreature {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("team", self.team.to_string())
       .set("squad", self.squad.to_string())
       .set("group", self.group.to_string())

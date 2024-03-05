@@ -51,7 +51,7 @@ impl AlifeObjectGeneric for AlifeObjectClimable {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("game_material", &self.game_material);
   }
 }

@@ -52,7 +52,7 @@ impl AlifeObjectGeneric for AlifeObjectItemAmmo {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("ammo_left", self.ammo_left.to_string());
   }
 }

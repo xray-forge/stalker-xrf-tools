@@ -47,7 +47,7 @@ impl AlifeObjectGeneric for AlifeObjectVisual {
   /// Export object data into ini file.
   fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("visual_name", &self.visual_name)
       .set("visual_flags", self.visual_flags.to_string());
   }
@@ -130,9 +130,9 @@ mod tests {
     let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
 
     let read_first: AlifeObjectVisual =
-      AlifeObjectVisual::import(source.section(Some("first")).unwrap())?;
+      AlifeObjectVisual::import(source.section("first").unwrap())?;
     let read_second: AlifeObjectVisual =
-      AlifeObjectVisual::import(source.section(Some("second")).unwrap())?;
+      AlifeObjectVisual::import(source.section("second").unwrap())?;
 
     assert_eq!(read_first, first);
     assert_eq!(read_second, second);

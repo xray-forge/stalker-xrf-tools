@@ -57,7 +57,7 @@ impl AlifeObjectGeneric for AlifeObjectSpaceRestrictor {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("restrictor_type", self.restrictor_type.to_string());
 
     Shape::export_shapes(&self.shape, section, ini);
@@ -192,9 +192,9 @@ mod tests {
     let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
 
     let read_first: AlifeObjectSpaceRestrictor =
-      AlifeObjectSpaceRestrictor::import(source.section(Some("first")).unwrap())?;
+      AlifeObjectSpaceRestrictor::import(source.section("first").unwrap())?;
     let read_second: AlifeObjectSpaceRestrictor =
-      AlifeObjectSpaceRestrictor::import(source.section(Some("second")).unwrap())?;
+      AlifeObjectSpaceRestrictor::import(source.section("second").unwrap())?;
 
     assert_eq!(read_first, first);
     assert_eq!(read_second, second);

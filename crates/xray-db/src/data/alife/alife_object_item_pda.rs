@@ -62,7 +62,7 @@ impl AlifeObjectGeneric for AlifeObjectItemPda {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("owner", self.owner.to_string())
       .set("character", &self.character)
       .set("info_portion", &self.info_portion);

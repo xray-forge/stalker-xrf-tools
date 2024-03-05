@@ -1,10 +1,9 @@
 use crate::ltx::Ltx;
 use crate::properties::Properties;
-use crate::property::{PropertyKey, SectionKey};
 use ordered_multimap::list_ordered_multimap::{IntoIter, Iter, IterMut};
 
 pub struct PropertyIter<'a> {
-  pub(crate) inner: Iter<'a, PropertyKey, String>,
+  pub(crate) inner: Iter<'a, String, String>,
 }
 
 impl<'a> Iterator for PropertyIter<'a> {
@@ -30,7 +29,7 @@ impl DoubleEndedIterator for PropertyIter<'_> {
 
 /// Iterator for traversing sections
 pub struct PropertyIterMut<'a> {
-  pub(crate) inner: IterMut<'a, PropertyKey, String>,
+  pub(crate) inner: IterMut<'a, String, String>,
 }
 
 impl<'a> Iterator for PropertyIterMut<'a> {
@@ -52,14 +51,14 @@ impl DoubleEndedIterator for PropertyIterMut<'_> {
 }
 
 pub struct PropertiesIntoIter {
-  inner: IntoIter<PropertyKey, String>,
+  inner: IntoIter<String, String>,
 }
 
 impl Iterator for PropertiesIntoIter {
   type Item = (String, String);
 
   fn next(&mut self) -> Option<Self::Item> {
-    self.inner.next().map(|(k, v)| (k.into(), v))
+    self.inner.next()
   }
 
   fn size_hint(&self) -> (usize, Option<usize>) {
@@ -69,13 +68,13 @@ impl Iterator for PropertiesIntoIter {
 
 impl DoubleEndedIterator for PropertiesIntoIter {
   fn next_back(&mut self) -> Option<Self::Item> {
-    self.inner.next_back().map(|(k, v)| (k.into(), v))
+    self.inner.next_back()
   }
 }
 
 impl<'a> IntoIterator for &'a Properties {
-  type IntoIter = PropertyIter<'a>;
   type Item = (&'a str, &'a str);
+  type IntoIter = PropertyIter<'a>;
 
   fn into_iter(self) -> Self::IntoIter {
     self.iter()
@@ -83,8 +82,8 @@ impl<'a> IntoIterator for &'a Properties {
 }
 
 impl<'a> IntoIterator for &'a mut Properties {
-  type IntoIter = PropertyIterMut<'a>;
   type Item = (&'a str, &'a mut String);
+  type IntoIter = PropertyIterMut<'a>;
 
   fn into_iter(self) -> Self::IntoIter {
     self.iter_mut()
@@ -92,8 +91,8 @@ impl<'a> IntoIterator for &'a mut Properties {
 }
 
 impl IntoIterator for Properties {
-  type IntoIter = PropertiesIntoIter;
   type Item = (String, String);
+  type IntoIter = PropertiesIntoIter;
 
   fn into_iter(self) -> Self::IntoIter {
     PropertiesIntoIter {
@@ -104,17 +103,14 @@ impl IntoIterator for Properties {
 
 /// Iterator for traversing sections
 pub struct SectionIter<'a> {
-  inner: Iter<'a, SectionKey, Properties>,
+  inner: Iter<'a, String, Properties>,
 }
 
 impl<'a> Iterator for SectionIter<'a> {
-  type Item = (Option<&'a str>, &'a Properties);
+  type Item = (&'a str, &'a Properties);
 
   fn next(&mut self) -> Option<Self::Item> {
-    self
-      .inner
-      .next()
-      .map(|(k, v)| (k.as_ref().map(|s| s.as_str()), v))
+    self.inner.next().map(|(k, v)| (k.as_str(), v))
   }
 
   fn size_hint(&self) -> (usize, Option<usize>) {
@@ -124,26 +120,20 @@ impl<'a> Iterator for SectionIter<'a> {
 
 impl DoubleEndedIterator for SectionIter<'_> {
   fn next_back(&mut self) -> Option<Self::Item> {
-    self
-      .inner
-      .next_back()
-      .map(|(k, v)| (k.as_ref().map(|s| s.as_str()), v))
+    self.inner.next_back().map(|(k, v)| (k.as_str(), v))
   }
 }
 
 /// Iterator for traversing sections
 pub struct SectionIterMut<'a> {
-  inner: IterMut<'a, SectionKey, Properties>,
+  inner: IterMut<'a, String, Properties>,
 }
 
 impl<'a> Iterator for SectionIterMut<'a> {
-  type Item = (Option<&'a str>, &'a mut Properties);
+  type Item = (&'a str, &'a mut Properties);
 
   fn next(&mut self) -> Option<Self::Item> {
-    self
-      .inner
-      .next()
-      .map(|(k, v)| (k.as_ref().map(|s| s.as_str()), v))
+    self.inner.next().map(|(k, v)| (k.as_str(), v))
   }
 
   fn size_hint(&self) -> (usize, Option<usize>) {
@@ -153,20 +143,17 @@ impl<'a> Iterator for SectionIterMut<'a> {
 
 impl DoubleEndedIterator for SectionIterMut<'_> {
   fn next_back(&mut self) -> Option<Self::Item> {
-    self
-      .inner
-      .next_back()
-      .map(|(k, v)| (k.as_ref().map(|s| s.as_str()), v))
+    self.inner.next_back().map(|(k, v)| (k.as_str(), v))
   }
 }
 
 /// Iterator for traversing sections
 pub struct SectionIntoIter {
-  inner: IntoIter<SectionKey, Properties>,
+  inner: IntoIter<String, Properties>,
 }
 
 impl Iterator for SectionIntoIter {
-  type Item = (SectionKey, Properties);
+  type Item = (String, Properties);
 
   fn next(&mut self) -> Option<Self::Item> {
     self.inner.next()
@@ -206,8 +193,8 @@ impl<'a> Ltx {
 }
 
 impl<'a> IntoIterator for &'a Ltx {
+  type Item = (&'a str, &'a Properties);
   type IntoIter = SectionIter<'a>;
-  type Item = (Option<&'a str>, &'a Properties);
 
   fn into_iter(self) -> Self::IntoIter {
     self.iter()
@@ -215,8 +202,8 @@ impl<'a> IntoIterator for &'a Ltx {
 }
 
 impl<'a> IntoIterator for &'a mut Ltx {
+  type Item = (&'a str, &'a mut Properties);
   type IntoIter = SectionIterMut<'a>;
-  type Item = (Option<&'a str>, &'a mut Properties);
 
   fn into_iter(self) -> Self::IntoIter {
     self.iter_mut()
@@ -224,8 +211,8 @@ impl<'a> IntoIterator for &'a mut Ltx {
 }
 
 impl IntoIterator for Ltx {
+  type Item = (String, Properties);
   type IntoIter = SectionIntoIter;
-  type Item = (SectionKey, Properties);
 
   fn into_iter(self) -> Self::IntoIter {
     SectionIntoIter {

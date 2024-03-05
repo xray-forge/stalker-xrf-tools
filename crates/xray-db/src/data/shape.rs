@@ -51,7 +51,7 @@ impl Shape {
   /// Export shapes object to target ini file section.
   pub fn export_shapes(shapes: &[Shape], section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("shapes_count", shapes.len().to_string());
 
     for (index, shape) in shapes.iter().enumerate() {
@@ -60,14 +60,14 @@ impl Shape {
       match shape {
         Shape::Sphere(sphere) => {
           ini
-            .with_section(Some(section))
+            .with_section(section)
             .set(format!("{prefix}.type"), "sphere")
             .set(format!("{prefix}.center"), sphere.0.to_string())
             .set(format!("{prefix}.radius"), sphere.1.to_string());
         }
         Shape::Box(square) => {
           ini
-            .with_section(Some(section))
+            .with_section(section)
             .set(format!("{prefix}.type"), "box")
             .set(format!("{prefix}.a"), square.0.to_string())
             .set(format!("{prefix}.b"), square.1.to_string())

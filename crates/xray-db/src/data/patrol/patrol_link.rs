@@ -85,7 +85,7 @@ impl PatrolLink {
   /// Import patrol point link from ini config.
   pub fn import(section: &str, config: &Ltx) -> io::Result<PatrolLink> {
     let props: &Properties = config
-      .section(Some(section))
+      .section(section)
       .unwrap_or_else(|| panic!("Patrol point link '{section}' should be defined in ltx file"));
 
     let index: u32 = read_ini_field("index", props)?;
@@ -108,13 +108,13 @@ impl PatrolLink {
   /// Export patrol link data into ini.
   pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("index", self.index.to_string())
       .set("count", self.links.len().to_string());
 
     for (index, (from, weight)) in self.links.iter().enumerate() {
       ini
-        .with_section(Some(section))
+        .with_section(section)
         .set(format!("from.{index}"), from.to_string())
         .set(format!("weight.{index}"), weight.to_string());
     }

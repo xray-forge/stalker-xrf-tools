@@ -66,10 +66,8 @@ impl ArtefactSpawnsChunk {
     let config: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
-    for (section, props) in &config {
-      if section.is_some() {
-        nodes.push(ArtefactSpawnPoint::import(props)?);
-      }
+    for (_, props) in &config {
+      nodes.push(ArtefactSpawnPoint::import(props)?);
     }
 
     log::info!("Imported artefact spawns chunk");

@@ -3,11 +3,11 @@ use crate::ltx::Ltx;
 /// A setter which could be used to set key-value pair in a specified section.
 pub struct SectionSetter<'a> {
   ltx: &'a mut Ltx,
-  section_name: Option<String>,
+  section_name: String,
 }
 
 impl<'a> SectionSetter<'a> {
-  pub fn new(ltx: &'a mut Ltx, section_name: Option<String>) -> SectionSetter<'a> {
+  pub fn new(ltx: &'a mut Ltx, section_name: String) -> SectionSetter<'a> {
     SectionSetter { ltx, section_name }
   }
 
@@ -28,7 +28,7 @@ impl<'a> SectionSetter<'a> {
 
   /// Delete the first entry in this section with `key`.
   pub fn delete<K: AsRef<str>>(&'a mut self, key: &K) -> &'a mut SectionSetter<'a> {
-    for prop in self.ltx.section_all_mut(self.section_name.as_ref()) {
+    for prop in self.ltx.section_all_mut(self.section_name.clone()) {
       prop.remove(key);
     }
 
@@ -36,11 +36,10 @@ impl<'a> SectionSetter<'a> {
   }
 
   /// Get the entry in this section with `key`.
-  pub fn get<K: AsRef<str>>(&'a mut self, key: K) -> Option<&'a str> {
+  pub fn get<K: Into<String>>(&'a mut self, key: K) -> Option<&'a str> {
     self
       .ltx
-      .section(self.section_name.as_ref())
+      .section(&self.section_name)
       .and_then(|prop| prop.get(key))
-      .map(AsRef::as_ref)
   }
 }

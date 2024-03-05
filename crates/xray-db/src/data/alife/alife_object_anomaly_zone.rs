@@ -62,7 +62,7 @@ impl AlifeObjectGeneric for AlifeObjectAnomalyZone {
     self.base.export(section, ini);
 
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set(
         "offline_interactive_radius",
         self.offline_interactive_radius.to_string(),

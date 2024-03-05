@@ -48,7 +48,7 @@ impl ArtefactSpawnPoint {
   /// Export artefact spawn point data into ini.
   pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
-      .with_section(Some(section))
+      .with_section(section)
       .set("distance", self.distance.to_string())
       .set("position", self.position.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string());
@@ -133,8 +133,8 @@ mod tests {
     export_ini_to_file(&ltx, &mut file)?;
 
     let read_point: ArtefactSpawnPoint = ArtefactSpawnPoint::import(
-      &open_ini_config(config_path)?
-        .section(Some("artefact_spawn_point"))
+      open_ini_config(config_path)?
+        .section("artefact_spawn_point")
         .expect("0 point section"),
     )?;
 

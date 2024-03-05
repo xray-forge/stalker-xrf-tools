@@ -61,7 +61,7 @@ impl HeaderChunk {
   pub fn import(path: &Path) -> io::Result<HeaderChunk> {
     let config: Ltx = open_ini_config(&path.join("header.ltx"))?;
     let props: &Properties = config
-      .section(Some("header"))
+      .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
     Ok(HeaderChunk {
@@ -79,7 +79,7 @@ impl HeaderChunk {
     let mut config: Ltx = Ltx::new();
 
     config
-      .with_section(Some("header"))
+      .with_section("header")
       .set("version", self.version.to_string())
       .set("guid", self.guid.to_string())
       .set("graph_guid", self.graph_guid.to_string())

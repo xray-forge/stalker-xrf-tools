@@ -62,7 +62,7 @@ impl AlifeObjectGeneric for AlifeObjectTorridZone {
     self.base.export(section, ini);
     self.motion.export(section, ini);
 
-    ini.with_section(Some(section)).set(
+    ini.with_section(section).set(
       "last_spawn_time",
       Time::export_to_string(&self.last_spawn_time),
     );

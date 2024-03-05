@@ -1,5 +1,5 @@
 use crate::escape_policy::escape_str;
-use crate::{EscapePolicy, Ltx, WriteOption};
+use crate::{EscapePolicy, Ltx, WriteOption, ROOT_SECTION};
 use std::fs::OpenOptions;
 use std::io;
 use std::io::Write;
@@ -66,7 +66,7 @@ impl Ltx {
 
     for (section, props) in &self.sections {
       // If root section with data or generic section.
-      if section.is_some() || !props.data.is_empty() {
+      if section != ROOT_SECTION || !props.data.is_empty() {
         if firstline {
           firstline = false;
         } else {
@@ -75,25 +75,11 @@ impl Ltx {
         }
       }
 
-      if let Some(ref section) = *section {
+      if section != ROOT_SECTION {
         let inherited: String = if props.inherited.is_empty() {
           String::new()
         } else {
-          format!(
-            ":{}",
-            props
-              .inherited
-              .iter()
-              .filter_map(|it| {
-                if it.is_some() {
-                  Some(it.clone().unwrap().into_inner())
-                } else {
-                  None
-                }
-              })
-              .collect::<Vec<String>>()
-              .join(", ")
-          )
+          format!(":{}", props.inherited.join(", "))
         };
 
         write!(
@@ -123,7 +109,7 @@ impl Ltx {
 #[cfg(test)]
 mod test {
   use crate::line_separator::{LineSeparator, DEFAULT_LINE_SEPARATOR};
-  use crate::{EscapePolicy, Ltx, WriteOption};
+  use crate::{EscapePolicy, Ltx, WriteOption, ROOT_SECTION};
 
   #[test]
   fn preserve_order_write() {
@@ -141,11 +127,11 @@ a3 = n3
     ltx.write_to(&mut buf).unwrap();
     let new_data = Ltx::load_from_str(&String::from_utf8(buf).unwrap()).unwrap();
 
-    let sec0 = new_data.general_section();
+    let sec0 = new_data.root_section();
     let keys0: Vec<&str> = sec0.iter().map(|(k, _)| k).collect();
     assert_eq!(keys0, vec!["x2", "x1", "x3"]);
 
-    let sec1 = new_data.section(Some("s")).unwrap();
+    let sec1 = new_data.section("s").unwrap();
     let keys1: Vec<&str> = sec1.iter().map(|(k, _)| k).collect();
     assert_eq!(keys1, vec!["x2", "xb", "a3"]);
   }
@@ -172,11 +158,11 @@ a3 = n3
 
     let mut ini = Ltx::new();
     ini
-      .with_section(Some("Section1"))
+      .with_section("Section1")
       .set("Key1", "Value")
       .set("Key2", "Value");
     ini
-      .with_section(Some("Section2"))
+      .with_section("Section2")
       .set("Key1", "Value")
       .set("Key2", "Value");
 
@@ -250,15 +236,15 @@ a3 = n3
     let mut ini = Ltx::new();
 
     ini
-      .with_section(None::<String>)
+      .with_section(ROOT_SECTION)
       .set("Key1", "Value")
       .set("Key2", "Value");
     ini
-      .with_section(Some("Section1"))
+      .with_section("Section1")
       .set("Key1", "Value")
       .set("Key2", "Value");
     ini
-      .with_section(Some("Section2"))
+      .with_section("Section2")
       .set("Key1", "Value")
       .set("Key2", "Value");
 

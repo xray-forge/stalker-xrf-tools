@@ -1,10 +1,9 @@
 use crate::properties::Properties;
-use crate::property::SectionKey;
 use ordered_multimap::list_ordered_multimap::{Entry, OccupiedEntry, VacantEntry};
 
 /// A view into a vacant entry in a `Ltx`.
 pub struct SectionVacantEntry<'a> {
-  inner: VacantEntry<'a, SectionKey, Properties>,
+  inner: VacantEntry<'a, String, Properties>,
 }
 
 impl<'a> SectionVacantEntry<'a> {
@@ -16,7 +15,7 @@ impl<'a> SectionVacantEntry<'a> {
 
 /// A view into an occupied entry in a `Ltx`.
 pub struct SectionOccupiedEntry<'a> {
-  inner: OccupiedEntry<'a, SectionKey, Properties>,
+  inner: OccupiedEntry<'a, String, Properties>,
 }
 
 impl<'a> SectionOccupiedEntry<'a> {
@@ -65,8 +64,8 @@ impl<'a> SectionEntry<'a> {
   }
 }
 
-impl<'a> From<Entry<'a, SectionKey, Properties>> for SectionEntry<'a> {
-  fn from(entry: Entry<'a, SectionKey, Properties>) -> SectionEntry<'a> {
+impl<'a> From<Entry<'a, String, Properties>> for SectionEntry<'a> {
+  fn from(entry: Entry<'a, String, Properties>) -> SectionEntry<'a> {
     match entry {
       Entry::Occupied(inner) => SectionEntry::Occupied(SectionOccupiedEntry { inner }),
       Entry::Vacant(inner) => SectionEntry::Vacant(SectionVacantEntry { inner }),

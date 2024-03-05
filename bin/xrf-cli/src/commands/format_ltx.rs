@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_ltx::{Ltx, ParseOption};
+use xray_ltx::{EscapePolicy, Ltx, ParseOption, WriteOption};
 
 /// Lint ltx file or folder based on provided arguments.
 pub fn format_ltx(matches: &ArgMatches) {
@@ -27,4 +27,14 @@ pub fn format_ltx(matches: &ArgMatches) {
   let ltx: Ltx = ltx.unwrap();
 
   log::info!("Read ini file: {}", ltx.len());
+
+  ltx
+    .write_to_file_opt(
+      "test.ltx",
+      WriteOption {
+        escape_policy: EscapePolicy::Nothing,
+        ..Default::default()
+      },
+    )
+    .unwrap();
 }

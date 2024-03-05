@@ -60,14 +60,12 @@ impl PatrolsChunk {
     let mut patrols: Vec<Patrol> = Vec::new();
 
     for section in patrols_config.sections() {
-      if section.is_some() {
-        patrols.push(Patrol::import(
-          section.unwrap(),
-          &patrols_config,
-          &patrol_points_config,
-          &patrol_links_config,
-        )?);
-      }
+      patrols.push(Patrol::import(
+        section,
+        &patrols_config,
+        &patrol_points_config,
+        &patrol_links_config,
+      )?);
     }
 
     log::info!("Imported patrols chunk");
