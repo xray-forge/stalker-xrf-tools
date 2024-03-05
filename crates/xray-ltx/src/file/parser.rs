@@ -119,8 +119,8 @@ impl<'a> LtxParser<'a> {
         }
 
         '[' => match self.parse_section() {
-          Ok(sec) => {
-            current_section = String::from(sec[..].trim());
+          Ok(section) => {
+            current_section = String::from(section[..].trim());
 
             if current_section.chars().any(char::is_uppercase) {
               return self.error(format!(
@@ -132,8 +132,8 @@ impl<'a> LtxParser<'a> {
               SectionEntry::Vacant(vacant_entry) => {
                 vacant_entry.insert(Default::default());
               }
-              SectionEntry::Occupied(mut occupied_entry) => {
-                occupied_entry.append(Default::default());
+              SectionEntry::Occupied(_) => {
+                return self.error(String::from("Duplicate sections are not allowed"));
               }
             }
           }
@@ -222,13 +222,13 @@ impl<'a> LtxParser<'a> {
     while !endpoint.contains(&self.ch) {
       match self.ch {
         None => {
-          return self.error(format!("expecting \"{:?}\" but found EOF.", endpoint));
+          return self.error(format!("Expecting \"{:?}\" but found EOF.", endpoint));
         }
         Some(space) if check_inline_comment && (space == ' ' || space == '\t') => {
           self.bump();
 
           match self.ch {
-            Some('#') | Some(';') => {
+            Some(';') => {
               // [space]#, [space]; starts an inline comment.
               break;
             }
@@ -243,9 +243,11 @@ impl<'a> LtxParser<'a> {
         }
         Some('\\') if self.opt.enabled_escape => {
           self.bump();
+
           if self.eof() {
-            return self.error(format!("expecting \"{:?}\" but found EOF.", endpoint));
+            return self.error(format!("Expecting \"{:?}\" but found EOF.", endpoint));
           }
+
           match self.ch.unwrap() {
             '0' => result.push('\0'),
             'a' => result.push('\x07'),

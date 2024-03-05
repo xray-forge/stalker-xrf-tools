@@ -756,36 +756,21 @@ a3 = n3
     let input = r"
 [peer]
 foo = a
-bar = b
 
 [peer]
 foo = c
-bar = d
 
 [peer]
 foo = e
-bar = f
 ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(3, ltx.section_all("peer").count());
+    let ltx = Ltx::load_from_str(input);
 
-    let mut iter = ltx.iter();
-    // there is always an empty general section
-    let (k1, p1) = iter.next().unwrap();
-    assert_eq!("peer", k1);
-    assert_eq!(Some("a"), p1.get("foo"));
-    assert_eq!(Some("b"), p1.get("bar"));
-    let (k2, p2) = iter.next().unwrap();
-    assert_eq!("peer", k2);
-    assert_eq!(Some("c"), p2.get("foo"));
-    assert_eq!(Some("d"), p2.get("bar"));
-    let (k3, p3) = iter.next().unwrap();
-    assert_eq!("peer", k3);
-    assert_eq!(Some("e"), p3.get("foo"));
-    assert_eq!(Some("f"), p3.get("bar"));
-
-    assert_eq!(None, iter.next());
+    assert!(ltx.is_err());
+    assert_eq!(
+      ltx.unwrap_err().message,
+      "Duplicate sections are not allowed"
+    );
   }
 
   #[test]
