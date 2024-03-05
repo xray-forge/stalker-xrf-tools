@@ -8,7 +8,8 @@ license = "MIT"
 path = "src/lib.rs"
 
 [dependencies]
-ordered-multimap = "0.7"
+indexmap = "2.2.5"
+fxhash = "0.2.1"
 
 [features]
 default = []

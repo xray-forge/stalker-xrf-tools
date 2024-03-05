@@ -1,13 +1,14 @@
 use crate::file::section_entry::SectionEntry;
 use crate::file::section_setter::SectionSetter;
 use crate::{Properties, ROOT_SECTION};
-use ordered_multimap::ListOrderedMultimap;
+use fxhash::FxBuildHasher;
+use indexmap::IndexMap;
 use std::ops::{Index, IndexMut};
 
 #[derive(Debug, Default, Clone)]
 pub struct Ltx {
   pub(crate) includes: Vec<String>,
-  pub(crate) sections: ListOrderedMultimap<String, Properties>,
+  pub(crate) sections: IndexMap<String, Properties, FxBuildHasher>,
 }
 
 impl Ltx {
@@ -59,22 +60,6 @@ impl Ltx {
     self.sections.get_mut(&name.into())
   }
 
-  /// Get all sections immutable with the same key
-  pub fn section_all<S>(&self, name: S) -> impl DoubleEndedIterator<Item = &Properties>
-  where
-    S: Into<String>,
-  {
-    self.sections.get_all::<String>(&name.into())
-  }
-
-  /// Get all sections mutable with the same key
-  pub fn section_all_mut<S>(&mut self, name: S) -> impl DoubleEndedIterator<Item = &mut Properties>
-  where
-    S: Into<String>,
-  {
-    self.sections.get_all_mut(&name.into())
-  }
-
   pub fn entry(&mut self, name: String) -> SectionEntry<'_> {
     SectionEntry::from(self.sections.entry(name))
   }
@@ -117,7 +102,7 @@ impl Ltx {
     self
       .sections
       .get(&section.into())
-      .and_then(|prop| prop.get(key))
+      .and_then(|props| props.get(key))
   }
 
   /// Get the first value from the sections with key, return the default value if it does not exist
@@ -136,7 +121,7 @@ impl Ltx {
     self
       .sections
       .get_mut(&section.into())
-      .and_then(|prop| prop.get_mut(key))
+      .and_then(|prop| prop.get_mut(key).map(|it| it.as_mut_str()))
   }
 
   /// Delete the first section with key, return the properties if it exists
@@ -144,7 +129,7 @@ impl Ltx {
   where
     S: Into<String>,
   {
-    self.sections.remove(&section.into())
+    self.sections.shift_remove(&section.into())
   }
 
   /// Delete the key from the section, return the value if key exists or None
@@ -157,7 +142,7 @@ impl Ltx {
 
   /// Total sections count
   pub fn len(&self) -> usize {
-    self.sections.keys_len()
+    self.sections.len()
   }
 
   /// Check if object contains no section
@@ -194,7 +179,6 @@ mod test {
   use crate::file::ltx::Ltx;
   use crate::file::parse_options::ParseOptions;
   use crate::file::properties::Properties;
-  use std::string::ParseError;
 
   #[test]
   fn load_from_str_with_empty_general_section() {

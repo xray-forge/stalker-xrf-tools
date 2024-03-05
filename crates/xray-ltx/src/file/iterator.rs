@@ -1,5 +1,5 @@
 use crate::{Ltx, Properties};
-use ordered_multimap::list_ordered_multimap::{IntoIter, Iter, IterMut};
+use indexmap::map::{IntoIter, Iter, IterMut};
 
 pub struct PropertyIter<'a> {
   pub(crate) inner: Iter<'a, String, String>,

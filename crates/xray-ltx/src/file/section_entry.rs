@@ -1,5 +1,5 @@
 use crate::Properties;
-use ordered_multimap::list_ordered_multimap::{Entry, OccupiedEntry, VacantEntry};
+use indexmap::map::{Entry, OccupiedEntry, VacantEntry};
 
 /// A view into a vacant entry in a `Ltx`.
 pub struct SectionVacantEntry<'a> {
@@ -26,15 +26,7 @@ impl<'a> SectionOccupiedEntry<'a> {
 
   /// Append a new section
   pub fn append(&mut self, props: Properties) {
-    self.inner.append(props);
-  }
-
-  pub(crate) fn last_mut(&'a mut self) -> &'a mut Properties {
-    self
-      .inner
-      .iter_mut()
-      .next_back()
-      .expect("occupied section shouldn't have 0 property")
+    self.inner.insert(props);
   }
 }
 

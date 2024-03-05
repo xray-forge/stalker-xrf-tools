@@ -1,12 +1,13 @@
 use crate::file::iterator::{PropertyIter, PropertyIterMut};
-use ordered_multimap::ListOrderedMultimap;
+use fxhash::FxBuildHasher;
+use indexmap::IndexMap;
 use std::ops::Index;
 
 /// Properties type (key-value pairs).
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct Properties {
   pub inherited: Vec<String>,
-  pub data: ListOrderedMultimap<String, String>,
+  pub data: IndexMap<String, String, FxBuildHasher>,
 }
 
 impl Properties {
@@ -17,7 +18,7 @@ impl Properties {
 
   /// Get the number of the properties.
   pub fn len(&self) -> usize {
-    self.data.keys_len()
+    self.data.len()
   }
 
   /// Check if properties has 0 elements.
@@ -54,55 +55,43 @@ impl Properties {
   }
 
   /// Return true if section inherits another section.
-  pub fn inherits_section<S>(&self, section: S) -> bool
+  pub fn inherits_section<S>(&self, parent_section: S) -> bool
   where
     S: Into<String>,
   {
-    self.inherited.contains(&section.into())
+    self.inherited.contains(&parent_section.into())
   }
 
   /// Insert (key, value) pair by replace.
-  pub fn inherit<S>(&mut self, section: S)
+  pub fn inherit<S>(&mut self, parent_section: S)
   where
     S: Into<String>,
   {
-    self.inherited.push(section.into());
+    self.inherited.push(parent_section.into());
   }
 
   /// Append key with (key, value) pair.
-  pub fn append<K, V>(&mut self, k: K, v: V)
+  pub fn append<K, V>(&mut self, key: K, value: V)
   where
     K: Into<String>,
     V: Into<String>,
   {
-    self.data.append(k.into(), v.into());
+    self.data.insert(key.into(), value.into());
   }
 
   /// Get the first value associate with the key.
-  pub fn get<S: Into<String>>(&self, s: S) -> Option<&str> {
-    self.data.get(&s.into()).map(|v| v.as_str())
+  pub fn get<S: Into<String>>(&self, key: S) -> Option<&str> {
+    self.data.get(&key.into()).map(|value| value.as_str())
   }
 
-  /// Get all values associate with the key.
-  pub fn get_all<S: AsRef<str>>(&self, s: S) -> impl DoubleEndedIterator<Item = &str> {
-    self.data.get_all(s.as_ref()).map(|v| v.as_str())
+  /// Get the first value associate with the key.
+  pub fn get_mut<S: Into<String>>(&mut self, key: S) -> Option<&mut String> {
+    self.data.get_mut(&key.into())
   }
 
   /// Remove the property with the first value of the key.
-  pub fn remove<S: AsRef<str>>(&mut self, s: S) -> Option<String> {
-    self.data.remove(s.as_ref())
-  }
-
-  /// Remove the property with all values with the same key.
-  pub fn remove_all<S: AsRef<str>>(
-    &mut self,
-    s: S,
-  ) -> impl DoubleEndedIterator<Item = String> + '_ {
-    self.data.remove_all(s.as_ref())
-  }
-
-  pub fn get_mut<S: AsRef<str>>(&mut self, s: S) -> Option<&mut str> {
-    self.data.get_mut(s.as_ref()).map(|v| v.as_mut_str())
+  pub fn remove<S: AsRef<str>>(&mut self, key: S) -> Option<String> {
+    self.data.shift_remove(key.as_ref())
   }
 }
 
@@ -125,46 +114,29 @@ mod test {
 
   #[test]
   fn property_replace() {
-    let mut props = Properties::new();
+    let mut props: Properties = Properties::new();
+
+    assert_eq!(props.len(), 0);
+
     props.insert("k1", "v1");
 
-    assert_eq!(Some("v1"), props.get("k1"));
-    let res = props.get_all("k1").collect::<Vec<&str>>();
-    assert_eq!(res, vec!["v1"]);
+    assert_eq!(props.len(), 1);
+    assert_eq!(props.get("k1"), Some("v1"));
 
     props.insert("k1", "v2");
-    assert_eq!(Some("v2"), props.get("k1"));
 
-    let res = props.get_all("k1").collect::<Vec<&str>>();
-    assert_eq!(res, vec!["v2"]);
-  }
-
-  #[test]
-  fn property_get_vec() {
-    let mut props = Properties::new();
-    props.append("k1", "v1");
-
-    assert_eq!(Some("v1"), props.get("k1"));
-
-    props.append("k1", "v2");
-
-    assert_eq!(Some("v1"), props.get("k1"));
-
-    let res = props.get_all("k1").collect::<Vec<&str>>();
-    assert_eq!(res, vec!["v1", "v2"]);
-
-    let res = props.get_all("k2").collect::<Vec<&str>>();
-    assert!(res.is_empty());
+    assert_eq!(props.len(), 1);
+    assert_eq!(props.get("k1"), Some("v2"));
   }
 
   #[test]
   fn property_remove() {
     let mut props = Properties::new();
+
     props.append("k1", "v1");
     props.append("k1", "v2");
 
-    let res = props.remove_all("k1").collect::<Vec<String>>();
-    assert_eq!(res, vec!["v1", "v2"]);
+    assert_eq!(props.remove("k1"), Some("v2".into()));
     assert!(!props.contains_key("k1"));
   }
 }

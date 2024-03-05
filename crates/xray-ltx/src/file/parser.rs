@@ -156,9 +156,9 @@ impl<'a> LtxParser<'a> {
                   properties.insert(current_key, value);
                   vacant_entry.insert(properties);
                 }
-                SectionEntry::Occupied(mut occupied_entry) => {
+                SectionEntry::Occupied(occupied_entry) => {
                   // Insert into the last (current) section
-                  occupied_entry.last_mut().append(current_key, value);
+                  occupied_entry.into_mut().append(current_key, value);
                 }
               }
               current_key = String::new();
@@ -176,14 +176,14 @@ impl<'a> LtxParser<'a> {
               SectionEntry::Vacant(vacant_entry) => {
                 let mut properties: Properties = Properties::new();
 
-                for base_name in value.split(',').map(|it| it.trim()) {
+                for base_name in value.split(',').map(|inherited| inherited.trim()) {
                   properties.inherit(base_name);
                 }
 
                 vacant_entry.insert(properties);
               }
-              SectionEntry::Occupied(mut occupied_entry) => {
-                let properties: &mut Properties = occupied_entry.last_mut();
+              SectionEntry::Occupied(occupied_entry) => {
+                let properties: &mut Properties = occupied_entry.into_mut();
 
                 for base_name in value.split(',').map(|it| it.trim()) {
                   properties.inherit(base_name);

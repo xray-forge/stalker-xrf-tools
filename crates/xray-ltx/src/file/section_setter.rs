@@ -28,8 +28,8 @@ impl<'a> SectionSetter<'a> {
 
   /// Delete the first entry in this section with `key`.
   pub fn delete<K: AsRef<str>>(&'a mut self, key: &K) -> &'a mut SectionSetter<'a> {
-    for prop in self.ltx.section_all_mut(self.section_name.clone()) {
-      prop.remove(key);
+    if let Some(props) = self.ltx.section_mut(&self.section_name) {
+      props.remove(key);
     }
 
     self
@@ -40,6 +40,6 @@ impl<'a> SectionSetter<'a> {
     self
       .ltx
       .section(&self.section_name)
-      .and_then(|prop| prop.get(key))
+      .and_then(|props| props.get(key))
   }
 }
