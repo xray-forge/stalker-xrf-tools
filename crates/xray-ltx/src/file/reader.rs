@@ -3,7 +3,7 @@ use crate::file::parser::LtxParser;
 use crate::{Ltx, ParseOptions};
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 impl Ltx {
   /// Load from a string
@@ -23,8 +23,8 @@ impl Ltx {
   }
 
   /// Load from a string with options
-  pub fn load_from_str_opt(buf: &str, opt: ParseOptions) -> Result<Ltx, LtxParseError> {
-    let mut parser = LtxParser::new(buf.chars(), opt);
+  pub fn load_from_str_opt(buf: &str, options: ParseOptions) -> Result<Ltx, LtxParseError> {
+    let mut parser = LtxParser::new(buf.chars(), options);
     parser.parse()
   }
 
@@ -77,10 +77,10 @@ impl Ltx {
     options: ParseOptions,
   ) -> Result<Ltx, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
+      Ok(file) => file,
       Err(error) => {
         return Err(LtxError::Io(error));
       }
-      Ok(r) => r,
     };
 
     let mut with_bom: bool = false;
@@ -97,7 +97,15 @@ impl Ltx {
       reader.seek(SeekFrom::Start(0))?;
     }
 
-    Ltx::read_from_opt(&mut reader, options)
+    match Ltx::read_from_opt(&mut reader, options) {
+      Ok(mut ltx) => {
+        ltx.path = Some(PathBuf::from(filename.as_ref()));
+        ltx.directory = filename.as_ref().parent().map(PathBuf::from);
+
+        Ok(ltx)
+      }
+      Err(error) => Err(error),
+    }
   }
 }
 

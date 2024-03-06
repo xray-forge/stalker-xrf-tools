@@ -1,12 +1,16 @@
+use crate::file::ltx_include::LtxIncludeConvertor;
 use crate::file::section_entry::SectionEntry;
 use crate::file::section_setter::SectionSetter;
-use crate::{Properties, ROOT_SECTION};
+use crate::{LtxError, ParseOptions, Properties, ROOT_SECTION};
 use fxhash::FxBuildHasher;
 use indexmap::IndexMap;
 use std::ops::{Index, IndexMut};
+use std::path::PathBuf;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ltx {
+  pub(crate) path: Option<PathBuf>,
+  pub(crate) directory: Option<PathBuf>,
   pub(crate) includes: Vec<String>,
   pub(crate) sections: IndexMap<String, Properties, FxBuildHasher>,
 }
@@ -15,6 +19,21 @@ impl Ltx {
   /// Create an instance
   pub fn new() -> Ltx {
     Default::default()
+  }
+
+  /// Convert current instance of ltx file into full parsed one.
+  pub fn into_full(self) -> Result<Ltx, LtxError> {
+    LtxIncludeConvertor::convert(self, ParseOptions::default())
+  }
+
+  /// Convert current instance of ltx file into full parsed one.
+  pub fn into_full_opt(self, options: ParseOptions) -> Result<Ltx, LtxError> {
+    LtxIncludeConvertor::convert(self, options)
+  }
+
+  /// Get parent directory of LTX file.
+  pub fn get_directory(&self) -> Option<&PathBuf> {
+    self.directory.as_ref()
   }
 
   /// Set with a specified section, `None` is for the general section
@@ -50,6 +69,14 @@ impl Ltx {
     S: Into<String>,
   {
     self.sections.get(&name.into())
+  }
+
+  /// Check whether ltx has section with name.
+  pub fn has_section<S>(&self, name: S) -> bool
+  where
+    S: Into<String>,
+  {
+    self.sections.contains_key(&name.into())
   }
 
   /// Get a mutable section
@@ -664,22 +691,6 @@ Exec = \"/path/to/exe with space\" arg
     .unwrap();
     let sec = ltx.section("desktop_entry").unwrap();
     assert_eq!(&sec["Exec"], "\"/path/to/exe with space\" arg");
-  }
-
-  #[test]
-  fn wrong_char_case() {
-    let input = "
-[secTION]
-KeY=value
-";
-
-    let ltx = Ltx::load_from_str(input);
-
-    assert!(ltx.is_err());
-    assert_eq!(
-      ltx.unwrap_err().message,
-      "Only lowercase section names are allowed in ltx file, got 'secTION'"
-    );
   }
 
   #[test]

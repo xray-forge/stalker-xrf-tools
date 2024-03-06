@@ -24,9 +24,15 @@ pub fn format_ltx(matches: &ArgMatches) {
     return;
   }
 
-  let ltx: Ltx = ltx.unwrap();
+  let ltx: Ltx = ltx
+    .unwrap()
+    .into_full_opt(ParseOptions {
+      enabled_escape: false,
+      enabled_quote: false,
+    })
+    .unwrap();
 
-  log::info!("Read ini file: {}", ltx.len());
+  log::info!("Read ini file: {} {:?}", ltx.len(), ltx.get_directory());
 
   ltx
     .write_to_file_opt(

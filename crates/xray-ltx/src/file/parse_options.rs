@@ -1,4 +1,5 @@
 /// Parsing configuration.
+#[derive(Clone)]
 pub struct ParseOptions {
   /// Allow quote (`"` or `'`) in value.
   pub enabled_quote: bool,

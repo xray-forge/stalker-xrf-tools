@@ -13,13 +13,13 @@ pub struct LtxParser<'a> {
 }
 
 impl<'a> LtxParser<'a> {
-  pub fn new(rdr: Chars<'a>, opt: ParseOptions) -> LtxParser<'a> {
+  pub fn new(rdr: Chars<'a>, options: ParseOptions) -> LtxParser<'a> {
     let mut parser: LtxParser = LtxParser {
       ch: None,
       line: 0,
       col: 0,
       rdr,
-      opt,
+      opt: options,
     };
 
     parser.bump();
@@ -121,12 +121,6 @@ impl<'a> LtxParser<'a> {
         '[' => match self.parse_section() {
           Ok(section) => {
             current_section = String::from(section[..].trim());
-
-            if current_section.chars().any(char::is_uppercase) {
-              return self.error(format!(
-                "Only lowercase section names are allowed in ltx file, got '{current_section}'"
-              ));
-            }
 
             match ltx.entry(current_section.clone()) {
               SectionEntry::Vacant(vacant_entry) => {
