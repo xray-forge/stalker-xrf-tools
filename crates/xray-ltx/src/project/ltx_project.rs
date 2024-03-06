@@ -1,5 +1,6 @@
+use crate::file::constants::LTX_EXTENSION;
+use crate::file::error::LtxConvertError;
 use crate::{EscapePolicy, Ltx, LtxError, ParseOptions, WriteOptions};
-use std::io;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
@@ -8,30 +9,76 @@ use walkdir::{DirEntry, WalkDir};
 #[derive(Debug)]
 pub struct LtxProject {
   pub root: PathBuf,
+  pub files: Vec<DirEntry>,
   pub entries: Vec<DirEntry>,
 }
 
 impl LtxProject {
-  pub fn on_root(root: &Path) -> io::Result<LtxProject> {
-    let mut entries: Vec<DirEntry> = Vec::new();
+  /// Initialize project on provided root.
+  pub fn on_root(root: &Path) -> Result<LtxProject, LtxError> {
+    let mut files: Vec<DirEntry> = Vec::new();
+    let mut included: Vec<PathBuf> = Vec::new();
 
     for entry in WalkDir::new(root) {
-      let value: DirEntry = entry?;
+      let entry: DirEntry = match entry {
+        Ok(entry) => entry,
+        Err(error) => return Err(LtxError::Io(error.into_io_error().unwrap())),
+      };
 
-      if value.path().extension().is_some_and(|it| it == "ltx") {
-        entries.push(value);
+      let entry_path: &Path = entry.path();
+
+      if entry_path
+        .extension()
+        .is_some_and(|extension| extension == LTX_EXTENSION)
+      {
+        let parent: &Path = match entry_path.parent() {
+          Some(parent) => parent,
+          None => {
+            return Err(LtxConvertError::new_ltx_error(
+              "Failed to parse parent directory of ltx file.",
+            ))
+          }
+        };
+
+        for include in &Ltx::load_includes_from_file_opt(
+          entry.path(),
+          ParseOptions {
+            enabled_quote: false,
+            enabled_escape: false,
+          },
+        )? {
+          let mut included_path: PathBuf = PathBuf::from(parent);
+
+          included_path.push(include);
+
+          included.push(included_path);
+        }
+
+        files.push(entry);
       }
     }
 
+    let entries: Vec<DirEntry> = files
+      .iter()
+      .filter_map(|it| {
+        if included.contains(&PathBuf::from(it.path())) {
+          None
+        } else {
+          Some(it.clone())
+        }
+      })
+      .collect();
+
     Ok(LtxProject {
       root: PathBuf::from(root),
+      files,
       entries,
     })
   }
 
-  pub fn verify_all(&self) -> Result<(), LtxError> {
+  pub fn verify_entries(&self) -> Result<(), LtxError> {
     for entry in &self.entries {
-      println!("Formatting: {:?}", entry.path());
+      println!("Verify: {:?}", entry.path());
 
       let ltx: Ltx = Ltx::load_from_file_full_inherited_opt(
         entry.path(),
@@ -41,7 +88,7 @@ impl LtxProject {
         },
       )?;
 
-      let mut destination = PathBuf::from("target/assets");
+      let mut destination: PathBuf = PathBuf::from("target/assets");
 
       destination.push(entry.file_name());
 
@@ -56,7 +103,8 @@ impl LtxProject {
         .unwrap();
     }
 
-    println!("Formatted {} ltx files", self.entries.len());
+    println!();
+    println!("Verified {} ltx files", self.entries.len());
 
     Ok(())
   }

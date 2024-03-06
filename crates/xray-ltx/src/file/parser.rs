@@ -54,36 +54,6 @@ impl<'a> LtxParser<'a> {
     })
   }
 
-  fn inherit_from_string(&self, value: &str, properties: &mut Properties) {
-    for base_name in value.split(',').map(|inherited| inherited.trim()) {
-      if !base_name.is_empty() {
-        properties.inherit(base_name);
-      }
-    }
-  }
-
-  /// Consume all the white space until the end of the line or a tab.
-  fn parse_whitespace(&mut self) {
-    while let Some(c) = self.ch {
-      if !c.is_whitespace() && c != '\n' && c != '\t' && c != '\r' {
-        break;
-      }
-
-      self.bump();
-    }
-  }
-
-  /// Consume all the white space except line break.
-  fn parse_whitespace_except_line_break(&mut self) {
-    while let Some(c) = self.ch {
-      if (c == '\n' || c == '\r' || !c.is_whitespace()) && c != '\t' {
-        break;
-      }
-
-      self.bump();
-    }
-  }
-
   /// Parse the whole LTX input.
   pub fn parse(&mut self) -> Result<Ltx, LtxParseError> {
     let mut includes_processed: bool = false;
@@ -207,6 +177,86 @@ impl<'a> LtxParser<'a> {
     Ok(ltx)
   }
 
+  /// Parse only include sections from file.
+  pub fn parse_includes(&mut self) -> Result<Vec<String>, LtxParseError> {
+    let mut includes_processed: bool = false;
+    let mut includes: Vec<String> = Vec::new();
+
+    self.parse_whitespace();
+
+    while let Some(current_char) = self.ch {
+      if !includes_processed {
+        includes_processed = current_char != '#' && current_char != ';';
+      }
+
+      match current_char {
+        ';' => {
+          self.parse_comment()?;
+        }
+
+        '#' => {
+          if includes_processed {
+            return self.error(String::from(
+              "Unexpected '#include' statement, all include statements should be part of config heading",
+            ));
+          }
+
+          match self.parse_include() {
+            Ok(value) => {
+              if includes.contains(&value) {
+                return self.error(format!(
+                  "Failed to parse include statement in ltx file, including '{}' more than once",
+                  &value
+                ));
+              } else {
+                includes.push(value)
+              }
+            }
+            Err(error) => return Err(error),
+          }
+        }
+        _ => {
+          return Ok(includes);
+        }
+      }
+
+      self.parse_whitespace();
+    }
+
+    Ok(includes)
+  }
+}
+
+impl<'a> LtxParser<'a> {
+  fn inherit_from_string(&self, value: &str, properties: &mut Properties) {
+    for base_name in value.split(',').map(|inherited| inherited.trim()) {
+      if !base_name.is_empty() {
+        properties.inherit(base_name);
+      }
+    }
+  }
+
+  /// Consume all the white space until the end of the line or a tab.
+  fn parse_whitespace(&mut self) {
+    while let Some(c) = self.ch {
+      if !c.is_whitespace() && c != '\n' && c != '\t' && c != '\r' {
+        break;
+      }
+
+      self.bump();
+    }
+  }
+
+  /// Consume all the white space except line break.
+  fn parse_whitespace_except_line_break(&mut self) {
+    while let Some(c) = self.ch {
+      if (c == '\n' || c == '\r' || !c.is_whitespace()) && c != '\t' {
+        break;
+      }
+
+      self.bump();
+    }
+  }
   fn parse_comment(&mut self) -> Result<String, LtxParseError> {
     self.parse_val()
   }

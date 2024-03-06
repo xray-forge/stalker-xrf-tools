@@ -18,7 +18,7 @@ pub fn verify_ltx(matches: &ArgMatches) {
 fn verify_project_ltx(path: &Path) {
   log::info!("Verifying ltx folder: {:?}", path);
 
-  LtxProject::on_root(path).unwrap().verify_all().unwrap();
+  LtxProject::on_root(path).unwrap().verify_entries().unwrap();
 }
 
 fn verify_single_ltx(path: &Path) {

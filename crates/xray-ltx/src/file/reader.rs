@@ -1,8 +1,9 @@
 use crate::file::error::{LtxError, LtxParseError};
 use crate::file::parser::LtxParser;
+use crate::file::types::LtxIncludes;
 use crate::{Ltx, ParseOptions};
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 
 impl Ltx {
@@ -24,8 +25,7 @@ impl Ltx {
 
   /// Load from a string with options
   pub fn load_from_str_opt(buf: &str, options: ParseOptions) -> Result<Ltx, LtxParseError> {
-    let mut parser = LtxParser::new(buf.chars(), options);
-    parser.parse()
+    LtxParser::new(buf.chars(), options).parse()
   }
 
   /// Load from a reader
@@ -46,10 +46,11 @@ impl Ltx {
 
   /// Load from a reader with options
   pub fn read_from_opt<R: Read>(reader: &mut R, options: ParseOptions) -> Result<Ltx, LtxError> {
-    let mut s = String::new();
-    reader.read_to_string(&mut s).map_err(LtxError::Io)?;
-    let mut parser = LtxParser::new(s.chars(), options);
-    match parser.parse() {
+    let mut data: String = String::new();
+
+    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
+
+    match LtxParser::new(data.chars(), options).parse() {
       Err(e) => Err(LtxError::Parse(e)),
       Ok(success) => Ok(success),
     }
@@ -101,20 +102,6 @@ impl Ltx {
       }
     };
 
-    let mut with_bom: bool = false;
-
-    // Check if file starts with a BOM marker
-    // UTF-8: EF BB BF
-    let mut bom = [0u8; 3];
-    if reader.read_exact(&mut bom).is_ok() && &bom == b"\xEF\xBB\xBF" {
-      with_bom = true;
-    }
-
-    // Reset file pointer
-    if !with_bom {
-      reader.seek(SeekFrom::Start(0))?;
-    }
-
     match Ltx::read_from_opt(&mut reader, options) {
       Ok(mut ltx) => {
         ltx.path = Some(PathBuf::from(filename.as_ref()));
@@ -127,17 +114,74 @@ impl Ltx {
   }
 }
 
+impl Ltx {
+  /// Load include statements from a string.
+  pub fn load_includes_from_str(buf: &str) -> Result<LtxIncludes, LtxParseError> {
+    Ltx::load_includes_from_str_opt(buf, ParseOptions::default())
+  }
+
+  /// Load include statements from a string with options.
+  pub fn load_includes_from_str_opt(
+    buf: &str,
+    options: ParseOptions,
+  ) -> Result<LtxIncludes, LtxParseError> {
+    LtxParser::new(buf.chars(), options).parse_includes()
+  }
+
+  /// Load include statements from a reader.
+  pub fn read_includes_from<R: Read>(reader: &mut R) -> Result<LtxIncludes, LtxError> {
+    Ltx::read_includes_from_opt(reader, ParseOptions::default())
+  }
+
+  /// Load include statements from a reader with options.
+  pub fn read_includes_from_opt<R: Read>(
+    reader: &mut R,
+    options: ParseOptions,
+  ) -> Result<LtxIncludes, LtxError> {
+    let mut data: String = String::new();
+
+    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
+
+    match LtxParser::new(data.chars(), options).parse_includes() {
+      Err(error) => Err(LtxError::Parse(error)),
+      Ok(success) => Ok(success),
+    }
+  }
+
+  /// Load include statements from a file.
+  pub fn load_includes_from_file<P: AsRef<Path>>(filename: P) -> Result<LtxIncludes, LtxError> {
+    Ltx::load_includes_from_file_opt(filename, ParseOptions::default())
+  }
+
+  /// Load include statements from a file with options.
+  pub fn load_includes_from_file_opt<P: AsRef<Path>>(
+    filename: P,
+    options: ParseOptions,
+  ) -> Result<LtxIncludes, LtxError> {
+    let mut reader: File = match File::open(filename.as_ref()) {
+      Ok(file) => file,
+      Err(error) => {
+        return Err(LtxError::Io(error));
+      }
+    };
+
+    Ltx::read_includes_from_opt(&mut reader, options)
+  }
+}
+
 #[cfg(test)]
 mod test {
+  use crate::file::types::LtxIncludes;
   use crate::Ltx;
   use std::env::temp_dir;
   use std::fs::File;
   use std::io::Write;
+  use std::path::PathBuf;
 
   #[test]
-  fn load_from_file_with_bom() {
-    let file_name = temp_dir().join("rust_ini_load_from_file_with_bom");
-    let file_content = b"\xEF\xBB\xBF[test]Key=Value\n";
+  fn load_from_file() {
+    let file_name = temp_dir().join("rust_ini_load_from_file");
+    let file_content = b"[test]Key=Value\n";
 
     {
       let mut file = File::create(&file_name).expect("create");
@@ -149,18 +193,31 @@ mod test {
   }
 
   #[test]
-  fn load_from_file_without_bom() {
-    let file_name = temp_dir().join("rust_ini_load_from_file_without_bom");
-
+  fn load_no_includes_from_file() {
+    let file_name: PathBuf = temp_dir().join("rust_ini_load_no_includes");
     let file_content = b"[test]Key=Value\n";
 
     {
-      let mut file = File::create(&file_name).expect("create");
+      let mut file: File = File::create(&file_name).expect("create");
       file.write_all(file_content).expect("write");
     }
 
-    let ltx: Ltx = Ltx::load_from_file(&file_name).unwrap();
-    assert_eq!(ltx.get_from("test", "Key"), Some("Value"));
+    let includes: LtxIncludes = Ltx::load_includes_from_file(&file_name).unwrap();
+    assert_eq!(includes, Vec::<String>::new());
+  }
+
+  #[test]
+  fn load_few_includes_from_file() {
+    let file_name: PathBuf = temp_dir().join("rust_ini_load_from_file_without_bom");
+    let file_content = b"#include \"first.ltx\"\n;commented\n#include \"second.ltx\"";
+
+    {
+      let mut file: File = File::create(&file_name).expect("create");
+      file.write_all(file_content).expect("write");
+    }
+
+    let includes: LtxIncludes = Ltx::load_includes_from_file(&file_name).unwrap();
+    assert_eq!(includes, vec!("first.ltx", "second.ltx"));
   }
 
   #[test]

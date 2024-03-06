@@ -2,7 +2,7 @@ use crate::file::ltx_include::LtxIncludeConvertor;
 use crate::file::ltx_inherit::LtxInheritConvertor;
 use crate::file::section_entry::SectionEntry;
 use crate::file::section_setter::SectionSetter;
-use crate::file::types::LtxSections;
+use crate::file::types::{LtxIncludes, LtxSections};
 use crate::{LtxError, ParseOptions, Properties, ROOT_SECTION};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
@@ -11,12 +11,12 @@ use std::path::PathBuf;
 pub struct Ltx {
   pub(crate) path: Option<PathBuf>,
   pub(crate) directory: Option<PathBuf>,
-  pub(crate) includes: Vec<String>,
+  pub(crate) includes: LtxIncludes,
   pub(crate) sections: LtxSections,
 }
 
 impl Ltx {
-  /// Create an instance
+  /// Create an instance.
   pub fn new() -> Ltx {
     Default::default()
   }
