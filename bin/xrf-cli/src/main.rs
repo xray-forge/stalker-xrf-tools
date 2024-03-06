@@ -7,6 +7,7 @@ use crate::commands::repack_spawn_file::repack_spawn_file;
 use crate::commands::setup::setup_commands;
 use crate::commands::unpack_archive::unpack_archive;
 use crate::commands::unpack_spawn_file::unpack_spawn_file;
+use crate::commands::verify_ltx::verify_ltx;
 use crate::commands::verify_spawn_file::verify_spawn_file;
 use std::env;
 
@@ -21,6 +22,7 @@ fn main() {
     Some(("pack-spawn", matches)) => pack_spawn_file(matches).unwrap(),
     Some(("unpack-archive", matches)) => unpack_archive(matches),
     Some(("format-ltx", matches)) => format_ltx(matches),
+    Some(("verify-ltx", matches)) => verify_ltx(matches),
     _ => panic!("Unexpected cli command provided, check --help for details"),
   };
 }

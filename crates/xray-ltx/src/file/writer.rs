@@ -1,4 +1,4 @@
-use crate::file::escape_policy::escape_str;
+use crate::file::configuration::escape_policy::escape_str;
 use crate::{EscapePolicy, Ltx, WriteOptions, ROOT_SECTION};
 use std::fs::OpenOptions;
 use std::io;
@@ -112,7 +112,7 @@ impl Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::file::line_separator::{LineSeparator, DEFAULT_LINE_SEPARATOR};
+  use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_LINE_SEPARATOR};
   use crate::{EscapePolicy, Ltx, WriteOptions, ROOT_SECTION};
 
   #[test]

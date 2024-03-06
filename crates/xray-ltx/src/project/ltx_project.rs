@@ -3,6 +3,8 @@ use std::io;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
+/// Handler of LTX configs root.
+/// Iteration and filtering of de-duplicated ini files.
 #[derive(Debug)]
 pub struct LtxProject {
   pub root: PathBuf,
@@ -27,11 +29,11 @@ impl LtxProject {
     })
   }
 
-  pub fn format_all(&self) -> Result<(), LtxError> {
+  pub fn verify_all(&self) -> Result<(), LtxError> {
     for entry in &self.entries {
       println!("Formatting: {:?}", entry.path());
 
-      let ltx: Ltx = Ltx::load_from_file_full_opt(
+      let ltx: Ltx = Ltx::load_from_file_full_inherited_opt(
         entry.path(),
         ParseOptions {
           enabled_escape: false,

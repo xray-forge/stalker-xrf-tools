@@ -125,4 +125,24 @@ pub fn setup_commands() -> Command {
             .value_parser(value_parser!(String)),
         ),
     )
+    .subcommand(
+      Command::new("verify-ltx")
+        .about("Command to verification ltx and ini files")
+        .arg(
+          Arg::new("path")
+            .help("Path to ltx file or folder with ltx files")
+            .short('p')
+            .long("path")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("filter")
+            .help("Path or mask to include in formatting (works with folders as path)")
+            .short('f')
+            .long("filter")
+            .required(false)
+            .value_parser(value_parser!(String)),
+        ),
+    )
 }

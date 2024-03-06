@@ -1,9 +1,9 @@
 use crate::file::ltx_include::LtxIncludeConvertor;
+use crate::file::ltx_inherit::LtxInheritConvertor;
 use crate::file::section_entry::SectionEntry;
 use crate::file::section_setter::SectionSetter;
+use crate::file::types::LtxSections;
 use crate::{LtxError, ParseOptions, Properties, ROOT_SECTION};
-use fxhash::FxBuildHasher;
-use indexmap::IndexMap;
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
 
@@ -12,7 +12,7 @@ pub struct Ltx {
   pub(crate) path: Option<PathBuf>,
   pub(crate) directory: Option<PathBuf>,
   pub(crate) includes: Vec<String>,
-  pub(crate) sections: IndexMap<String, Properties, FxBuildHasher>,
+  pub(crate) sections: LtxSections,
 }
 
 impl Ltx {
@@ -22,13 +22,18 @@ impl Ltx {
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_full(self) -> Result<Ltx, LtxError> {
+  pub fn into_included(self) -> Result<Ltx, LtxError> {
     LtxIncludeConvertor::convert(self, ParseOptions::default())
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_full_opt(self, options: ParseOptions) -> Result<Ltx, LtxError> {
+  pub fn into_included_opt(self, options: ParseOptions) -> Result<Ltx, LtxError> {
     LtxIncludeConvertor::convert(self, options)
+  }
+
+  /// Convert current instance of ltx file into full parsed one.
+  pub fn into_inherited(self) -> Result<Ltx, LtxError> {
+    LtxInheritConvertor::convert(self)
   }
 
   /// Get parent directory of LTX file.
@@ -200,12 +205,12 @@ impl<'q> IndexMut<&'q str> for Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::file::constants::ROOT_SECTION;
+  use crate::file::configuration::escape_policy::escape_str;
+  use crate::file::configuration::parse_options::ParseOptions;
   use crate::file::error::LtxParseError;
-  use crate::file::escape_policy::{escape_str, EscapePolicy};
   use crate::file::ltx::Ltx;
-  use crate::file::parse_options::ParseOptions;
   use crate::file::properties::Properties;
+  use crate::{EscapePolicy, ROOT_SECTION};
 
   #[test]
   fn load_from_str_with_empty_general_section() {
@@ -344,6 +349,19 @@ key = value ; comment
     assert!(properties.inherits_section("base2"));
     assert!(properties.inherits_section("base3"));
     assert!(!properties.inherits_section("base4"));
+  }
+
+  #[test]
+  fn inherited_empty() {
+    let input = "
+[section_name]: ,,
+name = hello
+";
+
+    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let properties: &Properties = ltx.section("section_name").expect("Existing section");
+
+    assert_eq!(properties.inherited.len(), 0);
   }
 
   #[test]
@@ -587,13 +605,15 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn load_from_str_with_crlf() {
     let input: &str = "key1=val1\r\nkey2=val2\r\n";
-    let opt = Ltx::load_from_str(input);
-    assert!(opt.is_ok());
+    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
 
-    let output = opt.unwrap();
-    assert_eq!(output.len(), 1);
-    assert!(output.section(ROOT_SECTION).is_some());
-    let sec1 = output.section(ROOT_SECTION).unwrap();
+    assert!(ltx.is_ok());
+
+    let ltx: Ltx = ltx.unwrap();
+    assert_eq!(ltx.len(), 1);
+    assert!(ltx.section(ROOT_SECTION).is_some());
+
+    let sec1: &Properties = ltx.section(ROOT_SECTION).unwrap();
     assert_eq!(sec1.len(), 2);
     let key1: String = "key1".into();
     assert!(sec1.contains_key(&key1));

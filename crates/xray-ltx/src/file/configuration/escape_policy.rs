@@ -95,6 +95,7 @@ impl EscapePolicy {
 // * `\x????` Unicode character with hexadecimal code point corresponding to ????
 pub fn escape_str(s: &str, policy: EscapePolicy) -> String {
   let mut escaped: String = String::with_capacity(s.len());
+
   for c in s.chars() {
     // if we know this is not something to escape as per policy, we just write it and continue.
     if !policy.should_escape(c) {

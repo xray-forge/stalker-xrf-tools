@@ -54,6 +54,14 @@ impl<'a> LtxParser<'a> {
     })
   }
 
+  fn inherit_from_string(&self, value: &str, properties: &mut Properties) {
+    for base_name in value.split(',').map(|inherited| inherited.trim()) {
+      if !base_name.is_empty() {
+        properties.inherit(base_name);
+      }
+    }
+  }
+
   /// Consume all the white space until the end of the line or a tab.
   fn parse_whitespace(&mut self) {
     while let Some(c) = self.ch {
@@ -172,18 +180,12 @@ impl<'a> LtxParser<'a> {
               SectionEntry::Vacant(vacant_entry) => {
                 let mut properties: Properties = Properties::new();
 
-                for base_name in value.split(',').map(|inherited| inherited.trim()) {
-                  properties.inherit(base_name);
-                }
+                self.inherit_from_string(&value, &mut properties);
 
                 vacant_entry.insert(properties);
               }
               SectionEntry::Occupied(occupied_entry) => {
-                let properties: &mut Properties = occupied_entry.into_mut();
-
-                for base_name in value.split(',').map(|it| it.trim()) {
-                  properties.inherit(base_name);
-                }
+                self.inherit_from_string(&value, occupied_entry.into_mut());
               }
             }
             current_key = String::new();

@@ -1,13 +1,12 @@
 use crate::file::iterator::{PropertyIter, PropertyIterMut};
-use fxhash::FxBuildHasher;
-use indexmap::IndexMap;
+use crate::file::types::PropertiesData;
 use std::ops::Index;
 
 /// Properties type (key-value pairs).
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct Properties {
   pub inherited: Vec<String>,
-  pub data: IndexMap<String, String, FxBuildHasher>,
+  pub data: PropertiesData,
 }
 
 impl Properties {

@@ -17,6 +17,7 @@ Set of utility tools to assist with xray engine mods development and debugging.
 - verify-spawn
 - unpack-archive
 - format-ltx
+- verify-ltx
 
 ### Todo
 

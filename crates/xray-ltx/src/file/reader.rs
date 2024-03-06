@@ -72,11 +72,21 @@ impl Ltx {
   }
 
   /// Load from a file with options
+  pub fn load_from_file_full_inherited_opt<P: AsRef<Path>>(
+    filename: P,
+    options: ParseOptions,
+  ) -> Result<Ltx, LtxError> {
+    Ltx::load_from_file_opt(filename, options.clone())?
+      .into_included_opt(options)?
+      .into_inherited()
+  }
+
+  /// Load from a file with options
   pub fn load_from_file_full_opt<P: AsRef<Path>>(
     filename: P,
     options: ParseOptions,
   ) -> Result<Ltx, LtxError> {
-    Ltx::load_from_file_opt(filename, options.clone())?.into_full_opt(options)
+    Ltx::load_from_file_opt(filename, options.clone())?.into_included_opt(options)
   }
 
   /// Load from a file with options

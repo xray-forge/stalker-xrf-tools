@@ -1,4 +1,4 @@
-use crate::file::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
+use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
 use crate::EscapePolicy;
 
 #[derive(Debug, Clone)]
