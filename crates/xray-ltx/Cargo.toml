@@ -8,8 +8,6 @@ license = "MIT"
 path = "src/lib.rs"
 
 [dependencies]
-indexmap = "2.2.5"
 fxhash = "0.2.1"
-
-[features]
-default = []
+indexmap = "2.2.5"
+walkdir = "2.5.0"

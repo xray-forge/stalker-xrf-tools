@@ -87,8 +87,10 @@ impl<'a> LtxParser<'a> {
     self.parse_whitespace();
 
     while let Some(current_char) = self.ch {
+      // Allow includes declaration header.
+      // Allow writing comments before
       if !includes_processed {
-        includes_processed = current_char != '#';
+        includes_processed = current_char != '#' && current_char != ';';
       }
 
       match current_char {

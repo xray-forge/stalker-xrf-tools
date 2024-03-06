@@ -349,8 +349,11 @@ key = value ; comment
   #[test]
   fn includes() {
     let input = "
+; comment line 1 before
+; comment line 2 before
 #include \"file1.ltx\"
 #include \"file2.ltx\"
+; comment line between
 #include \"file3.ltx\"
 
 [section_name]: base1, base2

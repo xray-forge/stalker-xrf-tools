@@ -4508,6 +4508,7 @@ version = "0.1.0"
 dependencies = [
  "fxhash",
  "indexmap 2.2.5",
+ "walkdir",
 ]
 
 [[package]]

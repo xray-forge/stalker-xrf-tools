@@ -8,3 +8,4 @@ pub use crate::file::ltx::Ltx;
 pub use crate::file::parse_options::ParseOptions;
 pub use crate::file::properties::Properties;
 pub use crate::file::write_options::WriteOptions;
+pub use crate::project::ltx_project::LtxProject;

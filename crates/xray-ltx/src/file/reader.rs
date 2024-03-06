@@ -45,10 +45,10 @@ impl Ltx {
   }
 
   /// Load from a reader with options
-  pub fn read_from_opt<R: Read>(reader: &mut R, opt: ParseOptions) -> Result<Ltx, LtxError> {
+  pub fn read_from_opt<R: Read>(reader: &mut R, options: ParseOptions) -> Result<Ltx, LtxError> {
     let mut s = String::new();
     reader.read_to_string(&mut s).map_err(LtxError::Io)?;
-    let mut parser = LtxParser::new(s.chars(), opt);
+    let mut parser = LtxParser::new(s.chars(), options);
     match parser.parse() {
       Err(e) => Err(LtxError::Parse(e)),
       Ok(success) => Ok(success),
@@ -69,6 +69,14 @@ impl Ltx {
         ..ParseOptions::default()
       },
     )
+  }
+
+  /// Load from a file with options
+  pub fn load_from_file_full_opt<P: AsRef<Path>>(
+    filename: P,
+    options: ParseOptions,
+  ) -> Result<Ltx, LtxError> {
+    Ltx::load_from_file_opt(filename, options.clone())?.into_full_opt(options)
   }
 
   /// Load from a file with options

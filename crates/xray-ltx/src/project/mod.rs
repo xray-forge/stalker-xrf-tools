@@ -1,1 +1,1 @@
-mod ltx_project;
+pub mod ltx_project;

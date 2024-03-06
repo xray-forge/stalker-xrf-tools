@@ -81,7 +81,7 @@ impl LtxIncludeConvertor {
       }
     };
 
-    for (key, value) in ltx.into_full()?.sections {
+    for (key, value) in ltx.into_full_opt(options)?.sections {
       if into.has_section(key.clone()) {
         return Err(LtxConvertError::new_ltx_error(format!(
           "Failed to include ltx file '{:?}' in {:?}, duplicate section {key} found",

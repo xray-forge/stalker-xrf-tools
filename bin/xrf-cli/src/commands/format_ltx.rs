@@ -1,6 +1,6 @@
 use clap::ArgMatches;
-use std::path::PathBuf;
-use xray_ltx::{EscapePolicy, Ltx, LtxError, ParseOptions, WriteOptions};
+use std::path::{Path, PathBuf};
+use xray_ltx::{EscapePolicy, Ltx, LtxError, LtxProject, ParseOptions, WriteOptions};
 
 /// Lint ltx file or folder based on provided arguments.
 pub fn format_ltx(matches: &ArgMatches) {
@@ -8,7 +8,21 @@ pub fn format_ltx(matches: &ArgMatches) {
     .get_one::<PathBuf>("path")
     .expect("Expected valid input path to be provided");
 
-  log::info!("Formatting ltx: {:?}", path);
+  if path.is_dir() {
+    format_project_ltx(path)
+  } else {
+    format_single_ltx(path)
+  }
+}
+
+fn format_project_ltx(path: &Path) {
+  log::info!("Formatting ltx folder: {:?}", path);
+
+  LtxProject::on_root(path).unwrap().format_all().unwrap();
+}
+
+fn format_single_ltx(path: &Path) {
+  log::info!("Formatting ltx file: {:?}", path);
 
   let ltx: Result<Ltx, LtxError> = Ltx::load_from_file_opt(
     path,
@@ -36,7 +50,7 @@ pub fn format_ltx(matches: &ArgMatches) {
 
   ltx
     .write_to_file_opt(
-      "test.ltx",
+      "target/assets/test.ltx",
       WriteOptions {
         escape_policy: EscapePolicy::Nothing,
         ..Default::default()
