@@ -1,6 +1,9 @@
 pub(crate) mod file;
 pub(crate) mod project;
 
+#[cfg(test)]
+pub mod test;
+
 pub use crate::file::configuration::escape_policy::EscapePolicy;
 pub use crate::file::configuration::parse_options::ParseOptions;
 pub use crate::file::configuration::write_options::WriteOptions;

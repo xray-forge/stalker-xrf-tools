@@ -1,9 +1,9 @@
 use crate::file::error::LtxParseError;
 use crate::file::section_entry::SectionEntry;
-use crate::{Ltx, ParseOptions, Properties, ROOT_SECTION};
+use crate::{Ltx, ParseOptions, Properties, WriteOptions, ROOT_SECTION};
 use std::str::Chars;
 
-// Ltx parser.
+/// Ltx parser.
 pub struct LtxParser<'a> {
   ch: Option<char>,
   rdr: Chars<'a>,
@@ -66,7 +66,7 @@ impl<'a> LtxParser<'a> {
 
     while let Some(current_char) = self.ch {
       // Allow includes declaration header.
-      // Allow writing comments before
+      // Allow writing comments before.
       if !includes_processed {
         includes_processed = current_char != '#' && current_char != ';';
       }
@@ -119,7 +119,7 @@ impl<'a> LtxParser<'a> {
             return self.error("Missing key when parsing '=' in ltx file");
           }
 
-          match self.parse_val() {
+          match self.parse_val(true) {
             Ok(value) => {
               let value: String = value[..].trim().to_owned();
 
@@ -142,7 +142,7 @@ impl<'a> LtxParser<'a> {
         }
 
         // Parsing of inherited sections.
-        ':' => match self.parse_val() {
+        ':' => match self.parse_val(true) {
           Ok(value) => {
             let value: String = value[..].trim().to_owned();
 
@@ -175,6 +175,114 @@ impl<'a> LtxParser<'a> {
     }
 
     Ok(ltx)
+  }
+
+  /// Parse the whole LTX input and reformat as string.
+  pub fn parse_into_formatted_opt(
+    &mut self,
+    write_options: WriteOptions,
+  ) -> Result<String, LtxParseError> {
+    let mut formatted: String = String::new();
+
+    let mut need_new_line: bool = false;
+    let mut need_value: bool = false;
+
+    self.parse_whitespace();
+
+    while let Some(current_char) = self.ch {
+      if need_new_line {
+        need_new_line = false;
+
+        if current_char != ':' {
+          formatted.push_str(write_options.line_separator.as_str());
+        }
+      }
+
+      // Handle single key rows.
+      if need_value {
+        need_value = false;
+
+        if current_char != '=' {
+          formatted.push_str(write_options.line_separator.as_str());
+        }
+      }
+
+      match current_char {
+        ';' => {
+          need_new_line = true;
+          formatted.push_str(&format!("; {}", self.parse_comment()?,));
+        }
+
+        '#' => match self.parse_include() {
+          Ok(value) => {
+            need_new_line = true;
+            formatted.push_str(&format!("#include \"{value}\""));
+          }
+          Err(error) => return Err(error),
+        },
+
+        '[' => match self.parse_section() {
+          Ok(section) => {
+            if !formatted.is_empty() {
+              formatted.push_str(write_options.line_separator.as_str())
+            }
+
+            formatted.push_str(&format!("[{}]", section[..].trim()));
+            need_new_line = true;
+          }
+          Err(error) => return Err(error),
+        },
+
+        '=' => match self.parse_val(false) {
+          Ok(value) => {
+            let value: &str = value.trim();
+
+            if value.is_empty() {
+              formatted.push_str(" =");
+            } else {
+              formatted.push_str(&format!(
+                " = {}",
+                value
+                  .split(';')
+                  .map(|it| it.trim())
+                  .collect::<Vec<&str>>()
+                  .join(" ; ")
+              ));
+            }
+
+            need_new_line = true;
+          }
+          Err(error) => return Err(error),
+        },
+
+        // Parsing of inherited sections.
+        ':' => match self.parse_val(true) {
+          Ok(value) => {
+            let sections = &value.split(',').map(|it| it.trim()).collect::<Vec<&str>>();
+
+            if !sections.is_empty() {
+              need_new_line = true;
+              formatted.push_str(&format!(":{}", &sections.join(",").to_string(),));
+            }
+          }
+          Err(error) => return Err(error),
+        },
+
+        _ => match self.parse_key() {
+          Ok(key) => {
+            need_value = true;
+            formatted.push_str(key.trim());
+          }
+          Err(error) => return Err(error),
+        },
+      }
+
+      self.parse_whitespace();
+    }
+
+    formatted.push_str(write_options.line_separator.as_str());
+
+    Ok(formatted)
   }
 
   /// Parse only include sections from file.
@@ -257,8 +365,9 @@ impl<'a> LtxParser<'a> {
       self.bump();
     }
   }
+
   fn parse_comment(&mut self) -> Result<String, LtxParseError> {
-    self.parse_val()
+    self.parse_val(true)
   }
 
   fn parse_str_until(
@@ -369,9 +478,9 @@ impl<'a> LtxParser<'a> {
     self.parse_str_until(&[Some('='), Some('\n')], false)
   }
 
-  fn parse_val(&mut self) -> Result<String, LtxParseError> {
+  fn parse_val(&mut self, check_inline_comment: bool) -> Result<String, LtxParseError> {
     self.bump();
-    // Issue #35: Allow empty value
+    // Allow empty value.
     self.parse_whitespace_except_line_break();
 
     match self.ch {
@@ -381,7 +490,9 @@ impl<'a> LtxParser<'a> {
         self.parse_str_until(&[Some('"')], false).and_then(|s| {
           self.bump(); // Eats the last "
                        // Parse until EOL
-          self.parse_str_until_eol(true).map(|x| s + &x)
+          self
+            .parse_str_until_eol(check_inline_comment)
+            .map(|x| s + &x)
         })
       }
       Some('\'') if self.opt.enabled_quote => {
@@ -389,15 +500,17 @@ impl<'a> LtxParser<'a> {
         self.parse_str_until(&[Some('\'')], false).and_then(|s| {
           self.bump(); // Eats the last '
                        // Parse until EOL
-          self.parse_str_until_eol(true).map(|x| s + &x)
+          self
+            .parse_str_until_eol(check_inline_comment)
+            .map(|x| s + &x)
         })
       }
-      _ => self.parse_str_until_eol(true),
+      _ => self.parse_str_until_eol(check_inline_comment),
     }
   }
 
   fn parse_include(&mut self) -> Result<String, LtxParseError> {
-    let value: String = self.parse_val()?[..].trim().to_owned();
+    let value: String = self.parse_val(true)?[..].trim().to_owned();
 
     if !value.starts_with("include \"") || !value.ends_with('\"') {
       return self.error(format!(

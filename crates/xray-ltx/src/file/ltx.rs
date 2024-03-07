@@ -658,20 +658,6 @@ Key = 'Value   # This is not a comment ; at all'
   }
 
   #[test]
-  fn load_from_str_noescape() {
-    let input: &str = "path=C:\\Windows\\Some\\Folder\\";
-    let opt = Ltx::load_from_str_noescape(input);
-    assert!(opt.is_ok());
-
-    let output = opt.unwrap();
-    assert_eq!(output.len(), 1);
-    let sec = output.section(ROOT_SECTION).unwrap();
-    assert_eq!(sec.len(), 1);
-    assert!(sec.contains_key("path"));
-    assert_eq!(&sec["path"], "C:\\Windows\\Some\\Folder\\");
-  }
-
-  #[test]
   fn partial_quoting_double() {
     let input: &str = "
 [section]
