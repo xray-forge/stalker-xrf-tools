@@ -2,7 +2,7 @@ use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife_object_base::AlifeObjectBase;
-use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
+use crate::export::file::{create_export_file, open_ini_config};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
@@ -98,16 +98,13 @@ impl ALifeSpawnsChunk {
 
   /// Export alife spawns data into provided path.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let mut config: Ltx = Ltx::new();
+    let mut ltx: Ltx = Ltx::new();
 
     for object in &self.objects {
-      object.export(&object.index.to_string(), &mut config);
+      object.export(&object.index.to_string(), &mut ltx);
     }
 
-    export_ini_to_file(
-      &config,
-      &mut create_export_file(&path.join("alife_spawns.ltx"))?,
-    )?;
+    ltx.write_to(&mut create_export_file(&path.join("alife_spawns.ltx"))?)?;
 
     log::info!("Exported alife spawns chunk");
 

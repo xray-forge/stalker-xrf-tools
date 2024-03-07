@@ -1,6 +1,6 @@
-use crate::file::constants::LTX_EXTENSION;
+use crate::file::configuration::constants::LTX_EXTENSION;
 use crate::file::error::LtxConvertError;
-use crate::{EscapePolicy, Ltx, LtxError, WriteOptions};
+use crate::{Ltx, LtxError};
 use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
@@ -92,15 +92,7 @@ impl LtxProject {
 
       destination.push(entry.file_name());
 
-      ltx
-        .write_to_file_opt(
-          destination,
-          WriteOptions {
-            escape_policy: EscapePolicy::Nothing,
-            ..Default::default()
-          },
-        )
-        .unwrap();
+      ltx.write_to_file(destination)?
     }
 
     println!();
@@ -124,30 +116,17 @@ impl LtxProject {
 
   /// Format single LTX file by provided path
   pub fn format_file(path: &Path) -> Result<(), LtxError> {
-    let formatted: String = Ltx::format_from_file_opt(
-      path,
-      WriteOptions {
-        escape_policy: EscapePolicy::Nothing,
-        ..Default::default()
-      },
-    )?;
-
-    fs::write(path, formatted).map_err(LtxError::Io)
+    fs::write(path, Ltx::format_from_file(path)?).map_err(LtxError::Io)
   }
 
   /// Format single LTX file by provided path
   pub fn verify_file(path: &Path) -> Result<(), LtxError> {
     let ltx: Ltx = Ltx::load_from_file(path)?;
 
-    let ltx: Ltx = ltx.into_included().unwrap().into_inherited().unwrap();
-
-    ltx.write_to_file_opt(
-      "target/assets/test.ltx",
-      WriteOptions {
-        escape_policy: EscapePolicy::Nothing,
-        ..Default::default()
-      },
-    )?;
+    ltx
+      .into_included()?
+      .into_inherited()?
+      .write_to_file("target/assets/test.ltx")?;
 
     Ok(())
   }

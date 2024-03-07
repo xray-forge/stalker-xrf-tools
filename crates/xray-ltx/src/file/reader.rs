@@ -1,7 +1,7 @@
 use crate::file::error::{LtxError, LtxParseError};
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncludes;
-use crate::{Ltx, WriteOptions};
+use crate::Ltx;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -105,38 +105,24 @@ impl Ltx {
 
 impl Ltx {
   /// Load from a string with options.
-  pub fn format_from_str_opt(
-    buf: &str,
-    write_options: WriteOptions,
-  ) -> Result<String, LtxParseError> {
-    LtxParser::new(buf.chars()).parse_into_formatted_opt(write_options)
-  }
-
-  /// Load from a string.
   pub fn format_from_str(buf: &str) -> Result<String, LtxParseError> {
-    Ltx::format_from_str_opt(buf, WriteOptions::default())
+    LtxParser::new(buf.chars()).parse_into_formatted()
   }
 
   /// Load from a reader with options.
-  pub fn format_from_opt<R: Read>(
-    reader: &mut R,
-    write_options: WriteOptions,
-  ) -> Result<String, LtxError> {
+  pub fn format_from<R: Read>(reader: &mut R) -> Result<String, LtxError> {
     let mut data: String = String::new();
 
     reader.read_to_string(&mut data).map_err(LtxError::Io)?;
 
-    match LtxParser::new(data.chars()).parse_into_formatted_opt(write_options) {
+    match LtxParser::new(data.chars()).parse_into_formatted() {
       Err(e) => Err(LtxError::Parse(e)),
       Ok(success) => Ok(success),
     }
   }
 
   /// Load from a file with options
-  pub fn format_from_file_opt<P: AsRef<Path>>(
-    filename: P,
-    write_options: WriteOptions,
-  ) -> Result<String, LtxError> {
+  pub fn format_from_file<P: AsRef<Path>>(filename: P) -> Result<String, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
       Ok(file) => file,
       Err(error) => {
@@ -144,17 +130,16 @@ impl Ltx {
       }
     };
 
-    Ltx::format_from_opt(&mut reader, write_options)
+    Ltx::format_from(&mut reader)
   }
 }
 
 #[cfg(test)]
 mod test {
-  use crate::file::configuration::line_separator::LineSeparator;
   use crate::file::types::LtxIncludes;
   use crate::test::file::read_file_as_string;
   use crate::test::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
-  use crate::{EscapePolicy, Ltx, WriteOptions};
+  use crate::Ltx;
   use std::env::temp_dir;
   use std::fs::File;
   use std::io::Write;
@@ -176,15 +161,8 @@ mod test {
 
   #[test]
   fn format_from_file_one() {
-    let formatted: String = Ltx::format_from_file_opt(
-      get_absolute_test_file_path(file!(), "not_formatted_1.ltx"),
-      WriteOptions {
-        escape_policy: EscapePolicy::Nothing,
-        line_separator: LineSeparator::SystemDefault,
-        ..Default::default()
-      },
-    )
-    .unwrap();
+    let formatted: String =
+      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_1.ltx")).unwrap();
 
     let expected: String = read_file_as_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_1.ltx").unwrap(),
@@ -196,15 +174,8 @@ mod test {
 
   #[test]
   fn format_from_file_two() {
-    let formatted: String = Ltx::format_from_file_opt(
-      get_absolute_test_file_path(file!(), "not_formatted_2.ltx"),
-      WriteOptions {
-        escape_policy: EscapePolicy::Nothing,
-        line_separator: LineSeparator::SystemDefault,
-        ..Default::default()
-      },
-    )
-    .unwrap();
+    let formatted: String =
+      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_2.ltx")).unwrap();
 
     let expected: String = read_file_as_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_2.ltx").unwrap(),

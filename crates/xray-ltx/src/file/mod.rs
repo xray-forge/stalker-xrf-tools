@@ -1,5 +1,4 @@
 pub(crate) mod configuration;
-pub(crate) mod constants;
 pub(crate) mod error;
 pub(crate) mod iterator;
 pub(crate) mod ltx;

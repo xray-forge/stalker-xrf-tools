@@ -1,6 +1,6 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
+use crate::export::file::{create_export_file, open_ini_config};
 use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -76,9 +76,9 @@ impl HeaderChunk {
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
-    let mut config: Ltx = Ltx::new();
+    let mut ltx: Ltx = Ltx::new();
 
-    config
+    ltx
       .with_section("header")
       .set("version", self.version.to_string())
       .set("guid", self.guid.to_string())
@@ -86,7 +86,7 @@ impl HeaderChunk {
       .set("objects", self.objects_count.to_string())
       .set("level_count", self.levels_count.to_string());
 
-    export_ini_to_file(&config, &mut create_export_file(&path.join("header.ltx"))?)?;
+    ltx.write_to(&mut create_export_file(&path.join("header.ltx"))?)?;
 
     log::info!("Exported header chunk");
 

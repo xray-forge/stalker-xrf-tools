@@ -1,6 +1,7 @@
+use crate::file::configuration::line_separator::LineSeparator;
 use crate::file::error::LtxParseError;
 use crate::file::section_entry::SectionEntry;
-use crate::{Ltx, Properties, WriteOptions, ROOT_SECTION};
+use crate::{Ltx, Properties, ROOT_SECTION};
 use std::str::Chars;
 
 /// Ltx parser.
@@ -172,10 +173,7 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse the whole LTX input and reformat as string.
-  pub fn parse_into_formatted_opt(
-    &mut self,
-    write_options: WriteOptions,
-  ) -> Result<String, LtxParseError> {
+  pub fn parse_into_formatted(&mut self) -> Result<String, LtxParseError> {
     let mut formatted: String = String::new();
 
     let mut need_new_line: bool = false;
@@ -188,7 +186,7 @@ impl<'a> LtxParser<'a> {
         need_new_line = false;
 
         if current_char != ':' {
-          formatted.push_str(write_options.line_separator.as_str());
+          formatted.push_str(LineSeparator::CRLF.as_str());
         }
       }
 
@@ -197,7 +195,7 @@ impl<'a> LtxParser<'a> {
         need_value = false;
 
         if current_char != '=' {
-          formatted.push_str(write_options.line_separator.as_str());
+          formatted.push_str(LineSeparator::CRLF.as_str());
         }
       }
 
@@ -218,7 +216,7 @@ impl<'a> LtxParser<'a> {
         '[' => match self.parse_section() {
           Ok(section) => {
             if !formatted.is_empty() {
-              formatted.push_str(write_options.line_separator.as_str())
+              formatted.push_str(LineSeparator::CRLF.as_str())
             }
 
             formatted.push_str(&format!("[{}]", section[..].trim()));
@@ -274,7 +272,7 @@ impl<'a> LtxParser<'a> {
       self.parse_whitespace();
     }
 
-    formatted.push_str(write_options.line_separator.as_str());
+    formatted.push_str(LineSeparator::CRLF.as_str());
 
     Ok(formatted)
   }

@@ -74,7 +74,7 @@ mod tests {
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::export::file::open_ini_config;
   use crate::test::assertions::files_are_equal_by_path;
   use crate::test::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
@@ -184,10 +184,9 @@ mod tests {
     first.export("first", &mut exported);
     second.export("second", &mut exported);
 
-    export_ini_to_file(
-      &exported,
-      &mut overwrite_test_relative_resource_as_file(&exported_filename)?,
-    )?;
+    exported.write_to(&mut overwrite_test_relative_resource_as_file(
+      &exported_filename,
+    )?)?;
 
     let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
 
@@ -205,10 +204,9 @@ mod tests {
     read_first.export("first", &mut imported);
     read_second.export("second", &mut imported);
 
-    export_ini_to_file(
-      &imported,
-      &mut overwrite_test_relative_resource_as_file(&imported_filename)?,
-    )?;
+    imported.write_to(&mut overwrite_test_relative_resource_as_file(
+      &imported_filename,
+    )?)?;
 
     assert!(files_are_equal_by_path(
       get_absolute_test_resource_path(&exported_filename),

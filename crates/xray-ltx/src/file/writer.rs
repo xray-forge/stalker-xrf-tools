@@ -1,5 +1,6 @@
-use crate::file::configuration::escape_policy::escape_str;
-use crate::{EscapePolicy, Ltx, WriteOptions, ROOT_SECTION};
+use crate::file::configuration::constants::ROOT_SECTION;
+use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
+use crate::Ltx;
 use std::fs::OpenOptions;
 use std::io;
 use std::io::Write;
@@ -8,55 +9,16 @@ use std::path::Path;
 impl Ltx {
   /// Write to a file
   pub fn write_to_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
-    self.write_to_file_policy(filename, EscapePolicy::Basics)
-  }
-
-  /// Write to a file
-  pub fn write_to_file_policy<P: AsRef<Path>>(
-    &self,
-    filename: P,
-    policy: EscapePolicy,
-  ) -> io::Result<()> {
     let mut file = OpenOptions::new()
       .write(true)
       .truncate(true)
       .create(true)
       .open(filename.as_ref())?;
-    self.write_to_policy(&mut file, policy)
-  }
-
-  /// Write to a file with options
-  pub fn write_to_file_opt<P: AsRef<Path>>(
-    &self,
-    filename: P,
-    opt: WriteOptions,
-  ) -> io::Result<()> {
-    let mut file = OpenOptions::new()
-      .write(true)
-      .truncate(true)
-      .create(true)
-      .open(filename.as_ref())?;
-    self.write_to_opt(&mut file, opt)
-  }
-
-  /// Write to a writer
-  pub fn write_to<W: Write>(&self, writer: &mut W) -> io::Result<()> {
-    self.write_to_opt(writer, Default::default())
-  }
-
-  /// Write to a writer
-  pub fn write_to_policy<W: Write>(&self, writer: &mut W, policy: EscapePolicy) -> io::Result<()> {
-    self.write_to_opt(
-      writer,
-      WriteOptions {
-        escape_policy: policy,
-        ..Default::default()
-      },
-    )
+    self.write_to(&mut file)
   }
 
   /// Write to a writer with options
-  pub fn write_to_opt<W: Write>(&self, writer: &mut W, option: WriteOptions) -> io::Result<()> {
+  pub fn write_to<W: Write>(&self, writer: &mut W) -> io::Result<()> {
     let mut firstline = true;
 
     // Write include statements.
@@ -64,7 +26,7 @@ impl Ltx {
       firstline = false;
 
       for include in &self.includes {
-        write!(writer, "#include \"{}\"{}", include, option.line_separator)?;
+        write!(writer, "#include \"{}\"{}", include, LineSeparator::CRLF)?;
       }
     }
 
@@ -75,7 +37,7 @@ impl Ltx {
           firstline = false;
         } else {
           // Write an empty line between sections
-          writer.write_all(option.line_separator.as_str().as_bytes())?;
+          writer.write_all(LineSeparator::CRLF.as_str().as_bytes())?;
         }
       }
 
@@ -86,23 +48,17 @@ impl Ltx {
           format!(":{}", props.inherited.join(", "))
         };
 
-        write!(
-          writer,
-          "[{}]{}{}",
-          escape_str(&section[..], option.escape_policy),
-          escape_str(&inherited, option.escape_policy),
-          option.line_separator
-        )?;
+        write!(writer, "[{}]{}{}", section, inherited, LineSeparator::CRLF)?;
       }
 
-      for (k, v) in props.iter() {
-        let key_string = escape_str(k, option.escape_policy);
-        let value_string = escape_str(v, option.escape_policy);
-
+      for (key, value) in props.iter() {
         write!(
           writer,
           "{}{}{}{}",
-          key_string, option.kv_separator, value_string, option.line_separator
+          key,
+          DEFAULT_KV_SEPARATOR,
+          value,
+          LineSeparator::CRLF
         )?;
       }
     }
@@ -112,8 +68,8 @@ impl Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_LINE_SEPARATOR};
-  use crate::{EscapePolicy, Ltx, WriteOptions, ROOT_SECTION};
+  use crate::file::configuration::line_separator::DEFAULT_LINE_SEPARATOR;
+  use crate::{Ltx, ROOT_SECTION};
 
   #[test]
   fn preserve_order_write() {
@@ -146,12 +102,8 @@ a3 = n3
 
     let ltx: Ltx = Ltx::new();
 
-    let opt = WriteOptions {
-      line_separator: LineSeparator::CR,
-      ..Default::default()
-    };
     let mut buf = Vec::new();
-    ltx.write_to_opt(&mut buf, opt).unwrap();
+    ltx.write_to(&mut buf).unwrap();
 
     assert_eq!("", str::from_utf8(&buf).unwrap());
   }
@@ -171,65 +123,13 @@ a3 = n3
       .set("Key2", "Value");
 
     {
-      let mut buf = Vec::new();
-      ini
-        .write_to_opt(
-          &mut buf,
-          WriteOptions {
-            line_separator: LineSeparator::CR,
-            kv_separator: "=",
-            ..Default::default()
-          },
-        )
-        .unwrap();
-
-      assert_eq!(
-        "[Section1]\nKey1=Value\nKey2=Value\n\n[Section2]\nKey1=Value\nKey2=Value\n",
-        str::from_utf8(&buf).unwrap()
-      );
-    }
-
-    {
-      let mut buf = Vec::new();
-      ini
-        .write_to_opt(
-          &mut buf,
-          WriteOptions {
-            line_separator: LineSeparator::CRLF,
-            ..Default::default()
-          },
-        )
-        .unwrap();
+      let mut buf: Vec<u8> = Vec::new();
+      ini.write_to(&mut buf).unwrap();
 
       assert_eq!(
         "[Section1]\r\nKey1 = Value\r\nKey2 = Value\r\n\r\n[Section2]\r\nKey1 = Value\r\nKey2 = Value\r\n",
         str::from_utf8(&buf).unwrap()
       );
-    }
-
-    {
-      let mut buf = Vec::new();
-      ini
-        .write_to_opt(
-          &mut buf,
-          WriteOptions {
-            line_separator: LineSeparator::SystemDefault,
-            ..Default::default()
-          },
-        )
-        .unwrap();
-
-      if cfg!(windows) {
-        assert_eq!(
-          "[Section1]\r\nKey1 = Value\r\nKey2 = Value\r\n\r\n[Section2]\r\nKey1 = Value\r\nKey2 = Value\r\n",
-          str::from_utf8(&buf).unwrap()
-        );
-      } else {
-        assert_eq!(
-          "[Section1]\nKey1 = Value\nKey2 = Value\n\n[Section2]\nKey1 = Value\nKey2 = Value\n",
-          str::from_utf8(&buf).unwrap()
-        );
-      }
     }
   }
 
@@ -252,22 +152,14 @@ a3 = n3
       .set("Key1", "Value")
       .set("Key2", "Value");
 
-    let mut buf = Vec::new();
-    ini
-      .write_to_opt(
-        &mut buf,
-        WriteOptions {
-          kv_separator: "=",
-          ..Default::default()
-        },
-      )
-      .unwrap();
+    let mut buf: Vec<u8> = Vec::new();
+    ini.write_to(&mut buf).unwrap();
 
     // Test different line endings in Windows and Unix
     if cfg!(windows) {
       assert_eq!(
         str::from_utf8(&buf).unwrap(),
-        "Key1=Value\r\nKey2=Value\r\n\r\n[Section1]\r\nKey1=Value\r\nKey2=Value\r\n\r\n[Section2]\r\nKey1=Value\r\nKey2=Value\r\n",
+        "Key1 = Value\r\nKey2 = Value\r\n\r\n[Section1]\r\nKey1 = Value\r\nKey2 = Value\r\n\r\n[Section2]\r\nKey1 = Value\r\nKey2 = Value\r\n",
       );
     } else {
       assert_eq!(
@@ -284,9 +176,7 @@ a3 = n3
     let conf = Ltx::load_from_str(&input).unwrap();
 
     let mut output = Vec::new();
-    conf
-      .write_to_policy(&mut output, EscapePolicy::Basics)
-      .unwrap();
+    conf.write_to(&mut output).unwrap();
 
     assert_eq!(input, String::from_utf8(output).unwrap());
   }

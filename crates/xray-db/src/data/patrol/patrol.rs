@@ -203,7 +203,7 @@ mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::export::file::open_ini_config;
   use crate::test::file::read_file_as_string;
   use crate::test::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
@@ -393,9 +393,9 @@ mod tests {
       &mut links_ltx,
     );
 
-    export_ini_to_file(&patrol_ltx, &mut patrol_file)?;
-    export_ini_to_file(&points_ltx, &mut points_file)?;
-    export_ini_to_file(&links_ltx, &mut links_file)?;
+    patrol_ltx.write_to(&mut patrol_file)?;
+    points_ltx.write_to(&mut points_file)?;
+    links_ltx.write_to(&mut links_file)?;
 
     let read_point: Patrol = Patrol::import(
       &patrol.name,

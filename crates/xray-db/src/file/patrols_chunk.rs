@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
-use crate::export::file::{create_export_file, export_ini_to_file, open_ini_config};
+use crate::export::file::{create_export_file, open_ini_config};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
@@ -88,20 +88,9 @@ impl PatrolsChunk {
       );
     }
 
-    export_ini_to_file(
-      &patrols_config,
-      &mut create_export_file(&path.join("patrols.ltx"))?,
-    )?;
-
-    export_ini_to_file(
-      &patrol_points_config,
-      &mut create_export_file(&path.join("patrol_points.ltx"))?,
-    )?;
-
-    export_ini_to_file(
-      &patrol_links_config,
-      &mut create_export_file(&path.join("patrol_links.ltx"))?,
-    )?;
+    patrols_config.write_to(&mut create_export_file(&path.join("patrols.ltx"))?)?;
+    patrol_points_config.write_to(&mut create_export_file(&path.join("patrol_points.ltx"))?)?;
+    patrol_links_config.write_to(&mut create_export_file(&path.join("patrol_links.ltx"))?)?;
 
     log::info!("Exported patrols chunk");
 

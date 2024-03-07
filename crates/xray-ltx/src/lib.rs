@@ -4,9 +4,8 @@ pub(crate) mod project;
 #[cfg(test)]
 pub mod test;
 
-pub use crate::file::configuration::escape_policy::EscapePolicy;
-pub use crate::file::configuration::write_options::WriteOptions;
-pub use crate::file::constants::ROOT_SECTION;
+pub use crate::file::configuration::constants::ROOT_SECTION;
+pub use crate::file::configuration::line_separator::LineSeparator;
 pub use crate::file::error::{LtxError, LtxParseError};
 pub use crate::file::ltx::Ltx;
 pub use crate::file::properties::Properties;

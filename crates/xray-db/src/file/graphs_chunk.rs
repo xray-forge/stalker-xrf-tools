@@ -6,9 +6,7 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
-use crate::export::file::{
-  create_export_file, export_ini_to_file, open_binary_file, open_ini_config,
-};
+use crate::export::file::{create_export_file, open_binary_file, open_ini_config};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -165,10 +163,7 @@ impl GraphsChunk {
 
     self.header.export(&mut graphs_header_config);
 
-    export_ini_to_file(
-      &graphs_header_config,
-      &mut create_export_file(&path.join("graphs_header.ltx"))?,
-    )?;
+    graphs_header_config.write_to(&mut create_export_file(&path.join("graphs_header.ltx"))?)?;
 
     let mut graphs_level_config: Ltx = Ltx::new();
 
@@ -176,10 +171,7 @@ impl GraphsChunk {
       level.export(&index.to_string(), &mut graphs_level_config);
     }
 
-    export_ini_to_file(
-      &graphs_level_config,
-      &mut create_export_file(&path.join("graphs_levels.ltx"))?,
-    )?;
+    graphs_level_config.write_to(&mut create_export_file(&path.join("graphs_levels.ltx"))?)?;
 
     log::info!("Exported graph levels");
 
@@ -189,10 +181,7 @@ impl GraphsChunk {
       vertex.export(&index.to_string(), &mut graphs_vertices_config);
     }
 
-    export_ini_to_file(
-      &graphs_vertices_config,
-      &mut create_export_file(&path.join("graphs_vertices.ltx"))?,
-    )?;
+    graphs_vertices_config.write_to(&mut create_export_file(&path.join("graphs_vertices.ltx"))?)?;
 
     log::info!("Exported graph vertices");
 
@@ -202,10 +191,7 @@ impl GraphsChunk {
       point.export(&index.to_string(), &mut graphs_points_config);
     }
 
-    export_ini_to_file(
-      &graphs_points_config,
-      &mut create_export_file(&path.join("graphs_points.ltx"))?,
-    )?;
+    graphs_points_config.write_to(&mut create_export_file(&path.join("graphs_points.ltx"))?)?;
 
     log::info!("Exported graph points");
 
@@ -215,10 +201,7 @@ impl GraphsChunk {
       edge.export(&index.to_string(), &mut graphs_edges_config);
     }
 
-    export_ini_to_file(
-      &graphs_edges_config,
-      &mut create_export_file(&path.join("graphs_edges.ltx"))?,
-    )?;
+    graphs_edges_config.write_to(&mut create_export_file(&path.join("graphs_edges.ltx"))?)?;
 
     log::info!("Exported graph edges");
 

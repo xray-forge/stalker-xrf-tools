@@ -1,7 +1,7 @@
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::Path;
-use xray_ltx::{EscapePolicy, Ltx, WriteOptions};
+use xray_ltx::Ltx;
 
 /// Create file for exporting by provided path.
 pub fn create_export_file(path: &Path) -> io::Result<File> {
@@ -17,17 +17,6 @@ pub fn create_export_file(path: &Path) -> io::Result<File> {
       format!("Failed to create file for spawn output {:?}", path),
     )),
   }
-}
-
-/// Export ini file content to provided file.
-pub fn export_ini_to_file(ini: &Ltx, file: &mut File) -> io::Result<()> {
-  ini.write_to_opt(
-    file,
-    WriteOptions {
-      escape_policy: EscapePolicy::Nothing,
-      ..Default::default()
-    },
-  )
 }
 
 /// Try opening ini file.

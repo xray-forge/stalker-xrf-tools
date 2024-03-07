@@ -200,11 +200,10 @@ impl<'q> IndexMut<&'q str> for Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::file::configuration::escape_policy::escape_str;
   use crate::file::error::LtxParseError;
   use crate::file::ltx::Ltx;
   use crate::file::properties::Properties;
-  use crate::{EscapePolicy, ROOT_SECTION};
+  use crate::ROOT_SECTION;
 
   #[test]
   fn load_from_str_with_empty_general_section() {
@@ -735,130 +734,6 @@ foo = c
     // assert the new value was set
     let v = conf.get_from(section, key).unwrap();
     assert_eq!(v, new_value);
-  }
-
-  #[test]
-  fn escape_str_nothing_policy() {
-    let test_str = "\0\x07\n字'\"✨🍉杓";
-    // This policy should never escape anything.
-    let policy = EscapePolicy::Nothing;
-    assert_eq!(escape_str(test_str, policy), test_str);
-  }
-
-  #[test]
-  fn escape_str_basics() {
-    let test_backslash = r"\backslashes\";
-    let test_nul = "string with \x00nulls\x00 in it";
-    let test_controls = "|\x07| bell, |\x08| backspace, |\x7f| delete, |\x1b| escape";
-    let test_whitespace = "\t \r\n";
-
-    assert_eq!(
-      escape_str(test_backslash, EscapePolicy::Nothing),
-      test_backslash
-    );
-    assert_eq!(escape_str(test_nul, EscapePolicy::Nothing), test_nul);
-    assert_eq!(
-      escape_str(test_controls, EscapePolicy::Nothing),
-      test_controls
-    );
-    assert_eq!(
-      escape_str(test_whitespace, EscapePolicy::Nothing),
-      test_whitespace
-    );
-
-    for policy in [
-      EscapePolicy::Basics,
-      EscapePolicy::BasicsUnicode,
-      EscapePolicy::BasicsUnicodeExtended,
-      EscapePolicy::Reserved,
-      EscapePolicy::ReservedUnicode,
-      EscapePolicy::ReservedUnicodeExtended,
-      EscapePolicy::Everything,
-    ] {
-      assert_eq!(escape_str(test_backslash, policy), r"\\backslashes\\");
-      assert_eq!(escape_str(test_nul, policy), r"string with \0nulls\0 in it");
-      assert_eq!(
-        escape_str(test_controls, policy),
-        r"|\a| bell, |\b| backspace, |\x007f| delete, |\x001b| escape"
-      );
-      assert_eq!(escape_str(test_whitespace, policy), r"\t \r\n");
-    }
-  }
-
-  #[test]
-  fn escape_str_reserved() {
-    // Test reserved characters.
-    let test_reserved = ":=;#";
-    // And characters which are *not* reserved, but look like they might be.
-    let test_punctuation = "!@$%^&*()-_+/?.>,<[]{}``";
-
-    // These policies should *not* escape reserved characters.
-    for policy in [
-      EscapePolicy::Nothing,
-      EscapePolicy::Basics,
-      EscapePolicy::BasicsUnicode,
-      EscapePolicy::BasicsUnicodeExtended,
-    ] {
-      assert_eq!(escape_str(test_reserved, policy), ":=;#");
-      assert_eq!(escape_str(test_punctuation, policy), test_punctuation);
-    }
-
-    // These should.
-    for policy in [
-      EscapePolicy::Reserved,
-      EscapePolicy::ReservedUnicodeExtended,
-      EscapePolicy::ReservedUnicode,
-      EscapePolicy::Everything,
-    ] {
-      assert_eq!(escape_str(test_reserved, policy), r"\:\=\;\#");
-      assert_eq!(
-        escape_str(test_punctuation, policy),
-        "!@$%^&*()-_+/?.>,<[]{}``"
-      );
-    }
-  }
-
-  #[test]
-  fn escape_str_unicode() {
-    // Test unicode escapes.
-    // The first are Basic Multilingual Plane (BMP) characters - i.e. <= U+FFFF
-    // Emoji are above U+FFFF (e.g. in the 1F???? range), and the CJK characters are in the U+20???? range.
-    // The last one is for codepoints at the edge of Rust's char type.
-    let test_unicode: &str = r"é£∳字✨";
-    let test_emoji: &str = r"🐱😉";
-    let test_cjk: &str = r"𠈌𠕇";
-    let test_high_points: &str = "\u{10ABCD}\u{10FFFF}";
-
-    let policy = EscapePolicy::Nothing;
-    assert_eq!(escape_str(test_unicode, policy), test_unicode);
-    assert_eq!(escape_str(test_emoji, policy), test_emoji);
-    assert_eq!(escape_str(test_high_points, policy), test_high_points);
-
-    // The "Unicode" policies should escape standard BMP unicode, but should *not* escape emoji or supplementary CJK codepoints.
-    // The Basics/Reserved policies should behave identically in this regard.
-    for policy in [EscapePolicy::BasicsUnicode, EscapePolicy::ReservedUnicode] {
-      assert_eq!(
-        escape_str(test_unicode, policy),
-        r"\x00e9\x00a3\x2233\x5b57\x2728"
-      );
-      assert_eq!(escape_str(test_emoji, policy), test_emoji);
-      assert_eq!(escape_str(test_cjk, policy), test_cjk);
-      assert_eq!(escape_str(test_high_points, policy), test_high_points);
-    }
-
-    // UnicodeExtended policies should escape both BMP and supplementary plane characters.
-    for policy in [
-      EscapePolicy::BasicsUnicodeExtended,
-      EscapePolicy::ReservedUnicodeExtended,
-    ] {
-      assert_eq!(
-        escape_str(test_unicode, policy),
-        r"\x00e9\x00a3\x2233\x5b57\x2728"
-      );
-      assert_eq!(escape_str(test_emoji, policy), r"\x1f431\x1f609");
-      assert_eq!(escape_str(test_cjk, policy), r"\x2020c\x20547");
-      assert_eq!(escape_str(test_high_points, policy), r"\x10abcd\x10ffff");
-    }
   }
 
   #[test]

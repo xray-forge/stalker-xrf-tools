@@ -65,7 +65,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::{export_ini_to_file, open_ini_config};
+  use crate::export::file::open_ini_config;
   use crate::test::file::read_file_as_string;
   use crate::test::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
@@ -131,7 +131,7 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     point.export("graph_level_point", &mut ltx);
-    export_ini_to_file(&ltx, &mut file)?;
+    ltx.write_to(&mut file)?;
 
     let read_point: GraphLevelPoint =
       GraphLevelPoint::import("graph_level_point", &open_ini_config(config_path)?)?;
