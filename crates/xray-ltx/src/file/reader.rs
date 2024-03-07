@@ -1,7 +1,7 @@
 use crate::file::error::{LtxError, LtxParseError};
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncludes;
-use crate::{Ltx, ParseOptions, WriteOptions};
+use crate::{Ltx, WriteOptions};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -9,81 +9,23 @@ use std::path::{Path, PathBuf};
 impl Ltx {
   /// Load from a string.
   pub fn load_from_str(buf: &str) -> Result<Ltx, LtxParseError> {
-    Ltx::load_from_str_opt(buf, ParseOptions::default())
-  }
-
-  /// Load from a string with options.
-  pub fn load_from_str_opt(buf: &str, options: ParseOptions) -> Result<Ltx, LtxParseError> {
-    LtxParser::new(buf.chars(), options).parse()
+    LtxParser::new(buf.chars()).parse()
   }
 
   /// Load from a reader.
   pub fn read_from<R: Read>(reader: &mut R) -> Result<Ltx, LtxError> {
-    Ltx::read_from_opt(reader, ParseOptions::default())
-  }
-
-  /// Load from a reader, but do not interpret '\' as an escape character.
-  pub fn read_from_noescape<R: Read>(reader: &mut R) -> Result<Ltx, LtxError> {
-    Ltx::read_from_opt(
-      reader,
-      ParseOptions {
-        enabled_escape: false,
-        ..ParseOptions::default()
-      },
-    )
-  }
-
-  /// Load from a reader with options.
-  pub fn read_from_opt<R: Read>(reader: &mut R, options: ParseOptions) -> Result<Ltx, LtxError> {
     let mut data: String = String::new();
 
     reader.read_to_string(&mut data).map_err(LtxError::Io)?;
 
-    match LtxParser::new(data.chars(), options).parse() {
-      Err(e) => Err(LtxError::Parse(e)),
+    match LtxParser::new(data.chars()).parse() {
+      Err(error) => Err(LtxError::Parse(error)),
       Ok(success) => Ok(success),
     }
   }
 
   /// Load from a file.
   pub fn load_from_file<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::load_from_file_opt(filename, ParseOptions::default())
-  }
-
-  /// Load from a file, but do not interpret '\' as an escape character.
-  pub fn load_from_file_noescape<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::load_from_file_opt(
-      filename,
-      ParseOptions {
-        enabled_escape: false,
-        ..ParseOptions::default()
-      },
-    )
-  }
-
-  /// Load from a file with options.
-  pub fn load_from_file_full_inherited_opt<P: AsRef<Path>>(
-    filename: P,
-    options: ParseOptions,
-  ) -> Result<Ltx, LtxError> {
-    Ltx::load_from_file_opt(filename, options.clone())?
-      .into_included_opt(options)?
-      .into_inherited()
-  }
-
-  /// Load from a file with options.
-  pub fn load_from_file_full_opt<P: AsRef<Path>>(
-    filename: P,
-    options: ParseOptions,
-  ) -> Result<Ltx, LtxError> {
-    Ltx::load_from_file_opt(filename, options.clone())?.into_included_opt(options)
-  }
-
-  /// Load from a file with options.
-  pub fn load_from_file_opt<P: AsRef<Path>>(
-    filename: P,
-    options: ParseOptions,
-  ) -> Result<Ltx, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
       Ok(file) => file,
       Err(error) => {
@@ -91,7 +33,7 @@ impl Ltx {
       }
     };
 
-    match Ltx::read_from_opt(&mut reader, options) {
+    match Ltx::read_from(&mut reader) {
       Ok(mut ltx) => {
         ltx.path = Some(PathBuf::from(filename.as_ref()));
         ltx.directory = filename.as_ref().parent().map(PathBuf::from);
@@ -101,37 +43,43 @@ impl Ltx {
       Err(error) => Err(error),
     }
   }
+
+  /// Load from a file with options.
+  pub fn load_from_file_full_inherited<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
+    Ltx::load_from_file(filename)?
+      .into_included()?
+      .into_inherited()
+  }
+
+  /// Load from a file with options.
+  pub fn load_from_file_full<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
+    Ltx::load_from_file(filename)?.into_included()
+  }
 }
 
 impl Ltx {
   /// Load include statements from a string.
   pub fn read_includes_from_str(buf: &str) -> Result<LtxIncludes, LtxParseError> {
-    Ltx::read_includes_from_str_opt(buf, ParseOptions::default())
+    Ltx::read_includes_from_str_opt(buf)
   }
 
   /// Load include statements from a string with options.
-  pub fn read_includes_from_str_opt(
-    buf: &str,
-    options: ParseOptions,
-  ) -> Result<LtxIncludes, LtxParseError> {
-    LtxParser::new(buf.chars(), options).parse_includes()
+  pub fn read_includes_from_str_opt(buf: &str) -> Result<LtxIncludes, LtxParseError> {
+    LtxParser::new(buf.chars()).parse_includes()
   }
 
   /// Load include statements from a reader.
   pub fn read_includes_from<R: Read>(reader: &mut R) -> Result<LtxIncludes, LtxError> {
-    Ltx::read_includes_from_opt(reader, ParseOptions::default())
+    Ltx::read_includes_from_opt(reader)
   }
 
   /// Load include statements from a reader with options.
-  pub fn read_includes_from_opt<R: Read>(
-    reader: &mut R,
-    options: ParseOptions,
-  ) -> Result<LtxIncludes, LtxError> {
+  pub fn read_includes_from_opt<R: Read>(reader: &mut R) -> Result<LtxIncludes, LtxError> {
     let mut data: String = String::new();
 
     reader.read_to_string(&mut data).map_err(LtxError::Io)?;
 
-    match LtxParser::new(data.chars(), options).parse_includes() {
+    match LtxParser::new(data.chars()).parse_includes() {
       Err(error) => Err(LtxError::Parse(error)),
       Ok(success) => Ok(success),
     }
@@ -139,14 +87,11 @@ impl Ltx {
 
   /// Load include statements from a file.
   pub fn read_includes_from_file<P: AsRef<Path>>(filename: P) -> Result<LtxIncludes, LtxError> {
-    Ltx::read_includes_from_file_opt(filename, ParseOptions::default())
+    Ltx::read_includes_from_file_opt(filename)
   }
 
   /// Load include statements from a file with options.
-  pub fn read_includes_from_file_opt<P: AsRef<Path>>(
-    filename: P,
-    options: ParseOptions,
-  ) -> Result<LtxIncludes, LtxError> {
+  pub fn read_includes_from_file_opt<P: AsRef<Path>>(filename: P) -> Result<LtxIncludes, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
       Ok(file) => file,
       Err(error) => {
@@ -154,7 +99,7 @@ impl Ltx {
       }
     };
 
-    Ltx::read_includes_from_opt(&mut reader, options)
+    Ltx::read_includes_from_opt(&mut reader)
   }
 }
 
@@ -162,28 +107,26 @@ impl Ltx {
   /// Load from a string with options.
   pub fn format_from_str_opt(
     buf: &str,
-    parse_options: ParseOptions,
     write_options: WriteOptions,
   ) -> Result<String, LtxParseError> {
-    LtxParser::new(buf.chars(), parse_options).parse_into_formatted_opt(write_options)
+    LtxParser::new(buf.chars()).parse_into_formatted_opt(write_options)
   }
 
   /// Load from a string.
   pub fn format_from_str(buf: &str) -> Result<String, LtxParseError> {
-    Ltx::format_from_str_opt(buf, ParseOptions::default(), WriteOptions::default())
+    Ltx::format_from_str_opt(buf, WriteOptions::default())
   }
 
   /// Load from a reader with options.
   pub fn format_from_opt<R: Read>(
     reader: &mut R,
-    parse_options: ParseOptions,
     write_options: WriteOptions,
   ) -> Result<String, LtxError> {
     let mut data: String = String::new();
 
     reader.read_to_string(&mut data).map_err(LtxError::Io)?;
 
-    match LtxParser::new(data.chars(), parse_options).parse_into_formatted_opt(write_options) {
+    match LtxParser::new(data.chars()).parse_into_formatted_opt(write_options) {
       Err(e) => Err(LtxError::Parse(e)),
       Ok(success) => Ok(success),
     }
@@ -192,7 +135,6 @@ impl Ltx {
   /// Load from a file with options
   pub fn format_from_file_opt<P: AsRef<Path>>(
     filename: P,
-    parse_options: ParseOptions,
     write_options: WriteOptions,
   ) -> Result<String, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
@@ -202,7 +144,7 @@ impl Ltx {
       }
     };
 
-    Ltx::format_from_opt(&mut reader, parse_options, write_options)
+    Ltx::format_from_opt(&mut reader, write_options)
   }
 }
 
@@ -212,7 +154,7 @@ mod test {
   use crate::file::types::LtxIncludes;
   use crate::test::file::read_file_as_string;
   use crate::test::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
-  use crate::{EscapePolicy, Ltx, ParseOptions, WriteOptions};
+  use crate::{EscapePolicy, Ltx, WriteOptions};
   use std::env::temp_dir;
   use std::fs::File;
   use std::io::Write;
@@ -236,10 +178,6 @@ mod test {
   fn format_from_file_one() {
     let formatted: String = Ltx::format_from_file_opt(
       get_absolute_test_file_path(file!(), "not_formatted_1.ltx"),
-      ParseOptions {
-        enabled_escape: false,
-        enabled_quote: false,
-      },
       WriteOptions {
         escape_policy: EscapePolicy::Nothing,
         line_separator: LineSeparator::SystemDefault,
@@ -260,10 +198,6 @@ mod test {
   fn format_from_file_two() {
     let formatted: String = Ltx::format_from_file_opt(
       get_absolute_test_file_path(file!(), "not_formatted_2.ltx"),
-      ParseOptions {
-        enabled_escape: false,
-        enabled_quote: false,
-      },
       WriteOptions {
         escape_policy: EscapePolicy::Nothing,
         line_separator: LineSeparator::SystemDefault,

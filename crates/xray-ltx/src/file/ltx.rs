@@ -3,7 +3,7 @@ use crate::file::ltx_inherit::LtxInheritConvertor;
 use crate::file::section_entry::SectionEntry;
 use crate::file::section_setter::SectionSetter;
 use crate::file::types::{LtxIncludes, LtxSections};
-use crate::{LtxError, ParseOptions, Properties, ROOT_SECTION};
+use crate::{LtxError, Properties, ROOT_SECTION};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
 
@@ -23,12 +23,7 @@ impl Ltx {
 
   /// Convert current instance of ltx file into full parsed one.
   pub fn into_included(self) -> Result<Ltx, LtxError> {
-    LtxIncludeConvertor::convert(self, ParseOptions::default())
-  }
-
-  /// Convert current instance of ltx file into full parsed one.
-  pub fn into_included_opt(self, options: ParseOptions) -> Result<Ltx, LtxError> {
-    LtxIncludeConvertor::convert(self, options)
+    LtxIncludeConvertor::convert(self)
   }
 
   /// Convert current instance of ltx file into full parsed one.
@@ -206,7 +201,6 @@ impl<'q> IndexMut<&'q str> for Ltx {
 #[cfg(test)]
 mod test {
   use crate::file::configuration::escape_policy::escape_str;
-  use crate::file::configuration::parse_options::ParseOptions;
   use crate::file::error::LtxParseError;
   use crate::file::ltx::Ltx;
   use crate::file::properties::Properties;
@@ -215,10 +209,11 @@ mod test {
   #[test]
   fn load_from_str_with_empty_general_section() {
     let input = "[sec1]\nkey1=val1\n";
-    let opt = Ltx::load_from_str(input);
-    assert!(opt.is_ok());
+    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
 
-    let mut output = opt.unwrap();
+    assert!(ltx.is_ok());
+
+    let mut output: Ltx = ltx.unwrap();
     assert_eq!(output.len(), 1);
 
     assert!(output.root_section().is_empty());
@@ -237,10 +232,11 @@ mod test {
   #[test]
   fn load_from_str_with_empty_input() {
     let input: &str = "";
-    let opt = Ltx::load_from_str(input);
-    assert!(opt.is_ok());
+    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
 
-    let mut output = opt.unwrap();
+    assert!(ltx.is_ok());
+
+    let mut output: Ltx = ltx.unwrap();
     assert!(output.root_section().is_empty());
     assert!(output.root_section_mut().is_empty());
     assert_eq!(output.len(), 1);
@@ -249,10 +245,11 @@ mod test {
   #[test]
   fn load_from_str_with_empty_lines() {
     let input: &str = "\n\n\n";
-    let opt = Ltx::load_from_str(input);
-    assert!(opt.is_ok());
+    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
 
-    let mut output = opt.unwrap();
+    assert!(ltx.is_ok());
+
+    let mut output: Ltx = ltx.unwrap();
     assert!(output.root_section().is_empty());
     assert!(output.root_section_mut().is_empty());
     assert_eq!(output.len(), 1);
@@ -261,7 +258,8 @@ mod test {
   #[test]
   fn load_from_str_with_valid_input() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar\n";
-    let opt = Ltx::load_from_str(input);
+    let opt: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+
     assert!(opt.is_ok());
 
     let output = opt.unwrap();
@@ -284,20 +282,16 @@ mod test {
   #[test]
   fn load_from_str_without_ending_newline() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar";
-    let opt = Ltx::load_from_str(input);
+    let opt: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+
     assert!(opt.is_ok());
   }
 
   #[test]
   fn parse_error_numbers() {
     let invalid_input: &str = "\n\\x";
-    let ltx = Ltx::load_from_str_opt(
-      invalid_input,
-      ParseOptions {
-        enabled_escape: true,
-        ..Default::default()
-      },
-    );
+    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(invalid_input);
+
     assert!(ltx.is_err());
 
     let error: LtxParseError = ltx.unwrap_err();
@@ -491,22 +485,7 @@ name = hello
 Key = \"Value\"
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(ltx.get_from("section name", "Key").unwrap(), "Value");
-  }
-
-  #[test]
-  fn string_multiline() {
-    let input: &str = "
-[section name]
-; This is a comment
-Key = \"Value
-Otherline\"
-";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(
-      ltx.get_from("section name", "Key").unwrap(),
-      "Value\nOtherline"
-    );
+    assert_eq!(ltx.get_from("section name", "Key").unwrap(), "\"Value\"");
   }
 
   #[test]
@@ -520,7 +499,7 @@ Stuff = Other
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     assert_eq!(
       ltx.get_from("section name", "Key").unwrap(),
-      "Value   # This is not a comment ; at all"
+      "\"Value   # This is not a comment"
     );
   }
 
@@ -533,7 +512,7 @@ Key = 'Value'
 Stuff = Other
 ";
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(ltx.get_from("section name", "Key").unwrap(), "Value");
+    assert_eq!(ltx.get_from("section name", "Key").unwrap(), "'Value'");
   }
 
   #[test]
@@ -551,22 +530,6 @@ Comment[uk]=Доступ до Інтернету
   }
 
   #[test]
-  fn string_single_multiline() {
-    let input = "
-[section name]
-; This is a comment
-Key = 'Value
-Otherline'
-Stuff = Other
-";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    assert_eq!(
-      ltx.get_from("section name", "Key").unwrap(),
-      "Value\nOtherline"
-    );
-  }
-
-  #[test]
   fn string_single_comment() {
     let input: &str = "
 [section name]
@@ -576,7 +539,7 @@ Key = 'Value   # This is not a comment ; at all'
     let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     assert_eq!(
       ltx.get_from("section name", "Key").unwrap(),
-      "Value   # This is not a comment ; at all"
+      "'Value   # This is not a comment"
     );
   }
 
@@ -658,46 +621,13 @@ Key = 'Value   # This is not a comment ; at all'
   }
 
   #[test]
-  fn partial_quoting_double() {
-    let input: &str = "
-[section]
-A=\"quote\" arg0
-B=b";
-
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let sec: &Properties = ltx.section("section").unwrap();
-    assert_eq!(&sec["A"], "quote arg0");
-    assert_eq!(&sec["B"], "b");
-  }
-
-  #[test]
-  fn partial_quoting_single() {
-    let input = "
-[section]
-A='quote' arg0
-B=b";
-
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
-    let section: &Properties = ltx.section("section").unwrap();
-    assert_eq!(&section["A"], "quote arg0");
-    assert_eq!(&section["B"], "b");
-  }
-
-  #[test]
   fn parse_without_quote() {
     let input = "
 [desktop_entry]
 Exec = \"/path/to/exe with space\" arg
 ";
 
-    let ltx: Ltx = Ltx::load_from_str_opt(
-      input,
-      ParseOptions {
-        enabled_quote: false,
-        ..ParseOptions::default()
-      },
-    )
-    .unwrap();
+    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
     let sec = ltx.section("desktop_entry").unwrap();
     assert_eq!(&sec["Exec"], "\"/path/to/exe with space\" arg");
   }

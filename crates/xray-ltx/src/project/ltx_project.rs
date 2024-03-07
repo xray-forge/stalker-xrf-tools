@@ -1,6 +1,6 @@
 use crate::file::constants::LTX_EXTENSION;
 use crate::file::error::LtxConvertError;
-use crate::{EscapePolicy, Ltx, LtxError, ParseOptions, WriteOptions};
+use crate::{EscapePolicy, Ltx, LtxError, WriteOptions};
 use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
@@ -45,13 +45,7 @@ impl LtxProject {
           }
         };
 
-        for include in &Ltx::read_includes_from_file_opt(
-          entry_path,
-          ParseOptions {
-            enabled_quote: false,
-            enabled_escape: false,
-          },
-        )? {
+        for include in &Ltx::read_includes_from_file(entry_path)? {
           let mut included_path: PathBuf = PathBuf::from(parent);
 
           included_path.push(include);
@@ -92,13 +86,7 @@ impl LtxProject {
     for entry in &self.ltx_entries {
       println!("Verify: {:?}", entry.path());
 
-      let ltx: Ltx = Ltx::load_from_file_full_inherited_opt(
-        entry.path(),
-        ParseOptions {
-          enabled_escape: false,
-          enabled_quote: false,
-        },
-      )?;
+      let ltx: Ltx = Ltx::load_from_file_full_inherited(entry.path())?;
 
       let mut destination: PathBuf = PathBuf::from("target/assets");
 
@@ -138,10 +126,6 @@ impl LtxProject {
   pub fn format_file(path: &Path) -> Result<(), LtxError> {
     let formatted: String = Ltx::format_from_file_opt(
       path,
-      ParseOptions {
-        enabled_escape: false,
-        enabled_quote: false,
-      },
       WriteOptions {
         escape_policy: EscapePolicy::Nothing,
         ..Default::default()
@@ -153,22 +137,9 @@ impl LtxProject {
 
   /// Format single LTX file by provided path
   pub fn verify_file(path: &Path) -> Result<(), LtxError> {
-    let ltx: Ltx = Ltx::load_from_file_opt(
-      path,
-      ParseOptions {
-        enabled_escape: false,
-        enabled_quote: false,
-      },
-    )?;
+    let ltx: Ltx = Ltx::load_from_file(path)?;
 
-    let ltx: Ltx = ltx
-      .into_included_opt(ParseOptions {
-        enabled_escape: false,
-        enabled_quote: false,
-      })
-      .unwrap()
-      .into_inherited()
-      .unwrap();
+    let ltx: Ltx = ltx.into_included().unwrap().into_inherited().unwrap();
 
     ltx.write_to_file_opt(
       "target/assets/test.ltx",

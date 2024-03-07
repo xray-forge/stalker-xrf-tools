@@ -1,7 +1,7 @@
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::Path;
-use xray_ltx::{EscapePolicy, Ltx, ParseOptions, WriteOptions};
+use xray_ltx::{EscapePolicy, Ltx, WriteOptions};
 
 /// Create file for exporting by provided path.
 pub fn create_export_file(path: &Path) -> io::Result<File> {
@@ -33,13 +33,7 @@ pub fn export_ini_to_file(ini: &Ltx, file: &mut File) -> io::Result<()> {
 /// Try opening ini file.
 /// Map any ini reading operation errors as IO invalid input.
 pub fn open_ini_config(path: &Path) -> io::Result<Ltx> {
-  match Ltx::load_from_file_opt(
-    path,
-    ParseOptions {
-      enabled_escape: false,
-      enabled_quote: false,
-    },
-  ) {
+  match Ltx::load_from_file(path) {
     Ok(ini) => Ok(ini),
     Err(error) => Err(io::Error::new(
       io::ErrorKind::InvalidInput,

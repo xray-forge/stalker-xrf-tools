@@ -37,7 +37,7 @@ dependencies = [
   { name = "build-release", path = "bin/xrf-cli" },
 ]
 
-[tasks.build-application]
+[tasks.build-app]
 description = "Build UI application in debug mode."
 workspace = false
 dependencies = [

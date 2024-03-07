@@ -1,6 +1,6 @@
 use crate::file::error::LtxParseError;
 use crate::file::section_entry::SectionEntry;
-use crate::{Ltx, ParseOptions, Properties, WriteOptions, ROOT_SECTION};
+use crate::{Ltx, Properties, WriteOptions, ROOT_SECTION};
 use std::str::Chars;
 
 /// Ltx parser.
@@ -9,26 +9,20 @@ pub struct LtxParser<'a> {
   rdr: Chars<'a>,
   line: usize,
   col: usize,
-  opt: ParseOptions,
 }
 
 impl<'a> LtxParser<'a> {
-  pub fn new(rdr: Chars<'a>, options: ParseOptions) -> LtxParser<'a> {
+  pub fn new(rdr: Chars<'a>) -> LtxParser<'a> {
     let mut parser: LtxParser = LtxParser {
       ch: None,
       line: 0,
       col: 0,
       rdr,
-      opt: options,
     };
 
     parser.bump();
 
     parser
-  }
-
-  fn eof(&self) -> bool {
-    self.ch.is_none()
   }
 
   fn bump(&mut self) {
@@ -399,54 +393,6 @@ impl<'a> LtxParser<'a> {
             }
           }
         }
-        Some('\\') if self.opt.enabled_escape => {
-          self.bump();
-
-          if self.eof() {
-            return self.error(format!("Expecting \"{:?}\" but found EOF.", endpoint));
-          }
-
-          match self.ch.unwrap() {
-            '0' => result.push('\0'),
-            'a' => result.push('\x07'),
-            'b' => result.push('\x08'),
-            't' => result.push('\t'),
-            'r' => result.push('\r'),
-            'n' => result.push('\n'),
-            '\n' => (),
-            'x' => {
-              // Unicode 4 character
-              let mut code: String = String::with_capacity(4);
-              for _ in 0..4 {
-                self.bump();
-                if self.eof() {
-                  return self.error(format!("expecting \"{:?}\" but found EOF.", endpoint));
-                } else if let Some('\\') = self.ch {
-                  self.bump();
-                  if self.ch != Some('\n') {
-                    return self.error(format!(
-                      "expecting \"\\\\n\" but \
-                                             found \"{:?}\".",
-                      self.ch
-                    ));
-                  }
-                }
-                code.push(self.ch.unwrap());
-              }
-              let r = u32::from_str_radix(&code[..], 16);
-              match r {
-                Ok(c) => match char::from_u32(c) {
-                  Some(c) => result.push(c),
-                  None => {
-                    return self.error("unknown character in \\xHH form");
-                  }
-                },
-                Err(_) => return self.error("unknown character in \\xHH form"),
-              }
-            }
-            c => result.push(c),
-          }
-        }
         Some(c) => {
           result.push(c);
         }
@@ -485,26 +431,6 @@ impl<'a> LtxParser<'a> {
 
     match self.ch {
       None => Ok(String::new()),
-      Some('"') if self.opt.enabled_quote => {
-        self.bump();
-        self.parse_str_until(&[Some('"')], false).and_then(|s| {
-          self.bump(); // Eats the last "
-                       // Parse until EOL
-          self
-            .parse_str_until_eol(check_inline_comment)
-            .map(|x| s + &x)
-        })
-      }
-      Some('\'') if self.opt.enabled_quote => {
-        self.bump();
-        self.parse_str_until(&[Some('\'')], false).and_then(|s| {
-          self.bump(); // Eats the last '
-                       // Parse until EOL
-          self
-            .parse_str_until_eol(check_inline_comment)
-            .map(|x| s + &x)
-        })
-      }
       _ => self.parse_str_until_eol(check_inline_comment),
     }
   }

@@ -1,5 +1,5 @@
 use crate::file::error::LtxConvertError;
-use crate::{Ltx, LtxError, ParseOptions};
+use crate::{Ltx, LtxError};
 use std::io;
 use std::path::{Path, PathBuf};
 
@@ -13,14 +13,14 @@ impl LtxIncludeConvertor {
   }
 
   /// Cast LTX file to fully parsed with include sections.
-  pub fn convert(ltx: Ltx, options: ParseOptions) -> Result<Ltx, LtxError> {
-    LtxIncludeConvertor::new().convert_ltx(ltx, options)
+  pub fn convert(ltx: Ltx) -> Result<Ltx, LtxError> {
+    LtxIncludeConvertor::new().convert_ltx(ltx)
   }
 }
 
 impl LtxIncludeConvertor {
   /// Convert ltx file with inclusion of nested files.
-  fn convert_ltx(&self, ltx: Ltx, options: ParseOptions) -> Result<Ltx, LtxError> {
+  fn convert_ltx(&self, ltx: Ltx) -> Result<Ltx, LtxError> {
     if ltx.directory.is_none() {
       return Err(LtxConvertError::new_ltx_error(
         "Failed to convert ltx file, parent directory is not specified",
@@ -44,7 +44,7 @@ impl LtxIncludeConvertor {
 
       included_path.push(PathBuf::from(included));
 
-      self.include_children(&mut result, &included_path, options.clone())?;
+      self.include_children(&mut result, &included_path)?;
     }
 
     for (key, value) in ltx.sections {
@@ -61,13 +61,8 @@ impl LtxIncludeConvertor {
   }
 
   /// Include children ltx into provided ltx.
-  fn include_children(
-    &self,
-    into: &mut Ltx,
-    path: &Path,
-    options: ParseOptions,
-  ) -> Result<(), LtxError> {
-    let ltx: Ltx = match self.parse_nested_file(path, options.clone()) {
+  fn include_children(&self, into: &mut Ltx, path: &Path) -> Result<(), LtxError> {
+    let ltx: Ltx = match self.parse_nested_file(path) {
       Ok(value) => match value {
         Some(ltx) => ltx,
         None => return Ok(()),
@@ -81,7 +76,7 @@ impl LtxIncludeConvertor {
       }
     };
 
-    for (key, value) in ltx.into_included_opt(options)?.sections {
+    for (key, value) in ltx.into_included()?.sections {
       if into.has_section(key.clone()) {
         return Err(LtxConvertError::new_ltx_error(format!(
           "Failed to include ltx file '{:?}' in {:?}, duplicate section {key} found",
@@ -98,8 +93,8 @@ impl LtxIncludeConvertor {
 
   /// Open nested file for importing in current context.
   /// Skips '.ts' variant of configuration file as None.
-  fn parse_nested_file(&self, path: &Path, options: ParseOptions) -> Result<Option<Ltx>, LtxError> {
-    match Ltx::load_from_file_opt(path, options) {
+  fn parse_nested_file(&self, path: &Path) -> Result<Option<Ltx>, LtxError> {
+    match Ltx::load_from_file(path) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {
         LtxError::Io(ref io_error) => {
