@@ -4,6 +4,7 @@ use crate::file::configuration::constants::{
 };
 use crate::file::configuration::line_separator::LineSeparator;
 use crate::file::error::LtxParseError;
+use crate::file::formatter::LtxFormatter;
 use crate::file::section_entry::SectionEntry;
 use crate::{Ltx, Properties, ROOT_SECTION};
 use std::str::Chars;
@@ -188,66 +189,30 @@ impl<'a> LtxParser<'a> {
       match current_char {
         current if current == LTX_SYMBOL_COMMENT => {
           let comment_line: String = self.parse_str_until_eol(false)?;
-          let comment: &str = comment_line[1..].trim_start();
+          let comment: &str = &comment_line[1..];
 
-          if !comment.is_empty() {
-            formatted.push_str(&format!("; {comment}{}", LineSeparator::CRLF.as_str()));
-          }
+          LtxFormatter::write_comment(&mut formatted, comment);
         }
 
         current if current == LTX_SYMBOL_INCLUDE => {
           let include_line: String = self.parse_str_until_eol(false)?;
-          let (include_path, comment) = self.parse_include_from_line(&include_line)?;
+          let (included_path, comment) = self.parse_include_from_line(&include_line)?;
 
-          formatted.push_str(&format!("#include \"{include_path}\""));
-
-          if let Some(comment) = comment {
-            formatted.push_str(&format!(" ; {}", comment));
-          }
-
-          formatted.push_str(LineSeparator::CRLF.as_str());
+          LtxFormatter::write_include(&mut formatted, &included_path, comment.as_deref());
         }
 
         current if current == LTX_SYMBOL_SECTION_OPEN => {
           let section_line: String = self.parse_str_until_eol(false)?;
           let (section, inherited, comment) = self.parse_section_from_line(&section_line)?;
 
-          if !formatted.is_empty() {
-            formatted.push_str(LineSeparator::CRLF.as_str())
-          }
-
-          formatted.push_str(&format!("[{section}]"));
-
-          if let Some(inherited) = inherited {
-            formatted.push_str(&format!(":{}", inherited.join(",")));
-          }
-
-          if let Some(comment) = comment {
-            formatted.push_str(&format!(" ; {}", comment));
-          }
-
-          formatted.push_str(LineSeparator::CRLF.as_str());
+          LtxFormatter::write_section(&mut formatted, &section, inherited, comment.as_deref());
         }
 
         _ => {
           let key_value_line: String = self.parse_str_until_eol(false)?;
           let (key, value, comment) = self.parse_key_value_from_line(&key_value_line)?;
 
-          formatted.push_str(&key);
-
-          if let Some(value) = value {
-            if value.is_empty() {
-              formatted.push_str(" =");
-            } else {
-              formatted.push_str(&format!(" = {value}"));
-            }
-          }
-
-          if let Some(comment) = comment {
-            formatted.push_str(&format!(" ; {comment}"));
-          }
-
-          formatted.push_str(LineSeparator::CRLF.as_str());
+          LtxFormatter::write_key_value(&mut formatted, &key, value.as_deref(), comment.as_deref());
         }
       }
 
