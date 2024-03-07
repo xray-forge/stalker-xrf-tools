@@ -186,6 +186,32 @@ mod test {
   }
 
   #[test]
+  fn format_from_file_three() {
+    let formatted: String =
+      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_3.ltx")).unwrap();
+
+    let expected: String = read_file_as_string(
+      &mut get_absolute_test_resource_as_file(file!(), "formatted_3.ltx").unwrap(),
+    )
+    .unwrap();
+
+    assert_eq!(formatted, expected);
+  }
+
+  #[test]
+  fn format_from_file_four() {
+    let formatted: String =
+      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_4.ltx")).unwrap();
+
+    let expected: String = read_file_as_string(
+      &mut get_absolute_test_resource_as_file(file!(), "formatted_4.ltx").unwrap(),
+    )
+    .unwrap();
+
+    assert_eq!(formatted, expected);
+  }
+
+  #[test]
   fn load_no_includes_from_file() {
     let file_name: PathBuf = temp_dir().join("rust_ini_load_no_includes");
     let file_content = b"[test]Key=Value\n";

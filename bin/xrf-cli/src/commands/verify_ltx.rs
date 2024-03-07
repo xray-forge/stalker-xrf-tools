@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::{Path, PathBuf};
-use xray_ltx::{EscapePolicy, Ltx, LtxError, LtxProject, ParseOptions, WriteOptions};
+use xray_ltx::LtxProject;
 
 /// Verify ltx file or folder based on provided arguments.
 pub fn verify_ltx(matches: &ArgMatches) {
