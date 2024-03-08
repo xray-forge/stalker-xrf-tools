@@ -23,12 +23,12 @@ export function Root(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Spawn editor</Button>
             <Button onClick={() => navigate("/archive_editor", { replace: true })}>Archive editor</Button>
             <Button onClick={() => navigate("/dialog_editor", { replace: true })}>Dialog editor</Button>
-            <Button onClick={() => navigate("/icon_editor", { replace: true })}>Icon editor</Button>
             <Button onClick={() => navigate("/configs_editor", { replace: true })}>Configs editor</Button>
             <Button onClick={() => navigate("/exports_viewer", { replace: true })}>Exports viewer</Button>
+            <Button onClick={() => navigate("/icon_editor", { replace: true })}>Icon editor</Button>
+            <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Spawn editor</Button>
           </ButtonGroup>
         </Grid>
       </Card>
