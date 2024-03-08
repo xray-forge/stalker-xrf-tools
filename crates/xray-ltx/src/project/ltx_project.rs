@@ -87,7 +87,6 @@ impl LtxProject {
       println!("Verify: {:?}", entry.path());
 
       let ltx: Ltx = Ltx::load_from_file_full(entry.path())?;
-
       let mut destination: PathBuf = PathBuf::from("target/assets");
 
       destination.push(entry.file_name());

@@ -122,10 +122,10 @@ impl<'a> LtxParser<'a> {
 
               vacant_entry.insert(properties);
             }
-            SectionEntry::Occupied(_) => {
-              return self.error(format!(
-                "Duplicate fields are not allowed, looks like '{current_section}' is declared twice in {current_section}"
-              ));
+            SectionEntry::Occupied(properties) => {
+              properties
+                .into_mut()
+                .append(key, value.unwrap_or(String::new()));
             }
           }
         }
