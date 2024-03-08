@@ -234,7 +234,7 @@ mod tests {
 
   #[test]
   fn test_read_empty_file() -> io::Result<()> {
-    let file: FileSlice = open_test_resource_as_slice("samples/empty")?;
+    let file: FileSlice = open_test_resource_as_slice("empty")?;
 
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 0);

@@ -26,7 +26,6 @@ pub fn get_absolute_test_resource_path(resource_path: &str) -> PathBuf {
 pub fn get_relative_test_sample_file_path(file: &str, resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
-  path.push("samples");
   path.push(Path::new(file).file_stem().unwrap());
   path.push(resource);
 
@@ -42,7 +41,6 @@ pub fn get_absolute_test_sample_file_path(file: &str, resource: &str) -> PathBuf
 pub fn get_relative_test_sample_file_directory(file: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
-  path.push("samples");
   path.push(Path::new(file).file_stem().unwrap());
 
   path.into_os_string().into_string().unwrap()
@@ -52,7 +50,6 @@ pub fn get_relative_test_sample_file_directory(file: &str) -> String {
 pub fn get_relative_test_sample_sub_dir(resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
-  path.push("samples");
   path.push(resource);
 
   path.into_os_string().into_string().unwrap()
