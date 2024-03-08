@@ -1,20 +1,26 @@
 use crate::file::configuration::constants::ROOT_SECTION;
 use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
-use crate::Ltx;
+use crate::{Ltx, LtxError};
 use std::fs::OpenOptions;
-use std::io;
 use std::io::Write;
 use std::path::Path;
+use std::{fs, io};
 
 impl Ltx {
+  /// Format single LTX file by provided path
+  pub fn format_file<P: AsRef<Path>>(filename: P) -> Result<(), LtxError> {
+    fs::write(&filename, Ltx::format_from_file(&filename)?).map_err(LtxError::Io)
+  }
+
   /// Write to a file
   pub fn write_to_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
-    let mut file = OpenOptions::new()
-      .write(true)
-      .truncate(true)
-      .create(true)
-      .open(filename.as_ref())?;
-    self.write_to(&mut file)
+    self.write_to(
+      &mut OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open(filename.as_ref())?,
+    )
   }
 
   /// Write to a writer with options
@@ -82,10 +88,10 @@ x2 = n2
 xb = n2
 a3 = n3
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     let mut buf = vec![];
     ltx.write_to(&mut buf).unwrap();
-    let mut new_data = Ltx::load_from_str(&String::from_utf8(buf).unwrap()).unwrap();
+    let mut new_data = Ltx::read_from_str(&String::from_utf8(buf).unwrap()).unwrap();
 
     let sec0 = new_data.root_section();
     let keys0: Vec<&str> = sec0.iter().map(|(k, _)| k).collect();
@@ -173,7 +179,7 @@ a3 = n3
   fn fix_issue64() {
     let input = format!("some-key = åäö{}", DEFAULT_LINE_SEPARATOR);
 
-    let conf = Ltx::load_from_str(&input).unwrap();
+    let conf = Ltx::read_from_str(&input).unwrap();
 
     let mut output = Vec::new();
     conf.write_to(&mut output).unwrap();

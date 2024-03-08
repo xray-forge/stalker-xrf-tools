@@ -1,31 +1,31 @@
 use crate::file::error::{LtxError, LtxParseError};
 use crate::file::parser::LtxParser;
-use crate::file::types::LtxIncludes;
+use crate::file::types::LtxIncluded;
 use crate::Ltx;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
 impl Ltx {
-  /// Load from a string.
-  pub fn load_from_str(buf: &str) -> Result<Ltx, LtxParseError> {
+  /// Read LTX from a string.
+  pub fn read_from_str(buf: &str) -> Result<Ltx, LtxParseError> {
     LtxParser::new(buf.chars()).parse()
   }
 
-  /// Load from a reader.
-  pub fn read_from<R: Read>(reader: &mut R) -> Result<Ltx, LtxError> {
-    let mut data: String = String::new();
-
-    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
-
-    match LtxParser::new(data.chars()).parse() {
-      Err(error) => Err(LtxError::Parse(error)),
-      Ok(success) => Ok(success),
-    }
+  /// Read LTX from a file as full parsed file, inject included files.
+  pub fn read_from_file_included<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
+    Ltx::read_from_file(filename)?.into_included()
   }
 
-  /// Load from a file.
-  pub fn load_from_file<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
+  /// Read LTX from a file, inject all includes and unwrap inherited sections.
+  pub fn load_from_file_full<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
+    Ltx::read_from_file(filename)?
+      .into_included()?
+      .into_inherited()
+  }
+
+  /// Read from a file as generic ini with LTX descriptor filled.
+  pub fn read_from_file<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
       Ok(file) => file,
       Err(error) => {
@@ -44,37 +44,39 @@ impl Ltx {
     }
   }
 
-  /// Load from a file with options.
-  pub fn load_from_file_full_inherited<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::load_from_file(filename)?
-      .into_included()?
-      .into_inherited()
-  }
+  /// Read from a reader as generic ini with LTX descriptor filled.
+  pub fn read_from<R: Read>(reader: &mut R) -> Result<Ltx, LtxError> {
+    let mut data: String = String::new();
 
-  /// Load from a file with options.
-  pub fn load_from_file_full<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::load_from_file(filename)?.into_included()
+    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
+
+    match LtxParser::new(data.chars()).parse() {
+      Err(error) => Err(LtxError::Parse(error)),
+      Ok(success) => Ok(success),
+    }
   }
 }
 
 impl Ltx {
   /// Load include statements from a string.
-  pub fn read_includes_from_str(buf: &str) -> Result<LtxIncludes, LtxParseError> {
-    Ltx::read_includes_from_str_opt(buf)
-  }
-
-  /// Load include statements from a string with options.
-  pub fn read_includes_from_str_opt(buf: &str) -> Result<LtxIncludes, LtxParseError> {
+  pub fn read_included_from_str(buf: &str) -> Result<LtxIncluded, LtxParseError> {
     LtxParser::new(buf.chars()).parse_includes()
   }
 
-  /// Load include statements from a reader.
-  pub fn read_includes_from<R: Read>(reader: &mut R) -> Result<LtxIncludes, LtxError> {
-    Ltx::read_includes_from_opt(reader)
+  /// Load include statements from a file with options.
+  pub fn read_included_from_file<P: AsRef<Path>>(filename: P) -> Result<LtxIncluded, LtxError> {
+    let mut reader: File = match File::open(filename.as_ref()) {
+      Ok(file) => file,
+      Err(error) => {
+        return Err(LtxError::Io(error));
+      }
+    };
+
+    Ltx::read_included_from(&mut reader)
   }
 
-  /// Load include statements from a reader with options.
-  pub fn read_includes_from_opt<R: Read>(reader: &mut R) -> Result<LtxIncludes, LtxError> {
+  /// Load include statements from a reader.
+  pub fn read_included_from<R: Read>(reader: &mut R) -> Result<LtxIncluded, LtxError> {
     let mut data: String = String::new();
 
     reader.read_to_string(&mut data).map_err(LtxError::Io)?;
@@ -84,44 +86,15 @@ impl Ltx {
       Ok(success) => Ok(success),
     }
   }
-
-  /// Load include statements from a file.
-  pub fn read_includes_from_file<P: AsRef<Path>>(filename: P) -> Result<LtxIncludes, LtxError> {
-    Ltx::read_includes_from_file_opt(filename)
-  }
-
-  /// Load include statements from a file with options.
-  pub fn read_includes_from_file_opt<P: AsRef<Path>>(filename: P) -> Result<LtxIncludes, LtxError> {
-    let mut reader: File = match File::open(filename.as_ref()) {
-      Ok(file) => file,
-      Err(error) => {
-        return Err(LtxError::Io(error));
-      }
-    };
-
-    Ltx::read_includes_from_opt(&mut reader)
-  }
 }
 
 impl Ltx {
-  /// Load from a string with options.
+  /// Load formatted LTX as string from string.
   pub fn format_from_str(buf: &str) -> Result<String, LtxParseError> {
     LtxParser::new(buf.chars()).parse_into_formatted()
   }
 
-  /// Load from a reader with options.
-  pub fn format_from<R: Read>(reader: &mut R) -> Result<String, LtxError> {
-    let mut data: String = String::new();
-
-    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
-
-    match LtxParser::new(data.chars()).parse_into_formatted() {
-      Err(e) => Err(LtxError::Parse(e)),
-      Ok(success) => Ok(success),
-    }
-  }
-
-  /// Load from a file with options
+  /// Load formatted LTX as string from file.
   pub fn format_from_file<P: AsRef<Path>>(filename: P) -> Result<String, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
       Ok(file) => file,
@@ -132,11 +105,23 @@ impl Ltx {
 
     Ltx::format_from(&mut reader)
   }
+
+  /// Load formatted LTX as string from reader.
+  pub fn format_from<R: Read>(reader: &mut R) -> Result<String, LtxError> {
+    let mut data: String = String::new();
+
+    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
+
+    match LtxParser::new(data.chars()).parse_into_formatted() {
+      Err(e) => Err(LtxError::Parse(e)),
+      Ok(success) => Ok(success),
+    }
+  }
 }
 
 #[cfg(test)]
 mod test {
-  use crate::file::types::LtxIncludes;
+  use crate::file::types::LtxIncluded;
   use crate::test::file::read_file_as_string;
   use crate::test::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
   use crate::Ltx;
@@ -155,7 +140,7 @@ mod test {
       file.write_all(file_content).expect("write");
     }
 
-    let ltx: Ltx = Ltx::load_from_file(&file_name).unwrap();
+    let ltx: Ltx = Ltx::read_from_file(&file_name).unwrap();
     assert_eq!(ltx.get_from("test", "Key"), Some("Value"));
   }
 
@@ -221,7 +206,7 @@ mod test {
       file.write_all(file_content).expect("write");
     }
 
-    let includes: LtxIncludes = Ltx::read_includes_from_file(&file_name).unwrap();
+    let includes: LtxIncluded = Ltx::read_included_from_file(&file_name).unwrap();
     assert_eq!(includes, Vec::<String>::new());
   }
 
@@ -235,7 +220,7 @@ mod test {
       file.write_all(file_content).expect("write");
     }
 
-    let includes: LtxIncludes = Ltx::read_includes_from_file(&file_name).unwrap();
+    let includes: LtxIncluded = Ltx::read_included_from_file(&file_name).unwrap();
     assert_eq!(includes, vec!("first.ltx", "second.ltx"));
   }
 

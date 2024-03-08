@@ -22,7 +22,7 @@ pub fn create_export_file(path: &Path) -> io::Result<File> {
 /// Try opening ini file.
 /// Map any ini reading operation errors as IO invalid input.
 pub fn open_ini_config(path: &Path) -> io::Result<Ltx> {
-  match Ltx::load_from_file(path) {
+  match Ltx::read_from_file(path) {
     Ok(ini) => Ok(ini),
     Err(error) => Err(io::Error::new(
       io::ErrorKind::InvalidInput,

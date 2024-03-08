@@ -2,7 +2,7 @@ use crate::file::ltx_include::LtxIncludeConvertor;
 use crate::file::ltx_inherit::LtxInheritConvertor;
 use crate::file::section_entry::SectionEntry;
 use crate::file::section_setter::SectionSetter;
-use crate::file::types::{LtxIncludes, LtxSections};
+use crate::file::types::{LtxIncluded, LtxSections};
 use crate::{LtxError, Properties, ROOT_SECTION};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
@@ -11,7 +11,7 @@ use std::path::PathBuf;
 pub struct Ltx {
   pub(crate) path: Option<PathBuf>,
   pub(crate) directory: Option<PathBuf>,
-  pub(crate) includes: LtxIncludes,
+  pub(crate) includes: LtxIncluded,
   pub(crate) sections: LtxSections,
 }
 
@@ -208,7 +208,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_general_section() {
     let input = "[sec1]\nkey1=val1\n";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -231,7 +231,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_input() {
     let input: &str = "";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -244,7 +244,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_lines() {
     let input: &str = "\n\n\n";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -257,7 +257,7 @@ mod test {
   #[test]
   fn load_from_str_with_valid_input() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar\n";
-    let opt: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+    let opt: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
 
@@ -281,7 +281,7 @@ mod test {
   #[test]
   fn load_from_str_without_ending_newline() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar";
-    let opt: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+    let opt: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
   }
@@ -289,7 +289,7 @@ mod test {
   #[test]
   fn parse_error_numbers() {
     let invalid_input: &str = "\n\\x";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(invalid_input);
+    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(invalid_input);
 
     assert!(ltx.is_err());
 
@@ -302,7 +302,7 @@ mod test {
   #[test]
   fn parse_comment() {
     let input: &str = "; abcdefghijklmn\n";
-    let opt = Ltx::load_from_str(input);
+    let opt = Ltx::read_from_str(input);
     assert!(opt.is_ok());
   }
 
@@ -314,7 +314,7 @@ name = hello
 gender = mail ; abdddd
 ";
 
-    let mut ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let mut ltx: Ltx = Ltx::read_from_str(input).unwrap();
 
     for _ in &mut ltx {}
     for _ in &ltx {}
@@ -329,7 +329,7 @@ name = hello
 key = value ; comment
 ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
 
     assert_eq!(ltx.get_from("section_name", "name").unwrap(), "hello");
     assert_eq!(ltx.get_from("section_name", "key").unwrap(), "value");
@@ -351,7 +351,7 @@ key = value ; comment
 name = hello
 ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     let properties: &Properties = ltx.section("section_name").expect("Existing section");
 
     assert_eq!(properties.inherited.len(), 0);
@@ -372,7 +372,7 @@ name = hello
 key = value ; comment
 ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
 
     assert_eq!(ltx.get_from("section_name", "name").unwrap(), "hello");
     assert_eq!(ltx.get_from("section_name", "key").unwrap(), "value");
@@ -393,7 +393,7 @@ key = value ; comment
 name = hello
 ";
 
-    let ltx = Ltx::load_from_str(input);
+    let ltx = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -411,7 +411,7 @@ name = hello
 name = hello
 ";
 
-    let ltx = Ltx::load_from_str(input);
+    let ltx = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -429,7 +429,7 @@ name = hello
 name = hello
 ";
 
-    let ltx = Ltx::load_from_str(input);
+    let ltx = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -447,7 +447,7 @@ name = hello
 name = hello
 ";
 
-    let ltx = Ltx::load_from_str(input);
+    let ltx = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -467,7 +467,7 @@ name = hello
 #include \"file2.ltx\"
 ";
 
-    let ltx = Ltx::load_from_str(input);
+    let ltx = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -483,7 +483,7 @@ name = hello
 ; This is a comment
 Key = \"Value\"
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     assert_eq!(ltx.get_from("section name", "Key").unwrap(), "\"Value\"");
   }
 
@@ -495,7 +495,7 @@ Key = \"Value\"
 Key = \"Value   # This is not a comment ; at all\"
 Stuff = Other
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     assert_eq!(
       ltx.get_from("section name", "Key").unwrap(),
       "\"Value   # This is not a comment"
@@ -510,7 +510,7 @@ Stuff = Other
 Key = 'Value'
 Stuff = Other
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     assert_eq!(ltx.get_from("section name", "Key").unwrap(), "'Value'");
   }
 
@@ -521,7 +521,7 @@ Stuff = Other
 Comment[tr]=İnternet'e erişin
 Comment[uk]=Доступ до Інтернету
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     assert_eq!(
       ltx.get_from("test", "Comment[tr]").unwrap(),
       "İnternet'e erişin"
@@ -535,7 +535,7 @@ Comment[uk]=Доступ до Інтернету
 ; This is a comment
 Key = 'Value   # This is not a comment ; at all'
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     assert_eq!(
       ltx.get_from("section name", "Key").unwrap(),
       "'Value   # This is not a comment"
@@ -545,7 +545,7 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn load_from_str_with_valid_empty_input() {
     let input: &str = "key1=\nkey2=val2\n";
-    let opt = Ltx::load_from_str(input);
+    let opt = Ltx::read_from_str(input);
     assert!(opt.is_ok());
 
     let output = opt.unwrap();
@@ -567,7 +567,7 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn load_from_str_with_crlf() {
     let input: &str = "key1=val1\r\nkey2=val2\r\n";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -590,7 +590,7 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn load_from_str_with_cr() {
     let input: &str = "key1=val1\rkey2=val2\r";
-    let opt = Ltx::load_from_str(input);
+    let opt = Ltx::read_from_str(input);
     assert!(opt.is_ok());
 
     let output = opt.unwrap();
@@ -611,7 +611,7 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn get_with_non_static_key() {
     let input: &str = "key1=val1\nkey2=val2\n";
-    let opt = Ltx::load_from_str(input).unwrap();
+    let opt = Ltx::read_from_str(input).unwrap();
 
     let sec1 = opt.section(ROOT_SECTION).unwrap();
 
@@ -626,7 +626,7 @@ Key = 'Value   # This is not a comment ; at all'
 Exec = \"/path/to/exe with space\" arg
 ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     let sec = ltx.section("desktop_entry").unwrap();
     assert_eq!(&sec["Exec"], "\"/path/to/exe with space\" arg");
   }
@@ -645,7 +645,7 @@ cd1 = x
 xd = x
         ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     let keys: Vec<&str> = ltx.iter().map(|(k, _)| k).collect();
 
     assert_eq!(keys.len(), 5);
@@ -663,7 +663,7 @@ x2 = n2
 x1 = n2
 x3 = n2
 ";
-    let mut ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let mut ltx: Ltx = Ltx::read_from_str(input).unwrap();
     let section: &Properties = ltx.root_section();
     let keys: Vec<&str> = section.iter().map(|(k, _)| k).collect();
     assert_eq!(keys, vec!["x2", "x1", "x3"]);
@@ -677,7 +677,7 @@ x2 = n2
 xb = n2
 a3 = n3
 ";
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     let section: &Properties = ltx.section("s").unwrap();
     let keys: Vec<&str> = section.iter().map(|(k, _)| k).collect();
     assert_eq!(keys, vec!["x2", "xb", "a3"])
@@ -695,7 +695,7 @@ foo = a
 foo = c
 ";
 
-    let ltx: Result<Ltx, LtxParseError> = Ltx::load_from_str(input);
+    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -744,7 +744,7 @@ x1 = na
 x3 = nb
 ";
 
-    let mut str: Ltx = Ltx::load_from_str(input).unwrap();
+    let mut str: Ltx = Ltx::read_from_str(input).unwrap();
     let section: &mut Properties = str.root_section_mut();
     section.iter_mut().enumerate().for_each(|(i, (_, v))| {
       v.push_str(&i.to_string());
@@ -761,7 +761,7 @@ x1 = na
 x3 = nb
 ";
 
-    let ltx: Ltx = Ltx::load_from_str(input).unwrap();
+    let ltx: Ltx = Ltx::read_from_str(input).unwrap();
     let (_, section) = ltx.into_iter().next().unwrap();
     let props: Vec<_> = section.into_iter().collect();
     assert_eq!(

@@ -1,12 +1,12 @@
 use crate::file::configuration::constants::LTX_EXTENSION;
 use crate::file::error::LtxConvertError;
 use crate::{Ltx, LtxError};
-use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
 /// Handler of LTX configs root.
 /// Iteration and filtering of de-duplicated ini files.
+/// Parsing of validation schema and making sure LTX files are valid.
 #[derive(Debug)]
 pub struct LtxProject {
   /// Root path of the project.
@@ -45,7 +45,7 @@ impl LtxProject {
           }
         };
 
-        for include in &Ltx::read_includes_from_file(entry_path)? {
+        for include in &Ltx::read_included_from_file(entry_path)? {
           let mut included_path: PathBuf = PathBuf::from(parent);
 
           included_path.push(include);
@@ -86,7 +86,7 @@ impl LtxProject {
     for entry in &self.ltx_entries {
       println!("Verify: {:?}", entry.path());
 
-      let ltx: Ltx = Ltx::load_from_file_full_inherited(entry.path())?;
+      let ltx: Ltx = Ltx::load_from_file_full(entry.path())?;
 
       let mut destination: PathBuf = PathBuf::from("target/assets");
 
@@ -105,7 +105,7 @@ impl LtxProject {
   pub fn format_all_files(&self) -> Result<(), LtxError> {
     for entry in &self.ltx_files {
       println!("Format: {:?}", entry.path());
-      Self::format_file(entry.path())?;
+      Ltx::format_file(entry.path())?;
     }
 
     println!();
@@ -115,13 +115,8 @@ impl LtxProject {
   }
 
   /// Format single LTX file by provided path
-  pub fn format_file(path: &Path) -> Result<(), LtxError> {
-    fs::write(path, Ltx::format_from_file(path)?).map_err(LtxError::Io)
-  }
-
-  /// Format single LTX file by provided path
   pub fn verify_file(path: &Path) -> Result<(), LtxError> {
-    let ltx: Ltx = Ltx::load_from_file(path)?;
+    let ltx: Ltx = Ltx::read_from_file(path)?;
 
     ltx
       .into_included()?

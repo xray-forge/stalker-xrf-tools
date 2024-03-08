@@ -11,19 +11,31 @@ use std::str::Chars;
 
 /// Ltx parser.
 pub struct LtxParser<'a> {
-  ch: Option<char>,
-  rdr: Chars<'a>,
+  char: Option<char>,
+  reader: Chars<'a>,
   line: usize,
-  col: usize,
+  column: usize,
+}
+
+impl<'a> Default for LtxParser<'a> {
+  fn default() -> LtxParser<'a> {
+    LtxParser {
+      char: None,
+      line: 0,
+      column: 0,
+      reader: "".chars(),
+    }
+  }
 }
 
 impl<'a> LtxParser<'a> {
-  pub fn new(rdr: Chars<'a>) -> LtxParser<'a> {
+  /// Create new parser based on characters stream.
+  pub fn new(reader: Chars<'a>) -> LtxParser<'a> {
     let mut parser: LtxParser = LtxParser {
-      ch: None,
+      char: None,
       line: 0,
-      col: 0,
-      rdr,
+      column: 0,
+      reader,
     };
 
     parser.bump();
@@ -31,149 +43,95 @@ impl<'a> LtxParser<'a> {
     parser
   }
 
-  fn bump(&mut self) {
-    self.ch = self.rdr.next();
-
-    match self.ch {
-      Some('\n') => {
-        self.line += 1;
-        self.col = 0;
-      }
-      Some(..) => {
-        self.col += 1;
-      }
-      None => {}
-    }
-  }
-
-  fn error<U, M: Into<String>>(&self, message: M) -> Result<U, LtxParseError> {
-    Err(LtxParseError {
-      line: self.line + 1,
-      col: self.col + 1,
-      message: message.into(),
-    })
-  }
-
   /// Parse the whole LTX input.
   pub fn parse(&mut self) -> Result<Ltx, LtxParseError> {
-    let mut includes_processed: bool = false;
-
-    let mut ltx: Ltx = Ltx::new();
     let mut current_section: String = ROOT_SECTION.to_string();
-    let mut current_key: String = String::new();
+    let mut includes_processed: bool = false;
+    let mut ltx: Ltx = Ltx::new();
 
-    self.parse_whitespace();
+    self.skip_whitespaces();
 
-    while let Some(current_char) = self.ch {
+    while let Some(current_char) = self.char {
       // Allow includes declaration header.
       // Allow writing comments before.
       if !includes_processed {
-        includes_processed = current_char != '#' && current_char != ';';
+        includes_processed = matches!(current_char, |LTX_SYMBOL_INCLUDE| LTX_SYMBOL_COMMENT)
       }
 
       match current_char {
-        ';' => {
-          self.parse_comment()?;
+        current if current == LTX_SYMBOL_COMMENT => {
+          self.skip_comment()?;
         }
 
-        '#' => {
+        current if current == LTX_SYMBOL_INCLUDE => {
+          // Allow includes only in header.
           if includes_processed {
             return self.error(String::from(
               "Unexpected '#include' statement, all include statements should be part of config heading",
             ));
           }
 
-          match self.parse_str_until_eol(true) {
-            Ok(include_line) => {
-              let (include, _) = self.parse_include_from_line(&include_line)?;
+          let line: String = self.parse_until_eol(true)?;
+          let (included_path, _) = self.parse_include_from_line(&line)?;
 
-              if ltx.includes(&include) {
-                return self.error(format!(
-                  "Failed to parse include statement in ltx file, including '{}' more than once",
-                  &include
-                ));
-              } else {
-                ltx.include(include)
-              }
-            }
-            Err(error) => return Err(error),
+          if ltx.includes(&included_path) {
+            return self.error(format!(
+              "Failed to parse include statement in ltx file, including '{}' more than once",
+              &included_path
+            ));
+          } else {
+            ltx.include(included_path)
           }
         }
 
-        '[' => match self.parse_section(true) {
-          Ok(section) => {
-            current_section = String::from(section[..].trim());
+        current if current == LTX_SYMBOL_SECTION_OPEN => {
+          let line: String = self.parse_until_eol(true)?;
+          let (section, inherited, _) = self.parse_section_from_line(&line)?;
 
-            match ltx.entry(current_section.clone()) {
-              SectionEntry::Vacant(vacant_entry) => {
-                vacant_entry.insert(Default::default());
-              }
-              SectionEntry::Occupied(_) => {
-                return self.error(String::from("Duplicate sections are not allowed"));
-              }
-            }
-          }
-          Err(error) => return Err(error),
-        },
+          current_section = section;
 
-        '=' => {
-          if current_key[..].is_empty() {
-            return self.error("Missing key when parsing '=' in ltx file");
-          }
+          match ltx.entry(current_section.clone()) {
+            SectionEntry::Vacant(vacant_entry) => {
+              let mut properties: Properties = Default::default();
 
-          match self.parse_val(true) {
-            Ok(value) => {
-              let value: String = value[..].trim().to_owned();
-
-              match ltx.entry(current_section.clone()) {
-                SectionEntry::Vacant(vacant_entry) => {
-                  let mut properties: Properties = Properties::new(); // cursec must be None (the General Section)
-
-                  properties.insert(current_key, value);
-                  vacant_entry.insert(properties);
-                }
-                SectionEntry::Occupied(occupied_entry) => {
-                  // Insert into the last (current) section
-                  occupied_entry.into_mut().append(current_key, value);
+              if let Some(inherited) = inherited {
+                for base_name in inherited {
+                  properties.inherit(base_name);
                 }
               }
-              current_key = String::new();
+
+              vacant_entry.insert(Default::default());
             }
-            Err(error) => return Err(error),
+            SectionEntry::Occupied(_) => {
+              return self.error(format!(
+                "Duplicate sections are not allowed, looks like '{current_section}' is declared twice"
+              ));
+            }
           }
         }
 
-        // Parsing of inherited sections.
-        LTX_SYMBOL_INHERIT => match self.parse_val(true) {
-          Ok(value) => {
-            let value: String = value[..].trim().to_owned();
+        _ => {
+          let line: String = self.parse_until_eol(true)?;
+          let (key, value, _) = self.parse_key_value_from_line(&line)?;
 
-            match ltx.entry(current_section.clone()) {
-              SectionEntry::Vacant(vacant_entry) => {
-                let mut properties: Properties = Properties::new();
+          match ltx.entry(current_section.clone()) {
+            SectionEntry::Vacant(vacant_entry) => {
+              let mut properties: Properties = Properties::new();
 
-                self.inherit_from_string(&value, &mut properties);
+              properties.insert(key, value.unwrap_or(String::new()));
 
-                vacant_entry.insert(properties);
-              }
-              SectionEntry::Occupied(occupied_entry) => {
-                self.inherit_from_string(&value, occupied_entry.into_mut());
-              }
+              vacant_entry.insert(properties);
             }
-            current_key = String::new();
+            SectionEntry::Occupied(_) => {
+              return self.error(format!(
+                "Duplicate fields are not allowed, looks like '{current_section}' is declared twice in {current_section}"
+              ));
+            }
           }
-          Err(error) => return Err(error),
-        },
-
-        _ => match self.parse_key() {
-          Ok(key) => {
-            current_key = key[..].trim().to_owned();
-          }
-          Err(error) => return Err(error),
-        },
+        }
       }
 
-      self.parse_whitespace();
+      self.skip_whitespaces();
     }
 
     Ok(ltx)
@@ -181,42 +139,38 @@ impl<'a> LtxParser<'a> {
 
   /// Parse the whole LTX input and reformat as string.
   pub fn parse_into_formatted(&mut self) -> Result<String, LtxParseError> {
-    self.parse_whitespace();
-
     let mut formatted: String = String::new();
 
-    while let Some(current_char) = self.ch {
+    self.skip_whitespaces();
+
+    while let Some(current_char) = self.char {
+      let line: String = self.parse_until_eol(false)?;
+
       match current_char {
         current if current == LTX_SYMBOL_COMMENT => {
-          let comment_line: String = self.parse_str_until_eol(false)?;
-          let comment: &str = &comment_line[1..];
-
-          LtxFormatter::write_comment(&mut formatted, comment);
+          LtxFormatter::write_comment(&mut formatted, &line[1..]);
         }
 
         current if current == LTX_SYMBOL_INCLUDE => {
-          let include_line: String = self.parse_str_until_eol(false)?;
-          let (included_path, comment) = self.parse_include_from_line(&include_line)?;
+          let (included_path, comment) = self.parse_include_from_line(&line)?;
 
           LtxFormatter::write_include(&mut formatted, &included_path, comment.as_deref());
         }
 
         current if current == LTX_SYMBOL_SECTION_OPEN => {
-          let section_line: String = self.parse_str_until_eol(false)?;
-          let (section, inherited, comment) = self.parse_section_from_line(&section_line)?;
+          let (section, inherited, comment) = self.parse_section_from_line(&line)?;
 
           LtxFormatter::write_section(&mut formatted, &section, inherited, comment.as_deref());
         }
 
         _ => {
-          let key_value_line: String = self.parse_str_until_eol(false)?;
-          let (key, value, comment) = self.parse_key_value_from_line(&key_value_line)?;
+          let (key, value, comment) = self.parse_key_value_from_line(&line)?;
 
           LtxFormatter::write_key_value(&mut formatted, &key, value.as_deref(), comment.as_deref());
         }
       }
 
-      self.parse_whitespace();
+      self.skip_whitespaces();
     }
 
     if !formatted.ends_with(LineSeparator::CRLF.as_str()) {
@@ -226,72 +180,73 @@ impl<'a> LtxParser<'a> {
     Ok(formatted)
   }
 
-  /// Parse only include sections from file.
+  /// Parse only include sections from file and return list of included LTX files.
   pub fn parse_includes(&mut self) -> Result<Vec<String>, LtxParseError> {
-    let mut includes_processed: bool = false;
-    let mut includes: Vec<String> = Vec::new();
+    let mut included: Vec<String> = Vec::new();
 
-    self.parse_whitespace();
+    self.skip_whitespaces();
 
-    while let Some(current_char) = self.ch {
-      if !includes_processed {
-        includes_processed =
-          current_char != LTX_SYMBOL_INCLUDE && current_char != LTX_SYMBOL_COMMENT;
-      }
-
+    while let Some(current_char) = self.char {
       match current_char {
-        ';' => {
-          self.parse_comment()?;
+        current if current == LTX_SYMBOL_COMMENT => {
+          self.skip_comment()?;
         }
 
-        '#' => {
-          if includes_processed {
-            return self.error(String::from(
-              "Unexpected '#include' statement, all include statements should be part of config heading",
+        current if current == LTX_SYMBOL_INCLUDE => {
+          let line: String = self.parse_until_eol(true)?;
+          let (include_path, _) = self.parse_include_from_line(&line)?;
+
+          if included.contains(&include_path) {
+            return self.error(format!(
+              "Failed to parse include statement in ltx file, including '{}' more than once",
+              &include_path
             ));
-          }
-
-          match self.parse_str_until_eol(true) {
-            Ok(include_line) => {
-              let (include, _) = self.parse_include_from_line(&include_line)?;
-
-              if includes.contains(&include) {
-                return self.error(format!(
-                  "Failed to parse include statement in ltx file, including '{}' more than once",
-                  &include
-                ));
-              } else {
-                includes.push(include)
-              }
-            }
-            Err(error) => return Err(error),
+          } else {
+            included.push(include_path)
           }
         }
+
         _ => {
-          return Ok(includes);
+          return Ok(included);
         }
       }
 
-      self.parse_whitespace();
+      self.skip_whitespaces();
     }
 
-    Ok(includes)
+    Ok(included)
   }
 }
 
 impl<'a> LtxParser<'a> {
-  fn inherit_from_string(&self, value: &str, properties: &mut Properties) {
-    for base_name in value.split(',').map(|inherited| inherited.trim()) {
-      if !base_name.is_empty() {
-        properties.inherit(base_name);
+  fn bump(&mut self) {
+    self.char = self.reader.next();
+
+    match self.char {
+      Some('\n') => {
+        self.line += 1;
+        self.column = 0;
       }
+      Some(..) => {
+        self.column += 1;
+      }
+      None => {}
     }
   }
 
+  /// Create parsing error.
+  fn error<U, M: Into<String>>(&self, message: M) -> Result<U, LtxParseError> {
+    Err(LtxParseError {
+      line: self.line + 1,
+      col: self.column + 1,
+      message: message.into(),
+    })
+  }
+
   /// Consume all the white space until the end of the line or a tab.
-  fn parse_whitespace(&mut self) {
-    while let Some(c) = self.ch {
-      if !c.is_whitespace() && c != '\n' && c != '\t' && c != '\r' {
+  fn skip_whitespaces(&mut self) {
+    while let Some(char) = self.char {
+      if !char.is_whitespace() && char != '\n' && char != '\t' && char != '\r' {
         break;
       }
 
@@ -300,8 +255,8 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Consume all the white space except line break.
-  fn parse_whitespace_except_line_break(&mut self) {
-    while let Some(c) = self.ch {
+  fn skip_whitespaces_except_line_break(&mut self) {
+    while let Some(c) = self.char {
       if (c == '\n' || c == '\r' || !c.is_whitespace()) && c != '\t' {
         break;
       }
@@ -310,26 +265,34 @@ impl<'a> LtxParser<'a> {
     }
   }
 
-  fn parse_comment(&mut self) -> Result<String, LtxParseError> {
-    self.parse_val(false)
+  fn skip_comment(&mut self) -> Result<String, LtxParseError> {
+    self.bump();
+
+    // Allow empty value.
+    self.skip_whitespaces_except_line_break();
+
+    match self.char {
+      None => Ok(String::new()),
+      _ => self.parse_until_eol(false),
+    }
   }
 
-  fn parse_str_until(
+  fn parse_until(
     &mut self,
     endpoint: &[Option<char>],
     check_inline_comment: bool,
   ) -> Result<String, LtxParseError> {
     let mut result: String = String::new();
 
-    while !endpoint.contains(&self.ch) {
-      match self.ch {
+    while !endpoint.contains(&self.char) {
+      match self.char {
         None => {
           return self.error(format!("Expecting \"{:?}\" but found EOF.", endpoint));
         }
         Some(space) if check_inline_comment && (space == ' ' || space == '\t') => {
           self.bump();
 
-          match self.ch {
+          match self.char {
             Some(';') => {
               // [space]; starts an inline comment.
               break;
@@ -354,47 +317,12 @@ impl<'a> LtxParser<'a> {
     Ok(result)
   }
 
-  fn parse_section(&mut self, strip_comment: bool) -> Result<String, LtxParseError> {
-    // Skip [
-    self.bump();
-
-    let section: String = self.parse_str_until(&[Some(LTX_SYMBOL_SECTION_CLOSE)], false)?;
-
-    if let Some(LTX_SYMBOL_SECTION_CLOSE) = self.ch {
-      self.bump();
-    }
-
-    // Deal with inline comment
-    if strip_comment && matches!(self.ch, Some(LTX_SYMBOL_COMMENT)) {
-      self.parse_comment()?;
-    }
-
-    Ok(section)
-  }
-
-  fn parse_key(&mut self) -> Result<String, LtxParseError> {
-    self.parse_str_until(&[Some('='), Some('\n')], false)
-  }
-
-  fn parse_val(&mut self, strip_inline_comment: bool) -> Result<String, LtxParseError> {
-    self.bump();
-
-    // Allow empty value.
-    self.parse_whitespace_except_line_break();
-
-    match self.ch {
-      None => Ok(String::new()),
-      _ => self.parse_str_until_eol(strip_inline_comment),
-    }
-  }
-
   #[inline]
-  fn parse_str_until_eol(&mut self, strip_inline_comment: bool) -> Result<String, LtxParseError> {
-    let value: String =
-      self.parse_str_until(&[Some('\n'), Some('\r'), None], strip_inline_comment)?;
+  fn parse_until_eol(&mut self, strip_inline_comment: bool) -> Result<String, LtxParseError> {
+    let value: String = self.parse_until(&[Some('\n'), Some('\r'), None], strip_inline_comment)?;
 
-    if strip_inline_comment && matches!(self.ch, Some(LTX_SYMBOL_COMMENT)) {
-      self.parse_comment()?;
+    if strip_inline_comment && matches!(self.char, Some(LTX_SYMBOL_COMMENT)) {
+      self.skip_comment()?;
     }
 
     Ok(value)
@@ -411,7 +339,7 @@ impl<'a> LtxParser<'a> {
       return self.error("Failed to parse empty section statement");
     }
 
-    let closing_bracket_position: Option<usize> = line.find(']');
+    let closing_bracket_position: Option<usize> = line.find(LTX_SYMBOL_SECTION_CLOSE);
 
     if closing_bracket_position.is_none() {
       return self.error("Failed to parse section statement without closing bracket ']'");
@@ -530,17 +458,6 @@ impl<'a> LtxParser<'a> {
       value.map(String::from),
       comment.filter(|it| !it.is_empty()).map(String::from),
     ))
-  }
-}
-
-impl<'a> Default for LtxParser<'a> {
-  fn default() -> LtxParser<'a> {
-    LtxParser {
-      ch: None,
-      line: 0,
-      col: 0,
-      rdr: "".chars(),
-    }
   }
 }
 

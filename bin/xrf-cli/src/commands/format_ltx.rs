@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_ltx::LtxProject;
+use xray_ltx::{Ltx, LtxProject};
 
 /// Lint and format ltx file or folder based on provided arguments.
 pub fn format_ltx(matches: &ArgMatches) {
@@ -16,6 +16,6 @@ pub fn format_ltx(matches: &ArgMatches) {
       .unwrap();
   } else {
     log::info!("Formatting ltx file: {:?}", path);
-    LtxProject::format_file(path).unwrap()
+    Ltx::format_file(path).unwrap()
   }
 }
