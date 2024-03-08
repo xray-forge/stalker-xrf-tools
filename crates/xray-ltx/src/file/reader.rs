@@ -133,7 +133,7 @@ mod test {
   #[test]
   fn load_from_file() {
     let file_name = temp_dir().join("rust_ini_load_from_file");
-    let file_content = b"[test]Key=Value\n";
+    let file_content = b"[test]\nKey=Value\n";
 
     {
       let mut file = File::create(&file_name).expect("create");

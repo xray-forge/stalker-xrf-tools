@@ -8,8 +8,20 @@ use std::{fs, io};
 
 impl Ltx {
   /// Format single LTX file by provided path
-  pub fn format_file<P: AsRef<Path>>(filename: P) -> Result<(), LtxError> {
-    fs::write(&filename, Ltx::format_from_file(&filename)?).map_err(LtxError::Io)
+  pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> Result<bool, LtxError> {
+    let formatted: String = Ltx::format_from_file(&filename)?;
+    let existing: String =
+      io::read_to_string(&mut OpenOptions::new().read(true).open(filename.as_ref())?)?;
+
+    if existing == formatted {
+      Ok(false)
+    } else {
+      if write {
+        fs::write(&filename, formatted).map_err(LtxError::Io)?;
+      }
+
+      Ok(true)
+    }
   }
 
   /// Write to a file

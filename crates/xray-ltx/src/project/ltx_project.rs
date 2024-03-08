@@ -1,6 +1,6 @@
 use crate::file::configuration::constants::LTX_EXTENSION;
 use crate::file::error::LtxConvertError;
-use crate::{Ltx, LtxError};
+use crate::{Ltx, LtxError, LtxFormatOptions};
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
@@ -101,18 +101,70 @@ impl LtxProject {
   }
 
   /// Format all LTX entries in current project.
-  pub fn format_all_files(&self) -> Result<(), LtxError> {
-    println!("Formatting path: {:?}", self.root);
+  pub fn format_all_files_opt(&self, options: LtxFormatOptions) -> Result<bool, LtxError> {
+    let mut count: usize = 0;
 
-    for entry in &self.ltx_files {
-      println!("Format: {:?}", entry.path());
-      Ltx::format_file(entry.path())?;
+    if !options.is_silent {
+      println!("Formatting path: {:?}", self.root);
     }
 
-    println!();
-    println!("Formatted {} ltx files", self.ltx_entries.len());
+    for entry in &self.ltx_files {
+      if Ltx::format_file(entry.path(), true)? {
+        count += 1;
 
-    Ok(())
+        if !options.is_silent {
+          println!("Formatted: {:?}", entry.path());
+        }
+      }
+    }
+
+    if !options.is_silent {
+      println!("Formatted {count}/{} ltx files", self.ltx_entries.len());
+    }
+
+    Ok(count > 0)
+  }
+
+  /// Check format of all LTX entries in current project.
+  pub fn check_all_files_opt(&self, options: LtxFormatOptions) -> Result<bool, LtxError> {
+    let mut count: usize = 0;
+
+    if !options.is_silent {
+      println!("Checking path: {:?}", self.root);
+    }
+
+    for entry in &self.ltx_files {
+      if Ltx::format_file(entry.path(), false)? {
+        count += 1;
+
+        if !options.is_silent {
+          println!("Not formatted: {:?}", entry.path());
+        }
+      }
+    }
+
+    if !options.is_silent {
+      if count > 0 {
+        println!(
+          "Format issues with {count}/{} ltx files",
+          self.ltx_entries.len()
+        );
+      } else {
+        println!("All {} ltx files are formatted", self.ltx_entries.len());
+      }
+    }
+
+    Ok(count > 0)
+  }
+
+  /// Format all LTX entries in current project.
+  pub fn format_all_files(&self) -> Result<bool, LtxError> {
+    self.format_all_files_opt(LtxFormatOptions::default())
+  }
+
+  /// Format all LTX entries in current project.
+  pub fn check_all_files(&self) -> Result<bool, LtxError> {
+    self.check_all_files_opt(LtxFormatOptions::default())
   }
 
   /// Format single LTX file by provided path

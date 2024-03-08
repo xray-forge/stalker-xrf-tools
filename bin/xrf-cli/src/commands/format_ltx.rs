@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_ltx::{Ltx, LtxProject};
+use std::process;
+use xray_ltx::{Ltx, LtxFormatOptions, LtxProject};
 
 /// Lint and format ltx file or folder based on provided arguments.
 pub fn format_ltx(matches: &ArgMatches) {
@@ -8,14 +9,35 @@ pub fn format_ltx(matches: &ArgMatches) {
     .get_one::<PathBuf>("path")
     .expect("Expected valid input path to be provided");
 
+  let is_silent: bool = matches.get_flag("silent");
+  let is_check: bool = matches.get_flag("check");
+
   if path.is_dir() {
-    log::info!("Formatting ltx folder: {:?}", path);
-    LtxProject::open_at_path(path)
-      .unwrap()
-      .format_all_files()
-      .unwrap();
+    let project: LtxProject = LtxProject::open_at_path(path).unwrap();
+
+    if is_check {
+      log::info!("Checking format of ltx folder: {:?}", path);
+
+      let has_invalid: bool = project
+        .check_all_files_opt(LtxFormatOptions { is_silent })
+        .unwrap();
+
+      if has_invalid {
+        process::exit(1);
+      }
+    } else {
+      log::info!("Formatting ltx folder: {:?}", path);
+
+      project
+        .format_all_files_opt(LtxFormatOptions { is_silent })
+        .unwrap();
+    }
   } else {
-    log::info!("Formatting ltx file: {:?}", path);
-    Ltx::format_file(path).unwrap()
+    log::info!(
+      "Formatting ltx file: {:?}, --check={is_check}, --silent={is_silent}",
+      path
+    );
+
+    Ltx::format_file(path, true).unwrap();
   }
 }

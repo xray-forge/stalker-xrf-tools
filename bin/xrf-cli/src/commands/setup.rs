@@ -117,12 +117,20 @@ pub fn setup_commands() -> Command {
             .value_parser(value_parser!(PathBuf)),
         )
         .arg(
-          Arg::new("filter")
-            .help("Path or mask to include in formatting (works with folders as path)")
-            .short('f')
-            .long("filter")
+          Arg::new("silent")
+            .help("Turn of formatter logging")
+            .short('s')
+            .long("silent")
             .required(false)
-            .value_parser(value_parser!(String)),
+            .action(ArgAction::SetTrue),
+        )
+        .arg(
+          Arg::new("check")
+            .help("Turn of formatter logging")
+            .short('c')
+            .long("check")
+            .required(false)
+            .action(ArgAction::SetTrue),
         ),
     )
     .subcommand(

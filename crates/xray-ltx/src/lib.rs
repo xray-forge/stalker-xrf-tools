@@ -10,4 +10,5 @@ pub use crate::file::error::{LtxError, LtxParseError};
 pub use crate::file::ltx::Ltx;
 pub use crate::file::properties::Properties;
 
+pub use crate::project::ltx_format_options::LtxFormatOptions;
 pub use crate::project::ltx_project::LtxProject;

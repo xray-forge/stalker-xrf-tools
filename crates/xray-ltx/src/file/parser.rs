@@ -55,7 +55,7 @@ impl<'a> LtxParser<'a> {
       // Allow includes declaration header.
       // Allow writing comments before.
       if !includes_processed {
-        includes_processed = matches!(current_char, |LTX_SYMBOL_INCLUDE| LTX_SYMBOL_COMMENT)
+        includes_processed = !matches!(current_char, |LTX_SYMBOL_INCLUDE| LTX_SYMBOL_COMMENT)
       }
 
       match current_char {
@@ -100,7 +100,7 @@ impl<'a> LtxParser<'a> {
                 }
               }
 
-              vacant_entry.insert(Default::default());
+              vacant_entry.insert(properties);
             }
             SectionEntry::Occupied(_) => {
               return self.error(format!(

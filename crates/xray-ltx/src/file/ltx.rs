@@ -288,15 +288,15 @@ mod test {
 
   #[test]
   fn parse_error_numbers() {
-    let invalid_input: &str = "\n\\x";
+    let invalid_input: &str = "\n\n[not_closed";
     let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(invalid_input);
 
     assert!(ltx.is_err());
 
     let error: LtxParseError = ltx.unwrap_err();
 
-    assert_eq!(error.line, 2);
-    assert_eq!(error.col, 3);
+    assert_eq!(error.line, 3);
+    assert_eq!(error.col, 12);
   }
 
   #[test]
@@ -700,7 +700,7 @@ foo = c
     assert!(ltx.is_err());
     assert_eq!(
       ltx.unwrap_err().message,
-      "Duplicate sections are not allowed"
+      "Duplicate sections are not allowed, looks like 'peer' is declared twice"
     );
   }
 
