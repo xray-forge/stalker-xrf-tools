@@ -4,7 +4,8 @@
 [![language-rust](https://img.shields.io/badge/language-rust-orange.svg?style=flat)](https://github.com/xray-forge/stalker-xrf-tools/search?l=rust)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/Neloreck/dreamstate/blob/master/LICENSE)
 <br/>
-![status](https://github.com/xray-forge/stalker-xrf-tools/actions/workflows/build_and_test.yml/badge.svg)
+![status](https://github.com/xray-forge/stalker-xrf-tools/actions/workflows/build_and_test_windows.yml/badge.svg)
+![status](https://github.com/xray-forge/stalker-xrf-tools/actions/workflows/build_and_test_ubuntu.yml/badge.svg)
 
 Set of utility tools to assist with xray engine mods development and debugging.
 
