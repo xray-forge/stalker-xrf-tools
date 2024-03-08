@@ -1,0 +1,60 @@
+name: Build and test ubuntu
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run xray crates tests
+        run: cargo test --verbose -p xray-db xray-ltx
+
+      - name: Build CLI
+        run: cargo build -p xrf-cli --release
+
+      - name: Upload CLI build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: xrf-cli
+          path: target/release/xrf-cli
+          retention-days: 1
+
+  upload-nightly:
+    if: ${{ github.ref_name == 'main' && github.event_name != 'pull_request' }}
+    needs: [ build ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update nightly tag
+        uses: EndBug/latest-tag@latest
+        id: update-nightly-tag
+        with:
+          ref: nightly
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: xrf-cli
+
+      - name: Publish nightly cli build
+        if: ${{ steps.update-nightly-tag.outcome == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --clobber nightly xrf-cli

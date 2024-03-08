@@ -1,4 +1,4 @@
-name: Build and test
+name: Build and test windows
 
 on:
   push:
@@ -36,8 +36,8 @@ jobs:
       - name: Run formatter
         run: cargo fmt --all -- --check
 
-      - name: Run xray-db tests
-        run: cargo test --verbose -p xray-db
+      - name: Run xray crates tests
+        run: cargo test --verbose -p xray-db xray-ltx
 
       - name: Build CLI
         run: cargo make build-cli-release
