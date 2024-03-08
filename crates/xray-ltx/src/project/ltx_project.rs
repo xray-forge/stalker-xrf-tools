@@ -103,6 +103,8 @@ impl LtxProject {
 
   /// Format all LTX entries in current project.
   pub fn format_all_files(&self) -> Result<(), LtxError> {
+    println!("Formatting path: {:?}", self.root);
+
     for entry in &self.ltx_files {
       println!("Format: {:?}", entry.path());
       Ltx::format_file(entry.path())?;
