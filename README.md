@@ -7,48 +7,27 @@
 ![status](https://github.com/xray-forge/stalker-xrf-tools/actions/workflows/build_and_test_windows.yml/badge.svg)
 ![status](https://github.com/xray-forge/stalker-xrf-tools/actions/workflows/build_and_test_ubuntu.yml/badge.svg)
 
-Set of utility tools to assist with xray engine mods development and debugging.
+Set of [utility tools](https://xray-forge.github.io/stalker-xrf-book/tools/tools.html) to assist with xray engine mods
+development and debugging. <br/>
+Includes UI application for usability and manual usage and CLI variant for scripts / CI.
 
-### CLI tool commands
+## Application
 
-- help
-- repack-spawn
-- unpack-spawn
-- pack-spawn
-- verify-spawn
-- unpack-archive
-- format-ltx
-- verify-ltx
+Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/app/app.html).
 
-### Todo
+- [Archive editor](https://xray-forge.github.io/stalker-xrf-book/tools/app/archive_editor.md)
+- [Dialog editor](https://xray-forge.github.io/stalker-xrf-book/tools/app/dialog_editor.md)
+- [Config editor](https://xray-forge.github.io/stalker-xrf-book/tools/app/config_editor.md)
+- [Exports viewer](https://xray-forge.github.io/stalker-xrf-book/tools/app/exports_viewer.md)
+- [Icon editor](https://xray-forge.github.io/stalker-xrf-book/tools/app/icon_editor.md)
+- [Spawn editor](https://xray-forge.github.io/stalker-xrf-book/tools/app/spawn_editor.md)
 
-Description of commands and guide/doc should be implemented later. <br/>
-Description of UI application with dev tools.
+<img width="600px" src="https://xray-forge.github.io/stalker-xrf-book/tools/app/images/main_window.png">
 
-#### Spawn editor
+## CLI
 
-todo;
+Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/app/cli.html).
 
-#### Dialog editor
-
-todo;
-
-#### Icons editor
-
-todo;
-
-#### Translations editor
-
-todo;
-
-#### Effects and conditions explorer
-
-todo;
-
-#### Archive editor
-
-todo;
-
-#### Ltx validator
-
-todo;
+- [Archive commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/archive.html)
+- [LTX commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/ltx.html)
+- [Spawn commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/spawn.html)
