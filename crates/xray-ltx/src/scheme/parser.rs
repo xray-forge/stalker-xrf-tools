@@ -1,6 +1,7 @@
 use crate::error::ltx_convert_error::LtxConvertError;
 use crate::error::ltx_error::LtxError;
 use crate::error::ltx_read_error::LtxReadError;
+use crate::file::configuration::constants::LTX_SCHEME_STRICT_FIELD;
 use crate::file::ltx::Ltx;
 use crate::file::section::section::Section;
 use crate::file::types::LtxSectionSchemes;
@@ -48,7 +49,13 @@ impl LtxSchemeParser {
   ) -> Result<LtxSectionScheme, LtxError> {
     let mut scheme: LtxSectionScheme = LtxSectionScheme::new(section_name);
 
-    for (field, _) in section {
+    for (field, value) in section {
+      if field == LTX_SCHEME_STRICT_FIELD {
+        scheme.is_strict = LtxSectionScheme::parse_strict_mode(value).map_err(LtxError::from)?;
+
+        continue;
+      }
+
       match field.split_once('.') {
         None => {
           return Err(LtxReadError::new_ltx_error(format!(
@@ -59,7 +66,7 @@ impl LtxSchemeParser {
           if !scheme.fields.contains_key(field_name) {
             scheme.fields.insert(
               field_name.into(),
-              Self::parse_field_scheme(field_name, &section_name, section)?,
+              Self::parse_field_scheme(field_name, section_name, section)?,
             );
           }
         }

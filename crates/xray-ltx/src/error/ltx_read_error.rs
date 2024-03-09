@@ -9,6 +9,15 @@ pub struct LtxReadError {
 }
 
 impl LtxReadError {
+  pub fn new<T>(message: T) -> LtxReadError
+  where
+    T: Into<String>,
+  {
+    LtxReadError {
+      message: message.into(),
+    }
+  }
+
   pub fn new_ltx_error<T>(message: T) -> LtxError
   where
     T: Into<String>,

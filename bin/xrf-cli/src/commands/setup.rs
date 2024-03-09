@@ -145,6 +145,22 @@ pub fn setup_commands() -> Command {
             .value_parser(value_parser!(PathBuf)),
         )
         .arg(
+          Arg::new("silent")
+            .help("Turn of formatter logging")
+            .short('s')
+            .long("silent")
+            .required(false)
+            .action(ArgAction::SetTrue),
+        )
+        .arg(
+          Arg::new("verbose")
+            .help("Turn on verbose logging")
+            .short('v')
+            .long("verbose")
+            .required(false)
+            .action(ArgAction::SetTrue),
+        )
+        .arg(
           Arg::new("filter")
             .help("Path or mask to include in formatting (works with folders as path)")
             .short('f')

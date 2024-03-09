@@ -6,6 +6,9 @@ pub enum LtxFieldDataType {
   TypeI32,
   TypeU16,
   TypeI16,
+  TypeU8,
+  TypeI8,
+  TypeEnum,
   TypeUnknown,
   TypeAny,
 }
@@ -14,12 +17,15 @@ impl LtxFieldDataType {
   /// Parse data type enum variant from provided string option.
   pub fn from_field_data(data: &str) -> LtxFieldDataType {
     match data {
-      "string" => LtxFieldDataType::TypeString,
       "f32" => LtxFieldDataType::TypeF32,
       "u32" => LtxFieldDataType::TypeU32,
       "i32" => LtxFieldDataType::TypeI32,
       "u16" => LtxFieldDataType::TypeU16,
       "i16" => LtxFieldDataType::TypeI16,
+      "u8" => LtxFieldDataType::TypeU8,
+      "i8" => LtxFieldDataType::TypeI8,
+      "string" => LtxFieldDataType::TypeString,
+      "enum" => LtxFieldDataType::TypeEnum,
       _ => LtxFieldDataType::TypeUnknown,
     }
   }

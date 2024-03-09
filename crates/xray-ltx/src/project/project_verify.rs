@@ -31,10 +31,17 @@ impl LtxProject {
           // Check if definition or required schema exists:
           if let Some(scheme_definition) = self.ltx_scheme_declarations.get(scheme_name) {
             // Check every field definition:
-            for (_, field_definition) in &scheme_definition.fields {
+            for (field_name, field_definition) in &scheme_definition.fields {
               let validation_error: Option<LtxSchemeError> = field_definition.validate(&section);
 
               checked_fields += 1;
+
+              if options.is_verbose && !options.is_silent {
+                println!(
+                  "Checking {:?} - [{section_name}] {field_name}",
+                  entry.path()
+                );
+              }
 
               if let Some(error) = validation_error {
                 scheme_errors.push(error);

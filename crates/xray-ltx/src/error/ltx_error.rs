@@ -45,3 +45,9 @@ impl From<io::Error> for LtxError {
     LtxError::Io(err)
   }
 }
+
+impl From<LtxReadError> for LtxError {
+  fn from(item: LtxReadError) -> Self {
+    LtxError::Read(item)
+  }
+}
