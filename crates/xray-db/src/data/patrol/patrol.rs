@@ -8,7 +8,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 /// Patrols list is represented by list of samples containing patrol chunk.
 /// 0...N, where N is chunk.
@@ -125,7 +125,7 @@ impl Patrol {
     patrol_points_config: &Ltx,
     patrol_links_config: &Ltx,
   ) -> io::Result<Patrol> {
-    let props: &Properties = patrols_config
+    let props: &Section = patrols_config
       .section(section)
       .unwrap_or_else(|| panic!("Patrol section {section} should be defined in ltx file"));
 

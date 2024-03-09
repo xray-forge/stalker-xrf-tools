@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectDynamic {
@@ -23,7 +23,7 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamic> for AlifeObjectDynamic {
   }
 
   /// Import dynamic object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectDynamic> {
+  fn import(props: &Section) -> io::Result<AlifeObjectDynamic> {
     Ok(AlifeObjectDynamic {
       base: AlifeObjectAbstract::import(props)?,
     })

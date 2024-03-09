@@ -3,10 +3,10 @@ use crate::file::configuration::constants::{
   LTX_SYMBOL_SECTION_OPEN,
 };
 use crate::file::configuration::line_separator::LineSeparator;
-use crate::file::error::LtxParseError;
 use crate::file::formatter::LtxFormatter;
-use crate::file::section_entry::SectionEntry;
-use crate::{Ltx, Properties, ROOT_SECTION};
+use crate::file::section::section::Section;
+use crate::file::section::section_entry::SectionEntry;
+use crate::{Ltx, LtxParseError, ROOT_SECTION};
 use std::str::Chars;
 
 /// Ltx parser.
@@ -92,7 +92,7 @@ impl<'a> LtxParser<'a> {
 
           match ltx.entry(current_section.clone()) {
             SectionEntry::Vacant(vacant_entry) => {
-              let mut properties: Properties = Default::default();
+              let mut properties: Section = Default::default();
 
               if let Some(inherited) = inherited {
                 for base_name in inherited {
@@ -116,7 +116,7 @@ impl<'a> LtxParser<'a> {
 
           match ltx.entry(current_section.clone()) {
             SectionEntry::Vacant(vacant_entry) => {
-              let mut properties: Properties = Properties::new();
+              let mut properties: Section = Section::new();
 
               properties.insert(key, value.unwrap_or(String::new()));
 

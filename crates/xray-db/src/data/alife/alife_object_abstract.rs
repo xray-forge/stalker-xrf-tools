@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 /// Generic alife object abstraction data.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -47,7 +47,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   }
 
   /// Import generic alife object base data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectAbstract> {
+  fn import(props: &Section) -> io::Result<AlifeObjectAbstract> {
     Ok(AlifeObjectAbstract {
       game_vertex_id: read_ini_field("game_vertex_id", props)?,
       distance: read_ini_field("distance", props)?,

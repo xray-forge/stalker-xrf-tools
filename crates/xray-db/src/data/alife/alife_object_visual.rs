@@ -6,7 +6,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectVisual {
@@ -26,7 +26,7 @@ impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
   }
 
   /// Import visual object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectVisual> {
+  fn import(props: &Section) -> io::Result<AlifeObjectVisual> {
     Ok(AlifeObjectVisual {
       visual_name: read_ini_field("visual_name", props)?,
       visual_flags: read_ini_field("visual_flags", props)?,

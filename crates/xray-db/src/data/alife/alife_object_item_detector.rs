@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_item::AlifeObjectItem;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemDetector {
@@ -23,7 +23,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemDetector> for AlifeObjectItemDete
   }
 
   /// Import alife item object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectItemDetector> {
+  fn import(props: &Section) -> io::Result<AlifeObjectItemDetector> {
     Ok(AlifeObjectItemDetector {
       base: AlifeObjectItem::import(props)?,
     })

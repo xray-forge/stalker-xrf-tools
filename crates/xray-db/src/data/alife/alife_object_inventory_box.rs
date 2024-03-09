@@ -7,7 +7,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectInventoryBox {
@@ -33,7 +33,7 @@ impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventor
   }
 
   /// Import alife inventory box object from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectInventoryBox> {
+  fn import(props: &Section) -> io::Result<AlifeObjectInventoryBox> {
     Ok(AlifeObjectInventoryBox {
       base: AlifeObjectDynamicVisual::import(props)?,
       can_take: read_ini_field("can_take", props)?,

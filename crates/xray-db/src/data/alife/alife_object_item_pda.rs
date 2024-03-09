@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemPda {
@@ -34,7 +34,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
   }
 
   /// Import pda object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectItemPda> {
+  fn import(props: &Section) -> io::Result<AlifeObjectItemPda> {
     Ok(AlifeObjectItemPda {
       base: AlifeObjectItem::import(props)?,
       owner: read_ini_field("owner", props)?,

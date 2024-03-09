@@ -5,7 +5,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use uuid::Uuid;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphHeader {
@@ -50,7 +50,7 @@ impl GraphHeader {
 
   /// Import graph header from ini file.
   pub fn import(config: &Ltx) -> io::Result<GraphHeader> {
-    let props: &Properties = config
+    let props: &Section = config
       .section("header")
       .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
 

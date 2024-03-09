@@ -1,14 +1,11 @@
 pub(crate) mod configuration;
-pub(crate) mod error;
 pub(crate) mod formatter;
+pub(crate) mod include;
+pub(crate) mod inherit;
 pub(crate) mod iterator;
 pub(crate) mod ltx;
-pub(crate) mod ltx_include;
-pub(crate) mod ltx_inherit;
 pub(crate) mod parser;
-pub(crate) mod properties;
 pub(crate) mod reader;
-pub(crate) mod section_entry;
-pub(crate) mod section_setter;
+pub(crate) mod section;
 pub(crate) mod types;
 pub(crate) mod writer;

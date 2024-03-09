@@ -8,7 +8,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 /// Represents script extension of base server smart cover class.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -45,7 +45,7 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   }
 
   /// Import smart cover data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeSmartCover> {
+  fn import(props: &Section) -> io::Result<AlifeSmartCover> {
     Ok(AlifeSmartCover {
       base: AlifeObjectSmartCover::import(props)?,
       last_description: read_ini_field("last_description", props)?,

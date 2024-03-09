@@ -13,7 +13,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 /// Generic abstract alife object base.
 #[derive(Debug, Serialize, Deserialize)]
@@ -229,7 +229,7 @@ impl AlifeObjectBase {
   }
 
   /// Import alife object data from ini file section.
-  pub fn import(props: &Properties) -> io::Result<AlifeObjectBase> {
+  pub fn import(props: &Section) -> io::Result<AlifeObjectBase> {
     let section: String = read_ini_field("section", props)?;
     let clsid: ClsId = ClsId::from_section(&section);
 

@@ -1,6 +1,6 @@
-use crate::file::error::LtxConvertError;
+use crate::file::section::section::Section;
 use crate::file::types::LtxSections;
-use crate::{Ltx, LtxError, Properties};
+use crate::{Ltx, LtxConvertError, LtxError};
 
 /// Converter object to process and inject all inherit section statements.
 #[derive(Default)]
@@ -57,7 +57,7 @@ impl LtxInheritConvertor {
     destination: &mut LtxSections,
     key: &str,
   ) -> Result<(), LtxError> {
-    let props: &Properties = match base.get(key) {
+    let props: &Section = match base.get(key) {
       None => {
         return Err(LtxConvertError::new_ltx_error(format!(
           "Failed to inherit unknown section {key} in ltx"
@@ -73,7 +73,7 @@ impl LtxInheritConvertor {
         Self::inherit_section(base, destination, inherited)?;
       }
 
-      let mut new_props: Properties = Default::default();
+      let mut new_props: Section = Default::default();
 
       for inherited in &props.inherited {
         for (key, value) in base.get(inherited).unwrap() {

@@ -2,7 +2,7 @@ use crate::export::file_import::read_ini_field;
 use crate::types::{Matrix3d, Sphere3d};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 /// Shape enumeration stored in alife objects descriptors.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -13,7 +13,7 @@ pub enum Shape {
 
 impl Shape {
   /// Import shape objects from ini config file.
-  pub fn import_shapes(props: &Properties) -> io::Result<Vec<Shape>> {
+  pub fn import_shapes(props: &Section) -> io::Result<Vec<Shape>> {
     let mut shapes: Vec<Shape> = Vec::new();
     let count: usize = read_ini_field("shapes_count", props)?;
 

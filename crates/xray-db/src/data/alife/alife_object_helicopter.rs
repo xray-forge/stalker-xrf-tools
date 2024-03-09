@@ -9,7 +9,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectHelicopter {
@@ -38,7 +38,7 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
   }
 
   /// Import helicopter object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectHelicopter> {
+  fn import(props: &Section) -> io::Result<AlifeObjectHelicopter> {
     Ok(AlifeObjectHelicopter {
       base: AlifeObjectDynamicVisual::import(props)?,
       skeleton: AlifeObjectSkeleton::import(props)?,

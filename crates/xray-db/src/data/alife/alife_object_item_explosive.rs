@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_item::AlifeObjectItem;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemExplosive {
@@ -22,7 +22,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemExplosive> for AlifeObjectItemExp
     })
   }
 
-  fn import(props: &Properties) -> io::Result<AlifeObjectItemExplosive> {
+  fn import(props: &Section) -> io::Result<AlifeObjectItemExplosive> {
     Ok(AlifeObjectItemExplosive {
       base: AlifeObjectItem::import(props)?,
     })

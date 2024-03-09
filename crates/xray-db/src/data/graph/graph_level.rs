@@ -6,7 +6,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use uuid::Uuid;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 /// `GameGraph::SLevel::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -48,7 +48,7 @@ impl GraphLevel {
 
   /// Import patrols data from provided path.
   pub fn import(section: &str, config: &Ltx) -> io::Result<GraphLevel> {
-    let props: &Properties = config
+    let props: &Section = config
       .section(section)
       .unwrap_or_else(|| panic!("Graph section {section} should be defined in ltx file"));
 

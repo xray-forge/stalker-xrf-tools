@@ -1,7 +1,6 @@
-use crate::file::error::{LtxError, LtxParseError};
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncluded;
-use crate::Ltx;
+use crate::{Ltx, LtxError, LtxParseError};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};

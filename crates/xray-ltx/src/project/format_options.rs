@@ -1,4 +1,4 @@
-/// Parsing configuration.
+/// Formatting configuration.
 #[derive(Clone, Default)]
 pub struct LtxFormatOptions {
   /// Whether log is in silent mode.

@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeapo
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectItemWeaponMagazinedWgl {
@@ -25,7 +25,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
   }
 
   /// Read magazined weapon with launcher from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectItemWeaponMagazinedWgl> {
+  fn import(props: &Section) -> io::Result<AlifeObjectItemWeaponMagazinedWgl> {
     Ok(AlifeObjectItemWeaponMagazinedWgl {
       base: AlifeObjectItemWeaponMagazined::import(props)?,
     })

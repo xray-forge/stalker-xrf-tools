@@ -9,7 +9,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectHangingLamp {
@@ -92,7 +92,7 @@ impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLa
   }
 
   /// Import alife hanging lamp object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectHangingLamp> {
+  fn import(props: &Section) -> io::Result<AlifeObjectHangingLamp> {
     Ok(AlifeObjectHangingLamp {
       base: AlifeObjectDynamicVisual::import(props)?,
       skeleton: AlifeObjectSkeleton::import(props)?,

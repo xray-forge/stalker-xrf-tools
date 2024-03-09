@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeActor {
@@ -38,7 +38,7 @@ impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
   }
 
   /// Import actor data from ini file section.
-  fn import(props: &Properties) -> io::Result<AlifeActor> {
+  fn import(props: &Section) -> io::Result<AlifeActor> {
     Ok(AlifeActor {
       base: AlifeObjectActor::import(props)?,
       start_position_filled: read_ini_field("start_position_filled", props)?,

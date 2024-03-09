@@ -1,7 +1,7 @@
 use crate::types::U32Bytes;
 use std::io;
 use std::str::FromStr;
-use xray_ltx::Properties;
+use xray_ltx::Section;
 
 /// Export ini file content to provided file.
 pub fn import_vector_from_string<T: FromStr>(value: &str) -> io::Result<Vec<T>> {
@@ -62,7 +62,7 @@ pub fn import_sized_vector_from_string<T: FromStr>(size: usize, value: &str) -> 
 }
 
 /// Read value from ini section and parse it as provided T type.
-pub fn read_ini_field<T: FromStr>(field: &str, props: &Properties) -> io::Result<T> {
+pub fn read_ini_field<T: FromStr>(field: &str, props: &Section) -> io::Result<T> {
   Ok(
     match props
       .get(field)
@@ -85,7 +85,7 @@ pub fn read_ini_field<T: FromStr>(field: &str, props: &Properties) -> io::Result
 }
 
 /// Read value from ini section and parse it as provided T type.
-pub fn read_ini_u32_bytes_field(field: &str, props: &Properties) -> io::Result<U32Bytes> {
+pub fn read_ini_u32_bytes_field(field: &str, props: &Section) -> io::Result<U32Bytes> {
   let vertex_type: Vec<u8> =
     import_sized_vector_from_string(4, &read_ini_field::<String>(field, props)?)?;
 

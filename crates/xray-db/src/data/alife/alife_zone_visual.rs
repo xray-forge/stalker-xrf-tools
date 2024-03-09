@@ -10,7 +10,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeZoneVisual {
@@ -45,7 +45,7 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   }
 
   /// Import visual zone data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeZoneVisual> {
+  fn import(props: &Section) -> io::Result<AlifeZoneVisual> {
     Ok(AlifeZoneVisual {
       base: AlifeObjectAnomalyZone::import(props)?,
       visual: AlifeObjectVisual::import(props)?,

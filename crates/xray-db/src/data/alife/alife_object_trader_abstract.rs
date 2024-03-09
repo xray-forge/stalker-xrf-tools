@@ -7,7 +7,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectTraderAbstract {
@@ -51,7 +51,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
   }
 
   /// Import trader data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectTraderAbstract> {
+  fn import(props: &Section) -> io::Result<AlifeObjectTraderAbstract> {
     Ok(AlifeObjectTraderAbstract {
       money: read_ini_field("money", props)?,
       specific_character: read_ini_field("specific_character", props)?,

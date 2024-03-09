@@ -4,7 +4,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GraphEdge {
@@ -33,7 +33,7 @@ impl GraphEdge {
 
   /// Import graph edge from ini file.
   pub fn import(section: &str, config: &Ltx) -> io::Result<GraphEdge> {
-    let props: &Properties = config.section(section).unwrap_or_else(|| {
+    let props: &Section = config.section(section).unwrap_or_else(|| {
       panic!("Graph section '{section}' should be defined in level point ltx file")
     });
 

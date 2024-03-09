@@ -1,5 +1,5 @@
-use crate::file::error::LtxConvertError;
-use crate::{Ltx, LtxError};
+use crate::error::ltx_error::LtxError;
+use crate::{Ltx, LtxConvertError};
 use std::io;
 use std::path::{Path, PathBuf};
 

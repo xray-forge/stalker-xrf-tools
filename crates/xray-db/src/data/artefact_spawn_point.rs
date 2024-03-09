@@ -5,7 +5,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ArtefactSpawnPoint {
@@ -37,7 +37,7 @@ impl ArtefactSpawnPoint {
   }
 
   /// Import artefact spawn point data from ini section.
-  pub fn import(props: &Properties) -> io::Result<ArtefactSpawnPoint> {
+  pub fn import(props: &Section) -> io::Result<ArtefactSpawnPoint> {
     Ok(ArtefactSpawnPoint {
       position: read_ini_field("position", props)?,
       level_vertex_id: read_ini_field("level_vertex_id", props)?,

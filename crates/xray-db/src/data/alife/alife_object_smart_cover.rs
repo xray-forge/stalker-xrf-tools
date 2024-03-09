@@ -9,7 +9,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectSmartCover {
@@ -47,7 +47,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
   }
 
   /// Import smart cover object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectSmartCover> {
+  fn import(props: &Section) -> io::Result<AlifeObjectSmartCover> {
     Ok(AlifeObjectSmartCover {
       base: AlifeObjectDynamic::import(props)?,
       shape: Shape::import_shapes(props)?,

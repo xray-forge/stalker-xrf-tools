@@ -6,7 +6,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectMotion {
@@ -23,7 +23,7 @@ impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
   }
 
   /// Import motion object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectMotion> {
+  fn import(props: &Section) -> io::Result<AlifeObjectMotion> {
     Ok(AlifeObjectMotion {
       motion_name: read_ini_field("motion_name", props)?,
     })

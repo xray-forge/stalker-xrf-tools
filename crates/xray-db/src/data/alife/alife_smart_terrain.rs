@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeSmartTerrain {
@@ -96,7 +96,7 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   }
 
   /// Import alife smart terrain data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeSmartTerrain> {
+  fn import(props: &Section) -> io::Result<AlifeSmartTerrain> {
     Ok(AlifeSmartTerrain {
       base: AlifeSmartZone::import(props)?,
       arriving_objects_count: read_ini_field("arriving_objects_count", props)?,

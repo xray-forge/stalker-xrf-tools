@@ -9,7 +9,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeAnomalousZone {
@@ -29,7 +29,7 @@ impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   }
 
   /// Import anomalous zone object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeAnomalousZone> {
+  fn import(props: &Section) -> io::Result<AlifeAnomalousZone> {
     Ok(AlifeAnomalousZone {
       base: AlifeObjectAnomalyZone::import(props)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(

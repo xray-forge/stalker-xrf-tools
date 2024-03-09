@@ -33,7 +33,7 @@ use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
 use byteorder::ByteOrder;
 use enum_map::Enum;
 use std::io;
-use xray_ltx::Properties;
+use xray_ltx::Section;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
 pub enum AlifeClass {
@@ -255,7 +255,7 @@ impl AlifeClass {
   /// Import custom save data based on serialized clsid.
   pub fn import_by_class(
     alife_class: &AlifeClass,
-    props: &Properties,
+    props: &Section,
   ) -> io::Result<Box<dyn AlifeObjectGeneric>> {
     Ok(match alife_class {
       AlifeClass::SeActor => Box::new(AlifeActor::import(props)?),

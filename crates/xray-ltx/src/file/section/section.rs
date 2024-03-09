@@ -1,17 +1,17 @@
 use crate::file::iterator::{PropertyIter, PropertyIterMut};
-use crate::file::types::PropertiesData;
+use crate::file::types::SectionData;
 use std::ops::Index;
 
 /// Properties type (key-value pairs).
 #[derive(Clone, Default, Debug, PartialEq)]
-pub struct Properties {
+pub struct Section {
   pub inherited: Vec<String>,
-  pub data: PropertiesData,
+  pub data: SectionData,
 }
 
-impl Properties {
+impl Section {
   /// Create an instance.
-  pub fn new() -> Properties {
+  pub fn new() -> Section {
     Default::default()
   }
 
@@ -94,7 +94,7 @@ impl Properties {
   }
 }
 
-impl<S: AsRef<str>> Index<S> for Properties {
+impl<S: AsRef<str>> Index<S> for Section {
   type Output = str;
 
   fn index(&self, index: S) -> &str {
@@ -109,11 +109,11 @@ impl<S: AsRef<str>> Index<S> for Properties {
 
 #[cfg(test)]
 mod test {
-  use crate::Properties;
+  use crate::file::section::section::Section;
 
   #[test]
   fn property_replace() {
-    let mut props: Properties = Properties::new();
+    let mut props: Section = Section::new();
 
     assert_eq!(props.len(), 0);
 
@@ -130,7 +130,7 @@ mod test {
 
   #[test]
   fn property_remove() {
-    let mut props = Properties::new();
+    let mut props = Section::new();
 
     props.append("k1", "v1");
     props.append("k1", "v2");

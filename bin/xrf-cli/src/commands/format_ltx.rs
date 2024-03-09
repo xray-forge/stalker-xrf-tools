@@ -19,7 +19,7 @@ pub fn format_ltx(matches: &ArgMatches) {
       log::info!("Checking format of ltx folder: {:?}", path);
 
       let has_invalid: bool = project
-        .check_all_files_opt(LtxFormatOptions { is_silent })
+        .check_format_all_files_opt(LtxFormatOptions { is_silent })
         .unwrap();
 
       if has_invalid {

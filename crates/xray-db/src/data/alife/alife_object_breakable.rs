@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectBreakable {
@@ -28,7 +28,7 @@ impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   }
 
   /// Import alife breakable object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectBreakable> {
+  fn import(props: &Section) -> io::Result<AlifeObjectBreakable> {
     Ok(AlifeObjectBreakable {
       base: AlifeObjectDynamicVisual::import(props)?,
       health: read_ini_field("health", props)?,

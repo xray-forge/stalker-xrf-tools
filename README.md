@@ -26,7 +26,7 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/app
 
 ## CLI
 
-Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/app/cli.html).
+Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli/cli.html).
 
 - [Archive commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/archive.html)
 - [LTX commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/ltx.html)

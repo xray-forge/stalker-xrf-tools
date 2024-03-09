@@ -9,7 +9,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectSpaceRestrictor {
@@ -32,7 +32,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
   }
 
   /// Import generic space restrictor data from the chunk.
-  fn import(props: &Properties) -> io::Result<AlifeObjectSpaceRestrictor> {
+  fn import(props: &Section) -> io::Result<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract::import(props)?,
       shape: Shape::import_shapes(props)?,

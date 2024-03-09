@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::io;
 use std::path::Path;
 use uuid::Uuid;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct HeaderChunk {
@@ -60,7 +60,7 @@ impl HeaderChunk {
   /// Parse ini files and populate spawn file.
   pub fn import(path: &Path) -> io::Result<HeaderChunk> {
     let config: Ltx = open_ini_config(&path.join("header.ltx"))?;
-    let props: &Properties = config
+    let props: &Section = config
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 

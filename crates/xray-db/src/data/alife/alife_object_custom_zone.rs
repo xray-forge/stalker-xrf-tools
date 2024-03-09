@@ -8,7 +8,7 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectCustomZone {
@@ -40,7 +40,7 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
   }
 
   /// Import alife custom zone object data from ini config section..
-  fn import(props: &Properties) -> io::Result<AlifeObjectCustomZone> {
+  fn import(props: &Section) -> io::Result<AlifeObjectCustomZone> {
     Ok(AlifeObjectCustomZone {
       base: AlifeObjectSpaceRestrictor::import(props)?,
       max_power: read_ini_field("max_power", props)?,

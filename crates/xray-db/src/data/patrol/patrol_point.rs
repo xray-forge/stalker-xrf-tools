@@ -7,7 +7,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::Write;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -103,7 +103,7 @@ impl PatrolPoint {
 
   /// Import patrol point data from ini config.
   pub fn import(section: &str, config: &Ltx) -> io::Result<PatrolPoint> {
-    let props: &Properties = config
+    let props: &Section = config
       .section(section)
       .unwrap_or_else(|| panic!("Patrol point section {section} should be defined in ltx file"));
 

@@ -4,7 +4,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PatrolLink {
@@ -84,7 +84,7 @@ impl PatrolLink {
 
   /// Import patrol point link from ini config.
   pub fn import(section: &str, config: &Ltx) -> io::Result<PatrolLink> {
-    let props: &Properties = config
+    let props: &Section = config
       .section(section)
       .unwrap_or_else(|| panic!("Patrol point link '{section}' should be defined in ltx file"));
 

@@ -1,9 +1,9 @@
-use crate::file::ltx_include::LtxIncludeConvertor;
-use crate::file::ltx_inherit::LtxInheritConvertor;
-use crate::file::section_entry::SectionEntry;
-use crate::file::section_setter::SectionSetter;
+use crate::file::include::LtxIncludeConvertor;
+use crate::file::inherit::LtxInheritConvertor;
+use crate::file::section::section_entry::SectionEntry;
+use crate::file::section::section_setter::SectionSetter;
 use crate::file::types::{LtxIncluded, LtxSections};
-use crate::{LtxError, Properties, ROOT_SECTION};
+use crate::{LtxError, Section, ROOT_SECTION};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
 
@@ -50,21 +50,21 @@ impl Ltx {
   }
 
   /// Get the immutable general section
-  pub fn root_section(&mut self) -> &Properties {
+  pub fn root_section(&mut self) -> &Section {
     self
       .entry(ROOT_SECTION.into())
       .or_insert_with(Default::default)
   }
 
   /// Get the mutable general section
-  pub fn root_section_mut(&mut self) -> &mut Properties {
+  pub fn root_section_mut(&mut self) -> &mut Section {
     self
       .section_mut(ROOT_SECTION)
       .expect("There is no root section in this Ltx")
   }
 
   /// Get a immutable section
-  pub fn section<S>(&self, name: S) -> Option<&Properties>
+  pub fn section<S>(&self, name: S) -> Option<&Section>
   where
     S: Into<String>,
   {
@@ -80,7 +80,7 @@ impl Ltx {
   }
 
   /// Get a mutable section
-  pub fn section_mut<S>(&mut self, name: S) -> Option<&mut Properties>
+  pub fn section_mut<S>(&mut self, name: S) -> Option<&mut Section>
   where
     S: Into<String>,
   {
@@ -152,7 +152,7 @@ impl Ltx {
   }
 
   /// Delete the first section with key, return the properties if it exists
-  pub fn delete<S>(&mut self, section: S) -> Option<Properties>
+  pub fn delete<S>(&mut self, section: S) -> Option<Section>
   where
     S: Into<String>,
   {
@@ -179,9 +179,9 @@ impl Ltx {
 }
 
 impl<'q> Index<&'q str> for Ltx {
-  type Output = Properties;
+  type Output = Section;
 
-  fn index<'a>(&'a self, index: &'q str) -> &'a Properties {
+  fn index<'a>(&'a self, index: &'q str) -> &'a Section {
     match self.section(index) {
       Some(p) => p,
       None => panic!("Section `{}` does not exist", index),
@@ -190,7 +190,7 @@ impl<'q> Index<&'q str> for Ltx {
 }
 
 impl<'q> IndexMut<&'q str> for Ltx {
-  fn index_mut<'a>(&'a mut self, index: &'q str) -> &'a mut Properties {
+  fn index_mut<'a>(&'a mut self, index: &'q str) -> &'a mut Section {
     match self.section_mut(index) {
       Some(p) => p,
       None => panic!("Section `{}` does not exist", index),
@@ -200,10 +200,8 @@ impl<'q> IndexMut<&'q str> for Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::file::error::LtxParseError;
   use crate::file::ltx::Ltx;
-  use crate::file::properties::Properties;
-  use crate::ROOT_SECTION;
+  use crate::{LtxParseError, Section, ROOT_SECTION};
 
   #[test]
   fn load_from_str_with_empty_general_section() {
@@ -352,7 +350,7 @@ name = hello
 ";
 
     let ltx: Ltx = Ltx::read_from_str(input).unwrap();
-    let properties: &Properties = ltx.section("section_name").expect("Existing section");
+    let properties: &Section = ltx.section("section_name").expect("Existing section");
 
     assert_eq!(properties.inherited.len(), 0);
   }
@@ -575,7 +573,7 @@ Key = 'Value   # This is not a comment ; at all'
     assert_eq!(ltx.len(), 1);
     assert!(ltx.section(ROOT_SECTION).is_some());
 
-    let sec1: &Properties = ltx.section(ROOT_SECTION).unwrap();
+    let sec1: &Section = ltx.section(ROOT_SECTION).unwrap();
     assert_eq!(sec1.len(), 2);
     let key1: String = "key1".into();
     assert!(sec1.contains_key(&key1));
@@ -664,7 +662,7 @@ x1 = n2
 x3 = n2
 ";
     let mut ltx: Ltx = Ltx::read_from_str(input).unwrap();
-    let section: &Properties = ltx.root_section();
+    let section: &Section = ltx.root_section();
     let keys: Vec<&str> = section.iter().map(|(k, _)| k).collect();
     assert_eq!(keys, vec!["x2", "x1", "x3"]);
   }
@@ -678,7 +676,7 @@ xb = n2
 a3 = n3
 ";
     let ltx: Ltx = Ltx::read_from_str(input).unwrap();
-    let section: &Properties = ltx.section("s").unwrap();
+    let section: &Section = ltx.section("s").unwrap();
     let keys: Vec<&str> = section.iter().map(|(k, _)| k).collect();
     assert_eq!(keys, vec!["x2", "xb", "a3"])
   }
@@ -745,7 +743,7 @@ x3 = nb
 ";
 
     let mut str: Ltx = Ltx::read_from_str(input).unwrap();
-    let section: &mut Properties = str.root_section_mut();
+    let section: &mut Section = str.root_section_mut();
     section.iter_mut().enumerate().for_each(|(i, (_, v))| {
       v.push_str(&i.to_string());
     });

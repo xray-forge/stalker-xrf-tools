@@ -7,7 +7,7 @@ use crate::export::file_import::read_ini_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io;
-use xray_ltx::{Ltx, Properties};
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AlifeObjectClimable {
@@ -27,7 +27,7 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   }
 
   /// Import climable object data from ini config section.
-  fn import(props: &Properties) -> io::Result<AlifeObjectClimable> {
+  fn import(props: &Section) -> io::Result<AlifeObjectClimable> {
     Ok(AlifeObjectClimable {
       base: AlifeObjectShape::import(props)?,
       game_material: read_ini_field("game_material", props)?,
