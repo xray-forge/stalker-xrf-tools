@@ -62,11 +62,6 @@ mod tests {
   use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::test::file::read_file_as_string;
-  use crate::test::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
-  };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use serde_json::json;
@@ -75,6 +70,11 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::utils::{
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+  };
 
   #[test]
   fn test_read_write_simple_artefact_spawn_point() -> io::Result<()> {

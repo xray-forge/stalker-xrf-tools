@@ -3,9 +3,6 @@ pub(crate) mod file;
 pub(crate) mod project;
 pub(crate) mod scheme;
 
-#[cfg(test)]
-pub mod test;
-
 pub use crate::error::ltx_convert_error::LtxConvertError;
 pub use crate::error::ltx_error::LtxError;
 pub use crate::error::ltx_parse_error::LtxParseError;

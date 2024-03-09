@@ -53,13 +53,13 @@ mod tests {
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-  use crate::test::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
-  };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
 
   #[test]
   fn test_read_write_object() -> io::Result<()> {

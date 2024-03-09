@@ -3,21 +3,33 @@ use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::{Path, PathBuf};
 
-/// Get absolute resources directory.
-pub fn get_absolute_resources_path() -> PathBuf {
+/// Get absolute path to provided test resource.
+pub fn get_absolute_test_resource_path(resource_path: &str) -> PathBuf {
   let mut path: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
   path.push("resources");
+  path.push("tests");
+  path.push(resource_path);
 
   path
 }
 
-/// Get absolute path to provided test resource.
-pub fn get_absolute_test_resource_path(resource_path: &str) -> PathBuf {
-  let mut path: PathBuf = get_absolute_resources_path();
+/// Get Absolute path to sample resource.
+pub fn get_absolute_test_file_path(file: &str, resource: &str) -> PathBuf {
+  get_absolute_test_resource_path(
+    &get_relative_test_file_path(file, resource)
+      .into_os_string()
+      .into_string()
+      .unwrap(),
+  )
+}
 
-  path.push("tests");
-  path.push(resource_path);
+/// Get relative path to sample resource.
+pub fn get_relative_test_file_path(file: &str, resource: &str) -> PathBuf {
+  let mut path: PathBuf = PathBuf::new();
+
+  path.push(Path::new(file).file_stem().unwrap());
+  path.push(resource);
 
   path
 }
@@ -35,6 +47,19 @@ pub fn get_relative_test_sample_file_path(file: &str, resource: &str) -> String 
 /// Get Absolute path to sample resource.
 pub fn get_absolute_test_sample_file_path(file: &str, resource: &str) -> PathBuf {
   get_absolute_test_resource_path(&get_relative_test_sample_file_path(file, resource))
+}
+
+/// Open file from test resources.
+pub fn get_absolute_test_resource_as_file(file: &str, resource: &str) -> io::Result<File> {
+  let path: PathBuf = get_absolute_test_file_path(file, resource);
+
+  match File::open(&path) {
+    Ok(file) => Ok(file),
+    Err(error) => Err(io::Error::new(
+      error.kind(),
+      format!("Failed to open test asset {:?}", path),
+    )),
+  }
 }
 
 /// Get relative path to sample resource of current test file.

@@ -180,13 +180,13 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::time::Time;
-  use crate::test::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
-  };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
 
   #[test]
   fn test_read_write_time_object() -> io::Result<()> {

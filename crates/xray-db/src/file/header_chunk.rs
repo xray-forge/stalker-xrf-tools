@@ -99,12 +99,6 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::file::header_chunk::HeaderChunk;
-  use crate::test::file::read_file_as_string;
-  use crate::test::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_directory,
-    get_relative_test_sample_file_path, get_relative_test_sample_sub_dir,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
-  };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use serde_json::json;
@@ -113,6 +107,12 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::{uuid, Uuid};
+  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::utils::{
+    get_absolute_test_resource_path, get_relative_test_sample_file_directory,
+    get_relative_test_sample_file_path, get_relative_test_sample_sub_dir,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+  };
 
   #[test]
   fn test_read_empty_chunk() -> io::Result<()> {

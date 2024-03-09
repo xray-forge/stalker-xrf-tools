@@ -121,13 +121,13 @@ impl Ltx {
 #[cfg(test)]
 mod test {
   use crate::file::types::LtxIncluded;
-  use crate::test::file::read_file_as_string;
-  use crate::test::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
   use crate::Ltx;
   use std::env::temp_dir;
   use std::fs::File;
   use std::io::Write;
   use std::path::PathBuf;
+  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
 
   #[test]
   fn load_from_file() {
@@ -135,7 +135,7 @@ mod test {
     let file_content = b"[test]\nKey=Value\n";
 
     {
-      let mut file = File::create(&file_name).expect("create");
+      let mut file: File = File::create(&file_name).expect("create");
       file.write_all(file_content).expect("write");
     }
 

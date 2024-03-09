@@ -1,0 +1,10 @@
+[package]
+name = "xray-test-utils"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+fileslice = "0.4.0"

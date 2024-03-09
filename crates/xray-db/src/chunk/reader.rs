@@ -228,9 +228,9 @@ impl fmt::Debug for ChunkReader {
 #[cfg(test)]
 mod tests {
   use crate::chunk::reader::ChunkReader;
-  use crate::test::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
   use fileslice::FileSlice;
   use std::io;
+  use xray_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
 
   #[test]
   fn test_read_empty_file() -> io::Result<()> {

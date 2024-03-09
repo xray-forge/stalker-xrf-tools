@@ -124,11 +124,6 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
-  use crate::test::file::read_file_as_string;
-  use crate::test::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
-  };
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use serde_json::json;
@@ -136,6 +131,11 @@ mod tests {
   use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use uuid::uuid;
+  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
 
   #[test]
   fn test_read_write_cross_table() -> io::Result<()> {

@@ -4500,6 +4500,7 @@ dependencies = [
  "typetag",
  "uuid",
  "xray-ltx",
+ "xray-test-utils",
 ]
 
 [[package]]
@@ -4509,6 +4510,14 @@ dependencies = [
  "fxhash",
  "indexmap 2.2.5",
  "walkdir",
+ "xray-test-utils",
+]
+
+[[package]]
+name = "xray-test-utils"
+version = "0.1.0"
+dependencies = [
+ "fileslice",
 ]
 
 [[package]]
