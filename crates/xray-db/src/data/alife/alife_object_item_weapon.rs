@@ -43,15 +43,15 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon
   }
 
   /// Import alife weapon item object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItemWeapon> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemWeapon> {
     Ok(AlifeObjectItemWeapon {
-      base: AlifeObjectItem::import(props)?,
-      ammo_current: read_ini_field("ammo_current", props)?,
-      ammo_elapsed: read_ini_field("ammo_elapsed", props)?,
-      weapon_state: read_ini_field("weapon_state", props)?,
-      addon_flags: read_ini_field("addon_flags", props)?,
-      ammo_type: read_ini_field("ammo_type", props)?,
-      elapsed_grenades: read_ini_field("elapsed_grenades", props)?,
+      base: AlifeObjectItem::import(section)?,
+      ammo_current: read_ini_field("ammo_current", section)?,
+      ammo_elapsed: read_ini_field("ammo_elapsed", section)?,
+      weapon_state: read_ini_field("weapon_state", section)?,
+      addon_flags: read_ini_field("addon_flags", section)?,
+      ammo_type: read_ini_field("ammo_type", section)?,
+      elapsed_grenades: read_ini_field("elapsed_grenades", section)?,
     })
   }
 }

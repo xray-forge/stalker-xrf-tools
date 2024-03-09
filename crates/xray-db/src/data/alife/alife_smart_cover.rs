@@ -45,13 +45,13 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   }
 
   /// Import smart cover data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeSmartCover> {
+  fn import(section: &Section) -> io::Result<AlifeSmartCover> {
     Ok(AlifeSmartCover {
-      base: AlifeObjectSmartCover::import(props)?,
-      last_description: read_ini_field("last_description", props)?,
+      base: AlifeObjectSmartCover::import(section)?,
+      last_description: read_ini_field("last_description", section)?,
       loopholes: AlifeSmartCoverLoophole::string_to_list(&read_ini_field::<String>(
         "loopholes",
-        props,
+        section,
       )?)?,
     })
   }

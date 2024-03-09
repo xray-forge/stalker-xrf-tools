@@ -23,9 +23,9 @@ impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
   }
 
   /// Import generic alife smart zone object from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeSmartZone> {
+  fn import(section: &Section) -> io::Result<AlifeSmartZone> {
     Ok(AlifeSmartZone {
-      base: AlifeObjectSpaceRestrictor::import(props)?,
+      base: AlifeObjectSpaceRestrictor::import(section)?,
     })
   }
 }

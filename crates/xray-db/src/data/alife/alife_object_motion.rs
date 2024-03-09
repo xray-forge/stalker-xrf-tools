@@ -23,9 +23,9 @@ impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
   }
 
   /// Import motion object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectMotion> {
+  fn import(section: &Section) -> io::Result<AlifeObjectMotion> {
     Ok(AlifeObjectMotion {
-      motion_name: read_ini_field("motion_name", props)?,
+      motion_name: read_ini_field("motion_name", section)?,
     })
   }
 }

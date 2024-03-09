@@ -50,17 +50,17 @@ impl GraphHeader {
 
   /// Import graph header from ini file.
   pub fn import(config: &Ltx) -> io::Result<GraphHeader> {
-    let props: &Section = config
+    let section: &Section = config
       .section("header")
       .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
 
     Ok(GraphHeader {
-      version: read_ini_field("version", props)?,
-      vertices_count: read_ini_field("vertex_count", props)?,
-      edges_count: read_ini_field("edges_count", props)?,
-      points_count: read_ini_field("point_count", props)?,
-      levels_count: read_ini_field("level_count", props)?,
-      guid: read_ini_field("guid", props)?,
+      version: read_ini_field("version", section)?,
+      vertices_count: read_ini_field("vertex_count", section)?,
+      edges_count: read_ini_field("edges_count", section)?,
+      points_count: read_ini_field("point_count", section)?,
+      levels_count: read_ini_field("level_count", section)?,
+      guid: read_ini_field("guid", section)?,
     })
   }
 

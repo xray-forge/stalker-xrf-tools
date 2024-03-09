@@ -28,10 +28,10 @@ impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   }
 
   /// Import alife breakable object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectBreakable> {
+  fn import(section: &Section) -> io::Result<AlifeObjectBreakable> {
     Ok(AlifeObjectBreakable {
-      base: AlifeObjectDynamicVisual::import(props)?,
-      health: read_ini_field("health", props)?,
+      base: AlifeObjectDynamicVisual::import(section)?,
+      health: read_ini_field("health", section)?,
     })
   }
 }

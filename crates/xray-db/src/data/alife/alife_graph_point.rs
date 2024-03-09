@@ -39,14 +39,14 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   }
 
   /// Import graph data from ini file section.
-  fn import(props: &Section) -> io::Result<AlifeGraphPoint> {
+  fn import(section: &Section) -> io::Result<AlifeGraphPoint> {
     Ok(AlifeGraphPoint {
-      connection_point_name: read_ini_field("connection_point_name", props)?,
-      connection_level_name: read_ini_field("connection_point_name", props)?,
-      location0: read_ini_field("location0", props)?,
-      location1: read_ini_field("location1", props)?,
-      location2: read_ini_field("location2", props)?,
-      location3: read_ini_field("location3", props)?,
+      connection_point_name: read_ini_field("connection_point_name", section)?,
+      connection_level_name: read_ini_field("connection_point_name", section)?,
+      location0: read_ini_field("location0", section)?,
+      location1: read_ini_field("location1", section)?,
+      location2: read_ini_field("location2", section)?,
+      location3: read_ini_field("location3", section)?,
     })
   }
 }

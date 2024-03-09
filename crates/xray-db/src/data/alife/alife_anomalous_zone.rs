@@ -29,12 +29,12 @@ impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   }
 
   /// Import anomalous zone object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeAnomalousZone> {
+  fn import(section: &Section) -> io::Result<AlifeAnomalousZone> {
     Ok(AlifeAnomalousZone {
-      base: AlifeObjectAnomalyZone::import(props)?,
+      base: AlifeObjectAnomalyZone::import(section)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
         "last_spawn_time",
-        props,
+        section,
       )?)?,
     })
   }

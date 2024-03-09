@@ -47,16 +47,16 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   }
 
   /// Import generic alife object base data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectAbstract> {
+  fn import(section: &Section) -> io::Result<AlifeObjectAbstract> {
     Ok(AlifeObjectAbstract {
-      game_vertex_id: read_ini_field("game_vertex_id", props)?,
-      distance: read_ini_field("distance", props)?,
-      direct_control: read_ini_field("direct_control", props)?,
-      level_vertex_id: read_ini_field("level_vertex_id", props)?,
-      flags: read_ini_field("flags", props)?,
-      custom_data: string_from_base64(&read_ini_field::<String>("custom_data", props)?)?,
-      story_id: read_ini_field("story_id", props)?,
-      spawn_story_id: read_ini_field("spawn_story_id", props)?,
+      game_vertex_id: read_ini_field("game_vertex_id", section)?,
+      distance: read_ini_field("distance", section)?,
+      direct_control: read_ini_field("direct_control", section)?,
+      level_vertex_id: read_ini_field("level_vertex_id", section)?,
+      flags: read_ini_field("flags", section)?,
+      custom_data: string_from_base64(&read_ini_field::<String>("custom_data", section)?)?,
+      story_id: read_ini_field("story_id", section)?,
+      spawn_story_id: read_ini_field("spawn_story_id", section)?,
     })
   }
 }

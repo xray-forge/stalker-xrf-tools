@@ -45,15 +45,15 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   }
 
   /// Import visual zone data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeZoneVisual> {
+  fn import(section: &Section) -> io::Result<AlifeZoneVisual> {
     Ok(AlifeZoneVisual {
-      base: AlifeObjectAnomalyZone::import(props)?,
-      visual: AlifeObjectVisual::import(props)?,
-      idle_animation: read_ini_field("idle_animation", props)?,
-      attack_animation: read_ini_field("attack_animation", props)?,
+      base: AlifeObjectAnomalyZone::import(section)?,
+      visual: AlifeObjectVisual::import(section)?,
+      idle_animation: read_ini_field("idle_animation", section)?,
+      attack_animation: read_ini_field("attack_animation", section)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
         "last_spawn_time",
-        props,
+        section,
       )?)?,
     })
   }

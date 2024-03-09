@@ -36,12 +36,12 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
   }
 
   /// Import actor data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectActor> {
+  fn import(section: &Section) -> io::Result<AlifeObjectActor> {
     Ok(AlifeObjectActor {
-      base: AlifeObjectCreature::import(props)?,
-      trader: AlifeObjectTraderAbstract::import(props)?,
-      skeleton: AlifeObjectSkeleton::import(props)?,
-      holder_id: read_ini_field("holder_id", props)?,
+      base: AlifeObjectCreature::import(section)?,
+      trader: AlifeObjectTraderAbstract::import(section)?,
+      skeleton: AlifeObjectSkeleton::import(section)?,
+      holder_id: read_ini_field("holder_id", section)?,
     })
   }
 }

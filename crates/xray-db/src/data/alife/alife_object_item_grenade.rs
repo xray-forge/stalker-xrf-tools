@@ -23,9 +23,9 @@ impl AlifeObjectInheritedReader<AlifeObjectItemGrenade> for AlifeObjectItemGrena
   }
 
   /// Import alife object data from ini config file section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItemGrenade> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemGrenade> {
     Ok(AlifeObjectItemGrenade {
-      base: AlifeObjectItem::import(props)?,
+      base: AlifeObjectItem::import(section)?,
     })
   }
 }

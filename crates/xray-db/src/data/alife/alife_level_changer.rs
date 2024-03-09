@@ -66,20 +66,20 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
   }
 
   /// Import alife level changer object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeLevelChanger> {
+  fn import(section: &Section) -> io::Result<AlifeLevelChanger> {
     Ok(AlifeLevelChanger {
-      base: AlifeObjectSpaceRestrictor::import(props)?,
-      dest_game_vertex_id: read_ini_field("dest_game_vertex_id", props)?,
-      dest_level_vertex_id: read_ini_field("dest_level_vertex_id", props)?,
-      dest_position: read_ini_field("dest_position", props)?,
-      dest_direction: read_ini_field("dest_direction", props)?,
-      angle_y: read_ini_field("angle_y", props)?,
-      dest_level_name: read_ini_field("dest_level_name", props)?,
-      dest_graph_point: read_ini_field("dest_graph_point", props)?,
-      silent_mode: read_ini_field("silent_mode", props)?,
-      enabled: read_ini_field("enabled", props)?,
-      hint: read_ini_field("hint", props)?,
-      save_marker: read_ini_field("save_marker", props)?,
+      base: AlifeObjectSpaceRestrictor::import(section)?,
+      dest_game_vertex_id: read_ini_field("dest_game_vertex_id", section)?,
+      dest_level_vertex_id: read_ini_field("dest_level_vertex_id", section)?,
+      dest_position: read_ini_field("dest_position", section)?,
+      dest_direction: read_ini_field("dest_direction", section)?,
+      angle_y: read_ini_field("angle_y", section)?,
+      dest_level_name: read_ini_field("dest_level_name", section)?,
+      dest_graph_point: read_ini_field("dest_graph_point", section)?,
+      silent_mode: read_ini_field("silent_mode", section)?,
+      enabled: read_ini_field("enabled", section)?,
+      hint: read_ini_field("hint", section)?,
+      save_marker: read_ini_field("save_marker", section)?,
     })
   }
 }

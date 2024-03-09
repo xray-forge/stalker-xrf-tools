@@ -23,9 +23,9 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazined> for AlifeObjectI
   }
 
   /// Import alife item object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItemWeaponMagazined> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemWeaponMagazined> {
     Ok(AlifeObjectItemWeaponMagazined {
-      base: AlifeObjectItemWeapon::import(props)?,
+      base: AlifeObjectItemWeapon::import(section)?,
     })
   }
 }

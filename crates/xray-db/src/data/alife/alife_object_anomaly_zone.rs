@@ -34,12 +34,12 @@ impl AlifeObjectInheritedReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZo
   }
 
   /// Import anomaly zone object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectAnomalyZone> {
+  fn import(section: &Section) -> io::Result<AlifeObjectAnomalyZone> {
     Ok(AlifeObjectAnomalyZone {
-      base: AlifeObjectCustomZone::import(props)?,
-      offline_interactive_radius: read_ini_field("offline_interactive_radius", props)?,
-      artefact_spawn_count: read_ini_field("artefact_spawn_count", props)?,
-      artefact_position_offset: read_ini_field("artefact_position_offset", props)?,
+      base: AlifeObjectCustomZone::import(section)?,
+      offline_interactive_radius: read_ini_field("offline_interactive_radius", section)?,
+      artefact_spawn_count: read_ini_field("artefact_spawn_count", section)?,
+      artefact_position_offset: read_ini_field("artefact_position_offset", section)?,
     })
   }
 }

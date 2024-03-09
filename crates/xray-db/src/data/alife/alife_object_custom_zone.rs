@@ -40,14 +40,14 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
   }
 
   /// Import alife custom zone object data from ini config section..
-  fn import(props: &Section) -> io::Result<AlifeObjectCustomZone> {
+  fn import(section: &Section) -> io::Result<AlifeObjectCustomZone> {
     Ok(AlifeObjectCustomZone {
-      base: AlifeObjectSpaceRestrictor::import(props)?,
-      max_power: read_ini_field("max_power", props)?,
-      owner_id: read_ini_field("owner_id", props)?,
-      enabled_time: read_ini_field("enabled_time", props)?,
-      disabled_time: read_ini_field("disabled_time", props)?,
-      start_time_shift: read_ini_field("start_time_shift", props)?,
+      base: AlifeObjectSpaceRestrictor::import(section)?,
+      max_power: read_ini_field("max_power", section)?,
+      owner_id: read_ini_field("owner_id", section)?,
+      enabled_time: read_ini_field("enabled_time", section)?,
+      disabled_time: read_ini_field("disabled_time", section)?,
+      start_time_shift: read_ini_field("start_time_shift", section)?,
     })
   }
 }

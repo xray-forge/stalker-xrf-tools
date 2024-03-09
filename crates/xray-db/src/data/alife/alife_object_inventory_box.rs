@@ -33,12 +33,12 @@ impl AlifeObjectInheritedReader<AlifeObjectInventoryBox> for AlifeObjectInventor
   }
 
   /// Import alife inventory box object from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectInventoryBox> {
+  fn import(section: &Section) -> io::Result<AlifeObjectInventoryBox> {
     Ok(AlifeObjectInventoryBox {
-      base: AlifeObjectDynamicVisual::import(props)?,
-      can_take: read_ini_field("can_take", props)?,
-      is_closed: read_ini_field("is_closed", props)?,
-      tip: read_ini_field("tip", props)?,
+      base: AlifeObjectDynamicVisual::import(section)?,
+      can_take: read_ini_field("can_take", section)?,
+      is_closed: read_ini_field("is_closed", section)?,
+      tip: read_ini_field("tip", section)?,
     })
   }
 }

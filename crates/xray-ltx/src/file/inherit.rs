@@ -57,7 +57,7 @@ impl LtxInheritConvertor {
     destination: &mut LtxSections,
     key: &str,
   ) -> Result<(), LtxError> {
-    let props: &Section = match base.get(key) {
+    let section: &Section = match base.get(key) {
       None => {
         return Err(LtxConvertError::new_ltx_error(format!(
           "Failed to inherit unknown section {key} in ltx"
@@ -66,22 +66,22 @@ impl LtxInheritConvertor {
       Some(it) => it,
     };
 
-    if props.inherited.is_empty() {
-      destination.insert(key.into(), props.clone());
+    if section.inherited.is_empty() {
+      destination.insert(key.into(), section.clone());
     } else {
-      for inherited in &props.inherited {
+      for inherited in &section.inherited {
         Self::inherit_section(base, destination, inherited)?;
       }
 
       let mut new_props: Section = Default::default();
 
-      for inherited in &props.inherited {
+      for inherited in &section.inherited {
         for (key, value) in base.get(inherited).unwrap() {
           new_props.insert(key, value)
         }
       }
 
-      for (key, value) in props {
+      for (key, value) in section {
         new_props.insert(key, value)
       }
 

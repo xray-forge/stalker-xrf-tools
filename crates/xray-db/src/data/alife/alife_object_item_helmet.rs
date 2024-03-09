@@ -23,9 +23,9 @@ impl AlifeObjectInheritedReader<AlifeObjectItemHelmet> for AlifeObjectItemHelmet
   }
 
   /// Import alife item object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItemHelmet> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemHelmet> {
     Ok(AlifeObjectItemHelmet {
-      base: AlifeObjectItem::import(props)?,
+      base: AlifeObjectItem::import(section)?,
     })
   }
 }

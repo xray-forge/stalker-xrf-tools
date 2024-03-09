@@ -51,18 +51,18 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
   }
 
   /// Import trader data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectTraderAbstract> {
+  fn import(section: &Section) -> io::Result<AlifeObjectTraderAbstract> {
     Ok(AlifeObjectTraderAbstract {
-      money: read_ini_field("money", props)?,
-      specific_character: read_ini_field("specific_character", props)?,
-      trader_flags: read_ini_field("trader_flags", props)?,
-      character_profile: read_ini_field("character_profile", props)?,
-      community_index: read_ini_field("community_index", props)?,
-      rank: read_ini_field("rank", props)?,
-      reputation: read_ini_field("reputation", props)?,
-      character_name: read_ini_field("character_name", props)?,
-      dead_body_can_take: read_ini_field("dead_body_can_take", props)?,
-      dead_body_closed: read_ini_field("dead_body_closed", props)?,
+      money: read_ini_field("money", section)?,
+      specific_character: read_ini_field("specific_character", section)?,
+      trader_flags: read_ini_field("trader_flags", section)?,
+      character_profile: read_ini_field("character_profile", section)?,
+      community_index: read_ini_field("community_index", section)?,
+      rank: read_ini_field("rank", section)?,
+      reputation: read_ini_field("reputation", section)?,
+      character_name: read_ini_field("character_name", section)?,
+      dead_body_can_take: read_ini_field("dead_body_can_take", section)?,
+      dead_body_closed: read_ini_field("dead_body_closed", section)?,
     })
   }
 }

@@ -23,9 +23,9 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamic> for AlifeObjectDynamic {
   }
 
   /// Import dynamic object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectDynamic> {
+  fn import(section: &Section) -> io::Result<AlifeObjectDynamic> {
     Ok(AlifeObjectDynamic {
-      base: AlifeObjectAbstract::import(props)?,
+      base: AlifeObjectAbstract::import(section)?,
     })
   }
 }

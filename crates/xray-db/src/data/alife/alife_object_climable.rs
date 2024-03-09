@@ -27,10 +27,10 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   }
 
   /// Import climable object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectClimable> {
+  fn import(section: &Section) -> io::Result<AlifeObjectClimable> {
     Ok(AlifeObjectClimable {
-      base: AlifeObjectShape::import(props)?,
-      game_material: read_ini_field("game_material", props)?,
+      base: AlifeObjectShape::import(section)?,
+      game_material: read_ini_field("game_material", section)?,
     })
   }
 }

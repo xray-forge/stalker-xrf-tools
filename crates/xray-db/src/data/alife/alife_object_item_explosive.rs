@@ -22,9 +22,9 @@ impl AlifeObjectInheritedReader<AlifeObjectItemExplosive> for AlifeObjectItemExp
     })
   }
 
-  fn import(props: &Section) -> io::Result<AlifeObjectItemExplosive> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemExplosive> {
     Ok(AlifeObjectItemExplosive {
-      base: AlifeObjectItem::import(props)?,
+      base: AlifeObjectItem::import(section)?,
     })
   }
 }

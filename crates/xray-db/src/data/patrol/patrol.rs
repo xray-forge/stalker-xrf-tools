@@ -120,18 +120,18 @@ impl Patrol {
 
   /// Import patrols data from provided path.
   pub fn import(
-    section: &str,
+    section_name: &str,
     patrols_config: &Ltx,
     patrol_points_config: &Ltx,
     patrol_links_config: &Ltx,
   ) -> io::Result<Patrol> {
-    let props: &Section = patrols_config
-      .section(section)
-      .unwrap_or_else(|| panic!("Patrol section {section} should be defined in ltx file"));
+    let section: &Section = patrols_config
+      .section(section_name)
+      .unwrap_or_else(|| panic!("Patrol section {section_name} should be defined in ltx file"));
 
-    let name: String = read_ini_field("name", props)?;
-    let points_list: String = read_ini_field("points", props)?;
-    let links_count: usize = read_ini_field("links_count", props)?;
+    let name: String = read_ini_field("name", section)?;
+    let points_list: String = read_ini_field("points", section)?;
+    let links_count: usize = read_ini_field("links_count", section)?;
 
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut links: Vec<PatrolLink> = Vec::new();

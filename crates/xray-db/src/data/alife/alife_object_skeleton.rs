@@ -37,11 +37,11 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   }
 
   /// Import skeleton data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectSkeleton> {
+  fn import(section: &Section) -> io::Result<AlifeObjectSkeleton> {
     Ok(AlifeObjectSkeleton {
-      name: read_ini_field("name", props)?,
-      flags: read_ini_field("flags", props)?,
-      source_id: read_ini_field("source_id", props)?,
+      name: read_ini_field("name", section)?,
+      flags: read_ini_field("flags", section)?,
+      source_id: read_ini_field("source_id", section)?,
     })
   }
 }

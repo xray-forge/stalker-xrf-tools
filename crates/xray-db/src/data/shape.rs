@@ -13,27 +13,27 @@ pub enum Shape {
 
 impl Shape {
   /// Import shape objects from ini config file.
-  pub fn import_shapes(props: &Section) -> io::Result<Vec<Shape>> {
+  pub fn import_shapes(section: &Section) -> io::Result<Vec<Shape>> {
     let mut shapes: Vec<Shape> = Vec::new();
-    let count: usize = read_ini_field("shapes_count", props)?;
+    let count: usize = read_ini_field("shapes_count", section)?;
 
     for index in 0..count {
       let prefix: String = format!("shape.{index}");
-      let shape_type: String = read_ini_field(&format!("{prefix}.type"), props)?;
+      let shape_type: String = read_ini_field(&format!("{prefix}.type"), section)?;
 
       match shape_type.as_str() {
         "sphere" => {
           shapes.push(Shape::Sphere((
-            read_ini_field(&format!("{prefix}.center"), props)?,
-            read_ini_field(&format!("{prefix}.radius"), props)?,
+            read_ini_field(&format!("{prefix}.center"), section)?,
+            read_ini_field(&format!("{prefix}.radius"), section)?,
           )));
         }
         "box" => {
           shapes.push(Shape::Box((
-            read_ini_field(&format!("{prefix}.a"), props)?,
-            read_ini_field(&format!("{prefix}.b"), props)?,
-            read_ini_field(&format!("{prefix}.c"), props)?,
-            read_ini_field(&format!("{prefix}.d"), props)?,
+            read_ini_field(&format!("{prefix}.a"), section)?,
+            read_ini_field(&format!("{prefix}.b"), section)?,
+            read_ini_field(&format!("{prefix}.c"), section)?,
+            read_ini_field(&format!("{prefix}.d"), section)?,
           )));
         }
         _ => {

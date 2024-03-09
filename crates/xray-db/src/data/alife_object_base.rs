@@ -229,32 +229,32 @@ impl AlifeObjectBase {
   }
 
   /// Import alife object data from ini file section.
-  pub fn import(props: &Section) -> io::Result<AlifeObjectBase> {
-    let section: String = read_ini_field("section", props)?;
-    let clsid: ClsId = ClsId::from_section(&section);
+  pub fn import(section: &Section) -> io::Result<AlifeObjectBase> {
+    let object_section: String = read_ini_field("section", section)?;
+    let clsid: ClsId = ClsId::from_section(&object_section);
 
     Ok(AlifeObjectBase {
-      index: read_ini_field("index", props)?,
-      id: read_ini_field("id", props)?,
-      net_action: read_ini_field("net_action", props)?,
+      index: read_ini_field("index", section)?,
+      id: read_ini_field("id", section)?,
+      net_action: read_ini_field("net_action", section)?,
       clsid: clsid.clone(),
-      section,
-      name: read_ini_field("name", props)?,
-      script_game_id: read_ini_field("script_game_id", props)?,
-      script_rp: read_ini_field("script_rp", props)?,
-      position: read_ini_field("position", props)?,
-      direction: read_ini_field("direction", props)?,
-      respawn_time: read_ini_field("respawn_time", props)?,
-      parent_id: read_ini_field("parent_id", props)?,
-      phantom_id: read_ini_field("phantom_id", props)?,
-      script_flags: read_ini_field("script_flags", props)?,
-      version: read_ini_field("version", props)?,
-      game_type: read_ini_field("game_type", props)?,
-      script_version: read_ini_field("script_version", props)?,
-      client_data_size: read_ini_field("client_data_size", props)?,
-      spawn_id: read_ini_field("spawn_id", props)?,
-      inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), props)?,
-      update_data: bytes_from_base64(&read_ini_field::<String>("update_data", props)?)?,
+      section: object_section,
+      name: read_ini_field("name", section)?,
+      script_game_id: read_ini_field("script_game_id", section)?,
+      script_rp: read_ini_field("script_rp", section)?,
+      position: read_ini_field("position", section)?,
+      direction: read_ini_field("direction", section)?,
+      respawn_time: read_ini_field("respawn_time", section)?,
+      parent_id: read_ini_field("parent_id", section)?,
+      phantom_id: read_ini_field("phantom_id", section)?,
+      script_flags: read_ini_field("script_flags", section)?,
+      version: read_ini_field("version", section)?,
+      game_type: read_ini_field("game_type", section)?,
+      script_version: read_ini_field("script_version", section)?,
+      client_data_size: read_ini_field("client_data_size", section)?,
+      spawn_id: read_ini_field("spawn_id", section)?,
+      inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), section)?,
+      update_data: bytes_from_base64(&read_ini_field::<String>("update_data", section)?)?,
     })
   }
 

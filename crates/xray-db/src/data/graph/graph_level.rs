@@ -47,17 +47,17 @@ impl GraphLevel {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(section: &str, config: &Ltx) -> io::Result<GraphLevel> {
-    let props: &Section = config
-      .section(section)
-      .unwrap_or_else(|| panic!("Graph section {section} should be defined in ltx file"));
+  pub fn import(section_name: &str, config: &Ltx) -> io::Result<GraphLevel> {
+    let section: &Section = config
+      .section(section_name)
+      .unwrap_or_else(|| panic!("Graph section {section_name} should be defined in ltx file"));
 
     Ok(GraphLevel {
-      name: read_ini_field("name", props)?,
-      offset: read_ini_field("offset", props)?,
-      id: read_ini_field("id", props)?,
-      section: read_ini_field("section", props)?,
-      guid: read_ini_field("guid", props)?,
+      name: read_ini_field("name", section)?,
+      offset: read_ini_field("offset", section)?,
+      id: read_ini_field("id", section)?,
+      section: read_ini_field("section", section)?,
+      guid: read_ini_field("guid", section)?,
     })
   }
 

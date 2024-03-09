@@ -32,11 +32,11 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
   }
 
   /// Import generic space restrictor data from the chunk.
-  fn import(props: &Section) -> io::Result<AlifeObjectSpaceRestrictor> {
+  fn import(section: &Section) -> io::Result<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
-      base: AlifeObjectAbstract::import(props)?,
-      shape: Shape::import_shapes(props)?,
-      restrictor_type: read_ini_field("restrictor_type", props)?,
+      base: AlifeObjectAbstract::import(section)?,
+      shape: Shape::import_shapes(section)?,
+      restrictor_type: read_ini_field("restrictor_type", section)?,
     })
   }
 }

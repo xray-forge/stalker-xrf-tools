@@ -38,13 +38,13 @@ impl AlifeObjectInheritedReader<AlifeObjectPhysic> for AlifeObjectPhysic {
   }
 
   /// Import alife physic object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectPhysic> {
+  fn import(section: &Section) -> io::Result<AlifeObjectPhysic> {
     Ok(AlifeObjectPhysic {
-      base: AlifeObjectDynamicVisual::import(props)?,
-      skeleton: AlifeObjectSkeleton::import(props)?,
-      physic_type: read_ini_field("physic_type", props)?,
-      mass: read_ini_field("mass", props)?,
-      fixed_bones: read_ini_field("fixed_bones", props)?,
+      base: AlifeObjectDynamicVisual::import(section)?,
+      skeleton: AlifeObjectSkeleton::import(section)?,
+      physic_type: read_ini_field("physic_type", section)?,
+      mass: read_ini_field("mass", section)?,
+      fixed_bones: read_ini_field("fixed_bones", section)?,
     })
   }
 }

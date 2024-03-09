@@ -50,23 +50,23 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   }
 
   /// Import alife creature object from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectCreature> {
+  fn import(section: &Section) -> io::Result<AlifeObjectCreature> {
     Ok(AlifeObjectCreature {
-      base: AlifeObjectDynamicVisual::import(props)?,
-      team: read_ini_field("team", props)?,
-      squad: read_ini_field("squad", props)?,
-      group: read_ini_field("group", props)?,
-      health: read_ini_field("health", props)?,
+      base: AlifeObjectDynamicVisual::import(section)?,
+      team: read_ini_field("team", section)?,
+      squad: read_ini_field("squad", section)?,
+      group: read_ini_field("group", section)?,
+      health: read_ini_field("health", section)?,
       dynamic_out_restrictions: import_vector_from_string(&read_ini_field::<String>(
         "dynamic_out_restrictions",
-        props,
+        section,
       )?)?,
       dynamic_in_restrictions: import_vector_from_string(&read_ini_field::<String>(
         "dynamic_in_restrictions",
-        props,
+        section,
       )?)?,
-      killer_id: read_ini_field("killer_id", props)?,
-      game_death_time: read_ini_field("game_death_time", props)?,
+      killer_id: read_ini_field("killer_id", section)?,
+      game_death_time: read_ini_field("game_death_time", section)?,
     })
   }
 }

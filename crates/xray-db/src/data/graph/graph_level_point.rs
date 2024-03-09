@@ -37,15 +37,15 @@ impl GraphLevelPoint {
   }
 
   /// Import graph level point from ini file.
-  pub fn import(section: &str, config: &Ltx) -> io::Result<GraphLevelPoint> {
-    let props: &Section = config.section(section).unwrap_or_else(|| {
-      panic!("Graph section '{section}' should be defined in level point ltx file")
+  pub fn import(section_name: &str, config: &Ltx) -> io::Result<GraphLevelPoint> {
+    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+      panic!("Graph section '{section_name}' should be defined in level point ltx file")
     });
 
     Ok(GraphLevelPoint {
-      position: read_ini_field("position", props)?,
-      level_vertex_id: read_ini_field("level_vertex_id", props)?,
-      distance: read_ini_field("distance", props)?,
+      position: read_ini_field("position", section)?,
+      level_vertex_id: read_ini_field("level_vertex_id", section)?,
+      distance: read_ini_field("distance", section)?,
     })
   }
 

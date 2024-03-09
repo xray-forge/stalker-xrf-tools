@@ -38,11 +38,11 @@ impl AlifeObjectInheritedReader<AlifeObjectItem> for AlifeObjectItem {
   }
 
   /// Import alife item object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItem> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItem> {
     Ok(AlifeObjectItem {
-      base: AlifeObjectDynamicVisual::import(props)?,
-      condition: read_ini_field("condition", props)?,
-      upgrades_count: read_ini_field("upgrades_count", props)?,
+      base: AlifeObjectDynamicVisual::import(section)?,
+      condition: read_ini_field("condition", section)?,
+      upgrades_count: read_ini_field("upgrades_count", section)?,
     })
   }
 }

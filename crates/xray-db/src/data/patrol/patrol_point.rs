@@ -102,17 +102,17 @@ impl PatrolPoint {
   }
 
   /// Import patrol point data from ini config.
-  pub fn import(section: &str, config: &Ltx) -> io::Result<PatrolPoint> {
-    let props: &Section = config
-      .section(section)
-      .unwrap_or_else(|| panic!("Patrol point section {section} should be defined in ltx file"));
+  pub fn import(section_name: &str, config: &Ltx) -> io::Result<PatrolPoint> {
+    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+      panic!("Patrol point section {section_name} should be defined in ltx file")
+    });
 
     Ok(PatrolPoint {
-      name: read_ini_field("name", props)?,
-      position: read_ini_field("position", props)?,
-      flags: read_ini_field("flags", props)?,
-      level_vertex_id: read_ini_field("level_vertex_id", props)?,
-      game_vertex_id: read_ini_field("game_vertex_id", props)?,
+      name: read_ini_field("name", section)?,
+      position: read_ini_field("position", section)?,
+      flags: read_ini_field("flags", section)?,
+      level_vertex_id: read_ini_field("level_vertex_id", section)?,
+      game_vertex_id: read_ini_field("game_vertex_id", section)?,
     })
   }
 

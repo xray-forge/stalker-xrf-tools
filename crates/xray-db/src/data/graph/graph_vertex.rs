@@ -64,21 +64,21 @@ impl GraphVertex {
   }
 
   /// Import graph vertex from ini file.
-  pub fn import(section: &str, config: &Ltx) -> io::Result<GraphVertex> {
-    let props: &Section = config.section(section).unwrap_or_else(|| {
-      panic!("Graph section '{section}' should be defined in graph vertex ltx file")
+  pub fn import(section_name: &str, config: &Ltx) -> io::Result<GraphVertex> {
+    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+      panic!("Graph section '{section_name}' should be defined in graph vertex ltx file")
     });
 
     Ok(GraphVertex {
-      level_point: read_ini_field("level_point", props)?,
-      game_point: read_ini_field("game_point", props)?,
-      level_id: read_ini_field("level_id", props)?,
-      level_vertex_id: read_ini_field("level_vertex_id", props)?,
-      vertex_type: read_ini_u32_bytes_field("vertex_type", props)?,
-      edges_offset: read_ini_field("edge_offset", props)?,
-      level_points_offset: read_ini_field("level_point_offset", props)?,
-      edges_count: read_ini_field("edge_count", props)?,
-      level_points_count: read_ini_field("level_point_count", props)?,
+      level_point: read_ini_field("level_point", section)?,
+      game_point: read_ini_field("game_point", section)?,
+      level_id: read_ini_field("level_id", section)?,
+      level_vertex_id: read_ini_field("level_vertex_id", section)?,
+      vertex_type: read_ini_u32_bytes_field("vertex_type", section)?,
+      edges_offset: read_ini_field("edge_offset", section)?,
+      level_points_offset: read_ini_field("level_point_offset", section)?,
+      edges_count: read_ini_field("edge_count", section)?,
+      level_points_count: read_ini_field("level_point_count", section)?,
     })
   }
 

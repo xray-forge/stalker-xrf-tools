@@ -33,13 +33,13 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
   }
 
   /// Import torrid zone object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectTorridZone> {
+  fn import(section: &Section) -> io::Result<AlifeObjectTorridZone> {
     Ok(AlifeObjectTorridZone {
-      base: AlifeObjectCustomZone::import(props)?,
-      motion: AlifeObjectMotion::import(props)?,
+      base: AlifeObjectCustomZone::import(section)?,
+      motion: AlifeObjectMotion::import(section)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
         "last_spawn_time",
-        props,
+        section,
       )?)?,
     })
   }

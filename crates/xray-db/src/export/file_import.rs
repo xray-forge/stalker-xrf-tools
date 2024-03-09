@@ -62,9 +62,9 @@ pub fn import_sized_vector_from_string<T: FromStr>(size: usize, value: &str) -> 
 }
 
 /// Read value from ini section and parse it as provided T type.
-pub fn read_ini_field<T: FromStr>(field: &str, props: &Section) -> io::Result<T> {
+pub fn read_ini_field<T: FromStr>(field: &str, section: &Section) -> io::Result<T> {
   Ok(
-    match props
+    match section
       .get(field)
       .unwrap_or_else(|| panic!("'{field}' to be in ini"))
       .parse::<T>()
@@ -85,9 +85,9 @@ pub fn read_ini_field<T: FromStr>(field: &str, props: &Section) -> io::Result<T>
 }
 
 /// Read value from ini section and parse it as provided T type.
-pub fn read_ini_u32_bytes_field(field: &str, props: &Section) -> io::Result<U32Bytes> {
+pub fn read_ini_u32_bytes_field(field: &str, section: &Section) -> io::Result<U32Bytes> {
   let vertex_type: Vec<u8> =
-    import_sized_vector_from_string(4, &read_ini_field::<String>(field, props)?)?;
+    import_sized_vector_from_string(4, &read_ini_field::<String>(field, section)?)?;
 
   Ok((
     *vertex_type.get(0).unwrap(),

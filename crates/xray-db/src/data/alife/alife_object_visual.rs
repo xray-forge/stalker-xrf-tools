@@ -26,10 +26,10 @@ impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
   }
 
   /// Import visual object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectVisual> {
+  fn import(section: &Section) -> io::Result<AlifeObjectVisual> {
     Ok(AlifeObjectVisual {
-      visual_name: read_ini_field("visual_name", props)?,
-      visual_flags: read_ini_field("visual_flags", props)?,
+      visual_name: read_ini_field("visual_name", section)?,
+      visual_flags: read_ini_field("visual_flags", section)?,
     })
   }
 }

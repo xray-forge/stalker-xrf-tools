@@ -28,10 +28,10 @@ impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   }
 
   /// Import alife shape object data from ini config.
-  fn import(props: &Section) -> io::Result<AlifeObjectShape> {
+  fn import(section: &Section) -> io::Result<AlifeObjectShape> {
     Ok(AlifeObjectShape {
-      base: AlifeObjectAbstract::import(props)?,
-      shape: Shape::import_shapes(props)?,
+      base: AlifeObjectAbstract::import(section)?,
+      shape: Shape::import_shapes(section)?,
     })
   }
 }

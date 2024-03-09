@@ -28,10 +28,10 @@ impl AlifeObjectInheritedReader<AlifeObjectItemAmmo> for AlifeObjectItemAmmo {
   }
 
   /// Import alife ammo item data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItemAmmo> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemAmmo> {
     Ok(AlifeObjectItemAmmo {
-      base: AlifeObjectItem::import(props)?,
-      ammo_left: read_ini_field("ammo_left", props)?,
+      base: AlifeObjectItem::import(section)?,
+      ammo_left: read_ini_field("ammo_left", section)?,
     })
   }
 }

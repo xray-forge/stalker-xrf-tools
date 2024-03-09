@@ -38,11 +38,11 @@ impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
   }
 
   /// Import actor data from ini file section.
-  fn import(props: &Section) -> io::Result<AlifeActor> {
+  fn import(section: &Section) -> io::Result<AlifeActor> {
     Ok(AlifeActor {
-      base: AlifeObjectActor::import(props)?,
-      start_position_filled: read_ini_field("start_position_filled", props)?,
-      save_marker: read_ini_field("save_marker", props)?,
+      base: AlifeObjectActor::import(section)?,
+      start_position_filled: read_ini_field("start_position_filled", section)?,
+      save_marker: read_ini_field("save_marker", section)?,
     })
   }
 }

@@ -60,16 +60,16 @@ impl HeaderChunk {
   /// Parse ini files and populate spawn file.
   pub fn import(path: &Path) -> io::Result<HeaderChunk> {
     let config: Ltx = open_ini_config(&path.join("header.ltx"))?;
-    let props: &Section = config
+    let section: &Section = config
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
     Ok(HeaderChunk {
-      version: read_ini_field("version", props)?,
-      guid: read_ini_field("guid", props)?,
-      graph_guid: read_ini_field("graph_guid", props)?,
-      objects_count: read_ini_field("objects", props)?,
-      levels_count: read_ini_field("level_count", props)?,
+      version: read_ini_field("version", section)?,
+      guid: read_ini_field("guid", section)?,
+      graph_guid: read_ini_field("graph_guid", section)?,
+      objects_count: read_ini_field("objects", section)?,
+      levels_count: read_ini_field("level_count", section)?,
     })
   }
 

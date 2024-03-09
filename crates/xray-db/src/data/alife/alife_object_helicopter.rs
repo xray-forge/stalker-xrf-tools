@@ -38,13 +38,13 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
   }
 
   /// Import helicopter object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectHelicopter> {
+  fn import(section: &Section) -> io::Result<AlifeObjectHelicopter> {
     Ok(AlifeObjectHelicopter {
-      base: AlifeObjectDynamicVisual::import(props)?,
-      skeleton: AlifeObjectSkeleton::import(props)?,
-      motion: AlifeObjectMotion::import(props)?,
-      startup_animation: read_ini_field("startup_animation", props)?,
-      engine_sound: read_ini_field("engine_sound", props)?,
+      base: AlifeObjectDynamicVisual::import(section)?,
+      skeleton: AlifeObjectSkeleton::import(section)?,
+      motion: AlifeObjectMotion::import(section)?,
+      startup_animation: read_ini_field("startup_animation", section)?,
+      engine_sound: read_ini_field("engine_sound", section)?,
     })
   }
 }

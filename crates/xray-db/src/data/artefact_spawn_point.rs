@@ -37,11 +37,11 @@ impl ArtefactSpawnPoint {
   }
 
   /// Import artefact spawn point data from ini section.
-  pub fn import(props: &Section) -> io::Result<ArtefactSpawnPoint> {
+  pub fn import(section: &Section) -> io::Result<ArtefactSpawnPoint> {
     Ok(ArtefactSpawnPoint {
-      position: read_ini_field("position", props)?,
-      level_vertex_id: read_ini_field("level_vertex_id", props)?,
-      distance: read_ini_field("distance", props)?,
+      position: read_ini_field("position", section)?,
+      level_vertex_id: read_ini_field("level_vertex_id", section)?,
+      distance: read_ini_field("distance", section)?,
     })
   }
 

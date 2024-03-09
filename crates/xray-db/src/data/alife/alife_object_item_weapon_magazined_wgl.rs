@@ -25,9 +25,9 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
   }
 
   /// Read magazined weapon with launcher from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItemWeaponMagazinedWgl> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemWeaponMagazinedWgl> {
     Ok(AlifeObjectItemWeaponMagazinedWgl {
-      base: AlifeObjectItemWeaponMagazined::import(props)?,
+      base: AlifeObjectItemWeaponMagazined::import(section)?,
     })
   }
 }

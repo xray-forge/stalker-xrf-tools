@@ -10,7 +10,7 @@ pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric> {
   fn read<B: ByteOrder>(reader: &mut ChunkReader) -> io::Result<T>;
 
   /// Import alife object data from generic ini properties section.
-  fn import(props: &Section) -> io::Result<T>;
+  fn import(section: &Section) -> io::Result<T>;
 
   fn verify(reader: &ChunkReader) {
     assert!(

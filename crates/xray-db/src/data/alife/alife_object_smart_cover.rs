@@ -47,16 +47,16 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
   }
 
   /// Import smart cover object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectSmartCover> {
+  fn import(section: &Section) -> io::Result<AlifeObjectSmartCover> {
     Ok(AlifeObjectSmartCover {
-      base: AlifeObjectDynamic::import(props)?,
-      shape: Shape::import_shapes(props)?,
-      description: read_ini_field("description", props)?,
-      hold_position_time: read_ini_field("hold_position_time", props)?,
-      enter_min_enemy_distance: read_ini_field("enter_min_enemy_distance", props)?,
-      exit_min_enemy_distance: read_ini_field("exit_min_enemy_distance", props)?,
-      is_combat_cover: read_ini_field("is_combat_cover", props)?,
-      can_fire: read_ini_field("can_fire", props)?,
+      base: AlifeObjectDynamic::import(section)?,
+      shape: Shape::import_shapes(section)?,
+      description: read_ini_field("description", section)?,
+      hold_position_time: read_ini_field("hold_position_time", section)?,
+      enter_min_enemy_distance: read_ini_field("enter_min_enemy_distance", section)?,
+      exit_min_enemy_distance: read_ini_field("exit_min_enemy_distance", section)?,
+      is_combat_cover: read_ini_field("is_combat_cover", section)?,
+      can_fire: read_ini_field("can_fire", section)?,
     })
   }
 }

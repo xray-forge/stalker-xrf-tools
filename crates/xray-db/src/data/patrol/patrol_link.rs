@@ -83,20 +83,20 @@ impl PatrolLink {
   }
 
   /// Import patrol point link from ini config.
-  pub fn import(section: &str, config: &Ltx) -> io::Result<PatrolLink> {
-    let props: &Section = config
-      .section(section)
-      .unwrap_or_else(|| panic!("Patrol point link '{section}' should be defined in ltx file"));
+  pub fn import(section_name: &str, config: &Ltx) -> io::Result<PatrolLink> {
+    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+      panic!("Patrol point link '{section_name}' should be defined in ltx file")
+    });
 
-    let index: u32 = read_ini_field("index", props)?;
-    let count: usize = read_ini_field("count", props)?;
+    let index: u32 = read_ini_field("index", section)?;
+    let count: usize = read_ini_field("count", section)?;
 
     let mut links: Vec<(u32, f32)> = Vec::new();
 
     for link in 0..count {
       links.push((
-        read_ini_field(&format!("from.{link}"), props)?,
-        read_ini_field(&format!("weight.{link}"), props)?,
+        read_ini_field(&format!("from.{link}"), section)?,
+        read_ini_field(&format!("weight.{link}"), section)?,
       ))
     }
 

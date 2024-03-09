@@ -34,12 +34,12 @@ impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
   }
 
   /// Import pda object data from ini config section.
-  fn import(props: &Section) -> io::Result<AlifeObjectItemPda> {
+  fn import(section: &Section) -> io::Result<AlifeObjectItemPda> {
     Ok(AlifeObjectItemPda {
-      base: AlifeObjectItem::import(props)?,
-      owner: read_ini_field("owner", props)?,
-      character: read_ini_field("character", props)?,
-      info_portion: read_ini_field("info_portion", props)?,
+      base: AlifeObjectItem::import(section)?,
+      owner: read_ini_field("owner", section)?,
+      character: read_ini_field("character", section)?,
+      info_portion: read_ini_field("info_portion", section)?,
     })
   }
 }
