@@ -1,6 +1,8 @@
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {
   TypeString,
+  TypeSection,
+  TypeTuple,
   TypeCondlist,
   TypeF32,
   TypeU32,
@@ -30,10 +32,13 @@ impl LtxFieldDataType {
       "string" => LtxFieldDataType::TypeString,
       "condlist" => LtxFieldDataType::TypeCondlist,
       "vector" => LtxFieldDataType::TypeVector,
+      "section" => LtxFieldDataType::TypeSection,
       "bool" => LtxFieldDataType::TypeBool,
       field_type => {
         if field_type.starts_with("enum") {
           LtxFieldDataType::TypeEnum
+        } else if field_type.starts_with("tuple") {
+          LtxFieldDataType::TypeTuple
         } else {
           LtxFieldDataType::TypeUnknown
         }

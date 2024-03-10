@@ -95,6 +95,8 @@ impl LtxFieldScheme {
       LtxFieldDataType::TypeVector => self.validate_vector(field_data),
       LtxFieldDataType::TypeEnum => self.validate_enum(field_data),
       LtxFieldDataType::TypeCondlist => self.validate_condlist(field_data),
+      LtxFieldDataType::TypeTuple => self.validate_tuple(field_data),
+      LtxFieldDataType::TypeSection => self.validate_section(field_data),
       LtxFieldDataType::TypeString => self.validate_string(field_data),
       LtxFieldDataType::TypeUnknown => None,
       LtxFieldDataType::TypeAny => None,
@@ -215,6 +217,14 @@ impl LtxFieldScheme {
         self.allowed_values.join(",")
       )))
     }
+  }
+
+  fn validate_section(&self, _: &str) -> Option<LtxSchemeError> {
+    None
+  }
+
+  fn validate_tuple(&self, _: &str) -> Option<LtxSchemeError> {
+    None
   }
 
   fn validate_condlist(&self, _: &str) -> Option<LtxSchemeError> {
