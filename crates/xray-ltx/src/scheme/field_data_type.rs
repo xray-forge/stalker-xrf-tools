@@ -1,6 +1,7 @@
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {
   TypeString,
+  TypeCondlist,
   TypeF32,
   TypeU32,
   TypeI32,
@@ -27,6 +28,7 @@ impl LtxFieldDataType {
       "u8" => LtxFieldDataType::TypeU8,
       "i8" => LtxFieldDataType::TypeI8,
       "string" => LtxFieldDataType::TypeString,
+      "condlist" => LtxFieldDataType::TypeCondlist,
       "vector" => LtxFieldDataType::TypeVector,
       "bool" => LtxFieldDataType::TypeBool,
       field_type => {

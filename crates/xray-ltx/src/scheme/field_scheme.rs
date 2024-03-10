@@ -27,6 +27,7 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
+  /// Validate provided section based on current field schema definition.
   pub fn validate(&self, section: &Section) -> Option<LtxSchemeError> {
     match section.get(&self.name) {
       Some(value) => {
@@ -74,6 +75,7 @@ impl LtxFieldScheme {
       LtxFieldDataType::TypeBool => self.validate_bool(field_data),
       LtxFieldDataType::TypeVector => self.validate_vector(field_data),
       LtxFieldDataType::TypeEnum => self.validate_enum(field_data),
+      LtxFieldDataType::TypeCondlist => self.validate_condlist(field_data),
       LtxFieldDataType::TypeString => self.validate_string(field_data),
       LtxFieldDataType::TypeUnknown => None,
       LtxFieldDataType::TypeAny => None,
@@ -193,6 +195,10 @@ impl LtxFieldScheme {
         self.allowed_values.join(",")
       )))
     }
+  }
+
+  fn validate_condlist(&self, _: &str) -> Option<LtxSchemeError> {
+    None
   }
 
   fn validate_string(&self, _: &str) -> Option<LtxSchemeError> {
