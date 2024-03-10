@@ -65,7 +65,7 @@ impl LtxSchemeParser {
 
     for (field, value) in section {
       if field == LTX_SCHEME_STRICT_FIELD {
-        scheme.is_strict = LtxSectionScheme::parse_strict_mode(value).map_err(LtxError::from)?;
+        scheme.is_strict = scheme.parse_strict_mode(value).map_err(LtxError::from)?;
 
         continue;
       }
@@ -90,7 +90,7 @@ impl LtxSchemeParser {
     Ok(scheme)
   }
 
-  /// Parse LTX field definition from section.
+  /// Parse LTX field definition from section by field name.
   fn parse_field_scheme(
     field_name: &str,
     section_name: &str,
@@ -143,6 +143,8 @@ impl LtxSchemeParser {
     })
   }
 
+  /// Parse enumeration allowed values from field value.
+  /// Expected value like `enum:value_1,value_2`.
   fn parse_enum_allowed_values(
     section_name: &str,
     field_name: &str,

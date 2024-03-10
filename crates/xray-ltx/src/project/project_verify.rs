@@ -95,6 +95,7 @@ impl LtxProject {
     Ok(scheme_errors.is_empty())
   }
 
+  /// Verify all the section/field entries in current ltx project.
   pub fn verify_entries(&self) -> Result<bool, LtxError> {
     self.verify_entries_opt(Default::default())
   }

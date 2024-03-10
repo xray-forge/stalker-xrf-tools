@@ -28,7 +28,7 @@ impl LtxSectionScheme {
   }
 
   /// Parse whether strict mode is activated for ltx scheme.
-  pub fn parse_strict_mode(value: &str) -> Result<bool, LtxReadError> {
+  pub fn parse_strict_mode(&self, value: &str) -> Result<bool, LtxReadError> {
     match value.parse::<bool>() {
       Ok(value) => Ok(value),
       Err(_) => Err(LtxReadError::new(format!(
