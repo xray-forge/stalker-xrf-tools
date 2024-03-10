@@ -8,6 +8,7 @@ use crate::file::types::LtxSectionSchemes;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;
+use crate::LtxSchemeError;
 use indexmap::map::Entry;
 use walkdir::DirEntry;
 
@@ -56,7 +57,9 @@ impl LtxSchemeParser {
         section: section_name.into(),
         name: String::from("$scheme"),
         is_optional: false,
+        is_array: false,
         data_type: LtxFieldDataType::TypeString,
+        allowed_values: Vec::new(),
       },
     );
 
@@ -89,16 +92,17 @@ impl LtxSchemeParser {
 
   /// Parse LTX field definition from section.
   fn parse_field_scheme(
-    name: &str,
+    field_name: &str,
     section_name: &str,
     section: &Section,
   ) -> Result<LtxFieldScheme, LtxError> {
-    let field_type: Option<&str> = section.get(format!("{name}.type"));
-    let field_optional: Option<&str> = section.get(format!("{name}.optional"));
+    let field_type: Option<&str> = section.get(format!("{field_name}.type"));
+    let field_optional: Option<&str> = section.get(format!("{field_name}.optional"));
+    let field_array: Option<&str> = section.get(format!("{field_name}.array"));
 
     if field_type.is_none() && field_optional.is_none() {
       return Err(LtxReadError::new_ltx_error(format!(
-        "Invalid ltx field '{name}' configuration, no valid definitions supplied"
+        "Invalid ltx field '{field_name}' configuration, no valid definitions supplied"
       )));
     }
 
@@ -106,16 +110,75 @@ impl LtxSchemeParser {
 
     if data_type == LtxFieldDataType::TypeUnknown {
       return Err(LtxReadError::new_ltx_error(format!(
-        "Invalid ltx field '{name}' configuration, unknown type '{}' supplied",
+        "Invalid ltx field '{field_name}' configuration, unknown type '{}' supplied",
         field_type.unwrap()
       )));
     }
 
+    let mut is_array: bool = false;
+
+    if let Some(is_array_data) = field_array {
+      if let Ok(parsed) = is_array_data.parse::<bool>() {
+        is_array = parsed
+      } else {
+        return Err(LtxReadError::new_ltx_error(format!(
+          "Invalid ltx field '{field_name}' configuration, invalid value for array definition.\
+           Expected true or false, got {}",
+          field_array.unwrap()
+        )));
+      }
+    }
+
     Ok(LtxFieldScheme {
       section: section_name.into(),
-      name: name.into(),
-      is_optional: LtxFieldDataType::is_field_optional(field_optional),
+      name: field_name.into(),
+      allowed_values: if data_type == LtxFieldDataType::TypeEnum {
+        Self::parse_enum_allowed_values(section_name, field_name, field_type.unwrap())?
+      } else {
+        Vec::new()
+      },
       data_type,
+      is_array,
+      is_optional: LtxFieldDataType::is_field_optional(field_optional),
     })
+  }
+
+  fn parse_enum_allowed_values(
+    section_name: &str,
+    field_name: &str,
+    value: &str,
+  ) -> Result<Vec<String>, LtxError> {
+    let mut allowed_values: Vec<String> = Vec::new();
+
+    match value.split_once(':') {
+      None => {
+        return Err(LtxReadError::new_ltx_error(format!(
+          "Failed to read scheme enum type for field '{section_name}', expected ':' separated type and values"
+        )))
+      }
+      Some((_, allowed_values_string)) => {
+        for allowed in allowed_values_string.trim().split(',').filter_map(|it| {
+          let trimmed: &str = it.trim();
+
+          if trimmed.is_empty() {
+            None
+          } else {
+            Some(trimmed)
+          }
+        }) {
+            allowed_values.push(allowed.into());
+        }
+      }
+    }
+
+    if allowed_values.is_empty() {
+      Err(LtxSchemeError::new_ltx_error(
+        section_name,
+        field_name,
+        "Failed to parse enum type, expected comma separated list of possible values after 'enum:'",
+      ))
+    } else {
+      Ok(allowed_values)
+    }
   }
 }

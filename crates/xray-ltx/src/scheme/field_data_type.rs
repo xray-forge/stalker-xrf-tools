@@ -29,8 +29,13 @@ impl LtxFieldDataType {
       "string" => LtxFieldDataType::TypeString,
       "vector" => LtxFieldDataType::TypeVector,
       "bool" => LtxFieldDataType::TypeBool,
-      "enum" => LtxFieldDataType::TypeEnum,
-      _ => LtxFieldDataType::TypeUnknown,
+      field_type => {
+        if field_type.starts_with("enum") {
+          LtxFieldDataType::TypeEnum
+        } else {
+          LtxFieldDataType::TypeUnknown
+        }
+      }
     }
   }
 
