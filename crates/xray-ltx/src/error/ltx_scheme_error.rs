@@ -7,6 +7,7 @@ pub struct LtxSchemeError {
   pub section: String,
   pub field: String,
   pub message: String,
+  pub at: Option<String>,
 }
 
 impl LtxSchemeError {
@@ -20,6 +21,22 @@ impl LtxSchemeError {
       section: section.into(),
       field: field.into(),
       message: message.into(),
+      at: None,
+    }
+  }
+
+  pub fn new_at<S, F, M, A>(section: S, field: F, message: M, at: A) -> LtxSchemeError
+  where
+    S: Into<String>,
+    F: Into<String>,
+    M: Into<String>,
+    A: Into<String>,
+  {
+    LtxSchemeError {
+      section: section.into(),
+      field: field.into(),
+      message: message.into(),
+      at: Some(at.into()),
     }
   }
 
@@ -33,17 +50,26 @@ impl LtxSchemeError {
       section: section.into(),
       field: field.into(),
       message: message.into(),
+      at: None,
     })
   }
 }
 
 impl Display for LtxSchemeError {
   fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
-    write!(
-      formatter,
-      "Error in [{}] {}, reason: {}",
-      self.section, self.field, self.message
-    )
+    if let Some(at) = &self.at {
+      write!(
+        formatter,
+        "Error in '{at}' [{}] {}, reason: {}",
+        self.section, self.field, self.message
+      )
+    } else {
+      write!(
+        formatter,
+        "Error in [{}] {}, reason: {}",
+        self.section, self.field, self.message
+      )
+    }
   }
 }
 

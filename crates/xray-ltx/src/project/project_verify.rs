@@ -20,7 +20,8 @@ impl LtxProject {
 
     // For each file entry in the project:
     for entry in &self.ltx_file_entries {
-      let ltx: Ltx = Ltx::load_from_file_full(entry.path())?;
+      let entry_path: &Path = entry.path();
+      let ltx: Ltx = Ltx::load_from_file_full(entry_path)?;
 
       // For each section in file:
       for (section_name, section) in &ltx {
@@ -37,20 +38,20 @@ impl LtxProject {
                 let validation_error: Option<LtxSchemeError> = field_definition.validate(section);
 
                 if options.is_verbose && !options.is_silent {
-                  println!(
-                    "Checking {:?} - [{section_name}] {field_name}",
-                    entry.path()
-                  );
+                  println!("Checking {:?} - [{section_name}] {field_name}", entry_path);
                 }
 
-                if let Some(error) = validation_error {
+                if let Some(mut error) = validation_error {
+                  error.at = Some(entry_path.to_str().unwrap().into());
+
                   scheme_errors.push(error);
                 }
               } else if scheme_definition.is_strict {
-                scheme_errors.push(LtxSchemeError::new(
+                scheme_errors.push(LtxSchemeError::new_at(
                   section_name,
                   field_name,
                   "Unexpected field, definition is required in strict mode",
+                  entry_path.to_str().unwrap(),
                 ));
               }
             }
@@ -58,28 +59,31 @@ impl LtxProject {
             if scheme_definition.is_strict
               && section.len() < scheme_definition.get_required_fields_count()
             {
-              scheme_errors.push(LtxSchemeError::new(
+              scheme_errors.push(LtxSchemeError::new_at(
                 section_name,
                 "*",
                 format!(
                   "Not matching count of received fields and scheme definitions, {} got, {} expected",
                   section.len(),
-                  scheme_definition.get_required_fields_count()
+                  scheme_definition.get_required_fields_count(),
                 ),
+                entry_path.to_str().unwrap()
               ));
             }
           } else {
-            scheme_errors.push(LtxSchemeError::new(
+            scheme_errors.push(LtxSchemeError::new_at(
               section_name,
               "*",
               format!("Required schema '{scheme_name}' definition is not found"),
+              entry_path.to_str().unwrap(),
             ));
           }
         } else if options.is_strict {
-          scheme_errors.push(LtxSchemeError::new(
+          scheme_errors.push(LtxSchemeError::new_at(
             section_name,
             "*",
             "Expected '$schema' field to be defined in strict mode check",
+            entry_path.to_str().unwrap(),
           ));
         }
       }
