@@ -75,6 +75,12 @@ impl LtxProject {
               format!("Required schema '{scheme_name}' definition is not found"),
             ));
           }
+        } else if options.is_strict {
+          scheme_errors.push(LtxSchemeError::new(
+            section_name,
+            "*",
+            "Expected '$schema' field to be defined in strict mode check",
+          ));
         }
       }
     }

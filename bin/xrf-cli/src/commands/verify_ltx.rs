@@ -10,6 +10,7 @@ pub fn verify_ltx(matches: &ArgMatches) {
 
   let is_silent: bool = matches.get_flag("silent");
   let is_verbose: bool = matches.get_flag("verbose");
+  let is_strict: bool = matches.get_flag("strict");
 
   if path.is_dir() {
     log::info!("Verifying ltx folder: {:?}", path);
@@ -19,6 +20,7 @@ pub fn verify_ltx(matches: &ArgMatches) {
       .verify_entries_opt(LtxVerifyOptions {
         is_silent,
         is_verbose,
+        is_strict,
       })
       .unwrap();
   } else {

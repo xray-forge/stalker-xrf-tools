@@ -119,7 +119,6 @@ pub fn setup_commands() -> Command {
         .arg(
           Arg::new("silent")
             .help("Turn of formatter logging")
-            .short('s')
             .long("silent")
             .required(false)
             .action(ArgAction::SetTrue),
@@ -147,7 +146,6 @@ pub fn setup_commands() -> Command {
         .arg(
           Arg::new("silent")
             .help("Turn of formatter logging")
-            .short('s')
             .long("silent")
             .required(false)
             .action(ArgAction::SetTrue),
@@ -161,12 +159,12 @@ pub fn setup_commands() -> Command {
             .action(ArgAction::SetTrue),
         )
         .arg(
-          Arg::new("filter")
-            .help("Path or mask to include in formatting (works with folders as path)")
-            .short('f')
-            .long("filter")
+          Arg::new("strict")
+            .help("Turn on strict checking mode")
+            .short('s')
+            .long("strict")
             .required(false)
-            .value_parser(value_parser!(String)),
+            .action(ArgAction::SetTrue),
         ),
     )
 }
