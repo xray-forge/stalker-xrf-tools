@@ -18,13 +18,21 @@ impl LtxSectionScheme {
     }
   }
 
+  /// Get count of fields required in scheme.
+  pub fn get_required_fields_count(&self) -> usize {
+    self
+      .fields
+      .iter()
+      .filter(|(_, definition)| !definition.is_optional)
+      .count()
+  }
+
   /// Parse whether strict mode is activated for ltx scheme.
   pub fn parse_strict_mode(value: &str) -> Result<bool, LtxReadError> {
-    match value {
-      "true" => Ok(true),
-      "false" => Ok(false),
-      &_ => Err(LtxReadError::new(format!(
-        "Invalid scheme declaration, unexpected value for 'strict field' - {value}"
+    match value.parse::<bool>() {
+      Ok(value) => Ok(value),
+      Err(_) => Err(LtxReadError::new(format!(
+        "Invalid scheme declaration, unexpected value for 'strict' field - '{value}', boolean expected"
       ))),
     }
   }

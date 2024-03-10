@@ -28,35 +28,51 @@ impl LtxFieldScheme {
       Some(value) => match self.data_type {
         LtxFieldDataType::TypeF32 => match value.parse::<f32>() {
           Ok(_) => None,
-          Err(_) => Some(self.validation_error("Invalid value, floating point number is expected")),
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, floating point number is expected, got '{value}'"
+          ))),
         },
         LtxFieldDataType::TypeU32 => match value.parse::<u32>() {
           Ok(_) => None,
-          Err(_) => {
-            Some(self.validation_error("Invalid value, unsigned 32 bit number is expected"))
-          }
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, unsigned 32 bit number is expected, got '{value}'"
+          ))),
         },
         LtxFieldDataType::TypeI32 => match value.parse::<i32>() {
           Ok(_) => None,
-          Err(_) => Some(self.validation_error("Invalid value, signed 32 bit number is expected")),
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, signed 32 bit number is expected, got '{value}'"
+          ))),
         },
         LtxFieldDataType::TypeU16 => match value.parse::<u16>() {
           Ok(_) => None,
-          Err(_) => {
-            Some(self.validation_error("Invalid value, unsigned 16 bit number is expected"))
-          }
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, unsigned 16 bit number is expected, got '{value}'"
+          ))),
         },
         LtxFieldDataType::TypeI16 => match value.parse::<i16>() {
           Ok(_) => None,
-          Err(_) => Some(self.validation_error("Invalid value, signed 16 bit number is expected")),
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, signed 16 bit number is expected, got '{value}'"
+          ))),
         },
         LtxFieldDataType::TypeU8 => match value.parse::<u8>() {
           Ok(_) => None,
-          Err(_) => Some(self.validation_error("Invalid value, unsigned 8 bit number is expected")),
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, unsigned 8 bit number is expected, got '{value}'"
+          ))),
         },
         LtxFieldDataType::TypeI8 => match value.parse::<i8>() {
           Ok(_) => None,
-          Err(_) => Some(self.validation_error("Invalid value, signed 8 bit number is expected")),
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, signed 8 bit number is expected, got '{value}'"
+          ))),
+        },
+        LtxFieldDataType::TypeBool => match value.parse::<bool>() {
+          Ok(_) => None,
+          Err(_) => Some(self.validation_error(&format!(
+            "Invalid value, boolean is expected, got '{value}'"
+          ))),
         },
         LtxFieldDataType::TypeEnum => None,
         LtxFieldDataType::TypeString => None,

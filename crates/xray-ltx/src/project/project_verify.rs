@@ -23,29 +23,50 @@ impl LtxProject {
       let ltx: Ltx = Ltx::load_from_file_full(entry.path())?;
 
       // For each section in file:
-      for (section_name, section) in ltx {
+      for (section_name, section) in &ltx {
         // Check only if schema is defined:
         if let Some(scheme_name) = section.get(LTX_SCHEME_FIELD) {
           checked_sections += 1;
 
           // Check if definition or required schema exists:
           if let Some(scheme_definition) = self.ltx_scheme_declarations.get(scheme_name) {
-            // Check every field definition:
-            for (field_name, field_definition) in &scheme_definition.fields {
-              let validation_error: Option<LtxSchemeError> = field_definition.validate(&section);
+            for (field_name, _) in section {
+              if let Some(field_definition) = scheme_definition.fields.get(field_name) {
+                checked_fields += 1;
 
-              checked_fields += 1;
+                let validation_error: Option<LtxSchemeError> = field_definition.validate(section);
 
-              if options.is_verbose && !options.is_silent {
-                println!(
-                  "Checking {:?} - [{section_name}] {field_name}",
-                  entry.path()
-                );
+                if options.is_verbose && !options.is_silent {
+                  println!(
+                    "Checking {:?} - [{section_name}] {field_name}",
+                    entry.path()
+                  );
+                }
+
+                if let Some(error) = validation_error {
+                  scheme_errors.push(error);
+                }
+              } else if scheme_definition.is_strict {
+                scheme_errors.push(LtxSchemeError::new(
+                  section_name,
+                  field_name,
+                  "Unexpected field, definition is required in strict mode",
+                ));
               }
+            }
 
-              if let Some(error) = validation_error {
-                scheme_errors.push(error);
-              }
+            if scheme_definition.is_strict
+              && section.len() < scheme_definition.get_required_fields_count()
+            {
+              scheme_errors.push(LtxSchemeError::new(
+                section_name,
+                "*",
+                format!(
+                  "Not matching count of received fields and scheme definitions, {} got, {} expected",
+                  section.len(),
+                  scheme_definition.get_required_fields_count()
+                ),
+              ));
             }
           } else {
             scheme_errors.push(LtxSchemeError::new(

@@ -8,6 +8,7 @@ pub enum LtxFieldDataType {
   TypeI16,
   TypeU8,
   TypeI8,
+  TypeBool,
   TypeEnum,
   TypeUnknown,
   TypeAny,
@@ -25,6 +26,7 @@ impl LtxFieldDataType {
       "u8" => LtxFieldDataType::TypeU8,
       "i8" => LtxFieldDataType::TypeI8,
       "string" => LtxFieldDataType::TypeString,
+      "bool" => LtxFieldDataType::TypeBool,
       "enum" => LtxFieldDataType::TypeEnum,
       _ => LtxFieldDataType::TypeUnknown,
     }

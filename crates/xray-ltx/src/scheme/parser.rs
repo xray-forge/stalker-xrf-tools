@@ -49,6 +49,17 @@ impl LtxSchemeParser {
   ) -> Result<LtxSectionScheme, LtxError> {
     let mut scheme: LtxSectionScheme = LtxSectionScheme::new(section_name);
 
+    // Insert default definition of $scheme field.
+    scheme.fields.insert(
+      String::from("$scheme"),
+      LtxFieldScheme {
+        section: section_name.into(),
+        name: String::from("$scheme"),
+        is_optional: false,
+        data_type: LtxFieldDataType::TypeString,
+      },
+    );
+
     for (field, value) in section {
       if field == LTX_SCHEME_STRICT_FIELD {
         scheme.is_strict = LtxSectionScheme::parse_strict_mode(value).map_err(LtxError::from)?;
