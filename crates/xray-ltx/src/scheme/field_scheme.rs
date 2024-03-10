@@ -74,6 +74,26 @@ impl LtxFieldScheme {
             "Invalid value, boolean is expected, got '{value}'"
           ))),
         },
+        LtxFieldDataType::TypeVector => {
+          let parsed_values: Vec<f32> = value
+            .split(',')
+            .filter_map(|x| {
+              if let Ok(parsed) = x.trim().parse::<f32>() {
+                Some(parsed)
+              } else {
+                None
+              }
+            })
+            .collect();
+
+          if parsed_values.len() != 3 {
+            Some(self.validation_error(&format!(
+              "Invalid value, comma separated 3d vector coordinates expected, got '{value}'"
+            )))
+          } else {
+            None
+          }
+        }
         LtxFieldDataType::TypeEnum => None,
         LtxFieldDataType::TypeString => None,
         LtxFieldDataType::TypeUnknown => None,
