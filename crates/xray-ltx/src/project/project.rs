@@ -1,4 +1,6 @@
-use crate::file::configuration::constants::{LTX_EXTENSION, LTX_SCHEME_EXTENSION};
+use crate::file::configuration::constants::{
+  LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME,
+};
 use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::scheme::parser::LtxSchemeParser;
@@ -19,6 +21,8 @@ pub struct LtxProject {
   pub ltx_files: Vec<DirEntry>,
   /// List of all LTX scheme files in the project.
   pub ltx_scheme_files: Vec<DirEntry>,
+  /// List of all LTX scheme files in the project.
+  pub ltx_scheme_file_entries: Vec<DirEntry>,
   /// Map of section schemes declared in the project.
   pub ltx_scheme_declarations: LtxSectionSchemes,
 }
@@ -79,11 +83,24 @@ impl LtxProject {
       })
       .collect();
 
+    // Filter our entries not included in other files.
+    let ltx_scheme_file_entries: Vec<DirEntry> = ltx_scheme_files
+      .iter()
+      .filter_map(|it| {
+        if included.contains(&PathBuf::from(it.path())) {
+          None
+        } else {
+          Some(it.clone())
+        }
+      })
+      .collect();
+
     Ok(LtxProject {
       root: PathBuf::from(root),
       ltx_files,
       ltx_file_entries,
-      ltx_scheme_declarations: LtxSchemeParser::parse_from_files(&ltx_scheme_files)?,
+      ltx_scheme_declarations: LtxSchemeParser::parse_from_files(&ltx_scheme_file_entries)?,
+      ltx_scheme_file_entries,
       ltx_scheme_files,
     })
   }
@@ -93,6 +110,8 @@ impl LtxProject {
     path
       .file_name()
       .and_then(|name| name.to_str())
-      .map_or(false, |name| name.ends_with(LTX_SCHEME_EXTENSION))
+      .map_or(false, |name| {
+        name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION)
+      })
   }
 }
