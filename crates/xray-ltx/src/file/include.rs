@@ -74,8 +74,8 @@ impl LtxIncludeConvertor {
       },
       Err(error) => {
         return Err(LtxConvertError::new_ltx_error(format!(
-          "Failed to convert ltx file, nested file '{:?}' in {:?} error: {error}",
-          path,
+          "Failed to convert ltx file, nested file {:?} in {:?} error: {error}",
+          path.as_os_str(),
           into.path.as_ref().unwrap(),
         )))
       }

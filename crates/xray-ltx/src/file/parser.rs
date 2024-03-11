@@ -79,6 +79,11 @@ impl<'a> LtxParser<'a> {
               "Failed to parse include statement in ltx file, including '{}' more than once",
               &included_path
             ));
+          } else if included_path.chars().any(|c| c.is_ascii_uppercase()) {
+            return self.error(format!(
+              "Failed to parse include statement in ltx file, '{}' contains uppercase letters",
+              &included_path
+            ));
           } else {
             ltx.include(included_path)
           }
