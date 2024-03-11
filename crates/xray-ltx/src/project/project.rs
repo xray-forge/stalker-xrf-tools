@@ -1,4 +1,5 @@
 use crate::file::configuration::constants::{LTX_EXTENSION, LTX_SCHEME_EXTENSION};
+use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::scheme::parser::LtxSchemeParser;
 use crate::{Ltx, LtxConvertError, LtxError};
@@ -52,7 +53,7 @@ impl LtxProject {
           for include in &Ltx::read_included_from_file(entry_path)? {
             let mut included_path: PathBuf = PathBuf::from(parent);
 
-            included_path.push(include);
+            included_path.push(LtxIncludeConvertor::statement_to_path(include));
 
             included.push(included_path);
           }

@@ -1,7 +1,7 @@
 use crate::error::ltx_error::LtxError;
 use crate::{Ltx, LtxConvertError};
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::{Path, PathBuf, MAIN_SEPARATOR_STR};
 
 /// Converter object to process and inject all child #include statements.
 #[derive(Default)]
@@ -15,6 +15,11 @@ impl LtxIncludeConvertor {
   /// Cast LTX file to fully parsed with include sections.
   pub fn convert(ltx: Ltx) -> Result<Ltx, LtxError> {
     LtxIncludeConvertor::new().convert_ltx(ltx)
+  }
+
+  /// Transform ltx statement to cross-platform path.
+  pub fn statement_to_path(statement: &str) -> PathBuf {
+    PathBuf::from(statement.replace('\\', MAIN_SEPARATOR_STR))
   }
 }
 
@@ -42,7 +47,7 @@ impl LtxIncludeConvertor {
     for included in &ltx.includes {
       let mut included_path: PathBuf = result.directory.as_ref().unwrap().clone();
 
-      included_path.push(PathBuf::from(included));
+      included_path.push(LtxIncludeConvertor::statement_to_path(included));
 
       self.include_children(&mut result, &included_path)?;
     }

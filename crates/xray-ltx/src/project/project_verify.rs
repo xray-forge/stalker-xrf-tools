@@ -38,7 +38,7 @@ impl LtxProject {
                 let validation_error: Option<LtxSchemeError> = field_definition.validate(section);
 
                 if options.is_verbose && !options.is_silent {
-                  println!("Checking {:?} - [{section_name}] {field_name}", entry_path);
+                  println!("Checking {:?} [{section_name}] {field_name}", entry_path);
                 }
 
                 if let Some(mut error) = validation_error {
@@ -112,9 +112,7 @@ impl LtxProject {
 
   /// Format single LTX file by provided path
   pub fn verify_file(path: &Path) -> Result<(), LtxError> {
-    let ltx: Ltx = Ltx::read_from_file(path)?;
-
-    ltx.into_included()?.into_inherited()?;
+    Ltx::load_from_file_full(path)?;
 
     Ok(())
   }
