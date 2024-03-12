@@ -21,6 +21,12 @@ impl LtxProject {
     // For each file entry in the project:
     for entry in &self.ltx_file_entries {
       let entry_path: &Path = entry.path();
+
+      // Do not check scheme definitions for scheme files - makes no sense.
+      if Self::is_ltx_scheme_path(entry_path) {
+        continue;
+      }
+
       let ltx: Ltx = Ltx::load_from_file_full(entry_path)?;
 
       // For each section in file:

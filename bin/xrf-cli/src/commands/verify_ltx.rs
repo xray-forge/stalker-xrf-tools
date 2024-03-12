@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
 use std::process;
-use xray_ltx::{LtxProject, LtxVerifyOptions};
+use xray_ltx::{LtxProject, LtxProjectOptions, LtxVerifyOptions};
 
 /// Verify ltx file or folder based on provided arguments.
 pub fn verify_ltx(matches: &ArgMatches) {
@@ -20,14 +20,19 @@ pub fn verify_ltx(matches: &ArgMatches) {
 
   log::info!("Verifying ltx folder: {:?}", path);
 
-  if !LtxProject::open_at_path(path)
-    .unwrap()
-    .verify_entries_opt(LtxVerifyOptions {
-      is_silent,
-      is_verbose,
-      is_strict,
-    })
-    .unwrap()
+  if !LtxProject::open_at_path_opt(
+    path,
+    LtxProjectOptions {
+      is_with_schemes_check: true,
+    },
+  )
+  .unwrap()
+  .verify_entries_opt(LtxVerifyOptions {
+    is_silent,
+    is_verbose,
+    is_strict,
+  })
+  .unwrap()
   {
     process::exit(1);
   }

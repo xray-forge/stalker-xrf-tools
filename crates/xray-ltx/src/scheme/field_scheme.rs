@@ -11,6 +11,9 @@ pub struct LtxFieldScheme {
   pub allowed_values: Vec<String>,
   pub is_optional: bool,
   pub is_array: bool,
+  // todo: Add range (min-max) support.
+  // todo: Add constant value support.
+  // todo: Add time value support.
 }
 
 impl LtxFieldScheme {

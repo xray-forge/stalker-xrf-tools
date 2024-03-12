@@ -3,6 +3,7 @@ use crate::file::configuration::constants::{
 };
 use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
+use crate::project::project_options::LtxProjectOptions;
 use crate::scheme::parser::LtxSchemeParser;
 use crate::{Ltx, LtxConvertError, LtxError};
 use std::path::{Path, PathBuf};
@@ -29,7 +30,7 @@ pub struct LtxProject {
 
 impl LtxProject {
   /// Initialize project on provided root.
-  pub fn open_at_path(root: &Path) -> Result<LtxProject, LtxError> {
+  pub fn open_at_path_opt(root: &Path, options: LtxProjectOptions) -> Result<LtxProject, LtxError> {
     let mut ltx_files: Vec<DirEntry> = Vec::new();
     let mut ltx_scheme_files: Vec<DirEntry> = Vec::new();
     let mut included: Vec<PathBuf> = Vec::new();
@@ -62,7 +63,7 @@ impl LtxProject {
             included.push(included_path);
           }
 
-          if Self::is_ltx_scheme_path(entry_path) {
+          if options.is_with_schemes_check && Self::is_ltx_scheme_path(entry_path) {
             ltx_scheme_files.push(entry.clone())
           }
 
@@ -84,29 +85,42 @@ impl LtxProject {
       .collect();
 
     // Filter our entries not included in other files.
-    let ltx_scheme_file_entries: Vec<DirEntry> = ltx_scheme_files
-      .iter()
-      .filter_map(|it| {
-        if included.contains(&PathBuf::from(it.path())) {
-          None
-        } else {
-          Some(it.clone())
-        }
-      })
-      .collect();
+    let ltx_scheme_file_entries: Vec<DirEntry> = if options.is_with_schemes_check {
+      ltx_scheme_files
+        .iter()
+        .filter_map(|it| {
+          if included.contains(&PathBuf::from(it.path())) {
+            None
+          } else {
+            Some(it.clone())
+          }
+        })
+        .collect()
+    } else {
+      Default::default()
+    };
 
     Ok(LtxProject {
       root: PathBuf::from(root),
       ltx_files,
       ltx_file_entries,
-      ltx_scheme_declarations: LtxSchemeParser::parse_from_files(&ltx_scheme_file_entries)?,
+      ltx_scheme_declarations: if options.is_with_schemes_check {
+        LtxSchemeParser::parse_from_files(&ltx_scheme_file_entries)?
+      } else {
+        Default::default()
+      },
       ltx_scheme_file_entries,
       ltx_scheme_files,
     })
   }
 
+  /// Initialize project on provided root with default options.
+  pub fn open_at_path(root: &Path) -> Result<LtxProject, LtxError> {
+    Self::open_at_path_opt(root, Default::default())
+  }
+
   /// Check if provided LTX file is scheme definition file.
-  fn is_ltx_scheme_path(path: &Path) -> bool {
+  pub fn is_ltx_scheme_path(path: &Path) -> bool {
     path
       .file_name()
       .and_then(|name| name.to_str())
