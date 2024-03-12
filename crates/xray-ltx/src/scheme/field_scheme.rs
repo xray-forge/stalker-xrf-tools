@@ -49,8 +49,17 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
+  /// Validate provided value based on current field schema definition.
+  pub fn validate_value(&self, value: &str) -> Option<LtxSchemeError> {
+    if self.is_array {
+      self.validate_array_data_entries(value)
+    } else {
+      self.validate_data_entry(value)
+    }
+  }
+
   /// Validate provided section based on current field schema definition.
-  pub fn validate(&self, section: &Section) -> Option<LtxSchemeError> {
+  pub fn validate_section(&self, section: &Section) -> Option<LtxSchemeError> {
     match section.get(&self.name) {
       Some(value) => {
         if self.is_array {
@@ -87,20 +96,20 @@ impl LtxFieldScheme {
 
   fn validate_data_entry(&self, field_data: &str) -> Option<LtxSchemeError> {
     match self.data_type {
-      LtxFieldDataType::TypeF32 => self.validate_f32(field_data),
-      LtxFieldDataType::TypeU32 => self.validate_u32(field_data),
-      LtxFieldDataType::TypeI32 => self.validate_i32(field_data),
-      LtxFieldDataType::TypeU16 => self.validate_u16(field_data),
-      LtxFieldDataType::TypeI16 => self.validate_i16(field_data),
-      LtxFieldDataType::TypeU8 => self.validate_u8(field_data),
-      LtxFieldDataType::TypeI8 => self.validate_i8(field_data),
-      LtxFieldDataType::TypeBool => self.validate_bool(field_data),
-      LtxFieldDataType::TypeVector => self.validate_vector(field_data),
-      LtxFieldDataType::TypeEnum => self.validate_enum(field_data),
-      LtxFieldDataType::TypeCondlist => self.validate_condlist(field_data),
-      LtxFieldDataType::TypeTuple => self.validate_tuple(field_data),
-      LtxFieldDataType::TypeSection => self.validate_section(field_data),
-      LtxFieldDataType::TypeString => self.validate_string(field_data),
+      LtxFieldDataType::TypeF32 => self.validate_f32_type(field_data),
+      LtxFieldDataType::TypeU32 => self.validate_u32_type(field_data),
+      LtxFieldDataType::TypeI32 => self.validate_i32_type(field_data),
+      LtxFieldDataType::TypeU16 => self.validate_u16_type(field_data),
+      LtxFieldDataType::TypeI16 => self.validate_i16_type(field_data),
+      LtxFieldDataType::TypeU8 => self.validate_u8_type(field_data),
+      LtxFieldDataType::TypeI8 => self.validate_i8_type(field_data),
+      LtxFieldDataType::TypeBool => self.validate_bool_type(field_data),
+      LtxFieldDataType::TypeVector => self.validate_vector_type(field_data),
+      LtxFieldDataType::TypeEnum => self.validate_enum_type(field_data),
+      LtxFieldDataType::TypeCondlist => self.validate_condlist_type(field_data),
+      LtxFieldDataType::TypeTuple => self.validate_tuple_type(field_data),
+      LtxFieldDataType::TypeSection => self.validate_section_type(field_data),
+      LtxFieldDataType::TypeString => self.validate_string_type(field_data),
       LtxFieldDataType::TypeUnknown => None,
       LtxFieldDataType::TypeAny => None,
     }
@@ -112,8 +121,7 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
-  #[inline(never)]
-  fn validate_f32(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_f32_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<f32>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -122,7 +130,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_u32(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_u32_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<u32>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -131,7 +139,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_i32(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_i32_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<i32>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -140,7 +148,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_u16(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_u16_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<u16>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -149,7 +157,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_i16(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_i16_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<i16>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -158,7 +166,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_u8(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_u8_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<u8>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -167,7 +175,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_i8(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_i8_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<i8>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -176,7 +184,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_bool(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_bool_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<bool>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -187,7 +195,7 @@ impl LtxFieldScheme {
 
   /// Validate if provided value is correct comma separated vector.
   /// Expected value like `x,y,z` in f32 format.
-  fn validate_vector(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_vector_type(&self, value: &str) -> Option<LtxSchemeError> {
     let parsed_values: Vec<f32> = value
       .split(',')
       .filter_map(|x| {
@@ -209,7 +217,7 @@ impl LtxFieldScheme {
   }
 
   /// Validate if provided value is correct enumeration defined field.
-  fn validate_enum(&self, value: &str) -> Option<LtxSchemeError> {
+  fn validate_enum_type(&self, value: &str) -> Option<LtxSchemeError> {
     if self.allowed_values.is_empty() {
       Some(self.validation_error("Unexpected enum check - list of possible values is empty"))
     } else if self.allowed_values.contains(&value.into()) {
@@ -222,19 +230,19 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_section(&self, _: &str) -> Option<LtxSchemeError> {
+  fn validate_section_type(&self, _: &str) -> Option<LtxSchemeError> {
     None
   }
 
-  fn validate_tuple(&self, _: &str) -> Option<LtxSchemeError> {
+  fn validate_tuple_type(&self, _: &str) -> Option<LtxSchemeError> {
     None
   }
 
-  fn validate_condlist(&self, _: &str) -> Option<LtxSchemeError> {
+  fn validate_condlist_type(&self, _: &str) -> Option<LtxSchemeError> {
     None
   }
 
-  fn validate_string(&self, _: &str) -> Option<LtxSchemeError> {
+  fn validate_string_type(&self, _: &str) -> Option<LtxSchemeError> {
     None
   }
 }
@@ -249,20 +257,20 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeI32);
 
-    assert!(scheme.validate_u32(&u32::MIN.to_string()).is_none());
-    assert!(scheme.validate_u32(&i32::MAX.to_string()).is_none());
+    assert!(scheme.validate_u32_type(&u32::MIN.to_string()).is_none());
+    assert!(scheme.validate_u32_type(&i32::MAX.to_string()).is_none());
 
     assert!(scheme
-      .validate_u32(&((u32::MIN as i64) - 1).to_string())
+      .validate_u32_type(&((u32::MIN as i64) - 1).to_string())
       .is_some());
     assert!(scheme
-      .validate_u32(&((u32::MAX as i64) + 1).to_string())
+      .validate_u32_type(&((u32::MAX as i64) + 1).to_string())
       .is_some());
 
-    assert!(scheme.validate_u32("a").is_some());
-    assert!(scheme.validate_u32("true").is_some());
-    assert!(scheme.validate_u32(",").is_some());
-    assert!(scheme.validate_u32("").is_some());
+    assert!(scheme.validate_u32_type("a").is_some());
+    assert!(scheme.validate_u32_type("true").is_some());
+    assert!(scheme.validate_u32_type(",").is_some());
+    assert!(scheme.validate_u32_type("").is_some());
   }
 
   #[test]
@@ -270,20 +278,20 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeI32);
 
-    assert!(scheme.validate_i32(&i32::MIN.to_string()).is_none());
-    assert!(scheme.validate_i32(&i32::MAX.to_string()).is_none());
+    assert!(scheme.validate_i32_type(&i32::MIN.to_string()).is_none());
+    assert!(scheme.validate_i32_type(&i32::MAX.to_string()).is_none());
 
     assert!(scheme
-      .validate_i32(&((i32::MIN as i64) - 1).to_string())
+      .validate_i32_type(&((i32::MIN as i64) - 1).to_string())
       .is_some());
     assert!(scheme
-      .validate_i32(&((i32::MAX as i64) + 1).to_string())
+      .validate_i32_type(&((i32::MAX as i64) + 1).to_string())
       .is_some());
 
-    assert!(scheme.validate_i32("a").is_some());
-    assert!(scheme.validate_i32("true").is_some());
-    assert!(scheme.validate_i32(",").is_some());
-    assert!(scheme.validate_i32("").is_some());
+    assert!(scheme.validate_i32_type("a").is_some());
+    assert!(scheme.validate_i32_type("true").is_some());
+    assert!(scheme.validate_i32_type(",").is_some());
+    assert!(scheme.validate_i32_type("").is_some());
   }
 
   #[test]
@@ -291,20 +299,20 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeU16);
 
-    assert!(scheme.validate_u16(&u16::MIN.to_string()).is_none());
-    assert!(scheme.validate_u16(&u16::MAX.to_string()).is_none());
+    assert!(scheme.validate_u16_type(&u16::MIN.to_string()).is_none());
+    assert!(scheme.validate_u16_type(&u16::MAX.to_string()).is_none());
 
     assert!(scheme
-      .validate_u16(&((u16::MIN as i32) - 1).to_string())
+      .validate_u16_type(&((u16::MIN as i32) - 1).to_string())
       .is_some());
     assert!(scheme
-      .validate_u16(&((u16::MAX as i32) + 1).to_string())
+      .validate_u16_type(&((u16::MAX as i32) + 1).to_string())
       .is_some());
 
-    assert!(scheme.validate_u16("a").is_some());
-    assert!(scheme.validate_u16("true").is_some());
-    assert!(scheme.validate_u16(",").is_some());
-    assert!(scheme.validate_u16("").is_some());
+    assert!(scheme.validate_u16_type("a").is_some());
+    assert!(scheme.validate_u16_type("true").is_some());
+    assert!(scheme.validate_u16_type(",").is_some());
+    assert!(scheme.validate_u16_type("").is_some());
   }
 
   #[test]
@@ -312,20 +320,20 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeI16);
 
-    assert!(scheme.validate_i16(&i16::MIN.to_string()).is_none());
-    assert!(scheme.validate_i16(&i16::MAX.to_string()).is_none());
+    assert!(scheme.validate_i16_type(&i16::MIN.to_string()).is_none());
+    assert!(scheme.validate_i16_type(&i16::MAX.to_string()).is_none());
 
     assert!(scheme
-      .validate_i16(&((i16::MIN as i32) - 1).to_string())
+      .validate_i16_type(&((i16::MIN as i32) - 1).to_string())
       .is_some());
     assert!(scheme
-      .validate_i16(&((i16::MAX as i32) + 1).to_string())
+      .validate_i16_type(&((i16::MAX as i32) + 1).to_string())
       .is_some());
 
-    assert!(scheme.validate_i16("a").is_some());
-    assert!(scheme.validate_i16("true").is_some());
-    assert!(scheme.validate_i16(",").is_some());
-    assert!(scheme.validate_i16("").is_some());
+    assert!(scheme.validate_i16_type("a").is_some());
+    assert!(scheme.validate_i16_type("true").is_some());
+    assert!(scheme.validate_i16_type(",").is_some());
+    assert!(scheme.validate_i16_type("").is_some());
   }
 
   #[test]
@@ -333,20 +341,20 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeU8);
 
-    assert!(scheme.validate_u8(&u8::MIN.to_string()).is_none());
-    assert!(scheme.validate_u8(&u8::MAX.to_string()).is_none());
+    assert!(scheme.validate_u8_type(&u8::MIN.to_string()).is_none());
+    assert!(scheme.validate_u8_type(&u8::MAX.to_string()).is_none());
 
     assert!(scheme
-      .validate_u8(&((u8::MIN as i32) - 1).to_string())
+      .validate_u8_type(&((u8::MIN as i32) - 1).to_string())
       .is_some());
     assert!(scheme
-      .validate_u8(&((u8::MAX as i32) + 1).to_string())
+      .validate_u8_type(&((u8::MAX as i32) + 1).to_string())
       .is_some());
 
-    assert!(scheme.validate_u8("a").is_some());
-    assert!(scheme.validate_u8("true").is_some());
-    assert!(scheme.validate_u8(",").is_some());
-    assert!(scheme.validate_u8("").is_some());
+    assert!(scheme.validate_u8_type("a").is_some());
+    assert!(scheme.validate_u8_type("true").is_some());
+    assert!(scheme.validate_u8_type(",").is_some());
+    assert!(scheme.validate_u8_type("").is_some());
   }
 
   #[test]
@@ -354,20 +362,20 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeI8);
 
-    assert!(scheme.validate_i8(&i8::MIN.to_string()).is_none());
-    assert!(scheme.validate_i8(&i8::MAX.to_string()).is_none());
+    assert!(scheme.validate_i8_type(&i8::MIN.to_string()).is_none());
+    assert!(scheme.validate_i8_type(&i8::MAX.to_string()).is_none());
 
     assert!(scheme
-      .validate_i8(&((i8::MIN as i32) - 1).to_string())
+      .validate_i8_type(&((i8::MIN as i32) - 1).to_string())
       .is_some());
     assert!(scheme
-      .validate_i8(&((i8::MAX as i32) + 1).to_string())
+      .validate_i8_type(&((i8::MAX as i32) + 1).to_string())
       .is_some());
 
-    assert!(scheme.validate_i8("a").is_some());
-    assert!(scheme.validate_i8("true").is_some());
-    assert!(scheme.validate_i8(",").is_some());
-    assert!(scheme.validate_i8("").is_some());
+    assert!(scheme.validate_i8_type("a").is_some());
+    assert!(scheme.validate_i8_type("true").is_some());
+    assert!(scheme.validate_i8_type(",").is_some());
+    assert!(scheme.validate_i8_type("").is_some());
   }
 
   #[test]
@@ -375,13 +383,13 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeBool);
 
-    assert!(scheme.validate_bool("true").is_none());
-    assert!(scheme.validate_bool("false").is_none());
+    assert!(scheme.validate_bool_type("true").is_none());
+    assert!(scheme.validate_bool_type("false").is_none());
 
-    assert!(scheme.validate_bool("1,2,3,4").is_some());
-    assert!(scheme.validate_bool("1").is_some());
-    assert!(scheme.validate_bool("0").is_some());
-    assert!(scheme.validate_bool("").is_some());
+    assert!(scheme.validate_bool_type("1,2,3,4").is_some());
+    assert!(scheme.validate_bool_type("1").is_some());
+    assert!(scheme.validate_bool_type("0").is_some());
+    assert!(scheme.validate_bool_type("").is_some());
   }
 
   #[test]
@@ -389,15 +397,15 @@ mod tests {
     let scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeVector);
 
-    assert!(scheme.validate_vector("1,2,3").is_none());
-    assert!(scheme.validate_vector("-2,2.5,-0.0025").is_none());
-    assert!(scheme.validate_vector("-1.5,-2.5,-3.1").is_none());
+    assert!(scheme.validate_vector_type("1,2,3").is_none());
+    assert!(scheme.validate_vector_type("-2,2.5,-0.0025").is_none());
+    assert!(scheme.validate_vector_type("-1.5,-2.5,-3.1").is_none());
 
-    assert!(scheme.validate_vector("").is_some());
-    assert!(scheme.validate_vector("1,2,3,4").is_some());
-    assert!(scheme.validate_vector("1,2").is_some());
-    assert!(scheme.validate_vector("-1,2.0").is_some());
-    assert!(scheme.validate_vector("a,b,c").is_some());
+    assert!(scheme.validate_vector_type("").is_some());
+    assert!(scheme.validate_vector_type("1,2,3,4").is_some());
+    assert!(scheme.validate_vector_type("1,2").is_some());
+    assert!(scheme.validate_vector_type("-1,2.0").is_some());
+    assert!(scheme.validate_vector_type("a,b,c").is_some());
   }
 
   #[test]
@@ -405,17 +413,17 @@ mod tests {
     let mut scheme: LtxFieldScheme =
       LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeVector);
 
-    assert!(scheme.validate_enum("a").is_some());
+    assert!(scheme.validate_enum_type("a").is_some());
 
     scheme.allowed_values = vec![String::from("a"), String::from("b_c"), String::from("d")];
 
-    assert!(scheme.validate_enum("a").is_none());
-    assert!(scheme.validate_enum("b_c").is_none());
-    assert!(scheme.validate_enum("d").is_none());
+    assert!(scheme.validate_enum_type("a").is_none());
+    assert!(scheme.validate_enum_type("b_c").is_none());
+    assert!(scheme.validate_enum_type("d").is_none());
 
-    assert!(scheme.validate_enum("").is_some());
-    assert!(scheme.validate_enum("e").is_some());
-    assert!(scheme.validate_enum("f").is_some());
-    assert!(scheme.validate_enum("1").is_some());
+    assert!(scheme.validate_enum_type("").is_some());
+    assert!(scheme.validate_enum_type("e").is_some());
+    assert!(scheme.validate_enum_type("f").is_some());
+    assert!(scheme.validate_enum_type("1").is_some());
   }
 }

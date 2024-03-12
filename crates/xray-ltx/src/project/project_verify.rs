@@ -2,6 +2,8 @@ use crate::error::ltx_scheme_error::LtxSchemeError;
 use crate::file::configuration::constants::LTX_SCHEME_FIELD;
 use crate::project::verify_options::LtxVerifyOptions;
 use crate::{Ltx, LtxError, LtxProject};
+use fxhash::FxBuildHasher;
+use indexmap::IndexSet;
 use std::path::Path;
 
 impl LtxProject {
@@ -37,11 +39,17 @@ impl LtxProject {
 
           // Check if definition or required schema exists:
           if let Some(scheme_definition) = self.ltx_scheme_declarations.get(scheme_name) {
-            for (field_name, _) in section {
+            let mut validated: IndexSet<String, FxBuildHasher> = Default::default();
+
+            // Check all fields in section data.
+            for (field_name, value) in section {
+              validated.insert(field_name.into());
+
               if let Some(field_definition) = scheme_definition.fields.get(field_name) {
                 checked_fields += 1;
 
-                let validation_error: Option<LtxSchemeError> = field_definition.validate(section);
+                let validation_error: Option<LtxSchemeError> =
+                  field_definition.validate_value(value);
 
                 if options.is_verbose && !options.is_silent {
                   println!("Checking {:?} [{section_name}] {field_name}", entry_path);
@@ -62,19 +70,17 @@ impl LtxProject {
               }
             }
 
-            if scheme_definition.is_strict
-              && section.len() < scheme_definition.get_required_fields_count()
-            {
-              scheme_errors.push(LtxSchemeError::new_at(
-                section_name,
-                "*",
-                format!(
-                  "Not matching count of received fields and scheme definitions, {} got, {} expected",
-                  section.len(),
-                  scheme_definition.get_required_fields_count(),
-                ),
-                entry_path.to_str().unwrap()
-              ));
+            if scheme_definition.is_strict {
+              for (field_name, definition) in &scheme_definition.fields {
+                if !definition.is_optional && !validated.contains(field_name) {
+                  scheme_errors.push(LtxSchemeError::new_at(
+                    section_name,
+                    field_name,
+                    "Required field was not provided",
+                    entry_path.to_str().unwrap(),
+                  ));
+                }
+              }
             }
           } else {
             scheme_errors.push(LtxSchemeError::new_at(
