@@ -13,6 +13,7 @@ impl LtxProject {
   /// - All the inherited sections are valid and declared before inherit attempt
   pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> Result<bool, LtxError> {
     let mut scheme_errors: Vec<LtxSchemeError> = Vec::new();
+    let mut total_sections: usize = 0;
     let mut checked_sections: usize = 0;
     let mut checked_fields: usize = 0;
 
@@ -33,6 +34,8 @@ impl LtxProject {
 
       // For each section in file:
       for (section_name, section) in &ltx {
+        total_sections += 1;
+
         // Check only if schema is defined:
         if let Some(scheme_name) = section.get(LTX_SCHEME_FIELD) {
           checked_sections += 1;
@@ -106,7 +109,10 @@ impl LtxProject {
         println!("{}", error);
       }
 
-      println!("Checked {} files", self.ltx_files.len());
+      println!(
+        "Checked {} files, {total_sections} sections",
+        self.ltx_files.len()
+      );
       println!(
         "Verified {} files, {checked_sections} sections, {checked_fields} fields",
         self.ltx_files.len()
