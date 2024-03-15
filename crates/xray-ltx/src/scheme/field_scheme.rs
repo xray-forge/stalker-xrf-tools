@@ -269,10 +269,7 @@ impl LtxFieldScheme {
               if let Some(error) =
                 self.validate_data_entry_by_type(types.get(it).unwrap(), values.get(it).unwrap())
               {
-                return Some(self.validation_error(&format!(
-                  "Invalid value in tuple, one of values did not pass validation: {}",
-                  error.message
-                )));
+                return Some(self.validation_error(&format!("Tuple error - {}", error.message)));
               }
             }
 

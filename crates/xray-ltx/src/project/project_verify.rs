@@ -1,5 +1,5 @@
 use crate::error::ltx_scheme_error::LtxSchemeError;
-use crate::file::configuration::constants::LTX_SCHEME_FIELD;
+use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::verify_options::LtxVerifyOptions;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::{Ltx, LtxError, LtxProject};
@@ -49,7 +49,11 @@ impl LtxProject {
             for (field_name, value) in section {
               validated.insert(field_name.into());
 
-              if let Some(field_definition) = scheme_definition.fields.get(field_name) {
+              if let Some(field_definition) = scheme_definition
+                .fields
+                .get(field_name)
+                .or_else(|| scheme_definition.fields.get(LTX_SYMBOL_ANY))
+              {
                 checked_fields += 1;
 
                 let validation_error: Option<LtxSchemeError> = match field_definition.data_type {
@@ -89,7 +93,10 @@ impl LtxProject {
 
             if scheme_definition.is_strict {
               for (field_name, definition) in &scheme_definition.fields {
-                if !definition.is_optional && !validated.contains(field_name) {
+                if !definition.is_optional
+                  && field_name != LTX_SYMBOL_ANY
+                  && !validated.contains(field_name)
+                {
                   scheme_errors.push(LtxSchemeError::new_at(
                     section_name,
                     field_name,
