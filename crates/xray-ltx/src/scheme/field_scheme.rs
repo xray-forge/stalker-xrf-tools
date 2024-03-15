@@ -8,7 +8,6 @@ pub struct LtxFieldScheme {
   pub section: String,
   pub name: String,
   pub data_type: LtxFieldDataType,
-  pub allowed_values: Vec<String>,
   pub is_optional: bool,
   pub is_array: bool,
   // todo: Add range (min-max) support.
@@ -26,7 +25,6 @@ impl LtxFieldScheme {
       name: name.into(),
       section: section.into(),
       data_type: LtxFieldDataType::TypeF32,
-      allowed_values: Vec::new(),
       is_optional: true,
       is_array: false,
     }
@@ -41,7 +39,6 @@ impl LtxFieldScheme {
       name: name.into(),
       section: section.into(),
       data_type,
-      allowed_values: Vec::new(),
       is_optional: true,
       is_array: false,
     }
@@ -95,7 +92,15 @@ impl LtxFieldScheme {
   }
 
   fn validate_data_entry(&self, field_data: &str) -> Option<LtxSchemeError> {
-    match self.data_type {
+    self.validate_data_entry_by_type(&self.data_type, field_data)
+  }
+
+  fn validate_data_entry_by_type(
+    &self,
+    field_type: &LtxFieldDataType,
+    field_data: &str,
+  ) -> Option<LtxSchemeError> {
+    match field_type {
       LtxFieldDataType::TypeF32 => self.validate_f32_type(field_data),
       LtxFieldDataType::TypeU32 => self.validate_u32_type(field_data),
       LtxFieldDataType::TypeI32 => self.validate_i32_type(field_data),
@@ -105,9 +110,9 @@ impl LtxFieldScheme {
       LtxFieldDataType::TypeI8 => self.validate_i8_type(field_data),
       LtxFieldDataType::TypeBool => self.validate_bool_type(field_data),
       LtxFieldDataType::TypeVector => self.validate_vector_type(field_data),
-      LtxFieldDataType::TypeEnum => self.validate_enum_type(field_data),
+      LtxFieldDataType::TypeEnum(_) => self.validate_enum_type(field_data),
       LtxFieldDataType::TypeCondlist => self.validate_condlist_type(field_data),
-      LtxFieldDataType::TypeTuple => self.validate_tuple_type(field_data),
+      LtxFieldDataType::TypeTuple(_) => self.validate_tuple_type(field_data),
       LtxFieldDataType::TypeSection => self.validate_section_type(field_data),
       LtxFieldDataType::TypeString => self.validate_string_type(field_data),
       LtxFieldDataType::TypeUnknown => None,
@@ -218,23 +223,63 @@ impl LtxFieldScheme {
 
   /// Validate if provided value is correct enumeration defined field.
   fn validate_enum_type(&self, value: &str) -> Option<LtxSchemeError> {
-    if self.allowed_values.is_empty() {
-      Some(self.validation_error("Unexpected enum check - list of possible values is empty"))
-    } else if self.allowed_values.contains(&value.into()) {
-      None
-    } else {
-      Some(self.validation_error(&format!(
-        "Invalid value, one of possible values [{}] expected, got '{value}'",
-        self.allowed_values.join(",")
-      )))
+    match &self.data_type {
+      LtxFieldDataType::TypeEnum(allowed_values) => {
+        if allowed_values.is_empty() {
+          Some(self.validation_error("Unexpected enum check - list of possible values is empty"))
+        } else if allowed_values.contains(&value.into()) {
+          None
+        } else {
+          Some(self.validation_error(&format!(
+            "Invalid value, one of possible values [{}] expected, got '{value}'",
+            allowed_values.join(",")
+          )))
+        }
+      }
+      _ => Some(self.validation_error(
+        "Unexpected enum type check, trying to validate enum with non-enum field",
+      )),
+    }
+  }
+
+  /// Validate if provided value matches tuple description.
+  fn validate_tuple_type(&self, value: &str) -> Option<LtxSchemeError> {
+    match &self.data_type {
+      LtxFieldDataType::TypeTuple(types) => {
+        if types.is_empty() {
+          Some(self.validation_error("Unexpected tuple check - list of possible values is empty"))
+        } else {
+          let values: Vec<&str> = value.split(',').map(|it| it.trim()).collect();
+
+          if values.len() != types.len() {
+            Some(self.validation_error(&format!(
+              "Invalid value, expected {} comma separated values expected, got '{value}'",
+              types.len(),
+            )))
+          } else {
+            // Validate all provided values.
+            for it in 0..values.len() {
+              if let Some(error) =
+                self.validate_data_entry_by_type(types.get(it).unwrap(), values.get(it).unwrap())
+              {
+                return Some(self.validation_error(&format!(
+                  "Invalid value in tuple, one of values did not pass validation: {}",
+                  error.message
+                )));
+              }
+            }
+
+            None
+          }
+        }
+      }
+      _ => Some(self.validation_error(
+        "Unexpected tuple type check, trying to validate enum with non-enum field",
+      )),
     }
   }
 
   fn validate_section_type(&self, _: &str) -> Option<LtxSchemeError> {
-    None
-  }
-
-  fn validate_tuple_type(&self, _: &str) -> Option<LtxSchemeError> {
     None
   }
 
@@ -415,7 +460,11 @@ mod tests {
 
     assert!(scheme.validate_enum_type("a").is_some());
 
-    scheme.allowed_values = vec![String::from("a"), String::from("b_c"), String::from("d")];
+    scheme.data_type = LtxFieldDataType::TypeEnum(vec![
+      String::from("a"),
+      String::from("b_c"),
+      String::from("d"),
+    ]);
 
     assert!(scheme.validate_enum_type("a").is_none());
     assert!(scheme.validate_enum_type("b_c").is_none());
@@ -425,5 +474,32 @@ mod tests {
     assert!(scheme.validate_enum_type("e").is_some());
     assert!(scheme.validate_enum_type("f").is_some());
     assert!(scheme.validate_enum_type("1").is_some());
+  }
+
+  #[test]
+  fn test_tuple_validation() {
+    let mut scheme: LtxFieldScheme =
+      LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeVector);
+
+    assert!(scheme.validate_enum_type("a").is_some());
+
+    scheme.data_type = LtxFieldDataType::TypeTuple(vec![
+      LtxFieldDataType::TypeF32,
+      LtxFieldDataType::TypeString,
+      LtxFieldDataType::TypeBool,
+    ]);
+
+    assert!(scheme.validate_tuple_type("15.25, abc, true").is_none());
+    assert!(scheme.validate_tuple_type("-12.50, def, false").is_none());
+    assert!(scheme.validate_tuple_type("0, a, true").is_none());
+
+    assert!(scheme.validate_tuple_type("").is_some());
+    assert!(scheme.validate_tuple_type("e").is_some());
+    assert!(scheme.validate_tuple_type("f").is_some());
+    assert!(scheme.validate_tuple_type("1").is_some());
+    assert!(scheme.validate_tuple_type("10,,true_true").is_some());
+    assert!(scheme.validate_tuple_type("10,,1").is_some());
+    assert!(scheme.validate_tuple_type("a,b,c").is_some());
+    assert!(scheme.validate_tuple_type("a,b,c,d").is_some());
   }
 }

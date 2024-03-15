@@ -8,7 +8,6 @@ use crate::file::types::LtxSectionSchemes;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;
-use crate::LtxSchemeError;
 use indexmap::map::Entry;
 use walkdir::DirEntry;
 
@@ -59,7 +58,6 @@ impl LtxSchemeParser {
         is_optional: false,
         is_array: false,
         data_type: LtxFieldDataType::TypeString,
-        allowed_values: Vec::new(),
       },
     );
 
@@ -106,7 +104,8 @@ impl LtxSchemeParser {
       )));
     }
 
-    let data_type: LtxFieldDataType = LtxFieldDataType::from_field_data_optional(field_type);
+    let data_type: LtxFieldDataType =
+      LtxFieldDataType::from_field_data_optional(field_name, section_name, field_type)?;
 
     if data_type == LtxFieldDataType::TypeUnknown {
       return Err(LtxReadError::new_ltx_error(format!(
@@ -132,55 +131,9 @@ impl LtxSchemeParser {
     Ok(LtxFieldScheme {
       section: section_name.into(),
       name: field_name.into(),
-      allowed_values: if data_type == LtxFieldDataType::TypeEnum {
-        Self::parse_enum_allowed_values(section_name, field_name, field_type.unwrap())?
-      } else {
-        Vec::new()
-      },
       data_type,
       is_array,
       is_optional: LtxFieldDataType::is_field_optional(field_optional),
     })
-  }
-
-  /// Parse enumeration allowed values from field value.
-  /// Expected value like `enum:value_1,value_2`.
-  fn parse_enum_allowed_values(
-    section_name: &str,
-    field_name: &str,
-    value: &str,
-  ) -> Result<Vec<String>, LtxError> {
-    let mut allowed_values: Vec<String> = Vec::new();
-
-    match value.split_once(':') {
-      None => {
-        return Err(LtxReadError::new_ltx_error(format!(
-          "Failed to read scheme enum type for field '{section_name}', expected ':' separated type and values"
-        )))
-      }
-      Some((_, allowed_values_string)) => {
-        for allowed in allowed_values_string.trim().split(',').filter_map(|it| {
-          let trimmed: &str = it.trim();
-
-          if trimmed.is_empty() {
-            None
-          } else {
-            Some(trimmed)
-          }
-        }) {
-            allowed_values.push(allowed.into());
-        }
-      }
-    }
-
-    if allowed_values.is_empty() {
-      Err(LtxSchemeError::new_ltx_error(
-        section_name,
-        field_name,
-        "Failed to parse enum type, expected comma separated list of possible values after 'enum:'",
-      ))
-    } else {
-      Ok(allowed_values)
-    }
   }
 }
