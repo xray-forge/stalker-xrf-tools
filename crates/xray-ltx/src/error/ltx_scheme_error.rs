@@ -60,13 +60,13 @@ impl Display for LtxSchemeError {
     if let Some(at) = &self.at {
       write!(
         formatter,
-        "Error '{at}' [{}] {} : {}",
+        "'{at}' [{}] {} : {}",
         self.section, self.field, self.message
       )
     } else {
       write!(
         formatter,
-        "Error [{}] {} : {}",
+        "[{}] {} : {}",
         self.section, self.field, self.message
       )
     }

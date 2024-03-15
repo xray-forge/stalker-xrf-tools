@@ -128,6 +128,13 @@ impl LtxSchemeParser {
       }
     }
 
+    // Array-specific logics.
+    if is_array && data_type == LtxFieldDataType::TypeSection {
+      return Err(LtxReadError::new_ltx_error(format!(
+        "Invalid ltx field '{field_name}' configuration, section type arrays are not supported",
+      )));
+    }
+
     Ok(LtxFieldScheme {
       section: section_name.into(),
       name: field_name.into(),

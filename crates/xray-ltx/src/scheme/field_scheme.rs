@@ -126,6 +126,13 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
+  // Whether field is defined as section.
+  pub fn is_section(&self) -> bool {
+    self.data_type == LtxFieldDataType::TypeSection
+  }
+}
+
+impl LtxFieldScheme {
   fn validate_f32_type(&self, value: &str) -> Option<LtxSchemeError> {
     match value.parse::<f32>() {
       Ok(_) => None,
