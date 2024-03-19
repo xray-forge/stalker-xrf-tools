@@ -5,15 +5,14 @@ use crate::Section;
 /// Scheme definition for single field in LTX file section.
 #[derive(Clone, Debug)]
 pub struct LtxFieldScheme {
-  pub section: String,
-  pub name: String,
   pub data_type: LtxFieldDataType,
-  pub is_optional: bool,
   pub is_array: bool,
+  pub is_optional: bool,
+  pub name: String,
+  pub section: String,
   // todo: Add range (min-max) support.
   // todo: Add constant value support.
   // todo: Add time value support.
-  // todo: Add rgb/rgba.
   // todo: Support array of sections.
   // todo: Write actual file section, not scheme section with error.
   // todo: Detect re-declared sections.
@@ -27,11 +26,11 @@ impl LtxFieldScheme {
     F: Into<String>,
   {
     LtxFieldScheme {
+      data_type: LtxFieldDataType::TypeF32,
+      is_array: false,
+      is_optional: true,
       name: name.into(),
       section: section.into(),
-      data_type: LtxFieldDataType::TypeF32,
-      is_optional: true,
-      is_array: false,
     }
   }
 
@@ -41,11 +40,11 @@ impl LtxFieldScheme {
     F: Into<String>,
   {
     LtxFieldScheme {
+      data_type,
+      is_array: false,
+      is_optional: true,
       name: name.into(),
       section: section.into(),
-      data_type,
-      is_optional: true,
-      is_array: false,
     }
   }
 }
@@ -106,22 +105,24 @@ impl LtxFieldScheme {
     field_data: &str,
   ) -> Option<LtxSchemeError> {
     match field_type {
-      LtxFieldDataType::TypeF32 => self.validate_f32_type(field_data),
-      LtxFieldDataType::TypeU32 => self.validate_u32_type(field_data),
-      LtxFieldDataType::TypeI32 => self.validate_i32_type(field_data),
-      LtxFieldDataType::TypeU16 => self.validate_u16_type(field_data),
-      LtxFieldDataType::TypeI16 => self.validate_i16_type(field_data),
-      LtxFieldDataType::TypeU8 => self.validate_u8_type(field_data),
-      LtxFieldDataType::TypeI8 => self.validate_i8_type(field_data),
+      LtxFieldDataType::TypeAny => None,
       LtxFieldDataType::TypeBool => self.validate_bool_type(field_data),
-      LtxFieldDataType::TypeVector => self.validate_vector_type(field_data),
-      LtxFieldDataType::TypeEnum(_) => self.validate_enum_type(field_data),
       LtxFieldDataType::TypeCondlist => self.validate_condlist_type(field_data),
-      LtxFieldDataType::TypeTuple(_) => self.validate_tuple_type(field_data),
+      LtxFieldDataType::TypeEnum(_) => self.validate_enum_type(field_data),
+      LtxFieldDataType::TypeF32 => self.validate_f32_type(field_data),
+      LtxFieldDataType::TypeI16 => self.validate_i16_type(field_data),
+      LtxFieldDataType::TypeI32 => self.validate_i32_type(field_data),
+      LtxFieldDataType::TypeI8 => self.validate_i8_type(field_data),
+      LtxFieldDataType::TypeRgb => self.validate_rgb_type(field_data),
+      LtxFieldDataType::TypeRgba => self.validate_rgba_type(field_data),
       LtxFieldDataType::TypeSection => self.validate_section_type(field_data),
       LtxFieldDataType::TypeString => self.validate_string_type(field_data),
+      LtxFieldDataType::TypeTuple(_) => self.validate_tuple_type(field_data),
+      LtxFieldDataType::TypeU16 => self.validate_u16_type(field_data),
+      LtxFieldDataType::TypeU32 => self.validate_u32_type(field_data),
+      LtxFieldDataType::TypeU8 => self.validate_u8_type(field_data),
       LtxFieldDataType::TypeUnknown => None,
-      LtxFieldDataType::TypeAny => None,
+      LtxFieldDataType::TypeVector => self.validate_vector_type(field_data),
     }
   }
 
@@ -213,6 +214,23 @@ impl LtxFieldScheme {
   /// Validate if provided value is correct comma separated vector.
   /// Expected value like `x,y,z` in f32 format.
   fn validate_vector_type(&self, value: &str) -> Option<LtxSchemeError> {
+    self.validate_fixed_float_list_type(value, 3)
+  }
+
+  /// Validate if provided value is correct comma separated rgb.
+  /// Expected value like `r,g,b` in f32 format.
+  fn validate_rgb_type(&self, value: &str) -> Option<LtxSchemeError> {
+    self.validate_fixed_float_list_type(value, 3)
+  }
+
+  /// Validate if provided value is correct comma separated rgba.
+  /// Expected value like `r,g,b,a` in f32 format.
+  fn validate_rgba_type(&self, value: &str) -> Option<LtxSchemeError> {
+    self.validate_fixed_float_list_type(value, 4)
+  }
+
+  /// Validate if provided value is correct list of floats with defined len.
+  fn validate_fixed_float_list_type(&self, value: &str, len: usize) -> Option<LtxSchemeError> {
     let parsed_values: Vec<f32> = value
       .split(',')
       .filter_map(|x| {
@@ -224,9 +242,9 @@ impl LtxFieldScheme {
       })
       .collect();
 
-    if parsed_values.len() != 3 {
+    if parsed_values.len() != len {
       Some(self.validation_error(&format!(
-        "Invalid value, comma separated 3d vector coordinates expected, got '{value}'"
+        "Invalid value, comma separated {len} float values expected, got '{value}'"
       )))
     } else {
       None

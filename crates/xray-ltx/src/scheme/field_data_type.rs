@@ -3,22 +3,24 @@ use crate::{LtxError, LtxReadError, LtxSchemeError};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {
-  TypeString,
-  TypeSection,
-  TypeTuple(Vec<LtxFieldDataType>),
-  TypeCondlist,
-  TypeF32,
-  TypeU32,
-  TypeI32,
-  TypeU16,
-  TypeI16,
-  TypeU8,
-  TypeI8,
-  TypeBool,
-  TypeVector,
-  TypeEnum(Vec<String>),
-  TypeUnknown,
   TypeAny,
+  TypeBool,
+  TypeCondlist,
+  TypeEnum(Vec<String>),
+  TypeF32,
+  TypeI16,
+  TypeI32,
+  TypeI8,
+  TypeRgb,
+  TypeRgba,
+  TypeSection,
+  TypeString,
+  TypeTuple(Vec<LtxFieldDataType>),
+  TypeU16,
+  TypeU32,
+  TypeU8,
+  TypeUnknown,
+  TypeVector,
 }
 
 impl LtxFieldDataType {
@@ -128,18 +130,20 @@ impl LtxFieldDataType {
     }
 
     Ok(match data {
-      "f32" => LtxFieldDataType::TypeF32,
-      "u32" => LtxFieldDataType::TypeU32,
-      "i32" => LtxFieldDataType::TypeI32,
-      "u16" => LtxFieldDataType::TypeU16,
-      "i16" => LtxFieldDataType::TypeI16,
-      "u8" => LtxFieldDataType::TypeU8,
-      "i8" => LtxFieldDataType::TypeI8,
-      "string" => LtxFieldDataType::TypeString,
-      "condlist" => LtxFieldDataType::TypeCondlist,
-      "vector" => LtxFieldDataType::TypeVector,
-      "section" => LtxFieldDataType::TypeSection,
       "bool" => LtxFieldDataType::TypeBool,
+      "condlist" => LtxFieldDataType::TypeCondlist,
+      "f32" => LtxFieldDataType::TypeF32,
+      "i16" => LtxFieldDataType::TypeI16,
+      "i32" => LtxFieldDataType::TypeI32,
+      "i8" => LtxFieldDataType::TypeI8,
+      "rgb" => LtxFieldDataType::TypeRgb,
+      "rgba" => LtxFieldDataType::TypeRgba,
+      "section" => LtxFieldDataType::TypeSection,
+      "string" => LtxFieldDataType::TypeString,
+      "u16" => LtxFieldDataType::TypeU16,
+      "u32" => LtxFieldDataType::TypeU32,
+      "u8" => LtxFieldDataType::TypeU8,
+      "vector" => LtxFieldDataType::TypeVector,
       field_type => {
         if field_type.starts_with("enum") {
           LtxFieldDataType::parse_enum(field_name, section_name, data)?
