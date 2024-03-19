@@ -104,20 +104,9 @@ impl LtxSchemeParser {
       )));
     }
 
-    let is_array: bool = LtxFieldDataType::is_field_data_array(field_data);
-
-    if is_array {
-      // Array-specific section logics.
-      if data_type == LtxFieldDataType::TypeSection {
-        return Err(LtxReadError::new_ltx_error(format!(
-          "Invalid ltx [{section_name}] {field_name} configuration, section type arrays are not supported",
-        )));
-      }
-    }
-
     Ok(LtxFieldScheme {
       data_type,
-      is_array,
+      is_array: LtxFieldDataType::is_field_data_array(field_data),
       is_optional: LtxFieldDataType::is_field_data_optional(field_data),
       name: field_name.into(),
       section: section_name.into(),

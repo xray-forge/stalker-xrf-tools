@@ -1,5 +1,6 @@
 use crate::error::ltx_scheme_error::LtxSchemeError;
 use crate::scheme::field_data_type::LtxFieldDataType;
+use crate::Ltx;
 
 /// Scheme definition for single field in LTX file section.
 #[derive(Clone, Debug)]
@@ -12,8 +13,6 @@ pub struct LtxFieldScheme {
   // todo: Add range (min-max) support, add fixed array len support (min-max).
   // todo: Add constant value support.
   // todo: Support array of sections.
-  // todo: Write actual file section, not scheme section with error.
-  // todo: Support condlist parsing.
   // todo: Deprecate 'strict'.
 }
 
@@ -49,7 +48,29 @@ impl LtxFieldScheme {
 
 impl LtxFieldScheme {
   /// Validate provided value based on current field schema definition.
-  pub fn validate_value(&self, field_data: &str) -> Option<LtxSchemeError> {
+  pub fn validate_value(&self, ltx: &Ltx, field_data: &str) -> Option<LtxSchemeError> {
+    // Ltx-specific validation of section type.
+    if self.data_type == LtxFieldDataType::TypeSection {
+      if self.is_array {
+        for entry in field_data.split(',') {
+          let entry: &str = entry.trim();
+
+          if !entry.is_empty() {
+            let validation_result: Option<LtxSchemeError> =
+              self.validate_section_type_defined(ltx, entry);
+
+            if validation_result.is_some() {
+              return validation_result;
+            }
+          }
+        }
+      } else {
+        return self.validate_section_type_defined(ltx, field_data);
+      }
+
+      return None;
+    }
+
     if self.is_array {
       for entry in field_data.split(',') {
         let entry: &str = entry.trim();
@@ -281,7 +302,18 @@ impl LtxFieldScheme {
     None
   }
 
+  fn validate_section_type_defined(&self, ltx: &Ltx, value: &str) -> Option<LtxSchemeError> {
+    if ltx.has_section(value) {
+      None
+    } else {
+      Some(self.validation_error(&format!(
+        "Unexpected value - section [{value}] is not defined in file scope"
+      )))
+    }
+  }
+
   fn validate_condlist_type(&self, _: &str) -> Option<LtxSchemeError> {
+    // todo: Actual condlist structure parsing.
     None
   }
 

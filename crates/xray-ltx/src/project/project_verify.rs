@@ -1,7 +1,6 @@
 use crate::error::ltx_scheme_error::LtxSchemeError;
 use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::verify_options::LtxVerifyOptions;
-use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::{Ltx, LtxError, LtxProject};
 use fxhash::FxBuildHasher;
 use indexmap::IndexSet;
@@ -61,23 +60,7 @@ impl LtxProject {
 
                 checked_fields += 1;
 
-                let validation_error: Option<LtxSchemeError> = match field_definition.data_type {
-                  LtxFieldDataType::TypeSection => {
-                    if ltx.has_section(value) {
-                      None
-                    } else {
-                      Some(LtxSchemeError::new_at(
-                        section_name,
-                        field_name,
-                        format!("Required section [{value}] is not in file scope"),
-                        entry_path.to_str().unwrap(),
-                      ))
-                    }
-                  }
-                  _ => field_definition.validate_value(value),
-                };
-
-                if let Some(mut error) = validation_error {
+                if let Some(mut error) = field_definition.validate_value(&ltx, value) {
                   error.section = section_name.into();
                   error.at = Some(entry_path.to_str().unwrap().into());
 
