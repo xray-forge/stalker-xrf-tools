@@ -1,3 +1,4 @@
+use crate::file::configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
 use crate::{LtxError, LtxReadError, LtxSchemeError};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -114,6 +115,18 @@ impl LtxFieldDataType {
     section_name: &str,
     data: &str,
   ) -> Result<LtxFieldDataType, LtxError> {
+    let mut data: &str = data;
+
+    // Respect optionals.
+    if data.starts_with(LTX_SYMBOL_OPTIONAL) {
+      data = &data[1..];
+    }
+
+    // Respect arrays.
+    if data.ends_with(LTX_SYMBOL_ARRAY) {
+      data = &data[0..(data.len() - 2)];
+    }
+
     Ok(match data {
       "f32" => LtxFieldDataType::TypeF32,
       "u32" => LtxFieldDataType::TypeU32,
@@ -152,12 +165,51 @@ impl LtxFieldDataType {
     }
   }
 
-  /// Check if provided field data enables type optional mode.
-  pub fn is_field_optional(data: Option<&str>) -> bool {
+  /// Parse data array type from value.
+  pub fn is_field_data_array(data: Option<&str>) -> bool {
     if let Some(data) = data {
-      data == "true"
+      data.ends_with(LTX_SYMBOL_ARRAY)
     } else {
       false
+    }
+  }
+
+  /// Parse data optional type from value.
+  pub fn is_field_data_optional(data: Option<&str>) -> bool {
+    if let Some(data) = data {
+      data.starts_with(LTX_SYMBOL_OPTIONAL)
+    } else {
+      false
+    }
+  }
+
+  /// Check if provided field data is declared as valid optional boolean and is true.
+  pub fn is_optional_bool_field_declared(
+    field_name: &str,
+    section_name: &str,
+    data: Option<&str>,
+  ) -> Result<bool, LtxError> {
+    if let Some(data) = data {
+      Self::is_bool_field_declared(field_name, section_name, data)
+    } else {
+      Ok(false)
+    }
+  }
+
+  /// Check if provided field data is declared as valid boolean and is true.
+  pub fn is_bool_field_declared(
+    field_name: &str,
+    section_name: &str,
+    data: &str,
+  ) -> Result<bool, LtxError> {
+    if let Ok(parsed) = data.parse::<bool>() {
+      Ok(parsed)
+    } else {
+      Err(LtxReadError::new_ltx_error(format!(
+        "Invalid ltx [{section_name}] {field_name} configuration, invalid value supplied.\
+           Expected 'true' or 'false', got '{}'",
+        data
+      )))
     }
   }
 }

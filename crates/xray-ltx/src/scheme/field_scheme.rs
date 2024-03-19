@@ -13,6 +13,11 @@ pub struct LtxFieldScheme {
   // todo: Add range (min-max) support.
   // todo: Add constant value support.
   // todo: Add time value support.
+  // todo: Add rgb/rgba.
+  // todo: Support array of sections.
+  // todo: Write actual file section, not scheme section with error.
+  // todo: Detect re-declared sections.
+  // todo: Support condlist parsing.
 }
 
 impl LtxFieldScheme {

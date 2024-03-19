@@ -100,39 +100,56 @@ impl LtxSchemeParser {
 
     if field_type.is_none() && field_optional.is_none() {
       return Err(LtxReadError::new_ltx_error(format!(
-        "Invalid ltx field '{field_name}' configuration, no valid definitions supplied"
+        "Invalid ltx [{section_name}] {field_name} configuration, no valid definitions supplied"
       )));
     }
 
     let data_type: LtxFieldDataType =
       LtxFieldDataType::from_field_data_optional(field_name, section_name, field_type)?;
 
+    // Do not allow unknown typing.
     if data_type == LtxFieldDataType::TypeUnknown {
       return Err(LtxReadError::new_ltx_error(format!(
-        "Invalid ltx field '{field_name}' configuration, unknown type '{}' supplied",
+        "Invalid ltx [{section_name}] {field_name} configuration, unknown type '{}' supplied",
         field_type.unwrap()
       )));
     }
 
-    let mut is_array: bool = false;
+    let mut is_array: bool = LtxFieldDataType::is_field_data_array(field_type);
 
-    if let Some(is_array_data) = field_array {
-      if let Ok(parsed) = is_array_data.parse::<bool>() {
-        is_array = parsed
-      } else {
+    if is_array {
+      // Check explicit re-declaration.
+      // todo: Deprecate.
+      if let Some(field_array) = field_array {
+        is_array = LtxFieldDataType::is_bool_field_declared(field_name, section_name, field_array)?;
+      }
+
+      // Array-specific section logics.
+      if data_type == LtxFieldDataType::TypeSection {
         return Err(LtxReadError::new_ltx_error(format!(
-          "Invalid ltx field '{field_name}' configuration, invalid value for array definition.\
-           Expected true or false, got {}",
-          field_array.unwrap()
+          "Invalid ltx [{section_name}] {field_name} configuration, section type arrays are not supported",
         )));
       }
+    } else {
+      is_array =
+        LtxFieldDataType::is_optional_bool_field_declared(field_name, section_name, field_array)?;
     }
 
-    // Array-specific logics.
-    if is_array && data_type == LtxFieldDataType::TypeSection {
-      return Err(LtxReadError::new_ltx_error(format!(
-        "Invalid ltx field '{field_name}' configuration, section type arrays are not supported",
-      )));
+    let mut is_optional: bool = LtxFieldDataType::is_field_data_optional(field_type);
+
+    if is_optional {
+      // Check explicit re-declaration.
+      // todo: Deprecate.
+      if let Some(field_optional) = field_optional {
+        is_optional =
+          LtxFieldDataType::is_bool_field_declared(field_name, section_name, field_optional)?;
+      }
+    } else {
+      is_optional = LtxFieldDataType::is_optional_bool_field_declared(
+        field_name,
+        section_name,
+        field_optional,
+      )?;
     }
 
     Ok(LtxFieldScheme {
@@ -140,7 +157,7 @@ impl LtxSchemeParser {
       name: field_name.into(),
       data_type,
       is_array,
-      is_optional: LtxFieldDataType::is_field_optional(field_optional),
+      is_optional,
     })
   }
 }

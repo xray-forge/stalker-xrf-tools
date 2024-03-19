@@ -21,3 +21,7 @@ pub const LTX_SYMBOL_ANY: &str = "*";
 pub const LTX_SYMBOL_SECTION_OPEN: char = '[';
 
 pub const LTX_SYMBOL_SECTION_CLOSE: char = ']';
+
+pub const LTX_SYMBOL_OPTIONAL: char = '?';
+
+pub const LTX_SYMBOL_ARRAY: &str = "[]";
