@@ -1,7 +1,9 @@
 use crate::error::ltx_convert_error::LtxConvertError;
 use crate::error::ltx_error::LtxError;
 use crate::error::ltx_read_error::LtxReadError;
-use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD};
+use crate::file::configuration::constants::{
+  LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME,
+};
 use crate::file::ltx::Ltx;
 use crate::file::section::section::Section;
 use crate::file::types::LtxSectionSchemes;
@@ -26,6 +28,13 @@ impl LtxSchemeParser {
         .into_inherited()?;
 
       for (name, section) in ltx {
+        if !name.starts_with(LTX_SYMBOL_SCHEME) {
+          return Err(LtxConvertError::new_ltx_error(format!(
+            "Failed to parse ltx schemes - scheme section declaration should be prefixed with $, \
+             got [{name}]"
+          )));
+        }
+
         match schemes.entry(name.clone()) {
           Entry::Occupied(_) => {
             return Err(LtxConvertError::new_ltx_error(format!(

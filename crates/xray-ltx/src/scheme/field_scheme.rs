@@ -16,7 +16,6 @@ pub struct LtxFieldScheme {
   // todo: Write actual file section, not scheme section with error.
   // todo: Support condlist parsing.
   // todo: Deprecate 'strict'.
-  // todo: Validate schemes have name starting with $
 }
 
 impl LtxFieldScheme {
