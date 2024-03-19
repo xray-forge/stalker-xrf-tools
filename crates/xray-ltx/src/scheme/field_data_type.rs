@@ -6,6 +6,7 @@ pub enum LtxFieldDataType {
   TypeAny,
   TypeBool,
   TypeCondlist,
+  TypeConst(String),
   TypeEnum(Vec<String>),
   TypeF32,
   TypeI16,
@@ -62,6 +63,8 @@ impl LtxFieldDataType {
           LtxFieldDataType::parse_enum(field_name, section_name, data)?
         } else if field_type.starts_with("tuple") {
           LtxFieldDataType::parse_tuple(field_name, section_name, data)?
+        } else if field_type.starts_with("const") {
+          LtxFieldDataType::parse_const(field_name, section_name, data)?
         } else {
           LtxFieldDataType::TypeUnknown
         }
@@ -117,6 +120,31 @@ impl LtxFieldDataType {
       ))
     } else {
       Ok(LtxFieldDataType::TypeEnum(allowed_values))
+    }
+  }
+
+  fn parse_const(
+    field_name: &str,
+    section_name: &str,
+    value: &str,
+  ) -> Result<LtxFieldDataType, LtxError> {
+    match value.split_once(':') {
+      None => Err(LtxReadError::new_ltx_error(format!(
+        "Failed to read scheme const type for field '{section_name}', expected ':' prepended value"
+      ))),
+      Some((_, const_value)) => {
+        let const_value: &str = const_value.trim();
+
+        if const_value.is_empty() {
+          Err(LtxSchemeError::new_ltx_error(
+            section_name,
+            field_name,
+            "Failed to parse const type, expected actual data after 'const:'",
+          ))
+        } else {
+          Ok(LtxFieldDataType::TypeConst(const_value.into()))
+        }
+      }
     }
   }
 

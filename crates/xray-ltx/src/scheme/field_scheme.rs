@@ -11,8 +11,6 @@ pub struct LtxFieldScheme {
   pub name: String,
   pub section: String,
   // todo: Add range (min-max) support, add fixed array len support (min-max).
-  // todo: Add constant value support.
-  // todo: Support array of sections.
   // todo: Deprecate 'strict'.
 }
 
@@ -100,6 +98,7 @@ impl LtxFieldScheme {
       LtxFieldDataType::TypeAny => None,
       LtxFieldDataType::TypeBool => self.validate_bool_type(field_data),
       LtxFieldDataType::TypeCondlist => self.validate_condlist_type(field_data),
+      LtxFieldDataType::TypeConst(_) => self.validate_const(field_data),
       LtxFieldDataType::TypeEnum(_) => self.validate_enum_type(field_data),
       LtxFieldDataType::TypeF32 => self.validate_f32_type(field_data),
       LtxFieldDataType::TypeI16 => self.validate_i16_type(field_data),
@@ -290,6 +289,26 @@ impl LtxFieldScheme {
 
             None
           }
+        }
+      }
+      _ => Some(self.validation_error(
+        "Unexpected tuple type check, trying to validate enum with non-enum field",
+      )),
+    }
+  }
+
+  /// Validate if provided value matches const description.
+  fn validate_const(&self, value: &str) -> Option<LtxSchemeError> {
+    match &self.data_type {
+      LtxFieldDataType::TypeConst(const_value) => {
+        if const_value.is_empty() {
+          Some(self.validation_error("Unexpected const check - value is empty"))
+        } else if const_value != value {
+          Some(self.validation_error(&format!(
+            "Invalid value - constant '{const_value} is expected, got '{value}'"
+          )))
+        } else {
+          None
         }
       }
       _ => Some(self.validation_error(
