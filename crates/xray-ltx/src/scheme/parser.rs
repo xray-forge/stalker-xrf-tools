@@ -1,7 +1,7 @@
 use crate::error::ltx_convert_error::LtxConvertError;
 use crate::error::ltx_error::LtxError;
 use crate::error::ltx_read_error::LtxReadError;
-use crate::file::configuration::constants::LTX_SCHEME_STRICT_FIELD;
+use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD};
 use crate::file::ltx::Ltx;
 use crate::file::section::section::Section;
 use crate::file::types::LtxSectionSchemes;
@@ -29,7 +29,7 @@ impl LtxSchemeParser {
         match schemes.entry(name.clone()) {
           Entry::Occupied(_) => {
             return Err(LtxConvertError::new_ltx_error(format!(
-              "Failed to parse ltx schemes - duplicate declaration of '{name}' section"
+              "Failed to parse ltx schemes - duplicate declaration of [{name}] section"
             )));
           }
           Entry::Vacant(entry) => {
@@ -51,36 +51,27 @@ impl LtxSchemeParser {
 
     // Insert default definition of $scheme field.
     scheme.fields.insert(
-      String::from("$scheme"),
+      LTX_SCHEME_FIELD.into(),
       LtxFieldScheme {
-        section: section_name.into(),
-        name: String::from("$scheme"),
-        is_optional: false,
-        is_array: false,
         data_type: LtxFieldDataType::TypeString,
+        is_array: false,
+        is_optional: false,
+        name: LTX_SCHEME_FIELD.into(),
+        section: section_name.into(),
       },
     );
 
-    for (field, value) in section {
-      if field == LTX_SCHEME_STRICT_FIELD {
-        scheme.is_strict = scheme.parse_strict_mode(value).map_err(LtxError::from)?;
-
-        continue;
-      }
-
-      match field.split_once('.') {
-        None => {
-          return Err(LtxReadError::new_ltx_error(format!(
-          "Failed to read scheme field '{field}', expected dot separated schema declaration fields"
-        )))
+    for (field_name, value) in section {
+      match field_name {
+        LTX_SCHEME_STRICT_FIELD => {
+          scheme.is_strict =
+            Self::parse_strict_mode(field_name, section_name, value).map_err(LtxError::from)?;
         }
-        Some((field_name, _)) => {
-          if !scheme.fields.contains_key(field_name) {
-            scheme.fields.insert(
-              field_name.into(),
-              Self::parse_field_scheme(field_name, section_name, section)?,
-            );
-          }
+        _ => {
+          scheme.fields.insert(
+            field_name.into(),
+            Self::parse_field_scheme(field_name, section_name, value)?,
+          );
         }
       }
     }
@@ -92,72 +83,49 @@ impl LtxSchemeParser {
   fn parse_field_scheme(
     field_name: &str,
     section_name: &str,
-    section: &Section,
+    field_data: &str,
   ) -> Result<LtxFieldScheme, LtxError> {
-    let field_type: Option<&str> = section.get(format!("{field_name}.type"));
-    let field_optional: Option<&str> = section.get(format!("{field_name}.optional"));
-    let field_array: Option<&str> = section.get(format!("{field_name}.array"));
-
-    if field_type.is_none() && field_optional.is_none() {
-      return Err(LtxReadError::new_ltx_error(format!(
-        "Invalid ltx [{section_name}] {field_name} configuration, no valid definitions supplied"
-      )));
-    }
-
     let data_type: LtxFieldDataType =
-      LtxFieldDataType::from_field_data_optional(field_name, section_name, field_type)?;
+      LtxFieldDataType::from_field_data(field_name, section_name, field_data)?;
 
     // Do not allow unknown typing.
     if data_type == LtxFieldDataType::TypeUnknown {
       return Err(LtxReadError::new_ltx_error(format!(
-        "Invalid ltx [{section_name}] {field_name} configuration, unknown type '{}' supplied",
-        field_type.unwrap()
+        "Invalid ltx [{section_name}] {field_name} configuration, unknown type '{field_data}' supplied",
       )));
     }
 
-    let mut is_array: bool = LtxFieldDataType::is_field_data_array(field_type);
+    let is_array: bool = LtxFieldDataType::is_field_data_array(field_data);
 
     if is_array {
-      // Check explicit re-declaration.
-      // todo: Deprecate.
-      if let Some(field_array) = field_array {
-        is_array = LtxFieldDataType::is_bool_field_declared(field_name, section_name, field_array)?;
-      }
-
       // Array-specific section logics.
       if data_type == LtxFieldDataType::TypeSection {
         return Err(LtxReadError::new_ltx_error(format!(
           "Invalid ltx [{section_name}] {field_name} configuration, section type arrays are not supported",
         )));
       }
-    } else {
-      is_array =
-        LtxFieldDataType::is_optional_bool_field_declared(field_name, section_name, field_array)?;
-    }
-
-    let mut is_optional: bool = LtxFieldDataType::is_field_data_optional(field_type);
-
-    if is_optional {
-      // Check explicit re-declaration.
-      // todo: Deprecate.
-      if let Some(field_optional) = field_optional {
-        is_optional =
-          LtxFieldDataType::is_bool_field_declared(field_name, section_name, field_optional)?;
-      }
-    } else {
-      is_optional = LtxFieldDataType::is_optional_bool_field_declared(
-        field_name,
-        section_name,
-        field_optional,
-      )?;
     }
 
     Ok(LtxFieldScheme {
-      section: section_name.into(),
-      name: field_name.into(),
       data_type,
       is_array,
-      is_optional,
+      is_optional: LtxFieldDataType::is_field_data_optional(field_data),
+      name: field_name.into(),
+      section: section_name.into(),
     })
+  }
+
+  /// Parse whether strict mode is activated for ltx scheme.
+  fn parse_strict_mode(
+    field_name: &str,
+    section_name: &str,
+    field_data: &str,
+  ) -> Result<bool, LtxReadError> {
+    match field_data.parse::<bool>() {
+      Ok(value) => Ok(value),
+      Err(_) => Err(LtxReadError::new(format!(
+        "Invalid scheme declaration, unexpected value for [{section_name}] {field_name} - '{field_data}', boolean expected"
+      ))),
+    }
   }
 }

@@ -10,13 +10,13 @@ pub struct LtxFieldScheme {
   pub is_optional: bool,
   pub name: String,
   pub section: String,
-  // todo: Add range (min-max) support.
+  // todo: Add range (min-max) support, add fixed array len support (min-max).
   // todo: Add constant value support.
-  // todo: Add time value support.
   // todo: Support array of sections.
   // todo: Write actual file section, not scheme section with error.
-  // todo: Detect re-declared sections.
   // todo: Support condlist parsing.
+  // todo: Deprecate 'strict'.
+  // todo: Validate schemes have name starting with $
 }
 
 impl LtxFieldScheme {
@@ -50,6 +50,20 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
+  /// Validate provided section based on current field schema definition.
+  pub fn validate_section(&self, section: &Section) -> Option<LtxSchemeError> {
+    match section.get(&self.name) {
+      Some(value) => self.validate_value(value),
+      None => {
+        if self.is_optional {
+          None
+        } else {
+          Some(self.validation_error("Field is not provided but required"))
+        }
+      }
+    }
+  }
+
   /// Validate provided value based on current field schema definition.
   pub fn validate_value(&self, value: &str) -> Option<LtxSchemeError> {
     if self.is_array {
@@ -59,24 +73,8 @@ impl LtxFieldScheme {
     }
   }
 
-  /// Validate provided section based on current field schema definition.
-  pub fn validate_section(&self, section: &Section) -> Option<LtxSchemeError> {
-    match section.get(&self.name) {
-      Some(value) => {
-        if self.is_array {
-          self.validate_array_data_entries(value)
-        } else {
-          self.validate_data_entry(value)
-        }
-      }
-      None => {
-        if self.is_optional {
-          None
-        } else {
-          Some(self.validation_error("Field is not provided but required"))
-        }
-      }
-    }
+  fn validate_data_entry(&self, field_data: &str) -> Option<LtxSchemeError> {
+    self.validate_data_entry_by_type(&self.data_type, field_data)
   }
 
   fn validate_array_data_entries(&self, field_data: &str) -> Option<LtxSchemeError> {
@@ -93,10 +91,6 @@ impl LtxFieldScheme {
     }
 
     None
-  }
-
-  fn validate_data_entry(&self, field_data: &str) -> Option<LtxSchemeError> {
-    self.validate_data_entry_by_type(&self.data_type, field_data)
   }
 
   fn validate_data_entry_by_type(
