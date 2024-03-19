@@ -49,11 +49,16 @@ impl LtxProject {
             for (field_name, value) in section {
               validated.insert(field_name.into());
 
+              // Respect `*` definition for mapping sections.
               if let Some(field_definition) = scheme_definition
                 .fields
                 .get(field_name)
                 .or_else(|| scheme_definition.fields.get(LTX_SYMBOL_ANY))
               {
+                if options.is_verbose && !options.is_silent {
+                  println!("Checking {:?} [{section_name}] {field_name}", entry_path);
+                }
+
                 checked_fields += 1;
 
                 let validation_error: Option<LtxSchemeError> = match field_definition.data_type {
@@ -64,7 +69,7 @@ impl LtxProject {
                       Some(LtxSchemeError::new_at(
                         section_name,
                         field_name,
-                        format!("Required section '{value}' is not in file scope"),
+                        format!("Required section [{value}] is not in file scope"),
                         entry_path.to_str().unwrap(),
                       ))
                     }
@@ -72,11 +77,8 @@ impl LtxProject {
                   _ => field_definition.validate_value(value),
                 };
 
-                if options.is_verbose && !options.is_silent {
-                  println!("Checking {:?} [{section_name}] {field_name}", entry_path);
-                }
-
                 if let Some(mut error) = validation_error {
+                  error.section = section_name.into();
                   error.at = Some(entry_path.to_str().unwrap().into());
 
                   scheme_errors.push(error);

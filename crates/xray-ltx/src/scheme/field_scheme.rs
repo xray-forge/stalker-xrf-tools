@@ -1,6 +1,5 @@
 use crate::error::ltx_scheme_error::LtxSchemeError;
 use crate::scheme::field_data_type::LtxFieldDataType;
-use crate::Section;
 
 /// Scheme definition for single field in LTX file section.
 #[derive(Clone, Debug)]
@@ -49,47 +48,26 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
-  /// Validate provided section based on current field schema definition.
-  pub fn validate_section(&self, section: &Section) -> Option<LtxSchemeError> {
-    match section.get(&self.name) {
-      Some(value) => self.validate_value(value),
-      None => {
-        if self.is_optional {
-          None
-        } else {
-          Some(self.validation_error("Field is not provided but required"))
-        }
-      }
-    }
-  }
-
   /// Validate provided value based on current field schema definition.
-  pub fn validate_value(&self, value: &str) -> Option<LtxSchemeError> {
+  pub fn validate_value(&self, field_data: &str) -> Option<LtxSchemeError> {
     if self.is_array {
-      self.validate_array_data_entries(value)
-    } else {
-      self.validate_data_entry(value)
-    }
-  }
+      for entry in field_data.split(',') {
+        let entry: &str = entry.trim();
 
-  fn validate_data_entry(&self, field_data: &str) -> Option<LtxSchemeError> {
-    self.validate_data_entry_by_type(&self.data_type, field_data)
-  }
+        if !entry.is_empty() {
+          let validation_result: Option<LtxSchemeError> =
+            self.validate_data_entry_by_type(&self.data_type, entry);
 
-  fn validate_array_data_entries(&self, field_data: &str) -> Option<LtxSchemeError> {
-    for entry in field_data.split(',') {
-      let entry: &str = entry.trim();
-
-      if !entry.is_empty() {
-        let validation_result: Option<LtxSchemeError> = self.validate_data_entry(entry);
-
-        if validation_result.is_some() {
-          return validation_result;
+          if validation_result.is_some() {
+            return validation_result;
+          }
         }
       }
-    }
 
-    None
+      None
+    } else {
+      self.validate_data_entry_by_type(&self.data_type, field_data)
+    }
   }
 
   fn validate_data_entry_by_type(
