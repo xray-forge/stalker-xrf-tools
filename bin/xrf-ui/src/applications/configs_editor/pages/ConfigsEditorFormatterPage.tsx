@@ -26,9 +26,9 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
 
       log.info("Formatting:", configsPath);
 
-      await invoke(ECommand.FORMAT_CONFIGS_PATH, { path: configsPath });
+      const result = await invoke(ECommand.FORMAT_CONFIGS_PATH, { path: configsPath });
 
-      log.info("Formatted:", configsPath);
+      log.info("Formatted:", configsPath, result);
     } catch (error) {
       log.error("Format error:", error);
     } finally {

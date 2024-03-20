@@ -4509,6 +4509,7 @@ version = "0.1.0"
 dependencies = [
  "fxhash",
  "indexmap 2.2.5",
+ "serde",
  "walkdir",
  "xray-test-utils",
 ]
