@@ -1,6 +1,7 @@
 import { PaletteMode, Theme } from "@mui/material";
 import { ContextManager } from "dreamstate";
 
+import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local_storage";
 import { Logger } from "@/lib/logging";
 import { createApplicationTheme } from "@/lib/theme";
 
@@ -20,7 +21,7 @@ export class ThemeManager extends ContextManager<IThemeContext> {
     themeActions: {
       toggleTheme: this.toggleTheme.bind(this),
     },
-    theme: createApplicationTheme("dark"),
+    theme: createApplicationTheme(getLocalStorageValue("theme") === "light" ? "light" : "dark"),
   };
 
   public log: Logger = new Logger("thm");
@@ -54,5 +55,7 @@ export class ThemeManager extends ContextManager<IThemeContext> {
     this.log.info("Toggle theme mode to:", nextThemeMode);
 
     this.setContext({ theme: nextTheme });
+
+    setLocalStorageValue("theme", nextThemeMode);
   }
 }
