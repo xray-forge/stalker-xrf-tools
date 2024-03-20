@@ -21,6 +21,15 @@
         "confirm": true,
         "save": true,
         "open": true
+      },
+      "fs": {
+        "exists": true,
+        "scope": [
+          "**"
+        ]
+      },
+      "path": {
+        "all": true
       }
     },
     "windows": [
