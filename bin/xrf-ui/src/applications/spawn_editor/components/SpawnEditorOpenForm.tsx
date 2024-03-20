@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { open } from "@tauri-apps/api/dialog";
 import { useManager } from "dreamstate";
-import { MouseEvent, ReactElement, RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { SpawnBackButton } from "@/applications/spawn_editor/components/SpawnBackButton";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
@@ -26,7 +26,6 @@ export function SpawnEditorOpenForm({
   projectContext: { xrfProjectPath } = useManager(ProjectManager),
 }): ReactElement {
   const log: Logger = useLogger("spawn-open");
-  const inputRef: RefObject<HTMLInputElement> = useRef(null);
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [spawnPath, setSpawnPath] = useState<Optional<string>>(null);
@@ -88,7 +87,6 @@ export function SpawnEditorOpenForm({
 
       <Stack direction={"row"} spacing={1} marginBottom={2} minWidth={350}>
         <OutlinedInput
-          ref={inputRef}
           size={"small"}
           disabled={isSelecting}
           value={spawnPath ?? ""}

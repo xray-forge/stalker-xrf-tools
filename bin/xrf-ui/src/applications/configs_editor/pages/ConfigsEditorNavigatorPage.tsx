@@ -4,7 +4,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { NavigationFooter } from "@/core/components/NavigationFooter";
 
-export function ConfigsEditor(): ReactElement {
+export function ConfigsEditorNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
@@ -23,9 +23,9 @@ export function ConfigsEditor(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/configs_editor/todo", { replace: true })}>Editor</Button>
-            <Button onClick={() => navigate("/configs_editor/todo", { replace: true })}>Validator</Button>
-            <Button onClick={() => navigate("/configs_editor/todo", { replace: true })}>Formatter</Button>
+            <Button onClick={() => navigate("/configs_editor/explorer", { replace: true })}>Explorer</Button>
+            <Button onClick={() => navigate("/configs_editor/verifier", { replace: true })}>Verifier</Button>
+            <Button onClick={() => navigate("/configs_editor/formatter", { replace: true })}>Formatter</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>

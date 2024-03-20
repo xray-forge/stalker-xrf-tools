@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { open } from "@tauri-apps/api/dialog";
 import { useManager } from "dreamstate";
-import { MouseEvent, ReactElement, RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { SpawnBackButton } from "@/applications/spawn_editor/components/SpawnBackButton";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
@@ -26,7 +26,6 @@ export function SpawnEditorUnpackForm({
   projectContext: { xrfProjectPath } = useManager(ProjectManager),
 }): ReactElement {
   const log: Logger = useLogger("spawn-unpack");
-  const inputRef: RefObject<HTMLInputElement> = useRef(null);
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);
@@ -146,7 +145,6 @@ export function SpawnEditorUnpackForm({
       <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
         <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container item>
           <OutlinedInput
-            ref={inputRef}
             size={"small"}
             disabled={isSelecting || spawnFile.isLoading}
             value={spawnPath ?? ""}
@@ -165,7 +163,6 @@ export function SpawnEditorUnpackForm({
           />
 
           <OutlinedInput
-            ref={inputRef}
             size={"small"}
             disabled={isSelecting || spawnFile.isLoading}
             value={outputPath ?? ""}
