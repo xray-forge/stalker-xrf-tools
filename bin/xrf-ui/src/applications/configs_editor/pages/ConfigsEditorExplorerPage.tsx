@@ -1,5 +1,5 @@
+import { default as FolderIcon } from "@mui/icons-material/Folder";
 import { Button, Grid, IconButton, InputAdornment, OutlinedInput, Typography } from "@mui/material";
-import { default as FolderIcon } from "@mui/material/SvgIcon/SvgIcon";
 import { useManager } from "dreamstate";
 import { useCallback, useState } from "react";
 

@@ -1,17 +1,40 @@
-import { Button, Grid, IconButton, InputAdornment, OutlinedInput, Typography } from "@mui/material";
-import { default as FolderIcon } from "@mui/material/SvgIcon/SvgIcon";
+import { default as FolderIcon } from "@mui/icons-material/Folder";
+import { Button, CircularProgress, Grid, IconButton, InputAdornment, OutlinedInput, Typography } from "@mui/material";
+import { invoke } from "@tauri-apps/api/tauri";
 import { useManager } from "dreamstate";
 import { useCallback, useState } from "react";
 
 import { ConfigsBackButton } from "@/applications/configs_editor/components/ConfigsBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
+import { ECommand } from "@/lib/ipc";
+import { Logger, useLogger } from "@/lib/logging";
 
 export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } = useManager(ProjectManager) }) {
+  const log: Logger = useLogger("configs-verifier");
+
+  const [isLoading, setIsLoading] = useState(false);
   const [configsPath] = useState<Optional<string>>(xrfConfigsPath);
 
   const onSelectTargetDirectory = useCallback(() => {}, []);
+
   const onSelectTargetDirectoryClicked = useCallback(() => {}, []);
+
+  const onVerifyPathClicked = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      log.info("Verifying:", configsPath);
+
+      await invoke(ECommand.VERIFY_CONFIGS_PATH, { path: configsPath });
+
+      log.info("Verified:", configsPath);
+    } catch (error) {
+      log.error("Verify error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [configsPath, log]);
 
   return (
     <Grid
@@ -30,6 +53,8 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
         <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container item>
           <OutlinedInput
             size={"small"}
+            disabled={isLoading}
+            value={configsPath || ""}
             placeholder={"Configs directory"}
             readOnly={true}
             endAdornment={
@@ -40,17 +65,20 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
               </InputAdornment>
             }
             sx={{ mb: 1 }}
-            value={configsPath || ""}
             onClick={onSelectTargetDirectoryClicked}
           />
         </Grid>
 
         <Grid direction={"column"} justifyContent={"center"} width={"auto"} container item>
-          <Button variant={"contained"}>Verify</Button>
+          <Button variant={"contained"} disabled={isLoading} onClick={onVerifyPathClicked}>
+            Verify
+          </Button>
         </Grid>
       </Grid>
 
-      <ConfigsBackButton />
+      {isLoading ? <CircularProgress size={24} /> : null}
+
+      <ConfigsBackButton disabled={isLoading} />
     </Grid>
   );
 }
