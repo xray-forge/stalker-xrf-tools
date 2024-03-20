@@ -12,15 +12,18 @@ import {
 } from "@mui/material";
 import { open } from "@tauri-apps/api/dialog";
 import { useManager } from "dreamstate";
-import { MouseEvent, ReactElement, RefObject, useCallback, useRef, useState } from "react";
+import { MouseEvent, ReactElement, RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { SpawnBackButton } from "@/applications/spawn_editor/components/SpawnBackButton";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
+import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
+import { getExistingProjectBuiltAllSpawnPath } from "@/lib/xrf_path";
 
 export function SpawnEditorOpenForm({
   spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
+  projectContext: { xrfProjectPath } = useManager(ProjectManager),
 }): ReactElement {
   const log: Logger = useLogger("spawn-open");
   const inputRef: RefObject<HTMLInputElement> = useRef(null);
@@ -61,6 +64,14 @@ export function SpawnEditorOpenForm({
       log.info("Cannot parse spawn file without path");
     }
   }, [spawnPath]);
+
+  useEffect(() => {
+    if (xrfProjectPath) {
+      getExistingProjectBuiltAllSpawnPath(xrfProjectPath).then((spawnPath) => {
+        setSpawnPath(spawnPath);
+      });
+    }
+  }, []);
 
   return (
     <Grid

@@ -12,13 +12,13 @@ import {
 } from "@mui/material";
 import { open } from "@tauri-apps/api/dialog";
 import { exists } from "@tauri-apps/api/fs";
-import * as path from "@tauri-apps/api/path";
 import { useManager } from "dreamstate";
 import { MouseEvent, ReactElement, useCallback, useState } from "react";
 
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
+import { getProjectConfigsPath } from "@/lib/xrf_path";
 
 export function SettingsModalButton({
   projectContext: { projectActions, xrfProjectPath, xrfConfigsPath } = useManager(ProjectManager),
@@ -42,7 +42,7 @@ export function SettingsModalButton({
 
       // Try to auto-guess configs folder from xrf directory.
       if (!xrfConfigsPath) {
-        const newXrfConfigsPath: string = await path.resolve(newXrfProjectPath, "src", "engine", "configs");
+        const newXrfConfigsPath: string = await getProjectConfigsPath(newXrfProjectPath);
 
         if (await exists(newXrfConfigsPath)) {
           log.info("Automatically selected new configs path:", newXrfConfigsPath);

@@ -12,15 +12,18 @@ import {
 } from "@mui/material";
 import { open } from "@tauri-apps/api/dialog";
 import { useManager } from "dreamstate";
-import { MouseEvent, ReactElement, RefObject, useCallback, useRef, useState } from "react";
+import { MouseEvent, ReactElement, RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { SpawnBackButton } from "@/applications/spawn_editor/components/SpawnBackButton";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
+import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
+import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf_path";
 
 export function SpawnEditorUnpackForm({
   spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
+  projectContext: { xrfProjectPath } = useManager(ProjectManager),
 }): ReactElement {
   const log: Logger = useLogger("spawn-unpack");
   const inputRef: RefObject<HTMLInputElement> = useRef(null);
@@ -117,6 +120,16 @@ export function SpawnEditorUnpackForm({
     }
   }, [spawnPath, outputPath]);
 
+  useEffect(() => {
+    if (xrfProjectPath) {
+      getExistingProjectBuiltAllSpawnPath(xrfProjectPath).then((spawnPath) => {
+        setSpawnPath(spawnPath);
+      });
+
+      getProjectAllSpawnUnpackPath(xrfProjectPath).then((outputPath) => setOutputPath(outputPath));
+    }
+  }, []);
+
   return (
     <Grid
       justifyContent={"center"}
@@ -188,7 +201,7 @@ export function SpawnEditorUnpackForm({
       ) : null}
 
       {isFinishedSuccessfully ? (
-        <Grid p={"0 8px"}>
+        <Grid p={"0 8px"} maxWidth={500}>
           <Alert severity={"success"} variant={"outlined"}>
             Successfully unpacked spawn to {outputPath}
           </Alert>
