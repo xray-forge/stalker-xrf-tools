@@ -3,17 +3,21 @@ use std::path::PathBuf;
 
 #[derive(Debug, Default, Serialize)]
 pub struct LtxProjectFormatResult {
-  pub invalid: Vec<PathBuf>,
-  pub total: usize,
-  pub valid: Vec<PathBuf>,
+  pub duration: u128,
+  pub invalid_files: usize,
+  pub to_format: Vec<PathBuf>,
+  pub total_files: usize,
+  pub valid_files: usize,
 }
 
 impl LtxProjectFormatResult {
   pub fn new() -> LtxProjectFormatResult {
     LtxProjectFormatResult {
-      invalid: Vec::new(),
-      total: 0,
-      valid: Vec::new(),
+      duration: 0,
+      invalid_files: 0,
+      to_format: Vec::new(),
+      total_files: 0,
+      valid_files: 0,
     }
   }
 }

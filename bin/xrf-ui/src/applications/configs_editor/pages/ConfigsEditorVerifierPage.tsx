@@ -71,9 +71,9 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
 
       const result: ILtxProjectVerifyResult = await invoke(ECommand.VERIFY_CONFIGS_PATH, { path: configsPath });
 
-      setResult(result);
-
       log.info("Verified:", configsPath);
+
+      setResult(result);
     } catch (error: unknown) {
       log.error("Verify error:", error);
       setError(String(error));
@@ -121,7 +121,7 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
         </Grid>
 
         <Grid direction={"column"} justifyContent={"center"} width={"auto"} container item>
-          <Button variant={"contained"} disabled={isLoading} onClick={onVerifyPathClicked}>
+          <Button variant={"contained"} disabled={isLoading || !configsPath} onClick={onVerifyPathClicked}>
             Verify
           </Button>
         </Grid>

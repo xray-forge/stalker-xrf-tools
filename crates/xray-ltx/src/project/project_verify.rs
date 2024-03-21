@@ -141,7 +141,7 @@ impl LtxProject {
       }
 
       println!(
-        "Checked {} files, {} sections in {} ms",
+        "Checked {} files, {} sections in {} sec",
         self.ltx_files.len(),
         result.total_sections,
         (result.duration as f64) / 1000.0

@@ -1,5 +1,6 @@
 use crate::project::project_format_result::LtxProjectFormatResult;
 use crate::{Ltx, LtxError, LtxFormatOptions, LtxProject};
+use std::time::Instant;
 
 impl LtxProject {
   /// Format all LTX entries in current project.
@@ -8,6 +9,7 @@ impl LtxProject {
     options: LtxFormatOptions,
   ) -> Result<LtxProjectFormatResult, LtxError> {
     let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
+    let started_at: Instant = Instant::now();
 
     if !options.is_silent {
       println!("Formatting path: {:?}", self.root);
@@ -15,23 +17,27 @@ impl LtxProject {
 
     for entry in &self.ltx_files {
       if Ltx::format_file(entry.path(), true)? {
-        result.invalid.push(entry.path().into());
+        result.invalid_files += 1;
+        result.to_format.push(entry.path().into());
 
         if !options.is_silent {
           println!("Formatted: {:?}", entry.path());
         }
       } else {
-        result.valid.push(entry.path().into());
+        result.valid_files += 1;
       }
 
-      result.total += 1;
+      result.total_files += 1;
     }
+
+    result.duration = started_at.elapsed().as_millis();
 
     if !options.is_silent {
       println!(
-        "Formatted {}/{} files",
-        result.invalid.len(),
-        self.ltx_file_entries.len()
+        "Formatted {}/{} files in {} sec",
+        result.invalid_files,
+        self.ltx_file_entries.len(),
+        (result.duration as f64) / 1000.0
       );
     }
 
@@ -44,6 +50,7 @@ impl LtxProject {
     options: LtxFormatOptions,
   ) -> Result<LtxProjectFormatResult, LtxError> {
     let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
+    let started_at: Instant = Instant::now();
 
     if !options.is_silent {
       println!("Checking path: {:?}", self.root);
@@ -51,26 +58,34 @@ impl LtxProject {
 
     for entry in &self.ltx_files {
       if Ltx::format_file(entry.path(), false)? {
-        result.invalid.push(entry.path().into());
+        result.invalid_files += 1;
+        result.to_format.push(entry.path().into());
 
         if !options.is_silent {
           println!("Not formatted: {:?}", entry.path());
         }
       } else {
-        result.valid.push(entry.path().into());
+        result.valid_files += 1;
       }
 
-      result.total += 1;
+      result.total_files += 1;
     }
 
+    result.duration = started_at.elapsed().as_millis();
+
     if !options.is_silent {
-      if result.invalid.is_empty() {
-        println!("All {} files are formatted", self.ltx_file_entries.len());
+      if result.invalid_files == 0 {
+        println!(
+          "All {} files are formatted, checked in {} sec",
+          self.ltx_file_entries.len(),
+          (result.duration as f64) / 1000.0
+        );
       } else {
         println!(
-          "Format issues with {}/{} files",
-          result.invalid.len(),
-          self.ltx_file_entries.len()
+          "Format issues with {}/{} files in {} sec",
+          result.invalid_files,
+          self.ltx_file_entries.len(),
+          (result.duration as f64) / 1000.0
         );
       }
     }

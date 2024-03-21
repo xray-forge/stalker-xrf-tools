@@ -1,6 +1,7 @@
 export enum ECommand {
   CLOSE_SPAWN_FILE = "close_spawn_file",
   EXPORT_SPAWN_FILE = "export_spawn_file",
+  CHECK_FORMAT_CONFIGS_PATH = "check_format_configs_path",
   FORMAT_CONFIGS_PATH = "format_configs_path",
   VERIFY_CONFIGS_PATH = "verify_configs_path",
   GET_SPAWN_FILE = "get_spawn_file",

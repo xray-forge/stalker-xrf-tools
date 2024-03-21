@@ -22,7 +22,7 @@ pub fn format_ltx(matches: &ArgMatches) {
         .check_format_all_files_opt(LtxFormatOptions { is_silent })
         .unwrap();
 
-      if !result.invalid.is_empty() {
+      if result.invalid_files > 0 {
         process::exit(1);
       }
     } else {

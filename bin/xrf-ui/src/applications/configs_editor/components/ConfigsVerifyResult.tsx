@@ -9,7 +9,7 @@ interface IConfigsVerifyResultProps {
 
 export function ConfigsVerifyResult({ result }: IConfigsVerifyResultProps): ReactElement {
   return (
-    <Grid direction={"column"} padding={2} maxWidth={540}>
+    <Grid direction={"column"} padding={2} maxWidth={540} container>
       <Grid justifyContent={"center"} gap={1} container>
         <Chip variant={"outlined"} label={`${result.duration / 1000} sec`} />
         <Chip variant={"outlined"} label={`${result.total_files} files total`} />

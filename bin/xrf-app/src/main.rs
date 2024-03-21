@@ -4,7 +4,7 @@
 mod configs_editor;
 mod spawn_editor;
 
-use crate::configs_editor::{format_configs_path, verify_configs_path};
+use crate::configs_editor::{check_format_configs_path, format_configs_path, verify_configs_path};
 use crate::spawn_editor::{
   close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_alife_spawns,
   get_spawn_file_artefact_spawns, get_spawn_file_graphs, get_spawn_file_header,
@@ -19,6 +19,7 @@ fn main() {
 
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
+      check_format_configs_path,
       format_configs_path,
       verify_configs_path,
       has_spawn_file,
