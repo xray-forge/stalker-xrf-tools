@@ -31,5 +31,4 @@ command = "cargo"
 args = ["run", "--no-default-features"]
 
 [tasks.serve-ui]
-command = "cargo"
 script = "npm run --prefix ../xrf-ui dev"

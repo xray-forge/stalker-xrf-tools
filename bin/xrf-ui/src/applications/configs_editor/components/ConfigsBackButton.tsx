@@ -10,7 +10,7 @@ export function ConfigsBackButton({ disabled }: ISpawnBackButtonProps): ReactEle
   const navigate: NavigateFunction = useNavigate();
 
   return (
-    <Card sx={{ minWidth: 200, marginTop: 2 }}>
+    <Card sx={{ minWidth: 200, marginTop: 2, marginBottom: 2, flexShrink: 0 }}>
       <Grid direction={"column"} container>
         <ButtonGroup orientation={"vertical"}>
           <Button disabled={disabled} onClick={() => navigate("/configs_editor", { replace: true })}>

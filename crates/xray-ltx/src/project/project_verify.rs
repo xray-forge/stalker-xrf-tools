@@ -1,21 +1,23 @@
 use crate::error::ltx_scheme_error::LtxSchemeError;
 use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::verify_options::LtxVerifyOptions;
-use crate::{Ltx, LtxError, LtxProject};
+use crate::{Ltx, LtxError, LtxProject, LtxProjectVerifyResult};
 use fxhash::FxBuildHasher;
 use indexmap::IndexSet;
 use std::path::Path;
+use std::time::Instant;
 
 impl LtxProject {
   /// Verify all the entries in current ltx project.
   /// Make sure that:
   /// - All included files exist or `.ts` counterpart is declared
   /// - All the inherited sections are valid and declared before inherit attempt
-  pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> Result<bool, LtxError> {
-    let mut scheme_errors: Vec<LtxSchemeError> = Vec::new();
-    let mut total_sections: usize = 0;
-    let mut checked_sections: usize = 0;
-    let mut checked_fields: usize = 0;
+  pub fn verify_entries_opt(
+    &self,
+    options: LtxVerifyOptions,
+  ) -> Result<LtxProjectVerifyResult, LtxError> {
+    let mut result: LtxProjectVerifyResult = LtxProjectVerifyResult::new();
+    let started_at: Instant = Instant::now();
 
     if !options.is_silent {
       println!("Verify path: {:?}", self.root);
@@ -28,17 +30,21 @@ impl LtxProject {
       // Do not check scheme definitions for scheme files - makes no sense.
       if Self::is_ltx_scheme_path(entry_path) {
         continue;
+      } else {
+        result.total_files += 1;
       }
 
       let ltx: Ltx = Ltx::load_from_file_full(entry_path)?;
 
       // For each section in file:
       for (section_name, section) in &ltx {
-        total_sections += 1;
+        result.total_sections += 1;
 
         // Check only if schema is defined:
         if let Some(scheme_name) = section.get(LTX_SCHEME_FIELD) {
-          checked_sections += 1;
+          let mut section_has_error: bool = false;
+
+          result.checked_sections += 1;
 
           // Check if definition or required schema exists:
           if let Some(scheme_definition) = self.ltx_scheme_declarations.get(scheme_name) {
@@ -58,16 +64,20 @@ impl LtxProject {
                   println!("Checking {:?} [{section_name}] {field_name}", entry_path);
                 }
 
-                checked_fields += 1;
+                result.checked_fields += 1;
 
                 if let Some(mut error) = field_definition.validate_value(&ltx, value) {
                   error.section = section_name.into();
                   error.at = Some(entry_path.to_str().unwrap().into());
 
-                  scheme_errors.push(error);
+                  section_has_error = true;
+
+                  result.errors.push(error);
                 }
               } else if scheme_definition.is_strict {
-                scheme_errors.push(LtxSchemeError::new_at(
+                section_has_error = true;
+
+                result.errors.push(LtxSchemeError::new_at(
                   section_name,
                   field_name,
                   "Unexpected field, definition is required in strict mode",
@@ -82,7 +92,9 @@ impl LtxProject {
                   && field_name != LTX_SYMBOL_ANY
                   && !validated.contains(field_name)
                 {
-                  scheme_errors.push(LtxSchemeError::new_at(
+                  section_has_error = true;
+
+                  result.errors.push(LtxSchemeError::new_at(
                     section_name,
                     field_name,
                     "Required field was not provided",
@@ -92,45 +104,60 @@ impl LtxProject {
               }
             }
           } else {
-            scheme_errors.push(LtxSchemeError::new_at(
+            section_has_error = true;
+
+            result.errors.push(LtxSchemeError::new_at(
               section_name,
               "*",
               format!("Required schema '{scheme_name}' definition is not found"),
               entry_path.to_str().unwrap(),
             ));
           }
+
+          if section_has_error {
+            result.invalid_sections += 1;
+          } else {
+            result.valid_sections += 1;
+          }
         } else if options.is_strict {
-          scheme_errors.push(LtxSchemeError::new_at(
+          result.invalid_sections += 1;
+          result.errors.push(LtxSchemeError::new_at(
             section_name,
             "*",
             "Expected '$schema' field to be defined in strict mode check",
             entry_path.to_str().unwrap(),
           ));
+        } else {
+          result.skipped_sections += 1
         }
       }
     }
 
+    result.duration = started_at.elapsed().as_millis();
+
     if !options.is_silent {
-      for error in &scheme_errors {
+      for error in &result.errors {
         println!("{}", error);
       }
 
       println!(
-        "Checked {} files, {total_sections} sections",
-        self.ltx_files.len()
+        "Checked {} files, {} sections in {} ms",
+        self.ltx_files.len(),
+        result.total_sections,
+        (result.duration as f64) / 1000.0
       );
       println!(
-        "Verified {} files, {checked_sections} sections, {checked_fields} fields",
-        self.ltx_files.len()
+        "Verified {} files, {} sections, {} fields",
+        result.total_files, result.checked_sections, result.checked_fields
       );
-      println!("Found {} error(s)", scheme_errors.len());
+      println!("Found {} error(s)", result.errors.len());
     }
 
-    Ok(scheme_errors.is_empty())
+    Ok(result)
   }
 
   /// Verify all the section/field entries in current ltx project.
-  pub fn verify_entries(&self) -> Result<bool, LtxError> {
+  pub fn verify_entries(&self) -> Result<LtxProjectVerifyResult, LtxError> {
     self.verify_entries_opt(Default::default())
   }
 

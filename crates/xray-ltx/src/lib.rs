@@ -16,5 +16,7 @@ pub use crate::file::section::section::Section;
 
 pub use crate::project::format_options::LtxFormatOptions;
 pub use crate::project::project::LtxProject;
+pub use crate::project::project_format_result::LtxProjectFormatResult;
 pub use crate::project::project_options::LtxProjectOptions;
+pub use crate::project::project_verify_result::LtxProjectVerifyResult;
 pub use crate::project::verify_options::LtxVerifyOptions;

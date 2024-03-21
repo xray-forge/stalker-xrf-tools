@@ -39,8 +39,11 @@ impl LtxProject {
   }
 
   /// Check format of all LTX entries in current project.
-  pub fn check_format_all_files_opt(&self, options: LtxFormatOptions) -> Result<bool, LtxError> {
-    let mut count: usize = 0;
+  pub fn check_format_all_files_opt(
+    &self,
+    options: LtxFormatOptions,
+  ) -> Result<LtxProjectFormatResult, LtxError> {
+    let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
 
     if !options.is_silent {
       println!("Checking path: {:?}", self.root);
@@ -48,26 +51,31 @@ impl LtxProject {
 
     for entry in &self.ltx_files {
       if Ltx::format_file(entry.path(), false)? {
-        count += 1;
+        result.invalid.push(entry.path().into());
 
         if !options.is_silent {
           println!("Not formatted: {:?}", entry.path());
         }
+      } else {
+        result.valid.push(entry.path().into());
       }
+
+      result.total += 1;
     }
 
     if !options.is_silent {
-      if count > 0 {
+      if result.invalid.is_empty() {
+        println!("All {} files are formatted", self.ltx_file_entries.len());
+      } else {
         println!(
-          "Format issues with {count}/{} files",
+          "Format issues with {}/{} files",
+          result.invalid.len(),
           self.ltx_file_entries.len()
         );
-      } else {
-        println!("All {} files are formatted", self.ltx_file_entries.len());
       }
     }
 
-    Ok(count > 0)
+    Ok(result)
   }
 
   /// Format all LTX entries in current project.
@@ -76,7 +84,7 @@ impl LtxProject {
   }
 
   /// Format all LTX entries in current project.
-  pub fn check_format_all_files(&self) -> Result<bool, LtxError> {
+  pub fn check_format_all_files(&self) -> Result<LtxProjectFormatResult, LtxError> {
     self.check_format_all_files_opt(LtxFormatOptions::default())
   }
 }

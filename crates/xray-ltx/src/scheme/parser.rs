@@ -27,7 +27,7 @@ impl LtxSchemeParser {
         .into_included()?
         .into_inherited()?;
 
-      for (name, section) in ltx {
+      for (name, section) in &ltx {
         if !name.starts_with(LTX_SYMBOL_SCHEME) {
           return Err(LtxConvertError::new_ltx_error(format!(
             "Failed to parse ltx schemes - scheme section declaration should be prefixed with $, \
@@ -35,14 +35,18 @@ impl LtxSchemeParser {
           )));
         }
 
-        match schemes.entry(name.clone()) {
+        match schemes.entry(name.into()) {
           Entry::Occupied(_) => {
             return Err(LtxConvertError::new_ltx_error(format!(
-              "Failed to parse ltx schemes - duplicate declaration of [{name}] section"
+              "Failed to parse ltx schemes - duplicate declaration of [{name}] section when reading '{}'",
+              &ltx
+                .path
+                .as_ref()
+                .map_or("virtial", |path| path.to_str().unwrap())
             )));
           }
           Entry::Vacant(entry) => {
-            entry.insert(Self::parse_section_scheme(&name, &section)?);
+            entry.insert(Self::parse_section_scheme(name, section)?);
           }
         }
       }

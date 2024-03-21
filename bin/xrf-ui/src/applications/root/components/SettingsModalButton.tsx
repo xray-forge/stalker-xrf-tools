@@ -75,7 +75,7 @@ export function SettingsModalButton({
 
   const onSelectConfigsPathClicked = useCallback(
     (event: MouseEvent<HTMLInputElement>) => onSelectConfigsPath(event),
-    [onSelectProjectPath]
+    [onSelectConfigsPath]
   );
 
   return (

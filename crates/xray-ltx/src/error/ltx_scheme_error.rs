@@ -1,8 +1,9 @@
 use crate::LtxError;
+use serde::Serialize;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct LtxSchemeError {
   pub section: String,
   pub field: String,

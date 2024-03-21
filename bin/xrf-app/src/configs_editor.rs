@@ -20,7 +20,7 @@ pub async fn format_configs_path(path: &str) -> Result<Value, String> {
 }
 
 #[tauri::command]
-pub async fn verify_configs_path(path: &str) -> Result<(), String> {
+pub async fn verify_configs_path(path: &str) -> Result<Value, String> {
   log::info!("Open ltx folder: {:?}", path);
 
   let project: LtxProject = match LtxProject::open_at_path_opt(
@@ -40,7 +40,7 @@ pub async fn verify_configs_path(path: &str) -> Result<(), String> {
     is_verbose: false,
     is_strict: false,
   }) {
-    Ok(_) => Ok(()),
+    Ok(result) => Ok(json!(result)),
     Err(error) => Err(error.to_string()),
   }
 }

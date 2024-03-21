@@ -33,34 +33,34 @@ impl LtxInheritConvertor {
 
     let mut new_sections: LtxSections = Default::default();
 
-    self.inherit_sections(&ltx.sections, &mut new_sections)?;
+    self.inherit_sections(&ltx, &mut new_sections)?;
 
     ltx.sections = new_sections;
 
     Ok(ltx)
   }
 
-  fn inherit_sections(
-    &self,
-    base: &LtxSections,
-    destination: &mut LtxSections,
-  ) -> Result<(), LtxError> {
-    for (section_name, _) in base {
-      Self::inherit_section(base, destination, section_name)?;
+  fn inherit_sections(&self, ltx: &Ltx, destination: &mut LtxSections) -> Result<(), LtxError> {
+    for (section_name, _) in &ltx.sections {
+      Self::inherit_section(ltx, destination, section_name)?;
     }
 
     Ok(())
   }
 
   fn inherit_section(
-    base: &LtxSections,
+    ltx: &Ltx,
     destination: &mut LtxSections,
     section_name: &str,
   ) -> Result<(), LtxError> {
-    let section: &Section = match base.get(section_name) {
+    let section: &Section = match ltx.sections.get(section_name) {
       None => {
         return Err(LtxConvertError::new_ltx_error(format!(
-          "Failed to inherit unknown section {section_name} in ltx"
+          "Failed to inherit unknown section [{section_name}] when reading ltx file ({})",
+          ltx
+            .path
+            .as_ref()
+            .map_or("virtual", |path| path.to_str().unwrap())
         )));
       }
       Some(it) => it,
@@ -81,7 +81,7 @@ impl LtxInheritConvertor {
           )));
         }
 
-        Self::inherit_section(base, destination, inherited)?;
+        Self::inherit_section(ltx, destination, inherited)?;
       }
 
       let mut new_props: Section = Default::default();

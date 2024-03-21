@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
 use std::process;
-use xray_ltx::{Ltx, LtxFormatOptions, LtxProject};
+use xray_ltx::{Ltx, LtxFormatOptions, LtxProject, LtxProjectFormatResult};
 
 /// Lint and format ltx file or folder based on provided arguments.
 pub fn format_ltx(matches: &ArgMatches) {
@@ -18,11 +18,11 @@ pub fn format_ltx(matches: &ArgMatches) {
     if is_check {
       log::info!("Checking format of ltx folder: {:?}", path);
 
-      let has_invalid: bool = project
+      let result: LtxProjectFormatResult = project
         .check_format_all_files_opt(LtxFormatOptions { is_silent })
         .unwrap();
 
-      if has_invalid {
+      if !result.invalid.is_empty() {
         process::exit(1);
       }
     } else {
