@@ -1,12 +1,16 @@
 use crate::archive::file_descriptor::ArchiveFileDescriptor;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ArchiveDescriptor {
-  pub path: PathBuf,
-  pub output_root_path: PathBuf,
+  #[serde(rename = "files")]
   pub files: HashMap<String, ArchiveFileDescriptor>,
+  #[serde(rename = "outputRootPath")]
+  pub output_root_path: PathBuf,
+  #[serde(rename = "path")]
+  pub path: PathBuf,
 }
 
 impl ArchiveDescriptor {

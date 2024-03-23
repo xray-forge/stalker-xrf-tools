@@ -15,7 +15,7 @@ export interface IProjectContext {
 }
 
 export class ProjectManager extends ContextManager<IProjectContext> {
-  public log: Logger = new Logger("pct");
+  public log: Logger = new Logger("project");
 
   public context: IProjectContext = {
     projectActions: createActions({

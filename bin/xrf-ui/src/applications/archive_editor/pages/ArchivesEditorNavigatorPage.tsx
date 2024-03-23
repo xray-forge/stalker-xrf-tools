@@ -23,7 +23,7 @@ export function ArchivesEditorNavigatorPage(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/archives_editor/explorer", { replace: true })}>Open</Button>
+            <Button onClick={() => navigate("/archives_editor/editor", { replace: true })}>Open</Button>
             <Button onClick={() => navigate("/archives_editor/unpacker", { replace: true })}>Unpack</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>

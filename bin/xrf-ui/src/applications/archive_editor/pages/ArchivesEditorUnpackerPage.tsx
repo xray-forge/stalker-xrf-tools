@@ -25,7 +25,7 @@ import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf_path";
 
 export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } = useManager(ProjectManager) }) {
-  const log: Logger = useLogger("archive-unpacker");
+  const log: Logger = useLogger("archives-unpacker");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);
@@ -33,7 +33,7 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
   const [archivesPath, setArchivesPath] = useState<Optional<string>>(null);
   const [archivesUnpackPath, setArchivesUnpackPath] = useState<Optional<string>>(null);
 
-  const onSelectConfigsPath = useCallback(
+  const onSelectArchivesPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {
       if (isLoading) {
         return;
@@ -58,12 +58,12 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
     [isLoading]
   );
 
-  const onSelectConfigsPathClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectConfigsPath(event),
-    [onSelectConfigsPath]
+  const onSelectArchivesPathClicked = useCallback(
+    (event: MouseEvent<HTMLInputElement>) => onSelectArchivesPath(event),
+    [onSelectArchivesPath]
   );
 
-  const onVerifyPathClicked = useCallback(async () => {
+  const onUnpackArchivesPathClicked = useCallback(async () => {
     try {
       setIsLoading(true);
       setResult(null);
@@ -80,7 +80,7 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
 
       setResult(result);
     } catch (error: unknown) {
-      log.error("Verify error:", error);
+      log.error("Unpack error:", error);
       setError(String(error));
     } finally {
       setIsLoading(false);
@@ -118,13 +118,13 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
             placeholder={"Source"}
             readOnly={true}
             endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
+              <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
                 <IconButton disabled={isLoading} edge={"end"}>
                   <FolderIcon />
                 </IconButton>
               </InputAdornment>
             }
-            onClick={onSelectConfigsPathClicked}
+            onClick={onSelectArchivesPathClicked}
           />
 
           <OutlinedInput
@@ -134,18 +134,18 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
             placeholder={"Output"}
             readOnly={true}
             endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
+              <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
                 <IconButton disabled={isLoading} edge={"end"}>
                   <FolderIcon />
                 </IconButton>
               </InputAdornment>
             }
-            onClick={onSelectConfigsPathClicked}
+            onClick={onSelectArchivesPathClicked}
           />
         </Grid>
 
         <Grid direction={"column"} justifyContent={"center"} width={"auto"} container item>
-          <Button variant={"contained"} disabled={isLoading || !archivesPath} onClick={onVerifyPathClicked}>
+          <Button variant={"contained"} disabled={isLoading || !archivesPath} onClick={onUnpackArchivesPathClicked}>
             Unpack
           </Button>
         </Grid>

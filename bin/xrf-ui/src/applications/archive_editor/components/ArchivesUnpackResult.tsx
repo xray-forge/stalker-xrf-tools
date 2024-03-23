@@ -19,7 +19,7 @@ export function ArchivesUnpackResult({ result }: IConfigsVerifyResultProps): Rea
       <Grid marginTop={2}>
         <Accordion>
           <AccordionSummary>Archives ({result.archives.length})</AccordionSummary>
-          <AccordionDetails sx={{ maxHeight: 180, overflowY: "auto" }}>
+          <AccordionDetails sx={{ maxHeight: 112, overflowY: "auto" }}>
             {result.archives.map((it, index) => (
               <Grid key={index}>
                 <Typography color={"green"}>

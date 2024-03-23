@@ -1,22 +1,35 @@
+use serde::Serialize;
 use std::path::{Path, PathBuf};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ArchiveFileDescriptor {
+  #[serde(rename = "crc")]
   pub crc: u32,
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "offset")]
   pub offset: u32,
+  #[serde(rename = "sizeCompressed")]
   pub size_compressed: u32,
+  #[serde(rename = "sizeReal")]
   pub size_real: u32,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ArchiveFileReplicationDescriptor {
+  #[serde(rename = "crc")]
   pub crc: u32,
+  #[serde(rename = "source")]
   pub source: PathBuf,
+  #[serde(rename = "destination")]
   pub destination: PathBuf,
+  #[serde(rename = "name")]
   pub name: String,
+  #[serde(rename = "offset")]
   pub offset: u32,
+  #[serde(rename = "sizeCompressed")]
   pub size_compressed: u32,
+  #[serde(rename = "sizeReal")]
   pub size_real: u32,
 }
 

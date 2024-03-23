@@ -3,10 +3,14 @@ use crate::archive::file_descriptor::ArchiveFileReplicationDescriptor;
 use crate::archive::reader::ArchiveReader;
 use crate::error::archive_error::ArchiveError;
 use crate::ArchiveReadError;
+use serde::Serialize;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
 use walkdir::WalkDir;
 
+// todo: Add reading from fsgame.ltx file.
+#[derive(Serialize)]
 pub struct ArchiveProject {
   pub archives: Vec<ArchiveDescriptor>,
   pub files: HashMap<String, ArchiveFileReplicationDescriptor>,
@@ -48,6 +52,8 @@ impl ArchiveProject {
       )));
     }
 
+    Self::sort_archives(&mut archives);
+
     for archive in &archives {
       for (name, descriptor) in &archive.files {
         files.insert(
@@ -84,5 +90,28 @@ impl ArchiveProject {
     }
 
     total
+  }
+
+  /// Sort archives list to maintain overriding of files in a correct way.
+  /// Patches are exceptional case and should override all the files.
+  fn sort_archives(archives: &mut [ArchiveDescriptor]) {
+    archives.sort_by(|a, b| {
+      let a = a.path.to_str().unwrap();
+      let b = b.path.to_str().unwrap();
+
+      if a.contains("patches") {
+        if b.contains("patches") {
+          a.cmp(b)
+        } else {
+          Ordering::Greater
+        }
+      } else {
+        if b.contains("patches") {
+          Ordering::Less
+        } else {
+          a.cmp(b)
+        }
+      }
+    });
   }
 }

@@ -24,7 +24,7 @@ export class ThemeManager extends ContextManager<IThemeContext> {
     theme: createApplicationTheme(getLocalStorageValue("theme") === "light" ? "light" : "dark"),
   };
 
-  public log: Logger = new Logger("thm");
+  public log: Logger = new Logger("theme");
 
   /**
    * Send generic message on manager provision start and subscribe to events.
