@@ -143,7 +143,7 @@ export function SpawnEditorPackForm({
       </Grid>
 
       <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={1} container item>
           <OutlinedInput
             size={"small"}
             disabled={isSelecting || spawnFile.isLoading}
@@ -158,7 +158,6 @@ export function SpawnEditorPackForm({
                 </IconButton>
               </InputAdornment>
             }
-            sx={{ mb: 1 }}
             onClick={onSelectInput}
           />
 
