@@ -7,5 +7,7 @@ edition = "2021"
 clap = { version = "4.5.0", features = ["derive", "default"] }
 env_logger = "0.11.1"
 log = "0.4.20"
+xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-ltx = { path = "../../crates/xray-ltx" }
+encoding_rs = "0.8.33"

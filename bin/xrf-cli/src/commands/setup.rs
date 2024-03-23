@@ -82,6 +82,26 @@ pub fn setup_commands() -> Command {
         ),
     )
     .subcommand(
+      Command::new("unpack-archive")
+        .about("Command to unpack provided *.db into separate files")
+        .arg(
+          Arg::new("path")
+            .help("Path to *.db file")
+            .short('p')
+            .long("path")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("dest")
+            .help("Path to folder for exporting")
+            .short('d')
+            .long("dest")
+            .default_value("unpacked")
+            .value_parser(value_parser!(PathBuf)),
+        ),
+    )
+    .subcommand(
       Command::new("verify-spawn")
         .about("Command to verify provided *.spawn file")
         .arg(

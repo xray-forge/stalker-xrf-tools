@@ -447,8 +447,10 @@ checksum = "5bc015644b92d5890fab7489e49d21f879d5c990186827d42ec511919404f38b"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-targets 0.52.4",
 ]
 
@@ -620,6 +622,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc-any"
+version = "2.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c01a5e1f881f6fb6099a7bdf949e946719fd4f1fefa56264890574febf0eb6d0"
+dependencies = [
+ "debug-helper",
+]
+
+[[package]]
 name = "crc32fast"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -748,6 +759,23 @@ dependencies = [
  "darling_core",
  "quote",
  "syn 2.0.52",
+]
+
+[[package]]
+name = "debug-helper"
+version = "0.3.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f578e8e2c440e7297e008bb5486a3a8a194775224bbc23729b0dbdfaeebf162e"
+
+[[package]]
+name = "delharc"
+version = "0.5.0"
+dependencies = [
+ "bitflags 2.4.2",
+ "chrono",
+ "crc-any",
+ "memchr",
+ "rand 0.8.5",
 ]
 
 [[package]]
@@ -1916,6 +1944,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a634b1c61a95585bd15607c6ab0c4e5b226e695ff2800ba0cdccddf208c406c"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "minilzo-rs"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c71a19a4b57d7712a7946e51a7a998f1d8252e16000706ae63243e951fcfce09"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
@@ -4481,6 +4518,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "xray-archive"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "bytes",
+ "crc32fast",
+ "delharc",
+ "encoding_rs",
+ "env_logger",
+ "fileslice",
+ "log",
+ "minilzo-rs",
+ "regex",
+ "walkdir",
+ "xray-test-utils",
+]
+
+[[package]]
 name = "xray-db"
 version = "0.1.0"
 dependencies = [
@@ -4540,8 +4595,10 @@ name = "xrf-cli"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "encoding_rs",
  "env_logger",
  "log",
+ "xray-archive",
  "xray-db",
  "xray-ltx",
 ]
