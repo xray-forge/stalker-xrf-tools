@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use xray_archive::{ArchiveProject, ArchiveUnpackResult};
 
 /// Unpack xray engine database archive.
-pub fn unpack_archive(matches: &ArgMatches) {
+pub async fn unpack_archive(matches: &ArgMatches) {
   let path: &PathBuf = matches
     .get_one::<PathBuf>("path")
     .expect("Expected valid path to be provided");
@@ -13,6 +13,10 @@ pub fn unpack_archive(matches: &ArgMatches) {
     .get_one::<PathBuf>("dest")
     .expect("Expected valid output path to be provided")
     .clone();
+
+  let parallel: usize = *matches
+    .get_one::<usize>("parallel")
+    .expect("Expected valid parallel threads count to be provided");
 
   if destination.is_relative() {
     destination = env::current_dir().unwrap().join(destination);
@@ -31,9 +35,12 @@ pub fn unpack_archive(matches: &ArgMatches) {
     (archive_project.get_real_size() as f64) / 1024.0 / 1024.0,
   );
 
-  log::info!("Unpacking files");
+  log::info!("Unpacking files, parallel {parallel}");
 
-  let result: ArchiveUnpackResult = archive_project.unpack(&destination).unwrap();
+  let result: ArchiveUnpackResult = archive_project
+    .unpack_parallel(&destination, parallel)
+    .await
+    .unwrap();
 
   log::info!(
     "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",

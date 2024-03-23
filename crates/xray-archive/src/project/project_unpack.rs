@@ -27,9 +27,7 @@ impl ArchiveProject {
     // Unpack each separate file.
     for file_descriptor in self.files.values() {
       if file_descriptor.size_real > 0 {
-        self
-          .unpack_file(&lzo, destination, file_descriptor)
-          .unwrap();
+        Self::unpack_file(&lzo, destination, file_descriptor).unwrap();
       }
 
       unpacked_files_count += 1;
@@ -58,8 +56,63 @@ impl ArchiveProject {
     })
   }
 
-  fn unpack_file(
+  pub async fn unpack_parallel(
     &self,
+    destination: &Path,
+    concurrency: usize,
+  ) -> Result<ArchiveUnpackResult, ArchiveError> {
+    let start: Instant = Instant::now();
+
+    let mut unpacked_files_count: usize = 0;
+    let unpacked_files_chunk: usize = max(self.files.len() / 100 * 5, 5);
+
+    // Prepare structure of folders for further unpacking.
+    self.unpack_dirs(destination)?;
+
+    let prepared_at: Duration = start.elapsed();
+
+    let mut tasks_set = bounded_join_set::JoinSet::new(concurrency);
+
+    // Unpack each separate file.
+    for file_descriptor in self.files.values() {
+      if file_descriptor.size_real > 0 {
+        let destination: PathBuf = destination.into();
+        let descriptor: ArchiveFileReplicationDescriptor = file_descriptor.clone();
+
+        tasks_set.spawn(async move {
+          ArchiveProject::unpack_file(&LZO::init().unwrap(), &destination, &descriptor)
+        });
+      }
+    }
+
+    while tasks_set.join_next().await.is_some() {
+      unpacked_files_count += 1;
+
+      if unpacked_files_count % unpacked_files_chunk == 0 {
+        log::info!(
+          "Unpacked {unpacked_files_count} / {} files",
+          self.files.len()
+        )
+      }
+    }
+
+    let unpacked_at: Duration = start.elapsed();
+
+    Ok(ArchiveUnpackResult {
+      archives: self
+        .archives
+        .iter()
+        .map(|it| it.path.to_str().unwrap().into())
+        .collect(),
+      destination: destination.to_str().unwrap().into(),
+      duration: unpacked_at.as_millis(),
+      prepare_duration: prepared_at.as_millis(),
+      unpack_duration: unpacked_at.as_millis() - prepared_at.as_millis(),
+      unpacked_size: self.get_real_size(),
+    })
+  }
+
+  fn unpack_file(
     lzo: &LZO,
     destination: &Path,
     file_descriptor: &ArchiveFileReplicationDescriptor,
@@ -103,7 +156,7 @@ impl ArchiveProject {
       let mut buf: Vec<u8> = vec![0u8; min(256 * 1024, remaining_bytes)];
 
       while remaining_bytes > 0 {
-        let to_read = min(buf.len(), remaining_bytes);
+        let to_read: usize = min(buf.len(), remaining_bytes);
         let read: usize = source_file.read(&mut buf[..to_read])?;
 
         assert!(

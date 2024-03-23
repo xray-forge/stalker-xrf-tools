@@ -11,7 +11,8 @@ use crate::commands::verify_ltx::verify_ltx;
 use crate::commands::verify_spawn_file::verify_spawn_file;
 use std::env;
 
-fn main() {
+#[tokio::main]
+async fn main() {
   setup_logger();
 
   match setup_commands().get_matches().subcommand() {
@@ -20,7 +21,7 @@ fn main() {
     Some(("unpack-spawn", matches)) => unpack_spawn_file(matches).unwrap(),
     Some(("repack-spawn", matches)) => repack_spawn_file(matches).unwrap(),
     Some(("pack-spawn", matches)) => pack_spawn_file(matches).unwrap(),
-    Some(("unpack-archive", matches)) => unpack_archive(matches),
+    Some(("unpack-archive", matches)) => unpack_archive(matches).await,
     Some(("format-ltx", matches)) => format_ltx(matches),
     Some(("verify-ltx", matches)) => verify_ltx(matches),
     _ => panic!("Unexpected cli command provided, check --help for details"),

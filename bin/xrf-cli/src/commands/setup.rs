@@ -99,6 +99,13 @@ pub fn setup_commands() -> Command {
             .long("dest")
             .default_value("unpacked")
             .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("parallel")
+            .help("Count of parallel threads for unpack")
+            .long("parallel")
+            .default_value("32")
+            .value_parser(value_parser!(usize)),
         ),
     )
     .subcommand(

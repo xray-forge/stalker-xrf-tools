@@ -13,7 +13,7 @@ pub async fn unpack_archives_path(from: &str, destination: &str) -> Result<Value
 
   log::info!("Unpacking archive to: {:?}", destination);
 
-  match project.unpack(&PathBuf::from(destination)) {
+  match project.unpack_parallel(&PathBuf::from(destination)).await {
     Ok(result) => Ok(json!(result)),
     Err(error) => Err(error.to_string()),
   }
