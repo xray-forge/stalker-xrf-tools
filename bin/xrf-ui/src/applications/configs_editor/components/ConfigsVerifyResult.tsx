@@ -12,19 +12,19 @@ export function ConfigsVerifyResult({ result }: IConfigsVerifyResultProps): Reac
     <Grid direction={"column"} padding={2} maxWidth={540} container>
       <Grid justifyContent={"center"} gap={1} container>
         <Chip variant={"outlined"} label={`${result.duration / 1000} sec`} />
-        <Chip variant={"outlined"} label={`${result.total_files} files total`} />
-        <Chip variant={"outlined"} label={`${result.total_sections} sections total`} />
+        <Chip variant={"outlined"} label={`${result.totalFiles} files total`} />
+        <Chip variant={"outlined"} label={`${result.totalSections} sections total`} />
       </Grid>
 
       <Grid justifyContent={"center"} gap={1} marginTop={1} padding={`0 ${16}px`} container>
-        <Chip variant={"outlined"} label={`${result.checked_fields} field(s) checked`} />
-        <Chip variant={"outlined"} label={`${result.checked_sections} section(s) checked`} />
-        <Chip variant={"outlined"} color={"success"} label={`${result.valid_sections} section(s) valid`} />
-        <Chip variant={"outlined"} color={"info"} label={`${result.skipped_sections} section(s) skipped`} />
+        <Chip variant={"outlined"} label={`${result.checkedFields} field(s) checked`} />
+        <Chip variant={"outlined"} label={`${result.checkedSections} section(s) checked`} />
+        <Chip variant={"outlined"} color={"success"} label={`${result.validSections} section(s) valid`} />
+        <Chip variant={"outlined"} color={"info"} label={`${result.skippedSections} section(s) skipped`} />
         <Chip
           variant={"outlined"}
-          color={result.invalid_sections ? "error" : "success"}
-          label={`${result.invalid_sections} section(s) invalid`}
+          color={result.invalidSections ? "error" : "success"}
+          label={`${result.invalidSections} section(s) invalid`}
         />
       </Grid>
 

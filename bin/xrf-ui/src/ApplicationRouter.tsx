@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
-import { ArchiveEditor } from "@/applications/archive_editor/ArchiveEditor";
+import { ArchivesEditorRouter } from "@/applications/archive_editor/ArchivesEditorRouter";
 import { ConfigsEditorRouter } from "@/applications/configs_editor/ConfigsEditorRouter";
 import { DialogEditor } from "@/applications/dialog_editor/DialogEditor";
 import { ExportsViewer } from "@/applications/exports_viewer/ExportsViewer";
@@ -16,7 +16,7 @@ export function ApplicationRouter(): ReactElement {
       <Routes>
         <Route path={"/"} element={<Root />} />
         <Route path={"spawn_editor/*"} element={<SpawnEditorRouter />} />
-        <Route path={"archive_editor/*"} element={<ArchiveEditor />} />
+        <Route path={"archives_editor/*"} element={<ArchivesEditorRouter />} />
         <Route path={"dialog_editor/*"} element={<DialogEditor />} />
         <Route path={"icon_editor/*"} element={<IconEditor />} />
         <Route path={"configs_editor/*"} element={<ConfigsEditorRouter />} />

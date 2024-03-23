@@ -2,7 +2,7 @@ use crate::archive::file_descriptor::ArchiveFileReplicationDescriptor;
 use crate::project::project_unpack_result::ArchiveUnpackResult;
 use crate::{ArchiveError, ArchiveProject};
 use minilzo_rs::LZO;
-use std::cmp::min;
+use std::cmp::{max, min};
 use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
@@ -16,6 +16,9 @@ impl ArchiveProject {
     let start: Instant = Instant::now();
     let lzo: LZO = LZO::init().unwrap();
 
+    let mut unpacked_files_count: usize = 0;
+    let unpacked_files_chunk: usize = max(self.files.len() / 100 * 5, 5);
+
     // Prepare structure of folders for further unpacking.
     self.unpack_dirs(destination)?;
 
@@ -28,15 +31,30 @@ impl ArchiveProject {
           .unpack_file(&lzo, destination, file_descriptor)
           .unwrap();
       }
+
+      unpacked_files_count += 1;
+
+      if unpacked_files_count % unpacked_files_chunk == 0 {
+        log::info!(
+          "Unpacked {unpacked_files_count} / {} files",
+          self.files.len()
+        )
+      }
     }
 
     let unpacked_at: Duration = start.elapsed();
 
     Ok(ArchiveUnpackResult {
-      unpacked_size: self.get_real_size(),
+      archives: self
+        .archives
+        .iter()
+        .map(|it| it.path.to_str().unwrap().into())
+        .collect(),
+      destination: destination.to_str().unwrap().into(),
       duration: unpacked_at.as_millis(),
-      unpack_duration: unpacked_at.as_millis() - prepared_at.as_millis(),
       prepare_duration: prepared_at.as_millis(),
+      unpack_duration: unpacked_at.as_millis() - prepared_at.as_millis(),
+      unpacked_size: self.get_real_size(),
     })
   }
 
@@ -69,11 +87,11 @@ impl ArchiveProject {
       let mut buf = vec![0u8; file_descriptor.size_compressed as usize];
       source_file.read_exact(buf.as_mut_slice())?;
 
-      let decompressed_buf = lzo
+      let decompressed_buf: Vec<u8> = lzo
         .decompress_safe(buf.as_slice(), file_descriptor.size_real as usize)
         .expect("Valid LZO data");
 
-      let actual_crc = crc32fast::hash(decompressed_buf.as_slice());
+      let actual_crc: u32 = crc32fast::hash(decompressed_buf.as_slice());
 
       assert_eq!(file_descriptor.crc, actual_crc, "CRCs do not match");
 

@@ -5,9 +5,13 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct LtxSchemeError {
+  #[serde(rename = "section")]
   pub section: String,
+  #[serde(rename = "field")]
   pub field: String,
+  #[serde(rename = "message")]
   pub message: String,
+  #[serde(rename = "at")]
   pub at: Option<String>,
 }
 

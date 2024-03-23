@@ -2,6 +2,7 @@ use crate::archive::descriptor::ArchiveDescriptor;
 use crate::archive::file_descriptor::ArchiveFileReplicationDescriptor;
 use crate::archive::reader::ArchiveReader;
 use crate::error::archive_error::ArchiveError;
+use crate::ArchiveReadError;
 use std::collections::HashMap;
 use std::path::Path;
 use walkdir::WalkDir;
@@ -38,6 +39,13 @@ impl ArchiveProject {
           archives.push(ArchiveReader::from_path_utf8(path)?.read_archive()?);
         }
       }
+    }
+
+    if archives.is_empty() {
+      return Err(ArchiveReadError::new_archive_error(format!(
+        "Unable to read archives at location {:?}",
+        path
+      )));
     }
 
     for archive in &archives {

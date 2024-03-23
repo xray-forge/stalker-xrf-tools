@@ -164,11 +164,11 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
 
       {result ? (
         <Grid>
-          {result.to_format.length ? (
+          {result.toFormat.length ? (
             isCheck ? (
               <Alert severity={"error"}>There are files with invalid formatting.</Alert>
             ) : (
-              <Alert severity={"warning"}>Formatted {result.to_format.length} file(s).</Alert>
+              <Alert severity={"warning"}>Formatted {result.toFormat.length} file(s).</Alert>
             )
           ) : (
             <Alert severity={"success"}>All files are in correct format.</Alert>

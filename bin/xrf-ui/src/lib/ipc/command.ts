@@ -1,9 +1,8 @@
 export enum ECommand {
+  CHECK_FORMAT_CONFIGS_PATH = "check_format_configs_path",
   CLOSE_SPAWN_FILE = "close_spawn_file",
   EXPORT_SPAWN_FILE = "export_spawn_file",
-  CHECK_FORMAT_CONFIGS_PATH = "check_format_configs_path",
   FORMAT_CONFIGS_PATH = "format_configs_path",
-  VERIFY_CONFIGS_PATH = "verify_configs_path",
   GET_SPAWN_FILE = "get_spawn_file",
   GET_SPAWN_FILE_ALIFE_SPAWNS = "get_spawn_file_alife_spawns",
   GET_SPAWN_FILE_ARTEFACT_SPAWNS = "get_spawn_file_artefact_spawns",
@@ -13,4 +12,6 @@ export enum ECommand {
   IMPORT_SPAWN_FILE = "import_spawn_file",
   OPEN_SPAWN_FILE = "open_spawn_file",
   SAVE_SPAWN_FILE = "save_spawn_file",
+  UNPACK_ARCHIVES_PATH = "unpack_archives_path",
+  VERIFY_CONFIGS_PATH = "verify_configs_path",
 }

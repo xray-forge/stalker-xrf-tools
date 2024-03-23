@@ -4,7 +4,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { NavigationFooter } from "@/core/components/NavigationFooter";
 
-export function ArchiveEditor(): ReactElement {
+export function ArchivesEditorNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
@@ -23,8 +23,8 @@ export function ArchiveEditor(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/archive_editor/todo", { replace: true })}>Open</Button>
-            <Button onClick={() => navigate("/archive_editor/todo", { replace: true })}>Unpack</Button>
+            <Button onClick={() => navigate("/archives_editor/explorer", { replace: true })}>Open</Button>
+            <Button onClick={() => navigate("/archives_editor/unpacker", { replace: true })}>Unpack</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>

@@ -13,29 +13,29 @@ export function ConfigsFormatResult({ isCheck, result }: IConfigsVerifyResultPro
     <Grid direction={"column"} padding={2} maxWidth={540} container>
       <Grid justifyContent={"center"} gap={1} container>
         <Chip variant={"outlined"} label={`${result.duration / 1000} sec`} />
-        <Chip variant={"outlined"} label={`${result.total_files} files total`} />
+        <Chip variant={"outlined"} label={`${result.totalFiles} files total`} />
       </Grid>
 
       <Grid justifyContent={"center"} gap={1} marginTop={1} padding={`0 ${16}px`} container>
-        <Chip variant={"outlined"} label={`${result.valid_files} file(s) valid`} />
+        <Chip variant={"outlined"} label={`${result.validFiles} file(s) valid`} />
         <Chip
           variant={"outlined"}
-          color={result.invalid_files ? (isCheck ? "error" : "warning") : "success"}
-          label={isCheck ? `${result.invalid_files} file(s) to format` : `${result.invalid_files} file(s) formatted`}
+          color={result.invalidFiles ? (isCheck ? "error" : "warning") : "success"}
+          label={isCheck ? `${result.invalidFiles} file(s) to format` : `${result.invalidFiles} file(s) formatted`}
         />
       </Grid>
 
-      {result.to_format.length ? (
+      {result.toFormat.length ? (
         <Grid marginTop={2}>
           <Accordion>
             <AccordionSummary>
-              {isCheck ? `Invalid (${result.to_format.length})` : `Formatted (${result.to_format.length})`}
+              {isCheck ? `Invalid (${result.toFormat.length})` : `Formatted (${result.toFormat.length})`}
             </AccordionSummary>
             <AccordionDetails sx={{ maxHeight: 300, overflowY: "auto" }}>
-              {result.to_format.map((it, index) => (
+              {result.toFormat.map((it, index) => (
                 <Grid key={index}>
                   <Typography color={"green"}>
-                    ({index + 1}) {it}
+                    ({index + 1}) ({it})
                   </Typography>
                 </Grid>
               ))}

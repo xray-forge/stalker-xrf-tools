@@ -1,7 +1,7 @@
 export interface ILtxProjectFormatResult {
   duration: number;
-  invalid_files: number;
-  to_format: Array<string>;
-  total_files: number;
-  valid_files: number;
+  invalidFiles: number;
+  toFormat: Array<string>;
+  totalFiles: number;
+  validFiles: number;
 }

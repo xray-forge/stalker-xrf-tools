@@ -3,14 +3,23 @@ use serde::Serialize;
 
 #[derive(Debug, Default, Serialize)]
 pub struct LtxProjectVerifyResult {
+  #[serde(rename = "checkedFields")]
   pub checked_fields: usize,
+  #[serde(rename = "checkedSections")]
   pub checked_sections: usize,
+  #[serde(rename = "duration")]
   pub duration: u128,
+  #[serde(rename = "errors")]
   pub errors: Vec<LtxSchemeError>,
+  #[serde(rename = "invalidSections")]
   pub invalid_sections: usize,
+  #[serde(rename = "skippedSections")]
   pub skipped_sections: usize,
+  #[serde(rename = "totalFiles")]
   pub total_files: usize,
+  #[serde(rename = "totalSections")]
   pub total_sections: usize,
+  #[serde(rename = "validSections")]
   pub valid_sections: usize,
 }
 

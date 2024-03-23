@@ -1,9 +1,11 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod archive_editor;
 mod configs_editor;
 mod spawn_editor;
 
+use crate::archive_editor::unpack_archives_path;
 use crate::configs_editor::{check_format_configs_path, format_configs_path, verify_configs_path};
 use crate::spawn_editor::{
   close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_alife_spawns,
@@ -20,20 +22,21 @@ fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       check_format_configs_path,
+      close_spawn_file,
+      export_spawn_file,
       format_configs_path,
-      verify_configs_path,
-      has_spawn_file,
       get_spawn_file,
-      get_spawn_file_header,
       get_spawn_file_alife_spawns,
       get_spawn_file_artefact_spawns,
-      get_spawn_file_patrols,
       get_spawn_file_graphs,
+      get_spawn_file_header,
+      get_spawn_file_patrols,
+      has_spawn_file,
+      import_spawn_file,
       open_spawn_file,
       save_spawn_file,
-      import_spawn_file,
-      export_spawn_file,
-      close_spawn_file
+      unpack_archives_path,
+      verify_configs_path,
     ])
     .manage(SpawnFileState {
       file: Arc::new(Mutex::new(None)),

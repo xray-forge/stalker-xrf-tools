@@ -4531,6 +4531,7 @@ dependencies = [
  "log",
  "minilzo-rs",
  "regex",
+ "serde",
  "walkdir",
  "xray-test-utils",
 ]
@@ -4586,6 +4587,7 @@ dependencies = [
  "serde_json",
  "tauri",
  "tauri-build",
+ "xray-archive",
  "xray-db",
  "xray-ltx",
 ]
