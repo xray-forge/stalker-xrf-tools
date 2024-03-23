@@ -5,7 +5,7 @@ import { ArchivesEditorRouter } from "@/applications/archive_editor/ArchivesEdit
 import { ConfigsEditorRouter } from "@/applications/configs_editor/ConfigsEditorRouter";
 import { DialogEditor } from "@/applications/dialog_editor/DialogEditor";
 import { ExportsViewer } from "@/applications/exports_viewer/ExportsViewer";
-import { IconEditor } from "@/applications/icon_editor/IconEditor";
+import { IconsEditor } from "@/applications/icons_editor/IconsEditor";
 import { Root } from "@/applications/root/Root";
 import { SpawnEditorRouter } from "@/applications/spawn_editor/SpawnEditorRouter";
 import { NavigationError } from "@/core/components/NavigationError";
@@ -18,7 +18,7 @@ export function ApplicationRouter(): ReactElement {
         <Route path={"spawn_editor/*"} element={<SpawnEditorRouter />} />
         <Route path={"archives_editor/*"} element={<ArchivesEditorRouter />} />
         <Route path={"dialog_editor/*"} element={<DialogEditor />} />
-        <Route path={"icon_editor/*"} element={<IconEditor />} />
+        <Route path={"icons_editor/*"} element={<IconsEditor />} />
         <Route path={"configs_editor/*"} element={<ConfigsEditorRouter />} />
         <Route path={"exports_viewer/*"} element={<ExportsViewer />} />
         <Route path={"*"} element={<NavigationError />} />

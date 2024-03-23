@@ -1,7 +1,8 @@
-import { Button, ButtonGroup, Card, Grid, Typography } from "@mui/material";
+import { Button, ButtonGroup, Card, Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
+import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
 import { NavigationFooter } from "@/core/components/NavigationFooter";
 
 export function ArchivesEditorNavigatorPage(): ReactElement {
@@ -15,10 +16,12 @@ export function ArchivesEditorNavigatorPage(): ReactElement {
       container={true}
       width={"100%"}
       height={"100%"}
+      gap={1}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
-        <Typography>XRF archive editor</Typography>
-      </Grid>
+      <ApplicationNavigatorHeader
+        title={"XRF development tools"}
+        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/archive_editor.html"}
+      />
 
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>

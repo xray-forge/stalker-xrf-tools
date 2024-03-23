@@ -1,7 +1,8 @@
-import { Button, ButtonGroup, Card, Grid, Typography } from "@mui/material";
+import { Button, ButtonGroup, Card, Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
+import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
 import { NavigationFooter } from "@/core/components/NavigationFooter";
 
 export function Root(): ReactElement {
@@ -15,10 +16,12 @@ export function Root(): ReactElement {
       container={true}
       width={"100%"}
       height={"100%"}
+      gap={1}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
-        <Typography>XRF development tools</Typography>
-      </Grid>
+      <ApplicationNavigatorHeader
+        title={"XRF development tools"}
+        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/app.html"}
+      />
 
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
@@ -27,7 +30,7 @@ export function Root(): ReactElement {
             <Button onClick={() => navigate("/dialog_editor", { replace: true })}>Dialog editor</Button>
             <Button onClick={() => navigate("/configs_editor", { replace: true })}>Configs editor</Button>
             <Button onClick={() => navigate("/exports_viewer", { replace: true })}>Exports viewer</Button>
-            <Button onClick={() => navigate("/icon_editor", { replace: true })}>Icon editor</Button>
+            <Button onClick={() => navigate("/icons_editor", { replace: true })}>Icon editor</Button>
             <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Spawn editor</Button>
           </ButtonGroup>
         </Grid>

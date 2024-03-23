@@ -12,9 +12,7 @@ export function ArchivesMenu({
 }): ReactElement {
   const files: Array<IArchiveFileReplicationDescriptor> = Object.values(project?.files ?? {});
 
-  const tree: Array<TreeViewBaseItem> = useMemo(() => {
-    return parseTree(files, "\\");
-  }, [files]);
+  const tree: Array<TreeViewBaseItem> = useMemo(() => parseTree(files, "\\"), [files]);
 
   return (
     <Drawer
@@ -24,7 +22,7 @@ export function ArchivesMenu({
       PaperProps={{ sx: { position: "relative" } }}
     >
       <Grid padding={1} paddingBottom={0}>
-        <Typography variant={"h5"} gutterBottom={false}>
+        <Typography variant={"h6"} gutterBottom={false}>
           Files
         </Typography>
       </Grid>

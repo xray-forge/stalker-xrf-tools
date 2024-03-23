@@ -1,7 +1,8 @@
-import { Button, ButtonGroup, Card, Grid, Typography } from "@mui/material";
+import { Button, ButtonGroup, Card, Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
+import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
 import { NavigationFooter } from "@/core/components/NavigationFooter";
 
 export function ExportsViewer(): ReactElement {
@@ -15,10 +16,12 @@ export function ExportsViewer(): ReactElement {
       container={true}
       width={"100%"}
       height={"100%"}
+      gap={1}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
-        <Typography>XRF exports viewer</Typography>
-      </Grid>
+      <ApplicationNavigatorHeader
+        title={"XRF exports viewer"}
+        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/exports_viewer.html"}
+      />
 
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
