@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="format: xray-db" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="format">
-    <option name="command" value="fmt --package xray-db" />
+  <configuration default="false" name="run: unpack verification gamedata" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
+    <option name="command" value="run --package xrf-cli --bin xrf-cli --  unpack-spawn -p .\target\assets\packed.spawn -d .\target\assets\verification -f " />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />
@@ -9,7 +9,7 @@
     <option name="allFeatures" value="false" />
     <option name="withSudo" value="false" />
     <option name="buildTarget" value="REMOTE" />
-    <option name="backtrace" value="SHORT" />
+    <option name="backtrace" value="FULL" />
     <option name="isRedirectInput" value="false" />
     <option name="redirectInputPath" value="" />
     <method v="2">
