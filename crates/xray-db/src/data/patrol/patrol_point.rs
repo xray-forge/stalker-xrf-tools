@@ -11,16 +11,12 @@ use xray_ltx::{Ltx, Section};
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PatrolPoint {
-  #[serde(rename = "name")]
   pub name: String,
-  #[serde(rename = "position")]
   pub position: Vector3d<f32>,
-  #[serde(rename = "flags")]
   pub flags: u32,
-  #[serde(rename = "levelVertexId")]
   pub level_vertex_id: u32,
-  #[serde(rename = "gameVertexId")]
   pub game_vertex_id: u16,
 }
 

@@ -4,12 +4,10 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArchiveDescriptor {
-  #[serde(rename = "files")]
   pub files: HashMap<String, ArchiveFileDescriptor>,
-  #[serde(rename = "outputRootPath")]
   pub output_root_path: PathBuf,
-  #[serde(rename = "path")]
   pub path: PathBuf,
 }
 

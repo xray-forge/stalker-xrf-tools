@@ -11,8 +11,8 @@ use xray_ltx::Ltx;
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArtefactSpawnsChunk {
-  #[serde(rename = "nodes")]
   pub nodes: Vec<ArtefactSpawnPoint>,
 }
 

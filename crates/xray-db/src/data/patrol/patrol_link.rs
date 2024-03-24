@@ -7,10 +7,9 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PatrolLink {
-  #[serde(rename = "index")]
   pub index: u32,
-  #[serde(rename = "links")]
   pub links: Vec<(u32, f32)>,
 }
 

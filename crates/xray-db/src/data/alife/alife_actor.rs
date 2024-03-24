@@ -8,15 +8,14 @@ use crate::types::SpawnByteOrder;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io;
+use typetag::serde;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeActor {
-  #[serde(rename = "base")]
   pub base: AlifeObjectActor,
-  #[serde(rename = "startPositionFilled")]
   pub start_position_filled: u8,
-  #[serde(rename = "saveMarker")]
   pub save_marker: u16,
 }
 

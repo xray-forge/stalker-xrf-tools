@@ -6,13 +6,14 @@ import { ReactElement, useMemo } from "react";
 
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
 import { parseTree } from "@/lib/archive";
-import { IArchiveFileReplicationDescriptor } from "@/lib/archive/types";
+
 export function ArchivesMenu({
   archivesContext: { project: { value: project }, archiveActions } = useManager(ArchivesManager),
 }): ReactElement {
-  const files: Array<IArchiveFileReplicationDescriptor> = Object.values(project?.files ?? {});
-
-  const tree: Array<TreeViewBaseItem> = useMemo(() => parseTree(files, "\\"), [files]);
+  const items: Array<TreeViewBaseItem> = useMemo(
+    () => parseTree(Object.values(project?.files ?? {}), "\\"),
+    [project?.files]
+  );
 
   return (
     <Drawer
@@ -28,7 +29,7 @@ export function ArchivesMenu({
       </Grid>
 
       <Grid padding={1} flexGrow={1} overflow={"auto"}>
-        <RichTreeView items={tree} />
+        <RichTreeView items={items} />
       </Grid>
 
       <Grid padding={1} marginTop={1}>

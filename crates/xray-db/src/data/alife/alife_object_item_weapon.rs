@@ -11,20 +11,14 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectItemWeapon {
-  #[serde(rename = "base")]
   pub base: AlifeObjectItem,
-  #[serde(rename = "ammoCurrent")]
   pub ammo_current: u16,
-  #[serde(rename = "ammoElapsed")]
   pub ammo_elapsed: u16,
-  #[serde(rename = "weaponState")]
   pub weapon_state: u8,
-  #[serde(rename = "addonFlags")]
   pub addon_flags: u8,
-  #[serde(rename = "ammoType")]
   pub ammo_type: u8,
-  #[serde(rename = "elapsedGrenades")]
   pub elapsed_grenades: u8,
 }
 

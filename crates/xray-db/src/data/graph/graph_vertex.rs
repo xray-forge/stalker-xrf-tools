@@ -11,24 +11,16 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphVertex {
-  #[serde(rename = "levelPoint")]
   pub level_point: Vector3d<f32>,
-  #[serde(rename = "gamePoint")]
   pub game_point: Vector3d<f32>,
-  #[serde(rename = "levelId")]
   pub level_id: u8,
-  #[serde(rename = "levelVertexId")]
   pub level_vertex_id: u32,
-  #[serde(rename = "vertexType")]
   pub vertex_type: U32Bytes,
-  #[serde(rename = "edgesOffset")]
   pub edges_offset: u32,
-  #[serde(rename = "levelPointsOffset")]
   pub level_points_offset: u32,
-  #[serde(rename = "edgesCount")]
   pub edges_count: u8,
-  #[serde(rename = "levelPointsCount")]
   pub level_points_count: u8,
 }
 

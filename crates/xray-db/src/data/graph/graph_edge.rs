@@ -7,10 +7,9 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphEdge {
-  #[serde(rename = "gameVertexId")]
   pub game_vertex_id: u16,
-  #[serde(rename = "distance")]
   pub distance: f32,
 }
 

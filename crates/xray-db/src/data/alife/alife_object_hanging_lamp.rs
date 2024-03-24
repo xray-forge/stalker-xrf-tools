@@ -12,52 +12,30 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectHangingLamp {
-  #[serde(rename = "base")]
   pub base: AlifeObjectDynamicVisual,
-  #[serde(rename = "skeleton")]
   pub skeleton: AlifeObjectSkeleton,
-  #[serde(rename = "mainColor")]
   pub main_color: u32,
-  #[serde(rename = "mainBrightness")]
   pub main_brightness: f32,
-  #[serde(rename = "colorAnimator")]
   pub color_animator: String,
-  #[serde(rename = "mainRange")]
   pub main_range: f32,
-  #[serde(rename = "lightFlags")]
   pub light_flags: u16,
-  #[serde(rename = "startupAnimation")]
   pub startup_animation: String,
-  #[serde(rename = "fixedBones")]
   pub fixed_bones: String,
-  #[serde(rename = "health")]
   pub health: f32,
-  #[serde(rename = "virtualSize")]
   pub virtual_size: f32,
-  #[serde(rename = "ambientRadius")]
   pub ambient_radius: f32,
-  #[serde(rename = "ambientPower")]
   pub ambient_power: f32,
-  #[serde(rename = "ambientTexture")]
   pub ambient_texture: String,
-  #[serde(rename = "lightTexture")]
   pub light_texture: String,
-  #[serde(rename = "lightBone")]
   pub light_bone: String,
-  #[serde(rename = "spotConeAngle")]
   pub spot_cone_angle: f32,
-  #[serde(rename = "glowTexture")]
   pub glow_texture: String,
-  #[serde(rename = "glowRadius")]
   pub glow_radius: f32,
-  #[serde(rename = "lightAmbientBone")]
   pub light_ambient_bone: String,
-  #[serde(rename = "volumetricQuality")]
   pub volumetric_quality: f32,
-  #[serde(rename = "volumetricIntensity")]
   pub volumetric_intensity: f32,
-  #[serde(rename = "volumetricDistance")]
   pub volumetric_distance: f32,
 }
 

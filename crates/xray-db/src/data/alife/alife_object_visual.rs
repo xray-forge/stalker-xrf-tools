@@ -9,10 +9,9 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectVisual {
-  #[serde(rename = "visualName")]
   pub visual_name: String,
-  #[serde(rename = "visualFlags")]
   pub visual_flags: u8,
 }
 

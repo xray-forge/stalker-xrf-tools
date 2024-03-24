@@ -10,16 +10,12 @@ use uuid::Uuid;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct HeaderChunk {
-  #[serde(rename = "version")]
   pub version: u32,
-  #[serde(rename = "guid")]
   pub guid: Uuid,
-  #[serde(rename = "graphGuid")]
   pub graph_guid: Uuid,
-  #[serde(rename = "objectsCount")]
   pub objects_count: u32,
-  #[serde(rename = "levelCount")]
   pub levels_count: u32,
 }
 

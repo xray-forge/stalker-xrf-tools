@@ -11,10 +11,9 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectShape {
-  #[serde(rename = "base")]
   pub base: AlifeObjectAbstract,
-  #[serde(rename = "shape")]
   pub shape: Vec<Shape>,
 }
 

@@ -1,16 +1,18 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod archive_editor;
+mod archives_editor;
 mod configs_editor;
-mod spawn_editor;
+mod exports_editor;
+mod spawns_editor;
 
-use crate::archive_editor::{
+use crate::archives_editor::{
   close_archives_project, get_archives_project, has_archives_project, open_archives_project,
   unpack_archives_path, ArchivesProjectState,
 };
 use crate::configs_editor::{check_format_configs_path, format_configs_path, verify_configs_path};
-use crate::spawn_editor::{
+use crate::exports_editor::get_xr_effects;
+use crate::spawns_editor::{
   close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_alife_spawns,
   get_spawn_file_artefact_spawns, get_spawn_file_graphs, get_spawn_file_header,
   get_spawn_file_patrols, has_spawn_file, import_spawn_file, open_spawn_file, save_spawn_file,
@@ -36,6 +38,7 @@ fn main() {
       get_spawn_file_graphs,
       get_spawn_file_header,
       get_spawn_file_patrols,
+      get_xr_effects,
       has_archives_project,
       has_spawn_file,
       import_spawn_file,

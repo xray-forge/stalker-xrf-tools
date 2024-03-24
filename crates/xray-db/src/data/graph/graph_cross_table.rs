@@ -9,16 +9,12 @@ use std::io::Write;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphCrossTable {
-  #[serde(rename = "version")]
   pub version: u32,
-  #[serde(rename = "nodesCount")]
   pub nodes_count: u32,
-  #[serde(rename = "verticesCount")]
   pub vertices_count: u32,
-  #[serde(rename = "levelGuid")]
   pub level_guid: Uuid,
-  #[serde(rename = "gameGuid")]
   pub game_guid: Uuid,
   #[serde(skip_serializing, default)] // Does not make sense for JSON.
   pub data: Vec<u8>,

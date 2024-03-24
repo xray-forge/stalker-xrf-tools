@@ -8,12 +8,10 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphLevelPoint {
-  #[serde(rename = "position")]
   pub position: Vector3d,
-  #[serde(rename = "levelVertexId")]
   pub level_vertex_id: u32,
-  #[serde(rename = "distance")]
   pub distance: f32,
 }
 

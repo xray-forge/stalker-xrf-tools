@@ -7,12 +7,10 @@ use std::io;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Vector3d<T = f32> {
-  #[serde(rename = "x")]
   pub x: T,
-  #[serde(rename = "y")]
   pub y: T,
-  #[serde(rename = "z")]
   pub z: T,
 }
 

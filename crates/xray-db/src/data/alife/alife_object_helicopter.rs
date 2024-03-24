@@ -12,16 +12,12 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectHelicopter {
-  #[serde(rename = "base")]
   pub base: AlifeObjectDynamicVisual,
-  #[serde(rename = "motion")]
   pub motion: AlifeObjectMotion,
-  #[serde(rename = "skeleton")]
   pub skeleton: AlifeObjectSkeleton,
-  #[serde(rename = "startupAnimation")]
   pub startup_animation: String,
-  #[serde(rename = "engineSound")]
   pub engine_sound: String,
 }
 

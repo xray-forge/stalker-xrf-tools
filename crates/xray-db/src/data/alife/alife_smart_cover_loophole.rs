@@ -2,10 +2,9 @@ use serde::{Deserialize, Serialize};
 use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeSmartCoverLoophole {
-  #[serde(rename = "name")]
   pub name: String,
-  #[serde(rename = "enabled")]
   pub enabled: u8,
 }
 

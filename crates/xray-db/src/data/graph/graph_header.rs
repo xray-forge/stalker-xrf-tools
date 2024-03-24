@@ -8,18 +8,13 @@ use uuid::Uuid;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphHeader {
-  #[serde(rename = "version")]
   pub version: u8,
-  #[serde(rename = "verticesCount")]
   pub vertices_count: u16,
-  #[serde(rename = "edgesCount")]
   pub edges_count: u32,
-  #[serde(rename = "pointsCount")]
   pub points_count: u32,
-  #[serde(rename = "guid")]
   pub guid: Uuid,
-  #[serde(rename = "levelsCount")]
   pub levels_count: u8,
 }
 

@@ -13,12 +13,10 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectTorridZone {
-  #[serde(rename = "base")]
   pub base: AlifeObjectCustomZone,
-  #[serde(rename = "motion")]
   pub motion: AlifeObjectMotion,
-  #[serde(rename = "lastSpawnTime")]
   pub last_spawn_time: Option<Time>,
 }
 

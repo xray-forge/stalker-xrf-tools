@@ -12,12 +12,10 @@ use xray_ltx::{Ltx, Section};
 
 /// Represents script extension of base server smart cover class.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeSmartCover {
-  #[serde(rename = "base")]
   pub base: AlifeObjectSmartCover,
-  #[serde(rename = "lastDescription")]
   pub last_description: String,
-  #[serde(rename = "loopholes")]
   pub loopholes: Vec<AlifeSmartCoverLoophole>,
 }
 

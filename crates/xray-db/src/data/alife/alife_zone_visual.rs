@@ -13,16 +13,12 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeZoneVisual {
-  #[serde(rename = "base")]
   pub base: AlifeObjectAnomalyZone,
-  #[serde(rename = "visual")]
   pub visual: AlifeObjectVisual,
-  #[serde(rename = "idleAnimation")]
   pub idle_animation: String,
-  #[serde(rename = "attackAnimation")]
   pub attack_animation: String,
-  #[serde(rename = "lastSpawnTime")]
   pub last_spawn_time: Option<Time>,
 }
 

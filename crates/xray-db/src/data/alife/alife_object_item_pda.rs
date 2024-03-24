@@ -11,14 +11,11 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectItemPda {
-  #[serde(rename = "base")]
   pub base: AlifeObjectItem,
-  #[serde(rename = "owner")]
   pub owner: u16,
-  #[serde(rename = "character")]
   pub character: String,
-  #[serde(rename = "infoPortion")]
   pub info_portion: String,
 }
 

@@ -1,11 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
-  "bin/xrf-cli",
   "bin/xrf-app",
+  "bin/xrf-cli",
+  "crates/xray-archive",
   "crates/xray-db",
   "crates/xray-delharc",
+  "crates/xray-export",
   "crates/xray-ltx",
   "crates/xray-test-utils",
-  "crates/xray-archive"
 ]

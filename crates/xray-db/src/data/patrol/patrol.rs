@@ -23,12 +23,10 @@ use xray_ltx::{Ltx, Section};
 ///   1 - patrol points
 ///   2 - patrol points links
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Patrol {
-  #[serde(rename = "name")]
   pub name: String,
-  #[serde(rename = "points")]
   pub points: Vec<PatrolPoint>,
-  #[serde(rename = "links")]
   pub links: Vec<PatrolLink>,
 }
 

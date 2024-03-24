@@ -4,14 +4,11 @@ use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LtxSchemeError {
-  #[serde(rename = "section")]
   pub section: String,
-  #[serde(rename = "field")]
   pub field: String,
-  #[serde(rename = "message")]
   pub message: String,
-  #[serde(rename = "at")]
   pub at: Option<String>,
 }
 

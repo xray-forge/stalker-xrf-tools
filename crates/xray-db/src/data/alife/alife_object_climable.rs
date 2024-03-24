@@ -10,10 +10,9 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectClimable {
-  #[serde(rename = "base")]
   pub base: AlifeObjectShape,
-  #[serde(rename = "gameMaterial")]
   pub game_material: String,
 }
 

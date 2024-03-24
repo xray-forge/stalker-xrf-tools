@@ -12,10 +12,9 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeAnomalousZone {
-  #[serde(rename = "base")]
   pub base: AlifeObjectAnomalyZone,
-  #[serde(rename = "lastSpawnTime")]
   pub last_spawn_time: Option<Time>,
 }
 

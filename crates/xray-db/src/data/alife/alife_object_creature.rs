@@ -12,24 +12,16 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectCreature {
-  #[serde(rename = "base")]
   pub base: AlifeObjectDynamicVisual,
-  #[serde(rename = "team")]
   pub team: u8,
-  #[serde(rename = "squad")]
   pub squad: u8,
-  #[serde(rename = "group")]
   pub group: u8,
-  #[serde(rename = "health")]
   pub health: f32,
-  #[serde(rename = "dynamicOutRestrictions")]
   pub dynamic_out_restrictions: Vec<u16>,
-  #[serde(rename = "dynamicInRestrictions")]
   pub dynamic_in_restrictions: Vec<u16>,
-  #[serde(rename = "killerId")]
   pub killer_id: u16,
-  #[serde(rename = "gameDeathTime")]
   pub game_death_time: u64,
 }
 

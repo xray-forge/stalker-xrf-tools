@@ -10,26 +10,17 @@ use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AlifeObjectTraderAbstract {
-  #[serde(rename = "money")]
   pub money: u32,
-  #[serde(rename = "specificCharacter")]
   pub specific_character: String,
-  #[serde(rename = "traderFlags")]
   pub trader_flags: u32,
-  #[serde(rename = "characterProfile")]
   pub character_profile: String,
-  #[serde(rename = "communityIndex")]
   pub community_index: u32,
-  #[serde(rename = "rank")]
   pub rank: u32,
-  #[serde(rename = "reputation")]
   pub reputation: u32,
-  #[serde(rename = "characterName")]
   pub character_name: String,
-  #[serde(rename = "deadBodyCanTake")]
   pub dead_body_can_take: u8,
-  #[serde(rename = "deadBodyClosed")]
   pub dead_body_closed: u8,
 }
 

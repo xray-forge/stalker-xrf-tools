@@ -10,16 +10,12 @@ use xray_ltx::{Ltx, Section};
 
 /// `GameGraph::SLevel::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphLevel {
-  #[serde(rename = "name")]
   pub name: String,
-  #[serde(rename = "offset")]
   pub offset: Vector3d<f32>,
-  #[serde(rename = "id")]
   pub id: u8,
-  #[serde(rename = "section")]
   pub section: String,
-  #[serde(rename = "guid")]
   pub guid: Uuid,
 }
 

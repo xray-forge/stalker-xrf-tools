@@ -1,0 +1,13 @@
+[package]
+name = "xray-export"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.11.1"
+log = "0.4.20"
+serde = { version = "1.0.197", features = ["derive"] }
+swc_common = { version = "0.33.20", features = ["tty-emitter"] }
+swc_ecma_ast = "0.112.6"
+swc_ecma_parser = "0.143.10"
+walkdir = "2.5.0"
