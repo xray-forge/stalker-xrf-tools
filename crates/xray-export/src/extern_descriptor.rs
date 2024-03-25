@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportDescriptor {
   pub filename: String,
@@ -11,7 +11,7 @@ pub struct ExportDescriptor {
   pub col: usize,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportParameterDescriptor {
   pub name: String,

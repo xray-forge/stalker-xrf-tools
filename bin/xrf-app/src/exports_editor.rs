@@ -122,3 +122,23 @@ pub async fn get_xr_effects(
 
   Ok(Some(json!(lock.as_ref().unwrap())))
 }
+
+#[tauri::command]
+pub async fn get_xr_exports(
+  state: tauri::State<'_, ExportsProjectState>,
+) -> Result<Option<Value>, String> {
+  let conditions: Option<Vec<ExportDescriptor>> =
+    state.conditions.lock().unwrap().as_ref().cloned();
+  let dialogs: Option<Vec<ExportDescriptor>> = state.dialogs.lock().unwrap().as_ref().cloned();
+  let effects: Option<Vec<ExportDescriptor>> = state.effects.lock().unwrap().as_ref().cloned();
+
+  if conditions.is_some() && dialogs.is_some() && effects.is_some() {
+    Ok(Some(json!(ExportsDeclarations {
+      conditions: conditions.unwrap(),
+      dialogs: dialogs.unwrap(),
+      effects: effects.unwrap(),
+    })))
+  } else {
+    Ok(None)
+  }
+}

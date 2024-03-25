@@ -12,8 +12,8 @@ use crate::archives_editor::{
 };
 use crate::configs_editor::{check_format_configs_path, format_configs_path, verify_configs_path};
 use crate::exports_editor::{
-  close_xr_effects, close_xr_exports, get_xr_effects, has_xr_effects, open_xr_effects,
-  open_xr_exports, parse_xr_effects, ExportsProjectState,
+  close_xr_effects, close_xr_exports, get_xr_effects, get_xr_exports, has_xr_effects,
+  open_xr_effects, open_xr_exports, parse_xr_effects, ExportsProjectState,
 };
 use crate::spawns_editor::{
   close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_alife_spawns,
@@ -44,6 +44,7 @@ fn main() {
       get_spawn_file_header,
       get_spawn_file_patrols,
       get_xr_effects,
+      get_xr_exports,
       has_archives_project,
       has_spawn_file,
       has_xr_effects,

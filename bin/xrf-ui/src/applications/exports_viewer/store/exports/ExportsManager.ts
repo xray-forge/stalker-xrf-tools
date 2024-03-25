@@ -3,7 +3,7 @@ import { ContextManager, createActions, createLoadable, Loadable } from "dreamst
 
 import { queryProjectPath } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
-import { IExportDescriptor, IExportsDeclarations } from "@/lib/exports";
+import { IExportsDeclarations } from "@/lib/exports";
 import { ECommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 import {
@@ -31,16 +31,12 @@ export class ExportsManager extends ContextManager<IExportsContext> {
   public log: Logger = new Logger("exports");
 
   public async onProvisionStarted(): Promise<void> {
-    const existing: Array<IExportDescriptor> = await invoke(ECommand.GET_XR_EFFECTS);
+    const declarations: Optional<IExportsDeclarations> = await invoke(ECommand.GET_XR_EXPORTS);
 
-    if (existing) {
-      this.log.info("Existing parsed effects detected");
+    if (declarations) {
+      this.log.info("Existing parsed exports detected");
       this.setContext({
-        declarations: createLoadable({
-          conditions: [],
-          dialogs: [],
-          effects: existing,
-        }),
+        declarations: createLoadable(declarations),
         isReady: true,
       });
     } else {

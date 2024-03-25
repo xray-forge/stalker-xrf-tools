@@ -14,6 +14,7 @@ export enum ECommand {
   GET_SPAWN_FILE_HEADER = "get_spawn_file_header",
   GET_SPAWN_FILE_PATROLS = "get_spawn_file_patrols",
   GET_XR_EFFECTS = "get_xr_effects",
+  GET_XR_EXPORTS = "get_xr_exports",
   HAS_ARCHIVES_PROJECT = "has_archives_project",
   HAS_XR_EFFECTS = "has_xr_effects",
   IMPORT_SPAWN_FILE = "import_spawn_file",
