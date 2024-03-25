@@ -5,3 +5,4 @@ pub(crate) mod error;
 pub(crate) mod extern_descriptor;
 
 pub use crate::effects_parser::EffectsParser;
+pub use crate::extern_descriptor::ExportDescriptor;

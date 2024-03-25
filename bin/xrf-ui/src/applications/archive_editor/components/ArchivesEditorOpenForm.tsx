@@ -13,8 +13,8 @@ import { open } from "@tauri-apps/api/dialog";
 import { useManager } from "dreamstate";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
-import { ArchivesBackButton } from "@/applications/archive_editor/components/ArchivesBackButton";
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
+import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
@@ -57,7 +57,7 @@ export function ArchivesEditorOpenForm({
 
   const onOpenPathClicked = useCallback(async () => {
     if (archivesPath) {
-      archiveActions.openProject(archivesPath);
+      archiveActions.open(archivesPath);
     } else {
       log.info("Cannot parse archives project without path");
     }
@@ -118,7 +118,7 @@ export function ArchivesEditorOpenForm({
         </Grid>
       ) : null}
 
-      <ArchivesBackButton disabled={project.isLoading} />
+      <ApplicationBackButton disabled={project.isLoading} path={"/archives_editor"} />
     </Grid>
   );
 }

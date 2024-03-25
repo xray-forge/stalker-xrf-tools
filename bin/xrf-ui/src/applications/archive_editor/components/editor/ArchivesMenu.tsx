@@ -33,7 +33,7 @@ export function ArchivesMenu({
       </Grid>
 
       <Grid padding={1} marginTop={1}>
-        <Button startIcon={<CloseIcon />} variant={"outlined"} fullWidth={true} onClick={archiveActions.closeProject}>
+        <Button startIcon={<CloseIcon />} variant={"outlined"} fullWidth={true} onClick={archiveActions.close}>
           Close
         </Button>
       </Grid>

@@ -11,7 +11,10 @@ use crate::archives_editor::{
   unpack_archives_path, ArchivesProjectState,
 };
 use crate::configs_editor::{check_format_configs_path, format_configs_path, verify_configs_path};
-use crate::exports_editor::get_xr_effects;
+use crate::exports_editor::{
+  close_xr_effects, close_xr_exports, get_xr_effects, has_xr_effects, open_xr_effects,
+  open_xr_exports, parse_xr_effects, ExportsProjectState,
+};
 use crate::spawns_editor::{
   close_spawn_file, export_spawn_file, get_spawn_file, get_spawn_file_alife_spawns,
   get_spawn_file_artefact_spawns, get_spawn_file_graphs, get_spawn_file_header,
@@ -29,6 +32,8 @@ fn main() {
       check_format_configs_path,
       close_archives_project,
       close_spawn_file,
+      close_xr_effects,
+      close_xr_exports,
       export_spawn_file,
       format_configs_path,
       get_archives_project,
@@ -41,9 +46,13 @@ fn main() {
       get_xr_effects,
       has_archives_project,
       has_spawn_file,
+      has_xr_effects,
       import_spawn_file,
       open_archives_project,
       open_spawn_file,
+      open_xr_effects,
+      open_xr_exports,
+      parse_xr_effects,
       save_spawn_file,
       unpack_archives_path,
       verify_configs_path,
@@ -53,6 +62,9 @@ fn main() {
     })
     .manage(ArchivesProjectState {
       project: Arc::new(Mutex::new(None)),
+    })
+    .manage(ExportsProjectState {
+      effects: Arc::new(Mutex::new(None)),
     })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

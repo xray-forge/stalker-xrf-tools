@@ -4,9 +4,9 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ArchivesEditorRouter } from "@/applications/archive_editor/ArchivesEditorRouter";
 import { ConfigsEditorRouter } from "@/applications/configs_editor/ConfigsEditorRouter";
 import { DialogEditor } from "@/applications/dialog_editor/DialogEditor";
-import { ExportsViewer } from "@/applications/exports_viewer/ExportsViewer";
+import { ExportsViewerRouter } from "@/applications/exports_viewer/ExportsViewerRouter";
 import { IconsEditor } from "@/applications/icons_editor/IconsEditor";
-import { Root } from "@/applications/root/Root";
+import { Root } from "@/applications/Root";
 import { SpawnEditorRouter } from "@/applications/spawn_editor/SpawnEditorRouter";
 import { NavigationError } from "@/core/components/NavigationError";
 
@@ -20,7 +20,7 @@ export function ApplicationRouter(): ReactElement {
         <Route path={"dialog_editor/*"} element={<DialogEditor />} />
         <Route path={"icons_editor/*"} element={<IconsEditor />} />
         <Route path={"configs_editor/*"} element={<ConfigsEditorRouter />} />
-        <Route path={"exports_viewer/*"} element={<ExportsViewer />} />
+        <Route path={"exports_viewer/*"} element={<ExportsViewerRouter />} />
         <Route path={"*"} element={<NavigationError />} />
       </Routes>
     </Router>

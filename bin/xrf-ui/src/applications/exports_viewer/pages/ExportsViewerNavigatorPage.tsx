@@ -3,9 +3,9 @@ import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
-import { NavigationFooter } from "@/core/components/NavigationFooter";
+import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
 
-export function ExportsViewer(): ReactElement {
+export function ExportsViewerNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
@@ -26,8 +26,7 @@ export function ExportsViewer(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/exports_viewer/conditions", { replace: true })}>Conditions</Button>
-            <Button onClick={() => navigate("/exports_viewer/effects", { replace: true })}>Effects</Button>
+            <Button onClick={() => navigate("/exports_viewer/exports", { replace: true })}>Open</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>

@@ -3,7 +3,7 @@ import { Button, Grid, IconButton, InputAdornment, OutlinedInput, Typography } f
 import { useManager } from "dreamstate";
 import { useCallback, useState } from "react";
 
-import { ConfigsBackButton } from "@/applications/configs_editor/components/ConfigsBackButton";
+import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 
@@ -50,7 +50,7 @@ export function ConfigsEditorExplorerPage({ projectContext: { xrfConfigsPath } =
         </Grid>
       </Grid>
 
-      <ConfigsBackButton />
+      <ApplicationBackButton path={"/configs_editor"} />
     </Grid>
   );
 }

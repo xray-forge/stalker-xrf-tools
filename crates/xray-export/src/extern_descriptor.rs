@@ -2,14 +2,14 @@ use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ExternDescriptor {
+pub struct ExportDescriptor {
   pub name: String,
-  pub parameters: Vec<ExternParameterDescriptor>,
+  pub parameters: Vec<ExportParameterDescriptor>,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ExternParameterDescriptor {
+pub struct ExportParameterDescriptor {
   pub name: String,
   pub typing: String,
   pub comment: Option<String>,

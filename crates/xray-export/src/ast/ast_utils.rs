@@ -1,5 +1,5 @@
 use crate::ast::ast_to_string::{ts_type_ref_to_string, ts_type_to_string};
-use crate::extern_descriptor::ExternParameterDescriptor;
+use crate::extern_descriptor::ExportParameterDescriptor;
 use swc_ecma_ast::{Callee, Expr, ExprOrSpread, Lit, Pat, TsType, TsTypeAnn};
 
 pub fn get_expression_callee_name(callee: &Callee) -> Option<String> {
@@ -26,20 +26,20 @@ pub fn get_expression_parameter_as_string_name(expression: &ExprOrSpread) -> Opt
 
 pub fn get_parameters_from_arrow_expression(
   expression: &ExprOrSpread,
-) -> Vec<ExternParameterDescriptor> {
+) -> Vec<ExportParameterDescriptor> {
   if let Expr::Arrow(arrow) = expression.expr.as_ref() {
     if arrow.params.len() == 3 {
       let third = arrow.params.get(2).unwrap();
 
       match third {
         Pat::Ident(identifier) => {
-          let mut params: Vec<ExternParameterDescriptor> = Vec::new();
+          let mut params: Vec<ExportParameterDescriptor> = Vec::new();
 
           if let Some(type_annotation) = identifier.type_ann.as_ref() {
             match type_annotation.type_ann.as_ref() {
               TsType::TsTupleType(tuple_type) => {
                 for (index, element_type) in tuple_type.elem_types.iter().enumerate() {
-                  params.push(ExternParameterDescriptor {
+                  params.push(ExportParameterDescriptor {
                     name: format!("{}.{}", identifier.sym, index),
                     typing: ts_type_to_string(element_type.ty.as_ref()),
                     comment: None,
@@ -47,7 +47,7 @@ pub fn get_parameters_from_arrow_expression(
                 }
               }
               TsType::TsTypeRef(type_ref) => {
-                params.push(ExternParameterDescriptor {
+                params.push(ExportParameterDescriptor {
                   name: format!("...{}", identifier.sym,),
                   typing: ts_type_ref_to_string(type_ref),
                   comment: None,
@@ -95,8 +95,8 @@ pub fn get_parameters_from_arrow_expression(
 pub fn get_parameters_descriptors_from_annotations(
   names: &[String],
   type_annotation: &TsTypeAnn,
-) -> Vec<ExternParameterDescriptor> {
-  let mut parameters: Vec<ExternParameterDescriptor> = Vec::new();
+) -> Vec<ExportParameterDescriptor> {
+  let mut parameters: Vec<ExportParameterDescriptor> = Vec::new();
 
   match type_annotation.type_ann.as_ref() {
     TsType::TsTupleType(tuple_type) => {
@@ -107,7 +107,7 @@ pub fn get_parameters_descriptors_from_annotations(
       );
 
       for (index, name) in names.iter().enumerate() {
-        parameters.push(ExternParameterDescriptor {
+        parameters.push(ExportParameterDescriptor {
           name: name.clone(),
           typing: ts_type_to_string(tuple_type.elem_types.get(index).unwrap().ty.as_ref()),
           comment: None,

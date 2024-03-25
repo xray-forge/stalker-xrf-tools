@@ -15,8 +15,8 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { useManager } from "dreamstate";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
-import { ArchivesBackButton } from "@/applications/archive_editor/components/ArchivesBackButton";
 import { ArchivesUnpackResult } from "@/applications/archive_editor/components/ArchivesUnpackResult";
+import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IArchiveUnpackResult } from "@/lib/archive";
@@ -165,7 +165,7 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
         </Grid>
       ) : null}
 
-      <ArchivesBackButton disabled={isLoading} />
+      <ApplicationBackButton disabled={isLoading} path={"/archives_editor"} />
 
       {result ? (
         <Paper elevation={4}>

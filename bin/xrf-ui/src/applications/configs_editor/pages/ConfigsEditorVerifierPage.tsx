@@ -15,8 +15,8 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { useManager } from "dreamstate";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
-import { ConfigsBackButton } from "@/applications/configs_editor/components/ConfigsBackButton";
 import { ConfigsVerifyResult } from "@/applications/configs_editor/components/ConfigsVerifyResult";
+import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { ECommand } from "@/lib/ipc";
@@ -145,7 +145,7 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
         </Grid>
       ) : null}
 
-      <ConfigsBackButton disabled={isLoading} />
+      <ApplicationBackButton path={"/configs_editor"} />
 
       {result ? (
         <Paper elevation={4}>

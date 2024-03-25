@@ -8,7 +8,7 @@ use crate::ast::ast_utils::{
 };
 use crate::constants::{XR_EFFECT_PREFIX, XR_EXTERN_EXPRESSION};
 use crate::error::export_error::ExportError;
-use crate::extern_descriptor::ExternDescriptor;
+use crate::extern_descriptor::ExportDescriptor;
 
 use walkdir::WalkDir;
 extern crate swc_common;
@@ -64,8 +64,8 @@ impl EffectsParser {
 }
 
 impl EffectsParser {
-  pub fn parse_effects(&self) -> Result<Vec<ExternDescriptor>, ExportError> {
-    let mut expressions: Vec<ExternDescriptor> = Vec::new();
+  pub fn parse_effects(&self) -> Result<Vec<ExportDescriptor>, ExportError> {
+    let mut expressions: Vec<ExportDescriptor> = Vec::new();
 
     for path in &self.files {
       log::info!("Parsing exports effects from: {:?}", path);
@@ -117,11 +117,13 @@ impl EffectsParser {
       expressions.append(&mut self.parse_program_extern_declarations(&program));
     }
 
+    expressions.sort_by(|a, b| a.name.cmp(&b.name));
+
     Ok(expressions)
   }
 
-  fn parse_program_extern_declarations(&self, program: &Program) -> Vec<ExternDescriptor> {
-    let mut expressions: Vec<ExternDescriptor> = Vec::new();
+  fn parse_program_extern_declarations(&self, program: &Program) -> Vec<ExportDescriptor> {
+    let mut expressions: Vec<ExportDescriptor> = Vec::new();
 
     if let Program::Module(module) = &program {
       for module_item in &module.body {
@@ -137,7 +139,7 @@ impl EffectsParser {
 
               if let Some(name) = name {
                 if Self::is_xr_effect_literal(&name) {
-                  expressions.push(ExternDescriptor {
+                  expressions.push(ExportDescriptor {
                     name: name[XR_EFFECT_PREFIX.len()..].into(),
                     parameters: get_parameters_from_arrow_expression(
                       call_expression.args.get(1).unwrap(),

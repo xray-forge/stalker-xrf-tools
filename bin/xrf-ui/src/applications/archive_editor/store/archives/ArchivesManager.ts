@@ -8,9 +8,9 @@ import { Logger } from "@/lib/logging";
 
 export interface IArchivesContext {
   archiveActions: {
-    openProject: (path: string) => Promise<void>;
-    closeProject: () => Promise<void>;
-    resetProject: () => void;
+    open: (path: string) => Promise<void>;
+    close: () => Promise<void>;
+    reset: () => void;
   };
   isReady: boolean;
   project: Loadable<Optional<IArchivesProject>>;
@@ -19,9 +19,9 @@ export interface IArchivesContext {
 export class ArchivesManager extends ContextManager<IArchivesContext> {
   public context: IArchivesContext = {
     archiveActions: createActions({
-      openProject: (path) => this.openArchivesProject(path),
-      closeProject: () => this.closeArchivesProject(),
-      resetProject: () => this.setContext({ project: createLoadable(null) }),
+      open: (path) => this.openArchivesProject(path),
+      close: () => this.closeArchivesProject(),
+      reset: () => this.setContext({ project: createLoadable(null) }),
     }),
     isReady: false,
     project: createLoadable(null),

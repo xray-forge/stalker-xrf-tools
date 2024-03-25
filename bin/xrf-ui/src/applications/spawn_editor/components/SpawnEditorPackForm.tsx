@@ -14,8 +14,8 @@ import { open, save } from "@tauri-apps/api/dialog";
 import { useManager } from "dreamstate";
 import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
-import { SpawnBackButton } from "@/applications/spawn_editor/components/SpawnBackButton";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
+import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
@@ -206,7 +206,7 @@ export function SpawnEditorPackForm({
 
       {spawnFile.isLoading ? <CircularProgress size={24} /> : null}
 
-      <SpawnBackButton disabled={spawnFile.isLoading || isSelecting} />
+      <ApplicationBackButton disabled={spawnFile.isLoading || isSelecting} path={"/spawn_editor"} />
     </Grid>
   );
 }

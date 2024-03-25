@@ -7,6 +7,22 @@ export function getProjectConfigsPath(projectPath: string): Promise<string> {
   return path.resolve(projectPath, "src", "engine", "configs");
 }
 
+export function getProjectExportDeclarationsPath(projectPath: string): Promise<string> {
+  return path.resolve(projectPath, "src", "engine", "scripts", "declarations");
+}
+
+export async function getProjectExportConditionsPath(projectPath: string): Promise<string> {
+  return path.resolve(await getProjectExportDeclarationsPath(projectPath), "conditions");
+}
+
+export async function getProjectExportEffectsPath(projectPath: string): Promise<string> {
+  return path.resolve(await getProjectExportDeclarationsPath(projectPath), "effects");
+}
+
+export async function getProjectExportDialogsPath(projectPath: string): Promise<string> {
+  return path.resolve(await getProjectExportDeclarationsPath(projectPath), "dialogs");
+}
+
 export function getProjectBuiltAllSpawnPath(projectPath: string): Promise<string> {
   return path.resolve(projectPath, "target", "gamedata", "spawns", "all.spawn");
 }

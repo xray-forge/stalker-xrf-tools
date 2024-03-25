@@ -5,7 +5,7 @@ import { open } from "@tauri-apps/api/shell";
 import { useManager } from "dreamstate";
 import { ReactElement, useCallback } from "react";
 
-import { SettingsModalButton } from "@/applications/root/components/SettingsModalButton";
+import { SettingsModalButton } from "@/core/components/settings/SettingsModalButton";
 import { IThemeContext, ThemeManager } from "@/core/store/theme";
 
 interface INavigationFooterProps {

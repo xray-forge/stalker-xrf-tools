@@ -1,6 +1,7 @@
 import { exists } from "@tauri-apps/api/fs";
-import { ContextManager, createActions } from "dreamstate";
+import { ContextManager, createActions, OnQuery } from "dreamstate";
 
+import { EProjectQuery } from "@/core/store/project/queries";
 import { Optional } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local_storage";
 import { Logger } from "@/lib/logging";
@@ -67,5 +68,10 @@ export class ProjectManager extends ContextManager<IProjectContext> {
     }
 
     return null;
+  }
+
+  @OnQuery(EProjectQuery.PROJECT_PATH)
+  public onGetProjectPath(): Optional<string> {
+    return this.context.xrfProjectPath;
   }
 }

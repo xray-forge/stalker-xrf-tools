@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
-import { NavigationFooter } from "@/core/components/NavigationFooter";
+import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
 
 export function ConfigsEditorNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
