@@ -2,9 +2,11 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard};
-use xray_export::{EffectsParser, ExportDescriptor};
+use xray_export::{ExportDescriptor, ExportsParser};
 
 pub struct ExportsProjectState {
+  pub conditions: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
+  pub dialogs: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
   pub effects: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
 }
 
@@ -25,24 +27,24 @@ pub async fn open_xr_exports(
 ) -> Result<Value, String> {
   log::info!("Parsing exports folders: {conditions_path} + {dialogs_path} + {effects_path}");
 
-  let parser: EffectsParser = match EffectsParser::new(&PathBuf::from(effects_path)) {
-    Ok(parser) => parser,
-    Err(error) => return Err(error.to_string()),
-  };
-
-  log::info!("Parsing xr_effects exports from folder: {:?}", effects_path);
+  let parser: ExportsParser = ExportsParser::new();
 
   let declaration: ExportsDeclarations = ExportsDeclarations {
-    conditions: Vec::new(),
-    dialogs: Vec::new(),
-    effects: match parser.parse_effects() {
-      Ok(value) => value,
-      Err(error) => return Err(error.to_string()),
-    },
+    conditions: parser
+      .parse_conditions_from_path(&PathBuf::from(conditions_path))
+      .map_err(|x| x.to_string())?,
+    dialogs: parser
+      .parse_dialogs_from_path(&PathBuf::from(dialogs_path))
+      .map_err(|x| x.to_string())?,
+    effects: parser
+      .parse_effects_from_path(&PathBuf::from(effects_path))
+      .map_err(|x| x.to_string())?,
   };
 
   let json: Value = json!(declaration);
 
+  *state.conditions.lock().unwrap() = Some(declaration.conditions);
+  *state.dialogs.lock().unwrap() = Some(declaration.dialogs);
   *state.effects.lock().unwrap() = Some(declaration.effects);
 
   Ok(json)
@@ -63,14 +65,9 @@ pub fn close_xr_exports(state: tauri::State<'_, ExportsProjectState>) {
 pub async fn parse_xr_effects(path: &str) -> Result<Value, String> {
   log::info!("Parsing effects exports folder: {:?}", path);
 
-  let parser: EffectsParser = match EffectsParser::new(&PathBuf::from(path)) {
-    Ok(parser) => parser,
-    Err(error) => return Err(error.to_string()),
-  };
+  let parser: ExportsParser = ExportsParser::new();
 
-  log::info!("Parsing xr_effects exports from folder: {:?}", path);
-
-  match parser.parse_effects() {
+  match parser.parse_effects_from_path(&PathBuf::from(path)) {
     Ok(value) => Ok(json!(value)),
     Err(error) => Err(error.to_string()),
   }
@@ -83,14 +80,9 @@ pub async fn open_xr_effects(
 ) -> Result<Value, String> {
   log::info!("Parsing effects exports folder: {:?}", path);
 
-  let parser: EffectsParser = match EffectsParser::new(&PathBuf::from(path)) {
-    Ok(parser) => parser,
-    Err(error) => return Err(error.to_string()),
-  };
+  let parser: ExportsParser = ExportsParser::new();
 
-  log::info!("Parsing xr_effects exports from folder: {:?}", path);
-
-  match parser.parse_effects() {
+  match parser.parse_effects_from_path(&PathBuf::from(path)) {
     Ok(value) => {
       let json: Value = json!(value);
 
@@ -98,7 +90,7 @@ pub async fn open_xr_effects(
 
       Ok(json)
     }
-    Err(error) => return Err(error.to_string()),
+    Err(error) => Err(error.to_string()),
   }
 }
 

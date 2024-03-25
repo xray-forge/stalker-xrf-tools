@@ -30,14 +30,25 @@ export function ExportsViewerDeclaration({ descriptor }: IExportsViewerDeclarati
             </Grid>
           ) : null}
 
+          {descriptor.parameters.length ? (
+            <Grid>
+              <Typography variant={"subtitle1"} color={"secondary"}>
+                Parameters:
+              </Typography>
+
+              {descriptor.parameters.map((parameter) => (
+                <ExportsViewerParameters key={parameter.name} parameter={parameter} />
+              ))}
+            </Grid>
+          ) : null}
+
           <Grid>
             <Typography variant={"subtitle1"} color={"secondary"}>
-              Parameters:
+              Location:
             </Typography>
-
-            {descriptor.parameters.map((parameter) => (
-              <ExportsViewerParameters key={parameter.name} parameter={parameter} />
-            ))}
+            <Typography variant={"body2"} sx={{ whiteSpace: "pre-wrap" }}>
+              {descriptor.filename} ({descriptor.line}:{descriptor.col})
+            </Typography>
           </Grid>
         </Grid>
       </Card>

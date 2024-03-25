@@ -7,9 +7,12 @@ export interface IExportParameterDescriptor {
 }
 
 export interface IExportDescriptor {
+  filename: string;
   name: string;
   comment: Optional<string>;
   parameters: Array<IExportParameterDescriptor>;
+  line: number;
+  col: number;
 }
 
 export interface IExportsDeclarations {

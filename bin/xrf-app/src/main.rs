@@ -64,6 +64,8 @@ fn main() {
       project: Arc::new(Mutex::new(None)),
     })
     .manage(ExportsProjectState {
+      conditions: Arc::new(Mutex::new(None)),
+      dialogs: Arc::new(Mutex::new(None)),
       effects: Arc::new(Mutex::new(None)),
     })
     .run(tauri::generate_context!())
