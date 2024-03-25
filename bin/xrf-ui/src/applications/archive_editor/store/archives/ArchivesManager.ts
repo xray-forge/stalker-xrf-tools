@@ -49,7 +49,7 @@ export class ArchivesManager extends ContextManager<IArchivesContext> {
 
       const response: IArchivesProject = await invoke(ECommand.OPEN_ARCHIVES_PROJECT, { path });
 
-      this.log.info("Archives project opened:", Object.keys(response));
+      this.log.info("Archives project opened");
 
       this.setContext({ project: createLoadable(response, false) });
     } catch (error) {

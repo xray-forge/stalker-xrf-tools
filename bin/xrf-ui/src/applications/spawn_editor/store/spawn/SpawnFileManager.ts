@@ -55,7 +55,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
 
       const response: ISpawnFile = await invoke(ECommand.OPEN_SPAWN_FILE, { path });
 
-      this.log.info("Spawn file opened:", Object.keys(response));
+      this.log.info("Spawn file opened");
 
       this.setContext({ spawnFile: createLoadable(response, false) });
     } catch (error) {

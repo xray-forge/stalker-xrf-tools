@@ -61,7 +61,7 @@ export function SpawnEditorMenu({
 
   return (
     <Drawer variant={"permanent"} open={true} sx={{ height: "100%" }} PaperProps={{ sx: { position: "relative" } }}>
-      <List>
+      <List disablePadding>
         {sections.map(([text, icon]) => (
           <ListItem key={text} disablePadding>
             <ListItemButton onClick={() => navigate(text.toLowerCase(), { replace: true })}>
@@ -74,7 +74,7 @@ export function SpawnEditorMenu({
 
       <Divider />
 
-      <List>
+      <List disablePadding>
         <ListItem disablePadding>
           <ListItemButton disabled={spawnFile.isLoading} onClick={onSaveClicked}>
             <ListItemIcon>
