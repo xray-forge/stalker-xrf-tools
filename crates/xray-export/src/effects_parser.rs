@@ -14,6 +14,7 @@ use walkdir::WalkDir;
 extern crate swc_common;
 extern crate swc_ecma_parser;
 use crate::error::parse_error::ExportParseError;
+use swc_common::comments::{Comments, SingleThreadedComments};
 use swc_common::errors::DiagnosticBuilder;
 use swc_common::sync::Lrc;
 use swc_common::{
@@ -70,16 +71,19 @@ impl EffectsParser {
     for path in &self.files {
       log::info!("Parsing exports effects from: {:?}", path);
 
-      let cm: Lrc<SourceMap> = Default::default();
+      let source_map: Lrc<SourceMap> = Default::default();
       let handler: Handler =
-        Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
-      let fm: Rc<SourceFile> = cm.load_file(path).expect("Failed to load source file");
+        Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(source_map.clone()));
+      let fm: Rc<SourceFile> = source_map
+        .load_file(path)
+        .expect("Failed to load source file");
+      let comments: SingleThreadedComments = SingleThreadedComments::default();
 
-      let lexer = Lexer::new(
+      let lexer: Lexer = Lexer::new(
         Syntax::Typescript(Default::default()),
         Default::default(),
         StringInput::from(fm.as_ref()),
-        None,
+        Some(&comments),
       );
 
       let mut parser: Parser<Lexer> = Parser::new_from(lexer);
@@ -114,7 +118,7 @@ impl EffectsParser {
         .map_err(|error| error.into_diagnostic(&handler).emit())
         .expect("Failed to parse TS module");
 
-      expressions.append(&mut self.parse_program_extern_declarations(&program));
+      expressions.append(&mut self.parse_program_extern_declarations(&program, &comments));
     }
 
     expressions.sort_by(|a, b| a.name.cmp(&b.name));
@@ -122,7 +126,11 @@ impl EffectsParser {
     Ok(expressions)
   }
 
-  fn parse_program_extern_declarations(&self, program: &Program) -> Vec<ExportDescriptor> {
+  fn parse_program_extern_declarations(
+    &self,
+    program: &Program,
+    comments: &dyn Comments,
+  ) -> Vec<ExportDescriptor> {
     let mut expressions: Vec<ExportDescriptor> = Vec::new();
 
     if let Program::Module(module) = &program {
@@ -137,10 +145,19 @@ impl EffectsParser {
               let name: Option<String> =
                 get_expression_parameter_as_string_name(call_expression.args.first().unwrap());
 
-              if let Some(name) = name {
-                if Self::is_xr_effect_literal(&name) {
+              if let Some(effect_name) = name {
+                if Self::is_xr_effect_literal(&effect_name) {
+                  let comment: Option<String> =
+                    comments.get_leading(expression.span.lo).map(|it| {
+                      it.iter()
+                        .map(|comment| comment.text.as_str())
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                    });
+
                   expressions.push(ExportDescriptor {
-                    name: name[XR_EFFECT_PREFIX.len()..].into(),
+                    name: effect_name[XR_EFFECT_PREFIX.len()..].into(),
+                    comment,
                     parameters: get_parameters_from_arrow_expression(
                       call_expression.args.get(1).unwrap(),
                     ),

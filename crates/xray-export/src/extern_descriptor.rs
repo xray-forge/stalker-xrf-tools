@@ -4,6 +4,7 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct ExportDescriptor {
   pub name: String,
+  pub comment: Option<String>,
   pub parameters: Vec<ExportParameterDescriptor>,
 }
 

@@ -8,6 +8,7 @@ export interface IExportParameterDescriptor {
 
 export interface IExportDescriptor {
   name: string;
+  comment: Optional<string>;
   parameters: Array<IExportParameterDescriptor>;
 }
 

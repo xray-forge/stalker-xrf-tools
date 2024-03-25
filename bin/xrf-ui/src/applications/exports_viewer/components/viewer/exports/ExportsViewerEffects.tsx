@@ -35,7 +35,7 @@ export function ExportsViewerEffects({
       flexGrow={1}
       container
     >
-      <Typography variant={"h5"}>Effects</Typography>
+      <Typography variant={"h5"}>Effects ({declarations.effects.length})</Typography>
       <Divider sx={{ margin: "16px 0" }} />
 
       <Grid direction={"column"} flexGrow={1} gap={1} flexWrap={"nowrap"} sx={{ overflowY: "auto" }} container>

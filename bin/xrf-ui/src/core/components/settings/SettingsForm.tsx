@@ -80,15 +80,11 @@ export function SettingsForm({
   );
 
   return (
-    <Grid direction={"column"} padding={padding} container>
-      {title ? (
-        <Typography variant={"h6"} component={"h2"}>
-          {title}
-        </Typography>
-      ) : null}
+    <Grid direction={"column"} padding={padding} gap={2} container>
+      {title ? <Typography variant={"h5"}>{title}</Typography> : null}
 
       {isWithProjectForm ? (
-        <FormControl sx={{ m: "8px 0" }} size={"small"} variant={"outlined"}>
+        <FormControl size={"small"} variant={"outlined"}>
           <InputLabel size={"small"}>Project</InputLabel>
           <OutlinedInput
             size={"small"}
@@ -109,7 +105,7 @@ export function SettingsForm({
       ) : null}
 
       {isWithConfigsForm ? (
-        <FormControl sx={{ m: "8px 0" }} size={"small"} variant={"outlined"}>
+        <FormControl size={"small"} variant={"outlined"}>
           <InputLabel size={"small"}>Configs</InputLabel>
           <OutlinedInput
             size={"small"}
