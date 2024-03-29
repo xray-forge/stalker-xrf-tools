@@ -71,9 +71,9 @@ export function ExportsViewerDialogs({
       <Typography variant={"h5"}>Dialogs ({declarations.dialogs.length})</Typography>
       <Divider sx={{ margin: "16px 0" }} />
 
-      <Tabs value={activeTab} onChange={onActiveTabChange}>
+      <Tabs value={activeTab || dialogSections[0]} onChange={onActiveTabChange}>
         {Object.keys(dialogExports).map((it) => (
-          <Tab value={it} label={it} />
+          <Tab key={it} value={it} label={it} />
         ))}
       </Tabs>
 
