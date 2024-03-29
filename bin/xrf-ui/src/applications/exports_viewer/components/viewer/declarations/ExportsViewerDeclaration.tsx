@@ -33,7 +33,7 @@ export function ExportsViewerDeclaration({ descriptor }: IExportsViewerDeclarati
           {descriptor.parameters.length ? (
             <Grid>
               <Typography variant={"subtitle1"} color={"secondary"}>
-                Parameters:
+                Types:
               </Typography>
 
               {descriptor.parameters.map((parameter) => (

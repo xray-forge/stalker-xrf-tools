@@ -1,15 +1,67 @@
 use swc_ecma_ast::{
-  TsArrayType, TsKeywordType, TsKeywordTypeKind, TsType, TsTypeParamInstantiation, TsTypeRef,
+  TsArrayType, TsEntityName, TsKeywordType, TsKeywordTypeKind, TsLitType, TsType, TsTypeOperator,
+  TsTypeOperatorOp, TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr, TsTypeRef,
   TsUnionOrIntersectionType,
 };
 
-pub fn ts_type_to_string(ty: &TsType) -> String {
-  match ty {
+pub fn ts_type_to_string(ts_type: &TsType) -> String {
+  match ts_type {
     TsType::TsKeywordType(keyword_type) => ts_keyword_type_to_string(keyword_type),
     TsType::TsTypeRef(type_ref) => ts_type_ref_to_string(type_ref),
     TsType::TsArrayType(array_type) => ts_array_type_to_string(array_type),
     TsType::TsUnionOrIntersectionType(union_type) => ts_union_or_intersection_to_string(union_type),
-    _ => String::from("unsupported"),
+    TsType::TsLitType(literal_type) => ts_literal_type_to_string(literal_type),
+    TsType::TsTypeOperator(type_operator) => ts_type_operator_to_string(type_operator),
+    TsType::TsTypeQuery(type_query) => ts_type_query_to_string(type_query),
+    other => {
+      log::warn!("Parsed unsupported type: {:?}", other);
+      String::from("unsupported")
+    }
+  }
+}
+
+pub fn ts_literal_type_to_string(literal_type: &TsLitType) -> String {
+  format!("\"{}\"", literal_type.lit.as_str().unwrap().value)
+}
+
+fn ts_type_operator_to_string(type_operator: &TsTypeOperator) -> String {
+  match type_operator.op {
+    TsTypeOperatorOp::KeyOf => {
+      format!("keyof {}", ts_type_to_string(&type_operator.type_ann))
+    }
+    TsTypeOperatorOp::Unique => {
+      format!("unique {}", ts_type_to_string(&type_operator.type_ann))
+    }
+    TsTypeOperatorOp::ReadOnly => {
+      format!("readonly {}", ts_type_to_string(&type_operator.type_ann))
+    }
+  }
+}
+
+pub fn ts_type_query_to_string(type_query: &TsTypeQuery) -> String {
+  format!(
+    "typeof {}",
+    ts_entity_query_to_string(&type_query.expr_name)
+  )
+}
+
+pub fn ts_entity_query_to_string(name: &TsTypeQueryExpr) -> String {
+  match name {
+    TsTypeQueryExpr::TsEntityName(entity_name) => ts_entity_name_to_string(entity_name),
+    TsTypeQueryExpr::Import(_) => String::from("unsupported"),
+  }
+}
+
+pub fn ts_entity_name_to_string(name: &TsEntityName) -> String {
+  match name {
+    TsEntityName::Ident(ident) => ident.sym.to_string(),
+    TsEntityName::TsQualifiedName(qname) => {
+      format!(
+        "{}.{}",
+        ts_entity_name_to_string(&qname.left),
+        qname.right.sym
+      )
+    }
   }
 }
 

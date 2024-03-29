@@ -2,7 +2,7 @@ import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { useManager } from "dreamstate";
 import { ReactElement } from "react";
 
-import { ExportsViewerDeclaration } from "@/applications/exports_viewer/components/viewer/declarations/ExportsViewerDeclaration";
+import { ExportsViewerDeclarationList } from "@/applications/exports_viewer/components/viewer/declarations/ExportsViewerDeclarationList";
 import { ExportsManager } from "@/applications/exports_viewer/store/exports";
 
 export function ExportsViewerEffects({
@@ -37,12 +37,7 @@ export function ExportsViewerEffects({
     >
       <Typography variant={"h5"}>Effects ({declarations.effects.length})</Typography>
       <Divider sx={{ margin: "16px 0" }} />
-
-      <Grid direction={"column"} flexGrow={1} gap={1} flexWrap={"nowrap"} sx={{ overflowY: "auto" }} container>
-        {declarations.effects.map((descriptor) => (
-          <ExportsViewerDeclaration key={descriptor.name} descriptor={descriptor} />
-        ))}
-      </Grid>
+      <ExportsViewerDeclarationList descriptors={declarations.effects} />
     </Grid>
   );
 }
