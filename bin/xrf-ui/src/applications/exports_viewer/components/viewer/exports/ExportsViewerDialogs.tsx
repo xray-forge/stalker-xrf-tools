@@ -77,7 +77,7 @@ export function ExportsViewerDialogs({
         ))}
       </Tabs>
 
-      <Box marginBottom={1} />
+      <Box marginBottom={2} />
 
       <Grid direction={"column"} flexGrow={1} gap={1} flexWrap={"nowrap"} sx={{ overflowY: "auto" }} container>
         {list}

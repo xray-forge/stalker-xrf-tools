@@ -147,8 +147,11 @@ impl LtxProject {
         (result.duration as f64) / 1000.0
       );
       println!(
-        "Verified {} files, {} sections, {} fields",
-        result.total_files, result.checked_sections, result.checked_fields
+        "Verified {:.2}%, {} files, {} sections, {} fields",
+        (result.checked_sections as f32 * 100.0) / result.total_sections as f32,
+        result.total_files,
+        result.checked_sections,
+        result.checked_fields
       );
       println!("Found {} error(s)", result.errors.len());
     }
