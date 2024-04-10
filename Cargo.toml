@@ -10,3 +10,10 @@ members = [
   "crates/xray-ltx",
   "crates/xray-test-utils",
 ]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
