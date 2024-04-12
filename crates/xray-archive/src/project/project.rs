@@ -95,21 +95,21 @@ impl ArchiveProject {
   /// Sort archives list to maintain overriding of files in a correct way.
   /// Patches are exceptional case and should override all the files.
   fn sort_archives(archives: &mut [ArchiveDescriptor]) {
-    archives.sort_by(|a, b| {
-      let a = a.path.to_str().unwrap();
-      let b = b.path.to_str().unwrap();
+    archives.sort_by(|first, second| {
+      let first: &str = first.path.to_str().unwrap();
+      let second: &str = second.path.to_str().unwrap();
 
-      if a.contains("patches") {
-        if b.contains("patches") {
-          a.cmp(b)
+      if first.contains("patches") {
+        if second.contains("patches") {
+          first.cmp(second)
         } else {
           Ordering::Greater
         }
       } else {
-        if b.contains("patches") {
+        if second.contains("patches") {
           Ordering::Less
         } else {
-          a.cmp(b)
+          first.cmp(second)
         }
       }
     });

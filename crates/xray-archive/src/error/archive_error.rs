@@ -29,7 +29,13 @@ impl Error for ArchiveError {
 }
 
 impl From<io::Error> for ArchiveError {
-  fn from(err: io::Error) -> Self {
-    ArchiveError::Io(err)
+  fn from(error: io::Error) -> Self {
+    ArchiveError::Io(error)
+  }
+}
+
+impl From<ArchiveReadError> for ArchiveError {
+  fn from(error: ArchiveReadError) -> Self {
+    ArchiveError::Read(error)
   }
 }

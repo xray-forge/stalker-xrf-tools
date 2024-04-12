@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { ContextManager, createActions, createLoadable, Loadable } from "dreamstate";
 
 import { Optional } from "@/core/types/general";
-import { IArchivesProject } from "@/lib/archive";
+import { IArchiveFileReadResult, IArchivesProject } from "@/lib/archive";
 import { ECommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 
@@ -12,8 +12,12 @@ export interface IArchivesContext {
     close: () => Promise<void>;
     reset: () => void;
   };
+  fileActions: {
+    open: (path: string) => Promise<void>;
+  };
   isReady: boolean;
   project: Loadable<Optional<IArchivesProject>>;
+  file: Loadable<Optional<IArchiveFileReadResult>>;
 }
 
 export class ArchivesManager extends ContextManager<IArchivesContext> {
@@ -23,8 +27,12 @@ export class ArchivesManager extends ContextManager<IArchivesContext> {
       close: () => this.closeArchivesProject(),
       reset: () => this.setContext({ project: createLoadable(null) }),
     }),
+    fileActions: createActions({
+      open: (path) => this.openArchiveFile(path),
+    }),
     isReady: false,
     project: createLoadable(null),
+    file: createLoadable(null),
   };
 
   public log: Logger = new Logger("archives");
@@ -66,6 +74,25 @@ export class ArchivesManager extends ContextManager<IArchivesContext> {
       this.setContext({ project: createLoadable(null) });
     } catch (error) {
       this.log.error("Failed to close archives project:", error);
+    }
+  }
+
+  public async openArchiveFile(path: string): Promise<void> {
+    this.log.info("Opening archive file:", path);
+
+    this.setContext(({ file }) => ({
+      file: file.asLoading(),
+    }));
+
+    try {
+      const result: IArchiveFileReadResult = await invoke(ECommand.READ_ARCHIVE_FILE, { path });
+
+      this.log.info("Opened file:", path);
+
+      this.setContext({ file: createLoadable(result) });
+    } catch (error) {
+      this.log.error("Failed to open archive file:", path, error);
+      this.setContext({ file: createLoadable(null, false, new Error(String(error))) });
     }
   }
 }

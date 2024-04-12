@@ -23,6 +23,7 @@ export enum ECommand {
   OPEN_XR_EFFECTS = "open_xr_effects",
   OPEN_XR_EXPORTS = "open_xr_exports",
   PARSE_XR_EFFECTS = "parse_xr_effects",
+  READ_ARCHIVE_FILE = "read_archive_file",
   SAVE_SPAWN_FILE = "save_spawn_file",
   UNPACK_ARCHIVES_PATH = "unpack_archives_path",
   VERIFY_CONFIGS_PATH = "verify_configs_path",

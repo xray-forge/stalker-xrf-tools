@@ -26,3 +26,9 @@ export interface IArchivesProject {
   archives: Array<IArchiveDescriptor>;
   files: Record<string, IArchiveFileReplicationDescriptor>;
 }
+
+export interface IArchiveFileReadResult {
+  name: string;
+  content: string;
+  size: number;
+}

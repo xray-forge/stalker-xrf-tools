@@ -4,7 +4,7 @@ import { Maybe } from "@/core/types/general";
 import { IArchiveFileReplicationDescriptor } from "@/lib/archive/types";
 
 export function parseTree(files: Array<IArchiveFileReplicationDescriptor>, separator: string): Array<TreeViewBaseItem> {
-  const node: TreeViewBaseItem = { id: "~root~", label: "root", children: [] };
+  const node: TreeViewBaseItem = { id: "~", label: "root", children: [] };
 
   for (const file of files) {
     const path: string = file.name;
@@ -33,7 +33,7 @@ function createNode(path: Array<string>, parent: TreeViewBaseItem): void {
     createNode(path, element);
   } else {
     const node: TreeViewBaseItem = {
-      id: name + "#" + parent.id,
+      id: parent.id + "\\" + name,
       label: name,
       children: [],
     };

@@ -137,7 +137,7 @@ impl ArchiveProject {
       .expect("File can not be opened for writing");
 
     if file_descriptor.size_real != file_descriptor.size_compressed {
-      let mut buf = vec![0u8; file_descriptor.size_compressed as usize];
+      let mut buf: Vec<u8> = vec![0u8; file_descriptor.size_compressed as usize];
       source_file.read_exact(buf.as_mut_slice())?;
 
       let decompressed_buf: Vec<u8> = lzo
@@ -152,7 +152,7 @@ impl ArchiveProject {
         .write_all(decompressed_buf.as_slice())
         .expect("Unable to write to dest file");
     } else {
-      let mut remaining_bytes = file_descriptor.size_real as usize;
+      let mut remaining_bytes: usize = file_descriptor.size_real as usize;
       let mut buf: Vec<u8> = vec![0u8; min(256 * 1024, remaining_bytes)];
 
       while remaining_bytes > 0 {

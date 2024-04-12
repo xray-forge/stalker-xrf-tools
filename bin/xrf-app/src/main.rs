@@ -8,7 +8,7 @@ mod spawns_editor;
 
 use crate::archives_editor::{
   close_archives_project, get_archives_project, has_archives_project, open_archives_project,
-  unpack_archives_path, ArchivesProjectState,
+  read_archive_file, unpack_archives_path, ArchivesProjectState,
 };
 use crate::configs_editor::{check_format_configs_path, format_configs_path, verify_configs_path};
 use crate::exports_editor::{
@@ -54,6 +54,7 @@ fn main() {
       open_xr_effects,
       open_xr_exports,
       parse_xr_effects,
+      read_archive_file,
       save_spawn_file,
       unpack_archives_path,
       verify_configs_path,
