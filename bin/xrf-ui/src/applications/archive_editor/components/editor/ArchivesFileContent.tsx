@@ -2,6 +2,7 @@ import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { useManager } from "dreamstate";
 
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
+import { bytesToMegabytes } from "@/lib/size";
 
 export function ArchivesFileContent({ archivesContext: { file } = useManager(ArchivesManager) }) {
   if (file.isLoading) {
@@ -48,7 +49,7 @@ export function ArchivesFileContent({ archivesContext: { file } = useManager(Arc
       >
         <Grid>
           <Typography variant={"h5"}>
-            {file.value.name} ({(file.value.size / 1024 / 1024).toFixed(3)} MB)
+            {file.value.name} ({bytesToMegabytes(file.value.size).toFixed(3)} MB)
           </Typography>
         </Grid>
 
