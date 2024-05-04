@@ -31,3 +31,12 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli
 - [Archive commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/archive.html)
 - [LTX commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/ltx.html)
 - [Spawn commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/spawn.html)
+
+## Building
+
+### Requirements
+
+- rust
+- cargo-make (`cargo install --force cargo-make`)
+- tauri-cli (`cargo install --force tauri-cli@1.5.11`),
+  [tauri installation](https://tauri.app/v1/guides/getting-started/prerequisites)
