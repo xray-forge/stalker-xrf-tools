@@ -2,10 +2,12 @@ mod commands;
 
 use crate::commands::format_ltx::format_ltx;
 use crate::commands::info_spawn_file::info_spawn_file;
+use crate::commands::pack_inventory_icons::pack_icons;
 use crate::commands::pack_spawn_file::pack_spawn_file;
 use crate::commands::repack_spawn_file::repack_spawn_file;
 use crate::commands::setup::setup_commands;
 use crate::commands::unpack_archive::unpack_archive;
+use crate::commands::unpack_inventory_icons::unpack_icons;
 use crate::commands::unpack_spawn_file::unpack_spawn_file;
 use crate::commands::verify_ltx::verify_ltx;
 use crate::commands::verify_spawn_file::verify_spawn_file;
@@ -24,6 +26,8 @@ async fn main() {
     Some(("unpack-archive", matches)) => unpack_archive(matches).await,
     Some(("format-ltx", matches)) => format_ltx(matches),
     Some(("verify-ltx", matches)) => verify_ltx(matches),
+    Some(("pack-inventory-icons", matches)) => pack_icons(matches),
+    Some(("unpack-inventory-icons", matches)) => unpack_icons(matches),
     _ => panic!("Unexpected cli command provided, check --help for details"),
   };
 }

@@ -12,7 +12,7 @@ pub struct Ltx {
   pub(crate) path: Option<PathBuf>,
   pub(crate) directory: Option<PathBuf>,
   pub(crate) includes: LtxIncluded,
-  pub(crate) sections: LtxSections,
+  pub sections: LtxSections,
 }
 
 impl Ltx {

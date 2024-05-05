@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: info raw gamedata" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
-    <option name="command" value="run --package xrf-cli-tool --bin xrf-cli-tool -- info-spawn -p F:\Documents\Projects\gamedata_raw\spawns\all.spawn" />
+  <configuration default="false" name="run: pack unpacked spawn" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
+    <option name="command" value="run --package xrf-cli --bin xrf-cli -- pack-spawn -p .\target\assets\unpacked -d .\target\assets\packed.spawn -f" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />

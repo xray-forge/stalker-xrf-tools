@@ -194,4 +194,58 @@ pub fn setup_commands() -> Command {
             .action(ArgAction::SetTrue),
         ),
     )
+    .subcommand(
+      Command::new("pack-inventory-icons")
+        .about("Command to pack dds icons into single element")
+        .arg(
+          Arg::new("system-ltx")
+            .help("Path to system ltx file or root folder with ltx files")
+            .long("system-ltx")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("source")
+            .help("Path to source folder with section icons")
+            .short('s')
+            .long("source")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("output")
+            .help("Path to output dds file")
+            .short('o')
+            .long("output")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        ),
+    )
+    .subcommand(
+      Command::new("unpack-inventory-icons")
+        .about("Command to unpack dds icons into multiple icons")
+        .arg(
+          Arg::new("system-ltx")
+            .help("Path to system ltx file or root folder with ltx files")
+            .long("system-ltx")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("source")
+            .help("Path to source dds file")
+            .short('s')
+            .long("source")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("output")
+            .help("Path to output folder for sections icons")
+            .short('o')
+            .long("output")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        ),
+    )
 }
