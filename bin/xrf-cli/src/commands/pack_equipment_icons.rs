@@ -13,11 +13,14 @@ pub fn pack_equipment_icons(matches: &ArgMatches) {
     .get_one::<PathBuf>("source")
     .expect("Expected valid source path to be provided");
 
+  let gamedata: Option<&PathBuf> = matches.get_one::<PathBuf>("gamedata");
+
   let output: &PathBuf = matches
     .get_one::<PathBuf>("output")
     .expect("Expected valid output path to be provided");
 
   let is_verbose: bool = matches.get_flag("verbose");
+  let is_strict: bool = matches.get_flag("strict");
 
   if !source.is_dir() {
     println!("Expected valid source folder containing DDS icons");
@@ -34,7 +37,9 @@ pub fn pack_equipment_icons(matches: &ArgMatches) {
     ltx: system_ltx,
     source: source.into(),
     output: output.into(),
+    gamedata: gamedata.cloned(),
     is_verbose,
+    is_strict,
   });
 
   println!("Saved resulting file with combined icons {:?}", output);

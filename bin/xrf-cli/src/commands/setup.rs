@@ -207,7 +207,6 @@ pub fn setup_commands() -> Command {
         .arg(
           Arg::new("source")
             .help("Path to source folder with section icons")
-            .short('s')
             .long("source")
             .required(true)
             .value_parser(value_parser!(PathBuf)),
@@ -215,9 +214,15 @@ pub fn setup_commands() -> Command {
         .arg(
           Arg::new("output")
             .help("Path to output dds file")
-            .short('o')
             .long("output")
             .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("gamedata")
+            .help("Path to gamedata folder for resources usage")
+            .long("gamedata")
+            .required(false)
             .value_parser(value_parser!(PathBuf)),
         )
         .arg(
@@ -225,6 +230,14 @@ pub fn setup_commands() -> Command {
             .help("Turn on verbose logging")
             .short('v')
             .long("verbose")
+            .required(false)
+            .action(ArgAction::SetTrue),
+        )
+        .arg(
+          Arg::new("strict")
+            .help("Turn on strict mode")
+            .short('s')
+            .long("strict")
             .required(false)
             .action(ArgAction::SetTrue),
         ),
@@ -242,7 +255,6 @@ pub fn setup_commands() -> Command {
         .arg(
           Arg::new("source")
             .help("Path to source dds file")
-            .short('s')
             .long("source")
             .required(true)
             .value_parser(value_parser!(PathBuf)),
@@ -250,7 +262,6 @@ pub fn setup_commands() -> Command {
         .arg(
           Arg::new("output")
             .help("Path to output folder for sections icons")
-            .short('o')
             .long("output")
             .required(true)
             .value_parser(value_parser!(PathBuf)),

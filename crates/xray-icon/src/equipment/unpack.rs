@@ -11,8 +11,11 @@ pub fn unpack_equipment_icons_by_ltx(options: UnpackOptions) {
   for (section_name, section) in &options.ltx.sections {
     if let Some(is_type_inventory_icon) = section.get(SECTION_TYPE_INVENTORY_ICON) {
       if is_type_inventory_icon.to_lowercase() == "true" {
-        unpack_equipment_icon(&options, &section_name, &section);
-        count += 1;
+        let is_packed: bool = unpack_equipment_icon(&options, section_name, section);
+
+        if is_packed {
+          count += 1;
+        }
       }
     }
   }
@@ -20,7 +23,11 @@ pub fn unpack_equipment_icons_by_ltx(options: UnpackOptions) {
   println!("Unpacked {count} icons")
 }
 
-pub fn unpack_equipment_icon(options: &UnpackOptions, section_name: &str, section: &Section) {
+pub fn unpack_equipment_icon(
+  options: &UnpackOptions,
+  section_name: &str,
+  section: &Section,
+) -> bool {
   let inv_grid_x: Option<&str> = section.get("inv_grid_x");
   let inv_grid_y: Option<&str> = section.get("inv_grid_y");
   let inv_grid_w: Option<&str> = section.get("inv_grid_width");
@@ -29,7 +36,7 @@ pub fn unpack_equipment_icon(options: &UnpackOptions, section_name: &str, sectio
   if inv_grid_x.is_none() || inv_grid_y.is_none() || inv_grid_w.is_none() || inv_grid_h.is_none() {
     println!("Skip for possible section: '{section_name}'");
 
-    return;
+    return false;
   }
 
   let inv_grid_x: u32 = inv_grid_x.unwrap().parse::<u32>().unwrap();
@@ -57,4 +64,6 @@ pub fn unpack_equipment_icon(options: &UnpackOptions, section_name: &str, sectio
       .to_image(),
     ImageFormat::BC3RgbaUnorm,
   );
+
+  true
 }

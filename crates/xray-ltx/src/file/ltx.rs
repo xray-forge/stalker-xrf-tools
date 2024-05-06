@@ -9,9 +9,9 @@ use std::path::PathBuf;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ltx {
-  pub(crate) path: Option<PathBuf>,
-  pub(crate) directory: Option<PathBuf>,
   pub(crate) includes: LtxIncluded,
+  pub directory: Option<PathBuf>,
+  pub path: Option<PathBuf>,
   pub sections: LtxSections,
 }
 

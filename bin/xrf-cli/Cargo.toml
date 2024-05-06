@@ -11,5 +11,5 @@ log = "0.4.20"
 tokio = { version = "1.35.1", features = ["full"] }
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
-xray-ltx = { path = "../../crates/xray-ltx" }
 xray-icon = { path = "../../crates/xray-icon" }
+xray-ltx = { path = "../../crates/xray-ltx" }
