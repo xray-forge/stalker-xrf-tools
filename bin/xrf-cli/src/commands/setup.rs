@@ -219,6 +219,14 @@ pub fn setup_commands() -> Command {
             .long("output")
             .required(true)
             .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("verbose")
+            .help("Turn on verbose logging")
+            .short('v')
+            .long("verbose")
+            .required(false)
+            .action(ArgAction::SetTrue),
         ),
     )
     .subcommand(
@@ -246,6 +254,14 @@ pub fn setup_commands() -> Command {
             .long("output")
             .required(true)
             .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("verbose")
+            .help("Turn on verbose logging")
+            .short('v')
+            .long("verbose")
+            .required(false)
+            .action(ArgAction::SetTrue),
         ),
     )
 }

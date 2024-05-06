@@ -22,7 +22,7 @@ impl LtxInheritConvertor {
   fn convert_ltx(&self, mut ltx: Ltx) -> Result<Ltx, LtxError> {
     if !ltx.includes.is_empty() {
       return Err(LtxConvertError::new_ltx_error(
-        "Failed to convert ltx file, not processed include statements detected on inheritance conversion",
+        "Failed to equipment ltx file, not processed include statements detected on inheritance conversion",
       ));
     }
 

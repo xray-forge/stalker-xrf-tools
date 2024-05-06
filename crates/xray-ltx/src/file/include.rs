@@ -28,7 +28,7 @@ impl LtxIncludeConvertor {
   fn convert_ltx(&self, ltx: Ltx) -> Result<Ltx, LtxError> {
     if ltx.directory.is_none() {
       return Err(LtxConvertError::new_ltx_error(
-        "Failed to convert ltx file, parent directory is not specified",
+        "Failed to equipment ltx file, parent directory is not specified",
       ));
     }
 
@@ -55,7 +55,7 @@ impl LtxIncludeConvertor {
     for (key, value) in ltx.sections {
       if result.has_section(key.clone()) {
         return Err(LtxConvertError::new_ltx_error(format!(
-          "Failed to convert ltx file, duplicate section {key} found",
+          "Failed to equipment ltx file, duplicate section {key} found",
         )));
       }
 
@@ -74,7 +74,7 @@ impl LtxIncludeConvertor {
       },
       Err(error) => {
         return Err(LtxConvertError::new_ltx_error(format!(
-          "Failed to convert ltx file, nested file {:?} in {:?} error: {error}",
+          "Failed to equipment ltx file, nested file {:?} in {:?} error: {error}",
           path.as_os_str(),
           into.path.as_ref().unwrap(),
         )))

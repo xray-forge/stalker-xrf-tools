@@ -1,0 +1,6 @@
+pub const INVENTORY_ICON_GRID_SQUARE_BASE: u32 = 50;
+// pub const CHARACTER_ICON_GRID_SQUARE_BASE: u32 = 64;
+// pub const CHARACTER_GRID_SQUARE_BASE: u32 = 2;
+// pub const CHARACTER_FULL_GRID_SQUARE_BASE: u32 = 2;
+
+pub const SECTION_TYPE_INVENTORY_ICON: &str = "$inventory_icon";
