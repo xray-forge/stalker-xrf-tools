@@ -195,7 +195,7 @@ pub fn setup_commands() -> Command {
         ),
     )
     .subcommand(
-      Command::new("pack-inventory-icons")
+      Command::new("pack-equipment-icons")
         .about("Command to pack dds icons into single element")
         .arg(
           Arg::new("system-ltx")
@@ -243,7 +243,7 @@ pub fn setup_commands() -> Command {
         ),
     )
     .subcommand(
-      Command::new("unpack-inventory-icons")
+      Command::new("unpack-equipment-icons")
         .about("Command to unpack dds icons into multiple icons")
         .arg(
           Arg::new("system-ltx")
