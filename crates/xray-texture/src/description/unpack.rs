@@ -1,6 +1,7 @@
 use crate::{read_dds_by_path, save_image_as_dds, PackDescriptionOptions};
 use image::{GenericImageView, RgbaImage};
 use image_dds::ImageFormat;
+use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::io;
 use std::path::PathBuf;
@@ -9,12 +10,12 @@ use crate::description::file_description::FileDescription;
 use crate::description::xml_description::get_files_descriptions;
 
 pub fn unpack_xml_descriptions(options: PackDescriptionOptions) {
-  let files: Vec<FileDescription> = get_files_descriptions(&options);
+  let files: HashMap<String, FileDescription> = get_files_descriptions(&options);
   let mut count: u32 = 0;
 
   println!("Unpacking for {:?} files", files.len());
 
-  for file in &files {
+  for (_, file) in &files {
     let is_unpacked: bool = unpack_xml_description(&options, file);
 
     if is_unpacked {

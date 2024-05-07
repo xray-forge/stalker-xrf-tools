@@ -2,19 +2,22 @@ use crate::description::file_description::FileDescription;
 use crate::description::pack_options::PackDescriptionOptions;
 use crate::description::texture_description::TextureDescription;
 use roxmltree::{Document, Node, ParsingOptions};
+use std::collections::HashMap;
 use std::fs;
 use std::fs::{File, ReadDir};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-pub fn get_files_descriptions(options: &PackDescriptionOptions) -> Vec<FileDescription> {
+pub fn get_files_descriptions(
+  options: &PackDescriptionOptions,
+) -> HashMap<String, FileDescription> {
   if options.description.is_dir() {
     println!(
       "Check texture descriptions from dir: {:?}",
       options.description
     );
 
-    let mut files: Vec<FileDescription> = Vec::new();
+    let mut files: HashMap<String, FileDescription> = HashMap::new();
     let entries: ReadDir = fs::read_dir(&options.description).unwrap();
 
     for entry in entries.flatten() {
@@ -22,9 +25,23 @@ pub fn get_files_descriptions(options: &PackDescriptionOptions) -> Vec<FileDescr
 
       if let Some(extension) = path.extension() {
         if extension == "xml" {
-          let descriptions: Vec<FileDescription> = get_file_descriptions(options, &path);
+          let descriptions: HashMap<String, FileDescription> =
+            get_file_descriptions(options, &path);
 
-          files.extend(descriptions);
+          descriptions
+            .into_iter()
+            .for_each(|(name, description)| match files.get_mut(&name) {
+              None => {
+                files.insert(name, description);
+              }
+              Some(existing) => {
+                if options.is_verbose {
+                  println!("Merging textures for {name}");
+                }
+
+                existing.textures.extend(description.textures);
+              }
+            })
         }
       }
     }
@@ -38,12 +55,12 @@ pub fn get_files_descriptions(options: &PackDescriptionOptions) -> Vec<FileDescr
 pub fn get_file_descriptions(
   options: &PackDescriptionOptions,
   path: &Path,
-) -> Vec<FileDescription> {
+) -> HashMap<String, FileDescription> {
   if options.is_verbose {
     println!("Found texture description: {:?}", path);
   }
 
-  let mut descriptions: Vec<FileDescription> = Vec::new();
+  let mut descriptions: HashMap<String, FileDescription> = HashMap::new();
 
   let mut file: File = File::open(path).unwrap();
   let mut text: String = String::new();
@@ -59,8 +76,12 @@ pub fn get_file_descriptions(
   ) {
     Ok(doc) => doc,
     Err(error) => {
-      println!("Error: {}.", error);
-      return Vec::new();
+      if options.is_strict {
+        panic!("Failed to parse xml: {:?} - {:?}", path, error)
+      }
+
+      println!("Error parsing XML file: {:?} - {:?}", path, error);
+      return HashMap::new();
     }
   };
 
@@ -132,7 +153,21 @@ pub fn get_file_descriptions(
         if file_description.textures.is_empty() {
           println!("Skip definitions {file_name} without textures");
         } else {
-          descriptions.push(file_description)
+          match descriptions.get_mut(&file_description.name) {
+            None => {
+              descriptions.insert(file_description.name.clone(), file_description);
+            }
+            Some(existing) => {
+              if options.is_verbose {
+                println!("Merging textures for {file_name}");
+              }
+
+              file_description
+                .textures
+                .into_iter()
+                .for_each(|it| existing.textures.push(it));
+            }
+          }
         }
       } else {
         println!("Invalid file node supplied without name attribute");

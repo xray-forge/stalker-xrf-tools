@@ -5,15 +5,16 @@ use crate::description::xml_description::get_files_descriptions;
 use crate::{read_dds_by_path, save_image_as_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
 use image_dds::ImageFormat;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 pub fn pack_xml_descriptions(options: PackDescriptionOptions) {
-  let files: Vec<FileDescription> = get_files_descriptions(&options);
+  let files: HashMap<String, FileDescription> = get_files_descriptions(&options);
   let mut count: u32 = 0;
 
   println!("Packing for {:?} files", files.len());
 
-  for file in &files {
+  for (_, file) in &files {
     let is_packed: bool = pack_xml_description(&options, file);
 
     if is_packed {
