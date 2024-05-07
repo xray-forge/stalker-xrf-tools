@@ -1,7 +1,9 @@
 use clap::ArgMatches;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
-use xray_icon::{read_dds_by_path, unpack_equipment_icons_by_ltx, RgbaImage, UnpackOptions};
+use xray_icon::{
+  read_dds_by_path, unpack_equipment_icons_by_ltx, RgbaImage, UnpackEquipmentOptions,
+};
 use xray_ltx::Ltx;
 
 pub fn unpack_equipment_icons(matches: &ArgMatches) {
@@ -35,7 +37,7 @@ pub fn unpack_equipment_icons(matches: &ArgMatches) {
 
   create_dir_all(output).unwrap();
 
-  unpack_equipment_icons_by_ltx(UnpackOptions {
+  unpack_equipment_icons_by_ltx(UnpackEquipmentOptions {
     ltx: system_ltx,
     source: source_dds,
     output: output.into(),

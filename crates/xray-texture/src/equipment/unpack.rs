@@ -1,11 +1,12 @@
 use crate::{
-  save_image_as_dds, UnpackOptions, INVENTORY_ICON_GRID_SQUARE_BASE, SECTION_TYPE_INVENTORY_ICON,
+  save_image_as_dds, UnpackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
+  SECTION_TYPE_INVENTORY_ICON,
 };
 use image::GenericImageView;
 use image_dds::ImageFormat;
 use xray_ltx::Section;
 
-pub fn unpack_equipment_icons_by_ltx(options: UnpackOptions) {
+pub fn unpack_equipment_icons_by_ltx(options: UnpackEquipmentOptions) {
   let mut count: u32 = 0;
 
   for (section_name, section) in &options.ltx.sections {
@@ -24,7 +25,7 @@ pub fn unpack_equipment_icons_by_ltx(options: UnpackOptions) {
 }
 
 pub fn unpack_equipment_icon(
-  options: &UnpackOptions,
+  options: &UnpackEquipmentOptions,
   section_name: &str,
   section: &Section,
 ) -> bool {

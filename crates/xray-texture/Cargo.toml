@@ -8,4 +8,5 @@ ddsfile = "0.5.1"
 image = "0.24.9"
 image_dds = "0.5.1"
 path-absolutize = "3.1.1"
+roxmltree = "0.19.0"
 xray-ltx = { path = "../xray-ltx" }

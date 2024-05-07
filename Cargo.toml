@@ -7,7 +7,7 @@ members = [
   "crates/xray-db",
   "crates/xray-delharc",
   "crates/xray-export",
-  "crates/xray-icon",
+  "crates/xray-texture",
   "crates/xray-ltx",
   "crates/xray-test-utils",
 ]

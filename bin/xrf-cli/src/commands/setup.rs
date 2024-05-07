@@ -275,4 +275,78 @@ pub fn setup_commands() -> Command {
             .action(ArgAction::SetTrue),
         ),
     )
+    .subcommand(
+      Command::new("pack-texture-description")
+        .about("Command to pack texture description xml")
+        .arg(
+          Arg::new("description")
+            .help("Path to XML file describing textures")
+            .long("description")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("base")
+            .help("Path to base where search for described files")
+            .long("base")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("output")
+            .help("Path to directory where output dds files")
+            .long("output")
+            .required(false)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("verbose")
+            .help("Turn on verbose logging")
+            .short('v')
+            .long("verbose")
+            .required(false)
+            .action(ArgAction::SetTrue),
+        ),
+    )
+    .subcommand(
+      Command::new("unpack-texture-description")
+        .about("Command to unpack dds icons into multiple icons")
+        .arg(
+          Arg::new("description")
+            .help("Path to XML file describing textures")
+            .long("description")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("base")
+            .help("Path to base where search for described files")
+            .long("base")
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("output")
+            .help("Path to output folder for icons")
+            .long("output")
+            .required(false)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+          Arg::new("verbose")
+            .help("Turn on verbose logging")
+            .short('v')
+            .long("verbose")
+            .required(false)
+            .action(ArgAction::SetTrue),
+        )
+        .arg(
+          Arg::new("strict")
+            .help("Turn on strict unpack mode")
+            .short('s')
+            .long("strict")
+            .required(false)
+            .action(ArgAction::SetTrue),
+        ),
+    )
 }

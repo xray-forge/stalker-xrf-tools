@@ -1,6 +1,6 @@
 use crate::equipment::dimensions::get_system_ltx_equipment_sprite_max_dimension;
 use crate::{
-  read_dds_by_path, save_image_as_dds, PackOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
+  read_dds_by_path, save_image_as_dds, PackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
   SECTION_TYPE_INVENTORY_ICON,
 };
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
@@ -10,7 +10,7 @@ use std::io;
 use std::path::PathBuf;
 use xray_ltx::Section;
 
-pub fn pack_equipment_icons_by_ltx(options: PackOptions) {
+pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) {
   let (max_width, max_height) = get_system_ltx_equipment_sprite_max_dimension(&options.ltx);
 
   if max_width > 32 * 1024 || max_height > 32 * 1024 {
@@ -38,7 +38,7 @@ pub fn pack_equipment_icons_by_ltx(options: PackOptions) {
 }
 
 pub fn pack_equipment_icon(
-  options: &PackOptions,
+  options: &PackEquipmentOptions,
   into: &mut RgbaImage,
   section_name: &str,
   section: &Section,
@@ -99,7 +99,7 @@ pub fn pack_equipment_icon(
 }
 
 pub fn get_equipment_icon_source_path(
-  options: &PackOptions,
+  options: &PackEquipmentOptions,
   name: &str,
   custom_path: Option<&str>,
 ) -> PathBuf {

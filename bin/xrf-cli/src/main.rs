@@ -4,11 +4,13 @@ use crate::commands::format_ltx::format_ltx;
 use crate::commands::info_spawn_file::info_spawn_file;
 use crate::commands::pack_equipment_icons::pack_equipment_icons;
 use crate::commands::pack_spawn_file::pack_spawn_file;
+use crate::commands::pack_texture_description::pack_texture_description;
 use crate::commands::repack_spawn_file::repack_spawn_file;
 use crate::commands::setup::setup_commands;
 use crate::commands::unpack_archive::unpack_archive;
 use crate::commands::unpack_equipment_icons::unpack_equipment_icons;
 use crate::commands::unpack_spawn_file::unpack_spawn_file;
+use crate::commands::unpack_texture_description::unpack_texture_description;
 use crate::commands::verify_ltx::verify_ltx;
 use crate::commands::verify_spawn_file::verify_spawn_file;
 use std::env;
@@ -18,16 +20,18 @@ async fn main() {
   setup_logger();
 
   match setup_commands().get_matches().subcommand() {
-    Some(("verify-spawn", matches)) => verify_spawn_file(matches),
-    Some(("info-spawn", matches)) => info_spawn_file(matches),
-    Some(("unpack-spawn", matches)) => unpack_spawn_file(matches).unwrap(),
-    Some(("repack-spawn", matches)) => repack_spawn_file(matches).unwrap(),
-    Some(("pack-spawn", matches)) => pack_spawn_file(matches).unwrap(),
-    Some(("unpack-archive", matches)) => unpack_archive(matches).await,
     Some(("format-ltx", matches)) => format_ltx(matches),
-    Some(("verify-ltx", matches)) => verify_ltx(matches),
+    Some(("info-spawn", matches)) => info_spawn_file(matches),
     Some(("pack-inventory-icons", matches)) => pack_equipment_icons(matches),
+    Some(("pack-spawn", matches)) => pack_spawn_file(matches).unwrap(),
+    Some(("pack-texture-description", matches)) => pack_texture_description(matches),
+    Some(("repack-spawn", matches)) => repack_spawn_file(matches).unwrap(),
+    Some(("unpack-archive", matches)) => unpack_archive(matches).await,
     Some(("unpack-inventory-icons", matches)) => unpack_equipment_icons(matches),
+    Some(("unpack-spawn", matches)) => unpack_spawn_file(matches).unwrap(),
+    Some(("unpack-texture-description", matches)) => unpack_texture_description(matches),
+    Some(("verify-ltx", matches)) => verify_ltx(matches),
+    Some(("verify-spawn", matches)) => verify_spawn_file(matches),
     _ => panic!("Unexpected cli command provided, check --help for details"),
   };
 }
