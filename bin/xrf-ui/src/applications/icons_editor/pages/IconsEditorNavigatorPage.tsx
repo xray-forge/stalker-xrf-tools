@@ -5,7 +5,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
 import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
 
-export function IconsEditor(): ReactElement {
+export function IconsEditorNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
@@ -26,7 +26,8 @@ export function IconsEditor(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/icons_editor", { replace: true })}>Open</Button>
+            <Button onClick={() => navigate("/icons_editor/icons_equipment", { replace: true })}>Equipment</Button>
+            <Button onClick={() => navigate("/icons_editor/icons_description", { replace: true })}>Description</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>

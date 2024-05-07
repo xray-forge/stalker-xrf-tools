@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+base64 = "0.22.1"
 ddsfile = "0.5.1"
 image = "0.24.9"
 image_dds = "0.5.1"

@@ -15,7 +15,7 @@ pub fn unpack_xml_descriptions(options: PackDescriptionOptions) {
 
   println!("Unpacking for {:?} files", files.len());
 
-  for (_, file) in &files {
+  for file in files.values() {
     let is_unpacked: bool = unpack_xml_description(&options, file);
 
     if is_unpacked {
