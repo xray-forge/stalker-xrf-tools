@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-pub struct UnpackDescriptionOptions {
+pub struct PackDescriptionOptions {
   pub description: PathBuf,
   pub base: PathBuf,
   pub output: PathBuf,

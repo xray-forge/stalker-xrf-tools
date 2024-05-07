@@ -2,8 +2,9 @@ pub(crate) mod dds;
 pub(crate) mod description;
 pub(crate) mod equipment;
 
+pub use crate::description::pack::pack_xml_descriptions;
+pub use crate::description::pack_options::PackDescriptionOptions;
 pub use crate::description::unpack::unpack_xml_descriptions;
-pub use crate::description::unpack_options::UnpackDescriptionOptions;
 
 pub use crate::equipment::convert_constants::INVENTORY_ICON_GRID_SQUARE_BASE;
 pub use crate::equipment::convert_constants::SECTION_TYPE_INVENTORY_ICON;

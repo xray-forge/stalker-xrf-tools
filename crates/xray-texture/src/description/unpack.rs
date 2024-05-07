@@ -1,4 +1,4 @@
-use crate::{read_dds_by_path, save_image_as_dds, UnpackDescriptionOptions};
+use crate::{read_dds_by_path, save_image_as_dds, PackDescriptionOptions};
 use image::{GenericImageView, RgbaImage};
 use image_dds::ImageFormat;
 use std::fs::create_dir_all;
@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use crate::description::file_description::FileDescription;
 use crate::description::xml_description::get_files_descriptions;
 
-pub fn unpack_xml_descriptions(options: UnpackDescriptionOptions) {
+pub fn unpack_xml_descriptions(options: PackDescriptionOptions) {
   let files: Vec<FileDescription> = get_files_descriptions(&options);
   let mut count: u32 = 0;
 
@@ -25,7 +25,7 @@ pub fn unpack_xml_descriptions(options: UnpackDescriptionOptions) {
   println!("Unpacked {count} files");
 }
 
-pub fn unpack_xml_description(options: &UnpackDescriptionOptions, file: &FileDescription) -> bool {
+pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &FileDescription) -> bool {
   let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
   let destination: PathBuf = options.output.join(&file.name);
 

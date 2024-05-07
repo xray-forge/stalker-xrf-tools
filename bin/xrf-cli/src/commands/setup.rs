@@ -306,6 +306,14 @@ pub fn setup_commands() -> Command {
             .long("verbose")
             .required(false)
             .action(ArgAction::SetTrue),
+        )
+        .arg(
+          Arg::new("strict")
+            .help("Turn on strict unpack mode")
+            .short('s')
+            .long("strict")
+            .required(false)
+            .action(ArgAction::SetTrue),
         ),
     )
     .subcommand(

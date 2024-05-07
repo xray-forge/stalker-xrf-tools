@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_icon::{unpack_xml_descriptions, UnpackDescriptionOptions};
+use xray_icon::{unpack_xml_descriptions, PackDescriptionOptions};
 
 pub fn unpack_texture_description(matches: &ArgMatches) {
   let description: &PathBuf = matches
@@ -19,7 +19,7 @@ pub fn unpack_texture_description(matches: &ArgMatches) {
   log::info!("Unpacking texture descriptions from: {:?}", description);
   log::info!("Paths: base {:?}, output {:?}", base, output);
 
-  unpack_xml_descriptions(UnpackDescriptionOptions {
+  unpack_xml_descriptions(PackDescriptionOptions {
     description: description.clone(),
     base: base.clone(),
     output: output.clone(),

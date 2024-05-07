@@ -1,13 +1,13 @@
 use crate::description::file_description::FileDescription;
+use crate::description::pack_options::PackDescriptionOptions;
 use crate::description::texture_description::TextureDescription;
-use crate::UnpackDescriptionOptions;
 use roxmltree::{Document, Node, ParsingOptions};
 use std::fs;
 use std::fs::{File, ReadDir};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-pub fn get_files_descriptions(options: &UnpackDescriptionOptions) -> Vec<FileDescription> {
+pub fn get_files_descriptions(options: &PackDescriptionOptions) -> Vec<FileDescription> {
   if options.description.is_dir() {
     println!(
       "Check texture descriptions from dir: {:?}",
@@ -36,7 +36,7 @@ pub fn get_files_descriptions(options: &UnpackDescriptionOptions) -> Vec<FileDes
 }
 
 pub fn get_file_descriptions(
-  options: &UnpackDescriptionOptions,
+  options: &PackDescriptionOptions,
   path: &Path,
 ) -> Vec<FileDescription> {
   if options.is_verbose {
@@ -120,7 +120,7 @@ pub fn get_file_descriptions(
 
             if options.is_verbose {
               println!(
-                "Parsed texture: id:{:?}, x:{:?}, y:{:?}, w:{:?}, h:{:?}",
+                "Parsed texture: id:{:?} [x:{:?}, y:{:?}, w:{:?}, h:{:?}]",
                 id, x, y, w, h
               );
             }
