@@ -1,29 +1,15 @@
-use serde::Serialize;
+use crate::exports_editor::state::{ExportsDeclarations, ExportsEditorState};
 use serde_json::{json, Value};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::MutexGuard;
 use xray_export::{ExportDescriptor, ExportsParser};
-
-pub struct ExportsProjectState {
-  pub conditions: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
-  pub dialogs: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
-  pub effects: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ExportsDeclarations {
-  pub conditions: Vec<ExportDescriptor>,
-  pub dialogs: Vec<ExportDescriptor>,
-  pub effects: Vec<ExportDescriptor>,
-}
 
 #[tauri::command]
 pub async fn open_xr_exports(
   conditions_path: &str,
   dialogs_path: &str,
   effects_path: &str,
-  state: tauri::State<'_, ExportsProjectState>,
+  state: tauri::State<'_, ExportsEditorState>,
 ) -> Result<Value, String> {
   log::info!("Parsing exports folders: {conditions_path} + {dialogs_path} + {effects_path}");
 
@@ -51,7 +37,7 @@ pub async fn open_xr_exports(
 }
 
 #[tauri::command]
-pub fn close_xr_exports(state: tauri::State<'_, ExportsProjectState>) {
+pub fn close_xr_exports(state: tauri::State<'_, ExportsEditorState>) {
   log::info!("Closing xr exports");
 
   let mut lock: MutexGuard<Option<Vec<ExportDescriptor>>> = state.effects.lock().unwrap();
@@ -76,7 +62,7 @@ pub async fn parse_xr_effects(path: &str) -> Result<Value, String> {
 #[tauri::command]
 pub async fn open_xr_effects(
   path: &str,
-  state: tauri::State<'_, ExportsProjectState>,
+  state: tauri::State<'_, ExportsEditorState>,
 ) -> Result<Value, String> {
   log::info!("Parsing effects exports folder: {:?}", path);
 
@@ -95,7 +81,7 @@ pub async fn open_xr_effects(
 }
 
 #[tauri::command]
-pub fn close_xr_effects(state: tauri::State<'_, ExportsProjectState>) {
+pub fn close_xr_effects(state: tauri::State<'_, ExportsEditorState>) {
   log::info!("Closing xr effects project");
 
   let mut lock: MutexGuard<Option<Vec<ExportDescriptor>>> = state.effects.lock().unwrap();
@@ -106,13 +92,13 @@ pub fn close_xr_effects(state: tauri::State<'_, ExportsProjectState>) {
 }
 
 #[tauri::command]
-pub fn has_xr_effects(state: tauri::State<'_, ExportsProjectState>) -> bool {
+pub fn has_xr_effects(state: tauri::State<'_, ExportsEditorState>) -> bool {
   state.effects.lock().unwrap().is_some()
 }
 
 #[tauri::command]
 pub async fn get_xr_effects(
-  state: tauri::State<'_, ExportsProjectState>,
+  state: tauri::State<'_, ExportsEditorState>,
 ) -> Result<Option<Value>, String> {
   let lock: MutexGuard<Option<Vec<ExportDescriptor>>> = state.effects.lock().unwrap();
 
@@ -125,7 +111,7 @@ pub async fn get_xr_effects(
 
 #[tauri::command]
 pub async fn get_xr_exports(
-  state: tauri::State<'_, ExportsProjectState>,
+  state: tauri::State<'_, ExportsEditorState>,
 ) -> Result<Option<Value>, String> {
   let conditions: Option<Vec<ExportDescriptor>> =
     state.conditions.lock().unwrap().as_ref().cloned();

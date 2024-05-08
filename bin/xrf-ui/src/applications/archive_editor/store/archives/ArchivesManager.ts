@@ -3,7 +3,7 @@ import { ContextManager, createActions, createLoadable, Loadable } from "dreamst
 
 import { Optional } from "@/core/types/general";
 import { IArchiveFileReadResult, IArchivesProject } from "@/lib/archive";
-import { ECommand } from "@/lib/ipc";
+import { EArchivesEditorCommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 
 export interface IArchivesContext {
@@ -38,7 +38,7 @@ export class ArchivesManager extends ContextManager<IArchivesContext> {
   public log: Logger = new Logger("archives");
 
   public async onProvisionStarted(): Promise<void> {
-    const existing: IArchivesProject = await invoke(ECommand.GET_ARCHIVES_PROJECT);
+    const existing: IArchivesProject = await invoke(EArchivesEditorCommand.GET_ARCHIVES_PROJECT);
 
     if (existing) {
       this.log.info("Existing archives project detected");
@@ -55,7 +55,7 @@ export class ArchivesManager extends ContextManager<IArchivesContext> {
     try {
       this.setContext({ project: createLoadable(null, true) });
 
-      const response: IArchivesProject = await invoke(ECommand.OPEN_ARCHIVES_PROJECT, { path });
+      const response: IArchivesProject = await invoke(EArchivesEditorCommand.OPEN_ARCHIVES_PROJECT, { path });
 
       this.log.info("Archives project opened");
 
@@ -70,7 +70,7 @@ export class ArchivesManager extends ContextManager<IArchivesContext> {
     this.log.info("Closing existing archives project");
 
     try {
-      await invoke(ECommand.CLOSE_ARCHIVES_PROJECT);
+      await invoke(EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT);
       this.setContext({ project: createLoadable(null) });
     } catch (error) {
       this.log.error("Failed to close archives project:", error);
@@ -85,7 +85,7 @@ export class ArchivesManager extends ContextManager<IArchivesContext> {
     }));
 
     try {
-      const result: IArchiveFileReadResult = await invoke(ECommand.READ_ARCHIVE_FILE, { path });
+      const result: IArchiveFileReadResult = await invoke(EArchivesEditorCommand.READ_ARCHIVE_FILE, { path });
 
       this.log.info("Opened file:", path);
 

@@ -17,6 +17,7 @@ tauri = { version = "1", features = ["path-all", "fs-exists", "dialog-save", "di
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-export = { path = "../../crates/xray-export" }
+xray-icon = { path = "../../crates/xray-texture" }
 xray-ltx = { path = "../../crates/xray-ltx" }
 
 [features]

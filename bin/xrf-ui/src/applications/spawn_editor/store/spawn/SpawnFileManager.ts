@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { ContextManager, createActions, createLoadable, Loadable } from "dreamstate";
 
 import { Optional } from "@/core/types/general";
-import { ECommand } from "@/lib/ipc";
+import { ESpawnsEditorCommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 import { ISpawnFile } from "@/lib/spawn_file";
 
@@ -36,7 +36,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
   public log: Logger = new Logger("spawn");
 
   public async onProvisionStarted(): Promise<void> {
-    const existing: ISpawnFile = await invoke(ECommand.GET_SPAWN_FILE);
+    const existing: ISpawnFile = await invoke(ESpawnsEditorCommand.GET_SPAWN_FILE);
 
     if (existing) {
       this.log.info("Existing spawn file detected");
@@ -53,7 +53,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
     try {
       this.setContext({ spawnFile: createLoadable(null, true) });
 
-      const response: ISpawnFile = await invoke(ECommand.OPEN_SPAWN_FILE, { path });
+      const response: ISpawnFile = await invoke(ESpawnsEditorCommand.OPEN_SPAWN_FILE, { path });
 
       this.log.info("Spawn file opened");
 
@@ -70,7 +70,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
     try {
       this.setContext({ spawnFile: createLoadable(null, true) });
 
-      const response: ISpawnFile = await invoke(ECommand.IMPORT_SPAWN_FILE, { path });
+      const response: ISpawnFile = await invoke(ESpawnsEditorCommand.IMPORT_SPAWN_FILE, { path });
 
       this.log.info("Spawn file imported");
 
@@ -88,7 +88,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
 
     try {
       this.setContext({ spawnFile: this.context.spawnFile.asLoading() });
-      await invoke(ECommand.EXPORT_SPAWN_FILE, { path });
+      await invoke(ESpawnsEditorCommand.EXPORT_SPAWN_FILE, { path });
       this.setContext({ spawnFile: this.context.spawnFile.asReady() });
     } catch (error) {
       this.log.error("Failed to export spawn file:", error);
@@ -103,7 +103,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
 
     try {
       this.setContext({ spawnFile: this.context.spawnFile.asLoading() });
-      await invoke(ECommand.SAVE_SPAWN_FILE, { path });
+      await invoke(ESpawnsEditorCommand.SAVE_SPAWN_FILE, { path });
       this.setContext({ spawnFile: this.context.spawnFile.asReady() });
     } catch (error) {
       this.log.error("Failed to save spawn file:", error);
@@ -115,7 +115,7 @@ export class SpawnFileManager extends ContextManager<ISpawnFileContext> {
     this.log.info("Closing existing spawn file");
 
     try {
-      await invoke(ECommand.CLOSE_SPAWN_FILE);
+      await invoke(ESpawnsEditorCommand.CLOSE_SPAWN_FILE);
       this.setContext({ spawnFile: createLoadable(null) });
     } catch (error) {
       this.log.error("Failed to close spawn file:", error);

@@ -20,7 +20,7 @@ import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IArchiveUnpackResult } from "@/lib/archive";
-import { ECommand } from "@/lib/ipc";
+import { EArchivesEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf_path";
 
@@ -71,7 +71,7 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
 
       log.info("Unpacking:", archivesPath);
 
-      const result: IArchiveUnpackResult = await invoke(ECommand.UNPACK_ARCHIVES_PATH, {
+      const result: IArchiveUnpackResult = await invoke(EArchivesEditorCommand.UNPACK_ARCHIVES_PATH, {
         from: archivesPath,
         destination: archivesUnpackPath,
       });

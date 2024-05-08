@@ -4,7 +4,7 @@ import { ContextManager, createActions, createLoadable, Loadable } from "dreamst
 import { queryProjectPath } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IExportsDeclarations } from "@/lib/exports";
-import { ECommand } from "@/lib/ipc";
+import { EExportsEditorCommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 import {
   getProjectExportConditionsPath,
@@ -31,7 +31,7 @@ export class ExportsManager extends ContextManager<IExportsContext> {
   public log: Logger = new Logger("exports");
 
   public async onProvisionStarted(): Promise<void> {
-    const declarations: Optional<IExportsDeclarations> = await invoke(ECommand.GET_XR_EXPORTS);
+    const declarations: Optional<IExportsDeclarations> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
 
     if (declarations) {
       this.log.info("Existing parsed exports detected");
@@ -71,7 +71,7 @@ export class ExportsManager extends ContextManager<IExportsContext> {
     try {
       this.setContext(({ declarations }) => ({ declarations: declarations.asLoading() }));
 
-      const result: IExportsDeclarations = await invoke(ECommand.OPEN_XR_EXPORTS, {
+      const result: IExportsDeclarations = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
         effectsPath,
         conditionsPath,
         dialogsPath,
@@ -89,7 +89,7 @@ export class ExportsManager extends ContextManager<IExportsContext> {
 
     this.setContext(({ declarations }) => ({ declarations: declarations.asLoading() }));
 
-    await invoke(ECommand.CLOSE_XR_EXPORTS);
+    await invoke(EExportsEditorCommand.CLOSE_XR_EXPORTS);
 
     this.setContext({ declarations: createLoadable(null) });
   }

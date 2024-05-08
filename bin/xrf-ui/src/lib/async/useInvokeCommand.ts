@@ -2,7 +2,6 @@ import { invoke, InvokeArgs } from "@tauri-apps/api/tauri";
 import { useCallback, useState } from "react";
 
 import { Optional } from "@/core/types/general";
-import { ECommand } from "@/lib/ipc";
 
 export interface IAsyncCommandData<T> {
   isLoading: boolean;
@@ -11,7 +10,7 @@ export interface IAsyncCommandData<T> {
   get(args?: InvokeArgs): Promise<Optional<T>>;
 }
 
-export function useInvokeCommand<T>(command: ECommand): IAsyncCommandData<T> {
+export function useInvokeCommand<T>(command: string): IAsyncCommandData<T> {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [value, setValue] = useState<Optional<T>>(null);
   const [error, setError] = useState<Optional<string>>(null);

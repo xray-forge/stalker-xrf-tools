@@ -1,11 +1,8 @@
+use crate::archives_editor::state::ArchivesEditorState;
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::MutexGuard;
 use xray_archive::ArchiveProject;
-
-pub struct ArchivesProjectState {
-  pub project: Arc<Mutex<Option<ArchiveProject>>>,
-}
 
 #[tauri::command]
 pub async fn unpack_archives_path(from: &str, destination: &str) -> Result<Value, String> {
@@ -30,7 +27,7 @@ pub async fn unpack_archives_path(from: &str, destination: &str) -> Result<Value
 #[tauri::command]
 pub async fn open_archives_project(
   path: &str,
-  state: tauri::State<'_, ArchivesProjectState>,
+  state: tauri::State<'_, ArchivesEditorState>,
 ) -> Result<Value, String> {
   log::info!("Opening archives project");
 
@@ -49,7 +46,7 @@ pub async fn open_archives_project(
 }
 
 #[tauri::command]
-pub fn close_archives_project(state: tauri::State<'_, ArchivesProjectState>) {
+pub fn close_archives_project(state: tauri::State<'_, ArchivesEditorState>) {
   log::info!("Closing archives project");
 
   let mut lock: MutexGuard<Option<ArchiveProject>> = state.project.lock().unwrap();
@@ -60,13 +57,13 @@ pub fn close_archives_project(state: tauri::State<'_, ArchivesProjectState>) {
 }
 
 #[tauri::command]
-pub fn has_archives_project(state: tauri::State<'_, ArchivesProjectState>) -> bool {
+pub fn has_archives_project(state: tauri::State<'_, ArchivesEditorState>) -> bool {
   state.project.lock().unwrap().is_some()
 }
 
 #[tauri::command]
 pub async fn get_archives_project(
-  state: tauri::State<'_, ArchivesProjectState>,
+  state: tauri::State<'_, ArchivesEditorState>,
 ) -> Result<Option<Value>, String> {
   let lock: MutexGuard<Option<ArchiveProject>> = state.project.lock().unwrap();
 
@@ -80,7 +77,7 @@ pub async fn get_archives_project(
 #[tauri::command]
 pub async fn read_archive_file(
   path: &str,
-  state: tauri::State<'_, ArchivesProjectState>,
+  state: tauri::State<'_, ArchivesEditorState>,
 ) -> Result<Value, String> {
   let lock: MutexGuard<Option<ArchiveProject>> = state.project.lock().unwrap();
 

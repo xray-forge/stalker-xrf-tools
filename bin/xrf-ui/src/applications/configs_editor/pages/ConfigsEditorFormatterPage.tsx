@@ -21,7 +21,7 @@ import { ConfigsFormatResult } from "@/applications/configs_editor/components/Co
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
-import { ECommand } from "@/lib/ipc";
+import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectFormatResult } from "@/lib/ltx";
 
@@ -73,7 +73,7 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
       log.info("Performing format command:", isCheck, configsPath);
 
       const result: ILtxProjectFormatResult = await invoke(
-        isCheck ? ECommand.CHECK_FORMAT_CONFIGS_PATH : ECommand.FORMAT_CONFIGS_PATH,
+        isCheck ? EConfigsEditorCommand.CHECK_FORMAT_CONFIGS_PATH : EConfigsEditorCommand.FORMAT_CONFIGS_PATH,
         { path: configsPath }
       );
 

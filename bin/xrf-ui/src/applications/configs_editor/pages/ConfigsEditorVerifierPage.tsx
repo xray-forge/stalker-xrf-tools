@@ -19,7 +19,7 @@ import { ConfigsVerifyResult } from "@/applications/configs_editor/components/Co
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
-import { ECommand } from "@/lib/ipc";
+import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectVerifyResult } from "@/lib/ltx";
 
@@ -69,7 +69,9 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
 
       log.info("Verifying:", configsPath);
 
-      const result: ILtxProjectVerifyResult = await invoke(ECommand.VERIFY_CONFIGS_PATH, { path: configsPath });
+      const result: ILtxProjectVerifyResult = await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, {
+        path: configsPath,
+      });
 
       log.info("Verified:", configsPath);
 
