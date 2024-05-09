@@ -5183,6 +5183,7 @@ dependencies = [
  "image_dds",
  "path-absolutize",
  "roxmltree",
+ "serde",
  "xray-ltx",
 ]
 

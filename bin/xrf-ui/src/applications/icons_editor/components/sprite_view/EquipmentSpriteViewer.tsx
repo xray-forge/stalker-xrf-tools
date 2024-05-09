@@ -9,6 +9,7 @@ import { EquipmentGridZoom } from "@/applications/icons_editor/components/sprite
 import { EquipmentSpriteGrid } from "@/applications/icons_editor/components/sprite_view/EquipmentSpriteGrid";
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 import { Optional } from "@/core/types/general";
+import { GridMapper } from "@/lib/icons";
 
 export function EquipmentSpriteViewer({
   equipmentContext: { spriteImage: { value: spriteImage }, gridSize, isGridVisible, equipmentActions } = useManager(
@@ -20,8 +21,13 @@ export function EquipmentSpriteViewer({
   const [zoomOriginX, setZoomOriginX] = useState(0);
   const [zoomOriginY, setZoomOriginY] = useState(0);
 
-  const rowsCount: number = spriteImage ? Math.round(spriteImage.image.height / gridSize) : 0;
-  const columnsCount: number = spriteImage ? Math.round(spriteImage.image.width / gridSize) : 0;
+  const gridMapper: Optional<GridMapper> = useMemo(
+    () =>
+      spriteImage
+        ? new GridMapper(spriteImage.image.width, spriteImage.image.height, gridSize, spriteImage.descriptors)
+        : null,
+    [spriteImage, gridSize]
+  );
 
   const sx: SxProps = useMemo(
     () => ({
@@ -114,12 +120,7 @@ export function EquipmentSpriteViewer({
           >
             <img src={spriteImage.image.src} width={"100%"} height={"100%"} draggable={false} />
 
-            <EquipmentSpriteGrid
-              isGridVisible={isGridVisible}
-              gridSize={gridSize}
-              rowsCount={rowsCount}
-              columnsCount={columnsCount}
-            />
+            {gridMapper ? <EquipmentSpriteGrid isGridVisible={isGridVisible} gridMapper={gridMapper} /> : null}
           </Grid>
         ) : (
           "loading..."

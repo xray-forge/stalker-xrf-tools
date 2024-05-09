@@ -1,3 +1,4 @@
+use crate::equipment::config::get_section_inventory_coordinates;
 use crate::{
   save_image_as_dds, UnpackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
   SECTION_TYPE_INVENTORY_ICON,
@@ -29,21 +30,15 @@ pub fn unpack_equipment_icon(
   section_name: &str,
   section: &Section,
 ) -> bool {
-  let inv_grid_x: Option<&str> = section.get("inv_grid_x");
-  let inv_grid_y: Option<&str> = section.get("inv_grid_y");
-  let inv_grid_w: Option<&str> = section.get("inv_grid_width");
-  let inv_grid_h: Option<&str> = section.get("inv_grid_height");
+  let (inv_grid_x, inv_grid_y, inv_grid_w, inv_grid_h) =
+    match get_section_inventory_coordinates(section) {
+      None => {
+        println!("Skip for possible section: '{section_name}'");
 
-  if inv_grid_x.is_none() || inv_grid_y.is_none() || inv_grid_w.is_none() || inv_grid_h.is_none() {
-    println!("Skip for possible section: '{section_name}'");
-
-    return false;
-  }
-
-  let inv_grid_x: u32 = inv_grid_x.unwrap().parse::<u32>().unwrap();
-  let inv_grid_y: u32 = inv_grid_y.unwrap().parse::<u32>().unwrap();
-  let inv_grid_w: u32 = inv_grid_w.unwrap().parse::<u32>().unwrap();
-  let inv_grid_h: u32 = inv_grid_h.unwrap().parse::<u32>().unwrap();
+        return false;
+      }
+      Some(it) => it,
+    };
 
   let x_absolute: u32 = inv_grid_x * INVENTORY_ICON_GRID_SQUARE_BASE;
   let y_absolute: u32 = inv_grid_y * INVENTORY_ICON_GRID_SQUARE_BASE;

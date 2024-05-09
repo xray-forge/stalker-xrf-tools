@@ -1,3 +1,4 @@
+use crate::equipment::config::get_section_inventory_coordinates;
 use crate::equipment::dimensions::get_system_ltx_equipment_sprite_max_dimension;
 use crate::{
   read_dds_by_path, save_image_as_dds, PackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
@@ -43,26 +44,18 @@ pub fn pack_equipment_icon(
   section_name: &str,
   section: &Section,
 ) -> bool {
-  let inv_grid_custom: Option<&str> = section.get("$inventory_icon_path");
-
-  let inv_grid_x: Option<&str> = section.get("inv_grid_x");
-  let inv_grid_y: Option<&str> = section.get("inv_grid_y");
-  let inv_grid_w: Option<&str> = section.get("inv_grid_width");
-  let inv_grid_h: Option<&str> = section.get("inv_grid_height");
-
-  if inv_grid_x.is_none() || inv_grid_y.is_none() || inv_grid_w.is_none() || inv_grid_h.is_none() {
-    return false;
-  }
-
-  let inv_grid_x: u32 = inv_grid_x.unwrap().parse::<u32>().unwrap();
-  let inv_grid_y: u32 = inv_grid_y.unwrap().parse::<u32>().unwrap();
-  let inv_grid_w: u32 = inv_grid_w.unwrap().parse::<u32>().unwrap();
-  let inv_grid_h: u32 = inv_grid_h.unwrap().parse::<u32>().unwrap();
+  let (inv_grid_x, inv_grid_y, inv_grid_w, inv_grid_h) =
+    match get_section_inventory_coordinates(section) {
+      None => return false,
+      Some(it) => it,
+    };
 
   let x_absolute: u32 = inv_grid_x * INVENTORY_ICON_GRID_SQUARE_BASE;
   let y_absolute: u32 = inv_grid_y * INVENTORY_ICON_GRID_SQUARE_BASE;
   let w_absolute: u32 = inv_grid_w * INVENTORY_ICON_GRID_SQUARE_BASE;
   let h_absolute: u32 = inv_grid_h * INVENTORY_ICON_GRID_SQUARE_BASE;
+
+  let inv_grid_custom: Option<&str> = section.get("$inventory_icon_path");
 
   let icon_dds_path: PathBuf =
     get_equipment_icon_source_path(options, section_name, inv_grid_custom);
