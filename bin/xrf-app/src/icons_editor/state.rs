@@ -6,6 +6,7 @@ pub struct IconsEditorState {
   pub equipment_sprite_path: Arc<Mutex<Option<String>>>,
   pub equipment_sprite_name: Arc<Mutex<Option<String>>>,
   pub equipment_sprite: Arc<Mutex<Option<RgbaImage>>>,
+  pub equipment_sprite_preview: Arc<Mutex<Option<Vec<u8>>>>,
   pub equipment_descriptors: Arc<Mutex<Option<Vec<u8>>>>,
 }
 

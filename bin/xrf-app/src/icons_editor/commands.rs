@@ -1,6 +1,8 @@
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
-use image::RgbaImage;
+use image::codecs::png::PngEncoder;
+use image::{ColorType, ImageEncoder, RgbaImage};
 use serde_json::{json, Value};
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::MutexGuard;
 use xray_icon::read_dds_by_path;
@@ -21,6 +23,17 @@ pub async fn open_equipment_sprite(
     Err(error) => return Err(format!("Failed to open provided image file: {:?}", error,)),
   };
 
+  let mut preview_buffer: Vec<u8> = Vec::new();
+
+  PngEncoder::new(preview_buffer.by_ref())
+    .write_image(
+      image.as_raw(),
+      image.width(),
+      image.height(),
+      ColorType::Rgba8,
+    )
+    .expect("error encoding pixels as PNG");
+
   log::info!("Opened equipment dds file");
 
   let response = IconsEditorEquipmentResponse {
@@ -32,6 +45,7 @@ pub async fn open_equipment_sprite(
   *state.equipment_sprite_name.lock().unwrap() = Some(name.into());
   *state.equipment_sprite_path.lock().unwrap() = Some(equipment_dds_path.into());
   *state.equipment_sprite.lock().unwrap() = Some(image);
+  *state.equipment_sprite_preview.lock().unwrap() = Some(preview_buffer);
   *state.equipment_descriptors.lock().unwrap() = Some(descriptors);
 
   Ok(json!(response))
@@ -65,6 +79,8 @@ pub async fn close_equipment_sprite(
   *state.equipment_sprite_path.lock().unwrap() = None;
   *state.equipment_sprite_name.lock().unwrap() = None;
   *state.equipment_descriptors.lock().unwrap() = None;
+  *state.equipment_sprite.lock().unwrap() = None;
+  *state.equipment_sprite_preview.lock().unwrap() = None;
 
   Ok(())
 }

@@ -14,13 +14,14 @@ pub fn init_icons_editor<R: Runtime>() -> TauriPlugin<R> {
         equipment_sprite_path: Arc::new(Mutex::new(None)),
         equipment_sprite_name: Arc::new(Mutex::new(None)),
         equipment_sprite: Arc::new(Mutex::new(None)),
+        equipment_sprite_preview: Arc::new(Mutex::new(None)),
         equipment_descriptors: Arc::new(Mutex::new(None)),
       });
 
       Ok(())
     })
-    .register_uri_scheme_protocol("stream", move |_, request| {
-      match get_equipment_sprite_stream_response(request) {
+    .register_uri_scheme_protocol("stream", move |application, request| {
+      match get_equipment_sprite_stream_response(application, request) {
         Ok(response) => Ok(response),
         Err(error) => {
           log::warn!("Failed to handle stream protocol request: {:?}", error);
