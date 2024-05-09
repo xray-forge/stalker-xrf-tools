@@ -1,24 +1,27 @@
-import { default as AddIcon } from "@mui/icons-material/AddCircle";
-import { default as RemoveIcon } from "@mui/icons-material/RemoveCircle";
-import { Button, Grid, IconButton } from "@mui/material";
+import { Grid } from "@mui/material";
 import { SxProps } from "@mui/system";
 import { clamp } from "@mui/x-data-grid/internals";
-import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
-import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useRef, useState, WheelEvent } from "react";
+import { useManager } from "dreamstate";
+import { MouseEvent, ReactElement, useCallback, useMemo, useState, WheelEvent } from "react";
 
+import { EquipmentGridControls } from "@/applications/icons_editor/components/sprite_view/EquipmentGridControls";
+import { EquipmentGridZoom } from "@/applications/icons_editor/components/sprite_view/EquipmentGridZoom";
 import { EquipmentSpriteGrid } from "@/applications/icons_editor/components/sprite_view/EquipmentSpriteGrid";
+import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 import { Optional } from "@/core/types/general";
-import { EIconsEditorCommand } from "@/lib/ipc";
 
-export function EquipmentSpriteViewer(): ReactElement {
-  const [sourceUrl, setSourceUrl] = useState<Optional<string>>(null);
-
+export function EquipmentSpriteViewer({
+  equipmentContext: { spriteImage: { value: spriteImage }, gridSize, isGridVisible, equipmentActions } = useManager(
+    EquipmentManager
+  ),
+}): ReactElement {
   const [holdingOrigin, setHoldingOrigin] = useState<Optional<[number, number]>>(null);
   const [zoomValue, setZoomValue] = useState(1);
   const [zoomOriginX, setZoomOriginX] = useState(0);
   const [zoomOriginY, setZoomOriginY] = useState(0);
 
-  const imageWrapperRef = useRef<Optional<HTMLDivElement>>(null);
+  const rowsCount: number = spriteImage ? Math.round(spriteImage.image.height / gridSize) : 0;
+  const columnsCount: number = spriteImage ? Math.round(spriteImage.image.width / gridSize) : 0;
 
   const sx: SxProps = useMemo(
     () => ({
@@ -29,23 +32,17 @@ export function EquipmentSpriteViewer(): ReactElement {
       backgroundSize: "20px 20px",
       backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
       userSelect: "none",
-      transform: `scale(${zoomValue})`,
+      transform: `scale(${zoomValue}) translate(${zoomOriginX}px, ${zoomOriginY}px)`,
     }),
     [zoomValue, zoomOriginX, zoomOriginY]
   );
 
-  const onResetClick = useCallback(() => {
-    setZoomOriginX(0);
-    setZoomOriginY(0);
-    setZoomValue(1);
-  }, []);
-
   const onZoomUp = useCallback(() => {
-    setZoomValue((it) => clamp(it + 0.1, 0.1, 1.5));
+    setZoomValue((it) => clamp(it + 0.1, 0.1, 5));
   }, []);
 
   const onZoomDown = useCallback(() => {
-    setZoomValue((it) => clamp(it - 0.1, 0.1, 1.5));
+    setZoomValue((it) => clamp(it - 0.1, 0.1, 5));
   }, []);
 
   const onWheel = useCallback(
@@ -55,7 +52,7 @@ export function EquipmentSpriteViewer(): ReactElement {
       } else if (event.ctrlKey) {
         setZoomOriginX((it) => clamp(event.deltaY > 0 ? it - 30 : it + 30, -2000, 2000));
       } else {
-        setZoomValue((it) => clamp(event.deltaY > 0 ? it - 0.1 : it + 0.1, 0.1, 1.5));
+        setZoomValue((it) => clamp(event.deltaY > 0 ? it - 0.1 : it + 0.1, 0.1, 5));
       }
     },
     [zoomValue]
@@ -78,21 +75,13 @@ export function EquipmentSpriteViewer(): ReactElement {
       if (holdingOrigin) {
         const [x, y] = holdingOrigin;
 
-        setZoomOriginX((it) => it + (event.pageX - x));
-        setZoomOriginY((it) => it + (event.pageY - y));
+        setZoomOriginX((it) => clamp(it + (event.pageX - x) / 2, -2000, 2000));
+        setZoomOriginY((it) => clamp(it + (event.pageY - y) / 2, -2000, 2000));
         setHoldingOrigin([event.pageX, event.pageY]);
       }
     },
     [holdingOrigin]
   );
-
-  useEffect(() => {
-    invoke(EIconsEditorCommand.GET_EQUIPMENT_SPRITE_URI)
-      .then((uri) => {
-        setSourceUrl(uri as Optional<string>);
-      })
-      .catch(console.error);
-  }, []);
 
   return (
     <Grid width={"100%"} height={"100%"} position={"relative"} overflow={"hidden"}>
@@ -112,41 +101,38 @@ export function EquipmentSpriteViewer(): ReactElement {
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
       >
-        {sourceUrl ? (
+        {spriteImage ? (
           <Grid
-            ref={imageWrapperRef}
             position={"relative"}
             className={"sprite-preview"}
+            width={spriteImage.image.width}
+            minWidth={spriteImage.image.width}
             height={"auto"}
-            left={zoomOriginX}
-            top={zoomOriginY}
+            left={0}
+            top={0}
             sx={sx}
           >
-            <img src={convertFileSrc(sourceUrl, "stream")} width={"100%"} height={"100%"} draggable={false} />
+            <img src={spriteImage.image.src} width={"100%"} height={"100%"} draggable={false} />
 
-            <EquipmentSpriteGrid isGridVisible={true} gridSize={50} rowsCount={38} columnsCount={20} />
+            <EquipmentSpriteGrid
+              isGridVisible={isGridVisible}
+              gridSize={gridSize}
+              rowsCount={rowsCount}
+              columnsCount={columnsCount}
+            />
           </Grid>
         ) : (
           "loading..."
         )}
 
-        <Grid display={"flex"} alignItems={"center"} position={"absolute"} right={4} bottom={4}>
-          <IconButton aria-label={"delete"} size={"small"} color={"primary"} onClick={onZoomUp}>
-            <AddIcon />
-          </IconButton>
+        <EquipmentGridControls
+          gridSize={gridSize}
+          isGridVisible={isGridVisible}
+          onSetGridSize={equipmentActions.setGridSize}
+          onSetGridVisibility={equipmentActions.setGridVisibility}
+        />
 
-          <Grid marginLeft={0.5} marginRight={0.5}>
-            {zoomValue.toFixed(2)}
-          </Grid>
-
-          <IconButton aria-label={"delete"} size={"small"} color={"primary"} onClick={onZoomDown}>
-            <RemoveIcon />
-          </IconButton>
-
-          <Button size={"small"} onClick={onResetClick}>
-            RESET
-          </Button>
-        </Grid>
+        <EquipmentGridZoom zoom={zoomValue} onZoomDown={onZoomDown} onZoomUp={onZoomUp} />
       </Grid>
     </Grid>
   );

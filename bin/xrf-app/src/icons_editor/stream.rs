@@ -14,7 +14,7 @@ pub fn get_equipment_sprite_stream_response(
     .to_string();
 
   if !uri.ends_with("/test.png") {
-    log::info!("todo Incorrect response: {uri}");
+    log::info!("todo Incorrect request: {uri}");
 
     return ResponseBuilder::new().status(404).body(Vec::new());
   }
@@ -36,9 +36,16 @@ pub fn get_equipment_sprite_stream_response(
     )
     .expect("error encoding pixels as PNG");
 
-  log::info!("Opened: {:?}", path);
+  let mut response: ResponseBuilder = ResponseBuilder::new();
 
-  ResponseBuilder::new()
+  if let Some(referer) = request.headers().get(REFERER).map(|x| x.to_str().unwrap()) {
+    log::info!("Requested asset: {:?} # {:?}", path, referer);
+    response = response.header(ACCESS_CONTROL_ALLOW_ORIGIN, referer.trim_matches('/'))
+  } else {
+    log::info!("Requested asset: {:?}", path);
+  }
+
+  response
     .header(CONTENT_TYPE, "image/png")
     .header(CONTENT_LENGTH, image.len())
     .body(buffer)

@@ -43,32 +43,28 @@ export function getProjectArchivesUnpackPath(projectPath: string): Promise<strin
   return path.resolve(projectPath, "target", "unpacked_archives");
 }
 
+export function getProjectEquipmentDDSPath(projectPath: string): Promise<string> {
+  return path.resolve(projectPath, "src", "resources", "textures", "ui", "ui_icon_equipment.dds");
+}
+
+export async function getProjectSystemLtxPath(projectPath: string): Promise<string> {
+  return path.resolve(await getProjectConfigsPath(projectPath), "system.ltx");
+}
+
 export async function getExistingProjectBuiltAllSpawnPath(projectPath: string): Promise<Optional<string>> {
-  const spawnFilePath: string = await getProjectBuiltAllSpawnPath(projectPath);
-
-  if (await exists(spawnFilePath)) {
-    return spawnFilePath;
-  }
-
-  return null;
+  return getPathIfExists(getProjectBuiltAllSpawnPath(projectPath));
 }
 
 export async function getExistingProjectUnpackedAllSpawnPath(projectPath: string): Promise<Optional<string>> {
-  const unpackedPath: string = await getProjectAllSpawnUnpackPath(projectPath);
-
-  if (await exists(unpackedPath)) {
-    return unpackedPath;
-  }
-
-  return null;
+  return getPathIfExists(getProjectAllSpawnUnpackPath(projectPath));
 }
 
 export async function getExistingProjectLinkedGamePath(projectPath: string): Promise<Optional<string>> {
-  const unpackedPath: string = await getProjectLinkedGamePath(projectPath);
+  return getPathIfExists(getProjectLinkedGamePath(projectPath));
+}
 
-  if (await exists(unpackedPath)) {
-    return unpackedPath;
-  }
+export async function getPathIfExists(path: string | Promise<string>): Promise<Optional<string>> {
+  const resolved: string = await path;
 
-  return null;
+  return (await exists(resolved)) ? resolved : null;
 }

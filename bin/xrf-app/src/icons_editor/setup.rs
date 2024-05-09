@@ -19,10 +19,14 @@ pub fn init_icons_editor<R: Runtime>() -> TauriPlugin<R> {
     .register_uri_scheme_protocol("stream", move |_, request| {
       match get_equipment_sprite_stream_response(request) {
         Ok(response) => Ok(response),
-        Err(error) => ResponseBuilder::new()
-          .status(StatusCode::BAD_REQUEST)
-          .header(CONTENT_TYPE, "text/plain")
-          .body(error.to_string().as_bytes().to_vec()),
+        Err(error) => {
+          log::warn!("Failed to handle stream protocol request: {:?}", error);
+
+          ResponseBuilder::new()
+            .status(StatusCode::BAD_REQUEST)
+            .header(CONTENT_TYPE, "text/plain")
+            .body(error.to_string().as_bytes().to_vec())
+        }
       }
     })
     .invoke_handler(tauri::generate_handler![

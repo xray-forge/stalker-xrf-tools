@@ -1,5 +1,6 @@
 import { Grid } from "@mui/material";
-import { memo, ReactElement } from "react";
+import { SxProps } from "@mui/system";
+import { memo, ReactElement, useMemo } from "react";
 
 interface IEquipmentSpriteGridProps {
   isGridVisible: boolean;
@@ -10,8 +11,29 @@ interface IEquipmentSpriteGridProps {
 }
 
 export const EquipmentSpriteGrid = memo(
-  ({ zoomCoefficient = 1, gridSize = 50, rowsCount, columnsCount }: IEquipmentSpriteGridProps): ReactElement => {
+  ({
+    isGridVisible,
+    zoomCoefficient = 1,
+    gridSize = 50,
+    rowsCount,
+    columnsCount,
+  }: IEquipmentSpriteGridProps): ReactElement => {
     const size: number = zoomCoefficient * gridSize;
+
+    const sx: SxProps = useMemo(
+      () => ({
+        userSelect: "none",
+        border: isGridVisible ? "1px solid" : "none",
+        borderColor: "rgba(0,2,1,0.54)",
+        "&:hover": {
+          background: "rgba(0,0,0,0.49)",
+        },
+        "&:hover .coordinates": {
+          display: "flex",
+        },
+      }),
+      [isGridVisible]
+    );
 
     return (
       <Grid position={"absolute"} left={0} top={0} right={0} bottom={0} bgcolor={"#66666608"}>
@@ -32,17 +54,7 @@ export const EquipmentSpriteGrid = memo(
                     maxHeight={size}
                     minWidth={size}
                     maxWidth={size}
-                    sx={{
-                      userSelect: "none",
-                      border: "1px solid",
-                      borderColor: "rgba(0,251,105,0.25)",
-                      "&:hover": {
-                        background: "rgba(0,251,105,0.25)",
-                      },
-                      "&:hover .coordinates": {
-                        display: "flex",
-                      },
-                    }}
+                    sx={sx}
                   >
                     <Grid className={"coordinates"} display={"none"}>
                       {row}:{column}
