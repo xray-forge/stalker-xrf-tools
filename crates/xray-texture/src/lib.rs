@@ -6,6 +6,8 @@ pub use crate::description::pack::pack_xml_descriptions;
 pub use crate::description::pack_options::PackDescriptionOptions;
 pub use crate::description::unpack::unpack_xml_descriptions;
 
+pub use crate::equipment::config::get_ltx_inventory_descriptors;
+pub use crate::equipment::config_inventory_section_descriptor::ConfigInventorySectionDescriptor;
 pub use crate::equipment::convert_constants::INVENTORY_ICON_GRID_SQUARE_BASE;
 pub use crate::equipment::convert_constants::SECTION_TYPE_INVENTORY_ICON;
 pub use crate::equipment::pack::pack_equipment_icon;

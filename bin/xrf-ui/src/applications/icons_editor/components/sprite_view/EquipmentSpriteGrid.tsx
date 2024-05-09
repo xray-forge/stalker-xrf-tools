@@ -30,6 +30,7 @@ export const EquipmentSpriteGrid = memo(
         },
         "&:hover .coordinates": {
           display: "flex",
+          userSelect: "none",
         },
       }),
       [isGridVisible]

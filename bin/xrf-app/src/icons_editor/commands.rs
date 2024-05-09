@@ -5,7 +5,10 @@ use serde_json::{json, Value};
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::MutexGuard;
-use xray_icon::read_dds_by_path;
+use xray_icon::{
+  get_ltx_inventory_descriptors, read_dds_by_path, ConfigInventorySectionDescriptor,
+};
+use xray_ltx::Ltx;
 
 #[tauri::command]
 pub async fn open_equipment_sprite(
@@ -16,7 +19,6 @@ pub async fn open_equipment_sprite(
   log::info!("Opening equipment file: {equipment_dds_path} - {system_ltx_path}");
 
   let name: &str = "equipment.png";
-  let descriptors: Vec<u8> = Vec::new();
 
   let image: RgbaImage = match read_dds_by_path(&PathBuf::from(equipment_dds_path)) {
     Ok(image) => image,
@@ -35,6 +37,10 @@ pub async fn open_equipment_sprite(
     .expect("error encoding pixels as PNG");
 
   log::info!("Opened equipment dds file");
+
+  let descriptors: Vec<ConfigInventorySectionDescriptor> = get_ltx_inventory_descriptors(
+    &Ltx::load_from_file_full(system_ltx_path).map_err(|error| error.to_string())?,
+  );
 
   let response = IconsEditorEquipmentResponse {
     path: equipment_dds_path.into(),
@@ -57,7 +63,8 @@ pub async fn get_equipment_sprite(
 ) -> Result<Option<Value>, String> {
   let path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
   let name_lock: MutexGuard<Option<String>> = state.equipment_sprite_name.lock().unwrap();
-  let equipment_lock: MutexGuard<Option<Vec<u8>>> = state.equipment_descriptors.lock().unwrap();
+  let equipment_lock: MutexGuard<Option<Vec<ConfigInventorySectionDescriptor>>> =
+    state.equipment_descriptors.lock().unwrap();
 
   if (*equipment_lock).is_none() || (*name_lock).is_none() {
     return Ok(None);

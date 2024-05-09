@@ -6,7 +6,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 
 export function EquipmentSpriteEditorMenu({
-  equipmentContext: { spriteImage: { isLoading }, equipmentActions } = useManager(EquipmentManager),
+  equipmentContext: { spriteImage: { isLoading, value: spriteImage }, equipmentActions } = useManager(EquipmentManager),
 }): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
@@ -17,7 +17,9 @@ export function EquipmentSpriteEditorMenu({
   }, [navigate, equipmentActions]);
 
   return (
-    <Grid display={"flex"} direction={"column"} width={200} minWidth={200} justifySelf={"stretch"} container>
+    <Grid display={"flex"} direction={"column"} width={240} minWidth={240} justifySelf={"stretch"} container>
+      <Grid padding={3}>Descriptors: {spriteImage?.descriptors.length ?? 0}</Grid>
+
       <Grid flexGrow={1} container />
 
       <Grid padding={3}>

@@ -3,13 +3,13 @@ import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
 import { ContextManager, createActions, createLoadable, Loadable } from "dreamstate";
 
 import { Optional } from "@/core/types/general";
-import { IEquipmentResponse } from "@/lib/icons";
+import { IEquipmentResponse, IEquipmentSectionDescriptor } from "@/lib/icons";
 import { blobToImage } from "@/lib/image";
 import { EIconsEditorCommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 
 export interface IEquipmentPngDescriptor {
-  descriptors: Array<unknown>;
+  descriptors: Array<IEquipmentSectionDescriptor>;
   path: string;
   name: string;
   blob: Blob;
