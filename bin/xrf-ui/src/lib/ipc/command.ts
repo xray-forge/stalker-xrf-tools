@@ -13,6 +13,10 @@ export enum EConfigsEditorCommand {
   VERIFY_CONFIGS_PATH = "plugin:configs_editor|verify_configs_path",
 }
 
+export enum EIconsEditorCommand {
+  GET_EQUIPMENT_SPRITE_URI = "plugin:icons_editor|get_equipment_sprite_uri",
+}
+
 export enum EExportsEditorCommand {
   CLOSE_XR_EFFECTS = "plugin:exports_editor|close_xr_effects",
   CLOSE_XR_EXPORTS = "plugin:exports_editor|close_xr_exports",

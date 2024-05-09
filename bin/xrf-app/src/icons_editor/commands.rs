@@ -6,3 +6,10 @@ pub async fn open_equipment_sprite(equipment_dds_path: &str) -> Result<u32, Stri
 
   Ok(1)
 }
+
+#[tauri::command]
+pub async fn get_equipment_sprite_uri() -> &'static str {
+  log::info!("Getting equipment sprite uri");
+
+  "test.png"
+}

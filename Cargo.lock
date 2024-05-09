@@ -5209,7 +5209,11 @@ name = "xrf-app"
 version = "0.1.0"
 dependencies = [
  "env_logger",
+ "http",
+ "http-range",
+ "image",
  "log",
+ "percent-encoding",
  "serde",
  "serde_json",
  "tauri",

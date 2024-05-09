@@ -1,5 +1,9 @@
 use crate::icons_editor::state::IconsEditorState;
+use crate::icons_editor::stream::get_equipment_sprite_stream_response;
+use http::header::CONTENT_TYPE;
+use http::StatusCode;
 use std::sync::{Arc, Mutex};
+use tauri::http::ResponseBuilder;
 use tauri::plugin::TauriPlugin;
 use tauri::{Manager, Runtime};
 
@@ -12,8 +16,18 @@ pub fn init_icons_editor<R: Runtime>() -> TauriPlugin<R> {
 
       Ok(())
     })
+    .register_uri_scheme_protocol("stream", move |_, request| {
+      match get_equipment_sprite_stream_response(request) {
+        Ok(response) => Ok(response),
+        Err(error) => ResponseBuilder::new()
+          .status(StatusCode::BAD_REQUEST)
+          .header(CONTENT_TYPE, "text/plain")
+          .body(error.to_string().as_bytes().to_vec()),
+      }
+    })
     .invoke_handler(tauri::generate_handler![
-      crate::icons_editor::commands::open_equipment_sprite
+      crate::icons_editor::commands::open_equipment_sprite,
+      crate::icons_editor::commands::get_equipment_sprite_uri,
     ])
     .build()
 }

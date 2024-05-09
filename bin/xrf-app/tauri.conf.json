@@ -42,7 +42,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; media-src stream: http://stream.localhost"
     },
     "bundle": {
       "active": true,
