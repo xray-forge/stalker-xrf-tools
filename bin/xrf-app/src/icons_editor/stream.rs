@@ -13,8 +13,8 @@ pub fn get_equipment_sprite_stream_response(
     .decode_utf8_lossy()
     .to_string();
 
-  if !uri.ends_with("/test.png") {
-    log::info!("todo Incorrect request: {uri}");
+  if !uri.ends_with("/equipment.png") {
+    log::info!("Incorrect asset request: {uri}");
 
     return ResponseBuilder::new().status(404).body(Vec::new());
   }

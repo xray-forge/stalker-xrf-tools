@@ -11,7 +11,10 @@ pub fn init_icons_editor<R: Runtime>() -> TauriPlugin<R> {
   tauri::plugin::Builder::new("icons_editor")
     .setup(|application| {
       application.manage(IconsEditorState {
+        equipment_sprite_path: Arc::new(Mutex::new(None)),
+        equipment_sprite_name: Arc::new(Mutex::new(None)),
         equipment_sprite: Arc::new(Mutex::new(None)),
+        equipment_descriptors: Arc::new(Mutex::new(None)),
       });
 
       Ok(())
@@ -31,7 +34,8 @@ pub fn init_icons_editor<R: Runtime>() -> TauriPlugin<R> {
     })
     .invoke_handler(tauri::generate_handler![
       crate::icons_editor::commands::open_equipment_sprite,
-      crate::icons_editor::commands::get_equipment_sprite_uri,
+      crate::icons_editor::commands::get_equipment_sprite,
+      crate::icons_editor::commands::close_equipment_sprite,
     ])
     .build()
 }

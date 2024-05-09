@@ -11,6 +11,7 @@ use walkdir::WalkDir;
 
 // todo: Add reading from fsgame.ltx file.
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArchiveProject {
   pub archives: Vec<ArchiveDescriptor>,
   pub files: HashMap<String, ArchiveFileReplicationDescriptor>,

@@ -14,7 +14,9 @@ export enum EConfigsEditorCommand {
 }
 
 export enum EIconsEditorCommand {
-  GET_EQUIPMENT_SPRITE_URI = "plugin:icons_editor|get_equipment_sprite_uri",
+  GET_EQUIPMENT_SPRITE = "plugin:icons_editor|get_equipment_sprite",
+  OPEN_EQUIPMENT_SPRITE = "plugin:icons_editor|open_equipment_sprite",
+  CLOSE_EQUIPMENT_SPRITE = "plugin:icons_editor|close_equipment_sprite",
 }
 
 export enum EExportsEditorCommand {

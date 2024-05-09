@@ -1,3 +1,4 @@
+import { CircularProgress, Grid } from "@mui/material";
 import { useManager } from "dreamstate";
 import { ReactElement } from "react";
 
@@ -6,11 +7,15 @@ import { IconsEditorEquipmentOpenForm } from "@/applications/icons_editor/compon
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 
 export function IconsEditorEquipmentPage({
-  equipmentContext: { spriteImage } = useManager(EquipmentManager),
+  equipmentContext: { isReady, spriteImage } = useManager(EquipmentManager),
 }): ReactElement {
-  if (spriteImage.value) {
-    return <EquipmentSpriteEditor />;
+  if (isReady) {
+    return spriteImage.value ? <EquipmentSpriteEditor /> : <IconsEditorEquipmentOpenForm />;
   }
 
-  return <IconsEditorEquipmentOpenForm />;
+  return (
+    <Grid width={"100%"} height={"100%"} justifyContent={"center"} alignItems={"center"} container>
+      <CircularProgress />
+    </Grid>
+  );
 }
