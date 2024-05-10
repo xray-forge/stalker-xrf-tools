@@ -72,7 +72,7 @@
     "eqeqeq": "error",
     "eol-last": ["error", "always"],
     "func-call-spacing": ["error", "never"],
-    "function-paren-newline": ["error", "multiline-arguments"],
+    "function-paren-newline": "off",
     "import/default": "off",
     "import/no-relative-parent-imports": "error",
     "import/no-unresolved": "off",

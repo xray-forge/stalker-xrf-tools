@@ -9,6 +9,7 @@ import { EquipmentGridDetails } from "@/applications/icons_editor/components/spr
 import { EquipmentGridMoveOver } from "@/applications/icons_editor/components/sprite_view/EquipmentGridMoveOver";
 import { EquipmentGridZoom } from "@/applications/icons_editor/components/sprite_view/EquipmentGridZoom";
 import { EquipmentSpriteGrid } from "@/applications/icons_editor/components/sprite_view/EquipmentSpriteGrid";
+import { equipmentViewerConfig } from "@/applications/icons_editor/configs/EquipmentViewerConfig";
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 import { Optional } from "@/core/types/general";
 import { GridMapper } from "@/lib/icons";
@@ -63,21 +64,39 @@ export function EquipmentSpriteViewer({
   }, []);
 
   const onZoomUp = useCallback(() => {
-    setZoomValue((it) => clamp(it + 0.1, 0.1, 5));
+    setZoomValue((it) => clamp(it + 0.1, equipmentViewerConfig.ZOOM_IN_MIN, equipmentViewerConfig.ZOOM_IN_MAX));
   }, []);
 
   const onZoomDown = useCallback(() => {
-    setZoomValue((it) => clamp(it - 0.1, 0.1, 5));
+    setZoomValue((it) => clamp(it - 0.1, equipmentViewerConfig.ZOOM_IN_MIN, equipmentViewerConfig.ZOOM_IN_MAX));
   }, []);
 
   const onWheel = useCallback(
     (event: WheelEvent<HTMLDivElement>) => {
       if (event.shiftKey) {
-        setZoomOriginY((it) => clamp(event.deltaY > 0 ? it - 30 : it + 30, -2000, 2000));
+        setZoomOriginY((it) =>
+          clamp(
+            event.deltaY > 0 ? it - 30 : it + 30,
+            equipmentViewerConfig.ZOOM_OFFSET_MIN,
+            equipmentViewerConfig.ZOOM_OFFSET_MAX
+          )
+        );
       } else if (event.ctrlKey) {
-        setZoomOriginX((it) => clamp(event.deltaY > 0 ? it - 30 : it + 30, -2000, 2000));
+        setZoomOriginX((it) =>
+          clamp(
+            event.deltaY > 0 ? it - 30 : it + 30,
+            equipmentViewerConfig.ZOOM_OFFSET_MIN,
+            equipmentViewerConfig.ZOOM_OFFSET_MAX
+          )
+        );
       } else {
-        setZoomValue((it) => clamp(event.deltaY > 0 ? it - 0.1 : it + 0.1, 0.1, 5));
+        setZoomValue((it) =>
+          clamp(
+            event.deltaY > 0 ? it - 0.1 : it + 0.1,
+            equipmentViewerConfig.ZOOM_IN_MIN,
+            equipmentViewerConfig.ZOOM_IN_MAX
+          )
+        );
       }
     },
     [zoomValue]
@@ -104,8 +123,20 @@ export function EquipmentSpriteViewer({
       if (holdingOrigin) {
         const [x, y] = holdingOrigin;
 
-        setZoomOriginX((it) => clamp(it + (event.pageX - x) / 2, -2000, 2000));
-        setZoomOriginY((it) => clamp(it + (event.pageY - y) / 2, -2000, 2000));
+        setZoomOriginX((it) =>
+          clamp(
+            it + (event.pageX - x) / 2,
+            equipmentViewerConfig.ZOOM_OFFSET_MIN,
+            equipmentViewerConfig.ZOOM_OFFSET_MAX
+          )
+        );
+        setZoomOriginY((it) =>
+          clamp(
+            it + (event.pageY - y) / 2,
+            equipmentViewerConfig.ZOOM_OFFSET_MIN,
+            equipmentViewerConfig.ZOOM_OFFSET_MAX
+          )
+        );
         setHoldingOrigin([event.pageX, event.pageY]);
       }
     },
@@ -124,12 +155,6 @@ export function EquipmentSpriteViewer({
         width={"100%"}
         height={"100%"}
         bgcolor={"#353535"}
-        onWheel={onWheel}
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-        onContextMenu={onContextMenu}
       >
         {spriteImage ? (
           <Grid
@@ -141,6 +166,12 @@ export function EquipmentSpriteViewer({
             left={0}
             top={0}
             sx={sx}
+            onWheel={onWheel}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
+            onMouseLeave={onMouseLeave}
+            onContextMenu={onContextMenu}
+            onMouseMove={onMouseMove}
           >
             <img src={spriteImage.image.src} width={"100%"} height={"100%"} draggable={false} />
 

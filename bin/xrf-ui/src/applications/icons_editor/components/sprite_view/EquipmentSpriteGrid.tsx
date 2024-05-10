@@ -25,7 +25,7 @@ export const EquipmentSpriteGrid = memo(
       () => ({
         userSelect: "none",
         border: isGridVisible ? "1px solid" : "none",
-        borderColor: "rgba(0,2,1,0.54)",
+        borderColor: "rgba(2,2,2,0.6)",
         "&.selected": {
           background: "rgba(39,48,117,0.49)",
         },
