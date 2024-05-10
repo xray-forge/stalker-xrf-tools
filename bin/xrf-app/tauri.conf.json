@@ -41,9 +41,6 @@
         "maxHeight": 400
       }
     ],
-    "security": {
-      "csp": "default-src 'self'; connect-src ipc: http://stream.localhost; media-src stream: https://stream.localhost"
-    },
     "bundle": {
       "active": true,
       "targets": "all",
