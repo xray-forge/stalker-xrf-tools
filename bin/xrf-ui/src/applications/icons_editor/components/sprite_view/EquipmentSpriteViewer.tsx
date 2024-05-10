@@ -5,6 +5,8 @@ import { useManager } from "dreamstate";
 import { MouseEvent, ReactElement, useCallback, useMemo, useState, WheelEvent } from "react";
 
 import { EquipmentGridControls } from "@/applications/icons_editor/components/sprite_view/EquipmentGridControls";
+import { EquipmentGridDetails } from "@/applications/icons_editor/components/sprite_view/EquipmentGridDetails";
+import { EquipmentGridMoveOver } from "@/applications/icons_editor/components/sprite_view/EquipmentGridMoveOver";
 import { EquipmentGridZoom } from "@/applications/icons_editor/components/sprite_view/EquipmentGridZoom";
 import { EquipmentSpriteGrid } from "@/applications/icons_editor/components/sprite_view/EquipmentSpriteGrid";
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
@@ -20,6 +22,9 @@ export function EquipmentSpriteViewer({
   const [zoomValue, setZoomValue] = useState(1);
   const [zoomOriginX, setZoomOriginX] = useState(0);
   const [zoomOriginY, setZoomOriginY] = useState(0);
+
+  const [selectedCell, setSelectedCell] = useState<Optional<[number, number]>>(null);
+  const [moveOverCell, setMoveOverCell] = useState<Optional<[number, number]>>(null);
 
   const gridMapper: Optional<GridMapper> = useMemo(
     () =>
@@ -42,6 +47,20 @@ export function EquipmentSpriteViewer({
     }),
     [zoomValue, zoomOriginX, zoomOriginY]
   );
+
+  const onSelectCell = useCallback((row: number, column: number) => {
+    setSelectedCell([row, column]);
+  }, []);
+
+  const onCloseDetails = useCallback(() => {
+    setSelectedCell(null);
+  }, []);
+
+  const onMoveOverCell = useCallback((row: number, column: number) => {
+    setMoveOverCell((it) => {
+      return it && it[0] === row && it[1] === column ? it : [row, column];
+    });
+  }, []);
 
   const onZoomUp = useCallback(() => {
     setZoomValue((it) => clamp(it + 0.1, 0.1, 5));
@@ -76,6 +95,10 @@ export function EquipmentSpriteViewer({
     setHoldingOrigin(null);
   }, []);
 
+  const onContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  }, []);
+
   const onMouseMove = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
       if (holdingOrigin) {
@@ -106,6 +129,7 @@ export function EquipmentSpriteViewer({
         onMouseUp={onMouseUp}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
+        onContextMenu={onContextMenu}
       >
         {spriteImage ? (
           <Grid
@@ -120,11 +144,25 @@ export function EquipmentSpriteViewer({
           >
             <img src={spriteImage.image.src} width={"100%"} height={"100%"} draggable={false} />
 
-            {gridMapper ? <EquipmentSpriteGrid isGridVisible={isGridVisible} gridMapper={gridMapper} /> : null}
+            {gridMapper ? (
+              <EquipmentSpriteGrid
+                selectedCell={selectedCell}
+                isGridVisible={isGridVisible}
+                gridMapper={gridMapper}
+                onCellSelected={onSelectCell}
+                onCellMovedOver={onMoveOverCell}
+              />
+            ) : null}
           </Grid>
         ) : (
           "loading..."
         )}
+
+        {selectedCell && gridMapper ? (
+          <EquipmentGridDetails cell={selectedCell} gridMapper={gridMapper} onClose={onCloseDetails} />
+        ) : null}
+
+        {moveOverCell ? <EquipmentGridMoveOver cell={moveOverCell} /> : null}
 
         <EquipmentGridControls
           gridSize={gridSize}

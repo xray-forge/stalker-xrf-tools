@@ -11,3 +11,5 @@ export interface IEquipmentResponse {
   name: string;
   equipmentDescriptors: Array<IEquipmentSectionDescriptor>;
 }
+
+export type TEquipmentCell = [number, number];
