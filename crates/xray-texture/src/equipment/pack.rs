@@ -1,7 +1,7 @@
 use crate::equipment::config::get_section_inventory_coordinates;
 use crate::equipment::dimensions::get_system_ltx_equipment_sprite_max_dimension;
 use crate::{
-  read_dds_by_path, save_image_as_dds, PackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
+  read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
   SECTION_TYPE_INVENTORY_ICON,
 };
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
@@ -33,7 +33,7 @@ pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) {
     }
   }
 
-  save_image_as_dds(&options.output, &result, ImageFormat::BC3RgbaUnorm);
+  save_image_as_ui_dds(&options.output, &result, ImageFormat::BC3RgbaUnorm);
 
   println!("Packed {count} icons")
 }

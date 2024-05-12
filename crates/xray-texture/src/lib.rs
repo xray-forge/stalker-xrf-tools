@@ -17,10 +17,8 @@ pub use crate::equipment::unpack::unpack_equipment_icon;
 pub use crate::equipment::unpack::unpack_equipment_icons_by_ltx;
 
 pub use crate::equipment::unpack_options::UnpackEquipmentOptions;
-pub use crate::images::image_to_base64;
-pub use crate::images::image_to_web_base64;
 pub use crate::images::read_dds_by_path;
-pub use crate::images::save_image_as_dds;
+pub use crate::images::save_image_as_ui_dds;
 
 pub use image::RgbaImage;
 pub use image_dds::image::GenericImage;

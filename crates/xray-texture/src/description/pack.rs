@@ -2,7 +2,7 @@ use crate::description::dimensions::get_xml_description_sprite_max_dimension;
 use crate::description::file_description::FileDescription;
 use crate::description::pack_options::PackDescriptionOptions;
 use crate::description::xml_description::get_files_descriptions;
-use crate::{read_dds_by_path, save_image_as_dds};
+use crate::{read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
 use image_dds::ImageFormat;
 use std::collections::HashMap;
@@ -87,7 +87,7 @@ pub fn pack_xml_description(options: &PackDescriptionOptions, file: &FileDescrip
     println!("Saving file: {:?}", destination);
   }
 
-  save_image_as_dds(&destination, &result, ImageFormat::BC3RgbaUnorm);
+  save_image_as_ui_dds(&destination, &result, ImageFormat::BC3RgbaUnorm);
 
   true
 }

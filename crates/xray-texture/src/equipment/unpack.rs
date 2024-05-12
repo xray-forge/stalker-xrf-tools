@@ -1,6 +1,6 @@
 use crate::equipment::config::get_section_inventory_coordinates;
 use crate::{
-  save_image_as_dds, UnpackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
+  save_image_as_ui_dds, UnpackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
   SECTION_TYPE_INVENTORY_ICON,
 };
 use image::GenericImageView;
@@ -52,7 +52,7 @@ pub fn unpack_equipment_icon(
     );
   }
 
-  save_image_as_dds(
+  save_image_as_ui_dds(
     &options.output.join(format!("{section_name}.dds")),
     &options
       .source

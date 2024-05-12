@@ -1,4 +1,4 @@
-use crate::{read_dds_by_path, save_image_as_dds, PackDescriptionOptions};
+use crate::{read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions};
 use image::{GenericImageView, RgbaImage};
 use image_dds::ImageFormat;
 use std::collections::HashMap;
@@ -64,7 +64,7 @@ pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &FileDescr
             full_name
           );
 
-          save_image_as_dds(
+          save_image_as_ui_dds(
             &destination.join(format!("{}.dds", texture.id)),
             &dds
               .view(
@@ -86,7 +86,7 @@ pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &FileDescr
           );
         }
       } else {
-        save_image_as_dds(
+        save_image_as_ui_dds(
           &destination.join(format!("{}.dds", texture.id)),
           &dds
             .view(texture.x, texture.y, texture.w, texture.h)
