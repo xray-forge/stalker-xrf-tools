@@ -47,6 +47,10 @@ export function getProjectEquipmentDDSPath(projectPath: string): Promise<string>
   return path.resolve(projectPath, "src", "resources", "textures", "ui", "ui_icon_equipment.dds");
 }
 
+export function getProjectEquipmentSourcePath(projectPath: string): Promise<string> {
+  return path.resolve(projectPath, "src", "resources", "textures", "ui", "ui_icon_equipment");
+}
+
 export async function getProjectSystemLtxPath(projectPath: string): Promise<string> {
   return path.resolve(await getProjectConfigsPath(projectPath), "system.ltx");
 }

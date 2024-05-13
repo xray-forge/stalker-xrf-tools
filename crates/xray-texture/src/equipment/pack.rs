@@ -3,32 +3,35 @@ use crate::equipment::dimensions::get_system_ltx_equipment_sprite_max_dimension;
 use crate::images::dds_to_image;
 use crate::{
   read_dds_by_path, rescale_image_to_bounds, save_image_as_ui_dds, PackEquipmentOptions,
-  INVENTORY_ICON_GRID_SQUARE_BASE, SECTION_TYPE_INVENTORY_ICON,
+  PackEquipmentResult, INVENTORY_ICON_GRID_SQUARE_BASE, SECTION_TYPE_INVENTORY_ICON,
 };
 use image::io::Reader as ImageReader;
 use image::{DynamicImage, GenericImage, ImageBuffer, Rgba, RgbaImage};
 use path_absolutize::*;
 use std::error::Error;
 use std::path::{Path, PathBuf};
+use std::time::Instant;
 use xray_ltx::Section;
 
-pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) {
+pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) -> PackEquipmentResult {
+  let started_at: Instant = Instant::now();
   let (max_width, max_height) = get_system_ltx_equipment_sprite_max_dimension(&options.ltx);
 
   if max_width > 32 * 1024 || max_height > 32 * 1024 {
     panic!("Trying to create too large resulting dds file over 32k*32k, it is not supported");
   }
 
-  let mut count: u32 = 0;
+  let mut packed: u32 = 0;
+  let mut skipped: u32 = 0;
   let mut result: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(max_width, max_height);
 
   for (section_name, section) in &options.ltx.sections {
     if let Some(is_type_inventory_icon) = section.get(SECTION_TYPE_INVENTORY_ICON) {
       if is_type_inventory_icon.to_lowercase() == "true" {
-        let is_packed: bool = pack_equipment_icon(&options, &mut result, section_name, section);
-
-        if is_packed {
-          count += 1;
+        if pack_equipment_icon(&options, &mut result, section_name, section) {
+          packed += 1;
+        } else {
+          skipped += 1;
         }
       }
     }
@@ -48,9 +51,18 @@ pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) {
   save_image_as_ui_dds(&options.output, &result, options.dds_compression_format);
 
   println!(
-    "Packed {count} icons in {} format",
+    "Packed {packed} icons in {} format, {skipped} skipped",
     options.dds_compression_format
-  )
+  );
+
+  PackEquipmentResult {
+    duration: started_at.elapsed().as_millis(),
+    saved_at: options.output.clone(),
+    saved_width: result.width(),
+    saved_height: result.height(),
+    packed_count: packed,
+    skipped_count: skipped,
+  }
 }
 
 pub fn pack_equipment_icon(

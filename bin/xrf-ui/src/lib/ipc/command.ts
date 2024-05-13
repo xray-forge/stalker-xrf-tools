@@ -18,6 +18,7 @@ export enum EIconsEditorCommand {
   GET_EQUIPMENT_SPRITE = "plugin:icons_editor|get_equipment_sprite",
   OPEN_EQUIPMENT_SPRITE = "plugin:icons_editor|open_equipment_sprite",
   REOPEN_EQUIPMENT_SPRITE = "plugin:icons_editor|reopen_equipment_sprite",
+  PACK_EQUIPMENT = "plugin:icons_editor|pack_equipment",
 }
 
 export enum EExportsEditorCommand {

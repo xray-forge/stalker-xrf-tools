@@ -1,0 +1,37 @@
+import { DialogFilter, open } from "@tauri-apps/api/dialog";
+import { Dispatch, MouseEvent, SetStateAction, useCallback, useState } from "react";
+
+import { Optional } from "@/core/types/general";
+
+export function usePathState({
+  title = "Provide path",
+  filters = null as Optional<Array<DialogFilter>>,
+  isDisabled = false,
+  isDirectory = false,
+}): [Optional<string>, Dispatch<SetStateAction<Optional<string>>>, (event: MouseEvent<HTMLElement>) => void] {
+  const [pathState, setPathState] = useState<Optional<string>>(null);
+
+  const onSelectPath = useCallback(
+    async (event: MouseEvent<HTMLElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      if (isDisabled) {
+        return;
+      }
+
+      const newSystemLtxProjectPath: Optional<string> = (await open({
+        title,
+        filters: filters ? filters : undefined,
+        directory: isDirectory,
+      })) as Optional<string>;
+
+      if (newSystemLtxProjectPath) {
+        setPathState(newSystemLtxProjectPath);
+      }
+    },
+    [title, isDirectory, isDisabled]
+  );
+
+  return [pathState, setPathState, onSelectPath];
+}

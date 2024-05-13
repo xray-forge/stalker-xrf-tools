@@ -13,6 +13,7 @@ pub use crate::equipment::convert_constants::SECTION_TYPE_INVENTORY_ICON;
 pub use crate::equipment::pack::pack_equipment_icon;
 pub use crate::equipment::pack::pack_equipment_icons_by_ltx;
 pub use crate::equipment::pack_options::PackEquipmentOptions;
+pub use crate::equipment::pack_result::PackEquipmentResult;
 pub use crate::equipment::unpack::unpack_equipment_icon;
 pub use crate::equipment::unpack::unpack_equipment_icons_by_ltx;
 

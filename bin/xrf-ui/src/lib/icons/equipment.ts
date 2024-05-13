@@ -13,3 +13,12 @@ export interface IEquipmentResponse {
 }
 
 export type TEquipmentCell = [number, number];
+
+export interface IPackEquipmentResult {
+  duration: number;
+  savedAt: string;
+  savedWidth: number;
+  savedHeight: number;
+  packedCount: number;
+  skippedCount: number;
+}

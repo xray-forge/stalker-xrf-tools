@@ -11,7 +11,7 @@ export function EquipmentSpriteEditorToolbar({
     <AppBar position={"relative"}>
       <Toolbar variant={"dense"}>
         <Typography variant={"h6"} component={"div"}>
-          {spriteImage?.path ?? "equipment.dds"} ({spriteImage?.image.width}px * {spriteImage?.image?.height}px)
+          {spriteImage?.path ?? "equipment_editor.dds"} ({spriteImage?.image.width}px * {spriteImage?.image?.height}px)
         </Typography>
       </Toolbar>
     </AppBar>

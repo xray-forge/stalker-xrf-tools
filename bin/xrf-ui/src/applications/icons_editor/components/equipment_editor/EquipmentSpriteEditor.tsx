@@ -1,9 +1,9 @@
 import { Grid } from "@mui/material";
 import { ReactElement } from "react";
 
-import { EquipmentSpriteEditorMenu } from "@/applications/icons_editor/components/equipment/EquipmentSpriteEditorMenu";
-import { EquipmentSpriteEditorToolbar } from "@/applications/icons_editor/components/equipment/EquipmentSpriteEditorToolbar";
-import { EquipmentSpriteEditorWorkspace } from "@/applications/icons_editor/components/equipment/EquipmentSpriteEditorWorkspace";
+import { EquipmentSpriteEditorMenu } from "@/applications/icons_editor/components/equipment_editor/EquipmentSpriteEditorMenu";
+import { EquipmentSpriteEditorToolbar } from "@/applications/icons_editor/components/equipment_editor/EquipmentSpriteEditorToolbar";
+import { EquipmentSpriteEditorWorkspace } from "@/applications/icons_editor/components/equipment_editor/EquipmentSpriteEditorWorkspace";
 
 export function EquipmentSpriteEditor(): ReactElement {
   return (

@@ -35,10 +35,11 @@ pub fn init_icons_editor<R: Runtime>() -> TauriPlugin<R> {
       }
     })
     .invoke_handler(tauri::generate_handler![
-      crate::icons_editor::commands::open_equipment_sprite,
-      crate::icons_editor::commands::reopen_equipment_sprite,
-      crate::icons_editor::commands::get_equipment_sprite,
-      crate::icons_editor::commands::close_equipment_sprite,
+      crate::icons_editor::commands::equipment::close_equipment_sprite,
+      crate::icons_editor::commands::equipment::get_equipment_sprite,
+      crate::icons_editor::commands::equipment::open_equipment_sprite,
+      crate::icons_editor::commands::equipment::reopen_equipment_sprite,
+      crate::icons_editor::commands::equipment_pack::pack_equipment,
     ])
     .build()
 }

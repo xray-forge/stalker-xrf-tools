@@ -26,8 +26,30 @@ export function IconsEditorNavigatorPage(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/icons_editor/icons_equipment", { replace: true })}>Equipment</Button>
-            <Button onClick={() => navigate("/icons_editor/icons_description", { replace: true })}>Description</Button>
+            <Button onClick={() => navigate("/icons_editor/icons_equipment", { replace: true })}>
+              Equipment editor
+            </Button>
+
+            <Button onClick={() => navigate("/icons_editor/icons_equipment_pack", { replace: true })}>
+              Equipment pack
+            </Button>
+
+            <Button onClick={() => navigate("/icons_editor/icons_equipment_unpack", { replace: true })}>
+              Equipment unpack
+            </Button>
+
+            <Button onClick={() => navigate("/icons_editor/icons_description", { replace: true })}>
+              Description editor
+            </Button>
+
+            <Button onClick={() => navigate("/icons_editor/icons_description_pack", { replace: true })}>
+              Description pack
+            </Button>
+
+            <Button onClick={() => navigate("/icons_editor/icons_description_pack", { replace: true })}>
+              Description unpack
+            </Button>
+
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>
