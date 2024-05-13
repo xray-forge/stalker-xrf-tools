@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_icon::{pack_xml_descriptions, PackDescriptionOptions};
+use xray_icon::{pack_xml_descriptions, ImageFormat, PackDescriptionOptions};
 
 pub fn pack_texture_description(matches: &ArgMatches) {
   let description: &PathBuf = matches
@@ -16,14 +16,18 @@ pub fn pack_texture_description(matches: &ArgMatches) {
   let is_verbose: bool = matches.get_flag("verbose");
   let is_strict: bool = matches.get_flag("strict");
 
-  log::info!("Packing texture descriptions from: {:?}", description);
-  log::info!("Paths: base {:?}, output {:?}", base, output);
-
-  pack_xml_descriptions(PackDescriptionOptions {
+  let options: PackDescriptionOptions = PackDescriptionOptions {
     description: description.clone(),
     base: base.clone(),
     output: output.clone(),
+    dds_compression_format: ImageFormat::BC3RgbaUnorm,
     is_verbose,
     is_strict,
-  })
+  };
+
+  log::info!("Packing texture descriptions from: {:?}", description);
+  log::info!("Paths: base {:?}, output {:?}", base, output);
+  log::info!("DDS format: {:?}", options.dds_compression_format);
+
+  pack_xml_descriptions(options)
 }

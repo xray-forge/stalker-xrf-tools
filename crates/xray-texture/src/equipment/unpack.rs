@@ -4,7 +4,6 @@ use crate::{
   SECTION_TYPE_INVENTORY_ICON,
 };
 use image::GenericImageView;
-use image_dds::ImageFormat;
 use xray_ltx::Section;
 
 pub fn unpack_equipment_icons_by_ltx(options: UnpackEquipmentOptions) {
@@ -58,7 +57,7 @@ pub fn unpack_equipment_icon(
       .source
       .view(x_absolute, y_absolute, w_absolute, h_absolute)
       .to_image(),
-    ImageFormat::BC3RgbaUnorm,
+    options.dds_compression_format,
   );
 
   true

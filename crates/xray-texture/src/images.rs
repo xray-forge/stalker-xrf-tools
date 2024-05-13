@@ -1,6 +1,7 @@
 use ddsfile::Dds;
-use image::RgbaImage;
-use image_dds::{dds_from_image, ImageFormat};
+use image::imageops::FilterType;
+use image::{DynamicImage, ImageFormat, RgbaImage};
+use image_dds::{dds_from_image, ImageFormat as DDSImageFormat};
 use std::fs::File;
 use std::io;
 use std::io::BufWriter;
@@ -14,7 +15,7 @@ pub fn dds_to_image(dds: &Dds) -> io::Result<RgbaImage> {
   Ok(image_dds::image_from_dds(dds, 0).unwrap())
 }
 
-pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: ImageFormat) {
+pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: DDSImageFormat) {
   dds_from_image(
     image,
     format,
@@ -24,4 +25,22 @@ pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: ImageFormat)
   .unwrap()
   .write(&mut BufWriter::new(File::create(path).unwrap()))
   .unwrap();
+}
+
+pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) {
+  image.save_with_format(path, ImageFormat::Png).unwrap()
+}
+
+pub fn rescale_image_to_bounds(image: DynamicImage, width: u32, _: u32) -> DynamicImage {
+  // todo: Also rescale on height?
+
+  if image.width() > width {
+    image.resize(
+      width,
+      (image.height() as f32 * (width as f32 / image.width() as f32)) as u32,
+      FilterType::Lanczos3,
+    )
+  } else {
+    image
+  }
 }

@@ -2,7 +2,8 @@ use clap::ArgMatches;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use xray_icon::{
-  dds_to_image, read_dds_by_path, unpack_equipment_icons_by_ltx, RgbaImage, UnpackEquipmentOptions,
+  dds_to_image, read_dds_by_path, unpack_equipment_icons_by_ltx, ImageFormat, RgbaImage,
+  UnpackEquipmentOptions,
 };
 use xray_ltx::Ltx;
 
@@ -46,6 +47,7 @@ pub fn unpack_equipment_icons(matches: &ArgMatches) {
     ltx: system_ltx,
     source: source_dds,
     output: output.into(),
+    dds_compression_format: ImageFormat::BC3RgbaUnorm,
     is_verbose,
   });
 

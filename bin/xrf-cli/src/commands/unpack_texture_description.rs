@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
-use xray_icon::{unpack_xml_descriptions, PackDescriptionOptions};
+use xray_icon::{unpack_xml_descriptions, ImageFormat, PackDescriptionOptions};
 
 pub fn unpack_texture_description(matches: &ArgMatches) {
   let description: &PathBuf = matches
@@ -23,6 +23,7 @@ pub fn unpack_texture_description(matches: &ArgMatches) {
     description: description.clone(),
     base: base.clone(),
     output: output.clone(),
+    dds_compression_format: ImageFormat::BC3RgbaUnorm,
     is_verbose,
     is_strict,
   });

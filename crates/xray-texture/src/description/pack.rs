@@ -4,7 +4,6 @@ use crate::description::pack_options::PackDescriptionOptions;
 use crate::description::xml_description::get_files_descriptions;
 use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
-use image_dds::ImageFormat;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -87,7 +86,18 @@ pub fn pack_xml_description(options: &PackDescriptionOptions, file: &FileDescrip
     println!("Saving file: {:?}", destination);
   }
 
-  save_image_as_ui_dds(&destination, &result, ImageFormat::BC3RgbaUnorm);
+  assert_eq!(
+    result.width() % 4,
+    0,
+    "DirectX compression requires texture width to be multiple of 4"
+  );
+  assert_eq!(
+    result.height() % 4,
+    0,
+    "DirectX compression requires texture height to be multiple of 4"
+  );
+
+  save_image_as_ui_dds(&destination, &result, options.dds_compression_format);
 
   true
 }

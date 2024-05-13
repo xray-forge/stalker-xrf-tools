@@ -2,14 +2,14 @@ use crate::equipment::config::get_section_inventory_coordinates;
 use crate::equipment::dimensions::get_system_ltx_equipment_sprite_max_dimension;
 use crate::images::dds_to_image;
 use crate::{
-  read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
-  SECTION_TYPE_INVENTORY_ICON,
+  read_dds_by_path, rescale_image_to_bounds, save_image_as_ui_dds, PackEquipmentOptions,
+  INVENTORY_ICON_GRID_SQUARE_BASE, SECTION_TYPE_INVENTORY_ICON,
 };
-use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
-use image_dds::ImageFormat;
+use image::io::Reader as ImageReader;
+use image::{DynamicImage, GenericImage, ImageBuffer, Rgba, RgbaImage};
 use path_absolutize::*;
-use std::io;
-use std::path::PathBuf;
+use std::error::Error;
+use std::path::{Path, PathBuf};
 use xray_ltx::Section;
 
 pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) {
@@ -34,9 +34,23 @@ pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) {
     }
   }
 
-  save_image_as_ui_dds(&options.output, &result, ImageFormat::BC3RgbaUnorm);
+  assert_eq!(
+    result.width() % 4,
+    0,
+    "DirectX compression requires texture width to be multiple of 4"
+  );
+  assert_eq!(
+    result.height() % 4,
+    0,
+    "DirectX compression requires texture height to be multiple of 4"
+  );
 
-  println!("Packed {count} icons")
+  save_image_as_ui_dds(&options.output, &result, options.dds_compression_format);
+
+  println!(
+    "Packed {count} icons in {} format",
+    options.dds_compression_format
+  )
 }
 
 pub fn pack_equipment_icon(
@@ -58,42 +72,36 @@ pub fn pack_equipment_icon(
 
   let inv_grid_custom: Option<&str> = section.get("$inventory_icon_path");
 
-  let icon_dds_path: PathBuf =
-    get_equipment_icon_source_path(options, section_name, inv_grid_custom);
+  let icon_path: PathBuf = get_equipment_icon_source_path(options, section_name, inv_grid_custom);
+  let icon = get_equipment_image_from_path(&icon_path, w_absolute, h_absolute);
 
-  let icon_dds: Result<RgbaImage, io::Error> = read_dds_by_path(&icon_dds_path).and_then(|dds| {
-    if options.is_verbose {
-      println!(
-        "Packing icon: {:?} - '{section_name}' x:{inv_grid_x}({x_absolute}), \
-     y:{inv_grid_y}({y_absolute}), w:{inv_grid_w}({w_absolute}), h:{inv_grid_h}({h_absolute}), \
-      {}x{}, mip-maps: {:?}, format: {:?}",
-        icon_dds_path,
-        dds.header.width,
-        dds.header.height,
-        dds.header.mip_map_count.unwrap_or(0),
-        dds.header10.as_ref().map(|header| header.dxgi_format)
-      );
-    }
+  match icon {
+    Ok(image) => {
+      if options.is_verbose {
+        println!(
+          "Packing icon: {:?} - '{section_name}' x:{inv_grid_x}({x_absolute}), \
+   y:{inv_grid_y}({y_absolute}), w:{inv_grid_w}({w_absolute}), h:{inv_grid_h}({h_absolute}), \
+    {}x{}",
+          icon_path,
+          image.width(),
+          image.height(),
+        );
+      }
 
-    dds_to_image(&dds)
-  });
-
-  match icon_dds {
-    Ok(icon_dds) => {
-      into.copy_from(&icon_dds, x_absolute, y_absolute).unwrap();
+      into.copy_from(&image, x_absolute, y_absolute).unwrap();
 
       true
     }
     Err(error) => {
       if options.is_strict {
         panic!(
-          "Expected icon DDS to exist for assembling at path {:?} / {section_name}",
-          icon_dds_path
+          "Expected icon to exist for assembling at path {:?} / {section_name}",
+          icon_path
         );
       } else {
         println!(
           "Skip icon {:?} / '{section_name}', reason: {:?}",
-          icon_dds_path, error
+          icon_path, error
         );
       }
 
@@ -102,13 +110,40 @@ pub fn pack_equipment_icon(
   }
 }
 
+pub fn get_equipment_image_from_path(
+  path: &Path,
+  width: u32,
+  height: u32,
+) -> Result<DynamicImage, impl Error> {
+  if path
+    .extension()
+    .is_some_and(|extension| extension.eq("png"))
+  {
+    let icon_png: DynamicImage = ImageReader::open(path)?.decode().unwrap();
+
+    return Ok(rescale_image_to_bounds(icon_png, width, height));
+  }
+
+  read_dds_by_path(path)
+    .and_then(|dds| dds_to_image(&dds))
+    .map(|image| rescale_image_to_bounds(image.into(), width, height))
+}
+
 pub fn get_equipment_icon_source_path(
   options: &PackEquipmentOptions,
   name: &str,
   custom_path: Option<&str>,
 ) -> PathBuf {
   match custom_path {
-    None => options.source.join(format!("{name}.dds")),
+    None => {
+      let png_path: PathBuf = options.source.join(format!("{name}.png"));
+
+      if png_path.exists() {
+        png_path
+      } else {
+        options.source.join(format!("{name}.dds"))
+      }
+    }
     Some(custom_path) => {
       // Handle custom gamedata source.
       if let Some(gamedata) = &options.gamedata {

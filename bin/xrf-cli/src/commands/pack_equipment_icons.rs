@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use std::path::PathBuf;
 use std::process;
-use xray_icon::{pack_equipment_icons_by_ltx, PackEquipmentOptions};
+use xray_icon::{pack_equipment_icons_by_ltx, ImageFormat, PackEquipmentOptions};
 use xray_ltx::Ltx;
 
 pub fn pack_equipment_icons(matches: &ArgMatches) {
@@ -33,14 +33,19 @@ pub fn pack_equipment_icons(matches: &ArgMatches) {
 
   let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path).unwrap();
 
-  pack_equipment_icons_by_ltx(PackEquipmentOptions {
+  let options = PackEquipmentOptions {
     ltx: system_ltx,
     source: source.into(),
     output: output.into(),
     gamedata: gamedata.cloned(),
+    dds_compression_format: ImageFormat::BC3RgbaUnorm,
     is_verbose,
     is_strict,
-  });
+  };
+
+  log::info!("DDS format: {:?}", options.dds_compression_format);
+
+  pack_equipment_icons_by_ltx(options);
 
   println!("Saved resulting file with combined icons {:?}", output);
 }

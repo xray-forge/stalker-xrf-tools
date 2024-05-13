@@ -1,6 +1,5 @@
 use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions};
 use image::{GenericImageView, RgbaImage};
-use image_dds::ImageFormat;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::io;
@@ -82,7 +81,7 @@ pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &FileDescr
                 },
               )
               .to_image(),
-            ImageFormat::BC3RgbaUnorm,
+            options.dds_compression_format,
           );
         }
       } else {
@@ -91,7 +90,7 @@ pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &FileDescr
           &dds
             .view(texture.x, texture.y, texture.w, texture.h)
             .to_image(),
-          ImageFormat::BC3RgbaUnorm,
+          options.dds_compression_format,
         );
       }
     }

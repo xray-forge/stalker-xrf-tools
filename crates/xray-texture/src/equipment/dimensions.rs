@@ -9,13 +9,17 @@ pub fn get_system_ltx_equipment_sprite_max_dimension(ltx: &Ltx) -> (u32, u32) {
   for (_, section) in &ltx.sections {
     if let Some(is_type_inventory_icon) = section.get(SECTION_TYPE_INVENTORY_ICON) {
       if is_type_inventory_icon.to_lowercase() == "true" {
-        let (width, height) = get_section_sprite_max_dimension(&section);
+        let (width, height) = get_section_sprite_max_dimension(section);
 
         max_width = max(width, max_width);
         max_height = max(height, max_height);
       }
     }
   }
+
+  // Make sure resulting sprites are multiples of 4 for width and height
+  max_width = max_width + (4 - max_width % 4);
+  max_height = max_height + (4 - max_height % 4);
 
   (max_width, max_height)
 }
