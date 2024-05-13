@@ -2,7 +2,7 @@ use crate::description::dimensions::get_xml_description_sprite_max_dimension;
 use crate::description::file_description::FileDescription;
 use crate::description::pack_options::PackDescriptionOptions;
 use crate::description::xml_description::get_files_descriptions;
-use crate::{read_dds_by_path, save_image_as_ui_dds};
+use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
 use image_dds::ImageFormat;
 use std::collections::HashMap;
@@ -48,7 +48,7 @@ pub fn pack_xml_description(options: &PackDescriptionOptions, file: &FileDescrip
       .join(&file.name)
       .join(format!("{}.dds", texture.id));
 
-    match read_dds_by_path(&texture_path) {
+    match read_dds_by_path(&texture_path).and_then(|dds| dds_to_image(&dds)) {
       Ok(texture_dds) => {
         assert_eq!(
           texture_dds.width(),

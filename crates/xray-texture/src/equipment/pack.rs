@@ -1,5 +1,6 @@
 use crate::equipment::config::get_section_inventory_coordinates;
 use crate::equipment::dimensions::get_system_ltx_equipment_sprite_max_dimension;
+use crate::images::dds_to_image;
 use crate::{
   read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, INVENTORY_ICON_GRID_SQUARE_BASE,
   SECTION_TYPE_INVENTORY_ICON,
@@ -60,15 +61,22 @@ pub fn pack_equipment_icon(
   let icon_dds_path: PathBuf =
     get_equipment_icon_source_path(options, section_name, inv_grid_custom);
 
-  if options.is_verbose {
-    println!(
-      "Packing icon: {:?} - '{section_name}' x:{inv_grid_x}({x_absolute}), \
-     y:{inv_grid_y}({y_absolute}), w:{inv_grid_w}({w_absolute}), h:{inv_grid_h}({h_absolute})",
-      icon_dds_path
-    );
-  }
+  let icon_dds: Result<RgbaImage, io::Error> = read_dds_by_path(&icon_dds_path).and_then(|dds| {
+    if options.is_verbose {
+      println!(
+        "Packing icon: {:?} - '{section_name}' x:{inv_grid_x}({x_absolute}), \
+     y:{inv_grid_y}({y_absolute}), w:{inv_grid_w}({w_absolute}), h:{inv_grid_h}({h_absolute}), \
+      {}x{}, mip-maps: {:?}, format: {:?}",
+        icon_dds_path,
+        dds.header.width,
+        dds.header.height,
+        dds.header.mip_map_count.unwrap_or(0),
+        dds.header10.as_ref().map(|header| header.dxgi_format)
+      );
+    }
 
-  let icon_dds: io::Result<RgbaImage> = read_dds_by_path(&icon_dds_path);
+    dds_to_image(&dds)
+  });
 
   match icon_dds {
     Ok(icon_dds) => {
@@ -79,11 +87,14 @@ pub fn pack_equipment_icon(
     Err(error) => {
       if options.is_strict {
         panic!(
-          "Expected icon DDS to exist for assembling at path {:?}",
+          "Expected icon DDS to exist for assembling at path {:?} / {section_name}",
           icon_dds_path
         );
       } else {
-        println!("Skip icon '{section_name}', reason: {:?}", error);
+        println!(
+          "Skip icon {:?} / '{section_name}', reason: {:?}",
+          icon_dds_path, error
+        );
       }
 
       false

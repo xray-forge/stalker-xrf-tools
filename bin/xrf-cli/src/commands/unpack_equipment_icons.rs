@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use xray_icon::{
-  read_dds_by_path, unpack_equipment_icons_by_ltx, RgbaImage, UnpackEquipmentOptions,
+  dds_to_image, read_dds_by_path, unpack_equipment_icons_by_ltx, RgbaImage, UnpackEquipmentOptions,
 };
 use xray_ltx::Ltx;
 
@@ -23,15 +23,20 @@ pub fn unpack_equipment_icons(matches: &ArgMatches) {
 
   println!("Opening DDS file: {:?}", source);
 
-  let source_dds: RgbaImage =
-    read_dds_by_path(source).expect("Expected path to valid DDS source file");
-  let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path).unwrap();
+  let source_dds: RgbaImage = read_dds_by_path(source)
+    .and_then(|dds| {
+      println!(
+        "Source DDS file details: {}x{}, mip-maps: {:?}, format: {:?}",
+        dds.header.width,
+        dds.header.height,
+        dds.header.mip_map_count.unwrap_or(0),
+        dds.header10.as_ref().map(|header| header.dxgi_format)
+      );
 
-  println!(
-    "Source file size: {} x {}",
-    source_dds.width(),
-    source_dds.height()
-  );
+      dds_to_image(&dds)
+    })
+    .expect("Expected path to valid DDS source file");
+  let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path).unwrap();
 
   println!("Unpacking equipment DDS file into: {:?}", output);
 

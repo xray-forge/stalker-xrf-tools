@@ -1,4 +1,4 @@
-use crate::{read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions};
+use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions};
 use image::{GenericImageView, RgbaImage};
 use image_dds::ImageFormat;
 use std::collections::HashMap;
@@ -34,7 +34,7 @@ pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &FileDescr
     println!("Unpacking {:?}", full_name);
   }
 
-  let dds: io::Result<RgbaImage> = read_dds_by_path(&full_name);
+  let dds: io::Result<RgbaImage> = read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
 
   if let Ok(dds) = dds {
     if !destination.exists() {

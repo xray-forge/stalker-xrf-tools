@@ -6,15 +6,12 @@ use std::io;
 use std::io::BufWriter;
 use std::path::Path;
 
-pub fn read_dds_by_path(path: &Path) -> io::Result<RgbaImage> {
-  Ok(
-    image_dds::image_from_dds(
-      &Dds::read(&mut File::open(path)?)
-        .map_err(|error| io::Error::new(io::ErrorKind::NotFound, error))?,
-      0,
-    )
-    .unwrap(),
-  )
+pub fn read_dds_by_path(path: &Path) -> io::Result<Dds> {
+  Dds::read(&mut File::open(path)?).map_err(|error| io::Error::new(io::ErrorKind::NotFound, error))
+}
+
+pub fn dds_to_image(dds: &Dds) -> io::Result<RgbaImage> {
+  Ok(image_dds::image_from_dds(dds, 0).unwrap())
 }
 
 pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: ImageFormat) {
