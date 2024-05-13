@@ -16,5 +16,6 @@ pub struct IconsEditorState {
 pub struct IconsEditorEquipmentResponse {
   pub path: String,
   pub name: String,
+  pub system_ltx_path: String,
   pub equipment_descriptors: Vec<ConfigInventorySectionDescriptor>,
 }
