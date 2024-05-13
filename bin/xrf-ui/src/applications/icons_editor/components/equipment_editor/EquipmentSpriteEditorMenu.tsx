@@ -12,11 +12,13 @@ export function EquipmentSpriteEditorMenu({
   const navigate: NavigateFunction = useNavigate();
   const log: Logger = useLogger("editor-menu");
 
-  const onCloseClick = useCallback(async () => {
-    await equipmentActions.close();
-
-    navigate("/icons_editor", { replace: true });
-  }, [navigate, equipmentActions]);
+  const onRepackAndReopenClick = useCallback(async () => {
+    try {
+      await equipmentActions.repackAndOpen();
+    } catch (error) {
+      log.error("Failed to repack and reopen DDS:", error);
+    }
+  }, []);
 
   const onReopenClick = useCallback(async () => {
     try {
@@ -25,6 +27,12 @@ export function EquipmentSpriteEditorMenu({
       log.error("Failed to reopen DDS:", error);
     }
   }, []);
+
+  const onCloseClick = useCallback(async () => {
+    await equipmentActions.close();
+
+    navigate("/icons_editor", { replace: true });
+  }, [navigate, equipmentActions]);
 
   return (
     <Grid display={"flex"} direction={"column"} width={240} minWidth={240} justifySelf={"stretch"} container>
@@ -37,7 +45,7 @@ export function EquipmentSpriteEditorMenu({
           Reload
         </Button>
 
-        <Button fullWidth={true} variant={"outlined"} disabled={true}>
+        <Button fullWidth={true} variant={"outlined"} disabled={isLoading} onClick={onRepackAndReopenClick}>
           Repack and reload
         </Button>
       </Grid>

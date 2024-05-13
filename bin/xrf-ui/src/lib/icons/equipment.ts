@@ -7,6 +7,7 @@ export interface IEquipmentSectionDescriptor {
 }
 
 export interface IEquipmentResponse {
+  systemLtxPath: string;
   path: string;
   name: string;
   equipmentDescriptors: Array<IEquipmentSectionDescriptor>;

@@ -25,6 +25,7 @@ pub async fn open_equipment_sprite(
   );
 
   let response = IconsEditorEquipmentResponse {
+    system_ltx_path: system_ltx_path.into(),
     path: equipment_dds_path.into(),
     name: name.into(),
     equipment_descriptors: descriptors.clone(),
@@ -67,6 +68,7 @@ pub async fn reopen_equipment_sprite(
   );
 
   let response = IconsEditorEquipmentResponse {
+    system_ltx_path: ltx_path.into(),
     path: dds_path.into(),
     name: dds_name.into(),
     equipment_descriptors: descriptors.clone(),
@@ -83,17 +85,19 @@ pub async fn reopen_equipment_sprite(
 pub async fn get_equipment_sprite(
   state: tauri::State<'_, IconsEditorState>,
 ) -> Result<Option<Value>, String> {
-  let path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
+  let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
+  let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
   let name_lock: MutexGuard<Option<String>> = state.equipment_sprite_name.lock().unwrap();
   let equipment_lock: MutexGuard<Option<Vec<ConfigInventorySectionDescriptor>>> =
     state.equipment_descriptors.lock().unwrap();
 
-  if (*equipment_lock).is_none() || (*name_lock).is_none() {
+  if ltx_path_lock.is_none() || equipment_lock.is_none() || name_lock.is_none() {
     return Ok(None);
   }
 
   Ok(Some(json!(IconsEditorEquipmentResponse {
-    path: path_lock.as_ref().unwrap().clone(),
+    system_ltx_path: ltx_path_lock.as_ref().unwrap().clone(),
+    path: dds_path_lock.as_ref().unwrap().clone(),
     name: name_lock.as_ref().unwrap().clone(),
     equipment_descriptors: equipment_lock.as_ref().unwrap().clone(),
   })))
