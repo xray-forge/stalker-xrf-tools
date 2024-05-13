@@ -51,14 +51,22 @@ pub fn unpack_equipment_icon(
     );
   }
 
-  save_image_as_ui_dds(
-    &options.output.join(format!("{section_name}.dds")),
-    &options
-      .source
-      .view(x_absolute, y_absolute, w_absolute, h_absolute)
-      .to_image(),
-    options.dds_compression_format,
-  );
+  if x_absolute + w_absolute > options.source.width()
+    || y_absolute + h_absolute > options.source.height()
+  {
+    println!("Skip for possible section: '{section_name}' - icon is out of source file bonds");
 
-  true
+    false
+  } else {
+    save_image_as_ui_dds(
+      &options.output.join(format!("{section_name}.dds")),
+      &options
+        .source
+        .view(x_absolute, y_absolute, w_absolute, h_absolute)
+        .to_image(),
+      options.dds_compression_format,
+    );
+
+    true
+  }
 }

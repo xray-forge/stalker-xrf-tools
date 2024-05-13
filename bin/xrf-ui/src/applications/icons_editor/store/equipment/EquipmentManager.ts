@@ -19,6 +19,7 @@ export interface IEquipmentPngDescriptor {
 export interface IEquipmentContext {
   equipmentActions: {
     open(spritePath: string, systemLtxPath: string): Promise<void>;
+    reopen(): Promise<void>;
     close(): Promise<void>;
     setGridVisibility(isVisible: boolean): void;
     setGridSize(size: number): void;
@@ -29,10 +30,12 @@ export interface IEquipmentContext {
   spriteImage: Loadable<Optional<IEquipmentPngDescriptor>>;
 }
 
+// todo: Cleanup previous sprite asset URL.
 export class EquipmentManager extends ContextManager<IEquipmentContext> {
   public context: IEquipmentContext = {
     equipmentActions: createActions({
       open: (spritePath: string, systemLtxPath: string) => this.openEquipmentProject(spritePath, systemLtxPath),
+      reopen: () => this.reopenEquipmentProject(),
       close: () => this.closeEquipmentProject(),
       setGridVisibility: (isVisible: boolean) => this.setContext({ isGridVisible: isVisible }),
       setGridSize: (size: number) => this.setContext({ gridSize: Math.round(clamp(size, 10, 100)) }),
@@ -80,6 +83,25 @@ export class EquipmentManager extends ContextManager<IEquipmentContext> {
     } catch (error) {
       this.log.error("Failed to open equipment project:", error);
       this.setContext({ spriteImage: createLoadable(null, false, error as Error) });
+    }
+  }
+
+  public async reopenEquipmentProject(): Promise<void> {
+    this.log.info("Reopening equipment project");
+
+    try {
+      this.setContext(({ spriteImage }) => ({ spriteImage: spriteImage.asLoading() }));
+
+      const response: IEquipmentResponse = await invoke(EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE);
+
+      this.log.info("Equipment project reopened:", response);
+
+      this.setContext({
+        spriteImage: createLoadable(await this.spriteFromResponse(response)),
+      });
+    } catch (error) {
+      this.log.error("Failed to reopen equipment project:", error);
+      throw error;
     }
   }
 

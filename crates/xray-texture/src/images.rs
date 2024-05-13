@@ -1,11 +1,12 @@
 use ddsfile::Dds;
+use image::codecs::png::PngEncoder;
 use image::imageops::FilterType;
-use image::{DynamicImage, ImageFormat, RgbaImage};
+use image::{ColorType, DynamicImage, ImageEncoder, ImageFormat, RgbaImage};
 use image_dds::{dds_from_image, ImageFormat as DDSImageFormat};
 use std::fs::File;
 use std::io;
-use std::io::BufWriter;
-use std::path::Path;
+use std::io::{BufWriter, Write};
+use std::path::{Path, PathBuf};
 
 pub fn read_dds_by_path(path: &Path) -> io::Result<Dds> {
   Dds::read(&mut File::open(path)?).map_err(|error| io::Error::new(io::ErrorKind::NotFound, error))
@@ -43,4 +44,22 @@ pub fn rescale_image_to_bounds(image: DynamicImage, width: u32, _: u32) -> Dynam
   } else {
     image
   }
+}
+
+pub fn open_dds_as_png(path: &Path) -> io::Result<(RgbaImage, Vec<u8>)> {
+  let image: RgbaImage =
+    read_dds_by_path(&PathBuf::from(path)).and_then(|dds| dds_to_image(&dds))?;
+
+  let mut buffer: Vec<u8> = Vec::new();
+
+  PngEncoder::new(buffer.by_ref())
+    .write_image(
+      image.as_raw(),
+      image.width(),
+      image.height(),
+      ColorType::Rgba8,
+    )
+    .expect("Error encoding pixels as PNG");
+
+  Ok((image, buffer))
 }

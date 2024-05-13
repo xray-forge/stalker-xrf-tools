@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use xray_icon::{ConfigInventorySectionDescriptor, RgbaImage};
 
 pub struct IconsEditorState {
+  pub system_ltx_path: Arc<Mutex<Option<String>>>,
   pub equipment_sprite_path: Arc<Mutex<Option<String>>>,
   pub equipment_sprite_name: Arc<Mutex<Option<String>>>,
   pub equipment_sprite: Arc<Mutex<Option<RgbaImage>>>,

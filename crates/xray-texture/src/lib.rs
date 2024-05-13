@@ -18,6 +18,7 @@ pub use crate::equipment::unpack::unpack_equipment_icons_by_ltx;
 
 pub use crate::equipment::unpack_options::UnpackEquipmentOptions;
 pub use crate::images::dds_to_image;
+pub use crate::images::open_dds_as_png;
 pub use crate::images::read_dds_by_path;
 pub use crate::images::rescale_image_to_bounds;
 pub use crate::images::save_image_as_ui_dds;

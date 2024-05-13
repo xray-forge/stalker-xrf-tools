@@ -66,7 +66,7 @@ export const EquipmentSpriteGrid = memo(
                 onMouseMove={() => onCellMovedOver(rowIndex, columnIndex)}
               >
                 <Grid className={"coordinates"} display={"none"}>
-                  {rowIndex}:{columnIndex} ({column?.length ?? 0})
+                  {columnIndex}:{rowIndex}: ({column?.length ?? 0})
                 </Grid>
               </Grid>
             ))}

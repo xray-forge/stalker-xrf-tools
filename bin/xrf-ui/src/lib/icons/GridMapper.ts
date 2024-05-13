@@ -16,7 +16,7 @@ export class GridMapper {
     }
 
     descriptors.forEach((it) => {
-      if (it.x + it.w < columns && it.y + it.h < rows) {
+      if (it.x + it.w <= columns && it.y + it.h <= rows) {
         for (let i = it.x; i < it.x + it.w; i++) {
           for (let j = it.y; j < it.y + it.h; j++) {
             if (grid[j][i]) {

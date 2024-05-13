@@ -38,7 +38,7 @@ export function EquipmentGridDetails({ gridMapper, cell, onClose }: IEquipmentGr
       <Card>
         <Grid direction={"column"} padding={1} margin={0} width={"100%"} spacing={0.5} container={true}>
           <Grid justifyContent={"space-between"} alignItems={"center"} marginBottom={1} container>
-            <Typography variant={"h6"}>{`${cell[0]}:${cell[1]}`}</Typography>
+            <Typography variant={"h6"}>{`${cell[1]}:${cell[0]}`}</Typography>
 
             <IconButton size={"small"} onClick={onClose}>
               <CloseIcon />

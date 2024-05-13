@@ -1,13 +1,8 @@
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
-use image::codecs::png::PngEncoder;
-use image::{ColorType, ImageEncoder, RgbaImage};
 use serde_json::{json, Value};
-use std::io::Write;
 use std::path::PathBuf;
 use std::sync::MutexGuard;
-use xray_icon::{
-  dds_to_image, get_ltx_inventory_descriptors, read_dds_by_path, ConfigInventorySectionDescriptor,
-};
+use xray_icon::{get_ltx_inventory_descriptors, open_dds_as_png, ConfigInventorySectionDescriptor};
 use xray_ltx::Ltx;
 
 #[tauri::command]
@@ -20,22 +15,8 @@ pub async fn open_equipment_sprite(
 
   let name: &str = "equipment.png";
 
-  let image: RgbaImage =
-    match read_dds_by_path(&PathBuf::from(equipment_dds_path)).and_then(|dds| dds_to_image(&dds)) {
-      Ok(image) => image,
-      Err(error) => return Err(format!("Failed to open provided image file: {:?}", error,)),
-    };
-
-  let mut preview_buffer: Vec<u8> = Vec::new();
-
-  PngEncoder::new(preview_buffer.by_ref())
-    .write_image(
-      image.as_raw(),
-      image.width(),
-      image.height(),
-      ColorType::Rgba8,
-    )
-    .expect("error encoding pixels as PNG");
+  let (image, preview_buffer) = open_dds_as_png(&PathBuf::from(equipment_dds_path))
+    .map_err(|error| format!("Failed to open provided image file: {:?}", error,))?;
 
   log::info!("Opened equipment dds file");
 
@@ -49,8 +30,48 @@ pub async fn open_equipment_sprite(
     equipment_descriptors: descriptors.clone(),
   };
 
+  *state.system_ltx_path.lock().unwrap() = Some(system_ltx_path.into());
   *state.equipment_sprite_name.lock().unwrap() = Some(name.into());
   *state.equipment_sprite_path.lock().unwrap() = Some(equipment_dds_path.into());
+  *state.equipment_sprite.lock().unwrap() = Some(image);
+  *state.equipment_sprite_preview.lock().unwrap() = Some(preview_buffer);
+  *state.equipment_descriptors.lock().unwrap() = Some(descriptors);
+
+  Ok(json!(response))
+}
+
+#[tauri::command]
+pub async fn reopen_equipment_sprite(
+  state: tauri::State<'_, IconsEditorState>,
+) -> Result<Value, String> {
+  let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
+  let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
+  let dds_name_lock: MutexGuard<Option<String>> =
+    state.equipment_sprite_name.as_ref().lock().unwrap();
+
+  if ltx_path_lock.is_none() || dds_path_lock.is_none() || dds_name_lock.is_none() {
+    return Err(String::from(
+      "Failed to reopen equipment sprites - no active sprite open now",
+    ));
+  }
+
+  let dds_name: &String = dds_name_lock.as_ref().unwrap();
+  let ltx_path: &String = ltx_path_lock.as_ref().unwrap();
+  let dds_path: &String = dds_path_lock.as_ref().unwrap();
+
+  let (image, preview_buffer) = open_dds_as_png(&PathBuf::from(dds_path))
+    .map_err(|error| format!("Failed to open provided image file: {:?}", error))?;
+
+  let descriptors: Vec<ConfigInventorySectionDescriptor> = get_ltx_inventory_descriptors(
+    &Ltx::load_from_file_full(ltx_path).map_err(|error| error.to_string())?,
+  );
+
+  let response = IconsEditorEquipmentResponse {
+    path: dds_path.into(),
+    name: dds_name.into(),
+    equipment_descriptors: descriptors.clone(),
+  };
+
   *state.equipment_sprite.lock().unwrap() = Some(image);
   *state.equipment_sprite_preview.lock().unwrap() = Some(preview_buffer);
   *state.equipment_descriptors.lock().unwrap() = Some(descriptors);
@@ -84,6 +105,7 @@ pub async fn close_equipment_sprite(
 ) -> Result<(), String> {
   log::info!("Closing equipment file:");
 
+  *state.system_ltx_path.lock().unwrap() = None;
   *state.equipment_sprite_path.lock().unwrap() = None;
   *state.equipment_sprite_name.lock().unwrap() = None;
   *state.equipment_descriptors.lock().unwrap() = None;
