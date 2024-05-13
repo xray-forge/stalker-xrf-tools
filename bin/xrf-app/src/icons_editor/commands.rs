@@ -6,7 +6,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::MutexGuard;
 use xray_icon::{
-  get_ltx_inventory_descriptors, read_dds_by_path, ConfigInventorySectionDescriptor,
+  dds_to_image, get_ltx_inventory_descriptors, read_dds_by_path, ConfigInventorySectionDescriptor,
 };
 use xray_ltx::Ltx;
 
@@ -20,10 +20,11 @@ pub async fn open_equipment_sprite(
 
   let name: &str = "equipment.png";
 
-  let image: RgbaImage = match read_dds_by_path(&PathBuf::from(equipment_dds_path)) {
-    Ok(image) => image,
-    Err(error) => return Err(format!("Failed to open provided image file: {:?}", error,)),
-  };
+  let image: RgbaImage =
+    match read_dds_by_path(&PathBuf::from(equipment_dds_path)).and_then(|dds| dds_to_image(&dds)) {
+      Ok(image) => image,
+      Err(error) => return Err(format!("Failed to open provided image file: {:?}", error,)),
+    };
 
   let mut preview_buffer: Vec<u8> = Vec::new();
 
