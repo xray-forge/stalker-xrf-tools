@@ -77,6 +77,12 @@ pub fn pack_equipment_icon(
       Some(it) => it,
     };
 
+  if inv_grid_h == 0 || inv_grid_w == 0 {
+    println!("Skip icon for '{section_name}' - width or height is zero",);
+
+    return false;
+  }
+
   let x_absolute: u32 = inv_grid_x * INVENTORY_ICON_GRID_SQUARE_BASE;
   let y_absolute: u32 = inv_grid_y * INVENTORY_ICON_GRID_SQUARE_BASE;
   let w_absolute: u32 = inv_grid_w * INVENTORY_ICON_GRID_SQUARE_BASE;
