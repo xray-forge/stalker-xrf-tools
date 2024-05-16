@@ -64,13 +64,6 @@ impl<'a> LtxParser<'a> {
         }
 
         current if current == LTX_SYMBOL_INCLUDE => {
-          // Allow includes only in header.
-          if includes_processed {
-            return self.error(String::from(
-              "Unexpected '#include' statement, all include statements should be part of config heading",
-            ));
-          }
-
           let line: String = self.parse_until_eol(true)?;
           let (included_path, _) = self.parse_include_from_line(&line)?;
 
@@ -401,6 +394,10 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse section name, inherited sections and comment from the line.
+  ///
+  /// Supported include variants are:
+  /// - #include "file.ltx"
+  /// - #include("file.ltx")
   fn parse_include_from_line(&self, line: &str) -> Result<(String, Option<String>), LtxParseError> {
     if line.is_empty() {
       return self.error("Failed to parse empty include statement");
@@ -413,13 +410,15 @@ impl<'a> LtxParser<'a> {
       None => (line, None),
     };
 
-    if !include.starts_with("#include \"") || !include.ends_with('\"') {
+    let included_path: String = if include.starts_with("#include \"") && include.ends_with('\"') {
+      String::from(&include[10..include.len() - 1])
+    } else if include.starts_with("#include(\"") && include.ends_with("\")") {
+      String::from(&include[10..include.len() - 2])
+    } else {
       return self.error(format!(
         "Expected correct '#include \"config.ltx\"' statement, got '{include}'"
       ));
-    }
-
-    let included_path: String = String::from(&include[10..include.len() - 1]);
+    };
 
     if included_path.is_empty() {
       return self.error(String::from(

@@ -40,7 +40,7 @@ pub fn unpack_equipment_icon(
     };
 
   if inv_grid_h == 0 || inv_grid_w == 0 {
-    println!("Skip icon for '{section_name}' - width or height is zero",);
+    println!("Skip for possible section: '{section_name}' - width or height is zero",);
 
     return false;
   }

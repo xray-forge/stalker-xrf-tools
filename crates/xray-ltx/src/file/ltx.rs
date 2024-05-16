@@ -455,26 +455,6 @@ name = hello
   }
 
   #[test]
-  fn includes_not_in_header() {
-    let input = "
-#include \"file1.ltx\"
-
-[section_name]: base1, base2
-name = hello
-
-#include \"file2.ltx\"
-";
-
-    let ltx = Ltx::read_from_str(input);
-
-    assert!(ltx.is_err());
-    assert_eq!(
-      ltx.unwrap_err().message,
-      "Unexpected '#include' statement, all include statements should be part of config heading"
-    );
-  }
-
-  #[test]
   fn string() {
     let input: &str = "
 [section name]

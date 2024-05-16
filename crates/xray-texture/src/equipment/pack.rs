@@ -73,12 +73,16 @@ pub fn pack_equipment_icon(
 ) -> bool {
   let (inv_grid_x, inv_grid_y, inv_grid_w, inv_grid_h) =
     match get_section_inventory_coordinates(section) {
-      None => return false,
+      None => {
+        println!("Skip for possible section: '{section_name}'");
+
+        return false;
+      }
       Some(it) => it,
     };
 
   if inv_grid_h == 0 || inv_grid_w == 0 {
-    println!("Skip icon for '{section_name}' - width or height is zero",);
+    println!("Skip for possible section: '{section_name}' - width or height is zero",);
 
     return false;
   }

@@ -13,7 +13,16 @@ pub fn format_ltx(matches: &ArgMatches) {
   let is_check: bool = matches.get_flag("check");
 
   if path.is_dir() {
-    let project: LtxProject = LtxProject::open_at_path(path).unwrap();
+    let project: LtxProject = LtxProject::open_at_path(path)
+      .map_err(|error| {
+        println!(
+          "Failed to format project at {:?}, reason: {:?}",
+          path, error
+        );
+
+        process::exit(1);
+      })
+      .unwrap();
 
     if is_check {
       log::info!("Checking format of ltx folder: {:?}", path);
@@ -38,6 +47,14 @@ pub fn format_ltx(matches: &ArgMatches) {
       path
     );
 
-    Ltx::format_file(path, true).unwrap();
+    match Ltx::format_file(path, true) {
+      Ok(_) => {
+        println!("Successfully formatted ltx in '{:?}'", path);
+      }
+      Err(error) => {
+        println!("Failed to format {:?}, reason: {:?}", path, error);
+        process::exit(1);
+      }
+    }
   }
 }
