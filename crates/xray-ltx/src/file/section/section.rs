@@ -78,6 +78,11 @@ impl Section {
     self.data.insert(key.into(), value.into());
   }
 
+  /// Merge another section into current one.
+  pub fn merge(&mut self, section: Section) {
+    self.data.extend(section.data);
+  }
+
   /// Get the first value associate with the key.
   pub fn get<S: Into<String>>(&self, key: S) -> Option<&str> {
     self.data.get(&key.into()).map(|value| value.as_str())

@@ -28,7 +28,7 @@ impl LtxIncludeConvertor {
   fn convert_ltx(&self, ltx: Ltx) -> Result<Ltx, LtxError> {
     if ltx.directory.is_none() {
       return Err(LtxConvertError::new_ltx_error(
-        "Failed to equipment ltx file, parent directory is not specified",
+        "Failed to parse ltx file, parent directory is not specified",
       ));
     }
 
@@ -53,13 +53,21 @@ impl LtxIncludeConvertor {
     }
 
     for (key, value) in ltx.sections {
-      if result.has_section(key.clone()) {
-        return Err(LtxConvertError::new_ltx_error(format!(
-          "Failed to equipment ltx file, duplicate section {key} found",
-        )));
+      match result.section_mut(&key) {
+        None => {
+          result.sections.insert(key, value);
+        }
+        Some(existing) => {
+          // Handle cases with root declarations.
+          if key.is_empty() {
+            existing.merge(value);
+          } else {
+            return Err(LtxConvertError::new_ltx_error(format!(
+              "Failed to equipment ltx file, duplicate section {key} found",
+            )));
+          }
+        }
       }
-
-      result.sections.insert(key, value);
     }
 
     Ok(result)
@@ -74,7 +82,7 @@ impl LtxIncludeConvertor {
       },
       Err(error) => {
         return Err(LtxConvertError::new_ltx_error(format!(
-          "Failed to equipment ltx file, nested file {:?} in {:?} error: {error}",
+          "Failed to parse ltx file, nested file {:?} in {:?} error: {error}",
           path.as_os_str(),
           into.path.as_ref().unwrap(),
         )))
@@ -82,15 +90,23 @@ impl LtxIncludeConvertor {
     };
 
     for (key, value) in ltx.into_included()?.sections {
-      if into.has_section(key.clone()) {
-        return Err(LtxConvertError::new_ltx_error(format!(
-          "Failed to include ltx file '{:?}' in {:?}, duplicate section {key} found",
-          path,
-          into.path.as_ref().unwrap()
-        )));
+      match into.section_mut(&key) {
+        None => {
+          into.sections.insert(key, value);
+        }
+        Some(existing) => {
+          // Handle cases with root declarations.
+          if key.is_empty() {
+            existing.merge(value);
+          } else {
+            return Err(LtxConvertError::new_ltx_error(format!(
+              "Failed to include ltx file '{:?}' in {:?}, duplicate section '{key}' found",
+              path,
+              into.path.as_ref().unwrap()
+            )));
+          }
+        }
       }
-
-      into.sections.insert(key, value);
     }
 
     Ok(())
