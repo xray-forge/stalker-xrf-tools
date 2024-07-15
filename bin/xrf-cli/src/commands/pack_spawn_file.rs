@@ -1,9 +1,41 @@
-use clap::ArgMatches;
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
 use xray_db::file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
+
+/// Add command packing of spawn file.
+pub fn add_pack_spawn_file_command(command: Command) -> Command {
+  command.subcommand(
+    Command::new("pack-spawn")
+      .about("Command to pack unpacked spawn files into single *.spawn")
+      .arg(
+        Arg::new("path")
+          .help("Path to unpacked spawn file folder")
+          .short('p')
+          .long("path")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("dest")
+          .help("Path to resulting packed *.spawn file")
+          .short('d')
+          .long("dest")
+          .default_value("unpacked")
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("force")
+          .help("Whether existing packed spawwn should be pruned if destination folder exists")
+          .short('f')
+          .long("force")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      ),
+  )
+}
 
 /// Pack *.spawn file based on provided arguments.
 pub fn pack_spawn_file(matches: &ArgMatches) -> io::Result<()> {

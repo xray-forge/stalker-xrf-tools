@@ -1,7 +1,23 @@
-use clap::ArgMatches;
+use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use xray_db::file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
+
+/// Add command for printing spawn file info.
+pub fn add_info_spawn_file_command(command: Command) -> Command {
+  command.subcommand(
+    Command::new("info-spawn")
+      .about("Command to print information about provided *.spawn file")
+      .arg(
+        Arg::new("path")
+          .help("Path to *.spawn file")
+          .short('p')
+          .long("path")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      ),
+  )
+}
 
 /// Print information about spawn file.
 pub fn info_spawn_file(matches: &ArgMatches) {

@@ -1,7 +1,53 @@
-use clap::ArgMatches;
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use xray_icon::{pack_xml_descriptions, ImageFormat, PackDescriptionOptions};
 
+/// Add command for packing of texture description file.
+pub fn add_pack_texture_description_command(command: Command) -> Command {
+  command.subcommand(
+    Command::new("pack-texture-description")
+      .about("Command to pack texture description xml")
+      .arg(
+        Arg::new("description")
+          .help("Path to XML file describing textures")
+          .long("description")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("base")
+          .help("Path to base where search for described files")
+          .long("base")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("output")
+          .help("Path to directory where output dds files")
+          .long("output")
+          .required(false)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("strict")
+          .help("Turn on strict unpack mode")
+          .short('s')
+          .long("strict")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      ),
+  )
+}
+
+/// Pack texture descriptions file as single dds sprite.
 pub fn pack_texture_description(matches: &ArgMatches) {
   let description: &PathBuf = matches
     .get_one::<PathBuf>("description")

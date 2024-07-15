@@ -1,7 +1,38 @@
-use clap::ArgMatches;
+use clap::{value_parser, Arg, ArgMatches, Command};
 use std::env;
 use std::path::PathBuf;
 use xray_archive::{ArchiveProject, ArchiveUnpackResult};
+
+/// Add command to unpack archive.
+pub fn add_unpack_archive_command(command: Command) -> Command {
+  command.subcommand(
+    Command::new("unpack-archive")
+      .about("Command to unpack provided *.db into separate files")
+      .arg(
+        Arg::new("path")
+          .help("Path to *.db file")
+          .short('p')
+          .long("path")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("dest")
+          .help("Path to folder for exporting")
+          .short('d')
+          .long("dest")
+          .default_value("unpacked")
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("parallel")
+          .help("Count of parallel threads for unpack")
+          .long("parallel")
+          .default_value("32")
+          .value_parser(value_parser!(usize)),
+      ),
+  )
+}
 
 /// Unpack xray engine database archive.
 pub async fn unpack_archive(matches: &ArgMatches) {

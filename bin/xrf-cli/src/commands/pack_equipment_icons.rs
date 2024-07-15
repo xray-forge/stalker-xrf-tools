@@ -1,9 +1,62 @@
-use clap::ArgMatches;
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::process;
 use xray_icon::{pack_equipment_icons_by_ltx, ImageFormat, PackEquipmentOptions};
 use xray_ltx::Ltx;
 
+/// Add command for packing equipment icons.
+pub fn add_pack_equipment_icons_command(command: Command) -> Command {
+  command.subcommand(
+    Command::new("pack-equipment-icons")
+      .about("Command to pack dds icons into single element")
+      .arg(
+        Arg::new("system-ltx")
+          .help("Path to system ltx file or root folder with ltx files")
+          .long("system-ltx")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("source")
+          .help("Path to source folder with section icons")
+          .long("source")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("output")
+          .help("Path to output dds file")
+          .long("output")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("gamedata")
+          .help("Path to gamedata folder for resources usage")
+          .long("gamedata")
+          .required(false)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("strict")
+          .help("Turn on strict mode")
+          .short('s')
+          .long("strict")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      ),
+  )
+}
+
+/// Command to pack equipment icons files into single dds file.
 pub fn pack_equipment_icons(matches: &ArgMatches) {
   let system_ltx_path: &PathBuf = matches
     .get_one::<PathBuf>("system-ltx")
