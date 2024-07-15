@@ -7,41 +7,39 @@ use xray_icon::{
 };
 use xray_ltx::Ltx;
 
-/// Add command to unpack equipment icons.
-pub fn add_unpack_equipment_icons_command(command: Command) -> Command {
-  command.subcommand(
-    Command::new("unpack-equipment-icons")
-      .about("Command to unpack dds icons into multiple icons")
-      .arg(
-        Arg::new("system-ltx")
-          .help("Path to system ltx file or root folder with ltx files")
-          .long("system-ltx")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("source")
-          .help("Path to source dds file")
-          .long("source")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("output")
-          .help("Path to output folder for sections icons")
-          .long("output")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("verbose")
-          .help("Turn on verbose logging")
-          .short('v')
-          .long("verbose")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      ),
-  )
+/// Create command to unpack equipment icons.
+pub fn create_unpack_equipment_icons_command() -> Command {
+  Command::new("unpack-equipment-icons")
+    .about("Command to unpack dds icons into multiple icons")
+    .arg(
+      Arg::new("system-ltx")
+        .help("Path to system ltx file or root folder with ltx files")
+        .long("system-ltx")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("source")
+        .help("Path to source dds file")
+        .long("source")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("output")
+        .help("Path to output folder for sections icons")
+        .long("output")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("verbose")
+        .help("Turn on verbose logging")
+        .short('v')
+        .long("verbose")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
 }
 
 pub fn unpack_equipment_icons(matches: &ArgMatches) {

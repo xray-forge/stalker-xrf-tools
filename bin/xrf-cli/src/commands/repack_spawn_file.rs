@@ -5,28 +5,26 @@ use std::time::{Duration, Instant};
 use xray_db::file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
 
-/// Add command for repack of spawn file.
-pub fn add_repack_spawn_file_command(command: Command) -> Command {
-  command.subcommand(
-    Command::new("repack-spawn")
-      .about("Command to repack provided *.spawn into another file")
-      .arg(
-        Arg::new("path")
-          .help("Path to *.spawn file")
-          .short('p')
-          .long("path")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("dest")
-          .help("Path to resulting *.spawn file")
-          .short('d')
-          .long("dest")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      ),
-  )
+/// Create command for repack of spawn file.
+pub fn create_repack_spawn_file_command() -> Command {
+  Command::new("repack-spawn")
+    .about("Command to repack provided *.spawn into another file")
+    .arg(
+      Arg::new("path")
+        .help("Path to *.spawn file")
+        .short('p')
+        .long("path")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("dest")
+        .help("Path to resulting *.spawn file")
+        .short('d')
+        .long("dest")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
 }
 
 /// Repack provided *.spawn file and validate it.

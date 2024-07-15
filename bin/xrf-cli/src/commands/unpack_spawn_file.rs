@@ -5,36 +5,34 @@ use std::{fs, io};
 use xray_db::file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
 
-/// Add command to unpack spawn file.
-pub fn add_unpack_spawn_file_command(command: Command) -> Command {
-  command.subcommand(
-    Command::new("unpack-spawn")
-      .about("Command to unpack provided *.spawn into separate files")
-      .arg(
-        Arg::new("path")
-          .help("Path to *.spawn file")
-          .short('p')
-          .long("path")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("dest")
-          .help("Path to folder for exporting")
-          .short('d')
-          .long("dest")
-          .default_value("unpacked")
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("force")
-          .help("Whether existing unpacked data should be pruned if destination folder exists")
-          .short('f')
-          .long("force")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      ),
-  )
+/// Create command to unpack spawn file.
+pub fn create_unpack_spawn_file_command() -> Command {
+  Command::new("unpack-spawn")
+    .about("Command to unpack provided *.spawn into separate files")
+    .arg(
+      Arg::new("path")
+        .help("Path to *.spawn file")
+        .short('p')
+        .long("path")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("dest")
+        .help("Path to folder for exporting")
+        .short('d')
+        .long("dest")
+        .default_value("unpacked")
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("force")
+        .help("Whether existing unpacked data should be pruned if destination folder exists")
+        .short('f')
+        .long("force")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
 }
 
 /// Unpack provided *.spawn file.

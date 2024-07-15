@@ -4,42 +4,40 @@ use std::process;
 use xray_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 
 /// Add command for verifying of ltx files.
-pub fn add_verify_ltx_command(command: Command) -> Command {
-  command.subcommand(
-    Command::new("verify-ltx")
-      .about("Command to verification ltx and ini files")
-      .arg(
-        Arg::new("path")
-          .help("Path to ltx file or folder with ltx files")
-          .short('p')
-          .long("path")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("silent")
-          .help("Turn of formatter logging")
-          .long("silent")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      )
-      .arg(
-        Arg::new("verbose")
-          .help("Turn on verbose logging")
-          .short('v')
-          .long("verbose")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      )
-      .arg(
-        Arg::new("strict")
-          .help("Turn on strict checking mode")
-          .short('s')
-          .long("strict")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      ),
-  )
+pub fn create_verify_ltx_command() -> Command {
+  Command::new("verify-ltx")
+    .about("Command to verification ltx and ini files")
+    .arg(
+      Arg::new("path")
+        .help("Path to ltx file or folder with ltx files")
+        .short('p')
+        .long("path")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("silent")
+        .help("Turn of formatter logging")
+        .long("silent")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
+    .arg(
+      Arg::new("verbose")
+        .help("Turn on verbose logging")
+        .short('v')
+        .long("verbose")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
+    .arg(
+      Arg::new("strict")
+        .help("Turn on strict checking mode")
+        .short('s')
+        .long("strict")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
 }
 
 /// Verify ltx file or folder based on provided arguments.

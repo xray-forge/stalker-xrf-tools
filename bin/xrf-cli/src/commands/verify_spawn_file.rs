@@ -3,20 +3,18 @@ use std::path::PathBuf;
 use xray_db::file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
 
-/// Add command for verifying of spawn file.
-pub fn add_verify_spawn_file_command(command: Command) -> Command {
-  command.subcommand(
-    Command::new("verify-spawn")
-      .about("Command to verify provided *.spawn file")
-      .arg(
-        Arg::new("path")
-          .help("Path to *.spawn file")
-          .short('p')
-          .long("path")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      ),
-  )
+/// Create command for verifying of spawn file.
+pub fn create_verify_spawn_file_command() -> Command {
+  Command::new("verify-spawn")
+    .about("Command to verify provided *.spawn file")
+    .arg(
+      Arg::new("path")
+        .help("Path to *.spawn file")
+        .short('p')
+        .long("path")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
 }
 
 /// Verify *.spawn file based on provided arguments.

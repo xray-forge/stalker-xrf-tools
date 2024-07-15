@@ -2,48 +2,46 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use xray_icon::{unpack_xml_descriptions, ImageFormat, PackDescriptionOptions};
 
-pub fn add_unpack_texture_description_command(command: Command) -> Command {
-  command.subcommand(
-    Command::new("unpack-texture-description")
-      .about("Command to unpack dds icons into multiple icons")
-      .arg(
-        Arg::new("description")
-          .help("Path to XML file describing textures")
-          .long("description")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("base")
-          .help("Path to base where search for described files")
-          .long("base")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("output")
-          .help("Path to output folder for icons")
-          .long("output")
-          .required(false)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("verbose")
-          .help("Turn on verbose logging")
-          .short('v')
-          .long("verbose")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      )
-      .arg(
-        Arg::new("strict")
-          .help("Turn on strict unpack mode")
-          .short('s')
-          .long("strict")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      ),
-  )
+pub fn create_unpack_texture_description_command() -> Command {
+  Command::new("unpack-texture-description")
+    .about("Command to unpack dds icons into multiple icons")
+    .arg(
+      Arg::new("description")
+        .help("Path to XML file describing textures")
+        .long("description")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("base")
+        .help("Path to base where search for described files")
+        .long("base")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("output")
+        .help("Path to output folder for icons")
+        .long("output")
+        .required(false)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("verbose")
+        .help("Turn on verbose logging")
+        .short('v')
+        .long("verbose")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
+    .arg(
+      Arg::new("strict")
+        .help("Turn on strict unpack mode")
+        .short('s')
+        .long("strict")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
 }
 
 pub fn unpack_texture_description(matches: &ArgMatches) {

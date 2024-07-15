@@ -3,35 +3,33 @@ use std::path::PathBuf;
 use std::process;
 use xray_ltx::{Ltx, LtxFormatOptions, LtxProject, LtxProjectFormatResult};
 
-/// Add command for verifying of spawn file.
-pub fn add_format_ltx_command(command: Command) -> Command {
-  command.subcommand(
-    Command::new("format-ltx")
-      .about("Command to format ltx and ini files")
-      .arg(
-        Arg::new("path")
-          .help("Path to ltx file or folder with ltx files")
-          .short('p')
-          .long("path")
-          .required(true)
-          .value_parser(value_parser!(PathBuf)),
-      )
-      .arg(
-        Arg::new("silent")
-          .help("Turn of formatter logging")
-          .long("silent")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      )
-      .arg(
-        Arg::new("check")
-          .help("Turn of formatter logging")
-          .short('c')
-          .long("check")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      ),
-  )
+/// Create command for verifying of spawn file.
+pub fn create_format_ltx_command() -> Command {
+  Command::new("format-ltx")
+    .about("Command to format ltx and ini files")
+    .arg(
+      Arg::new("path")
+        .help("Path to ltx file or folder with ltx files")
+        .short('p')
+        .long("path")
+        .required(true)
+        .value_parser(value_parser!(PathBuf)),
+    )
+    .arg(
+      Arg::new("silent")
+        .help("Turn of formatter logging")
+        .long("silent")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
+    .arg(
+      Arg::new("check")
+        .help("Turn of formatter logging")
+        .short('c')
+        .long("check")
+        .required(false)
+        .action(ArgAction::SetTrue),
+    )
 }
 
 /// Lint and format ltx file or folder based on provided arguments.

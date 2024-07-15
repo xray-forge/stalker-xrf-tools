@@ -1,51 +1,53 @@
 mod commands;
 
-use crate::commands::build_translations::{add_build_translations_command, build_translations};
-use crate::commands::format_ltx::{add_format_ltx_command, format_ltx};
-use crate::commands::info_spawn_file::{add_info_spawn_file_command, info_spawn_file};
+use crate::commands::build_translations::{build_translations, create_build_translations_command};
+use crate::commands::format_ltx::{create_format_ltx_command, format_ltx};
+use crate::commands::info_spawn_file::{create_info_spawn_file_command, info_spawn_file};
 use crate::commands::pack_equipment_icons::{
-  add_pack_equipment_icons_command, pack_equipment_icons,
+  create_pack_equipment_icons_command, pack_equipment_icons,
 };
-use crate::commands::pack_spawn_file::{add_pack_spawn_file_command, pack_spawn_file};
+use crate::commands::pack_spawn_file::{create_pack_spawn_file_command, pack_spawn_file};
 use crate::commands::pack_texture_description::{
-  add_pack_texture_description_command, pack_texture_description,
+  create_pack_texture_description_command, pack_texture_description,
 };
-use crate::commands::parse_translations::{add_parse_translations_command, parse_translations};
-use crate::commands::repack_spawn_file::{add_repack_spawn_file_command, repack_spawn_file};
-use crate::commands::unpack_archive::{add_unpack_archive_command, unpack_archive};
+use crate::commands::parse_translations::{create_parse_translations_command, parse_translations};
+use crate::commands::repack_spawn_file::{create_repack_spawn_file_command, repack_spawn_file};
+use crate::commands::unpack_archive::{create_unpack_archive_command, unpack_archive};
 use crate::commands::unpack_equipment_icons::{
-  add_unpack_equipment_icons_command, unpack_equipment_icons,
+  create_unpack_equipment_icons_command, unpack_equipment_icons,
 };
-use crate::commands::unpack_spawn_file::{add_unpack_spawn_file_command, unpack_spawn_file};
+use crate::commands::unpack_spawn_file::{create_unpack_spawn_file_command, unpack_spawn_file};
 use crate::commands::unpack_texture_description::{
-  add_unpack_texture_description_command, unpack_texture_description,
+  create_unpack_texture_description_command, unpack_texture_description,
 };
-use crate::commands::verify_ltx::{add_verify_ltx_command, verify_ltx};
-use crate::commands::verify_spawn_file::{add_verify_spawn_file_command, verify_spawn_file};
-use crate::commands::verify_translations::{add_verify_translations_command, verify_translations};
+use crate::commands::verify_ltx::{create_verify_ltx_command, verify_ltx};
+use crate::commands::verify_spawn_file::{create_verify_spawn_file_command, verify_spawn_file};
+use crate::commands::verify_translations::{
+  create_verify_translations_command, verify_translations,
+};
 use clap::Command;
 use std::env;
 
 #[tokio::main]
 async fn main() {
   setup_logger();
-  let mut command: Command = Command::new("xrf-tool").about("XRF forge CLI tools application");
-
-  command = add_build_translations_command(command);
-  command = add_format_ltx_command(command);
-  command = add_info_spawn_file_command(command);
-  command = add_pack_equipment_icons_command(command);
-  command = add_pack_spawn_file_command(command);
-  command = add_pack_texture_description_command(command);
-  command = add_parse_translations_command(command);
-  command = add_repack_spawn_file_command(command);
-  command = add_unpack_archive_command(command);
-  command = add_unpack_equipment_icons_command(command);
-  command = add_unpack_spawn_file_command(command);
-  command = add_unpack_texture_description_command(command);
-  command = add_verify_ltx_command(command);
-  command = add_verify_spawn_file_command(command);
-  command = add_verify_translations_command(command);
+  let command: Command = Command::new("xrf-tool")
+    .about("XRF forge CLI tools application")
+    .subcommand(create_build_translations_command())
+    .subcommand(create_format_ltx_command())
+    .subcommand(create_info_spawn_file_command())
+    .subcommand(create_pack_equipment_icons_command())
+    .subcommand(create_pack_spawn_file_command())
+    .subcommand(create_pack_texture_description_command())
+    .subcommand(create_parse_translations_command())
+    .subcommand(create_repack_spawn_file_command())
+    .subcommand(create_unpack_archive_command())
+    .subcommand(create_unpack_equipment_icons_command())
+    .subcommand(create_unpack_spawn_file_command())
+    .subcommand(create_unpack_texture_description_command())
+    .subcommand(create_verify_ltx_command())
+    .subcommand(create_verify_spawn_file_command())
+    .subcommand(create_verify_translations_command());
 
   match command.get_matches().subcommand() {
     Some(("build-translations", matches)) => build_translations(matches),
