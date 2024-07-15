@@ -5,7 +5,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
 import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
 
-export function DialogEditor(): ReactElement {
+export function DialogEditorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
