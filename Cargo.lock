@@ -5206,6 +5206,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "xray-translation"
+version = "0.1.0"
+
+[[package]]
 name = "xrf-app"
 version = "0.1.0"
 dependencies = [
