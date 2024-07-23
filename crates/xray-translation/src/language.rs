@@ -29,6 +29,13 @@ impl TranslationLanguage {
     }
   }
 
+  pub fn get_language_encoding(&self) -> String {
+    match self {
+      TranslationLanguage::Russian | TranslationLanguage::Ukrainian => String::from("windows-1251"),
+      _ => String::from("windows-1250"),
+    }
+  }
+
   pub fn get_all() -> Vec<TranslationLanguage> {
     vec![
       TranslationLanguage::English,

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="run: build translations" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
-    <option name="command" value="run --package xrf-cli --bin xrf-cli -- build-translations -p C:\Projects\stalker-xrf-engine\src\engine\translations -o C:\Projects\stalker-xrf-engine\target\translations-test" />
+    <option name="command" value="run --package xrf-cli --bin xrf-cli -- build-translations -p C:\Projects\stalker-xrf-engine\src\engine\translations -o C:\Projects\stalker-xrf-engine\target\translations-test -s " />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />

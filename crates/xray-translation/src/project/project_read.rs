@@ -1,15 +1,19 @@
 use crate::project::project::TranslationProject;
 use crate::project::project_constants::ALLOWED_PROJECT_READ_EXTENSIONS;
 use std::fs::File;
+use std::io::Read;
 
 use crate::types::TranslationJson;
+use crate::TranslationError;
 use std::path::Path;
 
 impl TranslationProject {
-  pub fn read_translation_json_by_path(path: &Path) -> TranslationJson {
-    let file: File = File::open(path).unwrap();
+  pub fn read_translation_json_by_path(path: &Path) -> Result<TranslationJson, TranslationError> {
+    let mut data: Vec<u8> = Vec::new();
 
-    serde_json::from_reader(file).unwrap()
+    File::open(path)?.read_to_end(&mut data)?;
+
+    Ok(serde_json::from_slice(&data).unwrap())
   }
 
   pub fn can_read_path(&self, path: &Path) -> bool {

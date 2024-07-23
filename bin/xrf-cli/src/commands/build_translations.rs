@@ -2,7 +2,8 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::str::FromStr;
 use xray_translation::{
-  ProjectBuildOptions, TranslationError, TranslationLanguage, TranslationProject,
+  ProjectBuildOptions, ProjectBuildResult, TranslationError, TranslationLanguage,
+  TranslationProject,
 };
 
 /// Create command for building of translation files.
@@ -92,10 +93,17 @@ pub fn build_translations(matches: &ArgMatches) -> Result<(), TranslationError> 
     language: TranslationLanguage::from_str(language)?,
   };
 
-  if path.is_dir() {
-    TranslationProject::build_dir(path, &options)?;
+  let result: ProjectBuildResult = if path.is_dir() {
+    TranslationProject::build_dir(path, &options)?
   } else {
-    TranslationProject::build_file(path, &options)?;
+    TranslationProject::build_file(path, &options)?
+  };
+
+  if options.is_logging_enabled() {
+    println!(
+      "Built translation files in {} sec",
+      (result.duration as f64) / 1000.0
+    );
   }
 
   Ok(())

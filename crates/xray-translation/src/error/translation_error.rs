@@ -7,6 +7,7 @@ use std::io;
 pub enum TranslationError {
   Io(io::Error),
   UnknownLanguage(String),
+  InvalidSourceJson(String),
 }
 
 impl Display for TranslationError {
@@ -14,6 +15,7 @@ impl Display for TranslationError {
     match *self {
       TranslationError::Io(ref error) => error.fmt(formatter),
       TranslationError::UnknownLanguage(ref error) => error.fmt(formatter),
+      TranslationError::InvalidSourceJson(ref error) => error.fmt(formatter),
     }
   }
 }
@@ -23,6 +25,7 @@ impl Error for TranslationError {
     match *self {
       TranslationError::Io(ref error) => error.source(),
       TranslationError::UnknownLanguage(ref _error) => None,
+      TranslationError::InvalidSourceJson(ref _error) => None,
     }
   }
 }
