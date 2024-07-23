@@ -6,7 +6,8 @@ use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, Transl
 use quick_xml::se::Serializer;
 use serde::Serialize;
 use std::ffi::OsStr;
-use std::io::Write;
+use std::fs::File;
+use std::io::{copy, Write};
 use std::path::Path;
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
@@ -59,38 +60,11 @@ impl TranslationProject {
 
     let mut result: ProjectBuildResult = ProjectBuildResult::new();
 
-    log::info!("Building file {:?}", path);
-
     if let Some(extension) = extension {
       if extension == "xml" {
-        if options.is_logging_enabled() {
-          println!("Building todo XML based translations {:?}", path);
-        }
+        Self::build_xml_file(path, options)?;
       } else if extension == "json" {
-        if options.is_logging_enabled() {
-          println!("Building JSON based translations {:?}", path);
-        }
-
-        let parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
-
-        if options.language == TranslationLanguage::All {
-          for language in TranslationLanguage::get_all() {
-            Self::prepare_target_json_file(path, &options.output, &language, options)?.write_all(
-              TranslationProject::compile_translation_json_by_language(&parsed, &language, options)
-                .as_bytes(),
-            )?
-          }
-        } else {
-          Self::prepare_target_json_file(path, &options.output, &options.language, options)?
-            .write_all(
-              TranslationProject::compile_translation_json_by_language(
-                &parsed,
-                &options.language,
-                options,
-              )
-              .as_bytes(),
-            )?
-        }
+        Self::build_json_file(path, options)?;
       } else {
         log::info!("Skip file {:?}", path);
 
@@ -112,6 +86,87 @@ impl TranslationProject {
     Ok(ProjectBuildResult::new())
   }
 
+  pub fn build_xml_file(
+    path: &Path,
+    options: &ProjectBuildOptions,
+  ) -> Result<(), TranslationError> {
+    let locale = Self::get_locale_from_path(path);
+
+    if let Some(locale) = locale {
+      if options.is_logging_enabled() {
+        println!("Building XML based translations {:?}", path);
+      }
+
+      // All locales needed or file locale matches current one.
+      if options.language == TranslationLanguage::All || locale == options.language {
+        log::info!("Building dynamic XML file {:?} ({:?})", path, locale);
+
+        copy(
+          &mut File::open(path)?,
+          &mut Self::prepare_target_file(path, &options.output, &locale, options)?,
+        )?;
+      } else {
+        log::info!("Skip dynamic XML file {:?}", path);
+      }
+    } else {
+      log::info!("Building static XML file {:?}", path);
+
+      // Just plain XML to copy from one place to another.
+      if options.is_logging_enabled() {
+        println!("Copy static XML translations {:?}", path);
+      }
+
+      if options.language == TranslationLanguage::All {
+        for language in TranslationLanguage::get_all() {
+          copy(
+            &mut File::open(path)?,
+            &mut Self::prepare_target_file(path, &options.output, &language, options)?,
+          )?;
+        }
+      } else {
+        copy(
+          &mut File::open(path)?,
+          &mut Self::prepare_target_file(path, &options.output, &options.language, options)?,
+        )?;
+      }
+    }
+
+    Ok(())
+  }
+
+  pub fn build_json_file(
+    path: &Path,
+    options: &ProjectBuildOptions,
+  ) -> Result<(), TranslationError> {
+    log::info!("Building dynamic JSON file {:?}", path);
+
+    if options.is_logging_enabled() {
+      println!("Building JSON based translations {:?}", path);
+    }
+
+    let parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
+
+    if options.language == TranslationLanguage::All {
+      for language in TranslationLanguage::get_all() {
+        Self::prepare_target_file(path, &options.output, &language, options)?.write_all(
+          TranslationProject::compile_translation_json_by_language(&parsed, &language, options)
+            .as_bytes(),
+        )?;
+      }
+    } else {
+      Self::prepare_target_file(path, &options.output, &options.language, options)?.write_all(
+        TranslationProject::compile_translation_json_by_language(
+          &parsed,
+          &options.language,
+          options,
+        )
+        .as_bytes(),
+      )?;
+    }
+
+    Ok(())
+  }
+
   fn compile_translation_json_by_language(
     source: &TranslationJson,
     language: &TranslationLanguage,
@@ -125,11 +180,6 @@ impl TranslationProject {
     let mut compiled: TranslationCompiledXml = TranslationCompiledXml::default();
 
     let language: &str = language.as_str();
-
-    log::info!(
-      "Building json file with {} entries, language '{language}'",
-      source.len()
-    );
 
     if options.is_verbose_logging_enabled() {
       println!(

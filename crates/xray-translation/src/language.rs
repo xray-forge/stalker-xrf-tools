@@ -48,6 +48,15 @@ impl TranslationLanguage {
       TranslationLanguage::Ukrainian,
     ]
   }
+
+  pub fn from_str_single(language: &str) -> Result<Self, TranslationError> {
+    match Self::from_str(language)? {
+      TranslationLanguage::All => Err(TranslationError::UnknownLanguage(String::from(
+        "Unexpected language 'all' provided'",
+      ))),
+      language => Ok(language),
+    }
+  }
 }
 
 impl FromStr for TranslationLanguage {

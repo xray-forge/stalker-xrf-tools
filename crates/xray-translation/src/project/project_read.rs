@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::Read;
 
 use crate::types::TranslationJson;
-use crate::TranslationError;
+use crate::{TranslationError, TranslationLanguage};
 use std::path::Path;
 
 impl TranslationProject {
@@ -26,5 +26,26 @@ impl TranslationProject {
     }
 
     false
+  }
+
+  pub fn get_locale_from_path(path: &Path) -> Option<TranslationLanguage> {
+    match path.file_name() {
+      Some(name) => {
+        if let Some(name) = name.to_str() {
+          let parts: Vec<&str> = name.split('.').collect();
+          let parts_count: usize = parts.len();
+
+          if parts_count > 2 {
+            return match TranslationLanguage::from_str_single(parts.get(parts_count - 2).unwrap()) {
+              Ok(locale) => Some(locale),
+              Err(_) => None,
+            };
+          }
+        }
+
+        None
+      }
+      None => None,
+    }
   }
 }

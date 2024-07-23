@@ -7,7 +7,7 @@ use crate::{ProjectBuildOptions, TranslationError, TranslationLanguage};
 use std::path::{Path, PathBuf};
 
 impl TranslationProject {
-  pub fn prepare_target_json_file(
+  pub fn prepare_target_file(
     path: &Path,
     destination: &Path,
     language: &TranslationLanguage,
