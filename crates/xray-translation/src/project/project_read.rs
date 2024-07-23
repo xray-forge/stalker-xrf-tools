@@ -13,7 +13,7 @@ impl TranslationProject {
 
     File::open(path)?.read_to_end(&mut data)?;
 
-    Ok(serde_json::from_slice(&data).unwrap())
+    Ok(serde_json::from_slice(&data).expect("Expected valid JSON source file with standard format"))
   }
 
   pub fn can_read_path(&self, path: &Path) -> bool {
