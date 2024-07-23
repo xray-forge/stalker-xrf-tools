@@ -13,3 +13,4 @@ xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-icon = { path = "../../crates/xray-texture" }
 xray-ltx = { path = "../../crates/xray-ltx" }
+xray-translation = { path = "../../crates/xray-translation" }

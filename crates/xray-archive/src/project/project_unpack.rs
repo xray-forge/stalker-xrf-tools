@@ -128,7 +128,7 @@ impl ArchiveProject {
       .seek(SeekFrom::Start(file_descriptor.offset as u64))
       .expect("Expected to be able to seek to start of the source file");
 
-    let mut dest_file = File::options()
+    let mut dest_file: File = File::options()
       .read(false)
       .write(true)
       .create(true)

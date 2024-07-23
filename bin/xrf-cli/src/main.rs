@@ -50,7 +50,7 @@ async fn main() {
     .subcommand(create_verify_translations_command());
 
   match command.get_matches().subcommand() {
-    Some(("build-translations", matches)) => build_translations(matches),
+    Some(("build-translations", matches)) => build_translations(matches).unwrap(),
     Some(("parse-translations", matches)) => parse_translations(matches),
     Some(("verify-translations", matches)) => verify_translations(matches),
     Some(("format-ltx", matches)) => format_ltx(matches),
