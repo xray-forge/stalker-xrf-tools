@@ -29,9 +29,10 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/app
 Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli/cli.html).
 
 - [Archive commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/archive.html)
+- [Icons commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/icons.html)
 - [LTX commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/ltx.html)
 - [Spawn commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/spawn.html)
-- [Icons commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/icons.html)
+- [Translations commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/translations.html)
 
 ## Building
 
