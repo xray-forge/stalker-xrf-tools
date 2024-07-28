@@ -8,3 +8,5 @@ pub use crate::language::TranslationLanguage;
 pub use crate::project::project::TranslationProject;
 pub use crate::project::project_build_options::ProjectBuildOptions;
 pub use crate::project::project_build_result::ProjectBuildResult;
+pub use crate::project::project_verify_options::ProjectVerifyOptions;
+pub use crate::project::project_verify_result::ProjectVerifyResult;

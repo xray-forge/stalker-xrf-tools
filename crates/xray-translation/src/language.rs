@@ -49,6 +49,10 @@ impl TranslationLanguage {
     ]
   }
 
+  pub fn get_all_str<'a>() -> Vec<&'a str> {
+    Self::get_all().iter().map(|it| it.as_str()).collect()
+  }
+
   pub fn from_str_single(language: &str) -> Result<Self, TranslationError> {
     match Self::from_str(language)? {
       TranslationLanguage::All => Err(TranslationError::UnknownLanguage(String::from(

@@ -4,4 +4,7 @@ pub(crate) mod project_build_options;
 pub(crate) mod project_build_result;
 pub(crate) mod project_constants;
 pub(crate) mod project_read;
+pub(crate) mod project_verify;
+pub(crate) mod project_verify_options;
+pub(crate) mod project_verify_result;
 pub(crate) mod project_write;

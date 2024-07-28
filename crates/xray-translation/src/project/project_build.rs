@@ -68,8 +68,7 @@ impl TranslationProject {
       } else {
         log::info!("Skip file {:?}", path);
 
-        // Just warn.
-        if !options.is_silent {
+        if options.is_logging_enabled() {
           println!("Skip file {:?}", path);
         }
       }
@@ -83,7 +82,7 @@ impl TranslationProject {
       (result.duration as f64) / 1000.0
     );
 
-    Ok(ProjectBuildResult::new())
+    Ok(result)
   }
 
   pub fn build_xml_file(

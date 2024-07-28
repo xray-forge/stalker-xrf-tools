@@ -52,7 +52,7 @@ async fn main() {
   match command.get_matches().subcommand() {
     Some(("build-translations", matches)) => build_translations(matches).unwrap(),
     Some(("parse-translations", matches)) => parse_translations(matches),
-    Some(("verify-translations", matches)) => verify_translations(matches),
+    Some(("verify-translations", matches)) => verify_translations(matches).unwrap(),
     Some(("format-ltx", matches)) => format_ltx(matches),
     Some(("info-spawn", matches)) => info_spawn_file(matches),
     Some(("pack-equipment-icons", matches)) => pack_equipment_icons(matches),
