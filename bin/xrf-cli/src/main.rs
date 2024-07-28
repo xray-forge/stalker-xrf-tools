@@ -3,6 +3,9 @@ mod commands;
 use crate::commands::build_translations::{build_translations, create_build_translations_command};
 use crate::commands::format_ltx::{create_format_ltx_command, format_ltx};
 use crate::commands::info_spawn_file::{create_info_spawn_file_command, info_spawn_file};
+use crate::commands::initialize_translations::{
+  create_initialize_translations_command, initialize_translations,
+};
 use crate::commands::pack_equipment_icons::{
   create_pack_equipment_icons_command, pack_equipment_icons,
 };
@@ -31,11 +34,13 @@ use std::env;
 #[tokio::main]
 async fn main() {
   setup_logger();
+
   let command: Command = Command::new("xrf-tool")
     .about("XRF forge CLI tools application")
     .subcommand(create_build_translations_command())
     .subcommand(create_format_ltx_command())
     .subcommand(create_info_spawn_file_command())
+    .subcommand(create_initialize_translations_command())
     .subcommand(create_pack_equipment_icons_command())
     .subcommand(create_pack_spawn_file_command())
     .subcommand(create_pack_texture_description_command())
@@ -51,13 +56,13 @@ async fn main() {
 
   match command.get_matches().subcommand() {
     Some(("build-translations", matches)) => build_translations(matches).unwrap(),
-    Some(("parse-translations", matches)) => parse_translations(matches),
-    Some(("verify-translations", matches)) => verify_translations(matches).unwrap(),
     Some(("format-ltx", matches)) => format_ltx(matches),
     Some(("info-spawn", matches)) => info_spawn_file(matches),
+    Some(("initialize-translations", matches)) => initialize_translations(matches).unwrap(),
     Some(("pack-equipment-icons", matches)) => pack_equipment_icons(matches),
     Some(("pack-spawn", matches)) => pack_spawn_file(matches).unwrap(),
     Some(("pack-texture-description", matches)) => pack_texture_description(matches),
+    Some(("parse-translations", matches)) => parse_translations(matches),
     Some(("repack-spawn", matches)) => repack_spawn_file(matches).unwrap(),
     Some(("unpack-archive", matches)) => unpack_archive(matches).await,
     Some(("unpack-equipment-icons", matches)) => unpack_equipment_icons(matches),
@@ -65,20 +70,23 @@ async fn main() {
     Some(("unpack-texture-description", matches)) => unpack_texture_description(matches),
     Some(("verify-ltx", matches)) => verify_ltx(matches),
     Some(("verify-spawn", matches)) => verify_spawn_file(matches),
+    Some(("verify-translations", matches)) => verify_translations(matches).unwrap(),
     _ => panic!("Unexpected cli command provided, check --help for details"),
   };
 }
 
 /// Configure environment logger, fallback to info level.
 pub fn setup_logger() {
-  if env::var("RUST_LOG").is_err() {
-    env::set_var(
-      "RUST_LOG",
-      match cfg!(debug_assertions) {
-        true => "info",
-        false => "error",
-      },
-    )
+  unsafe {
+    if env::var("RUST_LOG").is_err() {
+      env::set_var(
+        "RUST_LOG",
+        match cfg!(debug_assertions) {
+          true => "info",
+          false => "error",
+        },
+      )
+    }
   }
 
   env_logger::init();

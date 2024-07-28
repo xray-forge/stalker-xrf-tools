@@ -1,3 +1,3 @@
 pub struct TranslationProject {
-  // todo;
+  // Nothing.
 }

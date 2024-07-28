@@ -1,6 +1,7 @@
 pub mod build_translations;
 pub mod format_ltx;
 pub mod info_spawn_file;
+pub mod initialize_translations;
 pub mod pack_equipment_icons;
 pub mod pack_spawn_file;
 pub mod pack_texture_description;

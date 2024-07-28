@@ -102,7 +102,7 @@ impl TranslationProject {
 
         copy(
           &mut File::open(path)?,
-          &mut Self::prepare_target_file(path, &options.output, &locale, options)?,
+          &mut Self::prepare_target_xml_translation_file(path, &options.output, &locale, options)?,
         )?;
       } else {
         log::info!("Skip dynamic XML file {:?}", path);
@@ -119,13 +119,23 @@ impl TranslationProject {
         for language in TranslationLanguage::get_all() {
           copy(
             &mut File::open(path)?,
-            &mut Self::prepare_target_file(path, &options.output, &language, options)?,
+            &mut Self::prepare_target_xml_translation_file(
+              path,
+              &options.output,
+              &language,
+              options,
+            )?,
           )?;
         }
       } else {
         copy(
           &mut File::open(path)?,
-          &mut Self::prepare_target_file(path, &options.output, &options.language, options)?,
+          &mut Self::prepare_target_xml_translation_file(
+            path,
+            &options.output,
+            &options.language,
+            options,
+          )?,
         )?;
       }
     }
@@ -147,20 +157,22 @@ impl TranslationProject {
 
     if options.language == TranslationLanguage::All {
       for language in TranslationLanguage::get_all() {
-        Self::prepare_target_file(path, &options.output, &language, options)?.write_all(
-          TranslationProject::compile_translation_json_by_language(&parsed, &language, options)
-            .as_bytes(),
-        )?;
+        Self::prepare_target_xml_translation_file(path, &options.output, &language, options)?
+          .write_all(
+            TranslationProject::compile_translation_json_by_language(&parsed, &language, options)
+              .as_bytes(),
+          )?;
       }
     } else {
-      Self::prepare_target_file(path, &options.output, &options.language, options)?.write_all(
-        TranslationProject::compile_translation_json_by_language(
-          &parsed,
-          &options.language,
-          options,
-        )
-        .as_bytes(),
-      )?;
+      Self::prepare_target_xml_translation_file(path, &options.output, &options.language, options)?
+        .write_all(
+          TranslationProject::compile_translation_json_by_language(
+            &parsed,
+            &options.language,
+            options,
+          )
+          .as_bytes(),
+        )?;
     }
 
     Ok(())
