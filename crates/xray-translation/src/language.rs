@@ -1,4 +1,5 @@
 use crate::error::translation_error::TranslationError;
+use encoding_rs::{Encoding, WINDOWS_1250, WINDOWS_1251};
 use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -33,6 +34,13 @@ impl TranslationLanguage {
     match self {
       TranslationLanguage::Russian | TranslationLanguage::Ukrainian => String::from("windows-1251"),
       _ => String::from("windows-1250"),
+    }
+  }
+
+  pub fn get_language_encoder(&self) -> &'static Encoding {
+    match self {
+      TranslationLanguage::Russian | TranslationLanguage::Ukrainian => WINDOWS_1251,
+      _ => WINDOWS_1250,
     }
   }
 

@@ -1,4 +1,5 @@
 use crate::project::project::TranslationProject;
+use std::borrow::Cow;
 use std::fs;
 use std::fs::File;
 use std::io::ErrorKind::AlreadyExists;
@@ -81,5 +82,35 @@ impl TranslationProject {
     }
 
     Value::Object(root)
+  }
+
+  /// Encode provided string data according to language.
+  pub fn encode_translation_data(
+    value: &str,
+    language: &TranslationLanguage,
+    options: &ProjectBuildOptions,
+  ) -> Vec<u8> {
+    let (transformed, _, had_errors) = language.get_language_encoder().encode(value);
+
+    if had_errors {
+      log::info!(
+        "Unexpected errors when encoding {:?} string data for language {:?}",
+        language.get_language_encoding(),
+        language
+      );
+
+      if options.is_verbose_logging_enabled() {
+        println!(
+          "Unexpected errors when encoding {:?} string data for language {:?}",
+          language.get_language_encoding(),
+          language
+        );
+      }
+    }
+
+    match transformed {
+      Cow::Borrowed(value) => value.to_vec(),
+      Cow::Owned(value) => value,
+    }
   }
 }

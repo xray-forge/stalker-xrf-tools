@@ -157,22 +157,28 @@ impl TranslationProject {
 
     if options.language == TranslationLanguage::All {
       for language in TranslationLanguage::get_all() {
+        let data: Vec<u8> = Self::encode_translation_data(
+          &TranslationProject::compile_translation_json_by_language(&parsed, &language, options),
+          &language,
+          options,
+        );
+
         Self::prepare_target_xml_translation_file(path, &options.output, &language, options)?
-          .write_all(
-            TranslationProject::compile_translation_json_by_language(&parsed, &language, options)
-              .as_bytes(),
-          )?;
+          .write_all(&data)?;
       }
     } else {
+      let data: Vec<u8> = Self::encode_translation_data(
+        &TranslationProject::compile_translation_json_by_language(
+          &parsed,
+          &options.language,
+          options,
+        ),
+        &options.language,
+        options,
+      );
+
       Self::prepare_target_xml_translation_file(path, &options.output, &options.language, options)?
-        .write_all(
-          TranslationProject::compile_translation_json_by_language(
-            &parsed,
-            &options.language,
-            options,
-          )
-          .as_bytes(),
-        )?;
+        .write_all(&data)?;
     }
 
     Ok(())
