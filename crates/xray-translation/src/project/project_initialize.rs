@@ -3,9 +3,6 @@ use crate::{
   ProjectInitializeOptions, ProjectInitializeResult, TranslationError, TranslationLanguage,
   TranslationProject,
 };
-use serde::Serialize;
-use serde_json::value::Serializer;
-use serde_json::Value;
 use std::ffi::OsStr;
 use std::io::Write;
 use std::path::Path;
@@ -36,8 +33,7 @@ impl TranslationProject {
       let entry_path: &Path = entry.path();
 
       if entry_path.is_file() {
-        let file_result: ProjectInitializeResult =
-          TranslationProject::initialize_file(entry_path, options)?;
+        TranslationProject::initialize_file(entry_path, options)?;
       }
     }
 

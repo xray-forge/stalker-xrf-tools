@@ -7,22 +7,26 @@ mod exports_editor;
 mod icons_editor;
 mod spawns_editor;
 
-use crate::archives_editor::setup::init_archives_editor;
-use crate::configs_editor::setup::init_configs_editor;
-use crate::exports_editor::setup::init_exports_editor;
-use crate::icons_editor::setup::init_icons_editor;
-use crate::spawns_editor::setup::init_spawns_editor;
+use crate::archives_editor::plugin::ArchivesEditorPlugin;
+use crate::configs_editor::plugin::ConfigsEditorPlugin;
+use crate::exports_editor::plugin::ExportsEditorPlugin;
+use crate::icons_editor::plugin::IconsEditorPlugin;
+use crate::spawns_editor::plugin::SpawnsEditorModule;
 use std::env;
 
 fn main() {
   setup_logger();
 
   tauri::Builder::default()
-    .plugin(init_icons_editor())
-    .plugin(init_spawns_editor())
-    .plugin(init_exports_editor())
-    .plugin(init_configs_editor())
-    .plugin(init_archives_editor())
+    .plugin(tauri_plugin_fs::init())
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_shell::init())
+    // Custom plugins.
+    .plugin(ArchivesEditorPlugin::init())
+    .plugin(ExportsEditorPlugin::init())
+    .plugin(SpawnsEditorModule::init())
+    .plugin(ConfigsEditorPlugin::init())
+    .plugin(IconsEditorPlugin::init())
     .run(tauri::generate_context!())
     .expect("Error while running tauri application")
 }
@@ -30,13 +34,15 @@ fn main() {
 /// Configure environment logger, fallback to info level.
 pub fn setup_logger() {
   if env::var("RUST_LOG").is_err() {
-    env::set_var(
-      "RUST_LOG",
-      match cfg!(debug_assertions) {
-        true => "info",
-        false => "error",
-      },
-    )
+    unsafe {
+      env::set_var(
+        "RUST_LOG",
+        match cfg!(debug_assertions) {
+          true => "info",
+          false => "error",
+        },
+      )
+    }
   }
 
   env_logger::init();

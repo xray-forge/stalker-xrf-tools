@@ -27,6 +27,7 @@ pub trait BitRead {
   fn read_bits<T: UBits>(&mut self, n: u32) -> io::Result<T>;
   /// Creates a "by reference" adaptor for this instance of `BitRead`.
   /// The returned adaptor also implements `BitRead` and will simply borrow this current reader.
+  #[allow(dead_code)]
   fn by_ref(&mut self) -> &mut Self {
     self
   }

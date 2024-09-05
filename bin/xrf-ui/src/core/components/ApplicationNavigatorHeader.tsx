@@ -1,6 +1,6 @@
 import { default as HelpIcon } from "@mui/icons-material/Help";
 import { Grid, IconButton, Typography } from "@mui/material";
-import { open } from "@tauri-apps/api/shell";
+import { open } from "@tauri-apps/plugin-shell";
 import { ReactElement, useCallback } from "react";
 
 interface IApplicationNavigatorHeader {

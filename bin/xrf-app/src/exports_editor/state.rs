@@ -8,6 +8,16 @@ pub struct ExportsEditorState {
   pub effects: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
 }
 
+impl ExportsEditorState {
+  pub fn new() -> ExportsEditorState {
+    ExportsEditorState {
+      conditions: Arc::new(Mutex::new(None)),
+      dialogs: Arc::new(Mutex::new(None)),
+      effects: Arc::new(Mutex::new(None)),
+    }
+  }
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportsDeclarations {

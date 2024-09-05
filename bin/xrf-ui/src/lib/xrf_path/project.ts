@@ -1,5 +1,5 @@
-import { exists } from "@tauri-apps/api/fs";
 import * as path from "@tauri-apps/api/path";
+import { exists } from "@tauri-apps/plugin-fs";
 
 import { Optional } from "@/core/types/general";
 

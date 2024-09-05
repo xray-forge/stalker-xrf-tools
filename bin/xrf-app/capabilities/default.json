@@ -1,0 +1,31 @@
+{
+  "identifier": "default",
+  "description": "Permissions that were migrated from v1.",
+  "local": true,
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "fs:allow-exists",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "**"
+      ]
+    },
+    "shell:allow-open",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-ask",
+    "dialog:allow-confirm",
+    "shell:default",
+    "dialog:default",
+    "fs:default",
+    "archives-editor:default",
+    "configs-editor:default",
+    "exports-editor:default",
+    "icons-editor:default",
+    "spawns-editor:default"
+  ]
+}

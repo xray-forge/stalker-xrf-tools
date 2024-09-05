@@ -6,18 +6,21 @@ authors = ["Neloreck"]
 edition = "2021"
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "2.0.0-rc.8", features = [
+  "codegen"
+] }
 
 [dependencies]
 env_logger = "0.11.2"
-http = "0.2.11"
-http-range = "0.1.5"
 image = "0.24.9"
 log = "0.4.21"
 percent-encoding = "2.3.1"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
-tauri = { version = "1.7.1", features = ["path-all", "fs-exists", "dialog-save", "dialog-ask", "dialog-open", "dialog-confirm", "shell-open"] }
+tauri = { version = "2.0.0-rc.9", features = [] }
+tauri-plugin-dialog = "2.0.0-rc"
+tauri-plugin-fs = "2.0.0-rc"
+tauri-plugin-shell = "2.0.0-rc"
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-export = { path = "../../crates/xray-export" }

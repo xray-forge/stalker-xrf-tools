@@ -1,7 +1,7 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import { FormControl, Grid, IconButton, InputAdornment, InputLabel, OutlinedInput, Typography } from "@mui/material";
-import { open } from "@tauri-apps/api/dialog";
-import { exists } from "@tauri-apps/api/fs";
+import { open } from "@tauri-apps/plugin-dialog";
+import { exists } from "@tauri-apps/plugin-fs";
 import { useManager } from "dreamstate";
 import { MouseEvent, ReactElement, ReactNode, useCallback } from "react";
 

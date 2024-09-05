@@ -10,7 +10,7 @@ import {
   OutlinedInput,
   Typography,
 } from "@mui/material";
-import { open, save } from "@tauri-apps/api/dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import { useManager } from "dreamstate";
 import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 

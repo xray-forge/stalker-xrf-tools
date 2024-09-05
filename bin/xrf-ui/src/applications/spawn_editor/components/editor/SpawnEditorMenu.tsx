@@ -7,13 +7,14 @@ import { default as LooksIcon1 } from "@mui/icons-material/LooksOne";
 import { default as LooksIcon2 } from "@mui/icons-material/LooksTwo";
 import { default as SaveIcon } from "@mui/icons-material/Save";
 import { Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { dialog } from "@tauri-apps/api";
+import {  } from "@tauri-apps/api";
 import { useManager } from "dreamstate";
 import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, redirect, useNavigate } from "react-router-dom";
 
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 import { Optional } from "@/core/types/general";
+import * as dialog from "@tauri-apps/plugin-dialog"
 
 export function SpawnEditorMenu({
   spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),

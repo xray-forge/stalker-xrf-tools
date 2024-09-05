@@ -1,57 +1,35 @@
 {
+  "productName": "xrf-app",
+  "version": "0.1.0",
+  "identifier": "com.xrf.tools",
   "build": {
     "beforeDevCommand": "npm run --prefix xrf-ui dev",
     "beforeBuildCommand": "npm run --prefix xrf-ui build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../xrf-ui/target"
+    "frontendDist": "../xrf-ui/target",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "xrf-app",
-    "version": "0.0.0"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "dialog": {
-        "ask": true,
-        "confirm": true,
-        "save": true,
-        "open": true
-      },
-      "fs": {
-        "exists": true,
-        "scope": [
-          "**"
-        ]
-      },
-      "path": {
-        "all": true
-      }
-    },
+  "plugins": {},
+  "app": {
     "windows": [
       {
         "title": "xrf tools",
         "width": 800,
         "height": 600,
         "minWidth": 400,
-        "maxHeight": 400
+        "minHeight": 400,
+        "resizable": true
       }
-    ],
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.xrf.tools",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    }
+    ]
   }
 }

@@ -10,8 +10,8 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import { open } from "@tauri-apps/api/dialog";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import { useManager } from "dreamstate";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 

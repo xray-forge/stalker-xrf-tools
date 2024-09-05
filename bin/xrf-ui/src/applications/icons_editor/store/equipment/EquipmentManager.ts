@@ -1,7 +1,7 @@
 import { clamp } from "@mui/x-data-grid/internals";
 import { path } from "@tauri-apps/api";
-import { exists } from "@tauri-apps/api/fs";
-import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { exists } from "@tauri-apps/plugin-fs";
 import { ContextManager, createActions, createLoadable, Loadable } from "dreamstate";
 
 import { Optional } from "@/core/types/general";

@@ -1,4 +1,4 @@
-import { exists } from "@tauri-apps/api/fs";
+import { exists } from "@tauri-apps/plugin-fs";
 import { ContextManager, createActions, OnQuery } from "dreamstate";
 
 import { EProjectQuery } from "@/core/store/project/queries";

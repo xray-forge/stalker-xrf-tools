@@ -1,4 +1,4 @@
-import { invoke, InvokeArgs } from "@tauri-apps/api/tauri";
+import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 import { useCallback, useState } from "react";
 
 import { Optional } from "@/core/types/general";

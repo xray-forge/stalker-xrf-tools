@@ -7,84 +7,90 @@ use xray_icon::{
 };
 use xray_ltx::Ltx;
 
-/// Create command to unpack equipment icons.
-pub fn create_unpack_equipment_icons_command() -> Command {
-  Command::new("unpack-equipment-icons")
-    .about("Command to unpack dds icons into multiple icons")
-    .arg(
-      Arg::new("system-ltx")
-        .help("Path to system ltx file or root folder with ltx files")
-        .long("system-ltx")
-        .required(true)
-        .value_parser(value_parser!(PathBuf)),
-    )
-    .arg(
-      Arg::new("source")
-        .help("Path to source dds file")
-        .long("source")
-        .required(true)
-        .value_parser(value_parser!(PathBuf)),
-    )
-    .arg(
-      Arg::new("output")
-        .help("Path to output folder for sections icons")
-        .long("output")
-        .required(true)
-        .value_parser(value_parser!(PathBuf)),
-    )
-    .arg(
-      Arg::new("verbose")
-        .help("Turn on verbose logging")
-        .short('v')
-        .long("verbose")
-        .required(false)
-        .action(ArgAction::SetTrue),
-    )
-}
+pub struct UnpackEquipmentIconsCommand {}
 
-pub fn unpack_equipment_icons(matches: &ArgMatches) {
-  let system_ltx_path: &PathBuf = matches
-    .get_one::<PathBuf>("system-ltx")
-    .expect("Expected valid path to be provided for system-ltx");
+impl UnpackEquipmentIconsCommand {
+  pub const NAME: &'static str = "unpack-equipment-icons";
 
-  let source: &PathBuf = matches
-    .get_one::<PathBuf>("source")
-    .expect("Expected valid source path to be provided");
+  /// Create command to unpack equipment icons.
+  pub fn init() -> Command {
+    Command::new(Self::NAME)
+      .about("Command to unpack dds icons into multiple icons")
+      .arg(
+        Arg::new("system-ltx")
+          .help("Path to system ltx file or root folder with ltx files")
+          .long("system-ltx")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("source")
+          .help("Path to source dds file")
+          .long("source")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("output")
+          .help("Path to output folder for sections icons")
+          .long("output")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+  }
 
-  let output: &PathBuf = matches
-    .get_one::<PathBuf>("output")
-    .expect("Expected valid output folder path to be provided");
+  pub fn execute(matches: &ArgMatches) {
+    let system_ltx_path: &PathBuf = matches
+      .get_one::<PathBuf>("system-ltx")
+      .expect("Expected valid path to be provided for system-ltx");
 
-  let is_verbose: bool = matches.get_flag("verbose");
+    let source: &PathBuf = matches
+      .get_one::<PathBuf>("source")
+      .expect("Expected valid source path to be provided");
 
-  println!("Opening DDS file: {:?}", source);
+    let output: &PathBuf = matches
+      .get_one::<PathBuf>("output")
+      .expect("Expected valid output folder path to be provided");
 
-  let source_dds: RgbaImage = read_dds_by_path(source)
-    .and_then(|dds| {
-      println!(
-        "Source DDS file details: {}x{}, mip-maps: {:?}, format: {:?}",
-        dds.header.width,
-        dds.header.height,
-        dds.header.mip_map_count.unwrap_or(0),
-        dds.header10.as_ref().map(|header| header.dxgi_format)
-      );
+    let is_verbose: bool = matches.get_flag("verbose");
 
-      dds_to_image(&dds)
-    })
-    .expect("Expected path to valid DDS source file");
-  let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path).unwrap();
+    println!("Opening DDS file: {:?}", source);
 
-  println!("Unpacking equipment DDS file into: {:?}", output);
+    let source_dds: RgbaImage = read_dds_by_path(source)
+      .and_then(|dds| {
+        println!(
+          "Source DDS file details: {}x{}, mip-maps: {:?}, format: {:?}",
+          dds.header.width,
+          dds.header.height,
+          dds.header.mip_map_count.unwrap_or(0),
+          dds.header10.as_ref().map(|header| header.dxgi_format)
+        );
 
-  create_dir_all(output).unwrap();
+        dds_to_image(&dds)
+      })
+      .expect("Expected path to valid DDS source file");
+    let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path).unwrap();
 
-  unpack_equipment_icons_by_ltx(UnpackEquipmentOptions {
-    ltx: system_ltx,
-    source: source_dds,
-    output: output.into(),
-    dds_compression_format: ImageFormat::BC3RgbaUnorm,
-    is_verbose,
-  });
+    println!("Unpacking equipment DDS file into: {:?}", output);
 
-  println!("Successfully DDS equipment file based on LTX sections");
+    create_dir_all(output).unwrap();
+
+    unpack_equipment_icons_by_ltx(UnpackEquipmentOptions {
+      ltx: system_ltx,
+      source: source_dds,
+      output: output.into(),
+      dds_compression_format: ImageFormat::BC3RgbaUnorm,
+      is_verbose,
+    });
+
+    println!("Successfully DDS equipment file based on LTX sections");
+  }
 }

@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { ContextManager, createActions, createLoadable, Loadable } from "dreamstate";
 
 import { queryProjectPath } from "@/core/store/project";

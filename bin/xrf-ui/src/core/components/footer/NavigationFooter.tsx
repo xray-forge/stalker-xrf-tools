@@ -1,7 +1,7 @@
 import { default as GitHubIcon } from "@mui/icons-material/GitHub";
 import { default as LightModeIcon } from "@mui/icons-material/LightMode";
 import { Grid, IconButton } from "@mui/material";
-import { open } from "@tauri-apps/api/shell";
+import { open } from "@tauri-apps/plugin-shell";
 import { useManager } from "dreamstate";
 import { ReactElement, useCallback } from "react";
 

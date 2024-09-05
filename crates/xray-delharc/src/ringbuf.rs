@@ -5,6 +5,7 @@ use core::ops::Index;
 /// A ring buffer trait.
 pub trait RingBuffer: Default + Index<usize, Output = u8> {
   /// The size of the buffer in bytes.
+  #[allow(dead_code)]
   const BUFFER_SIZE: usize;
   /// The current value of the internal cursor.
   fn cursor(&self) -> usize;
