@@ -12,6 +12,8 @@ pub type TranslationEntry = HashMap<String, Option<TranslationVariant>>;
 
 pub type TranslationJson = HashMap<String, TranslationEntry>;
 
+pub type TranslationProjectJson = HashMap<String, TranslationJson>;
+
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename = "string")]
 pub struct TranslationEntryCompiled {

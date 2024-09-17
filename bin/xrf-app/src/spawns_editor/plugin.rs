@@ -2,9 +2,9 @@ use crate::spawns_editor::state::SpawnsEditorState;
 use tauri::plugin::TauriPlugin;
 use tauri::{Manager, Runtime};
 
-pub struct SpawnsEditorModule {}
+pub struct SpawnsEditorPlugin {}
 
-impl SpawnsEditorModule {
+impl SpawnsEditorPlugin {
   pub const NAME: &'static str = "spawns-editor";
 
   pub fn init<R: Runtime>() -> TauriPlugin<R> {

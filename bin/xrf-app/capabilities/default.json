@@ -26,6 +26,7 @@
     "configs-editor:default",
     "exports-editor:default",
     "icons-editor:default",
-    "spawns-editor:default"
+    "spawns-editor:default",
+    "translations-editor:default"
   ]
 }

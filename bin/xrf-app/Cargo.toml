@@ -26,6 +26,7 @@ xray-db = { path = "../../crates/xray-db" }
 xray-export = { path = "../../crates/xray-export" }
 xray-icon = { path = "../../crates/xray-texture" }
 xray-ltx = { path = "../../crates/xray-ltx" }
+xray-translation = { path = "../../crates/xray-translation" }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

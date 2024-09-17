@@ -3,11 +3,43 @@ use crate::project::project_constants::ALLOWED_PROJECT_READ_EXTENSIONS;
 use std::fs::File;
 use std::io::Read;
 
-use crate::types::TranslationJson;
+use crate::types::{TranslationJson, TranslationProjectJson};
 use crate::{TranslationError, TranslationLanguage};
 use std::path::Path;
+use walkdir::{DirEntry, WalkDir};
 
 impl TranslationProject {
+  pub fn read_project(dir: &Path) -> Result<TranslationProjectJson, TranslationError> {
+    let mut project_json: TranslationProjectJson = Default::default();
+
+    // Filter all the entries that are not accessed by other files and represent entry points.
+    for entry in WalkDir::new(dir) {
+      let entry: DirEntry = match entry {
+        Ok(entry) => entry,
+        Err(error) => return Err(TranslationError::Io(error.into_io_error().unwrap())),
+      };
+
+      let entry_path: &Path = entry.path();
+
+      if entry_path.is_file() {
+        if let Some(extension) = entry_path.extension() {
+          if extension == "json" {
+            project_json.insert(
+              entry_path.to_str().unwrap().into(),
+              TranslationProject::read_translation_json_by_path(entry_path)?,
+            );
+          } else {
+            log::warn!("Skip non json translation file {:?}", entry_path);
+          }
+        }
+      }
+    }
+
+    // todo: Validate and de-duplicate?
+
+    Ok(project_json)
+  }
+
   pub fn read_translation_json_by_path(path: &Path) -> Result<TranslationJson, TranslationError> {
     let mut data: Vec<u8> = Vec::new();
 
@@ -47,5 +79,19 @@ impl TranslationProject {
       }
       None => None,
     }
+  }
+
+  pub fn flatten(translation_project_json: &TranslationProjectJson) -> TranslationJson {
+    let mut json: TranslationJson = Default::default();
+
+    for (_, nested) in translation_project_json {
+      for (key, value) in nested {
+        // todo: Duplicates check and error return?
+
+        json.insert(key.clone(), value.clone());
+      }
+    }
+
+    json
   }
 }

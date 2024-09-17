@@ -45,3 +45,7 @@ export enum ESpawnsEditorCommand {
   OPEN_SPAWN_FILE = "plugin:spawns-editor|open_spawn_file",
   SAVE_SPAWN_FILE = "plugin:spawns-editor|save_spawn_file",
 }
+
+export enum ETranslationsEditorCommand {
+  READ_TRANSLATIONS_PROJECT = "plugin:translations-editor|read_translations_project",
+}

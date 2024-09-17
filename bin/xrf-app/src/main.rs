@@ -6,12 +6,14 @@ mod configs_editor;
 mod exports_editor;
 mod icons_editor;
 mod spawns_editor;
+mod translations_editor;
 
 use crate::archives_editor::plugin::ArchivesEditorPlugin;
 use crate::configs_editor::plugin::ConfigsEditorPlugin;
 use crate::exports_editor::plugin::ExportsEditorPlugin;
 use crate::icons_editor::plugin::IconsEditorPlugin;
-use crate::spawns_editor::plugin::SpawnsEditorModule;
+use crate::spawns_editor::plugin::SpawnsEditorPlugin;
+use crate::translations_editor::plugin::TranslationsEditorPlugin;
 use std::env;
 
 fn main() {
@@ -24,9 +26,10 @@ fn main() {
     // Custom plugins.
     .plugin(ArchivesEditorPlugin::init())
     .plugin(ExportsEditorPlugin::init())
-    .plugin(SpawnsEditorModule::init())
+    .plugin(SpawnsEditorPlugin::init())
     .plugin(ConfigsEditorPlugin::init())
     .plugin(IconsEditorPlugin::init())
+    .plugin(TranslationsEditorPlugin::init())
     .run(tauri::generate_context!())
     .expect("Error while running tauri application")
 }

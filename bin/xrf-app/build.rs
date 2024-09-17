@@ -80,4 +80,10 @@ fn apply_inline_plugins(attributes: Attributes) -> Attributes {
         ])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )
+    .plugin(
+      "translations-editor",
+      tauri_build::InlinedPlugin::new()
+        .commands(&["read_translations_project"])
+        .default_permission(DefaultPermissionRule::AllowAllCommands),
+    )
 }

@@ -32,6 +32,7 @@ export function Root(): ReactElement {
             <Button onClick={() => navigate("/exports_viewer", { replace: true })}>Exports viewer</Button>
             <Button onClick={() => navigate("/icons_editor", { replace: true })}>Icon editor</Button>
             <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Spawn editor</Button>
+            <Button onClick={() => navigate("/translations_editor", { replace: true })}>Translation editor</Button>
           </ButtonGroup>
         </Grid>
       </Card>
