@@ -7,9 +7,9 @@ import { useManager } from "dreamstate";
 import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, redirect, useNavigate } from "react-router-dom";
 
-import { ExportsManager } from "@/applications/exports_viewer/store/exports";
+import { ExportsManager } from "@/applications/exports_editor/store/exports";
 
-export function ExportsViewerMenu({
+export function ExportsEditorMenu({
   exportsContext: { exportsActions, declarations } = useManager(ExportsManager),
 }): ReactElement {
   const navigate: NavigateFunction = useNavigate();
@@ -24,7 +24,7 @@ export function ExportsViewerMenu({
   );
 
   const onCloseClicked = useCallback(() => {
-    navigate("/exports_viewer", { replace: true });
+    navigate("/exports_editor", { replace: true });
 
     return exportsActions.close();
   }, [exportsActions, redirect]);

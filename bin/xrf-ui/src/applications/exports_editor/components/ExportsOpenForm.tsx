@@ -13,7 +13,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { useManager } from "dreamstate";
 import { MouseEvent, ReactElement, useCallback } from "react";
 
-import { ExportsManager } from "@/applications/exports_viewer/store/exports";
+import { ExportsManager } from "@/applications/exports_editor/store/exports";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
@@ -97,7 +97,7 @@ export function ExportsOpenForm({
         </Button>
       </Grid>
 
-      <ApplicationBackButton path={"/exports_viewer"} />
+      <ApplicationBackButton path={"/exports_editor"} />
     </Grid>
   );
 }

@@ -2,12 +2,12 @@ import { Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
-import { ExportsViewerConditions } from "@/applications/exports_viewer/components/viewer/exports/ExportsViewerConditions";
-import { ExportsViewerDialogs } from "@/applications/exports_viewer/components/viewer/exports/ExportsViewerDialogs";
-import { ExportsViewerEffects } from "@/applications/exports_viewer/components/viewer/exports/ExportsViewerEffects";
-import { ExportsViewerMenu } from "@/applications/exports_viewer/components/viewer/ExportsViewerMenu";
+import { ExportsViewerConditions } from "@/applications/exports_editor/components/viewer/exports/ExportsViewerConditions";
+import { ExportsViewerDialogs } from "@/applications/exports_editor/components/viewer/exports/ExportsViewerDialogs";
+import { ExportsViewerEffects } from "@/applications/exports_editor/components/viewer/exports/ExportsViewerEffects";
+import { ExportsEditorMenu } from "@/applications/exports_editor/components/viewer/ExportsEditorMenu";
 
-export function ExportsViewer(): ReactElement {
+export function ExportsEditor(): ReactElement {
   return (
     <Grid
       justifyContent={"center"}
@@ -18,7 +18,7 @@ export function ExportsViewer(): ReactElement {
       width={"100%"}
       height={"100%"}
     >
-      <ExportsViewerMenu />
+      <ExportsEditorMenu />
 
       <Routes>
         <Route path={"/conditions"} element={<ExportsViewerConditions />} />

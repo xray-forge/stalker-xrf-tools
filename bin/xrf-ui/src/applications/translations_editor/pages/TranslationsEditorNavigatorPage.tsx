@@ -38,7 +38,7 @@ export function TranslationsEditorNavigatorPage(): ReactElement {
                   }
                 );
 
-                console.warn("re", result);
+                console.warn("result", result);
               }}
             >
               Test

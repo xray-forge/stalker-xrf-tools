@@ -2,8 +2,8 @@ import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mu
 import { useManager } from "dreamstate";
 import { ReactElement, ReactNode, useLayoutEffect, useMemo } from "react";
 
-import { ExportsViewerDeclarationList } from "@/applications/exports_viewer/components/viewer/declarations/ExportsViewerDeclarationList";
-import { ExportsManager } from "@/applications/exports_viewer/store/exports";
+import { ExportsEditorDeclarationList } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorDeclarationList";
+import { ExportsManager } from "@/applications/exports_editor/store/exports";
 import { IExportDescriptor } from "@/lib/exports";
 import { useTabState } from "@/lib/tab";
 
@@ -29,7 +29,7 @@ export function ExportsViewerDialogs({
     const dialogSections: Array<string> = Object.keys(dialogExports);
 
     const list: ReactNode = (
-      <ExportsViewerDeclarationList descriptors={dialogExports[activeTab] ?? dialogExports[dialogSections[0]]} />
+      <ExportsEditorDeclarationList descriptors={dialogExports[activeTab] ?? dialogExports[dialogSections[0]]} />
     );
 
     return { dialogExports, dialogSections, list };

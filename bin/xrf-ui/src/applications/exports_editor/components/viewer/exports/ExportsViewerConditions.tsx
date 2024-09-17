@@ -2,8 +2,8 @@ import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { useManager } from "dreamstate";
 import { ReactElement } from "react";
 
-import { ExportsViewerDeclarationList } from "@/applications/exports_viewer/components/viewer/declarations/ExportsViewerDeclarationList";
-import { ExportsManager } from "@/applications/exports_viewer/store/exports";
+import { ExportsEditorDeclarationList } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorDeclarationList";
+import { ExportsManager } from "@/applications/exports_editor/store/exports";
 
 export function ExportsViewerConditions({
   exportsContext: { declarations: { isLoading, error, value: declarations } } = useManager(ExportsManager),
@@ -37,7 +37,7 @@ export function ExportsViewerConditions({
     >
       <Typography variant={"h5"}>Conditions ({declarations.conditions.length})</Typography>
       <Divider sx={{ margin: "16px 0" }} />
-      <ExportsViewerDeclarationList descriptors={declarations.conditions} />
+      <ExportsEditorDeclarationList descriptors={declarations.conditions} />
     </Grid>
   );
 }

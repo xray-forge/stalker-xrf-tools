@@ -29,7 +29,7 @@ export function Root(): ReactElement {
             <Button onClick={() => navigate("/archives_editor", { replace: true })}>Archive editor</Button>
             <Button onClick={() => navigate("/dialog_editor", { replace: true })}>Dialog editor</Button>
             <Button onClick={() => navigate("/configs_editor", { replace: true })}>Configs editor</Button>
-            <Button onClick={() => navigate("/exports_viewer", { replace: true })}>Exports viewer</Button>
+            <Button onClick={() => navigate("/exports_editor", { replace: true })}>Exports editor</Button>
             <Button onClick={() => navigate("/icons_editor", { replace: true })}>Icon editor</Button>
             <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Spawn editor</Button>
             <Button onClick={() => navigate("/translations_editor", { replace: true })}>Translation editor</Button>

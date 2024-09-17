@@ -1,15 +1,15 @@
 import { CircularProgress, Grid } from "@mui/material";
 import { useManager } from "dreamstate";
 
-import { ExportsOpenForm } from "@/applications/exports_viewer/components/ExportsOpenForm";
-import { ExportsViewer } from "@/applications/exports_viewer/components/viewer/ExportsViewer";
-import { ExportsManager } from "@/applications/exports_viewer/store/exports";
+import { ExportsOpenForm } from "@/applications/exports_editor/components/ExportsOpenForm";
+import { ExportsEditor } from "@/applications/exports_editor/components/viewer/ExportsEditor";
+import { ExportsManager } from "@/applications/exports_editor/store/exports";
 
-export function ExportsViewerPage({
+export function ExportsEditorPage({
   exportsContext: { isReady, declarations: { value: declarations } } = useManager(ExportsManager),
 }) {
   if (isReady) {
-    return declarations ? <ExportsViewer /> : <ExportsOpenForm />;
+    return declarations ? <ExportsEditor /> : <ExportsOpenForm />;
   }
 
   return (

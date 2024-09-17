@@ -5,7 +5,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
 import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
 
-export function ExportsViewerNavigatorPage(): ReactElement {
+export function ExportsEditorNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
@@ -19,14 +19,14 @@ export function ExportsViewerNavigatorPage(): ReactElement {
       gap={1}
     >
       <ApplicationNavigatorHeader
-        title={"XRF exports viewer"}
-        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/exports_viewer.html"}
+        title={"XRF exports editor"}
+        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/exports_editor.html"}
       />
 
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/exports_viewer/exports", { replace: true })}>Open</Button>
+            <Button onClick={() => navigate("/exports_editor/exports", { replace: true })}>Open</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>

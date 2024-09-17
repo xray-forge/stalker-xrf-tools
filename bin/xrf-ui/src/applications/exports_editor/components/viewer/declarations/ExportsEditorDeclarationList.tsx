@@ -1,15 +1,15 @@
 import { Grid } from "@mui/material";
 import { ReactElement, useState } from "react";
 
-import { ExportsFilterForm } from "@/applications/exports_viewer/components/viewer/declarations/ExportsFilterForm";
-import { ExportsViewerDeclaration } from "@/applications/exports_viewer/components/viewer/declarations/ExportsViewerDeclaration";
+import { ExportsEditorDeclaration } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorDeclaration";
+import { ExportsFilterForm } from "@/applications/exports_editor/components/viewer/declarations/ExportsFilterForm";
 import { IExportDescriptor } from "@/lib/exports";
 
 export interface IExportsViewerDeclarationProps {
   descriptors: Array<IExportDescriptor>;
 }
 
-export function ExportsViewerDeclarationList({ descriptors }: IExportsViewerDeclarationProps): ReactElement {
+export function ExportsEditorDeclarationList({ descriptors }: IExportsViewerDeclarationProps): ReactElement {
   const [filter, setFilter] = useState("");
 
   return (
@@ -24,7 +24,7 @@ export function ExportsViewerDeclarationList({ descriptors }: IExportsViewerDecl
             return filter ? descriptor.name.includes(filter) || descriptor.comment?.includes(filter) : true;
           })
           .map((descriptor) => (
-            <ExportsViewerDeclaration key={descriptor.name} descriptor={descriptor} />
+            <ExportsEditorDeclaration key={descriptor.name} descriptor={descriptor} />
           ))}
       </Grid>
     </>
