@@ -1,12 +1,9 @@
 import { Button, ButtonGroup, Card, Grid } from "@mui/material";
-import { invoke } from "@tauri-apps/api/core";
 import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
 import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
-import { IArchiveUnpackResult } from "@/lib/archive";
-import { ETranslationsEditorCommand } from "@/lib/ipc";
 
 export function TranslationsEditorNavigatorPage(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
@@ -29,20 +26,7 @@ export function TranslationsEditorNavigatorPage(): ReactElement {
       <Card sx={{ minWidth: 200 }}>
         <Grid direction={"column"} container>
           <ButtonGroup orientation={"vertical"}>
-            <Button
-              onClick={async () => {
-                const result: IArchiveUnpackResult = await invoke(
-                  ETranslationsEditorCommand.READ_TRANSLATIONS_PROJECT,
-                  {
-                    path: "C:\\Projects\\stalker-xrf-engine\\src\\engine\\translations",
-                  }
-                );
-
-                console.warn("result", result);
-              }}
-            >
-              Test
-            </Button>
+            <Button onClick={() => navigate("/translations_editor/project", { replace: true })}>Open</Button>
             <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
           </ButtonGroup>
         </Grid>

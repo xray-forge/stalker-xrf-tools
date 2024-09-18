@@ -47,5 +47,8 @@ export enum ESpawnsEditorCommand {
 }
 
 export enum ETranslationsEditorCommand {
+  CLOSE_TRANSLATIONS_PROJECT = "plugin:translations-editor|close_translations_project",
+  GET_TRANSLATIONS_PROJECT = "plugin:translations-editor|get_translations_project",
+  OPEN_TRANSLATIONS_PROJECT = "plugin:translations-editor|open_translations_project",
   READ_TRANSLATIONS_PROJECT = "plugin:translations-editor|read_translations_project",
 }

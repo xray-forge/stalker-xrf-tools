@@ -53,13 +53,13 @@ export class EquipmentManager extends ContextManager<IEquipmentContext> {
     spriteImage: createLoadable(null),
   };
 
-  public log: Logger = new Logger("equipment_editor");
+  public log: Logger = new Logger("equipment");
 
   public async onProvisionStarted(): Promise<void> {
     const response: IEquipmentResponse = await invoke(EIconsEditorCommand.GET_EQUIPMENT_SPRITE);
 
     if (response) {
-      this.log.info("Existing equipment_editor sprite detected");
+      this.log.info("Existing equipment sprite detected");
 
       this.setContext({
         isReady: true,
@@ -72,7 +72,7 @@ export class EquipmentManager extends ContextManager<IEquipmentContext> {
   }
 
   public async openEquipmentProject(equipmentDdsPath: string, systemLtxPath: string): Promise<void> {
-    this.log.info("Opening equipment_editor project:", equipmentDdsPath, systemLtxPath);
+    this.log.info("Opening equipment project:", equipmentDdsPath, systemLtxPath);
 
     try {
       this.cleanupAssets();
@@ -146,7 +146,7 @@ export class EquipmentManager extends ContextManager<IEquipmentContext> {
   }
 
   public async closeEquipmentProject(): Promise<void> {
-    this.log.info("Closing equipment_editor");
+    this.log.info("Closing equipment project");
 
     try {
       this.setContext(({ spriteImage }) => ({ spriteImage: spriteImage.asLoading() }));

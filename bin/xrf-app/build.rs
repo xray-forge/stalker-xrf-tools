@@ -83,7 +83,12 @@ fn apply_inline_plugins(attributes: Attributes) -> Attributes {
     .plugin(
       "translations-editor",
       tauri_build::InlinedPlugin::new()
-        .commands(&["read_translations_project"])
+        .commands(&[
+          "read_translations_project",
+          "open_translations_project",
+          "get_translations_project",
+          "close_translations_project",
+        ])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )
 }

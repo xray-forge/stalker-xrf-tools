@@ -21,7 +21,7 @@ export function IconsEditorEquipmentPackPage({
   equipmentContext: { equipmentActions } = useManager(EquipmentManager),
   projectContext: { xrfProjectPath } = useManager(ProjectManager),
 }): ReactElement {
-  const log: Logger = useLogger("equipment_editor-pack");
+  const log: Logger = useLogger("equipment-editor-pack");
 
   const [result, setResult] = useState<Loadable<Optional<IPackEquipmentResult>>>(() => createLoadable(null));
 

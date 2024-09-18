@@ -7003,10 +7003,52 @@
           ]
         },
         {
+          "description": "translations-editor:allow-close-translations-project -> Enables the close_translations_project command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "translations-editor:allow-close-translations-project"
+          ]
+        },
+        {
+          "description": "translations-editor:allow-get-translations-project -> Enables the get_translations_project command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "translations-editor:allow-get-translations-project"
+          ]
+        },
+        {
+          "description": "translations-editor:allow-open-translations-project -> Enables the open_translations_project command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "translations-editor:allow-open-translations-project"
+          ]
+        },
+        {
           "description": "translations-editor:allow-read-translations-project -> Enables the read_translations_project command without any pre-configured scope.",
           "type": "string",
           "enum": [
             "translations-editor:allow-read-translations-project"
+          ]
+        },
+        {
+          "description": "translations-editor:deny-close-translations-project -> Denies the close_translations_project command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "translations-editor:deny-close-translations-project"
+          ]
+        },
+        {
+          "description": "translations-editor:deny-get-translations-project -> Denies the get_translations_project command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "translations-editor:deny-get-translations-project"
+          ]
+        },
+        {
+          "description": "translations-editor:deny-open-translations-project -> Denies the open_translations_project command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "translations-editor:deny-open-translations-project"
           ]
         },
         {

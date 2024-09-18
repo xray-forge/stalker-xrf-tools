@@ -13,7 +13,7 @@ export function IconsEditorEquipmentOpenForm({
   equipmentContext: { spriteImage, equipmentActions } = useManager(EquipmentManager),
   projectContext: { xrfProjectPath } = useManager(ProjectManager),
 }): ReactElement {
-  const log: Logger = useLogger("equipment_editor-open");
+  const log: Logger = useLogger("equipment-editor-open");
 
   const [spritePath, setSpritePath, onSelectEquipmentPath] = usePathState({
     title: "Provide path to equipment_editor dds",

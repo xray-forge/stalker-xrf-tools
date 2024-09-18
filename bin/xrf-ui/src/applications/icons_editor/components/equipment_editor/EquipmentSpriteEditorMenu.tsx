@@ -10,7 +10,7 @@ export function EquipmentSpriteEditorMenu({
   equipmentContext: { spriteImage: { isLoading, value: spriteImage }, equipmentActions } = useManager(EquipmentManager),
 }): ReactElement {
   const navigate: NavigateFunction = useNavigate();
-  const log: Logger = useLogger("editor-menu");
+  const log: Logger = useLogger("equipment-editor-menu");
 
   const onRepackAndReopenClick = useCallback(async () => {
     try {

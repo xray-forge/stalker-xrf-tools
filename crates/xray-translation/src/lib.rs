@@ -12,3 +12,5 @@ pub use crate::project::project_initialize_options::ProjectInitializeOptions;
 pub use crate::project::project_initialize_result::ProjectInitializeResult;
 pub use crate::project::project_verify_options::ProjectVerifyOptions;
 pub use crate::project::project_verify_result::ProjectVerifyResult;
+pub use crate::types::TranslationJson;
+pub use crate::types::TranslationProjectJson;
