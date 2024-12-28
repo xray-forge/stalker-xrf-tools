@@ -3,7 +3,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::types::SpawnByteOrder;
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
-use std::io::{Seek, SeekFrom};
+use std::io::{Result as IoResult, Seek, SeekFrom};
 
 /// Iterate over samples in provided file slice.
 /// Mutates parent object to keep track of what was read during execution.
@@ -26,51 +26,47 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
   type Item = ChunkReader;
 
   fn next(&mut self) -> Option<ChunkReader> {
-    let chunk_type = self.reader.read_u32::<SpawnByteOrder>();
-    let chunk_size = self.reader.read_u32::<SpawnByteOrder>();
+    let chunk_type_result: IoResult<u32> = self.reader.read_u32::<SpawnByteOrder>();
+    let chunk_size_result: IoResult<u32> = self.reader.read_u32::<SpawnByteOrder>();
 
-    if chunk_type.is_err() || chunk_size.is_err() {
+    if chunk_type_result.is_err() || chunk_size_result.is_err() {
       return None;
     }
 
-    let chunk_id: u32 = chunk_type.unwrap();
-    let chunk_size: u32 = chunk_size.unwrap();
+    let chunk_id: u32 = chunk_type_result.unwrap();
+    let chunk_size: u32 = chunk_size_result.unwrap();
 
-    if self.index == chunk_id {
-      let position: u64 = self.reader.file.stream_position().unwrap();
-      let mut file: FileSlice = self
-        .reader
-        .file
-        .slice(position..(position + chunk_size as u64));
+    let position: u64 = self.reader.file.stream_position().unwrap();
+    let mut file: FileSlice = self
+      .reader
+      .file
+      .slice(position..(position + chunk_size as u64));
 
-      file.seek(SeekFrom::Start(0)).unwrap();
+    file.seek(SeekFrom::Start(0)).unwrap();
 
-      let reader: ChunkReader = ChunkReader {
-        index: chunk_id,
-        is_compressed: chunk_id & CFS_COMPRESS_MARK != 0,
-        size: chunk_size as u64,
-        position: self.reader.file.stream_position().unwrap(),
-        file: Box::new(file),
-      };
+    let reader: ChunkReader = ChunkReader {
+      index: chunk_id,
+      is_compressed: chunk_id & CFS_COMPRESS_MARK != 0,
+      size: chunk_size as u64,
+      position: self.reader.file.stream_position().unwrap(),
+      file: Box::new(file),
+    };
 
-      if reader.is_compressed {
-        panic!("Parsing not implemented compressed chunk");
-      }
-
-      // Rewind for next iteration.
-      self
-        .reader
-        .file
-        .seek(SeekFrom::Current(chunk_size as i64))
-        .unwrap();
-
-      // Iterate to next item.
-      self.index += 1;
-
-      Some(reader)
-    } else {
-      None
+    if reader.is_compressed {
+      panic!("Parsing not implemented compressed chunk");
     }
+
+    // Rewind for next iteration.
+    self
+      .reader
+      .file
+      .seek(SeekFrom::Current(chunk_size as i64))
+      .unwrap();
+
+    // Iterate to next item.
+    self.index += 1;
+
+    Some(reader)
   }
 }
 

@@ -16,7 +16,7 @@ use xray_ltx::Ltx;
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GraphsChunk {
+pub struct SpawnGraphsChunk {
   pub header: GraphHeader,
   pub levels: Vec<GraphLevel>,
   pub vertices: Vec<GraphVertex>,
@@ -25,9 +25,11 @@ pub struct GraphsChunk {
   pub cross_tables: Vec<GraphCrossTable>,
 }
 
-impl GraphsChunk {
+impl SpawnGraphsChunk {
+  pub const CHUNK_ID: u32 = 4;
+
   /// Read graphs chunk by position descriptor.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<GraphsChunk> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnGraphsChunk> {
     let mut levels: Vec<GraphLevel> = Vec::new();
     let mut vertices: Vec<GraphVertex> = Vec::new();
     let mut edges: Vec<GraphEdge> = Vec::new();
@@ -66,7 +68,7 @@ impl GraphsChunk {
     assert_eq!(cross_tables.len(), header.levels_count as usize);
     assert!(reader.is_ended(), "Expect graphs chunk to be ended");
 
-    Ok(GraphsChunk {
+    Ok(SpawnGraphsChunk {
       header,
       levels,
       vertices,
@@ -104,7 +106,7 @@ impl GraphsChunk {
   }
 
   /// Import graphs data from provided path.
-  pub fn import<T: ByteOrder>(path: &Path) -> io::Result<GraphsChunk> {
+  pub fn import<T: ByteOrder>(path: &Path) -> io::Result<SpawnGraphsChunk> {
     let header: GraphHeader =
       GraphHeader::import(&open_ini_config(&path.join("graphs_header.ltx"))?)?;
 
@@ -141,7 +143,7 @@ impl GraphsChunk {
 
     log::info!("Imported graphs chunk");
 
-    Ok(GraphsChunk {
+    Ok(SpawnGraphsChunk {
       header,
       levels,
       vertices,
@@ -213,7 +215,7 @@ impl GraphsChunk {
   }
 }
 
-impl fmt::Debug for GraphsChunk {
+impl fmt::Debug for SpawnGraphsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
@@ -236,7 +238,7 @@ mod tests {
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::data::vector_3d::Vector3d;
-  use crate::file::graphs_chunk::GraphsChunk;
+  use crate::spawn_file::spawn_graphs_chunk::SpawnGraphsChunk;
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
@@ -250,7 +252,7 @@ mod tests {
   fn test_read_write_empty_graphs_chunk() -> io::Result<()> {
     let filename: String = String::from("graphs_chunk_empty.chunk");
 
-    let graphs_chunk: GraphsChunk = GraphsChunk {
+    let graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk {
       header: GraphHeader {
         version: 10,
         vertices_count: 0,
@@ -289,7 +291,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: GraphsChunk = GraphsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_graphs_chunk, graphs_chunk);
 
@@ -300,7 +302,7 @@ mod tests {
   fn test_read_write_generic_graphs_chunk() -> io::Result<()> {
     let filename: String = String::from("graphs_chunk_generic.chunk");
 
-    let graphs_chunk: GraphsChunk = GraphsChunk {
+    let graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk {
       header: GraphHeader {
         version: 12,
         vertices_count: 2,
@@ -427,7 +429,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: GraphsChunk = GraphsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_graphs_chunk, graphs_chunk);
 

@@ -17,6 +17,7 @@ use crate::commands::verify_ltx::VerifyLtxCommand;
 use crate::commands::verify_spawn::VerifySpawnFileCommand;
 use crate::commands::verify_translations::VerifyTranslationsCommand;
 
+use crate::commands::unpack_particles::UnpackParticlesCommand;
 use clap::Command;
 use std::env;
 
@@ -37,6 +38,7 @@ async fn main() {
     .subcommand(RepackSpawnCommand::init())
     .subcommand(UnpackArchiveCommand::init())
     .subcommand(UnpackEquipmentIconsCommand::init())
+    .subcommand(UnpackParticlesCommand::init())
     .subcommand(UnpackSpawnFileCommand::init())
     .subcommand(UnpackTextureDescriptionCommand::init())
     .subcommand(VerifyLtxCommand::init())
@@ -62,6 +64,9 @@ async fn main() {
     Some((UnpackArchiveCommand::NAME, matches)) => UnpackArchiveCommand::execute(matches).await,
     Some((UnpackEquipmentIconsCommand::NAME, matches)) => {
       UnpackEquipmentIconsCommand::execute(matches)
+    }
+    Some((UnpackParticlesCommand::NAME, matches)) => {
+      UnpackParticlesCommand::execute(matches).unwrap()
     }
     Some((UnpackSpawnFileCommand::NAME, matches)) => {
       UnpackSpawnFileCommand::execute(matches).unwrap()

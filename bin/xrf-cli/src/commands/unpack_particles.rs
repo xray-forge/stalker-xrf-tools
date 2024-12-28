@@ -2,21 +2,21 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::spawn_file::spawn_file::SpawnFile;
+use xray_db::particles_file::particles_file::ParticlesFile;
 use xray_db::types::SpawnByteOrder;
 
-pub struct PackSpawnFileCommand {}
+pub struct UnpackParticlesCommand {}
 
-impl PackSpawnFileCommand {
-  pub const NAME: &'static str = "pack-spawn";
+impl UnpackParticlesCommand {
+  pub const NAME: &'static str = "unpack-particles";
 
-  /// Create command packing of spawn file.
+  /// Create command to unpack particles xr file.
   pub fn init() -> Command {
     Command::new(Self::NAME)
-      .about("Command to pack unpacked spawn files into single *.spawn")
+      .about("Command to unpack provided particles.xr into separate files")
       .arg(
         Arg::new("path")
-          .help("Path to unpacked spawn file folder")
+          .help("Path to particles.xr file")
           .short('p')
           .long("path")
           .required(true)
@@ -24,7 +24,7 @@ impl PackSpawnFileCommand {
       )
       .arg(
         Arg::new("dest")
-          .help("Path to resulting packed *.spawn file")
+          .help("Path to folder for exporting")
           .short('d')
           .long("dest")
           .default_value("unpacked")
@@ -32,7 +32,7 @@ impl PackSpawnFileCommand {
       )
       .arg(
         Arg::new("force")
-          .help("Whether existing packed spawwn should be pruned if destination folder exists")
+          .help("Whether existing unpacked data should be pruned if destination folder exists")
           .short('f')
           .long("force")
           .required(false)
@@ -40,7 +40,7 @@ impl PackSpawnFileCommand {
       )
   }
 
-  /// Pack *.spawn file based on provided arguments.
+  /// Unpack provided particles.xr file.
   pub fn execute(matches: &ArgMatches) -> io::Result<()> {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
@@ -52,34 +52,38 @@ impl PackSpawnFileCommand {
 
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting packing spawn file {:?}", path);
-    log::info!("Pack destination {:?}", destination);
+    log::info!("Starting parsing spawn file {:?}", path);
+    log::info!("Unpack destination {:?}", destination);
 
-    // Apply force flag and delete existing spawn output.
-    if force && destination.exists() && destination.is_file() {
-      fs::remove_file(destination)?;
+    // Apply force flag and delete existing directories.
+    if force && destination.exists() && destination.is_dir() {
+      fs::remove_dir_all(destination)?;
     }
 
     // Re-validate that provided output can be used.
-    if destination.exists() && destination.is_file() {
+    if destination.exists() && destination.is_dir() {
       return Err(io::Error::new(
         io::ErrorKind::AlreadyExists,
-        "Pack output file already exists, use --force to prune destination",
+        "Unpack output directory already exists, use --force to prune destination folder",
       ));
     }
 
     let started_at: Instant = Instant::now();
-    let spawn_file: SpawnFile = SpawnFile::import_from_path::<SpawnByteOrder>(path).unwrap();
+    let particles_file: ParticlesFile =
+      ParticlesFile::read_from_path::<SpawnByteOrder>(path).unwrap();
     let read_duration: Duration = started_at.elapsed();
 
-    spawn_file.write_to_path::<SpawnByteOrder>(destination)?;
+    // particles_file.export_to_path::<SpawnByteOrder>(destination)?;
 
-    let write_duration: Duration = started_at.elapsed() - read_duration;
+    let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read spawn file took: {:?}ms", read_duration.as_millis());
     log::info!(
-      "Writing packed spawn file took: {:?}ms",
-      write_duration.as_millis()
+      "Read particles file took: {:?}ms",
+      read_duration.as_millis()
+    );
+    log::info!(
+      "Export particles file took: {:?}ms",
+      unpack_duration.as_millis()
     );
 
     Ok(())

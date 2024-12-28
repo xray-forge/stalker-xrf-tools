@@ -12,14 +12,16 @@ use xray_ltx::Ltx;
 /// Is single plain chunk with nodes list in it.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ArtefactSpawnsChunk {
+pub struct SpawnArtefactSpawnsChunk {
   pub nodes: Vec<ArtefactSpawnPoint>,
 }
 
-impl ArtefactSpawnsChunk {
+impl SpawnArtefactSpawnsChunk {
+  pub const CHUNK_ID: u32 = 2;
+
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ArtefactSpawnsChunk> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnArtefactSpawnsChunk> {
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -40,7 +42,7 @@ impl ArtefactSpawnsChunk {
       reader.read_bytes_len(),
     );
 
-    Ok(ArtefactSpawnsChunk { nodes })
+    Ok(SpawnArtefactSpawnsChunk { nodes })
   }
 
   /// Write artefact spawns into chunk writer.
@@ -62,7 +64,7 @@ impl ArtefactSpawnsChunk {
 
   /// Import artefact spawns data from provided path.
   /// Parse ini files and populate spawn file.
-  pub fn import(path: &Path) -> io::Result<ArtefactSpawnsChunk> {
+  pub fn import(path: &Path) -> io::Result<SpawnArtefactSpawnsChunk> {
     let config: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
@@ -72,7 +74,7 @@ impl ArtefactSpawnsChunk {
 
     log::info!("Imported artefact spawns chunk");
 
-    Ok(ArtefactSpawnsChunk { nodes })
+    Ok(SpawnArtefactSpawnsChunk { nodes })
   }
 
   /// Export artefact spawns data into provided path.
@@ -91,7 +93,7 @@ impl ArtefactSpawnsChunk {
   }
 }
 
-impl fmt::Debug for ArtefactSpawnsChunk {
+impl fmt::Debug for SpawnArtefactSpawnsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
@@ -107,7 +109,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
+  use crate::spawn_file::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
@@ -120,7 +122,7 @@ mod tests {
   fn test_read_write_artefact_spawn_point() -> io::Result<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "artefact_spawns.chunk");
 
-    let spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk {
+    let spawns: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {
       nodes: vec![
         ArtefactSpawnPoint {
           position: Vector3d::new(55.5, 44.4, -33.3),
@@ -155,7 +157,8 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: ArtefactSpawnsChunk = ArtefactSpawnsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_spawns: SpawnArtefactSpawnsChunk =
+      SpawnArtefactSpawnsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_spawns, spawns);
 

@@ -11,13 +11,15 @@ use xray_ltx::Ltx;
 
 /// `CPatrolPathStorage::load` in xray engine.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
-pub struct PatrolsChunk {
+pub struct SpawnPatrolsChunk {
   pub patrols: Vec<Patrol>,
 }
 
-impl PatrolsChunk {
+impl SpawnPatrolsChunk {
+  pub const CHUNK_ID: u32 = 3;
+
   /// Read patrols list from the chunk.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<PatrolsChunk> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnPatrolsChunk> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -32,7 +34,7 @@ impl PatrolsChunk {
 
     log::info!("Parsed patrols, bytes {:?}", reader.read_bytes_len());
 
-    Ok(PatrolsChunk { patrols })
+    Ok(SpawnPatrolsChunk { patrols })
   }
 
   /// Write patrols data into chunk writer.
@@ -52,7 +54,7 @@ impl PatrolsChunk {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(path: &Path) -> io::Result<PatrolsChunk> {
+  pub fn import(path: &Path) -> io::Result<SpawnPatrolsChunk> {
     let patrols_config: Ltx = open_ini_config(&path.join("patrols.ltx"))?;
     let patrol_points_config: Ltx = open_ini_config(&path.join("patrol_points.ltx"))?;
     let patrol_links_config: Ltx = open_ini_config(&path.join("patrol_links.ltx"))?;
@@ -70,7 +72,7 @@ impl PatrolsChunk {
 
     log::info!("Imported patrols chunk");
 
-    Ok(PatrolsChunk { patrols })
+    Ok(SpawnPatrolsChunk { patrols })
   }
 
   /// Export patrols data into provided path.
@@ -98,7 +100,7 @@ impl PatrolsChunk {
   }
 }
 
-impl fmt::Debug for PatrolsChunk {
+impl fmt::Debug for SpawnPatrolsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
@@ -116,7 +118,7 @@ mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::file::patrols_chunk::PatrolsChunk;
+  use crate::spawn_file::spawn_patrols_chunk::SpawnPatrolsChunk;
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
@@ -129,7 +131,7 @@ mod tests {
   fn test_read_write_patrols_chunk() -> io::Result<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "patrols_list.chunk");
 
-    let patrols_chunk: PatrolsChunk = PatrolsChunk {
+    let patrols_chunk: SpawnPatrolsChunk = SpawnPatrolsChunk {
       patrols: vec![
         Patrol {
           name: String::from("patrol-1"),
@@ -196,7 +198,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 450 + 8);
 
     let reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrols_chunk: PatrolsChunk = PatrolsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_patrols_chunk: SpawnPatrolsChunk = SpawnPatrolsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_patrols_chunk, patrols_chunk);
 

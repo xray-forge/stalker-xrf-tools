@@ -1,7 +1,7 @@
 use crate::spawns_editor::state::SpawnsEditorState;
 use std::path::Path;
 use tauri::State;
-use xray_db::file::spawn_file::SpawnFile;
+use xray_db::spawn_file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
 
 #[tauri::command]

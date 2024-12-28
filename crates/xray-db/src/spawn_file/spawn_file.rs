@@ -1,11 +1,11 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file::create_export_file;
-use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
-use crate::file::artefact_spawns_chunk::ArtefactSpawnsChunk;
-use crate::file::graphs_chunk::GraphsChunk;
-use crate::file::header_chunk::HeaderChunk;
-use crate::file::patrols_chunk::PatrolsChunk;
+use crate::spawn_file::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
+use crate::spawn_file::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
+use crate::spawn_file::spawn_graphs_chunk::SpawnGraphsChunk;
+use crate::spawn_file::spawn_header_chunk::SpawnHeaderChunk;
+use crate::spawn_file::spawn_patrols_chunk::SpawnPatrolsChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
@@ -24,11 +24,11 @@ use std::{fs, io};
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SpawnFile {
-  pub header: HeaderChunk,
-  pub alife_spawn: ALifeSpawnsChunk,
-  pub artefact_spawn: ArtefactSpawnsChunk,
-  pub patrols: PatrolsChunk,
-  pub graphs: GraphsChunk,
+  pub header: SpawnHeaderChunk,
+  pub alife_spawn: SpawnALifeSpawnsChunk,
+  pub artefact_spawn: SpawnArtefactSpawnsChunk,
+  pub patrols: SpawnPatrolsChunk,
+  pub graphs: SpawnGraphsChunk,
 }
 
 impl SpawnFile {
@@ -39,7 +39,7 @@ impl SpawnFile {
 
   /// Read spawn file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<SpawnFile> {
-    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file)).unwrap();
+    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
 
     assert_eq!(
@@ -50,11 +50,36 @@ impl SpawnFile {
 
     let spawn_file: SpawnFile = {
       SpawnFile {
-        header: HeaderChunk::read::<T>(chunks.get(0).unwrap().clone())?,
-        alife_spawn: ALifeSpawnsChunk::read::<T>(chunks.get(1).unwrap().clone())?,
-        artefact_spawn: ArtefactSpawnsChunk::read::<T>(chunks.get(2).unwrap().clone())?,
-        patrols: PatrolsChunk::read::<T>(chunks.get(3).unwrap().clone())?,
-        graphs: GraphsChunk::read::<T>(chunks.get(4).unwrap().clone())?,
+        header: SpawnHeaderChunk::read::<T>(
+          chunks
+            .get(SpawnHeaderChunk::CHUNK_ID as usize)
+            .unwrap()
+            .clone(),
+        )?,
+        alife_spawn: SpawnALifeSpawnsChunk::read::<T>(
+          chunks
+            .get(SpawnALifeSpawnsChunk::CHUNK_ID as usize)
+            .unwrap()
+            .clone(),
+        )?,
+        artefact_spawn: SpawnArtefactSpawnsChunk::read::<T>(
+          chunks
+            .get(SpawnArtefactSpawnsChunk::CHUNK_ID as usize)
+            .unwrap()
+            .clone(),
+        )?,
+        patrols: SpawnPatrolsChunk::read::<T>(
+          chunks
+            .get(SpawnPatrolsChunk::CHUNK_ID as usize)
+            .unwrap()
+            .clone(),
+        )?,
+        graphs: SpawnGraphsChunk::read::<T>(
+          chunks
+            .get(SpawnGraphsChunk::CHUNK_ID as usize)
+            .unwrap()
+            .clone(),
+        )?,
       }
     };
 
@@ -106,11 +131,11 @@ impl SpawnFile {
   /// Read spawn file from provided path.
   pub fn import_from_path<T: ByteOrder>(path: &Path) -> io::Result<SpawnFile> {
     Ok(SpawnFile {
-      header: HeaderChunk::import(path)?,
-      alife_spawn: ALifeSpawnsChunk::import(path)?,
-      artefact_spawn: ArtefactSpawnsChunk::import(path)?,
-      patrols: PatrolsChunk::import(path)?,
-      graphs: GraphsChunk::import::<T>(path)?,
+      header: SpawnHeaderChunk::import(path)?,
+      alife_spawn: SpawnALifeSpawnsChunk::import(path)?,
+      artefact_spawn: SpawnArtefactSpawnsChunk::import(path)?,
+      patrols: SpawnPatrolsChunk::import(path)?,
+      graphs: SpawnGraphsChunk::import::<T>(path)?,
     })
   }
 

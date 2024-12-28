@@ -9,6 +9,7 @@ pub mod parse_translations;
 pub mod repack_spawn;
 pub mod unpack_archive;
 pub mod unpack_equipment_icons;
+pub mod unpack_particles;
 pub mod unpack_spawn;
 pub mod unpack_texture_description;
 pub mod verify_ltx;

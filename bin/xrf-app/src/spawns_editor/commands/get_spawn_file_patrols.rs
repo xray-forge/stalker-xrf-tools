@@ -2,7 +2,7 @@ use crate::spawns_editor::state::SpawnsEditorState;
 use serde_json::{json, Value};
 use std::sync::MutexGuard;
 use tauri::State;
-use xray_db::file::spawn_file::SpawnFile;
+use xray_db::spawn_file::spawn_file::SpawnFile;
 
 #[tauri::command]
 pub async fn get_spawn_file_patrols(

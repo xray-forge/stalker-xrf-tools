@@ -2,5 +2,6 @@ pub mod chunk;
 pub mod constants;
 pub mod data;
 pub mod export;
-pub mod file;
+pub mod particles_file;
+pub mod spawn_file;
 pub mod types;

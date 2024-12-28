@@ -2,7 +2,7 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::file::spawn_file::SpawnFile;
+use xray_db::spawn_file::spawn_file::SpawnFile;
 use xray_db::types::SpawnByteOrder;
 
 pub struct UnpackSpawnFileCommand {}

@@ -15,13 +15,15 @@ use xray_ltx::Ltx;
 /// 1 - objects
 /// 2 - edges
 #[derive(Serialize, Deserialize)]
-pub struct ALifeSpawnsChunk {
+pub struct SpawnALifeSpawnsChunk {
   pub objects: Vec<AlifeObjectBase>,
 }
 
-impl ALifeSpawnsChunk {
+impl SpawnALifeSpawnsChunk {
+  pub const CHUNK_ID: u32 = 1;
+
   /// Read spawns chunk by position descriptor from the chunk.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ALifeSpawnsChunk> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnALifeSpawnsChunk> {
     let mut count_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut objects_reader: ChunkReader = reader.read_child_by_index(1)?;
     let edges_reader: ChunkReader = reader.read_child_by_index(2)?;
@@ -47,7 +49,7 @@ impl ALifeSpawnsChunk {
 
     log::info!("Parsed alife spawns chunk, {:?} bytes", reader.size);
 
-    Ok(ALifeSpawnsChunk { objects })
+    Ok(SpawnALifeSpawnsChunk { objects })
   }
 
   /// Write alife chunk data into the writer.
@@ -83,7 +85,7 @@ impl ALifeSpawnsChunk {
   }
 
   /// Import alife spawns data from provided path.
-  pub fn import(path: &Path) -> io::Result<ALifeSpawnsChunk> {
+  pub fn import(path: &Path) -> io::Result<SpawnALifeSpawnsChunk> {
     let config: Ltx = open_ini_config(&path.join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
@@ -93,7 +95,7 @@ impl ALifeSpawnsChunk {
 
     log::info!("Imported alife spawns chunk");
 
-    Ok(ALifeSpawnsChunk { objects })
+    Ok(SpawnALifeSpawnsChunk { objects })
   }
 
   /// Export alife spawns data into provided path.
@@ -112,7 +114,7 @@ impl ALifeSpawnsChunk {
   }
 }
 
-impl fmt::Debug for ALifeSpawnsChunk {
+impl fmt::Debug for SpawnALifeSpawnsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
@@ -134,7 +136,7 @@ mod tests {
   use crate::data::alife_object_base::AlifeObjectBase;
   use crate::data::meta::cls_id::ClsId;
   use crate::data::vector_3d::Vector3d;
-  use crate::file::alife_spawns_chunk::ALifeSpawnsChunk;
+  use crate::spawn_file::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use std::io;
@@ -147,7 +149,7 @@ mod tests {
   fn test_read_write_empty_spawns_chunk() -> io::Result<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_spawns_empty.chunk");
 
-    let spawns: ALifeSpawnsChunk = ALifeSpawnsChunk { objects: vec![] };
+    let spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk { objects: vec![] };
 
     let mut writer: ChunkWriter = spawns.write::<SpawnByteOrder>(ChunkWriter::new())?;
 
@@ -168,7 +170,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: ALifeSpawnsChunk = ALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_spawns.objects.len(), spawns.objects.len());
 
@@ -179,7 +181,7 @@ mod tests {
   fn test_read_write_few_spawns_chunk() -> io::Result<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_spawns.chunk");
 
-    let spawns: ALifeSpawnsChunk = ALifeSpawnsChunk {
+    let spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {
       objects: vec![
         AlifeObjectBase {
           index: 21,
@@ -281,7 +283,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: ALifeSpawnsChunk = ALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
 
     assert_eq!(read_spawns.objects.len(), spawns.objects.len());
 

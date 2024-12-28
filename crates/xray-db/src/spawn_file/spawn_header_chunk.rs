@@ -11,7 +11,7 @@ use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct HeaderChunk {
+pub struct SpawnHeaderChunk {
   pub version: u32,
   pub guid: Uuid,
   pub graph_guid: Uuid,
@@ -19,11 +19,13 @@ pub struct HeaderChunk {
   pub levels_count: u32,
 }
 
-impl HeaderChunk {
+impl SpawnHeaderChunk {
+  pub const CHUNK_ID: u32 = 0;
+
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<HeaderChunk> {
-    let header: HeaderChunk = HeaderChunk {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnHeaderChunk> {
+    let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: reader.read_u32::<T>()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
       graph_guid: Uuid::from_u128(reader.read_u128::<T>()?),
@@ -54,13 +56,13 @@ impl HeaderChunk {
 
   /// Import header data from provided path.
   /// Parse ini files and populate spawn file.
-  pub fn import(path: &Path) -> io::Result<HeaderChunk> {
+  pub fn import(path: &Path) -> io::Result<SpawnHeaderChunk> {
     let config: Ltx = open_ini_config(&path.join("header.ltx"))?;
     let section: &Section = config
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
-    Ok(HeaderChunk {
+    Ok(SpawnHeaderChunk {
       version: read_ini_field("version", section)?,
       guid: read_ini_field("guid", section)?,
       graph_guid: read_ini_field("graph_guid", section)?,
@@ -94,7 +96,7 @@ impl HeaderChunk {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
-  use crate::file::header_chunk::HeaderChunk;
+  use crate::spawn_file::spawn_header_chunk::SpawnHeaderChunk;
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
   use serde_json::json;
@@ -117,7 +119,7 @@ mod tests {
     )?)?
     .read_child_by_index(0)?;
 
-    let header: io::Result<HeaderChunk> = HeaderChunk::read::<SpawnByteOrder>(reader);
+    let header: io::Result<SpawnHeaderChunk> = SpawnHeaderChunk::read::<SpawnByteOrder>(reader);
 
     assert!(header.is_err(), "Expected failure with empty chunk");
 
@@ -128,7 +130,7 @@ mod tests {
   fn test_read_write_simple_header() -> io::Result<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "header_simple.chunk");
 
-    let header: HeaderChunk = HeaderChunk {
+    let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 20,
       guid: Uuid::from_u128(2u128.pow(127)),
       graph_guid: Uuid::from_u128(2u128.pow(64)),
@@ -155,14 +157,14 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(HeaderChunk::read::<SpawnByteOrder>(reader)?, header);
+    assert_eq!(SpawnHeaderChunk::read::<SpawnByteOrder>(reader)?, header);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export_object() -> io::Result<()> {
-    let header: HeaderChunk = HeaderChunk {
+    let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 10,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
       graph_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0d9"),
@@ -175,7 +177,7 @@ mod tests {
 
     header.export::<SpawnByteOrder>(export_folder)?;
 
-    let read_header: HeaderChunk = HeaderChunk::import(export_folder)?;
+    let read_header: SpawnHeaderChunk = SpawnHeaderChunk::import(export_folder)?;
 
     assert_eq!(read_header, header);
 
@@ -184,7 +186,7 @@ mod tests {
 
   #[test]
   fn test_serialize_deserialize_object() -> io::Result<()> {
-    let header: HeaderChunk = HeaderChunk {
+    let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 12,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
       graph_guid: uuid!("67e55023-10b1-426f-9247-bb680e5fe0c8"),
@@ -202,7 +204,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(header, serde_json::from_str::<HeaderChunk>(&serialized)?);
+    assert_eq!(
+      header,
+      serde_json::from_str::<SpawnHeaderChunk>(&serialized)?
+    );
 
     Ok(())
   }
