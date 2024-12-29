@@ -19,7 +19,7 @@ impl SpawnPatrolsChunk {
   pub const CHUNK_ID: u32 = 3;
 
   /// Read patrols list from the chunk.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnPatrolsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnPatrolsChunk> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -197,8 +197,9 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 450 + 8);
 
-    let reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrols_chunk: SpawnPatrolsChunk = SpawnPatrolsChunk::read::<SpawnByteOrder>(reader)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_patrols_chunk: SpawnPatrolsChunk =
+      SpawnPatrolsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_patrols_chunk, patrols_chunk);
 

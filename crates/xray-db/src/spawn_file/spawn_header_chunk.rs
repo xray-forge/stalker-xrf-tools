@@ -24,7 +24,7 @@ impl SpawnHeaderChunk {
 
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnHeaderChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnHeaderChunk> {
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: reader.read_u32::<T>()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
@@ -114,12 +114,13 @@ mod tests {
 
   #[test]
   fn test_read_empty_chunk() -> io::Result<()> {
-    let reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
+    let mut reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
       &get_relative_test_sample_sub_dir("empty_nested_single.chunk"),
     )?)?
     .read_child_by_index(0)?;
 
-    let header: io::Result<SpawnHeaderChunk> = SpawnHeaderChunk::read::<SpawnByteOrder>(reader);
+    let header: io::Result<SpawnHeaderChunk> =
+      SpawnHeaderChunk::read::<SpawnByteOrder>(&mut reader);
 
     assert!(header.is_err(), "Expected failure with empty chunk");
 
@@ -153,11 +154,14 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 52);
 
-    let reader: ChunkReader = ChunkReader::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(SpawnHeaderChunk::read::<SpawnByteOrder>(reader)?, header);
+    assert_eq!(
+      SpawnHeaderChunk::read::<SpawnByteOrder>(&mut reader)?,
+      header
+    );
 
     Ok(())
   }

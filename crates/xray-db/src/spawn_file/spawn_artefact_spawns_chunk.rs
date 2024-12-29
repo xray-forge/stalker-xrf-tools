@@ -21,13 +21,13 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnArtefactSpawnsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnArtefactSpawnsChunk> {
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = reader.read_u32::<T>()?;
 
     // Parsing CLevelPoint structure, 20 bytes per one.
     for _ in 0..count {
-      nodes.push(ArtefactSpawnPoint::read::<T>(&mut reader)?);
+      nodes.push(ArtefactSpawnPoint::read::<T>(reader)?);
     }
 
     assert_eq!(nodes.len() as u64, count as u64);
@@ -152,13 +152,13 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 44 + 8);
 
-    let reader: ChunkReader = ChunkReader::from_slice(file)
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)
       .unwrap()
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
     let read_spawns: SpawnArtefactSpawnsChunk =
-      SpawnArtefactSpawnsChunk::read::<SpawnByteOrder>(reader)?;
+      SpawnArtefactSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_spawns, spawns);
 

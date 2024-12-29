@@ -23,7 +23,7 @@ impl SpawnALifeSpawnsChunk {
   pub const CHUNK_ID: u32 = 1;
 
   /// Read spawns chunk by position descriptor from the chunk.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnALifeSpawnsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnALifeSpawnsChunk> {
     let mut count_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut objects_reader: ChunkReader = reader.read_child_by_index(1)?;
     let edges_reader: ChunkReader = reader.read_child_by_index(2)?;
@@ -166,11 +166,12 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
-    let reader: ChunkReader = ChunkReader::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_spawns: SpawnALifeSpawnsChunk =
+      SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_spawns.objects.len(), spawns.objects.len());
 
@@ -279,11 +280,12 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 419 + 8);
 
-    let reader: ChunkReader = ChunkReader::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_spawns: SpawnALifeSpawnsChunk =
+      SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_spawns.objects.len(), spawns.objects.len());
 

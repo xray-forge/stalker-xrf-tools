@@ -29,31 +29,31 @@ impl SpawnGraphsChunk {
   pub const CHUNK_ID: u32 = 4;
 
   /// Read graphs chunk by position descriptor.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<SpawnGraphsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnGraphsChunk> {
     let mut levels: Vec<GraphLevel> = Vec::new();
     let mut vertices: Vec<GraphVertex> = Vec::new();
     let mut edges: Vec<GraphEdge> = Vec::new();
     let mut points: Vec<GraphLevelPoint> = Vec::new();
 
-    let header: GraphHeader = GraphHeader::read::<T>(&mut reader)?;
+    let header: GraphHeader = GraphHeader::read::<T>(reader)?;
 
     for _ in 0..header.levels_count {
-      levels.push(GraphLevel::read::<T>(&mut reader)?)
+      levels.push(GraphLevel::read::<T>(reader)?)
     }
 
     for _ in 0..header.vertices_count {
-      vertices.push(GraphVertex::read::<T>(&mut reader)?);
+      vertices.push(GraphVertex::read::<T>(reader)?);
     }
 
     for _ in 0..header.edges_count {
-      edges.push(GraphEdge::read::<T>(&mut reader)?);
+      edges.push(GraphEdge::read::<T>(reader)?);
     }
 
     for _ in 0..header.points_count {
-      points.push(GraphLevelPoint::read::<T>(&mut reader)?);
+      points.push(GraphLevelPoint::read::<T>(reader)?);
     }
 
-    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::read_list::<T>(&mut reader)?;
+    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::read_list::<T>(reader)?;
 
     log::info!(
       "Parsed graphs ver {:?}, {:?} bytes",
@@ -287,11 +287,12 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
-    let reader: ChunkReader = ChunkReader::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_graphs_chunk: SpawnGraphsChunk =
+      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_graphs_chunk, graphs_chunk);
 
@@ -425,11 +426,12 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
-    let reader: ChunkReader = ChunkReader::from_slice(file)?
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk::read::<SpawnByteOrder>(reader)?;
+    let read_graphs_chunk: SpawnGraphsChunk =
+      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_graphs_chunk, graphs_chunk);
 

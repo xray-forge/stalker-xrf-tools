@@ -8,3 +8,5 @@ pub type Matrix3d<T = f32> = (Vector3d<T>, Vector3d<T>, Vector3d<T>, Vector3d<T>
 pub type U32Bytes = (u8, u8, u8, u8);
 
 pub type SpawnByteOrder = LittleEndian;
+
+pub type ParticlesByteOrder = LittleEndian;

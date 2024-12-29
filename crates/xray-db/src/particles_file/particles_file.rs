@@ -1,4 +1,5 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::utils::find_chunk_by_id;
 use crate::particles_file::particles_effects_chunk::ParticlesEffectsChunk;
 use crate::particles_file::particles_firstgen_chunk::ParticlesFirstgenChunk;
 use crate::particles_file::particles_groups_chunk::ParticlesGroupsChunk;
@@ -7,8 +8,8 @@ use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::io;
 use std::path::Path;
+use std::{fs, io};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -44,26 +45,26 @@ impl ParticlesFile {
 
     Ok(ParticlesFile {
       version: ParticlesVersionChunk::read::<T>(
-        chunks
-          .iter()
-          .find(|it| it.index == ParticlesVersionChunk::CHUNK_ID)
-          .unwrap()
-          .clone(),
+        find_chunk_by_id(&chunks, ParticlesVersionChunk::CHUNK_ID)
+          .expect("Particle version chunk not found"),
       )?,
       effects: ParticlesEffectsChunk::read::<T>(
-        chunks
-          .iter()
-          .find(|it| it.index == ParticlesEffectsChunk::CHUNK_ID)
-          .unwrap()
-          .clone(),
+        find_chunk_by_id(&chunks, ParticlesEffectsChunk::CHUNK_ID)
+          .expect("Particle effects chunk not found"),
       )?,
       groups: ParticlesGroupsChunk::read::<T>(
-        chunks
-          .iter()
-          .find(|it| it.index == ParticlesGroupsChunk::CHUNK_ID)
-          .unwrap()
-          .clone(),
+        find_chunk_by_id(&chunks, ParticlesGroupsChunk::CHUNK_ID)
+          .expect("Particle groups chunk not found"),
       )?,
     })
+  }
+
+  /// Export unpacked particles file into provided path.
+  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+    fs::create_dir_all(path)?;
+
+    // todo: Implement.
+
+    Ok(())
   }
 }

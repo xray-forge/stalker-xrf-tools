@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="run: unpack xr particles" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
+    <option name="buildProfileId" value="dev" />
     <option name="command" value="run --package xrf-cli --bin xrf-cli -- unpack-particles -p C:\Projects\gamedata_raw\particles.xr -d .\target\assets\unpacked_particles -f" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />

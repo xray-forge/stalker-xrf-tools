@@ -1,4 +1,5 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::utils::find_chunk_by_id;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file::create_export_file;
 use crate::spawn_file::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
@@ -51,34 +52,24 @@ impl SpawnFile {
     let spawn_file: SpawnFile = {
       SpawnFile {
         header: SpawnHeaderChunk::read::<T>(
-          chunks
-            .get(SpawnHeaderChunk::CHUNK_ID as usize)
-            .unwrap()
-            .clone(),
+          &mut find_chunk_by_id(&chunks, SpawnHeaderChunk::CHUNK_ID)
+            .expect("Header chunk not found"),
         )?,
         alife_spawn: SpawnALifeSpawnsChunk::read::<T>(
-          chunks
-            .get(SpawnALifeSpawnsChunk::CHUNK_ID as usize)
-            .unwrap()
-            .clone(),
+          &mut find_chunk_by_id(&chunks, SpawnALifeSpawnsChunk::CHUNK_ID)
+            .expect("ALife spawns chunk not found"),
         )?,
         artefact_spawn: SpawnArtefactSpawnsChunk::read::<T>(
-          chunks
-            .get(SpawnArtefactSpawnsChunk::CHUNK_ID as usize)
-            .unwrap()
-            .clone(),
+          &mut find_chunk_by_id(&chunks, SpawnArtefactSpawnsChunk::CHUNK_ID)
+            .expect("Artefact spawns chunk not found"),
         )?,
         patrols: SpawnPatrolsChunk::read::<T>(
-          chunks
-            .get(SpawnPatrolsChunk::CHUNK_ID as usize)
-            .unwrap()
-            .clone(),
+          &mut find_chunk_by_id(&chunks, SpawnPatrolsChunk::CHUNK_ID)
+            .expect("Patrol chunk not found"),
         )?,
         graphs: SpawnGraphsChunk::read::<T>(
-          chunks
-            .get(SpawnGraphsChunk::CHUNK_ID as usize)
-            .unwrap()
-            .clone(),
+          &mut find_chunk_by_id(&chunks, SpawnGraphsChunk::CHUNK_ID)
+            .expect("Graphs chunk not found"),
         )?,
       }
     };

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
 use xray_db::particles_file::particles_file::ParticlesFile;
-use xray_db::types::SpawnByteOrder;
+use xray_db::types::ParticlesByteOrder;
 
 pub struct UnpackParticlesCommand {}
 
@@ -69,11 +69,10 @@ impl UnpackParticlesCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile =
-      ParticlesFile::read_from_path::<SpawnByteOrder>(path).unwrap();
+    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<ParticlesByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
-    // particles_file.export_to_path::<SpawnByteOrder>(destination)?;
+    particles_file.export_to_path::<ParticlesByteOrder>(destination)?;
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
