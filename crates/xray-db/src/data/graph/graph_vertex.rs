@@ -118,8 +118,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
-    let filename: String = String::from("graph_vertex.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let vertex: GraphVertex = GraphVertex {
@@ -165,7 +165,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let vertex: GraphVertex = GraphVertex {
       level_point: Vector3d::new(32.5, 523.6, 342.3),
       game_point: Vector3d::new(0.23, -4.0, 123.0),
@@ -178,7 +178,7 @@ mod tests {
       level_points_count: 63,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_vertex.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -195,7 +195,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let vertex: GraphVertex = GraphVertex {
       level_point: Vector3d::new(25.5, 15.6, 43.3),
       game_point: Vector3d::new(0.44, -4.0, 1000.0),
@@ -209,7 +209,7 @@ mod tests {
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(vertex).to_string().as_bytes())?;

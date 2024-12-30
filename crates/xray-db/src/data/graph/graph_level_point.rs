@@ -16,7 +16,7 @@ pub struct GraphLevelPoint {
 }
 
 impl GraphLevelPoint {
-  /// Read level point from chunk.
+  /// Read level point from the chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphLevelPoint> {
     Ok(GraphLevelPoint {
       position: reader.read_f32_3d_vector::<T>()?,
@@ -25,7 +25,7 @@ impl GraphLevelPoint {
     })
   }
 
-  /// Write level point data into chunk writer.
+  /// Write level point data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
@@ -47,7 +47,7 @@ impl GraphLevelPoint {
     })
   }
 
-  /// Export graph level point data into ini.
+  /// Export graph level point data into ini file.
   pub fn export(&self, section: &str, ini: &mut Ltx) {
     ini
       .with_section(section)
@@ -78,8 +78,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
-    let filename: String = String::from("graph_level_point_simple.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let point: GraphLevelPoint = GraphLevelPoint {
@@ -116,14 +116,14 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let point: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(66.5, 55.6, 88.7),
       distance: 4235.50,
       level_vertex_id: 236263,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_level_point.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -139,7 +139,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let point: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(11.5, 11.6, 2.7),
       distance: 321.50,
@@ -148,7 +148,7 @@ mod tests {
 
     let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
       file!(),
-      "serialized.json",
+      "serialize_deserialize.json",
     ))?;
 
     file.write_all(json!(point).to_string().as_bytes())?;
