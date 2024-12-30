@@ -14,7 +14,7 @@ pub struct GraphEdge {
 }
 
 impl GraphEdge {
-  /// Read edge from chunk.
+  /// Read edge from the chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphEdge> {
     Ok(GraphEdge {
       game_vertex_id: reader.read_u16::<T>()?,
@@ -22,7 +22,7 @@ impl GraphEdge {
     })
   }
 
-  /// Write graph edge data into chunk writer.
+  /// Write graph edge data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u16::<T>(self.game_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
@@ -71,8 +71,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
-    let filename: String = String::from("graph_edge_simple.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let edge: GraphEdge = GraphEdge {
@@ -111,13 +111,13 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let edge: GraphEdge = GraphEdge {
       game_vertex_id: 352,
       distance: 2554.50,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_edge.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -134,14 +134,14 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let edge: GraphEdge = GraphEdge {
       game_vertex_id: 713,
       distance: 400.50,
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(edge).to_string().as_bytes())?;

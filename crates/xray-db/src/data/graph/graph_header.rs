@@ -19,7 +19,7 @@ pub struct GraphHeader {
 }
 
 impl GraphHeader {
-  /// Read header data from the chunk.
+  /// Read header data from the chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphHeader> {
     Ok(GraphHeader {
       version: reader.read_u8()?,
@@ -31,7 +31,7 @@ impl GraphHeader {
     })
   }
 
-  /// Write graph edge data into chunk writer.
+  /// Write graph edge data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u8(self.version)?;
     writer.write_u16::<T>(self.vertices_count)?;
@@ -93,8 +93,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
-    let filename: String = String::from("graph_header.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let header: GraphHeader = GraphHeader {
@@ -137,7 +137,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let header: GraphHeader = GraphHeader {
       version: 16,
       vertices_count: 6434,
@@ -147,7 +147,7 @@ mod tests {
       guid: uuid!("23e55044-10b1-426f-9247-bb680e5fe0c8"),
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_header.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -163,7 +163,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let header: GraphHeader = GraphHeader {
       version: 12,
       vertices_count: 2341,
@@ -174,7 +174,7 @@ mod tests {
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(header).to_string().as_bytes())?;

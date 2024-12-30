@@ -20,7 +20,7 @@ pub struct GraphLevel {
 }
 
 impl GraphLevel {
-  /// Read graph level data from the chunk.
+  /// Read graph level data from the chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphLevel> {
     Ok(GraphLevel {
       name: reader.read_null_terminated_win_string()?,
@@ -31,7 +31,7 @@ impl GraphLevel {
     })
   }
 
-  /// Write graph level data into chunk writer.
+  /// Write graph level data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_f32_3d_vector::<T>(&self.offset)?;
@@ -91,8 +91,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
-    let filename: String = String::from("graph_level.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let level: GraphLevel = GraphLevel {
@@ -134,7 +134,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let level: GraphLevel = GraphLevel {
       id: 78,
       name: String::from("test-level-exported"),
@@ -143,7 +143,7 @@ mod tests {
       offset: Vector3d::new(0.25, 5.55, -1.5),
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "graph_level.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -159,7 +159,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let level: GraphLevel = GraphLevel {
       id: 243,
       name: String::from("test-level-example"),
@@ -169,7 +169,7 @@ mod tests {
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(level).to_string().as_bytes())?;

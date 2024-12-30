@@ -139,8 +139,9 @@ impl SpawnGraphsChunk {
       edges.push(GraphEdge::import(&index.to_string(), &edges_config)?);
     }
 
-    let cross_tables: Vec<GraphCrossTable> =
-      GraphCrossTable::import_list::<T>(open_binary_file(&path.join("graphs_cross_tables.gct"))?)?;
+    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::import_list::<T>(
+      &mut open_binary_file(&path.join("graphs_cross_tables.gct"))?,
+    )?;
 
     log::info!("Imported graphs chunk");
 
