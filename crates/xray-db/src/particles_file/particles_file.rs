@@ -29,7 +29,7 @@ impl ParticlesFile {
   pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<ParticlesFile> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
-    let chunk_ids: Vec<u32> = chunks.iter().map(|it| it.index).collect();
+    let chunk_ids: Vec<u32> = chunks.iter().map(|it| it.id).collect();
 
     log::info!(
       "Parsed particles file meta, {} chunks, {} bytes, {:?} chunks",

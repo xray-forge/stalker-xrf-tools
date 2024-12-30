@@ -13,7 +13,7 @@ use std::{fmt, io};
 
 #[derive(Clone, PartialEq)]
 pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
-  pub index: u32,
+  pub id: u32,
   pub size: u64,
   pub position: u64,
   pub is_compressed: bool,
@@ -41,7 +41,7 @@ impl ChunkReader {
     }
 
     Ok(ChunkReader {
-      index: 0,
+      id: 0,
       size: file.len() as u64,
       position: file.start_pos(),
       is_compressed: false,
@@ -220,7 +220,7 @@ impl fmt::Debug for ChunkReader {
     write!(
       formatter,
       "Chunk {{ index: {}, size: {}, position: {}, is_compressed: {} }}",
-      self.index, self.size, self.position, self.is_compressed
+      self.id, self.size, self.position, self.is_compressed
     )
   }
 }
@@ -300,15 +300,15 @@ mod tests {
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks.get(0).unwrap().size, 0);
-    assert_eq!(chunks.get(0).unwrap().index, 4);
+    assert_eq!(chunks.get(0).unwrap().id, 4);
     assert_eq!(chunks.get(1).unwrap().size, 0);
-    assert_eq!(chunks.get(1).unwrap().index, 3);
+    assert_eq!(chunks.get(1).unwrap().id, 3);
     assert_eq!(chunks.get(2).unwrap().size, 0);
-    assert_eq!(chunks.get(2).unwrap().index, 2);
+    assert_eq!(chunks.get(2).unwrap().id, 2);
     assert_eq!(chunks.get(3).unwrap().size, 0);
-    assert_eq!(chunks.get(3).unwrap().index, 1);
+    assert_eq!(chunks.get(3).unwrap().id, 1);
     assert_eq!(chunks.get(4).unwrap().size, 0);
-    assert_eq!(chunks.get(4).unwrap().index, 0);
+    assert_eq!(chunks.get(4).unwrap().id, 0);
 
     Ok(())
   }

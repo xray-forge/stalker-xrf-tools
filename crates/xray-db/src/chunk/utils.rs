@@ -6,7 +6,7 @@ use std::io::Read;
 
 /// Find chink in list by id.
 pub fn find_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<ChunkReader> {
-  chunks.iter().find(|it| it.index == id).cloned()
+  chunks.iter().find(|it| it.id == id).cloned()
 }
 
 /// Read chunk as u16 value, verify remaining data is 0.

@@ -45,7 +45,7 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
     file.seek(SeekFrom::Start(0)).unwrap();
 
     let reader: ChunkReader = ChunkReader {
-      index: chunk_id,
+      id: chunk_id,
       is_compressed: chunk_id & CFS_COMPRESS_MARK != 0,
       size: chunk_size as u64,
       position: self.reader.file.stream_position().unwrap(),
@@ -114,7 +114,7 @@ impl<'lifetime> Iterator for ChunkSizePackedIterator<'lifetime> {
       .unwrap();
 
     Some(ChunkReader {
-      index: self.index,
+      id: self.index,
       is_compressed: false,
       size: chunk_size as u64,
       position: self.reader.file.stream_position().unwrap(),
