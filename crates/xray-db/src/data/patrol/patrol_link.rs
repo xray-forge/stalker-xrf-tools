@@ -140,9 +140,9 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_patrol_link() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_link_simple.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let link: PatrolLink = PatrolLink {
       index: 1000,
@@ -176,9 +176,9 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list_of_patrol_links() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_link_list.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
     let links: Vec<PatrolLink> = vec![
       PatrolLink {
@@ -218,13 +218,13 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let link: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol_link.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(&config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -239,7 +239,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let link: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
@@ -247,7 +247,7 @@ mod tests {
 
     let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
       file!(),
-      "serialized.json",
+      "serialize_deserialize.json",
     ))?;
 
     file.write_all(json!(link).to_string().as_bytes())?;

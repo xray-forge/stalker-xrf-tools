@@ -1,4 +1,5 @@
 use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
+use crate::error::database_not_implemented_error::DatabaseNotImplementedError;
 use crate::error::database_parse_error::DatabaseParseError;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
@@ -9,6 +10,7 @@ use std::io;
 pub enum DatabaseError {
   Io(io::Error),
   InvalidChunk(DatabaseInvalidChunkError),
+  NotImplemented(DatabaseNotImplementedError),
   Parse(DatabaseParseError),
   Generic(Box<dyn Error>),
 }
@@ -19,6 +21,7 @@ impl Display for DatabaseError {
       DatabaseError::Io(ref error) => error.fmt(formatter),
       DatabaseError::InvalidChunk(ref error) => error.fmt(formatter),
       DatabaseError::Parse(ref error) => error.fmt(formatter),
+      DatabaseError::NotImplemented(ref error) => error.fmt(formatter),
       DatabaseError::Generic(ref error) => error.fmt(formatter),
     }
   }
@@ -30,6 +33,7 @@ impl Error for DatabaseError {
       DatabaseError::Io(ref error) => error.source(),
       DatabaseError::InvalidChunk(ref error) => error.source(),
       DatabaseError::Parse(ref error) => error.source(),
+      DatabaseError::NotImplemented(ref error) => error.source(),
       DatabaseError::Generic(ref error) => error.source(),
     }
   }
@@ -44,6 +48,12 @@ impl From<io::Error> for DatabaseError {
 impl From<DatabaseInvalidChunkError> for DatabaseError {
   fn from(error: DatabaseInvalidChunkError) -> Self {
     DatabaseError::InvalidChunk(error)
+  }
+}
+
+impl From<DatabaseNotImplementedError> for DatabaseError {
+  fn from(error: DatabaseNotImplementedError) -> Self {
+    DatabaseError::NotImplemented(error)
   }
 }
 

@@ -222,9 +222,9 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_patrol_point() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_simple.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name"),
@@ -274,9 +274,9 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_simple_patrols_list() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_list.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
     let patrols: Vec<Patrol> = vec![
       Patrol {
@@ -284,14 +284,14 @@ mod tests {
         points: vec![
           PatrolPoint {
             name: String::from("patrol-point-1"),
-            position: Vector3d::new(1.5, -2.3, 1.0),
+            position: Vector3d::new(10.5, -20.3, 10.0),
             flags: 33,
             level_vertex_id: 250,
             game_vertex_id: 555,
           },
           PatrolPoint {
             name: String::from("patrol-point-2"),
-            position: Vector3d::new(2.5, -5.3, 3.0),
+            position: Vector3d::new(20.5, -50.3, 30.0),
             flags: 64,
             level_vertex_id: 5500,
             game_vertex_id: 666,
@@ -307,14 +307,14 @@ mod tests {
         points: vec![
           PatrolPoint {
             name: String::from("patrol-point-1"),
-            position: Vector3d::new(7.5, -4.3, 3.0),
+            position: Vector3d::new(70.5, -40.3, 30.0),
             flags: 1,
             level_vertex_id: 601,
             game_vertex_id: 541,
           },
           PatrolPoint {
             name: String::from("patrol-point-2"),
-            position: Vector3d::new(2.5, -5.3, 3.0),
+            position: Vector3d::new(20.5, -50.3, 30.0),
             flags: 0,
             level_vertex_id: 600,
             game_vertex_id: 542,
@@ -351,7 +351,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name-exp"),
       points: vec![
@@ -376,10 +376,12 @@ mod tests {
       }],
     };
 
-    let patrol_config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol.ini");
+    let patrol_config_path: &Path =
+      &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let points_config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "patrol_points.ini");
-    let links_config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol_links.ini");
+      &get_absolute_test_sample_file_path(file!(), "import_export_points.ini");
+    let links_config_path: &Path =
+      &get_absolute_test_sample_file_path(file!(), "import_export_links.ini");
 
     let mut patrol_file: File = overwrite_file(&patrol_config_path)?;
     let mut points_file: File = overwrite_file(&points_config_path)?;
@@ -413,7 +415,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name-serde"),
       points: vec![
@@ -440,7 +442,7 @@ mod tests {
 
     let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
       file!(),
-      "serialized.json",
+      "serialize_deserialize.json",
     ))?;
 
     file.write_all(json!(patrol).to_string().as_bytes())?;
