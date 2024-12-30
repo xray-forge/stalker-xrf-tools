@@ -5,6 +5,7 @@ pub mod alife_level_changer;
 pub mod alife_object_abstract;
 pub mod alife_object_actor;
 pub mod alife_object_anomaly_zone;
+pub mod alife_object_base;
 pub mod alife_object_breakable;
 pub mod alife_object_climable;
 pub mod alife_object_creature;

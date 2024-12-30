@@ -1,10 +1,11 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::NIL;
+use crate::error::database_parse_error::DatabaseParseError;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
-use std::io;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -26,7 +27,7 @@ pub enum TimeError {
 
 impl Time {
   /// Read optional time object from the chunk.
-  pub fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Option<Time>> {
+  pub fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Option<Time>> {
     if reader.read_u8()? == 1 {
       Ok(Some(Time::read::<T>(reader)?))
     } else {
@@ -38,7 +39,7 @@ impl Time {
   pub fn write_optional<T: ByteOrder>(
     time: Option<&Time>,
     writer: &mut ChunkWriter,
-  ) -> io::Result<()> {
+  ) -> DatabaseResult<()> {
     if time.is_some() {
       writer.write_u8(1)?;
 
@@ -51,7 +52,7 @@ impl Time {
   }
 
   /// Read time object from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Time> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Time> {
     let year: u8 = reader.read_u8()?;
     let month: u8 = reader.read_u8()?;
     let day: u8 = reader.read_u8()?;
@@ -72,7 +73,7 @@ impl Time {
   }
 
   /// Write time object into the chunk.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u8(self.year)?;
     writer.write_u8(self.month)?;
     writer.write_u8(self.day)?;
@@ -92,7 +93,7 @@ impl Time {
   }
 
   /// Import optional time from string value.
-  pub fn import_from_string(value: &str) -> io::Result<Option<Time>> {
+  pub fn import_from_string(value: &str) -> DatabaseResult<Option<Time>> {
     if value.trim() == NIL {
       return Ok(None);
     }
@@ -100,8 +101,7 @@ impl Time {
     Ok(match Time::from_str(value) {
       Ok(time) => Some(time),
       Err(_) => {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidInput,
+        return Err(DatabaseParseError::new_database_error(
           "Failed to parse time",
         ))
       }
@@ -176,11 +176,10 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::time::Time;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
   use xray_test_utils::file::read_file_as_string;
@@ -190,7 +189,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> io::Result<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -228,7 +227,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_some() -> io::Result<()> {
+  fn test_read_write_optional_some() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
@@ -267,7 +266,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_none() -> io::Result<()> {
+  fn test_read_write_optional_none() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
@@ -295,7 +294,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_to_str() -> io::Result<()> {
+  fn test_import_export_to_str() -> DatabaseResult<()> {
     let vector: Time = Time {
       year: 20,
       month: 6,
@@ -318,7 +317,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> io::Result<()> {
+  fn test_from_to_str() -> DatabaseResult<()> {
     let vector: Time = Time {
       year: 22,
       month: 6,
@@ -336,7 +335,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> io::Result<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let time_old: Time = Time {
       year: 22,
       month: 6,
@@ -357,7 +356,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(time_old, serde_json::from_str::<Time>(&serialized)?);
+    assert_eq!(time_old, serde_json::from_str::<Time>(&serialized).unwrap());
 
     Ok(())
   }

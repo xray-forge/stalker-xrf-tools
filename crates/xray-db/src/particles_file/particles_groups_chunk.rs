@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::particle::particle_group::ParticleGroup;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,7 +15,7 @@ impl ParticlesGroupsChunk {
 
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticlesGroupsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticlesGroupsChunk> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
     let mut groups: Vec<ParticleGroup> = Vec::new();
 

@@ -9,9 +9,9 @@ use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
 use crate::data::vector_3d::Vector3d;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
 #[derive(Debug, Serialize, Deserialize)]
@@ -51,7 +51,7 @@ impl ParticleEffect {
 
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ParticleEffect> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> DatabaseResult<ParticleEffect> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
 
     let effect: ParticleEffect = {

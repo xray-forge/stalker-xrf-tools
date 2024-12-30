@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use std::io;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -25,7 +25,7 @@ impl Vector3d<f32> {
   }
 
   /// Read vector coordinates from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vector3d<f32>> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vector3d<f32>> {
     Ok(Vector3d {
       x: reader.read_f32::<T>()?,
       y: reader.read_f32::<T>()?,
@@ -34,7 +34,7 @@ impl Vector3d<f32> {
   }
 
   /// Write vector coordinates into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_f32::<T>(self.x)?;
     writer.write_f32::<T>(self.y)?;
     writer.write_f32::<T>(self.z)?;
@@ -89,11 +89,10 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::vector_3d::Vector3d;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
   use xray_test_utils::file::read_file_as_string;
@@ -103,7 +102,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> io::Result<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -144,7 +143,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> io::Result<()> {
+  fn test_from_to_str() -> DatabaseResult<()> {
     let vector: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,
@@ -158,7 +157,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> io::Result<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let vector_old: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,
@@ -175,7 +174,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(vector_old, serde_json::from_str::<Vector3d>(&serialized)?);
+    assert_eq!(
+      vector_old,
+      serde_json::from_str::<Vector3d>(&serialized).unwrap()
+    );
 
     Ok(())
   }

@@ -5,9 +5,9 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 /// Represents script extension of base server smart cover class.
@@ -21,7 +21,7 @@ pub struct AlifeSmartCover {
 
 impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   /// Read smart cover data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeSmartCover> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeSmartCover> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read::<T>(reader)?;
 
     let last_description: String = reader.read_null_terminated_win_string()?;
@@ -43,7 +43,7 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   }
 
   /// Import smart cover data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeSmartCover> {
+  fn import(section: &Section) -> DatabaseResult<AlifeSmartCover> {
     Ok(AlifeSmartCover {
       base: AlifeObjectSmartCover::import(section)?,
       last_description: read_ini_field("last_description", section)?,
@@ -58,7 +58,7 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeSmartCover {
   /// Write smart cover data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     writer.write_null_terminated_win_string(&self.last_description)?;
@@ -98,16 +98,15 @@ mod tests {
   use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_smart_cover.chunk");
 

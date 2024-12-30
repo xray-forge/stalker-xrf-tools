@@ -2,9 +2,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -16,8 +16,8 @@ pub struct ArtefactSpawnPoint {
 }
 
 impl ArtefactSpawnPoint {
-  /// Read artefact spawn point from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ArtefactSpawnPoint> {
+  /// Read artefact spawn point from the chunk reader.
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ArtefactSpawnPoint> {
     Ok(ArtefactSpawnPoint {
       position: reader.read_f32_3d_vector::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
@@ -25,8 +25,8 @@ impl ArtefactSpawnPoint {
     })
   }
 
-  /// Write artefact spawn point data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  /// Write artefact spawn point data into the chunk writer.
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
@@ -35,7 +35,7 @@ impl ArtefactSpawnPoint {
   }
 
   /// Import artefact spawn point data from ini section.
-  pub fn import(section: &Section) -> io::Result<ArtefactSpawnPoint> {
+  pub fn import(section: &Section) -> DatabaseResult<ArtefactSpawnPoint> {
     Ok(ArtefactSpawnPoint {
       position: read_ini_field("position", section)?,
       level_vertex_id: read_ini_field("level_vertex_id", section)?,
@@ -57,14 +57,13 @@ impl ArtefactSpawnPoint {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
+  use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_ltx::Ltx;
@@ -75,7 +74,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_artefact_spawn_point() -> io::Result<()> {
+  fn test_read_write_simple_artefact_spawn_point() -> DatabaseResult<()> {
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,
@@ -115,7 +114,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(11.5, 12.3, -10.5),
       level_vertex_id: 1001,
@@ -142,7 +141,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(21.5, 22.3, -20.5),
       level_vertex_id: 1001,
@@ -162,7 +161,7 @@ mod tests {
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
       point,
-      serde_json::from_str::<ArtefactSpawnPoint>(&serialized)?
+      serde_json::from_str::<ArtefactSpawnPoint>(&serialized).unwrap()
     );
 
     Ok(())

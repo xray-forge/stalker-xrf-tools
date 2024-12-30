@@ -6,10 +6,9 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -23,7 +22,7 @@ pub struct AlifeObjectActor {
 
 impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
   /// Read actor data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectActor> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectActor> {
     Ok(AlifeObjectActor {
       base: AlifeObjectCreature::read::<T>(reader)?,
       trader: AlifeObjectTraderAbstract::read::<T>(reader)?,
@@ -33,7 +32,7 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
   }
 
   /// Import actor data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectActor> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectActor> {
     Ok(AlifeObjectActor {
       base: AlifeObjectCreature::import(section)?,
       trader: AlifeObjectTraderAbstract::import(section)?,
@@ -46,7 +45,7 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectActor {
   /// Write object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
     self.trader.write(writer)?;
     self.skeleton.write(writer)?;
@@ -80,16 +79,15 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_object_actor.chunk");
 

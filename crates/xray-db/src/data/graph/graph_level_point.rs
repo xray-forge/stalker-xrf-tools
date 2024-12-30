@@ -2,9 +2,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -17,7 +17,7 @@ pub struct GraphLevelPoint {
 
 impl GraphLevelPoint {
   /// Read level point from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphLevelPoint> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphLevelPoint> {
     Ok(GraphLevelPoint {
       position: reader.read_f32_3d_vector::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
@@ -26,7 +26,7 @@ impl GraphLevelPoint {
   }
 
   /// Write level point data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
@@ -35,7 +35,7 @@ impl GraphLevelPoint {
   }
 
   /// Import graph level point from ini file.
-  pub fn import(section_name: &str, config: &Ltx) -> io::Result<GraphLevelPoint> {
+  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphLevelPoint> {
     let section: &Section = config.section(section_name).unwrap_or_else(|| {
       panic!("Graph section '{section_name}' should be defined in level point ltx file")
     });
@@ -64,11 +64,10 @@ mod tests {
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_ltx::Ltx;
@@ -79,7 +78,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> io::Result<()> {
+  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
     let filename: String = String::from("graph_level_point_simple.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -117,7 +116,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let point: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(66.5, 55.6, 88.7),
       distance: 4235.50,
@@ -140,7 +139,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let point: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(11.5, 11.6, 2.7),
       distance: 321.50,
@@ -158,7 +157,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(point, serde_json::from_str::<GraphLevelPoint>(&serialized)?);
+    assert_eq!(
+      point,
+      serde_json::from_str::<GraphLevelPoint>(&serialized).unwrap()
+    );
 
     Ok(())
   }

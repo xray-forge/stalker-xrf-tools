@@ -1,10 +1,10 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
 use crate::export::file_import::read_ini_field;
-use crate::types::{Matrix3d, Sphere3d};
+use crate::types::{DatabaseResult, Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 /// Shape enumeration stored in objects descriptors.
@@ -16,7 +16,7 @@ pub enum Shape {
 
 impl Shape {
   /// Read list of shapes from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<Shape>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Shape>> {
     let mut shapes: Vec<Shape> = Vec::new();
     let count: u8 = reader.read_u8().expect("Count flag to be read");
 
@@ -34,7 +34,7 @@ impl Shape {
   }
 
   /// Read shape from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Shape> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Shape> {
     let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
 
     Ok(match shape_type {
@@ -50,7 +50,10 @@ impl Shape {
   }
 
   /// Write list of shapes data into the chunk reader.
-  pub fn write_list<T: ByteOrder>(shapes: &Vec<Shape>, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write_list<T: ByteOrder>(
+    shapes: &Vec<Shape>,
+    writer: &mut ChunkWriter,
+  ) -> DatabaseResult<()> {
     writer.write_u8(shapes.len() as u8)?;
 
     for shape in shapes {
@@ -61,7 +64,7 @@ impl Shape {
   }
 
   /// Write shape data into the chunk reader.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     match self {
       Shape::Sphere(data) => {
         writer.write_u8(0)?;
@@ -83,7 +86,7 @@ impl Shape {
   }
 
   /// Import shape objects from ini config file.
-  pub fn import_list(section: &Section) -> io::Result<Vec<Shape>> {
+  pub fn import_list(section: &Section) -> DatabaseResult<Vec<Shape>> {
     let mut shapes: Vec<Shape> = Vec::new();
     let count: usize = read_ini_field("shapes_count", section)?;
 
@@ -107,10 +110,9 @@ impl Shape {
           )));
         }
         _ => {
-          return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            format!("Failed to parsed unknown type shape - {shape_type}"),
-          ))
+          return Err(DatabaseInvalidChunkError::new_database_error(format!(
+            "Failed to parsed unknown type of shape - {shape_type} when importing from ini"
+          )))
         }
       }
     }
@@ -155,21 +157,22 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
-  use crate::types::SpawnByteOrder;
+  use crate::export::file::open_ini_config;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_file, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_list() -> io::Result<()> {
+  fn test_read_write_list() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -230,7 +233,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_sphere() -> io::Result<()> {
+  fn test_read_write_sphere() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_sphere.chunk");
 
@@ -267,7 +270,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_box() -> io::Result<()> {
+  fn test_read_write_box() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_box.chunk");
 
@@ -318,9 +321,9 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_list() -> io::Result<()> {
+  fn test_import_export() -> DatabaseResult<()> {
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "test_import_export.ini");
     let mut ltx: Ltx = Ltx::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "import_export_list.ini");
 
     let shapes: Vec<Shape> = vec![
       Shape::Sphere((
@@ -356,11 +359,13 @@ mod tests {
     ];
 
     Shape::export_list(&shapes, "test_import_export", &mut ltx);
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&filename)?)?;
+    ltx.write_to(&mut overwrite_file(config_path)?)?;
 
-    let new_ltx: Ltx = Ltx::read_from(&mut open_test_resource_as_file(&filename)?).unwrap();
-    let read_shapes: Vec<Shape> =
-      Shape::import_list(new_ltx.section("test_import_export").unwrap())?;
+    let read_shapes: Vec<Shape> = Shape::import_list(
+      open_ini_config(config_path)?
+        .section("test_import_export")
+        .unwrap(),
+    )?;
 
     assert_eq!(read_shapes, shapes);
 
@@ -368,7 +373,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_sphere() -> io::Result<()> {
+  fn test_serialize_deserialize_sphere() -> DatabaseResult<()> {
     let sphere: Shape = Shape::Sphere((
       Vector3d {
         x: 243.5,
@@ -388,13 +393,13 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(sphere, serde_json::from_str::<Shape>(&serialized)?);
+    assert_eq!(sphere, serde_json::from_str::<Shape>(&serialized).unwrap());
 
     Ok(())
   }
 
   #[test]
-  fn test_serialize_deserialize_box() -> io::Result<()> {
+  fn test_serialize_deserialize_box() -> DatabaseResult<()> {
     let sphere: Shape = Shape::Box((
       Vector3d {
         x: 175.5,
@@ -428,7 +433,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(sphere, serde_json::from_str::<Shape>(&serialized)?);
+    assert_eq!(sphere, serde_json::from_str::<Shape>(&serialized).unwrap());
 
     Ok(())
   }

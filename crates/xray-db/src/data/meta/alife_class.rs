@@ -30,9 +30,9 @@ use crate::data::alife::alife_object_torrid_zone::AlifeObjectTorridZone;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
-use std::io;
 use xray_ltx::Section;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
@@ -97,7 +97,7 @@ impl AlifeClass {
   pub fn read_by_class<T: ByteOrder>(
     reader: &mut ChunkReader,
     alife_class: &AlifeClass,
-  ) -> io::Result<Box<dyn AlifeObjectGeneric>> {
+  ) -> DatabaseResult<Box<dyn AlifeObjectGeneric>> {
     match alife_class {
       AlifeClass::SeActor => {
         let object: AlifeActor = AlifeActor::read::<T>(reader)?;
@@ -256,7 +256,7 @@ impl AlifeClass {
   pub fn import_by_class(
     alife_class: &AlifeClass,
     section: &Section,
-  ) -> io::Result<Box<dyn AlifeObjectGeneric>> {
+  ) -> DatabaseResult<Box<dyn AlifeObjectGeneric>> {
     Ok(match alife_class {
       AlifeClass::SeActor => Box::new(AlifeActor::import(section)?),
       AlifeClass::CseAlifeObjectBreakable => Box::new(AlifeObjectBreakable::import(section)?),

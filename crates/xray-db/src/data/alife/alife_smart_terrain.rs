@@ -4,10 +4,9 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -25,7 +24,7 @@ pub struct AlifeSmartTerrain {
 
 impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   /// Read alife smart terrain data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeSmartTerrain> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeSmartTerrain> {
     let base: AlifeSmartZone = AlifeSmartZone::read::<T>(reader)?;
 
     let arriving_objects_count: u8 = reader.read_u8()?;
@@ -89,7 +88,7 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   }
 
   /// Import alife smart terrain data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeSmartTerrain> {
+  fn import(section: &Section) -> DatabaseResult<AlifeSmartTerrain> {
     Ok(AlifeSmartTerrain {
       base: AlifeSmartZone::import(section)?,
       arriving_objects_count: read_ini_field("arriving_objects_count", section)?,
@@ -106,7 +105,7 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeSmartTerrain {
   /// Write smart terrain data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     writer.write_u8(self.arriving_objects_count)?;
@@ -163,16 +162,15 @@ mod tests {
   use crate::data::alife::alife_smart_zone::AlifeSmartZone;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_smart_terrain.chunk");
 

@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,7 +13,7 @@ pub struct ParticleEffectSprite {
 
 impl ParticleEffectSprite {
   /// Read effect sprite data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleEffectSprite> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleEffectSprite> {
     let particle_sprite: ParticleEffectSprite = ParticleEffectSprite {
       shader_name: reader.read_null_terminated_win_string()?,
       texture_name: reader.read_null_terminated_win_string()?,
@@ -28,7 +28,7 @@ impl ParticleEffectSprite {
   }
 
   /// Write sprite data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.shader_name)?;
     writer.write_null_terminated_win_string(&self.texture_name)?;
 
@@ -41,11 +41,10 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -54,7 +53,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_sprite() -> io::Result<()> {
+  fn test_read_write_sprite() -> DatabaseResult<()> {
     let filename: String = String::from("particle_effect_sprite.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -95,7 +94,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let sprite: ParticleEffectSprite = ParticleEffectSprite {
       shader_name: String::from("shader_name"),
       texture_name: String::from("texture_name"),
@@ -113,7 +112,7 @@ mod tests {
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
       sprite,
-      serde_json::from_str::<ParticleEffectSprite>(&serialized)?
+      serde_json::from_str::<ParticleEffectSprite>(&serialized).unwrap()
     );
 
     Ok(())

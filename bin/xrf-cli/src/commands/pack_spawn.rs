@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
 use xray_db::spawn_file::spawn_file::SpawnFile;
-use xray_db::types::SpawnByteOrder;
+use xray_db::types::{DatabaseResult, SpawnByteOrder};
 
 pub struct PackSpawnFileCommand {}
 
@@ -41,7 +41,7 @@ impl PackSpawnFileCommand {
   }
 
   /// Pack *.spawn file based on provided arguments.
-  pub fn execute(matches: &ArgMatches) -> io::Result<()> {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult<()> {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -62,10 +62,13 @@ impl PackSpawnFileCommand {
 
     // Re-validate that provided output can be used.
     if destination.exists() && destination.is_file() {
-      return Err(io::Error::new(
-        io::ErrorKind::AlreadyExists,
-        "Pack output file already exists, use --force to prune destination",
-      ));
+      return Err(
+        io::Error::new(
+          io::ErrorKind::AlreadyExists,
+          "Pack output file already exists, use --force to prune destination",
+        )
+        .into(),
+      );
     }
 
     let started_at: Instant = Instant::now();

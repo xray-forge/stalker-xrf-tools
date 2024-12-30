@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::vector_3d::Vector3d;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,7 +18,7 @@ pub struct ParticleDomain {
 
 impl ParticleDomain {
   /// Read particle domain from chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleDomain> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleDomain> {
     Ok(ParticleDomain {
       domain_type: reader.read_u32::<T>()?,
       coordinates: (

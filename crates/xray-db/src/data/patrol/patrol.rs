@@ -4,9 +4,9 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use std::io::Write;
 use xray_ltx::{Ltx, Section};
 
@@ -32,7 +32,10 @@ pub struct Patrol {
 
 impl Patrol {
   /// Read chunk as list of patrol samples.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, count: u32) -> io::Result<Vec<Patrol>> {
+  pub fn read_list<T: ByteOrder>(
+    reader: &mut ChunkReader,
+    count: u32,
+  ) -> DatabaseResult<Vec<Patrol>> {
     let mut read_patrols_count: u32 = 0;
     let mut patrols: Vec<Patrol> = Vec::new();
 
@@ -51,7 +54,7 @@ impl Patrol {
   }
 
   /// Read chunk as patrol.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Patrol> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Patrol> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -78,7 +81,10 @@ impl Patrol {
   }
 
   /// Write list of patrols into chunk writer.
-  pub fn write_list<T: ByteOrder>(patrols: &[Patrol], writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write_list<T: ByteOrder>(
+    patrols: &[Patrol],
+    writer: &mut ChunkWriter,
+  ) -> DatabaseResult<()> {
     for (index, patrol) in patrols.iter().enumerate() {
       let mut patrol_writer: ChunkWriter = ChunkWriter::new();
 
@@ -91,7 +97,7 @@ impl Patrol {
   }
 
   /// Write single patrol entity into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -122,7 +128,7 @@ impl Patrol {
     patrols_config: &Ltx,
     patrol_points_config: &Ltx,
     patrol_links_config: &Ltx,
-  ) -> io::Result<Patrol> {
+  ) -> DatabaseResult<Patrol> {
     let section: &Section = patrols_config
       .section(section_name)
       .unwrap_or_else(|| panic!("Patrol section {section_name} should be defined in ltx file"));
@@ -202,11 +208,10 @@ mod tests {
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_ltx::Ltx;
@@ -217,7 +222,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_patrol_point() -> io::Result<()> {
+  fn test_read_write_simple_patrol_point() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "patrol_simple.chunk");
 
@@ -269,7 +274,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_simple_patrols_list() -> io::Result<()> {
+  fn test_read_write_simple_patrols_list() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "patrol_list.chunk");
 
@@ -346,7 +351,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name-exp"),
       points: vec![
@@ -408,7 +413,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let patrol: Patrol = Patrol {
       name: String::from("patrol-name-serde"),
       points: vec![
@@ -444,7 +449,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(patrol, serde_json::from_str::<Patrol>(&serialized)?);
+    assert_eq!(patrol, serde_json::from_str::<Patrol>(&serialized).unwrap());
 
     Ok(())
   }

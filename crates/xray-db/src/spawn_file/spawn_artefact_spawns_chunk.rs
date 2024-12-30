@@ -1,11 +1,12 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
+use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
 use crate::export::file::{create_export_file, open_ini_config};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::path::Path;
-use std::{fmt, io};
 use xray_ltx::Ltx;
 
 /// Artefacts spawns samples.
@@ -21,7 +22,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnArtefactSpawnsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnArtefactSpawnsChunk> {
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -47,7 +48,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Write artefact spawns into chunk writer.
   /// Writes artefact spawns data in binary format.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
     writer.write_u32::<T>(self.nodes.len() as u32)?;
 
     for node in &self.nodes {
@@ -64,7 +65,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Import artefact spawns data from provided path.
   /// Parse ini files and populate spawn file.
-  pub fn import(path: &Path) -> io::Result<SpawnArtefactSpawnsChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<SpawnArtefactSpawnsChunk> {
     let config: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
@@ -78,7 +79,7 @@ impl SpawnArtefactSpawnsChunk {
   }
 
   /// Export artefact spawns data into provided path.
-  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     let mut ltx: Ltx = Ltx::new();
 
     for (index, node) in self.nodes.iter().enumerate() {
@@ -107,19 +108,18 @@ impl fmt::Debug for SpawnArtefactSpawnsChunk {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::artefact_spawn_point::ArtefactSpawnPoint;
+  use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::spawn_file::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_artefact_spawn_point() -> io::Result<()> {
+  fn test_read_write_artefact_spawn_point() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "artefact_spawns.chunk");
 
     let spawns: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {

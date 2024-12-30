@@ -2,11 +2,12 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
 use crate::export::file::{create_export_file, open_ini_config};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::io::Write;
 use std::path::Path;
-use std::{fmt, io};
 use xray_ltx::Ltx;
 
 /// `CPatrolPathStorage::load` in xray engine.
@@ -19,7 +20,7 @@ impl SpawnPatrolsChunk {
   pub const CHUNK_ID: u32 = 3;
 
   /// Read patrols list from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnPatrolsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnPatrolsChunk> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -38,7 +39,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Write patrols data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -54,7 +55,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(path: &Path) -> io::Result<SpawnPatrolsChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<SpawnPatrolsChunk> {
     let patrols_config: Ltx = open_ini_config(&path.join("patrols.ltx"))?;
     let patrol_points_config: Ltx = open_ini_config(&path.join("patrol_points.ltx"))?;
     let patrol_links_config: Ltx = open_ini_config(&path.join("patrol_links.ltx"))?;
@@ -76,7 +77,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     let mut patrols_config: Ltx = Ltx::new();
     let mut patrol_points_config: Ltx = Ltx::new();
     let mut patrol_links_config: Ltx = Ltx::new();
@@ -119,16 +120,15 @@ mod tests {
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::spawn_file::spawn_patrols_chunk::SpawnPatrolsChunk;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_patrols_chunk() -> io::Result<()> {
+  fn test_read_write_patrols_chunk() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "patrols_list.chunk");
 
     let patrols_chunk: SpawnPatrolsChunk = SpawnPatrolsChunk {

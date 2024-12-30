@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -16,7 +16,7 @@ pub struct ParticleEffectFrame {
 
 impl ParticleEffectFrame {
   /// Read frame data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleEffectFrame> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleEffectFrame> {
     let particle_frame: ParticleEffectFrame = ParticleEffectFrame {
       texture_size: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
       reserved: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
@@ -31,7 +31,7 @@ impl ParticleEffectFrame {
   }
 
   /// Write frame data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_f32::<T>(self.texture_size.0)?;
     writer.write_f32::<T>(self.texture_size.1)?;
     writer.write_f32::<T>(self.reserved.0)?;
@@ -49,11 +49,10 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -62,7 +61,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_sprite() -> io::Result<()> {
+  fn test_read_write_sprite() -> DatabaseResult<()> {
     let filename: String = String::from("particle_effect_frame.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -105,7 +104,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let sprite: ParticleEffectFrame = ParticleEffectFrame {
       texture_size: (74.0, 236.5),
       reserved: (263.5, 5369.5),
@@ -126,7 +125,7 @@ mod tests {
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
       sprite,
-      serde_json::from_str::<ParticleEffectFrame>(&serialized)?
+      serde_json::from_str::<ParticleEffectFrame>(&serialized).unwrap()
     );
 
     Ok(())

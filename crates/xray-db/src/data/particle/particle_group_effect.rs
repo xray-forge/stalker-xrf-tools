@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,7 +18,9 @@ pub struct ParticleGroupEffect {
 
 impl ParticleGroupEffect {
   /// Read list of effect groups data from chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<ParticleGroupEffect>> {
+  pub fn read_list<T: ByteOrder>(
+    reader: &mut ChunkReader,
+  ) -> DatabaseResult<Vec<ParticleGroupEffect>> {
     let mut effects: Vec<ParticleGroupEffect> = Vec::new();
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -42,7 +44,7 @@ impl ParticleGroupEffect {
   }
 
   /// Read group effect from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleGroupEffect> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleGroupEffect> {
     let particle_group = ParticleGroupEffect {
       name: reader.read_null_terminated_win_string()?,
       on_play_child_name: reader.read_null_terminated_win_string()?,
@@ -60,7 +62,7 @@ impl ParticleGroupEffect {
   pub fn write_list<T: ByteOrder>(
     effects: &Vec<ParticleGroupEffect>,
     writer: &mut ChunkWriter,
-  ) -> io::Result<()> {
+  ) -> DatabaseResult<()> {
     writer.write_u32::<T>(effects.len() as u32)?;
 
     for effect in effects {
@@ -71,7 +73,7 @@ impl ParticleGroupEffect {
   }
 
   /// Write effect data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_null_terminated_win_string(&self.on_play_child_name)?;
     writer.write_null_terminated_win_string(&self.on_birth_child_name)?;
@@ -89,11 +91,10 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_group_effect::ParticleGroupEffect;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -102,7 +103,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_effect() -> io::Result<()> {
+  fn test_read_write_effect() -> DatabaseResult<()> {
     let filename: String = String::from("particle_group_effect.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -148,7 +149,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let effect: ParticleGroupEffect = ParticleGroupEffect {
       name: String::from("effect_old_name_serialize"),
       on_play_child_name: String::from("effect_old_on_play_child_name_serialize"),
@@ -171,7 +172,7 @@ mod tests {
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
       effect,
-      serde_json::from_str::<ParticleGroupEffect>(&serialized)?
+      serde_json::from_str::<ParticleGroupEffect>(&serialized).unwrap()
     );
 
     Ok(())

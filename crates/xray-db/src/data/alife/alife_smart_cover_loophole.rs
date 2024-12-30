@@ -1,5 +1,6 @@
+use crate::error::database_parse_error::DatabaseParseError;
+use crate::types::DatabaseResult;
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -19,7 +20,7 @@ impl AlifeSmartCoverLoophole {
   }
 
   /// Read list of loopholes from string.
-  pub fn string_to_list(value: &str) -> io::Result<Vec<AlifeSmartCoverLoophole>> {
+  pub fn string_to_list(value: &str) -> DatabaseResult<Vec<AlifeSmartCoverLoophole>> {
     let mut loopholes: Vec<AlifeSmartCoverLoophole> = Vec::new();
 
     for it in value.split(',').map(|it| it.trim()) {
@@ -31,16 +32,14 @@ impl AlifeSmartCoverLoophole {
           enabled: match partial.last().unwrap().parse::<u8>() {
             Ok(parsed) => parsed,
             Err(_) => {
-              return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
+              return Err(DatabaseParseError::new_database_error(
                 "Failed to parse loophole enabled status",
               ))
             }
           },
         })
       } else {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidInput,
+        return Err(DatabaseParseError::new_database_error(
           "Invalid value provided for loopholes parsion, ':' separated values expected",
         ));
       }

@@ -4,9 +4,9 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_shape::AlifeObjectShape;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -18,7 +18,7 @@ pub struct AlifeObjectClimable {
 
 impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   /// Read climable object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectClimable> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectClimable> {
     Ok(AlifeObjectClimable {
       base: AlifeObjectShape::read::<T>(reader)?,
       game_material: reader.read_null_terminated_win_string()?,
@@ -26,7 +26,7 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   }
 
   /// Import climable object data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectClimable> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectClimable> {
     Ok(AlifeObjectClimable {
       base: AlifeObjectShape::import(section)?,
       game_material: read_ini_field("game_material", section)?,
@@ -37,7 +37,7 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectClimable {
   /// Write climable object data into the chunk.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     writer.write_null_terminated_win_string(&self.game_material)?;
@@ -66,16 +66,15 @@ mod tests {
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_climable.chunk");

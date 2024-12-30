@@ -4,10 +4,9 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -19,7 +18,7 @@ pub struct AlifeObjectBreakable {
 
 impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   /// Read alife breakable object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectBreakable> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectBreakable> {
     Ok(AlifeObjectBreakable {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       health: reader.read_f32::<SpawnByteOrder>()?,
@@ -27,7 +26,7 @@ impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   }
 
   /// Import alife breakable object data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectBreakable> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectBreakable> {
     Ok(AlifeObjectBreakable {
       base: AlifeObjectDynamicVisual::import(section)?,
       health: read_ini_field("health", section)?,
@@ -38,7 +37,7 @@ impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectBreakable {
   /// Write alife breakable object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     writer.write_f32::<SpawnByteOrder>(self.health)?;
@@ -65,16 +64,15 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_breakable.chunk");

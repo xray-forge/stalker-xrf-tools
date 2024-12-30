@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::vector_3d::Vector3d;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,7 +15,7 @@ pub struct ParticleActionDamping {
 
 impl ParticleActionDamping {
   /// Read effect_action damping.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleActionDamping> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionDamping> {
     Ok(ParticleActionDamping {
       damping: reader.read_f32_3d_vector::<T>()?,
       v_low_sqr: reader.read_f32::<T>()?,

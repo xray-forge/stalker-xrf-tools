@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_domain::ParticleDomain;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,7 +18,7 @@ pub struct ParticleActionExplosion {
 
 impl ParticleActionExplosion {
   /// Read effect_action explosion.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleActionExplosion> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionExplosion> {
     Ok(ParticleActionExplosion {
       center: ParticleDomain::read::<T>(reader)?,
       velocity: reader.read_f32::<T>()?,

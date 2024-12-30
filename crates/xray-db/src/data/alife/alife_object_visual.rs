@@ -3,9 +3,9 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -17,7 +17,7 @@ pub struct AlifeObjectVisual {
 
 impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
   /// Read visual object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectVisual> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectVisual> {
     Ok(AlifeObjectVisual {
       visual_name: reader.read_null_terminated_win_string()?,
       visual_flags: reader.read_u8()?,
@@ -25,7 +25,7 @@ impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
   }
 
   /// Import visual object data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectVisual> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectVisual> {
     Ok(AlifeObjectVisual {
       visual_name: read_ini_field("visual_name", section)?,
       visual_flags: read_ini_field("visual_flags", section)?,
@@ -36,7 +36,7 @@ impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectVisual {
   /// Write visual alife object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.visual_name)?;
     writer.write_u8(self.visual_flags)?;
 
@@ -60,9 +60,8 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_ltx::Ltx;
   use xray_test_utils::assertions::files_are_equal_by_path;
   use xray_test_utils::utils::{
@@ -71,7 +70,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_object_visual.chunk");
 
@@ -104,7 +103,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let first: AlifeObjectVisual = AlifeObjectVisual {
       visual_name: String::from("visual-name-example"),
       visual_flags: 33,

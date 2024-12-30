@@ -4,9 +4,9 @@ use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -19,7 +19,7 @@ pub struct AlifeObjectDynamicVisual {
 
 impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamicVisual {
   /// Read visual object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectDynamicVisual> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectDynamicVisual> {
     Ok(AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract::read::<T>(reader)?,
       visual_name: reader.read_null_terminated_win_string()?,
@@ -28,7 +28,7 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamic
   }
 
   /// Import visual object data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectDynamicVisual> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectDynamicVisual> {
     Ok(AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract::import(section)?,
       visual_name: read_ini_field("visual_name", section)?,
@@ -40,7 +40,7 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamic
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectDynamicVisual {
   /// Write visual alife object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     writer.write_null_terminated_win_string(&self.visual_name)?;
@@ -68,16 +68,15 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_dynamic_visual.chunk");

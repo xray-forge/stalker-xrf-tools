@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use uuid::Uuid;
 use xray_ltx::{Ltx, Section};
 
@@ -20,7 +20,7 @@ pub struct GraphHeader {
 
 impl GraphHeader {
   /// Read header data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphHeader> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphHeader> {
     Ok(GraphHeader {
       version: reader.read_u8()?,
       vertices_count: reader.read_u16::<T>()?,
@@ -32,7 +32,7 @@ impl GraphHeader {
   }
 
   /// Write graph edge data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u8(self.version)?;
     writer.write_u16::<T>(self.vertices_count)?;
     writer.write_u32::<T>(self.edges_count)?;
@@ -44,7 +44,7 @@ impl GraphHeader {
   }
 
   /// Import graph header from ini file.
-  pub fn import(config: &Ltx) -> io::Result<GraphHeader> {
+  pub fn import(config: &Ltx) -> DatabaseResult<GraphHeader> {
     let section: &Section = config
       .section("header")
       .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
@@ -78,11 +78,10 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_header::GraphHeader;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
@@ -94,7 +93,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> io::Result<()> {
+  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
     let filename: String = String::from("graph_header.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -138,7 +137,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let header: GraphHeader = GraphHeader {
       version: 16,
       vertices_count: 6434,
@@ -164,7 +163,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let header: GraphHeader = GraphHeader {
       version: 12,
       vertices_count: 2341,
@@ -184,7 +183,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(header, serde_json::from_str::<GraphHeader>(&serialized)?);
+    assert_eq!(
+      header,
+      serde_json::from_str::<GraphHeader>(&serialized).unwrap()
+    );
 
     Ok(())
   }

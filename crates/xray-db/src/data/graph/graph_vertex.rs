@@ -4,10 +4,9 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{read_ini_field, read_ini_u32_bytes_field};
-use crate::types::U32Bytes;
+use crate::types::{DatabaseResult, U32Bytes};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -26,7 +25,7 @@ pub struct GraphVertex {
 
 impl GraphVertex {
   /// Read graph vertex data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphVertex> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphVertex> {
     Ok(GraphVertex {
       level_point: reader.read_f32_3d_vector::<T>()?,
       game_point: reader.read_f32_3d_vector::<T>()?,
@@ -41,7 +40,7 @@ impl GraphVertex {
   }
 
   /// Write graph vertex data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_f32_3d_vector::<T>(&self.level_point)?;
     writer.write_f32_3d_vector::<T>(&self.game_point)?;
     writer.write_u8(self.level_id)?;
@@ -56,7 +55,7 @@ impl GraphVertex {
   }
 
   /// Import graph vertex from ini file.
-  pub fn import(section_name: &str, config: &Ltx) -> io::Result<GraphVertex> {
+  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphVertex> {
     let section: &Section = config.section(section_name).unwrap_or_else(|| {
       panic!("Graph section '{section_name}' should be defined in graph vertex ltx file")
     });
@@ -105,11 +104,10 @@ mod tests {
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_ltx::Ltx;
@@ -120,7 +118,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> io::Result<()> {
+  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
     let filename: String = String::from("graph_vertex.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -167,7 +165,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let vertex: GraphVertex = GraphVertex {
       level_point: Vector3d::new(32.5, 523.6, 342.3),
       game_point: Vector3d::new(0.23, -4.0, 123.0),
@@ -197,7 +195,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let vertex: GraphVertex = GraphVertex {
       level_point: Vector3d::new(25.5, 15.6, 43.3),
       game_point: Vector3d::new(0.44, -4.0, 1000.0),
@@ -220,7 +218,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(vertex, serde_json::from_str::<GraphVertex>(&serialized)?);
+    assert_eq!(
+      vertex,
+      serde_json::from_str::<GraphVertex>(&serialized).unwrap()
+    );
 
     Ok(())
   }

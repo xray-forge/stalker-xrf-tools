@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -14,7 +14,7 @@ pub struct ParticleDescription {
 
 impl ParticleDescription {
   /// Read particle effect description data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleDescription> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleDescription> {
     let particle_description: ParticleDescription = ParticleDescription {
       creator: reader.read_null_terminated_win_string()?,
       editor: reader.read_null_terminated_win_string()?,

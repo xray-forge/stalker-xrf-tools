@@ -6,9 +6,9 @@ use crate::chunk::utils::{
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_group_effect::ParticleGroupEffect;
 use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,7 +32,7 @@ impl ParticleGroup {
   pub const CHUNK_EFFECTS2: u32 = 7;
 
   /// Read group from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleGroup> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleGroup> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
 
     let particle_group = ParticleGroup {

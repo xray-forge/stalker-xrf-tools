@@ -6,9 +6,9 @@ use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReade
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -23,7 +23,7 @@ pub struct AlifeObjectHelicopter {
 
 impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
   /// Read helicopter data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectHelicopter> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectHelicopter> {
     Ok(AlifeObjectHelicopter {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       motion: AlifeObjectMotion::read::<T>(reader)?,
@@ -34,7 +34,7 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
   }
 
   /// Import helicopter object data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectHelicopter> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectHelicopter> {
     Ok(AlifeObjectHelicopter {
       base: AlifeObjectDynamicVisual::import(section)?,
       skeleton: AlifeObjectSkeleton::import(section)?,
@@ -48,7 +48,7 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectHelicopter {
   /// Write helicopter data into the chunk.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
     self.motion.write(writer)?;
     self.skeleton.write(writer)?;
@@ -83,16 +83,15 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_helicopter.chunk");

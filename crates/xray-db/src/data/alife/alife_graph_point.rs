@@ -3,9 +3,9 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -22,7 +22,7 @@ pub struct AlifeGraphPoint {
 
 impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   /// Read graph point data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeGraphPoint> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeGraphPoint> {
     Ok(AlifeGraphPoint {
       connection_point_name: reader.read_null_terminated_win_string()?,
       connection_level_name: reader.read_null_terminated_win_string()?,
@@ -34,7 +34,7 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
   }
 
   /// Import graph data from ini file section.
-  fn import(section: &Section) -> io::Result<AlifeGraphPoint> {
+  fn import(section: &Section) -> DatabaseResult<AlifeGraphPoint> {
     Ok(AlifeGraphPoint {
       connection_point_name: read_ini_field("connection_point_name", section)?,
       connection_level_name: read_ini_field("connection_point_name", section)?,
@@ -49,7 +49,7 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeGraphPoint {
   /// Write graph point data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.connection_point_name)?;
     writer.write_null_terminated_win_string(&self.connection_level_name)?;
     writer.write_u8(self.location0)?;
@@ -80,16 +80,15 @@ mod tests {
   use crate::data::alife::alife_graph_point::AlifeGraphPoint;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_graph_point.chunk");
 

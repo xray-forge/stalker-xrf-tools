@@ -5,10 +5,9 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::time::Time;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -20,7 +19,7 @@ pub struct AlifeAnomalousZone {
 
 impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   /// Read anomalous zone object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeAnomalousZone> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeAnomalousZone> {
     Ok(AlifeAnomalousZone {
       base: AlifeObjectAnomalyZone::read::<T>(reader)?,
       last_spawn_time: Time::read_optional::<T>(reader)?,
@@ -28,7 +27,7 @@ impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   }
 
   /// Import anomalous zone object data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeAnomalousZone> {
+  fn import(section: &Section) -> DatabaseResult<AlifeAnomalousZone> {
     Ok(AlifeAnomalousZone {
       base: AlifeObjectAnomalyZone::import(section)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
@@ -42,7 +41,7 @@ impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeAnomalousZone {
   /// Write alife anomalous zone data to the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     Time::write_optional::<SpawnByteOrder>(self.last_spawn_time.as_ref(), writer)?;
@@ -75,16 +74,15 @@ mod tests {
   use crate::data::shape::Shape;
   use crate::data::time::Time;
   use crate::data::vector_3d::Vector3d;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_anomalous_zone.chunk");

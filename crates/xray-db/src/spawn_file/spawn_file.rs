@@ -7,12 +7,13 @@ use crate::spawn_file::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
 use crate::spawn_file::spawn_graphs_chunk::SpawnGraphsChunk;
 use crate::spawn_file::spawn_header_chunk::SpawnHeaderChunk;
 use crate::spawn_file::spawn_patrols_chunk::SpawnPatrolsChunk;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
+use std::fs;
 use std::fs::File;
 use std::path::Path;
-use std::{fs, io};
 
 /// Descriptor of generic spawn file used by xray game engine.
 ///
@@ -34,12 +35,12 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   /// Read spawn file from provided path.
-  pub fn read_from_path<T: ByteOrder>(path: &Path) -> io::Result<SpawnFile> {
+  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<SpawnFile> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read spawn file from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<SpawnFile> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<SpawnFile> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
 
@@ -88,13 +89,13 @@ impl SpawnFile {
   }
 
   /// Write spawn file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
     self.write_to_file::<T>(&mut create_export_file(path)?)
   }
 
   /// Write spawn file data to the file.
-  pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> io::Result<()> {
+  pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> DatabaseResult<()> {
     self
       .header
       .write::<T>(ChunkWriter::new())?
@@ -120,7 +121,7 @@ impl SpawnFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path<T: ByteOrder>(path: &Path) -> io::Result<SpawnFile> {
+  pub fn import_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<SpawnFile> {
     Ok(SpawnFile {
       header: SpawnHeaderChunk::import(path)?,
       alife_spawn: SpawnALifeSpawnsChunk::import(path)?,
@@ -131,7 +132,7 @@ impl SpawnFile {
   }
 
   /// Export unpacked alife spawn file into provided path.
-  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     fs::create_dir_all(path)?;
 
     self.header.export::<T>(path)?;

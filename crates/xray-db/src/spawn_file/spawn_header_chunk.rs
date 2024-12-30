@@ -2,9 +2,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file::{create_export_file, open_ini_config};
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use std::path::Path;
 use uuid::Uuid;
 use xray_ltx::{Ltx, Section};
@@ -24,7 +24,7 @@ impl SpawnHeaderChunk {
 
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<SpawnHeaderChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnHeaderChunk> {
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: reader.read_u32::<T>()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
@@ -42,7 +42,7 @@ impl SpawnHeaderChunk {
 
   /// Write header data into chunk writer.
   /// Writes header data in binary format.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> io::Result<ChunkWriter> {
+  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid.as_u128())?;
     writer.write_u128::<T>(self.graph_guid.as_u128())?;
@@ -56,7 +56,7 @@ impl SpawnHeaderChunk {
 
   /// Import header data from provided path.
   /// Parse ini files and populate spawn file.
-  pub fn import(path: &Path) -> io::Result<SpawnHeaderChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<SpawnHeaderChunk> {
     let config: Ltx = open_ini_config(&path.join("header.ltx"))?;
     let section: &Section = config
       .section("header")
@@ -73,7 +73,7 @@ impl SpawnHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  pub fn export<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -97,11 +97,10 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::spawn_file::spawn_header_chunk::SpawnHeaderChunk;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::{uuid, Uuid};
@@ -113,13 +112,13 @@ mod tests {
   };
 
   #[test]
-  fn test_read_empty_chunk() -> io::Result<()> {
+  fn test_read_empty_chunk() -> DatabaseResult<()> {
     let mut reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
       &get_relative_test_sample_sub_dir("empty_nested_single.chunk"),
     )?)?
     .read_child_by_index(0)?;
 
-    let header: io::Result<SpawnHeaderChunk> =
+    let header: DatabaseResult<SpawnHeaderChunk> =
       SpawnHeaderChunk::read::<SpawnByteOrder>(&mut reader);
 
     assert!(header.is_err(), "Expected failure with empty chunk");
@@ -128,7 +127,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_simple_header() -> io::Result<()> {
+  fn test_read_write_simple_header() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "header_simple.chunk");
 
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
@@ -167,7 +166,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 10,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
@@ -189,7 +188,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 12,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
@@ -210,7 +209,7 @@ mod tests {
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
       header,
-      serde_json::from_str::<SpawnHeaderChunk>(&serialized)?
+      serde_json::from_str::<SpawnHeaderChunk>(&serialized).unwrap()
     );
 
     Ok(())

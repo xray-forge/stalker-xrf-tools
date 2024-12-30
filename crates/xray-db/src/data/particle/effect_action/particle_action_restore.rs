@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,7 +12,7 @@ pub struct ParticleActionRestore {
 
 impl ParticleActionRestore {
   /// Read effect_action restore.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleActionRestore> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionRestore> {
     Ok(ParticleActionRestore {
       time_left: reader.read_f32::<T>()?,
     })

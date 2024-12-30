@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::effect_action::particle_action_type::ParticleActionType;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 /// C++ src/xrParticles/particle_actions_collection_io.cpp
 #[derive(Debug, Serialize, Deserialize)]
@@ -16,7 +16,7 @@ pub struct ParticleAction {
 
 impl ParticleAction {
   /// Read list of effect particle effect_action data from chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<ParticleAction>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<ParticleAction>> {
     let mut actions: Vec<ParticleAction> = Vec::new();
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -40,7 +40,7 @@ impl ParticleAction {
   }
 
   /// Read effect particle effect_action data from chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleAction> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleAction> {
     let action_type: u32 = reader.read_u32::<T>()?;
 
     let particle_action: ParticleAction = ParticleAction {

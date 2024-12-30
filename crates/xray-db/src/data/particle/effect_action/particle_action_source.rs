@@ -2,9 +2,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::data::vector_3d::Vector3d;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,7 +24,7 @@ pub struct ParticleActionSource {
 
 impl ParticleActionSource {
   /// Read effect_action source.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleActionSource> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionSource> {
     Ok(ParticleActionSource {
       position: ParticleDomain::read::<T>(reader)?,
       velocity: ParticleDomain::read::<T>(reader)?,

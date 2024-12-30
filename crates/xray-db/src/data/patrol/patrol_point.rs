@@ -3,9 +3,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use std::io::Write;
 use xray_ltx::{Ltx, Section};
 
@@ -21,8 +21,8 @@ pub struct PatrolPoint {
 }
 
 impl PatrolPoint {
-  /// Read points from chunk file.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<PatrolPoint>> {
+  /// Read points from the chunk reader.
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<PatrolPoint>> {
     let mut points: Vec<PatrolPoint> = Vec::new();
 
     for (index, mut point_reader) in ChunkIterator::new(reader).enumerate() {
@@ -45,8 +45,8 @@ impl PatrolPoint {
     Ok(points)
   }
 
-  /// Read patrol point data from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<PatrolPoint> {
+  /// Read patrol point data from the chunk reader.
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<PatrolPoint> {
     let point: PatrolPoint = PatrolPoint {
       name: reader.read_null_terminated_win_string()?,
       position: reader.read_f32_3d_vector::<T>()?,
@@ -67,7 +67,7 @@ impl PatrolPoint {
   pub fn write_list<T: ByteOrder>(
     points: &[PatrolPoint],
     writer: &mut ChunkWriter,
-  ) -> io::Result<()> {
+  ) -> DatabaseResult<()> {
     for (index, point) in points.iter().enumerate() {
       let mut point_chunk_writer: ChunkWriter = ChunkWriter::new();
 
@@ -87,7 +87,7 @@ impl PatrolPoint {
   }
 
   /// Write patrol point data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;
@@ -98,7 +98,7 @@ impl PatrolPoint {
   }
 
   /// Import patrol point data from ini config.
-  pub fn import(section_name: &str, config: &Ltx) -> io::Result<PatrolPoint> {
+  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<PatrolPoint> {
     let section: &Section = config.section(section_name).unwrap_or_else(|| {
       panic!("Patrol point section {section_name} should be defined in ltx file")
     });
@@ -131,11 +131,10 @@ mod tests {
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_ltx::Ltx;
@@ -146,9 +145,9 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_patrol_point() -> io::Result<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_point_simple.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let point: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-name"),
@@ -183,9 +182,9 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list_of_patrol_points() -> io::Result<()> {
+  fn test_read_write_list() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrol_point_list.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
     let points: Vec<PatrolPoint> = vec![
       PatrolPoint {
@@ -229,7 +228,11 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export() -> DatabaseResult<()> {
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let mut file: File = overwrite_file(config_path)?;
+    let mut ltx: Ltx = Ltx::new();
+
     let point: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-exported"),
       position: Vector3d::new(3.5, -2.3, 6.0),
@@ -238,12 +241,7 @@ mod tests {
       game_vertex_id: 364,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "patrol_point.ini");
-    let mut file: File = overwrite_file(&config_path)?;
-    let mut ltx: Ltx = Ltx::new();
-
     point.export("patrol_point", &mut ltx);
-
     ltx.write_to(&mut file)?;
 
     let read_point: PatrolPoint =
@@ -255,7 +253,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let point: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-serialized"),
       position: Vector3d::new(5.5, -2.3, 6.0),
@@ -266,7 +264,7 @@ mod tests {
 
     let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
       file!(),
-      "serialized.json",
+      "serialize_deserialize.json",
     ))?;
 
     file.write_all(json!(point).to_string().as_bytes())?;
@@ -275,7 +273,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(point, serde_json::from_str::<PatrolPoint>(&serialized)?);
+    assert_eq!(
+      point,
+      serde_json::from_str::<PatrolPoint>(&serialized).unwrap()
+    );
 
     Ok(())
   }

@@ -3,9 +3,9 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -16,14 +16,16 @@ pub struct AlifeObjectItemWeaponMagazined {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazined> for AlifeObjectItemWeaponMagazined {
   /// Read magazined weapon data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectItemWeaponMagazined> {
+  fn read<T: ByteOrder>(
+    reader: &mut ChunkReader,
+  ) -> DatabaseResult<AlifeObjectItemWeaponMagazined> {
     Ok(AlifeObjectItemWeaponMagazined {
       base: AlifeObjectItemWeapon::read::<T>(reader)?,
     })
   }
 
   /// Import alife item object data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectItemWeaponMagazined> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectItemWeaponMagazined> {
     Ok(AlifeObjectItemWeaponMagazined {
       base: AlifeObjectItemWeapon::import(section)?,
     })
@@ -33,7 +35,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazined> for AlifeObjectI
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectItemWeaponMagazined {
   /// Write magazined weapon item into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     Ok(())
@@ -57,16 +59,15 @@ mod tests {
   use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
   use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
   use crate::data::alife::alife_object_item_weapon_magazined_wgl::AlifeObjectItemWeaponMagazinedWgl;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_item_weapon_magazined.chunk");

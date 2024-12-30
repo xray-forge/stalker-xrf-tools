@@ -5,10 +5,9 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::shape::Shape;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -21,7 +20,7 @@ pub struct AlifeObjectSpaceRestrictor {
 
 impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
   /// Read generic space restrictor data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectSpaceRestrictor> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract::read::<T>(reader)?,
       shape: reader.read_shapes::<SpawnByteOrder>()?,
@@ -30,7 +29,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
   }
 
   /// Import generic space restrictor data from the chunk.
-  fn import(section: &Section) -> io::Result<AlifeObjectSpaceRestrictor> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract::import(section)?,
       shape: Shape::import_list(section)?,
@@ -41,7 +40,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
 
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectSpaceRestrictor {
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
@@ -73,9 +72,8 @@ mod tests {
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_ltx::Ltx;
   use xray_test_utils::assertions::files_are_equal_by_path;
   use xray_test_utils::utils::{
@@ -84,7 +82,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_abstract.chunk");
@@ -137,7 +135,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let first: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract {
         game_vertex_id: 2593,

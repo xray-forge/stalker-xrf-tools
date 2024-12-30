@@ -2,9 +2,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use uuid::Uuid;
 use xray_ltx::{Ltx, Section};
 
@@ -21,7 +21,7 @@ pub struct GraphLevel {
 
 impl GraphLevel {
   /// Read graph level data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphLevel> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphLevel> {
     Ok(GraphLevel {
       name: reader.read_null_terminated_win_string()?,
       offset: reader.read_f32_3d_vector::<T>()?,
@@ -32,7 +32,7 @@ impl GraphLevel {
   }
 
   /// Write graph level data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_f32_3d_vector::<T>(&self.offset)?;
     writer.write_u8(self.id)?;
@@ -43,7 +43,7 @@ impl GraphLevel {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(section_name: &str, config: &Ltx) -> io::Result<GraphLevel> {
+  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphLevel> {
     let section: &Section = config
       .section(section_name)
       .unwrap_or_else(|| panic!("Graph section {section_name} should be defined in ltx file"));
@@ -76,11 +76,10 @@ mod tests {
   use crate::data::graph::graph_level::GraphLevel;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
@@ -92,7 +91,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> io::Result<()> {
+  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
     let filename: String = String::from("graph_level.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -135,7 +134,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let level: GraphLevel = GraphLevel {
       id: 78,
       name: String::from("test-level-exported"),
@@ -160,7 +159,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let level: GraphLevel = GraphLevel {
       id: 243,
       name: String::from("test-level-example"),
@@ -179,7 +178,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(level, serde_json::from_str::<GraphLevel>(&serialized)?);
+    assert_eq!(
+      level,
+      serde_json::from_str::<GraphLevel>(&serialized).unwrap()
+    );
 
     Ok(())
   }

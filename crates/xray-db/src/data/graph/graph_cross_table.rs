@@ -1,10 +1,10 @@
 use crate::chunk::iterator::ChunkSizePackedIterator;
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::io;
 use std::io::Write;
 use uuid::Uuid;
 
@@ -22,7 +22,7 @@ pub struct GraphCrossTable {
 
 impl GraphCrossTable {
   /// Read cross tables list data from the chunk.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<Vec<GraphCrossTable>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<GraphCrossTable>> {
     let mut cross_tables: Vec<GraphCrossTable> = Vec::new();
 
     for mut cross_table_chunk in ChunkSizePackedIterator::new(reader) {
@@ -38,7 +38,7 @@ impl GraphCrossTable {
   }
 
   /// Read cross table data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphCrossTable> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphCrossTable> {
     Ok(GraphCrossTable {
       version: reader.read_u32::<T>()?,
       nodes_count: reader.read_u32::<T>()?,
@@ -53,7 +53,7 @@ impl GraphCrossTable {
   pub fn write_list<T: ByteOrder>(
     cross_tables: &Vec<GraphCrossTable>,
     writer: &mut ChunkWriter,
-  ) -> io::Result<()> {
+  ) -> DatabaseResult<()> {
     for table in cross_tables {
       let mut table_writer: ChunkWriter = ChunkWriter::new();
 
@@ -67,7 +67,7 @@ impl GraphCrossTable {
   }
 
   /// Write cross table data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u32::<T>(self.version)?;
     writer.write_u32::<T>(self.nodes_count)?;
     writer.write_u32::<T>(self.vertices_count)?;
@@ -79,7 +79,7 @@ impl GraphCrossTable {
   }
 
   /// Export cross-tables as separate chunk file.
-  pub fn import_list<T: ByteOrder>(file: File) -> io::Result<Vec<GraphCrossTable>> {
+  pub fn import_list<T: ByteOrder>(file: File) -> DatabaseResult<Vec<GraphCrossTable>> {
     let mut cross_tables: Vec<GraphCrossTable> = Vec::new();
 
     for mut cross_table_reader in ChunkSizePackedIterator::new(&mut ChunkReader::from_file(file)?) {
@@ -98,7 +98,7 @@ impl GraphCrossTable {
   pub fn export_list<T: ByteOrder>(
     cross_tables: &Vec<GraphCrossTable>,
     file: &mut File,
-  ) -> io::Result<()> {
+  ) -> DatabaseResult<()> {
     let mut cross_tables_writer: ChunkWriter = ChunkWriter::new();
 
     for cross_table in cross_tables {
@@ -121,11 +121,10 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use uuid::uuid;
   use xray_test_utils::file::read_file_as_string;
@@ -135,7 +134,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_cross_table() -> io::Result<()> {
+  fn test_read_write_cross_table() -> DatabaseResult<()> {
     let filename: String = String::from("cross_table.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -179,7 +178,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let cross_table: GraphCrossTable = GraphCrossTable {
       version: 24,
       nodes_count: 436,
@@ -201,7 +200,7 @@ mod tests {
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
       cross_table,
-      serde_json::from_str::<GraphCrossTable>(&serialized)?
+      serde_json::from_str::<GraphCrossTable>(&serialized).unwrap()
     );
 
     Ok(())

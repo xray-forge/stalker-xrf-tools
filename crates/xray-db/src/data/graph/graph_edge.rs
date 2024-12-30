@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file_import::read_ini_field;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -15,7 +15,7 @@ pub struct GraphEdge {
 
 impl GraphEdge {
   /// Read edge from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<GraphEdge> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphEdge> {
     Ok(GraphEdge {
       game_vertex_id: reader.read_u16::<T>()?,
       distance: reader.read_f32::<T>()?,
@@ -23,7 +23,7 @@ impl GraphEdge {
   }
 
   /// Write graph edge data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u16::<T>(self.game_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 
@@ -31,7 +31,7 @@ impl GraphEdge {
   }
 
   /// Import graph edge from ini file.
-  pub fn import(section_name: &str, config: &Ltx) -> io::Result<GraphEdge> {
+  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphEdge> {
     let section: &Section = config.section(section_name).unwrap_or_else(|| {
       panic!("Graph section '{section_name}' should be defined in level point ltx file")
     });
@@ -57,11 +57,10 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_edge::GraphEdge;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
-  use std::io;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_ltx::Ltx;
@@ -72,7 +71,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_graph_level_point() -> io::Result<()> {
+  fn test_read_write_simple_graph_level_point() -> DatabaseResult<()> {
     let filename: String = String::from("graph_edge_simple.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -112,7 +111,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let edge: GraphEdge = GraphEdge {
       game_vertex_id: 352,
       distance: 2554.50,
@@ -135,7 +134,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> io::Result<()> {
+  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
     let edge: GraphEdge = GraphEdge {
       game_vertex_id: 713,
       distance: 400.50,
@@ -151,7 +150,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(edge, serde_json::from_str::<GraphEdge>(&serialized)?);
+    assert_eq!(
+      edge,
+      serde_json::from_str::<GraphEdge>(&serialized).unwrap()
+    );
 
     Ok(())
   }

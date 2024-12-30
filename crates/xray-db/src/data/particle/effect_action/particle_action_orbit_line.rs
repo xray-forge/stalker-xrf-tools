@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::vector_3d::Vector3d;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -17,7 +17,7 @@ pub struct ParticleActionOrbitLine {
 
 impl ParticleActionOrbitLine {
   /// Read effect_action orbit line.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleActionOrbitLine> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionOrbitLine> {
     Ok(ParticleActionOrbitLine {
       p: reader.read_f32_3d_vector::<T>()?,
       axis: reader.read_f32_3d_vector::<T>()?,

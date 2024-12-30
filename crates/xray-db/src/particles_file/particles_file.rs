@@ -4,12 +4,13 @@ use crate::particles_file::particles_effects_chunk::ParticlesEffectsChunk;
 use crate::particles_file::particles_firstgen_chunk::ParticlesFirstgenChunk;
 use crate::particles_file::particles_groups_chunk::ParticlesGroupsChunk;
 use crate::particles_file::particles_header_chunk::ParticlesHeaderChunk;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
+use std::fs;
 use std::fs::File;
 use std::path::Path;
-use std::{fs, io};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,12 +22,12 @@ pub struct ParticlesFile {
 
 impl ParticlesFile {
   /// Read particles xr file from provided path.
-  pub fn read_from_path<T: ByteOrder>(path: &Path) -> io::Result<ParticlesFile> {
+  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<ParticlesFile> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read particles xr from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> io::Result<ParticlesFile> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<ParticlesFile> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
     let chunk_ids: Vec<u32> = chunks.iter().map(|it| it.id).collect();
@@ -60,7 +61,7 @@ impl ParticlesFile {
   }
 
   /// Export unpacked particles file into provided path.
-  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> io::Result<()> {
+  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     fs::create_dir_all(path)?;
 
     // todo: Implement.

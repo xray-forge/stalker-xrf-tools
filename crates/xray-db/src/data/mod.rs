@@ -1,6 +1,5 @@
 pub mod alife;
-pub mod alife_object_base;
-pub mod artefact_spawn_point;
+pub mod artefact_spawn;
 pub mod graph;
 pub mod meta;
 pub mod particle;

@@ -3,9 +3,9 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -16,13 +16,13 @@ pub struct AlifeObjectItemExplosive {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemExplosive> for AlifeObjectItemExplosive {
   /// Read alife item object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectItemExplosive> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectItemExplosive> {
     Ok(AlifeObjectItemExplosive {
       base: AlifeObjectItem::read::<T>(reader)?,
     })
   }
 
-  fn import(section: &Section) -> io::Result<AlifeObjectItemExplosive> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectItemExplosive> {
     Ok(AlifeObjectItemExplosive {
       base: AlifeObjectItem::import(section)?,
     })
@@ -32,7 +32,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemExplosive> for AlifeObjectItemExp
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectItemExplosive {
   /// Write item data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
     Ok(())
@@ -54,16 +54,15 @@ mod tests {
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_explosive::AlifeObjectItemExplosive;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_item_explosive.chunk");

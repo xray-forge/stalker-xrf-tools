@@ -3,10 +3,9 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -26,7 +25,7 @@ pub struct AlifeObjectTraderAbstract {
 
 impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
   /// Read trader data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectTraderAbstract> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectTraderAbstract> {
     Ok(AlifeObjectTraderAbstract {
       money: reader.read_u32::<SpawnByteOrder>()?,
       specific_character: reader.read_null_terminated_win_string()?,
@@ -42,7 +41,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
   }
 
   /// Import trader data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectTraderAbstract> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectTraderAbstract> {
     Ok(AlifeObjectTraderAbstract {
       money: read_ini_field("money", section)?,
       specific_character: read_ini_field("specific_character", section)?,
@@ -61,7 +60,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
   /// Write trader data into the chunk.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u32::<SpawnByteOrder>(self.money)?;
     writer.write_null_terminated_win_string(&self.specific_character)?;
     writer.write_u32::<SpawnByteOrder>(self.trader_flags)?;
@@ -100,16 +99,15 @@ mod tests {
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_trader_abstract.chunk");

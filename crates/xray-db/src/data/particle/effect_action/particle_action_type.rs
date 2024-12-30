@@ -29,9 +29,9 @@ use crate::data::particle::effect_action::particle_action_target_size::ParticleA
 use crate::data::particle::effect_action::particle_action_target_velocity::ParticleActionTargetVelocity;
 use crate::data::particle::effect_action::particle_action_turbulence::ParticleActionTurbulence;
 use crate::data::particle::effect_action::particle_action_vortex::ParticleActionVortex;
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
-use std::io;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
 pub enum ParticleActionType {
@@ -114,7 +114,7 @@ impl ParticleActionType {
   pub fn read_by_particle_type<T: ByteOrder>(
     reader: &mut ChunkReader,
     particle_action_type: ParticleActionType,
-  ) -> io::Result<Box<dyn ParticleActionGeneric>> {
+  ) -> DatabaseResult<Box<dyn ParticleActionGeneric>> {
     match particle_action_type {
       ParticleActionType::PAAvoidID => Ok(Box::new(ParticleActionAvoid::read::<T>(reader)?)),
       ParticleActionType::PABounceID => Ok(Box::new(ParticleActionBounce::read::<T>(reader)?)),

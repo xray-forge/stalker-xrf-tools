@@ -9,9 +9,9 @@ use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{bytes_from_base64, bytes_to_base64};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use std::io::Write;
 use xray_ltx::{Ltx, Section};
 
@@ -44,7 +44,7 @@ pub struct AlifeObjectBase {
 
 impl AlifeObjectBase {
   /// Read generic alife object data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectBase> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectBase> {
     let mut index_reader: ChunkReader = reader.read_child_by_index(0)?;
 
     let index: u16 = index_reader.read_u16::<T>()?;
@@ -145,7 +145,7 @@ impl AlifeObjectBase {
   }
 
   /// Write alife object data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     let mut index_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -209,7 +209,7 @@ impl AlifeObjectBase {
   }
 
   /// Import alife object data from ini file section.
-  pub fn import(section: &Section) -> io::Result<AlifeObjectBase> {
+  pub fn import(section: &Section) -> DatabaseResult<AlifeObjectBase> {
     let object_section: String = read_ini_field("section", section)?;
     let clsid: ClsId = ClsId::from_section(&object_section);
 
@@ -275,22 +275,21 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::alife_object_base::AlifeObjectBase;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
-  use crate::data::alife_object_base::AlifeObjectBase;
   use crate::data::meta::cls_id::ClsId;
   use crate::data::vector_3d::Vector3d;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object_base() -> io::Result<()> {
+  fn test_read_write_object_base() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "alife_object_base.chunk");
 

@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,7 +13,7 @@ pub struct ParticleActionKillOld {
 
 impl ParticleActionKillOld {
   /// Read effect_action kill old.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleActionKillOld> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionKillOld> {
     Ok(ParticleActionKillOld {
       age_limit: reader.read_f32::<T>()?,
       kill_less_than: reader.read_u32::<T>()?,

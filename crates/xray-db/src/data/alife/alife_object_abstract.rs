@@ -4,10 +4,9 @@ use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{string_from_base64, string_to_base64};
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 /// Generic alife object abstraction data.
@@ -26,7 +25,7 @@ pub struct AlifeObjectAbstract {
 
 impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   /// Read generic alife object base data from the file.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectAbstract> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectAbstract> {
     Ok(AlifeObjectAbstract {
       game_vertex_id: reader.read_u16::<T>()?,
       distance: reader.read_f32::<T>()?,
@@ -40,7 +39,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   }
 
   /// Import generic alife object base data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectAbstract> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectAbstract> {
     Ok(AlifeObjectAbstract {
       game_vertex_id: read_ini_field("game_vertex_id", section)?,
       distance: read_ini_field("distance", section)?,
@@ -57,7 +56,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectAbstract {
   /// Write abstract object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u16::<SpawnByteOrder>(self.game_vertex_id)?;
     writer.write_f32::<SpawnByteOrder>(self.distance)?;
     writer.write_u32::<SpawnByteOrder>(self.direct_control)?;
@@ -93,9 +92,8 @@ mod tests {
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::export::file::open_ini_config;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_ltx::Ltx;
   use xray_test_utils::assertions::files_are_equal_by_path;
   use xray_test_utils::utils::{
@@ -104,7 +102,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_abstract.chunk");
@@ -145,7 +143,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> io::Result<()> {
+  fn test_import_export_object() -> DatabaseResult<()> {
     let first: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1001,
       distance: 65.25,

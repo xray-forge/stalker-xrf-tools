@@ -2,9 +2,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::data::particle::effect_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::data::vector_3d::Vector3d;
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,7 +18,7 @@ pub struct ParticleActionJet {
 
 impl ParticleActionJet {
   /// Read effect_action jet.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleActionJet> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionJet> {
     Ok(ParticleActionJet {
       center: reader.read_f32_3d_vector::<T>()?,
       acc: ParticleDomain::read::<T>(reader)?,

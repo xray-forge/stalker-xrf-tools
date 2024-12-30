@@ -4,10 +4,9 @@ use crate::constants::FLAG_SKELETON_SAVED_DATA;
 use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
-use crate::types::SpawnByteOrder;
+use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -20,7 +19,7 @@ pub struct AlifeObjectSkeleton {
 
 impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   /// Read skeleton data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectSkeleton> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectSkeleton> {
     let object = AlifeObjectSkeleton {
       name: reader.read_null_terminated_win_string()?,
       flags: reader.read_u8()?,
@@ -35,7 +34,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   }
 
   /// Import skeleton data from ini config section.
-  fn import(section: &Section) -> io::Result<AlifeObjectSkeleton> {
+  fn import(section: &Section) -> DatabaseResult<AlifeObjectSkeleton> {
     Ok(AlifeObjectSkeleton {
       name: read_ini_field("name", section)?,
       flags: read_ini_field("flags", section)?,
@@ -47,7 +46,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectSkeleton {
   /// Write skeleton data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_u8(self.flags)?;
     writer.write_u16::<SpawnByteOrder>(self.source_id)?;
@@ -72,16 +71,15 @@ mod tests {
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-  use crate::types::SpawnByteOrder;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
-  use std::io;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> io::Result<()> {
+  fn test_read_write_object() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "alife_object_skeleton.chunk");
