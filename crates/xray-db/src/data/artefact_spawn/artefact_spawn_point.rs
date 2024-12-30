@@ -74,7 +74,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_simple_artefact_spawn_point() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,
@@ -82,8 +82,7 @@ mod tests {
     };
 
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "artefact_spawn_point_simple.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     point.write::<SpawnByteOrder>(&mut writer)?;
 
@@ -114,15 +113,14 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(11.5, 12.3, -10.5),
       level_vertex_id: 1001,
       distance: 6213.123,
     };
 
-    let config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "artefact_spawn_point.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(&config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -141,7 +139,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(21.5, 22.3, -20.5),
       level_vertex_id: 1001,
@@ -150,7 +148,7 @@ mod tests {
 
     let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
       file!(),
-      "serialized.json",
+      "serialize_deserialize.json",
     ))?;
 
     file.write_all(json!(point).to_string().as_bytes())?;

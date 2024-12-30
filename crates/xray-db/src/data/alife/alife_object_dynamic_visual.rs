@@ -18,7 +18,7 @@ pub struct AlifeObjectDynamicVisual {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamicVisual {
-  /// Read visual object data from the chunk.
+  /// Read visual object data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectDynamicVisual> {
     Ok(AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract::read::<T>(reader)?,
@@ -39,7 +39,7 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamic
 
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectDynamicVisual {
-  /// Write visual alife object data into the writer.
+  /// Write visual alife object data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
@@ -68,18 +68,23 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_dynamic_visual.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract {
@@ -116,6 +121,97 @@ mod tests {
       AlifeObjectDynamicVisual::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> DatabaseResult<()> {
+    let first: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
+      base: AlifeObjectAbstract {
+        game_vertex_id: 41243,
+        distance: 24.5,
+        direct_control: 523,
+        level_vertex_id: 7243,
+        flags: 23,
+        custom_data: String::from("custom_data_first"),
+        story_id: 253,
+        spawn_story_id: 6262,
+      },
+      visual_name: String::from("visual-name-first"),
+      visual_flags: 34,
+    };
+
+    let second: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
+      base: AlifeObjectAbstract {
+        game_vertex_id: 325,
+        distance: 12.65,
+        direct_control: 143,
+        level_vertex_id: 36421,
+        flags: 342,
+        custom_data: String::from("second"),
+        story_id: 235,
+        spawn_story_id: 45672,
+      },
+      visual_name: String::from("visual-name-second"),
+      visual_flags: 54,
+    };
+
+    let exported_filename: String =
+      get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let mut exported: Ltx = Ltx::new();
+
+    first.export("first", &mut exported);
+    second.export("second", &mut exported);
+
+    exported.write_to(&mut overwrite_test_relative_resource_as_file(
+      &exported_filename,
+    )?)?;
+
+    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+
+    let read_first: AlifeObjectDynamicVisual =
+      AlifeObjectDynamicVisual::import(source.section("first").unwrap())?;
+    let read_second: AlifeObjectDynamicVisual =
+      AlifeObjectDynamicVisual::import(source.section("second").unwrap())?;
+
+    assert_eq!(read_first, first);
+    assert_eq!(read_second, second);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
+    let object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
+      base: AlifeObjectAbstract {
+        game_vertex_id: 325,
+        distance: 523.100,
+        direct_control: 25313,
+        level_vertex_id: 235,
+        flags: 342,
+        custom_data: String::from("custom_data_serde"),
+        story_id: 235,
+        spawn_story_id: 45672,
+      },
+      visual_name: String::from("visual-name-serde"),
+      visual_flags: 33,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(object).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(
+      object,
+      serde_json::from_str::<AlifeObjectDynamicVisual>(&serialized).unwrap()
+    );
 
     Ok(())
   }

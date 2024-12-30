@@ -53,6 +53,22 @@ impl Patrol {
     Ok(patrols)
   }
 
+  /// Write list of patrols into chunk writer.
+  pub fn write_list<T: ByteOrder>(
+    patrols: &[Patrol],
+    writer: &mut ChunkWriter,
+  ) -> DatabaseResult<()> {
+    for (index, patrol) in patrols.iter().enumerate() {
+      let mut patrol_writer: ChunkWriter = ChunkWriter::new();
+
+      patrol.write::<T>(&mut patrol_writer)?;
+
+      writer.write_all(&patrol_writer.flush_chunk_into_buffer::<T>(index)?)?;
+    }
+
+    Ok(())
+  }
+
   /// Read chunk as patrol.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Patrol> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
@@ -78,22 +94,6 @@ impl Patrol {
       points,
       links,
     })
-  }
-
-  /// Write list of patrols into chunk writer.
-  pub fn write_list<T: ByteOrder>(
-    patrols: &[Patrol],
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
-    for (index, patrol) in patrols.iter().enumerate() {
-      let mut patrol_writer: ChunkWriter = ChunkWriter::new();
-
-      patrol.write::<T>(&mut patrol_writer)?;
-
-      writer.write_all(&patrol_writer.flush_chunk_into_buffer::<T>(index)?)?;
-    }
-
-    Ok(())
   }
 
   /// Write single patrol entity into chunk writer.

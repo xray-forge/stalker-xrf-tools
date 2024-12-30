@@ -24,7 +24,7 @@ pub struct AlifeObjectAbstract {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
-  /// Read generic alife object base data from the file.
+  /// Read generic alife object base data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectAbstract> {
     Ok(AlifeObjectAbstract {
       game_vertex_id: reader.read_u16::<T>()?,
@@ -55,7 +55,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
 
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectAbstract {
-  /// Write abstract object data into the writer.
+  /// Write abstract object data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u16::<SpawnByteOrder>(self.game_vertex_id)?;
     writer.write_f32::<SpawnByteOrder>(self.distance)?;
@@ -94,18 +94,20 @@ mod tests {
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_ltx::Ltx;
-  use xray_test_utils::assertions::files_are_equal_by_path;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_abstract.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let object: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1001,
@@ -143,7 +145,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let first: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1001,
       distance: 65.25,
@@ -166,7 +168,8 @@ mod tests {
       spawn_story_id: 255,
     };
 
-    let exported_filename: String = get_relative_test_sample_file_path(file!(), "exported.ini");
+    let exported_filename: String =
+      get_relative_test_sample_file_path(file!(), "import_export.ini");
     let mut exported: Ltx = Ltx::new();
 
     first.export("first", &mut exported);
@@ -186,20 +189,36 @@ mod tests {
     assert_eq!(read_first, first);
     assert_eq!(read_second, second);
 
-    let imported_filename: String = get_relative_test_sample_file_path(file!(), "imported.ini");
-    let mut imported: Ltx = Ltx::new();
+    Ok(())
+  }
 
-    read_first.export("first", &mut imported);
-    read_second.export("second", &mut imported);
+  #[test]
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
+    let object: AlifeObjectAbstract = AlifeObjectAbstract {
+      game_vertex_id: 1005,
+      distance: 23.25,
+      direct_control: 262342,
+      level_vertex_id: 25341,
+      flags: 34,
+      custom_data: String::from("[custom_data_section] field1 = 1\r\n field2 = 2\r\n"),
+      story_id: 433,
+      spawn_story_id: 36,
+    };
 
-    imported.write_to(&mut overwrite_test_relative_resource_as_file(
-      &imported_filename,
-    )?)?;
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
 
-    assert!(files_are_equal_by_path(
-      get_absolute_test_resource_path(&exported_filename),
-      get_absolute_test_resource_path(&imported_filename)
-    )?);
+    file.write_all(json!(object).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(
+      object,
+      serde_json::from_str::<AlifeObjectAbstract>(&serialized).unwrap()
+    );
 
     Ok(())
   }

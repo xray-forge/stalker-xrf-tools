@@ -25,7 +25,7 @@ pub struct AlifeObjectCreature {
 }
 
 impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
-  /// Read alife creature object data from the chunk.
+  /// Read alife creature object data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectCreature> {
     Ok(AlifeObjectCreature {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
@@ -64,7 +64,7 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
 
 #[typetag::serde]
 impl AlifeObjectGeneric for AlifeObjectCreature {
-  /// Write alife creature object data into the chunk.
+  /// Write alife creature object data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
@@ -101,7 +101,7 @@ impl AlifeObjectGeneric for AlifeObjectCreature {
         &export_vector_to_string(&self.dynamic_in_restrictions),
       )
       .set("killer_id", self.killer_id.to_string())
-      .set("game_death_time", self.killer_id.to_string());
+      .set("game_death_time", self.game_death_time.to_string());
   }
 }
 
@@ -114,18 +114,23 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_creature.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let object: AlifeObjectCreature = AlifeObjectCreature {
       base: AlifeObjectDynamicVisual {
@@ -172,6 +177,127 @@ mod tests {
       AlifeObjectCreature::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> DatabaseResult<()> {
+    let first: AlifeObjectCreature = AlifeObjectCreature {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 3215,
+          distance: 332.25,
+          direct_control: 32451,
+          level_vertex_id: 63663,
+          flags: 36,
+          custom_data: String::from("custom_data_first"),
+          story_id: 243,
+          spawn_story_id: 323,
+        },
+        visual_name: String::from("abcdef_first"),
+        visual_flags: 33,
+      },
+      team: 3,
+      squad: 4,
+      group: 5,
+      health: 0.5,
+      dynamic_out_restrictions: vec![1, 2, 3, 4],
+      dynamic_in_restrictions: vec![5, 6, 7, 8],
+      killer_id: 25,
+      game_death_time: 16,
+    };
+
+    let second: AlifeObjectCreature = AlifeObjectCreature {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 32,
+          distance: 25.25,
+          direct_control: 255,
+          level_vertex_id: 634,
+          flags: 36,
+          custom_data: String::from("custom_data_second"),
+          story_id: 43,
+          spawn_story_id: 32,
+        },
+        visual_name: String::from("abcdef_second"),
+        visual_flags: 35,
+      },
+      team: 4,
+      squad: 5,
+      group: 6,
+      health: 0.5,
+      dynamic_out_restrictions: vec![1, 2, 3, 4],
+      dynamic_in_restrictions: vec![5, 6, 7, 8],
+      killer_id: 25,
+      game_death_time: 17,
+    };
+
+    let exported_filename: String =
+      get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let mut exported: Ltx = Ltx::new();
+
+    first.export("first", &mut exported);
+    second.export("second", &mut exported);
+
+    exported.write_to(&mut overwrite_test_relative_resource_as_file(
+      &exported_filename,
+    )?)?;
+
+    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+
+    let read_first: AlifeObjectCreature =
+      AlifeObjectCreature::import(source.section("first").unwrap())?;
+    let read_second: AlifeObjectCreature =
+      AlifeObjectCreature::import(source.section("second").unwrap())?;
+
+    assert_eq!(read_first, first);
+    assert_eq!(read_second, second);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
+    let object: AlifeObjectCreature = AlifeObjectCreature {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 3215,
+          distance: 332.25,
+          direct_control: 32451,
+          level_vertex_id: 63663,
+          flags: 36,
+          custom_data: String::from("custom_data_serde"),
+          story_id: 243,
+          spawn_story_id: 323,
+        },
+        visual_name: String::from("abcdef_serde"),
+        visual_flags: 33,
+      },
+      team: 3,
+      squad: 4,
+      group: 5,
+      health: 0.5,
+      dynamic_out_restrictions: vec![1, 2, 3, 4],
+      dynamic_in_restrictions: vec![5, 6, 7, 8],
+      killer_id: 25,
+      game_death_time: 0,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(object).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(
+      object,
+      serde_json::from_str::<AlifeObjectCreature>(&serialized).unwrap()
+    );
 
     Ok(())
   }
