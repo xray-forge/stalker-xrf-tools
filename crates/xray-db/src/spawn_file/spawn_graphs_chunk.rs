@@ -80,30 +80,30 @@ impl SpawnGraphsChunk {
   }
 
   /// Write whole graphs chunk into the writer.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
-    self.header.write::<T>(&mut writer)?;
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    self.header.write::<T>(writer)?;
 
     for level in &self.levels {
-      level.write::<T>(&mut writer)?;
+      level.write::<T>(writer)?;
     }
 
     for vertex in &self.vertices {
-      vertex.write::<T>(&mut writer)?;
+      vertex.write::<T>(writer)?;
     }
 
     for edge in &self.edges {
-      edge.write::<T>(&mut writer)?;
+      edge.write::<T>(writer)?;
     }
 
     for point in &self.points {
-      point.write::<T>(&mut writer)?;
+      point.write::<T>(writer)?;
     }
 
-    GraphCrossTable::write_list::<T>(&self.cross_tables, &mut writer)?;
+    GraphCrossTable::write_list::<T>(&self.cross_tables, writer)?;
 
     log::info!("Written graphs chunk, {:?} bytes", writer.bytes_written());
 
-    Ok(writer)
+    Ok(())
   }
 
   /// Import graphs data from provided path.
@@ -250,8 +250,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_empty_graphs_chunk() -> DatabaseResult<()> {
-    let filename: String = String::from("graphs_chunk_empty.chunk");
+  fn test_read_write_empty() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write_empty.chunk");
 
     let graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk {
       header: GraphHeader {
@@ -269,7 +269,9 @@ mod tests {
       cross_tables: vec![],
     };
 
-    let mut writer: ChunkWriter = graphs_chunk.write::<SpawnByteOrder>(ChunkWriter::new())?;
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    graphs_chunk.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 28);
 
@@ -301,8 +303,8 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_generic_graphs_chunk() -> DatabaseResult<()> {
-    let filename: String = String::from("graphs_chunk_generic.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
 
     let graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk {
       header: GraphHeader {
@@ -408,7 +410,9 @@ mod tests {
       ],
     };
 
-    let mut writer: ChunkWriter = graphs_chunk.write::<SpawnByteOrder>(ChunkWriter::new())?;
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    graphs_chunk.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 430);
 

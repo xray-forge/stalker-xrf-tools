@@ -4,6 +4,7 @@ use crate::error::database_parse_error::DatabaseParseError;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 use std::io;
+use xray_ltx::LtxError;
 
 /// Error while working with DB data parsing/reading/writing/importing/exporting.
 #[derive(Debug)]
@@ -12,6 +13,7 @@ pub enum DatabaseError {
   InvalidChunk(DatabaseInvalidChunkError),
   NotImplemented(DatabaseNotImplementedError),
   Parse(DatabaseParseError),
+  LtxError(LtxError),
   Generic(Box<dyn Error>),
 }
 
@@ -22,6 +24,7 @@ impl Display for DatabaseError {
       DatabaseError::InvalidChunk(ref error) => error.fmt(formatter),
       DatabaseError::Parse(ref error) => error.fmt(formatter),
       DatabaseError::NotImplemented(ref error) => error.fmt(formatter),
+      DatabaseError::LtxError(ref error) => error.fmt(formatter),
       DatabaseError::Generic(ref error) => error.fmt(formatter),
     }
   }
@@ -33,6 +36,7 @@ impl Error for DatabaseError {
       DatabaseError::Io(ref error) => error.source(),
       DatabaseError::InvalidChunk(ref error) => error.source(),
       DatabaseError::Parse(ref error) => error.source(),
+      DatabaseError::LtxError(ref error) => error.source(),
       DatabaseError::NotImplemented(ref error) => error.source(),
       DatabaseError::Generic(ref error) => error.source(),
     }
@@ -60,6 +64,12 @@ impl From<DatabaseNotImplementedError> for DatabaseError {
 impl From<DatabaseParseError> for DatabaseError {
   fn from(error: DatabaseParseError) -> Self {
     DatabaseError::Parse(error)
+  }
+}
+
+impl From<LtxError> for DatabaseError {
+  fn from(error: LtxError) -> Self {
+    DatabaseError::LtxError(error)
   }
 }
 

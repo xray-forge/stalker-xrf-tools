@@ -42,7 +42,7 @@ impl SpawnHeaderChunk {
 
   /// Write header data into chunk writer.
   /// Writes header data in binary format.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid.as_u128())?;
     writer.write_u128::<T>(self.graph_guid.as_u128())?;
@@ -51,7 +51,7 @@ impl SpawnHeaderChunk {
 
     log::info!("Written header chunk, {:?} bytes", writer.bytes_written());
 
-    Ok(writer)
+    Ok(())
   }
 
   /// Import header data from provided path.
@@ -107,14 +107,14 @@ mod tests {
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_directory,
-    get_relative_test_sample_file_path, get_relative_test_sample_sub_dir,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_empty_chunk() -> DatabaseResult<()> {
+  fn test_read_empty() -> DatabaseResult<()> {
     let mut reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
-      &get_relative_test_sample_sub_dir("empty_nested_single.chunk"),
+      &get_relative_test_sample_file_path(file!(), "read_empty.chunk"),
     )?)?
     .read_child_by_index(0)?;
 
@@ -127,8 +127,8 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_simple_header() -> DatabaseResult<()> {
-    let filename: String = get_relative_test_sample_file_path(file!(), "header_simple.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 20,
@@ -138,7 +138,9 @@ mod tests {
       levels_count: 12,
     };
 
-    let mut writer: ChunkWriter = header.write::<SpawnByteOrder>(ChunkWriter::new())?;
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    header.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 44);
 
@@ -166,7 +168,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 10,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
@@ -188,7 +190,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let header: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 12,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
@@ -198,7 +200,7 @@ mod tests {
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(header).to_string().as_bytes())?;

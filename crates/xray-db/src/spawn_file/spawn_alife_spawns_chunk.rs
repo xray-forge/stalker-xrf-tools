@@ -54,7 +54,7 @@ impl SpawnALifeSpawnsChunk {
   }
 
   /// Write alife chunk data into the writer.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     let mut count_writer: ChunkWriter = ChunkWriter::new();
     let mut objects_writer: ChunkWriter = ChunkWriter::new();
     let mut vertex_writer: ChunkWriter = ChunkWriter::new();
@@ -82,7 +82,7 @@ impl SpawnALifeSpawnsChunk {
       writer.bytes_written()
     );
 
-    Ok(writer)
+    Ok(())
   }
 
   /// Import alife spawns data from provided path.
@@ -146,12 +146,14 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_empty_spawns_chunk() -> DatabaseResult<()> {
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_spawns_empty.chunk");
+  fn test_read_write_empty() -> DatabaseResult<()> {
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_empty.chunk");
 
     let spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk { objects: vec![] };
 
-    let mut writer: ChunkWriter = spawns.write::<SpawnByteOrder>(ChunkWriter::new())?;
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    spawns.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 28);
 
@@ -179,8 +181,8 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_few_spawns_chunk() -> DatabaseResult<()> {
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_spawns.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {
       objects: vec![
@@ -265,7 +267,9 @@ mod tests {
       ],
     };
 
-    let mut writer: ChunkWriter = spawns.write::<SpawnByteOrder>(ChunkWriter::new())?;
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    spawns.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 419);
 

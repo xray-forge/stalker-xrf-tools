@@ -96,26 +96,26 @@ impl SpawnFile {
 
   /// Write spawn file data to the file.
   pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> DatabaseResult<()> {
-    self
-      .header
-      .write::<T>(ChunkWriter::new())?
-      .flush_chunk_into_file::<T>(file, 0)?;
-    self
-      .alife_spawn
-      .write::<T>(ChunkWriter::new())?
-      .flush_chunk_into_file::<T>(file, 1)?;
+    let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
+    let mut alife_spawn_chunk_writer: ChunkWriter = ChunkWriter::new();
+    let mut artefact_spawn_chunk_writer: ChunkWriter = ChunkWriter::new();
+    let mut patrols_chunk_writer: ChunkWriter = ChunkWriter::new();
+    let mut graphs_chunk_writer: ChunkWriter = ChunkWriter::new();
+
+    self.header.write::<T>(&mut header_chunk_writer)?;
+    self.alife_spawn.write::<T>(&mut alife_spawn_chunk_writer)?;
     self
       .artefact_spawn
-      .write::<T>(ChunkWriter::new())?
-      .flush_chunk_into_file::<T>(file, 2)?;
-    self
-      .patrols
-      .write::<T>(ChunkWriter::new())?
-      .flush_chunk_into_file::<T>(file, 3)?;
-    self
-      .graphs
-      .write::<T>(ChunkWriter::new())?
-      .flush_chunk_into_file::<T>(file, 4)?;
+      .write::<T>(&mut artefact_spawn_chunk_writer)?;
+    self.patrols.write::<T>(&mut patrols_chunk_writer)?;
+    self.graphs.write::<T>(&mut graphs_chunk_writer)?;
+
+    header_chunk_writer.flush_chunk_into_file::<T>(file, SpawnHeaderChunk::CHUNK_ID)?;
+    alife_spawn_chunk_writer.flush_chunk_into_file::<T>(file, SpawnALifeSpawnsChunk::CHUNK_ID)?;
+    artefact_spawn_chunk_writer
+      .flush_chunk_into_file::<T>(file, SpawnArtefactSpawnsChunk::CHUNK_ID)?;
+    patrols_chunk_writer.flush_chunk_into_file::<T>(file, SpawnPatrolsChunk::CHUNK_ID)?;
+    graphs_chunk_writer.flush_chunk_into_file::<T>(file, SpawnGraphsChunk::CHUNK_ID)?;
 
     Ok(())
   }

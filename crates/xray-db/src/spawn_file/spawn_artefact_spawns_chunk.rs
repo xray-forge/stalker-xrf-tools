@@ -48,11 +48,11 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Write artefact spawns into chunk writer.
   /// Writes artefact spawns data in binary format.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u32::<T>(self.nodes.len() as u32)?;
 
     for node in &self.nodes {
-      node.write::<T>(&mut writer)?;
+      node.write::<T>(writer)?;
     }
 
     log::info!(
@@ -60,7 +60,7 @@ impl SpawnArtefactSpawnsChunk {
       writer.bytes_written()
     );
 
-    Ok(writer)
+    Ok(())
   }
 
   /// Import artefact spawns data from provided path.
@@ -137,7 +137,9 @@ mod tests {
       ],
     };
 
-    let mut writer: ChunkWriter = spawns.write::<SpawnByteOrder>(ChunkWriter::new())?;
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    spawns.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 44);
 

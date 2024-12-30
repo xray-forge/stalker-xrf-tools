@@ -39,7 +39,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Write patrols data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, mut writer: ChunkWriter) -> DatabaseResult<ChunkWriter> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -51,7 +51,7 @@ impl SpawnPatrolsChunk {
 
     log::info!("Written patrols chunk, {:?} bytes", writer.bytes_written());
 
-    Ok(writer)
+    Ok(())
   }
 
   /// Import patrols data from provided path.
@@ -128,8 +128,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_patrols_chunk() -> DatabaseResult<()> {
-    let filename: String = get_relative_test_sample_file_path(file!(), "patrols_list.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let patrols_chunk: SpawnPatrolsChunk = SpawnPatrolsChunk {
       patrols: vec![
@@ -182,7 +182,9 @@ mod tests {
       ],
     };
 
-    let mut writer: ChunkWriter = patrols_chunk.write::<SpawnByteOrder>(ChunkWriter::new())?;
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    patrols_chunk.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 450);
 
