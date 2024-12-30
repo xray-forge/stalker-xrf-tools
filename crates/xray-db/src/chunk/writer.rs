@@ -1,6 +1,6 @@
 use crate::data::shape::Shape;
 use crate::data::vector_3d::Vector3d;
-use crate::types::{Matrix3d, Sphere3d, U32Bytes};
+use crate::types::U32Bytes;
 use byteorder::{ByteOrder, WriteBytesExt};
 use encoding_rs::WINDOWS_1251;
 use std::borrow::Cow;
@@ -65,6 +65,16 @@ impl ChunkWriter {
     self.buffer.len()
   }
 
+  /// Write three float values.
+  pub fn write_f32_3d_vector<T: ByteOrder>(&mut self, value: &Vector3d<f32>) -> io::Result<()> {
+    value.write::<T>(self)
+  }
+
+  /// Write shapes data.
+  pub fn write_shapes_list<T: ByteOrder>(&mut self, shapes: &Vec<Shape>) -> io::Result<()> {
+    Shape::write_list::<T>(shapes, self)
+  }
+
   /// Write null terminated windows encoded string.
   pub fn write_null_terminated_win_string(&mut self, value: &str) -> io::Result<usize> {
     let (transformed, _, had_errors) = WINDOWS_1251.encode(value);
@@ -81,54 +91,12 @@ impl ChunkWriter {
 
     Ok(self.write(&value)? + self.write(&[0u8])?)
   }
-
-  /// Write three float values.
-  pub fn write_f32_3d_vector<T: ByteOrder>(&mut self, value: &Vector3d<f32>) -> io::Result<()> {
-    value.write::<T>(self)
-  }
-
   /// Write 4 bytes value as 4 separate byte entries.
   pub fn write_u32_bytes(&mut self, value: &U32Bytes) -> io::Result<()> {
     self.write_u8(value.0)?;
     self.write_u8(value.1)?;
     self.write_u8(value.2)?;
     self.write_u8(value.3)?;
-
-    Ok(())
-  }
-
-  /// Write shapes data.
-  pub fn write_shape_description<T: ByteOrder>(&mut self, shapes: &Vec<Shape>) -> io::Result<()> {
-    self.write_u8(shapes.len() as u8)?;
-
-    for shape in shapes {
-      match shape {
-        Shape::Sphere(sphere_object) => {
-          self.write_u8(0)?;
-          self.write_sphere::<T>(sphere_object)?;
-        }
-        Shape::Box(box_object) => {
-          self.write_u8(1)?;
-          self.write_matrix::<T>(box_object)?;
-        }
-      }
-    }
-
-    Ok(())
-  }
-
-  pub fn write_sphere<T: ByteOrder>(&mut self, sphere: &Sphere3d) -> io::Result<()> {
-    self.write_f32_3d_vector::<T>(&sphere.0)?;
-    self.write_f32::<T>(sphere.1)?;
-
-    Ok(())
-  }
-
-  pub fn write_matrix<T: ByteOrder>(&mut self, matrix: &Matrix3d) -> io::Result<()> {
-    self.write_f32_3d_vector::<T>(&matrix.0)?;
-    self.write_f32_3d_vector::<T>(&matrix.1)?;
-    self.write_f32_3d_vector::<T>(&matrix.2)?;
-    self.write_f32_3d_vector::<T>(&matrix.3)?;
 
     Ok(())
   }

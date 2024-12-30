@@ -2,7 +2,7 @@ use crate::chunk::interface::ChunkDataSource;
 use crate::chunk::iterator::ChunkIterator;
 use crate::data::shape::Shape;
 use crate::data::vector_3d::Vector3d;
-use crate::types::{Matrix3d, Sphere3d, U32Bytes};
+use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt};
 use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
@@ -120,6 +120,11 @@ impl ChunkReader {
     Vector3d::read::<T>(self)
   }
 
+  /// Read shape data.
+  pub fn read_shapes<T: ByteOrder>(&mut self) -> io::Result<Vec<Shape>> {
+    Shape::read_list::<T>(self)
+  }
+
   pub fn read_u32_bytes(&mut self) -> io::Result<U32Bytes> {
     Ok((
       self.read_u8()?,
@@ -172,38 +177,6 @@ impl ChunkReader {
     } else {
       panic!("No null terminator found in file");
     }
-  }
-
-  /// Read shape data.
-  pub fn read_shape_description<T: ByteOrder>(&mut self) -> io::Result<Vec<Shape>> {
-    let mut shapes: Vec<Shape> = Vec::new();
-    let count: u8 = self.read_u8().expect("Count flag to be read");
-
-    for _ in 0..count {
-      match self.read_u8().expect("Shape type to be read") {
-        0 => shapes.push(Shape::Sphere(self.read_sphere::<T>()?)),
-        1 => shapes.push(Shape::Box(self.read_matrix::<T>()?)),
-        _ => panic!("Unexpected shape type provided"),
-      }
-    }
-
-    Ok(shapes)
-  }
-
-  pub fn read_sphere<T: ByteOrder>(&mut self) -> io::Result<Sphere3d> {
-    let center: Vector3d = self.read_f32_3d_vector::<T>()?;
-    let radius: f32 = self.read_f32::<T>()?;
-
-    Ok((center, radius))
-  }
-
-  pub fn read_matrix<T: ByteOrder>(&mut self) -> io::Result<Matrix3d> {
-    Ok((
-      self.read_f32_3d_vector::<T>()?,
-      self.read_f32_3d_vector::<T>()?,
-      self.read_f32_3d_vector::<T>()?,
-      self.read_f32_3d_vector::<T>()?,
-    ))
   }
 
   pub fn read_bytes(&mut self, count: usize) -> io::Result<Vec<u8>> {

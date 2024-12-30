@@ -24,7 +24,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract::read::<T>(reader)?,
-      shape: reader.read_shape_description::<SpawnByteOrder>()?,
+      shape: reader.read_shapes::<SpawnByteOrder>()?,
       restrictor_type: reader.read_u8()?,
     })
   }
@@ -33,7 +33,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
   fn import(section: &Section) -> io::Result<AlifeObjectSpaceRestrictor> {
     Ok(AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract::import(section)?,
-      shape: Shape::import_shapes(section)?,
+      shape: Shape::import_list(section)?,
       restrictor_type: read_ini_field("restrictor_type", section)?,
     })
   }
@@ -44,7 +44,7 @@ impl AlifeObjectGeneric for AlifeObjectSpaceRestrictor {
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_shape_description::<SpawnByteOrder>(&self.shape)?;
+    writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
     writer.write_u8(self.restrictor_type)?;
 
     Ok(())
@@ -58,7 +58,7 @@ impl AlifeObjectGeneric for AlifeObjectSpaceRestrictor {
       .with_section(section)
       .set("restrictor_type", self.restrictor_type.to_string());
 
-    Shape::export_shapes(&self.shape, section, ini);
+    Shape::export_list(&self.shape, section, ini);
   }
 }
 

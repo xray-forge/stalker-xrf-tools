@@ -22,7 +22,7 @@ impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectShape> {
     Ok(AlifeObjectShape {
       base: AlifeObjectAbstract::read::<T>(reader)?,
-      shape: reader.read_shape_description::<SpawnByteOrder>()?,
+      shape: reader.read_shapes::<SpawnByteOrder>()?,
     })
   }
 
@@ -30,7 +30,7 @@ impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   fn import(section: &Section) -> io::Result<AlifeObjectShape> {
     Ok(AlifeObjectShape {
       base: AlifeObjectAbstract::import(section)?,
-      shape: Shape::import_shapes(section)?,
+      shape: Shape::import_list(section)?,
     })
   }
 }
@@ -41,7 +41,7 @@ impl AlifeObjectGeneric for AlifeObjectShape {
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_shape_description::<SpawnByteOrder>(&self.shape)?;
+    writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
 
     Ok(())
   }
@@ -50,7 +50,7 @@ impl AlifeObjectGeneric for AlifeObjectShape {
   fn export(&self, section: &str, ini: &mut Ltx) {
     self.base.export(section, ini);
 
-    Shape::export_shapes(&self.shape, section, ini);
+    Shape::export_list(&self.shape, section, ini);
   }
 }
 

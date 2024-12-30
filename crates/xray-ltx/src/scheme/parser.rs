@@ -23,7 +23,7 @@ impl LtxSchemeParser {
     let mut schemes: LtxSectionSchemes = Default::default();
 
     for file in files {
-      let ltx: Ltx = Ltx::read_from_file(file.path())?
+      let ltx: Ltx = Ltx::read_from_path(file.path())?
         .into_included()?
         .into_inherited()?;
 

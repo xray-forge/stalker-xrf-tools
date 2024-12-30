@@ -45,7 +45,7 @@ impl AlifeObjectGeneric for AlifeAnomalousZone {
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    Time::write_optional::<SpawnByteOrder>(&self.last_spawn_time, writer)?;
+    Time::write_optional::<SpawnByteOrder>(self.last_spawn_time.as_ref(), writer)?;
 
     Ok(())
   }
@@ -56,7 +56,7 @@ impl AlifeObjectGeneric for AlifeAnomalousZone {
 
     ini.with_section(section).set(
       "last_spawn_time",
-      &Time::export_to_string(&self.last_spawn_time),
+      &Time::export_to_string(self.last_spawn_time.as_ref()),
     );
   }
 }

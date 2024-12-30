@@ -36,7 +36,7 @@ impl Time {
 
   /// Write optional time object into the writer.
   pub fn write_optional<T: ByteOrder>(
-    time: &Option<Time>,
+    time: Option<&Time>,
     writer: &mut ChunkWriter,
   ) -> io::Result<()> {
     if time.is_some() {
@@ -85,17 +85,19 @@ impl Time {
   }
 
   /// Cast optional time object to serialized string.
-  pub fn export_to_string(time: &Option<Time>) -> String {
-    time.as_ref().map_or(String::from(NIL), |t| t.to_string())
+  pub fn export_to_string(time: Option<&Time>) -> String {
+    time
+      .as_ref()
+      .map_or(String::from(NIL), |value| value.to_string())
   }
 
   /// Import optional time from string value.
-  pub fn import_from_string(s: &str) -> io::Result<Option<Time>> {
-    if s.trim() == NIL {
+  pub fn import_from_string(value: &str) -> io::Result<Option<Time>> {
+    if value.trim() == NIL {
       return Ok(None);
     }
 
-    Ok(match Time::from_str(s) {
+    Ok(match Time::from_str(value) {
       Ok(time) => Some(time),
       Err(_) => {
         return Err(io::Error::new(
@@ -112,7 +114,7 @@ impl Display for Time {
     write!(
       formatter,
       "{},{},{},{},{},{},{}",
-      self.year, self.minute, self.day, self.hour, self.minute, self.second, self.millis
+      self.year, self.month, self.day, self.hour, self.minute, self.second, self.millis
     )
   }
 }
@@ -176,16 +178,21 @@ mod tests {
   use crate::data::time::Time;
   use crate::types::SpawnByteOrder;
   use fileslice::FileSlice;
+  use serde_json::json;
+  use std::fs::File;
   use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::str::FromStr;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_time_object() -> io::Result<()> {
+  fn test_read_write() -> io::Result<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "time.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let time: Time = Time {
       year: 22,
@@ -216,6 +223,141 @@ mod tests {
     let read_time: Time = Time::read::<SpawnByteOrder>(&mut reader)?;
 
     assert_eq!(read_time, time);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_read_write_optional_some() -> io::Result<()> {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
+
+    let time: Time = Time {
+      year: 22,
+      month: 10,
+      day: 24,
+      hour: 20,
+      minute: 30,
+      second: 50,
+      millis: 250,
+    };
+
+    Time::write_optional::<SpawnByteOrder>(Some(&time), &mut writer)?;
+
+    assert_eq!(writer.bytes_written(), 9);
+
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    assert_eq!(bytes_written, 9);
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+
+    assert_eq!(file.bytes_remaining(), 9 + 8);
+
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read_time: Option<Time> = Time::read_optional::<SpawnByteOrder>(&mut reader)?;
+
+    assert_eq!(read_time, Some(time));
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_read_write_optional_none() -> io::Result<()> {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
+
+    Time::write_optional::<SpawnByteOrder>(None, &mut writer)?;
+
+    assert_eq!(writer.bytes_written(), 1);
+
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    assert_eq!(bytes_written, 1);
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+
+    assert_eq!(file.bytes_remaining(), 1 + 8);
+
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    assert_eq!(Time::read_optional::<SpawnByteOrder>(&mut reader)?, None);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export_to_str() -> io::Result<()> {
+    let vector: Time = Time {
+      year: 20,
+      month: 6,
+      day: 1,
+      hour: 15,
+      minute: 15,
+      second: 23,
+      millis: 100,
+    };
+
+    assert_eq!(Time::export_to_string(Some(&vector)), "20,6,1,15,15,23,100");
+    assert_eq!(
+      Time::import_from_string("20,6,1,15,15,23,100")?,
+      Some(vector)
+    );
+    assert_eq!(Time::export_to_string(None), "nil");
+    assert_eq!(Time::import_from_string("nil")?, None);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_from_to_str() -> io::Result<()> {
+    let vector: Time = Time {
+      year: 22,
+      month: 6,
+      day: 1,
+      hour: 15,
+      minute: 15,
+      second: 23,
+      millis: 100,
+    };
+
+    assert_eq!(vector.to_string(), "22,6,1,15,15,23,100");
+    assert_eq!(Time::from_str("22,6,1,15,15,23,100").unwrap(), vector);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> io::Result<()> {
+    let time_old: Time = Time {
+      year: 22,
+      month: 6,
+      day: 1,
+      hour: 15,
+      minute: 16,
+      second: 45,
+      millis: 100,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(time_old).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(time_old, serde_json::from_str::<Time>(&serialized)?);
 
     Ok(())
   }

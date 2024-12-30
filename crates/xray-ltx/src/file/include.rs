@@ -115,7 +115,7 @@ impl LtxIncludeConvertor {
   /// Open nested file for importing in current context.
   /// Skips '.ts' variant of configuration file as None.
   fn parse_nested_file(&self, path: &Path) -> Result<Option<Ltx>, LtxError> {
-    match Ltx::read_from_file(path) {
+    match Ltx::read_from_path(path) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {
         LtxError::Io(ref io_error) => {

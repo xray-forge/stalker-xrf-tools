@@ -25,7 +25,7 @@ impl Ltx {
   }
 
   /// Write to a file
-  pub fn write_to_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
+  pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
     self.write_to(
       &mut OpenOptions::new()
         .write(true)

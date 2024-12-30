@@ -83,3 +83,100 @@ impl FromStr for Vector3d<f32> {
     })
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use crate::chunk::reader::ChunkReader;
+  use crate::chunk::writer::ChunkWriter;
+  use crate::data::vector_3d::Vector3d;
+  use crate::types::SpawnByteOrder;
+  use fileslice::FileSlice;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::str::FromStr;
+  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
+  #[test]
+  fn test_read_write() -> io::Result<()> {
+    let filename: String = String::from("read_write.chunk");
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    let vector_old: Vector3d = Vector3d {
+      x: 1.5,
+      y: 2.7,
+      z: 3.2,
+    };
+
+    vector_old.write::<SpawnByteOrder>(&mut writer)?;
+
+    assert_eq!(writer.bytes_written(), 12);
+
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+        file!(),
+        &filename,
+      ))?,
+      0,
+    )?;
+
+    assert_eq!(bytes_written, 12);
+
+    let file: FileSlice =
+      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+
+    assert_eq!(file.bytes_remaining(), 12 + 8);
+
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
+      .read_child_by_index(0)
+      .expect("0 index chunk to exist");
+
+    let vector_new: Vector3d = Vector3d::read::<SpawnByteOrder>(&mut reader)?;
+
+    assert_eq!(vector_new, vector_old);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_from_to_str() -> io::Result<()> {
+    let vector: Vector3d = Vector3d {
+      x: 10.5,
+      y: 20.7,
+      z: 30.2,
+    };
+
+    assert_eq!(vector.to_string(), "10.5,20.7,30.2");
+    assert_eq!(Vector3d::from_str("10.5,20.7,30.2").unwrap(), vector);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> io::Result<()> {
+    let vector_old: Vector3d = Vector3d {
+      x: 10.5,
+      y: 20.7,
+      z: 30.2,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(vector_old).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(vector_old, serde_json::from_str::<Vector3d>(&serialized)?);
+
+    Ok(())
+  }
+}

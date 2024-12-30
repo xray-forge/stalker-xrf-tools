@@ -65,7 +65,7 @@ impl AlifeObjectGeneric for AlifeZoneVisual {
     writer.write_null_terminated_win_string(&self.idle_animation)?;
     writer.write_null_terminated_win_string(&self.attack_animation)?;
 
-    Time::write_optional::<SpawnByteOrder>(&self.last_spawn_time, writer)?;
+    Time::write_optional::<SpawnByteOrder>(self.last_spawn_time.as_ref(), writer)?;
 
     Ok(())
   }
@@ -81,7 +81,7 @@ impl AlifeObjectGeneric for AlifeZoneVisual {
       .set("attack_animation", &self.attack_animation)
       .set(
         "last_spawn_time",
-        &Time::export_to_string(&self.last_spawn_time),
+        Time::export_to_string(self.last_spawn_time.as_ref()),
       );
   }
 }

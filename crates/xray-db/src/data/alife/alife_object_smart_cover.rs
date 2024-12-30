@@ -29,7 +29,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<AlifeObjectSmartCover> {
     Ok(AlifeObjectSmartCover {
       base: AlifeObjectDynamic::read::<T>(reader)?,
-      shape: reader.read_shape_description::<SpawnByteOrder>()?,
+      shape: reader.read_shapes::<SpawnByteOrder>()?,
       description: reader.read_null_terminated_win_string()?,
       hold_position_time: reader.read_f32::<SpawnByteOrder>()?,
       enter_min_enemy_distance: reader.read_f32::<SpawnByteOrder>()?,
@@ -43,7 +43,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSmartCover> for AlifeObjectSmartCover
   fn import(section: &Section) -> io::Result<AlifeObjectSmartCover> {
     Ok(AlifeObjectSmartCover {
       base: AlifeObjectDynamic::import(section)?,
-      shape: Shape::import_shapes(section)?,
+      shape: Shape::import_list(section)?,
       description: read_ini_field("description", section)?,
       hold_position_time: read_ini_field("hold_position_time", section)?,
       enter_min_enemy_distance: read_ini_field("enter_min_enemy_distance", section)?,
@@ -60,7 +60,7 @@ impl AlifeObjectGeneric for AlifeObjectSmartCover {
   fn write(&self, writer: &mut ChunkWriter) -> io::Result<()> {
     self.base.write(writer)?;
 
-    writer.write_shape_description::<SpawnByteOrder>(&self.shape)?;
+    writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
     writer.write_null_terminated_win_string(&self.description)?;
     writer.write_f32::<SpawnByteOrder>(self.hold_position_time)?;
     writer.write_f32::<SpawnByteOrder>(self.enter_min_enemy_distance)?;
@@ -94,7 +94,7 @@ impl AlifeObjectGeneric for AlifeObjectSmartCover {
       .set("is_combat_cover", self.is_combat_cover.to_string())
       .set("can_fire", self.can_fire.to_string());
 
-    Shape::export_shapes(&self.shape, section, ini);
+    Shape::export_list(&self.shape, section, ini);
   }
 }
 

@@ -13,18 +13,18 @@ impl Ltx {
 
   /// Read LTX from a file as full parsed file, inject included files.
   pub fn read_from_file_included<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::read_from_file(filename)?.into_included()
+    Ltx::read_from_path(filename)?.into_included()
   }
 
   /// Read LTX from a file, inject all includes and unwrap inherited sections.
   pub fn load_from_file_full<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::read_from_file(filename)?
+    Ltx::read_from_path(filename)?
       .into_included()?
       .into_inherited()
   }
 
   /// Read from a file as generic ini with LTX descriptor filled.
-  pub fn read_from_file<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
+  pub fn read_from_path<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
     let mut reader: File = match File::open(filename.as_ref()) {
       Ok(file) => file,
       Err(error) => {
@@ -139,7 +139,7 @@ mod test {
       file.write_all(file_content).expect("write");
     }
 
-    let ltx: Ltx = Ltx::read_from_file(&file_name).unwrap();
+    let ltx: Ltx = Ltx::read_from_path(&file_name).unwrap();
     assert_eq!(ltx.get_from("test", "Key"), Some("Value"));
   }
 
