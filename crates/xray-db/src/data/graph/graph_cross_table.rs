@@ -93,6 +93,7 @@ impl GraphCrossTable {
 
     Ok(cross_tables)
   }
+
   /// Export cross-tables as separate chunk file.
   pub fn export_list<T: ByteOrder>(
     cross_tables: &Vec<GraphCrossTable>,
