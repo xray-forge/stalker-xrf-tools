@@ -5,17 +5,17 @@ use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ParticlesVersionChunk {
+pub struct ParticlesHeaderChunk {
   pub version: u16,
 }
 
-impl ParticlesVersionChunk {
+impl ParticlesHeaderChunk {
   pub const CHUNK_ID: u32 = 1;
 
   /// Read version chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ParticlesVersionChunk> {
-    let version_chunk: ParticlesVersionChunk = ParticlesVersionChunk {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticlesHeaderChunk> {
+    let version_chunk: ParticlesHeaderChunk = ParticlesHeaderChunk {
       version: reader.read_u16::<T>()?,
     };
 

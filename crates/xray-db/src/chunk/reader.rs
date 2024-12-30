@@ -293,6 +293,27 @@ mod tests {
   }
 
   #[test]
+  fn test_read_empty_unordered_children() -> io::Result<()> {
+    let filename: String = get_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
+
+    assert_eq!(chunks.len(), 5, "Expect five chunks");
+    assert_eq!(chunks.get(0).unwrap().size, 0);
+    assert_eq!(chunks.get(0).unwrap().index, 4);
+    assert_eq!(chunks.get(1).unwrap().size, 0);
+    assert_eq!(chunks.get(1).unwrap().index, 3);
+    assert_eq!(chunks.get(2).unwrap().size, 0);
+    assert_eq!(chunks.get(2).unwrap().index, 2);
+    assert_eq!(chunks.get(3).unwrap().size, 0);
+    assert_eq!(chunks.get(3).unwrap().index, 1);
+    assert_eq!(chunks.get(4).unwrap().size, 0);
+    assert_eq!(chunks.get(4).unwrap().index, 0);
+
+    Ok(())
+  }
+
+  #[test]
   fn test_read_dummy_children() -> io::Result<()> {
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;

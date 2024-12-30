@@ -3,7 +3,7 @@ use crate::chunk::utils::find_chunk_by_id;
 use crate::particles_file::particles_effects_chunk::ParticlesEffectsChunk;
 use crate::particles_file::particles_firstgen_chunk::ParticlesFirstgenChunk;
 use crate::particles_file::particles_groups_chunk::ParticlesGroupsChunk;
-use crate::particles_file::particles_version_chunk::ParticlesVersionChunk;
+use crate::particles_file::particles_header_chunk::ParticlesHeaderChunk;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
@@ -14,7 +14,7 @@ use std::{fs, io};
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticlesFile {
-  pub version: ParticlesVersionChunk,
+  pub version: ParticlesHeaderChunk,
   pub effects: ParticlesEffectsChunk,
   pub groups: ParticlesGroupsChunk,
 }
@@ -44,16 +44,16 @@ impl ParticlesFile {
     );
 
     Ok(ParticlesFile {
-      version: ParticlesVersionChunk::read::<T>(
-        find_chunk_by_id(&chunks, ParticlesVersionChunk::CHUNK_ID)
+      version: ParticlesHeaderChunk::read::<T>(
+        &mut find_chunk_by_id(&chunks, ParticlesHeaderChunk::CHUNK_ID)
           .expect("Particle version chunk not found"),
       )?,
       effects: ParticlesEffectsChunk::read::<T>(
-        find_chunk_by_id(&chunks, ParticlesEffectsChunk::CHUNK_ID)
+        &mut find_chunk_by_id(&chunks, ParticlesEffectsChunk::CHUNK_ID)
           .expect("Particle effects chunk not found"),
       )?,
       groups: ParticlesGroupsChunk::read::<T>(
-        find_chunk_by_id(&chunks, ParticlesGroupsChunk::CHUNK_ID)
+        &mut find_chunk_by_id(&chunks, ParticlesGroupsChunk::CHUNK_ID)
           .expect("Particle groups chunk not found"),
       )?,
     })

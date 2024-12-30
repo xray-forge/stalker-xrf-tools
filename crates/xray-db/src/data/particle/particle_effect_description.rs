@@ -5,17 +5,17 @@ use std::io;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ParticleEffectDescription {
+pub struct ParticleDescription {
   pub creator: String,
   pub editor: String,
   pub created_time: u32,
   pub edit_time: u32,
 }
 
-impl ParticleEffectDescription {
+impl ParticleDescription {
   /// Read particle effect description data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleEffectDescription> {
-    let particle_description: ParticleEffectDescription = ParticleEffectDescription {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticleDescription> {
+    let particle_description: ParticleDescription = ParticleDescription {
       creator: reader.read_null_terminated_win_string()?,
       editor: reader.read_null_terminated_win_string()?,
       created_time: reader.read_u32::<T>()?,

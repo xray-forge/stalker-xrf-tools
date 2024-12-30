@@ -5,7 +5,7 @@ use crate::chunk::utils::{
 };
 use crate::data::particle::effect_action::particle_action::ParticleAction;
 use crate::data::particle::particle_effect_collision::ParticleEffectCollision;
-use crate::data::particle::particle_effect_description::ParticleEffectDescription;
+use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
 use crate::data::vector_3d::Vector3d;
@@ -27,7 +27,7 @@ pub struct ParticleEffect {
   time_limit: Option<f32>,
   collision: Option<ParticleEffectCollision>,
   velocity_scale: Option<Vector3d>,
-  description: Option<ParticleEffectDescription>,
+  description: Option<ParticleDescription>,
   rotation: Option<Vector3d>,
   editor_data: Option<Vec<u8>>,
 }
@@ -91,7 +91,7 @@ impl ParticleEffect {
           read_f32_vector_chunk::<T>(&mut it).expect("Invalid velocity scale chunk data")
         }),
         description: find_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
-          ParticleEffectDescription::read::<T>(&mut it).expect("Invalid description chunk data")
+          ParticleDescription::read::<T>(&mut it).expect("Invalid description chunk data")
         }),
         rotation: find_chunk_by_id(&chunks, Self::ROTATION_CHUNK_ID)
           .map(|mut it| read_f32_vector_chunk::<T>(&mut it).expect("Invalid rotation chunk data")),

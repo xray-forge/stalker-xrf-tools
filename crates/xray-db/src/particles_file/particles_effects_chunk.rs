@@ -15,8 +15,8 @@ impl ParticlesEffectsChunk {
 
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ParticlesEffectsChunk> {
-    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticlesEffectsChunk> {
+    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
     let mut particles: Vec<ParticleEffect> = Vec::new();
 
     log::info!(

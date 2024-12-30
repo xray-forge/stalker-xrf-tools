@@ -15,8 +15,8 @@ impl ParticlesGroupsChunk {
 
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> io::Result<ParticlesGroupsChunk> {
-    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> io::Result<ParticlesGroupsChunk> {
+    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     log::info!(
@@ -25,8 +25,8 @@ impl ParticlesGroupsChunk {
       chunks.len()
     );
 
-    for chunk in chunks {
-      groups.push(ParticleGroup::read::<T>(chunk)?);
+    for mut chunk in chunks {
+      groups.push(ParticleGroup::read::<T>(&mut chunk)?);
     }
 
     assert!(reader.is_ended(), "Expect groups chunk to be ended");
