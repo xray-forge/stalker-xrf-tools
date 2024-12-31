@@ -93,8 +93,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_sprite() -> DatabaseResult<()> {
-    let filename: String = String::from("particle_effect_sprite.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let sprite: ParticleEffectSprite = ParticleEffectSprite {
@@ -147,23 +147,23 @@ mod tests {
     sprite.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read_sprite: ParticleEffectSprite =
-      ParticleEffectSprite::import("data", &open_ini_config(config_path)?)?;
-
-    assert_eq!(read_sprite, sprite);
+    assert_eq!(
+      ParticleEffectSprite::import("data", &open_ini_config(config_path)?)?,
+      sprite
+    );
 
     Ok(())
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let sprite: ParticleEffectSprite = ParticleEffectSprite {
       shader_name: String::from("shader_name"),
       texture_name: String::from("texture_name"),
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(sprite).to_string().as_bytes())?;

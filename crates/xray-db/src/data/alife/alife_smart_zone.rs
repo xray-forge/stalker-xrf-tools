@@ -16,15 +16,15 @@ pub struct AlifeSmartZone {
 
 impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
   /// Read generic alife smart zone object from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeSmartZone> {
-    Ok(AlifeSmartZone {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
     })
   }
 
   /// Import generic alife smart zone object from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeSmartZone> {
-    Ok(AlifeSmartZone {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectSpaceRestrictor::import(section)?,
     })
   }
@@ -63,11 +63,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_smart_zone.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeSmartZone = AlifeSmartZone {
+    let original: AlifeSmartZone = AlifeSmartZone {
       base: AlifeObjectSpaceRestrictor {
         base: AlifeObjectAbstract {
           game_vertex_id: 1001,
@@ -92,7 +92,7 @@ mod tests {
       },
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 106);
 
@@ -108,9 +108,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 106 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeSmartZone = AlifeSmartZone::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeSmartZone::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

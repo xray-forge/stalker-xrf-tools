@@ -25,8 +25,8 @@ pub struct AlifeObjectTraderAbstract {
 
 impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
   /// Read trader data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectTraderAbstract> {
-    Ok(AlifeObjectTraderAbstract {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       money: reader.read_u32::<SpawnByteOrder>()?,
       specific_character: reader.read_null_terminated_win_string()?,
       trader_flags: reader.read_u32::<SpawnByteOrder>()?,
@@ -41,8 +41,8 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
   }
 
   /// Import trader data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectTraderAbstract> {
-    Ok(AlifeObjectTraderAbstract {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       money: read_ini_field("money", section)?,
       specific_character: read_ini_field("specific_character", section)?,
       trader_flags: read_ini_field("trader_flags", section)?,
@@ -107,12 +107,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_trader_abstract.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract {
+    let original: AlifeObjectTraderAbstract = AlifeObjectTraderAbstract {
       money: 1453,
       specific_character: String::from("specific-character"),
       trader_flags: 33,
@@ -125,7 +124,7 @@ mod tests {
       dead_body_closed: 0,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 74);
 
@@ -141,10 +140,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 74 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectTraderAbstract =
-      AlifeObjectTraderAbstract::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectTraderAbstract::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

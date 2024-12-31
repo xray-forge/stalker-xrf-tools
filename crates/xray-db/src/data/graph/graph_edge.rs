@@ -15,8 +15,8 @@ pub struct GraphEdge {
 
 impl GraphEdge {
   /// Read edge from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphEdge> {
-    Ok(GraphEdge {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       game_vertex_id: reader.read_u16::<T>()?,
       distance: reader.read_f32::<T>()?,
     })
@@ -31,12 +31,12 @@ impl GraphEdge {
   }
 
   /// Import graph edge from ini file.
-  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphEdge> {
-    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
       panic!("Graph section '{section_name}' should be defined in level point ltx file")
     });
 
-    Ok(GraphEdge {
+    Ok(Self {
       game_vertex_id: read_ini_field("game_vertex_id", section)?,
       distance: read_ini_field("distance", section)?,
     })
@@ -75,12 +75,12 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let edge: GraphEdge = GraphEdge {
+    let original: GraphEdge = GraphEdge {
       game_vertex_id: 713,
       distance: 400.50,
     };
 
-    edge.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 6);
 
@@ -103,16 +103,14 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_edge: GraphEdge = GraphEdge::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_edge, edge);
+    assert_eq!(GraphEdge::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let edge: GraphEdge = GraphEdge {
+    let original: GraphEdge = GraphEdge {
       game_vertex_id: 352,
       distance: 2554.50,
     };
@@ -122,20 +120,21 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    edge.export("graph_edge", &mut ltx);
+    original.export("graph_edge", &mut ltx);
 
     ltx.write_to(&mut file)?;
 
-    let read_header: GraphEdge = GraphEdge::import("graph_edge", &open_ini_config(config_path)?)?;
-
-    assert_eq!(read_header, edge);
+    assert_eq!(
+      GraphEdge::import("graph_edge", &open_ini_config(config_path)?)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let edge: GraphEdge = GraphEdge {
+    let original: GraphEdge = GraphEdge {
       game_vertex_id: 713,
       distance: 400.50,
     };
@@ -144,14 +143,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(edge).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      edge,
+      original,
       serde_json::from_str::<GraphEdge>(&serialized).unwrap()
     );
 

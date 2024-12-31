@@ -22,11 +22,11 @@ pub struct GraphCrossTable {
 
 impl GraphCrossTable {
   /// Read cross tables list data from the chunk.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<GraphCrossTable>> {
-    let mut cross_tables: Vec<GraphCrossTable> = Vec::new();
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+    let mut cross_tables: Vec<Self> = Vec::new();
 
     for mut cross_table_chunk in ChunkSizePackedIterator::new(reader) {
-      cross_tables.push(GraphCrossTable::read::<T>(&mut cross_table_chunk)?);
+      cross_tables.push(Self::read::<T>(&mut cross_table_chunk)?);
 
       assert!(
         cross_table_chunk.is_ended(),
@@ -39,7 +39,7 @@ impl GraphCrossTable {
 
   /// Write cross tables list data into the writer.
   pub fn write_list<T: ByteOrder>(
-    cross_tables: &Vec<GraphCrossTable>,
+    cross_tables: &[Self],
     writer: &mut ChunkWriter,
   ) -> DatabaseResult<()> {
     for table in cross_tables {
@@ -55,8 +55,8 @@ impl GraphCrossTable {
   }
 
   /// Read cross table data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphCrossTable> {
-    Ok(GraphCrossTable {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       version: reader.read_u32::<T>()?,
       nodes_count: reader.read_u32::<T>()?,
       vertices_count: reader.read_u32::<T>()?,
@@ -79,13 +79,13 @@ impl GraphCrossTable {
   }
 
   /// Export cross-tables as separate gct chunk file.
-  pub fn import_list<T: ByteOrder>(file: &mut File) -> DatabaseResult<Vec<GraphCrossTable>> {
-    let mut cross_tables: Vec<GraphCrossTable> = Vec::new();
+  pub fn import_list<T: ByteOrder>(file: &mut File) -> DatabaseResult<Vec<Self>> {
+    let mut cross_tables: Vec<Self> = Vec::new();
 
     for mut cross_table_reader in
       ChunkSizePackedIterator::new(&mut ChunkReader::from_file(file.try_clone().unwrap())?)
     {
-      cross_tables.push(GraphCrossTable::read::<T>(&mut cross_table_reader)?);
+      cross_tables.push(Self::read::<T>(&mut cross_table_reader)?);
 
       assert!(
         cross_table_reader.is_ended(),
@@ -97,10 +97,7 @@ impl GraphCrossTable {
   }
 
   /// Export cross-tables as separate gct chunk file.
-  pub fn export_list<T: ByteOrder>(
-    cross_tables: &Vec<GraphCrossTable>,
-    file: &mut File,
-  ) -> DatabaseResult<()> {
+  pub fn export_list<T: ByteOrder>(cross_tables: &[Self], file: &mut File) -> DatabaseResult<()> {
     let mut cross_tables_writer: ChunkWriter = ChunkWriter::new();
 
     for cross_table in cross_tables {
@@ -142,7 +139,7 @@ mod tests {
     let filename: String = String::from("read_write_list.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let cross_tables_list: Vec<GraphCrossTable> = vec![
+    let original: Vec<GraphCrossTable> = vec![
       GraphCrossTable {
         version: 16,
         nodes_count: 51,
@@ -169,7 +166,7 @@ mod tests {
       },
     ];
 
-    GraphCrossTable::write_list::<SpawnByteOrder>(&cross_tables_list, &mut writer)?;
+    GraphCrossTable::write_list::<SpawnByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 166);
 
@@ -192,10 +189,10 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_cross_tables: Vec<GraphCrossTable> =
-      GraphCrossTable::read_list::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_cross_tables, cross_tables_list);
+    assert_eq!(
+      GraphCrossTable::read_list::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
@@ -205,7 +202,7 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let cross_table: GraphCrossTable = GraphCrossTable {
+    let original: GraphCrossTable = GraphCrossTable {
       version: 16,
       nodes_count: 51,
       vertices_count: 4000,
@@ -214,7 +211,7 @@ mod tests {
       data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     };
 
-    cross_table.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 55);
 
@@ -237,9 +234,10 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_cross_table: GraphCrossTable = GraphCrossTable::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_cross_table, cross_table);
+    assert_eq!(
+      GraphCrossTable::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
@@ -250,7 +248,7 @@ mod tests {
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
 
-    let cross_tables_list: Vec<GraphCrossTable> = vec![
+    let original: Vec<GraphCrossTable> = vec![
       GraphCrossTable {
         version: 16,
         nodes_count: 23,
@@ -277,20 +275,21 @@ mod tests {
       },
     ];
 
-    GraphCrossTable::export_list::<SpawnByteOrder>(&cross_tables_list, &mut file)?;
+    GraphCrossTable::export_list::<SpawnByteOrder>(&original, &mut file)?;
 
-    let read_tables_list: Vec<GraphCrossTable> = GraphCrossTable::import_list::<SpawnByteOrder>(
-      &mut open_test_resource_as_file(config_path.to_str().unwrap())?,
-    )?;
-
-    assert_eq!(read_tables_list, cross_tables_list);
+    assert_eq!(
+      GraphCrossTable::import_list::<SpawnByteOrder>(&mut open_test_resource_as_file(
+        config_path.to_str().unwrap()
+      )?,)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let cross_table: GraphCrossTable = GraphCrossTable {
+    let original: GraphCrossTable = GraphCrossTable {
       version: 24,
       nodes_count: 436,
       vertices_count: 26324,
@@ -303,14 +302,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(cross_table).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      cross_table,
+      original,
       serde_json::from_str::<GraphCrossTable>(&serialized).unwrap()
     );
 

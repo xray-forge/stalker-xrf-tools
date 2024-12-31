@@ -18,16 +18,16 @@ pub struct AlifeObjectShape {
 
 impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
   /// Read shape object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectShape> {
-    Ok(AlifeObjectShape {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAbstract::read::<T>(reader)?,
       shape: reader.read_shapes::<SpawnByteOrder>()?,
     })
   }
 
   /// Import alife shape object data from ini config.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectShape> {
-    Ok(AlifeObjectShape {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAbstract::import(section)?,
       shape: Shape::import_list(section)?,
     })
@@ -71,11 +71,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_object_shape.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectShape = AlifeObjectShape {
+    let original: AlifeObjectShape = AlifeObjectShape {
       base: AlifeObjectAbstract {
         game_vertex_id: 623,
         distance: 253.55,
@@ -97,7 +97,7 @@ mod tests {
       ],
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 105);
 
@@ -113,9 +113,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 105 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectShape = AlifeObjectShape::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectShape::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

@@ -17,8 +17,8 @@ pub struct GraphLevelPoint {
 
 impl GraphLevelPoint {
   /// Read level point from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphLevelPoint> {
-    Ok(GraphLevelPoint {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       position: reader.read_f32_3d_vector::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
       distance: reader.read_f32::<T>()?,
@@ -35,12 +35,12 @@ impl GraphLevelPoint {
   }
 
   /// Import graph level point from ini file.
-  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphLevelPoint> {
-    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
       panic!("Graph section '{section_name}' should be defined in level point ltx file")
     });
 
-    Ok(GraphLevelPoint {
+    Ok(Self {
       position: read_ini_field("position", section)?,
       level_vertex_id: read_ini_field("level_vertex_id", section)?,
       distance: read_ini_field("distance", section)?,
@@ -82,13 +82,13 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let point: GraphLevelPoint = GraphLevelPoint {
+    let original: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(10.5, 11.6, 12.7),
       distance: 400.50,
       level_vertex_id: 8000,
     };
 
-    point.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 20);
 
@@ -108,16 +108,17 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_point: GraphLevelPoint = GraphLevelPoint::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_point, point);
+    assert_eq!(
+      GraphLevelPoint::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let point: GraphLevelPoint = GraphLevelPoint {
+    let original: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(66.5, 55.6, 88.7),
       distance: 4235.50,
       level_vertex_id: 236263,
@@ -127,20 +128,20 @@ mod tests {
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
-    point.export("graph_level_point", &mut ltx);
+    original.export("graph_level_point", &mut ltx);
     ltx.write_to(&mut file)?;
 
-    let read_point: GraphLevelPoint =
-      GraphLevelPoint::import("graph_level_point", &open_ini_config(config_path)?)?;
-
-    assert_eq!(read_point, point);
+    assert_eq!(
+      GraphLevelPoint::import("graph_level_point", &open_ini_config(config_path)?)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let point: GraphLevelPoint = GraphLevelPoint {
+    let original: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(11.5, 11.6, 2.7),
       distance: 321.50,
       level_vertex_id: 5213,
@@ -151,14 +152,14 @@ mod tests {
       "serialize_deserialize.json",
     ))?;
 
-    file.write_all(json!(point).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      point,
+      original,
       serde_json::from_str::<GraphLevelPoint>(&serialized).unwrap()
     );
 

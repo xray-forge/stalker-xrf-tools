@@ -21,8 +21,8 @@ pub struct GraphLevel {
 
 impl GraphLevel {
   /// Read graph level data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphLevel> {
-    Ok(GraphLevel {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       name: reader.read_null_terminated_win_string()?,
       offset: reader.read_f32_3d_vector::<T>()?,
       id: reader.read_u8()?,
@@ -43,12 +43,12 @@ impl GraphLevel {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphLevel> {
-    let section: &Section = config
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini
       .section(section_name)
       .unwrap_or_else(|| panic!("Graph section {section_name} should be defined in ltx file"));
 
-    Ok(GraphLevel {
+    Ok(Self {
       name: read_ini_field("name", section)?,
       offset: read_ini_field("offset", section)?,
       id: read_ini_field("id", section)?,
@@ -95,7 +95,7 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let level: GraphLevel = GraphLevel {
+    let original: GraphLevel = GraphLevel {
       id: 255,
       name: String::from("test-level"),
       section: String::from("test-level-section"),
@@ -103,7 +103,7 @@ mod tests {
       offset: Vector3d::new(0.5, 5.55, -1.5),
     };
 
-    level.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 59);
 
@@ -126,16 +126,14 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_level: GraphLevel = GraphLevel::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_level, level);
+    assert_eq!(GraphLevel::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let level: GraphLevel = GraphLevel {
+    let original: GraphLevel = GraphLevel {
       id: 78,
       name: String::from("test-level-exported"),
       section: String::from("test-level-section"),
@@ -148,19 +146,20 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    level.export("graph_level", &mut ltx);
+    original.export("graph_level", &mut ltx);
     ltx.write_to(&mut file)?;
 
-    let read_level: GraphLevel = GraphLevel::import("graph_level", &open_ini_config(config_path)?)?;
-
-    assert_eq!(read_level, level);
+    assert_eq!(
+      GraphLevel::import("graph_level", &open_ini_config(config_path)?)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let level: GraphLevel = GraphLevel {
+    let original: GraphLevel = GraphLevel {
       id: 243,
       name: String::from("test-level-example"),
       section: String::from("test-level-section"),
@@ -172,14 +171,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(level).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      level,
+      original,
       serde_json::from_str::<GraphLevel>(&serialized).unwrap()
     );
 

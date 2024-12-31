@@ -151,8 +151,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_effect() -> DatabaseResult<()> {
-    let filename: String = String::from("particle_group_effect.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let original: ParticleGroupEffect = ParticleGroupEffect {
@@ -188,9 +188,10 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read: ParticleGroupEffect = ParticleGroupEffect::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read, original);
+    assert_eq!(
+      ParticleGroupEffect::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
@@ -214,16 +215,16 @@ mod tests {
     original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read: ParticleGroupEffect =
-      ParticleGroupEffect::import("data", &open_ini_config(config_path)?)?;
-
-    assert_eq!(read, original);
+    assert_eq!(
+      ParticleGroupEffect::import("data", &open_ini_config(config_path)?)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let original: ParticleGroupEffect = ParticleGroupEffect {
       name: String::from("effect_old_name_serialize"),
       on_play_child_name: String::from("effect_old_on_play_child_name_serialize"),
@@ -235,7 +236,7 @@ mod tests {
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(original).to_string().as_bytes())?;

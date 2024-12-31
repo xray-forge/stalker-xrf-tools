@@ -119,8 +119,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_artefact_spawn_point() -> DatabaseResult<()> {
-    let filename: String = get_relative_test_sample_file_path(file!(), "artefact_spawns.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {
       nodes: vec![

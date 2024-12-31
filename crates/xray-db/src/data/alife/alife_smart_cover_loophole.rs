@@ -11,7 +11,7 @@ pub struct AlifeSmartCoverLoophole {
 
 impl AlifeSmartCoverLoophole {
   /// Serialize list of loopholes into single string.
-  pub fn list_to_string(loopholes: &[AlifeSmartCoverLoophole]) -> String {
+  pub fn list_to_string(loopholes: &[Self]) -> String {
     loopholes
       .iter()
       .map(|loophole| format!("{}:{}", loophole.name, loophole.enabled))
@@ -20,14 +20,14 @@ impl AlifeSmartCoverLoophole {
   }
 
   /// Read list of loopholes from string.
-  pub fn string_to_list(value: &str) -> DatabaseResult<Vec<AlifeSmartCoverLoophole>> {
-    let mut loopholes: Vec<AlifeSmartCoverLoophole> = Vec::new();
+  pub fn string_to_list(value: &str) -> DatabaseResult<Vec<Self>> {
+    let mut loopholes: Vec<Self> = Vec::new();
 
     for it in value.split(',').map(|it| it.trim()) {
       let partial: Vec<&str> = it.split(':').map(|it| it.trim()).collect::<Vec<&str>>();
 
       if partial.len() == 2 {
-        loopholes.push(AlifeSmartCoverLoophole {
+        loopholes.push(Self {
           name: String::from(*partial.first().unwrap()),
           enabled: match partial.last().unwrap().parse::<u8>() {
             Ok(parsed) => parsed,

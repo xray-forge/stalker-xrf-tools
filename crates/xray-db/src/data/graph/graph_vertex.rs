@@ -25,8 +25,8 @@ pub struct GraphVertex {
 
 impl GraphVertex {
   /// Read graph vertex data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphVertex> {
-    Ok(GraphVertex {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       level_point: reader.read_f32_3d_vector::<T>()?,
       game_point: reader.read_f32_3d_vector::<T>()?,
       level_id: reader.read_u8()?,
@@ -55,12 +55,12 @@ impl GraphVertex {
   }
 
   /// Import graph vertex from ini file.
-  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<GraphVertex> {
-    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
       panic!("Graph section '{section_name}' should be defined in graph vertex ltx file")
     });
 
-    Ok(GraphVertex {
+    Ok(Self {
       level_point: read_ini_field("level_point", section)?,
       game_point: read_ini_field("game_point", section)?,
       level_id: read_ini_field("level_id", section)?,
@@ -122,7 +122,7 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let vertex: GraphVertex = GraphVertex {
+    let original: GraphVertex = GraphVertex {
       level_point: Vector3d::new(10.5, 11.6, 12.3),
       game_point: Vector3d::new(0.5, -4.0, 1000.0),
       level_id: 255,
@@ -134,7 +134,7 @@ mod tests {
       level_points_count: 253,
     };
 
-    vertex.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 42);
 
@@ -157,16 +157,14 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_vertex: GraphVertex = GraphVertex::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_vertex, vertex);
+    assert_eq!(GraphVertex::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let vertex: GraphVertex = GraphVertex {
+    let original: GraphVertex = GraphVertex {
       level_point: Vector3d::new(32.5, 523.6, 342.3),
       game_point: Vector3d::new(0.23, -4.0, 123.0),
       level_id: 53,
@@ -183,20 +181,20 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    vertex.export("graph_vertex", &mut ltx);
+    original.export("graph_vertex", &mut ltx);
     ltx.write_to(&mut file)?;
 
-    let read_vertex: GraphVertex =
-      GraphVertex::import("graph_vertex", &open_ini_config(config_path)?)?;
-
-    assert_eq!(read_vertex, vertex);
+    assert_eq!(
+      GraphVertex::import("graph_vertex", &open_ini_config(config_path)?)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let vertex: GraphVertex = GraphVertex {
+    let original: GraphVertex = GraphVertex {
       level_point: Vector3d::new(25.5, 15.6, 43.3),
       game_point: Vector3d::new(0.44, -4.0, 1000.0),
       level_id: 213,
@@ -212,14 +210,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(vertex).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      vertex,
+      original,
       serde_json::from_str::<GraphVertex>(&serialized).unwrap()
     );
 

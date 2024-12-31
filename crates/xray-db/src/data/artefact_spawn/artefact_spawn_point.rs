@@ -17,8 +17,8 @@ pub struct ArtefactSpawnPoint {
 
 impl ArtefactSpawnPoint {
   /// Read artefact spawn point from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ArtefactSpawnPoint> {
-    Ok(ArtefactSpawnPoint {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       position: reader.read_f32_3d_vector::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
       distance: reader.read_f32::<T>()?,
@@ -35,8 +35,8 @@ impl ArtefactSpawnPoint {
   }
 
   /// Import artefact spawn point data from ini section.
-  pub fn import(section: &Section) -> DatabaseResult<ArtefactSpawnPoint> {
-    Ok(ArtefactSpawnPoint {
+  pub fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       position: read_ini_field("position", section)?,
       level_vertex_id: read_ini_field("level_vertex_id", section)?,
       distance: read_ini_field("distance", section)?,
@@ -75,7 +75,7 @@ mod tests {
 
   #[test]
   fn test_read_write() -> DatabaseResult<()> {
-    let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
+    let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,
       distance: 500.55,
@@ -84,16 +84,14 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    point.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 20);
 
-    let bytes_written: usize = writer
-      .flush_chunk_into_file::<SpawnByteOrder>(
-        &mut overwrite_test_relative_resource_as_file(&filename)?,
-        0,
-      )
-      .unwrap();
+    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
 
     assert_eq!(bytes_written, 20);
 
@@ -105,42 +103,44 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_point: ArtefactSpawnPoint = ArtefactSpawnPoint::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_point, point);
+    assert_eq!(
+      ArtefactSpawnPoint::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
+    let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(11.5, 12.3, -10.5),
       level_vertex_id: 1001,
       distance: 6213.123,
     };
 
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
-    let mut file: File = overwrite_file(&config_path)?;
+    let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
-    point.export("artefact_spawn_point", &mut ltx);
+    original.export("artefact_spawn_point", &mut ltx);
     ltx.write_to(&mut file)?;
 
-    let read_point: ArtefactSpawnPoint = ArtefactSpawnPoint::import(
-      open_ini_config(config_path)?
-        .section("artefact_spawn_point")
-        .expect("0 point section"),
-    )?;
-
-    assert_eq!(read_point, point);
+    assert_eq!(
+      ArtefactSpawnPoint::import(
+        open_ini_config(config_path)?
+          .section("artefact_spawn_point")
+          .expect("0 point section"),
+      )?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let point: ArtefactSpawnPoint = ArtefactSpawnPoint {
+    let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(21.5, 22.3, -20.5),
       level_vertex_id: 1001,
       distance: 3452.123,
@@ -151,14 +151,14 @@ mod tests {
       "serialize_deserialize.json",
     ))?;
 
-    file.write_all(json!(point).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      point,
+      original,
       serde_json::from_str::<ArtefactSpawnPoint>(&serialized).unwrap()
     );
 

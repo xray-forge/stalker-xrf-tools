@@ -21,8 +21,8 @@ pub struct AlifeObjectTorridZone {
 
 impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
   /// Read zone object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectTorridZone> {
-    Ok(AlifeObjectTorridZone {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectCustomZone::read::<T>(reader)?,
       motion: AlifeObjectMotion::read::<T>(reader)?,
       last_spawn_time: Time::read_optional::<T>(reader)?,
@@ -30,8 +30,8 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
   }
 
   /// Import torrid zone object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectTorridZone> {
-    Ok(AlifeObjectTorridZone {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectCustomZone::import(section)?,
       motion: AlifeObjectMotion::import(section)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
@@ -86,12 +86,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_torrid_zone.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectTorridZone = AlifeObjectTorridZone {
+    let original: AlifeObjectTorridZone = AlifeObjectTorridZone {
       base: AlifeObjectCustomZone {
         base: AlifeObjectSpaceRestrictor {
           base: AlifeObjectAbstract {
@@ -127,7 +126,7 @@ mod tests {
       }),
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 81);
 
@@ -143,10 +142,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 81 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectTorridZone =
-      AlifeObjectTorridZone::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectTorridZone::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

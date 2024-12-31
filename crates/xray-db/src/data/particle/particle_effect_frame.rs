@@ -149,8 +149,8 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_sprite() -> DatabaseResult<()> {
-    let filename: String = String::from("particle_effect_frame.chunk");
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let original: ParticleEffectFrame = ParticleEffectFrame {
@@ -217,7 +217,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_object() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
     let original: ParticleEffectFrame = ParticleEffectFrame {
       texture_size: (74.0, 236.5),
       reserved: (263.5, 5369.5),
@@ -227,7 +227,7 @@ mod tests {
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialized.json"),
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
     file.write_all(json!(original).to_string().as_bytes())?;

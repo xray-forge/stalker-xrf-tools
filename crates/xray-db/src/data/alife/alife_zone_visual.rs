@@ -23,8 +23,8 @@ pub struct AlifeZoneVisual {
 
 impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   /// Read visual zone data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeZoneVisual> {
-    Ok(AlifeZoneVisual {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAnomalyZone::read::<T>(reader)?,
       visual: AlifeObjectVisual::read::<T>(reader)?,
       idle_animation: reader
@@ -40,8 +40,8 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
   }
 
   /// Import visual zone data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeZoneVisual> {
-    Ok(AlifeZoneVisual {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAnomalyZone::import(section)?,
       visual: AlifeObjectVisual::import(section)?,
       idle_animation: read_ini_field("idle_animation", section)?,
@@ -107,12 +107,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_zone_visual.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeZoneVisual = AlifeZoneVisual {
+    let original: AlifeZoneVisual = AlifeZoneVisual {
       base: AlifeObjectAnomalyZone {
         base: AlifeObjectCustomZone {
           base: AlifeObjectSpaceRestrictor {
@@ -156,7 +155,7 @@ mod tests {
       last_spawn_time: None,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 182);
 
@@ -172,9 +171,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 182 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeZoneVisual = AlifeZoneVisual::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeZoneVisual::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

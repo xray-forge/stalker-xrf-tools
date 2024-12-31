@@ -19,8 +19,8 @@ pub struct AlifeObjectSkeleton {
 
 impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   /// Read skeleton data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectSkeleton> {
-    let object = AlifeObjectSkeleton {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let object = Self {
       name: reader.read_null_terminated_win_string()?,
       flags: reader.read_u8()?,
       source_id: reader.read_u16::<SpawnByteOrder>()?,
@@ -34,8 +34,8 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   }
 
   /// Import skeleton data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectSkeleton> {
-    Ok(AlifeObjectSkeleton {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       name: read_ini_field("name", section)?,
       flags: read_ini_field("flags", section)?,
       source_id: read_ini_field("source_id", section)?,
@@ -89,13 +89,13 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectSkeleton = AlifeObjectSkeleton {
+    let original: AlifeObjectSkeleton = AlifeObjectSkeleton {
       name: String::from("test-name"),
       flags: 33,
       source_id: 753,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 13);
 
@@ -114,13 +114,16 @@ mod tests {
     let read_object: AlifeObjectSkeleton =
       AlifeObjectSkeleton::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(read_object, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let mut ltx: Ltx = Ltx::new();
+
     let first: AlifeObjectSkeleton = AlifeObjectSkeleton {
       name: String::from("test-name-first"),
       flags: 33,
@@ -133,18 +136,14 @@ mod tests {
       source_id: 526,
     };
 
-    let exported_filename: String =
-      get_relative_test_sample_file_path(file!(), "import_export.ini");
-    let mut exported: Ltx = Ltx::new();
+    first.export("first", &mut ltx);
+    second.export("second", &mut ltx);
 
-    first.export("first", &mut exported);
-    second.export("second", &mut exported);
-
-    exported.write_to(&mut overwrite_test_relative_resource_as_file(
-      &exported_filename,
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     let read_first: AlifeObjectSkeleton =
       AlifeObjectSkeleton::import(source.section("first").unwrap())?;

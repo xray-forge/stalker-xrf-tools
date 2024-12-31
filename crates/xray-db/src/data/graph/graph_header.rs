@@ -20,8 +20,8 @@ pub struct GraphHeader {
 
 impl GraphHeader {
   /// Read header data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<GraphHeader> {
-    Ok(GraphHeader {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       version: reader.read_u8()?,
       vertices_count: reader.read_u16::<T>()?,
       edges_count: reader.read_u32::<T>()?,
@@ -44,12 +44,12 @@ impl GraphHeader {
   }
 
   /// Import graph header from ini file.
-  pub fn import(config: &Ltx) -> DatabaseResult<GraphHeader> {
-    let section: &Section = config
+  pub fn import(ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini
       .section("header")
       .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
 
-    Ok(GraphHeader {
+    Ok(Self {
       version: read_ini_field("version", section)?,
       vertices_count: read_ini_field("vertex_count", section)?,
       edges_count: read_ini_field("edges_count", section)?,
@@ -97,7 +97,7 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let header: GraphHeader = GraphHeader {
+    let original: GraphHeader = GraphHeader {
       version: 16,
       vertices_count: 4000,
       edges_count: 230_250,
@@ -106,7 +106,7 @@ mod tests {
       levels_count: 5,
     };
 
-    header.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 28);
 
@@ -129,16 +129,14 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_header: GraphHeader = GraphHeader::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_header, header);
+    assert_eq!(GraphHeader::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let header: GraphHeader = GraphHeader {
+    let original: GraphHeader = GraphHeader {
       version: 16,
       vertices_count: 6434,
       edges_count: 456,
@@ -152,19 +150,20 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    header.export(&mut ltx);
+    original.export(&mut ltx);
     ltx.write_to(&mut file)?;
 
-    let read_header: GraphHeader = GraphHeader::import(&open_ini_config(config_path)?)?;
-
-    assert_eq!(read_header, header);
+    assert_eq!(
+      GraphHeader::import(&open_ini_config(config_path)?)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let header: GraphHeader = GraphHeader {
+    let original: GraphHeader = GraphHeader {
       version: 12,
       vertices_count: 2341,
       edges_count: 12513,
@@ -177,14 +176,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(header).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      header,
+      original,
       serde_json::from_str::<GraphHeader>(&serialized).unwrap()
     );
 

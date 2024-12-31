@@ -20,8 +20,8 @@ pub struct AlifeObjectSpaceRestrictor {
 
 impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
   /// Read generic space restrictor data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectSpaceRestrictor> {
-    Ok(AlifeObjectSpaceRestrictor {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAbstract::read::<T>(reader)?,
       shape: reader.read_shapes::<SpawnByteOrder>()?,
       restrictor_type: reader.read_u8()?,
@@ -29,8 +29,8 @@ impl AlifeObjectInheritedReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpace
   }
 
   /// Import generic space restrictor data from the chunk.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectSpaceRestrictor> {
-    Ok(AlifeObjectSpaceRestrictor {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAbstract::import(section)?,
       shape: Shape::import_list(section)?,
       restrictor_type: read_ini_field("restrictor_type", section)?,
@@ -74,20 +74,20 @@ mod tests {
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use std::fs::File;
+  use std::path::Path;
   use xray_ltx::Ltx;
-  use xray_test_utils::assertions::files_are_equal_by_path;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_abstract.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor {
+    let original: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract {
         game_vertex_id: 1001,
         distance: 65.25,
@@ -110,7 +110,7 @@ mod tests {
       restrictor_type: 2,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 106);
 
@@ -126,16 +126,21 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 106 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectSpaceRestrictor =
-      AlifeObjectSpaceRestrictor::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectSpaceRestrictor::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
-  fn test_import_export_object() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult<()> {
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let mut file: File = overwrite_file(config_path)?;
+    let mut ltx: Ltx = Ltx::new();
+
     let first: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract {
         game_vertex_id: 2593,
@@ -174,17 +179,12 @@ mod tests {
       restrictor_type: 4,
     };
 
-    let exported_filename: String = get_relative_test_sample_file_path(file!(), "exported.ini");
-    let mut exported: Ltx = Ltx::new();
+    first.export("first", &mut ltx);
+    second.export("second", &mut ltx);
 
-    first.export("first", &mut exported);
-    second.export("second", &mut exported);
+    ltx.write_to(&mut file)?;
 
-    exported.write_to(&mut overwrite_test_relative_resource_as_file(
-      &exported_filename,
-    )?)?;
-
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+    let source: Ltx = open_ini_config(config_path)?;
 
     let read_first: AlifeObjectSpaceRestrictor =
       AlifeObjectSpaceRestrictor::import(source.section("first").unwrap())?;
@@ -193,21 +193,6 @@ mod tests {
 
     assert_eq!(read_first, first);
     assert_eq!(read_second, second);
-
-    let imported_filename: String = get_relative_test_sample_file_path(file!(), "imported.ini");
-    let mut imported: Ltx = Ltx::new();
-
-    read_first.export("first", &mut imported);
-    read_second.export("second", &mut imported);
-
-    imported.write_to(&mut overwrite_test_relative_resource_as_file(
-      &imported_filename,
-    )?)?;
-
-    assert!(files_are_equal_by_path(
-      get_absolute_test_resource_path(&exported_filename),
-      get_absolute_test_resource_path(&imported_filename)
-    )?);
 
     Ok(())
   }

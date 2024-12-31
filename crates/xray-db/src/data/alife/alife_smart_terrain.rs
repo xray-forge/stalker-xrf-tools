@@ -24,7 +24,7 @@ pub struct AlifeSmartTerrain {
 
 impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   /// Read alife smart terrain data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeSmartTerrain> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let base: AlifeSmartZone = AlifeSmartZone::read::<T>(reader)?;
 
     let arriving_objects_count: u8 = reader.read_u8()?;
@@ -75,7 +75,7 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
       "Unexpected data provided with smart terrain save"
     );
 
-    Ok(AlifeSmartTerrain {
+    Ok(Self {
       base,
       arriving_objects_count,
       object_job_descriptors_count,
@@ -88,8 +88,8 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   }
 
   /// Import alife smart terrain data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeSmartTerrain> {
-    Ok(AlifeSmartTerrain {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeSmartZone::import(section)?,
       arriving_objects_count: read_ini_field("arriving_objects_count", section)?,
       object_job_descriptors_count: read_ini_field("object_job_descriptors_count", section)?,
@@ -170,11 +170,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_smart_terrain.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeSmartTerrain = AlifeSmartTerrain {
+    let original: AlifeSmartTerrain = AlifeSmartTerrain {
       base: AlifeSmartZone {
         base: AlifeObjectSpaceRestrictor {
           base: AlifeObjectAbstract {
@@ -208,7 +208,7 @@ mod tests {
       save_marker: 6,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 114);
 
@@ -224,9 +224,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 114 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeSmartTerrain = AlifeSmartTerrain::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeSmartTerrain::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

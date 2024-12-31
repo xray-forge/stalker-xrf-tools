@@ -21,7 +21,7 @@ pub struct AlifeSmartCover {
 
 impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   /// Read smart cover data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeSmartCover> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read::<T>(reader)?;
 
     let last_description: String = reader.read_null_terminated_win_string()?;
@@ -35,7 +35,7 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
       loopholes.push(AlifeSmartCoverLoophole { name, enabled })
     }
 
-    Ok(AlifeSmartCover {
+    Ok(Self {
       base,
       last_description,
       loopholes,
@@ -43,8 +43,8 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
   }
 
   /// Import smart cover data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeSmartCover> {
-    Ok(AlifeSmartCover {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectSmartCover::import(section)?,
       last_description: read_ini_field("last_description", section)?,
       loopholes: AlifeSmartCoverLoophole::string_to_list(&read_ini_field::<String>(
@@ -106,11 +106,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_smart_cover.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectSmartCover = AlifeObjectSmartCover {
+    let original: AlifeObjectSmartCover = AlifeObjectSmartCover {
       base: AlifeObjectDynamic {
         base: AlifeObjectAbstract {
           game_vertex_id: 6734,
@@ -140,7 +140,7 @@ mod tests {
       can_fire: 1,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 131);
 
@@ -156,10 +156,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 131 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectSmartCover =
-      AlifeObjectSmartCover::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectSmartCover::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
