@@ -58,8 +58,8 @@ impl GraphLevel {
   }
 
   /// Export graph level data into ini.
-  pub fn export(&self, section: &str, config: &mut Ltx) {
-    config
+  pub fn export(&self, section: &str, ini: &mut Ltx) {
+    ini
       .with_section(section)
       .set("name", &self.name)
       .set("section", &self.section)

@@ -3,8 +3,8 @@ use crate::chunk::writer::ChunkWriter;
 use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
 };
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
 use crate::data::meta::alife_class::AlifeClass;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
@@ -44,7 +44,7 @@ pub struct AlifeObjectBase {
 
 impl AlifeObjectBase {
   /// Read generic alife object data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectBase> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let mut index_reader: ChunkReader = reader.read_child_by_index(0)?;
 
     let index: u16 = index_reader.read_u16::<T>()?;
@@ -119,7 +119,7 @@ impl AlifeObjectBase {
     assert!(update_reader.is_ended());
     assert!(reader.is_ended());
 
-    Ok(AlifeObjectBase {
+    Ok(Self {
       index,
       net_action,
       section,
@@ -209,11 +209,11 @@ impl AlifeObjectBase {
   }
 
   /// Import alife object data from ini file section.
-  pub fn import(section: &Section) -> DatabaseResult<AlifeObjectBase> {
+  pub fn import(section: &Section) -> DatabaseResult<Self> {
     let object_section: String = read_ini_field("section", section)?;
     let clsid: ClsId = ClsId::from_section(&object_section);
 
-    Ok(AlifeObjectBase {
+    Ok(Self {
       index: read_ini_field("index", section)?,
       id: read_ini_field("id", section)?,
       net_action: read_ini_field("net_action", section)?,
@@ -289,11 +289,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object_base() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_object_base.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectBase = AlifeObjectBase {
+    let original: AlifeObjectBase = AlifeObjectBase {
       index: 10,
       id: 340,
       net_action: 1,
@@ -336,7 +336,7 @@ mod tests {
       update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     };
 
-    object.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 203);
 
@@ -352,28 +352,28 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 203 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectBase = AlifeObjectBase::read::<SpawnByteOrder>(&mut reader)?;
+    let read: AlifeObjectBase = AlifeObjectBase::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object.index, object.index);
-    assert_eq!(read_object.id, object.id);
-    assert_eq!(read_object.net_action, object.net_action);
-    assert_eq!(read_object.section, object.section);
-    assert_eq!(read_object.clsid, object.clsid);
-    assert_eq!(read_object.name, object.name);
-    assert_eq!(read_object.script_game_id, object.script_game_id);
-    assert_eq!(read_object.script_rp, object.script_rp);
-    assert_eq!(read_object.position, object.position);
-    assert_eq!(read_object.direction, object.direction);
-    assert_eq!(read_object.respawn_time, object.respawn_time);
-    assert_eq!(read_object.parent_id, object.parent_id);
-    assert_eq!(read_object.phantom_id, object.phantom_id);
-    assert_eq!(read_object.script_flags, object.script_flags);
-    assert_eq!(read_object.version, object.version);
-    assert_eq!(read_object.game_type, object.game_type);
-    assert_eq!(read_object.script_version, object.script_version);
-    assert_eq!(read_object.client_data_size, object.client_data_size);
-    assert_eq!(read_object.spawn_id, object.spawn_id);
-    assert_eq!(read_object.update_data, object.update_data);
+    assert_eq!(read.index, original.index);
+    assert_eq!(read.id, original.id);
+    assert_eq!(read.net_action, original.net_action);
+    assert_eq!(read.section, original.section);
+    assert_eq!(read.clsid, original.clsid);
+    assert_eq!(read.name, original.name);
+    assert_eq!(read.script_game_id, original.script_game_id);
+    assert_eq!(read.script_rp, original.script_rp);
+    assert_eq!(read.position, original.position);
+    assert_eq!(read.direction, original.direction);
+    assert_eq!(read.respawn_time, original.respawn_time);
+    assert_eq!(read.parent_id, original.parent_id);
+    assert_eq!(read.phantom_id, original.phantom_id);
+    assert_eq!(read.script_flags, original.script_flags);
+    assert_eq!(read.version, original.version);
+    assert_eq!(read.game_type, original.game_type);
+    assert_eq!(read.script_version, original.script_version);
+    assert_eq!(read.client_data_size, original.client_data_size);
+    assert_eq!(read.spawn_id, original.spawn_id);
+    assert_eq!(read.update_data, original.update_data);
 
     Ok(())
   }

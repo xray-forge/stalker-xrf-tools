@@ -59,13 +59,13 @@ impl ParticlesEffectsChunk {
 
   /// Export particles effects data into provided path.
   pub fn export(&self, path: &Path) -> DatabaseResult<()> {
-    let mut particles_effects_config: Ltx = Ltx::new();
+    let mut particles_effects_ini: Ltx = Ltx::new();
 
     for effect in &self.effects {
-      effect.export(&effect.name, &mut particles_effects_config)?;
+      effect.export(&effect.name, &mut particles_effects_ini)?;
     }
 
-    particles_effects_config.write_to(&mut create_export_file(&path.join("effects.ltx"))?)?;
+    particles_effects_ini.write_to(&mut create_export_file(&path.join("effects.ltx"))?)?;
 
     Ok(())
   }

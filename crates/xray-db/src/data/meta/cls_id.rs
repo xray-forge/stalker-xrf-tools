@@ -109,7 +109,7 @@ pub enum ClsId {
 }
 
 impl ClsId {
-  pub fn from_section(section: &str) -> ClsId {
+  pub fn from_section(section: &str) -> Self {
     SECTION_TO_CLS_ID
       .get(section)
       .cloned()

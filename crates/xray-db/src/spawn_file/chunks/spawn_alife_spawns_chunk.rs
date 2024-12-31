@@ -87,10 +87,10 @@ impl SpawnALifeSpawnsChunk {
 
   /// Import alife spawns data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let config: Ltx = open_ini_config(&path.join("alife_spawns.ltx"))?;
+    let ini: Ltx = open_ini_config(&path.join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
-    for (_, props) in config.iter() {
+    for (_, props) in ini.iter() {
       objects.push(AlifeObjectBase::import(props)?);
     }
 

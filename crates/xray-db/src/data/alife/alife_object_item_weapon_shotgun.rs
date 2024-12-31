@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -16,15 +16,15 @@ pub struct AlifeObjectItemWeaponShotgun {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemWeaponShotgun> for AlifeObjectItemWeaponShotgun {
   /// Read shotgun object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectItemWeaponShotgun> {
-    Ok(AlifeObjectItemWeaponShotgun {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectItemWeapon::read::<T>(reader)?,
     })
   }
 
   /// Import alife object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectItemWeaponShotgun> {
-    Ok(AlifeObjectItemWeaponShotgun {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectItemWeapon::import(section)?,
     })
   }
@@ -51,11 +51,11 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
   use crate::data::alife::alife_object_item_weapon_shotgun::AlifeObjectItemWeaponShotgun;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{
@@ -64,12 +64,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_item_weapon_shotgun.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectItemWeaponShotgun = AlifeObjectItemWeaponShotgun {
+    let original: AlifeObjectItemWeaponShotgun = AlifeObjectItemWeaponShotgun {
       base: AlifeObjectItemWeapon {
         base: AlifeObjectItem {
           base: AlifeObjectDynamicVisual {
@@ -98,7 +97,7 @@ mod tests {
       },
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 67);
 
@@ -114,10 +113,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 67 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectItemWeaponShotgun =
-      AlifeObjectItemWeaponShotgun::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectItemWeaponShotgun::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

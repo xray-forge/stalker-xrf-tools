@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{import_vector_from_string, read_ini_field};
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -26,8 +26,8 @@ pub struct AlifeObjectCreature {
 
 impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   /// Read alife creature object data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectCreature> {
-    Ok(AlifeObjectCreature {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       team: reader.read_u8()?,
       squad: reader.read_u8()?,
@@ -41,8 +41,8 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
   }
 
   /// Import alife creature object from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectCreature> {
-    Ok(AlifeObjectCreature {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::import(section)?,
       team: read_ini_field("team", section)?,
       squad: read_ini_field("squad", section)?,
@@ -94,11 +94,11 @@ impl AlifeObjectGeneric for AlifeObjectCreature {
       .set("health", self.health.to_string())
       .set(
         "dynamic_out_restrictions",
-        &export_vector_to_string(&self.dynamic_out_restrictions),
+        export_vector_to_string(&self.dynamic_out_restrictions),
       )
       .set(
         "dynamic_in_restrictions",
-        &export_vector_to_string(&self.dynamic_in_restrictions),
+        export_vector_to_string(&self.dynamic_in_restrictions),
       )
       .set("killer_id", self.killer_id.to_string())
       .set("game_death_time", self.game_death_time.to_string());
@@ -112,8 +112,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
@@ -183,6 +183,9 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let mut ltx: Ltx = Ltx::new();
+
     let first: AlifeObjectCreature = AlifeObjectCreature {
       base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
@@ -233,18 +236,14 @@ mod tests {
       game_death_time: 17,
     };
 
-    let exported_filename: String =
-      get_relative_test_sample_file_path(file!(), "import_export.ini");
-    let mut exported: Ltx = Ltx::new();
+    first.export("first", &mut ltx);
+    second.export("second", &mut ltx);
 
-    first.export("first", &mut exported);
-    second.export("second", &mut exported);
-
-    exported.write_to(&mut overwrite_test_relative_resource_as_file(
-      &exported_filename,
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     let read_first: AlifeObjectCreature =
       AlifeObjectCreature::import(source.section("first").unwrap())?;

@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -93,9 +93,9 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

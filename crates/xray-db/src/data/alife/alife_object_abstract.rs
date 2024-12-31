@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{string_from_base64, string_to_base64};
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -25,8 +25,8 @@ pub struct AlifeObjectAbstract {
 
 impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   /// Read generic alife object base data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectAbstract> {
-    Ok(AlifeObjectAbstract {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       game_vertex_id: reader.read_u16::<T>()?,
       distance: reader.read_f32::<T>()?,
       direct_control: reader.read_u32::<T>()?,
@@ -39,8 +39,8 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   }
 
   /// Import generic alife object base data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectAbstract> {
-    Ok(AlifeObjectAbstract {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       game_vertex_id: read_ini_field("game_vertex_id", section)?,
       distance: read_ini_field("distance", section)?,
       direct_control: read_ini_field("direct_control", section)?,
@@ -89,8 +89,8 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
@@ -109,7 +109,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectAbstract = AlifeObjectAbstract {
+    let original: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1001,
       distance: 65.25,
       direct_control: 412421,
@@ -120,7 +120,7 @@ mod tests {
       spawn_story_id: 25,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 38);
 
@@ -136,16 +136,20 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 38 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectAbstract =
-      AlifeObjectAbstract::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectAbstract::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let mut ltx: Ltx = Ltx::new();
+
     let first: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1001,
       distance: 65.25,
@@ -168,18 +172,14 @@ mod tests {
       spawn_story_id: 255,
     };
 
-    let exported_filename: String =
-      get_relative_test_sample_file_path(file!(), "import_export.ini");
-    let mut exported: Ltx = Ltx::new();
+    first.export("first", &mut ltx);
+    second.export("second", &mut ltx);
 
-    first.export("first", &mut exported);
-    second.export("second", &mut exported);
-
-    exported.write_to(&mut overwrite_test_relative_resource_as_file(
-      &exported_filename,
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     let read_first: AlifeObjectAbstract =
       AlifeObjectAbstract::import(source.section("first").unwrap())?;
@@ -194,7 +194,7 @@ mod tests {
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let object: AlifeObjectAbstract = AlifeObjectAbstract {
+    let original: AlifeObjectAbstract = AlifeObjectAbstract {
       game_vertex_id: 1005,
       distance: 23.25,
       direct_control: 262342,
@@ -209,14 +209,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(object).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      object,
+      original,
       serde_json::from_str::<AlifeObjectAbstract>(&serialized).unwrap()
     );
 

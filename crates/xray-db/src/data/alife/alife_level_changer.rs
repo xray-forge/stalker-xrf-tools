@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -29,8 +29,8 @@ pub struct AlifeLevelChanger {
 
 impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
   /// Read alife level changer object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeLevelChanger> {
-    let object: AlifeLevelChanger = AlifeLevelChanger {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let object: Self = Self {
       base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
       dest_game_vertex_id: reader.read_u16::<T>()?,
       dest_level_vertex_id: reader.read_u32::<T>()?,
@@ -54,8 +54,8 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
   }
 
   /// Import alife level changer object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeLevelChanger> {
-    Ok(AlifeLevelChanger {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectSpaceRestrictor::import(section)?,
       dest_game_vertex_id: read_ini_field("dest_game_vertex_id", section)?,
       dest_level_vertex_id: read_ini_field("dest_level_vertex_id", section)?,
@@ -123,9 +123,9 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_level_changer::AlifeLevelChanger;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -136,11 +136,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_level_changer.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeLevelChanger = AlifeLevelChanger {
+    let original: AlifeLevelChanger = AlifeLevelChanger {
       base: AlifeObjectSpaceRestrictor {
         base: AlifeObjectAbstract {
           game_vertex_id: 12451,
@@ -176,7 +176,7 @@ mod tests {
       save_marker: 26,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 177);
 
@@ -194,7 +194,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeLevelChanger = AlifeLevelChanger::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(read_object, original);
 
     Ok(())
   }

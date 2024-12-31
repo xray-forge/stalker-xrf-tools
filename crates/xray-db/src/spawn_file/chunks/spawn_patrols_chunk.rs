@@ -56,18 +56,18 @@ impl SpawnPatrolsChunk {
 
   /// Import patrols data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let patrols_config: Ltx = open_ini_config(&path.join("patrols.ltx"))?;
-    let patrol_points_config: Ltx = open_ini_config(&path.join("patrol_points.ltx"))?;
-    let patrol_links_config: Ltx = open_ini_config(&path.join("patrol_links.ltx"))?;
+    let patrols_ini: Ltx = open_ini_config(&path.join("patrols.ltx"))?;
+    let patrol_points_ini: Ltx = open_ini_config(&path.join("patrol_points.ltx"))?;
+    let patrol_links_ini: Ltx = open_ini_config(&path.join("patrol_links.ltx"))?;
 
     let mut patrols: Vec<Patrol> = Vec::new();
 
-    for section in patrols_config.sections() {
+    for section in patrols_ini.sections() {
       patrols.push(Patrol::import(
         section,
-        &patrols_config,
-        &patrol_points_config,
-        &patrol_links_config,
+        &patrols_ini,
+        &patrol_points_ini,
+        &patrol_links_ini,
       )?);
     }
 
@@ -78,22 +78,22 @@ impl SpawnPatrolsChunk {
 
   /// Export patrols data into provided path.
   pub fn export(&self, path: &Path) -> DatabaseResult<()> {
-    let mut patrols_config: Ltx = Ltx::new();
-    let mut patrol_points_config: Ltx = Ltx::new();
-    let mut patrol_links_config: Ltx = Ltx::new();
+    let mut patrols_ini: Ltx = Ltx::new();
+    let mut patrol_points_ini: Ltx = Ltx::new();
+    let mut patrol_links_ini: Ltx = Ltx::new();
 
     for patrol in &self.patrols {
       patrol.export(
         &patrol.name,
-        &mut patrols_config,
-        &mut patrol_points_config,
-        &mut patrol_links_config,
+        &mut patrols_ini,
+        &mut patrol_points_ini,
+        &mut patrol_links_ini,
       )?;
     }
 
-    patrols_config.write_to(&mut create_export_file(&path.join("patrols.ltx"))?)?;
-    patrol_points_config.write_to(&mut create_export_file(&path.join("patrol_points.ltx"))?)?;
-    patrol_links_config.write_to(&mut create_export_file(&path.join("patrol_links.ltx"))?)?;
+    patrols_ini.write_to(&mut create_export_file(&path.join("patrols.ltx"))?)?;
+    patrol_points_ini.write_to(&mut create_export_file(&path.join("patrol_points.ltx"))?)?;
+    patrol_links_ini.write_to(&mut create_export_file(&path.join("patrol_links.ltx"))?)?;
 
     log::info!("Exported patrols chunk");
 

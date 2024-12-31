@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::time::Time;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -92,11 +92,11 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

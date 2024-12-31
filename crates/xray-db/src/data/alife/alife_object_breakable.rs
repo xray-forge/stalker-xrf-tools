@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -18,16 +18,16 @@ pub struct AlifeObjectBreakable {
 
 impl AlifeObjectInheritedReader<AlifeObjectBreakable> for AlifeObjectBreakable {
   /// Read alife breakable object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectBreakable> {
-    Ok(AlifeObjectBreakable {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       health: reader.read_f32::<SpawnByteOrder>()?,
     })
   }
 
   /// Import alife breakable object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectBreakable> {
-    Ok(AlifeObjectBreakable {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::import(section)?,
       health: read_ini_field("health", section)?,
     })
@@ -62,8 +62,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_breakable::AlifeObjectBreakable;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{
@@ -72,10 +72,9 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_breakable.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let object: AlifeObjectBreakable = AlifeObjectBreakable {
       base: AlifeObjectDynamicVisual {
@@ -111,10 +110,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 55 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectBreakable =
-      AlifeObjectBreakable::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectBreakable::read::<SpawnByteOrder>(&mut reader)?,
+      object
+    );
 
     Ok(())
   }

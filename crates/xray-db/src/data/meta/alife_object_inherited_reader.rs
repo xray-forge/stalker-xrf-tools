@@ -1,5 +1,5 @@
 use crate::chunk::reader::ChunkReader;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use xray_ltx::Section;

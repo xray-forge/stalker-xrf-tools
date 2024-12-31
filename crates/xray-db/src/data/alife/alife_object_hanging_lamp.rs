@@ -1,9 +1,9 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -40,8 +40,8 @@ pub struct AlifeObjectHangingLamp {
 
 impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
   /// Read hanging lamp data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectHangingLamp> {
-    Ok(AlifeObjectHangingLamp {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
       main_color: reader.read_u32::<T>()?,
@@ -69,8 +69,8 @@ impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLa
   }
 
   /// Import alife hanging lamp object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectHangingLamp> {
-    Ok(AlifeObjectHangingLamp {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::import(section)?,
       skeleton: AlifeObjectSkeleton::import(section)?,
       main_color: read_ini_field("main_color", section)?,
@@ -172,10 +172,10 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{
@@ -184,12 +184,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_hanging_lamp.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectHangingLamp = AlifeObjectHangingLamp {
+    let original: AlifeObjectHangingLamp = AlifeObjectHangingLamp {
       base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 15,
@@ -232,7 +231,7 @@ mod tests {
       volumetric_distance: 3.1,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 234);
 
@@ -248,10 +247,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 234 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectHangingLamp =
-      AlifeObjectHangingLamp::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectHangingLamp::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

@@ -59,13 +59,13 @@ impl ParticlesGroupsChunk {
 
   /// Export particles groups data into provided path.
   pub fn export(&self, path: &Path) -> DatabaseResult<()> {
-    let mut particles_effects_config: Ltx = Ltx::new();
+    let mut particles_effects_ini: Ltx = Ltx::new();
 
     for group in &self.groups {
-      group.export(&group.name, &mut particles_effects_config)?;
+      group.export(&group.name, &mut particles_effects_ini)?;
     }
 
-    particles_effects_config.write_to(&mut create_export_file(&path.join("groups.ltx"))?)?;
+    particles_effects_ini.write_to(&mut create_export_file(&path.join("groups.ltx"))?)?;
 
     Ok(())
   }

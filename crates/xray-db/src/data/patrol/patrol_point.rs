@@ -110,8 +110,8 @@ impl PatrolPoint {
   }
 
   /// Export patrol point data into ini.
-  pub fn export(&self, section: &str, config: &mut Ltx) -> DatabaseResult<()> {
-    config
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
       .with_section(section)
       .set("name", &self.name)
       .set("flags", self.flags.to_string())

@@ -1,10 +1,10 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_creature::AlifeObjectCreature;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -22,8 +22,8 @@ pub struct AlifeObjectActor {
 
 impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
   /// Read actor data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectActor> {
-    Ok(AlifeObjectActor {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectCreature::read::<T>(reader)?,
       trader: AlifeObjectTraderAbstract::read::<T>(reader)?,
       skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
@@ -32,8 +32,8 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
   }
 
   /// Import actor data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectActor> {
-    Ok(AlifeObjectActor {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectCreature::import(section)?,
       trader: AlifeObjectTraderAbstract::import(section)?,
       skeleton: AlifeObjectSkeleton::import(section)?,
@@ -75,10 +75,10 @@ mod tests {
   use crate::data::alife::alife_object_actor::AlifeObjectActor;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{
@@ -87,11 +87,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "alife_object_actor.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectActor = AlifeObjectActor {
+    let original: AlifeObjectActor = AlifeObjectActor {
       base: AlifeObjectCreature {
         base: AlifeObjectDynamicVisual {
           base: AlifeObjectAbstract {
@@ -136,7 +136,7 @@ mod tests {
       holder_id: 0,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 185);
 
@@ -152,9 +152,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 185 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectActor = AlifeObjectActor::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectActor::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

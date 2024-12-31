@@ -168,11 +168,11 @@ impl Patrol {
   pub fn export(
     &self,
     section: &str,
-    patrols_config: &mut Ltx,
-    patrol_points_config: &mut Ltx,
-    patrol_links_config: &mut Ltx,
+    patrols_ini: &mut Ltx,
+    patrol_points_ini: &mut Ltx,
+    patrol_links_ini: &mut Ltx,
   ) -> DatabaseResult<()> {
-    patrols_config
+    patrols_ini
       .with_section(section)
       .set("name", &self.name)
       .set(
@@ -187,14 +187,11 @@ impl Patrol {
       .set("links_count", self.links.len().to_string());
 
     for point in &self.points {
-      point.export(
-        &format!("{}.{}", self.name, point.name),
-        patrol_points_config,
-      )?;
+      point.export(&format!("{}.{}", self.name, point.name), patrol_points_ini)?;
     }
 
     for (index, link) in self.links.iter().enumerate() {
-      link.export(&format!("{}.{}", self.name, index), patrol_links_config)?;
+      link.export(&format!("{}.{}", self.name, index), patrol_links_ini)?;
     }
 
     Ok(())

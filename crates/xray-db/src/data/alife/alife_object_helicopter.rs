@@ -1,10 +1,10 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
@@ -23,8 +23,8 @@ pub struct AlifeObjectHelicopter {
 
 impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
   /// Read helicopter data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectHelicopter> {
-    Ok(AlifeObjectHelicopter {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       motion: AlifeObjectMotion::read::<T>(reader)?,
       skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
@@ -34,8 +34,8 @@ impl AlifeObjectInheritedReader<AlifeObjectHelicopter> for AlifeObjectHelicopter
   }
 
   /// Import helicopter object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectHelicopter> {
-    Ok(AlifeObjectHelicopter {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectDynamicVisual::import(section)?,
       skeleton: AlifeObjectSkeleton::import(section)?,
       motion: AlifeObjectMotion::import(section)?,
@@ -78,11 +78,11 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
   use crate::data::alife::alife_object_helicopter::AlifeObjectHelicopter;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{
@@ -91,10 +91,9 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_helicopter.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let object: AlifeObjectHelicopter = AlifeObjectHelicopter {
       base: AlifeObjectDynamicVisual {
@@ -139,10 +138,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 111 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectHelicopter =
-      AlifeObjectHelicopter::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectHelicopter::read::<SpawnByteOrder>(&mut reader)?,
+      object
+    );
 
     Ok(())
   }

@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_shape::AlifeObjectShape;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
@@ -18,16 +18,16 @@ pub struct AlifeObjectClimable {
 
 impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
   /// Read climable object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectClimable> {
-    Ok(AlifeObjectClimable {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectShape::read::<T>(reader)?,
       game_material: reader.read_null_terminated_win_string()?,
     })
   }
 
   /// Import climable object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectClimable> {
-    Ok(AlifeObjectClimable {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectShape::import(section)?,
       game_material: read_ini_field("game_material", section)?,
     })
@@ -61,9 +61,9 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_climable::AlifeObjectClimable;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -74,12 +74,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_climable.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectClimable = AlifeObjectClimable {
+    let original: AlifeObjectClimable = AlifeObjectClimable {
       base: AlifeObjectShape {
         base: AlifeObjectAbstract {
           game_vertex_id: 4223,
@@ -104,7 +103,7 @@ mod tests {
       game_material: String::from("dest-material"),
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 119);
 
@@ -120,10 +119,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 119 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectClimable =
-      AlifeObjectClimable::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectClimable::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

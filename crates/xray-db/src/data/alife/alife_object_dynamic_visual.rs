@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -19,8 +19,8 @@ pub struct AlifeObjectDynamicVisual {
 
 impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamicVisual {
   /// Read visual object data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectDynamicVisual> {
-    Ok(AlifeObjectDynamicVisual {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAbstract::read::<T>(reader)?,
       visual_name: reader.read_null_terminated_win_string()?,
       visual_flags: reader.read_u8()?,
@@ -28,8 +28,8 @@ impl AlifeObjectInheritedReader<AlifeObjectDynamicVisual> for AlifeObjectDynamic
   }
 
   /// Import visual object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectDynamicVisual> {
-    Ok(AlifeObjectDynamicVisual {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAbstract::import(section)?,
       visual_name: read_ini_field("visual_name", section)?,
       visual_flags: read_ini_field("visual_flags", section)?,
@@ -66,8 +66,8 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
@@ -86,7 +86,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
+    let original: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract {
         game_vertex_id: 1001,
         distance: 65.25,
@@ -101,7 +101,7 @@ mod tests {
       visual_flags: 33,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 51);
 
@@ -120,13 +120,16 @@ mod tests {
     let read_object: AlifeObjectDynamicVisual =
       AlifeObjectDynamicVisual::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(read_object, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let mut ltx: Ltx = Ltx::new();
+
     let first: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract {
         game_vertex_id: 41243,
@@ -157,18 +160,14 @@ mod tests {
       visual_flags: 54,
     };
 
-    let exported_filename: String =
-      get_relative_test_sample_file_path(file!(), "import_export.ini");
-    let mut exported: Ltx = Ltx::new();
+    first.export("first", &mut ltx);
+    second.export("second", &mut ltx);
 
-    first.export("first", &mut exported);
-    second.export("second", &mut exported);
-
-    exported.write_to(&mut overwrite_test_relative_resource_as_file(
-      &exported_filename,
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&exported_filename))?;
+    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     let read_first: AlifeObjectDynamicVisual =
       AlifeObjectDynamicVisual::import(source.section("first").unwrap())?;

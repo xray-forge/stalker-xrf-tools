@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -22,8 +22,8 @@ pub struct AlifeObjectCustomZone {
 
 impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
   /// Read alife custom zone object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectCustomZone> {
-    Ok(AlifeObjectCustomZone {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
       max_power: reader.read_f32::<SpawnByteOrder>()?,
       owner_id: reader.read_u32::<SpawnByteOrder>()?,
@@ -33,9 +33,9 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
     })
   }
 
-  /// Import alife custom zone object data from ini config section..
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectCustomZone> {
-    Ok(AlifeObjectCustomZone {
+  /// Import alife custom zone object data from ini config section.
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectSpaceRestrictor::import(section)?,
       max_power: read_ini_field("max_power", section)?,
       owner_id: read_ini_field("owner_id", section)?,
@@ -81,9 +81,9 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -94,12 +94,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_custom_zone.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectCustomZone = AlifeObjectCustomZone {
+    let original: AlifeObjectCustomZone = AlifeObjectCustomZone {
       base: AlifeObjectSpaceRestrictor {
         base: AlifeObjectAbstract {
           game_vertex_id: 42343,
@@ -129,7 +128,7 @@ mod tests {
       start_time_shift: 300,
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 126);
 
@@ -145,10 +144,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 126 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectCustomZone =
-      AlifeObjectCustomZone::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectCustomZone::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

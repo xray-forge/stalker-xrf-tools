@@ -66,10 +66,10 @@ impl SpawnArtefactSpawnsChunk {
   /// Import artefact spawns data from provided path.
   /// Parse ini files and populate spawn file.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let config: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
+    let ini: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
-    for (_, props) in &config {
+    for (_, props) in &ini {
       nodes.push(ArtefactSpawnPoint::import(props)?);
     }
 

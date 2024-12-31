@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::time::Time;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -19,16 +19,16 @@ pub struct AlifeAnomalousZone {
 
 impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
   /// Read anomalous zone object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeAnomalousZone> {
-    Ok(AlifeAnomalousZone {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAnomalyZone::read::<T>(reader)?,
       last_spawn_time: Time::read_optional::<T>(reader)?,
     })
   }
 
   /// Import anomalous zone object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeAnomalousZone> {
-    Ok(AlifeAnomalousZone {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectAnomalyZone::import(section)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
         "last_spawn_time",
@@ -55,7 +55,7 @@ impl AlifeObjectGeneric for AlifeAnomalousZone {
 
     ini.with_section(section).set(
       "last_spawn_time",
-      &Time::export_to_string(self.last_spawn_time.as_ref()),
+      Time::export_to_string(self.last_spawn_time.as_ref()),
     );
   }
 }
@@ -68,9 +68,9 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::shape::Shape;
   use crate::data::time::Time;
   use crate::data::vector_3d::Vector3d;
@@ -82,12 +82,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_anomalous_zone.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeAnomalousZone = AlifeAnomalousZone {
+    let original: AlifeAnomalousZone = AlifeAnomalousZone {
       base: AlifeObjectAnomalyZone {
         base: AlifeObjectCustomZone {
           base: AlifeObjectSpaceRestrictor {
@@ -133,7 +132,7 @@ mod tests {
       }),
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 145);
 
@@ -149,9 +148,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 145 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeAnomalousZone = AlifeAnomalousZone::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeAnomalousZone::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

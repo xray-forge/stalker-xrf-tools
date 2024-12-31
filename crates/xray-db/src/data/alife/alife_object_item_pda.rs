@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
+use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -20,8 +20,8 @@ pub struct AlifeObjectItemPda {
 
 impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
   /// Read pda object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<AlifeObjectItemPda> {
-    Ok(AlifeObjectItemPda {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectItem::read::<T>(reader)?,
       owner: reader.read_u16::<SpawnByteOrder>()?,
       character: reader.read_null_terminated_win_string()?,
@@ -30,8 +30,8 @@ impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
   }
 
   /// Import pda object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<AlifeObjectItemPda> {
-    Ok(AlifeObjectItemPda {
+  fn import(section: &Section) -> DatabaseResult<Self> {
+    Ok(Self {
       base: AlifeObjectItem::import(section)?,
       owner: read_ini_field("owner", section)?,
       character: read_ini_field("character", section)?,
@@ -71,10 +71,10 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::alife::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_pda::AlifeObjectItemPda;
+  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{
@@ -83,12 +83,11 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_object() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult<()> {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "alife_object_item_pda.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectItemPda = AlifeObjectItemPda {
+    let original: AlifeObjectItemPda = AlifeObjectItemPda {
       base: AlifeObjectItem {
         base: AlifeObjectDynamicVisual {
           base: AlifeObjectAbstract {
@@ -112,7 +111,7 @@ mod tests {
       info_portion: String::from("info-portion"),
     };
 
-    object.write(&mut writer)?;
+    original.write(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 78);
 
@@ -128,9 +127,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 78 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectItemPda = AlifeObjectItemPda::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(
+      AlifeObjectItemPda::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
