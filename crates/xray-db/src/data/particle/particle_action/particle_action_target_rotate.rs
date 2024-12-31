@@ -1,9 +1,11 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::vector_3d::Vector3d;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,4 +27,17 @@ impl ParticleActionTargetRotate {
 }
 
 #[typetag::serde]
-impl ParticleActionGeneric for ParticleActionTargetRotate {}
+impl ParticleActionGeneric for ParticleActionTargetRotate {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!()
+  }
+
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("rot", self.rot.to_string())
+      .set("scale", self.scale.to_string());
+
+    Ok(())
+  }
+}

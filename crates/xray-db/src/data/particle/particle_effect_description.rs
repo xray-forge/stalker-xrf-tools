@@ -50,6 +50,7 @@ impl ParticleDescription {
   /// Export particle effect description data into provided path.
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     todo!("Implement");
+
     Ok(())
   }
 }

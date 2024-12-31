@@ -1,9 +1,11 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -31,4 +33,21 @@ impl ParticleActionExplosion {
 }
 
 #[typetag::serde]
-impl ParticleActionGeneric for ParticleActionExplosion {}
+impl ParticleActionGeneric for ParticleActionExplosion {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!()
+  }
+
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("center", self.center.to_string())
+      .set("velocity", self.velocity.to_string())
+      .set("magnitude", self.magnitude.to_string())
+      .set("st_dev", self.st_dev.to_string())
+      .set("age", self.age.to_string())
+      .set("epsilon", self.epsilon.to_string());
+
+    Ok(())
+  }
+}

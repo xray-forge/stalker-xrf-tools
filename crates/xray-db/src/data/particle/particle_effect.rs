@@ -39,6 +39,7 @@ pub struct ParticleEffect {
 
 impl ParticleEffect {
   pub const META_TYPE: &'static str = "particle_effect";
+  pub const EDITOR_DATA_META_TYPE: &'static str = "editor_data";
 
   pub const VERSION_CHUNK_ID: u32 = 1;
   pub const NAME_CHUNK_ID: u32 = 2;
@@ -173,6 +174,7 @@ impl ParticleEffect {
     if let Some(editor_data) = &self.editor_data {
       ini
         .with_section(format!("{section}.editor_data"))
+        .set("$type", Self::EDITOR_DATA_META_TYPE)
         .set("value", bytes_to_base64(&editor_data));
     }
 

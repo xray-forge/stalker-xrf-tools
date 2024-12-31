@@ -1,9 +1,11 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::vector_3d::Vector3d;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -31,4 +33,20 @@ impl ParticleActionTargetColor {
 }
 
 #[typetag::serde]
-impl ParticleActionGeneric for ParticleActionTargetColor {}
+impl ParticleActionGeneric for ParticleActionTargetColor {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!()
+  }
+
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("color", self.color.to_string())
+      .set("alpha", self.alpha.to_string())
+      .set("scale", self.scale.to_string())
+      .set("time_from", self.time_from.to_string())
+      .set("time_to", self.time_to.to_string());
+
+    Ok(())
+  }
+}

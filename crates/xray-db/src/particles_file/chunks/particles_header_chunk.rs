@@ -16,6 +16,7 @@ pub struct ParticlesHeaderChunk {
 }
 
 impl ParticlesHeaderChunk {
+  pub const META_TYPE: &'static str = "particles_header";
   pub const CHUNK_ID: u32 = 1;
 
   /// Read version chunk by position descriptor.
@@ -53,10 +54,16 @@ impl ParticlesHeaderChunk {
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
+    let meta_type: String = read_ini_field("$type", section)?;
     let header_chunk: ParticlesHeaderChunk = ParticlesHeaderChunk {
       version: read_ini_field("version", section)?,
     };
 
+    assert_eq!(
+      meta_type,
+      Self::META_TYPE,
+      "Expect type metadata to be set as {meta_type}"
+    );
     assert_eq!(header_chunk.version, 1, "Expect version chunk to be 1");
 
     Ok(header_chunk)
@@ -69,6 +76,7 @@ impl ParticlesHeaderChunk {
 
     ltx
       .with_section("header")
+      .set("$type", Self::META_TYPE)
       .set("version", self.version.to_string());
 
     ltx.write_to(&mut create_export_file(&path.join("header.ltx"))?)?;

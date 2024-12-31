@@ -1,10 +1,12 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::data::vector_3d::Vector3d;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -42,4 +44,26 @@ impl ParticleActionSource {
 }
 
 #[typetag::serde]
-impl ParticleActionGeneric for ParticleActionSource {}
+impl ParticleActionGeneric for ParticleActionSource {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!()
+  }
+
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("position", self.position.to_string())
+      .set("velocity", self.velocity.to_string())
+      .set("rot", self.rot.to_string())
+      .set("size", self.size.to_string())
+      .set("color", self.color.to_string())
+      .set("alpha", self.alpha.to_string())
+      .set("particle_rate", self.particle_rate.to_string())
+      .set("age", self.age.to_string())
+      .set("age_sigma", self.age_sigma.to_string())
+      .set("parent_vel", self.parent_vel.to_string())
+      .set("parent_motion", self.parent_motion.to_string());
+
+    Ok(())
+  }
+}

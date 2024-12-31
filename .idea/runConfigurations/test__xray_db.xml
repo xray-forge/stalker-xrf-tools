@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="test: xray-db" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="test">
+    <option name="buildProfileId" value="test" />
     <option name="command" value="test --package xray-db" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />

@@ -79,8 +79,7 @@ impl ParticleAction {
       .set("action_flags", self.action_flags.to_string())
       .set("action_type", self.action_type.to_string());
 
-    // todo: Data write
-    // self.data.export
+    self.data.export(section, ini)?;
 
     Ok(())
   }

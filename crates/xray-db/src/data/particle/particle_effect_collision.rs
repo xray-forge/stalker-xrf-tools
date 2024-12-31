@@ -49,7 +49,7 @@ impl ParticleEffectCollision {
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
-      .set("type", Self::META_TYPE)
+      .set("$type", Self::META_TYPE)
       .set(
         "collide_one_minus_friction",
         self.collide_one_minus_friction.to_string(),
