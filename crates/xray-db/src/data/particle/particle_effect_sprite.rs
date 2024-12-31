@@ -1,8 +1,11 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::particle::particle_group::ParticleGroup;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
+use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,6 +15,8 @@ pub struct ParticleEffectSprite {
 }
 
 impl ParticleEffectSprite {
+  pub const META_TYPE: &'static str = "particle_effect_sprite";
+
   /// Read effect sprite data from chunk redder.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleEffectSprite> {
     let particle_sprite: ParticleEffectSprite = ParticleEffectSprite {
@@ -31,6 +36,22 @@ impl ParticleEffectSprite {
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.shader_name)?;
     writer.write_null_terminated_win_string(&self.texture_name)?;
+
+    Ok(())
+  }
+
+  /// Import particle effect sprite data from provided path.
+  pub fn import(path: &Path) -> DatabaseResult<ParticleGroup> {
+    todo!("Implement");
+  }
+
+  /// Export particle effect sprite data into provided path.
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("$type", Self::META_TYPE)
+      .set("shader_name", &self.shader_name)
+      .set("texture_name", &self.texture_name);
 
     Ok(())
   }

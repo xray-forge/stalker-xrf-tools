@@ -1,4 +1,4 @@
-pub mod effect_action;
+pub mod particle_action;
 pub mod particle_domain;
 pub mod particle_effect;
 pub mod particle_effect_collision;

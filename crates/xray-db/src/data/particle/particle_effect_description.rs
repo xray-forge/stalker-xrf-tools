@@ -1,7 +1,11 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::writer::ChunkWriter;
+use crate::data::particle::particle_action::particle_action::ParticleAction;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
+use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,6 +17,8 @@ pub struct ParticleDescription {
 }
 
 impl ParticleDescription {
+  pub const META_TYPE: &'static str = "particle_description";
+
   /// Read particle effect description data from chunk redder.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleDescription> {
     let particle_description: ParticleDescription = ParticleDescription {
@@ -28,5 +34,22 @@ impl ParticleDescription {
     );
 
     Ok(particle_description)
+  }
+
+  /// Write particle effect description data into chunk writer.
+  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!("Implement");
+    Ok(())
+  }
+
+  /// Import particle effect description data from provided path.
+  pub fn import(path: &Path) -> DatabaseResult<ParticleAction> {
+    todo!("Implement");
+  }
+
+  /// Export particle effect description data into provided path.
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    todo!("Implement");
+    Ok(())
   }
 }

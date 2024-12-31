@@ -75,7 +75,7 @@ impl UnpackParticlesCommand {
     let particles_file: ParticlesFile = ParticlesFile::read_from_path::<ParticlesByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
-    particles_file.export_to_path::<ParticlesByteOrder>(destination)?;
+    particles_file.export_to_path(destination)?;
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 

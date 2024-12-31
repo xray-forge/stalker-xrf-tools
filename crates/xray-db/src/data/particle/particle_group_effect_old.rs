@@ -3,6 +3,8 @@ use crate::chunk::writer::ChunkWriter;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
+use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,6 +17,8 @@ pub struct ParticleGroupEffectOld {
 }
 
 impl ParticleGroupEffectOld {
+  pub const META_TYPE: &'static str = "particle_group_effect_old";
+
   /// Read list of old effect groups data from chunk reader.
   pub fn read_list<T: ByteOrder>(
     reader: &mut ChunkReader,
@@ -75,6 +79,25 @@ impl ParticleGroupEffectOld {
     writer.write_f32::<T>(self.time_0)?;
     writer.write_f32::<T>(self.time_1)?;
     writer.write_u32::<T>(self.flags)?;
+
+    Ok(())
+  }
+
+  /// Import particles group effect data from provided path.
+  pub fn import(path: &Path) -> DatabaseResult<ParticleGroupEffectOld> {
+    todo!("Implement");
+  }
+
+  /// Export particles group effect data into provided path.
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("$type", Self::META_TYPE)
+      .set("name", &self.name)
+      .set("on_play_child_name", &self.on_play_child_name)
+      .set("time_0", self.time_0.to_string())
+      .set("time_1", self.time_1.to_string())
+      .set("flags", self.flags.to_string());
 
     Ok(())
   }

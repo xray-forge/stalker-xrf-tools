@@ -3,36 +3,43 @@ use crate::chunk::utils::{
   find_chunk_by_id, read_f32_chunk, read_f32_vector_chunk, read_null_terminated_win_string_chunk,
   read_till_end_binary_chunk, read_u16_chunk, read_u32_chunk,
 };
-use crate::data::particle::effect_action::particle_action::ParticleAction;
+use crate::chunk::writer::ChunkWriter;
+use crate::data::particle::particle_action::particle_action::ParticleAction;
 use crate::data::particle::particle_effect_collision::ParticleEffectCollision;
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
+use crate::data::particle::particle_group::ParticleGroup;
 use crate::data::vector_3d::Vector3d;
+use crate::export::string::bytes_to_base64;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
+use xray_ltx::{Ltx, Section};
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleEffect {
-  version: u16,
-  name: String,
-  max_particles: u32,
-  actions: Vec<ParticleAction>,
-  flags: u32,
-  frame: Option<ParticleEffectFrame>,
-  sprite: ParticleEffectSprite,
-  time_limit: Option<f32>,
-  collision: Option<ParticleEffectCollision>,
-  velocity_scale: Option<Vector3d>,
-  description: Option<ParticleDescription>,
-  rotation: Option<Vector3d>,
-  editor_data: Option<Vec<u8>>,
+  pub version: u16,
+  pub name: String,
+  pub max_particles: u32,
+  pub actions: Vec<ParticleAction>,
+  pub flags: u32,
+  pub frame: Option<ParticleEffectFrame>,
+  pub sprite: ParticleEffectSprite,
+  pub time_limit: Option<f32>,
+  pub collision: Option<ParticleEffectCollision>,
+  pub velocity_scale: Option<Vector3d>,
+  pub description: Option<ParticleDescription>,
+  pub rotation: Option<Vector3d>,
+  pub editor_data: Option<Vec<u8>>,
 }
 
 impl ParticleEffect {
+  pub const META_TYPE: &'static str = "particle_effect";
+
   pub const VERSION_CHUNK_ID: u32 = 1;
   pub const NAME_CHUNK_ID: u32 = 2;
   pub const MAX_PARTICLES_CHUNK_ID: u32 = 3;
@@ -106,5 +113,69 @@ impl ParticleEffect {
     );
 
     Ok(effect)
+  }
+
+  /// Write particle effect data into chunk writer.
+  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!("Implement")
+  }
+
+  /// Import particle effect data from provided path.
+  pub fn import(path: &Path) -> DatabaseResult<ParticleGroup> {
+    todo!("Implement");
+  }
+
+  /// Export particle effect data into provided path.
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("$type", Self::META_TYPE)
+      .set("version", self.version.to_string())
+      .set("name", &self.name)
+      .set("actions_count", self.actions.len().to_string())
+      .set("max_particles", self.max_particles.to_string())
+      .set("flags", self.flags.to_string());
+
+    self.sprite.export(&format!("{section}.sprite"), ini)?;
+
+    let ini_section: &mut Section = ini
+      .section_mut(section)
+      .expect("Unexpected missing section after write operation");
+
+    if let Some(time_limit) = &self.time_limit {
+      ini_section.insert("time_limit", time_limit.to_string());
+    }
+
+    if let Some(velocity_scale) = &self.velocity_scale {
+      ini_section.insert("velocity_scale", velocity_scale.to_string());
+    }
+
+    if let Some(rotation) = &self.rotation {
+      ini_section.insert("rotation", rotation.to_string());
+    }
+
+    for (index, action) in self.actions.iter().enumerate() {
+      action.export(&format!("{section}.action.{index}"), ini)?
+    }
+
+    if let Some(frame) = &self.frame {
+      frame.export(&format!("{section}.frame"), ini)?;
+    }
+
+    if let Some(collision) = &self.collision {
+      collision.export(&format!("{section}.collision"), ini)?;
+    }
+
+    if let Some(description) = &self.description {
+      description.export(&format!("{section}.description"), ini)?;
+    }
+
+    if let Some(editor_data) = &self.editor_data {
+      ini
+        .with_section(format!("{section}.editor_data"))
+        .set("value", bytes_to_base64(&editor_data));
+    }
+
+    Ok(())
   }
 }

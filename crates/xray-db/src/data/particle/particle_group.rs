@@ -3,12 +3,15 @@ use crate::chunk::utils::{
   find_chunk_by_id, read_f32_chunk, read_null_terminated_win_string_chunk, read_u16_chunk,
   read_u32_chunk,
 };
+use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_group_effect::ParticleGroupEffect;
 use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
+use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -23,6 +26,8 @@ pub struct ParticleGroup {
 }
 
 impl ParticleGroup {
+  pub const META_TYPE: &'static str = "particle_group";
+
   pub const CHUNK_VERSION: u32 = 1;
   pub const CHUNK_NAME: u32 = 2;
   pub const CHUNK_FLAGS: u32 = 3;
@@ -72,5 +77,42 @@ impl ParticleGroup {
     );
 
     Ok(particle_group)
+  }
+
+  /// Write particle group data into chunk writer.
+  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!("Implement")
+  }
+
+  /// Import particles group data from provided path.
+  pub fn import(path: &Path) -> DatabaseResult<ParticleGroup> {
+    todo!("Implement");
+  }
+
+  /// Export particles group data into provided path.
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("$type", Self::META_TYPE)
+      .set("version", self.version.to_string())
+      .set("name", &self.name)
+      .set("flags", self.flags.to_string())
+      .set("time_limit", self.time_limit.to_string());
+
+    for (index, effect) in self.effects.iter().enumerate() {
+      effect.export(&format!("{section}.effect.{index}"), ini)?;
+    }
+
+    if let Some(description) = &self.description {
+      description.export(&format!("{section}.description"), ini)?;
+    }
+
+    if let Some(effect_old) = &self.effects_old {
+      for (index, effect) in effect_old.iter().enumerate() {
+        effect.export(&format!("{section}.effect_old.{index}"), ini)?
+      }
+    }
+
+    Ok(())
   }
 }

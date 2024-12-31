@@ -1,8 +1,11 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::data::particle::particle_action::particle_action::ParticleAction;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
+use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,6 +18,8 @@ pub struct ParticleEffectFrame {
 }
 
 impl ParticleEffectFrame {
+  pub const META_TYPE: &'static str = "particle_effect_frame";
+
   /// Read frame data from chunk redder.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleEffectFrame> {
     let particle_frame: ParticleEffectFrame = ParticleEffectFrame {
@@ -39,6 +44,31 @@ impl ParticleEffectFrame {
     writer.write_u32::<T>(self.frame_dimension_x)?;
     writer.write_u32::<T>(self.frame_count)?;
     writer.write_f32::<T>(self.frame_speed)?;
+
+    Ok(())
+  }
+
+  /// Import particle effect frame data from provided path.
+  pub fn import(path: &Path) -> DatabaseResult<ParticleAction> {
+    todo!("Implement");
+  }
+
+  /// Export particle effect frame data into provided path.
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    ini
+      .with_section(section)
+      .set("$type", Self::META_TYPE)
+      .set(
+        "texture_size",
+        format!("{},{}", self.texture_size.0, self.texture_size.1),
+      )
+      .set(
+        "reserved",
+        format!("{},{}", self.reserved.0, self.reserved.1),
+      )
+      .set("frame_dimension_x", self.frame_dimension_x.to_string())
+      .set("frame_count", self.frame_count.to_string())
+      .set("frame_speed", self.frame_speed.to_string());
 
     Ok(())
   }

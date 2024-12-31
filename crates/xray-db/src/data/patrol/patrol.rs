@@ -165,7 +165,7 @@ impl Patrol {
 
   /// Export patrol data into ltx config files.
   /// Creates separate files for patrols, points and links.
-  pub fn export<T: ByteOrder>(
+  pub fn export(
     &self,
     section: &str,
     patrols_config: &mut Ltx,
@@ -391,7 +391,7 @@ mod tests {
     let mut links_ltx: Ltx = Ltx::new();
     let mut points_ltx: Ltx = Ltx::new();
 
-    patrol.export::<SpawnByteOrder>(
+    patrol.export(
       &patrol.name,
       &mut patrol_ltx,
       &mut points_ltx,

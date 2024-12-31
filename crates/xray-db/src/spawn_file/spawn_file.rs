@@ -2,11 +2,11 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::utils::find_chunk_by_id;
 use crate::chunk::writer::ChunkWriter;
 use crate::export::file::create_export_file;
-use crate::spawn_file::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
-use crate::spawn_file::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
-use crate::spawn_file::spawn_graphs_chunk::SpawnGraphsChunk;
-use crate::spawn_file::spawn_header_chunk::SpawnHeaderChunk;
-use crate::spawn_file::spawn_patrols_chunk::SpawnPatrolsChunk;
+use crate::spawn_file::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
+use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
+use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
+use crate::spawn_file::chunks::spawn_header_chunk::SpawnHeaderChunk;
+use crate::spawn_file::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
@@ -135,10 +135,10 @@ impl SpawnFile {
   pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     fs::create_dir_all(path)?;
 
-    self.header.export::<T>(path)?;
-    self.alife_spawn.export::<T>(path)?;
-    self.artefact_spawn.export::<T>(path)?;
-    self.patrols.export::<T>(path)?;
+    self.header.export(path)?;
+    self.alife_spawn.export(path)?;
+    self.artefact_spawn.export(path)?;
+    self.patrols.export(path)?;
     self.graphs.export::<T>(path)?;
 
     Ok(())
