@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::Index;
 
 /// todo: Add script to parse system ini and read all the data from ini/txt file instead.
-#[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize, Eq)]
 pub enum ClsId {
   AiCrow,
   AiFleG,

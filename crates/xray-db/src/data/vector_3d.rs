@@ -1,12 +1,14 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::error::database_error::DatabaseError;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Vector3d<T = f32> {
   pub x: T,
@@ -14,19 +16,14 @@ pub struct Vector3d<T = f32> {
   pub z: T,
 }
 
-#[derive(Debug)]
-pub enum Vector3dError {
-  ParsingError(String),
-}
-
 impl Vector3d<f32> {
-  pub fn new(x: f32, y: f32, z: f32) -> Vector3d {
-    Vector3d { x, y, z }
+  pub fn new(x: f32, y: f32, z: f32) -> Self {
+    Self { x, y, z }
   }
 
   /// Read vector coordinates from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vector3d<f32>> {
-    Ok(Vector3d {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       x: reader.read_f32::<T>()?,
       y: reader.read_f32::<T>()?,
       z: reader.read_f32::<T>()?,
@@ -50,36 +47,36 @@ impl Display for Vector3d<f32> {
 }
 
 impl FromStr for Vector3d<f32> {
-  type Err = Vector3dError;
+  type Err = DatabaseError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = s.split(',').collect();
 
     if parts.len() != 3 {
-      return Err(Vector3dError::ParsingError(String::from(
+      return Err(DatabaseParseError::new_database_error(
         "Failed to parse 3d vector from string, expected 3 numbers",
-      )));
+      ));
     }
 
-    Ok(Vector3d {
+    Ok(Self {
       x: parts[0]
         .trim()
         .parse::<f32>()
-        .or(Err(Vector3dError::ParsingError(String::from(
+        .or(Err(DatabaseParseError::new_database_error(
           "Failed to parse vector X value",
-        ))))?,
+        )))?,
       y: parts[1]
         .trim()
         .parse::<f32>()
-        .or(Err(Vector3dError::ParsingError(String::from(
+        .or(Err(DatabaseParseError::new_database_error(
           "Failed to parse vector Y value",
-        ))))?,
+        )))?,
       z: parts[2]
         .trim()
         .parse::<f32>()
-        .or(Err(Vector3dError::ParsingError(String::from(
+        .or(Err(DatabaseParseError::new_database_error(
           "Failed to parse vector Z value",
-        ))))?,
+        )))?,
     })
   }
 }
@@ -106,13 +103,13 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let vector_old: Vector3d = Vector3d {
+    let original: Vector3d = Vector3d {
       x: 1.5,
       y: 2.7,
       z: 3.2,
     };
 
-    vector_old.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 12);
 
@@ -135,30 +132,30 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let vector_new: Vector3d = Vector3d::read::<SpawnByteOrder>(&mut reader)?;
+    let read: Vector3d = Vector3d::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(vector_new, vector_old);
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_from_to_str() -> DatabaseResult<()> {
-    let vector: Vector3d = Vector3d {
+    let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,
       z: 30.2,
     };
 
-    assert_eq!(vector.to_string(), "10.5,20.7,30.2");
-    assert_eq!(Vector3d::from_str("10.5,20.7,30.2").unwrap(), vector);
+    assert_eq!(original.to_string(), "10.5,20.7,30.2");
+    assert_eq!(Vector3d::from_str("10.5,20.7,30.2")?, original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let vector_old: Vector3d = Vector3d {
+    let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,
       z: 30.2,
@@ -168,14 +165,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(vector_old).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      vector_old,
+      original,
       serde_json::from_str::<Vector3d>(&serialized).unwrap()
     );
 

@@ -1,10 +1,11 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::constants::META_TYPE_FIELD;
+use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,15 +21,13 @@ impl ParticleGroupEffectOld {
   pub const META_TYPE: &'static str = "particle_group_effect_old";
 
   /// Read list of old effect groups data from chunk reader.
-  pub fn read_list<T: ByteOrder>(
-    reader: &mut ChunkReader,
-  ) -> DatabaseResult<Vec<ParticleGroupEffectOld>> {
-    let mut effects: Vec<ParticleGroupEffectOld> = Vec::new();
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+    let mut effects: Vec<Self> = Vec::new();
 
     let count: u32 = reader.read_u32::<T>()?;
 
     for _ in 0..count {
-      effects.push(ParticleGroupEffectOld::read::<T>(reader)?);
+      effects.push(Self::read::<T>(reader)?);
     }
 
     assert_eq!(
@@ -46,8 +45,8 @@ impl ParticleGroupEffectOld {
   }
 
   /// Read old group effect from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleGroupEffectOld> {
-    let particle_group = ParticleGroupEffectOld {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let particle_group = Self {
       name: reader.read_null_terminated_win_string()?,
       on_play_child_name: reader.read_null_terminated_win_string()?,
       time_0: reader.read_f32::<T>()?,
@@ -60,7 +59,7 @@ impl ParticleGroupEffectOld {
 
   /// Write old effects list data into the writer.
   pub fn write_list<T: ByteOrder>(
-    effects: &Vec<ParticleGroupEffectOld>,
+    effects: &Vec<Self>,
     writer: &mut ChunkWriter,
   ) -> DatabaseResult<()> {
     writer.write_u32::<T>(effects.len() as u32)?;
@@ -84,15 +83,34 @@ impl ParticleGroupEffectOld {
   }
 
   /// Import particles group effect data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticleGroupEffectOld> {
-    todo!("Implement");
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
+      panic!("Particle group effect old '{section_name}' should be defined in ltx file")
+    });
+
+    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+
+    assert_eq!(
+      meta_type,
+      Self::META_TYPE,
+      "Expected corrected meta type field for '{}' importing",
+      Self::META_TYPE
+    );
+
+    Ok(Self {
+      name: read_ini_field("name", section)?,
+      on_play_child_name: read_ini_field("on_play_child_name", section)?,
+      time_0: read_ini_field("time_0", section)?,
+      time_1: read_ini_field("time_1", section)?,
+      flags: read_ini_field("flags", section)?,
+    })
   }
 
   /// Export particles group effect data into provided path.
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
-      .set("$type", Self::META_TYPE)
+      .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("name", &self.name)
       .set("on_play_child_name", &self.on_play_child_name)
       .set("time_0", self.time_0.to_string())
@@ -108,15 +126,18 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
+  use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
+  use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   #[test]
@@ -124,7 +145,7 @@ mod tests {
     let filename: String = String::from("particle_group_effect_old.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let effect_old: ParticleGroupEffectOld = ParticleGroupEffectOld {
+    let original: ParticleGroupEffectOld = ParticleGroupEffectOld {
       name: String::from("effect_old_name"),
       on_play_child_name: String::from("effect_old_on_play_child_name"),
       time_0: 150.50,
@@ -132,7 +153,7 @@ mod tests {
       flags: 1392,
     };
 
-    effect_old.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 58);
 
@@ -155,17 +176,41 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_effect_old: ParticleGroupEffectOld =
-      ParticleGroupEffectOld::read::<SpawnByteOrder>(&mut reader)?;
+    let read: ParticleGroupEffectOld = ParticleGroupEffectOld::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_effect_old, effect_old);
+    assert_eq!(read, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> DatabaseResult<()> {
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let mut file: File = overwrite_file(config_path)?;
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: ParticleGroupEffectOld = ParticleGroupEffectOld {
+      name: String::from("test-effect-old"),
+      on_play_child_name: String::from("test-effect-old-on-play-child-name"),
+      time_0: 1.5,
+      time_1: 5.30,
+      flags: 33,
+    };
+
+    original.export("data", &mut ltx)?;
+    ltx.write_to(&mut file)?;
+
+    let read: ParticleGroupEffectOld =
+      ParticleGroupEffectOld::import("data", &open_ini_config(config_path)?)?;
+
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize_object() -> DatabaseResult<()> {
-    let effect_old: ParticleGroupEffectOld = ParticleGroupEffectOld {
+    let original: ParticleGroupEffectOld = ParticleGroupEffectOld {
       name: String::from("effect_old_name_serialize"),
       on_play_child_name: String::from("effect_old_on_play_child_name_serialize"),
       time_0: 126.5,
@@ -177,14 +222,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialized.json"),
     )?;
 
-    file.write_all(json!(effect_old).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      effect_old,
+      original,
       serde_json::from_str::<ParticleGroupEffectOld>(&serialized).unwrap()
     );
 

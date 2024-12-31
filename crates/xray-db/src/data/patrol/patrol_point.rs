@@ -22,8 +22,8 @@ pub struct PatrolPoint {
 
 impl PatrolPoint {
   /// Read points from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<PatrolPoint>> {
-    let mut points: Vec<PatrolPoint> = Vec::new();
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+    let mut points: Vec<Self> = Vec::new();
 
     for (index, mut point_reader) in ChunkIterator::new(reader).enumerate() {
       let mut index_reader: ChunkReader = point_reader.read_child_by_index(0)?;
@@ -31,7 +31,7 @@ impl PatrolPoint {
 
       assert_eq!(index, index_reader.read_u32::<T>()? as usize);
 
-      points.push(PatrolPoint::read::<T>(&mut points_reader)?);
+      points.push(Self::read::<T>(&mut points_reader)?);
 
       assert!(index_reader.is_ended());
       assert!(point_reader.is_ended());
@@ -46,8 +46,8 @@ impl PatrolPoint {
   }
 
   /// Read patrol point data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<PatrolPoint> {
-    let point: PatrolPoint = PatrolPoint {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let point: Self = Self {
       name: reader.read_null_terminated_win_string()?,
       position: reader.read_f32_3d_vector::<T>()?,
       flags: reader.read_u32::<T>()?,
@@ -64,10 +64,7 @@ impl PatrolPoint {
   }
 
   /// Write list of patrol points into chunk writer.
-  pub fn write_list<T: ByteOrder>(
-    points: &[PatrolPoint],
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(points: &[Self], writer: &mut ChunkWriter) -> DatabaseResult<()> {
     for (index, point) in points.iter().enumerate() {
       let mut point_chunk_writer: ChunkWriter = ChunkWriter::new();
 
@@ -98,12 +95,12 @@ impl PatrolPoint {
   }
 
   /// Import patrol point data from ini config.
-  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<PatrolPoint> {
-    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
       panic!("Patrol point section {section_name} should be defined in ltx file")
     });
 
-    Ok(PatrolPoint {
+    Ok(Self {
       name: read_ini_field("name", section)?,
       position: read_ini_field("position", section)?,
       flags: read_ini_field("flags", section)?,
@@ -113,7 +110,7 @@ impl PatrolPoint {
   }
 
   /// Export patrol point data into ini.
-  pub fn export(&self, section: &str, config: &mut Ltx) {
+  pub fn export(&self, section: &str, config: &mut Ltx) -> DatabaseResult<()> {
     config
       .with_section(section)
       .set("name", &self.name)
@@ -121,6 +118,8 @@ impl PatrolPoint {
       .set("position", self.position.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
       .set("game_vertex_id", self.game_vertex_id.to_string());
+
+    Ok(())
   }
 }
 
@@ -149,7 +148,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let point: PatrolPoint = PatrolPoint {
+    let original: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-name"),
       position: Vector3d::new(1.5, -2.3, 1.0),
       flags: 33,
@@ -157,7 +156,7 @@ mod tests {
       game_vertex_id: 555,
     };
 
-    point.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 40);
 
@@ -173,10 +172,9 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 40 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read: PatrolPoint = PatrolPoint::read::<SpawnByteOrder>(&mut reader)?;
 
-    let read_point: PatrolPoint = PatrolPoint::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_point, point);
+    assert_eq!(read, original);
 
     Ok(())
   }
@@ -186,7 +184,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
-    let points: Vec<PatrolPoint> = vec![
+    let original: Vec<PatrolPoint> = vec![
       PatrolPoint {
         name: String::from("patrol-point-name-1"),
         position: Vector3d::new(1.5, -2.3, 1.0),
@@ -203,7 +201,7 @@ mod tests {
       },
     ];
 
-    PatrolPoint::write_list::<SpawnByteOrder>(&points, &mut writer)?;
+    PatrolPoint::write_list::<SpawnByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 140);
 
@@ -219,10 +217,9 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 140 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+    let read: Vec<PatrolPoint> = PatrolPoint::read_list::<SpawnByteOrder>(&mut reader)?;
 
-    let read_points: Vec<PatrolPoint> = PatrolPoint::read_list::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(points, read_points);
+    assert_eq!(original, read);
 
     Ok(())
   }
@@ -233,7 +230,7 @@ mod tests {
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
-    let point: PatrolPoint = PatrolPoint {
+    let original: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-exported"),
       position: Vector3d::new(3.5, -2.3, 6.0),
       flags: 73,
@@ -241,20 +238,19 @@ mod tests {
       game_vertex_id: 364,
     };
 
-    point.export("patrol_point", &mut ltx);
+    original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read_point: PatrolPoint =
-      PatrolPoint::import("patrol_point", &open_ini_config(config_path)?)?;
+    let read: PatrolPoint = PatrolPoint::import("data", &open_ini_config(config_path)?)?;
 
-    assert_eq!(read_point, point);
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let point: PatrolPoint = PatrolPoint {
+    let original: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-serialized"),
       position: Vector3d::new(5.5, -2.3, 6.0),
       flags: 53,
@@ -267,14 +263,14 @@ mod tests {
       "serialize_deserialize.json",
     ))?;
 
-    file.write_all(json!(point).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      point,
+      original,
       serde_json::from_str::<PatrolPoint>(&serialized).unwrap()
     );
 

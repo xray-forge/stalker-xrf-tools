@@ -20,12 +20,12 @@ pub enum DatabaseError {
 impl Display for DatabaseError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {
     match *self {
-      DatabaseError::Io(ref error) => error.fmt(formatter),
-      DatabaseError::InvalidChunk(ref error) => error.fmt(formatter),
-      DatabaseError::Parse(ref error) => error.fmt(formatter),
-      DatabaseError::NotImplemented(ref error) => error.fmt(formatter),
-      DatabaseError::LtxError(ref error) => error.fmt(formatter),
-      DatabaseError::Generic(ref error) => error.fmt(formatter),
+      Self::Io(ref error) => error.fmt(formatter),
+      Self::InvalidChunk(ref error) => error.fmt(formatter),
+      Self::Parse(ref error) => error.fmt(formatter),
+      Self::NotImplemented(ref error) => error.fmt(formatter),
+      Self::LtxError(ref error) => error.fmt(formatter),
+      Self::Generic(ref error) => error.fmt(formatter),
     }
   }
 }
@@ -33,48 +33,48 @@ impl Display for DatabaseError {
 impl Error for DatabaseError {
   fn source(&self) -> Option<&(dyn Error + 'static)> {
     match *self {
-      DatabaseError::Io(ref error) => error.source(),
-      DatabaseError::InvalidChunk(ref error) => error.source(),
-      DatabaseError::Parse(ref error) => error.source(),
-      DatabaseError::LtxError(ref error) => error.source(),
-      DatabaseError::NotImplemented(ref error) => error.source(),
-      DatabaseError::Generic(ref error) => error.source(),
+      Self::Io(ref error) => error.source(),
+      Self::InvalidChunk(ref error) => error.source(),
+      Self::Parse(ref error) => error.source(),
+      Self::LtxError(ref error) => error.source(),
+      Self::NotImplemented(ref error) => error.source(),
+      Self::Generic(ref error) => error.source(),
     }
   }
 }
 
 impl From<io::Error> for DatabaseError {
   fn from(error: io::Error) -> Self {
-    DatabaseError::Io(error)
+    Self::Io(error)
   }
 }
 
 impl From<DatabaseInvalidChunkError> for DatabaseError {
   fn from(error: DatabaseInvalidChunkError) -> Self {
-    DatabaseError::InvalidChunk(error)
+    Self::InvalidChunk(error)
   }
 }
 
 impl From<DatabaseNotImplementedError> for DatabaseError {
   fn from(error: DatabaseNotImplementedError) -> Self {
-    DatabaseError::NotImplemented(error)
+    Self::NotImplemented(error)
   }
 }
 
 impl From<DatabaseParseError> for DatabaseError {
   fn from(error: DatabaseParseError) -> Self {
-    DatabaseError::Parse(error)
+    Self::Parse(error)
   }
 }
 
 impl From<LtxError> for DatabaseError {
   fn from(error: LtxError) -> Self {
-    DatabaseError::LtxError(error)
+    Self::LtxError(error)
   }
 }
 
 impl From<Box<dyn Error>> for DatabaseError {
   fn from(error: Box<dyn Error>) -> Self {
-    DatabaseError::Generic(error)
+    Self::Generic(error)
   }
 }

@@ -15,11 +15,11 @@ pub struct PatrolLink {
 
 impl PatrolLink {
   /// Read links from chunk file.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<PatrolLink>> {
-    let mut links: Vec<PatrolLink> = Vec::new();
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+    let mut links: Vec<Self> = Vec::new();
 
     while reader.has_data() {
-      links.push(PatrolLink::read::<T>(reader)?);
+      links.push(Self::read::<T>(reader)?);
     }
 
     if reader.read_bytes_remain() > 0 {
@@ -35,7 +35,7 @@ impl PatrolLink {
   }
 
   /// Read patrol link from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<PatrolLink> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let index: u32 = reader.read_u32::<T>()?;
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -50,17 +50,14 @@ impl PatrolLink {
 
     assert_eq!(vertices.len(), count as usize);
 
-    Ok(PatrolLink {
+    Ok(Self {
       index,
       links: vertices,
     })
   }
 
   /// Write list patrol links into chunk writer.
-  pub fn write_list<T: ByteOrder>(
-    links: &Vec<PatrolLink>,
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(links: &[Self], writer: &mut ChunkWriter) -> DatabaseResult<()> {
     for link in links {
       link.write::<T>(writer)?;
     }
@@ -82,8 +79,8 @@ impl PatrolLink {
   }
 
   /// Import patrol point link from ini config.
-  pub fn import(section_name: &str, config: &Ltx) -> DatabaseResult<PatrolLink> {
-    let section: &Section = config.section(section_name).unwrap_or_else(|| {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
       panic!("Patrol point link '{section_name}' should be defined in ltx file")
     });
 
@@ -101,11 +98,11 @@ impl PatrolLink {
 
     assert_eq!(links.len(), count);
 
-    Ok(PatrolLink { index, links })
+    Ok(Self { index, links })
   }
 
   /// Export patrol link data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set("index", self.index.to_string())
@@ -117,6 +114,8 @@ impl PatrolLink {
         .set(format!("from.{index}"), from.to_string())
         .set(format!("weight.{index}"), weight.to_string());
     }
+
+    Ok(())
   }
 }
 
@@ -144,12 +143,12 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let link: PatrolLink = PatrolLink {
+    let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
 
-    link.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 32);
 
@@ -167,10 +166,9 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
+    let read: PatrolLink = PatrolLink::read::<SpawnByteOrder>(&mut reader)?;
 
-    let read_link: PatrolLink = PatrolLink::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_link, link);
+    assert_eq!(read, original);
 
     Ok(())
   }
@@ -180,7 +178,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
-    let links: Vec<PatrolLink> = vec![
+    let original: Vec<PatrolLink> = vec![
       PatrolLink {
         index: 1000,
         links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
@@ -191,7 +189,7 @@ mod tests {
       },
     ];
 
-    PatrolLink::write_list::<SpawnByteOrder>(&links, &mut writer)?;
+    PatrolLink::write_list::<SpawnByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 48);
 
@@ -209,38 +207,37 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
+    let read: Vec<PatrolLink> = PatrolLink::read_list::<SpawnByteOrder>(&mut reader)?;
 
-    let from_file: Vec<PatrolLink> = PatrolLink::read_list::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(from_file, links);
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let link: PatrolLink = PatrolLink {
+    let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
 
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
-    let mut file: File = overwrite_file(&config_path)?;
+    let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
-    link.export("patrol_link", &mut ltx);
+    original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read_point: PatrolLink = PatrolLink::import("patrol_link", &open_ini_config(config_path)?)?;
+    let read: PatrolLink = PatrolLink::import("data", &open_ini_config(config_path)?)?;
 
-    assert_eq!(read_point, link);
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let link: PatrolLink = PatrolLink {
+    let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
@@ -250,14 +247,14 @@ mod tests {
       "serialize_deserialize.json",
     ))?;
 
-    file.write_all(json!(link).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      link,
+      original,
       serde_json::from_str::<PatrolLink>(&serialized).unwrap()
     );
 

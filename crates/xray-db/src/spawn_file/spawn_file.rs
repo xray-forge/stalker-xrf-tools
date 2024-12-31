@@ -35,12 +35,12 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   /// Read spawn file from provided path.
-  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<SpawnFile> {
+  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read spawn file from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<SpawnFile> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
 
@@ -50,8 +50,8 @@ impl SpawnFile {
       "Unexpected chunks count in spawn file root, expected 5"
     );
 
-    let spawn_file: SpawnFile = {
-      SpawnFile {
+    let spawn_file: Self = {
+      Self {
         header: SpawnHeaderChunk::read::<T>(
           &mut find_chunk_by_id(&chunks, SpawnHeaderChunk::CHUNK_ID)
             .expect("Header chunk not found"),
@@ -121,8 +121,8 @@ impl SpawnFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<SpawnFile> {
-    Ok(SpawnFile {
+  pub fn import_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
+    Ok(Self {
       header: SpawnHeaderChunk::import(path)?,
       alife_spawn: SpawnALifeSpawnsChunk::import(path)?,
       artefact_spawn: SpawnArtefactSpawnsChunk::import(path)?,

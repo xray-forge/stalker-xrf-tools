@@ -1,11 +1,11 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::particle::particle_group::ParticleGroup;
+use crate::constants::META_TYPE_FIELD;
+use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,8 +18,8 @@ impl ParticleEffectSprite {
   pub const META_TYPE: &'static str = "particle_effect_sprite";
 
   /// Read effect sprite data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleEffectSprite> {
-    let particle_sprite: ParticleEffectSprite = ParticleEffectSprite {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let particle_sprite: Self = Self {
       shader_name: reader.read_null_terminated_win_string()?,
       texture_name: reader.read_null_terminated_win_string()?,
     };
@@ -41,15 +41,31 @@ impl ParticleEffectSprite {
   }
 
   /// Import particle effect sprite data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticleGroup> {
-    todo!("Implement");
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini
+      .section(section_name)
+      .unwrap_or_else(|| panic!("Particle sprite '{section_name}' should be defined in ltx file"));
+
+    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+
+    assert_eq!(
+      meta_type,
+      Self::META_TYPE,
+      "Expected corrected meta type field for '{}' importing",
+      Self::META_TYPE
+    );
+
+    Ok(Self {
+      shader_name: read_ini_field("shader_name", section)?,
+      texture_name: read_ini_field("texture_name", section)?,
+    })
   }
 
   /// Export particle effect sprite data into provided path.
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
-      .set("$type", Self::META_TYPE)
+      .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("shader_name", &self.shader_name)
       .set("texture_name", &self.texture_name);
 
@@ -62,15 +78,18 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
+  use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
+  use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   #[test]
@@ -108,6 +127,28 @@ mod tests {
 
     let read_sprite: ParticleEffectSprite =
       ParticleEffectSprite::read::<SpawnByteOrder>(&mut reader)?;
+
+    assert_eq!(read_sprite, sprite);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> DatabaseResult<()> {
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let mut file: File = overwrite_file(config_path)?;
+    let mut ltx: Ltx = Ltx::new();
+
+    let sprite: ParticleEffectSprite = ParticleEffectSprite {
+      shader_name: String::from("shader-name-test"),
+      texture_name: String::from("texture-name-test"),
+    };
+
+    sprite.export("data", &mut ltx)?;
+    ltx.write_to(&mut file)?;
+
+    let read_sprite: ParticleEffectSprite =
+      ParticleEffectSprite::import("data", &open_ini_config(config_path)?)?;
 
     assert_eq!(read_sprite, sprite);
 

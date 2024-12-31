@@ -1,5 +1,6 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::constants::META_TYPE_FIELD;
 use crate::error::database_not_implemented_error::DatabaseNotImplementedError;
 use crate::export::file::{create_export_file, open_ini_config};
 use crate::export::file_import::read_ini_field;
@@ -21,8 +22,8 @@ impl ParticlesHeaderChunk {
 
   /// Read version chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticlesHeaderChunk> {
-    let header_chunk: ParticlesHeaderChunk = ParticlesHeaderChunk {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let header_chunk: Self = Self {
       version: reader.read_u16::<T>()?,
     };
 
@@ -40,7 +41,7 @@ impl ParticlesHeaderChunk {
   }
 
   /// Write particle header into chunk writer.
-  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u16::<T>(self.version)?;
 
     Ok(())
@@ -48,14 +49,14 @@ impl ParticlesHeaderChunk {
 
   /// Import header data from provided path.
   /// Parse ini files and populate spawn file.
-  pub fn import(path: &Path) -> DatabaseResult<ParticlesHeaderChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     let config: Ltx = open_ini_config(&path.join("header.ltx"))?;
     let section: &Section = config
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
-    let meta_type: String = read_ini_field("$type", section)?;
-    let header_chunk: ParticlesHeaderChunk = ParticlesHeaderChunk {
+    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let header_chunk: Self = Self {
       version: read_ini_field("version", section)?,
     };
 
@@ -76,7 +77,7 @@ impl ParticlesHeaderChunk {
 
     ltx
       .with_section("header")
-      .set("$type", Self::META_TYPE)
+      .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("version", self.version.to_string());
 
     ltx.write_to(&mut create_export_file(&path.join("header.ltx"))?)?;
@@ -110,11 +111,11 @@ mod tests {
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
 
-    let header: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 2 };
+    let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 2 };
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    header.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 2);
 
@@ -147,11 +148,11 @@ mod tests {
   fn test_read_write() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let header: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
+    let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    header.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 2);
 
@@ -172,7 +173,7 @@ mod tests {
 
     assert_eq!(
       ParticlesHeaderChunk::read::<SpawnByteOrder>(&mut reader)?,
-      header
+      original
     );
 
     Ok(())
@@ -180,36 +181,36 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let header: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
+    let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let export_folder: &Path =
       &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
 
-    header.export(export_folder)?;
+    original.export(export_folder)?;
 
-    let read_header: ParticlesHeaderChunk = ParticlesHeaderChunk::import(export_folder)?;
+    let read: ParticlesHeaderChunk = ParticlesHeaderChunk::import(export_folder)?;
 
-    assert_eq!(read_header, header);
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let header: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
+    let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let mut file: File = overwrite_test_relative_resource_as_file(
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(header).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      header,
+      original,
       serde_json::from_str::<ParticlesHeaderChunk>(&serialized).unwrap()
     );
 

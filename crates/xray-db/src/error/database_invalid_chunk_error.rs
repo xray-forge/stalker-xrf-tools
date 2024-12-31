@@ -9,11 +9,11 @@ pub struct DatabaseInvalidChunkError {
 }
 
 impl DatabaseInvalidChunkError {
-  pub fn new<T>(message: T) -> DatabaseInvalidChunkError
+  pub fn new<T>(message: T) -> Self
   where
     T: Into<String>,
   {
-    DatabaseInvalidChunkError {
+    Self {
       message: message.into(),
     }
   }
@@ -22,7 +22,7 @@ impl DatabaseInvalidChunkError {
   where
     T: Into<String>,
   {
-    DatabaseError::InvalidChunk(DatabaseInvalidChunkError {
+    DatabaseError::InvalidChunk(Self {
       message: message.into(),
     })
   }

@@ -20,7 +20,7 @@ impl SpawnPatrolsChunk {
   pub const CHUNK_ID: u32 = 3;
 
   /// Read patrols list from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnPatrolsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -35,7 +35,7 @@ impl SpawnPatrolsChunk {
 
     log::info!("Parsed patrols, bytes {:?}", reader.read_bytes_len());
 
-    Ok(SpawnPatrolsChunk { patrols })
+    Ok(Self { patrols })
   }
 
   /// Write patrols data into chunk writer.
@@ -55,7 +55,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<SpawnPatrolsChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     let patrols_config: Ltx = open_ini_config(&path.join("patrols.ltx"))?;
     let patrol_points_config: Ltx = open_ini_config(&path.join("patrol_points.ltx"))?;
     let patrol_links_config: Ltx = open_ini_config(&path.join("patrol_links.ltx"))?;
@@ -73,7 +73,7 @@ impl SpawnPatrolsChunk {
 
     log::info!("Imported patrols chunk");
 
-    Ok(SpawnPatrolsChunk { patrols })
+    Ok(Self { patrols })
   }
 
   /// Export patrols data into provided path.
@@ -88,7 +88,7 @@ impl SpawnPatrolsChunk {
         &mut patrols_config,
         &mut patrol_points_config,
         &mut patrol_links_config,
-      );
+      )?;
     }
 
     patrols_config.write_to(&mut create_export_file(&path.join("patrols.ltx"))?)?;
@@ -131,7 +131,7 @@ mod tests {
   fn test_read_write() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let patrols_chunk: SpawnPatrolsChunk = SpawnPatrolsChunk {
+    let original: SpawnPatrolsChunk = SpawnPatrolsChunk {
       patrols: vec![
         Patrol {
           name: String::from("patrol-1"),
@@ -184,7 +184,7 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    patrols_chunk.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 450);
 
@@ -200,10 +200,9 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 450 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrols_chunk: SpawnPatrolsChunk =
-      SpawnPatrolsChunk::read::<SpawnByteOrder>(&mut reader)?;
+    let read: SpawnPatrolsChunk = SpawnPatrolsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_patrols_chunk, patrols_chunk);
+    assert_eq!(read, original);
 
     Ok(())
   }

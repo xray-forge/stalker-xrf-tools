@@ -1,5 +1,6 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_action::particle_action_type::ParticleActionType;
 use crate::types::DatabaseResult;
@@ -21,13 +22,13 @@ impl ParticleAction {
   pub const META_TYPE: &'static str = "particle_action";
 
   /// Read list of effect particle particle_action data from chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<ParticleAction>> {
-    let mut actions: Vec<ParticleAction> = Vec::new();
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+    let mut actions: Vec<Self> = Vec::new();
 
     let count: u32 = reader.read_u32::<T>()?;
 
     for _ in 0..count {
-      actions.push(ParticleAction::read::<T>(reader)?);
+      actions.push(Self::read::<T>(reader)?);
     }
 
     assert_eq!(
@@ -45,10 +46,10 @@ impl ParticleAction {
   }
 
   /// Read effect particle particle_action data from chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleAction> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let action_type: u32 = reader.read_u32::<T>()?;
 
-    let particle_action: ParticleAction = ParticleAction {
+    let particle_action: Self = Self {
       action_flags: reader.read_u32::<T>()?,
       action_type: reader.read_u32::<T>()?,
       data: ParticleActionType::read_by_particle_type::<T>(
@@ -61,13 +62,13 @@ impl ParticleAction {
   }
 
   /// Write particle effect data into chunk writer.
-  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     todo!("Implement");
     Ok(())
   }
 
   /// Import particle effect data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticleAction> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     todo!("Implement");
   }
 
@@ -75,7 +76,7 @@ impl ParticleAction {
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
-      .set("$type", Self::META_TYPE)
+      .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("action_flags", self.action_flags.to_string())
       .set("action_type", self.action_type.to_string());
 

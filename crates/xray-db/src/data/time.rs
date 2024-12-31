@@ -27,9 +27,9 @@ pub enum TimeError {
 
 impl Time {
   /// Read optional time object from the chunk.
-  pub fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Option<Time>> {
+  pub fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Option<Self>> {
     if reader.read_u8()? == 1 {
-      Ok(Some(Time::read::<T>(reader)?))
+      Ok(Some(Self::read::<T>(reader)?))
     } else {
       Ok(None)
     }
@@ -37,7 +37,7 @@ impl Time {
 
   /// Write optional time object into the writer.
   pub fn write_optional<T: ByteOrder>(
-    time: Option<&Time>,
+    time: Option<&Self>,
     writer: &mut ChunkWriter,
   ) -> DatabaseResult<()> {
     if time.is_some() {
@@ -52,7 +52,7 @@ impl Time {
   }
 
   /// Read time object from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Time> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let year: u8 = reader.read_u8()?;
     let month: u8 = reader.read_u8()?;
     let day: u8 = reader.read_u8()?;
@@ -86,19 +86,19 @@ impl Time {
   }
 
   /// Cast optional time object to serialized string.
-  pub fn export_to_string(time: Option<&Time>) -> String {
+  pub fn export_to_string(time: Option<&Self>) -> String {
     time
       .as_ref()
       .map_or(String::from(NIL), |value| value.to_string())
   }
 
   /// Import optional time from string value.
-  pub fn import_from_string(value: &str) -> DatabaseResult<Option<Time>> {
+  pub fn import_from_string(value: &str) -> DatabaseResult<Option<Self>> {
     if value.trim() == NIL {
       return Ok(None);
     }
 
-    Ok(match Time::from_str(value) {
+    Ok(match Self::from_str(value) {
       Ok(time) => Some(time),
       Err(_) => {
         return Err(DatabaseParseError::new_database_error(
@@ -193,7 +193,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let time: Time = Time {
+    let original: Time = Time {
       year: 22,
       month: 10,
       day: 24,
@@ -203,7 +203,7 @@ mod tests {
       millis: 250,
     };
 
-    time.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 8);
 
@@ -219,9 +219,8 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 8 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_time: Time = Time::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_time, time);
+    assert_eq!(Time::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -232,7 +231,7 @@ mod tests {
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
 
-    let time: Time = Time {
+    let original: Time = Time {
       year: 22,
       month: 10,
       day: 24,
@@ -242,7 +241,7 @@ mod tests {
       millis: 250,
     };
 
-    Time::write_optional::<SpawnByteOrder>(Some(&time), &mut writer)?;
+    Time::write_optional::<SpawnByteOrder>(Some(&original), &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 9);
 
@@ -258,9 +257,11 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 9 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_time: Option<Time> = Time::read_optional::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_time, Some(time));
+    assert_eq!(
+      Time::read_optional::<SpawnByteOrder>(&mut reader)?,
+      Some(original)
+    );
 
     Ok(())
   }
@@ -295,7 +296,7 @@ mod tests {
 
   #[test]
   fn test_import_export_to_str() -> DatabaseResult<()> {
-    let vector: Time = Time {
+    let original: Time = Time {
       year: 20,
       month: 6,
       day: 1,
@@ -305,10 +306,13 @@ mod tests {
       millis: 100,
     };
 
-    assert_eq!(Time::export_to_string(Some(&vector)), "20,6,1,15,15,23,100");
+    assert_eq!(
+      Time::export_to_string(Some(&original)),
+      "20,6,1,15,15,23,100"
+    );
     assert_eq!(
       Time::import_from_string("20,6,1,15,15,23,100")?,
-      Some(vector)
+      Some(original)
     );
     assert_eq!(Time::export_to_string(None), "nil");
     assert_eq!(Time::import_from_string("nil")?, None);
@@ -318,7 +322,7 @@ mod tests {
 
   #[test]
   fn test_from_to_str() -> DatabaseResult<()> {
-    let vector: Time = Time {
+    let original: Time = Time {
       year: 22,
       month: 6,
       day: 1,
@@ -328,15 +332,15 @@ mod tests {
       millis: 100,
     };
 
-    assert_eq!(vector.to_string(), "22,6,1,15,15,23,100");
-    assert_eq!(Time::from_str("22,6,1,15,15,23,100").unwrap(), vector);
+    assert_eq!(original.to_string(), "22,6,1,15,15,23,100");
+    assert_eq!(Time::from_str("22,6,1,15,15,23,100").unwrap(), original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let time_old: Time = Time {
+    let original: Time = Time {
       year: 22,
       month: 6,
       day: 1,
@@ -350,13 +354,13 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(time_old).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(time_old, serde_json::from_str::<Time>(&serialized).unwrap());
+    assert_eq!(original, serde_json::from_str::<Time>(&serialized).unwrap());
 
     Ok(())
   }

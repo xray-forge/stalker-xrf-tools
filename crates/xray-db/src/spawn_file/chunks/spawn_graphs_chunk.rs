@@ -30,7 +30,7 @@ impl SpawnGraphsChunk {
   pub const CHUNK_ID: u32 = 4;
 
   /// Read graphs chunk by position descriptor.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnGraphsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let mut levels: Vec<GraphLevel> = Vec::new();
     let mut vertices: Vec<GraphVertex> = Vec::new();
     let mut edges: Vec<GraphEdge> = Vec::new();
@@ -69,7 +69,7 @@ impl SpawnGraphsChunk {
     assert_eq!(cross_tables.len(), header.levels_count as usize);
     assert!(reader.is_ended(), "Expect graphs chunk to be ended");
 
-    Ok(SpawnGraphsChunk {
+    Ok(Self {
       header,
       levels,
       vertices,
@@ -107,7 +107,7 @@ impl SpawnGraphsChunk {
   }
 
   /// Import graphs data from provided path.
-  pub fn import<T: ByteOrder>(path: &Path) -> DatabaseResult<SpawnGraphsChunk> {
+  pub fn import<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
     let header: GraphHeader =
       GraphHeader::import(&open_ini_config(&path.join("graphs_header.ltx"))?)?;
 
@@ -145,7 +145,7 @@ impl SpawnGraphsChunk {
 
     log::info!("Imported graphs chunk");
 
-    Ok(SpawnGraphsChunk {
+    Ok(Self {
       header,
       levels,
       vertices,
@@ -253,7 +253,7 @@ mod tests {
   fn test_read_write_empty() -> DatabaseResult<()> {
     let filename: String = String::from("read_write_empty.chunk");
 
-    let graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk {
+    let original: SpawnGraphsChunk = SpawnGraphsChunk {
       header: GraphHeader {
         version: 10,
         vertices_count: 0,
@@ -271,7 +271,7 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    graphs_chunk.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 28);
 
@@ -294,10 +294,10 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: SpawnGraphsChunk =
-      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_graphs_chunk, graphs_chunk);
+    assert_eq!(
+      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
@@ -306,7 +306,7 @@ mod tests {
   fn test_read_write() -> DatabaseResult<()> {
     let filename: String = String::from("read_write.chunk");
 
-    let graphs_chunk: SpawnGraphsChunk = SpawnGraphsChunk {
+    let original: SpawnGraphsChunk = SpawnGraphsChunk {
       header: GraphHeader {
         version: 12,
         vertices_count: 2,
@@ -412,7 +412,7 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    graphs_chunk.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 430);
 
@@ -435,10 +435,10 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_graphs_chunk: SpawnGraphsChunk =
-      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_graphs_chunk, graphs_chunk);
+    assert_eq!(
+      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

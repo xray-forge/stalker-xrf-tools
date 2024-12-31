@@ -6,12 +6,6 @@ use crate::particles_file::chunks::particles_effects_chunk::ParticlesEffectsChun
 use crate::particles_file::chunks::particles_firstgen_chunk::ParticlesFirstgenChunk;
 use crate::particles_file::chunks::particles_groups_chunk::ParticlesGroupsChunk;
 use crate::particles_file::chunks::particles_header_chunk::ParticlesHeaderChunk;
-use crate::spawn_file::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
-use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
-use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
-use crate::spawn_file::chunks::spawn_header_chunk::SpawnHeaderChunk;
-use crate::spawn_file::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
-use crate::spawn_file::spawn_file::SpawnFile;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
@@ -30,12 +24,12 @@ pub struct ParticlesFile {
 
 impl ParticlesFile {
   /// Read particles xr file from provided path.
-  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<ParticlesFile> {
+  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read particles xr from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<ParticlesFile> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
     let chunk_ids: Vec<u32> = chunks.iter().map(|it| it.id).collect();
@@ -52,7 +46,7 @@ impl ParticlesFile {
       "Unexpected first-gen chunk in particles file, unpacking not implemented"
     );
 
-    Ok(ParticlesFile {
+    Ok(Self {
       header: ParticlesHeaderChunk::read::<T>(
         &mut find_chunk_by_id(&chunks, ParticlesHeaderChunk::CHUNK_ID)
           .expect("Particle version chunk not found"),
@@ -92,8 +86,8 @@ impl ParticlesFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path(path: &Path) -> DatabaseResult<ParticlesFile> {
-    Ok(ParticlesFile {
+  pub fn import_from_path(path: &Path) -> DatabaseResult<Self> {
+    Ok(Self {
       header: ParticlesHeaderChunk::import(path)?,
       effects: ParticlesEffectsChunk::import(path)?,
       groups: ParticlesGroupsChunk::import(path)?,

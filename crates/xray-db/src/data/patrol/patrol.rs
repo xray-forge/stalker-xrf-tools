@@ -19,9 +19,9 @@ use xray_ltx::{Ltx, Section};
 /// 0 - metadata
 ///   - name
 /// 1 - data
-///   0 - points count
-///   1 - patrol points
-///   2 - patrol points links
+///     0 - points count
+///     1 - patrol points
+///     2 - patrol points links
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Patrol {
@@ -35,12 +35,12 @@ impl Patrol {
   pub fn read_list<T: ByteOrder>(
     reader: &mut ChunkReader,
     count: u32,
-  ) -> DatabaseResult<Vec<Patrol>> {
+  ) -> DatabaseResult<Vec<Self>> {
     let mut read_patrols_count: u32 = 0;
-    let mut patrols: Vec<Patrol> = Vec::new();
+    let mut patrols: Vec<Self> = Vec::new();
 
     for mut patrol_reader in ChunkIterator::new(reader) {
-      patrols.push(Patrol::read::<T>(&mut patrol_reader)?);
+      patrols.push(Self::read::<T>(&mut patrol_reader)?);
       read_patrols_count += 1;
     }
 
@@ -55,7 +55,7 @@ impl Patrol {
 
   /// Write list of patrols into chunk writer.
   pub fn write_list<T: ByteOrder>(
-    patrols: &[Patrol],
+    patrols: &[Self],
     writer: &mut ChunkWriter,
   ) -> DatabaseResult<()> {
     for (index, patrol) in patrols.iter().enumerate() {
@@ -70,7 +70,7 @@ impl Patrol {
   }
 
   /// Read chunk as patrol.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Patrol> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -89,7 +89,7 @@ impl Patrol {
     assert_eq!(points_count, points.len() as u32);
     assert!(reader.is_ended(), "Expect patrol chunk to be ended");
 
-    Ok(Patrol {
+    Ok(Self {
       name,
       points,
       links,
@@ -125,11 +125,11 @@ impl Patrol {
   /// Import patrols data from provided path.
   pub fn import(
     section_name: &str,
-    patrols_config: &Ltx,
-    patrol_points_config: &Ltx,
-    patrol_links_config: &Ltx,
-  ) -> DatabaseResult<Patrol> {
-    let section: &Section = patrols_config
+    patrols_ini: &Ltx,
+    patrol_points_ini: &Ltx,
+    patrol_links_ini: &Ltx,
+  ) -> DatabaseResult<Self> {
+    let section: &Section = patrols_ini
       .section(section_name)
       .unwrap_or_else(|| panic!("Patrol section {section_name} should be defined in ltx file"));
 
@@ -143,20 +143,20 @@ impl Patrol {
     for section in points_list.split(',').map(|it| it.trim()) {
       points.push(PatrolPoint::import(
         &format!("{}.{}", name, section),
-        patrol_points_config,
+        patrol_points_ini,
       )?);
     }
 
     for index in 0..links_count {
       links.push(PatrolLink::import(
         &format!("{}.{}", name, index),
-        patrol_links_config,
+        patrol_links_ini,
       )?);
     }
 
     assert_eq!(links.len(), links_count);
 
-    Ok(Patrol {
+    Ok(Self {
       name,
       points,
       links,
@@ -171,7 +171,7 @@ impl Patrol {
     patrols_config: &mut Ltx,
     patrol_points_config: &mut Ltx,
     patrol_links_config: &mut Ltx,
-  ) {
+  ) -> DatabaseResult<()> {
     patrols_config
       .with_section(section)
       .set("name", &self.name)
@@ -190,12 +190,14 @@ impl Patrol {
       point.export(
         &format!("{}.{}", self.name, point.name),
         patrol_points_config,
-      );
+      )?;
     }
 
     for (index, link) in self.links.iter().enumerate() {
-      link.export(&format!("{}.{}", self.name, index), patrol_links_config);
+      link.export(&format!("{}.{}", self.name, index), patrol_links_config)?;
     }
+
+    Ok(())
   }
 }
 
@@ -226,7 +228,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let patrol: Patrol = Patrol {
+    let original: Patrol = Patrol {
       name: String::from("patrol-name"),
       points: vec![
         PatrolPoint {
@@ -250,7 +252,7 @@ mod tests {
       }],
     };
 
-    patrol.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 210);
 
@@ -266,9 +268,9 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 210 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrol: Patrol = Patrol::read::<SpawnByteOrder>(&mut reader)?;
+    let read: Patrol = Patrol::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_patrol, patrol);
+    assert_eq!(read, original);
 
     Ok(())
   }
@@ -278,7 +280,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
-    let patrols: Vec<Patrol> = vec![
+    let original: Vec<Patrol> = vec![
       Patrol {
         name: String::from("patrol-1"),
         points: vec![
@@ -327,7 +329,7 @@ mod tests {
       },
     ];
 
-    Patrol::write_list::<SpawnByteOrder>(&patrols, &mut writer)?;
+    Patrol::write_list::<SpawnByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 430);
 
@@ -343,16 +345,16 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_patrols: Vec<Patrol> = Patrol::read_list::<SpawnByteOrder>(&mut reader, 2)?;
+    let read: Vec<Patrol> = Patrol::read_list::<SpawnByteOrder>(&mut reader, 2)?;
 
-    assert_eq!(read_patrols, patrols);
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let patrol: Patrol = Patrol {
+    let original: Patrol = Patrol {
       name: String::from("patrol-name-exp"),
       points: vec![
         PatrolPoint {
@@ -383,40 +385,40 @@ mod tests {
     let links_config_path: &Path =
       &get_absolute_test_sample_file_path(file!(), "import_export_links.ini");
 
-    let mut patrol_file: File = overwrite_file(&patrol_config_path)?;
-    let mut points_file: File = overwrite_file(&points_config_path)?;
-    let mut links_file: File = overwrite_file(&links_config_path)?;
+    let mut patrol_file: File = overwrite_file(patrol_config_path)?;
+    let mut points_file: File = overwrite_file(points_config_path)?;
+    let mut links_file: File = overwrite_file(links_config_path)?;
 
     let mut patrol_ltx: Ltx = Ltx::new();
     let mut links_ltx: Ltx = Ltx::new();
     let mut points_ltx: Ltx = Ltx::new();
 
-    patrol.export(
-      &patrol.name,
+    original.export(
+      &original.name,
       &mut patrol_ltx,
       &mut points_ltx,
       &mut links_ltx,
-    );
+    )?;
 
     patrol_ltx.write_to(&mut patrol_file)?;
     points_ltx.write_to(&mut points_file)?;
     links_ltx.write_to(&mut links_file)?;
 
-    let read_point: Patrol = Patrol::import(
-      &patrol.name,
+    let read: Patrol = Patrol::import(
+      &original.name,
       &open_ini_config(patrol_config_path)?,
       &open_ini_config(points_config_path)?,
       &open_ini_config(links_config_path)?,
     )?;
 
-    assert_eq!(read_point, patrol);
+    assert_eq!(read, original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let patrol: Patrol = Patrol {
+    let original: Patrol = Patrol {
       name: String::from("patrol-name-serde"),
       points: vec![
         PatrolPoint {
@@ -445,13 +447,16 @@ mod tests {
       "serialize_deserialize.json",
     ))?;
 
-    file.write_all(json!(patrol).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(patrol, serde_json::from_str::<Patrol>(&serialized).unwrap());
+    assert_eq!(
+      original,
+      serde_json::from_str::<Patrol>(&serialized).unwrap()
+    );
 
     Ok(())
   }

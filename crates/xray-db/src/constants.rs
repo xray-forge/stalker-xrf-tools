@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 pub const NIL: &str = "nil";
+pub const META_TYPE_FIELD: &str = "$type";
 
 pub const MINIMAL_SUPPORTED_SPAWN_VERSION: u16 = 120;
 

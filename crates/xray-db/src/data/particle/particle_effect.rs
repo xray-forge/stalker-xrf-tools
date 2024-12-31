@@ -4,6 +4,7 @@ use crate::chunk::utils::{
   read_till_end_binary_chunk, read_u16_chunk, read_u32_chunk,
 };
 use crate::chunk::writer::ChunkWriter;
+use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_action::particle_action::ParticleAction;
 use crate::data::particle::particle_effect_collision::ParticleEffectCollision;
 use crate::data::particle::particle_effect_description::ParticleDescription;
@@ -59,11 +60,11 @@ impl ParticleEffect {
 
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> DatabaseResult<ParticleEffect> {
+  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> DatabaseResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
 
-    let effect: ParticleEffect = {
-      ParticleEffect {
+    let effect: Self = {
+      Self {
         version: read_u16_chunk::<T>(
           &mut find_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)
             .expect("Particle name chunk not found"),
@@ -117,7 +118,7 @@ impl ParticleEffect {
   }
 
   /// Write particle effect data into chunk writer.
-  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     todo!("Implement")
   }
 
@@ -130,7 +131,7 @@ impl ParticleEffect {
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
-      .set("$type", Self::META_TYPE)
+      .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("version", self.version.to_string())
       .set("name", &self.name)
       .set("actions_count", self.actions.len().to_string())
@@ -174,7 +175,7 @@ impl ParticleEffect {
     if let Some(editor_data) = &self.editor_data {
       ini
         .with_section(format!("{section}.editor_data"))
-        .set("$type", Self::EDITOR_DATA_META_TYPE)
+        .set(META_TYPE_FIELD, Self::EDITOR_DATA_META_TYPE)
         .set("value", bytes_to_base64(&editor_data));
     }
 

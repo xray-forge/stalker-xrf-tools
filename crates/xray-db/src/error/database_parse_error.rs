@@ -9,11 +9,11 @@ pub struct DatabaseParseError {
 }
 
 impl DatabaseParseError {
-  pub fn new<T>(message: T) -> DatabaseParseError
+  pub fn new<T>(message: T) -> Self
   where
     T: Into<String>,
   {
-    DatabaseParseError {
+    Self {
       message: message.into(),
     }
   }
@@ -22,7 +22,7 @@ impl DatabaseParseError {
   where
     T: Into<String>,
   {
-    DatabaseError::Parse(DatabaseParseError {
+    DatabaseError::Parse(Self {
       message: message.into(),
     })
   }

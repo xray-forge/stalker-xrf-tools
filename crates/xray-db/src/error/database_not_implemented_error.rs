@@ -9,11 +9,11 @@ pub struct DatabaseNotImplementedError {
 }
 
 impl DatabaseNotImplementedError {
-  pub fn new<T>(message: T) -> DatabaseNotImplementedError
+  pub fn new<T>(message: T) -> Self
   where
     T: Into<String>,
   {
-    DatabaseNotImplementedError {
+    Self {
       message: message.into(),
     }
   }
@@ -22,7 +22,7 @@ impl DatabaseNotImplementedError {
   where
     T: Into<String>,
   {
-    DatabaseError::NotImplemented(DatabaseNotImplementedError {
+    DatabaseError::NotImplemented(Self {
       message: message.into(),
     })
   }

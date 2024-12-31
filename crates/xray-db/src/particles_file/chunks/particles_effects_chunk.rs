@@ -20,7 +20,7 @@ impl ParticlesEffectsChunk {
 
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticlesEffectsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
     let mut particles: Vec<ParticleEffect> = Vec::new();
 
@@ -36,11 +36,11 @@ impl ParticlesEffectsChunk {
 
     assert!(reader.is_ended(), "Expect effects chunk to be ended");
 
-    Ok(ParticlesEffectsChunk { effects: particles })
+    Ok(Self { effects: particles })
   }
 
   /// Write particle effects data into chunk writer.
-  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     for effect in &self.effects {
       let mut effect_writer: ChunkWriter = ChunkWriter::new();
 
@@ -53,7 +53,7 @@ impl ParticlesEffectsChunk {
   }
 
   /// Import particles effects data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticlesEffectsChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     todo!("Implement");
   }
 

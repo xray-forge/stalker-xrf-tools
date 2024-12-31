@@ -24,8 +24,8 @@ impl SpawnHeaderChunk {
 
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnHeaderChunk> {
-    let header: SpawnHeaderChunk = SpawnHeaderChunk {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let header: Self = Self {
       version: reader.read_u32::<T>()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
       graph_guid: Uuid::from_u128(reader.read_u128::<T>()?),
@@ -56,13 +56,13 @@ impl SpawnHeaderChunk {
 
   /// Import header data from provided path.
   /// Parse ini files and populate spawn file.
-  pub fn import(path: &Path) -> DatabaseResult<SpawnHeaderChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     let config: Ltx = open_ini_config(&path.join("header.ltx"))?;
     let section: &Section = config
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
-    Ok(SpawnHeaderChunk {
+    Ok(Self {
       version: read_ini_field("version", section)?,
       guid: read_ini_field("guid", section)?,
       graph_guid: read_ini_field("graph_guid", section)?,
@@ -118,10 +118,10 @@ mod tests {
     )?)?
     .read_child_by_index(0)?;
 
-    let header: DatabaseResult<SpawnHeaderChunk> =
+    let original: DatabaseResult<SpawnHeaderChunk> =
       SpawnHeaderChunk::read::<SpawnByteOrder>(&mut reader);
 
-    assert!(header.is_err(), "Expected failure with empty chunk");
+    assert!(original.is_err(), "Expected failure with empty chunk");
 
     Ok(())
   }
@@ -130,7 +130,7 @@ mod tests {
   fn test_read_write() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let header: SpawnHeaderChunk = SpawnHeaderChunk {
+    let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 20,
       guid: Uuid::from_u128(2u128.pow(127)),
       graph_guid: Uuid::from_u128(2u128.pow(64)),
@@ -140,7 +140,7 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    header.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 44);
 
@@ -161,7 +161,7 @@ mod tests {
 
     assert_eq!(
       SpawnHeaderChunk::read::<SpawnByteOrder>(&mut reader)?,
-      header
+      original
     );
 
     Ok(())
@@ -169,7 +169,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult<()> {
-    let header: SpawnHeaderChunk = SpawnHeaderChunk {
+    let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 10,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
       graph_guid: uuid!("78e55023-10b1-426f-9247-bb680e5fe0d9"),
@@ -180,18 +180,16 @@ mod tests {
     let export_folder: &Path =
       &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
 
-    header.export(export_folder)?;
+    original.export(export_folder)?;
 
-    let read_header: SpawnHeaderChunk = SpawnHeaderChunk::import(export_folder)?;
-
-    assert_eq!(read_header, header);
+    assert_eq!(SpawnHeaderChunk::import(export_folder)?, original);
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
-    let header: SpawnHeaderChunk = SpawnHeaderChunk {
+    let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 12,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
       graph_guid: uuid!("67e55023-10b1-426f-9247-bb680e5fe0c8"),
@@ -203,14 +201,14 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(header).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      header,
+      original,
       serde_json::from_str::<SpawnHeaderChunk>(&serialized).unwrap()
     );
 

@@ -4,6 +4,7 @@ use crate::chunk::utils::{
   read_u32_chunk,
 };
 use crate::chunk::writer::ChunkWriter;
+use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_group_effect::ParticleGroupEffect;
 use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
@@ -37,10 +38,10 @@ impl ParticleGroup {
   pub const CHUNK_EFFECTS2: u32 = 7;
 
   /// Read group from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleGroup> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
 
-    let particle_group = ParticleGroup {
+    let particle_group = Self {
       version: read_u16_chunk::<T>(
         &mut find_chunk_by_id(&chunks, Self::CHUNK_VERSION)
           .expect("Particle group version chunk not found"),
@@ -80,12 +81,12 @@ impl ParticleGroup {
   }
 
   /// Write particle group data into chunk writer.
-  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     todo!("Implement")
   }
 
   /// Import particles group data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticleGroup> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     todo!("Implement");
   }
 
@@ -93,7 +94,7 @@ impl ParticleGroup {
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
-      .set("$type", Self::META_TYPE)
+      .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("version", self.version.to_string())
       .set("name", &self.name)
       .set("flags", self.flags.to_string())

@@ -20,8 +20,8 @@ impl ParticleDescription {
   pub const META_TYPE: &'static str = "particle_description";
 
   /// Read particle effect description data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleDescription> {
-    let particle_description: ParticleDescription = ParticleDescription {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let particle_description: Self = Self {
       creator: reader.read_null_terminated_win_string()?,
       editor: reader.read_null_terminated_win_string()?,
       created_time: reader.read_u32::<T>()?,
@@ -37,7 +37,7 @@ impl ParticleDescription {
   }
 
   /// Write particle effect description data into chunk writer.
-  pub fn write<T: ByteOrder>(self: &Self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     todo!("Implement");
     Ok(())
   }

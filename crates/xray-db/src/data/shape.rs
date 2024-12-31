@@ -16,12 +16,12 @@ pub enum Shape {
 
 impl Shape {
   /// Read list of shapes from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Shape>> {
-    let mut shapes: Vec<Shape> = Vec::new();
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+    let mut shapes: Vec<Self> = Vec::new();
     let count: u8 = reader.read_u8().expect("Count flag to be read");
 
     for _ in 0..count {
-      shapes.push(Shape::read::<T>(reader)?);
+      shapes.push(Self::read::<T>(reader)?);
     }
 
     assert_eq!(
@@ -34,12 +34,12 @@ impl Shape {
   }
 
   /// Read shape from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Shape> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
 
     Ok(match shape_type {
-      0 => Shape::Sphere((reader.read_f32_3d_vector::<T>()?, reader.read_f32::<T>()?)),
-      1 => Shape::Box((
+      0 => Self::Sphere((reader.read_f32_3d_vector::<T>()?, reader.read_f32::<T>()?)),
+      1 => Self::Box((
         reader.read_f32_3d_vector::<T>()?,
         reader.read_f32_3d_vector::<T>()?,
         reader.read_f32_3d_vector::<T>()?,
@@ -50,10 +50,7 @@ impl Shape {
   }
 
   /// Write list of shapes data into the chunk reader.
-  pub fn write_list<T: ByteOrder>(
-    shapes: &Vec<Shape>,
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u8(shapes.len() as u8)?;
 
     for shape in shapes {
@@ -66,13 +63,13 @@ impl Shape {
   /// Write shape data into the chunk reader.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     match self {
-      Shape::Sphere(data) => {
+      Self::Sphere(data) => {
         writer.write_u8(0)?;
 
         writer.write_f32_3d_vector::<T>(&data.0)?;
         writer.write_f32::<T>(data.1)?;
       }
-      Shape::Box(data) => {
+      Self::Box(data) => {
         writer.write_u8(1)?;
 
         writer.write_f32_3d_vector::<T>(&data.0)?;
@@ -86,8 +83,8 @@ impl Shape {
   }
 
   /// Import shape objects from ini config file.
-  pub fn import_list(section: &Section) -> DatabaseResult<Vec<Shape>> {
-    let mut shapes: Vec<Shape> = Vec::new();
+  pub fn import_list(section: &Section) -> DatabaseResult<Vec<Self>> {
+    let mut shapes: Vec<Self> = Vec::new();
     let count: usize = read_ini_field("shapes_count", section)?;
 
     for index in 0..count {
@@ -96,13 +93,13 @@ impl Shape {
 
       match shape_type.as_str() {
         "sphere" => {
-          shapes.push(Shape::Sphere((
+          shapes.push(Self::Sphere((
             read_ini_field(&format!("{prefix}.center"), section)?,
             read_ini_field(&format!("{prefix}.radius"), section)?,
           )));
         }
         "box" => {
-          shapes.push(Shape::Box((
+          shapes.push(Self::Box((
             read_ini_field(&format!("{prefix}.a"), section)?,
             read_ini_field(&format!("{prefix}.b"), section)?,
             read_ini_field(&format!("{prefix}.c"), section)?,
@@ -121,7 +118,7 @@ impl Shape {
   }
 
   /// Export shapes object to target ini file section.
-  pub fn export_list(shapes: &[Shape], section: &str, ini: &mut Ltx) {
+  pub fn export_list(shapes: &[Self], section: &str, ini: &mut Ltx) {
     ini
       .with_section(section)
       .set("shapes_count", shapes.len().to_string());
@@ -130,14 +127,14 @@ impl Shape {
       let prefix: String = format!("shape.{index}");
 
       match shape {
-        Shape::Sphere(sphere) => {
+        Self::Sphere(sphere) => {
           ini
             .with_section(section)
             .set(format!("{prefix}.type"), "sphere")
             .set(format!("{prefix}.center"), sphere.0.to_string())
             .set(format!("{prefix}.radius"), sphere.1.to_string());
         }
-        Shape::Box(square) => {
+        Self::Box(square) => {
           ini
             .with_section(section)
             .set(format!("{prefix}.type"), "box")
@@ -176,7 +173,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
-    let shapes: Vec<Shape> = vec![
+    let original: Vec<Shape> = vec![
       Shape::Sphere((
         Vector3d {
           x: 125.465,
@@ -209,7 +206,7 @@ mod tests {
       )),
     ];
 
-    Shape::write_list::<SpawnByteOrder>(&shapes, &mut writer)?;
+    Shape::write_list::<SpawnByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 67);
 
@@ -225,9 +222,8 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 67 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_shapes: Vec<Shape> = Shape::read_list::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_shapes, shapes);
+    assert_eq!(Shape::read_list::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -237,7 +233,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_sphere.chunk");
 
-    let sphere: Shape = Shape::Sphere((
+    let original: Shape = Shape::Sphere((
       Vector3d {
         x: 25.5,
         y: 3.4,
@@ -246,7 +242,7 @@ mod tests {
       150.0,
     ));
 
-    sphere.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 17);
 
@@ -262,9 +258,8 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 17 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_sphere: Shape = Shape::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_sphere, sphere);
+    assert_eq!(Shape::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -274,7 +269,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_box.chunk");
 
-    let box_shape: Shape = Shape::Box((
+    let original: Shape = Shape::Box((
       Vector3d {
         x: 1.5,
         y: 1.7,
@@ -297,7 +292,7 @@ mod tests {
       },
     ));
 
-    box_shape.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 49);
 
@@ -313,9 +308,8 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 49 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_box_shape: Shape = Shape::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_box_shape, box_shape);
+    assert_eq!(Shape::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -325,7 +319,7 @@ mod tests {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "test_import_export.ini");
     let mut ltx: Ltx = Ltx::new();
 
-    let shapes: Vec<Shape> = vec![
+    let original: Vec<Shape> = vec![
       Shape::Sphere((
         Vector3d {
           x: 1634.465,
@@ -358,23 +352,20 @@ mod tests {
       )),
     ];
 
-    Shape::export_list(&shapes, "test_import_export", &mut ltx);
+    Shape::export_list(&original, "data", &mut ltx);
     ltx.write_to(&mut overwrite_file(config_path)?)?;
 
-    let read_shapes: Vec<Shape> = Shape::import_list(
-      open_ini_config(config_path)?
-        .section("test_import_export")
-        .unwrap(),
-    )?;
-
-    assert_eq!(read_shapes, shapes);
+    assert_eq!(
+      Shape::import_list(open_ini_config(config_path)?.section("data").unwrap(),)?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize_sphere() -> DatabaseResult<()> {
-    let sphere: Shape = Shape::Sphere((
+    let original: Shape = Shape::Sphere((
       Vector3d {
         x: 243.5,
         y: 456.4,
@@ -387,20 +378,23 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize_sphere.json"),
     )?;
 
-    file.write_all(json!(sphere).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(sphere, serde_json::from_str::<Shape>(&serialized).unwrap());
+    assert_eq!(
+      original,
+      serde_json::from_str::<Shape>(&serialized).unwrap()
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize_box() -> DatabaseResult<()> {
-    let sphere: Shape = Shape::Box((
+    let original: Shape = Shape::Box((
       Vector3d {
         x: 175.5,
         y: 135.7,
@@ -427,13 +421,16 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize_box.json"),
     )?;
 
-    file.write_all(json!(sphere).to_string().as_bytes())?;
+    file.write_all(json!(original).to_string().as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(sphere, serde_json::from_str::<Shape>(&serialized).unwrap());
+    assert_eq!(
+      original,
+      serde_json::from_str::<Shape>(&serialized).unwrap()
+    );
 
     Ok(())
   }

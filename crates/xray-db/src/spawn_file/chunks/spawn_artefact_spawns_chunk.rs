@@ -22,7 +22,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnArtefactSpawnsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -43,7 +43,7 @@ impl SpawnArtefactSpawnsChunk {
       reader.read_bytes_len(),
     );
 
-    Ok(SpawnArtefactSpawnsChunk { nodes })
+    Ok(Self { nodes })
   }
 
   /// Write artefact spawns into chunk writer.
@@ -65,7 +65,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Import artefact spawns data from provided path.
   /// Parse ini files and populate spawn file.
-  pub fn import(path: &Path) -> DatabaseResult<SpawnArtefactSpawnsChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     let config: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
@@ -75,7 +75,7 @@ impl SpawnArtefactSpawnsChunk {
 
     log::info!("Imported artefact spawns chunk");
 
-    Ok(SpawnArtefactSpawnsChunk { nodes })
+    Ok(Self { nodes })
   }
 
   /// Export artefact spawns data into provided path.
@@ -122,7 +122,7 @@ mod tests {
   fn test_read_write_artefact_spawn_point() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "artefact_spawns.chunk");
 
-    let spawns: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {
+    let original: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {
       nodes: vec![
         ArtefactSpawnPoint {
           position: Vector3d::new(55.5, 44.4, -33.3),
@@ -139,7 +139,7 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    spawns.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 44);
 
@@ -154,15 +154,14 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 44 + 8);
 
-    let mut reader: ChunkReader = ChunkReader::from_slice(file)
-      .unwrap()
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: SpawnArtefactSpawnsChunk =
-      SpawnArtefactSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read_spawns, spawns);
+    assert_eq!(
+      SpawnArtefactSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

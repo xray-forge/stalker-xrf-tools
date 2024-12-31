@@ -24,7 +24,7 @@ impl SpawnALifeSpawnsChunk {
   pub const CHUNK_ID: u32 = 1;
 
   /// Read spawns chunk by position descriptor from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<SpawnALifeSpawnsChunk> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let mut count_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut objects_reader: ChunkReader = reader.read_child_by_index(1)?;
     let edges_reader: ChunkReader = reader.read_child_by_index(2)?;
@@ -50,7 +50,7 @@ impl SpawnALifeSpawnsChunk {
 
     log::info!("Parsed alife spawns chunk, {:?} bytes", reader.size);
 
-    Ok(SpawnALifeSpawnsChunk { objects })
+    Ok(Self { objects })
   }
 
   /// Write alife chunk data into the writer.
@@ -86,7 +86,7 @@ impl SpawnALifeSpawnsChunk {
   }
 
   /// Import alife spawns data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<SpawnALifeSpawnsChunk> {
+  pub fn import(path: &Path) -> DatabaseResult<Self> {
     let config: Ltx = open_ini_config(&path.join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
@@ -96,7 +96,7 @@ impl SpawnALifeSpawnsChunk {
 
     log::info!("Imported alife spawns chunk");
 
-    Ok(SpawnALifeSpawnsChunk { objects })
+    Ok(Self { objects })
   }
 
   /// Export alife spawns data into provided path.
@@ -149,11 +149,11 @@ mod tests {
   fn test_read_write_empty() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_empty.chunk");
 
-    let spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk { objects: vec![] };
+    let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk { objects: vec![] };
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    spawns.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 28);
 
@@ -172,10 +172,9 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: SpawnALifeSpawnsChunk =
-      SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
+    let read: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_spawns.objects.len(), spawns.objects.len());
+    assert_eq!(read.objects.len(), original.objects.len());
 
     Ok(())
   }
@@ -184,7 +183,7 @@ mod tests {
   fn test_read_write() -> DatabaseResult<()> {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let spawns: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {
+    let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {
       objects: vec![
         AlifeObjectBase {
           index: 21,
@@ -269,7 +268,7 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    spawns.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<SpawnByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 419);
 
@@ -288,13 +287,12 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_spawns: SpawnALifeSpawnsChunk =
-      SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
+    let read: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?;
 
-    assert_eq!(read_spawns.objects.len(), spawns.objects.len());
+    assert_eq!(read.objects.len(), original.objects.len());
 
-    for (index, object) in read_spawns.objects.iter().enumerate() {
-      let another: &AlifeObjectBase = spawns.objects.get(index).unwrap();
+    for (index, object) in read.objects.iter().enumerate() {
+      let another: &AlifeObjectBase = original.objects.get(index).unwrap();
 
       assert_eq!(object.index, another.index);
       assert_eq!(object.id, another.id);
