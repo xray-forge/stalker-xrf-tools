@@ -11,7 +11,6 @@ use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -86,7 +85,7 @@ impl ParticleGroup {
   }
 
   /// Import particles group data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
     todo!("Implement");
   }
 

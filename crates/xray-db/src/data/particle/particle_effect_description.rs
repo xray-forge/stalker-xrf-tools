@@ -1,11 +1,12 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::particle::particle_action::particle_action::ParticleAction;
+use crate::constants::META_TYPE_FIELD;
+use crate::error::database_parse_error::DatabaseParseError;
+use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,18 +39,49 @@ impl ParticleDescription {
 
   /// Write particle effect description data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    todo!("Implement");
+    writer.write_null_terminated_win_string(&self.creator)?;
+    writer.write_null_terminated_win_string(&self.editor)?;
+    writer.write_u32::<T>(self.created_time)?;
+    writer.write_u32::<T>(self.edit_time)?;
+
     Ok(())
   }
 
   /// Import particle effect description data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticleAction> {
-    todo!("Implement");
+  pub fn import(section_name: &str, ini: &mut Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Particle effect description section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
+    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+
+    assert_eq!(
+      meta_type,
+      Self::META_TYPE,
+      "Expected corrected meta type field for '{}' importing",
+      Self::META_TYPE
+    );
+
+    Ok(Self {
+      creator: read_ini_field("creator", section)?,
+      editor: read_ini_field("editor", section)?,
+      created_time: read_ini_field("created_time", section)?,
+      edit_time: read_ini_field("edit_time", section)?,
+    })
   }
 
   /// Export particle effect description data into provided path.
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
-    todo!("Implement");
+    ini
+      .with_section(section)
+      .set(META_TYPE_FIELD, Self::META_TYPE)
+      .set("creator", &self.creator)
+      .set("creator", &self.editor)
+      .set("created_time", self.created_time.to_string())
+      .set("edit_time", self.edit_time.to_string());
 
     Ok(())
   }

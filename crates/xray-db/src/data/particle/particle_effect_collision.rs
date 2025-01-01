@@ -1,12 +1,12 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
-use crate::data::particle::particle_action::particle_action::ParticleAction;
+use crate::error::database_parse_error::DatabaseParseError;
+use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -37,13 +37,36 @@ impl ParticleEffectCollision {
 
   /// Write particle effect collision data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    todo!("Implement");
+    writer.write_f32::<T>(self.collide_one_minus_friction)?;
+    writer.write_f32::<T>(self.collide_resilience)?;
+    writer.write_f32::<T>(self.collide_sqr_cutoff)?;
+
     Ok(())
   }
 
   /// Import particle effect collision data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticleAction> {
-    todo!("Implement");
+  pub fn import(section_name: &str, ini: &mut Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Particle effect description section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
+    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+
+    assert_eq!(
+      meta_type,
+      Self::META_TYPE,
+      "Expected corrected meta type field for '{}' importing",
+      Self::META_TYPE
+    );
+
+    Ok(Self {
+      collide_one_minus_friction: read_ini_field("collide_one_minus_friction", section)?,
+      collide_resilience: read_ini_field("collide_resilience", section)?,
+      collide_sqr_cutoff: read_ini_field("collide_sqr_cutoff", section)?,
+    })
   }
 
   /// Export particle effect collision data into provided path.

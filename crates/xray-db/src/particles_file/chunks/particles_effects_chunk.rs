@@ -1,7 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect::ParticleEffect;
-use crate::export::file::create_export_file;
+use crate::export::file::{create_export_file, open_ini_config};
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -54,7 +55,19 @@ impl ParticlesEffectsChunk {
 
   /// Import particles effects data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    todo!("Implement");
+    let ini: Ltx = open_ini_config(&path.join("groups.ltx"))?;
+
+    let mut effects: Vec<ParticleEffect> = Vec::new();
+
+    for (section_name, section) in &ini {
+      if let Some(meta_field) = section.get(META_TYPE_FIELD) {
+        if meta_field == ParticleEffect::META_TYPE {
+          effects.push(ParticleEffect::import(section_name, &ini)?);
+        }
+      }
+    }
+
+    Ok(Self { effects })
   }
 
   /// Export particles effects data into provided path.

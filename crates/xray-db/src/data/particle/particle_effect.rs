@@ -10,13 +10,11 @@ use crate::data::particle::particle_effect_collision::ParticleEffectCollision;
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-use crate::data::particle::particle_group::ParticleGroup;
 use crate::data::vector_3d::Vector3d;
 use crate::export::string::bytes_to_base64;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use xray_ltx::{Ltx, Section};
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
@@ -123,7 +121,7 @@ impl ParticleEffect {
   }
 
   /// Import particle effect data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<ParticleGroup> {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
     todo!("Implement");
   }
 
