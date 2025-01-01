@@ -132,9 +132,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read: Vector3d = Vector3d::read::<SpawnByteOrder>(&mut reader)?;
-
-    assert_eq!(read, original);
+    assert_eq!(Vector3d::read::<SpawnByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
