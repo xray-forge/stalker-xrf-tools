@@ -67,6 +67,8 @@ impl ParticlesGroupsChunk {
 
     particles_effects_ini.write_to(&mut create_export_file(&path.join("groups.ltx"))?)?;
 
+    log::info!("Exported groups chunk");
+
     Ok(())
   }
 }

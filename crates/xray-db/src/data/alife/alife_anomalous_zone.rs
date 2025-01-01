@@ -17,7 +17,7 @@ pub struct AlifeAnomalousZone {
   pub last_spawn_time: Option<Time>,
 }
 
-impl AlifeObjectInheritedReader<AlifeAnomalousZone> for AlifeAnomalousZone {
+impl AlifeObjectInheritedReader for AlifeAnomalousZone {
   /// Read anomalous zone object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {

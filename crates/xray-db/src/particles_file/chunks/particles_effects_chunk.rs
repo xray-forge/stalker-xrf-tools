@@ -67,6 +67,8 @@ impl ParticlesEffectsChunk {
 
     particles_effects_ini.write_to(&mut create_export_file(&path.join("effects.ltx"))?)?;
 
+    log::info!("Exported effects chunk");
+
     Ok(())
   }
 }

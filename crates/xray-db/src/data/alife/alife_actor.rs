@@ -18,7 +18,7 @@ pub struct AlifeActor {
   pub save_marker: u16,
 }
 
-impl AlifeObjectInheritedReader<AlifeActor> for AlifeActor {
+impl AlifeObjectInheritedReader for AlifeActor {
   /// Read actor data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let object: Self = Self {

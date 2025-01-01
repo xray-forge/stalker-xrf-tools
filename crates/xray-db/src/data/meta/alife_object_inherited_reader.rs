@@ -5,7 +5,7 @@ use byteorder::ByteOrder;
 use xray_ltx::Section;
 
 /// Generic trait describing possibility to read object data from chunk.
-pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric> {
+pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric = Self> {
   /// Read alife object data from chunk reader.
   fn read<B: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<T>;
 

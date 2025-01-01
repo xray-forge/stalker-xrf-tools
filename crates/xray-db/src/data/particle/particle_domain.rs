@@ -1,4 +1,5 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_error::DatabaseError;
 use crate::error::database_parse_error::DatabaseParseError;
@@ -38,6 +39,12 @@ impl ParticleDomain {
       radius1_sqr: reader.read_f32::<T>()?,
       radius2_sqr: reader.read_f32::<T>()?,
     })
+  }
+
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+    todo!();
+
+    Ok(())
   }
 }
 

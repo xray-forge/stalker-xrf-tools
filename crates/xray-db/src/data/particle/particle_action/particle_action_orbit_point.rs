@@ -1,11 +1,13 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
+use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
 use crate::data::vector_3d::Vector3d;
-use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt};
+use crate::export::file_import::read_ini_field;
+use crate::types::{DatabaseResult, ParticlesByteOrder};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -16,14 +18,26 @@ pub struct ParticleActionOrbitPoint {
   pub max_radius: f32,
 }
 
-impl ParticleActionOrbitPoint {
-  /// Read particle_action orbit point.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionOrbitPoint> {
-    Ok(ParticleActionOrbitPoint {
+impl ParticleActionReader for ParticleActionOrbitPoint {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       center: reader.read_f32_3d_vector::<T>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
       max_radius: reader.read_f32::<T>()?,
+    })
+  }
+
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini
+      .section(section_name)
+      .unwrap_or_else(|| panic!("Particle action '{section_name}' should be defined in ltx file"));
+
+    Ok(Self {
+      center: read_ini_field("center", section)?,
+      magnitude: read_ini_field("magnitude", section)?,
+      epsilon: read_ini_field("epsilon", section)?,
+      max_radius: read_ini_field("max_radius", section)?,
     })
   }
 }
@@ -31,7 +45,12 @@ impl ParticleActionOrbitPoint {
 #[typetag::serde]
 impl ParticleActionGeneric for ParticleActionOrbitPoint {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    todo!()
+    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.center)?;
+    writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
+    writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
+    writer.write_f32::<ParticlesByteOrder>(self.max_radius)?;
+
+    Ok(())
   }
 
   fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {

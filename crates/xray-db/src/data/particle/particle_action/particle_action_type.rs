@@ -17,6 +17,7 @@ use crate::data::particle::particle_action::particle_action_orbit_point::Particl
 use crate::data::particle::particle_action::particle_action_random_acceleration::ParticleActionRandomAcceleration;
 use crate::data::particle::particle_action::particle_action_random_displace::ParticleActionRandomDisplace;
 use crate::data::particle::particle_action::particle_action_random_velocity::ParticleActionRandomVelocity;
+use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
 use crate::data::particle::particle_action::particle_action_restore::ParticleActionRestore;
 use crate::data::particle::particle_action::particle_action_scatter::ParticleActionScatter;
 use crate::data::particle::particle_action::particle_action_sink::ParticleActionSink;
@@ -32,6 +33,7 @@ use crate::data::particle::particle_action::particle_action_vortex::ParticleActi
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
+use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
 pub enum ParticleActionType {
@@ -178,7 +180,115 @@ impl ParticleActionType {
       }
       ParticleActionType::PAScatterID => Ok(Box::new(ParticleActionScatter::read::<T>(reader)?)),
       ParticleActionType::Unknown | ParticleActionType::PACallActionListID => panic!(
-        "Not implemented parser for particle_action type: {:?}",
+        "Not implemented parser for particle action reading: {:?}",
+        particle_action_type
+      ),
+    }
+  }
+
+  /// Read particle action data from chunk based on action type.
+  pub fn import_by_particle_type(
+    particle_action_type: ParticleActionType,
+    section_name: &str,
+    ini: &Ltx,
+  ) -> DatabaseResult<Box<dyn ParticleActionGeneric>> {
+    match particle_action_type {
+      ParticleActionType::PAAvoidID => {
+        Ok(Box::new(ParticleActionAvoid::import(section_name, ini)?))
+      }
+      ParticleActionType::PABounceID => {
+        Ok(Box::new(ParticleActionBounce::import(section_name, ini)?))
+      }
+      ParticleActionType::PACopyVertexBID => Ok(Box::new(ParticleActionCopyVertex::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PADampingID => {
+        Ok(Box::new(ParticleActionDamping::import(section_name, ini)?))
+      }
+      ParticleActionType::PAExplosionID => Ok(Box::new(ParticleActionExplosion::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PAFollowID => {
+        Ok(Box::new(ParticleActionFollow::import(section_name, ini)?))
+      }
+      ParticleActionType::PAGravitateID => Ok(Box::new(ParticleActionGravitate::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PAGravityID => {
+        Ok(Box::new(ParticleActionGravity::import(section_name, ini)?))
+      }
+      ParticleActionType::PAJetID => Ok(Box::new(ParticleActionJet::import(section_name, ini)?)),
+      ParticleActionType::PAKillOldID => {
+        Ok(Box::new(ParticleActionKillOld::import(section_name, ini)?))
+      }
+      ParticleActionType::PAMatchVelocityID => Ok(Box::new(ParticleActionMatchVelocity::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PAMoveID => Ok(Box::new(ParticleActionMove::import(section_name, ini)?)),
+      ParticleActionType::PAOrbitLineID => Ok(Box::new(ParticleActionOrbitLine::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PAOrbitPointID => Ok(Box::new(ParticleActionOrbitPoint::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PARandomAccelID => Ok(Box::new(
+        ParticleActionRandomAcceleration::import(section_name, ini)?,
+      )),
+      ParticleActionType::PARandomDisplaceID => Ok(Box::new(ParticleActionRandomDisplace::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PARandomVelocityID => Ok(Box::new(ParticleActionRandomVelocity::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PARestoreID => {
+        Ok(Box::new(ParticleActionRestore::import(section_name, ini)?))
+      }
+      ParticleActionType::PASinkID => Ok(Box::new(ParticleActionSink::import(section_name, ini)?)),
+      ParticleActionType::PASinkVelocityID => Ok(Box::new(ParticleActionSinkVelocity::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PASourceID => {
+        Ok(Box::new(ParticleActionSource::import(section_name, ini)?))
+      }
+      ParticleActionType::PASpeedLimitID => Ok(Box::new(ParticleActionSpeedLimit::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PATargetColorID => Ok(Box::new(ParticleActionTargetColor::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PATargetSizeID => Ok(Box::new(ParticleActionTargetSize::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PATargetRotateID | ParticleActionType::PATargetRotateDID => Ok(Box::new(
+        ParticleActionTargetRotate::import(section_name, ini)?,
+      )),
+      ParticleActionType::PATargetVelocityID | ParticleActionType::PATargetVelocityDID => Ok(
+        Box::new(ParticleActionTargetVelocity::import(section_name, ini)?),
+      ),
+      ParticleActionType::PAVortexID => {
+        Ok(Box::new(ParticleActionVortex::import(section_name, ini)?))
+      }
+      ParticleActionType::PATurbulenceID => Ok(Box::new(ParticleActionTurbulence::import(
+        section_name,
+        ini,
+      )?)),
+      ParticleActionType::PAScatterID => {
+        Ok(Box::new(ParticleActionScatter::import(section_name, ini)?))
+      }
+      ParticleActionType::Unknown | ParticleActionType::PACallActionListID => panic!(
+        "Not implemented parser for particle action importing: {:?}",
         particle_action_type
       ),
     }

@@ -1,11 +1,13 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
+use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
 use crate::data::particle::particle_domain::ParticleDomain;
-use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt};
+use crate::export::file_import::read_ini_field;
+use crate::types::{DatabaseResult, ParticlesByteOrder};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,9 +20,8 @@ pub struct ParticleActionExplosion {
   pub epsilon: f32,
 }
 
-impl ParticleActionExplosion {
-  /// Read particle_action explosion.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionExplosion> {
+impl ParticleActionReader for ParticleActionExplosion {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionExplosion> {
     Ok(ParticleActionExplosion {
       center: ParticleDomain::read::<T>(reader)?,
       velocity: reader.read_f32::<T>()?,
@@ -30,12 +31,35 @@ impl ParticleActionExplosion {
       epsilon: reader.read_f32::<T>()?,
     })
   }
+
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini
+      .section(section_name)
+      .unwrap_or_else(|| panic!("Particle action '{section_name}' should be defined in ltx file"));
+
+    Ok(Self {
+      center: read_ini_field("center", section)?,
+      velocity: read_ini_field("velocity", section)?,
+      magnitude: read_ini_field("magnitude", section)?,
+      st_dev: read_ini_field("st_dev", section)?,
+      age: read_ini_field("age", section)?,
+      epsilon: read_ini_field("epsilon", section)?,
+    })
+  }
 }
 
 #[typetag::serde]
 impl ParticleActionGeneric for ParticleActionExplosion {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    todo!()
+    self.center.write::<ParticlesByteOrder>(writer)?;
+
+    writer.write_f32::<ParticlesByteOrder>(self.velocity)?;
+    writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
+    writer.write_f32::<ParticlesByteOrder>(self.st_dev)?;
+    writer.write_f32::<ParticlesByteOrder>(self.age)?;
+    writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
+
+    Ok(())
   }
 
   fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {

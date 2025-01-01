@@ -3,11 +3,11 @@ use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_action::particle_action_type::ParticleActionType;
+use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 /// C++ src/xrParticles/particle_actions_collection_io.cpp
 #[derive(Debug, Serialize, Deserialize)]
@@ -21,7 +21,7 @@ pub struct ParticleAction {
 impl ParticleAction {
   pub const META_TYPE: &'static str = "particle_action";
 
-  /// Read list of effect particle particle_action data from chunk reader.
+  /// Read list of particle action data from chunk reader.
   pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
     let mut actions: Vec<Self> = Vec::new();
 
@@ -45,11 +45,11 @@ impl ParticleAction {
     Ok(actions)
   }
 
-  /// Read effect particle particle_action data from chunk reader.
+  /// Read effect particle action data from chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let action_type: u32 = reader.read_u32::<T>()?;
 
-    let particle_action: Self = Self {
+    let action: Self = Self {
       action_flags: reader.read_u32::<T>()?,
       action_type: reader.read_u32::<T>()?,
       data: ParticleActionType::read_by_particle_type::<T>(
@@ -58,21 +58,52 @@ impl ParticleAction {
       )?,
     };
 
-    Ok(particle_action)
+    assert_eq!(action_type, action.action_type);
+
+    Ok(action)
   }
 
-  /// Write particle effect data into chunk writer.
+  /// Write particle action data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    todo!("Implement");
+    writer.write_u32::<T>(self.action_type)?;
+
+    writer.write_u32::<T>(self.action_flags)?;
+    writer.write_u32::<T>(self.action_type)?;
+
+    self.data.write(writer)?;
+
     Ok(())
   }
 
-  /// Import particle effect data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<Self> {
-    todo!("Implement");
+  /// Import particle action data from provided path.
+  pub fn import(section_name: &str, ini: &mut Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini
+      .section(section_name)
+      .unwrap_or_else(|| panic!("Particle action '{section_name}' should be defined in ltx file"));
+
+    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+
+    assert_eq!(
+      meta_type,
+      Self::META_TYPE,
+      "Expected corrected meta type field for '{}' importing",
+      Self::META_TYPE
+    );
+
+    let action_type: u32 = read_ini_field("action_type", section)?;
+
+    Ok(Self {
+      action_flags: read_ini_field("action_flags", section)?,
+      action_type: read_ini_field("action_type", section)?,
+      data: ParticleActionType::import_by_particle_type(
+        ParticleActionType::from_u32(action_type),
+        section_name,
+        ini,
+      )?,
+    })
   }
 
-  /// Export particle effect data into provided path.
+  /// Export particle action data into provided path.
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)

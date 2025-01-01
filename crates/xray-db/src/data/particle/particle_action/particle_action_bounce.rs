@@ -1,11 +1,13 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
+use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
 use crate::data::particle::particle_domain::ParticleDomain;
-use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt};
+use crate::export::file_import::read_ini_field;
+use crate::types::{DatabaseResult, ParticlesByteOrder};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_ltx::Ltx;
+use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -16,9 +18,9 @@ pub struct ParticleActionBounce {
   pub cutoff_sqr: f32,
 }
 
-impl ParticleActionBounce {
+impl ParticleActionReader for ParticleActionBounce {
   /// Read particle_action bounce.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionBounce> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionBounce> {
     Ok(ParticleActionBounce {
       position: ParticleDomain::read::<T>(reader)?,
       one_minus_friction: reader.read_f32::<T>()?,
@@ -26,12 +28,31 @@ impl ParticleActionBounce {
       cutoff_sqr: reader.read_f32::<T>()?,
     })
   }
+
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini
+      .section(section_name)
+      .unwrap_or_else(|| panic!("Particle action '{section_name}' should be defined in ltx file"));
+
+    Ok(Self {
+      position: read_ini_field("position", section)?,
+      one_minus_friction: read_ini_field("one_minus_friction", section)?,
+      resilience: read_ini_field("resilience", section)?,
+      cutoff_sqr: read_ini_field("cutoff_sqr", section)?,
+    })
+  }
 }
 
 #[typetag::serde]
 impl ParticleActionGeneric for ParticleActionBounce {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    todo!()
+    self.position.write::<ParticlesByteOrder>(writer)?;
+
+    writer.write_f32::<ParticlesByteOrder>(self.one_minus_friction)?;
+    writer.write_f32::<ParticlesByteOrder>(self.resilience)?;
+    writer.write_f32::<ParticlesByteOrder>(self.cutoff_sqr)?;
+
+    Ok(())
   }
 
   fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {

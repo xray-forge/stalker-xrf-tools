@@ -17,6 +17,7 @@ pub mod particle_action_orbit_point;
 pub mod particle_action_random_acceleration;
 pub mod particle_action_random_displace;
 pub mod particle_action_random_velocity;
+pub mod particle_action_reader;
 pub mod particle_action_restore;
 pub mod particle_action_scatter;
 pub mod particle_action_sink;
