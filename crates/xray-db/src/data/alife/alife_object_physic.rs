@@ -67,15 +67,17 @@ impl AlifeObjectWriter for AlifeObjectPhysic {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
-    self.skeleton.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
+    self.skeleton.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("physic_type", self.physic_type.to_string())
       .set("mass", self.mass.to_string())
       .set("fixed_bones", &self.fixed_bones);
+
+    Ok(())
   }
 }
 

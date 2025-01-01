@@ -3,13 +3,13 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_error::DatabaseError;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt};
+use crate::types::{DatabaseResult, ParticlesByteOrder};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleDomain {
   pub domain_type: u32,
@@ -42,7 +42,15 @@ impl ParticleDomain {
   }
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    todo!();
+    writer.write_u32::<ParticlesByteOrder>(self.domain_type)?;
+    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.coordinates.0)?;
+    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.coordinates.1)?;
+    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.basis.0)?;
+    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.basis.1)?;
+    writer.write_f32::<ParticlesByteOrder>(self.radius1)?;
+    writer.write_f32::<ParticlesByteOrder>(self.radius2)?;
+    writer.write_f32::<ParticlesByteOrder>(self.radius1_sqr)?;
+    writer.write_f32::<ParticlesByteOrder>(self.radius2_sqr)?;
 
     Ok(())
   }

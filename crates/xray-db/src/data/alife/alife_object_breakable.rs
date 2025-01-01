@@ -54,12 +54,14 @@ impl AlifeObjectWriter for AlifeObjectBreakable {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("health", self.health.to_string());
+
+    Ok(())
   }
 }
 

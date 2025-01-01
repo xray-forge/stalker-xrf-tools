@@ -62,14 +62,16 @@ impl AlifeObjectWriter for AlifeObjectInventoryBox {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("can_take", self.can_take.to_string())
       .set("is_closed", self.is_closed.to_string())
       .set("tip", &self.tip);
+
+    Ok(())
   }
 }
 

@@ -104,7 +104,7 @@ impl SpawnALifeSpawnsChunk {
     let mut ltx: Ltx = Ltx::new();
 
     for object in &self.objects {
-      object.export(&object.index.to_string(), &mut ltx);
+      object.export(&object.index.to_string(), &mut ltx)?;
     }
 
     ltx.write_to(&mut create_export_file(&path.join("alife_spawns.ltx"))?)?;

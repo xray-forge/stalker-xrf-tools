@@ -74,8 +74,8 @@ impl AlifeObjectWriter for AlifeObjectItemWeapon {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
@@ -85,6 +85,8 @@ impl AlifeObjectWriter for AlifeObjectItemWeapon {
       .set("addon_flags", self.addon_flags.to_string())
       .set("ammo_type", self.ammo_type.to_string())
       .set("elapsed_grenades", self.elapsed_grenades.to_string());
+
+    Ok(())
   }
 }
 

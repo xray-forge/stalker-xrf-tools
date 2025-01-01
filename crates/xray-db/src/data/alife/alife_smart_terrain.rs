@@ -130,8 +130,8 @@ impl AlifeObjectWriter for AlifeSmartTerrain {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
@@ -157,6 +157,8 @@ impl AlifeObjectWriter for AlifeSmartTerrain {
         self.staying_objects_count.to_string(),
       )
       .set("save_marker", self.save_marker.to_string());
+
+    Ok(())
   }
 }
 

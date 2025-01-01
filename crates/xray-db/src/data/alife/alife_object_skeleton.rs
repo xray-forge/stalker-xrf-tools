@@ -63,12 +63,14 @@ impl AlifeObjectWriter for AlifeObjectSkeleton {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set("name", &self.name)
       .set("flags", self.flags.to_string())
       .set("source_id", self.source_id.to_string());
+
+    Ok(())
   }
 }
 
@@ -144,8 +146,8 @@ mod tests {
       source_id: 526,
     };
 
-    first.export("first", &mut ltx);
-    second.export("second", &mut ltx);
+    first.export("first", &mut ltx)?;
+    second.export("second", &mut ltx)?;
 
     ltx.write_to(&mut overwrite_test_relative_resource_as_file(
       &ltx_filename,

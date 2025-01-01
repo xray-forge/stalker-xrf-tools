@@ -18,8 +18,8 @@ pub struct ParticleActionFollow {
 }
 
 impl ParticleActionReader for ParticleActionFollow {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionFollow> {
-    Ok(ParticleActionFollow {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    Ok(Self {
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
       max_radius: reader.read_f32::<T>()?,
@@ -27,7 +27,7 @@ impl ParticleActionReader for ParticleActionFollow {
   }
 
   fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section("header").ok_or_else(|| {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()

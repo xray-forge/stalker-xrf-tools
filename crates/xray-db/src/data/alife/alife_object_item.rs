@@ -65,14 +65,16 @@ impl AlifeObjectWriter for AlifeObjectItem {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("condition", self.condition.to_string())
       .set("is_closed", self.upgrades_count.to_string())
       .set("upgrades_count", self.upgrades_count.to_string());
+
+    Ok(())
   }
 }
 

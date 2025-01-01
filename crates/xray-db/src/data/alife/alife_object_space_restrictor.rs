@@ -58,14 +58,16 @@ impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("restrictor_type", self.restrictor_type.to_string());
 
     Shape::export_list(&self.shape, section, ini);
+
+    Ok(())
   }
 }
 
@@ -187,8 +189,8 @@ mod tests {
       restrictor_type: 4,
     };
 
-    first.export("first", &mut ltx);
-    second.export("second", &mut ltx);
+    first.export("first", &mut ltx)?;
+    second.export("second", &mut ltx)?;
 
     ltx.write_to(&mut file)?;
 

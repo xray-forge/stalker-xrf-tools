@@ -25,7 +25,7 @@ impl ParticleActionReader for ParticleActionSpeedLimit {
   }
 
   fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section("header").ok_or_else(|| {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()

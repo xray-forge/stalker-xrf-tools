@@ -64,14 +64,16 @@ impl AlifeObjectWriter for AlifeObjectActor {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
-    self.trader.export(section, ini);
-    self.skeleton.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
+    self.trader.export(section, ini)?;
+    self.skeleton.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("holder_id", self.holder_id.to_string());
+
+    Ok(())
   }
 }
 

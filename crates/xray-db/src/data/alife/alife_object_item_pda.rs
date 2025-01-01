@@ -62,14 +62,16 @@ impl AlifeObjectWriter for AlifeObjectItemPda {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("owner", self.owner.to_string())
       .set("character", &self.character)
       .set("info_portion", &self.info_portion);
+
+    Ok(())
   }
 }
 

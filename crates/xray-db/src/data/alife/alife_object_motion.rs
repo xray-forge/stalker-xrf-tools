@@ -48,10 +48,12 @@ impl AlifeObjectWriter for AlifeObjectMotion {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set("motion_name", &self.motion_name);
+
+    Ok(())
   }
 }
 

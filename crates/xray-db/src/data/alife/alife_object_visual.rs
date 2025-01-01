@@ -52,11 +52,13 @@ impl AlifeObjectWriter for AlifeObjectVisual {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set("visual_name", &self.visual_name)
       .set("visual_flags", self.visual_flags.to_string());
+
+    Ok(())
   }
 }
 
@@ -129,8 +131,8 @@ mod tests {
       visual_flags: 33,
     };
 
-    first.export("first", &mut ltx);
-    second.export("second", &mut ltx);
+    first.export("first", &mut ltx)?;
+    second.export("second", &mut ltx)?;
 
     ltx.write_to(&mut file)?;
 

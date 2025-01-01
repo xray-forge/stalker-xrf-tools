@@ -62,8 +62,8 @@ impl AlifeObjectWriter for AlifeObjectAnomalyZone {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
@@ -79,6 +79,8 @@ impl AlifeObjectWriter for AlifeObjectAnomalyZone {
         "artefact_position_offset",
         self.artefact_position_offset.to_string(),
       );
+
+    Ok(())
   }
 }
 

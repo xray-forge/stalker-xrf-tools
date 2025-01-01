@@ -69,7 +69,7 @@ impl AlifeObjectWriter for AlifeGraphPoint {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set("connection_point_name", &self.connection_point_name)
@@ -78,6 +78,8 @@ impl AlifeObjectWriter for AlifeGraphPoint {
       .set("location1", self.location1.to_string())
       .set("location2", self.location2.to_string())
       .set("location3", self.location3.to_string());
+
+    Ok(())
   }
 }
 

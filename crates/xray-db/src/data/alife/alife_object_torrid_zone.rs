@@ -63,14 +63,16 @@ impl AlifeObjectWriter for AlifeObjectTorridZone {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
-    self.motion.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
+    self.motion.export(section, ini)?;
 
     ini.with_section(section).set(
       "last_spawn_time",
       Time::export_to_string(self.last_spawn_time.as_ref()),
     );
+
+    Ok(())
   }
 }
 

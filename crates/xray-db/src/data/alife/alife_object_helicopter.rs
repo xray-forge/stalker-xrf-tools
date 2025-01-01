@@ -68,15 +68,17 @@ impl AlifeObjectWriter for AlifeObjectHelicopter {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
-    self.motion.export(section, ini);
-    self.skeleton.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
+    self.motion.export(section, ini)?;
+    self.skeleton.export(section, ini)?;
 
     ini
       .with_section(section)
       .set("startup_animation", &self.startup_animation)
       .set("engine_sound", &self.engine_sound);
+
+    Ok(())
   }
 }
 

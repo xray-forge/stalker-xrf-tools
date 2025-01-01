@@ -70,8 +70,8 @@ impl AlifeObjectWriter for AlifeObjectCustomZone {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
@@ -80,6 +80,8 @@ impl AlifeObjectWriter for AlifeObjectCustomZone {
       .set("enabled_time", self.enabled_time.to_string())
       .set("disabled_time", self.disabled_time.to_string())
       .set("start_time_shift", self.start_time_shift.to_string());
+
+    Ok(())
   }
 }
 

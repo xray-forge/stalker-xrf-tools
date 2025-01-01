@@ -78,7 +78,7 @@ impl AlifeObjectWriter for AlifeObjectAbstract {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set("game_vertex_id", self.game_vertex_id.to_string())
@@ -89,6 +89,8 @@ impl AlifeObjectWriter for AlifeObjectAbstract {
       .set("custom_data", &string_to_base64(&self.custom_data))
       .set("story_id", self.story_id.to_string())
       .set("spawn_story_id", self.spawn_story_id.to_string());
+
+    Ok(())
   }
 }
 
@@ -180,8 +182,8 @@ mod tests {
       spawn_story_id: 255,
     };
 
-    first.export("first", &mut ltx);
-    second.export("second", &mut ltx);
+    first.export("first", &mut ltx)?;
+    second.export("second", &mut ltx)?;
 
     ltx.write_to(&mut overwrite_test_relative_resource_as_file(
       &ltx_filename,

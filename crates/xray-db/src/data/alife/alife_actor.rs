@@ -66,8 +66,8 @@ impl AlifeObjectWriter for AlifeActor {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
@@ -76,6 +76,8 @@ impl AlifeObjectWriter for AlifeActor {
         self.start_position_filled.to_string(),
       )
       .set("save_marker", self.save_marker.to_string());
+
+    Ok(())
   }
 }
 

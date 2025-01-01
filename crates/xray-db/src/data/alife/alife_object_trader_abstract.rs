@@ -84,7 +84,7 @@ impl AlifeObjectWriter for AlifeObjectTraderAbstract {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set("money", self.money.to_string())
@@ -97,6 +97,8 @@ impl AlifeObjectWriter for AlifeObjectTraderAbstract {
       .set("character_name", &self.character_name)
       .set("dead_body_can_take", self.dead_body_can_take.to_string())
       .set("dead_body_closed", self.dead_body_closed.to_string());
+
+    Ok(())
   }
 }
 

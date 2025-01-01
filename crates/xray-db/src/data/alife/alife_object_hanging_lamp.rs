@@ -141,9 +141,9 @@ impl AlifeObjectWriter for AlifeObjectHangingLamp {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
-    self.skeleton.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
+    self.skeleton.export(section, ini)?;
 
     ini
       .with_section(section)
@@ -171,6 +171,8 @@ impl AlifeObjectWriter for AlifeObjectHangingLamp {
         self.volumetric_intensity.to_string(),
       )
       .set("volumetric_distance", self.volumetric_distance.to_string());
+
+    Ok(())
   }
 }
 

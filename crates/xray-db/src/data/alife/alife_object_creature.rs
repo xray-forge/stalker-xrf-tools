@@ -91,8 +91,8 @@ impl AlifeObjectWriter for AlifeObjectCreature {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) {
-    self.base.export(section, ini);
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+    self.base.export(section, ini)?;
 
     ini
       .with_section(section)
@@ -110,6 +110,8 @@ impl AlifeObjectWriter for AlifeObjectCreature {
       )
       .set("killer_id", self.killer_id.to_string())
       .set("game_death_time", self.game_death_time.to_string());
+
+    Ok(())
   }
 }
 
@@ -244,8 +246,8 @@ mod tests {
       game_death_time: 17,
     };
 
-    first.export("first", &mut ltx);
-    second.export("second", &mut ltx);
+    first.export("first", &mut ltx)?;
+    second.export("second", &mut ltx)?;
 
     ltx.write_to(&mut overwrite_test_relative_resource_as_file(
       &ltx_filename,
