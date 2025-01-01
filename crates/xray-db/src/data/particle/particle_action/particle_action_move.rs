@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
-use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
+use crate::data::meta::particle_action_reader::ParticleActionReader;
+use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ impl ParticleActionReader for ParticleActionMove {
 }
 
 #[typetag::serde]
-impl ParticleActionGeneric for ParticleActionMove {
+impl ParticleActionWriter for ParticleActionMove {
   fn write(&self, _: &mut ChunkWriter) -> DatabaseResult<()> {
     Ok(())
   }

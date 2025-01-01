@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -15,7 +15,7 @@ pub struct AlifeObjectVisual {
   pub visual_flags: u8,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
+impl AlifeObjectReader<AlifeObjectVisual> for AlifeObjectVisual {
   /// Read visual object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -34,7 +34,7 @@ impl AlifeObjectInheritedReader<AlifeObjectVisual> for AlifeObjectVisual {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectVisual {
+impl AlifeObjectWriter for AlifeObjectVisual {
   /// Write visual alife object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.visual_name)?;
@@ -57,8 +57,8 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

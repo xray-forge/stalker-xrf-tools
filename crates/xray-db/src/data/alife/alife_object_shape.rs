@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::shape::Shape;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::ByteOrder;
@@ -16,7 +16,7 @@ pub struct AlifeObjectShape {
   pub shape: Vec<Shape>,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
+impl AlifeObjectReader<AlifeObjectShape> for AlifeObjectShape {
   /// Read shape object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -35,7 +35,7 @@ impl AlifeObjectInheritedReader<AlifeObjectShape> for AlifeObjectShape {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectShape {
+impl AlifeObjectWriter for AlifeObjectShape {
   /// Write shape object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -59,8 +59,8 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

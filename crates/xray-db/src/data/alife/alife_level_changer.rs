@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -27,7 +27,7 @@ pub struct AlifeLevelChanger {
   pub save_marker: u16,
 }
 
-impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
+impl AlifeObjectReader<AlifeLevelChanger> for AlifeLevelChanger {
   /// Read alife level changer object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let object: Self = Self {
@@ -73,7 +73,7 @@ impl AlifeObjectInheritedReader<AlifeLevelChanger> for AlifeLevelChanger {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeLevelChanger {
+impl AlifeObjectWriter for AlifeLevelChanger {
   /// Write object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -124,8 +124,8 @@ mod tests {
   use crate::data::alife::alife_level_changer::AlifeLevelChanger;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

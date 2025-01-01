@@ -1,11 +1,12 @@
 use crate::chunk::reader::ChunkReader;
+use crate::data::meta::particle_action_reader::ParticleActionReader;
+use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_action::particle_action_avoid::ParticleActionAvoid;
 use crate::data::particle::particle_action::particle_action_bounce::ParticleActionBounce;
 use crate::data::particle::particle_action::particle_action_copy_vertex::ParticleActionCopyVertex;
 use crate::data::particle::particle_action::particle_action_damping::ParticleActionDamping;
 use crate::data::particle::particle_action::particle_action_explosion::ParticleActionExplosion;
 use crate::data::particle::particle_action::particle_action_follow::ParticleActionFollow;
-use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
 use crate::data::particle::particle_action::particle_action_gravitate::ParticleActionGravitate;
 use crate::data::particle::particle_action::particle_action_gravity::ParticleActionGravity;
 use crate::data::particle::particle_action::particle_action_jet::ParticleActionJet;
@@ -17,7 +18,6 @@ use crate::data::particle::particle_action::particle_action_orbit_point::Particl
 use crate::data::particle::particle_action::particle_action_random_acceleration::ParticleActionRandomAcceleration;
 use crate::data::particle::particle_action::particle_action_random_displace::ParticleActionRandomDisplace;
 use crate::data::particle::particle_action::particle_action_random_velocity::ParticleActionRandomVelocity;
-use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
 use crate::data::particle::particle_action::particle_action_restore::ParticleActionRestore;
 use crate::data::particle::particle_action::particle_action_scatter::ParticleActionScatter;
 use crate::data::particle::particle_action::particle_action_sink::ParticleActionSink;
@@ -116,7 +116,7 @@ impl ParticleActionType {
   pub fn read_by_particle_type<T: ByteOrder>(
     reader: &mut ChunkReader,
     particle_action_type: ParticleActionType,
-  ) -> DatabaseResult<Box<dyn ParticleActionGeneric>> {
+  ) -> DatabaseResult<Box<dyn ParticleActionWriter>> {
     match particle_action_type {
       ParticleActionType::PAAvoidID => Ok(Box::new(ParticleActionAvoid::read::<T>(reader)?)),
       ParticleActionType::PABounceID => Ok(Box::new(ParticleActionBounce::read::<T>(reader)?)),
@@ -191,7 +191,7 @@ impl ParticleActionType {
     particle_action_type: ParticleActionType,
     section_name: &str,
     ini: &Ltx,
-  ) -> DatabaseResult<Box<dyn ParticleActionGeneric>> {
+  ) -> DatabaseResult<Box<dyn ParticleActionWriter>> {
     match particle_action_type {
       ParticleActionType::PAAvoidID => {
         Ok(Box::new(ParticleActionAvoid::import(section_name, ini)?))

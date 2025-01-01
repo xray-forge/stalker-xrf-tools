@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
-use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
+use crate::data::meta::particle_action_reader::ParticleActionReader;
+use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
@@ -44,7 +44,7 @@ impl ParticleActionReader for ParticleActionBounce {
 }
 
 #[typetag::serde]
-impl ParticleActionGeneric for ParticleActionBounce {
+impl ParticleActionWriter for ParticleActionBounce {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.position.write::<ParticlesByteOrder>(writer)?;
 

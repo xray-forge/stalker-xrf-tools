@@ -2,8 +2,8 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -38,7 +38,7 @@ pub struct AlifeObjectHangingLamp {
   pub volumetric_distance: f32,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
+impl AlifeObjectReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
   /// Read hanging lamp data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -99,7 +99,7 @@ impl AlifeObjectInheritedReader<AlifeObjectHangingLamp> for AlifeObjectHangingLa
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectHangingLamp {
+impl AlifeObjectWriter for AlifeObjectHangingLamp {
   /// Write skeleton data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -174,8 +174,8 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_hanging_lamp::AlifeObjectHangingLamp;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

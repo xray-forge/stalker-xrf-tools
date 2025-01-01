@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::time::Time;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -17,7 +17,7 @@ pub struct AlifeAnomalousZone {
   pub last_spawn_time: Option<Time>,
 }
 
-impl AlifeObjectInheritedReader for AlifeAnomalousZone {
+impl AlifeObjectReader for AlifeAnomalousZone {
   /// Read anomalous zone object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -39,7 +39,7 @@ impl AlifeObjectInheritedReader for AlifeAnomalousZone {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeAnomalousZone {
+impl AlifeObjectWriter for AlifeAnomalousZone {
   /// Write alife anomalous zone data to the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -69,8 +69,8 @@ mod tests {
   use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::time::Time;
   use crate::data::vector_3d::Vector3d;

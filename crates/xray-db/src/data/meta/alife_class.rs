@@ -28,8 +28,8 @@ use crate::data::alife::alife_object_torrid_zone::AlifeObjectTorridZone;
 use crate::data::alife::alife_smart_cover::AlifeSmartCover;
 use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
@@ -97,7 +97,7 @@ impl AlifeClass {
   pub fn read_by_class<T: ByteOrder>(
     reader: &mut ChunkReader,
     alife_class: &Self,
-  ) -> DatabaseResult<Box<dyn AlifeObjectGeneric>> {
+  ) -> DatabaseResult<Box<dyn AlifeObjectWriter>> {
     match alife_class {
       Self::SeActor => {
         let object: AlifeActor = AlifeActor::read::<T>(reader)?;
@@ -256,7 +256,7 @@ impl AlifeClass {
   pub fn import_by_class(
     alife_class: &Self,
     section: &Section,
-  ) -> DatabaseResult<Box<dyn AlifeObjectGeneric>> {
+  ) -> DatabaseResult<Box<dyn AlifeObjectWriter>> {
     Ok(match alife_class {
       Self::SeActor => Box::new(AlifeActor::import(section)?),
       Self::CseAlifeObjectBreakable => Box::new(AlifeObjectBreakable::import(section)?),

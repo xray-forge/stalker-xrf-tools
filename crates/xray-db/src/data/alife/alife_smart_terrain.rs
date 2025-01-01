@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -22,7 +22,7 @@ pub struct AlifeSmartTerrain {
   pub save_marker: u16,
 }
 
-impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
+impl AlifeObjectReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   /// Read alife smart terrain data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let base: AlifeSmartZone = AlifeSmartZone::read::<T>(reader)?;
@@ -103,7 +103,7 @@ impl AlifeObjectInheritedReader<AlifeSmartTerrain> for AlifeSmartTerrain {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeSmartTerrain {
+impl AlifeObjectWriter for AlifeSmartTerrain {
   /// Write smart terrain data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -158,8 +158,8 @@ mod tests {
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
   use crate::data::alife::alife_smart_zone::AlifeSmartZone;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -20,7 +20,7 @@ pub struct AlifeGraphPoint {
   pub location3: u8,
 }
 
-impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
+impl AlifeObjectReader<AlifeGraphPoint> for AlifeGraphPoint {
   /// Read graph point data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -47,7 +47,7 @@ impl AlifeObjectInheritedReader<AlifeGraphPoint> for AlifeGraphPoint {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeGraphPoint {
+impl AlifeObjectWriter for AlifeGraphPoint {
   /// Write graph point data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.connection_point_name)?;
@@ -78,8 +78,8 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_graph_point::AlifeGraphPoint;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

@@ -2,8 +2,8 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -19,7 +19,7 @@ pub struct AlifeSmartCover {
   pub loopholes: Vec<AlifeSmartCoverLoophole>,
 }
 
-impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
+impl AlifeObjectReader<AlifeSmartCover> for AlifeSmartCover {
   /// Read smart cover data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read::<T>(reader)?;
@@ -56,7 +56,7 @@ impl AlifeObjectInheritedReader<AlifeSmartCover> for AlifeSmartCover {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeSmartCover {
+impl AlifeObjectWriter for AlifeSmartCover {
   /// Write smart cover data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -94,8 +94,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
   use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

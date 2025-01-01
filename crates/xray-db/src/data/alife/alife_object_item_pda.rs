@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -18,7 +18,7 @@ pub struct AlifeObjectItemPda {
   pub info_portion: String,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
+impl AlifeObjectReader<AlifeObjectItemPda> for AlifeObjectItemPda {
   /// Read pda object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -41,7 +41,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemPda> for AlifeObjectItemPda {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectItemPda {
+impl AlifeObjectWriter for AlifeObjectItemPda {
   /// Write item data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -73,8 +73,8 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_pda::AlifeObjectItemPda;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

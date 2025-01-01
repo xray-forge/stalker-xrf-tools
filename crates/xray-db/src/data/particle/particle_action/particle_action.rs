@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
-use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
+use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_action::particle_action_type::ParticleActionType;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
@@ -15,7 +15,7 @@ use xray_ltx::{Ltx, Section};
 pub struct ParticleAction {
   pub action_flags: u32,
   pub action_type: u32,
-  pub data: Box<dyn ParticleActionGeneric>,
+  pub data: Box<dyn ParticleActionWriter>,
 }
 
 impl ParticleAction {

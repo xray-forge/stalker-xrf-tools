@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::particle::particle_action::particle_action_generic::ParticleActionGeneric;
-use crate::data::particle::particle_action::particle_action_reader::ParticleActionReader;
+use crate::data::meta::particle_action_reader::ParticleActionReader;
+use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -36,7 +36,7 @@ impl ParticleActionReader for ParticleActionKillOld {
 }
 
 #[typetag::serde]
-impl ParticleActionGeneric for ParticleActionKillOld {
+impl ParticleActionWriter for ParticleActionKillOld {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_f32::<ParticlesByteOrder>(self.age_limit)?;
     writer.write_u32::<ParticlesByteOrder>(self.kill_less_than)?;

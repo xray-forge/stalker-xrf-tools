@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{import_vector_from_string, read_ini_field};
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -24,7 +24,7 @@ pub struct AlifeObjectCreature {
   pub game_death_time: u64,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
+impl AlifeObjectReader<AlifeObjectCreature> for AlifeObjectCreature {
   /// Read alife creature object data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -63,7 +63,7 @@ impl AlifeObjectInheritedReader<AlifeObjectCreature> for AlifeObjectCreature {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectCreature {
+impl AlifeObjectWriter for AlifeObjectCreature {
   /// Write alife creature object data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -112,8 +112,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_creature::AlifeObjectCreature;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

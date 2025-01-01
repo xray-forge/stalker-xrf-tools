@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{string_from_base64, string_to_base64};
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -23,7 +23,7 @@ pub struct AlifeObjectAbstract {
   pub spawn_story_id: u32,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
+impl AlifeObjectReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   /// Read generic alife object base data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -54,7 +54,7 @@ impl AlifeObjectInheritedReader<AlifeObjectAbstract> for AlifeObjectAbstract {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectAbstract {
+impl AlifeObjectWriter for AlifeObjectAbstract {
   /// Write abstract object data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u16::<SpawnByteOrder>(self.game_vertex_id)?;
@@ -89,8 +89,8 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

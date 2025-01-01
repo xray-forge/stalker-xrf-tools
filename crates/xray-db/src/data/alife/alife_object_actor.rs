@@ -3,8 +3,8 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_creature::AlifeObjectCreature;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -20,7 +20,7 @@ pub struct AlifeObjectActor {
   pub holder_id: u16,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
+impl AlifeObjectReader<AlifeObjectActor> for AlifeObjectActor {
   /// Read actor data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -43,7 +43,7 @@ impl AlifeObjectInheritedReader<AlifeObjectActor> for AlifeObjectActor {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectActor {
+impl AlifeObjectWriter for AlifeObjectActor {
   /// Write object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -77,8 +77,8 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

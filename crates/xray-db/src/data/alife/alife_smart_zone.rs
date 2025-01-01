@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -14,7 +14,7 @@ pub struct AlifeSmartZone {
   pub base: AlifeObjectSpaceRestrictor,
 }
 
-impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
+impl AlifeObjectReader<AlifeSmartZone> for AlifeSmartZone {
   /// Read generic alife smart zone object from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -31,7 +31,7 @@ impl AlifeObjectInheritedReader<AlifeSmartZone> for AlifeSmartZone {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeSmartZone {
+impl AlifeObjectWriter for AlifeSmartZone {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
 
@@ -51,8 +51,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_smart_zone::AlifeSmartZone;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

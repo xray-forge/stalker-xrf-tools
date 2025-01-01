@@ -2,8 +2,8 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::time::Time;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -19,7 +19,7 @@ pub struct AlifeObjectTorridZone {
   pub last_spawn_time: Option<Time>,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
+impl AlifeObjectReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
   /// Read zone object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -43,7 +43,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTorridZone> for AlifeObjectTorridZone
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectTorridZone {
+impl AlifeObjectWriter for AlifeObjectTorridZone {
   /// Write zone object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -75,8 +75,8 @@ mod tests {
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_object_torrid_zone::AlifeObjectTorridZone;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::time::Time;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

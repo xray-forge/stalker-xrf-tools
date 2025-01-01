@@ -1,11 +1,11 @@
 use crate::chunk::reader::ChunkReader;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use xray_ltx::Section;
 
 /// Generic trait describing possibility to read object data from chunk.
-pub trait AlifeObjectInheritedReader<T: AlifeObjectGeneric = Self> {
+pub trait AlifeObjectReader<T: AlifeObjectWriter = Self> {
   /// Read alife object data from chunk reader.
   fn read<B: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<T>;
 

@@ -4,7 +4,7 @@ use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
 };
 use crate::data::meta::alife_class::AlifeClass;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
 use crate::export::file_import::read_ini_field;
@@ -38,7 +38,7 @@ pub struct AlifeObjectBase {
   pub script_version: u16,
   pub client_data_size: u16,
   pub spawn_id: u16,
-  pub inherited: Box<dyn AlifeObjectGeneric>,
+  pub inherited: Box<dyn AlifeObjectWriter>,
   pub update_data: Vec<u8>, // todo: Parse.
 }
 
@@ -101,7 +101,7 @@ impl AlifeObjectBase {
 
     assert_ne!(class, AlifeClass::Unknown);
 
-    let inherited: Box<dyn AlifeObjectGeneric> =
+    let inherited: Box<dyn AlifeObjectWriter> =
       AlifeClass::read_by_class::<T>(&mut spawn_reader, &class)?;
 
     let update_data_length: u16 = update_reader.file.read_u16::<T>()?;

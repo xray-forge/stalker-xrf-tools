@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -14,9 +14,7 @@ pub struct AlifeObjectItemWeaponMagazinedWgl {
   pub base: AlifeObjectItemWeaponMagazined,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
-  for AlifeObjectItemWeaponMagazinedWgl
-{
+impl AlifeObjectReader<AlifeObjectItemWeaponMagazinedWgl> for AlifeObjectItemWeaponMagazinedWgl {
   /// Read magazined weapon with launcher from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -33,7 +31,7 @@ impl AlifeObjectInheritedReader<AlifeObjectItemWeaponMagazinedWgl>
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectItemWeaponMagazinedWgl {
+impl AlifeObjectWriter for AlifeObjectItemWeaponMagazinedWgl {
   /// Write magazined weapon with launcher data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -57,8 +55,8 @@ mod tests {
   use crate::data::alife::alife_object_item_weapon::AlifeObjectItemWeapon;
   use crate::data::alife::alife_object_item_weapon_magazined::AlifeObjectItemWeaponMagazined;
   use crate::data::alife::alife_object_item_weapon_magazined_wgl::AlifeObjectItemWeaponMagazinedWgl;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

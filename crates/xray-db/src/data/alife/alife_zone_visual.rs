@@ -2,8 +2,8 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::alife::alife_object_visual::AlifeObjectVisual;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::time::Time;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -21,7 +21,7 @@ pub struct AlifeZoneVisual {
   pub last_spawn_time: Option<Time>,
 }
 
-impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
+impl AlifeObjectReader<AlifeZoneVisual> for AlifeZoneVisual {
   /// Read visual zone data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -55,7 +55,7 @@ impl AlifeObjectInheritedReader<AlifeZoneVisual> for AlifeZoneVisual {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeZoneVisual {
+impl AlifeObjectWriter for AlifeZoneVisual {
   /// Write visual zone data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -95,8 +95,8 @@ mod tests {
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

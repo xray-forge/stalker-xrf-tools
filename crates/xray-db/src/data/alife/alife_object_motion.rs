@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
@@ -14,7 +14,7 @@ pub struct AlifeObjectMotion {
   pub motion_name: String,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
+impl AlifeObjectReader<AlifeObjectMotion> for AlifeObjectMotion {
   /// Read motion object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -31,7 +31,7 @@ impl AlifeObjectInheritedReader<AlifeObjectMotion> for AlifeObjectMotion {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectMotion {
+impl AlifeObjectWriter for AlifeObjectMotion {
   /// Write motion object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.motion_name)?;
@@ -52,8 +52,8 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

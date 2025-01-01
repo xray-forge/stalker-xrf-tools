@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_shape::AlifeObjectShape;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
@@ -16,7 +16,7 @@ pub struct AlifeObjectClimable {
   pub game_material: String,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
+impl AlifeObjectReader<AlifeObjectClimable> for AlifeObjectClimable {
   /// Read climable object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -35,7 +35,7 @@ impl AlifeObjectInheritedReader<AlifeObjectClimable> for AlifeObjectClimable {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectClimable {
+impl AlifeObjectWriter for AlifeObjectClimable {
   /// Write climable object data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -62,8 +62,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_climable::AlifeObjectClimable;
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

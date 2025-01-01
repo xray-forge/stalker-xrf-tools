@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -20,7 +20,7 @@ pub struct AlifeObjectCustomZone {
   pub start_time_shift: u32,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
+impl AlifeObjectReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
   /// Read alife custom zone object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -47,7 +47,7 @@ impl AlifeObjectInheritedReader<AlifeObjectCustomZone> for AlifeObjectCustomZone
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectCustomZone {
+impl AlifeObjectWriter for AlifeObjectCustomZone {
   /// Write custom zone object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     self.base.write(writer)?;
@@ -82,8 +82,8 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};

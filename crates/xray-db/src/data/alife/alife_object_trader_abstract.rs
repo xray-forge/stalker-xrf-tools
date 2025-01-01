@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -23,7 +23,7 @@ pub struct AlifeObjectTraderAbstract {
   pub dead_body_closed: u8,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
+impl AlifeObjectReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract {
   /// Read trader data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -58,7 +58,7 @@ impl AlifeObjectInheritedReader<AlifeObjectTraderAbstract> for AlifeObjectTrader
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectTraderAbstract {
+impl AlifeObjectWriter for AlifeObjectTraderAbstract {
   /// Write trader data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u32::<SpawnByteOrder>(self.money)?;
@@ -97,8 +97,8 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

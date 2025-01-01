@@ -1,8 +1,8 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::FLAG_SKELETON_SAVED_DATA;
-use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -17,7 +17,7 @@ pub struct AlifeObjectSkeleton {
   pub source_id: u16,
 }
 
-impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
+impl AlifeObjectReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
   /// Read skeleton data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let object = Self {
@@ -44,7 +44,7 @@ impl AlifeObjectInheritedReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
 }
 
 #[typetag::serde]
-impl AlifeObjectGeneric for AlifeObjectSkeleton {
+impl AlifeObjectWriter for AlifeObjectSkeleton {
   /// Write skeleton data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_null_terminated_win_string(&self.name)?;
@@ -69,8 +69,8 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
-  use crate::data::meta::alife_object_generic::AlifeObjectGeneric;
-  use crate::data::meta::alife_object_inherited_reader::AlifeObjectInheritedReader;
+  use crate::data::meta::alife_object_generic::AlifeObjectWriter;
+  use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
