@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -43,9 +44,16 @@ impl AlifeObjectReader<AlifeSmartCover> for AlifeSmartCover {
   }
 
   /// Import smart cover data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectSmartCover::import(section)?,
+      base: AlifeObjectSmartCover::import(section_name, ini)?,
       last_description: read_ini_field("last_description", section)?,
       loopholes: AlifeSmartCoverLoophole::string_to_list(&read_ini_field::<String>(
         "loopholes",

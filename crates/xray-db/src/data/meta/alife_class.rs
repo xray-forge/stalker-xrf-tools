@@ -33,7 +33,7 @@ use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
-use xray_ltx::Section;
+use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, Enum, PartialEq)]
 pub enum AlifeClass {
@@ -255,42 +255,52 @@ impl AlifeClass {
   /// Import custom save data based on serialized clsid.
   pub fn import_by_class(
     alife_class: &Self,
-    section: &Section,
+    section_name: &str,
+    ltx: &Ltx,
   ) -> DatabaseResult<Box<dyn AlifeObjectWriter>> {
     Ok(match alife_class {
-      Self::SeActor => Box::new(AlifeActor::import(section)?),
-      Self::CseAlifeObjectBreakable => Box::new(AlifeObjectBreakable::import(section)?),
-      Self::CseAlifeObjectClimable => Box::new(AlifeObjectClimable::import(section)?),
-      Self::CseAlifeGraphPoint => Box::new(AlifeGraphPoint::import(section)?),
-      Self::CseAlifeSpaceRestrictor => Box::new(AlifeObjectSpaceRestrictor::import(section)?),
-      Self::SeSmartCover => Box::new(AlifeSmartCover::import(section)?),
-      Self::CseAlifeAnomalousZone => Box::new(AlifeObjectAnomalyZone::import(section)?),
-      Self::SeZoneAnom => Box::new(AlifeAnomalousZone::import(section)?),
-      Self::SeZoneTorrid => Box::new(AlifeObjectTorridZone::import(section)?),
-      Self::SeSmartTerrain => Box::new(AlifeSmartTerrain::import(section)?),
-      Self::SeLevelChanger => Box::new(AlifeLevelChanger::import(section)?),
-      Self::SeZoneVisual => Box::new(AlifeZoneVisual::import(section)?),
-      Self::CseAlifeObjectPhysic => Box::new(AlifeObjectPhysic::import(section)?),
-      Self::CseAlifeHelicopter => Box::new(AlifeObjectHelicopter::import(section)?),
-      Self::CseAlifeInventoryBox => Box::new(AlifeObjectInventoryBox::import(section)?),
-      Self::CseAlifeObjectHangingLamp => Box::new(AlifeObjectHangingLamp::import(section)?),
-      Self::CseAlifeItem => Box::new(AlifeObjectItem::import(section)?),
-      Self::CseAlifeItemExplosive => Box::new(AlifeObjectItemExplosive::import(section)?),
-      Self::CseAlifeItemPda => Box::new(AlifeObjectItemPda::import(section)?),
-      Self::CseAlifeItemAmmo => Box::new(AlifeObjectItemAmmo::import(section)?),
-      Self::CseAlifeItemGrenade => Box::new(AlifeObjectItemGrenade::import(section)?),
-      Self::CseAlifeItemArtefact => Box::new(AlifeObjectItemArtefact::import(section)?),
-      Self::CseAlifeItemWeapon => Box::new(AlifeObjectItemWeapon::import(section)?),
-      Self::CseAlifeItemDetector => Box::new(AlifeObjectItemDetector::import(section)?),
-      Self::CseAlifeItemHelmet => Box::new(AlifeObjectItemHelmet::import(section)?),
-      Self::CseAlifeItemCustomOutfit => Box::new(AlifeObjectItemCustomOutfit::import(section)?),
-      Self::CseAlifeItemWeaponShotgun => Box::new(AlifeObjectItemWeaponShotgun::import(section)?),
+      Self::SeActor => Box::new(AlifeActor::import(section_name, ltx)?),
+      Self::CseAlifeObjectBreakable => Box::new(AlifeObjectBreakable::import(section_name, ltx)?),
+      Self::CseAlifeObjectClimable => Box::new(AlifeObjectClimable::import(section_name, ltx)?),
+      Self::CseAlifeGraphPoint => Box::new(AlifeGraphPoint::import(section_name, ltx)?),
+      Self::CseAlifeSpaceRestrictor => {
+        Box::new(AlifeObjectSpaceRestrictor::import(section_name, ltx)?)
+      }
+      Self::SeSmartCover => Box::new(AlifeSmartCover::import(section_name, ltx)?),
+      Self::CseAlifeAnomalousZone => Box::new(AlifeObjectAnomalyZone::import(section_name, ltx)?),
+      Self::SeZoneAnom => Box::new(AlifeAnomalousZone::import(section_name, ltx)?),
+      Self::SeZoneTorrid => Box::new(AlifeObjectTorridZone::import(section_name, ltx)?),
+      Self::SeSmartTerrain => Box::new(AlifeSmartTerrain::import(section_name, ltx)?),
+      Self::SeLevelChanger => Box::new(AlifeLevelChanger::import(section_name, ltx)?),
+      Self::SeZoneVisual => Box::new(AlifeZoneVisual::import(section_name, ltx)?),
+      Self::CseAlifeObjectPhysic => Box::new(AlifeObjectPhysic::import(section_name, ltx)?),
+      Self::CseAlifeHelicopter => Box::new(AlifeObjectHelicopter::import(section_name, ltx)?),
+      Self::CseAlifeInventoryBox => Box::new(AlifeObjectInventoryBox::import(section_name, ltx)?),
+      Self::CseAlifeObjectHangingLamp => {
+        Box::new(AlifeObjectHangingLamp::import(section_name, ltx)?)
+      }
+      Self::CseAlifeItem => Box::new(AlifeObjectItem::import(section_name, ltx)?),
+      Self::CseAlifeItemExplosive => Box::new(AlifeObjectItemExplosive::import(section_name, ltx)?),
+      Self::CseAlifeItemPda => Box::new(AlifeObjectItemPda::import(section_name, ltx)?),
+      Self::CseAlifeItemAmmo => Box::new(AlifeObjectItemAmmo::import(section_name, ltx)?),
+      Self::CseAlifeItemGrenade => Box::new(AlifeObjectItemGrenade::import(section_name, ltx)?),
+      Self::CseAlifeItemArtefact => Box::new(AlifeObjectItemArtefact::import(section_name, ltx)?),
+      Self::CseAlifeItemWeapon => Box::new(AlifeObjectItemWeapon::import(section_name, ltx)?),
+      Self::CseAlifeItemDetector => Box::new(AlifeObjectItemDetector::import(section_name, ltx)?),
+      Self::CseAlifeItemHelmet => Box::new(AlifeObjectItemHelmet::import(section_name, ltx)?),
+      Self::CseAlifeItemCustomOutfit => {
+        Box::new(AlifeObjectItemCustomOutfit::import(section_name, ltx)?)
+      }
+      Self::CseAlifeItemWeaponShotgun => {
+        Box::new(AlifeObjectItemWeaponShotgun::import(section_name, ltx)?)
+      }
       Self::CseAlifeItemWeaponMagazined => {
-        Box::new(AlifeObjectItemWeaponMagazined::import(section)?)
+        Box::new(AlifeObjectItemWeaponMagazined::import(section_name, ltx)?)
       }
-      Self::CseAlifeItemWeaponMagazinedWGl => {
-        Box::new(AlifeObjectItemWeaponMagazinedWgl::import(section)?)
-      }
+      Self::CseAlifeItemWeaponMagazinedWGl => Box::new(AlifeObjectItemWeaponMagazinedWgl::import(
+        section_name,
+        ltx,
+      )?),
       _ => {
         panic!("Not implemented parser for: {:?}", alife_class)
       }

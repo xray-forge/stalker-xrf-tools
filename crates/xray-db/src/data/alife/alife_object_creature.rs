@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{import_vector_from_string, read_ini_field};
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -41,9 +42,16 @@ impl AlifeObjectReader<AlifeObjectCreature> for AlifeObjectCreature {
   }
 
   /// Import alife creature object from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section)?,
+      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
       team: read_ini_field("team", section)?,
       squad: read_ini_field("squad", section)?,
       group: read_ini_field("group", section)?,
@@ -245,13 +253,8 @@ mod tests {
 
     let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
-    let read_first: AlifeObjectCreature =
-      AlifeObjectCreature::import(source.section("first").unwrap())?;
-    let read_second: AlifeObjectCreature =
-      AlifeObjectCreature::import(source.section("second").unwrap())?;
-
-    assert_eq!(read_first, first);
-    assert_eq!(read_second, second);
+    assert_eq!(AlifeObjectCreature::import("first", &source)?, first);
+    assert_eq!(AlifeObjectCreature::import("second", &source)?, second);
 
     Ok(())
   }

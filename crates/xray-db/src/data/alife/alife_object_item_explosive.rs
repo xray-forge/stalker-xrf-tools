@@ -6,7 +6,7 @@ use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_ltx::{Ltx, Section};
+use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,9 +22,9 @@ impl AlifeObjectReader<AlifeObjectItemExplosive> for AlifeObjectItemExplosive {
     })
   }
 
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
     Ok(Self {
-      base: AlifeObjectItem::import(section)?,
+      base: AlifeObjectItem::import(section_name, ini)?,
     })
   }
 }

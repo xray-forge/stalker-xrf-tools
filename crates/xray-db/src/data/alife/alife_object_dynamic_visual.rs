@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -28,9 +29,16 @@ impl AlifeObjectReader<AlifeObjectDynamicVisual> for AlifeObjectDynamicVisual {
   }
 
   /// Import visual object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectAbstract::import(section)?,
+      base: AlifeObjectAbstract::import(section_name, ini)?,
       visual_name: read_ini_field("visual_name", section)?,
       visual_flags: read_ini_field("visual_flags", section)?,
     })
@@ -169,13 +177,8 @@ mod tests {
 
     let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
-    let read_first: AlifeObjectDynamicVisual =
-      AlifeObjectDynamicVisual::import(source.section("first").unwrap())?;
-    let read_second: AlifeObjectDynamicVisual =
-      AlifeObjectDynamicVisual::import(source.section("second").unwrap())?;
-
-    assert_eq!(read_first, first);
-    assert_eq!(read_second, second);
+    assert_eq!(AlifeObjectDynamicVisual::import("first", &source)?, first);
+    assert_eq!(AlifeObjectDynamicVisual::import("second", &source)?, second);
 
     Ok(())
   }

@@ -209,7 +209,11 @@ impl AlifeObjectBase {
   }
 
   /// Import alife object data from ini file section.
-  pub fn import(section: &Section) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
+      panic!("ALife object base '{section_name}' should be defined in ltx file")
+    });
+
     let object_section: String = read_ini_field("section", section)?;
     let clsid: ClsId = ClsId::from_section(&object_section);
 
@@ -233,7 +237,7 @@ impl AlifeObjectBase {
       script_version: read_ini_field("script_version", section)?,
       client_data_size: read_ini_field("client_data_size", section)?,
       spawn_id: read_ini_field("spawn_id", section)?,
-      inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), section)?,
+      inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), section_name, ini)?,
       update_data: bytes_from_base64(&read_ini_field::<String>("update_data", section)?)?,
     })
   }

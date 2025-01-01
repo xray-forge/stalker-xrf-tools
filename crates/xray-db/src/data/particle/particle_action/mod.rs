@@ -27,5 +27,4 @@ pub mod particle_action_target_rotate;
 pub mod particle_action_target_size;
 pub mod particle_action_target_velocity;
 pub mod particle_action_turbulence;
-pub mod particle_action_type;
 pub mod particle_action_vortex;

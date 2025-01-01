@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::time::Time;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::ByteOrder;
@@ -40,10 +41,17 @@ impl AlifeObjectReader<AlifeZoneVisual> for AlifeZoneVisual {
   }
 
   /// Import visual zone data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectAnomalyZone::import(section)?,
-      visual: AlifeObjectVisual::import(section)?,
+      base: AlifeObjectAnomalyZone::import(section_name, ini)?,
+      visual: AlifeObjectVisual::import(section_name, ini)?,
       idle_animation: read_ini_field("idle_animation", section)?,
       attack_animation: read_ini_field("attack_animation", section)?,
       last_spawn_time: Time::import_from_string(&read_ini_field::<String>(

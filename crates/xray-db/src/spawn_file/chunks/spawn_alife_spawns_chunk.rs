@@ -90,8 +90,8 @@ impl SpawnALifeSpawnsChunk {
     let ini: Ltx = open_ini_config(&path.join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
-    for (_, props) in ini.iter() {
-      objects.push(AlifeObjectBase::import(props)?);
+    for (section_name, _) in ini.iter() {
+      objects.push(AlifeObjectBase::import(section_name, &ini)?);
     }
 
     log::info!("Imported alife spawns chunk");

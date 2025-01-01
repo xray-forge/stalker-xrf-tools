@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::shape::Shape;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -39,9 +40,16 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
   }
 
   /// Import smart cover object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectDynamic::import(section)?,
+      base: AlifeObjectDynamic::import(section_name, ini)?,
       shape: Shape::import_list(section)?,
       description: read_ini_field("description", section)?,
       hold_position_time: read_ini_field("hold_position_time", section)?,

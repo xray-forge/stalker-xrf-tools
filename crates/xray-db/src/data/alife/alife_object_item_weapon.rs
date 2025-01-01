@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -36,9 +37,16 @@ impl AlifeObjectReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
   }
 
   /// Import alife weapon item object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectItem::import(section)?,
+      base: AlifeObjectItem::import(section_name, ini)?,
       ammo_current: read_ini_field("ammo_current", section)?,
       ammo_elapsed: read_ini_field("ammo_elapsed", section)?,
       weapon_state: read_ini_field("weapon_state", section)?,

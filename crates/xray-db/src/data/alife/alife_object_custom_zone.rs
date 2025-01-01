@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -21,7 +22,7 @@ pub struct AlifeObjectCustomZone {
 }
 
 impl AlifeObjectReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
-  /// Read alife custom zone object data from the chunk.
+  /// Read ALife custom zone object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
       base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
@@ -33,10 +34,17 @@ impl AlifeObjectReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
     })
   }
 
-  /// Import alife custom zone object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  /// Import ALife custom zone object data from ini config section.
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectSpaceRestrictor::import(section)?,
+      base: AlifeObjectSpaceRestrictor::import(section_name, ini)?,
       max_power: read_ini_field("max_power", section)?,
       owner_id: read_ini_field("owner_id", section)?,
       enabled_time: read_ini_field("enabled_time", section)?,

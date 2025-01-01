@@ -2,6 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{string_from_base64, string_to_base64};
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -39,7 +40,14 @@ impl AlifeObjectReader<AlifeObjectAbstract> for AlifeObjectAbstract {
   }
 
   /// Import generic alife object base data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
       game_vertex_id: read_ini_field("game_vertex_id", section)?,
       distance: read_ini_field("distance", section)?,
@@ -181,13 +189,8 @@ mod tests {
 
     let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
-    let read_first: AlifeObjectAbstract =
-      AlifeObjectAbstract::import(source.section("first").unwrap())?;
-    let read_second: AlifeObjectAbstract =
-      AlifeObjectAbstract::import(source.section("second").unwrap())?;
-
-    assert_eq!(read_first, first);
-    assert_eq!(read_second, second);
+    assert_eq!(AlifeObjectAbstract::import("first", &source)?, first);
+    assert_eq!(AlifeObjectAbstract::import("second", &source)?, second);
 
     Ok(())
   }

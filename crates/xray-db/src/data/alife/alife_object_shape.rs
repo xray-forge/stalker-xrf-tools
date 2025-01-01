@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::shape::Shape;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -26,9 +27,15 @@ impl AlifeObjectReader<AlifeObjectShape> for AlifeObjectShape {
   }
 
   /// Import alife shape object data from ini config.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
     Ok(Self {
-      base: AlifeObjectAbstract::import(section)?,
+      base: AlifeObjectAbstract::import(section_name, ini)?,
       shape: Shape::import_list(section)?,
     })
   }

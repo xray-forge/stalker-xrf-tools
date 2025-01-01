@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -88,9 +89,16 @@ impl AlifeObjectReader<AlifeSmartTerrain> for AlifeSmartTerrain {
   }
 
   /// Import alife smart terrain data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeSmartZone::import(section)?,
+      base: AlifeSmartZone::import(section_name, ini)?,
       arriving_objects_count: read_ini_field("arriving_objects_count", section)?,
       object_job_descriptors_count: read_ini_field("object_job_descriptors_count", section)?,
       dead_objects_infos_count: read_ini_field("dead_objects_infos_count", section)?,

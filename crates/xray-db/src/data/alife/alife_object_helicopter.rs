@@ -5,6 +5,7 @@ use crate::data::alife::alife_object_motion::AlifeObjectMotion;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
@@ -34,11 +35,18 @@ impl AlifeObjectReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
   }
 
   /// Import helicopter object data from ini config section.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section)?,
-      skeleton: AlifeObjectSkeleton::import(section)?,
-      motion: AlifeObjectMotion::import(section)?,
+      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
+      skeleton: AlifeObjectSkeleton::import(section_name, ini)?,
+      motion: AlifeObjectMotion::import(section_name, ini)?,
       startup_animation: read_ini_field("startup_animation", section)?,
       engine_sound: read_ini_field("engine_sound", section)?,
     })

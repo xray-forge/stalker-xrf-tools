@@ -4,6 +4,7 @@ use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::shape::Shape;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -29,9 +30,16 @@ impl AlifeObjectReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestricto
   }
 
   /// Import generic space restrictor data from the chunk.
-  fn import(section: &Section) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
+
     Ok(Self {
-      base: AlifeObjectAbstract::import(section)?,
+      base: AlifeObjectAbstract::import(section_name, ini)?,
       shape: Shape::import_list(section)?,
       restrictor_type: read_ini_field("restrictor_type", section)?,
     })
@@ -186,13 +194,11 @@ mod tests {
 
     let source: Ltx = open_ini_config(config_path)?;
 
-    let read_first: AlifeObjectSpaceRestrictor =
-      AlifeObjectSpaceRestrictor::import(source.section("first").unwrap())?;
-    let read_second: AlifeObjectSpaceRestrictor =
-      AlifeObjectSpaceRestrictor::import(source.section("second").unwrap())?;
-
-    assert_eq!(read_first, first);
-    assert_eq!(read_second, second);
+    assert_eq!(AlifeObjectSpaceRestrictor::import("first", &source)?, first);
+    assert_eq!(
+      AlifeObjectSpaceRestrictor::import("second", &source)?,
+      second
+    );
 
     Ok(())
   }
