@@ -44,8 +44,17 @@ impl ParticleEffectCollision {
     Ok(())
   }
 
+  /// Import optional particle effect collision data from provided path.
+  pub fn import_optional(section_name: &str, ini: &Ltx) -> DatabaseResult<Option<Self>> {
+    if ini.has_section(section_name) {
+      Self::import(section_name, ini).map(Some)
+    } else {
+      Ok(None)
+    }
+  }
+
   /// Import particle effect collision data from provided path.
-  pub fn import(section_name: &str, ini: &mut Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ini.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle effect description section '{section_name}' should be defined in ltx file ({})",
@@ -67,6 +76,19 @@ impl ParticleEffectCollision {
       collide_resilience: read_ini_field("collide_resilience", section)?,
       collide_sqr_cutoff: read_ini_field("collide_sqr_cutoff", section)?,
     })
+  }
+
+  /// Export particle effect collision data into provided path.
+  pub fn export_optional(
+    data: Option<&Self>,
+    section_name: &str,
+    ini: &mut Ltx,
+  ) -> DatabaseResult<()> {
+    if let Some(data) = data {
+      data.export(section_name, ini)
+    } else {
+      Ok(())
+    }
   }
 
   /// Export particle effect collision data into provided path.

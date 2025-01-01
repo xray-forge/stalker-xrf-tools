@@ -59,23 +59,45 @@ pub fn import_sized_vector_from_string<T: FromStr>(
 }
 
 /// Read value from ini section and parse it as provided T type.
-pub fn read_ini_field<T: FromStr>(field: &str, section: &Section) -> DatabaseResult<T> {
+pub fn read_ini_field<T: FromStr>(field_name: &str, section: &Section) -> DatabaseResult<T> {
   Ok(
     match section
-      .get(field)
-      .unwrap_or_else(|| panic!("'{field}' to be in ini"))
+      .get(field_name)
+      .ok_or_else(|| {
+        DatabaseParseError::new_database_error(format!("'{field_name}' to be read in ini file"))
+      })?
       .parse::<T>()
     {
       Ok(value) => value,
-
       _ => {
         return Err(DatabaseParseError::new_database_error(format!(
-          "Failed to parse ini field '{field}' value, valid {:?} is expected",
+          "Failed to parse ini field '{field_name}' value, valid {:?} is expected",
           std::any::type_name::<T>()
         )))
       }
     },
   )
+}
+
+/// Read optional value from ini section and parse it as provided T type.
+pub fn read_ini_optional_field<T: FromStr>(
+  field_name: &str,
+  section: &Section,
+) -> DatabaseResult<Option<T>> {
+  let field_data: Option<&str> = section.get(field_name);
+
+  Ok(match field_data {
+    Some(value) => match value.parse::<T>() {
+      Ok(parsed) => Some(parsed),
+      _ => {
+        return Err(DatabaseParseError::new_database_error(format!(
+          "Failed to parse optional ini field '{field_name}' value, correct {:?} is expected",
+          std::any::type_name::<T>()
+        )))
+      }
+    },
+    None => None,
+  })
 }
 
 /// Read value from ini section and parse it as provided T type.

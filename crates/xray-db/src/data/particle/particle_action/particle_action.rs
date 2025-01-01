@@ -76,8 +76,22 @@ impl ParticleAction {
     Ok(())
   }
 
+  /// Write particle action data into chunk writer.
+  pub fn write_list<T: ByteOrder>(
+    actions: &[Self],
+    writer: &mut ChunkWriter,
+  ) -> DatabaseResult<()> {
+    writer.write_u32::<T>(actions.len() as u32)?;
+
+    for action in actions {
+      action.write::<T>(writer)?;
+    }
+
+    Ok(())
+  }
+
   /// Import particle action data from provided path.
-  pub fn import(section_name: &str, ini: &mut Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ini.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",

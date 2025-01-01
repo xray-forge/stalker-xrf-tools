@@ -1,37 +1,34 @@
 use crate::chunk::reader::ChunkReader;
+use crate::chunk::utils::read_till_end_binary_chunk;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
+use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use crate::types::DatabaseResult;
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
+use std::io::Write;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ParticleDescription {
-  pub creator: String,
-  pub editor: String,
-  pub created_time: u32,
-  pub edit_time: u32,
+pub struct ParticleEffectEditorData {
+  pub value: Vec<u8>,
 }
 
-impl ParticleDescription {
-  pub const META_TYPE: &'static str = "particle_description";
+impl ParticleEffectEditorData {
+  pub const META_TYPE: &'static str = "editor_data";
 
-  /// Read particle effect description data from chunk redder.
+  /// Read particle effect editor data data from chunk redder.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let particle_description: Self = Self {
-      creator: reader.read_null_terminated_win_string()?,
-      editor: reader.read_null_terminated_win_string()?,
-      created_time: reader.read_u32::<T>()?,
-      edit_time: reader.read_u32::<T>()?,
+      value: read_till_end_binary_chunk(reader)?,
     };
 
     assert!(
       reader.is_ended(),
-      "Expect particle description chunk to be ended"
+      "Expect particle editor data chunk to be ended"
     );
 
     Ok(particle_description)
@@ -39,10 +36,7 @@ impl ParticleDescription {
 
   /// Write particle effect description data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    writer.write_null_terminated_win_string(&self.creator)?;
-    writer.write_null_terminated_win_string(&self.editor)?;
-    writer.write_u32::<T>(self.created_time)?;
-    writer.write_u32::<T>(self.edit_time)?;
+    writer.write_all(&self.value)?;
 
     Ok(())
   }
@@ -60,7 +54,7 @@ impl ParticleDescription {
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ini.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
-        "Particle effect description section '{section_name}' should be defined in ltx file ({})",
+        "Particle effect editor data section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
@@ -75,10 +69,7 @@ impl ParticleDescription {
     );
 
     Ok(Self {
-      creator: read_ini_field("creator", section)?,
-      editor: read_ini_field("editor", section)?,
-      created_time: read_ini_field("created_time", section)?,
-      edit_time: read_ini_field("edit_time", section)?,
+      value: bytes_from_base64(&read_ini_field::<String>("data", section)?)?,
     })
   }
 
@@ -95,15 +86,12 @@ impl ParticleDescription {
     }
   }
 
-  /// Export particle effect description data into provided path.
+  /// Export particle effect editor data into provided path.
   pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
       .with_section(section)
       .set(META_TYPE_FIELD, Self::META_TYPE)
-      .set("creator", &self.creator)
-      .set("creator", &self.editor)
-      .set("created_time", self.created_time.to_string())
-      .set("edit_time", self.edit_time.to_string());
+      .set("value", bytes_to_base64(&self.value));
 
     Ok(())
   }

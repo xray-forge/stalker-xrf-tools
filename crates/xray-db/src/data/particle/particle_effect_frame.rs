@@ -49,6 +49,15 @@ impl ParticleEffectFrame {
     Ok(())
   }
 
+  /// Import optional particle effect frame data from provided path.
+  pub fn import_optional(section_name: &str, ini: &Ltx) -> DatabaseResult<Option<Self>> {
+    if ini.has_section(section_name) {
+      Self::import(section_name, ini).map(Some)
+    } else {
+      Ok(None)
+    }
+  }
+
   /// Import particle effect frame data from provided path.
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ini.section(section_name).ok_or_else(|| {
@@ -112,9 +121,22 @@ impl ParticleEffectFrame {
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export_optional(
+    data: Option<&Self>,
+    section_name: &str,
+    ini: &mut Ltx,
+  ) -> DatabaseResult<()> {
+    if let Some(data) = data {
+      data.export(section_name, ini)
+    } else {
+      Ok(())
+    }
+  }
+
+  /// Export particle effect frame data into provided path.
+  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult<()> {
     ini
-      .with_section(section)
+      .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set(
         "texture_size",
@@ -168,7 +190,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 28);
 
-    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,

@@ -275,7 +275,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 28);
 
-    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -416,7 +416,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 430);
 
-    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,

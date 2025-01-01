@@ -109,7 +109,7 @@ impl GraphCrossTable {
       cross_tables_writer.write_all(&cross_table_writer.flush_raw_into_buffer()?)?;
     }
 
-    cross_tables_writer.flush_raw_into_file(file)?;
+    cross_tables_writer.flush_raw_into(file)?;
 
     Ok(())
   }
@@ -170,7 +170,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 166);
 
-    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -215,7 +215,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 55);
 
-    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,

@@ -5,7 +5,6 @@ use crate::types::{DatabaseResult, U32Bytes};
 use byteorder::{ByteOrder, WriteBytesExt};
 use encoding_rs::WINDOWS_1251;
 use std::borrow::Cow;
-use std::fs::File;
 use std::io;
 use std::io::Write;
 
@@ -18,10 +17,10 @@ impl ChunkWriter {
     ChunkWriter { buffer: Vec::new() }
   }
 
-  /// Flush all the written data as chunk into the file.
-  pub fn flush_chunk_into_file<T: ByteOrder>(
+  /// Flush all the written data as chunk into the writable object.
+  pub fn flush_chunk_into<T: ByteOrder>(
     &mut self,
-    file: &mut File,
+    file: &mut dyn Write,
     index: u32,
   ) -> DatabaseResult<usize> {
     self.buffer.flush()?;
@@ -34,8 +33,8 @@ impl ChunkWriter {
       .map_err(DatabaseError::from)
   }
 
-  /// Flush all the written data as raw buffer into file.
-  pub fn flush_raw_into_file(&mut self, file: &mut File) -> DatabaseResult<()> {
+  /// Flush all the written data as raw buffer into writable.
+  pub fn flush_raw_into(&mut self, file: &mut dyn Write) -> DatabaseResult<()> {
     self.buffer.flush()?;
 
     file

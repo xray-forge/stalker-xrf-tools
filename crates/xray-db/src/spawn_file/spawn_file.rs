@@ -13,6 +13,7 @@ use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 
 /// Descriptor of generic spawn file used by xray game engine.
@@ -91,31 +92,33 @@ impl SpawnFile {
   /// Write spawn file data to the file by provided path.
   pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
-    self.write_to_file::<T>(&mut create_export_file(path)?)
+    self.write_to::<T>(&mut create_export_file(path)?)
   }
 
-  /// Write spawn file data to the file.
-  pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> DatabaseResult<()> {
+  /// Write spawn file data to the writer.
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult<()> {
     let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
-    let mut alife_spawn_chunk_writer: ChunkWriter = ChunkWriter::new();
-    let mut artefact_spawn_chunk_writer: ChunkWriter = ChunkWriter::new();
-    let mut patrols_chunk_writer: ChunkWriter = ChunkWriter::new();
-    let mut graphs_chunk_writer: ChunkWriter = ChunkWriter::new();
-
     self.header.write::<T>(&mut header_chunk_writer)?;
+    header_chunk_writer.flush_chunk_into::<T>(writer, SpawnHeaderChunk::CHUNK_ID)?;
+
+    let mut alife_spawn_chunk_writer: ChunkWriter = ChunkWriter::new();
     self.alife_spawn.write::<T>(&mut alife_spawn_chunk_writer)?;
+    alife_spawn_chunk_writer.flush_chunk_into::<T>(writer, SpawnALifeSpawnsChunk::CHUNK_ID)?;
+
+    let mut artefact_spawn_chunk_writer: ChunkWriter = ChunkWriter::new();
     self
       .artefact_spawn
       .write::<T>(&mut artefact_spawn_chunk_writer)?;
-    self.patrols.write::<T>(&mut patrols_chunk_writer)?;
-    self.graphs.write::<T>(&mut graphs_chunk_writer)?;
-
-    header_chunk_writer.flush_chunk_into_file::<T>(file, SpawnHeaderChunk::CHUNK_ID)?;
-    alife_spawn_chunk_writer.flush_chunk_into_file::<T>(file, SpawnALifeSpawnsChunk::CHUNK_ID)?;
     artefact_spawn_chunk_writer
-      .flush_chunk_into_file::<T>(file, SpawnArtefactSpawnsChunk::CHUNK_ID)?;
-    patrols_chunk_writer.flush_chunk_into_file::<T>(file, SpawnPatrolsChunk::CHUNK_ID)?;
-    graphs_chunk_writer.flush_chunk_into_file::<T>(file, SpawnGraphsChunk::CHUNK_ID)?;
+      .flush_chunk_into::<T>(writer, SpawnArtefactSpawnsChunk::CHUNK_ID)?;
+
+    let mut patrols_chunk_writer: ChunkWriter = ChunkWriter::new();
+    self.patrols.write::<T>(&mut patrols_chunk_writer)?;
+    patrols_chunk_writer.flush_chunk_into::<T>(writer, SpawnPatrolsChunk::CHUNK_ID)?;
+
+    let mut graphs_chunk_writer: ChunkWriter = ChunkWriter::new();
+    self.graphs.write::<T>(&mut graphs_chunk_writer)?;
+    graphs_chunk_writer.flush_chunk_into::<T>(writer, SpawnGraphsChunk::CHUNK_ID)?;
 
     Ok(())
   }

@@ -96,7 +96,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 20);
 
-    let bytes_written: usize = writer.flush_chunk_into_file::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
       &mut overwrite_file(&get_absolute_test_sample_file_path(file!(), &filename))?,
       0,
     )?;

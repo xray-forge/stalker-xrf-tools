@@ -12,6 +12,7 @@ use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -65,22 +66,22 @@ impl ParticlesFile {
   /// Write particles file data to the file by provided path.
   pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
-    self.write_to_file::<T>(&mut create_export_file(path)?)
+    self.write_to::<T>(&mut create_export_file(path)?)
   }
 
-  /// Write particles file data to the file.
-  pub fn write_to_file<T: ByteOrder>(&self, file: &mut File) -> DatabaseResult<()> {
+  /// Write particles file data to the writer.
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult<()> {
     let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
-    let mut effects_chunk_writer: ChunkWriter = ChunkWriter::new();
-    let mut group_chunk_writer: ChunkWriter = ChunkWriter::new();
-
     self.header.write::<T>(&mut header_chunk_writer)?;
-    self.effects.write::<T>(&mut effects_chunk_writer)?;
-    self.groups.write::<T>(&mut group_chunk_writer)?;
+    header_chunk_writer.flush_chunk_into::<T>(writer, ParticlesHeaderChunk::CHUNK_ID)?;
 
-    header_chunk_writer.flush_chunk_into_file::<T>(file, ParticlesHeaderChunk::CHUNK_ID)?;
-    effects_chunk_writer.flush_chunk_into_file::<T>(file, ParticlesEffectsChunk::CHUNK_ID)?;
-    group_chunk_writer.flush_chunk_into_file::<T>(file, ParticlesGroupsChunk::CHUNK_ID)?;
+    let mut effects_chunk_writer: ChunkWriter = ChunkWriter::new();
+    self.effects.write::<T>(&mut effects_chunk_writer)?;
+    effects_chunk_writer.flush_chunk_into::<T>(writer, ParticlesEffectsChunk::CHUNK_ID)?;
+
+    let mut group_chunk_writer: ChunkWriter = ChunkWriter::new();
+    self.groups.write::<T>(&mut group_chunk_writer)?;
+    group_chunk_writer.flush_chunk_into::<T>(writer, ParticlesGroupsChunk::CHUNK_ID)?;
 
     Ok(())
   }
