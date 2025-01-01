@@ -1,5 +1,6 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -44,10 +45,13 @@ impl GraphHeader {
   }
 
   /// Import graph header from ini file.
-  pub fn import(ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini
-      .section("header")
-      .unwrap_or_else(|| panic!("Graph section 'header' should be defined in ltx file"));
+  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Graph section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     Ok(Self {
       version: read_ini_field("version", section)?,
@@ -154,7 +158,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphHeader::import(&open_ini_config(config_path)?)?,
+      GraphHeader::import("header", &open_ini_config(config_path)?)?,
       original
     );
 

@@ -59,7 +59,9 @@ impl AlifeObjectReader<AlifeSmartTerrain> for AlifeSmartTerrain {
     let respawn_point: u8 = reader.read_u8()?;
 
     if respawn_point != 0 {
-      panic!("Not expected respawn point handler")
+      return Err(DatabaseParseError::new_database_error(
+        "Unexpected respawn point handler in smart terrain parser",
+      ));
     }
 
     let staying_objects_count: u8 = reader.read_u8()?;

@@ -3,6 +3,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -129,9 +130,12 @@ impl Patrol {
     patrol_points_ini: &Ltx,
     patrol_links_ini: &Ltx,
   ) -> DatabaseResult<Self> {
-    let section: &Section = patrols_ini
-      .section(section_name)
-      .unwrap_or_else(|| panic!("Patrol section {section_name} should be defined in ltx file"));
+    let section: &Section = patrols_ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Patrol section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     let name: String = read_ini_field("name", section)?;
     let points_list: String = read_ini_field("points", section)?;

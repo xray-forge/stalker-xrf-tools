@@ -1,6 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -45,7 +46,11 @@ impl Shape {
         reader.read_f32_3d_vector::<T>()?,
         reader.read_f32_3d_vector::<T>()?,
       )),
-      _ => panic!("Unexpected shape type provided"),
+      _ => {
+        return Err(DatabaseParseError::new_database_error(
+          "Unexpected shape type provided",
+        ))
+      }
     })
   }
 

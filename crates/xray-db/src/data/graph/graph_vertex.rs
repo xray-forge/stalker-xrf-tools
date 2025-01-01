@@ -2,6 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 
 use crate::data::vector_3d::Vector3d;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{read_ini_field, read_ini_u32_bytes_field};
 use crate::types::{DatabaseResult, U32Bytes};
@@ -56,9 +57,12 @@ impl GraphVertex {
 
   /// Import graph vertex from ini file.
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
-      panic!("Graph section '{section_name}' should be defined in graph vertex ltx file")
-    });
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Graph vertex section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     Ok(Self {
       level_point: read_ini_field("level_point", section)?,

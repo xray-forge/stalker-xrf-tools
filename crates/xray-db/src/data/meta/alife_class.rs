@@ -30,6 +30,7 @@ use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
@@ -98,158 +99,161 @@ impl AlifeClass {
     reader: &mut ChunkReader,
     alife_class: &Self,
   ) -> DatabaseResult<Box<dyn AlifeObjectWriter>> {
-    match alife_class {
+    Ok(match alife_class {
       Self::SeActor => {
         let object: AlifeActor = AlifeActor::read::<T>(reader)?;
         AlifeActor::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeObjectBreakable => {
         let object: AlifeObjectBreakable = AlifeObjectBreakable::read::<T>(reader)?;
         AlifeObjectBreakable::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeObjectClimable => {
         let object: AlifeObjectClimable = AlifeObjectClimable::read::<T>(reader)?;
         AlifeObjectClimable::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeGraphPoint => {
         let object: AlifeGraphPoint = AlifeGraphPoint::read::<T>(reader)?;
         AlifeGraphPoint::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeSpaceRestrictor => {
         let object: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor::read::<T>(reader)?;
         AlifeObjectSpaceRestrictor::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::SeSmartCover => {
         let object: AlifeSmartCover = AlifeSmartCover::read::<T>(reader)?;
         AlifeSmartCover::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeAnomalousZone => {
         let object: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone::read::<T>(reader)?;
         AlifeObjectAnomalyZone::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::SeZoneAnom => {
         let object: AlifeAnomalousZone = AlifeAnomalousZone::read::<T>(reader)?;
         AlifeAnomalousZone::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::SeZoneTorrid => {
         let object: AlifeObjectTorridZone = AlifeObjectTorridZone::read::<T>(reader)?;
         AlifeObjectTorridZone::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::SeSmartTerrain => {
         let object: AlifeSmartTerrain = AlifeSmartTerrain::read::<T>(reader)?;
         AlifeSmartTerrain::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::SeLevelChanger => {
         let object: AlifeLevelChanger = AlifeLevelChanger::read::<T>(reader)?;
         AlifeLevelChanger::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::SeZoneVisual => {
         let object: AlifeZoneVisual = AlifeZoneVisual::read::<T>(reader)?;
         AlifeZoneVisual::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeObjectPhysic => {
         let object: AlifeObjectPhysic = AlifeObjectPhysic::read::<T>(reader)?;
         AlifeObjectPhysic::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeHelicopter => {
         let object: AlifeObjectHelicopter = AlifeObjectHelicopter::read::<T>(reader)?;
         AlifeObjectHelicopter::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeInventoryBox => {
         let object: AlifeObjectInventoryBox = AlifeObjectInventoryBox::read::<T>(reader)?;
         AlifeObjectInventoryBox::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeObjectHangingLamp => {
         let object: AlifeObjectHangingLamp = AlifeObjectHangingLamp::read::<T>(reader)?;
         AlifeObjectHangingLamp::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItem => {
         let object: AlifeObjectItem = AlifeObjectItem::read::<T>(reader)?;
         AlifeObjectItem::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemExplosive => {
         let object: AlifeObjectItemExplosive = AlifeObjectItemExplosive::read::<T>(reader)?;
         AlifeObjectItemExplosive::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemPda => {
         let object: AlifeObjectItemPda = AlifeObjectItemPda::read::<T>(reader)?;
         AlifeObjectItemPda::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemAmmo => {
         let object: AlifeObjectItemAmmo = AlifeObjectItemAmmo::read::<T>(reader)?;
         AlifeObjectItemAmmo::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemGrenade => {
         let object: AlifeObjectItemGrenade = AlifeObjectItemGrenade::read::<T>(reader)?;
         AlifeObjectItemGrenade::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemArtefact => {
         let object: AlifeObjectItemArtefact = AlifeObjectItemArtefact::read::<T>(reader)?;
         AlifeObjectItemArtefact::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemWeapon => {
         let object: AlifeObjectItemWeapon = AlifeObjectItemWeapon::read::<T>(reader)?;
         AlifeObjectItemWeapon::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemDetector => {
         let object: AlifeObjectItemDetector = AlifeObjectItemDetector::read::<T>(reader)?;
         AlifeObjectItemDetector::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemHelmet => {
         let object: AlifeObjectItemHelmet = AlifeObjectItemHelmet::read::<T>(reader)?;
         AlifeObjectItemHelmet::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemCustomOutfit => {
         let object: AlifeObjectItemCustomOutfit = AlifeObjectItemCustomOutfit::read::<T>(reader)?;
         AlifeObjectItemCustomOutfit::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemWeaponShotgun => {
         let object: AlifeObjectItemWeaponShotgun = AlifeObjectItemWeaponShotgun::read::<T>(reader)?;
         AlifeObjectItemWeaponShotgun::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemWeaponMagazined => {
         let object: AlifeObjectItemWeaponMagazined =
           AlifeObjectItemWeaponMagazined::read::<T>(reader)?;
         AlifeObjectItemWeaponMagazined::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       Self::CseAlifeItemWeaponMagazinedWGl => {
         let object: AlifeObjectItemWeaponMagazinedWgl =
           AlifeObjectItemWeaponMagazinedWgl::read::<T>(reader)?;
         AlifeObjectItemWeaponMagazinedWgl::verify(reader);
-        Ok(Box::new(object))
+        Box::new(object)
       }
       _ => {
-        panic!("Not implemented parser for: {:?}", alife_class)
+        return Err(DatabaseParseError::new_database_error(format!(
+          "Not implemented parser for {:?}",
+          alife_class
+        )));
       }
-    }
+    })
   }
 
   /// Import custom save data based on serialized clsid.
@@ -302,7 +306,10 @@ impl AlifeClass {
         ltx,
       )?),
       _ => {
-        panic!("Not implemented parser for: {:?}", alife_class)
+        return Err(DatabaseParseError::new_database_error(format!(
+          "Not implemented parser for {:?}",
+          alife_class
+        )));
       }
     })
   }

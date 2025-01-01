@@ -1,6 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -84,9 +85,12 @@ impl ParticleGroupEffectOld {
 
   /// Import particles group effect data from provided path.
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
-      panic!("Particle group effect old '{section_name}' should be defined in ltx file")
-    });
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Particle group effect old section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
 

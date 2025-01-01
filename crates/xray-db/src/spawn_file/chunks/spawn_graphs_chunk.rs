@@ -109,7 +109,7 @@ impl SpawnGraphsChunk {
   /// Import graphs data from provided path.
   pub fn import<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
     let header: GraphHeader =
-      GraphHeader::import(&open_ini_config(&path.join("graphs_header.ltx"))?)?;
+      GraphHeader::import("header", &open_ini_config(&path.join("graphs_header.ltx"))?)?;
 
     let levels_ini: Ltx = open_ini_config(&path.join("graphs_levels.ltx"))?;
     let mut levels: Vec<GraphLevel> = Vec::new();

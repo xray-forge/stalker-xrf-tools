@@ -1,6 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -44,9 +45,12 @@ impl GraphLevel {
 
   /// Import patrols data from provided path.
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini
-      .section(section_name)
-      .unwrap_or_else(|| panic!("Graph section {section_name} should be defined in ltx file"));
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Graph level section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     Ok(Self {
       name: read_ini_field("name", section)?,

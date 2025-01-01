@@ -7,6 +7,7 @@ use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use crate::types::DatabaseResult;
@@ -210,9 +211,12 @@ impl AlifeObjectBase {
 
   /// Import alife object data from ini file section.
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
-      panic!("ALife object base '{section_name}' should be defined in ltx file")
-    });
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "ALife object base '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     let object_section: String = read_ini_field("section", section)?;
     let clsid: ClsId = ClsId::from_section(&object_section);

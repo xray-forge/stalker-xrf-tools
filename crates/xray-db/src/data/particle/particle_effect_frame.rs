@@ -51,9 +51,12 @@ impl ParticleEffectFrame {
 
   /// Import particle effect frame data from provided path.
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
-      panic!("Particle group effect old '{section_name}' should be defined in ltx file")
-    });
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Particle group '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
 

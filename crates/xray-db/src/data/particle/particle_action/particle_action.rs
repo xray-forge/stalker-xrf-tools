@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::data::meta::particle_action_type::ParticleActionType;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -77,9 +78,12 @@ impl ParticleAction {
 
   /// Import particle action data from provided path.
   pub fn import(section_name: &str, ini: &mut Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini
-      .section(section_name)
-      .unwrap_or_else(|| panic!("Particle action '{section_name}' should be defined in ltx file"));
+    let section: &Section = ini.section("header").ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Particle action section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
 

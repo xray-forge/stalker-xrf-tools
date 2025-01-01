@@ -1,5 +1,6 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -32,9 +33,12 @@ impl GraphEdge {
 
   /// Import graph edge from ini file.
   pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).unwrap_or_else(|| {
-      panic!("Graph section '{section_name}' should be defined in level point ltx file")
-    });
+    let section: &Section = ini.section(section_name).ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Graph section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     Ok(Self {
       game_vertex_id: read_ini_field("game_vertex_id", section)?,

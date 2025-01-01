@@ -3,6 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::vector_3d::Vector3d;
+use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -33,9 +34,12 @@ impl ParticleActionReader for ParticleActionTargetColor {
   }
 
   fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini
-      .section(section_name)
-      .unwrap_or_else(|| panic!("Particle action '{section_name}' should be defined in ltx file"));
+    let section: &Section = ini.section("header").ok_or_else(|| {
+      DatabaseParseError::new_database_error(format!(
+        "Particle action section '{section_name}' should be defined in ltx file ({})",
+        file!()
+      ))
+    })?;
 
     Ok(Self {
       color: read_ini_field("color", section)?,
