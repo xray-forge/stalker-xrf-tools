@@ -23,7 +23,7 @@ impl ParticlesEffectsChunk {
   /// Parses binary data into version chunk representation object.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
-    let mut particles: Vec<ParticleEffect> = Vec::new();
+    let mut effects: Vec<ParticleEffect> = Vec::new();
 
     log::info!(
       "Parsing effects chunk, {:?} bytes, {:?} chunks",
@@ -32,12 +32,14 @@ impl ParticlesEffectsChunk {
     );
 
     for mut chunk in chunks {
-      particles.push(ParticleEffect::read::<T>(&mut chunk)?);
+      effects.push(ParticleEffect::read::<T>(&mut chunk)?);
     }
+
+    effects.sort_by(|first, second| first.name.cmp(&second.name));
 
     assert!(reader.is_ended(), "Expect effects chunk to be ended");
 
-    Ok(Self { effects: particles })
+    Ok(Self { effects })
   }
 
   /// Write particle effects data into chunk writer.
@@ -77,6 +79,8 @@ impl ParticlesEffectsChunk {
         }
       }
     }
+
+    effects.sort_by(|first, second| first.name.cmp(&second.name));
 
     Ok(Self { effects })
   }

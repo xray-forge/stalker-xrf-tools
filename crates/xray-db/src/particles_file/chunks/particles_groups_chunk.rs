@@ -35,6 +35,8 @@ impl ParticlesGroupsChunk {
       groups.push(ParticleGroup::read::<T>(&mut chunk)?);
     }
 
+    groups.sort_by(|first, second| first.name.cmp(&second.name));
+
     assert!(reader.is_ended(), "Expect groups chunk to be ended");
 
     Ok(Self { groups })
@@ -69,6 +71,8 @@ impl ParticlesGroupsChunk {
         }
       }
     }
+
+    groups.sort_by(|first, second| first.name.cmp(&second.name));
 
     Ok(Self { groups })
   }

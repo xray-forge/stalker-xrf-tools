@@ -52,7 +52,7 @@ impl UnpackParticlesCommand {
 
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting parsing spawn file {:?}", path);
+    log::info!("Starting particles spawn file {:?}", path);
     log::info!("Unpack destination {:?}", destination);
 
     // Apply force flag and delete existing directories.
