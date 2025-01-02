@@ -19,6 +19,7 @@ use crate::commands::verify_translations::VerifyTranslationsCommand;
 
 use crate::commands::pack_particles::PackParticlesFileCommand;
 use crate::commands::repack_particles::RepackParticlesCommand;
+use crate::commands::reunpack_particles::ReUnpackParticlesCommand;
 use crate::commands::unpack_particles::UnpackParticlesCommand;
 use crate::commands::verify_particles::VerifyParticlesFileCommand;
 use clap::Command;
@@ -42,6 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .subcommand(ParseTranslationsCommand::init())
     .subcommand(RepackParticlesCommand::init())
     .subcommand(RepackSpawnCommand::init())
+    .subcommand(ReUnpackParticlesCommand::init())
     .subcommand(UnpackArchiveCommand::init())
     .subcommand(UnpackEquipmentIconsCommand::init())
     .subcommand(UnpackParticlesCommand::init())
@@ -68,6 +70,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Some((ParseTranslationsCommand::NAME, matches)) => ParseTranslationsCommand::execute(matches),
     Some((RepackParticlesCommand::NAME, matches)) => RepackParticlesCommand::execute(matches)?,
     Some((RepackSpawnCommand::NAME, matches)) => RepackSpawnCommand::execute(matches)?,
+    Some((ReUnpackParticlesCommand::NAME, matches)) => ReUnpackParticlesCommand::execute(matches)?,
     Some((UnpackArchiveCommand::NAME, matches)) => UnpackArchiveCommand::execute(matches).await,
     Some((UnpackEquipmentIconsCommand::NAME, matches)) => {
       UnpackEquipmentIconsCommand::execute(matches)

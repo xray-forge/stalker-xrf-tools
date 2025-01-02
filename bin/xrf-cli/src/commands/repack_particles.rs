@@ -1,9 +1,8 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
-use std::io;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use xray_db::particles_file::particles_file::ParticlesFile;
-use xray_db::types::ParticlesByteOrder;
+use xray_db::types::{DatabaseResult, ParticlesByteOrder};
 
 pub struct RepackParticlesCommand {}
 
@@ -32,8 +31,8 @@ impl RepackParticlesCommand {
       )
   }
 
-  /// Repack provided particles.xr file and validate it.
-  pub fn execute(matches: &ArgMatches) -> io::Result<()> {
+  /// Repack provided particles file and validate it.
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult<()> {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
@@ -46,13 +45,10 @@ impl RepackParticlesCommand {
     log::info!("Repack into {:?}", destination);
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile =
-      ParticlesFile::read_from_path::<ParticlesByteOrder>(path).unwrap();
+    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<ParticlesByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
-    particles_file
-      .write_to_path::<ParticlesByteOrder>(destination)
-      .expect("Correctly written particles file");
+    particles_file.write_to_path::<ParticlesByteOrder>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 

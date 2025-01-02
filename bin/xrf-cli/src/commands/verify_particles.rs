@@ -1,4 +1,4 @@
-use clap::{value_parser, Arg, ArgMatches, Command};
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use xray_db::particles_file::particles_file::ParticlesFile;
 use xray_db::types::ParticlesByteOrder;
@@ -20,6 +20,15 @@ impl VerifyParticlesFileCommand {
           .required(true)
           .value_parser(value_parser!(PathBuf)),
       )
+      .arg(
+        Arg::new("unpacked")
+          .help("Whether should verify unpacked particles")
+          .short('u')
+          .long("unpacked")
+          .required(false)
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
   }
 
   /// Verify particles file based on provided arguments.
@@ -28,9 +37,17 @@ impl VerifyParticlesFileCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    log::info!("Verify particles file {:?}", path);
+    let unpacked: bool = matches.get_flag("unpacked");
 
-    match ParticlesFile::read_from_path::<ParticlesByteOrder>(path) {
+    log::info!("Verify particles file {:?}, unpacked: {unpacked}", path);
+
+    let particles_file = if unpacked {
+      ParticlesFile::import_from_path(path)
+    } else {
+      ParticlesFile::read_from_path::<ParticlesByteOrder>(path)
+    };
+
+    match particles_file {
       Ok(_) => log::info!("Provided particles file is valid"),
       Err(error) => {
         log::error!("Provided particles file is invalid: {:?}", error);

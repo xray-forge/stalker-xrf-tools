@@ -101,7 +101,7 @@ impl ParticleDescription {
       .with_section(section)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("creator", &self.creator)
-      .set("creator", &self.editor)
+      .set("editor", &self.editor)
       .set("created_time", self.created_time.to_string())
       .set("edit_time", self.edit_time.to_string());
 
