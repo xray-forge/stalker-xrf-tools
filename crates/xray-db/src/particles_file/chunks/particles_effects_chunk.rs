@@ -65,8 +65,9 @@ impl ParticlesEffectsChunk {
 
   /// Import particles effects data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let ini: Ltx = open_ini_config(&path.join("groups.ltx"))?;
+    log::info!("Importing particles effects: {:?}", path);
 
+    let ini: Ltx = open_ini_config(&path.join("effects.ltx"))?;
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
     for (section_name, section) in &ini {

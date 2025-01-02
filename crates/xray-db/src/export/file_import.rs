@@ -64,7 +64,9 @@ pub fn read_ini_field<T: FromStr>(field_name: &str, section: &Section) -> Databa
     match section
       .get(field_name)
       .ok_or_else(|| {
-        DatabaseParseError::new_database_error(format!("'{field_name}' to be read in ini file"))
+        DatabaseParseError::new_database_error(format!(
+          "Field '{field_name}' was not found in ini file"
+        ))
       })?
       .parse::<T>()
     {

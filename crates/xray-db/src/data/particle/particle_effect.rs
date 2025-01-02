@@ -215,7 +215,7 @@ impl ParticleEffect {
       let action_section_name: String = Self::get_action_section(section_name, action_index);
 
       if ini.has_section(&action_section_name) {
-        actions.push(ParticleAction::import(section_name, ini)?);
+        actions.push(ParticleAction::import(&action_section_name, ini)?);
         action_index += 1
       } else {
         break;

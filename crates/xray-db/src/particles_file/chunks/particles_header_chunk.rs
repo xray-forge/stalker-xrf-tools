@@ -52,6 +52,8 @@ impl ParticlesHeaderChunk {
   /// Import header data from provided path.
   /// Parse ini files and populate spawn file.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
+    log::info!("Importing particles header: {:?}", path);
+
     let ini: Ltx = open_ini_config(&path.join("header.ltx"))?;
     let section: &Section = ini
       .section("header")

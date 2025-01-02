@@ -17,8 +17,10 @@ use crate::commands::verify_ltx::VerifyLtxCommand;
 use crate::commands::verify_spawn::VerifySpawnFileCommand;
 use crate::commands::verify_translations::VerifyTranslationsCommand;
 
+use crate::commands::pack_particles::PackParticlesFileCommand;
 use crate::commands::repack_particles::RepackParticlesCommand;
 use crate::commands::unpack_particles::UnpackParticlesCommand;
+use crate::commands::verify_particles::VerifyParticlesFileCommand;
 use clap::Command;
 use std::env;
 
@@ -33,6 +35,7 @@ async fn main() {
     .subcommand(InfoSpawnCommand::init())
     .subcommand(InitializeTranslationsCommand::init())
     .subcommand(PackEquipmentIconsCommand::init())
+    .subcommand(PackParticlesFileCommand::init())
     .subcommand(PackSpawnFileCommand::init())
     .subcommand(PackTextureDescriptionCommand::init())
     .subcommand(ParseTranslationsCommand::init())
@@ -44,6 +47,7 @@ async fn main() {
     .subcommand(UnpackSpawnFileCommand::init())
     .subcommand(UnpackTextureDescriptionCommand::init())
     .subcommand(VerifyLtxCommand::init())
+    .subcommand(VerifyParticlesFileCommand::init())
     .subcommand(VerifySpawnFileCommand::init())
     .subcommand(VerifyTranslationsCommand::init());
 
@@ -57,6 +61,9 @@ async fn main() {
       InitializeTranslationsCommand::execute(matches).unwrap()
     }
     Some((PackEquipmentIconsCommand::NAME, matches)) => PackEquipmentIconsCommand::execute(matches),
+    Some((PackParticlesFileCommand::NAME, matches)) => {
+      PackParticlesFileCommand::execute(matches).unwrap()
+    }
     Some((PackSpawnFileCommand::NAME, matches)) => PackSpawnFileCommand::execute(matches).unwrap(),
     Some((PackTextureDescriptionCommand::NAME, matches)) => {
       PackTextureDescriptionCommand::execute(matches)
@@ -80,6 +87,9 @@ async fn main() {
       UnpackTextureDescriptionCommand::execute(matches)
     }
     Some((VerifyLtxCommand::NAME, matches)) => VerifyLtxCommand::execute(matches),
+    Some((VerifyParticlesFileCommand::NAME, matches)) => {
+      VerifyParticlesFileCommand::execute(matches)
+    }
     Some((VerifySpawnFileCommand::NAME, matches)) => VerifySpawnFileCommand::execute(matches),
     Some((VerifyTranslationsCommand::NAME, matches)) => {
       VerifyTranslationsCommand::execute(matches).unwrap()

@@ -57,8 +57,9 @@ impl ParticlesGroupsChunk {
 
   /// Import particles groups data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let ini: Ltx = open_ini_config(&path.join("groups.ltx"))?;
+    log::info!("Importing particles groups: {:?}", path);
 
+    let ini: Ltx = open_ini_config(&path.join("groups.ltx"))?;
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     for (section_name, section) in &ini {

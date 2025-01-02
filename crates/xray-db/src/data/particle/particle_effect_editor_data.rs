@@ -69,7 +69,7 @@ impl ParticleEffectEditorData {
     );
 
     Ok(Self {
-      value: bytes_from_base64(&read_ini_field::<String>("data", section)?)?,
+      value: bytes_from_base64(&read_ini_field::<String>("value", section)?)?,
     })
   }
 

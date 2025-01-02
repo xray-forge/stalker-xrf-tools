@@ -77,7 +77,7 @@ impl ParticlesFile {
   /// Write particles file data to the writer.
   pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult<()> {
     log::info!(
-      "Writing particles file meta: version {}, {} effects, {} groups",
+      "Writing particles file: version {}, {} effects, {} groups",
       self.header.version,
       self.effects.effects.len(),
       self.groups.groups.len(),
@@ -100,6 +100,8 @@ impl ParticlesFile {
 
   /// Read spawn file from provided path.
   pub fn import_from_path(path: &Path) -> DatabaseResult<Self> {
+    log::info!("Importing particles file: {:?}", path);
+
     Ok(Self {
       header: ParticlesHeaderChunk::import(path)?,
       effects: ParticlesEffectsChunk::import(path)?,
@@ -107,7 +109,7 @@ impl ParticlesFile {
     })
   }
 
-  /// Export unpacked alife spawn file into provided path.
+  /// Export unpacked ALife spawn file into provided path.
   pub fn export_to_path(&self, path: &Path) -> DatabaseResult<()> {
     fs::create_dir_all(path)?;
 
