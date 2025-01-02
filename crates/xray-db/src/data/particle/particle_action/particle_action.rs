@@ -29,7 +29,12 @@ impl ParticleAction {
     let count: u32 = reader.read_u32::<T>()?;
 
     for _ in 0..count {
-      actions.push(Self::read::<T>(reader)?);
+      actions.push(Self::read::<T>(reader).map_err(|error| {
+        DatabaseParseError::new_database_error(format!(
+          "Failed to read particle effect action: {}",
+          error
+        ))
+      })?);
     }
 
     assert_eq!(
@@ -48,18 +53,23 @@ impl ParticleAction {
 
   /// Read effect particle action data from chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
-    let action_type: u32 = reader.read_u32::<T>()?;
+    let action_type_raw: u32 = reader.read_u32::<T>()?;
+    let action_type: ParticleActionType = ParticleActionType::from_u32(action_type_raw);
 
     let action: Self = Self {
       action_flags: reader.read_u32::<T>()?,
       action_type: reader.read_u32::<T>()?,
-      data: ParticleActionType::read_by_particle_type::<T>(
-        reader,
-        ParticleActionType::from_u32(action_type),
+      data: ParticleActionType::read_by_particle_type::<T>(reader, action_type).map_err(
+        |error| {
+          DatabaseParseError::new_database_error(format!(
+            "Failed to read dynamic particle action data for action '{:?}': {}",
+            action_type, error
+          ))
+        },
       )?,
     };
 
-    assert_eq!(action_type, action.action_type);
+    assert_eq!(action_type_raw, action.action_type);
 
     Ok(action)
   }

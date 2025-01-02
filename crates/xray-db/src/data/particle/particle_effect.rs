@@ -69,44 +69,90 @@ impl ParticleEffect {
         version: read_u16_chunk::<T>(
           &mut find_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)
             .expect("Particle name chunk not found"),
-        )?,
+        )
+        .map_err(|error| {
+          DatabaseParseError::new_database_error(format!(
+            "Failed to read particle version chunk: {}",
+            error
+          ))
+        })?,
         name: read_null_terminated_win_string_chunk(
           &mut find_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)
             .expect("Particle name chunk not found"),
-        )?,
+        )
+        .map_err(|error| {
+          DatabaseParseError::new_database_error(format!(
+            "Failed to read particle name chunk: {}",
+            error
+          ))
+        })?,
         max_particles: read_u32_chunk::<T>(
           &mut find_chunk_by_id(&chunks, Self::MAX_PARTICLES_CHUNK_ID)
             .expect("Particle max particles chunk not found"),
-        )?,
+        )
+        .map_err(|error| {
+          DatabaseParseError::new_database_error(format!(
+            "Failed to read particle max_particles chunk: {}",
+            error
+          ))
+        })?,
         actions: ParticleAction::read_list::<T>(
           &mut find_chunk_by_id(&chunks, Self::ACTION_LIST_CHUNK_ID)
             .expect("Particle effect actions chunk not found"),
-        )?,
+        )
+        .map_err(|error| {
+          DatabaseParseError::new_database_error(format!(
+            "Failed to read particle actions chunk: {}",
+            error
+          ))
+        })?,
         flags: read_u32_chunk::<T>(
           &mut find_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
             .expect("Particle flags chunk not found"),
-        )?,
-        frame: find_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID)
-          .map(|mut it| ParticleEffectFrame::read::<T>(&mut it).expect("Invalid frame chunk data")),
+        )
+        .map_err(|error| {
+          DatabaseParseError::new_database_error(format!(
+            "Failed to read particle flags chunk: {}",
+            error
+          ))
+        })?,
+        frame: find_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID).map(|mut it| {
+          ParticleEffectFrame::read::<T>(&mut it)
+            .expect("Invalid frame chunk data in particle effect")
+        }),
         sprite: ParticleEffectSprite::read::<T>(
           &mut find_chunk_by_id(&chunks, Self::SPRITE_CHUNK_ID)
             .expect("Particle frame sprite chunk not found"),
-        )?,
-        time_limit: find_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)
-          .map(|mut it| read_f32_chunk::<T>(&mut it).expect("Invalid frame time limit chunk data")),
+        )
+        .map_err(|error| {
+          DatabaseParseError::new_database_error(format!(
+            "Failed to read particle sprite chunk: {}",
+            error
+          ))
+        })?,
+        time_limit: find_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID).map(|mut it| {
+          read_f32_chunk::<T>(&mut it)
+            .expect("Invalid frame time limit chunk data in particle effect")
+        }),
         collision: find_chunk_by_id(&chunks, Self::COLLISION_CHUNK_ID).map(|mut it| {
-          ParticleEffectCollision::read::<T>(&mut it).expect("Invalid collision chunk data")
+          ParticleEffectCollision::read::<T>(&mut it)
+            .expect("Invalid collision chunk data in particle effect")
         }),
         velocity_scale: find_chunk_by_id(&chunks, Self::VELOCITY_SCALE_CHUNK_ID).map(|mut it| {
-          read_f32_vector_chunk::<T>(&mut it).expect("Invalid velocity scale chunk data")
+          read_f32_vector_chunk::<T>(&mut it)
+            .expect("Invalid velocity scale chunk data in particle effect")
         }),
         description: find_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
-          ParticleDescription::read::<T>(&mut it).expect("Invalid description chunk data")
+          ParticleDescription::read::<T>(&mut it)
+            .expect("Invalid description chunk data in particle effect")
         }),
-        rotation: find_chunk_by_id(&chunks, Self::ROTATION_CHUNK_ID)
-          .map(|mut it| read_f32_vector_chunk::<T>(&mut it).expect("Invalid rotation chunk data")),
+        rotation: find_chunk_by_id(&chunks, Self::ROTATION_CHUNK_ID).map(|mut it| {
+          read_f32_vector_chunk::<T>(&mut it)
+            .expect("Invalid rotation chunk data in particle effect")
+        }),
         editor_data: find_chunk_by_id(&chunks, Self::EDITOR_DATA_CHUNK_ID).map(|mut it| {
-          ParticleEffectEditorData::read::<T>(&mut it).expect("Invalid editor data chunk")
+          ParticleEffectEditorData::read::<T>(&mut it)
+            .expect("Invalid editor data chunk in particle effect")
         }),
       }
     };

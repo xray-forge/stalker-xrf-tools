@@ -30,11 +30,7 @@ impl DatabaseParseError {
 
 impl Display for DatabaseParseError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {
-    write!(
-      formatter,
-      "Invalid data for parsing error: {}",
-      self.message
-    )
+    write!(formatter, "DatabaseParseError: {}", self.message)
   }
 }
 

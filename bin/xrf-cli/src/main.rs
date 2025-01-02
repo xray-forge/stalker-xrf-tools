@@ -23,9 +23,10 @@ use crate::commands::unpack_particles::UnpackParticlesCommand;
 use crate::commands::verify_particles::VerifyParticlesFileCommand;
 use clap::Command;
 use std::env;
+use std::error::Error;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn Error>> {
   setup_logger();
 
   let command: Command = Command::new("xrf-tool")
@@ -52,37 +53,27 @@ async fn main() {
     .subcommand(VerifyTranslationsCommand::init());
 
   match command.get_matches().subcommand() {
-    Some((BuildTranslationsCommand::NAME, matches)) => {
-      BuildTranslationsCommand::execute(matches).unwrap()
-    }
+    Some((BuildTranslationsCommand::NAME, matches)) => BuildTranslationsCommand::execute(matches)?,
     Some((FormatLtxCommand::NAME, matches)) => FormatLtxCommand::execute(matches),
     Some((InfoSpawnCommand::NAME, matches)) => InfoSpawnCommand::execute(matches),
     Some((InitializeTranslationsCommand::NAME, matches)) => {
-      InitializeTranslationsCommand::execute(matches).unwrap()
+      InitializeTranslationsCommand::execute(matches)?
     }
     Some((PackEquipmentIconsCommand::NAME, matches)) => PackEquipmentIconsCommand::execute(matches),
-    Some((PackParticlesFileCommand::NAME, matches)) => {
-      PackParticlesFileCommand::execute(matches).unwrap()
-    }
-    Some((PackSpawnFileCommand::NAME, matches)) => PackSpawnFileCommand::execute(matches).unwrap(),
+    Some((PackParticlesFileCommand::NAME, matches)) => PackParticlesFileCommand::execute(matches)?,
+    Some((PackSpawnFileCommand::NAME, matches)) => PackSpawnFileCommand::execute(matches)?,
     Some((PackTextureDescriptionCommand::NAME, matches)) => {
       PackTextureDescriptionCommand::execute(matches)
     }
     Some((ParseTranslationsCommand::NAME, matches)) => ParseTranslationsCommand::execute(matches),
-    Some((RepackParticlesCommand::NAME, matches)) => {
-      RepackParticlesCommand::execute(matches).unwrap()
-    }
-    Some((RepackSpawnCommand::NAME, matches)) => RepackSpawnCommand::execute(matches).unwrap(),
+    Some((RepackParticlesCommand::NAME, matches)) => RepackParticlesCommand::execute(matches)?,
+    Some((RepackSpawnCommand::NAME, matches)) => RepackSpawnCommand::execute(matches)?,
     Some((UnpackArchiveCommand::NAME, matches)) => UnpackArchiveCommand::execute(matches).await,
     Some((UnpackEquipmentIconsCommand::NAME, matches)) => {
       UnpackEquipmentIconsCommand::execute(matches)
     }
-    Some((UnpackParticlesCommand::NAME, matches)) => {
-      UnpackParticlesCommand::execute(matches).unwrap()
-    }
-    Some((UnpackSpawnFileCommand::NAME, matches)) => {
-      UnpackSpawnFileCommand::execute(matches).unwrap()
-    }
+    Some((UnpackParticlesCommand::NAME, matches)) => UnpackParticlesCommand::execute(matches)?,
+    Some((UnpackSpawnFileCommand::NAME, matches)) => UnpackSpawnFileCommand::execute(matches)?,
     Some((UnpackTextureDescriptionCommand::NAME, matches)) => {
       UnpackTextureDescriptionCommand::execute(matches)
     }
@@ -92,10 +83,12 @@ async fn main() {
     }
     Some((VerifySpawnFileCommand::NAME, matches)) => VerifySpawnFileCommand::execute(matches),
     Some((VerifyTranslationsCommand::NAME, matches)) => {
-      VerifyTranslationsCommand::execute(matches).unwrap()
+      VerifyTranslationsCommand::execute(matches)?
     }
     _ => panic!("Unexpected cli command provided, check --help for details"),
   };
+
+  Ok(())
 }
 
 /// Configure environment logger, fallback to info level.

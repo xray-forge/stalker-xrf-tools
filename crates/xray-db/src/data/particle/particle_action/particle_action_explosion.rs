@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::data::particle::particle_domain::ParticleDomain;
+use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ini_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
@@ -13,7 +13,7 @@ use xray_ltx::{Ltx, Section};
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionExplosion {
-  pub center: ParticleDomain,
+  pub center: Vector3d,
   pub velocity: f32,
   pub magnitude: f32,
   pub st_dev: f32,
@@ -24,7 +24,7 @@ pub struct ParticleActionExplosion {
 impl ParticleActionReader for ParticleActionExplosion {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
-      center: ParticleDomain::read::<T>(reader)?,
+      center: reader.read_f32_3d_vector::<T>()?,
       velocity: reader.read_f32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
       st_dev: reader.read_f32::<T>()?,
@@ -55,8 +55,7 @@ impl ParticleActionReader for ParticleActionExplosion {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionExplosion {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    self.center.write::<ParticlesByteOrder>(writer)?;
-
+    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.center)?;
     writer.write_f32::<ParticlesByteOrder>(self.velocity)?;
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
     writer.write_f32::<ParticlesByteOrder>(self.st_dev)?;
@@ -87,7 +86,6 @@ mod tests {
   use crate::data::meta::particle_action_reader::ParticleActionReader;
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particle::particle_action::particle_action_explosion::ParticleActionExplosion;
-  use crate::data::particle::particle_domain::ParticleDomain;
   use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ini_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -108,36 +106,10 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticleActionExplosion = ParticleActionExplosion {
-      center: ParticleDomain {
-        domain_type: 5,
-        coordinates: (
-          Vector3d {
-            x: -10.36,
-            y: -20.85,
-            z: -30.56,
-          },
-          Vector3d {
-            x: 12.5,
-            y: 23.6,
-            z: 34.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: -20.58,
-            y: -30.66,
-            z: -40.75,
-          },
-          Vector3d {
-            x: 6.53,
-            y: 7.63,
-            z: 8.75,
-          },
-        ),
-        radius1: 15.0,
-        radius2: 25.0,
-        radius1_sqr: 10.0,
-        radius2_sqr: 5.0,
+      center: Vector3d {
+        x: 1.5,
+        y: 2.5,
+        z: 3.5,
       },
       velocity: 36.3,
       magnitude: 20.0,
@@ -148,18 +120,18 @@ mod tests {
 
     original.write(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 88);
+    assert_eq!(writer.bytes_written(), 32);
 
     let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 88);
+    assert_eq!(bytes_written, 32);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 88 + 8);
+    assert_eq!(file.bytes_remaining(), 32 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
@@ -177,36 +149,10 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionExplosion = ParticleActionExplosion {
-      center: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: -3.36,
-            y: -3.85,
-            z: -3.56,
-          },
-          Vector3d {
-            x: 12.5,
-            y: 12.6,
-            z: 12.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: -24.58,
-            y: -24.66,
-            z: -24.75,
-          },
-          Vector3d {
-            x: 25.53,
-            y: 25.63,
-            z: 25.75,
-          },
-        ),
-        radius1: 11.0,
-        radius2: 23.4,
-        radius1_sqr: 12.2,
-        radius2_sqr: 6.1,
+      center: Vector3d {
+        x: 10.5,
+        y: 20.5,
+        z: 30.5,
       },
       velocity: 30.5,
       magnitude: 1.0,
@@ -231,36 +177,10 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> DatabaseResult<()> {
     let original: ParticleActionExplosion = ParticleActionExplosion {
-      center: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: -4.36,
-            y: -4.85,
-            z: -4.56,
-          },
-          Vector3d {
-            x: 11.5,
-            y: 11.6,
-            z: 11.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: -23.58,
-            y: -23.66,
-            z: -23.75,
-          },
-          Vector3d {
-            x: 26.53,
-            y: 26.63,
-            z: 26.75,
-          },
-        ),
-        radius1: 13.0,
-        radius2: 26.4,
-        radius1_sqr: 13.2,
-        radius2_sqr: 5.1,
+      center: Vector3d {
+        x: 5.51,
+        y: 6.52,
+        z: 7.53,
       },
       velocity: 36.422,
       magnitude: 1.2,
