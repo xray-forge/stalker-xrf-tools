@@ -6,6 +6,7 @@ pub mod pack_equipment_icons;
 pub mod pack_spawn;
 pub mod pack_texture_description;
 pub mod parse_translations;
+pub mod repack_particles;
 pub mod repack_spawn;
 pub mod unpack_archive;
 pub mod unpack_equipment_icons;

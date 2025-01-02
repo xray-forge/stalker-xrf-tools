@@ -50,8 +50,8 @@ impl ParticleEffect {
   pub const FLAGS_CHUNK_ID: u32 = 5;
   pub const FRAME_CHUNK_ID: u32 = 6;
   pub const SPRITE_CHUNK_ID: u32 = 7;
-  pub const TIME_LIMIT_OLD_CHUNK_ID: u32 = 8;
-  pub const TIME_LIMIT_CHUNK_ID: u32 = 9;
+  pub const TIME_LIMIT_CHUNK_ID: u32 = 8;
+  pub const TIME_LIMIT_OLD_CHUNK_ID: u32 = 9;
   pub const SOURCE_TEXT_CHUNK_ID: u32 = 32;
   pub const COLLISION_CHUNK_ID: u32 = 33;
   pub const VELOCITY_SCALE_CHUNK_ID: u32 = 34;
@@ -61,8 +61,8 @@ impl ParticleEffect {
 
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(mut reader: ChunkReader) -> DatabaseResult<Self> {
-    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
 
     let effect: Self = {
       Self {
@@ -83,7 +83,7 @@ impl ParticleEffect {
             .expect("Particle effect actions chunk not found"),
         )?,
         flags: read_u32_chunk::<T>(
-          &mut find_chunk_by_id(&chunks, Self::MAX_PARTICLES_CHUNK_ID)
+          &mut find_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
             .expect("Particle flags chunk not found"),
         )?,
         frame: find_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID)
@@ -327,5 +327,239 @@ impl ParticleEffect {
 
   fn get_editor_data_section(section_name: &str) -> String {
     format!("{section_name}.editor_data")
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::chunk::reader::ChunkReader;
+  use crate::chunk::writer::ChunkWriter;
+  use crate::data::meta::particle_action_type::ParticleActionType;
+  use crate::data::particle::particle_action::particle_action::ParticleAction;
+  use crate::data::particle::particle_action::particle_action_copy_vertex::ParticleActionCopyVertex;
+  use crate::data::particle::particle_action::particle_action_damping::ParticleActionDamping;
+  use crate::data::particle::particle_effect::ParticleEffect;
+  use crate::data::particle::particle_effect_collision::ParticleEffectCollision;
+  use crate::data::particle::particle_effect_description::ParticleDescription;
+  use crate::data::particle::particle_effect_editor_data::ParticleEffectEditorData;
+  use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
+  use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
+  use crate::data::vector_3d::Vector3d;
+  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use fileslice::FileSlice;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
+  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
+  #[test]
+  fn test_read_write() -> DatabaseResult<()> {
+    let filename: String = String::from("read_write.chunk");
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    let original: ParticleEffect = ParticleEffect {
+      version: 1,
+      name: String::from("test-particle-effect"),
+      max_particles: 5,
+      actions: vec![
+        ParticleAction {
+          action_flags: 31,
+          action_type: ParticleActionType::Damping as u32,
+          data: Box::new(ParticleActionDamping {
+            damping: Vector3d {
+              x: 1.5,
+              y: 2.5,
+              z: 3.5,
+            },
+            v_low_sqr: 1.1,
+            v_high_sqr: 1.25,
+          }),
+        },
+        ParticleAction {
+          action_flags: 453,
+          action_type: ParticleActionType::CopyVertex as u32,
+          data: Box::new(ParticleActionCopyVertex { copy_position: 1 }),
+        },
+      ],
+      flags: 140,
+      frame: Some(ParticleEffectFrame {
+        texture_size: (450.0, 360.0),
+        reserved: (45.2, 51.2),
+        frame_dimension_x: 320,
+        frame_count: 60,
+        frame_speed: 29.7,
+      }),
+      sprite: ParticleEffectSprite {
+        shader_name: String::from("test-shader-name"),
+        texture_name: String::from("test-texture-name"),
+      },
+      time_limit: Some(450.1),
+      collision: Some(ParticleEffectCollision {
+        collide_one_minus_friction: 0.55,
+        collide_resilience: 45.2535,
+        collide_sqr_cutoff: 25.6313,
+      }),
+      velocity_scale: Some(Vector3d {
+        x: 45.5,
+        y: 46.6,
+        z: 47.7,
+      }),
+      description: Some(ParticleDescription {
+        creator: String::from("test-creator-name"),
+        editor: String::from("test-editor-name"),
+        created_time: 425,
+        edit_time: 450,
+      }),
+      rotation: Some(Vector3d {
+        x: 1.0,
+        y: 4.0,
+        z: 6.0,
+      }),
+      editor_data: Some(ParticleEffectEditorData {
+        value: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      }),
+    };
+
+    original.write::<SpawnByteOrder>(&mut writer)?;
+
+    assert_eq!(writer.bytes_written(), 343);
+
+    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+        file!(),
+        &filename,
+      ))?,
+      0,
+    )?;
+
+    assert_eq!(bytes_written, 343);
+
+    let file: FileSlice =
+      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+
+    assert_eq!(file.bytes_remaining(), 343 + 8);
+
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?
+      .read_child_by_index(0)
+      .expect("0 index chunk to exist");
+
+    let read: ParticleEffect = ParticleEffect::read::<SpawnByteOrder>(&mut reader)?;
+
+    assert_eq!(read.version, original.version);
+    assert_eq!(read.name, original.name);
+    assert_eq!(read.max_particles, original.max_particles);
+    assert_eq!(read.flags, original.flags);
+    assert_eq!(read.frame, original.frame);
+    assert_eq!(read.sprite, original.sprite);
+    assert_eq!(read.time_limit, original.time_limit);
+    assert_eq!(read.collision, original.collision);
+    assert_eq!(read.velocity_scale, original.velocity_scale);
+    assert_eq!(read.description, original.description);
+    assert_eq!(read.rotation, original.rotation);
+    assert_eq!(read.editor_data, original.editor_data);
+
+    assert_eq!(read.actions.len(), original.actions.len());
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> DatabaseResult<()> {
+    let original: ParticleEffect = ParticleEffect {
+      version: 1,
+      name: String::from("test-particle-effect"),
+      max_particles: 5,
+      actions: vec![
+        ParticleAction {
+          action_flags: 31,
+          action_type: ParticleActionType::Damping as u32,
+          data: Box::new(ParticleActionDamping {
+            damping: Vector3d {
+              x: 2.5,
+              y: 3.5,
+              z: 4.5,
+            },
+            v_low_sqr: 5.2,
+            v_high_sqr: 6.5,
+          }),
+        },
+        ParticleAction {
+          action_flags: 461,
+          action_type: ParticleActionType::CopyVertex as u32,
+          data: Box::new(ParticleActionCopyVertex { copy_position: 0 }),
+        },
+      ],
+      flags: 150,
+      frame: Some(ParticleEffectFrame {
+        texture_size: (460.0, 380.0),
+        reserved: (41.2, 42.2),
+        frame_dimension_x: 640,
+        frame_count: 80,
+        frame_speed: 29.7,
+      }),
+      sprite: ParticleEffectSprite {
+        shader_name: String::from("test-shader-name"),
+        texture_name: String::from("test-texture-name"),
+      },
+      time_limit: Some(460.1),
+      collision: Some(ParticleEffectCollision {
+        collide_one_minus_friction: 0.540,
+        collide_resilience: 455.2535,
+        collide_sqr_cutoff: 255.6313,
+      }),
+      velocity_scale: Some(Vector3d {
+        x: 455.5,
+        y: 465.6,
+        z: 475.7,
+      }),
+      description: Some(ParticleDescription {
+        creator: String::from("test-creator-name"),
+        editor: String::from("test-editor-name"),
+        created_time: 433,
+        edit_time: 444,
+      }),
+      rotation: Some(Vector3d {
+        x: 4.5,
+        y: 6.5,
+        z: 8.5,
+      }),
+      editor_data: Some(ParticleEffectEditorData {
+        value: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      }),
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    let read: ParticleEffect = serde_json::from_str::<ParticleEffect>(&serialized).unwrap();
+
+    assert_eq!(read.version, original.version);
+    assert_eq!(read.name, original.name);
+    assert_eq!(read.max_particles, original.max_particles);
+    assert_eq!(read.flags, original.flags);
+    assert_eq!(read.frame, original.frame);
+    assert_eq!(read.sprite, original.sprite);
+    assert_eq!(read.time_limit, original.time_limit);
+    assert_eq!(read.collision, original.collision);
+    assert_eq!(read.velocity_scale, original.velocity_scale);
+    assert_eq!(read.description, original.description);
+    assert_eq!(read.rotation, original.rotation);
+    assert_eq!(read.editor_data, original.editor_data);
+
+    assert_eq!(read.actions.len(), original.actions.len());
+
+    Ok(())
   }
 }

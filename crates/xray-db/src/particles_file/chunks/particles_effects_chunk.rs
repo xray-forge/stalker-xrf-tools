@@ -31,8 +31,8 @@ impl ParticlesEffectsChunk {
       chunks.len()
     );
 
-    for chunk in chunks {
-      particles.push(ParticleEffect::read::<T>(chunk)?);
+    for mut chunk in chunks {
+      particles.push(ParticleEffect::read::<T>(&mut chunk)?);
     }
 
     assert!(reader.is_ended(), "Expect effects chunk to be ended");
@@ -42,13 +42,23 @@ impl ParticlesEffectsChunk {
 
   /// Write particle effects data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    for effect in &self.effects {
+    for (index, effect) in self.effects.iter().enumerate() {
       let mut effect_writer: ChunkWriter = ChunkWriter::new();
 
       effect.write::<T>(&mut effect_writer)?;
 
-      writer.write_all(effect_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
+      writer.write_all(
+        effect_writer
+          .flush_chunk_into_buffer::<T>(index)?
+          .as_slice(),
+      )?;
     }
+
+    log::info!(
+      "Written effects chunk, {} bytes, {} chunks",
+      writer.bytes_written(),
+      self.effects.len()
+    );
 
     Ok(())
   }

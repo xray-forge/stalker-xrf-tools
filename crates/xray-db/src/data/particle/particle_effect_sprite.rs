@@ -11,8 +11,8 @@ use xray_ltx::{Ltx, Section};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleEffectSprite {
-  shader_name: String,
-  texture_name: String,
+  pub shader_name: String,
+  pub texture_name: String,
 }
 
 impl ParticleEffectSprite {

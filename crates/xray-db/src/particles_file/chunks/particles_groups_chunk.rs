@@ -42,13 +42,15 @@ impl ParticlesGroupsChunk {
 
   /// Write particle groups data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
-    for group in &self.groups {
+    for (index, group) in self.groups.iter().enumerate() {
       let mut group_writer: ChunkWriter = ChunkWriter::new();
 
       group.write::<T>(&mut group_writer)?;
 
-      writer.write_all(group_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
+      writer.write_all(group_writer.flush_chunk_into_buffer::<T>(index)?.as_slice())?;
     }
+
+    log::info!("Written groups chunk, {} bytes", writer.bytes_written());
 
     Ok(())
   }

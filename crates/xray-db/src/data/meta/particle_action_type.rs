@@ -36,135 +36,123 @@ use byteorder::ByteOrder;
 use enum_map::Enum;
 use xray_ltx::Ltx;
 
-#[derive(Clone, Debug, Enum, PartialEq)]
+#[derive(Copy, Clone, Debug, Enum, PartialEq)]
 pub enum ParticleActionType {
-  PAAvoidID = 0,
-  PABounceID = 1,
-  PACallActionListID = 2,
-  PACopyVertexBID = 3,
-  PADampingID = 4,
-  PAExplosionID = 5,
-  PAFollowID = 6,
-  PAGravitateID = 7,
-  PAGravityID = 8,
-  PAJetID = 9,
-  PAKillOldID = 10,
-  PAMatchVelocityID = 11,
-  PAMoveID = 12,
-  PAOrbitLineID = 13,
-  PAOrbitPointID = 14,
-  PARandomAccelID = 15,
-  PARandomDisplaceID = 16,
-  PARandomVelocityID = 17,
-  PARestoreID = 18,
-  PASinkID = 19,
-  PASinkVelocityID = 20,
-  PASourceID = 21,
-  PASpeedLimitID = 22,
-  PATargetColorID = 23,
-  PATargetSizeID = 24,
-  PATargetRotateID = 25,
-  PATargetRotateDID = 26,
-  PATargetVelocityID = 27,
-  PATargetVelocityDID = 28,
-  PAVortexID = 29,
-  PATurbulenceID = 30,
-  PAScatterID = 31,
+  Avoid = 0,
+  Bounce = 1,
+  CallActionList = 2,
+  CopyVertex = 3,
+  Damping = 4,
+  Explosion = 5,
+  Follow = 6,
+  Gravitate = 7,
+  Gravity = 8,
+  Jet = 9,
+  KillOld = 10,
+  MatchVelocity = 11,
+  Move = 12,
+  OrbitLine = 13,
+  OrbitPoint = 14,
+  RandomAccel = 15,
+  RandomDisplace = 16,
+  RandomVelocity = 17,
+  Restore = 18,
+  Sink = 19,
+  SinkVelocity = 20,
+  Source = 21,
+  SpeedLimit = 22,
+  TargetColor = 23,
+  TargetSize = 24,
+  TargetRotate = 25,
+  TargetRotateD = 26,
+  TargetVelocity = 27,
+  TargetVelocityD = 28,
+  Vortex = 29,
+  Turbulence = 30,
+  Scatter = 31,
   Unknown = -1,
 }
 
 impl ParticleActionType {
   /// Transform u32 to enumeration value.
-  pub fn from_u32(action_type: u32) -> ParticleActionType {
+  pub fn from_u32(action_type: u32) -> Self {
     match action_type {
-      0 => ParticleActionType::PAAvoidID,
-      1 => ParticleActionType::PABounceID,
-      2 => ParticleActionType::PACallActionListID,
-      3 => ParticleActionType::PACopyVertexBID,
-      4 => ParticleActionType::PADampingID,
-      5 => ParticleActionType::PAExplosionID,
-      6 => ParticleActionType::PAFollowID,
-      7 => ParticleActionType::PAGravitateID,
-      8 => ParticleActionType::PAGravityID,
-      9 => ParticleActionType::PAJetID,
-      10 => ParticleActionType::PAKillOldID,
-      11 => ParticleActionType::PAMatchVelocityID,
-      12 => ParticleActionType::PAMoveID,
-      13 => ParticleActionType::PAOrbitLineID,
-      14 => ParticleActionType::PAOrbitPointID,
-      15 => ParticleActionType::PARandomAccelID,
-      16 => ParticleActionType::PARandomDisplaceID,
-      17 => ParticleActionType::PARandomVelocityID,
-      18 => ParticleActionType::PARestoreID,
-      19 => ParticleActionType::PASinkID,
-      20 => ParticleActionType::PASinkVelocityID,
-      21 => ParticleActionType::PASourceID,
-      22 => ParticleActionType::PASpeedLimitID,
-      23 => ParticleActionType::PATargetColorID,
-      24 => ParticleActionType::PATargetSizeID,
-      25 => ParticleActionType::PATargetRotateID,
-      26 => ParticleActionType::PATargetRotateDID,
-      27 => ParticleActionType::PATargetVelocityID,
-      28 => ParticleActionType::PATargetVelocityDID,
-      29 => ParticleActionType::PAVortexID,
-      30 => ParticleActionType::PATurbulenceID,
-      31 => ParticleActionType::PAScatterID,
-      _ => ParticleActionType::Unknown,
+      0 => Self::Avoid,
+      1 => Self::Bounce,
+      2 => Self::CallActionList,
+      3 => Self::CopyVertex,
+      4 => Self::Damping,
+      5 => Self::Explosion,
+      6 => Self::Follow,
+      7 => Self::Gravitate,
+      8 => Self::Gravity,
+      9 => Self::Jet,
+      10 => Self::KillOld,
+      11 => Self::MatchVelocity,
+      12 => Self::Move,
+      13 => Self::OrbitLine,
+      14 => Self::OrbitPoint,
+      15 => Self::RandomAccel,
+      16 => Self::RandomDisplace,
+      17 => Self::RandomVelocity,
+      18 => Self::Restore,
+      19 => Self::Sink,
+      20 => Self::SinkVelocity,
+      21 => Self::Source,
+      22 => Self::SpeedLimit,
+      23 => Self::TargetColor,
+      24 => Self::TargetSize,
+      25 => Self::TargetRotate,
+      26 => Self::TargetRotateD,
+      27 => Self::TargetVelocity,
+      28 => Self::TargetVelocityD,
+      29 => Self::Vortex,
+      30 => Self::Turbulence,
+      31 => Self::Scatter,
+      _ => Self::Unknown,
     }
   }
 
   /// Read particle action data from chunk based on action type.
   pub fn read_by_particle_type<T: ByteOrder>(
     reader: &mut ChunkReader,
-    particle_action_type: ParticleActionType,
+    particle_action_type: Self,
   ) -> DatabaseResult<Box<dyn ParticleActionWriter>> {
     Ok(match particle_action_type {
-      ParticleActionType::PAAvoidID => Box::new(ParticleActionAvoid::read::<T>(reader)?),
-      ParticleActionType::PABounceID => Box::new(ParticleActionBounce::read::<T>(reader)?),
-      ParticleActionType::PACopyVertexBID => Box::new(ParticleActionCopyVertex::read::<T>(reader)?),
-      ParticleActionType::PADampingID => Box::new(ParticleActionDamping::read::<T>(reader)?),
-      ParticleActionType::PAExplosionID => Box::new(ParticleActionExplosion::read::<T>(reader)?),
-      ParticleActionType::PAFollowID => Box::new(ParticleActionFollow::read::<T>(reader)?),
-      ParticleActionType::PAGravitateID => Box::new(ParticleActionGravitate::read::<T>(reader)?),
-      ParticleActionType::PAGravityID => Box::new(ParticleActionGravity::read::<T>(reader)?),
-      ParticleActionType::PAJetID => Box::new(ParticleActionJet::read::<T>(reader)?),
-      ParticleActionType::PAKillOldID => Box::new(ParticleActionKillOld::read::<T>(reader)?),
-      ParticleActionType::PAMatchVelocityID => {
-        Box::new(ParticleActionMatchVelocity::read::<T>(reader)?)
-      }
-      ParticleActionType::PAMoveID => Box::new(ParticleActionMove::read::<T>(reader)?),
-      ParticleActionType::PAOrbitLineID => Box::new(ParticleActionOrbitLine::read::<T>(reader)?),
-      ParticleActionType::PAOrbitPointID => Box::new(ParticleActionOrbitPoint::read::<T>(reader)?),
-      ParticleActionType::PARandomAccelID => {
-        Box::new(ParticleActionRandomAcceleration::read::<T>(reader)?)
-      }
-      ParticleActionType::PARandomDisplaceID => {
-        Box::new(ParticleActionRandomDisplace::read::<T>(reader)?)
-      }
-      ParticleActionType::PARandomVelocityID => {
-        Box::new(ParticleActionRandomVelocity::read::<T>(reader)?)
-      }
-      ParticleActionType::PARestoreID => Box::new(ParticleActionRestore::read::<T>(reader)?),
-      ParticleActionType::PASinkID => Box::new(ParticleActionSink::read::<T>(reader)?),
-      ParticleActionType::PASinkVelocityID => {
-        Box::new(ParticleActionSinkVelocity::read::<T>(reader)?)
-      }
-      ParticleActionType::PASourceID => Box::new(ParticleActionSource::read::<T>(reader)?),
-      ParticleActionType::PASpeedLimitID => Box::new(ParticleActionSpeedLimit::read::<T>(reader)?),
-      ParticleActionType::PATargetColorID => {
-        Box::new(ParticleActionTargetColor::read::<T>(reader)?)
-      }
-      ParticleActionType::PATargetSizeID => Box::new(ParticleActionTargetSize::read::<T>(reader)?),
-      ParticleActionType::PATargetRotateID | ParticleActionType::PATargetRotateDID => {
+      Self::Avoid => Box::new(ParticleActionAvoid::read::<T>(reader)?),
+      Self::Bounce => Box::new(ParticleActionBounce::read::<T>(reader)?),
+      Self::CopyVertex => Box::new(ParticleActionCopyVertex::read::<T>(reader)?),
+      Self::Damping => Box::new(ParticleActionDamping::read::<T>(reader)?),
+      Self::Explosion => Box::new(ParticleActionExplosion::read::<T>(reader)?),
+      Self::Follow => Box::new(ParticleActionFollow::read::<T>(reader)?),
+      Self::Gravitate => Box::new(ParticleActionGravitate::read::<T>(reader)?),
+      Self::Gravity => Box::new(ParticleActionGravity::read::<T>(reader)?),
+      Self::Jet => Box::new(ParticleActionJet::read::<T>(reader)?),
+      Self::KillOld => Box::new(ParticleActionKillOld::read::<T>(reader)?),
+      Self::MatchVelocity => Box::new(ParticleActionMatchVelocity::read::<T>(reader)?),
+      Self::Move => Box::new(ParticleActionMove::read::<T>(reader)?),
+      Self::OrbitLine => Box::new(ParticleActionOrbitLine::read::<T>(reader)?),
+      Self::OrbitPoint => Box::new(ParticleActionOrbitPoint::read::<T>(reader)?),
+      Self::RandomAccel => Box::new(ParticleActionRandomAcceleration::read::<T>(reader)?),
+      Self::RandomDisplace => Box::new(ParticleActionRandomDisplace::read::<T>(reader)?),
+      Self::RandomVelocity => Box::new(ParticleActionRandomVelocity::read::<T>(reader)?),
+      Self::Restore => Box::new(ParticleActionRestore::read::<T>(reader)?),
+      Self::Sink => Box::new(ParticleActionSink::read::<T>(reader)?),
+      Self::SinkVelocity => Box::new(ParticleActionSinkVelocity::read::<T>(reader)?),
+      Self::Source => Box::new(ParticleActionSource::read::<T>(reader)?),
+      Self::SpeedLimit => Box::new(ParticleActionSpeedLimit::read::<T>(reader)?),
+      Self::TargetColor => Box::new(ParticleActionTargetColor::read::<T>(reader)?),
+      Self::TargetSize => Box::new(ParticleActionTargetSize::read::<T>(reader)?),
+      Self::TargetRotate | Self::TargetRotateD => {
         Box::new(ParticleActionTargetRotate::read::<T>(reader)?)
       }
-      ParticleActionType::PATargetVelocityID | ParticleActionType::PATargetVelocityDID => {
+      Self::TargetVelocity | Self::TargetVelocityD => {
         Box::new(ParticleActionTargetVelocity::read::<T>(reader)?)
       }
-      ParticleActionType::PAVortexID => Box::new(ParticleActionVortex::read::<T>(reader)?),
-      ParticleActionType::PATurbulenceID => Box::new(ParticleActionTurbulence::read::<T>(reader)?),
-      ParticleActionType::PAScatterID => Box::new(ParticleActionScatter::read::<T>(reader)?),
-      ParticleActionType::Unknown | ParticleActionType::PACallActionListID => {
+      Self::Vortex => Box::new(ParticleActionVortex::read::<T>(reader)?),
+      Self::Turbulence => Box::new(ParticleActionTurbulence::read::<T>(reader)?),
+      Self::Scatter => Box::new(ParticleActionScatter::read::<T>(reader)?),
+      Self::Unknown | Self::CallActionList => {
         return Err(DatabaseParseError::new_database_error(format!(
           "Not implemented parser for particle action reading: {:?}",
           particle_action_type
@@ -175,83 +163,45 @@ impl ParticleActionType {
 
   /// Read particle action data from chunk based on action type.
   pub fn import_by_particle_type(
-    particle_action_type: ParticleActionType,
+    particle_action_type: Self,
     section_name: &str,
     ini: &Ltx,
   ) -> DatabaseResult<Box<dyn ParticleActionWriter>> {
     Ok(match particle_action_type {
-      ParticleActionType::PAAvoidID => Box::new(ParticleActionAvoid::import(section_name, ini)?),
-      ParticleActionType::PABounceID => Box::new(ParticleActionBounce::import(section_name, ini)?),
-      ParticleActionType::PACopyVertexBID => {
-        Box::new(ParticleActionCopyVertex::import(section_name, ini)?)
-      }
-      ParticleActionType::PADampingID => {
-        Box::new(ParticleActionDamping::import(section_name, ini)?)
-      }
-      ParticleActionType::PAExplosionID => {
-        Box::new(ParticleActionExplosion::import(section_name, ini)?)
-      }
-      ParticleActionType::PAFollowID => Box::new(ParticleActionFollow::import(section_name, ini)?),
-      ParticleActionType::PAGravitateID => {
-        Box::new(ParticleActionGravitate::import(section_name, ini)?)
-      }
-      ParticleActionType::PAGravityID => {
-        Box::new(ParticleActionGravity::import(section_name, ini)?)
-      }
-      ParticleActionType::PAJetID => Box::new(ParticleActionJet::import(section_name, ini)?),
-      ParticleActionType::PAKillOldID => {
-        Box::new(ParticleActionKillOld::import(section_name, ini)?)
-      }
-      ParticleActionType::PAMatchVelocityID => {
-        Box::new(ParticleActionMatchVelocity::import(section_name, ini)?)
-      }
-      ParticleActionType::PAMoveID => Box::new(ParticleActionMove::import(section_name, ini)?),
-      ParticleActionType::PAOrbitLineID => {
-        Box::new(ParticleActionOrbitLine::import(section_name, ini)?)
-      }
-      ParticleActionType::PAOrbitPointID => {
-        Box::new(ParticleActionOrbitPoint::import(section_name, ini)?)
-      }
-      ParticleActionType::PARandomAccelID => {
-        Box::new(ParticleActionRandomAcceleration::import(section_name, ini)?)
-      }
-      ParticleActionType::PARandomDisplaceID => {
-        Box::new(ParticleActionRandomDisplace::import(section_name, ini)?)
-      }
-      ParticleActionType::PARandomVelocityID => {
-        Box::new(ParticleActionRandomVelocity::import(section_name, ini)?)
-      }
-      ParticleActionType::PARestoreID => {
-        Box::new(ParticleActionRestore::import(section_name, ini)?)
-      }
-      ParticleActionType::PASinkID => Box::new(ParticleActionSink::import(section_name, ini)?),
-      ParticleActionType::PASinkVelocityID => {
-        Box::new(ParticleActionSinkVelocity::import(section_name, ini)?)
-      }
-      ParticleActionType::PASourceID => Box::new(ParticleActionSource::import(section_name, ini)?),
-      ParticleActionType::PASpeedLimitID => {
-        Box::new(ParticleActionSpeedLimit::import(section_name, ini)?)
-      }
-      ParticleActionType::PATargetColorID => {
-        Box::new(ParticleActionTargetColor::import(section_name, ini)?)
-      }
-      ParticleActionType::PATargetSizeID => {
-        Box::new(ParticleActionTargetSize::import(section_name, ini)?)
-      }
-      ParticleActionType::PATargetRotateID | ParticleActionType::PATargetRotateDID => {
+      Self::Avoid => Box::new(ParticleActionAvoid::import(section_name, ini)?),
+      Self::Bounce => Box::new(ParticleActionBounce::import(section_name, ini)?),
+      Self::CopyVertex => Box::new(ParticleActionCopyVertex::import(section_name, ini)?),
+      Self::Damping => Box::new(ParticleActionDamping::import(section_name, ini)?),
+      Self::Explosion => Box::new(ParticleActionExplosion::import(section_name, ini)?),
+      Self::Follow => Box::new(ParticleActionFollow::import(section_name, ini)?),
+      Self::Gravitate => Box::new(ParticleActionGravitate::import(section_name, ini)?),
+      Self::Gravity => Box::new(ParticleActionGravity::import(section_name, ini)?),
+      Self::Jet => Box::new(ParticleActionJet::import(section_name, ini)?),
+      Self::KillOld => Box::new(ParticleActionKillOld::import(section_name, ini)?),
+      Self::MatchVelocity => Box::new(ParticleActionMatchVelocity::import(section_name, ini)?),
+      Self::Move => Box::new(ParticleActionMove::import(section_name, ini)?),
+      Self::OrbitLine => Box::new(ParticleActionOrbitLine::import(section_name, ini)?),
+      Self::OrbitPoint => Box::new(ParticleActionOrbitPoint::import(section_name, ini)?),
+      Self::RandomAccel => Box::new(ParticleActionRandomAcceleration::import(section_name, ini)?),
+      Self::RandomDisplace => Box::new(ParticleActionRandomDisplace::import(section_name, ini)?),
+      Self::RandomVelocity => Box::new(ParticleActionRandomVelocity::import(section_name, ini)?),
+      Self::Restore => Box::new(ParticleActionRestore::import(section_name, ini)?),
+      Self::Sink => Box::new(ParticleActionSink::import(section_name, ini)?),
+      Self::SinkVelocity => Box::new(ParticleActionSinkVelocity::import(section_name, ini)?),
+      Self::Source => Box::new(ParticleActionSource::import(section_name, ini)?),
+      Self::SpeedLimit => Box::new(ParticleActionSpeedLimit::import(section_name, ini)?),
+      Self::TargetColor => Box::new(ParticleActionTargetColor::import(section_name, ini)?),
+      Self::TargetSize => Box::new(ParticleActionTargetSize::import(section_name, ini)?),
+      Self::TargetRotate | Self::TargetRotateD => {
         Box::new(ParticleActionTargetRotate::import(section_name, ini)?)
       }
-      ParticleActionType::PATargetVelocityID | ParticleActionType::PATargetVelocityDID => {
+      Self::TargetVelocity | Self::TargetVelocityD => {
         Box::new(ParticleActionTargetVelocity::import(section_name, ini)?)
       }
-      ParticleActionType::PAVortexID => Box::new(ParticleActionVortex::import(section_name, ini)?),
-      ParticleActionType::PATurbulenceID => {
-        Box::new(ParticleActionTurbulence::import(section_name, ini)?)
-      }
-      ParticleActionType::PAScatterID => {
-        Box::new(ParticleActionScatter::import(section_name, ini)?)
-      }
-      ParticleActionType::Unknown | ParticleActionType::PACallActionListID => {
+      Self::Vortex => Box::new(ParticleActionVortex::import(section_name, ini)?),
+      Self::Turbulence => Box::new(ParticleActionTurbulence::import(section_name, ini)?),
+      Self::Scatter => Box::new(ParticleActionScatter::import(section_name, ini)?),
+      Self::Unknown | Self::CallActionList => {
         return Err(DatabaseParseError::new_database_error(format!(
           "Not implemented parser for particle action importing: {:?}",
           particle_action_type

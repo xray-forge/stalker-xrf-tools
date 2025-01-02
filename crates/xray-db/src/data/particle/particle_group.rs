@@ -44,7 +44,7 @@ impl ParticleGroup {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
 
-    let particle_group = Self {
+    let particle_group: Self = Self {
       version: read_u16_chunk::<T>(
         &mut find_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)
           .expect("Particle group version chunk not found"),

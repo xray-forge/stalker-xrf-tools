@@ -36,7 +36,7 @@ impl ParticlesFile {
     let chunk_ids: Vec<u32> = chunks.iter().map(|it| it.id).collect();
 
     log::info!(
-      "Parsed particles file meta, {} chunks, {} bytes, {:?} chunks",
+      "Parsed particles file, {} chunks, {} bytes, {:?} chunks IDs",
       chunks.len(),
       reader.read_bytes_len(),
       chunk_ids
@@ -45,6 +45,11 @@ impl ParticlesFile {
     assert!(
       !chunk_ids.contains(&ParticlesFirstgenChunk::CHUNK_ID),
       "Unexpected first-gen chunk in particles file, unpacking not implemented"
+    );
+    assert_eq!(
+      chunk_ids.len(),
+      3,
+      "Unexpected chunks in particles file root"
     );
 
     Ok(Self {
@@ -71,6 +76,13 @@ impl ParticlesFile {
 
   /// Write particles file data to the writer.
   pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult<()> {
+    log::info!(
+      "Writing particles file meta: version {}, {} effects, {} groups",
+      self.header.version,
+      self.effects.effects.len(),
+      self.groups.groups.len(),
+    );
+
     let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
     self.header.write::<T>(&mut header_chunk_writer)?;
     header_chunk_writer.flush_chunk_into::<T>(writer, ParticlesHeaderChunk::CHUNK_ID)?;

@@ -11,11 +11,11 @@ use xray_ltx::{Ltx, Section};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleEffectFrame {
-  texture_size: (f32, f32),
-  reserved: (f32, f32),
-  frame_dimension_x: u32,
-  frame_count: u32,
-  frame_speed: f32,
+  pub texture_size: (f32, f32),
+  pub reserved: (f32, f32),
+  pub frame_dimension_x: u32,
+  pub frame_count: u32,
+  pub frame_speed: f32,
 }
 
 impl ParticleEffectFrame {

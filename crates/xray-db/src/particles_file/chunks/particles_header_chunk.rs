@@ -44,6 +44,8 @@ impl ParticlesHeaderChunk {
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
     writer.write_u16::<T>(self.version)?;
 
+    log::info!("Written header chunk, {} bytes", writer.bytes_written());
+
     Ok(())
   }
 
