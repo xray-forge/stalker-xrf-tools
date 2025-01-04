@@ -1,8 +1,9 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::process;
-use xray_icon::{pack_equipment_icons_by_ltx, ImageFormat, PackEquipmentOptions, TextureResult};
+use std::time::Instant;
 use xray_ltx::Ltx;
+use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, TextureResult};
 
 pub struct PackEquipmentIconsCommand {}
 
@@ -83,10 +84,12 @@ impl PackEquipmentIconsCommand {
       process::exit(1);
     }
 
-    println!("Starting packing DDS icons file");
+    println!("Starting packing DDS icons file, parallel");
     println!("System ltx: {:?}", system_ltx_path);
     println!("Source icons dir: {:?}", source);
+    println!("Output dir: {:?}", output);
 
+    let started_at: Instant = Instant::now();
     let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path)?;
 
     let options = PackEquipmentOptions {
@@ -101,9 +104,14 @@ impl PackEquipmentIconsCommand {
 
     log::info!("DDS format: {:?}", options.dds_compression_format);
 
-    pack_equipment_icons_by_ltx(options)?;
+    PackEquipmentProcessor::pack_sprites(options)?;
 
     println!("Saved resulting file with combined icons {:?}", output);
+
+    log::info!(
+      "Pack equipment took: {:?}ms",
+      started_at.elapsed().as_millis()
+    );
 
     Ok(())
   }

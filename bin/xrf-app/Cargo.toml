@@ -7,7 +7,7 @@ edition = "2021"
 
 [build-dependencies]
 tauri-build = { version = "2.0.0-rc.8", features = [
-  "codegen"
+    "codegen"
 ] }
 
 [dependencies]
@@ -24,7 +24,7 @@ tauri-plugin-shell = "2.0.0-rc"
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-export = { path = "../../crates/xray-export" }
-xray-icon = { path = "../../crates/xray-texture" }
+xray-texture = { path = "../../crates/xray-texture" }
 xray-ltx = { path = "../../crates/xray-ltx" }
 xray-translation = { path = "../../crates/xray-translation" }
 

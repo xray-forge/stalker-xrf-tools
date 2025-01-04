@@ -5,24 +5,23 @@ pub(crate) mod error;
 pub(crate) mod types;
 pub(crate) mod utils;
 
+pub use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
+pub use crate::data::texture_file_descriptor::TextureFileDescriptor;
+pub use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
+
 pub use crate::description::pack_description_options::PackDescriptionOptions;
 pub use crate::description::pack_description_processor::PackDescriptionProcessor;
 pub use crate::description::unpack_description_processor::UnpackDescriptionProcessor;
 
 pub use crate::error::texture_error::TextureError;
 
-pub use crate::equipment::config::get_ltx_inventory_descriptors;
-pub use crate::equipment::config_inventory_section_descriptor::ConfigInventorySectionDescriptor;
-pub use crate::equipment::convert_constants::INVENTORY_ICON_GRID_SQUARE_BASE;
-pub use crate::equipment::convert_constants::SECTION_TYPE_INVENTORY_ICON;
-pub use crate::equipment::pack::pack_equipment_icon;
-pub use crate::equipment::pack::pack_equipment_icons_by_ltx;
-pub use crate::equipment::pack_options::PackEquipmentOptions;
-pub use crate::equipment::pack_result::PackEquipmentResult;
-pub use crate::equipment::unpack::unpack_equipment_icon;
-pub use crate::equipment::unpack::unpack_equipment_icons_by_ltx;
+pub use crate::equipment::equipment_constants::INVENTORY_ICON_GRID_SQUARE_BASE;
+pub use crate::equipment::pack_equipment_options::PackEquipmentOptions;
+pub use crate::equipment::pack_equipment_processor::PackEquipmentProcessor;
+pub use crate::equipment::pack_equipment_result::PackEquipmentResult;
+pub use crate::equipment::unpack_equipment_processor::UnpackEquipmentProcessor;
 
-pub use crate::equipment::unpack_options::UnpackEquipmentOptions;
+pub use crate::equipment::unpack_equipment_options::UnpackEquipmentOptions;
 pub use utils::images::dds_to_image;
 pub use utils::images::open_dds_as_png;
 pub use utils::images::read_dds_by_path;

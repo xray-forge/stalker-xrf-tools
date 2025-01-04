@@ -1,4 +1,4 @@
-use crate::data::file_description::FileDescription;
+use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
 use crate::{
   dds_to_image, read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions, TextureResult,
@@ -42,7 +42,7 @@ impl UnpackDescriptionProcessor {
 
   pub fn unpack_xml_description(
     options: &PackDescriptionOptions,
-    file: &FileDescription,
+    file: &TextureFileDescriptor,
   ) -> TextureResult<bool> {
     let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
     let destination: PathBuf = options.output.join(&file.name);

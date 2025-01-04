@@ -9,5 +9,4 @@ pub struct PackEquipmentResult {
   pub saved_width: u32,
   pub saved_height: u32,
   pub packed_count: u32,
-  pub skipped_count: u32,
 }

@@ -6571,20 +6571,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "xray-icon"
-version = "0.1.0"
-dependencies = [
- "ddsfile",
- "image 0.25.5",
- "image_dds",
- "path-absolutize",
- "rayon",
- "roxmltree",
- "serde",
- "xray-ltx",
-]
-
-[[package]]
 name = "xray-ltx"
 version = "0.1.0"
 dependencies = [
@@ -6601,6 +6587,20 @@ name = "xray-test-utils"
 version = "0.1.0"
 dependencies = [
  "fileslice",
+]
+
+[[package]]
+name = "xray-texture"
+version = "0.1.0"
+dependencies = [
+ "ddsfile",
+ "image 0.25.5",
+ "image_dds",
+ "path-absolutize",
+ "rayon",
+ "roxmltree",
+ "serde",
+ "xray-ltx",
 ]
 
 [[package]]
@@ -6633,8 +6633,8 @@ dependencies = [
  "xray-archive",
  "xray-db",
  "xray-export",
- "xray-icon",
  "xray-ltx",
+ "xray-texture",
  "xray-translation",
 ]
 
@@ -6648,8 +6648,8 @@ dependencies = [
  "tokio",
  "xray-archive",
  "xray-db",
- "xray-icon",
  "xray-ltx",
+ "xray-texture",
  "xray-translation",
 ]
 

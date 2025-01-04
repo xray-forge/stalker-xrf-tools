@@ -3,8 +3,8 @@ use serde_json::{json, Value};
 use std::path::PathBuf;
 use std::sync::MutexGuard;
 use tauri::State;
-use xray_icon::{get_ltx_inventory_descriptors, open_dds_as_png, ConfigInventorySectionDescriptor};
 use xray_ltx::Ltx;
+use xray_texture::{open_dds_as_png, InventorySpriteDescriptor};
 
 #[tauri::command]
 pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Result<Value, String> {
@@ -26,7 +26,7 @@ pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Resu
   let (image, preview_buffer) = open_dds_as_png(&PathBuf::from(dds_path))
     .map_err(|error| format!("Failed to open provided image file: {:?}", error))?;
 
-  let descriptors: Vec<ConfigInventorySectionDescriptor> = get_ltx_inventory_descriptors(
+  let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
     &Ltx::load_from_file_full(ltx_path).map_err(|error| error.to_string())?,
   );
 

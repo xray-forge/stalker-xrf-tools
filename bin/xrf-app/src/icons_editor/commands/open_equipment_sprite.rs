@@ -2,8 +2,8 @@ use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState}
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use tauri::State;
-use xray_icon::{get_ltx_inventory_descriptors, open_dds_as_png, ConfigInventorySectionDescriptor};
 use xray_ltx::Ltx;
+use xray_texture::{open_dds_as_png, InventorySpriteDescriptor};
 
 #[tauri::command]
 pub async fn open_equipment_sprite(
@@ -20,7 +20,7 @@ pub async fn open_equipment_sprite(
 
   log::info!("Opened equipment dds file");
 
-  let descriptors: Vec<ConfigInventorySectionDescriptor> = get_ltx_inventory_descriptors(
+  let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
     &Ltx::load_from_file_full(system_ltx_path).map_err(|error| error.to_string())?,
   );
 

@@ -1,7 +1,7 @@
 use roxmltree::Node;
 
 /// Description of single texture sprite.
-pub struct SpriteDescription {
+pub struct TextureSpriteDescriptor {
   pub id: String,
   pub x: u32,
   pub y: u32,
@@ -9,7 +9,7 @@ pub struct SpriteDescription {
   pub h: u32,
 }
 
-impl SpriteDescription {
+impl TextureSpriteDescriptor {
   pub fn new<T>(id: T, x: u32, y: u32, w: u32, h: u32) -> Self
   where
     T: Into<String>,

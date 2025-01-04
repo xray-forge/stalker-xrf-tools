@@ -1,7 +1,9 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::Instant;
-use xray_icon::{ImageFormat, PackDescriptionOptions, TextureResult, UnpackDescriptionProcessor};
+use xray_texture::{
+  ImageFormat, PackDescriptionOptions, TextureResult, UnpackDescriptionProcessor,
+};
 
 pub struct UnpackTextureDescriptionCommand {}
 

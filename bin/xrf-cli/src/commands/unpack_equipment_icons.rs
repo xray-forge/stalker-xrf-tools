@@ -1,11 +1,12 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::fs::create_dir_all;
 use std::path::PathBuf;
-use xray_icon::{
-  dds_to_image, read_dds_by_path, unpack_equipment_icons_by_ltx, ImageFormat, RgbaImage,
-  TextureResult, UnpackEquipmentOptions,
-};
+use std::time::Instant;
 use xray_ltx::Ltx;
+use xray_texture::{
+  dds_to_image, read_dds_by_path, ImageFormat, RgbaImage, TextureResult, UnpackEquipmentOptions,
+  UnpackEquipmentProcessor,
+};
 
 pub struct UnpackEquipmentIconsCommand {}
 
@@ -62,6 +63,8 @@ impl UnpackEquipmentIconsCommand {
 
     let is_verbose: bool = matches.get_flag("verbose");
 
+    let started_at: Instant = Instant::now();
+
     println!("Opening DDS file: {:?}", source);
 
     let source_dds: RgbaImage = read_dds_by_path(source)
@@ -83,7 +86,7 @@ impl UnpackEquipmentIconsCommand {
 
     create_dir_all(output)?;
 
-    unpack_equipment_icons_by_ltx(UnpackEquipmentOptions {
+    UnpackEquipmentProcessor::unpack_sprites(UnpackEquipmentOptions {
       ltx: system_ltx,
       source: source_dds,
       output: output.into(),
@@ -92,6 +95,11 @@ impl UnpackEquipmentIconsCommand {
     })?;
 
     println!("Successfully DDS equipment file based on LTX sections");
+
+    log::info!(
+      "Unpack equipment took: {:?}ms",
+      started_at.elapsed().as_millis()
+    );
 
     Ok(())
   }

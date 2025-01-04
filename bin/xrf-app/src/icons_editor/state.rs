@@ -1,6 +1,6 @@
 use serde::Serialize;
 use std::sync::{Arc, Mutex};
-use xray_icon::{ConfigInventorySectionDescriptor, RgbaImage};
+use xray_texture::{InventorySpriteDescriptor, RgbaImage};
 
 pub struct IconsEditorState {
   pub system_ltx_path: Arc<Mutex<Option<String>>>,
@@ -8,7 +8,7 @@ pub struct IconsEditorState {
   pub equipment_sprite_name: Arc<Mutex<Option<String>>>,
   pub equipment_sprite: Arc<Mutex<Option<RgbaImage>>>,
   pub equipment_sprite_preview: Arc<Mutex<Option<Vec<u8>>>>,
-  pub equipment_descriptors: Arc<Mutex<Option<Vec<ConfigInventorySectionDescriptor>>>>,
+  pub equipment_descriptors: Arc<Mutex<Option<Vec<InventorySpriteDescriptor>>>>,
 }
 
 impl IconsEditorState {
@@ -30,5 +30,5 @@ pub struct IconsEditorEquipmentResponse {
   pub path: String,
   pub name: String,
   pub system_ltx_path: String,
-  pub equipment_descriptors: Vec<ConfigInventorySectionDescriptor>,
+  pub equipment_descriptors: Vec<InventorySpriteDescriptor>,
 }

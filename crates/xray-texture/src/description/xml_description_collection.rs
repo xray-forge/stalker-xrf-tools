@@ -1,5 +1,5 @@
-use crate::data::file_description::FileDescription;
-use crate::data::sprite_description::SpriteDescription;
+use crate::data::texture_file_descriptor::TextureFileDescriptor;
+use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
 use crate::TextureResult;
 use roxmltree::{Document, Node, ParsingOptions};
@@ -10,7 +10,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 
 pub struct XmlDescriptionCollection {
-  pub files: HashMap<String, FileDescription>,
+  pub files: HashMap<String, TextureFileDescriptor>,
 }
 
 impl XmlDescriptionCollection {
@@ -23,7 +23,7 @@ impl XmlDescriptionCollection {
         options.description
       );
 
-      let mut files: HashMap<String, FileDescription> = HashMap::new();
+      let mut files: HashMap<String, TextureFileDescriptor> = HashMap::new();
       let entries: ReadDir = fs::read_dir(&options.description)?;
 
       for entry in entries.flatten() {
@@ -31,7 +31,7 @@ impl XmlDescriptionCollection {
 
         if let Some(extension) = path.extension() {
           if extension == "xml" {
-            let descriptions: HashMap<String, FileDescription> =
+            let descriptions: HashMap<String, TextureFileDescriptor> =
               Self::get_description(options, &path)?;
 
             descriptions
@@ -64,12 +64,12 @@ impl XmlDescriptionCollection {
   pub fn get_description(
     options: &PackDescriptionOptions,
     path: &Path,
-  ) -> TextureResult<HashMap<String, FileDescription>> {
+  ) -> TextureResult<HashMap<String, TextureFileDescriptor>> {
     if options.is_verbose {
       println!("Found texture description: {:?}", path);
     }
 
-    let mut descriptions: HashMap<String, FileDescription> = HashMap::new();
+    let mut descriptions: HashMap<String, TextureFileDescriptor> = HashMap::new();
 
     let mut file: File = File::open(path)?;
     let mut text: String = String::new();
@@ -111,13 +111,13 @@ impl XmlDescriptionCollection {
             println!("Parsing file: {file_name}");
           }
 
-          let mut file_description: FileDescription = FileDescription::new(file_name);
+          let mut file_description: TextureFileDescriptor = TextureFileDescriptor::new(file_name);
 
           for node in file
             .descendants()
             .filter(|it| it.is_element() && it.tag_name().name().eq("texture"))
           {
-            if let Some(sprite) = SpriteDescription::new_optional_from_node(node) {
+            if let Some(sprite) = TextureSpriteDescriptor::new_optional_from_node(node) {
               file_description.add_sprite(sprite);
             } else {
               println!(

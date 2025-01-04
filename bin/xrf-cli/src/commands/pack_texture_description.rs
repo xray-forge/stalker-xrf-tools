@@ -1,6 +1,6 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_icon::{ImageFormat, PackDescriptionOptions, PackDescriptionProcessor, TextureResult};
+use xray_texture::{ImageFormat, PackDescriptionOptions, PackDescriptionProcessor, TextureResult};
 
 pub struct PackTextureDescriptionCommand {}
 

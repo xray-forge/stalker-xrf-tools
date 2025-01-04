@@ -1,12 +1,12 @@
-use crate::data::sprite_description::SpriteDescription;
+use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 use std::cmp::max;
 
-pub struct FileDescription {
+pub struct TextureFileDescriptor {
   pub name: String,
-  pub sprites: Vec<SpriteDescription>,
+  pub sprites: Vec<TextureSpriteDescriptor>,
 }
 
-impl FileDescription {
+impl TextureFileDescriptor {
   pub fn new<T>(name: T) -> Self
   where
     T: Into<String>,
@@ -17,7 +17,7 @@ impl FileDescription {
     }
   }
 
-  pub fn add_sprite(&mut self, texture: SpriteDescription) {
+  pub fn add_sprite(&mut self, texture: TextureSpriteDescriptor) {
     self.sprites.push(texture);
   }
 
