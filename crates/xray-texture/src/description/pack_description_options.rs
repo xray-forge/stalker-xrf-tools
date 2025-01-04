@@ -8,4 +8,5 @@ pub struct PackDescriptionOptions {
   pub dds_compression_format: ImageFormat,
   pub is_verbose: bool,
   pub is_strict: bool,
+  pub is_parallel: bool,
 }

@@ -1,25 +1,20 @@
 use crate::equipment::config_inventory_section_descriptor::ConfigInventorySectionDescriptor;
-use crate::SECTION_TYPE_INVENTORY_ICON;
 use xray_ltx::{Ltx, Section};
 
 pub fn get_ltx_inventory_descriptors(config: &Ltx) -> Vec<ConfigInventorySectionDescriptor> {
   let mut inventory_sections: Vec<ConfigInventorySectionDescriptor> = Vec::new();
 
   for (section_name, section) in &config.sections {
-    if let Some(is_type_inventory_icon) = section.get(SECTION_TYPE_INVENTORY_ICON) {
-      if is_type_inventory_icon.to_lowercase() == "true" {
-        match get_section_inventory_coordinates(section) {
-          None => continue,
-          Some((x, y, w, h)) => {
-            inventory_sections.push(ConfigInventorySectionDescriptor {
-              name: section_name.into(),
-              x,
-              y,
-              w,
-              h,
-            });
-          }
-        }
+    match get_section_inventory_coordinates(section) {
+      None => continue,
+      Some((x, y, w, h)) => {
+        inventory_sections.push(ConfigInventorySectionDescriptor {
+          name: section_name.into(),
+          x,
+          y,
+          w,
+          h,
+        });
       }
     }
   }
@@ -38,9 +33,9 @@ pub fn get_section_inventory_coordinates(section: &Section) -> Option<(u32, u32,
   }
 
   Some((
-    inv_grid_x.unwrap().parse::<u32>().unwrap(),
-    inv_grid_y.unwrap().parse::<u32>().unwrap(),
-    inv_grid_w.unwrap().parse::<u32>().unwrap(),
-    inv_grid_h.unwrap().parse::<u32>().unwrap(),
+    inv_grid_x.unwrap().parse::<u32>().unwrap_or(0),
+    inv_grid_y.unwrap().parse::<u32>().unwrap_or(0),
+    inv_grid_w.unwrap().parse::<u32>().unwrap_or(0),
+    inv_grid_h.unwrap().parse::<u32>().unwrap_or(0),
   ))
 }

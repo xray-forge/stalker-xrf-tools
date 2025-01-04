@@ -61,11 +61,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Some((InitializeTranslationsCommand::NAME, matches)) => {
       InitializeTranslationsCommand::execute(matches)?
     }
-    Some((PackEquipmentIconsCommand::NAME, matches)) => PackEquipmentIconsCommand::execute(matches),
+    Some((PackEquipmentIconsCommand::NAME, matches)) => {
+      PackEquipmentIconsCommand::execute(matches)?
+    }
     Some((PackParticlesFileCommand::NAME, matches)) => PackParticlesFileCommand::execute(matches)?,
     Some((PackSpawnFileCommand::NAME, matches)) => PackSpawnFileCommand::execute(matches)?,
     Some((PackTextureDescriptionCommand::NAME, matches)) => {
-      PackTextureDescriptionCommand::execute(matches)
+      PackTextureDescriptionCommand::execute(matches)?
     }
     Some((ParseTranslationsCommand::NAME, matches)) => ParseTranslationsCommand::execute(matches),
     Some((RepackParticlesCommand::NAME, matches)) => RepackParticlesCommand::execute(matches)?,
@@ -73,12 +75,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Some((ReUnpackParticlesCommand::NAME, matches)) => ReUnpackParticlesCommand::execute(matches)?,
     Some((UnpackArchiveCommand::NAME, matches)) => UnpackArchiveCommand::execute(matches).await,
     Some((UnpackEquipmentIconsCommand::NAME, matches)) => {
-      UnpackEquipmentIconsCommand::execute(matches)
+      UnpackEquipmentIconsCommand::execute(matches)?
     }
     Some((UnpackParticlesCommand::NAME, matches)) => UnpackParticlesCommand::execute(matches)?,
     Some((UnpackSpawnFileCommand::NAME, matches)) => UnpackSpawnFileCommand::execute(matches)?,
     Some((UnpackTextureDescriptionCommand::NAME, matches)) => {
-      UnpackTextureDescriptionCommand::execute(matches)
+      UnpackTextureDescriptionCommand::execute(matches)?
     }
     Some((VerifyLtxCommand::NAME, matches)) => VerifyLtxCommand::execute(matches),
     Some((VerifyParticlesFileCommand::NAME, matches)) => {

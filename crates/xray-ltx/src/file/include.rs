@@ -1,5 +1,5 @@
 use crate::error::ltx_error::LtxError;
-use crate::{Ltx, LtxConvertError};
+use crate::{Ltx, LtxConvertError, LtxResult};
 use std::io;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR_STR};
 
@@ -8,13 +8,13 @@ use std::path::{Path, PathBuf, MAIN_SEPARATOR_STR};
 pub struct LtxIncludeConvertor {}
 
 impl LtxIncludeConvertor {
-  fn new() -> LtxIncludeConvertor {
-    LtxIncludeConvertor {}
+  fn new() -> Self {
+    Self {}
   }
 
   /// Cast LTX file to fully parsed with include sections.
-  pub fn convert(ltx: Ltx) -> Result<Ltx, LtxError> {
-    LtxIncludeConvertor::new().convert_ltx(ltx)
+  pub fn convert(ltx: Ltx) -> LtxResult<Ltx> {
+    Self::new().convert_ltx(ltx)
   }
 
   /// Transform ltx statement to cross-platform path.
@@ -25,7 +25,7 @@ impl LtxIncludeConvertor {
 
 impl LtxIncludeConvertor {
   /// Convert ltx file with inclusion of nested files.
-  fn convert_ltx(&self, ltx: Ltx) -> Result<Ltx, LtxError> {
+  fn convert_ltx(&self, ltx: Ltx) -> LtxResult<Ltx> {
     if ltx.directory.is_none() {
       return Err(LtxConvertError::new_ltx_error(
         "Failed to parse ltx file, parent directory is not specified",
@@ -47,7 +47,7 @@ impl LtxIncludeConvertor {
     for included in &ltx.includes {
       let mut included_path: PathBuf = result.directory.as_ref().unwrap().clone();
 
-      included_path.push(LtxIncludeConvertor::statement_to_path(included));
+      included_path.push(Self::statement_to_path(included));
 
       self.include_children(&mut result, &included_path)?;
     }
@@ -74,7 +74,7 @@ impl LtxIncludeConvertor {
   }
 
   /// Include children ltx into provided ltx.
-  fn include_children(&self, into: &mut Ltx, path: &Path) -> Result<(), LtxError> {
+  fn include_children(&self, into: &mut Ltx, path: &Path) -> LtxResult {
     let ltx: Ltx = match self.parse_nested_file(path) {
       Ok(value) => match value {
         Some(ltx) => ltx,
@@ -114,7 +114,7 @@ impl LtxIncludeConvertor {
 
   /// Open nested file for importing in current context.
   /// Skips '.ts' variant of configuration file as None.
-  fn parse_nested_file(&self, path: &Path) -> Result<Option<Ltx>, LtxError> {
+  fn parse_nested_file(&self, path: &Path) -> LtxResult<Option<Ltx>> {
     match Ltx::read_from_path(path) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {

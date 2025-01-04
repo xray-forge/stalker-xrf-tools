@@ -3,7 +3,7 @@ use crate::error::ltx_parse_error::LtxParseError;
 use crate::error::ltx_read_error::LtxReadError;
 use crate::error::ltx_scheme_error::LtxSchemeError;
 use std::error::Error;
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::io;
 
 /// Error while working with LTX document.
@@ -17,7 +17,7 @@ pub enum LtxError {
 }
 
 impl Display for LtxError {
-  fn fmt(&self, formatter: &mut Formatter) -> Result {
+  fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
     match *self {
       LtxError::Io(ref error) => error.fmt(formatter),
       LtxError::Parse(ref error) => error.fmt(formatter),
@@ -41,13 +41,30 @@ impl Error for LtxError {
 }
 
 impl From<io::Error> for LtxError {
-  fn from(err: io::Error) -> Self {
-    LtxError::Io(err)
+  fn from(error: io::Error) -> Self {
+    LtxError::Io(error)
   }
 }
 
 impl From<LtxReadError> for LtxError {
-  fn from(item: LtxReadError) -> Self {
-    LtxError::Read(item)
+  fn from(error: LtxReadError) -> Self {
+    LtxError::Read(error)
+  }
+}
+
+impl From<LtxParseError> for LtxError {
+  fn from(error: LtxParseError) -> Self {
+    LtxError::Parse(error)
+  }
+}
+
+impl TryInto<LtxParseError> for LtxError {
+  type Error = LtxError;
+
+  fn try_into(self) -> Result<LtxParseError, Self::Error> {
+    match self {
+      LtxError::Parse(error) => Ok(error),
+      error => Err(error),
+    }
   }
 }

@@ -1,25 +1,25 @@
 use crate::file::section::section::Section;
 use crate::file::types::LtxSections;
-use crate::{Ltx, LtxConvertError, LtxError};
+use crate::{Ltx, LtxConvertError, LtxError, LtxResult};
 
 /// Converter object to process and inject all inherit section statements.
 #[derive(Default)]
 pub struct LtxInheritConvertor {}
 
 impl LtxInheritConvertor {
-  fn new() -> LtxInheritConvertor {
-    LtxInheritConvertor {}
+  fn new() -> Self {
+    Self {}
   }
 
   /// Cast LTX file to fully parsed with include sections.
-  pub fn convert(ltx: Ltx) -> Result<Ltx, LtxError> {
-    LtxInheritConvertor::new().convert_ltx(ltx)
+  pub fn convert(ltx: Ltx) -> LtxResult<Ltx> {
+    Self::new().convert_ltx(ltx)
   }
 }
 
 impl LtxInheritConvertor {
   /// Convert ltx file with inclusion of inherited sections.
-  fn convert_ltx(&self, mut ltx: Ltx) -> Result<Ltx, LtxError> {
+  fn convert_ltx(&self, mut ltx: Ltx) -> LtxResult<Ltx> {
     if !ltx.includes.is_empty() {
       return Err(LtxConvertError::new_ltx_error(
         "Failed to equipment ltx file, not processed include statements detected on inheritance conversion",
@@ -108,7 +108,7 @@ impl LtxInheritConvertor {
 #[cfg(test)]
 mod test {
   use crate::file::ltx::Ltx;
-  use crate::{LtxError, LtxParseError, Section};
+  use crate::{LtxResult, Section};
 
   #[test]
   fn test_inheritance_chain() {
@@ -129,11 +129,11 @@ d = 20
 e = 100
 ";
 
-    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
-    let ltx: Result<Ltx, LtxError> = ltx.unwrap().into_inherited();
+    let ltx: LtxResult<Ltx> = ltx.unwrap().into_inherited();
 
     assert!(ltx.is_ok());
 

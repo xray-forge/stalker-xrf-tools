@@ -6,7 +6,7 @@ use crate::file::configuration::line_separator::LineSeparator;
 use crate::file::formatter::LtxFormatter;
 use crate::file::section::section::Section;
 use crate::file::section::section_entry::SectionEntry;
-use crate::{Ltx, LtxParseError, ROOT_SECTION};
+use crate::{Ltx, LtxParseError, LtxResult, ROOT_SECTION};
 use std::str::Chars;
 
 /// Ltx parser.
@@ -18,8 +18,8 @@ pub struct LtxParser<'a> {
 }
 
 impl<'a> Default for LtxParser<'a> {
-  fn default() -> LtxParser<'a> {
-    LtxParser {
+  fn default() -> Self {
+    Self {
       char: None,
       line: 0,
       column: 0,
@@ -30,8 +30,8 @@ impl<'a> Default for LtxParser<'a> {
 
 impl<'a> LtxParser<'a> {
   /// Create new parser based on characters stream.
-  pub fn new(reader: Chars<'a>) -> LtxParser<'a> {
-    let mut parser: LtxParser = LtxParser {
+  pub fn new(reader: Chars<'a>) -> Self {
+    let mut parser: Self = Self {
       char: None,
       line: 0,
       column: 0,
@@ -44,7 +44,7 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse the whole LTX input.
-  pub fn parse(&mut self) -> Result<Ltx, LtxParseError> {
+  pub fn parse(&mut self) -> LtxResult<Ltx> {
     let mut current_section: String = ROOT_SECTION.to_string();
     let mut includes_processed: bool = false;
     let mut ltx: Ltx = Ltx::new();
@@ -70,11 +70,6 @@ impl<'a> LtxParser<'a> {
           if ltx.includes(&included_path) {
             return self.error(format!(
               "Failed to parse include statement in ltx file, including '{}' more than once",
-              &included_path
-            ));
-          } else if included_path.chars().any(|c| c.is_ascii_uppercase()) {
-            return self.error(format!(
-              "Failed to parse include statement in ltx file, '{}' contains uppercase letters",
               &included_path
             ));
           } else {
@@ -136,7 +131,7 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse the whole LTX input and reformat as string.
-  pub fn parse_into_formatted(&mut self) -> Result<String, LtxParseError> {
+  pub fn parse_into_formatted(&mut self) -> LtxResult<String> {
     let mut formatted: String = String::new();
 
     self.skip_whitespaces();
@@ -179,7 +174,7 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse only include sections from file and return list of included LTX files.
-  pub fn parse_includes(&mut self) -> Result<Vec<String>, LtxParseError> {
+  pub fn parse_includes(&mut self) -> LtxResult<Vec<String>> {
     let mut included: Vec<String> = Vec::new();
 
     self.skip_whitespaces();
@@ -233,12 +228,12 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Create parsing error.
-  fn error<U, M: Into<String>>(&self, message: M) -> Result<U, LtxParseError> {
-    Err(LtxParseError {
-      line: self.line + 1,
-      col: self.column + 1,
-      message: message.into(),
-    })
+  fn error<U, M: Into<String>>(&self, message: M) -> LtxResult<U> {
+    Err(LtxParseError::new_ltx_error(
+      self.line + 1,
+      self.column + 1,
+      message,
+    ))
   }
 
   /// Consume all the white space until the end of the line or a tab.
@@ -263,7 +258,7 @@ impl<'a> LtxParser<'a> {
     }
   }
 
-  fn skip_comment(&mut self) -> Result<String, LtxParseError> {
+  fn skip_comment(&mut self) -> LtxResult<String> {
     self.bump();
 
     // Allow empty value.
@@ -279,7 +274,7 @@ impl<'a> LtxParser<'a> {
     &mut self,
     endpoint: &[Option<char>],
     check_inline_comment: bool,
-  ) -> Result<String, LtxParseError> {
+  ) -> LtxResult<String> {
     let mut result: String = String::new();
 
     while !endpoint.contains(&self.char) {
@@ -316,7 +311,7 @@ impl<'a> LtxParser<'a> {
   }
 
   #[inline]
-  fn parse_until_eol(&mut self, strip_inline_comment: bool) -> Result<String, LtxParseError> {
+  fn parse_until_eol(&mut self, strip_inline_comment: bool) -> LtxResult<String> {
     let value: String = self.parse_until(&[Some('\n'), Some('\r'), None], strip_inline_comment)?;
 
     if strip_inline_comment && matches!(self.char, Some(LTX_SYMBOL_COMMENT)) {
@@ -332,7 +327,7 @@ impl<'a> LtxParser<'a> {
   fn parse_section_from_line(
     &self,
     line: &str,
-  ) -> Result<(String, Option<Vec<String>>, Option<String>), LtxParseError> {
+  ) -> LtxResult<(String, Option<Vec<String>>, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty section statement");
     }
@@ -398,7 +393,7 @@ impl<'a> LtxParser<'a> {
   /// Supported include variants are:
   /// - #include "file.ltx"
   /// - #include("file.ltx")
-  fn parse_include_from_line(&self, line: &str) -> Result<(String, Option<String>), LtxParseError> {
+  fn parse_include_from_line(&self, line: &str) -> LtxResult<(String, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty include statement");
     }
@@ -442,7 +437,7 @@ impl<'a> LtxParser<'a> {
   fn parse_key_value_from_line(
     &self,
     line: &str,
-  ) -> Result<(String, Option<String>, Option<String>), LtxParseError> {
+  ) -> LtxResult<(String, Option<String>, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty value statement");
     }

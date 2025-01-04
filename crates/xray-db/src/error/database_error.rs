@@ -13,7 +13,7 @@ pub enum DatabaseError {
   InvalidChunk(DatabaseInvalidChunkError),
   NotImplemented(DatabaseNotImplementedError),
   Parse(DatabaseParseError),
-  LtxError(LtxError),
+  Ltx(LtxError),
   Generic(Box<dyn Error>),
 }
 
@@ -24,7 +24,7 @@ impl Display for DatabaseError {
       Self::InvalidChunk(ref error) => error.fmt(formatter),
       Self::Parse(ref error) => error.fmt(formatter),
       Self::NotImplemented(ref error) => error.fmt(formatter),
-      Self::LtxError(ref error) => error.fmt(formatter),
+      Self::Ltx(ref error) => error.fmt(formatter),
       Self::Generic(ref error) => error.fmt(formatter),
     }
   }
@@ -36,7 +36,7 @@ impl Error for DatabaseError {
       Self::Io(ref error) => error.source(),
       Self::InvalidChunk(ref error) => error.source(),
       Self::Parse(ref error) => error.source(),
-      Self::LtxError(ref error) => error.source(),
+      Self::Ltx(ref error) => error.source(),
       Self::NotImplemented(ref error) => error.source(),
       Self::Generic(ref error) => error.source(),
     }
@@ -69,7 +69,7 @@ impl From<DatabaseParseError> for DatabaseError {
 
 impl From<LtxError> for DatabaseError {
   fn from(error: LtxError) -> Self {
-    Self::LtxError(error)
+    Self::Ltx(error)
   }
 }
 

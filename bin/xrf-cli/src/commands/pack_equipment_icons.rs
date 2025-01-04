@@ -1,7 +1,7 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::process;
-use xray_icon::{pack_equipment_icons_by_ltx, ImageFormat, PackEquipmentOptions};
+use xray_icon::{pack_equipment_icons_by_ltx, ImageFormat, PackEquipmentOptions, TextureResult};
 use xray_ltx::Ltx;
 
 pub struct PackEquipmentIconsCommand {}
@@ -60,7 +60,7 @@ impl PackEquipmentIconsCommand {
   }
 
   /// Command to pack equipment icons files into single dds file.
-  pub fn execute(matches: &ArgMatches) {
+  pub fn execute(matches: &ArgMatches) -> TextureResult {
     let system_ltx_path: &PathBuf = matches
       .get_one::<PathBuf>("system-ltx")
       .expect("Expected valid path to be provided for system-ltx");
@@ -87,7 +87,7 @@ impl PackEquipmentIconsCommand {
     println!("System ltx: {:?}", system_ltx_path);
     println!("Source icons dir: {:?}", source);
 
-    let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path).unwrap();
+    let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path)?;
 
     let options = PackEquipmentOptions {
       ltx: system_ltx,
@@ -101,8 +101,10 @@ impl PackEquipmentIconsCommand {
 
     log::info!("DDS format: {:?}", options.dds_compression_format);
 
-    pack_equipment_icons_by_ltx(options);
+    pack_equipment_icons_by_ltx(options)?;
 
     println!("Saved resulting file with combined icons {:?}", output);
+
+    Ok(())
   }
 }

@@ -1,7 +1,5 @@
 use serde_json::{json, Value};
-use xray_icon::{
-  pack_equipment_icons_by_ltx, ImageFormat, PackEquipmentOptions, PackEquipmentResult,
-};
+use xray_icon::{pack_equipment_icons_by_ltx, ImageFormat, PackEquipmentOptions};
 use xray_ltx::Ltx;
 
 #[tauri::command]
@@ -22,7 +20,8 @@ pub async fn pack_equipment(
 
   log::info!("Packing equipment dds: {source_path} -> {output_path}, {system_ltx_path}");
 
-  let result: PackEquipmentResult = pack_equipment_icons_by_ltx(options);
-
-  Ok(json!(result))
+  match pack_equipment_icons_by_ltx(options) {
+    Ok(result) => Ok(json!(result)),
+    Err(error) => Err(error.to_string()),
+  }
 }

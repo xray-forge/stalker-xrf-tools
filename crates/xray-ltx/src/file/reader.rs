@@ -1,120 +1,104 @@
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncluded;
-use crate::{Ltx, LtxError, LtxParseError};
+use crate::{Ltx, LtxError, LtxReadError, LtxResult};
+use encoding_rs::WINDOWS_1251;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
 impl Ltx {
   /// Read LTX from a string.
-  pub fn read_from_str(buf: &str) -> Result<Ltx, LtxParseError> {
+  pub fn read_from_str(buf: &str) -> LtxResult<Self> {
     LtxParser::new(buf.chars()).parse()
   }
 
   /// Read LTX from a file as full parsed file, inject included files.
-  pub fn read_from_file_included<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::read_from_path(filename)?.into_included()
+  pub fn read_from_file_included<P: AsRef<Path>>(filename: P) -> LtxResult<Self> {
+    Self::read_from_path(filename)?.into_included()
   }
 
   /// Read LTX from a file, inject all includes and unwrap inherited sections.
-  pub fn load_from_file_full<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    Ltx::read_from_path(filename)?
+  pub fn load_from_file_full<P: AsRef<Path>>(filename: P) -> LtxResult<Self> {
+    Self::read_from_path(filename)?
       .into_included()?
       .into_inherited()
   }
 
   /// Read from a file as generic ini with LTX descriptor filled.
-  pub fn read_from_path<P: AsRef<Path>>(filename: P) -> Result<Ltx, LtxError> {
-    let mut reader: File = match File::open(filename.as_ref()) {
-      Ok(file) => file,
-      Err(error) => {
-        return Err(LtxError::Io(error));
-      }
-    };
+  pub fn read_from_path<P: AsRef<Path>>(filename: P) -> LtxResult<Self> {
+    let mut ltx: Self = Self::read_from(&mut File::open(filename.as_ref())?)?;
 
-    match Ltx::read_from(&mut reader) {
-      Ok(mut ltx) => {
-        ltx.path = Some(PathBuf::from(filename.as_ref()));
-        ltx.directory = filename.as_ref().parent().map(PathBuf::from);
+    ltx.path = Some(PathBuf::from(filename.as_ref()));
+    ltx.directory = filename.as_ref().parent().map(PathBuf::from);
 
-        Ok(ltx)
-      }
-      Err(error) => Err(error),
-    }
+    Ok(ltx)
   }
 
   /// Read from a reader as generic ini with LTX descriptor filled.
-  pub fn read_from<R: Read>(reader: &mut R) -> Result<Ltx, LtxError> {
-    let mut data: String = String::new();
+  pub fn read_from<R: Read>(reader: &mut R) -> LtxResult<Self> {
+    let mut raw_data: Vec<u8> = Vec::new();
+    let raw_data_read: usize = reader.read_to_end(&mut raw_data)?;
 
-    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
+    assert_eq!(
+      raw_data_read,
+      raw_data.len(),
+      "Expected raw data size to match in-memory buffer"
+    );
 
-    match LtxParser::new(data.chars()).parse() {
-      Err(error) => Err(LtxError::Parse(error)),
-      Ok(success) => Ok(success),
+    let (cow, encoding_used, had_errors) = WINDOWS_1251.decode(&raw_data);
+
+    if had_errors {
+      Err(LtxReadError::new_ltx_error(format!(
+        "Failed to decode LTX file data from reader with {:?} encoding, {} bytes",
+        encoding_used,
+        raw_data.len()
+      )))
+    } else {
+      LtxParser::new(cow.to_string().chars()).parse()
     }
   }
 }
 
 impl Ltx {
   /// Load include statements from a string.
-  pub fn read_included_from_str(buf: &str) -> Result<LtxIncluded, LtxParseError> {
+  pub fn read_included_from_str(buf: &str) -> LtxResult<LtxIncluded> {
     LtxParser::new(buf.chars()).parse_includes()
   }
 
   /// Load include statements from a file with options.
-  pub fn read_included_from_file<P: AsRef<Path>>(filename: P) -> Result<LtxIncluded, LtxError> {
-    let mut reader: File = match File::open(filename.as_ref()) {
-      Ok(file) => file,
-      Err(error) => {
-        return Err(LtxError::Io(error));
-      }
-    };
-
-    Ltx::read_included_from(&mut reader)
+  pub fn read_included_from_file<P: AsRef<Path>>(filename: P) -> LtxResult<LtxIncluded> {
+    Self::read_included_from(&mut File::open(filename.as_ref())?)
   }
 
   /// Load include statements from a reader.
-  pub fn read_included_from<R: Read>(reader: &mut R) -> Result<LtxIncluded, LtxError> {
+  pub fn read_included_from<R: Read>(reader: &mut R) -> LtxResult<LtxIncluded> {
     let mut data: String = String::new();
 
     reader.read_to_string(&mut data).map_err(LtxError::Io)?;
 
-    match LtxParser::new(data.chars()).parse_includes() {
-      Err(error) => Err(LtxError::Parse(error)),
-      Ok(success) => Ok(success),
-    }
+    LtxParser::new(data.chars()).parse_includes()
   }
 }
 
 impl Ltx {
   /// Load formatted LTX as string from string.
-  pub fn format_from_str(buf: &str) -> Result<String, LtxParseError> {
+  pub fn format_from_str(buf: &str) -> LtxResult<String> {
     LtxParser::new(buf.chars()).parse_into_formatted()
   }
 
   /// Load formatted LTX as string from file.
-  pub fn format_from_file<P: AsRef<Path>>(filename: P) -> Result<String, LtxError> {
-    let mut reader: File = match File::open(filename.as_ref()) {
-      Ok(file) => file,
-      Err(error) => {
-        return Err(LtxError::Io(error));
-      }
-    };
-
-    Ltx::format_from(&mut reader)
+  pub fn format_from_file<P: AsRef<Path>>(filename: P) -> LtxResult<String> {
+    Self::format_from(&mut File::open(filename.as_ref())?)
   }
 
   /// Load formatted LTX as string from reader.
-  pub fn format_from<R: Read>(reader: &mut R) -> Result<String, LtxError> {
+  pub fn format_from<R: Read>(reader: &mut R) -> LtxResult<String> {
     let mut data: String = String::new();
 
-    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
+    // todo: Probably can fail with non utf-8 encoding.
+    reader.read_to_string(&mut data)?;
 
-    match LtxParser::new(data.chars()).parse_into_formatted() {
-      Err(e) => Err(LtxError::Parse(e)),
-      Ok(success) => Ok(success),
-    }
+    LtxParser::new(data.chars()).parse_into_formatted()
   }
 }
 

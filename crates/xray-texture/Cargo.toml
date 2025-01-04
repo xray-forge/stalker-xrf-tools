@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-base64 = "0.22.1"
-ddsfile = "0.5.1"
-image = "0.24.9"
-image_dds = "0.5.1"
+ddsfile = "0.5.2"
+image = "0.25.5"
+image_dds = { git = "https://github.com/ScanMountGoat/image_dds.git", rev = "1ddcb46a5ff6e4858df586e3dd5cfd5201ba62ec" }
 path-absolutize = "3.1.1"
 roxmltree = "0.19.0"
 serde = { version = "1.0.197", features = ["derive"] }
 xray-ltx = { path = "../xray-ltx" }
+rayon = "1.10.0"

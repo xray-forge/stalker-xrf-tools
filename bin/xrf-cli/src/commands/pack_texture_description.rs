@@ -1,6 +1,6 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_icon::{pack_xml_descriptions, ImageFormat, PackDescriptionOptions};
+use xray_icon::{ImageFormat, PackDescriptionOptions, PackDescriptionProcessor, TextureResult};
 
 pub struct PackTextureDescriptionCommand {}
 
@@ -48,10 +48,17 @@ impl PackTextureDescriptionCommand {
           .required(false)
           .action(ArgAction::SetTrue),
       )
+      .arg(
+        Arg::new("parallel")
+          .help("Turn on parallel mode for pack operations")
+          .long("parallel")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
   }
 
   /// Pack texture descriptions file as single dds sprite.
-  pub fn execute(matches: &ArgMatches) {
+  pub fn execute(matches: &ArgMatches) -> TextureResult {
     let description: &PathBuf = matches
       .get_one::<PathBuf>("description")
       .expect("Expected valid path to be provided for texture description file or folder");
@@ -64,6 +71,7 @@ impl PackTextureDescriptionCommand {
 
     let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
+    let is_parallel: bool = matches.get_flag("parallel");
 
     let options: PackDescriptionOptions = PackDescriptionOptions {
       description: description.clone(),
@@ -72,12 +80,13 @@ impl PackTextureDescriptionCommand {
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
       is_verbose,
       is_strict,
+      is_parallel,
     };
 
     log::info!("Packing texture descriptions from: {:?}", description);
     log::info!("Paths: base {:?}, output {:?}", base, output);
     log::info!("DDS format: {:?}", options.dds_compression_format);
 
-    pack_xml_descriptions(options)
+    PackDescriptionProcessor::pack_xml_descriptions(&options)
   }
 }

@@ -1,6 +1,7 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_icon::{unpack_xml_descriptions, ImageFormat, PackDescriptionOptions};
+use std::time::Instant;
+use xray_icon::{ImageFormat, PackDescriptionOptions, TextureResult, UnpackDescriptionProcessor};
 
 pub struct UnpackTextureDescriptionCommand {}
 
@@ -47,9 +48,16 @@ impl UnpackTextureDescriptionCommand {
           .required(false)
           .action(ArgAction::SetTrue),
       )
+      .arg(
+        Arg::new("parallel")
+          .help("Turn on parallel unpack mode")
+          .long("parallel")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
   }
 
-  pub fn execute(matches: &ArgMatches) {
+  pub fn execute(matches: &ArgMatches) -> TextureResult {
     let description: &PathBuf = matches
       .get_one::<PathBuf>("description")
       .expect("Expected valid path to be provided for texture description file or folder");
@@ -62,17 +70,34 @@ impl UnpackTextureDescriptionCommand {
 
     let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
+    let is_parallel: bool = matches.get_flag("parallel");
+
+    let started_at: Instant = Instant::now();
 
     log::info!("Unpacking texture descriptions from: {:?}", description);
     log::info!("Paths: base {:?}, output {:?}", base, output);
+    log::info!("Parallel mode: {is_parallel}");
 
-    unpack_xml_descriptions(PackDescriptionOptions {
+    println!(
+      "Unpacking texture descriptions: {:?}, from {:?} to {:?}, parallel - {is_parallel}",
+      description, base, output
+    );
+
+    UnpackDescriptionProcessor::unpack_xml_descriptions(PackDescriptionOptions {
       description: description.clone(),
       base: base.clone(),
       output: output.clone(),
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
       is_verbose,
       is_strict,
-    });
+      is_parallel,
+    })?;
+
+    log::info!(
+      "Unpack texture descriptions took: {:?}ms",
+      started_at.elapsed().as_millis()
+    );
+
+    Ok(())
   }
 }

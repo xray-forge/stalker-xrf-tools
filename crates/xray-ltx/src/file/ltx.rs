@@ -3,7 +3,7 @@ use crate::file::inherit::LtxInheritConvertor;
 use crate::file::section::section_entry::SectionEntry;
 use crate::file::section::section_setter::SectionSetter;
 use crate::file::types::{LtxIncluded, LtxSections};
-use crate::{LtxError, Section, ROOT_SECTION};
+use crate::{LtxResult, Section, ROOT_SECTION};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
 
@@ -17,17 +17,17 @@ pub struct Ltx {
 
 impl Ltx {
   /// Create an instance.
-  pub fn new() -> Ltx {
-    Default::default()
+  pub fn new() -> Self {
+    Self::default()
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_included(self) -> Result<Ltx, LtxError> {
+  pub fn into_included(self) -> LtxResult<Self> {
     LtxIncludeConvertor::convert(self)
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_inherited(self) -> Result<Ltx, LtxError> {
+  pub fn into_inherited(self) -> LtxResult<Self> {
     LtxInheritConvertor::convert(self)
   }
 
@@ -201,12 +201,12 @@ impl<'q> IndexMut<&'q str> for Ltx {
 #[cfg(test)]
 mod test {
   use crate::file::ltx::Ltx;
-  use crate::{LtxParseError, Section, ROOT_SECTION};
+  use crate::{LtxError, LtxParseError, LtxResult, Section, ROOT_SECTION};
 
   #[test]
   fn load_from_str_with_empty_general_section() {
     let input = "[sec1]\nkey1=val1\n";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -229,7 +229,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_input() {
     let input: &str = "";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -242,7 +242,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_lines() {
     let input: &str = "\n\n\n";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -255,7 +255,7 @@ mod test {
   #[test]
   fn load_from_str_with_valid_input() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar\n";
-    let opt: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let opt: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
 
@@ -279,7 +279,7 @@ mod test {
   #[test]
   fn load_from_str_without_ending_newline() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar";
-    let opt: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let opt: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
   }
@@ -287,14 +287,19 @@ mod test {
   #[test]
   fn parse_error_numbers() {
     let invalid_input: &str = "\n\n[not_closed";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(invalid_input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(invalid_input);
 
     assert!(ltx.is_err());
 
-    let error: LtxParseError = ltx.unwrap_err();
-
-    assert_eq!(error.line, 3);
-    assert_eq!(error.col, 12);
+    match ltx.unwrap_err() {
+      LtxError::Parse(error) => {
+        assert_eq!(error.line, 3);
+        assert_eq!(error.col, 12);
+      }
+      _ => {
+        panic!("Unexpected error received");
+      }
+    }
   }
 
   #[test]
@@ -382,7 +387,7 @@ key = value ; comment
   }
 
   #[test]
-  fn includes_no_duplicates() {
+  fn includes_no_duplicates() -> LtxResult {
     let input = "
 #include \"file1.ltx\"
 #include \"file1.ltx\"
@@ -395,13 +400,15 @@ name = hello
 
     assert!(ltx.is_err());
     assert_eq!(
-      ltx.unwrap_err().message,
+      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
       "Failed to parse include statement in ltx file, including 'file1.ltx' more than once"
     );
+
+    Ok(())
   }
 
   #[test]
-  fn includes_valid() {
+  fn includes_valid() -> LtxResult {
     let input = "
 #include
 
@@ -409,17 +416,19 @@ name = hello
 name = hello
 ";
 
-    let ltx = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
-      ltx.unwrap_err().message,
+      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
       "Expected correct '#include \"config.ltx\"' statement, got '#include'"
     );
+
+    Ok(())
   }
 
   #[test]
-  fn includes_only_ltx() {
+  fn includes_only_ltx() -> LtxResult {
     let input = "
 #include \"file1.ini\"
 
@@ -431,13 +440,15 @@ name = hello
 
     assert!(ltx.is_err());
     assert_eq!(
-      ltx.unwrap_err().message,
+      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
       "Included file should have .ltx extension, got 'file1.ini'"
     );
+
+    Ok(())
   }
 
   #[test]
-  fn includes_empty() {
+  fn includes_empty() -> LtxResult {
     let input = "
 #include \"\"
 
@@ -445,13 +456,15 @@ name = hello
 name = hello
 ";
 
-    let ltx = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
-      ltx.unwrap_err().message,
+      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
       "Expected valid file name in include statement, got empty file name"
     );
+
+    Ok(())
   }
 
   #[test]
@@ -545,7 +558,7 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn load_from_str_with_crlf() {
     let input: &str = "key1=val1\r\nkey2=val2\r\n";
-    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -662,7 +675,7 @@ a3 = n3
   }
 
   #[test]
-  fn duplicate_sections() {
+  fn duplicate_sections() -> LtxResult {
     // https://github.com/zonyitoo/rust-ini/issues/49
 
     let input = r"
@@ -673,13 +686,15 @@ foo = a
 foo = c
 ";
 
-    let ltx: Result<Ltx, LtxParseError> = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
-      ltx.unwrap_err().message,
+      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
       "Duplicate sections are not allowed, looks like 'peer' is declared twice"
     );
+
+    Ok(())
   }
 
   #[test]

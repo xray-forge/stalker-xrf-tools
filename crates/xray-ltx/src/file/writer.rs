@@ -1,6 +1,6 @@
 use crate::file::configuration::constants::ROOT_SECTION;
 use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
-use crate::{Ltx, LtxError};
+use crate::{Ltx, LtxResult};
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
@@ -8,7 +8,7 @@ use std::{fs, io};
 
 impl Ltx {
   /// Format single LTX file by provided path
-  pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> Result<bool, LtxError> {
+  pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> LtxResult<bool> {
     let formatted: String = Ltx::format_from_file(&filename)?;
     let existing: String =
       io::read_to_string(&mut OpenOptions::new().read(true).open(filename.as_ref())?)?;
@@ -17,7 +17,7 @@ impl Ltx {
       Ok(false)
     } else {
       if write {
-        fs::write(&filename, formatted).map_err(LtxError::Io)?;
+        fs::write(&filename, formatted)?;
       }
 
       Ok(true)
@@ -25,7 +25,7 @@ impl Ltx {
   }
 
   /// Write to a file
-  pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
+  pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> LtxResult {
     self.write_to(
       &mut OpenOptions::new()
         .write(true)
@@ -36,8 +36,8 @@ impl Ltx {
   }
 
   /// Write to a writer with options
-  pub fn write_to<W: Write>(&self, writer: &mut W) -> io::Result<()> {
-    let mut firstline = true;
+  pub fn write_to<W: Write>(&self, writer: &mut W) -> LtxResult {
+    let mut firstline: bool = true;
 
     // Write include statements.
     if !self.includes.is_empty() {

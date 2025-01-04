@@ -1,19 +1,20 @@
 use crate::equipment::config::get_section_inventory_coordinates;
 use crate::equipment::dimensions::get_system_ltx_equipment_sprite_max_dimension;
-use crate::images::dds_to_image;
+use crate::utils::images::dds_to_image;
 use crate::{
   read_dds_by_path, rescale_image_to_bounds, save_image_as_ui_dds, PackEquipmentOptions,
-  PackEquipmentResult, INVENTORY_ICON_GRID_SQUARE_BASE, SECTION_TYPE_INVENTORY_ICON,
+  PackEquipmentResult, TextureResult, INVENTORY_ICON_GRID_SQUARE_BASE, SECTION_TYPE_INVENTORY_ICON,
 };
-use image::io::Reader as ImageReader;
-use image::{DynamicImage, GenericImage, ImageBuffer, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba, RgbaImage};
 use path_absolutize::*;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use xray_ltx::Section;
 
-pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) -> PackEquipmentResult {
+pub fn pack_equipment_icons_by_ltx(
+  options: PackEquipmentOptions,
+) -> TextureResult<PackEquipmentResult> {
   let started_at: Instant = Instant::now();
   let (max_width, max_height) = get_system_ltx_equipment_sprite_max_dimension(&options.ltx);
 
@@ -48,21 +49,21 @@ pub fn pack_equipment_icons_by_ltx(options: PackEquipmentOptions) -> PackEquipme
     "DirectX compression requires texture height to be multiple of 4"
   );
 
-  save_image_as_ui_dds(&options.output, &result, options.dds_compression_format);
+  save_image_as_ui_dds(&options.output, &result, options.dds_compression_format)?;
 
   println!(
     "Packed {packed} icons in {} format, {skipped} skipped",
     options.dds_compression_format
   );
 
-  PackEquipmentResult {
+  Ok(PackEquipmentResult {
     duration: started_at.elapsed().as_millis(),
     saved_at: options.output.clone(),
     saved_width: result.width(),
     saved_height: result.height(),
     packed_count: packed,
     skipped_count: skipped,
-  }
+  })
 }
 
 pub fn pack_equipment_icon(

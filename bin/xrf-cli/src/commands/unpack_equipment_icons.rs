@@ -3,7 +3,7 @@ use std::fs::create_dir_all;
 use std::path::PathBuf;
 use xray_icon::{
   dds_to_image, read_dds_by_path, unpack_equipment_icons_by_ltx, ImageFormat, RgbaImage,
-  UnpackEquipmentOptions,
+  TextureResult, UnpackEquipmentOptions,
 };
 use xray_ltx::Ltx;
 
@@ -47,7 +47,7 @@ impl UnpackEquipmentIconsCommand {
       )
   }
 
-  pub fn execute(matches: &ArgMatches) {
+  pub fn execute(matches: &ArgMatches) -> TextureResult {
     let system_ltx_path: &PathBuf = matches
       .get_one::<PathBuf>("system-ltx")
       .expect("Expected valid path to be provided for system-ltx");
@@ -77,11 +77,11 @@ impl UnpackEquipmentIconsCommand {
         dds_to_image(&dds)
       })
       .expect("Expected path to valid DDS source file");
-    let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path).unwrap();
+    let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path)?;
 
     println!("Unpacking equipment DDS file into: {:?}", output);
 
-    create_dir_all(output).unwrap();
+    create_dir_all(output)?;
 
     unpack_equipment_icons_by_ltx(UnpackEquipmentOptions {
       ltx: system_ltx,
@@ -89,8 +89,10 @@ impl UnpackEquipmentIconsCommand {
       output: output.into(),
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
       is_verbose,
-    });
+    })?;
 
     println!("Successfully DDS equipment file based on LTX sections");
+
+    Ok(())
   }
 }
