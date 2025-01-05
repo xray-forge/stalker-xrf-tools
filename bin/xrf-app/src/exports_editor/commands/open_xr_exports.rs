@@ -1,4 +1,5 @@
 use crate::exports_editor::state::{ExportsDeclarations, ExportsEditorState};
+use crate::types::TauriResult;
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use tauri::State;
@@ -10,7 +11,7 @@ pub async fn open_xr_exports(
   dialogs_path: &str,
   effects_path: &str,
   state: State<'_, ExportsEditorState>,
-) -> Result<Value, String> {
+) -> TauriResult<Value> {
   log::info!("Parsing exports folders: {conditions_path} + {dialogs_path} + {effects_path}");
 
   let parser: ExportsParser = ExportsParser::new();

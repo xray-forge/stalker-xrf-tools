@@ -35,7 +35,7 @@ impl ParticleEffectEditorData {
   }
 
   /// Write particle effect description data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_all(&self.value)?;
 
     Ok(())
@@ -74,11 +74,7 @@ impl ParticleEffectEditorData {
   }
 
   /// Export particle effect collision data into provided path.
-  pub fn export_optional(
-    data: Option<&Self>,
-    section_name: &str,
-    ini: &mut Ltx,
-  ) -> DatabaseResult<()> {
+  pub fn export_optional(data: Option<&Self>, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     if let Some(data) = data {
       data.export(section_name, ini)
     } else {
@@ -87,7 +83,7 @@ impl ParticleEffectEditorData {
   }
 
   /// Export particle effect editor data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set(META_TYPE_FIELD, Self::META_TYPE)

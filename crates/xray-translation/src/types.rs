@@ -1,5 +1,8 @@
+use crate::TranslationError;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+pub type TranslationResult<T = ()> = Result<T, TranslationError>;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]

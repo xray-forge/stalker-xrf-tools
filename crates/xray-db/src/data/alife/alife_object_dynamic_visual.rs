@@ -48,7 +48,7 @@ impl AlifeObjectReader<AlifeObjectDynamicVisual> for AlifeObjectDynamicVisual {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectDynamicVisual {
   /// Write visual alife object data into the chunk writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
     writer.write_null_terminated_win_string(&self.visual_name)?;
@@ -58,7 +58,7 @@ impl AlifeObjectWriter for AlifeObjectDynamicVisual {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     self.base.export(section, ini)?;
 
     ini
@@ -92,7 +92,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -136,7 +136,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
     let mut ltx: Ltx = Ltx::new();
 
@@ -186,7 +186,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual {
       base: AlifeObjectAbstract {
         game_vertex_id: 325,

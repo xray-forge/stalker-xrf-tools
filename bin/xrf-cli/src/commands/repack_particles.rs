@@ -1,8 +1,7 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use xray_db::particles_file::particles_file::ParticlesFile;
-use xray_db::types::{DatabaseResult, ParticlesByteOrder};
+use xray_db::{DatabaseResult, ParticlesByteOrder, ParticlesFile};
 
 pub struct RepackParticlesCommand {}
 
@@ -15,7 +14,7 @@ impl RepackParticlesCommand {
       .about("Command to repack provided particles.xr into another file")
       .arg(
         Arg::new("path")
-          .help("Path to particles.xr file")
+          .help("Path to particles file")
           .short('p')
           .long("path")
           .required(true)
@@ -23,7 +22,7 @@ impl RepackParticlesCommand {
       )
       .arg(
         Arg::new("dest")
-          .help("Path to resulting *.xr file")
+          .help("Path to resulting particles file")
           .short('d')
           .long("dest")
           .required(true)
@@ -32,7 +31,7 @@ impl RepackParticlesCommand {
   }
 
   /// Repack provided particles file and validate it.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult<()> {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");

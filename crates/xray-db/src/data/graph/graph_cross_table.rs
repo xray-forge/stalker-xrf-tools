@@ -41,7 +41,7 @@ impl GraphCrossTable {
   pub fn write_list<T: ByteOrder>(
     cross_tables: &[Self],
     writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  ) -> DatabaseResult {
     for table in cross_tables {
       let mut table_writer: ChunkWriter = ChunkWriter::new();
 
@@ -67,7 +67,7 @@ impl GraphCrossTable {
   }
 
   /// Write cross table data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<T>(self.version)?;
     writer.write_u32::<T>(self.nodes_count)?;
     writer.write_u32::<T>(self.vertices_count)?;
@@ -97,7 +97,7 @@ impl GraphCrossTable {
   }
 
   /// Export cross-tables as separate gct chunk file.
-  pub fn export_list<T: ByteOrder>(cross_tables: &[Self], file: &mut File) -> DatabaseResult<()> {
+  pub fn export_list<T: ByteOrder>(cross_tables: &[Self], file: &mut File) -> DatabaseResult {
     let mut cross_tables_writer: ChunkWriter = ChunkWriter::new();
 
     for cross_table in cross_tables {
@@ -135,7 +135,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult {
     let filename: String = String::from("read_write_list.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -198,7 +198,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -243,7 +243,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.gct");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
@@ -288,7 +288,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: GraphCrossTable = GraphCrossTable {
       version: 24,
       nodes_count: 436,

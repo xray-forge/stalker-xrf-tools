@@ -33,7 +33,7 @@ impl GraphHeader {
   }
 
   /// Write graph edge data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u8(self.version)?;
     writer.write_u16::<T>(self.vertices_count)?;
     writer.write_u32::<T>(self.edges_count)?;
@@ -97,7 +97,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -139,7 +139,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: GraphHeader = GraphHeader {
       version: 16,
       vertices_count: 6434,
@@ -166,7 +166,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: GraphHeader = GraphHeader {
       version: 12,
       vertices_count: 2341,

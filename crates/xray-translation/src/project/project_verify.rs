@@ -1,6 +1,9 @@
 use crate::project::project_verify_result::ProjectVerifyResult;
 use crate::types::TranslationJson;
-use crate::{ProjectVerifyOptions, TranslationError, TranslationLanguage, TranslationProject};
+use crate::{
+  ProjectVerifyOptions, TranslationError, TranslationLanguage, TranslationProject,
+  TranslationResult,
+};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::time::Instant;
@@ -10,7 +13,7 @@ impl TranslationProject {
   pub fn verify_dir(
     dir: &Path,
     options: &ProjectVerifyOptions,
-  ) -> Result<ProjectVerifyResult, TranslationError> {
+  ) -> TranslationResult<ProjectVerifyResult> {
     log::info!("Verifying dir {:?}", dir);
 
     if options.is_logging_enabled() {
@@ -30,8 +33,7 @@ impl TranslationProject {
       let entry_path: &Path = entry.path();
 
       if entry_path.is_file() {
-        let file_result: ProjectVerifyResult =
-          TranslationProject::verify_file(entry_path, options)?;
+        let file_result: ProjectVerifyResult = Self::verify_file(entry_path, options)?;
 
         result.missing_translations_count += file_result.missing_translations_count;
         result.checked_translations_count += file_result.checked_translations_count;
@@ -52,7 +54,7 @@ impl TranslationProject {
   pub fn verify_file(
     path: &Path,
     options: &ProjectVerifyOptions,
-  ) -> Result<ProjectVerifyResult, TranslationError> {
+  ) -> TranslationResult<ProjectVerifyResult> {
     let extension: Option<&OsStr> = path.extension();
 
     if let Some(extension) = extension {
@@ -73,7 +75,7 @@ impl TranslationProject {
   pub fn verify_json_file(
     path: &Path,
     options: &ProjectVerifyOptions,
-  ) -> Result<ProjectVerifyResult, TranslationError> {
+  ) -> TranslationResult<ProjectVerifyResult> {
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
 
     log::info!("Verifying dynamic JSON file {:?}", path);

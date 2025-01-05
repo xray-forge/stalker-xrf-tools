@@ -65,7 +65,7 @@ impl PatrolPoint {
   }
 
   /// Write list of patrol points into chunk writer.
-  pub fn write_list<T: ByteOrder>(points: &[Self], writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(points: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
     for (index, point) in points.iter().enumerate() {
       let mut point_chunk_writer: ChunkWriter = ChunkWriter::new();
 
@@ -85,7 +85,7 @@ impl PatrolPoint {
   }
 
   /// Write patrol point data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;
@@ -114,7 +114,7 @@ impl PatrolPoint {
   }
 
   /// Export patrol point data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("name", &self.name)
@@ -148,7 +148,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -184,7 +184,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -229,7 +229,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -253,7 +253,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-serialized"),
       position: Vector3d::new(5.5, -2.3, 6.0),

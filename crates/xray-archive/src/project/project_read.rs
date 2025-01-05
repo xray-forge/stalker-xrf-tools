@@ -5,7 +5,7 @@ use crate::project::project_constants::{
   ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
 };
 use crate::project::project_read_result::ProjectReadResult;
-use crate::{ArchiveError, ArchiveProject, ArchiveReadError};
+use crate::{ArchiveProject, ArchiveReadError, ArchiveResult};
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -13,7 +13,7 @@ use std::path::PathBuf;
 
 impl ArchiveProject {
   /// Read single file from project as string.
-  pub fn read_file_as_string(&self, filename: &str) -> Result<ProjectReadResult, ArchiveError> {
+  pub fn read_file_as_string(&self, filename: &str) -> ArchiveResult<ProjectReadResult> {
     log::info!("Trying to read file from archive: {filename}");
 
     if !self.can_read_file(filename) {

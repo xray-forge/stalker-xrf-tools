@@ -54,7 +54,7 @@ impl SpawnALifeSpawnsChunk {
   }
 
   /// Write alife chunk data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     let mut count_writer: ChunkWriter = ChunkWriter::new();
     let mut objects_writer: ChunkWriter = ChunkWriter::new();
     let mut vertex_writer: ChunkWriter = ChunkWriter::new();
@@ -100,7 +100,7 @@ impl SpawnALifeSpawnsChunk {
   }
 
   /// Export alife spawns data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export(&self, path: &Path) -> DatabaseResult {
     let mut ltx: Ltx = Ltx::new();
 
     for object in &self.objects {
@@ -146,7 +146,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_empty() -> DatabaseResult<()> {
+  fn test_read_write_empty() -> DatabaseResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_empty.chunk");
 
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk { objects: vec![] };
@@ -180,7 +180,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {

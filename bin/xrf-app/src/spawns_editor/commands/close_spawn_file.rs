@@ -1,10 +1,11 @@
 use crate::spawns_editor::state::SpawnsEditorState;
+use crate::types::TauriResult;
 use std::sync::MutexGuard;
 use tauri::State;
-use xray_db::spawn_file::spawn_file::SpawnFile;
+use xray_db::SpawnFile;
 
 #[tauri::command]
-pub fn close_spawn_file(state: State<'_, SpawnsEditorState>) {
+pub fn close_spawn_file(state: State<'_, SpawnsEditorState>) -> TauriResult {
   log::info!("Closing spawn file");
 
   let mut lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
@@ -12,4 +13,6 @@ pub fn close_spawn_file(state: State<'_, SpawnsEditorState>) {
   if lock.is_some() {
     *lock = None;
   }
+
+  Ok(())
 }

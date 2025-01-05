@@ -1,5 +1,6 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
+use xray_translation::TranslationResult;
 
 pub struct ParseTranslationsCommand {}
 
@@ -21,7 +22,9 @@ impl ParseTranslationsCommand {
   }
 
   /// Parse translations from path as json.
-  pub fn execute(_matches: &ArgMatches) {
+  pub fn execute(_matches: &ArgMatches) -> TranslationResult {
     // todo;
+
+    Ok(())
   }
 }

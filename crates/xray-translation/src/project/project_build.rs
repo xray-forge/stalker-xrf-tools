@@ -2,7 +2,10 @@ use crate::error::translation_error::TranslationError;
 use crate::types::{
   TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant,
 };
-use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
+use crate::{
+  ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject,
+  TranslationResult,
+};
 use quick_xml::se::Serializer;
 use serde::Serialize;
 use std::ffi::OsStr;
@@ -16,7 +19,7 @@ impl TranslationProject {
   pub fn build_dir(
     dir: &Path,
     options: &ProjectBuildOptions,
-  ) -> Result<ProjectBuildResult, TranslationError> {
+  ) -> TranslationResult<ProjectBuildResult> {
     log::info!("Building dir {:?}", dir);
 
     if options.is_logging_enabled() {
@@ -36,7 +39,7 @@ impl TranslationProject {
       let entry_path: &Path = entry.path();
 
       if entry_path.is_file() {
-        TranslationProject::build_file(entry_path, options)?;
+        Self::build_file(entry_path, options)?;
       }
     }
 
@@ -54,7 +57,7 @@ impl TranslationProject {
   pub fn build_file(
     path: &Path,
     options: &ProjectBuildOptions,
-  ) -> Result<ProjectBuildResult, TranslationError> {
+  ) -> TranslationResult<ProjectBuildResult> {
     let extension: Option<&OsStr> = path.extension();
     let started_at: Instant = Instant::now();
 
@@ -85,10 +88,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn build_xml_file(
-    path: &Path,
-    options: &ProjectBuildOptions,
-  ) -> Result<(), TranslationError> {
+  pub fn build_xml_file(path: &Path, options: &ProjectBuildOptions) -> TranslationResult {
     let locale = Self::get_locale_from_path(path);
 
     if let Some(locale) = locale {
@@ -143,10 +143,7 @@ impl TranslationProject {
     Ok(())
   }
 
-  pub fn build_json_file(
-    path: &Path,
-    options: &ProjectBuildOptions,
-  ) -> Result<(), TranslationError> {
+  pub fn build_json_file(path: &Path, options: &ProjectBuildOptions) -> TranslationResult {
     log::info!("Building dynamic JSON file {:?}", path);
 
     if options.is_logging_enabled() {
@@ -158,7 +155,7 @@ impl TranslationProject {
     if options.language == TranslationLanguage::All {
       for language in TranslationLanguage::get_all() {
         let data: Vec<u8> = Self::encode_translation_data(
-          &TranslationProject::compile_translation_json_by_language(&parsed, &language, options),
+          &Self::compile_translation_json_by_language(&parsed, &language, options),
           &language,
           options,
         );
@@ -168,11 +165,7 @@ impl TranslationProject {
       }
     } else {
       let data: Vec<u8> = Self::encode_translation_data(
-        &TranslationProject::compile_translation_json_by_language(
-          &parsed,
-          &options.language,
-          options,
-        ),
+        &Self::compile_translation_json_by_language(&parsed, &options.language, options),
         &options.language,
         options,
       );

@@ -13,7 +13,7 @@ impl LtxConvertError {
   where
     T: Into<String>,
   {
-    LtxError::Convert(LtxConvertError {
+    LtxError::Convert(Self {
       message: message.into(),
     })
   }

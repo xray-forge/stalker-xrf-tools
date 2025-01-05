@@ -24,7 +24,7 @@ impl GraphEdge {
   }
 
   /// Write graph edge data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u16::<T>(self.game_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 
@@ -75,7 +75,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -113,7 +113,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: GraphEdge = GraphEdge {
       game_vertex_id: 352,
       distance: 2554.50,
@@ -137,7 +137,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: GraphEdge = GraphEdge {
       game_vertex_id: 713,
       distance: 400.50,

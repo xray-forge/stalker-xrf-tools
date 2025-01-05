@@ -1,3 +1,3 @@
-pub mod patrol;
-pub mod patrol_link;
-pub mod patrol_point;
+pub(crate) mod patrol;
+pub(crate) mod patrol_link;
+pub(crate) mod patrol_point;

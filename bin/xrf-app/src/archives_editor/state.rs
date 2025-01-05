@@ -6,8 +6,8 @@ pub struct ArchivesEditorState {
 }
 
 impl ArchivesEditorState {
-  pub fn new() -> ArchivesEditorState {
-    ArchivesEditorState {
+  pub fn new() -> Self {
+    Self {
       project: Arc::new(Mutex::new(None)),
     }
   }

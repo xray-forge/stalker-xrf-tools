@@ -80,7 +80,7 @@ impl SpawnGraphsChunk {
   }
 
   /// Write whole graphs chunk into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.header.write::<T>(writer)?;
 
     for level in &self.levels {
@@ -157,7 +157,7 @@ impl SpawnGraphsChunk {
 
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
-  pub fn export<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
     let mut graphs_header_ini: Ltx = Ltx::new();
 
     self.header.export(&mut graphs_header_ini);
@@ -250,7 +250,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_empty() -> DatabaseResult<()> {
+  fn test_read_write_empty() -> DatabaseResult {
     let filename: String = String::from("read_write_empty.chunk");
 
     let original: SpawnGraphsChunk = SpawnGraphsChunk {
@@ -303,7 +303,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
 
     let original: SpawnGraphsChunk = SpawnGraphsChunk {

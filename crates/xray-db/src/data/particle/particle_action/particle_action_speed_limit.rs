@@ -41,14 +41,14 @@ impl ParticleActionReader for ParticleActionSpeedLimit {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionSpeedLimit {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<ParticlesByteOrder>(self.min_speed)?;
     writer.write_f32::<ParticlesByteOrder>(self.max_speed)?;
 
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("min_speed", self.min_speed.to_string())

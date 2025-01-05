@@ -44,7 +44,7 @@ impl ParticleActionReader for ParticleActionMatchVelocity {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionMatchVelocity {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
     writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
     writer.write_f32::<ParticlesByteOrder>(self.max_radius)?;
@@ -52,7 +52,7 @@ impl ParticleActionWriter for ParticleActionMatchVelocity {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("magnitude", self.magnitude.to_string())

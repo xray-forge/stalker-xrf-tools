@@ -36,7 +36,7 @@ impl ParticleEffectCollision {
   }
 
   /// Write particle effect collision data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<T>(self.collide_one_minus_friction)?;
     writer.write_f32::<T>(self.collide_resilience)?;
     writer.write_f32::<T>(self.collide_sqr_cutoff)?;
@@ -79,11 +79,7 @@ impl ParticleEffectCollision {
   }
 
   /// Export particle effect collision data into provided path.
-  pub fn export_optional(
-    data: Option<&Self>,
-    section_name: &str,
-    ini: &mut Ltx,
-  ) -> DatabaseResult<()> {
+  pub fn export_optional(data: Option<&Self>, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     if let Some(data) = data {
       data.export(section_name, ini)
     } else {
@@ -92,7 +88,7 @@ impl ParticleEffectCollision {
   }
 
   /// Export particle effect collision data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set(META_TYPE_FIELD, Self::META_TYPE)

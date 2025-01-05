@@ -56,8 +56,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
   match command.get_matches().subcommand() {
     Some((BuildTranslationsCommand::NAME, matches)) => BuildTranslationsCommand::execute(matches)?,
-    Some((FormatLtxCommand::NAME, matches)) => FormatLtxCommand::execute(matches),
-    Some((InfoSpawnCommand::NAME, matches)) => InfoSpawnCommand::execute(matches),
+    Some((FormatLtxCommand::NAME, matches)) => FormatLtxCommand::execute(matches)?,
+    Some((InfoSpawnCommand::NAME, matches)) => InfoSpawnCommand::execute(matches)?,
     Some((InitializeTranslationsCommand::NAME, matches)) => {
       InitializeTranslationsCommand::execute(matches)?
     }
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Some((PackTextureDescriptionCommand::NAME, matches)) => {
       PackTextureDescriptionCommand::execute(matches)?
     }
-    Some((ParseTranslationsCommand::NAME, matches)) => ParseTranslationsCommand::execute(matches),
+    Some((ParseTranslationsCommand::NAME, matches)) => ParseTranslationsCommand::execute(matches)?,
     Some((RepackParticlesCommand::NAME, matches)) => RepackParticlesCommand::execute(matches)?,
     Some((RepackSpawnCommand::NAME, matches)) => RepackSpawnCommand::execute(matches)?,
     Some((ReUnpackParticlesCommand::NAME, matches)) => ReUnpackParticlesCommand::execute(matches)?,
@@ -82,11 +82,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Some((UnpackTextureDescriptionCommand::NAME, matches)) => {
       UnpackTextureDescriptionCommand::execute(matches)?
     }
-    Some((VerifyLtxCommand::NAME, matches)) => VerifyLtxCommand::execute(matches),
+    Some((VerifyLtxCommand::NAME, matches)) => VerifyLtxCommand::execute(matches)?,
     Some((VerifyParticlesFileCommand::NAME, matches)) => {
-      VerifyParticlesFileCommand::execute(matches)
+      VerifyParticlesFileCommand::execute(matches)?
     }
-    Some((VerifySpawnFileCommand::NAME, matches)) => VerifySpawnFileCommand::execute(matches),
+    Some((VerifySpawnFileCommand::NAME, matches)) => VerifySpawnFileCommand::execute(matches)?,
     Some((VerifyTranslationsCommand::NAME, matches)) => {
       VerifyTranslationsCommand::execute(matches)?
     }

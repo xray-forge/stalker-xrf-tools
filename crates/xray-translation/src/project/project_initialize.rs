@@ -1,7 +1,7 @@
 use crate::types::TranslationJson;
 use crate::{
   ProjectInitializeOptions, ProjectInitializeResult, TranslationError, TranslationLanguage,
-  TranslationProject,
+  TranslationProject, TranslationResult,
 };
 use std::ffi::OsStr;
 use std::io::Write;
@@ -13,7 +13,7 @@ impl TranslationProject {
   pub fn initialize_dir(
     dir: &Path,
     options: &ProjectInitializeOptions,
-  ) -> Result<ProjectInitializeResult, TranslationError> {
+  ) -> TranslationResult<ProjectInitializeResult> {
     log::info!("Initializing dir {:?}", dir);
 
     if options.is_logging_enabled() {
@@ -33,7 +33,7 @@ impl TranslationProject {
       let entry_path: &Path = entry.path();
 
       if entry_path.is_file() {
-        TranslationProject::initialize_file(entry_path, options)?;
+        Self::initialize_file(entry_path, options)?;
       }
     }
 
@@ -51,7 +51,7 @@ impl TranslationProject {
   pub fn initialize_file(
     path: &Path,
     options: &ProjectInitializeOptions,
-  ) -> Result<ProjectInitializeResult, TranslationError> {
+  ) -> TranslationResult<ProjectInitializeResult> {
     let extension: Option<&OsStr> = path.extension();
 
     if let Some(extension) = extension {
@@ -72,7 +72,7 @@ impl TranslationProject {
   pub fn initialize_json_file(
     path: &Path,
     options: &ProjectInitializeOptions,
-  ) -> Result<ProjectInitializeResult, TranslationError> {
+  ) -> TranslationResult<ProjectInitializeResult> {
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();
     let mut initialized_count: u32 = 0;
 

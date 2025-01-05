@@ -1,6 +1,6 @@
 use crate::file::section::section::Section;
 use crate::file::types::LtxSections;
-use crate::{Ltx, LtxConvertError, LtxError, LtxResult};
+use crate::{Ltx, LtxConvertError, LtxResult};
 
 /// Converter object to process and inject all inherit section statements.
 #[derive(Default)]
@@ -40,7 +40,7 @@ impl LtxInheritConvertor {
     Ok(ltx)
   }
 
-  fn inherit_sections(&self, ltx: &Ltx, destination: &mut LtxSections) -> Result<(), LtxError> {
+  fn inherit_sections(&self, ltx: &Ltx, destination: &mut LtxSections) -> LtxResult {
     for (section_name, _) in &ltx.sections {
       Self::inherit_section(ltx, destination, section_name)?;
     }
@@ -48,11 +48,7 @@ impl LtxInheritConvertor {
     Ok(())
   }
 
-  fn inherit_section(
-    ltx: &Ltx,
-    destination: &mut LtxSections,
-    section_name: &str,
-  ) -> Result<(), LtxError> {
+  fn inherit_section(ltx: &Ltx, destination: &mut LtxSections, section_name: &str) -> LtxResult {
     let section: &Section = match ltx.sections.get(section_name) {
       None => {
         return Err(LtxConvertError::new_ltx_error(format!(

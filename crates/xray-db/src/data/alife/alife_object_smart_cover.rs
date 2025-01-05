@@ -64,7 +64,7 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectSmartCover {
   /// Write smart cover object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
     writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
@@ -79,7 +79,7 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     self.base.export(section, ini)?;
 
     ini
@@ -126,7 +126,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

@@ -9,8 +9,8 @@ pub struct ProjectVerifyResult {
 }
 
 impl ProjectVerifyResult {
-  pub fn new() -> ProjectVerifyResult {
-    ProjectVerifyResult {
+  pub fn new() -> Self {
+    Self {
       duration: 0,
       checked_translations_count: 0,
       missing_translations_count: 0,

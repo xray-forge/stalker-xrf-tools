@@ -7,6 +7,8 @@ mod exports_editor;
 mod icons_editor;
 mod spawns_editor;
 mod translations_editor;
+mod types;
+mod utils;
 
 use crate::archives_editor::plugin::ArchivesEditorPlugin;
 use crate::configs_editor::plugin::ConfigsEditorPlugin;

@@ -58,7 +58,7 @@ impl PatrolLink {
   }
 
   /// Write list patrol links into chunk writer.
-  pub fn write_list<T: ByteOrder>(links: &[Self], writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(links: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
     for link in links {
       link.write::<T>(writer)?;
     }
@@ -67,7 +67,7 @@ impl PatrolLink {
   }
 
   /// Write patrol link data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<T>(self.index)?;
     writer.write_u32::<T>(self.links.len() as u32)?;
 
@@ -106,7 +106,7 @@ impl PatrolLink {
   }
 
   /// Export patrol link data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("index", self.index.to_string())
@@ -143,7 +143,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -178,7 +178,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -219,7 +219,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
@@ -240,7 +240,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],

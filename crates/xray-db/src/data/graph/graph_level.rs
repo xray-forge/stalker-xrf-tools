@@ -33,7 +33,7 @@ impl GraphLevel {
   }
 
   /// Write graph level data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_f32_3d_vector::<T>(&self.offset)?;
     writer.write_u8(self.id)?;
@@ -95,7 +95,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -136,7 +136,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: GraphLevel = GraphLevel {
       id: 78,
       name: String::from("test-level-exported"),
@@ -162,7 +162,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: GraphLevel = GraphLevel {
       id: 243,
       name: String::from("test-level-example"),

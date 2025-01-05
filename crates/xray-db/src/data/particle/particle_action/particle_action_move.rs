@@ -23,11 +23,11 @@ impl ParticleActionReader for ParticleActionMove {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionMove {
-  fn write(&self, _: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, _: &mut ChunkWriter) -> DatabaseResult {
     Ok(())
   }
 
-  fn export(&self, _: &str, _: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, _: &str, _: &mut Ltx) -> DatabaseResult {
     Ok(())
   }
 }

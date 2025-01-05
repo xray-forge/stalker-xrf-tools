@@ -1,10 +1,11 @@
 use crate::exports_editor::state::{ExportsDeclarations, ExportsEditorState};
+use crate::types::TauriResult;
 use serde_json::{json, Value};
 use tauri::State;
 use xray_export::ExportDescriptor;
 
 #[tauri::command]
-pub async fn get_xr_exports(state: State<'_, ExportsEditorState>) -> Result<Option<Value>, String> {
+pub async fn get_xr_exports(state: State<'_, ExportsEditorState>) -> TauriResult<Option<Value>> {
   let conditions: Option<Vec<ExportDescriptor>> =
     state.conditions.lock().unwrap().as_ref().cloned();
   let dialogs: Option<Vec<ExportDescriptor>> = state.dialogs.lock().unwrap().as_ref().cloned();

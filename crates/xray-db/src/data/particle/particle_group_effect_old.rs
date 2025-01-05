@@ -61,10 +61,7 @@ impl ParticleGroupEffectOld {
   }
 
   /// Write old effects list data into the writer.
-  pub fn write_list<T: ByteOrder>(
-    effects: &Vec<Self>,
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(effects: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<T>(effects.len() as u32)?;
 
     for effect in effects {
@@ -75,7 +72,7 @@ impl ParticleGroupEffectOld {
   }
 
   /// Write old effect data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_null_terminated_win_string(&self.on_play_child_name)?;
     writer.write_f32::<T>(self.time_0)?;
@@ -138,11 +135,7 @@ impl ParticleGroupEffectOld {
   }
 
   /// Export list of particles group effect data into provided path.
-  pub fn export_list(
-    effects_old: &[Self],
-    section_name: &str,
-    ini: &mut Ltx,
-  ) -> DatabaseResult<()> {
+  pub fn export_list(effects_old: &[Self], section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     for (index, effect) in effects_old.iter().enumerate() {
       effect.export(&Self::get_effect_old_section(section_name, index), ini)?
     }
@@ -151,7 +144,7 @@ impl ParticleGroupEffectOld {
   }
 
   /// Export particles group effect data into provided path.
-  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -191,7 +184,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult {
     let filename: String = String::from("read_write_list.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -251,7 +244,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -295,7 +288,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -320,7 +313,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_list() -> DatabaseResult<()> {
+  fn test_import_export_list() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export_list.ini");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -362,7 +355,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ParticleGroupEffectOld = ParticleGroupEffectOld {
       name: String::from("effect_old_name_serialize"),
       on_play_child_name: String::from("effect_old_on_play_child_name_serialize"),

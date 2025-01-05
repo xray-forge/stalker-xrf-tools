@@ -1,6 +1,6 @@
 use fileslice::FileSlice;
 use std::fs::{File, OpenOptions};
-use std::io;
+use std::io::{Error as IoError, Result as IoResult};
 use std::path::{Path, PathBuf};
 
 /// Get absolute path to provided test resource.
@@ -50,12 +50,12 @@ pub fn get_absolute_test_sample_file_path(file: &str, resource: &str) -> PathBuf
 }
 
 /// Open file from test resources.
-pub fn get_absolute_test_resource_as_file(file: &str, resource: &str) -> io::Result<File> {
+pub fn get_absolute_test_resource_as_file(file: &str, resource: &str) -> IoResult<File> {
   let path: PathBuf = get_absolute_test_file_path(file, resource);
 
   match File::open(&path) {
     Ok(file) => Ok(file),
-    Err(error) => Err(io::Error::new(
+    Err(error) => Err(IoError::new(
       error.kind(),
       format!("Failed to open test asset {:?}", path),
     )),
@@ -81,12 +81,12 @@ pub fn get_relative_test_sample_sub_dir(resource: &str) -> String {
 }
 
 /// Open file from test resources as slice.
-pub fn open_test_resource_as_slice(resource_path: &str) -> io::Result<FileSlice> {
+pub fn open_test_resource_as_slice(resource_path: &str) -> IoResult<FileSlice> {
   let path: PathBuf = get_absolute_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(FileSlice::new(file)),
-    Err(error) => Err(io::Error::new(
+    Err(error) => Err(IoError::new(
       error.kind(),
       format!("Failed to open test asset {:?}", path),
     )),
@@ -94,12 +94,12 @@ pub fn open_test_resource_as_slice(resource_path: &str) -> io::Result<FileSlice>
 }
 
 /// Open file from test resources.
-pub fn open_test_resource_as_file(resource_path: &str) -> io::Result<File> {
+pub fn open_test_resource_as_file(resource_path: &str) -> IoResult<File> {
   let path: PathBuf = get_absolute_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(file),
-    Err(error) => Err(io::Error::new(
+    Err(error) => Err(IoError::new(
       error.kind(),
       format!("Failed to open test asset {:?}", path),
     )),
@@ -107,7 +107,7 @@ pub fn open_test_resource_as_file(resource_path: &str) -> io::Result<File> {
 }
 
 /// Create and open file from test resources, overwrite existing one.
-pub fn overwrite_test_relative_resource_as_file(resource_path: &str) -> io::Result<File> {
+pub fn overwrite_test_relative_resource_as_file(resource_path: &str) -> IoResult<File> {
   let path: PathBuf = get_absolute_test_resource_path(resource_path);
 
   std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
@@ -120,7 +120,7 @@ pub fn overwrite_test_relative_resource_as_file(resource_path: &str) -> io::Resu
     .open(path.clone())
   {
     Ok(file) => Ok(file),
-    Err(error) => Err(io::Error::new(
+    Err(error) => Err(IoError::new(
       error.kind(),
       format!("Failed to open test asset {:?}", path),
     )),
@@ -128,7 +128,7 @@ pub fn overwrite_test_relative_resource_as_file(resource_path: &str) -> io::Resu
 }
 
 /// Create and open file by path, overwrite existing one.
-pub fn overwrite_file(path: &Path) -> io::Result<File> {
+pub fn overwrite_file(path: &Path) -> IoResult<File> {
   std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
 
   match OpenOptions::new()
@@ -139,7 +139,7 @@ pub fn overwrite_file(path: &Path) -> io::Result<File> {
     .open(path)
   {
     Ok(file) => Ok(file),
-    Err(error) => Err(io::Error::new(
+    Err(error) => Err(IoError::new(
       error.kind(),
       format!("Failed to open test asset {:?}", path),
     )),

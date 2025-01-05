@@ -6,8 +6,8 @@ pub struct TranslationsEditorState {
 }
 
 impl TranslationsEditorState {
-  pub fn new() -> TranslationsEditorState {
-    TranslationsEditorState {
+  pub fn new() -> Self {
+    Self {
       project: Arc::new(Mutex::new(None)),
     }
   }

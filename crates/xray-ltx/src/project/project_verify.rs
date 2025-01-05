@@ -1,7 +1,7 @@
 use crate::error::ltx_scheme_error::LtxSchemeError;
 use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::verify_options::LtxVerifyOptions;
-use crate::{Ltx, LtxError, LtxProject, LtxProjectVerifyResult};
+use crate::{Ltx, LtxProject, LtxProjectVerifyResult, LtxResult};
 use fxhash::FxBuildHasher;
 use indexmap::IndexSet;
 use std::path::Path;
@@ -12,10 +12,7 @@ impl LtxProject {
   /// Make sure that:
   /// - All included files exist or `.ts` counterpart is declared
   /// - All the inherited sections are valid and declared before inherit attempt
-  pub fn verify_entries_opt(
-    &self,
-    options: LtxVerifyOptions,
-  ) -> Result<LtxProjectVerifyResult, LtxError> {
+  pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> LtxResult<LtxProjectVerifyResult> {
     let mut result: LtxProjectVerifyResult = LtxProjectVerifyResult::new();
     let started_at: Instant = Instant::now();
 
@@ -160,12 +157,12 @@ impl LtxProject {
   }
 
   /// Verify all the section/field entries in current ltx project.
-  pub fn verify_entries(&self) -> Result<LtxProjectVerifyResult, LtxError> {
+  pub fn verify_entries(&self) -> LtxResult<LtxProjectVerifyResult> {
     self.verify_entries_opt(Default::default())
   }
 
   /// Format single LTX file by provided path
-  pub fn verify_file(path: &Path) -> Result<(), LtxError> {
+  pub fn verify_file(path: &Path) -> LtxResult<()> {
     Ltx::load_from_file_full(path)?;
 
     Ok(())

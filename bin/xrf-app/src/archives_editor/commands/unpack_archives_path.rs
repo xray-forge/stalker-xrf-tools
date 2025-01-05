@@ -1,15 +1,15 @@
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use xray_archive::ArchiveProject;
 
 #[tauri::command]
-pub async fn unpack_archives_path(from: &str, destination: &str) -> Result<Value, String> {
+pub async fn unpack_archives_path(from: &str, destination: &str) -> TauriResult<Value> {
   log::info!("Open archive folder: {:?}", from);
 
-  let project: ArchiveProject = match ArchiveProject::new(&PathBuf::from(from)) {
-    Ok(project) => project,
-    Err(error) => return Err(error.to_string()),
-  };
+  let project: ArchiveProject =
+    ArchiveProject::new(&PathBuf::from(from)).map_err(error_to_string)?;
 
   log::info!("Unpacking archive to: {:?}", destination);
 

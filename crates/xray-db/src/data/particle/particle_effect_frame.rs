@@ -37,7 +37,7 @@ impl ParticleEffectFrame {
   }
 
   /// Write frame data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<T>(self.texture_size.0)?;
     writer.write_f32::<T>(self.texture_size.1)?;
     writer.write_f32::<T>(self.reserved.0)?;
@@ -121,11 +121,7 @@ impl ParticleEffectFrame {
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export_optional(
-    data: Option<&Self>,
-    section_name: &str,
-    ini: &mut Ltx,
-  ) -> DatabaseResult<()> {
+  pub fn export_optional(data: Option<&Self>, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     if let Some(data) = data {
       data.export(section_name, ini)
     } else {
@@ -134,7 +130,7 @@ impl ParticleEffectFrame {
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -174,7 +170,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -217,7 +213,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -242,7 +238,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ParticleEffectFrame = ParticleEffectFrame {
       texture_size: (74.0, 236.5),
       reserved: (263.5, 5369.5),

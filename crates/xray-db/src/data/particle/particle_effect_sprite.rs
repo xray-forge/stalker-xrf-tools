@@ -34,7 +34,7 @@ impl ParticleEffectSprite {
   }
 
   /// Write sprite data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_null_terminated_win_string(&self.shader_name)?;
     writer.write_null_terminated_win_string(&self.texture_name)?;
 
@@ -66,7 +66,7 @@ impl ParticleEffectSprite {
   }
 
   /// Export particle effect sprite data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -97,7 +97,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -138,7 +138,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -160,7 +160,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let sprite: ParticleEffectSprite = ParticleEffectSprite {
       shader_name: String::from("shader_name"),
       texture_name: String::from("texture_name"),

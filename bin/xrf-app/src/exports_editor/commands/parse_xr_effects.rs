@@ -1,15 +1,16 @@
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 use serde_json::{json, Value};
 use std::path::PathBuf;
-use xray_export::ExportsParser;
+use xray_export::{ExportDescriptor, ExportsParser};
 
 #[tauri::command]
-pub async fn parse_xr_effects(path: &str) -> Result<Value, String> {
+pub async fn parse_xr_effects(path: &str) -> TauriResult<Value> {
   log::info!("Parsing effects exports folder: {:?}", path);
 
-  let parser: ExportsParser = ExportsParser::new();
+  let value: Vec<ExportDescriptor> = ExportsParser::new()
+    .parse_effects_from_path(&PathBuf::from(path))
+    .map_err(error_to_string)?;
 
-  match parser.parse_effects_from_path(&PathBuf::from(path)) {
-    Ok(value) => Ok(json!(value)),
-    Err(error) => Err(error.to_string()),
-  }
+  Ok(json!(value))
 }

@@ -4,12 +4,12 @@ use std::fs::File;
 use std::io::Read;
 
 use crate::types::{TranslationJson, TranslationProjectJson};
-use crate::{TranslationError, TranslationLanguage};
+use crate::{TranslationError, TranslationLanguage, TranslationResult};
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
 
 impl TranslationProject {
-  pub fn read_project(dir: &Path) -> Result<TranslationProjectJson, TranslationError> {
+  pub fn read_project(dir: &Path) -> TranslationResult<TranslationProjectJson> {
     let mut project_json: TranslationProjectJson = Default::default();
 
     // Filter all the entries that are not accessed by other files and represent entry points.
@@ -26,7 +26,7 @@ impl TranslationProject {
           if extension == "json" {
             project_json.insert(
               entry_path.to_str().unwrap().into(),
-              TranslationProject::read_translation_json_by_path(entry_path)?,
+              Self::read_translation_json_by_path(entry_path)?,
             );
           } else {
             log::warn!("Skip non json translation file {:?}", entry_path);
@@ -40,7 +40,7 @@ impl TranslationProject {
     Ok(project_json)
   }
 
-  pub fn read_translation_json_by_path(path: &Path) -> Result<TranslationJson, TranslationError> {
+  pub fn read_translation_json_by_path(path: &Path) -> TranslationResult<TranslationJson> {
     let mut data: Vec<u8> = Vec::new();
 
     File::open(path)?.read_to_end(&mut data)?;
@@ -84,7 +84,7 @@ impl TranslationProject {
   pub fn flatten(translation_project_json: &TranslationProjectJson) -> TranslationJson {
     let mut json: TranslationJson = Default::default();
 
-    for (_, nested) in translation_project_json {
+    for nested in translation_project_json.values() {
       for (key, value) in nested {
         // todo: Duplicates check and error return?
 

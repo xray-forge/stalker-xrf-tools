@@ -69,13 +69,13 @@ impl ParticlesFile {
   }
 
   /// Write particles file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
     self.write_to::<T>(&mut create_export_file(path)?)
   }
 
   /// Write particles file data to the writer.
-  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult<()> {
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
     log::info!(
       "Writing particles file: version {}, {} effects, {} groups",
       self.header.version,
@@ -110,7 +110,7 @@ impl ParticlesFile {
   }
 
   /// Export unpacked ALife spawn file into provided path.
-  pub fn export_to_path(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export_to_path(&self, path: &Path) -> DatabaseResult {
     fs::create_dir_all(path)?;
 
     self.header.export(path)?;

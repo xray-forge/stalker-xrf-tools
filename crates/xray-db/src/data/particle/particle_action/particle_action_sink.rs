@@ -42,7 +42,7 @@ impl ParticleActionReader for ParticleActionSink {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionSink {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<ParticlesByteOrder>(self.kill_inside)?;
 
     self.position.write::<ParticlesByteOrder>(writer)?;
@@ -50,7 +50,7 @@ impl ParticleActionWriter for ParticleActionSink {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("kill_inside", self.kill_inside.to_string())

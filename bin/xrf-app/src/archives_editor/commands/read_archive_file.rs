@@ -1,4 +1,5 @@
 use crate::archives_editor::state::ArchivesEditorState;
+use crate::types::TauriResult;
 use serde_json::{json, Value};
 use std::sync::MutexGuard;
 use tauri::State;
@@ -8,7 +9,7 @@ use xray_archive::ArchiveProject;
 pub async fn read_archive_file(
   path: &str,
   state: State<'_, ArchivesEditorState>,
-) -> Result<Value, String> {
+) -> TauriResult<Value> {
   let lock: MutexGuard<Option<ArchiveProject>> = state.project.lock().unwrap();
 
   if (*lock).is_none() {

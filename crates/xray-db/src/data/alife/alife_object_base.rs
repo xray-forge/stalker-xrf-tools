@@ -146,7 +146,7 @@ impl AlifeObjectBase {
   }
 
   /// Write alife object data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     let mut index_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -247,7 +247,7 @@ impl AlifeObjectBase {
   }
 
   /// Export alife object data into ini file.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("index", self.index.to_string())
@@ -299,7 +299,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

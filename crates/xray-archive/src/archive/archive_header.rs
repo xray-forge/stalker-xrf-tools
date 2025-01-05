@@ -1,4 +1,4 @@
-use crate::archive::file_descriptor::ArchiveFileDescriptor;
+use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use std::collections::HashMap;
 use std::path::PathBuf;
 

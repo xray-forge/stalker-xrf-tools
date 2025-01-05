@@ -90,13 +90,13 @@ impl SpawnFile {
   }
 
   /// Write spawn file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
     self.write_to::<T>(&mut create_export_file(path)?)
   }
 
   /// Write spawn file data to the writer.
-  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult<()> {
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
     let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
     self.header.write::<T>(&mut header_chunk_writer)?;
     header_chunk_writer.flush_chunk_into::<T>(writer, SpawnHeaderChunk::CHUNK_ID)?;
@@ -135,7 +135,7 @@ impl SpawnFile {
   }
 
   /// Export unpacked alife spawn file into provided path.
-  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
     fs::create_dir_all(path)?;
 
     self.header.export(path)?;

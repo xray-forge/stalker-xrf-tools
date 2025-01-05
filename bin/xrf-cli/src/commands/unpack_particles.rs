@@ -2,8 +2,7 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::particles_file::particles_file::ParticlesFile;
-use xray_db::types::{DatabaseResult, ParticlesByteOrder};
+use xray_db::{DatabaseResult, ParticlesByteOrder, ParticlesFile};
 
 pub struct UnpackParticlesCommand {}
 
@@ -40,8 +39,8 @@ impl UnpackParticlesCommand {
       )
   }
 
-  /// Unpack provided particles.xr file.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult<()> {
+  /// Unpack provided particles file.
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");

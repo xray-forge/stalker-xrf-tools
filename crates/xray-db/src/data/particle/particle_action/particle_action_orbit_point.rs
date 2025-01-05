@@ -48,7 +48,7 @@ impl ParticleActionReader for ParticleActionOrbitPoint {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionOrbitPoint {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.center)?;
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
     writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
@@ -57,7 +57,7 @@ impl ParticleActionWriter for ParticleActionOrbitPoint {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("center", self.center.to_string())

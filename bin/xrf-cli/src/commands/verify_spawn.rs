@@ -1,7 +1,6 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::spawn_file::spawn_file::SpawnFile;
-use xray_db::types::SpawnByteOrder;
+use xray_db::{DatabaseParseError, DatabaseResult, SpawnByteOrder, SpawnFile};
 
 pub struct VerifySpawnFileCommand {}
 
@@ -11,10 +10,10 @@ impl VerifySpawnFileCommand {
   /// Create command for verifying of spawn file.
   pub fn init() -> Command {
     Command::new(Self::NAME)
-      .about("Command to verify provided *.spawn file")
+      .about("Command to verify provided spawn file")
       .arg(
         Arg::new("path")
-          .help("Path to *.spawn file")
+          .help("Path to spawn file")
           .short('p')
           .long("path")
           .required(true)
@@ -23,7 +22,7 @@ impl VerifySpawnFileCommand {
   }
 
   /// Verify *.spawn file based on provided arguments.
-  pub fn execute(matches: &ArgMatches) {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -31,10 +30,18 @@ impl VerifySpawnFileCommand {
     log::info!("Verify spawn file {:?}", path);
 
     match SpawnFile::read_from_path::<SpawnByteOrder>(path) {
-      Ok(_) => log::info!("Provided spawn file is valid"),
+      Ok(_) => {
+        log::info!("Provided spawn file is valid");
+
+        Ok(())
+      }
       Err(error) => {
-        log::error!("Provided spawn file is invalid: {:?}", error);
-        panic!("{:?}", error);
+        log::error!("Provided spawn file is invalid: {}", error);
+
+        Err(DatabaseParseError::new_database_error(format!(
+          "Verification of spawn file failed: {}",
+          error
+        )))
       }
     }
   }

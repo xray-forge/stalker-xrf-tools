@@ -53,7 +53,7 @@ impl ParticleActionReader for ParticleActionTargetColor {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTargetColor {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.color)?;
     writer.write_f32::<ParticlesByteOrder>(self.alpha)?;
     writer.write_f32::<ParticlesByteOrder>(self.scale)?;
@@ -63,7 +63,7 @@ impl ParticleActionWriter for ParticleActionTargetColor {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("color", self.color.to_string())

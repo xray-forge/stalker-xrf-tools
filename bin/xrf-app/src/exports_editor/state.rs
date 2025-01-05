@@ -9,8 +9,8 @@ pub struct ExportsEditorState {
 }
 
 impl ExportsEditorState {
-  pub fn new() -> ExportsEditorState {
-    ExportsEditorState {
+  pub fn new() -> Self {
+    Self {
       conditions: Arc::new(Mutex::new(None)),
       dialogs: Arc::new(Mutex::new(None)),
       effects: Arc::new(Mutex::new(None)),

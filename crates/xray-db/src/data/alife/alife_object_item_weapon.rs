@@ -60,7 +60,7 @@ impl AlifeObjectReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectItemWeapon {
   /// Write item data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
     writer.write_u16::<SpawnByteOrder>(self.ammo_current)?;
@@ -74,7 +74,7 @@ impl AlifeObjectWriter for AlifeObjectItemWeapon {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     self.base.export(section, ini)?;
 
     ini
@@ -108,7 +108,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

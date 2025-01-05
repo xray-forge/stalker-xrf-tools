@@ -1,7 +1,6 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::spawn_file::spawn_file::SpawnFile;
-use xray_db::types::SpawnByteOrder;
+use xray_db::{DatabaseResult, SpawnByteOrder, SpawnFile};
 
 pub struct InfoSpawnCommand {}
 
@@ -23,20 +22,14 @@ impl InfoSpawnCommand {
   }
 
   /// Print information about spawn file.
-  pub fn execute(matches: &ArgMatches) {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
     log::info!("Verify spawn file {:?}", path);
 
-    let spawn_file: SpawnFile = match SpawnFile::read_from_path::<SpawnByteOrder>(path) {
-      Ok(file) => file,
-      Err(error) => {
-        log::error!("Provided spawn file is invalid: {:?}", error);
-        panic!("{:?}", error);
-      }
-    };
+    let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path)?;
 
     log::info!("Spawn file information:");
 
@@ -65,5 +58,7 @@ impl InfoSpawnCommand {
       "Level graph edges: {}",
       spawn_file.graphs.header.edges_count
     );
+
+    Ok(())
   }
 }

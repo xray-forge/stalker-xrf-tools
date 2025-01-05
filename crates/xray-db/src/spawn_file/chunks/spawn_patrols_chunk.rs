@@ -39,7 +39,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Write patrols data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -77,7 +77,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export(&self, path: &Path) -> DatabaseResult {
     let mut patrols_ini: Ltx = Ltx::new();
     let mut patrol_points_ini: Ltx = Ltx::new();
     let mut patrol_links_ini: Ltx = Ltx::new();
@@ -128,7 +128,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnPatrolsChunk = SpawnPatrolsChunk {

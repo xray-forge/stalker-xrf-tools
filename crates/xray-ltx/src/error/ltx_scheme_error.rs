@@ -13,13 +13,13 @@ pub struct LtxSchemeError {
 }
 
 impl LtxSchemeError {
-  pub fn new<S, F, M>(section: S, field: F, message: M) -> LtxSchemeError
+  pub fn new<S, F, M>(section: S, field: F, message: M) -> Self
   where
     S: Into<String>,
     F: Into<String>,
     M: Into<String>,
   {
-    LtxSchemeError {
+    Self {
       section: section.into(),
       field: field.into(),
       message: message.into(),
@@ -27,14 +27,14 @@ impl LtxSchemeError {
     }
   }
 
-  pub fn new_at<S, F, M, A>(section: S, field: F, message: M, at: A) -> LtxSchemeError
+  pub fn new_at<S, F, M, A>(section: S, field: F, message: M, at: A) -> Self
   where
     S: Into<String>,
     F: Into<String>,
     M: Into<String>,
     A: Into<String>,
   {
-    LtxSchemeError {
+    Self {
       section: section.into(),
       field: field.into(),
       message: message.into(),
@@ -48,7 +48,7 @@ impl LtxSchemeError {
     F: Into<String>,
     M: Into<String>,
   {
-    LtxError::Scheme(LtxSchemeError {
+    LtxError::Scheme(Self {
       section: section.into(),
       field: field.into(),
       message: message.into(),

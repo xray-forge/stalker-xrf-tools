@@ -32,9 +32,9 @@ impl LineSeparator {
   /// String representation
   pub fn as_str(self) -> &'static str {
     match self {
-      LineSeparator::SystemDefault => DEFAULT_LINE_SEPARATOR,
-      LineSeparator::CR => "\n",
-      LineSeparator::CRLF => "\r\n",
+      Self::SystemDefault => DEFAULT_LINE_SEPARATOR,
+      Self::CR => "\n",
+      Self::CRLF => "\r\n",
     }
   }
 }

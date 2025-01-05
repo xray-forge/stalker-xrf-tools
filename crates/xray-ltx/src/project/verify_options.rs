@@ -10,8 +10,8 @@ pub struct LtxVerifyOptions {
 }
 
 impl LtxVerifyOptions {
-  pub fn new() -> LtxVerifyOptions {
-    LtxVerifyOptions {
+  pub fn new() -> Self {
+    Self {
       is_silent: false,
       is_verbose: false,
       is_strict: false,

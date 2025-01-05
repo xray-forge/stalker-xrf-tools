@@ -1,2 +1,2 @@
-pub mod chunks;
-pub mod spawn_file;
+pub(crate) mod chunks;
+pub(crate) mod spawn_file;

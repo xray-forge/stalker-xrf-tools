@@ -65,7 +65,7 @@ impl AlifeObjectReader<AlifeZoneVisual> for AlifeZoneVisual {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeZoneVisual {
   /// Write visual zone data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
     self.visual.write(writer)?;
 
@@ -78,7 +78,7 @@ impl AlifeObjectWriter for AlifeZoneVisual {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     self.base.export(section, ini)?;
     self.visual.export(section, ini)?;
 
@@ -117,7 +117,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

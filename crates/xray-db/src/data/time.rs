@@ -20,11 +20,6 @@ pub struct Time {
   pub millis: u16,
 }
 
-#[derive(Debug)]
-pub enum TimeError {
-  ParsingError(String),
-}
-
 impl Time {
   /// Read optional time object from the chunk.
   pub fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Option<Self>> {
@@ -39,7 +34,7 @@ impl Time {
   pub fn write_optional<T: ByteOrder>(
     time: Option<&Self>,
     writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  ) -> DatabaseResult {
     if time.is_some() {
       writer.write_u8(1)?;
 
@@ -61,7 +56,7 @@ impl Time {
     let second: u8 = reader.read_u8()?;
     let millis: u16 = reader.read_u16::<T>()?;
 
-    Ok(Time {
+    Ok(Self {
       year,
       month,
       day,
@@ -73,7 +68,7 @@ impl Time {
   }
 
   /// Write time object into the chunk.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u8(self.year)?;
     writer.write_u8(self.month)?;
     writer.write_u8(self.day)?;
@@ -120,53 +115,39 @@ impl Display for Time {
 }
 
 impl FromStr for Time {
-  type Err = TimeError;
+  type Err = DatabaseParseError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = s.split(',').map(|it| it.trim()).collect();
 
     if parts.len() != 7 {
-      return Err(TimeError::ParsingError(String::from(
+      return Err(DatabaseParseError::new(
         "Failed to parse time object from string",
-      )));
+      ));
     }
 
-    Ok(Time {
+    Ok(Self {
       year: parts[0]
         .parse()
-        .or(Err(TimeError::ParsingError(String::from(
-          "Failed to parse year value",
-        ))))?,
+        .or(Err(DatabaseParseError::new("Failed to parse year value")))?,
       month: parts[1]
         .parse()
-        .or(Err(TimeError::ParsingError(String::from(
-          "Failed to parse month value",
-        ))))?,
+        .or(Err(DatabaseParseError::new("Failed to parse month value")))?,
       day: parts[2]
         .parse()
-        .or(Err(TimeError::ParsingError(String::from(
-          "Failed to parse day value",
-        ))))?,
+        .or(Err(DatabaseParseError::new("Failed to parse day value")))?,
       hour: parts[3]
         .parse()
-        .or(Err(TimeError::ParsingError(String::from(
-          "Failed to parse hour value",
-        ))))?,
+        .or(Err(DatabaseParseError::new("Failed to parse hour value")))?,
       minute: parts[4]
         .parse()
-        .or(Err(TimeError::ParsingError(String::from(
-          "Failed to parse minute value",
-        ))))?,
+        .or(Err(DatabaseParseError::new("Failed to parse minute value")))?,
       second: parts[5]
         .parse()
-        .or(Err(TimeError::ParsingError(String::from(
-          "Failed to parse second value",
-        ))))?,
+        .or(Err(DatabaseParseError::new("Failed to parse second value")))?,
       millis: parts[6]
         .parse()
-        .or(Err(TimeError::ParsingError(String::from(
-          "Failed to parse millis value",
-        ))))?,
+        .or(Err(DatabaseParseError::new("Failed to parse millis value")))?,
     })
   }
 }
@@ -189,7 +170,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -226,7 +207,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_some() -> DatabaseResult<()> {
+  fn test_read_write_optional_some() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
@@ -267,7 +248,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_none() -> DatabaseResult<()> {
+  fn test_read_write_optional_none() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
@@ -295,7 +276,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_to_str() -> DatabaseResult<()> {
+  fn test_import_export_to_str() -> DatabaseResult {
     let original: Time = Time {
       year: 20,
       month: 6,
@@ -321,7 +302,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> DatabaseResult<()> {
+  fn test_from_to_str() -> DatabaseResult {
     let original: Time = Time {
       year: 22,
       month: 6,
@@ -339,7 +320,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: Time = Time {
       year: 22,
       month: 6,

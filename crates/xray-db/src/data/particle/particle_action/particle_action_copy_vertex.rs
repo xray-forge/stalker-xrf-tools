@@ -38,13 +38,13 @@ impl ParticleActionReader for ParticleActionCopyVertex {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionCopyVertex {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<ParticlesByteOrder>(self.copy_position)?;
 
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("copy_position", self.copy_position.to_string());

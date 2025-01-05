@@ -9,11 +9,11 @@ pub struct LtxReadError {
 }
 
 impl LtxReadError {
-  pub fn new<T>(message: T) -> LtxReadError
+  pub fn new<T>(message: T) -> Self
   where
     T: Into<String>,
   {
-    LtxReadError {
+    Self {
       message: message.into(),
     }
   }
@@ -22,7 +22,7 @@ impl LtxReadError {
   where
     T: Into<String>,
   {
-    LtxError::Read(LtxReadError {
+    LtxError::Read(Self {
       message: message.into(),
     })
   }

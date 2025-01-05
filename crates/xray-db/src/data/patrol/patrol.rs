@@ -55,10 +55,7 @@ impl Patrol {
   }
 
   /// Write list of patrols into chunk writer.
-  pub fn write_list<T: ByteOrder>(
-    patrols: &[Self],
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(patrols: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
     for (index, patrol) in patrols.iter().enumerate() {
       let mut patrol_writer: ChunkWriter = ChunkWriter::new();
 
@@ -98,7 +95,7 @@ impl Patrol {
   }
 
   /// Write single patrol entity into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -175,7 +172,7 @@ impl Patrol {
     patrols_ini: &mut Ltx,
     patrol_points_ini: &mut Ltx,
     patrol_links_ini: &mut Ltx,
-  ) -> DatabaseResult<()> {
+  ) -> DatabaseResult {
     patrols_ini
       .with_section(section)
       .set("name", &self.name)
@@ -225,7 +222,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -277,7 +274,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -354,7 +351,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: Patrol = Patrol {
       name: String::from("patrol-name-exp"),
       points: vec![
@@ -418,7 +415,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: Patrol = Patrol {
       name: String::from("patrol-name-serde"),
       points: vec![

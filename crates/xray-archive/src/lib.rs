@@ -3,13 +3,13 @@ pub(crate) mod error;
 pub(crate) mod project;
 pub(crate) mod types;
 
-pub use crate::error::archive_error::ArchiveError;
-pub use crate::error::archive_read_error::ArchiveReadError;
+pub use crate::error::archive_error::*;
+pub use crate::error::archive_read_error::*;
 
-pub use crate::archive::descriptor::ArchiveDescriptor;
-pub use crate::archive::file_descriptor::{
-  ArchiveFileDescriptor, ArchiveFileReplicationDescriptor,
-};
+pub use crate::archive::archive_descriptor::*;
+pub use crate::archive::archive_file_descriptor::*;
 
-pub use crate::project::project::ArchiveProject;
-pub use crate::project::project_unpack_result::ArchiveUnpackResult;
+pub use crate::project::project::*;
+pub use crate::project::project_unpack_result::*;
+
+pub use crate::types::*;

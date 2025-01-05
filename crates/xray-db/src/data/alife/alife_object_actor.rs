@@ -53,7 +53,7 @@ impl AlifeObjectReader<AlifeObjectActor> for AlifeObjectActor {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectActor {
   /// Write object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
     self.trader.write(writer)?;
     self.skeleton.write(writer)?;
@@ -64,7 +64,7 @@ impl AlifeObjectWriter for AlifeObjectActor {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     self.base.export(section, ini)?;
     self.trader.export(section, ini)?;
     self.skeleton.export(section, ini)?;
@@ -97,7 +97,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

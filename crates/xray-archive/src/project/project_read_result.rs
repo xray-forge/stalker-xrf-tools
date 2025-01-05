@@ -9,8 +9,8 @@ pub struct ProjectReadResult {
 }
 
 impl ProjectReadResult {
-  pub fn new(name: &str, content: &str, size: u32) -> ProjectReadResult {
-    ProjectReadResult {
+  pub fn new(name: &str, content: &str, size: u32) -> Self {
+    Self {
       name: name.into(),
       content: content.into(),
       size,

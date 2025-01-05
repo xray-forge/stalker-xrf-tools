@@ -41,14 +41,14 @@ impl ParticleActionReader for ParticleActionKillOld {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionKillOld {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<ParticlesByteOrder>(self.age_limit)?;
     writer.write_u32::<ParticlesByteOrder>(self.kill_less_than)?;
 
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("age_limit", self.age_limit.to_string())

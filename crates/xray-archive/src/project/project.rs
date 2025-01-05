@@ -1,8 +1,7 @@
-use crate::archive::descriptor::ArchiveDescriptor;
-use crate::archive::file_descriptor::ArchiveFileReplicationDescriptor;
+use crate::archive::archive_descriptor::ArchiveDescriptor;
+use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
 use crate::archive::reader::ArchiveReader;
-use crate::error::archive_error::ArchiveError;
-use crate::ArchiveReadError;
+use crate::{ArchiveReadError, ArchiveResult};
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -18,7 +17,7 @@ pub struct ArchiveProject {
 }
 
 impl ArchiveProject {
-  pub fn new(path: &Path) -> Result<ArchiveProject, ArchiveError> {
+  pub fn new(path: &Path) -> ArchiveResult<Self> {
     let mut archives: Vec<ArchiveDescriptor> = Vec::new();
     let mut files: HashMap<String, ArchiveFileReplicationDescriptor> = HashMap::new();
 
@@ -68,7 +67,7 @@ impl ArchiveProject {
       }
     }
 
-    Ok(ArchiveProject { archives, files })
+    Ok(Self { archives, files })
   }
 }
 

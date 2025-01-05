@@ -84,7 +84,7 @@ impl ParticleGroup {
   }
 
   /// Write particle group data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -162,7 +162,7 @@ impl ParticleGroup {
   }
 
   /// Export particles group data into provided path.
-  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)

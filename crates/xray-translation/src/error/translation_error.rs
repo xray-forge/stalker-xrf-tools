@@ -1,11 +1,11 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
-use std::io;
+use std::io::Error as IoError;
 
 /// Error while working with translation file
 #[derive(Debug)]
 pub enum TranslationError {
-  Io(io::Error),
+  Io(IoError),
   UnknownLanguage(String),
   InvalidSourceJson(String),
 }
@@ -13,9 +13,9 @@ pub enum TranslationError {
 impl Display for TranslationError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {
     match *self {
-      TranslationError::Io(ref error) => error.fmt(formatter),
-      TranslationError::UnknownLanguage(ref error) => error.fmt(formatter),
-      TranslationError::InvalidSourceJson(ref error) => error.fmt(formatter),
+      Self::Io(ref error) => error.fmt(formatter),
+      Self::UnknownLanguage(ref error) => error.fmt(formatter),
+      Self::InvalidSourceJson(ref error) => error.fmt(formatter),
     }
   }
 }
@@ -23,15 +23,15 @@ impl Display for TranslationError {
 impl Error for TranslationError {
   fn source(&self) -> Option<&(dyn Error + 'static)> {
     match *self {
-      TranslationError::Io(ref error) => error.source(),
-      TranslationError::UnknownLanguage(ref _error) => None,
-      TranslationError::InvalidSourceJson(ref _error) => None,
+      Self::Io(ref error) => error.source(),
+      Self::UnknownLanguage(ref _error) => None,
+      Self::InvalidSourceJson(ref _error) => None,
     }
   }
 }
 
-impl From<io::Error> for TranslationError {
-  fn from(err: io::Error) -> Self {
-    TranslationError::Io(err)
+impl From<IoError> for TranslationError {
+  fn from(error: IoError) -> Self {
+    Self::Io(error)
   }
 }

@@ -1,4 +1,5 @@
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
+use crate::types::TauriResult;
 use serde_json::{json, Value};
 use std::sync::MutexGuard;
 use tauri::State;
@@ -7,7 +8,7 @@ use xray_texture::InventorySpriteDescriptor;
 #[tauri::command]
 pub async fn get_equipment_sprite(
   state: State<'_, IconsEditorState>,
-) -> Result<Option<Value>, String> {
+) -> TauriResult<Option<Value>> {
   let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
   let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
   let name_lock: MutexGuard<Option<String>> = state.equipment_sprite_name.lock().unwrap();

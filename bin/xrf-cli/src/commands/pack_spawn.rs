@@ -2,8 +2,7 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::spawn_file::spawn_file::SpawnFile;
-use xray_db::types::{DatabaseResult, SpawnByteOrder};
+use xray_db::{DatabaseResult, SpawnByteOrder, SpawnFile};
 
 pub struct PackSpawnFileCommand {}
 
@@ -41,7 +40,7 @@ impl PackSpawnFileCommand {
   }
 
   /// Pack *.spawn file based on provided arguments.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult<()> {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");

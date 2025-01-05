@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::ErrorKind::AlreadyExists;
 
 use crate::types::{TranslationJson, TranslationVariant};
-use crate::{ProjectBuildOptions, TranslationError, TranslationLanguage};
+use crate::{ProjectBuildOptions, TranslationError, TranslationLanguage, TranslationResult};
 use serde_json::{Map, Value};
 use std::path::{Path, PathBuf};
 
@@ -15,7 +15,7 @@ impl TranslationProject {
     destination: &Path,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
-  ) -> Result<File, TranslationError> {
+  ) -> TranslationResult<File> {
     let target: PathBuf = destination
       .join(language.as_str())
       .join(path.file_name().unwrap())

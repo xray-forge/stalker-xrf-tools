@@ -54,7 +54,7 @@ impl ParticleActionReader for ParticleActionExplosion {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionExplosion {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.center)?;
     writer.write_f32::<ParticlesByteOrder>(self.velocity)?;
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
@@ -65,7 +65,7 @@ impl ParticleActionWriter for ParticleActionExplosion {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("center", self.center.to_string())
@@ -101,7 +101,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -144,7 +144,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
     let mut ltx: Ltx = Ltx::new();
 
@@ -175,7 +175,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ParticleActionExplosion = ParticleActionExplosion {
       center: Vector3d {
         x: 5.51,

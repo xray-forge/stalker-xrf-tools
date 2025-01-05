@@ -1,4 +1,6 @@
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use std::sync::MutexGuard;
@@ -7,7 +9,7 @@ use xray_ltx::Ltx;
 use xray_texture::{open_dds_as_png, InventorySpriteDescriptor};
 
 #[tauri::command]
-pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Result<Value, String> {
+pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult<Value> {
   let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
   let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
   let dds_name_lock: MutexGuard<Option<String>> =
@@ -27,7 +29,7 @@ pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Resu
     .map_err(|error| format!("Failed to open provided image file: {:?}", error))?;
 
   let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
-    &Ltx::load_from_file_full(ltx_path).map_err(|error| error.to_string())?,
+    &Ltx::load_from_file_full(ltx_path).map_err(error_to_string)?,
   );
 
   let response = IconsEditorEquipmentResponse {

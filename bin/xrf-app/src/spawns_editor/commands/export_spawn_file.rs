@@ -1,15 +1,13 @@
 use crate::spawns_editor::state::SpawnsEditorState;
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 use std::path::Path;
 use std::sync::MutexGuard;
 use tauri::State;
-use xray_db::spawn_file::spawn_file::SpawnFile;
-use xray_db::types::SpawnByteOrder;
+use xray_db::{SpawnByteOrder, SpawnFile};
 
 #[tauri::command]
-pub async fn export_spawn_file(
-  path: &str,
-  state: State<'_, SpawnsEditorState>,
-) -> Result<(), String> {
+pub async fn export_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> TauriResult {
   log::info!("Saving spawn file");
 
   let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
@@ -17,10 +15,9 @@ pub async fn export_spawn_file(
   if lock.is_some() {
     let file: &SpawnFile = lock.as_ref().unwrap();
 
-    match file.export_to_path::<SpawnByteOrder>(Path::new(path)) {
-      Ok(_) => Ok(()),
-      Err(error) => Err(error.to_string()),
-    }
+    file
+      .export_to_path::<SpawnByteOrder>(Path::new(path))
+      .map_err(error_to_string)
   } else {
     Err(String::from("No spawn file open for saving"))
   }

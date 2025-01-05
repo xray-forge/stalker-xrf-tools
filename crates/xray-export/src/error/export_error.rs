@@ -12,8 +12,8 @@ pub enum ExportError {
 impl Display for ExportError {
   fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
     match *self {
-      ExportError::Io(ref error) => error.fmt(formatter),
-      ExportError::Parse(ref error) => error.fmt(formatter),
+      Self::Io(ref error) => error.fmt(formatter),
+      Self::Parse(ref error) => error.fmt(formatter),
     }
   }
 }
@@ -21,14 +21,14 @@ impl Display for ExportError {
 impl Error for ExportError {
   fn source(&self) -> Option<&(dyn Error + 'static)> {
     match *self {
-      ExportError::Io(ref error) => error.source(),
-      ExportError::Parse(ref error) => error.source(),
+      Self::Io(ref error) => error.source(),
+      Self::Parse(ref error) => error.source(),
     }
   }
 }
 
 impl From<io::Error> for ExportError {
   fn from(err: io::Error) -> Self {
-    ExportError::Io(err)
+    Self::Io(err)
   }
 }

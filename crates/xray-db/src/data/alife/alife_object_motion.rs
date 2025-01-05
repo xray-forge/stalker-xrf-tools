@@ -41,14 +41,14 @@ impl AlifeObjectReader<AlifeObjectMotion> for AlifeObjectMotion {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectMotion {
   /// Write motion object data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_null_terminated_win_string(&self.motion_name)?;
 
     Ok(())
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("motion_name", &self.motion_name);
@@ -72,7 +72,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

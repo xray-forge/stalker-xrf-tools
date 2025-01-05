@@ -43,7 +43,7 @@ impl ParticlesGroupsChunk {
   }
 
   /// Write particle groups data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     for (index, group) in self.groups.iter().enumerate() {
       let mut group_writer: ChunkWriter = ChunkWriter::new();
 
@@ -78,7 +78,7 @@ impl ParticlesGroupsChunk {
   }
 
   /// Export particles groups data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export(&self, path: &Path) -> DatabaseResult {
     let mut particles_effects_ini: Ltx = Ltx::new();
 
     for group in &self.groups {

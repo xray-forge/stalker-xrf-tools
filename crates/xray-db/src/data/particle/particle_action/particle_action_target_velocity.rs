@@ -42,14 +42,14 @@ impl ParticleActionReader for ParticleActionTargetVelocity {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTargetVelocity {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.velocity)?;
     writer.write_f32::<ParticlesByteOrder>(self.scale)?;
 
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("velocity", self.velocity.to_string())

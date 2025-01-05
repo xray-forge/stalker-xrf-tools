@@ -43,7 +43,7 @@ impl ParticlesEffectsChunk {
   }
 
   /// Write particle effects data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     for (index, effect) in self.effects.iter().enumerate() {
       let mut effect_writer: ChunkWriter = ChunkWriter::new();
 
@@ -86,7 +86,7 @@ impl ParticlesEffectsChunk {
   }
 
   /// Export particles effects data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export(&self, path: &Path) -> DatabaseResult {
     let mut particles_effects_ini: Ltx = Ltx::new();
 
     for effect in &self.effects {

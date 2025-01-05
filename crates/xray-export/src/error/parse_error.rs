@@ -8,11 +8,11 @@ pub struct ExportParseError {
 }
 
 impl ExportParseError {
-  pub fn new<T>(message: T) -> ExportParseError
+  pub fn new<T>(message: T) -> Self
   where
     T: Into<String>,
   {
-    ExportParseError {
+    Self {
       message: message.into(),
     }
   }
@@ -21,7 +21,7 @@ impl ExportParseError {
   where
     T: Into<String>,
   {
-    ExportError::Parse(ExportParseError {
+    ExportError::Parse(Self {
       message: message.into(),
     })
   }

@@ -6,7 +6,7 @@ pub struct LtxFormatOptions {
 }
 
 impl LtxFormatOptions {
-  pub fn new() -> LtxFormatOptions {
-    LtxFormatOptions { is_silent: false }
+  pub fn new() -> Self {
+    Self { is_silent: false }
   }
 }

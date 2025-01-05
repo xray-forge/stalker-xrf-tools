@@ -48,7 +48,7 @@ impl AlifeObjectReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestricto
 
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
     writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
@@ -58,7 +58,7 @@ impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     self.base.export(section, ini)?;
 
     ini
@@ -93,7 +93,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -146,7 +146,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();

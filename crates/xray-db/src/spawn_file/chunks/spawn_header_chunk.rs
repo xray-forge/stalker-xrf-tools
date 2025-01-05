@@ -42,7 +42,7 @@ impl SpawnHeaderChunk {
 
   /// Write header data into chunk writer.
   /// Writes header data in binary format.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid.as_u128())?;
     writer.write_u128::<T>(self.graph_guid.as_u128())?;
@@ -73,7 +73,7 @@ impl SpawnHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  pub fn export(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export(&self, path: &Path) -> DatabaseResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -112,7 +112,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_empty() -> DatabaseResult<()> {
+  fn test_read_empty() -> DatabaseResult {
     let mut reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
       &get_relative_test_sample_file_path(file!(), "read_empty.chunk"),
     )?)?
@@ -127,7 +127,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnHeaderChunk = SpawnHeaderChunk {
@@ -168,7 +168,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 10,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
@@ -188,7 +188,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 12,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),

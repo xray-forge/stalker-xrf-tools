@@ -1,7 +1,7 @@
-pub mod constants;
-pub mod interface;
-pub mod io;
-pub mod iterator;
-pub mod reader;
-pub mod utils;
-pub mod writer;
+pub(crate) mod constants;
+pub(crate) mod interface;
+pub(crate) mod io;
+pub(crate) mod iterator;
+pub(crate) mod reader;
+pub(crate) mod utils;
+pub(crate) mod writer;

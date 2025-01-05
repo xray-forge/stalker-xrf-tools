@@ -2,8 +2,7 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::spawn_file::spawn_file::SpawnFile;
-use xray_db::types::{DatabaseResult, SpawnByteOrder};
+use xray_db::{DatabaseResult, SpawnByteOrder, SpawnFile};
 
 pub struct UnpackSpawnFileCommand {}
 
@@ -41,7 +40,7 @@ impl UnpackSpawnFileCommand {
   }
 
   /// Unpack provided *.spawn file.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult<()> {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -72,7 +71,7 @@ impl UnpackSpawnFileCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path).unwrap();
+    let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
     spawn_file.export_to_path::<SpawnByteOrder>(destination)?;

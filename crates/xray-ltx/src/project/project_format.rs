@@ -1,5 +1,5 @@
 use crate::project::project_format_result::LtxProjectFormatResult;
-use crate::{Ltx, LtxError, LtxFormatOptions, LtxProject};
+use crate::{Ltx, LtxFormatOptions, LtxProject, LtxResult};
 use std::time::Instant;
 
 impl LtxProject {
@@ -7,7 +7,7 @@ impl LtxProject {
   pub fn format_all_files_opt(
     &self,
     options: LtxFormatOptions,
-  ) -> Result<LtxProjectFormatResult, LtxError> {
+  ) -> LtxResult<LtxProjectFormatResult> {
     let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
     let started_at: Instant = Instant::now();
 
@@ -48,7 +48,7 @@ impl LtxProject {
   pub fn check_format_all_files_opt(
     &self,
     options: LtxFormatOptions,
-  ) -> Result<LtxProjectFormatResult, LtxError> {
+  ) -> LtxResult<LtxProjectFormatResult> {
     let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
     let started_at: Instant = Instant::now();
 
@@ -94,12 +94,12 @@ impl LtxProject {
   }
 
   /// Format all LTX entries in current project.
-  pub fn format_all_files(&self) -> Result<LtxProjectFormatResult, LtxError> {
+  pub fn format_all_files(&self) -> LtxResult<LtxProjectFormatResult> {
     self.format_all_files_opt(LtxFormatOptions::default())
   }
 
   /// Format all LTX entries in current project.
-  pub fn check_format_all_files(&self) -> Result<LtxProjectFormatResult, LtxError> {
+  pub fn check_format_all_files(&self) -> LtxResult<LtxProjectFormatResult> {
     self.check_format_all_files_opt(LtxFormatOptions::default())
   }
 }

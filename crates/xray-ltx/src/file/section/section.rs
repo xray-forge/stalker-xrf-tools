@@ -11,7 +11,7 @@ pub struct Section {
 
 impl Section {
   /// Create an instance.
-  pub fn new() -> Section {
+  pub fn new() -> Self {
     Default::default()
   }
 
@@ -79,7 +79,7 @@ impl Section {
   }
 
   /// Merge another section into current one.
-  pub fn merge(&mut self, section: Section) {
+  pub fn merge(&mut self, section: Self) {
     self.data.extend(section.data);
   }
 

@@ -5,7 +5,7 @@ use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::project::project_options::LtxProjectOptions;
 use crate::scheme::parser::LtxSchemeParser;
-use crate::{Ltx, LtxConvertError, LtxError};
+use crate::{Ltx, LtxConvertError, LtxError, LtxResult};
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
@@ -30,7 +30,7 @@ pub struct LtxProject {
 
 impl LtxProject {
   /// Initialize project on provided root.
-  pub fn open_at_path_opt(root: &Path, options: LtxProjectOptions) -> Result<LtxProject, LtxError> {
+  pub fn open_at_path_opt(root: &Path, options: LtxProjectOptions) -> LtxResult<Self> {
     let mut ltx_files: Vec<DirEntry> = Vec::new();
     let mut ltx_scheme_files: Vec<DirEntry> = Vec::new();
     let mut included: Vec<PathBuf> = Vec::new();
@@ -100,7 +100,7 @@ impl LtxProject {
       Default::default()
     };
 
-    Ok(LtxProject {
+    Ok(Self {
       root: PathBuf::from(root),
       ltx_files,
       ltx_file_entries,
@@ -115,7 +115,7 @@ impl LtxProject {
   }
 
   /// Initialize project on provided root with default options.
-  pub fn open_at_path(root: &Path) -> Result<LtxProject, LtxError> {
+  pub fn open_at_path(root: &Path) -> LtxResult<Self> {
     Self::open_at_path_opt(root, Default::default())
   }
 

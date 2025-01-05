@@ -209,7 +209,7 @@ mod tests {
   use xray_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
 
   #[test]
-  fn test_read_empty_file() -> DatabaseResult<()> {
+  fn test_read_empty_file() -> DatabaseResult {
     let file: FileSlice = open_test_resource_as_slice("empty")?;
 
     assert_eq!(file.start_pos(), 0);
@@ -231,7 +231,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_chunk() -> DatabaseResult<()> {
+  fn test_read_empty_chunk() -> DatabaseResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
@@ -246,7 +246,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_children() -> DatabaseResult<()> {
+  fn test_read_empty_children() -> DatabaseResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
@@ -269,7 +269,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_unordered_children() -> DatabaseResult<()> {
+  fn test_read_empty_unordered_children() -> DatabaseResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
@@ -290,7 +290,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_dummy_children() -> DatabaseResult<()> {
+  fn test_read_dummy_children() -> DatabaseResult {
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();

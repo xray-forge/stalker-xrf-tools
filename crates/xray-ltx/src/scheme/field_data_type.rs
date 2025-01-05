@@ -1,5 +1,5 @@
 use crate::file::configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
-use crate::{LtxError, LtxReadError, LtxSchemeError};
+use crate::{LtxReadError, LtxResult, LtxSchemeError};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {
@@ -26,11 +26,7 @@ pub enum LtxFieldDataType {
 
 impl LtxFieldDataType {
   /// Parse data type enum variant from provided string option.
-  pub fn from_field_data(
-    field_name: &str,
-    section_name: &str,
-    data: &str,
-  ) -> Result<LtxFieldDataType, LtxError> {
+  pub fn from_field_data(field_name: &str, section_name: &str, data: &str) -> LtxResult<Self> {
     let mut data: &str = data;
 
     // Respect optionals.
@@ -44,29 +40,29 @@ impl LtxFieldDataType {
     }
 
     Ok(match data {
-      "bool" => LtxFieldDataType::TypeBool,
-      "condlist" => LtxFieldDataType::TypeCondlist,
-      "f32" => LtxFieldDataType::TypeF32,
-      "i16" => LtxFieldDataType::TypeI16,
-      "i32" => LtxFieldDataType::TypeI32,
-      "i8" => LtxFieldDataType::TypeI8,
-      "rgb" => LtxFieldDataType::TypeRgb,
-      "rgba" => LtxFieldDataType::TypeRgba,
-      "section" => LtxFieldDataType::TypeSection,
-      "string" => LtxFieldDataType::TypeString,
-      "u16" => LtxFieldDataType::TypeU16,
-      "u32" => LtxFieldDataType::TypeU32,
-      "u8" => LtxFieldDataType::TypeU8,
-      "vector" => LtxFieldDataType::TypeVector,
+      "bool" => Self::TypeBool,
+      "condlist" => Self::TypeCondlist,
+      "f32" => Self::TypeF32,
+      "i16" => Self::TypeI16,
+      "i32" => Self::TypeI32,
+      "i8" => Self::TypeI8,
+      "rgb" => Self::TypeRgb,
+      "rgba" => Self::TypeRgba,
+      "section" => Self::TypeSection,
+      "string" => Self::TypeString,
+      "u16" => Self::TypeU16,
+      "u32" => Self::TypeU32,
+      "u8" => Self::TypeU8,
+      "vector" => Self::TypeVector,
       field_type => {
         if field_type.starts_with("enum") {
-          LtxFieldDataType::parse_enum(field_name, section_name, data)?
+          Self::parse_enum(field_name, section_name, data)?
         } else if field_type.starts_with("tuple") {
-          LtxFieldDataType::parse_tuple(field_name, section_name, data)?
+          Self::parse_tuple(field_name, section_name, data)?
         } else if field_type.starts_with("const") {
-          LtxFieldDataType::parse_const(field_name, section_name, data)?
+          Self::parse_const(field_name, section_name, data)?
         } else {
-          LtxFieldDataType::TypeUnknown
+          Self::TypeUnknown
         }
       }
     })
@@ -84,11 +80,7 @@ impl LtxFieldDataType {
 }
 
 impl LtxFieldDataType {
-  fn parse_enum(
-    field_name: &str,
-    section_name: &str,
-    value: &str,
-  ) -> Result<LtxFieldDataType, LtxError> {
+  fn parse_enum(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
     let mut allowed_values: Vec<String> = Vec::new();
 
     match value.split_once(':') {
@@ -119,15 +111,11 @@ impl LtxFieldDataType {
         "Failed to parse enum type, expected comma separated list of possible values after 'enum:'",
       ))
     } else {
-      Ok(LtxFieldDataType::TypeEnum(allowed_values))
+      Ok(Self::TypeEnum(allowed_values))
     }
   }
 
-  fn parse_const(
-    field_name: &str,
-    section_name: &str,
-    value: &str,
-  ) -> Result<LtxFieldDataType, LtxError> {
+  fn parse_const(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
     match value.split_once(':') {
       None => Err(LtxReadError::new_ltx_error(format!(
         "Failed to read scheme const type for field '{section_name}', expected ':' prepended value"
@@ -142,17 +130,13 @@ impl LtxFieldDataType {
             "Failed to parse const type, expected actual data after 'const:'",
           ))
         } else {
-          Ok(LtxFieldDataType::TypeConst(const_value.into()))
+          Ok(Self::TypeConst(const_value.into()))
         }
       }
     }
   }
 
-  fn parse_tuple(
-    field_name: &str,
-    section_name: &str,
-    value: &str,
-  ) -> Result<LtxFieldDataType, LtxError> {
+  fn parse_tuple(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
     let mut types: Vec<LtxFieldDataType> = Vec::new();
 
     match value.split_once(':') {
@@ -174,7 +158,7 @@ impl LtxFieldDataType {
           let schema: LtxFieldDataType = tuple_entry?;
 
           match schema {
-            LtxFieldDataType::TypeTuple(_) => {
+            Self::TypeTuple(_) => {
               return Err(LtxReadError::new_ltx_error(format!(
                 "Failed to read scheme for field '{section_name}', tuple cannot contain nested tuples"
               )))
@@ -192,7 +176,7 @@ impl LtxFieldDataType {
         "Failed to parse tuple type, expected comma separated list of possible values after 'tuple:'",
       ))
     } else {
-      Ok(LtxFieldDataType::TypeTuple(types))
+      Ok(Self::TypeTuple(types))
     }
   }
 
@@ -201,8 +185,8 @@ impl LtxFieldDataType {
     field_name: &str,
     section_name: &str,
     data: Option<&str>,
-  ) -> Result<LtxFieldDataType, LtxError> {
-    data.map_or(Ok(LtxFieldDataType::TypeAny), |data| {
+  ) -> LtxResult<LtxFieldDataType> {
+    data.map_or(Ok(Self::TypeAny), |data| {
       Self::from_field_data(field_name, section_name, data)
     })
   }

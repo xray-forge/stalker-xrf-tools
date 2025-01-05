@@ -12,8 +12,8 @@ pub struct IconsEditorState {
 }
 
 impl IconsEditorState {
-  pub fn new() -> IconsEditorState {
-    IconsEditorState {
+  pub fn new() -> Self {
+    Self {
       system_ltx_path: Arc::new(Mutex::new(None)),
       equipment_sprite_path: Arc::new(Mutex::new(None)),
       equipment_sprite_name: Arc::new(Mutex::new(None)),

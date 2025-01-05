@@ -6,8 +6,8 @@ pub struct LtxProjectOptions {
 }
 
 impl LtxProjectOptions {
-  pub fn new() -> LtxProjectOptions {
-    LtxProjectOptions {
+  pub fn new() -> Self {
+    Self {
       is_with_schemes_check: false,
     }
   }

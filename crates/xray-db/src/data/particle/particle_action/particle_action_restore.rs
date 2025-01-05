@@ -38,13 +38,13 @@ impl ParticleActionReader for ParticleActionRestore {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionRestore {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<ParticlesByteOrder>(self.time_left)?;
 
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("time_left", self.time_left.to_string());

@@ -27,7 +27,7 @@ impl GraphLevelPoint {
   }
 
   /// Write level point data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
@@ -82,7 +82,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -121,7 +121,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(66.5, 55.6, 88.7),
       distance: 4235.50,
@@ -144,7 +144,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: GraphLevelPoint = GraphLevelPoint {
       position: Vector3d::new(11.5, 11.6, 2.7),
       distance: 321.50,

@@ -44,7 +44,7 @@ impl ParticleActionReader for ParticleActionGravitate {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionGravitate {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
     writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
     writer.write_f32::<ParticlesByteOrder>(self.max_radius)?;
@@ -52,7 +52,7 @@ impl ParticleActionWriter for ParticleActionGravitate {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("magnitude", self.magnitude.to_string())
@@ -84,7 +84,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -120,7 +120,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
     let mut ltx: Ltx = Ltx::new();
 
@@ -144,7 +144,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ParticleActionGravitate = ParticleActionGravitate {
       magnitude: 2100.453,
       epsilon: 0.000001,

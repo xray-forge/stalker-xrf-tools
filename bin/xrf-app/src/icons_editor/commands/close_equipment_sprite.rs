@@ -1,8 +1,9 @@
 use crate::icons_editor::state::IconsEditorState;
+use crate::types::TauriResult;
 use tauri::State;
 
 #[tauri::command]
-pub async fn close_equipment_sprite(state: State<'_, IconsEditorState>) -> Result<(), String> {
+pub async fn close_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult {
   log::info!("Closing equipment file:");
 
   *state.system_ltx_path.lock().unwrap() = None;

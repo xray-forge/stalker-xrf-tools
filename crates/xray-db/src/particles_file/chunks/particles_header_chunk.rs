@@ -41,7 +41,7 @@ impl ParticlesHeaderChunk {
   }
 
   /// Write particle header into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u16::<T>(self.version)?;
 
     log::info!("Written header chunk, {} bytes", writer.bytes_written());
@@ -76,7 +76,7 @@ impl ParticlesHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  pub fn export(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export(&self, path: &Path) -> DatabaseResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -111,7 +111,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_incorrect() -> DatabaseResult<()> {
+  fn test_read_write_incorrect() -> DatabaseResult {
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
 
@@ -149,7 +149,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
@@ -184,7 +184,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let export_folder: &Path =
@@ -200,7 +200,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let mut file: File = overwrite_test_relative_resource_as_file(

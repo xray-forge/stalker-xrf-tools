@@ -12,8 +12,8 @@ impl<'a> SectionEntry<'a> {
   /// and returns a mutable reference to the value in the entry.
   pub fn or_insert(self, properties: Section) -> &'a mut Section {
     match self {
-      SectionEntry::Occupied(entry) => entry.into_mut(),
-      SectionEntry::Vacant(entry) => entry.insert(properties),
+      Self::Occupied(entry) => entry.into_mut(),
+      Self::Vacant(entry) => entry.insert(properties),
     }
   }
 
@@ -21,17 +21,17 @@ impl<'a> SectionEntry<'a> {
   /// and returns a mutable reference to the value in the entry.
   pub fn or_insert_with<F: FnOnce() -> Section>(self, default: F) -> &'a mut Section {
     match self {
-      SectionEntry::Occupied(entry) => entry.into_mut(),
-      SectionEntry::Vacant(entry) => entry.insert(default()),
+      Self::Occupied(entry) => entry.into_mut(),
+      Self::Vacant(entry) => entry.insert(default()),
     }
   }
 }
 
 impl<'a> From<Entry<'a, String, Section>> for SectionEntry<'a> {
-  fn from(entry: Entry<'a, String, Section>) -> SectionEntry<'a> {
+  fn from(entry: Entry<'a, String, Section>) -> Self {
     match entry {
-      Entry::Occupied(inner) => SectionEntry::Occupied(SectionOccupiedEntry { inner }),
-      Entry::Vacant(inner) => SectionEntry::Vacant(SectionVacantEntry { inner }),
+      Entry::Occupied(inner) => Self::Occupied(SectionOccupiedEntry { inner }),
+      Entry::Vacant(inner) => Self::Vacant(SectionVacantEntry { inner }),
     }
   }
 }

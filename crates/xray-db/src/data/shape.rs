@@ -55,7 +55,7 @@ impl Shape {
   }
 
   /// Write list of shapes data into the chunk reader.
-  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u8(shapes.len() as u8)?;
 
     for shape in shapes {
@@ -66,7 +66,7 @@ impl Shape {
   }
 
   /// Write shape data into the chunk reader.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     match self {
       Self::Sphere(data) => {
         writer.write_u8(0)?;
@@ -174,7 +174,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult<()> {
+  fn test_read_write_list() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -234,7 +234,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_sphere() -> DatabaseResult<()> {
+  fn test_read_write_sphere() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_sphere.chunk");
 
@@ -270,7 +270,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_box() -> DatabaseResult<()> {
+  fn test_read_write_box() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_box.chunk");
 
@@ -320,7 +320,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "test_import_export.ini");
     let mut ltx: Ltx = Ltx::new();
 
@@ -369,7 +369,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_sphere() -> DatabaseResult<()> {
+  fn test_serialize_deserialize_sphere() -> DatabaseResult {
     let original: Shape = Shape::Sphere((
       Vector3d {
         x: 243.5,
@@ -398,7 +398,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_box() -> DatabaseResult<()> {
+  fn test_serialize_deserialize_box() -> DatabaseResult {
     let original: Shape = Shape::Box((
       Vector3d {
         x: 175.5,

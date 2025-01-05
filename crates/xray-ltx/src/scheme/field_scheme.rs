@@ -15,12 +15,12 @@ pub struct LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
-  pub fn new<S, F>(section: S, name: F) -> LtxFieldScheme
+  pub fn new<S, F>(section: S, name: F) -> Self
   where
     S: Into<String>,
     F: Into<String>,
   {
-    LtxFieldScheme {
+    Self {
       data_type: LtxFieldDataType::TypeF32,
       is_array: false,
       is_optional: true,
@@ -29,12 +29,12 @@ impl LtxFieldScheme {
     }
   }
 
-  pub fn new_with_type<S, F>(section: S, name: F, data_type: LtxFieldDataType) -> LtxFieldScheme
+  pub fn new_with_type<S, F>(section: S, name: F, data_type: LtxFieldDataType) -> Self
   where
     S: Into<String>,
     F: Into<String>,
   {
-    LtxFieldScheme {
+    Self {
       data_type,
       is_array: false,
       is_optional: true,

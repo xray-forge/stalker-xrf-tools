@@ -1,1 +1,1 @@
-pub mod artefact_spawn_point;
+pub(crate) mod artefact_spawn_point;

@@ -41,7 +41,7 @@ impl GraphVertex {
   }
 
   /// Write graph vertex data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<T>(&self.level_point)?;
     writer.write_f32_3d_vector::<T>(&self.game_point)?;
     writer.write_u8(self.level_id)?;
@@ -122,7 +122,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -167,7 +167,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: GraphVertex = GraphVertex {
       level_point: Vector3d::new(32.5, 523.6, 342.3),
       game_point: Vector3d::new(0.23, -4.0, 123.0),
@@ -197,7 +197,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: GraphVertex = GraphVertex {
       level_point: Vector3d::new(25.5, 15.6, 43.3),
       game_point: Vector3d::new(0.44, -4.0, 1000.0),

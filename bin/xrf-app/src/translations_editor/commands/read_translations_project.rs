@@ -1,17 +1,20 @@
 use crate::translations_editor::state::TranslationsEditorState;
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use tauri::State;
-use xray_translation::TranslationProject;
+use xray_translation::{TranslationProject, TranslationProjectJson};
 
 #[tauri::command]
 pub async fn read_translations_project(
   path: &str,
   _: State<'_, TranslationsEditorState>,
-) -> Result<Value, String> {
+) -> TauriResult<Value> {
   log::info!("Reading translations project: {:?}", path);
 
-  TranslationProject::read_project(&PathBuf::from(path))
-    .map(|value| json!(value))
-    .map_err(|error| error.to_string())
+  let value: TranslationProjectJson =
+    TranslationProject::read_project(&PathBuf::from(path)).map_err(error_to_string)?;
+
+  Ok(json!(value))
 }

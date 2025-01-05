@@ -41,13 +41,13 @@ impl ParticleActionReader for ParticleActionRandomAcceleration {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionRandomAcceleration {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.gen_acc.write::<ParticlesByteOrder>(writer)?;
 
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("gen_acc", self.gen_acc.to_string());

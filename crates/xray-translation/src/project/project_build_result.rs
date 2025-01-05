@@ -7,7 +7,7 @@ pub struct ProjectBuildResult {
 }
 
 impl ProjectBuildResult {
-  pub fn new() -> ProjectBuildResult {
-    ProjectBuildResult { duration: 0 }
+  pub fn new() -> Self {
+    Self { duration: 0 }
   }
 }

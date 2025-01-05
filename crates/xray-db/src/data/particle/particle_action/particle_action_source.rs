@@ -70,7 +70,7 @@ impl ParticleActionReader for ParticleActionSource {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionSource {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.position.write::<ParticlesByteOrder>(writer)?;
     self.velocity.write::<ParticlesByteOrder>(writer)?;
     self.rot.write::<ParticlesByteOrder>(writer)?;
@@ -87,7 +87,7 @@ impl ParticleActionWriter for ParticleActionSource {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("position", self.position.to_string())

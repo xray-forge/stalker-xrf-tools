@@ -26,7 +26,7 @@ impl ArtefactSpawnPoint {
   }
 
   /// Write artefact spawn point data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<T>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
@@ -74,7 +74,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,
@@ -112,7 +112,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult<()> {
+  fn test_import_export() -> DatabaseResult {
     let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(11.5, 12.3, -10.5),
       level_vertex_id: 1001,
@@ -139,7 +139,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(21.5, 22.3, -20.5),
       level_vertex_id: 1001,

@@ -51,7 +51,7 @@ impl ParticleActionReader for ParticleActionOrbitLine {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionOrbitLine {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.position)?;
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.axis)?;
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
@@ -61,7 +61,7 @@ impl ParticleActionWriter for ParticleActionOrbitLine {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("position", self.position.to_string())

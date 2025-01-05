@@ -16,8 +16,8 @@ pub struct LtxProjectVerifyResult {
 }
 
 impl LtxProjectVerifyResult {
-  pub fn new() -> LtxProjectVerifyResult {
-    LtxProjectVerifyResult {
+  pub fn new() -> Self {
+    Self {
       checked_fields: 0,
       checked_sections: 0,
       duration: 0,

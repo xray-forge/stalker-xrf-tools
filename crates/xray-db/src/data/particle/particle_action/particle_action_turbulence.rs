@@ -51,7 +51,7 @@ impl ParticleActionReader for ParticleActionTurbulence {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTurbulence {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<ParticlesByteOrder>(self.frequency)?;
     writer.write_i32::<ParticlesByteOrder>(self.octaves)?;
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
@@ -61,7 +61,7 @@ impl ParticleActionWriter for ParticleActionTurbulence {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("frequency", self.frequency.to_string())

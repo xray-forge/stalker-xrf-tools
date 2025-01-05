@@ -28,8 +28,8 @@ impl ArchiveFileReplicationDescriptor {
     descriptor: &ArchiveFileDescriptor,
     source: &Path,
     destination: &Path,
-  ) -> ArchiveFileReplicationDescriptor {
-    ArchiveFileReplicationDescriptor {
+  ) -> Self {
+    Self {
       crc: descriptor.crc,
       source: source.into(),
       destination: destination.into(),

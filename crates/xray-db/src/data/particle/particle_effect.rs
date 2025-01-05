@@ -166,7 +166,7 @@ impl ParticleEffect {
   }
 
   /// Write particle effect data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -301,7 +301,7 @@ impl ParticleEffect {
   }
 
   /// Export particle effect data into provided path.
-  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -403,7 +403,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -514,7 +514,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ParticleEffect = ParticleEffect {
       version: 1,
       name: String::from("test-particle-effect"),

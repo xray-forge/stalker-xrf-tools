@@ -1,4 +1,5 @@
 use crate::archives_editor::state::ArchivesEditorState;
+use crate::types::TauriResult;
 use serde_json::{json, Value};
 use std::path::Path;
 use tauri::State;
@@ -8,19 +9,17 @@ use xray_archive::ArchiveProject;
 pub async fn open_archives_project(
   path: &str,
   state: State<'_, ArchivesEditorState>,
-) -> Result<Value, String> {
+) -> TauriResult<Value> {
   log::info!("Opening archives project");
 
-  match ArchiveProject::new(Path::new(path)) {
-    Ok(project) => {
-      log::info!("Opened archives project");
+  let project: ArchiveProject = ArchiveProject::new(Path::new(path))
+    .map_err(|error| format!("Failed to open provided archive project: {}", error))?;
 
-      let json: Value = json!(project);
+  log::info!("Opened archives project");
 
-      *state.project.lock().unwrap() = Some(project);
+  let json: Value = json!(project);
 
-      Ok(json)
-    }
-    Err(_) => Err(String::from("Failed to open provided archive project")),
-  }
+  *state.project.lock().unwrap() = Some(project);
+
+  Ok(json)
 }

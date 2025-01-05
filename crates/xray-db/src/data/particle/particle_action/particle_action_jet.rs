@@ -52,7 +52,7 @@ impl ParticleActionReader for ParticleActionJet {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionJet {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.center)?;
 
     self.acc.write::<ParticlesByteOrder>(writer)?;
@@ -64,7 +64,7 @@ impl ParticleActionWriter for ParticleActionJet {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set("center", self.center.to_string())

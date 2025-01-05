@@ -7,13 +7,13 @@ use crate::ast::ast_utils::{
   get_parameters_from_arrow_expression,
 };
 use crate::constants::{XR_CONDITIONS_PREFIX, XR_EFFECT_PREFIX, XR_EXTERN_EXPRESSION};
-use crate::error::export_error::ExportError;
 use crate::extern_descriptor::ExportDescriptor;
 
 use walkdir::WalkDir;
 extern crate swc_common;
 extern crate swc_ecma_parser;
 use crate::error::parse_error::ExportParseError;
+use crate::ExportResult;
 use swc_common::comments::{Comments, SingleThreadedComments};
 use swc_common::errors::DiagnosticBuilder;
 use swc_common::sync::Lrc;
@@ -28,8 +28,8 @@ use swc_ecma_parser::{lexer::Lexer, Parser, StringInput, Syntax};
 pub struct ExportsParser {}
 
 impl ExportsParser {
-  pub fn new() -> ExportsParser {
-    ExportsParser {}
+  pub fn new() -> Self {
+    Self {}
   }
 }
 
@@ -52,41 +52,35 @@ impl ExportsParser {
 }
 
 impl ExportsParser {
-  pub fn parse_conditions(
-    &self,
-    files: &Vec<PathBuf>,
-  ) -> Result<Vec<ExportDescriptor>, ExportError> {
+  pub fn parse_conditions(&self, files: &[PathBuf]) -> ExportResult<Vec<ExportDescriptor>> {
     self.parse_exports(files, Self::is_xr_conditions_literal)
   }
 
-  pub fn parse_conditions_from_path(
-    &self,
-    path: &Path,
-  ) -> Result<Vec<ExportDescriptor>, ExportError> {
+  pub fn parse_conditions_from_path(&self, path: &Path) -> ExportResult<Vec<ExportDescriptor>> {
     self.parse_conditions(&Self::read_exporting_sources_from_path(path)?)
   }
 
-  pub fn parse_dialogs(&self, files: &Vec<PathBuf>) -> Result<Vec<ExportDescriptor>, ExportError> {
+  pub fn parse_dialogs(&self, files: &[PathBuf]) -> ExportResult<Vec<ExportDescriptor>> {
     self.parse_exports(files, |value| Some(value.into()))
   }
 
-  pub fn parse_dialogs_from_path(&self, path: &Path) -> Result<Vec<ExportDescriptor>, ExportError> {
+  pub fn parse_dialogs_from_path(&self, path: &Path) -> ExportResult<Vec<ExportDescriptor>> {
     self.parse_dialogs(&Self::read_exporting_sources_from_path(path)?)
   }
 
-  pub fn parse_effects(&self, files: &Vec<PathBuf>) -> Result<Vec<ExportDescriptor>, ExportError> {
+  pub fn parse_effects(&self, files: &[PathBuf]) -> ExportResult<Vec<ExportDescriptor>> {
     self.parse_exports(files, Self::is_xr_effect_literal)
   }
 
-  pub fn parse_effects_from_path(&self, path: &Path) -> Result<Vec<ExportDescriptor>, ExportError> {
+  pub fn parse_effects_from_path(&self, path: &Path) -> ExportResult<Vec<ExportDescriptor>> {
     self.parse_effects(&Self::read_exporting_sources_from_path(path)?)
   }
 
   pub fn parse_exports(
     &self,
-    files: &Vec<PathBuf>,
+    files: &[PathBuf],
     filter: fn(&str) -> Option<String>,
-  ) -> Result<Vec<ExportDescriptor>, ExportError> {
+  ) -> ExportResult<Vec<ExportDescriptor>> {
     let mut expressions: Vec<ExportDescriptor> = Vec::new();
 
     for path in files {
@@ -163,7 +157,7 @@ impl ExportsParser {
 }
 
 impl ExportsParser {
-  pub fn read_exporting_sources_from_path(path: &Path) -> Result<Vec<PathBuf>, ExportError> {
+  pub fn read_exporting_sources_from_path(path: &Path) -> ExportResult<Vec<PathBuf>> {
     let mut files: Vec<PathBuf> = Vec::new();
 
     for entry in WalkDir::new(path)
@@ -186,7 +180,7 @@ impl ExportsParser {
   fn open_ts_source_file(
     &self,
     path: &Path,
-  ) -> Result<(Program, Lrc<SourceMap>, Box<dyn Comments>), ExportError> {
+  ) -> ExportResult<(Program, Lrc<SourceMap>, Box<dyn Comments>)> {
     let source_map: Lrc<SourceMap> = Default::default();
     let handler: Handler =
       Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(source_map.clone()));

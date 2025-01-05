@@ -9,8 +9,8 @@ pub struct LtxSectionScheme {
 }
 
 impl LtxSectionScheme {
-  pub fn new(name: &str) -> LtxSectionScheme {
-    LtxSectionScheme {
+  pub fn new(name: &str) -> Self {
+    Self {
       name: name.into(),
       is_strict: false,
       fields: Default::default(),

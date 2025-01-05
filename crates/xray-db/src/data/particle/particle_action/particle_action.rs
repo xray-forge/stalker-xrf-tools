@@ -75,7 +75,7 @@ impl ParticleAction {
   }
 
   /// Write particle action data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<T>(self.action_type)?;
 
     writer.write_u32::<T>(self.action_flags)?;
@@ -87,10 +87,7 @@ impl ParticleAction {
   }
 
   /// Write particle action data into chunk writer.
-  pub fn write_list<T: ByteOrder>(
-    actions: &[Self],
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult<()> {
+  pub fn write_list<T: ByteOrder>(actions: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<T>(actions.len() as u32)?;
 
     for action in actions {
@@ -132,7 +129,7 @@ impl ParticleAction {
   }
 
   /// Export particle action data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     ini
       .with_section(section)
       .set(META_TYPE_FIELD, Self::META_TYPE)

@@ -1,7 +1,6 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::particles_file::particles_file::ParticlesFile;
-use xray_db::types::ParticlesByteOrder;
+use xray_db::{DatabaseParseError, DatabaseResult, ParticlesByteOrder, ParticlesFile};
 
 pub struct VerifyParticlesFileCommand {}
 
@@ -11,7 +10,7 @@ impl VerifyParticlesFileCommand {
   /// Create command for verifying of particles file.
   pub fn init() -> Command {
     Command::new(Self::NAME)
-      .about("Command to verify provided particles.xr file")
+      .about("Command to verify provided particles file")
       .arg(
         Arg::new("path")
           .help("Path to particles.xr file")
@@ -32,7 +31,7 @@ impl VerifyParticlesFileCommand {
   }
 
   /// Verify particles file based on provided arguments.
-  pub fn execute(matches: &ArgMatches) {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -41,17 +40,25 @@ impl VerifyParticlesFileCommand {
 
     log::info!("Verify particles file {:?}, unpacked: {unpacked}", path);
 
-    let particles_file = if unpacked {
+    let particles_file_result: DatabaseResult<ParticlesFile> = if unpacked {
       ParticlesFile::import_from_path(path)
     } else {
       ParticlesFile::read_from_path::<ParticlesByteOrder>(path)
     };
 
-    match particles_file {
-      Ok(_) => log::info!("Provided particles file is valid"),
+    match particles_file_result {
+      Ok(_) => {
+        log::info!("Provided particles file is valid");
+
+        Ok(())
+      }
       Err(error) => {
-        log::error!("Provided particles file is invalid: {:?}", error);
-        panic!("{:?}", error);
+        log::error!("Provided particles file is invalid: {}", error);
+
+        Err(DatabaseParseError::new_database_error(format!(
+          "Verification of particles file failed: {}",
+          error
+        )))
       }
     }
   }

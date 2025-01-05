@@ -1,8 +1,7 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use xray_db::particles_file::particles_file::ParticlesFile;
-use xray_db::types::DatabaseResult;
+use xray_db::{DatabaseResult, ParticlesFile};
 
 pub struct ReUnpackParticlesCommand {}
 
@@ -32,7 +31,7 @@ impl ReUnpackParticlesCommand {
   }
 
   /// Re-unpack provided particles dir and validate it.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult<()> {
+  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");

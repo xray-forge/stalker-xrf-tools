@@ -1,17 +1,16 @@
-use crate::archive::constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK};
-use crate::archive::descriptor::ArchiveDescriptor;
-use crate::archive::file_descriptor::ArchiveFileDescriptor;
-use crate::archive::header::ArchiveHeader;
-use crate::error::archive_error::ArchiveError;
+use crate::archive::archive_constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK};
+use crate::archive::archive_descriptor::ArchiveDescriptor;
+use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
+use crate::archive::archive_header::ArchiveHeader;
 use crate::error::archive_read_error::ArchiveReadError;
 use crate::types::ArchiveByteOrder;
+use crate::ArchiveResult;
 use byteorder::ReadBytesExt;
 use delharc::decode::{Decoder, Lh1Decoder};
 use encoding_rs::{Encoding, UTF_8};
 use regex::Regex;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io;
 use std::io::ErrorKind::UnexpectedEof;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
@@ -28,12 +27,9 @@ pub struct ArchiveReader {
 
 impl ArchiveReader {
   /// Create chunk based on whole file.
-  pub fn from_path(
-    path: &Path,
-    encoding: &'static Encoding,
-  ) -> Result<ArchiveReader, ArchiveError> {
+  pub fn from_path(path: &Path, encoding: &'static Encoding) -> ArchiveResult<Self> {
     match File::open(path) {
-      Ok(file) => Ok(ArchiveReader {
+      Ok(file) => Ok(Self {
         encoding,
         file,
         path: path.into(),
@@ -49,14 +45,14 @@ impl ArchiveReader {
   }
 
   /// Create chunk based on whole file.
-  pub fn from_path_utf8(path: &Path) -> Result<ArchiveReader, ArchiveError> {
+  pub fn from_path_utf8(path: &Path) -> ArchiveResult<Self> {
     Self::from_path(path, UTF_8)
   }
 }
 
 impl ArchiveReader {
-  pub fn read_archive(&mut self) -> io::Result<ArchiveDescriptor> {
-    let header: ArchiveHeader = self.read_archive_header().unwrap();
+  pub fn read_archive(&mut self) -> ArchiveResult<ArchiveDescriptor> {
+    let header: ArchiveHeader = self.read_archive_header()?.unwrap();
 
     Ok(ArchiveDescriptor {
       files: header.files,
@@ -67,7 +63,7 @@ impl ArchiveReader {
 }
 
 impl ArchiveReader {
-  fn read_archive_header(&mut self) -> Option<ArchiveHeader> {
+  fn read_archive_header(&mut self) -> ArchiveResult<Option<ArchiveHeader>> {
     let mut file_descriptors = None;
     let mut root_path: String = String::new();
 
@@ -77,8 +73,13 @@ impl ArchiveReader {
         Err(error) if error.kind() == UnexpectedEof => break,
         Err(error) => panic!("Error reading file: {}", error),
       };
-      let chunk_size: u32 = self.file.read_u32::<ArchiveByteOrder>().unwrap();
-      let chunk_usize: usize = usize::try_from(chunk_size).unwrap();
+      let chunk_size: u32 = self.file.read_u32::<ArchiveByteOrder>()?;
+      let chunk_usize: usize = usize::try_from(chunk_size).map_err(|error| {
+        ArchiveReadError::new_archive_error(format!(
+          "Failed to read archive header chunk size: {:?}",
+          error
+        ))
+      })?;
 
       let chunk_id: u32 = raw_chunk_id & CHUNK_ID_MASK;
       let compressed: bool = (raw_chunk_id & CHUNK_ID_COMPRESSED_MASK) != 0;
@@ -86,7 +87,7 @@ impl ArchiveReader {
       match chunk_id {
         // File descriptors list
         0x1 | 0x86 => {
-          let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed);
+          let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
           let mut reader: Cursor<&[u8]> = Cursor::new(chunk_data.as_slice());
 
           file_descriptors = Some(
@@ -96,7 +97,7 @@ impl ArchiveReader {
         }
         // Metadata header
         666 | 1337 => {
-          let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed);
+          let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
 
           root_path = self
             .read_root_path(chunk_data.as_slice())
@@ -104,19 +105,16 @@ impl ArchiveReader {
         }
         _ => {
           // Skip
-          self
-            .file
-            .seek(SeekFrom::Current(i64::from(chunk_size)))
-            .unwrap();
+          self.file.seek(SeekFrom::Current(i64::from(chunk_size)))?;
         }
       }
     }
 
-    file_descriptors.map(|file_descriptors| ArchiveHeader {
+    Ok(file_descriptors.map(|file_descriptors| ArchiveHeader {
       archive_path: self.path.clone(),
       output_root_path: PathBuf::from(root_path),
       files: file_descriptors,
-    })
+    }))
   }
 
   fn read_root_path(&self, chunk_data: &[u8]) -> Option<String> {
@@ -160,27 +158,31 @@ impl ArchiveReader {
     None
   }
 
-  fn read_chunk<T: Read>(file: &mut T, chunk_usize: usize, compressed: bool) -> Vec<u8> {
+  fn read_chunk<T: Read>(
+    file: &mut T,
+    chunk_usize: usize,
+    compressed: bool,
+  ) -> ArchiveResult<Vec<u8>> {
     match compressed {
       true => {
-        let decoded_len: u32 = file.read_u32::<ArchiveByteOrder>().unwrap();
+        let decoded_len: u32 = file.read_u32::<ArchiveByteOrder>()?;
         let mut compressed_buf: Vec<u8> = vec![0u8; chunk_usize - 4usize];
 
-        file.read_exact(compressed_buf.as_mut_slice()).unwrap();
+        file.read_exact(compressed_buf.as_mut_slice())?;
 
         let mut res: Lh1Decoder<&[u8]> = Lh1Decoder::new(compressed_buf.as_slice());
         let mut decompressed_buf: Vec<u8> = vec![0u8; decoded_len as usize];
 
-        res.fill_buffer(&mut decompressed_buf).unwrap();
+        res.fill_buffer(&mut decompressed_buf)?;
 
-        decompressed_buf
+        Ok(decompressed_buf)
       }
       false => {
         let mut raw_buf: Vec<u8> = vec![0u8; chunk_usize];
 
-        file.read_exact(raw_buf.as_mut_slice()).unwrap();
+        file.read_exact(raw_buf.as_mut_slice())?;
 
-        raw_buf
+        Ok(raw_buf)
       }
     }
   }
@@ -188,7 +190,7 @@ impl ArchiveReader {
   fn read_file_descriptors<T: Read>(
     reader: &mut T,
     encoding: &'static Encoding,
-  ) -> Result<HashMap<String, ArchiveFileDescriptor>, ArchiveError> {
+  ) -> ArchiveResult<HashMap<String, ArchiveFileDescriptor>> {
     let mut file_descriptors: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
     let mut name_buf: [u8; 520] = [0u8; 260 * 2];
 
@@ -199,9 +201,9 @@ impl ArchiveReader {
         Err(error) => return Err(error.into()),
       };
 
-      let size_real: u32 = reader.read_u32::<ArchiveByteOrder>().unwrap();
-      let size_compressed: u32 = reader.read_u32::<ArchiveByteOrder>().unwrap();
-      let crc: u32 = reader.read_u32::<ArchiveByteOrder>().unwrap();
+      let size_real: u32 = reader.read_u32::<ArchiveByteOrder>()?;
+      let size_compressed: u32 = reader.read_u32::<ArchiveByteOrder>()?;
+      let crc: u32 = reader.read_u32::<ArchiveByteOrder>()?;
       let name_size: u16 = header_size - 16;
 
       let name_bytes = {
@@ -214,7 +216,7 @@ impl ArchiveReader {
         &name_buf[..(name_size as usize)]
       };
 
-      let offset: u32 = reader.read_u32::<ArchiveByteOrder>().unwrap();
+      let offset: u32 = reader.read_u32::<ArchiveByteOrder>()?;
       let (name, had_errors) = encoding.decode_without_bom_handling(name_bytes);
 
       if had_errors {

@@ -48,7 +48,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Write artefact spawns into chunk writer.
   /// Writes artefact spawns data in binary format.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<T>(self.nodes.len() as u32)?;
 
     for node in &self.nodes {
@@ -79,7 +79,7 @@ impl SpawnArtefactSpawnsChunk {
   }
 
   /// Export artefact spawns data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult<()> {
+  pub fn export(&self, path: &Path) -> DatabaseResult {
     let mut ltx: Ltx = Ltx::new();
 
     for (index, node) in self.nodes.iter().enumerate() {
@@ -119,7 +119,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {

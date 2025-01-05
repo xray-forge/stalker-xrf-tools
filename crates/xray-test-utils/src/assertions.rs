@@ -1,10 +1,9 @@
 use std::fs::File;
-use std::io;
-use std::io::{BufReader, Read};
+use std::io::{BufReader, Read, Result as IoResult};
 use std::path::Path;
 
 /// Assert file content is equal.
-pub fn files_are_equal_by_path<P: AsRef<Path>>(first_path: P, second_path: P) -> io::Result<bool> {
+pub fn files_are_equal_by_path<P: AsRef<Path>>(first_path: P, second_path: P) -> IoResult<bool> {
   files_are_equal(
     File::open(first_path.as_ref())?,
     File::open(second_path.as_ref())?,
@@ -12,7 +11,7 @@ pub fn files_are_equal_by_path<P: AsRef<Path>>(first_path: P, second_path: P) ->
 }
 
 /// Assert file content is equal.
-pub fn files_are_equal(first: File, second: File) -> io::Result<bool> {
+pub fn files_are_equal(first: File, second: File) -> IoResult<bool> {
   let mut first_reader: BufReader<File> = BufReader::new(first);
   let mut second_reader: BufReader<File> = BufReader::new(second);
 

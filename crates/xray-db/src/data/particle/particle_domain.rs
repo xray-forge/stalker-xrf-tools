@@ -41,7 +41,7 @@ impl ParticleDomain {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<ParticlesByteOrder>(self.domain_type)?;
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.coordinates.0)?;
     writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.coordinates.1)?;
@@ -223,7 +223,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -291,7 +291,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> DatabaseResult<()> {
+  fn test_from_to_str() -> DatabaseResult {
     let original: ParticleDomain = ParticleDomain {
       domain_type: 23,
       coordinates: (
@@ -331,7 +331,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: ParticleDomain = ParticleDomain {
       domain_type: 52,
       coordinates: (

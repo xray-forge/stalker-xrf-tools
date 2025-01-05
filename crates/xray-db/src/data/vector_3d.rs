@@ -31,7 +31,7 @@ impl Vector3d<f32> {
   }
 
   /// Write vector coordinates into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_f32::<T>(self.x)?;
     writer.write_f32::<T>(self.y)?;
     writer.write_f32::<T>(self.z)?;
@@ -99,7 +99,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -138,7 +138,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> DatabaseResult<()> {
+  fn test_from_to_str() -> DatabaseResult {
     let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,
@@ -152,7 +152,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult<()> {
+  fn test_serialize_deserialize() -> DatabaseResult {
     let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,

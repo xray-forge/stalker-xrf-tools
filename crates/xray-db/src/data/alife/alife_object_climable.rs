@@ -45,7 +45,7 @@ impl AlifeObjectReader<AlifeObjectClimable> for AlifeObjectClimable {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectClimable {
   /// Write climable object data into the chunk.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult<()> {
+  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
     writer.write_null_terminated_win_string(&self.game_material)?;
@@ -54,7 +54,7 @@ impl AlifeObjectWriter for AlifeObjectClimable {
   }
 
   /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult<()> {
+  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
     self.base.export(section, ini)?;
 
     ini
@@ -84,7 +84,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult<()> {
+  fn test_read_write() -> DatabaseResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

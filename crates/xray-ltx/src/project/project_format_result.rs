@@ -12,8 +12,8 @@ pub struct LtxProjectFormatResult {
 }
 
 impl LtxProjectFormatResult {
-  pub fn new() -> LtxProjectFormatResult {
-    LtxProjectFormatResult {
+  pub fn new() -> Self {
+    Self {
       duration: 0,
       invalid_files: 0,
       to_format: Vec::new(),
