@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect::ParticleEffect;
-use crate::export::file::{create_export_file, open_ini_config};
+use crate::export::file::{create_export_file, open_ltx_config};
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -69,13 +69,13 @@ impl ParticlesEffectsChunk {
   pub fn import(path: &Path) -> DatabaseResult<Self> {
     log::info!("Importing particles effects: {:?}", path);
 
-    let ini: Ltx = open_ini_config(&path.join("effects.ltx"))?;
+    let ltx: Ltx = open_ltx_config(&path.join("effects.ltx"))?;
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
-    for (section_name, section) in &ini {
+    for (section_name, section) in &ltx {
       if let Some(meta_field) = section.get(META_TYPE_FIELD) {
         if meta_field == ParticleEffect::META_TYPE {
-          effects.push(ParticleEffect::import(section_name, &ini)?);
+          effects.push(ParticleEffect::import(section_name, &ltx)?);
         }
       }
     }
@@ -87,13 +87,13 @@ impl ParticlesEffectsChunk {
 
   /// Export particles effects data into provided path.
   pub fn export(&self, path: &Path) -> DatabaseResult {
-    let mut particles_effects_ini: Ltx = Ltx::new();
+    let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for effect in &self.effects {
-      effect.export(&effect.name, &mut particles_effects_ini)?;
+      effect.export(&effect.name, &mut particles_effects_ltx)?;
     }
 
-    particles_effects_ini.write_to(&mut create_export_file(&path.join("effects.ltx"))?)?;
+    particles_effects_ltx.write_to(&mut create_export_file(&path.join("effects.ltx"))?)?;
 
     log::info!("Exported effects chunk");
 

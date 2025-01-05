@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,7 @@ pub struct AlifeObjectVisual {
   pub visual_flags: u8,
 }
 
-impl AlifeObjectReader<AlifeObjectVisual> for AlifeObjectVisual {
+impl AlifeObjectReader for AlifeObjectVisual {
   /// Read visual object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -25,9 +25,9 @@ impl AlifeObjectReader<AlifeObjectVisual> for AlifeObjectVisual {
     })
   }
 
-  /// Import visual object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import visual object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -35,8 +35,8 @@ impl AlifeObjectReader<AlifeObjectVisual> for AlifeObjectVisual {
     })?;
 
     Ok(Self {
-      visual_name: read_ini_field("visual_name", section)?,
-      visual_flags: read_ini_field("visual_flags", section)?,
+      visual_name: read_ltx_field("visual_name", section)?,
+      visual_flags: read_ltx_field("visual_flags", section)?,
     })
   }
 }
@@ -51,10 +51,10 @@ impl AlifeObjectWriter for AlifeObjectVisual {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("visual_name", &self.visual_name)
       .set("visual_flags", self.visual_flags.to_string());
 
@@ -69,7 +69,7 @@ mod tests {
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use std::fs::File;
@@ -117,7 +117,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -136,7 +136,7 @@ mod tests {
 
     ltx.write_to(&mut file)?;
 
-    let source: Ltx = open_ini_config(config_path)?;
+    let source: Ltx = open_ltx_config(config_path)?;
 
     assert_eq!(AlifeObjectVisual::import("first", &source)?, first);
     assert_eq!(AlifeObjectVisual::import("second", &source)?, second);

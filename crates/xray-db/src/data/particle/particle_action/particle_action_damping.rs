@@ -4,7 +4,7 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -27,8 +27,8 @@ impl ParticleActionReader for ParticleActionDamping {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -36,9 +36,9 @@ impl ParticleActionReader for ParticleActionDamping {
     })?;
 
     Ok(Self {
-      damping: read_ini_field("damping", section)?,
-      v_low_sqr: read_ini_field("v_low_sqr", section)?,
-      v_high_sqr: read_ini_field("v_high_sqr", section)?,
+      damping: read_ltx_field("damping", section)?,
+      v_low_sqr: read_ltx_field("v_low_sqr", section)?,
+      v_high_sqr: read_ltx_field("v_high_sqr", section)?,
     })
   }
 }
@@ -53,9 +53,9 @@ impl ParticleActionWriter for ParticleActionDamping {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("damping", self.damping.to_string())
       .set("v_low_sqr", self.v_low_sqr.to_string())
       .set("v_high_sqr", self.v_high_sqr.to_string());
@@ -72,7 +72,7 @@ mod tests {
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particle::particle_action::particle_action_damping::ParticleActionDamping;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -127,7 +127,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionDamping = ParticleActionDamping {
@@ -146,7 +146,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = open_ltx_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionDamping::import("data", &source)?, original);
 

@@ -9,7 +9,7 @@ use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_group_effect::ParticleGroupEffect;
 use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -123,15 +123,15 @@ impl ParticleGroup {
   }
 
   /// Import particles group data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle group section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
     assert_eq!(
       meta_type,
@@ -141,17 +141,17 @@ impl ParticleGroup {
     );
 
     let effects_old: Vec<ParticleGroupEffectOld> =
-      ParticleGroupEffectOld::import_list(section_name, ini)?;
+      ParticleGroupEffectOld::import_list(section_name, ltx)?;
 
     Ok(Self {
-      version: read_ini_field("version", section)?,
-      name: read_ini_field("name", section)?,
-      flags: read_ini_field("flags", section)?,
-      time_limit: read_ini_field("time_limit", section)?,
-      effects: ParticleGroupEffect::import_list(section_name, ini)?,
+      version: read_ltx_field("version", section)?,
+      name: read_ltx_field("name", section)?,
+      flags: read_ltx_field("flags", section)?,
+      time_limit: read_ltx_field("time_limit", section)?,
+      effects: ParticleGroupEffect::import_list(section_name, ltx)?,
       description: ParticleDescription::import_optional(
         &Self::get_description_section(section_name),
-        ini,
+        ltx,
       )?,
       effects_old: if effects_old.is_empty() {
         None
@@ -162,8 +162,8 @@ impl ParticleGroup {
   }
 
   /// Export particles group data into provided path.
-  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("version", self.version.to_string())
@@ -171,14 +171,14 @@ impl ParticleGroup {
       .set("flags", self.flags.to_string())
       .set("time_limit", self.time_limit.to_string());
 
-    ParticleGroupEffect::export_list(&self.effects, section_name, ini)?;
+    ParticleGroupEffect::export_list(&self.effects, section_name, ltx)?;
 
     if let Some(description) = &self.description {
-      description.export(&Self::get_description_section(section_name), ini)?;
+      description.export(&Self::get_description_section(section_name), ltx)?;
     }
 
     if let Some(effects_old) = &self.effects_old {
-      ParticleGroupEffectOld::export_list(effects_old, section_name, ini)?;
+      ParticleGroupEffectOld::export_list(effects_old, section_name, ltx)?;
     }
 
     Ok(())

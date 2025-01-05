@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -31,9 +31,9 @@ impl GraphEdge {
     Ok(())
   }
 
-  /// Import graph edge from ini file.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import graph edge from ltx file.
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Graph section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -41,15 +41,15 @@ impl GraphEdge {
     })?;
 
     Ok(Self {
-      game_vertex_id: read_ini_field("game_vertex_id", section)?,
-      distance: read_ini_field("distance", section)?,
+      game_vertex_id: read_ltx_field("game_vertex_id", section)?,
+      distance: read_ltx_field("distance", section)?,
     })
   }
 
-  /// Export graph edge data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) {
-    ini
-      .with_section(section)
+  /// Export graph edge data into ltx.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+    ltx
+      .with_section(section_name)
       .set("game_vertex_id", self.game_vertex_id.to_string())
       .set("distance", self.distance.to_string());
   }
@@ -60,7 +60,7 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_edge::GraphEdge;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -119,7 +119,7 @@ mod tests {
       distance: 2554.50,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -129,7 +129,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphEdge::import("graph_edge", &open_ini_config(config_path)?)?,
+      GraphEdge::import("graph_edge", &open_ltx_config(config_path)?)?,
       original
     );
 

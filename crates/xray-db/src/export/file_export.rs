@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-/// Export ini file content to provided file.
+/// Export ltx file content to provided file.
 pub fn export_vector_to_string<T: Display>(vector: &[T]) -> String {
   vector
     .iter()

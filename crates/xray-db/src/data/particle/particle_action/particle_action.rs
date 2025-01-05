@@ -4,7 +4,7 @@ use crate::constants::META_TYPE_FIELD;
 use crate::data::meta::particle_action_type::ParticleActionType;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -98,15 +98,15 @@ impl ParticleAction {
   }
 
   /// Import particle action data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
     assert_eq!(
       meta_type,
@@ -115,28 +115,28 @@ impl ParticleAction {
       Self::META_TYPE
     );
 
-    let action_type: u32 = read_ini_field("action_type", section)?;
+    let action_type: u32 = read_ltx_field("action_type", section)?;
 
     Ok(Self {
-      action_flags: read_ini_field("action_flags", section)?,
-      action_type: read_ini_field("action_type", section)?,
+      action_flags: read_ltx_field("action_flags", section)?,
+      action_type: read_ltx_field("action_type", section)?,
       data: ParticleActionType::import_by_particle_type(
         ParticleActionType::from_u32(action_type),
         section_name,
-        ini,
+        ltx,
       )?,
     })
   }
 
   /// Export particle action data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("action_flags", self.action_flags.to_string())
       .set("action_type", self.action_type.to_string());
 
-    self.data.export(section, ini)?;
+    self.data.export(section_name, ltx)?;
 
     Ok(())
   }

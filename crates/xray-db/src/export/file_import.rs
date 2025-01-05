@@ -3,7 +3,7 @@ use crate::types::{DatabaseResult, U32Bytes};
 use std::str::FromStr;
 use xray_ltx::Section;
 
-/// Export ini file content to provided file.
+/// Export ltx file content to provided file.
 pub fn import_vector_from_string<T: FromStr>(value: &str) -> DatabaseResult<Vec<T>> {
   let mut vector: Vec<T> = Vec::new();
 
@@ -25,7 +25,7 @@ pub fn import_vector_from_string<T: FromStr>(value: &str) -> DatabaseResult<Vec<
   Ok(vector)
 }
 
-/// Export ini file content to provided file.
+/// Export ltx file content to provided file.
 pub fn import_sized_vector_from_string<T: FromStr>(
   size: usize,
   value: &str,
@@ -58,14 +58,14 @@ pub fn import_sized_vector_from_string<T: FromStr>(
   Ok(vector)
 }
 
-/// Read value from ini section and parse it as provided T type.
-pub fn read_ini_field<T: FromStr>(field_name: &str, section: &Section) -> DatabaseResult<T> {
+/// Read value from ltx section and parse it as provided T type.
+pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> DatabaseResult<T> {
   Ok(
     match section
       .get(field_name)
       .ok_or_else(|| {
         DatabaseParseError::new_database_error(format!(
-          "Field '{field_name}' was not found in ini file"
+          "Field '{field_name}' was not found in ltx file"
         ))
       })?
       .parse::<T>()
@@ -73,7 +73,7 @@ pub fn read_ini_field<T: FromStr>(field_name: &str, section: &Section) -> Databa
       Ok(value) => value,
       _ => {
         return Err(DatabaseParseError::new_database_error(format!(
-          "Failed to parse ini field '{field_name}' value, valid {:?} is expected",
+          "Failed to parse ltx field '{field_name}' value, valid {:?} is expected",
           std::any::type_name::<T>()
         )))
       }
@@ -81,7 +81,7 @@ pub fn read_ini_field<T: FromStr>(field_name: &str, section: &Section) -> Databa
   )
 }
 
-/// Read optional value from ini section and parse it as provided T type.
+/// Read optional value from ltx section and parse it as provided T type.
 pub fn read_ini_optional_field<T: FromStr>(
   field_name: &str,
   section: &Section,
@@ -93,7 +93,7 @@ pub fn read_ini_optional_field<T: FromStr>(
       Ok(parsed) => Some(parsed),
       _ => {
         return Err(DatabaseParseError::new_database_error(format!(
-          "Failed to parse optional ini field '{field_name}' value, correct {:?} is expected",
+          "Failed to parse optional ltx field '{field_name}' value, correct {:?} is expected",
           std::any::type_name::<T>()
         )))
       }
@@ -102,10 +102,10 @@ pub fn read_ini_optional_field<T: FromStr>(
   })
 }
 
-/// Read value from ini section and parse it as provided T type.
+/// Read value from ltx section and parse it as provided T type.
 pub fn read_ini_u32_bytes_field(field: &str, section: &Section) -> DatabaseResult<U32Bytes> {
   let vertex_type: Vec<u8> =
-    import_sized_vector_from_string(4, &read_ini_field::<String>(field, section)?)?;
+    import_sized_vector_from_string(4, &read_ltx_field::<String>(field, section)?)?;
 
   Ok((
     *vertex_type.get(0).unwrap(),

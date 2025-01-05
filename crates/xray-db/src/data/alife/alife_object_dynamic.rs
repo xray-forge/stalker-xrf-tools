@@ -22,10 +22,10 @@ impl AlifeObjectReader<AlifeObjectDynamic> for AlifeObjectDynamic {
     })
   }
 
-  /// Import dynamic object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+  /// Import dynamic object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     Ok(Self {
-      base: AlifeObjectAbstract::import(section_name, ini)?,
+      base: AlifeObjectAbstract::import(section_name, ltx)?,
     })
   }
 }
@@ -39,9 +39,9 @@ impl AlifeObjectWriter for AlifeObjectDynamic {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
     Ok(())
   }

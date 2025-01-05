@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -42,15 +42,15 @@ impl ParticleEffectSprite {
   }
 
   /// Import particle effect sprite data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle sprite section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
     assert_eq!(
       meta_type,
@@ -60,15 +60,15 @@ impl ParticleEffectSprite {
     );
 
     Ok(Self {
-      shader_name: read_ini_field("shader_name", section)?,
-      texture_name: read_ini_field("texture_name", section)?,
+      shader_name: read_ltx_field("shader_name", section)?,
+      texture_name: read_ltx_field("texture_name", section)?,
     })
   }
 
   /// Export particle effect sprite data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("shader_name", &self.shader_name)
       .set("texture_name", &self.texture_name);
@@ -82,7 +82,7 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -139,7 +139,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -152,7 +152,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      ParticleEffectSprite::import("data", &open_ini_config(config_path)?)?,
+      ParticleEffectSprite::import("data", &open_ltx_config(config_path)?)?,
       sprite
     );
 

@@ -8,7 +8,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::cls_id::ClsId;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -209,47 +209,47 @@ impl AlifeObjectBase {
     Ok(())
   }
 
-  /// Import alife object data from ini file section.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife object data from ltx file section.
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object base '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let object_section: String = read_ini_field("section", section)?;
+    let object_section: String = read_ltx_field("section", section)?;
     let clsid: ClsId = ClsId::from_section(&object_section);
 
     Ok(Self {
-      index: read_ini_field("index", section)?,
-      id: read_ini_field("id", section)?,
-      net_action: read_ini_field("net_action", section)?,
+      index: read_ltx_field("index", section)?,
+      id: read_ltx_field("id", section)?,
+      net_action: read_ltx_field("net_action", section)?,
       clsid: clsid.clone(),
       section: object_section,
-      name: read_ini_field("name", section)?,
-      script_game_id: read_ini_field("script_game_id", section)?,
-      script_rp: read_ini_field("script_rp", section)?,
-      position: read_ini_field("position", section)?,
-      direction: read_ini_field("direction", section)?,
-      respawn_time: read_ini_field("respawn_time", section)?,
-      parent_id: read_ini_field("parent_id", section)?,
-      phantom_id: read_ini_field("phantom_id", section)?,
-      script_flags: read_ini_field("script_flags", section)?,
-      version: read_ini_field("version", section)?,
-      game_type: read_ini_field("game_type", section)?,
-      script_version: read_ini_field("script_version", section)?,
-      client_data_size: read_ini_field("client_data_size", section)?,
-      spawn_id: read_ini_field("spawn_id", section)?,
-      inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), section_name, ini)?,
-      update_data: bytes_from_base64(&read_ini_field::<String>("update_data", section)?)?,
+      name: read_ltx_field("name", section)?,
+      script_game_id: read_ltx_field("script_game_id", section)?,
+      script_rp: read_ltx_field("script_rp", section)?,
+      position: read_ltx_field("position", section)?,
+      direction: read_ltx_field("direction", section)?,
+      respawn_time: read_ltx_field("respawn_time", section)?,
+      parent_id: read_ltx_field("parent_id", section)?,
+      phantom_id: read_ltx_field("phantom_id", section)?,
+      script_flags: read_ltx_field("script_flags", section)?,
+      version: read_ltx_field("version", section)?,
+      game_type: read_ltx_field("game_type", section)?,
+      script_version: read_ltx_field("script_version", section)?,
+      client_data_size: read_ltx_field("client_data_size", section)?,
+      spawn_id: read_ltx_field("spawn_id", section)?,
+      inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), section_name, ltx)?,
+      update_data: bytes_from_base64(&read_ltx_field::<String>("update_data", section)?)?,
     })
   }
 
-  /// Export alife object data into ini file.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  /// Export alife object data into ltx file.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("index", self.index.to_string())
       .set("id", self.id.to_string())
       .set("net_action", self.net_action.to_string())
@@ -270,10 +270,10 @@ impl AlifeObjectBase {
       .set("spawn_id", self.script_version.to_string())
       .set("index", self.index.to_string());
 
-    self.inherited.export(section, ini)?;
+    self.inherited.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("update_data", bytes_to_base64(&self.update_data));
 
     Ok(())

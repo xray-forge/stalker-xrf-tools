@@ -4,7 +4,7 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ pub struct AlifeObjectItem {
   pub upgrades_count: u32,
 }
 
-impl AlifeObjectReader<AlifeObjectItem> for AlifeObjectItem {
+impl AlifeObjectReader for AlifeObjectItem {
   /// Read alife item object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let object: Self = Self {
@@ -35,9 +35,9 @@ impl AlifeObjectReader<AlifeObjectItem> for AlifeObjectItem {
     Ok(object)
   }
 
-  /// Import alife item object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife item object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -45,9 +45,9 @@ impl AlifeObjectReader<AlifeObjectItem> for AlifeObjectItem {
     })?;
 
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
-      condition: read_ini_field("condition", section)?,
-      upgrades_count: read_ini_field("upgrades_count", section)?,
+      base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
+      condition: read_ltx_field("condition", section)?,
+      upgrades_count: read_ltx_field("upgrades_count", section)?,
     })
   }
 }
@@ -64,12 +64,12 @@ impl AlifeObjectWriter for AlifeObjectItem {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("condition", self.condition.to_string())
       .set("is_closed", self.upgrades_count.to_string())
       .set("upgrades_count", self.upgrades_count.to_string());

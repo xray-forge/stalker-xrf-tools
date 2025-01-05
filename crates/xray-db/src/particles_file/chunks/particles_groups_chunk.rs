@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_group::ParticleGroup;
-use crate::export::file::{create_export_file, open_ini_config};
+use crate::export::file::{create_export_file, open_ltx_config};
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -61,13 +61,13 @@ impl ParticlesGroupsChunk {
   pub fn import(path: &Path) -> DatabaseResult<Self> {
     log::info!("Importing particles groups: {:?}", path);
 
-    let ini: Ltx = open_ini_config(&path.join("groups.ltx"))?;
+    let ltx: Ltx = open_ltx_config(&path.join("groups.ltx"))?;
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
-    for (section_name, section) in &ini {
+    for (section_name, section) in &ltx {
       if let Some(meta_field) = section.get(META_TYPE_FIELD) {
         if meta_field == ParticleGroup::META_TYPE {
-          groups.push(ParticleGroup::import(section_name, &ini)?);
+          groups.push(ParticleGroup::import(section_name, &ltx)?);
         }
       }
     }
@@ -79,13 +79,13 @@ impl ParticlesGroupsChunk {
 
   /// Export particles groups data into provided path.
   pub fn export(&self, path: &Path) -> DatabaseResult {
-    let mut particles_effects_ini: Ltx = Ltx::new();
+    let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for group in &self.groups {
-      group.export(&group.name, &mut particles_effects_ini)?;
+      group.export(&group.name, &mut particles_effects_ltx)?;
     }
 
-    particles_effects_ini.write_to(&mut create_export_file(&path.join("groups.ltx"))?)?;
+    particles_effects_ltx.write_to(&mut create_export_file(&path.join("groups.ltx"))?)?;
 
     log::info!("Exported groups chunk");
 

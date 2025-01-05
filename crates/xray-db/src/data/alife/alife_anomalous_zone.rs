@@ -5,7 +5,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::time::Time;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -27,9 +27,9 @@ impl AlifeObjectReader for AlifeAnomalousZone {
     })
   }
 
-  /// Import anomalous zone object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import anomalous zone object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -37,8 +37,8 @@ impl AlifeObjectReader for AlifeAnomalousZone {
     })?;
 
     Ok(Self {
-      base: AlifeObjectAnomalyZone::import(section_name, ini)?,
-      last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
+      base: AlifeObjectAnomalyZone::import(section_name, ltx)?,
+      last_spawn_time: Time::import_from_string(&read_ltx_field::<String>(
         "last_spawn_time",
         section,
       )?)?,
@@ -57,11 +57,11 @@ impl AlifeObjectWriter for AlifeAnomalousZone {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini.with_section(section).set(
+    ltx.with_section(section_name).set(
       "last_spawn_time",
       Time::export_to_string(self.last_spawn_time.as_ref()),
     );

@@ -3,7 +3,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -95,9 +95,9 @@ impl PatrolPoint {
     Ok(())
   }
 
-  /// Import patrol point data from ini config.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import patrol point data from ltx config.
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Patrol point section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -105,18 +105,18 @@ impl PatrolPoint {
     })?;
 
     Ok(Self {
-      name: read_ini_field("name", section)?,
-      position: read_ini_field("position", section)?,
-      flags: read_ini_field("flags", section)?,
-      level_vertex_id: read_ini_field("level_vertex_id", section)?,
-      game_vertex_id: read_ini_field("game_vertex_id", section)?,
+      name: read_ltx_field("name", section)?,
+      position: read_ltx_field("position", section)?,
+      flags: read_ltx_field("flags", section)?,
+      level_vertex_id: read_ltx_field("level_vertex_id", section)?,
+      game_vertex_id: read_ltx_field("game_vertex_id", section)?,
     })
   }
 
-  /// Export patrol point data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  /// Export patrol point data into ltx.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("name", &self.name)
       .set("flags", self.flags.to_string())
       .set("position", self.position.to_string())
@@ -133,7 +133,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -230,7 +230,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -245,7 +245,7 @@ mod tests {
     original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read: PatrolPoint = PatrolPoint::import("data", &open_ini_config(config_path)?)?;
+    let read: PatrolPoint = PatrolPoint::import("data", &open_ltx_config(config_path)?)?;
 
     assert_eq!(read, original);
 

@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -35,9 +35,9 @@ impl GraphLevelPoint {
     Ok(())
   }
 
-  /// Import graph level point from ini file.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import graph level point from ltx file.
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Graph level point section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -45,16 +45,16 @@ impl GraphLevelPoint {
     })?;
 
     Ok(Self {
-      position: read_ini_field("position", section)?,
-      level_vertex_id: read_ini_field("level_vertex_id", section)?,
-      distance: read_ini_field("distance", section)?,
+      position: read_ltx_field("position", section)?,
+      level_vertex_id: read_ltx_field("level_vertex_id", section)?,
+      distance: read_ltx_field("distance", section)?,
     })
   }
 
-  /// Export graph level point data into ini file.
-  pub fn export(&self, section: &str, ini: &mut Ltx) {
-    ini
-      .with_section(section)
+  /// Export graph level point data into ltx file.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+    ltx
+      .with_section(section_name)
       .set("position", self.position.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
       .set("distance", self.distance.to_string());
@@ -67,7 +67,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -128,7 +128,7 @@ mod tests {
       level_vertex_id: 236263,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -136,7 +136,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphLevelPoint::import("graph_level_point", &open_ini_config(config_path)?)?,
+      GraphLevelPoint::import("graph_level_point", &open_ltx_config(config_path)?)?,
       original
     );
 

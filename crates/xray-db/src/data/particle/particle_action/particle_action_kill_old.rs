@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -24,8 +24,8 @@ impl ParticleActionReader for ParticleActionKillOld {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -33,8 +33,8 @@ impl ParticleActionReader for ParticleActionKillOld {
     })?;
 
     Ok(Self {
-      age_limit: read_ini_field("age_limit", section)?,
-      kill_less_than: read_ini_field("kill_less_than", section)?,
+      age_limit: read_ltx_field("age_limit", section)?,
+      kill_less_than: read_ltx_field("kill_less_than", section)?,
     })
   }
 }
@@ -48,9 +48,9 @@ impl ParticleActionWriter for ParticleActionKillOld {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("age_limit", self.age_limit.to_string())
       .set("kill_less_than", self.kill_less_than.to_string());
 

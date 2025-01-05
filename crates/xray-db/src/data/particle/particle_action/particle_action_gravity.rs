@@ -4,7 +4,7 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -23,8 +23,8 @@ impl ParticleActionReader for ParticleActionGravity {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -32,7 +32,7 @@ impl ParticleActionReader for ParticleActionGravity {
     })?;
 
     Ok(Self {
-      direction: read_ini_field("direction", section)?,
+      direction: read_ltx_field("direction", section)?,
     })
   }
 }
@@ -45,9 +45,9 @@ impl ParticleActionWriter for ParticleActionGravity {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("direction", self.direction.to_string());
 
     Ok(())
@@ -62,7 +62,7 @@ mod tests {
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particle::particle_action::particle_action_gravity::ParticleActionGravity;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -115,7 +115,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionGravity = ParticleActionGravity {
@@ -132,7 +132,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = open_ltx_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionGravity::import("data", &source)?, original);
 

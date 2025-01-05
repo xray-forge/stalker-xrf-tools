@@ -130,19 +130,20 @@ a3 = n3
   fn write_line_separator() {
     use std::str;
 
-    let mut ini = Ltx::new();
-    ini
+    let mut ltx: Ltx = Ltx::new();
+
+    ltx
       .with_section("Section1")
       .set("Key1", "Value")
       .set("Key2", "Value");
-    ini
+    ltx
       .with_section("Section2")
       .set("Key1", "Value")
       .set("Key2", "Value");
 
     {
       let mut buf: Vec<u8> = Vec::new();
-      ini.write_to(&mut buf).unwrap();
+      ltx.write_to(&mut buf).unwrap();
 
       assert_eq!(
         "[Section1]\r\nKey1 = Value\r\nKey2 = Value\r\n\r\n[Section2]\r\nKey1 = Value\r\nKey2 = Value\r\n",
@@ -155,23 +156,23 @@ a3 = n3
   fn write_kv_separator() {
     use std::str;
 
-    let mut ini = Ltx::new();
+    let mut ltx: Ltx = Ltx::new();
 
-    ini
+    ltx
       .with_section(ROOT_SECTION)
       .set("Key1", "Value")
       .set("Key2", "Value");
-    ini
+    ltx
       .with_section("Section1")
       .set("Key1", "Value")
       .set("Key2", "Value");
-    ini
+    ltx
       .with_section("Section2")
       .set("Key1", "Value")
       .set("Key2", "Value");
 
     let mut buf: Vec<u8> = Vec::new();
-    ini.write_to(&mut buf).unwrap();
+    ltx.write_to(&mut buf).unwrap();
 
     // Test different line endings in Windows and Unix
     if cfg!(windows) {

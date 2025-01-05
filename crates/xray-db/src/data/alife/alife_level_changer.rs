@@ -5,7 +5,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -28,7 +28,7 @@ pub struct AlifeLevelChanger {
   pub save_marker: u16,
 }
 
-impl AlifeObjectReader<AlifeLevelChanger> for AlifeLevelChanger {
+impl AlifeObjectReader for AlifeLevelChanger {
   /// Read alife level changer object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let object: Self = Self {
@@ -54,9 +54,9 @@ impl AlifeObjectReader<AlifeLevelChanger> for AlifeLevelChanger {
     Ok(object)
   }
 
-  /// Import alife level changer object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife level changer object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -64,18 +64,18 @@ impl AlifeObjectReader<AlifeLevelChanger> for AlifeLevelChanger {
     })?;
 
     Ok(Self {
-      base: AlifeObjectSpaceRestrictor::import(section_name, ini)?,
-      dest_game_vertex_id: read_ini_field("dest_game_vertex_id", section)?,
-      dest_level_vertex_id: read_ini_field("dest_level_vertex_id", section)?,
-      dest_position: read_ini_field("dest_position", section)?,
-      dest_direction: read_ini_field("dest_direction", section)?,
-      angle_y: read_ini_field("angle_y", section)?,
-      dest_level_name: read_ini_field("dest_level_name", section)?,
-      dest_graph_point: read_ini_field("dest_graph_point", section)?,
-      silent_mode: read_ini_field("silent_mode", section)?,
-      enabled: read_ini_field("enabled", section)?,
-      hint: read_ini_field("hint", section)?,
-      save_marker: read_ini_field("save_marker", section)?,
+      base: AlifeObjectSpaceRestrictor::import(section_name, ltx)?,
+      dest_game_vertex_id: read_ltx_field("dest_game_vertex_id", section)?,
+      dest_level_vertex_id: read_ltx_field("dest_level_vertex_id", section)?,
+      dest_position: read_ltx_field("dest_position", section)?,
+      dest_direction: read_ltx_field("dest_direction", section)?,
+      angle_y: read_ltx_field("angle_y", section)?,
+      dest_level_name: read_ltx_field("dest_level_name", section)?,
+      dest_graph_point: read_ltx_field("dest_graph_point", section)?,
+      silent_mode: read_ltx_field("silent_mode", section)?,
+      enabled: read_ltx_field("enabled", section)?,
+      hint: read_ltx_field("hint", section)?,
+      save_marker: read_ltx_field("save_marker", section)?,
     })
   }
 }
@@ -102,12 +102,12 @@ impl AlifeObjectWriter for AlifeLevelChanger {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("dest_game_vertex_id", self.dest_game_vertex_id.to_string())
       .set(
         "dest_level_vertex_id",

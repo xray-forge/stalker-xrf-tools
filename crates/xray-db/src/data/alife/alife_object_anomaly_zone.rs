@@ -4,7 +4,7 @@ use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -19,7 +19,7 @@ pub struct AlifeObjectAnomalyZone {
   pub artefact_position_offset: u32,
 }
 
-impl AlifeObjectReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
+impl AlifeObjectReader for AlifeObjectAnomalyZone {
   /// Read anomaly zone object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -30,9 +30,9 @@ impl AlifeObjectReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
     })
   }
 
-  /// Import anomaly zone object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import anomaly zone object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -40,10 +40,10 @@ impl AlifeObjectReader<AlifeObjectAnomalyZone> for AlifeObjectAnomalyZone {
     })?;
 
     Ok(Self {
-      base: AlifeObjectCustomZone::import(section_name, ini)?,
-      offline_interactive_radius: read_ini_field("offline_interactive_radius", section)?,
-      artefact_spawn_count: read_ini_field("artefact_spawn_count", section)?,
-      artefact_position_offset: read_ini_field("artefact_position_offset", section)?,
+      base: AlifeObjectCustomZone::import(section_name, ltx)?,
+      offline_interactive_radius: read_ltx_field("offline_interactive_radius", section)?,
+      artefact_spawn_count: read_ltx_field("artefact_spawn_count", section)?,
+      artefact_position_offset: read_ltx_field("artefact_position_offset", section)?,
     })
   }
 }
@@ -61,12 +61,12 @@ impl AlifeObjectWriter for AlifeObjectAnomalyZone {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set(
         "offline_interactive_radius",
         self.offline_interactive_radius.to_string(),

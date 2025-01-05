@@ -9,6 +9,6 @@ pub trait ParticleActionReader<T: ParticleActionWriter = Self> {
   /// Read particle action data from chunk reader.
   fn read<B: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<T>;
 
-  /// Import particle action data from generic ini properties section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<T>;
+  /// Import particle action data from generic ltx properties section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<T>;
 }

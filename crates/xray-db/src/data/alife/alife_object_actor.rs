@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,7 @@ pub struct AlifeObjectActor {
   pub holder_id: u16,
 }
 
-impl AlifeObjectReader<AlifeObjectActor> for AlifeObjectActor {
+impl AlifeObjectReader for AlifeObjectActor {
   /// Read actor data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -32,9 +32,9 @@ impl AlifeObjectReader<AlifeObjectActor> for AlifeObjectActor {
     })
   }
 
-  /// Import actor data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import actor data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -42,10 +42,10 @@ impl AlifeObjectReader<AlifeObjectActor> for AlifeObjectActor {
     })?;
 
     Ok(Self {
-      base: AlifeObjectCreature::import(section_name, ini)?,
-      trader: AlifeObjectTraderAbstract::import(section_name, ini)?,
-      skeleton: AlifeObjectSkeleton::import(section_name, ini)?,
-      holder_id: read_ini_field("holder_id", section)?,
+      base: AlifeObjectCreature::import(section_name, ltx)?,
+      trader: AlifeObjectTraderAbstract::import(section_name, ltx)?,
+      skeleton: AlifeObjectSkeleton::import(section_name, ltx)?,
+      holder_id: read_ltx_field("holder_id", section)?,
     })
   }
 }
@@ -63,14 +63,14 @@ impl AlifeObjectWriter for AlifeObjectActor {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
-    self.trader.export(section, ini)?;
-    self.skeleton.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
+    self.trader.export(section_name, ltx)?;
+    self.skeleton.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("holder_id", self.holder_id.to_string());
 
     Ok(())

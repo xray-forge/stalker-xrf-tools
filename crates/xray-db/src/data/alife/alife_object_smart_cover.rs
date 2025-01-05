@@ -5,7 +5,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::shape::Shape;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -39,9 +39,9 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
     })
   }
 
-  /// Import smart cover object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import smart cover object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -49,14 +49,14 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
     })?;
 
     Ok(Self {
-      base: AlifeObjectDynamic::import(section_name, ini)?,
+      base: AlifeObjectDynamic::import(section_name, ltx)?,
       shape: Shape::import_list(section)?,
-      description: read_ini_field("description", section)?,
-      hold_position_time: read_ini_field("hold_position_time", section)?,
-      enter_min_enemy_distance: read_ini_field("enter_min_enemy_distance", section)?,
-      exit_min_enemy_distance: read_ini_field("exit_min_enemy_distance", section)?,
-      is_combat_cover: read_ini_field("is_combat_cover", section)?,
-      can_fire: read_ini_field("can_fire", section)?,
+      description: read_ltx_field("description", section)?,
+      hold_position_time: read_ltx_field("hold_position_time", section)?,
+      enter_min_enemy_distance: read_ltx_field("enter_min_enemy_distance", section)?,
+      exit_min_enemy_distance: read_ltx_field("exit_min_enemy_distance", section)?,
+      is_combat_cover: read_ltx_field("is_combat_cover", section)?,
+      can_fire: read_ltx_field("can_fire", section)?,
     })
   }
 }
@@ -78,12 +78,12 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("description", &self.description)
       .set("hold_position_time", self.hold_position_time.to_string())
       .set(
@@ -101,7 +101,7 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
       .set("is_combat_cover", self.is_combat_cover.to_string())
       .set("can_fire", self.can_fire.to_string());
 
-    Shape::export_list(&self.shape, section, ini);
+    Shape::export_list(&self.shape, section_name, ltx);
 
     Ok(())
   }

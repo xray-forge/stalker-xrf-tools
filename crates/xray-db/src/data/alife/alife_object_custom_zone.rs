@@ -4,7 +4,7 @@ use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestricto
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -34,9 +34,9 @@ impl AlifeObjectReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
     })
   }
 
-  /// Import ALife custom zone object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import ALife custom zone object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -44,12 +44,12 @@ impl AlifeObjectReader<AlifeObjectCustomZone> for AlifeObjectCustomZone {
     })?;
 
     Ok(Self {
-      base: AlifeObjectSpaceRestrictor::import(section_name, ini)?,
-      max_power: read_ini_field("max_power", section)?,
-      owner_id: read_ini_field("owner_id", section)?,
-      enabled_time: read_ini_field("enabled_time", section)?,
-      disabled_time: read_ini_field("disabled_time", section)?,
-      start_time_shift: read_ini_field("start_time_shift", section)?,
+      base: AlifeObjectSpaceRestrictor::import(section_name, ltx)?,
+      max_power: read_ltx_field("max_power", section)?,
+      owner_id: read_ltx_field("owner_id", section)?,
+      enabled_time: read_ltx_field("enabled_time", section)?,
+      disabled_time: read_ltx_field("disabled_time", section)?,
+      start_time_shift: read_ltx_field("start_time_shift", section)?,
     })
   }
 }
@@ -69,12 +69,12 @@ impl AlifeObjectWriter for AlifeObjectCustomZone {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("max_power", self.max_power.to_string())
       .set("owner_id", self.owner_id.to_string())
       .set("enabled_time", self.enabled_time.to_string())

@@ -24,9 +24,9 @@ pub fn create_export_file(path: &Path) -> DatabaseResult<File> {
   }
 }
 
-/// Try opening ini file.
-/// Map any ini reading operation errors as IO invalid input.
-pub fn open_ini_config(path: &Path) -> DatabaseResult<Ltx> {
+/// Try opening ltx file.
+/// Map any ltx reading operation errors as IO invalid input.
+pub fn open_ltx_config(path: &Path) -> DatabaseResult<Ltx> {
   Ltx::read_from_path(path).map_err(DatabaseError::from)
 }
 

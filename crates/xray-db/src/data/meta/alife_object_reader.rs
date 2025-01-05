@@ -9,8 +9,8 @@ pub trait AlifeObjectReader<T: AlifeObjectWriter = Self> {
   /// Read alife object data from chunk reader.
   fn read<B: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<T>;
 
-  /// Import alife object data from generic ini properties section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<T>;
+  /// Import alife object data from generic ltx properties section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<T>;
 
   fn verify(reader: &ChunkReader) {
     assert!(

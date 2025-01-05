@@ -6,7 +6,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::time::Time;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ pub struct AlifeZoneVisual {
   pub last_spawn_time: Option<Time>,
 }
 
-impl AlifeObjectReader<AlifeZoneVisual> for AlifeZoneVisual {
+impl AlifeObjectReader for AlifeZoneVisual {
   /// Read visual zone data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -40,9 +40,9 @@ impl AlifeObjectReader<AlifeZoneVisual> for AlifeZoneVisual {
     })
   }
 
-  /// Import visual zone data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import visual zone data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -50,11 +50,11 @@ impl AlifeObjectReader<AlifeZoneVisual> for AlifeZoneVisual {
     })?;
 
     Ok(Self {
-      base: AlifeObjectAnomalyZone::import(section_name, ini)?,
-      visual: AlifeObjectVisual::import(section_name, ini)?,
-      idle_animation: read_ini_field("idle_animation", section)?,
-      attack_animation: read_ini_field("attack_animation", section)?,
-      last_spawn_time: Time::import_from_string(&read_ini_field::<String>(
+      base: AlifeObjectAnomalyZone::import(section_name, ltx)?,
+      visual: AlifeObjectVisual::import(section_name, ltx)?,
+      idle_animation: read_ltx_field("idle_animation", section)?,
+      attack_animation: read_ltx_field("attack_animation", section)?,
+      last_spawn_time: Time::import_from_string(&read_ltx_field::<String>(
         "last_spawn_time",
         section,
       )?)?,
@@ -77,13 +77,13 @@ impl AlifeObjectWriter for AlifeZoneVisual {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
-    self.visual.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
+    self.visual.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("idle_animation", &self.idle_animation)
       .set("attack_animation", &self.attack_animation)
       .set(

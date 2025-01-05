@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::export::file::{create_export_file, open_ini_config};
-use crate::export::file_import::read_ini_field;
+use crate::export::file::{create_export_file, open_ltx_config};
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -55,19 +55,19 @@ impl SpawnHeaderChunk {
   }
 
   /// Import header data from provided path.
-  /// Parse ini files and populate spawn file.
+  /// Parse ltx files and populate spawn file.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let ini: Ltx = open_ini_config(&path.join("header.ltx"))?;
-    let section: &Section = ini
+    let ltx: Ltx = open_ltx_config(&path.join("header.ltx"))?;
+    let section: &Section = ltx
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
     Ok(Self {
-      version: read_ini_field("version", section)?,
-      guid: read_ini_field("guid", section)?,
-      graph_guid: read_ini_field("graph_guid", section)?,
-      objects_count: read_ini_field("objects", section)?,
-      levels_count: read_ini_field("level_count", section)?,
+      version: read_ltx_field("version", section)?,
+      guid: read_ltx_field("guid", section)?,
+      graph_guid: read_ltx_field("graph_guid", section)?,
+      objects_count: read_ltx_field("objects", section)?,
+      levels_count: read_ltx_field("level_count", section)?,
     })
   }
 

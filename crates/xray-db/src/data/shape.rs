@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -87,33 +87,33 @@ impl Shape {
     Ok(())
   }
 
-  /// Import shape objects from ini config file.
+  /// Import shape objects from ltx config file.
   pub fn import_list(section: &Section) -> DatabaseResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
-    let count: usize = read_ini_field("shapes_count", section)?;
+    let count: usize = read_ltx_field("shapes_count", section)?;
 
     for index in 0..count {
       let prefix: String = format!("shape.{index}");
-      let shape_type: String = read_ini_field(&format!("{prefix}.type"), section)?;
+      let shape_type: String = read_ltx_field(&format!("{prefix}.type"), section)?;
 
       match shape_type.as_str() {
         "sphere" => {
           shapes.push(Self::Sphere((
-            read_ini_field(&format!("{prefix}.center"), section)?,
-            read_ini_field(&format!("{prefix}.radius"), section)?,
+            read_ltx_field(&format!("{prefix}.center"), section)?,
+            read_ltx_field(&format!("{prefix}.radius"), section)?,
           )));
         }
         "box" => {
           shapes.push(Self::Box((
-            read_ini_field(&format!("{prefix}.a"), section)?,
-            read_ini_field(&format!("{prefix}.b"), section)?,
-            read_ini_field(&format!("{prefix}.c"), section)?,
-            read_ini_field(&format!("{prefix}.d"), section)?,
+            read_ltx_field(&format!("{prefix}.a"), section)?,
+            read_ltx_field(&format!("{prefix}.b"), section)?,
+            read_ltx_field(&format!("{prefix}.c"), section)?,
+            read_ltx_field(&format!("{prefix}.d"), section)?,
           )));
         }
         _ => {
           return Err(DatabaseInvalidChunkError::new_database_error(format!(
-            "Failed to parsed unknown type of shape - {shape_type} when importing from ini"
+            "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
           )))
         }
       }
@@ -122,10 +122,10 @@ impl Shape {
     Ok(shapes)
   }
 
-  /// Export shapes object to target ini file section.
-  pub fn export_list(shapes: &[Self], section: &str, ini: &mut Ltx) {
-    ini
-      .with_section(section)
+  /// Export shapes object to target ltx file section.
+  pub fn export_list(shapes: &[Self], section_name: &str, ltx: &mut Ltx) {
+    ltx
+      .with_section(section_name)
       .set("shapes_count", shapes.len().to_string());
 
     for (index, shape) in shapes.iter().enumerate() {
@@ -133,15 +133,15 @@ impl Shape {
 
       match shape {
         Self::Sphere(sphere) => {
-          ini
-            .with_section(section)
+          ltx
+            .with_section(section_name)
             .set(format!("{prefix}.type"), "sphere")
             .set(format!("{prefix}.center"), sphere.0.to_string())
             .set(format!("{prefix}.radius"), sphere.1.to_string());
         }
         Self::Box(square) => {
-          ini
-            .with_section(section)
+          ltx
+            .with_section(section_name)
             .set(format!("{prefix}.type"), "box")
             .set(format!("{prefix}.a"), square.0.to_string())
             .set(format!("{prefix}.b"), square.1.to_string())
@@ -159,7 +159,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -321,7 +321,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "test_import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "test_import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let original: Vec<Shape> = vec![
@@ -361,7 +361,7 @@ mod tests {
     ltx.write_to(&mut overwrite_file(config_path)?)?;
 
     assert_eq!(
-      Shape::import_list(open_ini_config(config_path)?.section("data").unwrap(),)?,
+      Shape::import_list(open_ltx_config(config_path)?.section("data").unwrap(),)?,
       original
     );
 

@@ -5,7 +5,7 @@ use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -20,7 +20,7 @@ pub struct AlifeSmartCover {
   pub loopholes: Vec<AlifeSmartCoverLoophole>,
 }
 
-impl AlifeObjectReader<AlifeSmartCover> for AlifeSmartCover {
+impl AlifeObjectReader for AlifeSmartCover {
   /// Read smart cover data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read::<T>(reader)?;
@@ -43,9 +43,9 @@ impl AlifeObjectReader<AlifeSmartCover> for AlifeSmartCover {
     })
   }
 
-  /// Import smart cover data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import smart cover data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -53,9 +53,9 @@ impl AlifeObjectReader<AlifeSmartCover> for AlifeSmartCover {
     })?;
 
     Ok(Self {
-      base: AlifeObjectSmartCover::import(section_name, ini)?,
-      last_description: read_ini_field("last_description", section)?,
-      loopholes: AlifeSmartCoverLoophole::string_to_list(&read_ini_field::<String>(
+      base: AlifeObjectSmartCover::import(section_name, ltx)?,
+      last_description: read_ltx_field("last_description", section)?,
+      loopholes: AlifeSmartCoverLoophole::string_to_list(&read_ltx_field::<String>(
         "loopholes",
         section,
       )?)?,
@@ -80,12 +80,12 @@ impl AlifeObjectWriter for AlifeSmartCover {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("last_description", &self.last_description)
       .set("loopholes", self.loopholes.len().to_string())
       .set(

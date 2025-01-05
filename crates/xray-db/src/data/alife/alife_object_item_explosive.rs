@@ -14,7 +14,7 @@ pub struct AlifeObjectItemExplosive {
   pub base: AlifeObjectItem,
 }
 
-impl AlifeObjectReader<AlifeObjectItemExplosive> for AlifeObjectItemExplosive {
+impl AlifeObjectReader for AlifeObjectItemExplosive {
   /// Read alife item object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -22,9 +22,9 @@ impl AlifeObjectReader<AlifeObjectItemExplosive> for AlifeObjectItemExplosive {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     Ok(Self {
-      base: AlifeObjectItem::import(section_name, ini)?,
+      base: AlifeObjectItem::import(section_name, ltx)?,
     })
   }
 }
@@ -38,9 +38,9 @@ impl AlifeObjectWriter for AlifeObjectItemExplosive {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
     Ok(())
   }

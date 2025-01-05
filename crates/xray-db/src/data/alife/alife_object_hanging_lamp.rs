@@ -5,7 +5,7 @@ use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -39,7 +39,7 @@ pub struct AlifeObjectHangingLamp {
   pub volumetric_distance: f32,
 }
 
-impl AlifeObjectReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
+impl AlifeObjectReader for AlifeObjectHangingLamp {
   /// Read hanging lamp data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -69,9 +69,9 @@ impl AlifeObjectReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
     })
   }
 
-  /// Import alife hanging lamp object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife hanging lamp object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -79,29 +79,29 @@ impl AlifeObjectReader<AlifeObjectHangingLamp> for AlifeObjectHangingLamp {
     })?;
 
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
-      skeleton: AlifeObjectSkeleton::import(section_name, ini)?,
-      main_color: read_ini_field("main_color", section)?,
-      main_brightness: read_ini_field("main_brightness", section)?,
-      color_animator: read_ini_field("color_animator", section)?,
-      main_range: read_ini_field("main_range", section)?,
-      light_flags: read_ini_field("light_flags", section)?,
-      startup_animation: read_ini_field("startup_animation", section)?,
-      fixed_bones: read_ini_field("fixed_bones", section)?,
-      health: read_ini_field("health", section)?,
-      virtual_size: read_ini_field("virtual_size", section)?,
-      ambient_radius: read_ini_field("ambient_radius", section)?,
-      ambient_power: read_ini_field("ambient_power", section)?,
-      ambient_texture: read_ini_field("ambient_texture", section)?,
-      light_texture: read_ini_field("light_texture", section)?,
-      light_bone: read_ini_field("light_bone", section)?,
-      spot_cone_angle: read_ini_field("spot_cone_angle", section)?,
-      glow_texture: read_ini_field("glow_texture", section)?,
-      glow_radius: read_ini_field("glow_radius", section)?,
-      light_ambient_bone: read_ini_field("light_ambient_bone", section)?,
-      volumetric_quality: read_ini_field("volumetric_quality", section)?,
-      volumetric_intensity: read_ini_field("volumetric_intensity", section)?,
-      volumetric_distance: read_ini_field("volumetric_distance", section)?,
+      base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
+      skeleton: AlifeObjectSkeleton::import(section_name, ltx)?,
+      main_color: read_ltx_field("main_color", section)?,
+      main_brightness: read_ltx_field("main_brightness", section)?,
+      color_animator: read_ltx_field("color_animator", section)?,
+      main_range: read_ltx_field("main_range", section)?,
+      light_flags: read_ltx_field("light_flags", section)?,
+      startup_animation: read_ltx_field("startup_animation", section)?,
+      fixed_bones: read_ltx_field("fixed_bones", section)?,
+      health: read_ltx_field("health", section)?,
+      virtual_size: read_ltx_field("virtual_size", section)?,
+      ambient_radius: read_ltx_field("ambient_radius", section)?,
+      ambient_power: read_ltx_field("ambient_power", section)?,
+      ambient_texture: read_ltx_field("ambient_texture", section)?,
+      light_texture: read_ltx_field("light_texture", section)?,
+      light_bone: read_ltx_field("light_bone", section)?,
+      spot_cone_angle: read_ltx_field("spot_cone_angle", section)?,
+      glow_texture: read_ltx_field("glow_texture", section)?,
+      glow_radius: read_ltx_field("glow_radius", section)?,
+      light_ambient_bone: read_ltx_field("light_ambient_bone", section)?,
+      volumetric_quality: read_ltx_field("volumetric_quality", section)?,
+      volumetric_intensity: read_ltx_field("volumetric_intensity", section)?,
+      volumetric_distance: read_ltx_field("volumetric_distance", section)?,
     })
   }
 }
@@ -140,13 +140,13 @@ impl AlifeObjectWriter for AlifeObjectHangingLamp {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
-    self.skeleton.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
+    self.skeleton.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("main_color", self.main_color.to_string())
       .set("main_brightness", self.main_brightness.to_string())
       .set("color_animator", &self.color_animator)

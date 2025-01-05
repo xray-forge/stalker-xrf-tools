@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -79,24 +79,24 @@ impl PatrolLink {
     Ok(())
   }
 
-  /// Import patrol point link from ini config.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import patrol point link from ltx config.
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Patrol point link section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let index: u32 = read_ini_field("index", section)?;
-    let count: usize = read_ini_field("count", section)?;
+    let index: u32 = read_ltx_field("index", section)?;
+    let count: usize = read_ltx_field("count", section)?;
 
     let mut links: Vec<(u32, f32)> = Vec::new();
 
     for link in 0..count {
       links.push((
-        read_ini_field(&format!("from.{link}"), section)?,
-        read_ini_field(&format!("weight.{link}"), section)?,
+        read_ltx_field(&format!("from.{link}"), section)?,
+        read_ltx_field(&format!("weight.{link}"), section)?,
       ))
     }
 
@@ -105,16 +105,16 @@ impl PatrolLink {
     Ok(Self { index, links })
   }
 
-  /// Export patrol link data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  /// Export patrol link data into ltx.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("index", self.index.to_string())
       .set("count", self.links.len().to_string());
 
     for (index, (from, weight)) in self.links.iter().enumerate() {
-      ini
-        .with_section(section)
+      ltx
+        .with_section(section_name)
         .set(format!("from.{index}"), from.to_string())
         .set(format!("weight.{index}"), weight.to_string());
     }
@@ -128,7 +128,7 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::patrol::patrol_link::PatrolLink;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -225,14 +225,14 @@ mod tests {
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
     original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read: PatrolLink = PatrolLink::import("data", &open_ini_config(config_path)?)?;
+    let read: PatrolLink = PatrolLink::import("data", &open_ltx_config(config_path)?)?;
 
     assert_eq!(read, original);
 

@@ -2,8 +2,8 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::error::database_not_implemented_error::DatabaseNotImplementedError;
-use crate::export::file::{create_export_file, open_ini_config};
-use crate::export::file_import::read_ini_field;
+use crate::export::file::{create_export_file, open_ltx_config};
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -50,18 +50,18 @@ impl ParticlesHeaderChunk {
   }
 
   /// Import header data from provided path.
-  /// Parse ini files and populate spawn file.
+  /// Parse ltx files and populate spawn file.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
     log::info!("Importing particles header: {:?}", path);
 
-    let ini: Ltx = open_ini_config(&path.join("header.ltx"))?;
-    let section: &Section = ini
+    let ltx: Ltx = open_ltx_config(&path.join("header.ltx"))?;
+    let section: &Section = ltx
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
     let header_chunk: Self = Self {
-      version: read_ini_field("version", section)?,
+      version: read_ltx_field("version", section)?,
     };
 
     assert_eq!(

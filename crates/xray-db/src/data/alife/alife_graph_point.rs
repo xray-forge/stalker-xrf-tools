@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,7 @@ pub struct AlifeGraphPoint {
   pub location3: u8,
 }
 
-impl AlifeObjectReader<AlifeGraphPoint> for AlifeGraphPoint {
+impl AlifeObjectReader for AlifeGraphPoint {
   /// Read graph point data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -34,9 +34,9 @@ impl AlifeObjectReader<AlifeGraphPoint> for AlifeGraphPoint {
     })
   }
 
-  /// Import graph data from ini file section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import graph data from ltx file section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -44,12 +44,12 @@ impl AlifeObjectReader<AlifeGraphPoint> for AlifeGraphPoint {
     })?;
 
     Ok(Self {
-      connection_point_name: read_ini_field("connection_point_name", section)?,
-      connection_level_name: read_ini_field("connection_point_name", section)?,
-      location0: read_ini_field("location0", section)?,
-      location1: read_ini_field("location1", section)?,
-      location2: read_ini_field("location2", section)?,
-      location3: read_ini_field("location3", section)?,
+      connection_point_name: read_ltx_field("connection_point_name", section)?,
+      connection_level_name: read_ltx_field("connection_point_name", section)?,
+      location0: read_ltx_field("location0", section)?,
+      location1: read_ltx_field("location1", section)?,
+      location2: read_ltx_field("location2", section)?,
+      location3: read_ltx_field("location3", section)?,
     })
   }
 }
@@ -68,10 +68,10 @@ impl AlifeObjectWriter for AlifeGraphPoint {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("connection_point_name", &self.connection_point_name)
       .set("connection_level_name", &self.connection_level_name)
       .set("location0", self.location0.to_string())

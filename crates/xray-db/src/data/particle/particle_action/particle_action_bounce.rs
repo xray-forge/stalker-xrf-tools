@@ -4,7 +4,7 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -30,8 +30,8 @@ impl ParticleActionReader for ParticleActionBounce {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -39,10 +39,10 @@ impl ParticleActionReader for ParticleActionBounce {
     })?;
 
     Ok(Self {
-      position: read_ini_field("position", section)?,
-      one_minus_friction: read_ini_field("one_minus_friction", section)?,
-      resilience: read_ini_field("resilience", section)?,
-      cutoff_sqr: read_ini_field("cutoff_sqr", section)?,
+      position: read_ltx_field("position", section)?,
+      one_minus_friction: read_ltx_field("one_minus_friction", section)?,
+      resilience: read_ltx_field("resilience", section)?,
+      cutoff_sqr: read_ltx_field("cutoff_sqr", section)?,
     })
   }
 }
@@ -59,9 +59,9 @@ impl ParticleActionWriter for ParticleActionBounce {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("position", self.position.to_string())
       .set("one_minus_friction", self.one_minus_friction.to_string())
       .set("resilience", self.resilience.to_string())
@@ -80,7 +80,7 @@ mod tests {
   use crate::data::particle::particle_action::particle_action_bounce::ParticleActionBounce;
   use crate::data::particle::particle_domain::ParticleDomain;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -162,7 +162,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionBounce = ParticleActionBounce {
@@ -208,7 +208,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = open_ltx_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionBounce::import("data", &source)?, original);
 

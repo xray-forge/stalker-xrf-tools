@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -45,24 +45,24 @@ impl ParticleEffectCollision {
   }
 
   /// Import optional particle effect collision data from provided path.
-  pub fn import_optional(section_name: &str, ini: &Ltx) -> DatabaseResult<Option<Self>> {
-    if ini.has_section(section_name) {
-      Self::import(section_name, ini).map(Some)
+  pub fn import_optional(section_name: &str, ltx: &Ltx) -> DatabaseResult<Option<Self>> {
+    if ltx.has_section(section_name) {
+      Self::import(section_name, ltx).map(Some)
     } else {
       Ok(None)
     }
   }
 
   /// Import particle effect collision data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle effect description section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
     assert_eq!(
       meta_type,
@@ -72,25 +72,25 @@ impl ParticleEffectCollision {
     );
 
     Ok(Self {
-      collide_one_minus_friction: read_ini_field("collide_one_minus_friction", section)?,
-      collide_resilience: read_ini_field("collide_resilience", section)?,
-      collide_sqr_cutoff: read_ini_field("collide_sqr_cutoff", section)?,
+      collide_one_minus_friction: read_ltx_field("collide_one_minus_friction", section)?,
+      collide_resilience: read_ltx_field("collide_resilience", section)?,
+      collide_sqr_cutoff: read_ltx_field("collide_sqr_cutoff", section)?,
     })
   }
 
   /// Export particle effect collision data into provided path.
-  pub fn export_optional(data: Option<&Self>, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
+  pub fn export_optional(data: Option<&Self>, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
     if let Some(data) = data {
-      data.export(section_name, ini)
+      data.export(section_name, ltx)
     } else {
       Ok(())
     }
   }
 
   /// Export particle effect collision data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set(
         "collide_one_minus_friction",

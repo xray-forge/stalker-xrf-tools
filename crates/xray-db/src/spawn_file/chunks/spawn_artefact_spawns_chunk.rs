@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
-use crate::export::file::{create_export_file, open_ini_config};
+use crate::export::file::{create_export_file, open_ltx_config};
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -64,12 +64,12 @@ impl SpawnArtefactSpawnsChunk {
   }
 
   /// Import artefact spawns data from provided path.
-  /// Parse ini files and populate spawn file.
+  /// Parse ltx files and populate spawn file.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let ini: Ltx = open_ini_config(&path.join("artefact_spawns.ltx"))?;
+    let ltx: Ltx = open_ltx_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
-    for (_, props) in &ini {
+    for (_, props) in &ltx {
       nodes.push(ArtefactSpawnPoint::import(props)?);
     }
 

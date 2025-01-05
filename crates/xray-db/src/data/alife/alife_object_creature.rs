@@ -5,7 +5,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_export::export_vector_to_string;
-use crate::export::file_import::{import_vector_from_string, read_ini_field};
+use crate::export::file_import::{import_vector_from_string, read_ltx_field};
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -25,7 +25,7 @@ pub struct AlifeObjectCreature {
   pub game_death_time: u64,
 }
 
-impl AlifeObjectReader<AlifeObjectCreature> for AlifeObjectCreature {
+impl AlifeObjectReader for AlifeObjectCreature {
   /// Read alife creature object data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -41,9 +41,9 @@ impl AlifeObjectReader<AlifeObjectCreature> for AlifeObjectCreature {
     })
   }
 
-  /// Import alife creature object from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife creature object from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -51,21 +51,21 @@ impl AlifeObjectReader<AlifeObjectCreature> for AlifeObjectCreature {
     })?;
 
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
-      team: read_ini_field("team", section)?,
-      squad: read_ini_field("squad", section)?,
-      group: read_ini_field("group", section)?,
-      health: read_ini_field("health", section)?,
-      dynamic_out_restrictions: import_vector_from_string(&read_ini_field::<String>(
+      base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
+      team: read_ltx_field("team", section)?,
+      squad: read_ltx_field("squad", section)?,
+      group: read_ltx_field("group", section)?,
+      health: read_ltx_field("health", section)?,
+      dynamic_out_restrictions: import_vector_from_string(&read_ltx_field::<String>(
         "dynamic_out_restrictions",
         section,
       )?)?,
-      dynamic_in_restrictions: import_vector_from_string(&read_ini_field::<String>(
+      dynamic_in_restrictions: import_vector_from_string(&read_ltx_field::<String>(
         "dynamic_in_restrictions",
         section,
       )?)?,
-      killer_id: read_ini_field("killer_id", section)?,
-      game_death_time: read_ini_field("game_death_time", section)?,
+      killer_id: read_ltx_field("killer_id", section)?,
+      game_death_time: read_ltx_field("game_death_time", section)?,
     })
   }
 }
@@ -90,12 +90,12 @@ impl AlifeObjectWriter for AlifeObjectCreature {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("team", self.team.to_string())
       .set("squad", self.squad.to_string())
       .set("group", self.group.to_string())
@@ -124,7 +124,7 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -193,7 +193,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let first: AlifeObjectCreature = AlifeObjectCreature {
@@ -253,7 +253,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = open_ltx_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(AlifeObjectCreature::import("first", &source)?, first);
     assert_eq!(AlifeObjectCreature::import("second", &source)?, second);

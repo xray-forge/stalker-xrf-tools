@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -22,8 +22,8 @@ impl ParticleActionReader for ParticleActionCopyVertex {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -31,7 +31,7 @@ impl ParticleActionReader for ParticleActionCopyVertex {
     })?;
 
     Ok(Self {
-      copy_position: read_ini_field("copy_position", section)?,
+      copy_position: read_ltx_field("copy_position", section)?,
     })
   }
 }
@@ -44,9 +44,9 @@ impl ParticleActionWriter for ParticleActionCopyVertex {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("copy_position", self.copy_position.to_string());
 
     Ok(())

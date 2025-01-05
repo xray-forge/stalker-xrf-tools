@@ -5,7 +5,7 @@ use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,7 @@ pub struct AlifeObjectPhysic {
   pub fixed_bones: String,
 }
 
-impl AlifeObjectReader<AlifeObjectPhysic> for AlifeObjectPhysic {
+impl AlifeObjectReader for AlifeObjectPhysic {
   /// Read alife physic object from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -33,9 +33,9 @@ impl AlifeObjectReader<AlifeObjectPhysic> for AlifeObjectPhysic {
     })
   }
 
-  /// Import alife physic object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife physic object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -43,11 +43,11 @@ impl AlifeObjectReader<AlifeObjectPhysic> for AlifeObjectPhysic {
     })?;
 
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
-      skeleton: AlifeObjectSkeleton::import(section_name, ini)?,
-      physic_type: read_ini_field("physic_type", section)?,
-      mass: read_ini_field("mass", section)?,
-      fixed_bones: read_ini_field("fixed_bones", section)?,
+      base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
+      skeleton: AlifeObjectSkeleton::import(section_name, ltx)?,
+      physic_type: read_ltx_field("physic_type", section)?,
+      mass: read_ltx_field("mass", section)?,
+      fixed_bones: read_ltx_field("fixed_bones", section)?,
     })
   }
 }
@@ -66,13 +66,13 @@ impl AlifeObjectWriter for AlifeObjectPhysic {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
-    self.skeleton.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
+    self.skeleton.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("physic_type", self.physic_type.to_string())
       .set("mass", self.mass.to_string())
       .set("fixed_bones", &self.fixed_bones);

@@ -4,7 +4,7 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -33,8 +33,8 @@ impl ParticleActionReader for ParticleActionTargetColor {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -42,11 +42,11 @@ impl ParticleActionReader for ParticleActionTargetColor {
     })?;
 
     Ok(Self {
-      color: read_ini_field("color", section)?,
-      alpha: read_ini_field("alpha", section)?,
-      scale: read_ini_field("scale", section)?,
-      time_from: read_ini_field("time_from", section)?,
-      time_to: read_ini_field("time_to", section)?,
+      color: read_ltx_field("color", section)?,
+      alpha: read_ltx_field("alpha", section)?,
+      scale: read_ltx_field("scale", section)?,
+      time_from: read_ltx_field("time_from", section)?,
+      time_to: read_ltx_field("time_to", section)?,
     })
   }
 }
@@ -63,9 +63,9 @@ impl ParticleActionWriter for ParticleActionTargetColor {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("color", self.color.to_string())
       .set("alpha", self.alpha.to_string())
       .set("scale", self.scale.to_string())

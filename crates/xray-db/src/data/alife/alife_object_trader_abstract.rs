@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -41,9 +41,9 @@ impl AlifeObjectReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract 
     })
   }
 
-  /// Import trader data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import trader data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -51,16 +51,16 @@ impl AlifeObjectReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract 
     })?;
 
     Ok(Self {
-      money: read_ini_field("money", section)?,
-      specific_character: read_ini_field("specific_character", section)?,
-      trader_flags: read_ini_field("trader_flags", section)?,
-      character_profile: read_ini_field("character_profile", section)?,
-      community_index: read_ini_field("community_index", section)?,
-      rank: read_ini_field("rank", section)?,
-      reputation: read_ini_field("reputation", section)?,
-      character_name: read_ini_field("character_name", section)?,
-      dead_body_can_take: read_ini_field("dead_body_can_take", section)?,
-      dead_body_closed: read_ini_field("dead_body_closed", section)?,
+      money: read_ltx_field("money", section)?,
+      specific_character: read_ltx_field("specific_character", section)?,
+      trader_flags: read_ltx_field("trader_flags", section)?,
+      character_profile: read_ltx_field("character_profile", section)?,
+      community_index: read_ltx_field("community_index", section)?,
+      rank: read_ltx_field("rank", section)?,
+      reputation: read_ltx_field("reputation", section)?,
+      character_name: read_ltx_field("character_name", section)?,
+      dead_body_can_take: read_ltx_field("dead_body_can_take", section)?,
+      dead_body_closed: read_ltx_field("dead_body_closed", section)?,
     })
   }
 }
@@ -83,10 +83,10 @@ impl AlifeObjectWriter for AlifeObjectTraderAbstract {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("money", self.money.to_string())
       .set("specific_character", &self.specific_character)
       .set("trader_flags", self.trader_flags.to_string())

@@ -5,7 +5,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::data::shape::Shape;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -19,7 +19,7 @@ pub struct AlifeObjectSpaceRestrictor {
   pub restrictor_type: u8,
 }
 
-impl AlifeObjectReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestrictor {
+impl AlifeObjectReader for AlifeObjectSpaceRestrictor {
   /// Read generic space restrictor data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -30,8 +30,8 @@ impl AlifeObjectReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestricto
   }
 
   /// Import generic space restrictor data from the chunk.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -39,9 +39,9 @@ impl AlifeObjectReader<AlifeObjectSpaceRestrictor> for AlifeObjectSpaceRestricto
     })?;
 
     Ok(Self {
-      base: AlifeObjectAbstract::import(section_name, ini)?,
+      base: AlifeObjectAbstract::import(section_name, ltx)?,
       shape: Shape::import_list(section)?,
-      restrictor_type: read_ini_field("restrictor_type", section)?,
+      restrictor_type: read_ltx_field("restrictor_type", section)?,
     })
   }
 }
@@ -57,15 +57,15 @@ impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("restrictor_type", self.restrictor_type.to_string());
 
-    Shape::export_list(&self.shape, section, ini);
+    Shape::export_list(&self.shape, section_name, ltx);
 
     Ok(())
   }
@@ -81,7 +81,7 @@ mod tests {
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::data::shape::Shape;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use std::fs::File;
@@ -147,7 +147,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -194,7 +194,7 @@ mod tests {
 
     ltx.write_to(&mut file)?;
 
-    let source: Ltx = open_ini_config(config_path)?;
+    let source: Ltx = open_ltx_config(config_path)?;
 
     assert_eq!(AlifeObjectSpaceRestrictor::import("first", &source)?, first);
     assert_eq!(

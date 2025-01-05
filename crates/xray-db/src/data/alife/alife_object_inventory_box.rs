@@ -4,7 +4,7 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -19,7 +19,7 @@ pub struct AlifeObjectInventoryBox {
   pub tip: String,
 }
 
-impl AlifeObjectReader<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
+impl AlifeObjectReader for AlifeObjectInventoryBox {
   /// Read inventory object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -30,9 +30,9 @@ impl AlifeObjectReader<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
     })
   }
 
-  /// Import alife inventory box object from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife inventory box object from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -40,10 +40,10 @@ impl AlifeObjectReader<AlifeObjectInventoryBox> for AlifeObjectInventoryBox {
     })?;
 
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
-      can_take: read_ini_field("can_take", section)?,
-      is_closed: read_ini_field("is_closed", section)?,
-      tip: read_ini_field("tip", section)?,
+      base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
+      can_take: read_ltx_field("can_take", section)?,
+      is_closed: read_ltx_field("is_closed", section)?,
+      tip: read_ltx_field("tip", section)?,
     })
   }
 }
@@ -61,12 +61,12 @@ impl AlifeObjectWriter for AlifeObjectInventoryBox {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("can_take", self.can_take.to_string())
       .set("is_closed", self.is_closed.to_string())
       .set("tip", &self.tip);

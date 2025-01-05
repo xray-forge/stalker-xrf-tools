@@ -6,7 +6,7 @@ use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ pub struct AlifeObjectHelicopter {
   pub engine_sound: String,
 }
 
-impl AlifeObjectReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
+impl AlifeObjectReader for AlifeObjectHelicopter {
   /// Read helicopter data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -34,9 +34,9 @@ impl AlifeObjectReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
     })
   }
 
-  /// Import helicopter object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import helicopter object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -44,11 +44,11 @@ impl AlifeObjectReader<AlifeObjectHelicopter> for AlifeObjectHelicopter {
     })?;
 
     Ok(Self {
-      base: AlifeObjectDynamicVisual::import(section_name, ini)?,
-      skeleton: AlifeObjectSkeleton::import(section_name, ini)?,
-      motion: AlifeObjectMotion::import(section_name, ini)?,
-      startup_animation: read_ini_field("startup_animation", section)?,
-      engine_sound: read_ini_field("engine_sound", section)?,
+      base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
+      skeleton: AlifeObjectSkeleton::import(section_name, ltx)?,
+      motion: AlifeObjectMotion::import(section_name, ltx)?,
+      startup_animation: read_ltx_field("startup_animation", section)?,
+      engine_sound: read_ltx_field("engine_sound", section)?,
     })
   }
 }
@@ -67,14 +67,14 @@ impl AlifeObjectWriter for AlifeObjectHelicopter {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
-    self.motion.export(section, ini)?;
-    self.skeleton.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
+    self.motion.export(section_name, ltx)?;
+    self.skeleton.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("startup_animation", &self.startup_animation)
       .set("engine_sound", &self.engine_sound);
 

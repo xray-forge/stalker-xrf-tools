@@ -3,7 +3,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -24,8 +24,8 @@ impl ParticleActionReader for ParticleActionSpeedLimit {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -33,8 +33,8 @@ impl ParticleActionReader for ParticleActionSpeedLimit {
     })?;
 
     Ok(Self {
-      min_speed: read_ini_field("min_speed", section)?,
-      max_speed: read_ini_field("max_speed", section)?,
+      min_speed: read_ltx_field("min_speed", section)?,
+      max_speed: read_ltx_field("max_speed", section)?,
     })
   }
 }
@@ -48,9 +48,9 @@ impl ParticleActionWriter for ParticleActionSpeedLimit {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("min_speed", self.min_speed.to_string())
       .set("max_speed", self.max_speed.to_string());
 

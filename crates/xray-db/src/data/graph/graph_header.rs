@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -44,9 +44,9 @@ impl GraphHeader {
     Ok(())
   }
 
-  /// Import graph header from ini file.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import graph header from ltx file.
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Graph section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -54,18 +54,18 @@ impl GraphHeader {
     })?;
 
     Ok(Self {
-      version: read_ini_field("version", section)?,
-      vertices_count: read_ini_field("vertex_count", section)?,
-      edges_count: read_ini_field("edges_count", section)?,
-      points_count: read_ini_field("point_count", section)?,
-      levels_count: read_ini_field("level_count", section)?,
-      guid: read_ini_field("guid", section)?,
+      version: read_ltx_field("version", section)?,
+      vertices_count: read_ltx_field("vertex_count", section)?,
+      edges_count: read_ltx_field("edges_count", section)?,
+      points_count: read_ltx_field("point_count", section)?,
+      levels_count: read_ltx_field("level_count", section)?,
+      guid: read_ltx_field("guid", section)?,
     })
   }
 
-  /// Export graph header data into level ini.
-  pub fn export(&self, ini: &mut Ltx) {
-    ini
+  /// Export graph header data into level ltx.
+  pub fn export(&self, ltx: &mut Ltx) {
+    ltx
       .with_section("header")
       .set("version", self.version.to_string())
       .set("vertex_count", self.vertices_count.to_string())
@@ -81,7 +81,7 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_header::GraphHeader;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -149,7 +149,7 @@ mod tests {
       guid: uuid!("23e55044-10b1-426f-9247-bb680e5fe0c8"),
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -158,7 +158,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphHeader::import("header", &open_ini_config(config_path)?)?,
+      GraphHeader::import("header", &open_ltx_config(config_path)?)?,
       original
     );
 

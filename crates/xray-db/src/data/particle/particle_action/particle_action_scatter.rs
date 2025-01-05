@@ -4,7 +4,7 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -29,8 +29,8 @@ impl ParticleActionReader for ParticleActionScatter {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -38,10 +38,10 @@ impl ParticleActionReader for ParticleActionScatter {
     })?;
 
     Ok(Self {
-      center: read_ini_field("center", section)?,
-      magnitude: read_ini_field("magnitude", section)?,
-      epsilon: read_ini_field("epsilon", section)?,
-      max_radius: read_ini_field("max_radius", section)?,
+      center: read_ltx_field("center", section)?,
+      magnitude: read_ltx_field("magnitude", section)?,
+      epsilon: read_ltx_field("epsilon", section)?,
+      max_radius: read_ltx_field("max_radius", section)?,
     })
   }
 }
@@ -58,9 +58,9 @@ impl ParticleActionWriter for ParticleActionScatter {
   }
 
   /// Export scatter action data.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("center", self.center.to_string())
       .set("magnitude", self.magnitude.to_string())
       .set("epsilon", self.epsilon.to_string())

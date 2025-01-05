@@ -4,7 +4,7 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -25,8 +25,8 @@ impl ParticleActionReader for ParticleActionTargetVelocity {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -34,8 +34,8 @@ impl ParticleActionReader for ParticleActionTargetVelocity {
     })?;
 
     Ok(Self {
-      velocity: read_ini_field("velocity", section)?,
-      scale: read_ini_field("scale", section)?,
+      velocity: read_ltx_field("velocity", section)?,
+      scale: read_ltx_field("scale", section)?,
     })
   }
 }
@@ -49,9 +49,9 @@ impl ParticleActionWriter for ParticleActionTargetVelocity {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("velocity", self.velocity.to_string())
       .set("scale", self.scale.to_string());
 

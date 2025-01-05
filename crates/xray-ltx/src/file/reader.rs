@@ -24,7 +24,7 @@ impl Ltx {
       .into_inherited()
   }
 
-  /// Read from a file as generic ini with LTX descriptor filled.
+  /// Read from a file as generic ltx with LTX descriptor filled.
   pub fn read_from_path<P: AsRef<Path>>(filename: P) -> LtxResult<Self> {
     let mut ltx: Self = Self::read_from(&mut File::open(filename.as_ref())?)?;
 
@@ -34,7 +34,7 @@ impl Ltx {
     Ok(ltx)
   }
 
-  /// Read from a reader as generic ini with LTX descriptor filled.
+  /// Read from a reader as generic ltx with LTX descriptor filled.
   pub fn read_from<R: Read>(reader: &mut R) -> LtxResult<Self> {
     let mut raw_data: Vec<u8> = Vec::new();
     let raw_data_read: usize = reader.read_to_end(&mut raw_data)?;

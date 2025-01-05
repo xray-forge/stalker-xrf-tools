@@ -4,7 +4,7 @@ use crate::data::alife::alife_object_item::AlifeObjectItem;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ pub struct AlifeObjectItemWeapon {
   pub elapsed_grenades: u8,
 }
 
-impl AlifeObjectReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
+impl AlifeObjectReader for AlifeObjectItemWeapon {
   /// Read alife item object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -36,9 +36,9 @@ impl AlifeObjectReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
     })
   }
 
-  /// Import alife weapon item object data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife weapon item object data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -46,13 +46,13 @@ impl AlifeObjectReader<AlifeObjectItemWeapon> for AlifeObjectItemWeapon {
     })?;
 
     Ok(Self {
-      base: AlifeObjectItem::import(section_name, ini)?,
-      ammo_current: read_ini_field("ammo_current", section)?,
-      ammo_elapsed: read_ini_field("ammo_elapsed", section)?,
-      weapon_state: read_ini_field("weapon_state", section)?,
-      addon_flags: read_ini_field("addon_flags", section)?,
-      ammo_type: read_ini_field("ammo_type", section)?,
-      elapsed_grenades: read_ini_field("elapsed_grenades", section)?,
+      base: AlifeObjectItem::import(section_name, ltx)?,
+      ammo_current: read_ltx_field("ammo_current", section)?,
+      ammo_elapsed: read_ltx_field("ammo_elapsed", section)?,
+      weapon_state: read_ltx_field("weapon_state", section)?,
+      addon_flags: read_ltx_field("addon_flags", section)?,
+      ammo_type: read_ltx_field("ammo_type", section)?,
+      elapsed_grenades: read_ltx_field("elapsed_grenades", section)?,
     })
   }
 }
@@ -73,12 +73,12 @@ impl AlifeObjectWriter for AlifeObjectItemWeapon {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set("ammo_current", self.ammo_current.to_string())
       .set("ammo_elapsed", self.ammo_elapsed.to_string())
       .set("weapon_state", self.weapon_state.to_string())

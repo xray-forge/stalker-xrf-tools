@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -34,19 +34,19 @@ impl ArtefactSpawnPoint {
     Ok(())
   }
 
-  /// Import artefact spawn point data from ini section.
+  /// Import artefact spawn point data from ltx section.
   pub fn import(section: &Section) -> DatabaseResult<Self> {
     Ok(Self {
-      position: read_ini_field("position", section)?,
-      level_vertex_id: read_ini_field("level_vertex_id", section)?,
-      distance: read_ini_field("distance", section)?,
+      position: read_ltx_field("position", section)?,
+      level_vertex_id: read_ltx_field("level_vertex_id", section)?,
+      distance: read_ltx_field("distance", section)?,
     })
   }
 
-  /// Export artefact spawn point data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) {
-    ini
-      .with_section(section)
+  /// Export artefact spawn point data into ltx.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+    ltx
+      .with_section(section_name)
       .set("distance", self.distance.to_string())
       .set("position", self.position.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string());
@@ -59,7 +59,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -119,7 +119,7 @@ mod tests {
       distance: 6213.123,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -128,7 +128,7 @@ mod tests {
 
     assert_eq!(
       ArtefactSpawnPoint::import(
-        open_ini_config(config_path)?
+        open_ltx_config(config_path)?
           .section("artefact_spawn_point")
           .expect("0 point section"),
       )?,

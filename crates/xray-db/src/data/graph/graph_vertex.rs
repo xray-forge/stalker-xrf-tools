@@ -4,7 +4,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_export::export_vector_to_string;
-use crate::export::file_import::{read_ini_field, read_ini_u32_bytes_field};
+use crate::export::file_import::{read_ini_u32_bytes_field, read_ltx_field};
 use crate::types::{DatabaseResult, U32Bytes};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -55,9 +55,9 @@ impl GraphVertex {
     Ok(())
   }
 
-  /// Import graph vertex from ini file.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import graph vertex from ltx file.
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Graph vertex section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -65,22 +65,22 @@ impl GraphVertex {
     })?;
 
     Ok(Self {
-      level_point: read_ini_field("level_point", section)?,
-      game_point: read_ini_field("game_point", section)?,
-      level_id: read_ini_field("level_id", section)?,
-      level_vertex_id: read_ini_field("level_vertex_id", section)?,
+      level_point: read_ltx_field("level_point", section)?,
+      game_point: read_ltx_field("game_point", section)?,
+      level_id: read_ltx_field("level_id", section)?,
+      level_vertex_id: read_ltx_field("level_vertex_id", section)?,
       vertex_type: read_ini_u32_bytes_field("vertex_type", section)?,
-      edges_offset: read_ini_field("edge_offset", section)?,
-      level_points_offset: read_ini_field("level_point_offset", section)?,
-      edges_count: read_ini_field("edge_count", section)?,
-      level_points_count: read_ini_field("level_point_count", section)?,
+      edges_offset: read_ltx_field("edge_offset", section)?,
+      level_points_offset: read_ltx_field("level_point_offset", section)?,
+      edges_count: read_ltx_field("edge_count", section)?,
+      level_points_count: read_ltx_field("level_point_count", section)?,
     })
   }
 
-  /// Export graph vertex data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) {
-    ini
-      .with_section(section)
+  /// Export graph vertex data into ltx.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+    ltx
+      .with_section(section_name)
       .set("level_point", self.level_point.to_string())
       .set("game_point", self.game_point.to_string())
       .set("level_id", self.level_id.to_string())
@@ -107,7 +107,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -180,7 +180,7 @@ mod tests {
       level_points_count: 63,
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -189,7 +189,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphVertex::import("graph_vertex", &open_ini_config(config_path)?)?,
+      GraphVertex::import("graph_vertex", &open_ltx_config(config_path)?)?,
       original
     );
 

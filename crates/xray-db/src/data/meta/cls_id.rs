@@ -6,7 +6,7 @@ use enum_map::Enum;
 use serde::{Deserialize, Serialize};
 use std::ops::Index;
 
-/// todo: Add script to parse system ini and read all the data from ini/txt file instead.
+/// todo: Add script to parse system ltx and read all the data from ltx/txt file instead.
 #[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize, Eq)]
 pub enum ClsId {
   AiCrow,
@@ -109,9 +109,10 @@ pub enum ClsId {
 }
 
 impl ClsId {
-  pub fn from_section(section: &str) -> Self {
+  pub fn from_section(section_name: &str) -> Self {
+    // todo: Implement with From<T> trait?
     SECTION_TO_CLS_ID
-      .get(section)
+      .get(section_name)
       .cloned()
       .expect("Unexpected section provided for clsid matching")
   }
@@ -119,6 +120,7 @@ impl ClsId {
 
 impl AlifeClass {
   pub fn from_cls_id(cls_id: &ClsId) -> AlifeClass {
+    // todo: Implement with From<T> trait?
     CLS_ID_TO_CLASS.index(cls_id.clone()).clone()
   }
 }

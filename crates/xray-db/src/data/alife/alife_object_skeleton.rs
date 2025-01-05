@@ -4,7 +4,7 @@ use crate::constants::FLAG_SKELETON_SAVED_DATA;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ pub struct AlifeObjectSkeleton {
   pub source_id: u16,
 }
 
-impl AlifeObjectReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
+impl AlifeObjectReader for AlifeObjectSkeleton {
   /// Read skeleton data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let object = Self {
@@ -34,9 +34,9 @@ impl AlifeObjectReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
     Ok(object)
   }
 
-  /// Import skeleton data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import skeleton data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -44,9 +44,9 @@ impl AlifeObjectReader<AlifeObjectSkeleton> for AlifeObjectSkeleton {
     })?;
 
     Ok(Self {
-      name: read_ini_field("name", section)?,
-      flags: read_ini_field("flags", section)?,
-      source_id: read_ini_field("source_id", section)?,
+      name: read_ltx_field("name", section)?,
+      flags: read_ltx_field("flags", section)?,
+      source_id: read_ltx_field("source_id", section)?,
     })
   }
 }
@@ -62,10 +62,10 @@ impl AlifeObjectWriter for AlifeObjectSkeleton {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("name", &self.name)
       .set("flags", self.flags.to_string())
       .set("source_id", self.source_id.to_string());
@@ -81,7 +81,7 @@ mod tests {
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -131,7 +131,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ini");
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let first: AlifeObjectSkeleton = AlifeObjectSkeleton {
@@ -153,7 +153,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ini_config(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = open_ltx_config(&get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(AlifeObjectSkeleton::import("first", &source)?, first);
     assert_eq!(AlifeObjectSkeleton::import("second", &source)?, second);

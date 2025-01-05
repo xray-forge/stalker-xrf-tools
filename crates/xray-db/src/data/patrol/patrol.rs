@@ -4,7 +4,7 @@ use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -123,20 +123,20 @@ impl Patrol {
   /// Import patrols data from provided path.
   pub fn import(
     section_name: &str,
-    patrols_ini: &Ltx,
-    patrol_points_ini: &Ltx,
-    patrol_links_ini: &Ltx,
+    patrols_ltx: &Ltx,
+    patrol_points_ltx: &Ltx,
+    patrol_links_ltx: &Ltx,
   ) -> DatabaseResult<Self> {
-    let section: &Section = patrols_ini.section(section_name).ok_or_else(|| {
+    let section: &Section = patrols_ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Patrol section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let name: String = read_ini_field("name", section)?;
-    let points_list: String = read_ini_field("points", section)?;
-    let links_count: usize = read_ini_field("links_count", section)?;
+    let name: String = read_ltx_field("name", section)?;
+    let points_list: String = read_ltx_field("points", section)?;
+    let links_count: usize = read_ltx_field("links_count", section)?;
 
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut links: Vec<PatrolLink> = Vec::new();
@@ -144,14 +144,14 @@ impl Patrol {
     for section in points_list.split(',').map(|it| it.trim()) {
       points.push(PatrolPoint::import(
         &format!("{}.{}", name, section),
-        patrol_points_ini,
+        patrol_points_ltx,
       )?);
     }
 
     for index in 0..links_count {
       links.push(PatrolLink::import(
         &format!("{}.{}", name, index),
-        patrol_links_ini,
+        patrol_links_ltx,
       )?);
     }
 
@@ -168,13 +168,13 @@ impl Patrol {
   /// Creates separate files for patrols, points and links.
   pub fn export(
     &self,
-    section: &str,
-    patrols_ini: &mut Ltx,
-    patrol_points_ini: &mut Ltx,
-    patrol_links_ini: &mut Ltx,
+    section_name: &str,
+    patrols_ltx: &mut Ltx,
+    patrol_points_ltx: &mut Ltx,
+    patrol_links_ltx: &mut Ltx,
   ) -> DatabaseResult {
-    patrols_ini
-      .with_section(section)
+    patrols_ltx
+      .with_section(section_name)
       .set("name", &self.name)
       .set(
         "points",
@@ -188,11 +188,11 @@ impl Patrol {
       .set("links_count", self.links.len().to_string());
 
     for point in &self.points {
-      point.export(&format!("{}.{}", self.name, point.name), patrol_points_ini)?;
+      point.export(&format!("{}.{}", self.name, point.name), patrol_points_ltx)?;
     }
 
     for (index, link) in self.links.iter().enumerate() {
-      link.export(&format!("{}.{}", self.name, index), patrol_links_ini)?;
+      link.export(&format!("{}.{}", self.name, index), patrol_links_ltx)?;
     }
 
     Ok(())
@@ -207,7 +207,7 @@ mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -377,11 +377,11 @@ mod tests {
     };
 
     let patrol_config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+      &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let points_config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "import_export_points.ini");
+      &get_absolute_test_sample_file_path(file!(), "import_export_points.ltx");
     let links_config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "import_export_links.ini");
+      &get_absolute_test_sample_file_path(file!(), "import_export_links.ltx");
 
     let mut patrol_file: File = overwrite_file(patrol_config_path)?;
     let mut points_file: File = overwrite_file(points_config_path)?;
@@ -404,9 +404,9 @@ mod tests {
 
     let read: Patrol = Patrol::import(
       &original.name,
-      &open_ini_config(patrol_config_path)?,
-      &open_ini_config(points_config_path)?,
-      &open_ini_config(links_config_path)?,
+      &open_ltx_config(patrol_config_path)?,
+      &open_ltx_config(points_config_path)?,
+      &open_ltx_config(links_config_path)?,
     )?;
 
     assert_eq!(read, original);

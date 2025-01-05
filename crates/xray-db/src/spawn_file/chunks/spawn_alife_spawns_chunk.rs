@@ -2,7 +2,7 @@ use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_base::AlifeObjectBase;
-use crate::export::file::{create_export_file, open_ini_config};
+use crate::export::file::{create_export_file, open_ltx_config};
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -87,11 +87,11 @@ impl SpawnALifeSpawnsChunk {
 
   /// Import alife spawns data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    let ini: Ltx = open_ini_config(&path.join("alife_spawns.ltx"))?;
+    let ltx: Ltx = open_ltx_config(&path.join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
-    for (section_name, _) in ini.iter() {
-      objects.push(AlifeObjectBase::import(section_name, &ini)?);
+    for (section_name, _) in ltx.iter() {
+      objects.push(AlifeObjectBase::import(section_name, &ltx)?);
     }
 
     log::info!("Imported alife spawns chunk");

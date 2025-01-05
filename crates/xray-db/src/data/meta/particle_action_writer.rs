@@ -7,5 +7,5 @@ use xray_ltx::Ltx;
 pub trait ParticleActionWriter: Debug + Send + Sync {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult;
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult;
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult;
 }

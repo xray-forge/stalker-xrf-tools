@@ -17,7 +17,7 @@ pub struct AlifeObjectShape {
   pub shape: Vec<Shape>,
 }
 
-impl AlifeObjectReader<AlifeObjectShape> for AlifeObjectShape {
+impl AlifeObjectReader for AlifeObjectShape {
   /// Read shape object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
@@ -26,16 +26,16 @@ impl AlifeObjectReader<AlifeObjectShape> for AlifeObjectShape {
     })
   }
 
-  /// Import alife shape object data from ini config.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife shape object data from ltx config.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
     Ok(Self {
-      base: AlifeObjectAbstract::import(section_name, ini)?,
+      base: AlifeObjectAbstract::import(section_name, ltx)?,
       shape: Shape::import_list(section)?,
     })
   }
@@ -52,11 +52,11 @@ impl AlifeObjectWriter for AlifeObjectShape {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    Shape::export_list(&self.shape, section, ini);
+    Shape::export_list(&self.shape, section_name, ltx);
 
     Ok(())
   }

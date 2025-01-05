@@ -6,7 +6,7 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
-use crate::export::file::{create_export_file, open_binary_file, open_ini_config};
+use crate::export::file::{create_export_file, open_binary_file, open_ltx_config};
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
@@ -109,34 +109,34 @@ impl SpawnGraphsChunk {
   /// Import graphs data from provided path.
   pub fn import<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
     let header: GraphHeader =
-      GraphHeader::import("header", &open_ini_config(&path.join("graphs_header.ltx"))?)?;
+      GraphHeader::import("header", &open_ltx_config(&path.join("graphs_header.ltx"))?)?;
 
-    let levels_ini: Ltx = open_ini_config(&path.join("graphs_levels.ltx"))?;
+    let levels_ltx: Ltx = open_ltx_config(&path.join("graphs_levels.ltx"))?;
     let mut levels: Vec<GraphLevel> = Vec::new();
 
     for index in 0..header.levels_count {
-      levels.push(GraphLevel::import(&index.to_string(), &levels_ini)?);
+      levels.push(GraphLevel::import(&index.to_string(), &levels_ltx)?);
     }
 
-    let vertices_ini: Ltx = open_ini_config(&path.join("graphs_vertices.ltx"))?;
+    let vertices_ltx: Ltx = open_ltx_config(&path.join("graphs_vertices.ltx"))?;
     let mut vertices: Vec<GraphVertex> = Vec::new();
 
     for index in 0..header.vertices_count {
-      vertices.push(GraphVertex::import(&index.to_string(), &vertices_ini)?);
+      vertices.push(GraphVertex::import(&index.to_string(), &vertices_ltx)?);
     }
 
-    let points_ini: Ltx = open_ini_config(&path.join("graphs_points.ltx"))?;
+    let points_ltx: Ltx = open_ltx_config(&path.join("graphs_points.ltx"))?;
     let mut points: Vec<GraphLevelPoint> = Vec::new();
 
     for index in 0..header.points_count {
-      points.push(GraphLevelPoint::import(&index.to_string(), &points_ini)?);
+      points.push(GraphLevelPoint::import(&index.to_string(), &points_ltx)?);
     }
 
-    let edges_ini: Ltx = open_ini_config(&path.join("graphs_edges.ltx"))?;
+    let edges_ltx: Ltx = open_ltx_config(&path.join("graphs_edges.ltx"))?;
     let mut edges: Vec<GraphEdge> = Vec::new();
 
     for index in 0..header.edges_count {
-      edges.push(GraphEdge::import(&index.to_string(), &edges_ini)?);
+      edges.push(GraphEdge::import(&index.to_string(), &edges_ltx)?);
     }
 
     let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::import_list::<T>(
@@ -158,49 +158,49 @@ impl SpawnGraphsChunk {
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
   pub fn export<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
-    let mut graphs_header_ini: Ltx = Ltx::new();
+    let mut graphs_header_ltx: Ltx = Ltx::new();
 
-    self.header.export(&mut graphs_header_ini);
+    self.header.export(&mut graphs_header_ltx);
 
-    graphs_header_ini.write_to(&mut create_export_file(&path.join("graphs_header.ltx"))?)?;
+    graphs_header_ltx.write_to(&mut create_export_file(&path.join("graphs_header.ltx"))?)?;
 
-    let mut graphs_level_ini: Ltx = Ltx::new();
+    let mut graphs_level_ltx: Ltx = Ltx::new();
 
     for (index, level) in self.levels.iter().enumerate() {
-      level.export(&index.to_string(), &mut graphs_level_ini);
+      level.export(&index.to_string(), &mut graphs_level_ltx);
     }
 
-    graphs_level_ini.write_to(&mut create_export_file(&path.join("graphs_levels.ltx"))?)?;
+    graphs_level_ltx.write_to(&mut create_export_file(&path.join("graphs_levels.ltx"))?)?;
 
     log::info!("Exported graph levels");
 
-    let mut graphs_vertices_ini: Ltx = Ltx::new();
+    let mut graphs_vertices_ltx: Ltx = Ltx::new();
 
     for (index, vertex) in self.vertices.iter().enumerate() {
-      vertex.export(&index.to_string(), &mut graphs_vertices_ini);
+      vertex.export(&index.to_string(), &mut graphs_vertices_ltx);
     }
 
-    graphs_vertices_ini.write_to(&mut create_export_file(&path.join("graphs_vertices.ltx"))?)?;
+    graphs_vertices_ltx.write_to(&mut create_export_file(&path.join("graphs_vertices.ltx"))?)?;
 
     log::info!("Exported graph vertices");
 
-    let mut graphs_points_ini: Ltx = Ltx::new();
+    let mut graphs_points_ltx: Ltx = Ltx::new();
 
     for (index, point) in self.points.iter().enumerate() {
-      point.export(&index.to_string(), &mut graphs_points_ini);
+      point.export(&index.to_string(), &mut graphs_points_ltx);
     }
 
-    graphs_points_ini.write_to(&mut create_export_file(&path.join("graphs_points.ltx"))?)?;
+    graphs_points_ltx.write_to(&mut create_export_file(&path.join("graphs_points.ltx"))?)?;
 
     log::info!("Exported graph points");
 
-    let mut graphs_edges_ini: Ltx = Ltx::new();
+    let mut graphs_edges_ltx: Ltx = Ltx::new();
 
     for (index, edge) in self.edges.iter().enumerate() {
-      edge.export(&index.to_string(), &mut graphs_edges_ini);
+      edge.export(&index.to_string(), &mut graphs_edges_ltx);
     }
 
-    graphs_edges_ini.write_to(&mut create_export_file(&path.join("graphs_edges.ltx"))?)?;
+    graphs_edges_ltx.write_to(&mut create_export_file(&path.join("graphs_edges.ltx"))?)?;
 
     log::info!("Exported graph edges");
 

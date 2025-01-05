@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -89,15 +89,15 @@ impl ParticleGroupEffect {
   }
 
   /// Import list of particles group effect data from provided path.
-  pub fn import_list(section_name: &str, ini: &Ltx) -> DatabaseResult<Vec<Self>> {
+  pub fn import_list(section_name: &str, ltx: &Ltx) -> DatabaseResult<Vec<Self>> {
     let mut effect_index: usize = 0;
     let mut effects: Vec<Self> = Vec::new();
 
     loop {
       let action_section_name: String = Self::get_effect_section(section_name, effect_index);
 
-      if ini.has_section(&action_section_name) {
-        effects.push(Self::import(&action_section_name, ini)?);
+      if ltx.has_section(&action_section_name) {
+        effects.push(Self::import(&action_section_name, ltx)?);
         effect_index += 1
       } else {
         break;
@@ -114,15 +114,15 @@ impl ParticleGroupEffect {
   }
 
   /// Import particles group effect data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle group effect section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
     assert_eq!(
       meta_type,
@@ -132,29 +132,29 @@ impl ParticleGroupEffect {
     );
 
     Ok(Self {
-      name: read_ini_field("name", section)?,
-      on_play_child_name: read_ini_field("on_play_child_name", section)?,
-      on_birth_child_name: read_ini_field("on_birth_child_name", section)?,
-      on_dead_child_name: read_ini_field("on_dead_child_name", section)?,
-      time_0: read_ini_field("time_0", section)?,
-      time_1: read_ini_field("time_1", section)?,
-      flags: read_ini_field("flags", section)?,
+      name: read_ltx_field("name", section)?,
+      on_play_child_name: read_ltx_field("on_play_child_name", section)?,
+      on_birth_child_name: read_ltx_field("on_birth_child_name", section)?,
+      on_dead_child_name: read_ltx_field("on_dead_child_name", section)?,
+      time_0: read_ltx_field("time_0", section)?,
+      time_1: read_ltx_field("time_1", section)?,
+      flags: read_ltx_field("flags", section)?,
     })
   }
 
   /// Export list of particles group effect data into provided path.
-  pub fn export_list(effects_old: &[Self], section_name: &str, ini: &mut Ltx) -> DatabaseResult {
+  pub fn export_list(effects_old: &[Self], section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
     for (index, effect) in effects_old.iter().enumerate() {
-      effect.export(&Self::get_effect_section(section_name, index), ini)?
+      effect.export(&Self::get_effect_section(section_name, index), ltx)?
     }
 
     Ok(())
   }
 
   /// Export particles group effect data into provided path.
-  pub fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("name", &self.name)
       .set("on_play_child_name", &self.on_play_child_name)
@@ -179,7 +179,7 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_group_effect::ParticleGroupEffect;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, ParticlesByteOrder, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -307,7 +307,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -325,7 +325,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      ParticleGroupEffect::import("data", &open_ini_config(config_path)?)?,
+      ParticleGroupEffect::import("data", &open_ltx_config(config_path)?)?,
       original
     );
 
@@ -334,7 +334,7 @@ mod tests {
 
   #[test]
   fn test_import_export_list() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export_list.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export_list.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -373,7 +373,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      ParticleGroupEffect::import_list("data", &open_ini_config(config_path)?)?,
+      ParticleGroupEffect::import_list("data", &open_ltx_config(config_path)?)?,
       original
     );
 

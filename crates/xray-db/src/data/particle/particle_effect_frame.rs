@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -50,24 +50,24 @@ impl ParticleEffectFrame {
   }
 
   /// Import optional particle effect frame data from provided path.
-  pub fn import_optional(section_name: &str, ini: &Ltx) -> DatabaseResult<Option<Self>> {
-    if ini.has_section(section_name) {
-      Self::import(section_name, ini).map(Some)
+  pub fn import_optional(section_name: &str, ltx: &Ltx) -> DatabaseResult<Option<Self>> {
+    if ltx.has_section(section_name) {
+      Self::import(section_name, ltx).map(Some)
     } else {
       Ok(None)
     }
   }
 
   /// Import particle effect frame data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle group '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
     assert_eq!(
       meta_type,
@@ -76,11 +76,11 @@ impl ParticleEffectFrame {
       Self::META_TYPE
     );
 
-    let texture_size: Vec<String> = read_ini_field::<String>("texture_size", section)?
+    let texture_size: Vec<String> = read_ltx_field::<String>("texture_size", section)?
       .split(',')
       .map(String::from)
       .collect();
-    let reserved: Vec<String> = read_ini_field::<String>("reserved", section)?
+    let reserved: Vec<String> = read_ltx_field::<String>("reserved", section)?
       .split(',')
       .map(String::from)
       .collect();
@@ -114,24 +114,24 @@ impl ParticleEffectFrame {
             "Failed to parse reserved Y value",
           )))?,
       ),
-      frame_dimension_x: read_ini_field("frame_dimension_x", section)?,
-      frame_count: read_ini_field("frame_count", section)?,
-      frame_speed: read_ini_field("frame_speed", section)?,
+      frame_dimension_x: read_ltx_field("frame_dimension_x", section)?,
+      frame_count: read_ltx_field("frame_count", section)?,
+      frame_speed: read_ltx_field("frame_speed", section)?,
     })
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export_optional(data: Option<&Self>, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
+  pub fn export_optional(data: Option<&Self>, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
     if let Some(data) = data {
-      data.export(section_name, ini)
+      data.export(section_name, ltx)
     } else {
       Ok(())
     }
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set(
@@ -155,7 +155,7 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -214,7 +214,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> DatabaseResult {
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -230,7 +230,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     let read: ParticleEffectFrame =
-      ParticleEffectFrame::import("data", &open_ini_config(config_path)?)?;
+      ParticleEffectFrame::import("data", &open_ltx_config(config_path)?)?;
 
     assert_eq!(read, original);
 

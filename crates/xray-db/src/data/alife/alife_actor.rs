@@ -4,7 +4,7 @@ use crate::data::alife::alife_object_actor::AlifeObjectActor;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -36,9 +36,9 @@ impl AlifeObjectReader for AlifeActor {
     Ok(object)
   }
 
-  /// Import actor data from ini file section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import actor data from ltx file section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -46,9 +46,9 @@ impl AlifeObjectReader for AlifeActor {
     })?;
 
     Ok(Self {
-      base: AlifeObjectActor::import(section_name, ini)?,
-      start_position_filled: read_ini_field("start_position_filled", section)?,
-      save_marker: read_ini_field("save_marker", section)?,
+      base: AlifeObjectActor::import(section_name, ltx)?,
+      start_position_filled: read_ltx_field("start_position_filled", section)?,
+      save_marker: read_ltx_field("save_marker", section)?,
     })
   }
 }
@@ -65,12 +65,12 @@ impl AlifeObjectWriter for AlifeActor {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set(
         "start_position_filled",
         self.start_position_filled.to_string(),

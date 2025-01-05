@@ -13,7 +13,7 @@ impl VerifyLtxCommand {
   /// Add command for verifying of ltx files.
   pub fn init() -> Command {
     Command::new(Self::NAME)
-      .about("Command to verification ltx and ini files")
+      .about("Command for verification of ltx and ini files")
       .arg(
         Arg::new("path")
           .help("Path to ltx file or folder with ltx files")

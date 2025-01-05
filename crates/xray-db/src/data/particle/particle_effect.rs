@@ -13,7 +13,7 @@ use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::{read_ini_field, read_ini_optional_field};
+use crate::export::file_import::{read_ini_optional_field, read_ltx_field};
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -237,15 +237,15 @@ impl ParticleEffect {
   }
 
   /// Import particle effect data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle effect section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
     })?;
 
-    let meta_type: String = read_ini_field(META_TYPE_FIELD, section)?;
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
     assert_eq!(
       meta_type,
@@ -260,8 +260,8 @@ impl ParticleEffect {
     loop {
       let action_section_name: String = Self::get_action_section(section_name, action_index);
 
-      if ini.has_section(&action_section_name) {
-        actions.push(ParticleAction::import(&action_section_name, ini)?);
+      if ltx.has_section(&action_section_name) {
+        actions.push(ParticleAction::import(&action_section_name, ltx)?);
         action_index += 1
       } else {
         break;
@@ -275,34 +275,34 @@ impl ParticleEffect {
     }
 
     Ok(Self {
-      version: read_ini_field("version", section)?,
-      name: read_ini_field("name", section)?,
-      max_particles: read_ini_field("max_particles", section)?,
+      version: read_ltx_field("version", section)?,
+      name: read_ltx_field("name", section)?,
+      max_particles: read_ltx_field("max_particles", section)?,
       actions,
-      flags: read_ini_field("flags", section)?,
-      frame: ParticleEffectFrame::import_optional(&Self::get_frame_section(section_name), ini)?,
-      sprite: ParticleEffectSprite::import(&Self::get_sprite_section(section_name), ini)?,
+      flags: read_ltx_field("flags", section)?,
+      frame: ParticleEffectFrame::import_optional(&Self::get_frame_section(section_name), ltx)?,
+      sprite: ParticleEffectSprite::import(&Self::get_sprite_section(section_name), ltx)?,
       time_limit: read_ini_optional_field("time_limit", section)?,
       collision: ParticleEffectCollision::import_optional(
         &Self::get_collision_section(section_name),
-        ini,
+        ltx,
       )?,
       velocity_scale: read_ini_optional_field("velocity_scale", section)?,
       description: ParticleDescription::import_optional(
         &Self::get_description_section(section_name),
-        ini,
+        ltx,
       )?,
       rotation: read_ini_optional_field("rotation", section)?,
       editor_data: ParticleEffectEditorData::import_optional(
         &Self::get_editor_data_section(section_name),
-        ini,
+        ltx,
       )?,
     })
   }
 
   /// Export particle effect data into provided path.
-  pub fn export(&self, section_name: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("version", self.version.to_string())
@@ -319,31 +319,31 @@ impl ParticleEffect {
 
     self
       .sprite
-      .export(&Self::get_sprite_section(section_name), ini)?;
+      .export(&Self::get_sprite_section(section_name), ltx)?;
 
     for (index, action) in self.actions.iter().enumerate() {
-      action.export(&Self::get_action_section(section_name, index), ini)?
+      action.export(&Self::get_action_section(section_name, index), ltx)?
     }
 
     ParticleEffectFrame::export_optional(
       self.frame.as_ref(),
       &Self::get_frame_section(section_name),
-      ini,
+      ltx,
     )?;
     ParticleEffectCollision::export_optional(
       self.collision.as_ref(),
       &Self::get_collision_section(section_name),
-      ini,
+      ltx,
     )?;
     ParticleDescription::export_optional(
       self.description.as_ref(),
       &Self::get_description_section(section_name),
-      ini,
+      ltx,
     )?;
     ParticleEffectEditorData::export_optional(
       self.editor_data.as_ref(),
       &Self::get_editor_data_section(section_name),
-      ini,
+      ltx,
     )?;
 
     Ok(())

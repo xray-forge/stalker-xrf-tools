@@ -5,7 +5,7 @@ use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -44,8 +44,8 @@ impl ParticleActionReader for ParticleActionSource {
     })
   }
 
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -53,17 +53,17 @@ impl ParticleActionReader for ParticleActionSource {
     })?;
 
     Ok(Self {
-      position: read_ini_field("position", section)?,
-      velocity: read_ini_field("velocity", section)?,
-      rot: read_ini_field("rot", section)?,
-      size: read_ini_field("size", section)?,
-      color: read_ini_field("color", section)?,
-      alpha: read_ini_field("alpha", section)?,
-      particle_rate: read_ini_field("particle_rate", section)?,
-      age: read_ini_field("age", section)?,
-      age_sigma: read_ini_field("age_sigma", section)?,
-      parent_vel: read_ini_field("parent_vel", section)?,
-      parent_motion: read_ini_field("parent_motion", section)?,
+      position: read_ltx_field("position", section)?,
+      velocity: read_ltx_field("velocity", section)?,
+      rot: read_ltx_field("rot", section)?,
+      size: read_ltx_field("size", section)?,
+      color: read_ltx_field("color", section)?,
+      alpha: read_ltx_field("alpha", section)?,
+      particle_rate: read_ltx_field("particle_rate", section)?,
+      age: read_ltx_field("age", section)?,
+      age_sigma: read_ltx_field("age_sigma", section)?,
+      parent_vel: read_ltx_field("parent_vel", section)?,
+      parent_motion: read_ltx_field("parent_motion", section)?,
     })
   }
 }
@@ -87,9 +87,9 @@ impl ParticleActionWriter for ParticleActionSource {
     Ok(())
   }
 
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    ini
-      .with_section(section)
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    ltx
+      .with_section(section_name)
       .set("position", self.position.to_string())
       .set("velocity", self.velocity.to_string())
       .set("rot", self.rot.to_string())

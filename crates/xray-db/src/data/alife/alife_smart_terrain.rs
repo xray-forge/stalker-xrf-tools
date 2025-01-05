@@ -4,7 +4,7 @@ use crate::data::alife::alife_smart_zone::AlifeSmartZone;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -23,7 +23,7 @@ pub struct AlifeSmartTerrain {
   pub save_marker: u16,
 }
 
-impl AlifeObjectReader<AlifeSmartTerrain> for AlifeSmartTerrain {
+impl AlifeObjectReader for AlifeSmartTerrain {
   /// Read alife smart terrain data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let base: AlifeSmartZone = AlifeSmartZone::read::<T>(reader)?;
@@ -90,9 +90,9 @@ impl AlifeObjectReader<AlifeSmartTerrain> for AlifeSmartTerrain {
     })
   }
 
-  /// Import alife smart terrain data from ini config section.
-  fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  /// Import alife smart terrain data from ltx config section.
+  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -100,14 +100,14 @@ impl AlifeObjectReader<AlifeSmartTerrain> for AlifeSmartTerrain {
     })?;
 
     Ok(Self {
-      base: AlifeSmartZone::import(section_name, ini)?,
-      arriving_objects_count: read_ini_field("arriving_objects_count", section)?,
-      object_job_descriptors_count: read_ini_field("object_job_descriptors_count", section)?,
-      dead_objects_infos_count: read_ini_field("dead_objects_infos_count", section)?,
-      smart_terrain_actor_control: read_ini_field("smart_terrain_actor_control", section)?,
-      respawn_point: read_ini_field("respawn_point", section)?,
-      staying_objects_count: read_ini_field("staying_objects_count", section)?,
-      save_marker: read_ini_field("save_marker", section)?,
+      base: AlifeSmartZone::import(section_name, ltx)?,
+      arriving_objects_count: read_ltx_field("arriving_objects_count", section)?,
+      object_job_descriptors_count: read_ltx_field("object_job_descriptors_count", section)?,
+      dead_objects_infos_count: read_ltx_field("dead_objects_infos_count", section)?,
+      smart_terrain_actor_control: read_ltx_field("smart_terrain_actor_control", section)?,
+      respawn_point: read_ltx_field("respawn_point", section)?,
+      staying_objects_count: read_ltx_field("staying_objects_count", section)?,
+      save_marker: read_ltx_field("save_marker", section)?,
     })
   }
 }
@@ -129,12 +129,12 @@ impl AlifeObjectWriter for AlifeSmartTerrain {
     Ok(())
   }
 
-  /// Export object data into ini file.
-  fn export(&self, section: &str, ini: &mut Ltx) -> DatabaseResult {
-    self.base.export(section, ini)?;
+  /// Export object data into ltx file.
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+    self.base.export(section_name, ltx)?;
 
-    ini
-      .with_section(section)
+    ltx
+      .with_section(section_name)
       .set(
         "arriving_objects_count",
         self.arriving_objects_count.to_string(),

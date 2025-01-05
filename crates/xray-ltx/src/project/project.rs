@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
 /// Handler of LTX configs root.
-/// Iteration and filtering of de-duplicated ini files.
+/// Iteration and filtering of de-duplicated ltx files.
 /// Parsing of validation schema and making sure LTX files are valid.
 #[derive(Debug)]
 pub struct LtxProject {

@@ -436,7 +436,7 @@ name = hello
 name = hello
 ";
 
-    let ltx = Ltx::read_from_str(input);
+    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(

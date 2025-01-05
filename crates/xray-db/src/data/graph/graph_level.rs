@@ -2,7 +2,7 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::export::file_import::read_ini_field;
+use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -44,8 +44,8 @@ impl GraphLevel {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(section_name: &str, ini: &Ltx) -> DatabaseResult<Self> {
-    let section: &Section = ini.section(section_name).ok_or_else(|| {
+  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
       DatabaseParseError::new_database_error(format!(
         "Graph level section '{section_name}' should be defined in ltx file ({})",
         file!()
@@ -53,18 +53,18 @@ impl GraphLevel {
     })?;
 
     Ok(Self {
-      name: read_ini_field("name", section)?,
-      offset: read_ini_field("offset", section)?,
-      id: read_ini_field("id", section)?,
-      section: read_ini_field("section", section)?,
-      guid: read_ini_field("guid", section)?,
+      name: read_ltx_field("name", section)?,
+      offset: read_ltx_field("offset", section)?,
+      id: read_ltx_field("id", section)?,
+      section: read_ltx_field("section", section)?,
+      guid: read_ltx_field("guid", section)?,
     })
   }
 
-  /// Export graph level data into ini.
-  pub fn export(&self, section: &str, ini: &mut Ltx) {
-    ini
-      .with_section(section)
+  /// Export graph level data into ltx.
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+    ltx
+      .with_section(section_name)
       .set("name", &self.name)
       .set("section", &self.section)
       .set("offset", self.offset.to_string())
@@ -79,7 +79,7 @@ mod tests {
   use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_level::GraphLevel;
   use crate::data::vector_3d::Vector3d;
-  use crate::export::file::open_ini_config;
+  use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
@@ -145,7 +145,7 @@ mod tests {
       offset: Vector3d::new(0.25, 5.55, -1.5),
     };
 
-    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ini");
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
@@ -154,7 +154,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphLevel::import("graph_level", &open_ini_config(config_path)?)?,
+      GraphLevel::import("graph_level", &open_ltx_config(config_path)?)?,
       original
     );
 

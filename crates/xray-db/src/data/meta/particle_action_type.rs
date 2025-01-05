@@ -76,6 +76,7 @@ pub enum ParticleActionType {
 impl ParticleActionType {
   /// Transform u32 to enumeration value.
   pub fn from_u32(action_type: u32) -> Self {
+    // todo: Probably use From trait?
     match action_type {
       0 => Self::Avoid,
       1 => Self::Bounce,
@@ -165,42 +166,42 @@ impl ParticleActionType {
   pub fn import_by_particle_type(
     particle_action_type: Self,
     section_name: &str,
-    ini: &Ltx,
+    ltx: &Ltx,
   ) -> DatabaseResult<Box<dyn ParticleActionWriter>> {
     Ok(match particle_action_type {
-      Self::Avoid => Box::new(ParticleActionAvoid::import(section_name, ini)?),
-      Self::Bounce => Box::new(ParticleActionBounce::import(section_name, ini)?),
-      Self::CopyVertex => Box::new(ParticleActionCopyVertex::import(section_name, ini)?),
-      Self::Damping => Box::new(ParticleActionDamping::import(section_name, ini)?),
-      Self::Explosion => Box::new(ParticleActionExplosion::import(section_name, ini)?),
-      Self::Follow => Box::new(ParticleActionFollow::import(section_name, ini)?),
-      Self::Gravitate => Box::new(ParticleActionGravitate::import(section_name, ini)?),
-      Self::Gravity => Box::new(ParticleActionGravity::import(section_name, ini)?),
-      Self::Jet => Box::new(ParticleActionJet::import(section_name, ini)?),
-      Self::KillOld => Box::new(ParticleActionKillOld::import(section_name, ini)?),
-      Self::MatchVelocity => Box::new(ParticleActionMatchVelocity::import(section_name, ini)?),
-      Self::Move => Box::new(ParticleActionMove::import(section_name, ini)?),
-      Self::OrbitLine => Box::new(ParticleActionOrbitLine::import(section_name, ini)?),
-      Self::OrbitPoint => Box::new(ParticleActionOrbitPoint::import(section_name, ini)?),
-      Self::RandomAccel => Box::new(ParticleActionRandomAcceleration::import(section_name, ini)?),
-      Self::RandomDisplace => Box::new(ParticleActionRandomDisplace::import(section_name, ini)?),
-      Self::RandomVelocity => Box::new(ParticleActionRandomVelocity::import(section_name, ini)?),
-      Self::Restore => Box::new(ParticleActionRestore::import(section_name, ini)?),
-      Self::Sink => Box::new(ParticleActionSink::import(section_name, ini)?),
-      Self::SinkVelocity => Box::new(ParticleActionSinkVelocity::import(section_name, ini)?),
-      Self::Source => Box::new(ParticleActionSource::import(section_name, ini)?),
-      Self::SpeedLimit => Box::new(ParticleActionSpeedLimit::import(section_name, ini)?),
-      Self::TargetColor => Box::new(ParticleActionTargetColor::import(section_name, ini)?),
-      Self::TargetSize => Box::new(ParticleActionTargetSize::import(section_name, ini)?),
+      Self::Avoid => Box::new(ParticleActionAvoid::import(section_name, ltx)?),
+      Self::Bounce => Box::new(ParticleActionBounce::import(section_name, ltx)?),
+      Self::CopyVertex => Box::new(ParticleActionCopyVertex::import(section_name, ltx)?),
+      Self::Damping => Box::new(ParticleActionDamping::import(section_name, ltx)?),
+      Self::Explosion => Box::new(ParticleActionExplosion::import(section_name, ltx)?),
+      Self::Follow => Box::new(ParticleActionFollow::import(section_name, ltx)?),
+      Self::Gravitate => Box::new(ParticleActionGravitate::import(section_name, ltx)?),
+      Self::Gravity => Box::new(ParticleActionGravity::import(section_name, ltx)?),
+      Self::Jet => Box::new(ParticleActionJet::import(section_name, ltx)?),
+      Self::KillOld => Box::new(ParticleActionKillOld::import(section_name, ltx)?),
+      Self::MatchVelocity => Box::new(ParticleActionMatchVelocity::import(section_name, ltx)?),
+      Self::Move => Box::new(ParticleActionMove::import(section_name, ltx)?),
+      Self::OrbitLine => Box::new(ParticleActionOrbitLine::import(section_name, ltx)?),
+      Self::OrbitPoint => Box::new(ParticleActionOrbitPoint::import(section_name, ltx)?),
+      Self::RandomAccel => Box::new(ParticleActionRandomAcceleration::import(section_name, ltx)?),
+      Self::RandomDisplace => Box::new(ParticleActionRandomDisplace::import(section_name, ltx)?),
+      Self::RandomVelocity => Box::new(ParticleActionRandomVelocity::import(section_name, ltx)?),
+      Self::Restore => Box::new(ParticleActionRestore::import(section_name, ltx)?),
+      Self::Sink => Box::new(ParticleActionSink::import(section_name, ltx)?),
+      Self::SinkVelocity => Box::new(ParticleActionSinkVelocity::import(section_name, ltx)?),
+      Self::Source => Box::new(ParticleActionSource::import(section_name, ltx)?),
+      Self::SpeedLimit => Box::new(ParticleActionSpeedLimit::import(section_name, ltx)?),
+      Self::TargetColor => Box::new(ParticleActionTargetColor::import(section_name, ltx)?),
+      Self::TargetSize => Box::new(ParticleActionTargetSize::import(section_name, ltx)?),
       Self::TargetRotate | Self::TargetRotateD => {
-        Box::new(ParticleActionTargetRotate::import(section_name, ini)?)
+        Box::new(ParticleActionTargetRotate::import(section_name, ltx)?)
       }
       Self::TargetVelocity | Self::TargetVelocityD => {
-        Box::new(ParticleActionTargetVelocity::import(section_name, ini)?)
+        Box::new(ParticleActionTargetVelocity::import(section_name, ltx)?)
       }
-      Self::Vortex => Box::new(ParticleActionVortex::import(section_name, ini)?),
-      Self::Turbulence => Box::new(ParticleActionTurbulence::import(section_name, ini)?),
-      Self::Scatter => Box::new(ParticleActionScatter::import(section_name, ini)?),
+      Self::Vortex => Box::new(ParticleActionVortex::import(section_name, ltx)?),
+      Self::Turbulence => Box::new(ParticleActionTurbulence::import(section_name, ltx)?),
+      Self::Scatter => Box::new(ParticleActionScatter::import(section_name, ltx)?),
       Self::Unknown | Self::CallActionList => {
         return Err(DatabaseParseError::new_database_error(format!(
           "Not implemented parser for particle action importing: {:?}",
