@@ -25,7 +25,6 @@ pub use crate::equipment::unpack_equipment_options::UnpackEquipmentOptions;
 pub use utils::images::dds_to_image;
 pub use utils::images::open_dds_as_png;
 pub use utils::images::read_dds_by_path;
-pub use utils::images::rescale_image_to_bounds;
 pub use utils::images::save_image_as_ui_dds;
 pub use utils::images::save_image_as_ui_png;
 

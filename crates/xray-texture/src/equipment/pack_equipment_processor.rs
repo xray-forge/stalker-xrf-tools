@@ -2,10 +2,10 @@ use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::error::texture_processing_error::TextureProcessingError;
 use crate::utils::images::dds_to_image;
 use crate::{
-  read_dds_by_path, rescale_image_to_bounds, save_image_as_ui_dds, PackEquipmentOptions,
-  PackEquipmentResult, TextureResult,
+  read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, PackEquipmentResult, TextureResult,
 };
-use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba};
+use image::imageops::FilterType;
+use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba, RgbaImage};
 use path_absolutize::*;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -29,8 +29,7 @@ impl PackEquipmentProcessor {
 
           if options.is_verbose {
             println!(
-              "Packing icon: {:?} - '{}' x:{}({x}), y:{}({y}), w:{}({w}), h:{}({h}), {}x{}",
-              sprite_path,
+              "Packing icon: '{}':({}:{};{}x{}) as ({x}:{y};{w}x{h}), src: {}x{}, {:?}",
               sprite_descriptor.section,
               sprite_descriptor.x,
               sprite_descriptor.y,
@@ -38,6 +37,7 @@ impl PackEquipmentProcessor {
               sprite_descriptor.h,
               sprite.width(),
               sprite.height(),
+              sprite_path,
             );
           }
 
@@ -107,20 +107,58 @@ impl PackEquipmentProcessor {
     width: u32,
     height: u32,
   ) -> TextureResult<DynamicImage> {
-    if path
+    let image: DynamicImage = if path
       .extension()
       .is_some_and(|extension| extension.eq("png"))
     {
-      return Ok(rescale_image_to_bounds(
-        ImageReader::open(path)?.decode()?,
-        width,
-        height,
-      ));
-    }
+      ImageReader::open(path)?.decode()?
+    } else {
+      dds_to_image(&read_dds_by_path(path)?)?.into()
+    };
 
-    read_dds_by_path(path)
-      .and_then(|dds| dds_to_image(&dds))
-      .map(|image| rescale_image_to_bounds(image.into(), width, height))
+    let image_width: u32 = image.width();
+    let image_height: u32 = image.height();
+
+    if image_width != width || image_height != height {
+      log::info!(
+        "Rescaling image to bounds: {width}x{height} from {image_width}x{image_height} {:?}",
+        path
+      );
+
+      let rescaled_image: DynamicImage = image.resize(width, height, FilterType::Lanczos3);
+      let rescaled_width: u32 = rescaled_image.width();
+      let rescaled_height: u32 = rescaled_image.height();
+
+      if rescaled_width != width || rescaled_height != height {
+        log::info!(
+          "Re-center rescaled image to bounds: {width}x{height} from {rescaled_width}x{rescaled_height} {:?}",
+          path
+        );
+
+        let mut centered: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
+
+        assert!(
+          rescaled_width <= width,
+          "Unexpected width {rescaled_width} > {width} when rescaling"
+        );
+        assert!(
+          rescaled_height <= height,
+          "Unexpected height {rescaled_height} > {height} when rescaling"
+        );
+
+        centered.copy_from(
+          &rescaled_image,
+          (width - rescaled_width) / 2,
+          (height - rescaled_height) / 2,
+        )?;
+
+        Ok(centered.into())
+      } else {
+        Ok(rescaled_image)
+      }
+    } else {
+      Ok(image)
+    }
   }
 
   /// Read equipment icon from custom path defined in ltx config folder.

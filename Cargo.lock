@@ -6596,6 +6596,7 @@ dependencies = [
  "ddsfile",
  "image 0.25.5",
  "image_dds",
+ "log",
  "path-absolutize",
  "rayon",
  "roxmltree",

@@ -2,8 +2,7 @@ use crate::error::texture_processing_error::TextureProcessingError;
 use crate::TextureResult;
 use ddsfile::Dds;
 use image::codecs::png::PngEncoder;
-use image::imageops::FilterType;
-use image::{DynamicImage, ExtendedColorType, ImageEncoder, ImageFormat, RgbaImage};
+use image::{ExtendedColorType, ImageEncoder, ImageFormat, RgbaImage};
 use image_dds::{dds_from_image, ImageFormat as DDSImageFormat};
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -45,20 +44,6 @@ pub fn save_image_as_ui_dds(
 
 pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> TextureResult<()> {
   Ok(image.save_with_format(path, ImageFormat::Png)?)
-}
-
-pub fn rescale_image_to_bounds(image: DynamicImage, width: u32, _: u32) -> DynamicImage {
-  // todo: Also rescale on height?
-
-  if image.width() > width {
-    image.resize(
-      width,
-      (image.height() as f32 * (width as f32 / image.width() as f32)) as u32,
-      FilterType::Lanczos3,
-    )
-  } else {
-    image
-  }
 }
 
 pub fn open_dds_as_png(path: &Path) -> TextureResult<(RgbaImage, Vec<u8>)> {
