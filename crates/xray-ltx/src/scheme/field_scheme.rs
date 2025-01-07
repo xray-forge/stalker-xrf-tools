@@ -78,11 +78,13 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
+  // todo: Do not use ltx as parameter, split section check on higher level or impl 2 separate methods.
   /// Validate provided value based on current field schema definition.
   pub fn validate_value(&self, ltx: &Ltx, field_data: &str) -> Option<LtxSchemeError> {
     // Ltx-specific validation of section type.
     if self.data_type == LtxFieldDataType::TypeSection {
       if self.is_array {
+        // todo: Probably merge with generic array check.
         for entry in field_data.split(',') {
           let entry: &str = entry.trim();
 
@@ -103,16 +105,25 @@ impl LtxFieldScheme {
     }
 
     if self.is_array {
-      for entry in field_data.split(',') {
-        let entry: &str = entry.trim();
+      let array_values: Vec<&str> = field_data
+        .split(',')
+        .map(|it| it.trim())
+        .filter(|it| !it.is_empty())
+        .collect::<Vec<&str>>();
 
-        if !entry.is_empty() {
-          let validation_result: Option<LtxSchemeError> =
-            self.validate_data_entry_by_type(&self.data_type, entry);
+      if array_values.is_empty() && !self.is_optional {
+        return Some(self.validation_error(&format!(
+          "Invalid value - expected non optional array of {:?}",
+          self.data_type.to_string(),
+        )));
+      }
 
-          if validation_result.is_some() {
-            return validation_result;
-          }
+      for entry in array_values {
+        let validation_result: Option<LtxSchemeError> =
+          self.validate_data_entry_by_type(&self.data_type, entry);
+
+        if validation_result.is_some() {
+          return validation_result;
         }
       }
 
@@ -387,9 +398,10 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_condlist_type(&self, _: &str) -> Option<LtxSchemeError> {
+  fn validate_condlist_type(&self, value: &str) -> Option<LtxSchemeError> {
     // todo: Actual condlist structure parsing.
-    None
+
+    self.validate_string_type(value)
   }
 
   fn validate_string_type(&self, value: &str) -> Option<LtxSchemeError> {
@@ -405,6 +417,7 @@ impl LtxFieldScheme {
 mod tests {
   use super::LtxFieldScheme;
   use crate::scheme::field_data_type::LtxFieldDataType;
+  use crate::Ltx;
 
   #[test]
   fn test_u32_validation() {
@@ -591,15 +604,18 @@ mod tests {
       LtxFieldDataType::TypeString,
     );
 
-    assert!(scheme.validate_string_type("true").is_none());
-    assert!(scheme.validate_string_type("false").is_none());
-    assert!(scheme.validate_string_type("0").is_none());
-    assert!(scheme.validate_string_type("1").is_none());
-    assert!(scheme.validate_string_type("-1").is_none());
-    assert!(scheme.validate_string_type(",").is_none());
+    let ltx: Ltx = Ltx::new();
 
-    assert!(scheme.validate_string_type(",,,,,,").is_some());
-    assert!(scheme.validate_string_type("").is_some());
+    assert!(scheme.validate_value(&ltx, "true").is_none());
+    assert!(scheme.validate_value(&ltx, "false").is_none());
+    assert!(scheme.validate_value(&ltx, "0").is_none());
+    assert!(scheme.validate_value(&ltx, "1").is_none());
+    assert!(scheme.validate_value(&ltx, "-1").is_none());
+
+    assert!(scheme.validate_value(&ltx, ",").is_some());
+    assert!(scheme.validate_value(&ltx, ",,,,,,,,,").is_some());
+    assert!(scheme.validate_value(&ltx, ",,,   , ,     ,").is_some());
+    assert!(scheme.validate_value(&ltx, "").is_some());
   }
 
   #[test]

@@ -1,5 +1,6 @@
 use crate::file::configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
 use crate::{LtxReadError, LtxResult, LtxSchemeError};
+use std::fmt::Display;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {
@@ -202,5 +203,33 @@ impl LtxFieldDataType {
     data.map_or(Ok(Self::TypeAny), |data| {
       Self::from_field_data(field_name, section_name, data)
     })
+  }
+}
+
+impl Display for LtxFieldDataType {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    let type_string: String = match self {
+      Self::TypeAny => String::from("any"),
+      Self::TypeBool => String::from("bool"),
+      Self::TypeCondlist => String::from("condlist"),
+      Self::TypeConst(value) => format!("const:{value}"),
+      Self::TypeEnum(values) => format!("enum:{}", values.join(",")),
+      Self::TypeF32 => String::from("g43"),
+      Self::TypeI16 => String::from("i16"),
+      Self::TypeI32 => String::from("i32"),
+      Self::TypeI8 => String::from("i8"),
+      Self::TypeRgb => String::from("rgb"),
+      Self::TypeRgba => String::from("rgba"),
+      Self::TypeSection => String::from("section"),
+      Self::TypeString => String::from("string"),
+      Self::TypeTuple(_, raw_types) => format!("tuple:{}", raw_types.join(",")),
+      Self::TypeU16 => String::from("u16"),
+      Self::TypeU32 => String::from("u32"),
+      Self::TypeU8 => String::from("u8"),
+      Self::TypeUnknown => String::from("unknown"),
+      Self::TypeVector => String::from("vector"),
+    };
+
+    write!(f, "{}", type_string)
   }
 }
