@@ -16,7 +16,7 @@ pub enum LtxFieldDataType {
   TypeRgba,
   TypeSection,
   TypeString,
-  TypeTuple(Vec<LtxFieldDataType>),
+  TypeTuple(Vec<LtxFieldDataType>, Vec<String>),
   TypeU16,
   TypeU32,
   TypeU8,
@@ -138,6 +138,7 @@ impl LtxFieldDataType {
 
   fn parse_tuple(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
     let mut types: Vec<LtxFieldDataType> = Vec::new();
+    let mut types_raw: Vec<String> = Vec::new();
 
     match value.split_once(':') {
       None => {
@@ -146,24 +147,30 @@ impl LtxFieldDataType {
       )))
       }
       Some((_, allowed_values_string)) => {
-        for tuple_entry in allowed_values_string.trim().split(',').filter_map(|it| {
-          let trimmed: &str = it.trim();
+        for (tuple_entry, tuple_entry_raw) in
+          allowed_values_string.trim().split(',').filter_map(|it| {
+            let trimmed: &str = it.trim();
 
-          if trimmed.is_empty() {
-            None
-          } else {
-            Some(Self::from_field_data(field_name, section_name, trimmed))
-          }
-        }) {
-          let schema: LtxFieldDataType = tuple_entry?;
-
-          match schema {
-            Self::TypeTuple(_) => {
+            if trimmed.is_empty() {
+              None
+            } else {
+              Some((
+                Self::from_field_data(field_name, section_name, trimmed),
+                trimmed,
+              ))
+            }
+          })
+        {
+          match tuple_entry? {
+            Self::TypeTuple(_, _) => {
               return Err(LtxReadError::new_ltx_error(format!(
                 "Failed to read scheme for field '{section_name}', tuple cannot contain nested tuples"
               )))
             }
-            _ => types.push(schema),
+            schema => {
+              types.push(schema);
+              types_raw.push(tuple_entry_raw.into());
+            },
           }
         }
       }
@@ -176,7 +183,13 @@ impl LtxFieldDataType {
         "Failed to parse tuple type, expected comma separated list of possible values after 'tuple:'",
       ))
     } else {
-      Ok(Self::TypeTuple(types))
+      assert_eq!(
+        types_raw.len(),
+        types.len(),
+        "Expected same count of raw and converted types for tuple type definition"
+      );
+
+      Ok(Self::TypeTuple(types, types_raw))
     }
   }
 
