@@ -2,9 +2,9 @@ use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_custom_zone::AlifeObjectCustomZone;
 use crate::data::alife::alife_object_motion::AlifeObjectMotion;
+use crate::data::generic::time::Time;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::data::time::Time;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -85,9 +85,9 @@ mod tests {
   use crate::data::alife::alife_object_motion::AlifeObjectMotion;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_object_torrid_zone::AlifeObjectTorridZone;
+  use crate::data::generic::time::Time;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::data::time::Time;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

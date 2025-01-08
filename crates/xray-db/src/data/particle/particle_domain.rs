@@ -1,6 +1,6 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::vector_3d::Vector3d;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_error::DatabaseError;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
@@ -208,8 +208,8 @@ impl FromStr for ParticleDomain {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particle::particle_domain::ParticleDomain;
-  use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;

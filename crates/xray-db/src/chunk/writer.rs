@@ -1,5 +1,5 @@
-use crate::data::shape::Shape;
-use crate::data::vector_3d::Vector3d;
+use crate::data::generic::shape::Shape;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_error::DatabaseError;
 use crate::types::{DatabaseResult, U32Bytes};
 use byteorder::{ByteOrder, WriteBytesExt};

@@ -115,10 +115,10 @@ impl fmt::Debug for SpawnPatrolsChunk {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::patrol::patrol::Patrol;
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
-  use crate::data::vector_3d::Vector3d;
   use crate::spawn_file::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

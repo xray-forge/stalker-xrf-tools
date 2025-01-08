@@ -3,10 +3,10 @@ use crate::chunk::writer::ChunkWriter;
 use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
 };
+use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::cls_id::ClsId;
-use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::export::string::{bytes_from_base64, bytes_to_base64};
@@ -289,8 +289,8 @@ mod tests {
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::cls_id::ClsId;
-  use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

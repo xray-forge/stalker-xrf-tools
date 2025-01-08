@@ -72,10 +72,10 @@ mod tests {
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_climable::AlifeObjectClimable;
   use crate::data::alife::alife_object_shape::AlifeObjectShape;
+  use crate::data::generic::shape::Shape;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::data::shape::Shape;
-  use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

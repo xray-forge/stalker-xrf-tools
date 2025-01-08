@@ -1,7 +1,7 @@
 use crate::chunk::iterator::ChunkIterator;
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
-use crate::data::vector_3d::Vector3d;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
@@ -131,8 +131,8 @@ impl PatrolPoint {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::patrol::patrol_point::PatrolPoint;
-  use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

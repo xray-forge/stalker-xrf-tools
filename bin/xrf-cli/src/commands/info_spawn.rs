@@ -10,10 +10,10 @@ impl InfoSpawnCommand {
   /// Create command for printing spawn file info.
   pub fn init() -> Command {
     Command::new(Self::NAME)
-      .about("Command to print information about provided *.spawn file")
+      .about("Command to print information about provided spawn file")
       .arg(
         Arg::new("path")
-          .help("Path to *.spawn file")
+          .help("Path to spawn file")
           .short('p')
           .long("path")
           .required(true)
@@ -27,34 +27,34 @@ impl InfoSpawnCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    log::info!("Verify spawn file {:?}", path);
+    println!("Read spawn file {:?}", path);
 
     let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path)?;
 
-    log::info!("Spawn file information:");
+    println!("Spawn file information:");
 
-    log::info!("Version: {}", spawn_file.header.version);
-    log::info!("GUID: {}", spawn_file.header.guid);
-    log::info!("Levels count: {}", spawn_file.header.levels_count);
-    log::info!("Objects count: {}", spawn_file.header.objects_count);
+    println!("Version: {}", spawn_file.header.version);
+    println!("GUID: {}", spawn_file.header.guid);
+    println!("Levels count: {}", spawn_file.header.levels_count);
+    println!("Objects count: {}", spawn_file.header.objects_count);
 
-    log::info!(
+    println!(
       "Artefact spawn points: {}",
       spawn_file.artefact_spawn.nodes.len()
     );
 
-    log::info!("Patrols: {}", spawn_file.patrols.patrols.len());
+    println!("Patrols: {}", spawn_file.patrols.patrols.len());
 
-    log::info!("Level version: {}", spawn_file.graphs.header.version);
-    log::info!(
+    println!("Level version: {}", spawn_file.graphs.header.version);
+    println!(
       "Level graph vertices: {}",
       spawn_file.graphs.header.vertices_count
     );
-    log::info!(
+    println!(
       "Level graph points: {}",
       spawn_file.graphs.header.points_count
     );
-    log::info!(
+    println!(
       "Level graph edges: {}",
       spawn_file.graphs.header.edges_count
     );

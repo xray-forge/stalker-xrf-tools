@@ -1,5 +1,5 @@
 use crate::chunk::reader::ChunkReader;
-use crate::data::vector_3d::Vector3d;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::io::Read;

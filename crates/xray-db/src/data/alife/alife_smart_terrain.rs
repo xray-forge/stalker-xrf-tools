@@ -170,10 +170,10 @@ mod tests {
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
   use crate::data::alife::alife_smart_zone::AlifeSmartZone;
+  use crate::data::generic::shape::Shape;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::data::shape::Shape;
-  use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use xray_test_utils::utils::{

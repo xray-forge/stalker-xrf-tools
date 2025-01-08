@@ -109,7 +109,7 @@ mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
-  use crate::data::vector_3d::Vector3d;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

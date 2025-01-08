@@ -5,13 +5,13 @@ use crate::chunk::utils::{
 };
 use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::data::particle::particle_action::particle_action::ParticleAction;
 use crate::data::particle::particle_effect_collision::ParticleEffectCollision;
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_effect_editor_data::ParticleEffectEditorData;
 use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-use crate::data::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::{read_ini_optional_field, read_ltx_field};
 use crate::types::DatabaseResult;
@@ -380,6 +380,7 @@ impl ParticleEffect {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::particle_action_type::ParticleActionType;
   use crate::data::particle::particle_action::particle_action::ParticleAction;
   use crate::data::particle::particle_action::particle_action_copy_vertex::ParticleActionCopyVertex;
@@ -390,7 +391,6 @@ mod tests {
   use crate::data::particle::particle_effect_editor_data::ParticleEffectEditorData;
   use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-  use crate::data::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;

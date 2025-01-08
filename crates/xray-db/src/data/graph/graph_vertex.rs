@@ -1,7 +1,7 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 
-use crate::data::vector_3d::Vector3d;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{read_ini_u32_bytes_field, read_ltx_field};
@@ -105,8 +105,8 @@ impl GraphVertex {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_vertex::GraphVertex;
-  use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

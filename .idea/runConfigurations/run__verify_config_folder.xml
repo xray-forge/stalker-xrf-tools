@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="run: verify config folder" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
-    <option name="command" value="run --package xrf-cli --bin xrf-cli  -- verify-ltx -p C:\Projects\stalker-xrf-engine\src\engine\configs" />
+    <option name="buildProfileId" value="dev" />
+    <option name="command" value="run --package xrf-cli --bin xrf-cli -- verify-ltx -p C:\Projects\stalker-xrf-engine\src\engine\configs" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />

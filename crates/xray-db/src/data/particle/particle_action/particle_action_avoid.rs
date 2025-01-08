@@ -74,11 +74,11 @@ impl ParticleActionWriter for ParticleActionAvoid {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::particle_action_reader::ParticleActionReader;
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particle::particle_action::particle_action_avoid::ParticleActionAvoid;
   use crate::data::particle::particle_domain::ParticleDomain;
-  use crate::data::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

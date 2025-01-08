@@ -135,8 +135,8 @@ mod tests {
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::cls_id::ClsId;
-  use crate::data::vector_3d::Vector3d;
   use crate::spawn_file::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

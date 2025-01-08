@@ -1,11 +1,10 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::constants::NIL;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
+use std::io::{Read, Write};
 use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -22,7 +21,7 @@ pub struct Time {
 
 impl Time {
   /// Read optional time object from the chunk.
-  pub fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Option<Self>> {
+  pub fn read_optional<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Option<Self>> {
     if reader.read_u8()? == 1 {
       Ok(Some(Self::read::<T>(reader)?))
     } else {
@@ -33,7 +32,7 @@ impl Time {
   /// Write optional time object into the writer.
   pub fn write_optional<T: ByteOrder>(
     time: Option<&Self>,
-    writer: &mut ChunkWriter,
+    writer: &mut dyn Write,
   ) -> DatabaseResult {
     if time.is_some() {
       writer.write_u8(1)?;
@@ -47,7 +46,7 @@ impl Time {
   }
 
   /// Read time object from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Self> {
     let year: u8 = reader.read_u8()?;
     let month: u8 = reader.read_u8()?;
     let day: u8 = reader.read_u8()?;
@@ -68,7 +67,7 @@ impl Time {
   }
 
   /// Write time object into the chunk.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
     writer.write_u8(self.year)?;
     writer.write_u8(self.month)?;
     writer.write_u8(self.day)?;
@@ -156,7 +155,7 @@ impl FromStr for Time {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::time::Time;
+  use crate::data::generic::time::Time;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;

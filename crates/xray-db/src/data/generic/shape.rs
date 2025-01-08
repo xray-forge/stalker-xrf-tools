@@ -1,11 +1,11 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use std::io::{Read, Write};
 use xray_ltx::{Ltx, Section};
 
 /// Shape enumeration stored in objects descriptors.
@@ -17,7 +17,7 @@ pub enum Shape {
 
 impl Shape {
   /// Read list of shapes from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
     let count: u8 = reader.read_u8().expect("Count flag to be read");
 
@@ -35,16 +35,16 @@ impl Shape {
   }
 
   /// Read shape from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Self> {
     let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
 
     Ok(match shape_type {
-      0 => Self::Sphere((reader.read_f32_3d_vector::<T>()?, reader.read_f32::<T>()?)),
+      0 => Self::Sphere((Vector3d::read::<T>(reader)?, reader.read_f32::<T>()?)),
       1 => Self::Box((
-        reader.read_f32_3d_vector::<T>()?,
-        reader.read_f32_3d_vector::<T>()?,
-        reader.read_f32_3d_vector::<T>()?,
-        reader.read_f32_3d_vector::<T>()?,
+        Vector3d::read::<T>(reader)?,
+        Vector3d::read::<T>(reader)?,
+        Vector3d::read::<T>(reader)?,
+        Vector3d::read::<T>(reader)?,
       )),
       _ => {
         return Err(DatabaseParseError::new_database_error(
@@ -55,7 +55,7 @@ impl Shape {
   }
 
   /// Write list of shapes data into the chunk reader.
-  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut dyn Write) -> DatabaseResult {
     writer.write_u8(shapes.len() as u8)?;
 
     for shape in shapes {
@@ -66,21 +66,22 @@ impl Shape {
   }
 
   /// Write shape data into the chunk reader.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
     match self {
       Self::Sphere(data) => {
         writer.write_u8(0)?;
 
-        writer.write_f32_3d_vector::<T>(&data.0)?;
+        data.0.write::<T>(writer)?;
+
         writer.write_f32::<T>(data.1)?;
       }
       Self::Box(data) => {
         writer.write_u8(1)?;
 
-        writer.write_f32_3d_vector::<T>(&data.0)?;
-        writer.write_f32_3d_vector::<T>(&data.1)?;
-        writer.write_f32_3d_vector::<T>(&data.2)?;
-        writer.write_f32_3d_vector::<T>(&data.3)?;
+        data.0.write::<T>(writer)?;
+        data.1.write::<T>(writer)?;
+        data.2.write::<T>(writer)?;
+        data.3.write::<T>(writer)?;
       }
     }
 
@@ -157,8 +158,8 @@ impl Shape {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::shape::Shape;
-  use crate::data::vector_3d::Vector3d;
+  use crate::data::generic::shape::Shape;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

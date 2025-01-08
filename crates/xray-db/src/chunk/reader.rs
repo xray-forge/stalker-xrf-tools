@@ -1,7 +1,7 @@
 use crate::chunk::interface::ChunkDataSource;
 use crate::chunk::iterator::ChunkIterator;
-use crate::data::shape::Shape;
-use crate::data::vector_3d::Vector3d;
+use crate::data::generic::shape::Shape;
+use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_error::DatabaseError;
 use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
 use crate::types::{DatabaseResult, U32Bytes};
@@ -120,12 +120,12 @@ impl ChunkReader {
 impl ChunkReader {
   /// Read three float values.
   pub fn read_f32_3d_vector<T: ByteOrder>(&mut self) -> DatabaseResult<Vector3d<f32>> {
-    Vector3d::read::<T>(self).map_err(DatabaseError::from)
+    Vector3d::read::<T>(self)
   }
 
   /// Read shape data.
   pub fn read_shapes<T: ByteOrder>(&mut self) -> DatabaseResult<Vec<Shape>> {
-    Shape::read_list::<T>(self).map_err(DatabaseError::from)
+    Shape::read_list::<T>(self)
   }
 
   pub fn read_u32_bytes(&mut self) -> DatabaseResult<U32Bytes> {

@@ -233,13 +233,13 @@ impl fmt::Debug for SpawnGraphsChunk {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
   use crate::data::graph::graph_edge::GraphEdge;
   use crate::data::graph::graph_header::GraphHeader;
   use crate::data::graph::graph_level::GraphLevel;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::graph::graph_vertex::GraphVertex;
-  use crate::data::vector_3d::Vector3d;
   use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;

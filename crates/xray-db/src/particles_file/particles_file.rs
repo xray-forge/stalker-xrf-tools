@@ -33,37 +33,38 @@ impl ParticlesFile {
   pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
-    let chunk_ids: Vec<u32> = chunks.iter().map(|it| it.id).collect();
 
     log::info!(
-      "Parsed particles file, {} chunks, {} bytes, {:?} chunks IDs",
+      "Reading particles file, {} chunks, {} bytes",
       chunks.len(),
       reader.read_bytes_len(),
-      chunk_ids
     );
 
+    Self::read_from_chunks::<T>(&chunks)
+  }
+
+  /// Read particles from chunks.
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> DatabaseResult<Self> {
     assert!(
-      !chunk_ids.contains(&ParticlesFirstgenChunk::CHUNK_ID),
+      !chunks
+        .iter()
+        .any(|it| it.id == ParticlesFirstgenChunk::CHUNK_ID),
       "Unexpected first-gen chunk in particles file, unpacking not implemented"
     );
-    assert_eq!(
-      chunk_ids.len(),
-      3,
-      "Unexpected chunks in particles file root"
-    );
+    assert_eq!(chunks.len(), 3, "Unexpected chunks in particles file root");
 
     Ok(Self {
       header: ParticlesHeaderChunk::read::<T>(
-        &mut find_chunk_by_id(&chunks, ParticlesHeaderChunk::CHUNK_ID)
-          .expect("Particle version chunk not found"),
+        &mut find_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)
+          .expect("Particles header chunk not found"),
       )?,
       effects: ParticlesEffectsChunk::read::<T>(
-        &mut find_chunk_by_id(&chunks, ParticlesEffectsChunk::CHUNK_ID)
-          .expect("Particle effects chunk not found"),
+        &mut find_chunk_by_id(chunks, ParticlesEffectsChunk::CHUNK_ID)
+          .expect("Particles effects chunk not found"),
       )?,
       groups: ParticlesGroupsChunk::read::<T>(
-        &mut find_chunk_by_id(&chunks, ParticlesGroupsChunk::CHUNK_ID)
-          .expect("Particle groups chunk not found"),
+        &mut find_chunk_by_id(chunks, ParticlesGroupsChunk::CHUNK_ID)
+          .expect("Particles groups chunk not found"),
       )?,
     })
   }

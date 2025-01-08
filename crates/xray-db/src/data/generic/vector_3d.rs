@@ -1,11 +1,10 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::error::database_error::DatabaseError;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use std::io::{Read, Write};
 use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq)]
@@ -22,7 +21,7 @@ impl Vector3d<f32> {
   }
 
   /// Read vector coordinates from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Self> {
     Ok(Self {
       x: reader.read_f32::<T>()?,
       y: reader.read_f32::<T>()?,
@@ -31,7 +30,7 @@ impl Vector3d<f32> {
   }
 
   /// Write vector coordinates into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
     writer.write_f32::<T>(self.x)?;
     writer.write_f32::<T>(self.y)?;
     writer.write_f32::<T>(self.z)?;
@@ -85,7 +84,7 @@ impl FromStr for Vector3d<f32> {
 mod tests {
   use crate::chunk::reader::ChunkReader;
   use crate::chunk::writer::ChunkWriter;
-  use crate::data::vector_3d::Vector3d;
+  use crate::data::generic::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use serde_json::json;
