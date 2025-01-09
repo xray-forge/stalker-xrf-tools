@@ -94,13 +94,13 @@ impl ParticlesHeaderChunk {
 #[cfg(test)]
 mod tests {
   use crate::particles_file::chunks::particles_header_chunk::ParticlesHeaderChunk;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_directory,
@@ -117,11 +117,11 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 2);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -137,7 +137,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticlesHeaderChunk::read::<SpawnByteOrder>(&mut reader).map_err(|error| error.to_string()),
+      ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader).map_err(|error| error.to_string()),
       Err(String::from(
         "Database not implemented error: Unknown version in particles header chunk, expected v1 only",
       ))
@@ -154,11 +154,11 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 2);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -174,7 +174,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticlesHeaderChunk::read::<SpawnByteOrder>(&mut reader)?,
+      ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

@@ -5,10 +5,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -57,7 +57,7 @@ impl AlifeObjectWriter for AlifeObjectActor {
     self.trader.write(writer)?;
     self.skeleton.write(writer)?;
 
-    writer.write_u16::<SpawnByteOrder>(self.holder_id)?;
+    writer.write_u16::<XRayByteOrder>(self.holder_id)?;
 
     Ok(())
   }
@@ -86,9 +86,9 @@ mod tests {
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -148,7 +148,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 185);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -162,7 +162,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeObjectActor::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeObjectActor::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

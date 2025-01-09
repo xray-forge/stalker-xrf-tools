@@ -109,9 +109,9 @@ mod tests {
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -138,11 +138,11 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 44);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename).unwrap(),
       0,
     )?;
@@ -158,7 +158,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      SpawnArtefactSpawnsChunk::read::<SpawnByteOrder>(&mut reader)?,
+      SpawnArtefactSpawnsChunk::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

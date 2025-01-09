@@ -177,13 +177,13 @@ impl ParticleGroupEffect {
 mod tests {
   use crate::data::particle::particle_group_effect::ParticleGroupEffect;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, ParticlesByteOrder, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -226,11 +226,11 @@ mod tests {
       },
     ];
 
-    ParticleGroupEffect::write_list::<ParticlesByteOrder>(&original, &mut writer)?;
+    ParticleGroupEffect::write_list::<XRayByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 370);
 
-    let bytes_written: usize = writer.flush_chunk_into::<ParticlesByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -250,7 +250,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticleGroupEffect::read_list::<ParticlesByteOrder>(&mut reader)?,
+      ParticleGroupEffect::read_list::<XRayByteOrder>(&mut reader)?,
       original
     );
 
@@ -272,11 +272,11 @@ mod tests {
       flags: 763,
     };
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 103);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -296,7 +296,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticleGroupEffect::read::<SpawnByteOrder>(&mut reader)?,
+      ParticleGroupEffect::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

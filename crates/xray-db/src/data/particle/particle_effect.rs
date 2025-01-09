@@ -389,12 +389,12 @@ mod tests {
   use crate::data::particle::particle_effect_editor_data::ParticleEffectEditorData;
   use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
@@ -469,11 +469,11 @@ mod tests {
       }),
     };
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 343);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -492,7 +492,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read: ParticleEffect = ParticleEffect::read::<SpawnByteOrder>(&mut reader)?;
+    let read: ParticleEffect = ParticleEffect::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read.version, original.version);
     assert_eq!(read.name, original.name);

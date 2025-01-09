@@ -3,10 +3,10 @@ use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::export::string::{string_from_base64, string_to_base64};
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 /// Generic alife object abstraction data.
@@ -64,14 +64,14 @@ impl AlifeObjectReader for AlifeObjectAbstract {
 impl AlifeObjectWriter for AlifeObjectAbstract {
   /// Write abstract object data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_u16::<SpawnByteOrder>(self.game_vertex_id)?;
-    writer.write_f32::<SpawnByteOrder>(self.distance)?;
-    writer.write_u32::<SpawnByteOrder>(self.direct_control)?;
-    writer.write_u32::<SpawnByteOrder>(self.level_vertex_id)?;
-    writer.write_u32::<SpawnByteOrder>(self.flags)?;
+    writer.write_u16::<XRayByteOrder>(self.game_vertex_id)?;
+    writer.write_f32::<XRayByteOrder>(self.distance)?;
+    writer.write_u32::<XRayByteOrder>(self.direct_control)?;
+    writer.write_u32::<XRayByteOrder>(self.level_vertex_id)?;
+    writer.write_u32::<XRayByteOrder>(self.flags)?;
     writer.write_null_terminated_win_string(&self.custom_data)?;
-    writer.write_u32::<SpawnByteOrder>(self.story_id)?;
-    writer.write_u32::<SpawnByteOrder>(self.spawn_story_id)?;
+    writer.write_u32::<XRayByteOrder>(self.story_id)?;
+    writer.write_u32::<XRayByteOrder>(self.spawn_story_id)?;
 
     Ok(())
   }
@@ -99,12 +99,12 @@ mod tests {
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -132,7 +132,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 38);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -146,7 +146,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeObjectAbstract::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeObjectAbstract::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

@@ -1,6 +1,6 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseResult, ParticlesByteOrder, ParticlesFile};
+use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
 
 pub struct InfoParticlesCommand {}
 
@@ -29,7 +29,7 @@ impl InfoParticlesCommand {
 
     println!("Read particles file {:?}", path);
 
-    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<ParticlesByteOrder>(path)?;
+    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder>(path)?;
 
     println!("Particles file information:");
 

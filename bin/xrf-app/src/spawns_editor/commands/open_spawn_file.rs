@@ -2,7 +2,7 @@ use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
 use serde_json::{json, Value};
 use std::path::Path;
-use xray_db::{SpawnByteOrder, SpawnFile};
+use xray_db::{SpawnFile, XRayByteOrder};
 
 #[tauri::command]
 pub async fn open_spawn_file(
@@ -11,7 +11,7 @@ pub async fn open_spawn_file(
 ) -> TauriResult<Value> {
   log::info!("Opening spawn file");
 
-  match SpawnFile::read_from_path::<SpawnByteOrder>(Path::new(path)) {
+  match SpawnFile::read_from_path::<XRayByteOrder>(Path::new(path)) {
     Ok(file) => {
       log::info!("Opened spawn file");
 

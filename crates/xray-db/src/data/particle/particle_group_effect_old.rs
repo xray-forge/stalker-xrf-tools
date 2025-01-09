@@ -167,13 +167,13 @@ impl ParticleGroupEffectOld {
 mod tests {
   use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, ParticlesByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -210,11 +210,11 @@ mod tests {
       },
     ];
 
-    ParticleGroupEffectOld::write_list::<ParticlesByteOrder>(&original, &mut writer)?;
+    ParticleGroupEffectOld::write_list::<XRayByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 200);
 
-    let bytes_written: usize = writer.flush_chunk_into::<ParticlesByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -234,7 +234,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticleGroupEffectOld::read_list::<ParticlesByteOrder>(&mut reader)?,
+      ParticleGroupEffectOld::read_list::<XRayByteOrder>(&mut reader)?,
       original
     );
 
@@ -254,11 +254,11 @@ mod tests {
       flags: 1392,
     };
 
-    original.write::<ParticlesByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 58);
 
-    let bytes_written: usize = writer.flush_chunk_into::<ParticlesByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -278,7 +278,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticleGroupEffectOld::read::<ParticlesByteOrder>(&mut reader)?,
+      ParticleGroupEffectOld::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

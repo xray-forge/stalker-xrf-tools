@@ -248,10 +248,10 @@ mod tests {
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use uuid::uuid;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -279,11 +279,11 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 28);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -303,7 +303,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?,
+      SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 
@@ -420,11 +420,11 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 430);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -444,7 +444,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      SpawnGraphsChunk::read::<SpawnByteOrder>(&mut reader)?,
+      SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

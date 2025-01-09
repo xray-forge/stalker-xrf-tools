@@ -4,10 +4,10 @@ use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, ParticlesByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -52,12 +52,12 @@ impl ParticleActionReader for ParticleActionJet {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionJet {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    self.center.write::<ParticlesByteOrder>(writer)?;
-    self.acc.write::<ParticlesByteOrder>(writer)?;
+    self.center.write::<XRayByteOrder>(writer)?;
+    self.acc.write::<XRayByteOrder>(writer)?;
 
-    writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
-    writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
-    writer.write_f32::<ParticlesByteOrder>(self.max_radius)?;
+    writer.write_f32::<XRayByteOrder>(self.magnitude)?;
+    writer.write_f32::<XRayByteOrder>(self.epsilon)?;
+    writer.write_f32::<XRayByteOrder>(self.max_radius)?;
 
     Ok(())
   }

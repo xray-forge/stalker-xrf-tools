@@ -3,10 +3,10 @@ use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, ParticlesByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,7 +41,7 @@ impl ParticleActionReader for ParticleActionRandomAcceleration {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionRandomAcceleration {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    self.gen_acc.write::<ParticlesByteOrder>(writer)?;
+    self.gen_acc.write::<XRayByteOrder>(writer)?;
 
     Ok(())
   }

@@ -1,6 +1,6 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseParseError, DatabaseResult, SpawnByteOrder, SpawnFile};
+use xray_db::{DatabaseParseError, DatabaseResult, SpawnFile, XRayByteOrder};
 
 pub struct VerifySpawnFileCommand {}
 
@@ -29,7 +29,7 @@ impl VerifySpawnFileCommand {
 
     log::info!("Verify spawn file {:?}", path);
 
-    match SpawnFile::read_from_path::<SpawnByteOrder>(path) {
+    match SpawnFile::read_from_path::<XRayByteOrder>(path) {
       Ok(_) => {
         log::info!("Provided spawn file is valid");
 

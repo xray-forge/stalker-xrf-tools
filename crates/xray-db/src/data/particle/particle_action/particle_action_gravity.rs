@@ -3,10 +3,10 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, ParticlesByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -39,7 +39,7 @@ impl ParticleActionReader for ParticleActionGravity {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionGravity {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    self.direction.write::<ParticlesByteOrder>(writer)?;
+    self.direction.write::<XRayByteOrder>(writer)?;
 
     Ok(())
   }
@@ -60,12 +60,12 @@ mod tests {
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particle::particle_action::particle_action_gravity::ParticleActionGravity;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -90,7 +90,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 12);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -104,7 +104,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      ParticleActionGravity::read::<SpawnByteOrder>(&mut reader)?,
+      ParticleActionGravity::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

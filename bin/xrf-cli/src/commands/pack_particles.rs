@@ -2,7 +2,7 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::{DatabaseResult, ParticlesByteOrder, ParticlesFile};
+use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
 
 pub struct PackParticlesFileCommand {}
 
@@ -74,7 +74,7 @@ impl PackParticlesFileCommand {
     let particles_file: ParticlesFile = ParticlesFile::import_from_path(path)?;
     let read_duration: Duration = started_at.elapsed();
 
-    particles_file.write_to_path::<ParticlesByteOrder>(destination)?;
+    particles_file.write_to_path::<XRayByteOrder>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 

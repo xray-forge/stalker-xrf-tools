@@ -3,10 +3,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -70,7 +70,7 @@ impl AlifeObjectReader for AlifeSmartTerrain {
       "Unexpected smart terrain staying objects"
     );
 
-    let save_marker: u16 = reader.read_u16::<SpawnByteOrder>()?;
+    let save_marker: u16 = reader.read_u16::<XRayByteOrder>()?;
 
     assert_eq!(
       save_marker, 6,
@@ -123,7 +123,7 @@ impl AlifeObjectWriter for AlifeSmartTerrain {
     writer.write_u8(self.smart_terrain_actor_control)?;
     writer.write_u8(self.respawn_point)?;
     writer.write_u8(self.staying_objects_count)?;
-    writer.write_u16::<SpawnByteOrder>(self.save_marker)?;
+    writer.write_u16::<XRayByteOrder>(self.save_marker)?;
 
     Ok(())
   }
@@ -171,9 +171,9 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -222,7 +222,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 114);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -236,7 +236,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeSmartTerrain::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeSmartTerrain::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

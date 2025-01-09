@@ -3,10 +3,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -53,9 +53,9 @@ impl AlifeObjectWriter for AlifeObjectAnomalyZone {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
-    writer.write_f32::<SpawnByteOrder>(self.offline_interactive_radius)?;
-    writer.write_u16::<SpawnByteOrder>(self.artefact_spawn_count)?;
-    writer.write_u32::<SpawnByteOrder>(self.artefact_position_offset)?;
+    writer.write_f32::<XRayByteOrder>(self.offline_interactive_radius)?;
+    writer.write_u16::<XRayByteOrder>(self.artefact_spawn_count)?;
+    writer.write_u32::<XRayByteOrder>(self.artefact_position_offset)?;
 
     Ok(())
   }
@@ -93,9 +93,9 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -145,7 +145,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 125);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -159,7 +159,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeObjectAnomalyZone::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeObjectAnomalyZone::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

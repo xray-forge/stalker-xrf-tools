@@ -116,14 +116,14 @@ impl GraphCrossTable {
 #[cfg(test)]
 mod tests {
   use crate::data::graph::graph_cross_table::GraphCrossTable;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
@@ -163,11 +163,11 @@ mod tests {
       },
     ];
 
-    GraphCrossTable::write_list::<SpawnByteOrder>(&original, &mut writer)?;
+    GraphCrossTable::write_list::<XRayByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 166);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -187,7 +187,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      GraphCrossTable::read_list::<SpawnByteOrder>(&mut reader)?,
+      GraphCrossTable::read_list::<XRayByteOrder>(&mut reader)?,
       original
     );
 
@@ -208,11 +208,11 @@ mod tests {
       data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     };
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 55);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -232,7 +232,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      GraphCrossTable::read::<SpawnByteOrder>(&mut reader)?,
+      GraphCrossTable::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 
@@ -272,10 +272,10 @@ mod tests {
       },
     ];
 
-    GraphCrossTable::export_list::<SpawnByteOrder>(&original, &mut file)?;
+    GraphCrossTable::export_list::<XRayByteOrder>(&original, &mut file)?;
 
     assert_eq!(
-      GraphCrossTable::import_list::<SpawnByteOrder>(&mut open_test_resource_as_file(
+      GraphCrossTable::import_list::<XRayByteOrder>(&mut open_test_resource_as_file(
         config_path.to_str().unwrap()
       )?,)?,
       original

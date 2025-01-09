@@ -154,13 +154,13 @@ impl FromStr for Time {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::time::Time;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
@@ -182,11 +182,11 @@ mod tests {
       millis: 250,
     };
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 8);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -199,7 +199,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Time::read::<SpawnByteOrder>(&mut reader)?, original);
+    assert_eq!(Time::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -220,11 +220,11 @@ mod tests {
       millis: 250,
     };
 
-    Time::write_optional::<SpawnByteOrder>(Some(&original), &mut writer)?;
+    Time::write_optional::<XRayByteOrder>(Some(&original), &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 9);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -238,7 +238,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      Time::read_optional::<SpawnByteOrder>(&mut reader)?,
+      Time::read_optional::<XRayByteOrder>(&mut reader)?,
       Some(original)
     );
 
@@ -251,11 +251,11 @@ mod tests {
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
 
-    Time::write_optional::<SpawnByteOrder>(None, &mut writer)?;
+    Time::write_optional::<XRayByteOrder>(None, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 1);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -268,7 +268,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Time::read_optional::<SpawnByteOrder>(&mut reader)?, None);
+    assert_eq!(Time::read_optional::<XRayByteOrder>(&mut reader)?, None);
 
     Ok(())
   }

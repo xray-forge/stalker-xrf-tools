@@ -204,13 +204,13 @@ mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -247,11 +247,11 @@ mod tests {
       }],
     };
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 210);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -263,7 +263,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 210 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read: Patrol = Patrol::read::<SpawnByteOrder>(&mut reader)?;
+    let read: Patrol = Patrol::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read, original);
 
@@ -324,11 +324,11 @@ mod tests {
       },
     ];
 
-    Patrol::write_list::<SpawnByteOrder>(&original, &mut writer)?;
+    Patrol::write_list::<XRayByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 430);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -340,7 +340,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read: Vec<Patrol> = Patrol::read_list::<SpawnByteOrder>(&mut reader, 2)?;
+    let read: Vec<Patrol> = Patrol::read_list::<XRayByteOrder>(&mut reader, 2)?;
 
     assert_eq!(read, original);
 

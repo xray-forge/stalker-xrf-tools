@@ -4,7 +4,7 @@ use crate::utils::error_to_string;
 use std::path::Path;
 use std::sync::MutexGuard;
 use tauri::State;
-use xray_db::{SpawnByteOrder, SpawnFile};
+use xray_db::{SpawnFile, XRayByteOrder};
 
 #[tauri::command]
 pub fn save_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> TauriResult {
@@ -16,7 +16,7 @@ pub fn save_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> Tauri
     let file: &SpawnFile = lock.as_ref().unwrap();
 
     file
-      .write_to_path::<SpawnByteOrder>(Path::new(path))
+      .write_to_path::<XRayByteOrder>(Path::new(path))
       .map_err(error_to_string)
   } else {
     Err(String::from("No spawn file open for saving"))

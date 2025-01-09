@@ -1,6 +1,6 @@
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseParseError, DatabaseResult, ParticlesByteOrder, ParticlesFile};
+use xray_db::{DatabaseParseError, DatabaseResult, ParticlesFile, XRayByteOrder};
 
 pub struct VerifyParticlesFileCommand {}
 
@@ -43,7 +43,7 @@ impl VerifyParticlesFileCommand {
     let particles_file_result: DatabaseResult<ParticlesFile> = if unpacked {
       ParticlesFile::import_from_path(path)
     } else {
-      ParticlesFile::read_from_path::<ParticlesByteOrder>(path)
+      ParticlesFile::read_from_path::<XRayByteOrder>(path)
     };
 
     match particles_file_result {

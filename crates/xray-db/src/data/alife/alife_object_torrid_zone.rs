@@ -5,10 +5,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -56,7 +56,7 @@ impl AlifeObjectWriter for AlifeObjectTorridZone {
     self.base.write(writer)?;
     self.motion.write(writer)?;
 
-    Time::write_optional::<SpawnByteOrder>(self.last_spawn_time.as_ref(), writer)?;
+    Time::write_optional::<XRayByteOrder>(self.last_spawn_time.as_ref(), writer)?;
 
     Ok(())
   }
@@ -85,9 +85,9 @@ mod tests {
   use crate::data::generic::time::Time;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -138,7 +138,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 81);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -152,7 +152,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeObjectTorridZone::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeObjectTorridZone::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

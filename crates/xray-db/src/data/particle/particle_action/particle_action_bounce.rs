@@ -3,10 +3,10 @@ use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, ParticlesByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -49,11 +49,11 @@ impl ParticleActionReader for ParticleActionBounce {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionBounce {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    self.position.write::<ParticlesByteOrder>(writer)?;
+    self.position.write::<XRayByteOrder>(writer)?;
 
-    writer.write_f32::<ParticlesByteOrder>(self.one_minus_friction)?;
-    writer.write_f32::<ParticlesByteOrder>(self.resilience)?;
-    writer.write_f32::<ParticlesByteOrder>(self.cutoff_sqr)?;
+    writer.write_f32::<XRayByteOrder>(self.one_minus_friction)?;
+    writer.write_f32::<XRayByteOrder>(self.resilience)?;
+    writer.write_f32::<XRayByteOrder>(self.cutoff_sqr)?;
 
     Ok(())
   }
@@ -78,12 +78,12 @@ mod tests {
   use crate::data::particle::particle_action::particle_action_bounce::ParticleActionBounce;
   use crate::data::particle::particle_domain::ParticleDomain;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -137,7 +137,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 80);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -151,7 +151,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      ParticleActionBounce::read::<SpawnByteOrder>(&mut reader)?,
+      ParticleActionBounce::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

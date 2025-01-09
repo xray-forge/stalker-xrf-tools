@@ -80,13 +80,13 @@ impl ParticleEffectSprite {
 mod tests {
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -104,11 +104,11 @@ mod tests {
       texture_name: String::from("texture_name"),
     };
 
-    sprite.write::<SpawnByteOrder>(&mut writer)?;
+    sprite.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 25);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -128,7 +128,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     let read_sprite: ParticleEffectSprite =
-      ParticleEffectSprite::read::<SpawnByteOrder>(&mut reader)?;
+      ParticleEffectSprite::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read_sprite, sprite);
 

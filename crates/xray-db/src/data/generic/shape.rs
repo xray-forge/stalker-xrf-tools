@@ -162,13 +162,13 @@ mod tests {
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -214,11 +214,11 @@ mod tests {
       )),
     ];
 
-    Shape::write_list::<SpawnByteOrder>(&original, &mut writer)?;
+    Shape::write_list::<XRayByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 67);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -231,7 +231,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Shape::read_list::<SpawnByteOrder>(&mut reader)?, original);
+    assert_eq!(Shape::read_list::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -250,11 +250,11 @@ mod tests {
       150.0,
     ));
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 17);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -267,7 +267,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Shape::read::<SpawnByteOrder>(&mut reader)?, original);
+    assert_eq!(Shape::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -300,11 +300,11 @@ mod tests {
       },
     ));
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 49);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -317,7 +317,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Shape::read::<SpawnByteOrder>(&mut reader)?, original);
+    assert_eq!(Shape::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

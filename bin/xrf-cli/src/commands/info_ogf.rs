@@ -1,6 +1,6 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseResult, OgfByteOrder, OgfFile};
+use xray_db::{DatabaseResult, OgfFile, XRayByteOrder};
 
 pub struct InfoOgfCommand {}
 
@@ -29,7 +29,7 @@ impl InfoOgfCommand {
 
     println!("Read ogf file {:?}", path);
 
-    let ogf_file: OgfFile = OgfFile::read_from_path::<OgfByteOrder>(path)?;
+    let ogf_file: OgfFile = OgfFile::read_from_path::<XRayByteOrder>(path)?;
 
     println!("Ogf file information");
 

@@ -2,10 +2,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -27,13 +27,13 @@ impl AlifeObjectReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract 
   /// Read trader data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
-      money: reader.read_u32::<SpawnByteOrder>()?,
+      money: reader.read_u32::<XRayByteOrder>()?,
       specific_character: reader.read_null_terminated_win_string()?,
-      trader_flags: reader.read_u32::<SpawnByteOrder>()?,
+      trader_flags: reader.read_u32::<XRayByteOrder>()?,
       character_profile: reader.read_null_terminated_win_string()?,
-      community_index: reader.read_u32::<SpawnByteOrder>()?,
-      rank: reader.read_u32::<SpawnByteOrder>()?,
-      reputation: reader.read_u32::<SpawnByteOrder>()?,
+      community_index: reader.read_u32::<XRayByteOrder>()?,
+      rank: reader.read_u32::<XRayByteOrder>()?,
+      reputation: reader.read_u32::<XRayByteOrder>()?,
       character_name: reader.read_null_terminated_win_string()?,
       dead_body_can_take: reader.read_u8()?,
       dead_body_closed: reader.read_u8()?,
@@ -68,13 +68,13 @@ impl AlifeObjectReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract 
 impl AlifeObjectWriter for AlifeObjectTraderAbstract {
   /// Write trader data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_u32::<SpawnByteOrder>(self.money)?;
+    writer.write_u32::<XRayByteOrder>(self.money)?;
     writer.write_null_terminated_win_string(&self.specific_character)?;
-    writer.write_u32::<SpawnByteOrder>(self.trader_flags)?;
+    writer.write_u32::<XRayByteOrder>(self.trader_flags)?;
     writer.write_null_terminated_win_string(&self.character_profile)?;
-    writer.write_u32::<SpawnByteOrder>(self.community_index)?;
-    writer.write_u32::<SpawnByteOrder>(self.rank)?;
-    writer.write_u32::<SpawnByteOrder>(self.reputation)?;
+    writer.write_u32::<XRayByteOrder>(self.community_index)?;
+    writer.write_u32::<XRayByteOrder>(self.rank)?;
+    writer.write_u32::<XRayByteOrder>(self.reputation)?;
     writer.write_null_terminated_win_string(&self.character_name)?;
     writer.write_u8(self.dead_body_can_take)?;
     writer.write_u8(self.dead_body_closed)?;
@@ -106,9 +106,9 @@ mod tests {
   use crate::data::alife::alife_object_trader_abstract::AlifeObjectTraderAbstract;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -136,7 +136,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 74);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -150,7 +150,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeObjectTraderAbstract::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeObjectTraderAbstract::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

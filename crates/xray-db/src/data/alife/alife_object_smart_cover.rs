@@ -4,10 +4,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -30,9 +30,9 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
       base: AlifeObjectDynamic::read::<T>(reader)?,
       shape: Shape::read_list::<T>(reader)?,
       description: reader.read_null_terminated_win_string()?,
-      hold_position_time: reader.read_f32::<SpawnByteOrder>()?,
-      enter_min_enemy_distance: reader.read_f32::<SpawnByteOrder>()?,
-      exit_min_enemy_distance: reader.read_f32::<SpawnByteOrder>()?,
+      hold_position_time: reader.read_f32::<XRayByteOrder>()?,
+      enter_min_enemy_distance: reader.read_f32::<XRayByteOrder>()?,
+      exit_min_enemy_distance: reader.read_f32::<XRayByteOrder>()?,
       is_combat_cover: reader.read_u8()?,
       can_fire: reader.read_u8()?,
     })
@@ -66,12 +66,12 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
-    Shape::write_list::<SpawnByteOrder>(&self.shape, writer)?;
+    Shape::write_list::<XRayByteOrder>(&self.shape, writer)?;
 
     writer.write_null_terminated_win_string(&self.description)?;
-    writer.write_f32::<SpawnByteOrder>(self.hold_position_time)?;
-    writer.write_f32::<SpawnByteOrder>(self.enter_min_enemy_distance)?;
-    writer.write_f32::<SpawnByteOrder>(self.exit_min_enemy_distance)?;
+    writer.write_f32::<XRayByteOrder>(self.hold_position_time)?;
+    writer.write_f32::<XRayByteOrder>(self.enter_min_enemy_distance)?;
+    writer.write_f32::<XRayByteOrder>(self.exit_min_enemy_distance)?;
     writer.write_u8(self.is_combat_cover)?;
     writer.write_u8(self.can_fire)?;
 
@@ -116,9 +116,9 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -163,7 +163,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 136);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -177,7 +177,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeObjectSmartCover::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeObjectSmartCover::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

@@ -101,14 +101,14 @@ impl SpawnHeaderChunk {
 #[cfg(test)]
 mod tests {
   use crate::spawn_file::chunks::spawn_header_chunk::SpawnHeaderChunk;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::{uuid, Uuid};
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_directory,
@@ -124,7 +124,7 @@ mod tests {
     .read_child_by_index(0)?;
 
     let original: DatabaseResult<SpawnHeaderChunk> =
-      SpawnHeaderChunk::read::<SpawnByteOrder>(&mut reader);
+      SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader);
 
     assert!(original.is_err(), "Expected failure with empty chunk");
 
@@ -145,11 +145,11 @@ mod tests {
 
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 44);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -165,7 +165,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      SpawnHeaderChunk::read::<SpawnByteOrder>(&mut reader)?,
+      SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

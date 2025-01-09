@@ -1,7 +1,7 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use xray_db::{DatabaseResult, ParticlesByteOrder, ParticlesFile};
+use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
 
 pub struct RepackParticlesCommand {}
 
@@ -44,10 +44,10 @@ impl RepackParticlesCommand {
     log::info!("Repack into {:?}", destination);
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<ParticlesByteOrder>(path)?;
+    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
-    particles_file.write_to_path::<ParticlesByteOrder>(destination)?;
+    particles_file.write_to_path::<XRayByteOrder>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 

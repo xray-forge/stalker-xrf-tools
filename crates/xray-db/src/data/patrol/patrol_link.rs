@@ -126,13 +126,13 @@ impl PatrolLink {
 mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -150,11 +150,11 @@ mod tests {
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 32);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -168,7 +168,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
-    let read: PatrolLink = PatrolLink::read::<SpawnByteOrder>(&mut reader)?;
+    let read: PatrolLink = PatrolLink::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read, original);
 
@@ -191,11 +191,11 @@ mod tests {
       },
     ];
 
-    PatrolLink::write_list::<SpawnByteOrder>(&original, &mut writer)?;
+    PatrolLink::write_list::<XRayByteOrder>(&original, &mut writer)?;
 
     assert_eq!(writer.bytes_written(), 48);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -209,7 +209,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
-    let read: Vec<PatrolLink> = PatrolLink::read_list::<SpawnByteOrder>(&mut reader)?;
+    let read: Vec<PatrolLink> = PatrolLink::read_list::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read, original);
 

@@ -2,10 +2,10 @@ use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, ParticlesByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,7 +38,7 @@ impl ParticleActionReader for ParticleActionCopyVertex {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionCopyVertex {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_u32::<ParticlesByteOrder>(self.copy_position)?;
+    writer.write_u32::<XRayByteOrder>(self.copy_position)?;
 
     Ok(())
   }

@@ -1,7 +1,7 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use xray_db::{DatabaseResult, SpawnByteOrder, SpawnFile};
+use xray_db::{DatabaseResult, SpawnFile, XRayByteOrder};
 
 pub struct RepackSpawnCommand {}
 
@@ -44,11 +44,11 @@ impl RepackSpawnCommand {
     log::info!("Repack into {:?}", destination);
 
     let started_at: Instant = Instant::now();
-    let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path)?;
+    let spawn_file: SpawnFile = SpawnFile::read_from_path::<XRayByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
     spawn_file
-      .write_to_path::<SpawnByteOrder>(destination)
+      .write_to_path::<XRayByteOrder>(destination)
       .expect("Correctly written spawn file");
 
     let write_duration: Duration = started_at.elapsed() - read_duration;

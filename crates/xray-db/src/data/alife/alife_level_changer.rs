@@ -4,10 +4,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -85,20 +85,20 @@ impl AlifeObjectWriter for AlifeLevelChanger {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
-    writer.write_u16::<SpawnByteOrder>(self.dest_game_vertex_id)?;
-    writer.write_u32::<SpawnByteOrder>(self.dest_level_vertex_id)?;
+    writer.write_u16::<XRayByteOrder>(self.dest_game_vertex_id)?;
+    writer.write_u32::<XRayByteOrder>(self.dest_level_vertex_id)?;
 
-    self.dest_position.write::<SpawnByteOrder>(writer)?;
-    self.dest_direction.write::<SpawnByteOrder>(writer)?;
+    self.dest_position.write::<XRayByteOrder>(writer)?;
+    self.dest_direction.write::<XRayByteOrder>(writer)?;
 
-    writer.write_f32::<SpawnByteOrder>(self.angle_y)?;
+    writer.write_f32::<XRayByteOrder>(self.angle_y)?;
     writer.write_null_terminated_win_string(&self.dest_level_name)?;
     writer.write_null_terminated_win_string(&self.dest_graph_point)?;
     writer.write_u8(self.silent_mode)?;
 
     writer.write_u8(self.enabled)?;
     writer.write_null_terminated_win_string(&self.hint)?;
-    writer.write_u16::<SpawnByteOrder>(self.save_marker)?;
+    writer.write_u16::<XRayByteOrder>(self.save_marker)?;
 
     Ok(())
   }
@@ -137,9 +137,9 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -190,7 +190,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 177);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -202,7 +202,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 177 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeLevelChanger = AlifeLevelChanger::read::<SpawnByteOrder>(&mut reader)?;
+    let read_object: AlifeLevelChanger = AlifeLevelChanger::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, original);
 

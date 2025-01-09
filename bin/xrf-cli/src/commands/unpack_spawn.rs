@@ -2,7 +2,7 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::{DatabaseResult, SpawnByteOrder, SpawnFile};
+use xray_db::{DatabaseResult, SpawnFile, XRayByteOrder};
 
 pub struct UnpackSpawnFileCommand {}
 
@@ -71,10 +71,10 @@ impl UnpackSpawnFileCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path)?;
+    let spawn_file: SpawnFile = SpawnFile::read_from_path::<XRayByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
-    spawn_file.export_to_path::<SpawnByteOrder>(destination)?;
+    spawn_file.export_to_path::<XRayByteOrder>(destination)?;
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 

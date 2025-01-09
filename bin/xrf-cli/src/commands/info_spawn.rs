@@ -1,6 +1,6 @@
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseResult, SpawnByteOrder, SpawnFile};
+use xray_db::{DatabaseResult, SpawnFile, XRayByteOrder};
 
 pub struct InfoSpawnCommand {}
 
@@ -29,7 +29,7 @@ impl InfoSpawnCommand {
 
     println!("Read spawn file {:?}", path);
 
-    let spawn_file: SpawnFile = SpawnFile::read_from_path::<SpawnByteOrder>(path)?;
+    let spawn_file: SpawnFile = SpawnFile::read_from_path::<XRayByteOrder>(path)?;
 
     println!("Spawn file information:");
 

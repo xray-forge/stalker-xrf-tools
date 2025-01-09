@@ -4,10 +4,10 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -112,29 +112,29 @@ impl AlifeObjectWriter for AlifeObjectHangingLamp {
     self.base.write(writer)?;
     self.skeleton.write(writer)?;
 
-    writer.write_u32::<SpawnByteOrder>(self.main_color)?;
-    writer.write_f32::<SpawnByteOrder>(self.main_brightness)?;
+    writer.write_u32::<XRayByteOrder>(self.main_color)?;
+    writer.write_f32::<XRayByteOrder>(self.main_brightness)?;
     writer.write_null_terminated_win_string(&self.color_animator)?;
-    writer.write_f32::<SpawnByteOrder>(self.main_range)?;
-    writer.write_u16::<SpawnByteOrder>(self.light_flags)?;
+    writer.write_f32::<XRayByteOrder>(self.main_range)?;
+    writer.write_u16::<XRayByteOrder>(self.light_flags)?;
     writer.write_null_terminated_win_string(&self.startup_animation)?;
     writer.write_null_terminated_win_string(&self.fixed_bones)?;
-    writer.write_f32::<SpawnByteOrder>(self.health)?;
+    writer.write_f32::<XRayByteOrder>(self.health)?;
 
-    writer.write_f32::<SpawnByteOrder>(self.virtual_size)?;
-    writer.write_f32::<SpawnByteOrder>(self.ambient_radius)?;
-    writer.write_f32::<SpawnByteOrder>(self.ambient_power)?;
+    writer.write_f32::<XRayByteOrder>(self.virtual_size)?;
+    writer.write_f32::<XRayByteOrder>(self.ambient_radius)?;
+    writer.write_f32::<XRayByteOrder>(self.ambient_power)?;
     writer.write_null_terminated_win_string(&self.ambient_texture)?;
     writer.write_null_terminated_win_string(&self.light_texture)?;
     writer.write_null_terminated_win_string(&self.light_bone)?;
-    writer.write_f32::<SpawnByteOrder>(self.spot_cone_angle)?;
+    writer.write_f32::<XRayByteOrder>(self.spot_cone_angle)?;
     writer.write_null_terminated_win_string(&self.glow_texture)?;
-    writer.write_f32::<SpawnByteOrder>(self.glow_radius)?;
+    writer.write_f32::<XRayByteOrder>(self.glow_radius)?;
 
     writer.write_null_terminated_win_string(&self.light_ambient_bone)?;
-    writer.write_f32::<SpawnByteOrder>(self.volumetric_quality)?;
-    writer.write_f32::<SpawnByteOrder>(self.volumetric_intensity)?;
-    writer.write_f32::<SpawnByteOrder>(self.volumetric_distance)?;
+    writer.write_f32::<XRayByteOrder>(self.volumetric_quality)?;
+    writer.write_f32::<XRayByteOrder>(self.volumetric_intensity)?;
+    writer.write_f32::<XRayByteOrder>(self.volumetric_distance)?;
 
     Ok(())
   }
@@ -183,9 +183,9 @@ mod tests {
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
@@ -243,7 +243,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 234);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -257,7 +257,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
     assert_eq!(
-      AlifeObjectHangingLamp::read::<SpawnByteOrder>(&mut reader)?,
+      AlifeObjectHangingLamp::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

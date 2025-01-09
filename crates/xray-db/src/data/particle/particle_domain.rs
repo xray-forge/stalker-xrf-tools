@@ -1,12 +1,12 @@
 use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_error::DatabaseError;
 use crate::error::database_parse_error::DatabaseParseError;
-use crate::types::{DatabaseResult, ParticlesByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -35,17 +35,17 @@ impl ParticleDomain {
   }
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_u32::<ParticlesByteOrder>(self.domain_type)?;
+    writer.write_u32::<XRayByteOrder>(self.domain_type)?;
 
     self.coordinates.0.write::<T>(writer)?;
     self.coordinates.1.write::<T>(writer)?;
     self.basis.0.write::<T>(writer)?;
     self.basis.1.write::<T>(writer)?;
 
-    writer.write_f32::<ParticlesByteOrder>(self.radius1)?;
-    writer.write_f32::<ParticlesByteOrder>(self.radius2)?;
-    writer.write_f32::<ParticlesByteOrder>(self.radius1_sqr)?;
-    writer.write_f32::<ParticlesByteOrder>(self.radius2_sqr)?;
+    writer.write_f32::<XRayByteOrder>(self.radius1)?;
+    writer.write_f32::<XRayByteOrder>(self.radius2)?;
+    writer.write_f32::<XRayByteOrder>(self.radius1_sqr)?;
+    writer.write_f32::<XRayByteOrder>(self.radius2_sqr)?;
 
     Ok(())
   }
@@ -203,13 +203,13 @@ impl FromStr for ParticleDomain {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particle::particle_domain::ParticleDomain;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
@@ -253,11 +253,11 @@ mod tests {
       radius2_sqr: 2.0,
     };
 
-    original.write::<SpawnByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 68);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
         file!(),
         &filename,
@@ -277,7 +277,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticleDomain::read::<SpawnByteOrder>(&mut reader)?,
+      ParticleDomain::read::<XRayByteOrder>(&mut reader)?,
       original
     );
 

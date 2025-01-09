@@ -4,10 +4,10 @@ use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{import_vector_from_string, read_ltx_field};
-use crate::types::{DatabaseResult, SpawnByteOrder};
+use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -78,13 +78,13 @@ impl AlifeObjectWriter for AlifeObjectCreature {
     writer.write_u8(self.team)?;
     writer.write_u8(self.squad)?;
     writer.write_u8(self.group)?;
-    writer.write_f32::<SpawnByteOrder>(self.health)?;
+    writer.write_f32::<XRayByteOrder>(self.health)?;
 
-    writer.write_u16_vector::<SpawnByteOrder>(&self.dynamic_out_restrictions)?;
-    writer.write_u16_vector::<SpawnByteOrder>(&self.dynamic_in_restrictions)?;
+    writer.write_u16_vector::<XRayByteOrder>(&self.dynamic_out_restrictions)?;
+    writer.write_u16_vector::<XRayByteOrder>(&self.dynamic_in_restrictions)?;
 
-    writer.write_u16::<SpawnByteOrder>(self.killer_id)?;
-    writer.write_u64::<SpawnByteOrder>(self.game_death_time)?;
+    writer.write_u16::<XRayByteOrder>(self.killer_id)?;
+    writer.write_u64::<XRayByteOrder>(self.game_death_time)?;
 
     Ok(())
   }
@@ -122,12 +122,12 @@ mod tests {
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::export::file::open_ltx_config;
-  use crate::types::{DatabaseResult, SpawnByteOrder};
+  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter};
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -169,7 +169,7 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 87);
 
-    let bytes_written: usize = writer.flush_chunk_into::<SpawnByteOrder>(
+    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
@@ -181,8 +181,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 87 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectCreature =
-      AlifeObjectCreature::read::<SpawnByteOrder>(&mut reader)?;
+    let read_object: AlifeObjectCreature = AlifeObjectCreature::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, object);
 

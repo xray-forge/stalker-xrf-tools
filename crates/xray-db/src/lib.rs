@@ -21,3 +21,5 @@ pub use crate::particles_file::particles_file::*;
 pub use crate::spawn_file::spawn_file::*;
 
 pub use crate::types::*;
+
+pub use xray_chunk::XRayByteOrder;

@@ -2,7 +2,7 @@ use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::{DatabaseResult, ParticlesByteOrder, ParticlesFile};
+use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
 
 pub struct UnpackParticlesCommand {}
 
@@ -71,7 +71,7 @@ impl UnpackParticlesCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<ParticlesByteOrder>(path)?;
+    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.export_to_path(destination)?;
