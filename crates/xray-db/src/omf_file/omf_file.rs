@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::utils::find_chunk_by_id;
 use crate::omf_file::chunks::omf_motions_chunk::OmfMotionsChunk;
 use crate::omf_file::chunks::omf_parameters_chunk::OmfParametersChunk;
 use crate::{DatabaseParseError, DatabaseResult};
@@ -8,6 +6,7 @@ use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
+use xray_chunk::{find_chunk_by_id, ChunkReader};
 
 // c++ CKinematicsAnimated
 #[derive(Debug, Serialize, Deserialize)]

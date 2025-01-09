@@ -1,6 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::utils::find_chunk_by_id;
-use crate::chunk::writer::ChunkWriter;
 use crate::export::file::create_export_file;
 use crate::spawn_file::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
 use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
@@ -15,6 +12,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use xray_chunk::{find_chunk_by_id, ChunkReader, ChunkWriter};
 
 /// Descriptor of generic spawn file used by xray game engine.
 ///

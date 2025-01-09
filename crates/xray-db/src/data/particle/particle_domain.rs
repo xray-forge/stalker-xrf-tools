@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_error::DatabaseError;
 use crate::error::database_parse_error::DatabaseParseError;
@@ -8,6 +6,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
+use xray_chunk::{ChunkReader, ChunkWriter};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -26,14 +25,8 @@ impl ParticleDomain {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
       domain_type: reader.read_u32::<T>()?,
-      coordinates: (
-        reader.read_f32_3d_vector::<T>()?,
-        reader.read_f32_3d_vector::<T>()?,
-      ),
-      basis: (
-        reader.read_f32_3d_vector::<T>()?,
-        reader.read_f32_3d_vector::<T>()?,
-      ),
+      coordinates: (Vector3d::read::<T>(reader)?, Vector3d::read::<T>(reader)?),
+      basis: (Vector3d::read::<T>(reader)?, Vector3d::read::<T>(reader)?),
       radius1: reader.read_f32::<T>()?,
       radius2: reader.read_f32::<T>()?,
       radius1_sqr: reader.read_f32::<T>()?,
@@ -43,10 +36,12 @@ impl ParticleDomain {
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_u32::<ParticlesByteOrder>(self.domain_type)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.coordinates.0)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.coordinates.1)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.basis.0)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.basis.1)?;
+
+    self.coordinates.0.write::<T>(writer)?;
+    self.coordinates.1.write::<T>(writer)?;
+    self.basis.0.write::<T>(writer)?;
+    self.basis.1.write::<T>(writer)?;
+
     writer.write_f32::<ParticlesByteOrder>(self.radius1)?;
     writer.write_f32::<ParticlesByteOrder>(self.radius2)?;
     writer.write_f32::<ParticlesByteOrder>(self.radius1_sqr)?;
@@ -206,8 +201,6 @@ impl FromStr for ParticleDomain {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particle::particle_domain::ParticleDomain;
   use crate::types::{DatabaseResult, SpawnByteOrder};
@@ -216,6 +209,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,

@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
@@ -9,6 +7,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -35,8 +34,8 @@ impl AlifeObjectReader for AlifeLevelChanger {
       base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
       dest_game_vertex_id: reader.read_u16::<T>()?,
       dest_level_vertex_id: reader.read_u32::<T>()?,
-      dest_position: reader.read_f32_3d_vector::<T>()?,
-      dest_direction: reader.read_f32_3d_vector::<T>()?,
+      dest_position: Vector3d::read::<T>(reader)?,
+      dest_direction: Vector3d::read::<T>(reader)?,
       angle_y: reader.read_f32::<T>()?,
       dest_level_name: reader.read_null_terminated_win_string()?,
       dest_graph_point: reader.read_null_terminated_win_string()?,
@@ -88,8 +87,10 @@ impl AlifeObjectWriter for AlifeLevelChanger {
 
     writer.write_u16::<SpawnByteOrder>(self.dest_game_vertex_id)?;
     writer.write_u32::<SpawnByteOrder>(self.dest_level_vertex_id)?;
-    writer.write_f32_3d_vector::<SpawnByteOrder>(&self.dest_position)?;
-    writer.write_f32_3d_vector::<SpawnByteOrder>(&self.dest_direction)?;
+
+    self.dest_position.write::<SpawnByteOrder>(writer)?;
+    self.dest_direction.write::<SpawnByteOrder>(writer)?;
+
     writer.write_f32::<SpawnByteOrder>(self.angle_y)?;
     writer.write_null_terminated_win_string(&self.dest_level_name)?;
     writer.write_null_terminated_win_string(&self.dest_graph_point)?;
@@ -129,8 +130,6 @@ impl AlifeObjectWriter for AlifeLevelChanger {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_level_changer::AlifeLevelChanger;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
@@ -140,6 +139,7 @@ mod tests {
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,

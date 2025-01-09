@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
@@ -7,6 +5,7 @@ use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 /// `GameGraph::SLevel::load` in xray codebase.
@@ -25,7 +24,7 @@ impl GraphLevel {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
       name: reader.read_null_terminated_win_string()?,
-      offset: reader.read_f32_3d_vector::<T>()?,
+      offset: Vector3d::read::<T>(reader)?,
       id: reader.read_u8()?,
       section: reader.read_null_terminated_win_string()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
@@ -35,7 +34,9 @@ impl GraphLevel {
   /// Write graph level data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_null_terminated_win_string(&self.name)?;
-    writer.write_f32_3d_vector::<T>(&self.offset)?;
+
+    self.offset.write::<T>(writer)?;
+
     writer.write_u8(self.id)?;
     writer.write_null_terminated_win_string(&self.section)?;
     writer.write_u128::<T>(self.guid.as_u128())?;
@@ -75,8 +76,6 @@ impl GraphLevel {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_level::GraphLevel;
   use crate::export::file::open_ltx_config;
@@ -87,6 +86,7 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

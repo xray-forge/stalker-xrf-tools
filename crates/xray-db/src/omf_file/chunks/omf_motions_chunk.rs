@@ -1,10 +1,8 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::utils::read_u32_chunk;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::ogf::ogf_motion::OgfMotion;
 use crate::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
+use xray_chunk::{read_u32_chunk, ChunkReader, ChunkWriter};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OmfMotionsChunk {

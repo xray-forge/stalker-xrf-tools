@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -8,6 +6,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -24,7 +23,7 @@ pub struct ParticleActionTargetColor {
 impl ParticleActionReader for ParticleActionTargetColor {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionTargetColor> {
     Ok(ParticleActionTargetColor {
-      color: reader.read_f32_3d_vector::<T>()?,
+      color: Vector3d::read::<T>(reader)?,
       alpha: reader.read_f32::<T>()?,
       scale: reader.read_f32::<T>()?,
       // CS / COP only:
@@ -54,7 +53,8 @@ impl ParticleActionReader for ParticleActionTargetColor {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTargetColor {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.color)?;
+    self.color.write::<ParticlesByteOrder>(writer)?;
+
     writer.write_f32::<ParticlesByteOrder>(self.alpha)?;
     writer.write_f32::<ParticlesByteOrder>(self.scale)?;
     writer.write_f32::<ParticlesByteOrder>(self.time_from)?;

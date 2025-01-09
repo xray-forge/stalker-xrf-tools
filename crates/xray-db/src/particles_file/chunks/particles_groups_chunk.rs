@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_group::ParticleGroup;
 use crate::export::file::{create_export_file, open_ltx_config};
@@ -8,6 +6,7 @@ use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]

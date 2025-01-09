@@ -1,11 +1,10 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -20,7 +19,7 @@ impl GraphLevelPoint {
   /// Read level point from the chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
-      position: reader.read_f32_3d_vector::<T>()?,
+      position: Vector3d::read::<T>(reader)?,
       level_vertex_id: reader.read_u32::<T>()?,
       distance: reader.read_f32::<T>()?,
     })
@@ -28,7 +27,8 @@ impl GraphLevelPoint {
 
   /// Write level point data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_f32_3d_vector::<T>(&self.position)?;
+    self.position.write::<T>(writer)?;
+
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 
@@ -63,8 +63,6 @@ impl GraphLevelPoint {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::export::file::open_ltx_config;
@@ -74,6 +72,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

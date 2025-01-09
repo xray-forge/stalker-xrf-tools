@@ -1,5 +1,4 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
+use xray_chunk::{ChunkReader, ChunkWriter};
 
 use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
@@ -28,8 +27,8 @@ impl GraphVertex {
   /// Read graph vertex data from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
-      level_point: reader.read_f32_3d_vector::<T>()?,
-      game_point: reader.read_f32_3d_vector::<T>()?,
+      level_point: Vector3d::read::<T>(reader)?,
+      game_point: Vector3d::read::<T>(reader)?,
       level_id: reader.read_u8()?,
       level_vertex_id: reader.read_u24::<T>()?,
       vertex_type: reader.read_u32_bytes()?,
@@ -42,8 +41,9 @@ impl GraphVertex {
 
   /// Write graph vertex data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_f32_3d_vector::<T>(&self.level_point)?;
-    writer.write_f32_3d_vector::<T>(&self.game_point)?;
+    self.level_point.write::<T>(writer)?;
+    self.game_point.write::<T>(writer)?;
+
     writer.write_u8(self.level_id)?;
     writer.write_u24::<T>(self.level_vertex_id)?;
     writer.write_u32_bytes(&self.vertex_type)?;
@@ -103,8 +103,6 @@ impl GraphVertex {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::export::file::open_ltx_config;
@@ -114,6 +112,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

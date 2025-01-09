@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -9,6 +7,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,7 +38,7 @@ impl ParticleActionReader for ParticleActionSource {
       particle_rate: reader.read_f32::<T>()?,
       age: reader.read_f32::<T>()?,
       age_sigma: reader.read_f32::<T>()?,
-      parent_vel: reader.read_f32_3d_vector::<T>()?,
+      parent_vel: Vector3d::read::<T>(reader)?,
       parent_motion: reader.read_f32::<T>()?,
     })
   }
@@ -81,7 +80,9 @@ impl ParticleActionWriter for ParticleActionSource {
     writer.write_f32::<ParticlesByteOrder>(self.particle_rate)?;
     writer.write_f32::<ParticlesByteOrder>(self.age)?;
     writer.write_f32::<ParticlesByteOrder>(self.age_sigma)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.parent_vel)?;
+
+    self.parent_vel.write::<ParticlesByteOrder>(writer)?;
+
     writer.write_f32::<ParticlesByteOrder>(self.parent_motion)?;
 
     Ok(())

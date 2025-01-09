@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
@@ -8,6 +6,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -73,8 +72,6 @@ impl ParticleActionWriter for ParticleActionBounce {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::particle_action_reader::ParticleActionReader;
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -86,6 +83,7 @@ mod tests {
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

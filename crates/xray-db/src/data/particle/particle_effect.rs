@@ -1,9 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::utils::{
-  find_chunk_by_id, read_f32_chunk, read_f32_vector_chunk, read_null_terminated_win_string_chunk,
-  read_u16_chunk, read_u32_chunk,
-};
-use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::particle::particle_action::particle_action::ParticleAction;
@@ -17,6 +11,10 @@ use crate::export::file_import::{read_ini_optional_field, read_ltx_field};
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{
+  find_chunk_by_id, read_f32_chunk, read_f32_vector_chunk, read_null_terminated_win_string_chunk,
+  read_u16_chunk, read_u32_chunk, ChunkReader, ChunkWriter,
+};
 use xray_ltx::{Ltx, Section};
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
@@ -141,6 +139,7 @@ impl ParticleEffect {
         velocity_scale: find_chunk_by_id(&chunks, Self::VELOCITY_SCALE_CHUNK_ID).map(|mut it| {
           read_f32_vector_chunk::<T>(&mut it)
             .expect("Invalid velocity scale chunk data in particle effect")
+            .into()
         }),
         description: find_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
           ParticleDescription::read::<T>(&mut it)
@@ -149,6 +148,7 @@ impl ParticleEffect {
         rotation: find_chunk_by_id(&chunks, Self::ROTATION_CHUNK_ID).map(|mut it| {
           read_f32_vector_chunk::<T>(&mut it)
             .expect("Invalid rotation chunk data in particle effect")
+            .into()
         }),
         editor_data: find_chunk_by_id(&chunks, Self::EDITOR_DATA_CHUNK_ID).map(|mut it| {
           ParticleEffectEditorData::read::<T>(&mut it)
@@ -211,7 +211,7 @@ impl ParticleEffect {
 
     if let Some(velocity_scale) = &self.velocity_scale {
       let mut velocity_scale_chunk_writer: ChunkWriter = ChunkWriter::new();
-      velocity_scale_chunk_writer.write_f32_3d_vector::<T>(velocity_scale)?;
+      velocity_scale.write::<T>(&mut velocity_scale_chunk_writer)?;
       velocity_scale_chunk_writer.flush_chunk_into::<T>(writer, Self::VELOCITY_SCALE_CHUNK_ID)?;
     }
 
@@ -223,7 +223,7 @@ impl ParticleEffect {
 
     if let Some(rotation) = &self.rotation {
       let mut rotation_chunk_writer: ChunkWriter = ChunkWriter::new();
-      rotation_chunk_writer.write_f32_3d_vector::<T>(rotation)?;
+      rotation.write::<T>(&mut rotation_chunk_writer)?;
       rotation_chunk_writer.flush_chunk_into::<T>(writer, Self::ROTATION_CHUNK_ID)?;
     }
 
@@ -378,8 +378,6 @@ impl ParticleEffect {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::particle_action_type::ParticleActionType;
   use crate::data::particle::particle_action::particle_action::ParticleAction;
@@ -396,6 +394,7 @@ mod tests {
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,

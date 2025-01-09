@@ -1,11 +1,11 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
+use xray_chunk::ChunkParsingError;
 use xray_ltx::{Ltx, Section};
 
 /// Shape enumeration stored in objects descriptors.
@@ -113,9 +113,12 @@ impl Shape {
           )));
         }
         _ => {
-          return Err(DatabaseInvalidChunkError::new_database_error(format!(
-            "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
-          )))
+          return Err(
+            ChunkParsingError::new_chunk_error(format!(
+              "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
+            ))
+            .into(),
+          )
         }
       }
     }
@@ -156,8 +159,6 @@ impl Shape {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
@@ -167,6 +168,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

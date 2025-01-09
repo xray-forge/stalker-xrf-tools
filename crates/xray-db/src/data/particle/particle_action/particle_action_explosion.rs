@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -8,6 +6,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -24,7 +23,7 @@ pub struct ParticleActionExplosion {
 impl ParticleActionReader for ParticleActionExplosion {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
-      center: reader.read_f32_3d_vector::<T>()?,
+      center: Vector3d::read::<T>(reader)?,
       velocity: reader.read_f32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
       st_dev: reader.read_f32::<T>()?,
@@ -55,7 +54,8 @@ impl ParticleActionReader for ParticleActionExplosion {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionExplosion {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.center)?;
+    self.center.write::<ParticlesByteOrder>(writer)?;
+
     writer.write_f32::<ParticlesByteOrder>(self.velocity)?;
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
     writer.write_f32::<ParticlesByteOrder>(self.st_dev)?;
@@ -81,8 +81,6 @@ impl ParticleActionWriter for ParticleActionExplosion {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::particle_action_reader::ParticleActionReader;
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -93,6 +91,7 @@ mod tests {
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

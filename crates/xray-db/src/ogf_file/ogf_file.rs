@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::utils::find_chunk_by_id;
 use crate::ogf_file::chunks::ogf_description_chunk::OgfDescriptionChunk;
 use crate::ogf_file::chunks::ogf_header_chunk::OgfHeaderChunk;
 use crate::DatabaseResult;
@@ -8,6 +6,7 @@ use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
+use xray_chunk::{find_chunk_by_id, ChunkReader};
 
 /// FMesh in c++ codebase.
 #[derive(Debug, Serialize, Deserialize)]

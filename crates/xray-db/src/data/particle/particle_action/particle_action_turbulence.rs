@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -8,6 +6,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,7 +26,7 @@ impl ParticleActionReader for ParticleActionTurbulence {
       octaves: reader.read_i32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
-      offset: reader.read_f32_3d_vector::<T>()?,
+      offset: Vector3d::read::<T>(reader)?,
     })
   }
 
@@ -56,7 +55,8 @@ impl ParticleActionWriter for ParticleActionTurbulence {
     writer.write_i32::<ParticlesByteOrder>(self.octaves)?;
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
     writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.offset)?;
+
+    self.offset.write::<ParticlesByteOrder>(writer)?;
 
     Ok(())
   }

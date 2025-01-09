@@ -1,16 +1,16 @@
-use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
 use crate::error::database_not_implemented_error::DatabaseNotImplementedError;
 use crate::error::database_parse_error::DatabaseParseError;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 use std::io;
+use xray_chunk::ChunkError;
 use xray_ltx::LtxError;
 
 /// Error while working with DB data parsing/reading/writing/importing/exporting.
 #[derive(Debug)]
 pub enum DatabaseError {
   Io(io::Error),
-  InvalidChunk(DatabaseInvalidChunkError),
+  Chunk(ChunkError),
   NotImplemented(DatabaseNotImplementedError),
   Parse(DatabaseParseError),
   Ltx(LtxError),
@@ -21,7 +21,7 @@ impl Display for DatabaseError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {
     match *self {
       Self::Io(ref error) => error.fmt(formatter),
-      Self::InvalidChunk(ref error) => error.fmt(formatter),
+      Self::Chunk(ref error) => error.fmt(formatter),
       Self::Parse(ref error) => error.fmt(formatter),
       Self::NotImplemented(ref error) => error.fmt(formatter),
       Self::Ltx(ref error) => error.fmt(formatter),
@@ -34,7 +34,7 @@ impl Error for DatabaseError {
   fn source(&self) -> Option<&(dyn Error + 'static)> {
     match *self {
       Self::Io(ref error) => error.source(),
-      Self::InvalidChunk(ref error) => error.source(),
+      Self::Chunk(ref error) => error.source(),
       Self::Parse(ref error) => error.source(),
       Self::Ltx(ref error) => error.source(),
       Self::NotImplemented(ref error) => error.source(),
@@ -49,9 +49,9 @@ impl From<io::Error> for DatabaseError {
   }
 }
 
-impl From<DatabaseInvalidChunkError> for DatabaseError {
-  fn from(error: DatabaseInvalidChunkError) -> Self {
-    Self::InvalidChunk(error)
+impl From<ChunkError> for DatabaseError {
+  fn from(error: ChunkError) -> Self {
+    Self::Chunk(error)
   }
 }
 
@@ -76,5 +76,11 @@ impl From<LtxError> for DatabaseError {
 impl From<Box<dyn Error>> for DatabaseError {
   fn from(error: Box<dyn Error>) -> Self {
     Self::Generic(error)
+  }
+}
+
+impl Into<ChunkError> for DatabaseError {
+  fn into(self) -> ChunkError {
+    ChunkError::Generic(Box::new(self))
   }
 }

@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -8,6 +6,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -21,7 +20,7 @@ pub struct ParticleActionDamping {
 impl ParticleActionReader for ParticleActionDamping {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
-      damping: reader.read_f32_3d_vector::<T>()?,
+      damping: Vector3d::read::<T>(reader)?,
       v_low_sqr: reader.read_f32::<T>()?,
       v_high_sqr: reader.read_f32::<T>()?,
     })
@@ -46,7 +45,8 @@ impl ParticleActionReader for ParticleActionDamping {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionDamping {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.damping)?;
+    self.damping.write::<ParticlesByteOrder>(writer)?;
+
     writer.write_f32::<ParticlesByteOrder>(self.v_low_sqr)?;
     writer.write_f32::<ParticlesByteOrder>(self.v_high_sqr)?;
 
@@ -66,8 +66,6 @@ impl ParticleActionWriter for ParticleActionDamping {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::particle_action_reader::ParticleActionReader;
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -78,6 +76,7 @@ mod tests {
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

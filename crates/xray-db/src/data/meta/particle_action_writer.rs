@@ -1,6 +1,6 @@
-use crate::chunk::writer::ChunkWriter;
 use crate::types::DatabaseResult;
 use std::fmt::Debug;
+use xray_chunk::ChunkWriter;
 use xray_ltx::Ltx;
 
 #[typetag::serde(tag = "type")]

@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::graph::graph_cross_table::GraphCrossTable;
 use crate::data::graph::graph_edge::GraphEdge;
 use crate::data::graph::graph_header::GraphHeader;
@@ -12,6 +10,7 @@ use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::Path;
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::Ltx;
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
@@ -241,8 +240,6 @@ impl fmt::Debug for SpawnGraphsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
   use crate::data::graph::graph_edge::GraphEdge;
@@ -254,6 +251,7 @@ mod tests {
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
   use uuid::uuid;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,

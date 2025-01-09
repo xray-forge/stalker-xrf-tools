@@ -1,4 +1,3 @@
-pub(crate) mod chunk;
 pub(crate) mod constants;
 pub(crate) mod data;
 pub(crate) mod error;
@@ -10,7 +9,6 @@ pub(crate) mod spawn_file;
 pub(crate) mod types;
 
 pub use crate::error::database_error::*;
-pub use crate::error::database_invalid_chunk_error::*;
 pub use crate::error::database_not_implemented_error::*;
 pub use crate::error::database_parse_error::*;
 

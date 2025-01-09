@@ -1,10 +1,8 @@
 use crate::chunk::interface::ChunkDataSource;
 use crate::chunk::iterator::ChunkIterator;
-use crate::data::generic::shape::Shape;
-use crate::data::generic::vector_3d::Vector3d;
-use crate::error::database_error::DatabaseError;
-use crate::error::database_invalid_chunk_error::DatabaseInvalidChunkError;
-use crate::types::{DatabaseResult, U32Bytes};
+use crate::error::invalid_chunk_error::ChunkInvalidError;
+use crate::types::U32Bytes;
+use crate::ChunkResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
@@ -24,14 +22,14 @@ pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
 
 impl ChunkReader {
   /// Create chunk based on whole file.
-  pub fn from_file(file: File) -> DatabaseResult<ChunkReader> {
+  pub fn from_file(file: File) -> ChunkResult<ChunkReader> {
     Self::from_slice(FileSlice::new(file))
   }
 
   /// Create chunk based on file slice boundaries.
-  pub fn from_slice(file: FileSlice) -> DatabaseResult<ChunkReader> {
+  pub fn from_slice(file: FileSlice) -> ChunkResult<ChunkReader> {
     if file.is_empty() {
-      return Err(DatabaseInvalidChunkError::new_database_error(
+      return Err(ChunkInvalidError::new_chunk_error(
         "Trying to create chunk from empty file",
       ));
     }
@@ -85,16 +83,16 @@ impl ChunkReader {
 
 impl ChunkReader {
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_child_by_index(&mut self, index: u32) -> DatabaseResult<ChunkReader> {
+  pub fn read_child_by_index(&mut self, index: u32) -> ChunkResult<ChunkReader> {
     for (iteration, chunk) in ChunkIterator::new(self).enumerate() {
       if index as usize == iteration {
         return Ok(chunk);
       }
     }
 
-    Err(DatabaseInvalidChunkError::new_database_error(String::from(
+    Err(ChunkInvalidError::new_chunk_error(
       "Attempt to read chunk with index out of bonds",
-    )))
+    ))
   }
 
   /// Get list of all child samples in current chunk, do not mutate current chunk.
@@ -109,26 +107,13 @@ impl ChunkReader {
 
   /// Reset seek position in chunk file.
   #[allow(dead_code)]
-  pub fn reset_pos(&mut self) -> DatabaseResult<u64> {
-    self
-      .file
-      .seek(SeekFrom::Start(0))
-      .map_err(DatabaseError::from)
+  pub fn reset_pos(&mut self) -> ChunkResult<u64> {
+    Ok(self.file.seek(SeekFrom::Start(0))?)
   }
 }
 
 impl ChunkReader {
-  /// Read three float values.
-  pub fn read_f32_3d_vector<T: ByteOrder>(&mut self) -> DatabaseResult<Vector3d<f32>> {
-    Vector3d::read::<T>(self)
-  }
-
-  /// Read shape data.
-  pub fn read_shapes<T: ByteOrder>(&mut self) -> DatabaseResult<Vec<Shape>> {
-    Shape::read_list::<T>(self)
-  }
-
-  pub fn read_u32_bytes(&mut self) -> DatabaseResult<U32Bytes> {
+  pub fn read_u32_bytes(&mut self) -> ChunkResult<U32Bytes> {
     Ok((
       self.read_u8()?,
       self.read_u8()?,
@@ -138,7 +123,7 @@ impl ChunkReader {
   }
 
   /// Read serialized vector from chunk, where u32 count N is followed by N u16 entries.
-  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> DatabaseResult<Vec<u16>> {
+  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> ChunkResult<Vec<u16>> {
     let mut vector: Vec<u16> = Vec::new();
     let count: u32 = self.read_u32::<T>()?;
 
@@ -150,7 +135,7 @@ impl ChunkReader {
   }
 
   /// Read null terminated windows encoded string from file bytes.
-  pub fn read_null_terminated_win_string(&mut self) -> DatabaseResult<String> {
+  pub fn read_null_terminated_win_string(&mut self) -> ChunkResult<String> {
     let offset: u64 = self.file.stream_position()?;
     let mut buffer: Vec<u8> = Vec::new();
 
@@ -182,7 +167,7 @@ impl ChunkReader {
     }
   }
 
-  pub fn read_bytes(&mut self, count: usize) -> DatabaseResult<Vec<u8>> {
+  pub fn read_bytes(&mut self, count: usize) -> ChunkResult<Vec<u8>> {
     let mut buffer: Vec<u8> = vec![0; count];
 
     self.read_exact(&mut buffer)?;
@@ -204,18 +189,18 @@ impl fmt::Debug for ChunkReader {
 #[cfg(test)]
 mod tests {
   use crate::chunk::reader::ChunkReader;
-  use crate::types::DatabaseResult;
+  use crate::types::ChunkResult;
   use fileslice::FileSlice;
   use xray_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
 
   #[test]
-  fn test_read_empty_file() -> DatabaseResult {
+  fn test_read_empty_file() -> ChunkResult {
     let file: FileSlice = open_test_resource_as_slice("empty")?;
 
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 0);
 
-    let result: DatabaseResult<ChunkReader> = ChunkReader::from_slice(file);
+    let result: ChunkResult<ChunkReader> = ChunkReader::from_slice(file);
 
     assert!(
       result.is_err(),
@@ -231,7 +216,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_chunk() -> DatabaseResult {
+  fn test_read_empty_chunk() -> ChunkResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
@@ -246,7 +231,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_children() -> DatabaseResult {
+  fn test_read_empty_children() -> ChunkResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
@@ -269,7 +254,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_unordered_children() -> DatabaseResult {
+  fn test_read_empty_unordered_children() -> ChunkResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
@@ -290,7 +275,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_dummy_children() -> DatabaseResult {
+  fn test_read_dummy_children() -> ChunkResult {
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();

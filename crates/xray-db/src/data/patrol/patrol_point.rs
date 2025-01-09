@@ -1,6 +1,3 @@
-use crate::chunk::iterator::ChunkIterator;
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
@@ -8,6 +5,7 @@ use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
+use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
@@ -50,7 +48,7 @@ impl PatrolPoint {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let point: Self = Self {
       name: reader.read_null_terminated_win_string()?,
-      position: reader.read_f32_3d_vector::<T>()?,
+      position: Vector3d::read::<T>(reader)?,
       flags: reader.read_u32::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
       game_vertex_id: reader.read_u16::<T>()?,
@@ -87,7 +85,9 @@ impl PatrolPoint {
   /// Write patrol point data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     writer.write_null_terminated_win_string(&self.name)?;
-    writer.write_f32_3d_vector::<T>(&self.position)?;
+
+    self.position.write::<T>(writer)?;
+
     writer.write_u32::<T>(self.flags)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_u16::<T>(self.game_vertex_id)?;
@@ -129,8 +129,6 @@ impl PatrolPoint {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::export::file::open_ltx_config;
@@ -140,6 +138,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

@@ -1,6 +1,3 @@
-use crate::chunk::iterator::ChunkIterator;
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_base::AlifeObjectBase;
 use crate::export::file::{create_export_file, open_ltx_config};
 use crate::types::DatabaseResult;
@@ -9,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
+use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
 use xray_ltx::Ltx;
 
 /// ALife spawns chunk has the following structure:
@@ -140,8 +138,6 @@ impl fmt::Debug for SpawnALifeSpawnsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_base::AlifeObjectBase;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -153,6 +149,7 @@ mod tests {
   use crate::spawn_file::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,

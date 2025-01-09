@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -8,6 +6,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -23,8 +22,8 @@ pub struct ParticleActionVortex {
 impl ParticleActionReader for ParticleActionVortex {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionVortex> {
     Ok(ParticleActionVortex {
-      center: reader.read_f32_3d_vector::<T>()?,
-      axis: reader.read_f32_3d_vector::<T>()?,
+      center: Vector3d::read::<T>(reader)?,
+      axis: Vector3d::read::<T>(reader)?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
       max_radius: reader.read_f32::<T>()?,
@@ -52,8 +51,9 @@ impl ParticleActionReader for ParticleActionVortex {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionVortex {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.center)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.axis)?;
+    self.center.write::<ParticlesByteOrder>(writer)?;
+    self.axis.write::<ParticlesByteOrder>(writer)?;
+
     writer.write_f32::<ParticlesByteOrder>(self.magnitude)?;
     writer.write_f32::<ParticlesByteOrder>(self.epsilon)?;
     writer.write_f32::<ParticlesByteOrder>(self.max_radius)?;

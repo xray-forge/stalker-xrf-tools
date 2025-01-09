@@ -1,14 +1,14 @@
-use crate::error::database_error::DatabaseError;
+use crate::error::chunk_error::ChunkError;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 
 /// Parsing of chunk error.
 #[derive(Clone, Debug, PartialEq)]
-pub struct DatabaseInvalidChunkError {
+pub struct ChunkInvalidError {
   pub message: String,
 }
 
-impl DatabaseInvalidChunkError {
+impl ChunkInvalidError {
   pub fn new<T>(message: T) -> Self
   where
     T: Into<String>,
@@ -18,20 +18,20 @@ impl DatabaseInvalidChunkError {
     }
   }
 
-  pub fn new_database_error<T>(message: T) -> DatabaseError
+  pub fn new_chunk_error<T>(message: T) -> ChunkError
   where
     T: Into<String>,
   {
-    DatabaseError::InvalidChunk(Self {
+    ChunkError::Invalid(Self {
       message: message.into(),
     })
   }
 }
 
-impl Display for DatabaseInvalidChunkError {
+impl Display for ChunkInvalidError {
   fn fmt(&self, formatter: &mut Formatter) -> Result {
     write!(formatter, "Invalid chunk error: {}", self.message)
   }
 }
 
-impl Error for DatabaseInvalidChunkError {}
+impl Error for ChunkInvalidError {}

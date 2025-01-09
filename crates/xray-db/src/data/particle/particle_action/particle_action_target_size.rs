@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
@@ -8,6 +6,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, ParticlesByteOrder};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,8 +19,8 @@ pub struct ParticleActionTargetSize {
 impl ParticleActionReader for ParticleActionTargetSize {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionTargetSize> {
     Ok(ParticleActionTargetSize {
-      size: reader.read_f32_3d_vector::<T>()?,
-      scale: reader.read_f32_3d_vector::<T>()?,
+      size: Vector3d::read::<T>(reader)?,
+      scale: Vector3d::read::<T>(reader)?,
     })
   }
 
@@ -43,8 +42,8 @@ impl ParticleActionReader for ParticleActionTargetSize {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTargetSize {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.size)?;
-    writer.write_f32_3d_vector::<ParticlesByteOrder>(&self.scale)?;
+    self.size.write::<ParticlesByteOrder>(writer)?;
+    self.scale.write::<ParticlesByteOrder>(writer)?;
 
     Ok(())
   }

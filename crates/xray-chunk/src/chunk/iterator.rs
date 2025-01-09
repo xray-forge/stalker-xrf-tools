@@ -1,6 +1,6 @@
 use crate::chunk::constants::CFS_COMPRESS_MARK;
 use crate::chunk::reader::ChunkReader;
-use crate::types::SpawnByteOrder;
+use crate::XRayByteOrder;
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
 use std::io::{Result as IoResult, Seek, SeekFrom};
@@ -26,8 +26,8 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
   type Item = ChunkReader;
 
   fn next(&mut self) -> Option<ChunkReader> {
-    let chunk_type_result: IoResult<u32> = self.reader.read_u32::<SpawnByteOrder>();
-    let chunk_size_result: IoResult<u32> = self.reader.read_u32::<SpawnByteOrder>();
+    let chunk_type_result: IoResult<u32> = self.reader.read_u32::<XRayByteOrder>();
+    let chunk_size_result: IoResult<u32> = self.reader.read_u32::<XRayByteOrder>();
 
     if chunk_type_result.is_err() || chunk_size_result.is_err() {
       return None;
@@ -104,7 +104,7 @@ impl<'lifetime> Iterator for ChunkSizePackedIterator<'lifetime> {
 
     self.reader.file.seek(SeekFrom::Start(current)).unwrap();
 
-    let chunk_size: u32 = self.reader.read_u32::<SpawnByteOrder>().unwrap();
+    let chunk_size: u32 = self.reader.read_u32::<XRayByteOrder>().unwrap();
 
     self.index += 1;
     self.next_seek = self

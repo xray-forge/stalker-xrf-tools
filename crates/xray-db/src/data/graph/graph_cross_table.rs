@@ -1,12 +1,10 @@
-use crate::chunk::iterator::ChunkSizePackedIterator;
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use uuid::Uuid;
+use xray_chunk::{ChunkReader, ChunkSizePackedIterator, ChunkWriter};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -117,8 +115,6 @@ impl GraphCrossTable {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::graph::graph_cross_table::GraphCrossTable;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
@@ -127,6 +123,7 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,

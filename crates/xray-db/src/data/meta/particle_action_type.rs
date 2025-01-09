@@ -1,4 +1,3 @@
-use crate::chunk::reader::ChunkReader;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_action::particle_action_avoid::ParticleActionAvoid;
@@ -34,6 +33,7 @@ use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
+use xray_chunk::ChunkReader;
 use xray_ltx::Ltx;
 
 #[derive(Copy, Clone, Debug, Enum, PartialEq)]

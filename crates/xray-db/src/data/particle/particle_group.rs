@@ -1,9 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::utils::{
-  find_chunk_by_id, read_f32_chunk, read_null_terminated_win_string_chunk, read_u16_chunk,
-  read_u32_chunk,
-};
-use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_group_effect::ParticleGroupEffect;
@@ -13,6 +7,10 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{
+  find_chunk_by_id, read_f32_chunk, read_null_terminated_win_string_chunk, read_u16_chunk,
+  read_u32_chunk, ChunkReader, ChunkWriter,
+};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]

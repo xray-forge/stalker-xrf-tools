@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
 };
@@ -14,6 +12,7 @@ use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 /// Generic abstract alife object base.
@@ -68,8 +67,8 @@ impl AlifeObjectBase {
     let name: String = spawn_reader.read_null_terminated_win_string()?;
     let script_game_id: u8 = spawn_reader.read_u8()?;
     let script_rp: u8 = spawn_reader.read_u8()?;
-    let position: Vector3d = spawn_reader.read_f32_3d_vector::<T>()?;
-    let direction: Vector3d = spawn_reader.read_f32_3d_vector::<T>()?;
+    let position: Vector3d = Vector3d::read::<T>(&mut spawn_reader)?;
+    let direction: Vector3d = Vector3d::read::<T>(&mut spawn_reader)?;
     let respawn_time: u16 = spawn_reader.read_u16::<T>()?;
     let id: u16 = spawn_reader.read_u16::<T>()?;
     let parent_id: u16 = spawn_reader.read_u16::<T>()?;
@@ -165,8 +164,10 @@ impl AlifeObjectBase {
     object_data_writer.write_null_terminated_win_string(&self.name)?;
     object_data_writer.write_u8(self.script_game_id)?;
     object_data_writer.write_u8(self.script_rp)?;
-    object_data_writer.write_f32_3d_vector::<T>(&self.position)?;
-    object_data_writer.write_f32_3d_vector::<T>(&self.direction)?;
+
+    self.position.write::<T>(&mut object_data_writer)?;
+    self.direction.write::<T>(&mut object_data_writer)?;
+
     object_data_writer.write_u16::<T>(self.respawn_time)?;
     object_data_writer.write_u16::<T>(self.id)?;
     object_data_writer.write_u16::<T>(self.parent_id)?;
@@ -282,8 +283,6 @@ impl AlifeObjectBase {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_base::AlifeObjectBase;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
@@ -293,6 +292,7 @@ mod tests {
   use crate::data::meta::cls_id::ClsId;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,

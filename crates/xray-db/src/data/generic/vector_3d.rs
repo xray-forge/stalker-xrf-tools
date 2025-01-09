@@ -39,6 +39,12 @@ impl Vector3d<f32> {
   }
 }
 
+impl From<(f32, f32, f32)> for Vector3d<f32> {
+  fn from(value: (f32, f32, f32)) -> Self {
+    Vector3d::new(value.0, value.1, value.2)
+  }
+}
+
 impl Display for Vector3d<f32> {
   fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     write!(formatter, "{},{},{}", self.x, self.y, self.z)
@@ -82,8 +88,6 @@ impl FromStr for Vector3d<f32> {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
@@ -91,6 +95,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,

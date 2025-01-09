@@ -1,7 +1,4 @@
-use crate::data::generic::shape::Shape;
-use crate::data::generic::vector_3d::Vector3d;
-use crate::error::database_error::DatabaseError;
-use crate::types::{DatabaseResult, U32Bytes};
+use crate::{ChunkResult, U32Bytes};
 use byteorder::{ByteOrder, WriteBytesExt};
 use encoding_rs::WINDOWS_1251;
 use std::borrow::Cow;
@@ -22,28 +19,24 @@ impl ChunkWriter {
     &mut self,
     file: &mut dyn Write,
     index: u32,
-  ) -> DatabaseResult<usize> {
+  ) -> ChunkResult<usize> {
     self.buffer.flush()?;
 
     file.write_u32::<T>(index)?;
     file.write_u32::<T>(self.buffer.len() as u32)?;
 
-    file
-      .write(self.buffer.as_slice())
-      .map_err(DatabaseError::from)
+    Ok(file.write(self.buffer.as_slice())?)
   }
 
   /// Flush all the written data as raw buffer into writable.
-  pub fn flush_raw_into(&mut self, file: &mut dyn Write) -> DatabaseResult {
+  pub fn flush_raw_into(&mut self, file: &mut dyn Write) -> ChunkResult {
     self.buffer.flush()?;
 
-    file
-      .write_all(self.buffer.as_slice())
-      .map_err(DatabaseError::from)
+    Ok(file.write_all(self.buffer.as_slice())?)
   }
 
   /// Flush all the written data as chunk into the file.
-  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, index: usize) -> DatabaseResult<Vec<u8>> {
+  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, index: usize) -> ChunkResult<Vec<u8>> {
     self.buffer.flush()?;
 
     let mut buffer: Vec<u8> = Vec::new();
@@ -56,7 +49,7 @@ impl ChunkWriter {
   }
 
   /// Flush all the written data as chunk into the file.
-  pub fn flush_raw_into_buffer(&mut self) -> DatabaseResult<Vec<u8>> {
+  pub fn flush_raw_into_buffer(&mut self) -> ChunkResult<Vec<u8>> {
     self.buffer.flush()?;
 
     let mut buffer: Vec<u8> = Vec::new();
@@ -71,18 +64,8 @@ impl ChunkWriter {
     self.buffer.len()
   }
 
-  /// Write three float values.
-  pub fn write_f32_3d_vector<T: ByteOrder>(&mut self, value: &Vector3d<f32>) -> DatabaseResult {
-    value.write::<T>(self).map_err(DatabaseError::from)
-  }
-
-  /// Write shapes data.
-  pub fn write_shapes_list<T: ByteOrder>(&mut self, shapes: &[Shape]) -> DatabaseResult {
-    Shape::write_list::<T>(shapes, self)
-  }
-
   /// Write null terminated windows encoded string.
-  pub fn write_null_terminated_win_string(&mut self, value: &str) -> DatabaseResult<usize> {
+  pub fn write_null_terminated_win_string(&mut self, value: &str) -> ChunkResult<usize> {
     let (transformed, _, had_errors) = WINDOWS_1251.encode(value);
 
     if had_errors {
@@ -98,7 +81,7 @@ impl ChunkWriter {
     Ok(self.write(&value)? + self.write(&[0u8])?)
   }
   /// Write 4 bytes value as 4 separate byte entries.
-  pub fn write_u32_bytes(&mut self, value: &U32Bytes) -> DatabaseResult {
+  pub fn write_u32_bytes(&mut self, value: &U32Bytes) -> ChunkResult {
     self.write_u8(value.0)?;
     self.write_u8(value.1)?;
     self.write_u8(value.2)?;
@@ -108,7 +91,7 @@ impl ChunkWriter {
   }
 
   /// Write serialized vector into vector, where u32 count N is followed by N u16 entries.
-  pub fn write_u16_vector<T: ByteOrder>(&mut self, vector: &[u16]) -> DatabaseResult {
+  pub fn write_u16_vector<T: ByteOrder>(&mut self, vector: &[u16]) -> ChunkResult {
     self.write_u32::<T>(vector.len() as u32)?;
 
     for it in vector {

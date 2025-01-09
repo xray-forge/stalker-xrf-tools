@@ -1,4 +1,3 @@
-use crate::chunk::reader::ChunkReader;
 use crate::data::alife::alife_actor::AlifeActor;
 use crate::data::alife::alife_anomalous_zone::AlifeAnomalousZone;
 use crate::data::alife::alife_graph_point::AlifeGraphPoint;
@@ -34,6 +33,7 @@ use crate::error::database_parse_error::DatabaseParseError;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
+use xray_chunk::ChunkReader;
 use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, Enum, PartialEq)]

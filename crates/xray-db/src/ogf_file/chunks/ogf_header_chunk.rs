@@ -1,10 +1,9 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::ogf::ogf_box::OgfBox;
 use crate::data::ogf::ogf_sphere::OgfSphere;
 use crate::{DatabaseNotImplementedError, DatabaseResult};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfHeaderChunk {

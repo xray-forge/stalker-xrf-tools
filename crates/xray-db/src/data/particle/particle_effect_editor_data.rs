@@ -1,6 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::utils::read_till_end_binary_chunk;
-use crate::chunk::writer::ChunkWriter;
 use crate::constants::META_TYPE_FIELD;
 use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
@@ -9,6 +6,7 @@ use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
+use xray_chunk::{read_till_end_binary_chunk, ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

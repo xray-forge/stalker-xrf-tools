@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::generic::shape::Shape;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
@@ -9,6 +7,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -24,7 +23,7 @@ impl AlifeObjectReader for AlifeObjectSpaceRestrictor {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
       base: AlifeObjectAbstract::read::<T>(reader)?,
-      shape: reader.read_shapes::<SpawnByteOrder>()?,
+      shape: Shape::read_list::<T>(reader)?,
       restrictor_type: reader.read_u8()?,
     })
   }
@@ -51,7 +50,8 @@ impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
-    writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
+    Shape::write_list::<SpawnByteOrder>(&self.shape, writer)?;
+
     writer.write_u8(self.restrictor_type)?;
 
     Ok(())
@@ -73,8 +73,6 @@ impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::generic::shape::Shape;
@@ -86,6 +84,7 @@ mod tests {
   use fileslice::FileSlice;
   use std::fs::File;
   use std::path::Path;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_ltx::Ltx;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,

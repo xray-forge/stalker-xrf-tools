@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::patrol::patrol::Patrol;
 use crate::export::file::{create_export_file, open_ltx_config};
 use crate::types::DatabaseResult;
@@ -8,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::Ltx;
 
 /// `CPatrolPathStorage::load` in xray engine.
@@ -121,8 +120,6 @@ impl fmt::Debug for SpawnPatrolsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::patrol::patrol::Patrol;
   use crate::data::patrol::patrol_link::PatrolLink;
@@ -130,6 +127,7 @@ mod tests {
   use crate::spawn_file::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,

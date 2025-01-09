@@ -1,5 +1,3 @@
-use crate::chunk::reader::ChunkReader;
-use crate::chunk::writer::ChunkWriter;
 use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
 use crate::data::generic::shape::Shape;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
@@ -9,6 +7,7 @@ use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, SpawnByteOrder};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -29,7 +28,7 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     Ok(Self {
       base: AlifeObjectDynamic::read::<T>(reader)?,
-      shape: reader.read_shapes::<SpawnByteOrder>()?,
+      shape: Shape::read_list::<T>(reader)?,
       description: reader.read_null_terminated_win_string()?,
       hold_position_time: reader.read_f32::<SpawnByteOrder>()?,
       enter_min_enemy_distance: reader.read_f32::<SpawnByteOrder>()?,
@@ -67,7 +66,8 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
   fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
     self.base.write(writer)?;
 
-    writer.write_shapes_list::<SpawnByteOrder>(&self.shape)?;
+    Shape::write_list::<SpawnByteOrder>(&self.shape, writer)?;
+
     writer.write_null_terminated_win_string(&self.description)?;
     writer.write_f32::<SpawnByteOrder>(self.hold_position_time)?;
     writer.write_f32::<SpawnByteOrder>(self.enter_min_enemy_distance)?;
@@ -109,8 +109,6 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
-  use crate::chunk::writer::ChunkWriter;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::alife_object_dynamic::AlifeObjectDynamic;
   use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
@@ -120,6 +118,7 @@ mod tests {
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::types::{DatabaseResult, SpawnByteOrder};
   use fileslice::FileSlice;
+  use xray_chunk::{ChunkReader, ChunkWriter};
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,

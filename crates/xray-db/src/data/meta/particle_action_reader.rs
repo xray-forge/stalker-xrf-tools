@@ -1,7 +1,7 @@
-use crate::chunk::reader::ChunkReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
+use xray_chunk::ChunkReader;
 use xray_ltx::Ltx;
 
 /// Generic trait describing possibility to read object data from chunk.
