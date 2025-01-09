@@ -44,7 +44,7 @@ impl SpawnFile {
   pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
 
-    Self::read_from_chunks::<T>(&ChunkReader::read_all_from_file(&mut reader))
+    Self::read_from_chunks::<T>(&reader.read_children())
   }
 
   /// Read spawn file from chunks.

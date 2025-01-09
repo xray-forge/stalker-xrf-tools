@@ -42,7 +42,7 @@ impl ParticleGroup {
 
   /// Read group from chunk reader binary data.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
-    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
+    let chunks: Vec<ChunkReader> = reader.read_children();
 
     let particle_group: Self = Self {
       version: read_u16_chunk::<T>(

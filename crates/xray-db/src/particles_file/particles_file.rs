@@ -32,7 +32,7 @@ impl ParticlesFile {
   /// Read particles xr from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
-    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(&mut reader);
+    let chunks: Vec<ChunkReader> = reader.read_children();
 
     log::info!(
       "Reading particles file, {} chunks, {} bytes",

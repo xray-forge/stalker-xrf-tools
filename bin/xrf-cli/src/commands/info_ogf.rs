@@ -27,11 +27,11 @@ impl InfoOgfCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read OGF file {:?}", path);
+    println!("Read ogf file {:?}", path);
 
     let ogf_file: OgfFile = OgfFile::read_from_path::<OgfByteOrder>(path)?;
 
-    println!("Ogf file information:");
+    println!("Ogf file information");
 
     println!(
       "Version: {}, model_type: {}, shader_id: {}, {:?} - {:?}",

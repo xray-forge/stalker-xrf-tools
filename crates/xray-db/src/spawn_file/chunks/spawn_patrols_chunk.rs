@@ -21,6 +21,11 @@ impl SpawnPatrolsChunk {
 
   /// Read patrols list from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    log::info!(
+      "Reading patrols chunk, bytes {:?}",
+      reader.read_bytes_remain()
+    );
+
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -31,9 +36,12 @@ impl SpawnPatrolsChunk {
 
     assert!(meta_reader.is_ended());
     assert!(data_reader.is_ended());
-    assert!(reader.is_ended());
 
-    log::info!("Parsed patrols, bytes {:?}", reader.read_bytes_len());
+    assert!(
+      reader.is_ended(),
+      "Expect patrols chunk to be ended, {} remain",
+      reader.read_bytes_remain()
+    );
 
     Ok(Self { patrols })
   }

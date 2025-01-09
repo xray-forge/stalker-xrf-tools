@@ -25,6 +25,11 @@ impl SpawnHeaderChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    log::info!(
+      "Parsing header chunk, {:?} bytes",
+      reader.read_bytes_remain()
+    );
+
     let header: Self = Self {
       version: reader.read_u32::<T>()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
@@ -33,9 +38,11 @@ impl SpawnHeaderChunk {
       levels_count: reader.read_u32::<T>()?,
     };
 
-    log::info!("Parsed header chunk, {:?} bytes", reader.read_bytes_len());
-
-    assert!(reader.is_ended(), "Expect header chunk to be ended");
+    assert!(
+      reader.is_ended(),
+      "Expect header chunk to be ended, {} remain",
+      reader.read_bytes_remain()
+    );
 
     Ok(header)
   }

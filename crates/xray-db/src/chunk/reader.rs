@@ -23,11 +23,6 @@ pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
 }
 
 impl ChunkReader {
-  /// Read all chunk descriptors from file and put seek into the end.
-  pub fn read_all_from_file(reader: &mut ChunkReader) -> Vec<ChunkReader> {
-    ChunkIterator::new(reader).collect()
-  }
-
   /// Create chunk based on whole file.
   pub fn from_file(file: File) -> DatabaseResult<ChunkReader> {
     Self::from_slice(FileSlice::new(file))
@@ -102,9 +97,14 @@ impl ChunkReader {
     )))
   }
 
-  /// Get list of all child samples in current chunk.
-  pub fn read_all_children(&self) -> Vec<ChunkReader> {
+  /// Get list of all child samples in current chunk, do not mutate current chunk.
+  pub fn get_children_cloned(&self) -> Vec<ChunkReader> {
     ChunkIterator::new(&mut self.clone()).collect()
+  }
+
+  /// Read list of all child samples in current chunk and advance further.
+  pub fn read_children(&mut self) -> Vec<ChunkReader> {
+    ChunkIterator::new(self).collect()
   }
 
   /// Reset seek position in chunk file.
@@ -249,14 +249,14 @@ mod tests {
   fn test_read_empty_children() -> DatabaseResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 0);
 
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks.get(0).unwrap().size, 0);
@@ -272,7 +272,7 @@ mod tests {
   fn test_read_empty_unordered_children() -> DatabaseResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks.get(0).unwrap().size, 0);
@@ -293,14 +293,14 @@ mod tests {
   fn test_read_dummy_children() -> DatabaseResult {
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 8);
 
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_all_children();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks.get(0).unwrap().size, 8);

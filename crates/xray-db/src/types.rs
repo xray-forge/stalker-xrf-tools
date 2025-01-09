@@ -14,4 +14,6 @@ pub type SpawnByteOrder = LittleEndian;
 
 pub type ParticlesByteOrder = LittleEndian;
 
+pub type OmfByteOrder = LittleEndian;
+
 pub type OgfByteOrder = LittleEndian;

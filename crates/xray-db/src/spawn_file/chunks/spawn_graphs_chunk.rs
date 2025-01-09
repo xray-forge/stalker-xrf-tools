@@ -31,6 +31,11 @@ impl SpawnGraphsChunk {
 
   /// Read graphs chunk by position descriptor.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    log::info!(
+      "Reading graphs chunk, bytes {:?}",
+      reader.read_bytes_remain()
+    );
+
     let mut levels: Vec<GraphLevel> = Vec::new();
     let mut vertices: Vec<GraphVertex> = Vec::new();
     let mut edges: Vec<GraphEdge> = Vec::new();
@@ -57,7 +62,7 @@ impl SpawnGraphsChunk {
     let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::read_list::<T>(reader)?;
 
     log::info!(
-      "Parsed graphs ver {:?}, {:?} bytes",
+      "Read graphs ver {:?}, {:?} bytes",
       header.version,
       reader.read_bytes_len(),
     );
@@ -67,7 +72,12 @@ impl SpawnGraphsChunk {
     assert_eq!(edges.len(), header.edges_count as usize);
     assert_eq!(points.len(), header.points_count as usize);
     assert_eq!(cross_tables.len(), header.levels_count as usize);
-    assert!(reader.is_ended(), "Expect graphs chunk to be ended");
+
+    assert!(
+      reader.is_ended(),
+      "Expect graphs chunk to be ended, {} remain",
+      reader.read_bytes_remain()
+    );
 
     Ok(Self {
       header,

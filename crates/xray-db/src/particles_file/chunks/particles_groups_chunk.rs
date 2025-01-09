@@ -22,7 +22,7 @@ impl ParticlesGroupsChunk {
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
-    let chunks: Vec<ChunkReader> = ChunkReader::read_all_from_file(reader);
+    let chunks: Vec<ChunkReader> = reader.read_children();
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     log::info!(

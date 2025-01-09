@@ -23,6 +23,11 @@ impl SpawnArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    log::info!(
+      "Reading artefacts spawns chunk: {:?} bytes",
+      reader.read_bytes_remain()
+    );
+
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -35,12 +40,8 @@ impl SpawnArtefactSpawnsChunk {
 
     assert!(
       reader.is_ended(),
-      "Expect artefact spawns chunk to be ended"
-    );
-
-    log::info!(
-      "Parsed artefacts spawns: {:?} bytes",
-      reader.read_bytes_len(),
+      "Expect artefact spawns chunk to be ended, {} remain",
+      reader.read_bytes_remain()
     );
 
     Ok(Self { nodes })

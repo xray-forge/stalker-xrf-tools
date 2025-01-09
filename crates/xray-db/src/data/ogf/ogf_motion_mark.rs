@@ -1,16 +1,27 @@
 use crate::chunk::reader::ChunkReader;
 use crate::chunk::writer::ChunkWriter;
 use crate::DatabaseResult;
-use byteorder::ByteOrder;
+use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OgfMotionMark {}
+pub struct OgfMotionMark {
+  pub name: String,
+  pub intervals: Vec<(f32, f32)>,
+}
 
 impl OgfMotionMark {
-  pub fn read<T: ByteOrder>(_: &mut ChunkReader) -> DatabaseResult<Self> {
-    todo!("Implement")
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    let name: String = reader.read_null_terminated_win_string()?;
+    let count: u32 = reader.read_u32::<T>()?;
+    let mut intervals: Vec<(f32, f32)> = Vec::new();
+
+    for _ in 0..count {
+      intervals.push((reader.read_f32::<T>()?, reader.read_f32::<T>()?));
+    }
+
+    Ok(Self { name, intervals })
   }
 
   pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> DatabaseResult {

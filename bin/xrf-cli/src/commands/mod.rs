@@ -1,6 +1,7 @@
 pub mod build_translations;
 pub mod format_ltx;
 pub mod info_ogf;
+pub mod info_omf;
 pub mod info_particles;
 pub mod info_spawn;
 pub mod initialize_translations;

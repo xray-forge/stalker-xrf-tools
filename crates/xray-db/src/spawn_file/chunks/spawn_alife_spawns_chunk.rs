@@ -25,6 +25,11 @@ impl SpawnALifeSpawnsChunk {
 
   /// Read spawns chunk by position descriptor from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    log::info!(
+      "Reading alife spawns chunk, {:?} bytes",
+      reader.read_bytes_remain()
+    );
+
     let mut count_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut objects_reader: ChunkReader = reader.read_child_by_index(1)?;
     let edges_reader: ChunkReader = reader.read_child_by_index(2)?;
@@ -37,18 +42,26 @@ impl SpawnALifeSpawnsChunk {
     }
 
     assert_eq!(objects.len(), count as usize);
-    assert!(count_reader.is_ended(), "Expect count chunk to be ended");
+    assert!(
+      count_reader.is_ended(),
+      "Expect count chunk to be ended, {} remain",
+      count_reader.read_bytes_remain()
+    );
     assert!(
       objects_reader.is_ended(),
-      "Expect objects chunk to be ended"
+      "Expect objects chunk to be ended, {} remain",
+      objects_reader.read_bytes_remain()
     );
     assert!(
       edges_reader.is_ended(),
       "Parsing of edges in spawn chunk is not implemented"
     );
-    assert!(reader.is_ended(), "Expect alife spawns chunk to be ended");
 
-    log::info!("Parsed alife spawns chunk, {:?} bytes", reader.size);
+    assert!(
+      reader.is_ended(),
+      "Expect alife spawns chunk to be ended, {} remain",
+      reader.read_bytes_remain()
+    );
 
     Ok(Self { objects })
   }

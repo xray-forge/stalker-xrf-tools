@@ -18,6 +18,7 @@ use crate::commands::verify_spawn::VerifySpawnFileCommand;
 use crate::commands::verify_translations::VerifyTranslationsCommand;
 
 use crate::commands::info_ogf::InfoOgfCommand;
+use crate::commands::info_omf::InfoOmfCommand;
 use crate::commands::info_particles::InfoParticlesCommand;
 use crate::commands::pack_particles::PackParticlesFileCommand;
 use crate::commands::repack_particles::RepackParticlesCommand;
@@ -36,6 +37,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .about("XRF forge CLI tools application")
     .subcommand(BuildTranslationsCommand::init())
     .subcommand(FormatLtxCommand::init())
+    .subcommand(InfoOmfCommand::init())
     .subcommand(InfoOgfCommand::init())
     .subcommand(InfoParticlesCommand::init())
     .subcommand(InfoSpawnCommand::init())
@@ -62,6 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Some((BuildTranslationsCommand::NAME, matches)) => BuildTranslationsCommand::execute(matches)?,
     Some((FormatLtxCommand::NAME, matches)) => FormatLtxCommand::execute(matches)?,
     Some((InfoOgfCommand::NAME, matches)) => InfoOgfCommand::execute(matches)?,
+    Some((InfoOmfCommand::NAME, matches)) => InfoOmfCommand::execute(matches)?,
     Some((InfoParticlesCommand::NAME, matches)) => InfoParticlesCommand::execute(matches)?,
     Some((InfoSpawnCommand::NAME, matches)) => InfoSpawnCommand::execute(matches)?,
     Some((InitializeTranslationsCommand::NAME, matches)) => {

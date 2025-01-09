@@ -20,6 +20,11 @@ impl OgfDescriptionChunk {
   pub const CHUNK_ID: u32 = 18;
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+    log::info!(
+      "Reading description chunk: {:?} bytes",
+      reader.read_bytes_remain()
+    );
+
     let description: Self = Self {
       source_file: reader.read_null_terminated_win_string()?,
       convertor: reader.read_null_terminated_win_string()?,
@@ -32,7 +37,7 @@ impl OgfDescriptionChunk {
 
     assert!(
       reader.is_ended(),
-      "Expect all data to be read from description header, {} remain",
+      "Expect all data to be read from ogf description, {} remain",
       reader.read_bytes_remain()
     );
 

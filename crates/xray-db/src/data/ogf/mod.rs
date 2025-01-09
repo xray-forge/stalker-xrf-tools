@@ -10,6 +10,7 @@ pub(crate) mod ogf_lod_vertex;
 pub(crate) mod ogf_motion;
 pub(crate) mod ogf_motion_definition;
 pub(crate) mod ogf_motion_mark;
+pub(crate) mod ogf_part;
 pub(crate) mod ogf_progressive;
 pub(crate) mod ogf_render_visual;
 pub(crate) mod ogf_s_sm_params;
