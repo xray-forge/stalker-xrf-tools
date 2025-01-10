@@ -1,11 +1,11 @@
-use crate::error::archive_read_error::{
-  ARCHIVE_READ_ERROR_INVALID_FORMAT, ARCHIVE_READ_ERROR_NOT_FOUND,
-};
 use crate::project::project_constants::{
   ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
 };
 use crate::project::project_read_result::ProjectReadResult;
-use crate::{ArchiveProject, ArchiveReadError, ArchiveResult};
+use crate::{
+  ArchiveError, ArchiveProject, ArchiveResult, ARCHIVE_READ_ERROR_INVALID_FORMAT,
+  ARCHIVE_READ_ERROR_NOT_FOUND,
+};
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -17,26 +17,26 @@ impl ArchiveProject {
     log::info!("Trying to read file from archive: {filename}");
 
     if !self.can_read_file(filename) {
-      return Err(ArchiveReadError::new_archive_error_with_code(
+      return Err(ArchiveError::new_read_error_with_code(
         ARCHIVE_READ_ERROR_INVALID_FORMAT,
         format!("File '{filename}' cannot be read, extension is not allowed to be read"),
       ));
     }
 
     return match self.files.get(filename) {
-      None => Err(ArchiveReadError::new_archive_error_with_code(
+      None => Err(ArchiveError::new_read_error_with_code(
         ARCHIVE_READ_ERROR_NOT_FOUND,
         format!("File '{filename}' is not found in the archive project"),
       )),
       Some(file_descriptor) => {
         if file_descriptor.size_real > ALLOWED_PROJECT_READ_SIZE {
-          return Err(ArchiveReadError::new_archive_error_with_code(
+          return Err(ArchiveError::new_read_error_with_code(
             ARCHIVE_READ_ERROR_NOT_FOUND,
             format!("File '{filename}' is too big to be read - {}, {ALLOWED_PROJECT_READ_SIZE} is maximum allowed", file_descriptor.size_real),
           ));
         } else if file_descriptor.size_real != file_descriptor.size_compressed {
           return Err(
-            ArchiveReadError::new_with_code(
+            ArchiveError::new_read_error_with_code(
               ARCHIVE_READ_ERROR_INVALID_FORMAT,
               format!(
                 "File '{filename}' is compressed, reading compressed files is not supported yet"

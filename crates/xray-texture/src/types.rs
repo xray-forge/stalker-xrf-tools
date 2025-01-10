@@ -1,3 +1,3 @@
-use crate::error::texture_error::TextureError;
+use crate::error::TextureError;
 
 pub type TextureResult<T = ()> = Result<T, TextureError>;

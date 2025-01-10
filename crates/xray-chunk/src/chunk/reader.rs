@@ -1,8 +1,7 @@
 use crate::chunk::interface::ChunkDataSource;
 use crate::chunk::iterator::ChunkIterator;
-use crate::error::invalid_chunk_error::ChunkInvalidError;
 use crate::types::U32Bytes;
-use crate::ChunkResult;
+use crate::{ChunkError, ChunkResult};
 use byteorder::{ByteOrder, ReadBytesExt};
 use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
@@ -29,7 +28,7 @@ impl ChunkReader {
   /// Create chunk based on file slice boundaries.
   pub fn from_slice(file: FileSlice) -> ChunkResult<ChunkReader> {
     if file.is_empty() {
-      return Err(ChunkInvalidError::new_chunk_error(
+      return Err(ChunkError::new_invalid_chunk_error(
         "Trying to create chunk from empty file",
       ));
     }
@@ -90,7 +89,7 @@ impl ChunkReader {
       }
     }
 
-    Err(ChunkInvalidError::new_chunk_error(
+    Err(ChunkError::new_invalid_chunk_error(
       "Attempt to read chunk with index out of bonds",
     ))
   }
@@ -208,7 +207,7 @@ mod tests {
     );
     assert_eq!(
       result.unwrap_err().to_string(),
-      String::from("Invalid chunk error: Trying to create chunk from empty file"),
+      String::from("Chunk invalid error: \"Trying to create chunk from empty file\""),
       "Expect input error"
     );
 

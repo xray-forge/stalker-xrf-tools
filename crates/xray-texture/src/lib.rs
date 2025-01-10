@@ -13,7 +13,7 @@ pub use crate::description::pack_description_options::PackDescriptionOptions;
 pub use crate::description::pack_description_processor::PackDescriptionProcessor;
 pub use crate::description::unpack_description_processor::UnpackDescriptionProcessor;
 
-pub use crate::error::texture_error::TextureError;
+pub use crate::error::*;
 
 pub use crate::equipment::equipment_constants::INVENTORY_ICON_GRID_SQUARE_BASE;
 pub use crate::equipment::pack_equipment_options::PackEquipmentOptions;

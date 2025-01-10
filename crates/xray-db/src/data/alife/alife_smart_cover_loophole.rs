@@ -1,4 +1,4 @@
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use serde::{Deserialize, Serialize};
 
@@ -32,14 +32,14 @@ impl AlifeSmartCoverLoophole {
           enabled: match partial.last().unwrap().parse::<u8>() {
             Ok(parsed) => parsed,
             Err(_) => {
-              return Err(DatabaseParseError::new_database_error(
+              return Err(DatabaseError::new_parse_error(
                 "Failed to parse loophole enabled status",
               ))
             }
           },
         })
       } else {
-        return Err(DatabaseParseError::new_database_error(
+        return Err(DatabaseError::new_parse_error(
           "Invalid value provided for loopholes parsion, ':' separated values expected",
         ));
       }

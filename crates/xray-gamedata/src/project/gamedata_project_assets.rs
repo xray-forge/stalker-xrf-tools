@@ -1,4 +1,4 @@
-use crate::gamedata_error::GamedataError;
+use crate::error::GamedataError;
 use crate::{GamedataProject, GamedataResult};
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};

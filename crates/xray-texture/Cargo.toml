@@ -13,3 +13,4 @@ serde = { version = "1.0.197", features = ["derive"] }
 xray-ltx = { path = "../xray-ltx" }
 rayon = "1.10.0"
 log = "0.4.22"
+thiserror = "2.0.11"

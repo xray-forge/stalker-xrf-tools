@@ -5,7 +5,7 @@ use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::cls_id::ClsId;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
 use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use crate::types::DatabaseResult;
@@ -213,7 +213,7 @@ impl AlifeObjectBase {
   /// Import alife object data from ltx file section.
   pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "ALife object base '{section_name}' should be defined in ltx file ({})",
         file!()
       ))

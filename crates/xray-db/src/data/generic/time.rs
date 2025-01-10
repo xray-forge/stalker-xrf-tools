@@ -1,5 +1,5 @@
 use crate::constants::NIL;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -94,11 +94,7 @@ impl Time {
 
     Ok(match Self::from_str(value) {
       Ok(time) => Some(time),
-      Err(_) => {
-        return Err(DatabaseParseError::new_database_error(
-          "Failed to parse time",
-        ))
-      }
+      Err(_) => return Err(DatabaseError::new_parse_error("Failed to parse time")),
     })
   }
 }
@@ -114,39 +110,39 @@ impl Display for Time {
 }
 
 impl FromStr for Time {
-  type Err = DatabaseParseError;
+  type Err = DatabaseError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = s.split(',').map(|it| it.trim()).collect();
 
     if parts.len() != 7 {
-      return Err(DatabaseParseError::new(
+      return Err(DatabaseError::new_parse_error(
         "Failed to parse time object from string",
       ));
     }
 
     Ok(Self {
-      year: parts[0]
-        .parse()
-        .or(Err(DatabaseParseError::new("Failed to parse year value")))?,
-      month: parts[1]
-        .parse()
-        .or(Err(DatabaseParseError::new("Failed to parse month value")))?,
-      day: parts[2]
-        .parse()
-        .or(Err(DatabaseParseError::new("Failed to parse day value")))?,
-      hour: parts[3]
-        .parse()
-        .or(Err(DatabaseParseError::new("Failed to parse hour value")))?,
-      minute: parts[4]
-        .parse()
-        .or(Err(DatabaseParseError::new("Failed to parse minute value")))?,
-      second: parts[5]
-        .parse()
-        .or(Err(DatabaseParseError::new("Failed to parse second value")))?,
-      millis: parts[6]
-        .parse()
-        .or(Err(DatabaseParseError::new("Failed to parse millis value")))?,
+      year: parts[0].parse().or(Err(DatabaseError::new_parse_error(
+        "Failed to parse years value",
+      )))?,
+      month: parts[1].parse().or(Err(DatabaseError::new_parse_error(
+        "Failed to parse months value",
+      )))?,
+      day: parts[2].parse().or(Err(DatabaseError::new_parse_error(
+        "Failed to parse days value",
+      )))?,
+      hour: parts[3].parse().or(Err(DatabaseError::new_parse_error(
+        "Failed to parse hours value",
+      )))?,
+      minute: parts[4].parse().or(Err(DatabaseError::new_parse_error(
+        "Failed to parse minutes value",
+      )))?,
+      second: parts[5].parse().or(Err(DatabaseError::new_parse_error(
+        "Failed to parse seconds value",
+      )))?,
+      millis: parts[6].parse().or(Err(DatabaseError::new_parse_error(
+        "Failed to parse millis value",
+      )))?,
     })
   }
 }

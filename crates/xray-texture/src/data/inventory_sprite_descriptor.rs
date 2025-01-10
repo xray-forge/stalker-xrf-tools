@@ -1,5 +1,4 @@
-use crate::error::texture_processing_error::TextureProcessingError;
-use crate::{TextureResult, INVENTORY_ICON_GRID_SQUARE_BASE};
+use crate::{TextureError, TextureResult, INVENTORY_ICON_GRID_SQUARE_BASE};
 use image::{ImageBuffer, Rgba, RgbaImage};
 use serde::Serialize;
 use std::cmp::max;
@@ -87,7 +86,7 @@ impl InventorySpriteDescriptor {
     let (max_width, max_height) = Self::get_equipment_sprite_boundaries_from_ltx(ltx);
 
     if max_width > 32 * 1024 || max_height > 32 * 1024 {
-      Err(TextureProcessingError::new_texture_error(format!(
+      Err(TextureError::new_processing_error(format!(
         "Trying to create too large resulting dds file over 32k*32k ({max_width}x{max_height}), it is not supported",
       )))
     } else {

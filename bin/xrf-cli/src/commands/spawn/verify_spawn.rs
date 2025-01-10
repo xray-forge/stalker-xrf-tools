@@ -1,7 +1,7 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseParseError, SpawnFile, XRayByteOrder};
+use xray_db::{DatabaseError, SpawnFile, XRayByteOrder};
 
 #[derive(Default)]
 pub struct VerifySpawnFileCommand;
@@ -43,11 +43,8 @@ impl GenericCommand for VerifySpawnFileCommand {
         log::error!("Provided spawn file is invalid: {}", error);
 
         Err(
-          DatabaseParseError::new_database_error(format!(
-            "Verification of spawn file failed: {}",
-            error
-          ))
-          .into(),
+          DatabaseError::new_parse_error(format!("Verification of spawn file failed: {}", error))
+            .into(),
         )
       }
     }

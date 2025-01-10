@@ -1,10 +1,10 @@
+use crate::error::LtxError;
 use crate::file::configuration::constants::{
   LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME,
 };
 use crate::file::ltx::Ltx;
 use crate::file::section::section::Section;
 use crate::file::types::LtxSectionSchemes;
-use crate::ltx_error::LtxError;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;

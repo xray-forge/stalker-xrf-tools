@@ -1,8 +1,8 @@
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
-use crate::error::texture_processing_error::TextureProcessingError;
 use crate::utils::images::dds_to_image;
 use crate::{
-  read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, PackEquipmentResult, TextureResult,
+  read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, PackEquipmentResult, TextureError,
+  TextureResult,
 };
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba, RgbaImage};
@@ -85,7 +85,7 @@ impl PackEquipmentProcessor {
       Ok(icon) => Ok(Some((sprite_path, icon))),
       Err(error) => {
         if options.is_strict {
-          Err(TextureProcessingError::new_texture_error(format!(
+          Err(TextureError::new_processing_error(format!(
             "Expected icon to exist for assembling at path {:?} / {}, error: {:?}",
             sprite_path, sprite.section, error
           )))

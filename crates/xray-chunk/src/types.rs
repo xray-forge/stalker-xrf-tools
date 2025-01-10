@@ -1,4 +1,4 @@
-use crate::error::chunk_error::ChunkError;
+use crate::ChunkError;
 use byteorder::LittleEndian;
 
 pub type ChunkResult<T = ()> = Result<T, ChunkError>;

@@ -1,6 +1,6 @@
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -126,7 +126,7 @@ impl Patrol {
     patrol_links_ltx: &Ltx,
   ) -> DatabaseResult<Self> {
     let section: &Section = patrols_ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "Patrol section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))

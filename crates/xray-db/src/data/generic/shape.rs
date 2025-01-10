@@ -1,11 +1,11 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::{DatabaseResult, Matrix3d, Sphere3d};
+use crate::DatabaseError;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
-use xray_chunk::ChunkParsingError;
+use xray_chunk::ChunkError;
 use xray_ltx::{Ltx, Section};
 
 /// Shape enumeration stored in objects descriptors.
@@ -47,7 +47,7 @@ impl Shape {
         Vector3d::read::<T>(reader)?,
       )),
       _ => {
-        return Err(DatabaseParseError::new_database_error(
+        return Err(DatabaseError::new_parse_error(
           "Unexpected shape type provided",
         ))
       }
@@ -114,7 +114,7 @@ impl Shape {
         }
         _ => {
           return Err(
-            ChunkParsingError::new_chunk_error(format!(
+            ChunkError::new_parsing_chunk_error(format!(
               "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
             ))
             .into(),

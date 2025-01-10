@@ -1,6 +1,6 @@
 use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
 use crate::data::ogf::ogf_part::OgfPart;
-use crate::{DatabaseNotImplementedError, DatabaseResult};
+use crate::{DatabaseError, DatabaseResult};
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
@@ -25,7 +25,7 @@ impl OmfParametersChunk {
     let version: u16 = reader.read_u16::<T>()?;
 
     if version != Self::SUPPORTED_VERSION {
-      return Err(DatabaseNotImplementedError::new_database_error(format!(
+      return Err(DatabaseError::new_not_implemented_error(format!(
         "Unexpected parameters version {version}, only version {} is implemented",
         Self::SUPPORTED_VERSION
       )));

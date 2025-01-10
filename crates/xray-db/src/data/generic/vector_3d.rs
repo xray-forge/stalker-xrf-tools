@@ -1,5 +1,4 @@
-use crate::error::database_error::DatabaseError;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -58,7 +57,7 @@ impl FromStr for Vector3d<f32> {
     let parts: Vec<&str> = s.split(',').collect();
 
     if parts.len() != 3 {
-      return Err(DatabaseParseError::new_database_error(
+      return Err(DatabaseError::new_parse_error(
         "Failed to parse 3d vector from string, expected 3 numbers",
       ));
     }
@@ -67,19 +66,19 @@ impl FromStr for Vector3d<f32> {
       x: parts[0]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseParseError::new_database_error(
+        .or(Err(DatabaseError::new_parse_error(
           "Failed to parse vector X value",
         )))?,
       y: parts[1]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseParseError::new_database_error(
+        .or(Err(DatabaseError::new_parse_error(
           "Failed to parse vector Y value",
         )))?,
       z: parts[2]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseParseError::new_database_error(
+        .or(Err(DatabaseError::new_parse_error(
           "Failed to parse vector Z value",
         )))?,
     })

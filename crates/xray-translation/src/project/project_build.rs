@@ -1,4 +1,3 @@
-use crate::error::translation_error::TranslationError;
 use crate::types::{
   TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant,
 };
@@ -33,7 +32,7 @@ impl TranslationProject {
     for entry in WalkDir::new(dir) {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
-        Err(error) => return Err(TranslationError::Io(error.into_io_error().unwrap())),
+        Err(error) => return Err(error.into_io_error().unwrap().into()),
       };
 
       let entry_path: &Path = entry.path();
@@ -48,7 +47,7 @@ impl TranslationProject {
     log::info!(
       "Built dir {:?} in {} sec",
       dir,
-      (result.duration as f64) / 1000.0
+      (result.duration as f64) / 1_000.0
     );
 
     Ok(result)

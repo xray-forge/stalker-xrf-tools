@@ -1,5 +1,4 @@
-use crate::error::database_error::DatabaseError;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -50,7 +49,7 @@ impl FromStr for RgbColor {
     let parts: Vec<&str> = s.split(',').collect();
 
     if parts.len() != 3 {
-      return Err(DatabaseParseError::new_database_error(
+      return Err(DatabaseError::new_parse_error(
         "Failed to parse rgb color from string, expected 3 numbers",
       ));
     }
@@ -59,19 +58,19 @@ impl FromStr for RgbColor {
       r: parts[0]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseParseError::new_database_error(
+        .or(Err(DatabaseError::new_parse_error(
           "Failed to parse color R value",
         )))?,
       g: parts[1]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseParseError::new_database_error(
+        .or(Err(DatabaseError::new_parse_error(
           "Failed to parse color G value",
         )))?,
       b: parts[2]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseParseError::new_database_error(
+        .or(Err(DatabaseError::new_parse_error(
           "Failed to parse color B value",
         )))?,
     })

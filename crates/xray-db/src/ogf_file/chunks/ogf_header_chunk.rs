@@ -1,6 +1,6 @@
 use crate::data::ogf::ogf_box::OgfBox;
 use crate::data::ogf::ogf_sphere::OgfSphere;
-use crate::{DatabaseNotImplementedError, DatabaseResult};
+use crate::{DatabaseError, DatabaseResult};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
@@ -26,7 +26,7 @@ impl OgfHeaderChunk {
     let version: u8 = reader.read_u8()?;
 
     if version != 4 {
-      return Err(DatabaseNotImplementedError::new_database_error(format!(
+      return Err(DatabaseError::new_not_implemented_error(format!(
         "Unexpected version '{version}' of OGF file, only version 4 is supported"
       )));
     }

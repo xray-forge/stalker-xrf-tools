@@ -29,7 +29,7 @@ use crate::data::particle::particle_action::particle_action_target_size::Particl
 use crate::data::particle::particle_action::particle_action_target_velocity::ParticleActionTargetVelocity;
 use crate::data::particle::particle_action::particle_action_turbulence::ParticleActionTurbulence;
 use crate::data::particle::particle_action::particle_action_vortex::ParticleActionVortex;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
@@ -154,7 +154,7 @@ impl ParticleActionType {
       Self::Turbulence => Box::new(ParticleActionTurbulence::read::<T>(reader)?),
       Self::Scatter => Box::new(ParticleActionScatter::read::<T>(reader)?),
       Self::Unknown | Self::CallActionList => {
-        return Err(DatabaseParseError::new_database_error(format!(
+        return Err(DatabaseError::new_parse_error(format!(
           "Not implemented parser for particle action reading: {:?}",
           particle_action_type
         )));
@@ -203,7 +203,7 @@ impl ParticleActionType {
       Self::Turbulence => Box::new(ParticleActionTurbulence::import(section_name, ltx)?),
       Self::Scatter => Box::new(ParticleActionScatter::import(section_name, ltx)?),
       Self::Unknown | Self::CallActionList => {
-        return Err(DatabaseParseError::new_database_error(format!(
+        return Err(DatabaseError::new_parse_error(format!(
           "Not implemented parser for particle action importing: {:?}",
           particle_action_type
         )));

@@ -10,17 +10,15 @@ path = "src/lib.rs"
 [dependencies]
 bounded_join_set = "0.1.0"
 byteorder = "1.4.3"
-bytes = "1.5.0"
 crc32fast = "1.3.2"
 delharc = { path = "../xray-delharc", features = ["lh1"] }
 encoding_rs = "0.8.33"
-env_logger = "0.11.1"
 log = "0.4.20"
 minilzo-rs = "0.6.1"
 regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }
-tokio = { version = "1.35.1", features = ["full"] }
 walkdir = "2.5.0"
+thiserror = "2.0.10"
 
 [dev-dependencies]
 xray-test-utils = { path = "../xray-test-utils" }

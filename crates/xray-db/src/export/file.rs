@@ -1,4 +1,4 @@
-use crate::error::database_error::DatabaseError;
+use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use std::fs::{File, OpenOptions};
 use std::io;

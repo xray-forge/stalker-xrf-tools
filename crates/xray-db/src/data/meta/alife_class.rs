@@ -29,7 +29,7 @@ use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use enum_map::Enum;
@@ -248,7 +248,7 @@ impl AlifeClass {
         Box::new(object)
       }
       _ => {
-        return Err(DatabaseParseError::new_database_error(format!(
+        return Err(DatabaseError::new_parse_error(format!(
           "Not implemented parser for {:?}",
           alife_class
         )));
@@ -306,7 +306,7 @@ impl AlifeClass {
         ltx,
       )?),
       _ => {
-        return Err(DatabaseParseError::new_database_error(format!(
+        return Err(DatabaseError::new_parse_error(format!(
           "Not implemented parser for {:?}",
           alife_class
         )));

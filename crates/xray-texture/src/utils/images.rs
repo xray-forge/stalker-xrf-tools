@@ -1,5 +1,4 @@
-use crate::error::texture_processing_error::TextureProcessingError;
-use crate::TextureResult;
+use crate::{TextureError, TextureResult};
 use ddsfile::Dds;
 use image::codecs::png::PngEncoder;
 use image::{ExtendedColorType, ImageEncoder, ImageFormat, RgbaImage};
@@ -10,7 +9,7 @@ use std::path::{Path, PathBuf};
 
 pub fn read_dds_by_path(path: &Path) -> TextureResult<Dds> {
   Dds::read(&mut File::open(path)?).map_err(|error| {
-    TextureProcessingError::new_texture_error(format!(
+    TextureError::new_processing_error(format!(
       "Failed to read texture by path '{:?}, error: {:?}'",
       path, error,
     ))
@@ -19,7 +18,7 @@ pub fn read_dds_by_path(path: &Path) -> TextureResult<Dds> {
 
 pub fn dds_to_image(dds: &Dds) -> TextureResult<RgbaImage> {
   image_dds::image_from_dds(dds, 0).map_err(|error| {
-    TextureProcessingError::new_texture_error(format!(
+    TextureError::new_processing_error(format!(
       "Failed to convert DDS to RGBA image : {:?}'",
       error,
     ))
@@ -30,7 +29,7 @@ pub fn save_image_as_ui_dds(
   path: &Path,
   image: &RgbaImage,
   format: DDSImageFormat,
-) -> TextureResult<()> {
+) -> TextureResult {
   dds_from_image(
     image,
     format,
@@ -42,7 +41,7 @@ pub fn save_image_as_ui_dds(
   Ok(())
 }
 
-pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> TextureResult<()> {
+pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> TextureResult {
   Ok(image.save_with_format(path, ImageFormat::Png)?)
 }
 

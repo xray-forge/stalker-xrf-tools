@@ -2,9 +2,9 @@ use crate::data::alife::alife_object_anomaly_zone::AlifeObjectAnomalyZone;
 use crate::data::generic::time::Time;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::database_parse_error::DatabaseParseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
+use crate::DatabaseError;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
@@ -29,7 +29,7 @@ impl AlifeObjectReader for AlifeAnomalousZone {
   /// Import anomalous zone object data from ltx config section.
   fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
       ))

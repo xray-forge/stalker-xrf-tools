@@ -1,7 +1,7 @@
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
 use crate::archive::reader::ArchiveReader;
-use crate::{ArchiveReadError, ArchiveResult};
+use crate::{ArchiveError, ArchiveResult};
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -46,7 +46,7 @@ impl ArchiveProject {
     }
 
     if archives.is_empty() {
-      return Err(ArchiveReadError::new_archive_error(format!(
+      return Err(ArchiveError::new_read_error(format!(
         "Unable to read archives at location {:?}",
         path
       )));

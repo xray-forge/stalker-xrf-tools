@@ -1,7 +1,7 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::meta::particle_action_type::ParticleActionType;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -29,10 +29,7 @@ impl ParticleAction {
 
     for _ in 0..count {
       actions.push(Self::read::<T>(reader).map_err(|error| {
-        DatabaseParseError::new_database_error(format!(
-          "Failed to read particle effect action: {}",
-          error
-        ))
+        DatabaseError::new_parse_error(format!("Failed to read particle effect action: {}", error))
       })?);
     }
 
@@ -60,7 +57,7 @@ impl ParticleAction {
       action_type: reader.read_u32::<T>()?,
       data: ParticleActionType::read_by_particle_type::<T>(reader, action_type).map_err(
         |error| {
-          DatabaseParseError::new_database_error(format!(
+          DatabaseError::new_parse_error(format!(
             "Failed to read dynamic particle action data for action '{:?}': {}",
             action_type, error
           ))
@@ -99,7 +96,7 @@ impl ParticleAction {
   /// Import particle action data from provided path.
   pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))

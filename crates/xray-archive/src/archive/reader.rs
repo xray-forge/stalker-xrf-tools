@@ -2,9 +2,8 @@ use crate::archive::archive_constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK}
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::archive::archive_header::ArchiveHeader;
-use crate::error::archive_read_error::ArchiveReadError;
-use crate::types::ArchiveByteOrder;
-use crate::ArchiveResult;
+use crate::types::XRayByteOrder;
+use crate::{ArchiveError, ArchiveResult};
 use byteorder::ReadBytesExt;
 use delharc::decode::{Decoder, Lh1Decoder};
 use encoding_rs::{Encoding, UTF_8};
@@ -37,7 +36,7 @@ impl ArchiveReader {
         section_regex: Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap(),
         variable_regex: Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap(),
       }),
-      Err(error) => Err(ArchiveReadError::new_archive_error(format!(
+      Err(error) => Err(ArchiveError::new_read_error(format!(
         "Failed to read archive file {:?}, {}",
         path, error
       ))),
@@ -68,14 +67,14 @@ impl ArchiveReader {
     let mut root_path: String = String::new();
 
     loop {
-      let raw_chunk_id = match self.file.read_u32::<ArchiveByteOrder>() {
+      let raw_chunk_id = match self.file.read_u32::<XRayByteOrder>() {
         Ok(data) => data,
         Err(error) if error.kind() == UnexpectedEof => break,
         Err(error) => panic!("Error reading file: {}", error),
       };
-      let chunk_size: u32 = self.file.read_u32::<ArchiveByteOrder>()?;
+      let chunk_size: u32 = self.file.read_u32::<XRayByteOrder>()?;
       let chunk_usize: usize = usize::try_from(chunk_size).map_err(|error| {
-        ArchiveReadError::new_archive_error(format!(
+        ArchiveError::new_read_error(format!(
           "Failed to read archive header chunk size: {:?}",
           error
         ))
@@ -165,7 +164,7 @@ impl ArchiveReader {
   ) -> ArchiveResult<Vec<u8>> {
     match compressed {
       true => {
-        let decoded_len: u32 = file.read_u32::<ArchiveByteOrder>()?;
+        let decoded_len: u32 = file.read_u32::<XRayByteOrder>()?;
         let mut compressed_buf: Vec<u8> = vec![0u8; chunk_usize - 4usize];
 
         file.read_exact(compressed_buf.as_mut_slice())?;
@@ -195,15 +194,15 @@ impl ArchiveReader {
     let mut name_buf: [u8; 520] = [0u8; 260 * 2];
 
     loop {
-      let header_size: u16 = match reader.read_u16::<ArchiveByteOrder>() {
+      let header_size: u16 = match reader.read_u16::<XRayByteOrder>() {
         Ok(data) => data,
         Err(error) if error.kind() == UnexpectedEof => break,
         Err(error) => return Err(error.into()),
       };
 
-      let size_real: u32 = reader.read_u32::<ArchiveByteOrder>()?;
-      let size_compressed: u32 = reader.read_u32::<ArchiveByteOrder>()?;
-      let crc: u32 = reader.read_u32::<ArchiveByteOrder>()?;
+      let size_real: u32 = reader.read_u32::<XRayByteOrder>()?;
+      let size_compressed: u32 = reader.read_u32::<XRayByteOrder>()?;
+      let crc: u32 = reader.read_u32::<XRayByteOrder>()?;
       let name_size: u16 = header_size - 16;
 
       let name_bytes = {
@@ -216,7 +215,7 @@ impl ArchiveReader {
         &name_buf[..(name_size as usize)]
       };
 
-      let offset: u32 = reader.read_u32::<ArchiveByteOrder>()?;
+      let offset: u32 = reader.read_u32::<XRayByteOrder>()?;
       let (name, had_errors) = encoding.decode_without_bom_handling(name_bytes);
 
       if had_errors {

@@ -1,5 +1,5 @@
 use crate::constants::META_TYPE_FIELD;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -58,7 +58,7 @@ impl ParticleDescription {
   /// Import particle effect description data from provided path.
   pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "Particle effect description section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))

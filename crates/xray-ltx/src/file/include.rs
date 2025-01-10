@@ -1,4 +1,4 @@
-use crate::ltx_error::LtxError;
+use crate::error::LtxError;
 use crate::{Ltx, LtxResult};
 use std::io;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR_STR};

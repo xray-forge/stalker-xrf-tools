@@ -1,7 +1,7 @@
 use crate::data::alife::alife_smart_zone::AlifeSmartZone;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -58,7 +58,7 @@ impl AlifeObjectReader for AlifeSmartTerrain {
     let respawn_point: u8 = reader.read_u8()?;
 
     if respawn_point != 0 {
-      return Err(DatabaseParseError::new_database_error(
+      return Err(DatabaseError::new_parse_error(
         "Unexpected respawn point handler in smart terrain parser",
       ));
     }
@@ -92,7 +92,7 @@ impl AlifeObjectReader for AlifeSmartTerrain {
   /// Import alife smart terrain data from ltx config section.
   fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "ALife object '{section_name}' should be defined in ltx file ({})",
         file!()
       ))

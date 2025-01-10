@@ -12,8 +12,7 @@ use crate::extern_descriptor::ExportDescriptor;
 use walkdir::WalkDir;
 extern crate swc_common;
 extern crate swc_ecma_parser;
-use crate::error::parse_error::ExportParseError;
-use crate::ExportResult;
+use crate::{ExportError, ExportResult};
 use swc_common::comments::{Comments, SingleThreadedComments};
 use swc_common::errors::DiagnosticBuilder;
 use swc_common::sync::Lrc;
@@ -208,7 +207,7 @@ impl ExportsParser {
     }
 
     if !diagnostics.is_empty() {
-      return Err(ExportParseError::new_export_error(format!(
+      return Err(ExportError::new_parse_error(format!(
         "Failed to parse target files: {}",
         diagnostics
           .iter()

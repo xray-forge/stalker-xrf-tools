@@ -1,4 +1,4 @@
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::types::{DatabaseResult, U32Bytes};
 use std::str::FromStr;
 use xray_ltx::Section;
@@ -15,7 +15,7 @@ pub fn import_vector_from_string<T: FromStr>(value: &str) -> DatabaseResult<Vec<
     vector.push(match it.trim().parse::<T>() {
       Ok(v) => v,
       _ => {
-        return Err(DatabaseParseError::new_database_error(
+        return Err(DatabaseError::new_parse_error(
           "Failed to parse vector from string value",
         ))
       }
@@ -36,21 +36,21 @@ pub fn import_sized_vector_from_string<T: FromStr>(
     vector.push(match it.trim().parse::<T>() {
       Ok(v) => v,
       _ => {
-        return Err(DatabaseParseError::new_database_error(
+        return Err(DatabaseError::new_parse_error(
           "Failed to parse sized vector from string",
         ))
       }
     });
 
     if index >= size {
-      return Err(DatabaseParseError::new_database_error(
+      return Err(DatabaseError::new_parse_error(
         "Failed to parse sized vector from string, it has more elements than required",
       ));
     }
   }
 
   if vector.len() != size {
-    return Err(DatabaseParseError::new_database_error(
+    return Err(DatabaseError::new_parse_error(
       "Failed to parse sized vector from string, it has less elements than required",
     ));
   }
@@ -64,15 +64,13 @@ pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> Databa
     match section
       .get(field_name)
       .ok_or_else(|| {
-        DatabaseParseError::new_database_error(format!(
-          "Field '{field_name}' was not found in ltx file"
-        ))
+        DatabaseError::new_parse_error(format!("Field '{field_name}' was not found in ltx file"))
       })?
       .parse::<T>()
     {
       Ok(value) => value,
       _ => {
-        return Err(DatabaseParseError::new_database_error(format!(
+        return Err(DatabaseError::new_parse_error(format!(
           "Failed to parse ltx field '{field_name}' value, valid {:?} is expected",
           std::any::type_name::<T>()
         )))
@@ -92,7 +90,7 @@ pub fn read_ini_optional_field<T: FromStr>(
     Some(value) => match value.parse::<T>() {
       Ok(parsed) => Some(parsed),
       _ => {
-        return Err(DatabaseParseError::new_database_error(format!(
+        return Err(DatabaseError::new_parse_error(format!(
           "Failed to parse optional ltx field '{field_name}' value, correct {:?} is expected",
           std::any::type_name::<T>()
         )))

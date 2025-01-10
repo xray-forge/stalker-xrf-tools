@@ -5285,11 +5285,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.10"
+version = "2.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3ac7f54ca534db81081ef1c1e7f6ea8a3ef428d2fc069097c079443d24124d3"
+checksum = "d452f284b73e6d76dd36758a0c8684b1d5be31f92b89d07fd5822175732206fc"
 dependencies = [
- "thiserror-impl 2.0.10",
+ "thiserror-impl 2.0.11",
 ]
 
 [[package]]
@@ -5305,9 +5305,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.10"
+version = "2.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e9465d30713b56a37ede7185763c3492a91be2f5fa68d958c44e41ab9248beb"
+checksum = "26afc1baea8a989337eeb52b6e72a039780ce45c3edfcc9c5b9d112feeb173c2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6540,16 +6540,14 @@ version = "0.1.0"
 dependencies = [
  "bounded_join_set",
  "byteorder",
- "bytes",
  "crc32fast",
  "delharc",
  "encoding_rs",
- "env_logger",
  "log",
  "minilzo-rs",
  "regex",
  "serde",
- "tokio",
+ "thiserror 2.0.11",
  "walkdir",
  "xray-test-utils",
 ]
@@ -6563,6 +6561,7 @@ dependencies = [
  "encoding_rs",
  "fileslice",
  "parquet 50.0.0",
+ "thiserror 2.0.11",
  "xray-test-utils",
 ]
 
@@ -6579,6 +6578,7 @@ dependencies = [
  "phf 0.11.2",
  "serde",
  "serde_json",
+ "thiserror 2.0.11",
  "typetag",
  "uuid",
  "xray-chunk",
@@ -6596,6 +6596,7 @@ dependencies = [
  "swc_common",
  "swc_ecma_ast",
  "swc_ecma_parser",
+ "thiserror 2.0.11",
  "walkdir",
 ]
 
@@ -6604,7 +6605,7 @@ name = "xray-gamedata"
 version = "0.1.0"
 dependencies = [
  "log",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
  "walkdir",
  "xray-db",
  "xray-ltx",
@@ -6618,7 +6619,7 @@ dependencies = [
  "fxhash",
  "indexmap 2.2.6",
  "serde",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
  "walkdir",
  "xray-test-utils",
 ]
@@ -6642,6 +6643,7 @@ dependencies = [
  "rayon",
  "roxmltree",
  "serde",
+ "thiserror 2.0.11",
  "xray-ltx",
 ]
 
@@ -6654,6 +6656,7 @@ dependencies = [
  "quick-xml 0.36.1",
  "serde",
  "serde_json",
+ "thiserror 2.0.11",
  "walkdir",
 ]
 

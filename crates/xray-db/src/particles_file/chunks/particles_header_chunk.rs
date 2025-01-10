@@ -1,8 +1,8 @@
 use crate::constants::META_TYPE_FIELD;
-use crate::error::database_not_implemented_error::DatabaseNotImplementedError;
 use crate::export::file::{create_export_file, open_ltx_config};
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
+use crate::DatabaseError;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -29,7 +29,7 @@ impl ParticlesHeaderChunk {
     log::info!("Read header chunk, {:?} bytes", reader.read_bytes_len());
 
     if header_chunk.version != 1 {
-      return Err(DatabaseNotImplementedError::new_database_error(
+      return Err(DatabaseError::new_not_implemented_error(
         "Unknown version in particles header chunk, expected v1 only",
       ));
     }
@@ -139,7 +139,7 @@ mod tests {
     assert_eq!(
       ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader).map_err(|error| error.to_string()),
       Err(String::from(
-        "Database not implemented error: Unknown version in particles header chunk, expected v1 only",
+        "Database not implemented error: \"Unknown version in particles header chunk, expected v1 only\"",
       ))
     );
 

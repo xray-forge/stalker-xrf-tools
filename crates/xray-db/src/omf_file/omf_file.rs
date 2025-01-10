@@ -1,6 +1,6 @@
 use crate::omf_file::chunks::omf_motions_chunk::OmfMotionsChunk;
 use crate::omf_file::chunks::omf_parameters_chunk::OmfParametersChunk;
-use crate::{DatabaseParseError, DatabaseResult};
+use crate::{DatabaseError, DatabaseResult};
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
@@ -60,7 +60,7 @@ impl OmfFile {
     )?;
 
     if parameters.motions.len() != motions.motions.len() {
-      return Err(DatabaseParseError::new_database_error(format!(
+      return Err(DatabaseError::new_parse_error(format!(
         "Unexpected data stored in OMF file, count of motions and motions definitions mismatch: {} got, {} expected",
         parameters.motions.len(),
         motions.motions.len()

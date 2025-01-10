@@ -1,5 +1,5 @@
 use crate::constants::META_TYPE_FIELD;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -60,7 +60,7 @@ impl ParticleEffectFrame {
   /// Import particle effect frame data from provided path.
   pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "Particle group '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
@@ -89,13 +89,13 @@ impl ParticleEffectFrame {
         texture_size[0]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseParseError::new_database_error(
+          .or(Err(DatabaseError::new_parse_error(
             "Failed to parse texture_size W value",
           )))?,
         texture_size[1]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseParseError::new_database_error(
+          .or(Err(DatabaseError::new_parse_error(
             "Failed to parse texture_size H value",
           )))?,
       ),
@@ -103,13 +103,13 @@ impl ParticleEffectFrame {
         reserved[0]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseParseError::new_database_error(
+          .or(Err(DatabaseError::new_parse_error(
             "Failed to parse reserved X value",
           )))?,
         reserved[1]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseParseError::new_database_error(
+          .or(Err(DatabaseError::new_parse_error(
             "Failed to parse reserved Y value",
           )))?,
       ),

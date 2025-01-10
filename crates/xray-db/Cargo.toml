@@ -21,6 +21,7 @@ uuid = { version = "1.7.0", features = ["v4", "serde"] }
 typetag = "0.2.1"
 xray-chunk = { path = "../xray-chunk" }
 xray-ltx = { path = "../xray-ltx" }
+thiserror = "2.0.10"
 
 [dev-dependencies]
 xray-test-utils = { path = "../xray-test-utils" }

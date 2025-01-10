@@ -6,7 +6,7 @@ use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_effect_editor_data::ParticleEffectEditorData;
 use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-use crate::error::database_parse_error::DatabaseParseError;
+use crate::error::DatabaseError;
 use crate::export::file_import::{read_ini_optional_field, read_ltx_field};
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
@@ -69,7 +69,7 @@ impl ParticleEffect {
             .expect("Particle name chunk not found"),
         )
         .map_err(|error| {
-          DatabaseParseError::new_database_error(format!(
+          DatabaseError::new_parse_error(format!(
             "Failed to read particle version chunk: {}",
             error
           ))
@@ -79,17 +79,14 @@ impl ParticleEffect {
             .expect("Particle name chunk not found"),
         )
         .map_err(|error| {
-          DatabaseParseError::new_database_error(format!(
-            "Failed to read particle name chunk: {}",
-            error
-          ))
+          DatabaseError::new_parse_error(format!("Failed to read particle name chunk: {}", error))
         })?,
         max_particles: read_u32_chunk::<T>(
           &mut find_chunk_by_id(&chunks, Self::MAX_PARTICLES_CHUNK_ID)
             .expect("Particle max particles chunk not found"),
         )
         .map_err(|error| {
-          DatabaseParseError::new_database_error(format!(
+          DatabaseError::new_parse_error(format!(
             "Failed to read particle max_particles chunk: {}",
             error
           ))
@@ -99,7 +96,7 @@ impl ParticleEffect {
             .expect("Particle effect actions chunk not found"),
         )
         .map_err(|error| {
-          DatabaseParseError::new_database_error(format!(
+          DatabaseError::new_parse_error(format!(
             "Failed to read particle actions chunk: {}",
             error
           ))
@@ -109,10 +106,7 @@ impl ParticleEffect {
             .expect("Particle flags chunk not found"),
         )
         .map_err(|error| {
-          DatabaseParseError::new_database_error(format!(
-            "Failed to read particle flags chunk: {}",
-            error
-          ))
+          DatabaseError::new_parse_error(format!("Failed to read particle flags chunk: {}", error))
         })?,
         frame: find_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID).map(|mut it| {
           ParticleEffectFrame::read::<T>(&mut it)
@@ -123,10 +117,7 @@ impl ParticleEffect {
             .expect("Particle frame sprite chunk not found"),
         )
         .map_err(|error| {
-          DatabaseParseError::new_database_error(format!(
-            "Failed to read particle sprite chunk: {}",
-            error
-          ))
+          DatabaseError::new_parse_error(format!("Failed to read particle sprite chunk: {}", error))
         })?,
         time_limit: find_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID).map(|mut it| {
           read_f32_chunk::<T>(&mut it)
@@ -239,7 +230,7 @@ impl ParticleEffect {
   /// Import particle effect data from provided path.
   pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseParseError::new_database_error(format!(
+      DatabaseError::new_parse_error(format!(
         "Particle effect section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
@@ -268,7 +259,7 @@ impl ParticleEffect {
       }
 
       if action_index >= Self::EFFECT_ACTIONS_LIMIT {
-        return Err(DatabaseParseError::new_database_error(
+        return Err(DatabaseError::new_parse_error(
           "Failed to parse particle effect - reached maximum nested actions limit",
         ));
       }
