@@ -201,7 +201,7 @@ impl<'q> IndexMut<&'q str> for Ltx {
 #[cfg(test)]
 mod test {
   use crate::file::ltx::Ltx;
-  use crate::{LtxError, LtxParseError, LtxResult, Section, ROOT_SECTION};
+  use crate::{LtxError, LtxResult, Section, ROOT_SECTION};
 
   #[test]
   fn load_from_str_with_empty_general_section() {
@@ -292,9 +292,9 @@ mod test {
     assert!(ltx.is_err());
 
     match ltx.unwrap_err() {
-      LtxError::Parse(error) => {
-        assert_eq!(error.line, 3);
-        assert_eq!(error.col, 12);
+      LtxError::Parse { line, col, .. } => {
+        assert_eq!(line, 3);
+        assert_eq!(col, 12);
       }
       _ => {
         panic!("Unexpected error received");
@@ -400,8 +400,8 @@ name = hello
 
     assert!(ltx.is_err());
     assert_eq!(
-      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
-      "Failed to parse include statement in ltx file, including 'file1.ltx' more than once"
+      ltx.unwrap_err().to_string(),
+      "Ltx parse error: 4:1 \"Failed to parse include statement in ltx file, including 'file1.ltx' more than once\""
     );
 
     Ok(())
@@ -420,8 +420,8 @@ name = hello
 
     assert!(ltx.is_err());
     assert_eq!(
-      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
-      "Expected correct '#include \"config.ltx\"' statement, got '#include'"
+      ltx.unwrap_err().to_string(),
+      "Ltx parse error: 3:1 \"Expected correct '#include \\\"config.ltx\\\"' statement, got '#include'\""
     );
 
     Ok(())
@@ -440,8 +440,8 @@ name = hello
 
     assert!(ltx.is_err());
     assert_eq!(
-      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
-      "Included file should have .ltx extension, got 'file1.ini'"
+      ltx.unwrap_err().to_string(),
+      "Ltx parse error: 3:1 \"Included file should have .ltx extension, got 'file1.ini'\""
     );
 
     Ok(())
@@ -460,8 +460,8 @@ name = hello
 
     assert!(ltx.is_err());
     assert_eq!(
-      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
-      "Expected valid file name in include statement, got empty file name"
+      ltx.unwrap_err().to_string(),
+      "Ltx parse error: 3:1 \"Expected valid file name in include statement, got empty file name\""
     );
 
     Ok(())
@@ -690,8 +690,8 @@ foo = c
 
     assert!(ltx.is_err());
     assert_eq!(
-      TryInto::<LtxParseError>::try_into(ltx.unwrap_err())?.message,
-      "Duplicate sections are not allowed, looks like 'peer' is declared twice"
+      ltx.unwrap_err().to_string(),
+      "Ltx parse error: 6:1 \"Duplicate sections are not allowed, looks like 'peer' is declared twice\""
     );
 
     Ok(())

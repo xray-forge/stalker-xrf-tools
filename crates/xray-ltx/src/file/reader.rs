@@ -1,6 +1,6 @@
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncluded;
-use crate::{Ltx, LtxError, LtxReadError, LtxResult};
+use crate::{Ltx, LtxError, LtxResult};
 use encoding_rs::WINDOWS_1251;
 use std::fs::File;
 use std::io::Read;
@@ -48,7 +48,7 @@ impl Ltx {
     let (cow, encoding_used, had_errors) = WINDOWS_1251.decode(&raw_data);
 
     if had_errors {
-      Err(LtxReadError::new_ltx_error(format!(
+      Err(LtxError::new_read_error(format!(
         "Failed to decode LTX file data from reader with {:?} encoding, {} bytes",
         encoding_used,
         raw_data.len()

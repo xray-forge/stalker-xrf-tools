@@ -1,6 +1,6 @@
 use crate::file::section::section::Section;
 use crate::file::types::LtxSections;
-use crate::{Ltx, LtxConvertError, LtxResult};
+use crate::{Ltx, LtxError, LtxResult};
 
 /// Converter object to process and inject all inherit section statements.
 #[derive(Default)]
@@ -21,7 +21,7 @@ impl LtxInheritConvertor {
   /// Convert ltx file with inclusion of inherited sections.
   fn convert_ltx(&self, mut ltx: Ltx) -> LtxResult<Ltx> {
     if !ltx.includes.is_empty() {
-      return Err(LtxConvertError::new_ltx_error(
+      return Err(LtxError::new_convert_error(
         "Failed to equipment ltx file, not processed include statements detected on inheritance conversion",
       ));
     }
@@ -51,7 +51,7 @@ impl LtxInheritConvertor {
   fn inherit_section(ltx: &Ltx, destination: &mut LtxSections, section_name: &str) -> LtxResult {
     let section: &Section = match ltx.sections.get(section_name) {
       None => {
-        return Err(LtxConvertError::new_ltx_error(format!(
+        return Err(LtxError::new_convert_error(format!(
           "Failed to inherit unknown section [{section_name}] when reading ltx file ({})",
           ltx
             .path
@@ -72,7 +72,7 @@ impl LtxInheritConvertor {
     } else {
       for inherited in &section.inherited {
         if section_name == inherited {
-          return Err(LtxConvertError::new_ltx_error(format!(
+          return Err(LtxError::new_convert_error(format!(
             "Failed to inherit section '{inherited}' in '{section_name}', cannot inherit self"
           )));
         }

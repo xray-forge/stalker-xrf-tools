@@ -1,5 +1,5 @@
 use crate::file::configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
-use crate::{LtxReadError, LtxResult, LtxSchemeError};
+use crate::{LtxError, LtxResult};
 use std::fmt::Display;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -86,7 +86,7 @@ impl LtxFieldDataType {
 
     match value.split_once(':') {
       None => {
-        return Err(LtxReadError::new_ltx_error(format!(
+        return Err(LtxError::new_read_error(format!(
           "Failed to read scheme enum type for field '{section_name}', expected ':' separated type and values"
         )))
       }
@@ -106,7 +106,7 @@ impl LtxFieldDataType {
     }
 
     if allowed_values.is_empty() {
-      Err(LtxSchemeError::new_ltx_error(
+      Err(LtxError::new_scheme_error(
         section_name,
         field_name,
         "Failed to parse enum type, expected comma separated list of possible values after 'enum:'",
@@ -118,14 +118,14 @@ impl LtxFieldDataType {
 
   fn parse_const(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
     match value.split_once(':') {
-      None => Err(LtxReadError::new_ltx_error(format!(
+      None => Err(LtxError::new_read_error(format!(
         "Failed to read scheme const type for field '{section_name}', expected ':' prepended value"
       ))),
       Some((_, const_value)) => {
         let const_value: &str = const_value.trim();
 
         if const_value.is_empty() {
-          Err(LtxSchemeError::new_ltx_error(
+          Err(LtxError::new_scheme_error(
             section_name,
             field_name,
             "Failed to parse const type, expected actual data after 'const:'",
@@ -143,7 +143,7 @@ impl LtxFieldDataType {
 
     match value.split_once(':') {
       None => {
-        return Err(LtxReadError::new_ltx_error(format!(
+        return Err(LtxError::new_read_error(format!(
         "Failed to read scheme tuple type for field '{section_name}', expected ':' separated types"
       )))
       }
@@ -164,7 +164,7 @@ impl LtxFieldDataType {
         {
           match tuple_entry? {
             Self::TypeTuple(_, _) => {
-              return Err(LtxReadError::new_ltx_error(format!(
+              return Err(LtxError::new_read_error(format!(
                 "Failed to read scheme for field '{section_name}', tuple cannot contain nested tuples"
               )))
             }
@@ -178,7 +178,7 @@ impl LtxFieldDataType {
     }
 
     if types.is_empty() {
-      Err(LtxSchemeError::new_ltx_error(
+      Err(LtxError::new_scheme_error(
         section_name,
         field_name,
         "Failed to parse tuple type, expected comma separated list of possible values after 'tuple:'",

@@ -19,7 +19,7 @@ use commands::translation::verify_translations::VerifyTranslationsCommand;
 
 use crate::commands::gamedata::verify_gamedata_command::VerifyGamedataCommand;
 use crate::commands::ltx::format_ltx::FormatLtxCommand;
-use crate::generic_command::GenericCommand;
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::Command;
 use commands::ogf::info_ogf::InfoOgfCommand;
 use commands::omf::info_omf::InfoOmfCommand;
@@ -29,8 +29,8 @@ use commands::particle::repack_particles::RepackParticlesCommand;
 use commands::particle::reunpack_particles::ReUnpackParticlesCommand;
 use commands::particle::unpack_particles::UnpackParticlesCommand;
 use commands::particle::verify_particles::VerifyParticlesFileCommand;
-use std::env;
 use std::error::Error;
+use std::{env, process};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -47,7 +47,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     subcommands
       .iter()
       .find(|it| it.name() == command_name)
-      .map(|it| it.execute(matches))
+      .map(|it| {
+        let result: CommandResult = it.execute(matches);
+
+        if let Err(error) = &result {
+          eprintln!(
+            "Execution of command '{}' failed, error: \"{}\"",
+            it.name(),
+            error
+          );
+          process::exit(1);
+        } else {
+          result
+        }
+      })
       .expect("Valid used subcommand")?;
   } else {
     panic!("Unexpected cli command provided, check --help for details")

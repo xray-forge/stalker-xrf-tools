@@ -1,7 +1,6 @@
-use crate::error::ltx_scheme_error::LtxSchemeError;
 use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::verify_options::LtxVerifyOptions;
-use crate::{Ltx, LtxProject, LtxProjectVerifyResult, LtxResult};
+use crate::{Ltx, LtxError, LtxProject, LtxProjectVerifyResult, LtxResult};
 use fxhash::FxBuildHasher;
 use indexmap::IndexSet;
 use std::path::Path;
@@ -63,18 +62,25 @@ impl LtxProject {
 
                 result.checked_fields += 1;
 
-                if let Some(mut error) = field_definition.validate_value(&ltx, value) {
-                  error.section = section_name.into();
-                  error.at = Some(entry_path.to_str().unwrap().into());
+                if let Some(error) = field_definition.validate_value(&ltx, value) {
+                  match error {
+                    LtxError::Scheme { message, field, .. } => {
+                      section_has_error = true;
 
-                  section_has_error = true;
-
-                  result.errors.push(error);
+                      result.errors.push(LtxError::new_scheme_error_at(
+                        section_name,
+                        message,
+                        field,
+                        entry_path.to_str().unwrap(),
+                      ));
+                    }
+                    error => return Err(error),
+                  }
                 }
               } else if scheme_definition.is_strict {
                 section_has_error = true;
 
-                result.errors.push(LtxSchemeError::new_at(
+                result.errors.push(LtxError::new_scheme_error_at(
                   section_name,
                   field_name,
                   "Unexpected field, definition is required in strict mode",
@@ -91,7 +97,7 @@ impl LtxProject {
                 {
                   section_has_error = true;
 
-                  result.errors.push(LtxSchemeError::new_at(
+                  result.errors.push(LtxError::new_scheme_error_at(
                     section_name,
                     field_name,
                     "Required field was not provided",
@@ -103,7 +109,7 @@ impl LtxProject {
           } else {
             section_has_error = true;
 
-            result.errors.push(LtxSchemeError::new_at(
+            result.errors.push(LtxError::new_scheme_error_at(
               section_name,
               "*",
               format!("Required schema '{scheme_name}' definition is not found"),
@@ -118,7 +124,7 @@ impl LtxProject {
           }
         } else if options.is_strict {
           result.invalid_sections += 1;
-          result.errors.push(LtxSchemeError::new_at(
+          result.errors.push(LtxError::new_scheme_error_at(
             section_name,
             "*",
             "Expected '$schema' field to be defined in strict mode check",

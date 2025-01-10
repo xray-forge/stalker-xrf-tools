@@ -1,5 +1,6 @@
 use crate::project::gamedata_project_options::GamedataProjectOpenOptions;
 use crate::GamedataResult;
+use std::collections::HashSet;
 use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
@@ -8,8 +9,8 @@ use xray_ltx::{LtxProject, LtxProjectOptions};
 pub struct GamedataProject {
   pub roots: Vec<PathBuf>,
   pub configs: PathBuf,
+  pub assets: HashSet<PathBuf>,
   pub ltx_project: LtxProject,
-  // todo: Collect all asset paths and store as relative map here? Use it in asset helpers?
 }
 
 impl GamedataProject {
@@ -55,6 +56,9 @@ impl GamedataProject {
     }
 
     Ok(Self {
+      assets: Self::read_project_assets(
+        &roots.iter().map(|it| it.as_path()).collect::<Vec<&Path>>(),
+      )?,
       roots,
       configs: options.configs.clone(),
       ltx_project: LtxProject::open_at_path_opt(

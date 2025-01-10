@@ -1,5 +1,5 @@
-use crate::error::ltx_error::LtxError;
-use crate::{Ltx, LtxConvertError, LtxResult};
+use crate::ltx_error::LtxError;
+use crate::{Ltx, LtxResult};
 use std::io;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR_STR};
 
@@ -27,7 +27,7 @@ impl LtxIncludeConvertor {
   /// Convert ltx file with inclusion of nested files.
   fn convert_ltx(&self, ltx: Ltx) -> LtxResult<Ltx> {
     if ltx.directory.is_none() {
-      return Err(LtxConvertError::new_ltx_error(
+      return Err(LtxError::new_convert_error(
         "Failed to parse ltx file, parent directory is not specified",
       ));
     }
@@ -62,7 +62,7 @@ impl LtxIncludeConvertor {
           if key.is_empty() {
             existing.merge(value);
           } else {
-            return Err(LtxConvertError::new_ltx_error(format!(
+            return Err(LtxError::new_convert_error(format!(
               "Failed to equipment ltx file, duplicate section {key} found",
             )));
           }
@@ -81,7 +81,7 @@ impl LtxIncludeConvertor {
         None => return Ok(()),
       },
       Err(error) => {
-        return Err(LtxConvertError::new_ltx_error(format!(
+        return Err(LtxError::new_convert_error(format!(
           "Failed to parse ltx file, nested file {:?} in {:?} error: {error}",
           path.as_os_str(),
           into.path.as_ref().unwrap(),
@@ -99,7 +99,7 @@ impl LtxIncludeConvertor {
           if key.is_empty() {
             existing.merge(value);
           } else {
-            return Err(LtxConvertError::new_ltx_error(format!(
+            return Err(LtxError::new_convert_error(format!(
               "Failed to include ltx file '{:?}' in {:?}, duplicate section '{key}' found",
               path,
               into.path.as_ref().unwrap()

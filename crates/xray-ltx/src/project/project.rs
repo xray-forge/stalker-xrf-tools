@@ -5,7 +5,7 @@ use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::project::project_options::LtxProjectOptions;
 use crate::scheme::parser::LtxSchemeParser;
-use crate::{Ltx, LtxConvertError, LtxError, LtxResult};
+use crate::{Ltx, LtxError, LtxResult};
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
@@ -37,11 +37,7 @@ impl LtxProject {
 
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(root) {
-      let entry: DirEntry = match entry {
-        Ok(entry) => entry,
-        Err(error) => return Err(LtxError::Io(error.into_io_error().unwrap())),
-      };
-
+      let entry: DirEntry = entry.map_err(|error| LtxError::Io(error.into_io_error().unwrap()))?;
       let entry_path: &Path = entry.path();
 
       if let Some(extension) = entry_path.extension() {
@@ -49,7 +45,7 @@ impl LtxProject {
           let parent: &Path = match entry_path.parent() {
             Some(parent) => parent,
             None => {
-              return Err(LtxConvertError::new_ltx_error(
+              return Err(LtxError::new_convert_error(
                 "Failed to parse parent directory of ltx file.",
               ))
             }

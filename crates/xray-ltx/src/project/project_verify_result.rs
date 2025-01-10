@@ -1,4 +1,4 @@
-use crate::LtxSchemeError;
+use crate::LtxError;
 use serde::Serialize;
 
 #[derive(Debug, Default, Serialize)]
@@ -7,7 +7,7 @@ pub struct LtxProjectVerifyResult {
   pub checked_fields: usize,
   pub checked_sections: usize,
   pub duration: u128,
-  pub errors: Vec<LtxSchemeError>,
+  pub errors: Vec<LtxError>,
   pub invalid_sections: usize,
   pub skipped_sections: usize,
   pub total_files: usize,

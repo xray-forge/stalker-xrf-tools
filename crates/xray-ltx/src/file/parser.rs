@@ -6,7 +6,7 @@ use crate::file::configuration::line_separator::LineSeparator;
 use crate::file::formatter::LtxFormatter;
 use crate::file::section::section::Section;
 use crate::file::section::section_entry::SectionEntry;
-use crate::{Ltx, LtxParseError, LtxResult, ROOT_SECTION};
+use crate::{Ltx, LtxError, LtxResult, ROOT_SECTION};
 use std::str::Chars;
 
 /// Ltx parser.
@@ -229,7 +229,7 @@ impl<'a> LtxParser<'a> {
 
   /// Create parsing error.
   fn error<U, M: Into<String>>(&self, message: M) -> LtxResult<U> {
-    Err(LtxParseError::new_ltx_error(
+    Err(LtxError::new_parse_error(
       self.line + 1,
       self.column + 1,
       message,

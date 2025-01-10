@@ -1,12 +1,10 @@
-use crate::error::ltx_convert_error::LtxConvertError;
-use crate::error::ltx_error::LtxError;
-use crate::error::ltx_read_error::LtxReadError;
 use crate::file::configuration::constants::{
   LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME,
 };
 use crate::file::ltx::Ltx;
 use crate::file::section::section::Section;
 use crate::file::types::LtxSectionSchemes;
+use crate::ltx_error::LtxError;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;
@@ -29,7 +27,7 @@ impl LtxSchemeParser {
 
       for (name, section) in &ltx {
         if !name.starts_with(LTX_SYMBOL_SCHEME) {
-          return Err(LtxConvertError::new_ltx_error(format!(
+          return Err(LtxError::new_convert_error(format!(
             "Failed to parse ltx schemes - scheme section declaration should be prefixed with $, \
              got [{name}]"
           )));
@@ -37,7 +35,7 @@ impl LtxSchemeParser {
 
         match schemes.entry(name.into()) {
           Entry::Occupied(_) => {
-            return Err(LtxConvertError::new_ltx_error(format!(
+            return Err(LtxError::new_convert_error(format!(
               "Failed to parse ltx schemes - duplicate declaration of [{name}] section when reading '{}'",
               &ltx
                 .path
@@ -103,7 +101,7 @@ impl LtxSchemeParser {
 
     // Do not allow unknown typing.
     if data_type == LtxFieldDataType::TypeUnknown {
-      return Err(LtxReadError::new_ltx_error(format!(
+      return Err(LtxError::new_read_error(format!(
         "Invalid ltx [{section_name}] {field_name} configuration, unknown type '{field_data}' supplied",
       )));
     }
@@ -122,12 +120,11 @@ impl LtxSchemeParser {
     field_name: &str,
     section_name: &str,
     field_data: &str,
-  ) -> Result<bool, LtxReadError> {
-    match field_data.parse::<bool>() {
-      Ok(value) => Ok(value),
-      Err(_) => Err(LtxReadError::new(format!(
-        "Invalid scheme declaration, unexpected value for [{section_name}] {field_name} - '{field_data}', boolean expected"
-      ))),
-    }
+  ) -> Result<bool, LtxError> {
+    field_data.parse::<bool>().map_err(|error| {
+      LtxError::new_read_error(format!(
+        "Invalid scheme declaration, unexpected value for [{section_name}] {field_name} - '{field_data}', boolean expected ({error})"
+      ))
+    })
   }
 }

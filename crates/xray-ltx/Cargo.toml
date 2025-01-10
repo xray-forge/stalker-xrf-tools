@@ -13,6 +13,7 @@ indexmap = "2.2.5"
 walkdir = "2.5.0"
 serde = { version = "1.0.197", features = ["derive"] }
 encoding_rs = "0.8.33"
+thiserror = "2.0.10"
 
 [dev-dependencies]
 xray-test-utils = { path = "../xray-test-utils" }
