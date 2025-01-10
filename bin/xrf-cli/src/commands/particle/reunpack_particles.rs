@@ -1,20 +1,24 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use xray_db::{DatabaseResult, ParticlesFile};
+use xray_db::ParticlesFile;
 
-pub struct ReUnpackParticlesCommand {}
+#[derive(Default)]
+pub struct ReUnpackParticlesCommand;
 
-impl ReUnpackParticlesCommand {
-  pub const NAME: &'static str = "re-unpack-particles";
+impl GenericCommand for ReUnpackParticlesCommand {
+  fn name(&self) -> &'static str {
+    "re-unpack-particle"
+  }
 
-  /// Create command for re-unpack of particles file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
-      .about("Command to re-unpack provided particles directory into another directory")
+  /// Create command for re-unpack of particle file.
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("Command to re-unpack provided particle directory into another directory")
       .arg(
         Arg::new("path")
-          .help("Path to unpacked particles directory")
+          .help("Path to unpacked particle directory")
           .short('p')
           .long("path")
           .required(true)
@@ -22,7 +26,7 @@ impl ReUnpackParticlesCommand {
       )
       .arg(
         Arg::new("dest")
-          .help("Path to resulting unpacked particles")
+          .help("Path to resulting unpacked particle")
           .short('d')
           .long("dest")
           .required(true)
@@ -30,8 +34,8 @@ impl ReUnpackParticlesCommand {
       )
   }
 
-  /// Re-unpack provided particles dir and validate it.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  /// Re-unpack provided particle dir and validate it.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
@@ -40,7 +44,7 @@ impl ReUnpackParticlesCommand {
       .get_one::<PathBuf>("dest")
       .expect("Expected valid output path to be provided");
 
-    log::info!("Starting importing particles file {:?}", path);
+    log::info!("Starting importing particle file {:?}", path);
     log::info!("Re-unpack into {:?}", destination);
 
     let started_at: Instant = Instant::now();
@@ -52,11 +56,11 @@ impl ReUnpackParticlesCommand {
     let export_duration: Duration = started_at.elapsed() - import_duration;
 
     log::info!(
-      "Import particles file took: {:?}ms",
+      "Import particle file took: {:?}ms",
       import_duration.as_millis()
     );
     log::info!(
-      "Export particles file took: {:?}ms",
+      "Export particle file took: {:?}ms",
       export_duration.as_millis()
     );
 

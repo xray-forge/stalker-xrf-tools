@@ -1,19 +1,23 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
+use xray_db::{ParticlesFile, XRayByteOrder};
 
-pub struct InfoParticlesCommand {}
+#[derive(Default)]
+pub struct InfoParticlesCommand;
 
-impl InfoParticlesCommand {
-  pub const NAME: &'static str = "info-particles";
+impl GenericCommand for InfoParticlesCommand {
+  fn name(&self) -> &'static str {
+    "info-particle"
+  }
 
-  /// Create command for printing particles file info.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
-      .about("Command to print information about provided particles file")
+  /// Create command for printing particle file info.
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("Command to print information about provided particle file")
       .arg(
         Arg::new("path")
-          .help("Path to particles file")
+          .help("Path to particle file")
           .short('p')
           .long("path")
           .required(true)
@@ -21,13 +25,13 @@ impl InfoParticlesCommand {
       )
   }
 
-  /// Print information about particles file.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  /// Print information about particle file.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read particles file {:?}", path);
+    println!("Read particle file {:?}", path);
 
     let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder>(path)?;
 

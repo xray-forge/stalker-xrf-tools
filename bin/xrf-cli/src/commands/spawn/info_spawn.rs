@@ -1,15 +1,19 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseResult, SpawnFile, XRayByteOrder};
+use xray_db::{SpawnFile, XRayByteOrder};
 
-pub struct InfoSpawnCommand {}
+#[derive(Default)]
+pub struct InfoSpawnCommand;
 
-impl InfoSpawnCommand {
-  pub const NAME: &'static str = "info-spawn";
+impl GenericCommand for InfoSpawnCommand {
+  fn name(&self) -> &'static str {
+    "info-spawn"
+  }
 
   /// Create command for printing spawn file info.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to print information about provided spawn file")
       .arg(
         Arg::new("path")
@@ -22,7 +26,7 @@ impl InfoSpawnCommand {
   }
 
   /// Print information about spawn file.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");

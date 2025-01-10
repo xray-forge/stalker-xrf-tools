@@ -1,31 +1,33 @@
-mod commands;
+pub(crate) mod commands;
+pub(crate) mod generic_command;
 
-use crate::commands::build_translations::BuildTranslationsCommand;
-use crate::commands::format_ltx::FormatLtxCommand;
-use crate::commands::info_spawn::InfoSpawnCommand;
-use crate::commands::initialize_translations::InitializeTranslationsCommand;
-use crate::commands::pack_equipment_icons::PackEquipmentIconsCommand;
-use crate::commands::pack_spawn::PackSpawnFileCommand;
-use crate::commands::pack_texture_description::PackTextureDescriptionCommand;
-use crate::commands::parse_translations::ParseTranslationsCommand;
-use crate::commands::repack_spawn::RepackSpawnCommand;
-use crate::commands::unpack_archive::UnpackArchiveCommand;
-use crate::commands::unpack_equipment_icons::UnpackEquipmentIconsCommand;
-use crate::commands::unpack_spawn::UnpackSpawnFileCommand;
-use crate::commands::unpack_texture_description::UnpackTextureDescriptionCommand;
-use crate::commands::verify_ltx::VerifyLtxCommand;
-use crate::commands::verify_spawn::VerifySpawnFileCommand;
-use crate::commands::verify_translations::VerifyTranslationsCommand;
+use commands::archive::unpack_archive::UnpackArchiveCommand;
+use commands::ltx::verify_ltx::VerifyLtxCommand;
+use commands::spawn::info_spawn::InfoSpawnCommand;
+use commands::spawn::pack_spawn::PackSpawnFileCommand;
+use commands::spawn::repack_spawn::RepackSpawnCommand;
+use commands::spawn::unpack_spawn::UnpackSpawnFileCommand;
+use commands::spawn::verify_spawn::VerifySpawnFileCommand;
+use commands::texture::pack_equipment_icons::PackEquipmentIconsCommand;
+use commands::texture::pack_texture_description::PackTextureDescriptionCommand;
+use commands::texture::unpack_equipment_icons::UnpackEquipmentIconsCommand;
+use commands::texture::unpack_texture_description::UnpackTextureDescriptionCommand;
+use commands::translation::build_translations::BuildTranslationsCommand;
+use commands::translation::initialize_translations::InitializeTranslationsCommand;
+use commands::translation::parse_translations::ParseTranslationsCommand;
+use commands::translation::verify_translations::VerifyTranslationsCommand;
 
-use crate::commands::info_ogf::InfoOgfCommand;
-use crate::commands::info_omf::InfoOmfCommand;
-use crate::commands::info_particles::InfoParticlesCommand;
-use crate::commands::pack_particles::PackParticlesFileCommand;
-use crate::commands::repack_particles::RepackParticlesCommand;
-use crate::commands::reunpack_particles::ReUnpackParticlesCommand;
-use crate::commands::unpack_particles::UnpackParticlesCommand;
-use crate::commands::verify_particles::VerifyParticlesFileCommand;
+use crate::commands::ltx::format_ltx::FormatLtxCommand;
+use crate::generic_command::GenericCommand;
 use clap::Command;
+use commands::ogf::info_ogf::InfoOgfCommand;
+use commands::omf::info_omf::InfoOmfCommand;
+use commands::particle::info_particles::InfoParticlesCommand;
+use commands::particle::pack_particles::PackParticlesFileCommand;
+use commands::particle::repack_particles::RepackParticlesCommand;
+use commands::particle::reunpack_particles::ReUnpackParticlesCommand;
+use commands::particle::unpack_particles::UnpackParticlesCommand;
+use commands::particle::verify_particles::VerifyParticlesFileCommand;
 use std::env;
 use std::error::Error;
 
@@ -33,76 +35,61 @@ use std::error::Error;
 async fn main() -> Result<(), Box<dyn Error>> {
   setup_logger();
 
-  let command: Command = Command::new("xrf-tool")
-    .about("XRF forge CLI tools application")
-    .subcommand(BuildTranslationsCommand::init())
-    .subcommand(FormatLtxCommand::init())
-    .subcommand(InfoOmfCommand::init())
-    .subcommand(InfoOgfCommand::init())
-    .subcommand(InfoParticlesCommand::init())
-    .subcommand(InfoSpawnCommand::init())
-    .subcommand(InitializeTranslationsCommand::init())
-    .subcommand(PackEquipmentIconsCommand::init())
-    .subcommand(PackParticlesFileCommand::init())
-    .subcommand(PackSpawnFileCommand::init())
-    .subcommand(PackTextureDescriptionCommand::init())
-    .subcommand(ParseTranslationsCommand::init())
-    .subcommand(RepackParticlesCommand::init())
-    .subcommand(RepackSpawnCommand::init())
-    .subcommand(ReUnpackParticlesCommand::init())
-    .subcommand(UnpackArchiveCommand::init())
-    .subcommand(UnpackEquipmentIconsCommand::init())
-    .subcommand(UnpackParticlesCommand::init())
-    .subcommand(UnpackSpawnFileCommand::init())
-    .subcommand(UnpackTextureDescriptionCommand::init())
-    .subcommand(VerifyLtxCommand::init())
-    .subcommand(VerifyParticlesFileCommand::init())
-    .subcommand(VerifySpawnFileCommand::init())
-    .subcommand(VerifyTranslationsCommand::init());
+  let mut command: Command = Command::new("xrf-tool").about("XRF forge CLI tools application");
+  let subcommands: Vec<Box<dyn GenericCommand>> = setup_subcommands();
 
-  match command.get_matches().subcommand() {
-    Some((BuildTranslationsCommand::NAME, matches)) => BuildTranslationsCommand::execute(matches)?,
-    Some((FormatLtxCommand::NAME, matches)) => FormatLtxCommand::execute(matches)?,
-    Some((InfoOgfCommand::NAME, matches)) => InfoOgfCommand::execute(matches)?,
-    Some((InfoOmfCommand::NAME, matches)) => InfoOmfCommand::execute(matches)?,
-    Some((InfoParticlesCommand::NAME, matches)) => InfoParticlesCommand::execute(matches)?,
-    Some((InfoSpawnCommand::NAME, matches)) => InfoSpawnCommand::execute(matches)?,
-    Some((InitializeTranslationsCommand::NAME, matches)) => {
-      InitializeTranslationsCommand::execute(matches)?
-    }
-    Some((PackEquipmentIconsCommand::NAME, matches)) => {
-      PackEquipmentIconsCommand::execute(matches)?
-    }
-    Some((PackParticlesFileCommand::NAME, matches)) => PackParticlesFileCommand::execute(matches)?,
-    Some((PackSpawnFileCommand::NAME, matches)) => PackSpawnFileCommand::execute(matches)?,
-    Some((PackTextureDescriptionCommand::NAME, matches)) => {
-      PackTextureDescriptionCommand::execute(matches)?
-    }
-    Some((ParseTranslationsCommand::NAME, matches)) => ParseTranslationsCommand::execute(matches)?,
-    Some((RepackParticlesCommand::NAME, matches)) => RepackParticlesCommand::execute(matches)?,
-    Some((RepackSpawnCommand::NAME, matches)) => RepackSpawnCommand::execute(matches)?,
-    Some((ReUnpackParticlesCommand::NAME, matches)) => ReUnpackParticlesCommand::execute(matches)?,
-    Some((UnpackArchiveCommand::NAME, matches)) => UnpackArchiveCommand::execute(matches).await,
-    Some((UnpackEquipmentIconsCommand::NAME, matches)) => {
-      UnpackEquipmentIconsCommand::execute(matches)?
-    }
-    Some((UnpackParticlesCommand::NAME, matches)) => UnpackParticlesCommand::execute(matches)?,
-    Some((UnpackSpawnFileCommand::NAME, matches)) => UnpackSpawnFileCommand::execute(matches)?,
-    Some((UnpackTextureDescriptionCommand::NAME, matches)) => {
-      UnpackTextureDescriptionCommand::execute(matches)?
-    }
-    Some((VerifyLtxCommand::NAME, matches)) => VerifyLtxCommand::execute(matches)?,
-    Some((VerifyParticlesFileCommand::NAME, matches)) => {
-      VerifyParticlesFileCommand::execute(matches)?
-    }
-    Some((VerifySpawnFileCommand::NAME, matches)) => VerifySpawnFileCommand::execute(matches)?,
-    Some((VerifyTranslationsCommand::NAME, matches)) => {
-      VerifyTranslationsCommand::execute(matches)?
-    }
-    _ => panic!("Unexpected cli command provided, check --help for details"),
-  };
+  for subcommand in &subcommands {
+    command = command.subcommand(subcommand.init());
+  }
+
+  if let Some((command_name, matches)) = command.get_matches().subcommand() {
+    subcommands
+      .iter()
+      .find(|it| it.name() == command_name)
+      .map(|it| it.execute(matches))
+      .expect("Valid used subcommand")?;
+  } else {
+    panic!("Unexpected cli command provided, check --help for details")
+  }
 
   Ok(())
+}
+
+pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
+  vec![
+    // Archive:
+    UnpackArchiveCommand::new_box(),
+    // LTX:
+    FormatLtxCommand::new_box(),
+    VerifyLtxCommand::new_box(),
+    // OGF:
+    InfoOgfCommand::new_box(),
+    // OMF:
+    InfoOmfCommand::new_box(),
+    // Particles:
+    InfoParticlesCommand::new_box(),
+    PackParticlesFileCommand::new_box(),
+    RepackParticlesCommand::new_box(),
+    ReUnpackParticlesCommand::new_box(),
+    UnpackParticlesCommand::new_box(),
+    VerifyParticlesFileCommand::new_box(),
+    // Spawn:
+    InfoSpawnCommand::new_box(),
+    PackSpawnFileCommand::new_box(),
+    RepackSpawnCommand::new_box(),
+    UnpackSpawnFileCommand::new_box(),
+    VerifySpawnFileCommand::new_box(),
+    // Textures:
+    PackEquipmentIconsCommand::new_box(),
+    PackTextureDescriptionCommand::new_box(),
+    UnpackEquipmentIconsCommand::new_box(),
+    UnpackTextureDescriptionCommand::new_box(),
+    // Translations:
+    BuildTranslationsCommand::new_box(),
+    InitializeTranslationsCommand::new_box(),
+    ParseTranslationsCommand::new_box(),
+    VerifyTranslationsCommand::new_box(),
+  ]
 }
 
 /// Configure environment logger, fallback to info level.

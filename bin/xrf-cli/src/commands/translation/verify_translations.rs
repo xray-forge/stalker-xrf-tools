@@ -1,24 +1,27 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::process;
 use std::str::FromStr;
 use xray_translation::{
-  ProjectVerifyOptions, ProjectVerifyResult, TranslationError, TranslationLanguage,
-  TranslationProject,
+  ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject,
 };
 
-pub struct VerifyTranslationsCommand {}
+#[derive(Default)]
+pub struct VerifyTranslationsCommand;
 
-impl VerifyTranslationsCommand {
-  pub const NAME: &'static str = "verify-translations";
+impl GenericCommand for VerifyTranslationsCommand {
+  fn name(&self) -> &'static str {
+    "verify-translation"
+  }
 
   /// Create command for verifying of translation files.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to verify translation files integrity")
       .arg(
         Arg::new("path")
-          .help("Path to translations folder")
+          .help("Path to translation folder")
           .short('p')
           .long("path")
           .required(true)
@@ -35,7 +38,7 @@ impl VerifyTranslationsCommand {
       )
       .arg(
         Arg::new("strict")
-          .help("Fail with non 0 error code if translations are missing")
+          .help("Fail with non 0 error code if translation are missing")
           .long("strict")
           .required(false)
           .action(ArgAction::SetTrue),
@@ -58,7 +61,7 @@ impl VerifyTranslationsCommand {
       )
   }
 
-  pub fn execute(matches: &ArgMatches) -> Result<(), TranslationError> {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -72,7 +75,7 @@ impl VerifyTranslationsCommand {
     let is_strict: bool = matches.get_flag("strict");
 
     if !is_silent {
-      println!("Verifying translations {:?}, language - {language}", path)
+      println!("Verifying translation {:?}, language - {language}", path)
     }
 
     let options: ProjectVerifyOptions = ProjectVerifyOptions {
@@ -99,7 +102,7 @@ impl VerifyTranslationsCommand {
     }
 
     if options.is_strict && result.missing_translations_count > 0 {
-      log::error!("Failing with non-zero error code, missing translations found");
+      log::error!("Failing with non-zero error code, missing translation found");
       process::exit(1);
     }
 

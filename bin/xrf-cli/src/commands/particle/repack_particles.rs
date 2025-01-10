@@ -1,20 +1,24 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
+use xray_db::{ParticlesFile, XRayByteOrder};
 
-pub struct RepackParticlesCommand {}
+#[derive(Default)]
+pub struct RepackParticlesCommand;
 
-impl RepackParticlesCommand {
-  pub const NAME: &'static str = "repack-particles";
+impl GenericCommand for RepackParticlesCommand {
+  fn name(&self) -> &'static str {
+    "repack-particle"
+  }
 
-  /// Create command for repack of particles file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
-      .about("Command to repack provided particles.xr into another file")
+  /// Create command for repack of particle file.
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("Command to repack provided particle.xr into another file")
       .arg(
         Arg::new("path")
-          .help("Path to particles file")
+          .help("Path to particle file")
           .short('p')
           .long("path")
           .required(true)
@@ -22,7 +26,7 @@ impl RepackParticlesCommand {
       )
       .arg(
         Arg::new("dest")
-          .help("Path to resulting particles file")
+          .help("Path to resulting particle file")
           .short('d')
           .long("dest")
           .required(true)
@@ -30,8 +34,8 @@ impl RepackParticlesCommand {
       )
   }
 
-  /// Repack provided particles file and validate it.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  /// Repack provided particle file and validate it.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
@@ -40,7 +44,7 @@ impl RepackParticlesCommand {
       .get_one::<PathBuf>("dest")
       .expect("Expected valid output path to be provided");
 
-    log::info!("Starting parsing particles file {:?}", path);
+    log::info!("Starting parsing particle file {:?}", path);
     log::info!("Repack into {:?}", destination);
 
     let started_at: Instant = Instant::now();
@@ -51,12 +55,9 @@ impl RepackParticlesCommand {
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
+    log::info!("Read particle file took: {:?}ms", read_duration.as_millis());
     log::info!(
-      "Read particles file took: {:?}ms",
-      read_duration.as_millis()
-    );
-    log::info!(
-      "Write particles file took: {:?}ms",
+      "Write particle file took: {:?}ms",
       write_duration.as_millis()
     );
 

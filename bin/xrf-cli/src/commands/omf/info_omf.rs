@@ -1,15 +1,19 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseResult, OmfFile, XRayByteOrder};
+use xray_db::{OmfFile, XRayByteOrder};
 
-pub struct InfoOmfCommand {}
+#[derive(Default)]
+pub struct InfoOmfCommand;
 
-impl InfoOmfCommand {
-  pub const NAME: &'static str = "info-omf";
+impl GenericCommand for InfoOmfCommand {
+  fn name(&self) -> &'static str {
+    "info-omf"
+  }
 
   /// Create command for printing omf file info.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to print information about provided omf file")
       .arg(
         Arg::new("path")
@@ -22,7 +26,7 @@ impl InfoOmfCommand {
   }
 
   /// Print information about ogf file.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");

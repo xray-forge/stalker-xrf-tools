@@ -1,17 +1,19 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_ltx::{
-  Ltx, LtxFormatOptions, LtxProject, LtxProjectFormatResult, LtxResult, LtxVerifyError,
-};
+use xray_ltx::{Ltx, LtxFormatOptions, LtxProject, LtxProjectFormatResult, LtxVerifyError};
 
-pub struct FormatLtxCommand {}
+#[derive(Default)]
+pub struct FormatLtxCommand;
 
-impl FormatLtxCommand {
-  pub const NAME: &'static str = "format-ltx";
+impl GenericCommand for FormatLtxCommand {
+  fn name(&self) -> &'static str {
+    "format-ltx"
+  }
 
   /// Create command for verifying of spawn file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to format ltx and ini files")
       .arg(
         Arg::new("path")
@@ -39,7 +41,7 @@ impl FormatLtxCommand {
   }
 
   /// Lint and format ltx file or folder based on provided arguments.
-  pub fn execute(matches: &ArgMatches) -> LtxResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
@@ -64,9 +66,9 @@ impl FormatLtxCommand {
           project.check_format_all_files_opt(LtxFormatOptions { is_silent })?;
 
         if result.invalid_files > 0 {
-          return Err(LtxVerifyError::new_ltx_error(
-            "Project includes LTX files with invalid format",
-          ));
+          return Err(
+            LtxVerifyError::new_ltx_error("Project includes LTX files with invalid format").into(),
+          );
         }
       } else {
         log::info!("Formatting ltx folder: {:?}", path);
@@ -91,7 +93,7 @@ impl FormatLtxCommand {
         Err(error) => {
           println!("Failed to format {:?}, reason: {:?}", path, error);
 
-          Err(error)
+          Err(Box::new(error))
         }
       }
     }

@@ -1,23 +1,26 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::str::FromStr;
 use xray_translation::{
-  ProjectBuildOptions, ProjectBuildResult, TranslationError, TranslationLanguage,
-  TranslationProject,
+  ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject,
 };
 
-pub struct BuildTranslationsCommand {}
+#[derive(Default)]
+pub struct BuildTranslationsCommand;
 
-impl BuildTranslationsCommand {
-  pub const NAME: &'static str = "build-translations";
+impl GenericCommand for BuildTranslationsCommand {
+  fn name(&self) -> &'static str {
+    "build-translation"
+  }
 
   /// Create command for building of translation files.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to build translation files into gamedata")
       .arg(
         Arg::new("path")
-          .help("Path to translations folder")
+          .help("Path to translation folder")
           .short('p')
           .long("path")
           .required(true)
@@ -25,7 +28,7 @@ impl BuildTranslationsCommand {
       )
       .arg(
         Arg::new("output")
-          .help("Path to output translations")
+          .help("Path to output translation")
           .short('o')
           .long("output")
           .required(true)
@@ -65,7 +68,7 @@ impl BuildTranslationsCommand {
       )
   }
 
-  pub fn execute(matches: &ArgMatches) -> Result<(), TranslationError> {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -84,7 +87,7 @@ impl BuildTranslationsCommand {
 
     if !is_silent {
       println!(
-        "Building translations {:?}, language - {language}, sorted - {is_sorted}",
+        "Building translation {:?}, language - {language}, sorted - {is_sorted}",
         path
       )
     }

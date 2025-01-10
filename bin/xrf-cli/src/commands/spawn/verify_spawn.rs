@@ -1,15 +1,19 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseParseError, DatabaseResult, SpawnFile, XRayByteOrder};
+use xray_db::{DatabaseParseError, SpawnFile, XRayByteOrder};
 
-pub struct VerifySpawnFileCommand {}
+#[derive(Default)]
+pub struct VerifySpawnFileCommand;
 
-impl VerifySpawnFileCommand {
-  pub const NAME: &'static str = "verify-spawn";
+impl GenericCommand for VerifySpawnFileCommand {
+  fn name(&self) -> &'static str {
+    "verify-spawn"
+  }
 
   /// Create command for verifying of spawn file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to verify provided spawn file")
       .arg(
         Arg::new("path")
@@ -22,7 +26,7 @@ impl VerifySpawnFileCommand {
   }
 
   /// Verify *.spawn file based on provided arguments.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -38,10 +42,13 @@ impl VerifySpawnFileCommand {
       Err(error) => {
         log::error!("Provided spawn file is invalid: {}", error);
 
-        Err(DatabaseParseError::new_database_error(format!(
-          "Verification of spawn file failed: {}",
-          error
-        )))
+        Err(
+          DatabaseParseError::new_database_error(format!(
+            "Verification of spawn file failed: {}",
+            error
+          ))
+          .into(),
+        )
       }
     }
   }

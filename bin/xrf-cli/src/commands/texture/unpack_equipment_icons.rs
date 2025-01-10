@@ -1,21 +1,25 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use std::time::Instant;
 use xray_ltx::Ltx;
 use xray_texture::{
-  dds_to_image, read_dds_by_path, ImageFormat, RgbaImage, TextureResult, UnpackEquipmentOptions,
+  dds_to_image, read_dds_by_path, ImageFormat, RgbaImage, UnpackEquipmentOptions,
   UnpackEquipmentProcessor,
 };
 
-pub struct UnpackEquipmentIconsCommand {}
+#[derive(Default)]
+pub struct UnpackEquipmentIconsCommand;
 
-impl UnpackEquipmentIconsCommand {
-  pub const NAME: &'static str = "unpack-equipment-icons";
+impl GenericCommand for UnpackEquipmentIconsCommand {
+  fn name(&self) -> &'static str {
+    "unpack-equipment-icons"
+  }
 
   /// Create command to unpack equipment icons.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to unpack dds icons into multiple icons")
       .arg(
         Arg::new("system-ltx")
@@ -48,7 +52,7 @@ impl UnpackEquipmentIconsCommand {
       )
   }
 
-  pub fn execute(matches: &ArgMatches) -> TextureResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let system_ltx_path: &PathBuf = matches
       .get_one::<PathBuf>("system-ltx")
       .expect("Expected valid path to be provided for system-ltx");

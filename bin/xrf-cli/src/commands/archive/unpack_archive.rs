@@ -1,16 +1,21 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::env;
 use std::path::PathBuf;
+use tokio::runtime::Runtime;
 use xray_archive::{ArchiveProject, ArchiveUnpackResult};
 
-pub struct UnpackArchiveCommand {}
+#[derive(Default)]
+pub struct UnpackArchiveCommand;
 
-impl UnpackArchiveCommand {
-  pub const NAME: &'static str = "unpack-archive";
+impl GenericCommand for UnpackArchiveCommand {
+  fn name(&self) -> &'static str {
+    "unpack-archive"
+  }
 
   /// Create command to unpack archive.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to unpack provided *.db into separate files")
       .arg(
         Arg::new("path")
@@ -38,7 +43,7 @@ impl UnpackArchiveCommand {
   }
 
   /// Unpack xray engine database archive.
-  pub async fn execute(matches: &ArgMatches) {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -71,16 +76,16 @@ impl UnpackArchiveCommand {
 
     log::info!("Unpacking files, parallel {parallel}");
 
-    let result: ArchiveUnpackResult = archive_project
-      .unpack_parallel(&destination, parallel)
-      .await
-      .unwrap();
+    let result: ArchiveUnpackResult =
+      Runtime::new()?.block_on(archive_project.unpack_parallel(&destination, parallel))?;
 
     log::info!(
       "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",
       result.duration as f64 / 1000.0,
       result.prepare_duration as f64 / 1000.0,
       result.unpack_duration as f64 / 1000.0,
-    )
+    );
+
+    Ok(())
   }
 }

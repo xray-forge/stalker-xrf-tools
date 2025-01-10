@@ -1,18 +1,20 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use std::time::Instant;
-use xray_texture::{
-  ImageFormat, PackDescriptionOptions, TextureResult, UnpackDescriptionProcessor,
-};
+use xray_texture::{ImageFormat, PackDescriptionOptions, PackDescriptionProcessor};
 
-pub struct UnpackTextureDescriptionCommand {}
+#[derive(Default)]
+pub struct PackTextureDescriptionCommand;
 
-impl UnpackTextureDescriptionCommand {
-  pub const NAME: &'static str = "unpack-texture-description";
+impl GenericCommand for PackTextureDescriptionCommand {
+  fn name(&self) -> &'static str {
+    "pack-texture-description"
+  }
 
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
-      .about("Command to unpack dds icons into multiple icons")
+  /// Create command for packing of texture description file.
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("Command to pack texture description xml")
       .arg(
         Arg::new("description")
           .help("Path to XML file describing textures")
@@ -29,7 +31,7 @@ impl UnpackTextureDescriptionCommand {
       )
       .arg(
         Arg::new("output")
-          .help("Path to output folder for icons")
+          .help("Path to directory where output dds files")
           .long("output")
           .required(false)
           .value_parser(value_parser!(PathBuf)),
@@ -52,14 +54,15 @@ impl UnpackTextureDescriptionCommand {
       )
       .arg(
         Arg::new("parallel")
-          .help("Turn on parallel unpack mode")
+          .help("Turn on parallel mode for pack operations")
           .long("parallel")
           .required(false)
           .action(ArgAction::SetTrue),
       )
   }
 
-  pub fn execute(matches: &ArgMatches) -> TextureResult {
+  /// Pack texture descriptions file as single dds sprite.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let description: &PathBuf = matches
       .get_one::<PathBuf>("description")
       .expect("Expected valid path to be provided for texture description file or folder");
@@ -74,18 +77,7 @@ impl UnpackTextureDescriptionCommand {
     let is_strict: bool = matches.get_flag("strict");
     let is_parallel: bool = matches.get_flag("parallel");
 
-    let started_at: Instant = Instant::now();
-
-    log::info!("Unpacking texture descriptions from: {:?}", description);
-    log::info!("Paths: base {:?}, output {:?}", base, output);
-    log::info!("Parallel mode: {is_parallel}");
-
-    println!(
-      "Unpacking texture descriptions: {:?}, from {:?} to {:?}, parallel - {is_parallel}",
-      description, base, output
-    );
-
-    UnpackDescriptionProcessor::unpack_xml_descriptions(PackDescriptionOptions {
+    let options: PackDescriptionOptions = PackDescriptionOptions {
       description: description.clone(),
       base: base.clone(),
       output: output.clone(),
@@ -93,12 +85,13 @@ impl UnpackTextureDescriptionCommand {
       is_verbose,
       is_strict,
       is_parallel,
-    })?;
+    };
 
-    log::info!(
-      "Unpack texture descriptions took: {:?}ms",
-      started_at.elapsed().as_millis()
-    );
+    log::info!("Packing texture descriptions from: {:?}", description);
+    log::info!("Paths: base {:?}, output {:?}", base, output);
+    log::info!("DDS format: {:?}", options.dds_compression_format);
+
+    PackDescriptionProcessor::pack_xml_descriptions(&options)?;
 
     Ok(())
   }

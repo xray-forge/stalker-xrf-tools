@@ -1,18 +1,22 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::process;
 use std::time::Instant;
 use xray_ltx::Ltx;
-use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, TextureResult};
+use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor};
 
-pub struct PackEquipmentIconsCommand {}
+#[derive(Default)]
+pub struct PackEquipmentIconsCommand;
 
-impl PackEquipmentIconsCommand {
-  pub const NAME: &'static str = "pack-equipment-icons";
+impl GenericCommand for PackEquipmentIconsCommand {
+  fn name(&self) -> &'static str {
+    "pack-equipment-icons"
+  }
 
   /// Create command for packing equipment icons.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to pack dds icons into single element")
       .arg(
         Arg::new("system-ltx")
@@ -61,7 +65,7 @@ impl PackEquipmentIconsCommand {
   }
 
   /// Command to pack equipment icons files into single dds file.
-  pub fn execute(matches: &ArgMatches) -> TextureResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let system_ltx_path: &PathBuf = matches
       .get_one::<PathBuf>("system-ltx")
       .expect("Expected valid path to be provided for system-ltx");

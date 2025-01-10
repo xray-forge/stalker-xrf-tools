@@ -1,17 +1,21 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::{DatabaseResult, SpawnFile, XRayByteOrder};
+use xray_db::{SpawnFile, XRayByteOrder};
 
-pub struct PackSpawnFileCommand {}
+#[derive(Default)]
+pub struct PackSpawnFileCommand;
 
-impl PackSpawnFileCommand {
-  pub const NAME: &'static str = "pack-spawn";
+impl GenericCommand for PackSpawnFileCommand {
+  fn name(&self) -> &'static str {
+    "pack-spawn"
+  }
 
   /// Create command packing of spawn file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to pack unpacked spawn files into single *.spawn")
       .arg(
         Arg::new("path")
@@ -40,7 +44,7 @@ impl PackSpawnFileCommand {
   }
 
   /// Pack *.spawn file based on provided arguments.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");

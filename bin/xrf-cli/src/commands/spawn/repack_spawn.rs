@@ -1,16 +1,20 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use xray_db::{DatabaseResult, SpawnFile, XRayByteOrder};
+use xray_db::{SpawnFile, XRayByteOrder};
 
-pub struct RepackSpawnCommand {}
+#[derive(Default)]
+pub struct RepackSpawnCommand;
 
-impl RepackSpawnCommand {
-  pub const NAME: &'static str = "repack-spawn";
+impl GenericCommand for RepackSpawnCommand {
+  fn name(&self) -> &'static str {
+    "repack-spawn"
+  }
 
   /// Create command for repack of spawn file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to repack provided *.spawn into another file")
       .arg(
         Arg::new("path")
@@ -31,7 +35,7 @@ impl RepackSpawnCommand {
   }
 
   /// Repack provided *.spawn file and validate it.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");

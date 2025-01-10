@@ -1,21 +1,25 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
+use xray_db::{ParticlesFile, XRayByteOrder};
 
-pub struct UnpackParticlesCommand {}
+#[derive(Default)]
+pub struct UnpackParticlesCommand;
 
-impl UnpackParticlesCommand {
-  pub const NAME: &'static str = "unpack-particles";
+impl GenericCommand for UnpackParticlesCommand {
+  fn name(&self) -> &'static str {
+    "unpack-particle"
+  }
 
-  /// Create command to unpack particles xr file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
-      .about("Command to unpack provided particles.xr into separate files")
+  /// Create command to unpack particle xr file.
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("Command to unpack provided particle.xr into separate files")
       .arg(
         Arg::new("path")
-          .help("Path to particles.xr file")
+          .help("Path to particle.xr file")
           .short('p')
           .long("path")
           .required(true)
@@ -39,8 +43,8 @@ impl UnpackParticlesCommand {
       )
   }
 
-  /// Unpack provided particles file.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  /// Unpack provided particle file.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -51,7 +55,7 @@ impl UnpackParticlesCommand {
 
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting particles spawn file {:?}", path);
+    log::info!("Starting particle spawn file {:?}", path);
     log::info!("Unpack destination {:?}", destination);
 
     // Apply force flag and delete existing directories.
@@ -78,12 +82,9 @@ impl UnpackParticlesCommand {
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
+    log::info!("Read particle file took: {:?}ms", read_duration.as_millis());
     log::info!(
-      "Read particles file took: {:?}ms",
-      read_duration.as_millis()
-    );
-    log::info!(
-      "Export particles file took: {:?}ms",
+      "Export particle file took: {:?}ms",
       unpack_duration.as_millis()
     );
 

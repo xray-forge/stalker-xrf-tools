@@ -1,21 +1,23 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_translation::{
-  ProjectInitializeOptions, ProjectInitializeResult, TranslationError, TranslationProject,
-};
+use xray_translation::{ProjectInitializeOptions, ProjectInitializeResult, TranslationProject};
 
-pub struct InitializeTranslationsCommand {}
+#[derive(Default)]
+pub struct InitializeTranslationsCommand;
 
-impl InitializeTranslationsCommand {
-  pub const NAME: &'static str = "initialize-translations";
+impl GenericCommand for InitializeTranslationsCommand {
+  fn name(&self) -> &'static str {
+    "initialize-translation"
+  }
 
   /// Create command for initialization of translation files.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
+  fn init(&self) -> Command {
+    Command::new(self.name())
       .about("Command to initialize translation files")
       .arg(
         Arg::new("path")
-          .help("Path to translations folder")
+          .help("Path to translation folder")
           .short('p')
           .long("path")
           .required(true)
@@ -39,7 +41,7 @@ impl InitializeTranslationsCommand {
       )
   }
 
-  pub fn execute(matches: &ArgMatches) -> Result<(), TranslationError> {
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -48,7 +50,7 @@ impl InitializeTranslationsCommand {
     let is_verbose: bool = matches.get_flag("verbose");
 
     if !is_silent {
-      println!("Verifying translations {:?}", path)
+      println!("Verifying translation {:?}", path)
     }
 
     let options: ProjectInitializeOptions = ProjectInitializeOptions {

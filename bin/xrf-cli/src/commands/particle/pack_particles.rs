@@ -1,21 +1,25 @@
+use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
-use xray_db::{DatabaseResult, ParticlesFile, XRayByteOrder};
+use xray_db::{ParticlesFile, XRayByteOrder};
 
-pub struct PackParticlesFileCommand {}
+#[derive(Default)]
+pub struct PackParticlesFileCommand;
 
-impl PackParticlesFileCommand {
-  pub const NAME: &'static str = "pack-particles";
+impl GenericCommand for PackParticlesFileCommand {
+  fn name(&self) -> &'static str {
+    "pack-particle"
+  }
 
-  /// Create command packing of particles file.
-  pub fn init() -> Command {
-    Command::new(Self::NAME)
-      .about("Command to pack unpacked particles files into single particles.xr")
+  /// Create command packing of particle file.
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("Command to pack unpacked particle files into single particle.xr")
       .arg(
         Arg::new("path")
-          .help("Path to unpacked particles file folder")
+          .help("Path to unpacked particle file folder")
           .short('p')
           .long("path")
           .required(true)
@@ -31,7 +35,7 @@ impl PackParticlesFileCommand {
       )
       .arg(
         Arg::new("force")
-          .help("Whether existing packed particles should be pruned if destination folder exists")
+          .help("Whether existing packed particle should be pruned if destination folder exists")
           .short('f')
           .long("force")
           .required(false)
@@ -39,8 +43,8 @@ impl PackParticlesFileCommand {
       )
   }
 
-  /// Pack particles file based on provided arguments.
-  pub fn execute(matches: &ArgMatches) -> DatabaseResult {
+  /// Pack particle file based on provided arguments.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
@@ -51,10 +55,10 @@ impl PackParticlesFileCommand {
 
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting packing particles file {:?}", path);
+    log::info!("Starting packing particle file {:?}", path);
     log::info!("Pack destination {:?}", destination);
 
-    // Apply force flag and delete existing particles output.
+    // Apply force flag and delete existing particle output.
     if force && destination.exists() && destination.is_file() {
       fs::remove_file(destination)?;
     }
@@ -78,12 +82,9 @@ impl PackParticlesFileCommand {
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
+    log::info!("Read particle file took: {:?}ms", read_duration.as_millis());
     log::info!(
-      "Read particles file took: {:?}ms",
-      read_duration.as_millis()
-    );
-    log::info!(
-      "Writing packed particles file took: {:?}ms",
+      "Writing packed particle file took: {:?}ms",
       write_duration.as_millis()
     );
 
