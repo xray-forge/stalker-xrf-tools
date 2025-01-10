@@ -118,7 +118,9 @@ impl LtxProject {
   pub fn open_at_path(root: &Path) -> LtxResult<Self> {
     Self::open_at_path_opt(root, Default::default())
   }
+}
 
+impl LtxProject {
   /// Check if provided LTX file is scheme definition file.
   pub fn is_ltx_scheme_path(path: &Path) -> bool {
     path
@@ -127,5 +129,9 @@ impl LtxProject {
       .map_or(false, |name| {
         name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION)
       })
+  }
+
+  pub fn get_system_ltx(&self) -> LtxResult<Ltx> {
+    Ltx::read_from_file_full(self.root.join("system.ltx"))
   }
 }

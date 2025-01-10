@@ -10,6 +10,7 @@ log = "0.4.20"
 tokio = { version = "1.35.1", features = ["full"] }
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
-xray-texture = { path = "../../crates/xray-texture" }
+xray-gamedata = { path = "../../crates/xray-gamedata" }
 xray-ltx = { path = "../../crates/xray-ltx" }
+xray-texture = { path = "../../crates/xray-texture" }
 xray-translation = { path = "../../crates/xray-translation" }

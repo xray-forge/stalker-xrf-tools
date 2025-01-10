@@ -1,7 +1,7 @@
 use crate::error::database_not_implemented_error::DatabaseNotImplementedError;
 use crate::error::database_parse_error::DatabaseParseError;
 use std::error::Error;
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::io;
 use xray_chunk::ChunkError;
 use xray_ltx::LtxError;
@@ -18,7 +18,7 @@ pub enum DatabaseError {
 }
 
 impl Display for DatabaseError {
-  fn fmt(&self, formatter: &mut Formatter) -> Result {
+  fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
     match *self {
       Self::Io(ref error) => error.fmt(formatter),
       Self::Chunk(ref error) => error.fmt(formatter),

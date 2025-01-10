@@ -84,7 +84,7 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
         dds_to_image(&dds)
       })
       .expect("Expected path to valid DDS source file");
-    let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path)?;
+    let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
 
     println!("Unpacking equipment DDS file into: {:?}", output);
 

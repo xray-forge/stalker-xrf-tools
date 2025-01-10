@@ -1,4 +1,5 @@
 pub(crate) mod archive;
+pub(crate) mod gamedata;
 pub(crate) mod ltx;
 pub(crate) mod ogf;
 pub(crate) mod omf;

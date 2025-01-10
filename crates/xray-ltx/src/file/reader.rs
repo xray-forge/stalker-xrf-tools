@@ -18,7 +18,7 @@ impl Ltx {
   }
 
   /// Read LTX from a file, inject all includes and unwrap inherited sections.
-  pub fn load_from_file_full<P: AsRef<Path>>(filename: P) -> LtxResult<Self> {
+  pub fn read_from_file_full<P: AsRef<Path>>(filename: P) -> LtxResult<Self> {
     Self::read_from_path(filename)?
       .into_included()?
       .into_inherited()

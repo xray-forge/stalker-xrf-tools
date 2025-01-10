@@ -13,7 +13,7 @@ pub async fn pack_equipment(
   system_ltx_path: &str,
 ) -> TauriResult<Value> {
   let options = PackEquipmentOptions {
-    ltx: Ltx::load_from_file_full(system_ltx_path).map_err(|error| error.to_string())?,
+    ltx: Ltx::read_from_file_full(system_ltx_path).map_err(|error| error.to_string())?,
     source: source_path.into(),
     output: output_path.into(),
     gamedata: None,

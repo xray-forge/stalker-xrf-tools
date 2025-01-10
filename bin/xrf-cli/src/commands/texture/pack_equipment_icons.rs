@@ -94,7 +94,7 @@ impl GenericCommand for PackEquipmentIconsCommand {
     println!("Output dir: {:?}", output);
 
     let started_at: Instant = Instant::now();
-    let system_ltx: Ltx = Ltx::load_from_file_full(system_ltx_path)?;
+    let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
 
     let options = PackEquipmentOptions {
       ltx: system_ltx,

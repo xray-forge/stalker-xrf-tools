@@ -6580,6 +6580,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "xray-gamedata"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "xray-db",
+ "xray-ltx",
+]
+
+[[package]]
 name = "xray-ltx"
 version = "0.1.0"
 dependencies = [
@@ -6658,6 +6667,7 @@ dependencies = [
  "tokio",
  "xray-archive",
  "xray-db",
+ "xray-gamedata",
  "xray-ltx",
  "xray-texture",
  "xray-translation",

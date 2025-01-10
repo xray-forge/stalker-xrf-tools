@@ -1,17 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-  "bin/xrf-app",
-  "bin/xrf-cli",
-  "crates/xray-archive",
-  "crates/xray-chunk",
-  "crates/xray-db",
-  "crates/xray-delharc",
-  "crates/xray-export",
-  "crates/xray-ltx",
-  "crates/xray-test-utils",
-  "crates/xray-texture",
-  "crates/xray-translation",
+    "bin/xrf-app",
+    "bin/xrf-cli",
+    "crates/xray-archive",
+    "crates/xray-chunk",
+    "crates/xray-db",
+    "crates/xray-delharc",
+    "crates/xray-export",
+    "crates/xray-gamedata",
+    "crates/xray-ltx",
+    "crates/xray-test-utils",
+    "crates/xray-texture",
+    "crates/xray-translation",
 ]
 
 [profile.release]

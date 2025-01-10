@@ -23,7 +23,7 @@ pub async fn open_equipment_sprite(
   log::info!("Opened equipment dds file");
 
   let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
-    &Ltx::load_from_file_full(system_ltx_path).map_err(error_to_string)?,
+    &Ltx::read_from_file_full(system_ltx_path).map_err(error_to_string)?,
   );
 
   let response = IconsEditorEquipmentResponse {

@@ -29,7 +29,7 @@ pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Taur
     .map_err(|error| format!("Failed to open provided image file: {:?}", error))?;
 
   let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
-    &Ltx::load_from_file_full(ltx_path).map_err(error_to_string)?,
+    &Ltx::read_from_file_full(ltx_path).map_err(error_to_string)?,
   );
 
   let response = IconsEditorEquipmentResponse {

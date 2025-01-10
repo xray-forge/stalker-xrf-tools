@@ -31,7 +31,7 @@ impl LtxProject {
         result.total_files += 1;
       }
 
-      let ltx: Ltx = Ltx::load_from_file_full(entry_path)?;
+      let ltx: Ltx = Ltx::read_from_file_full(entry_path)?;
 
       // For each section in file:
       for (section_name, section) in &ltx {
@@ -163,7 +163,7 @@ impl LtxProject {
 
   /// Format single LTX file by provided path
   pub fn verify_file(path: &Path) -> LtxResult<()> {
-    Ltx::load_from_file_full(path)?;
+    Ltx::read_from_file_full(path)?;
 
     Ok(())
   }

@@ -17,6 +17,8 @@ pub struct OgfFile {
 
 impl OgfFile {
   pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
+    log::info!("Reading ogf path: {:?}", path);
+
     Self::read_from_file::<T>(File::open(path)?)
   }
 
@@ -30,14 +32,14 @@ impl OgfFile {
       reader.read_bytes_len(),
     );
 
-    for chunk in &chunks {
-      log::info!(
-        "Ogf chunk: {} ({:#x}) - {} bytes",
-        chunk.id,
-        chunk.id,
-        chunk.size
-      );
-    }
+    // for chunk in &chunks {
+    //   log::info!(
+    //     "Ogf chunk: {} ({:#x}) - {} bytes",
+    //      chunk.id,
+    //      chunk.id,
+    //      chunk.size
+    //   );
+    // }
 
     Self::read_from_chunks::<T>(&chunks)
   }
