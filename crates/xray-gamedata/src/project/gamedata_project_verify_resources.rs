@@ -15,6 +15,14 @@ impl GamedataProject {
       );
     }
 
+    if options.is_verbose_logging_enabled() {
+      for (path, descriptor) in &self.assets {
+        if descriptor.hits == 0 {
+          println!("Unused resource: -{}", path.red());
+        }
+      }
+    }
+
     Ok(())
   }
 }
