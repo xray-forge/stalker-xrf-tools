@@ -24,7 +24,7 @@ impl GamedataProject {
     let schemes_result: GamedataResult<LtxProjectVerifyResult> = self.verify_ltx_schemes(options);
     let spawns_results: GamedataResult = self.verify_spawns(options);
     let weapons_result: GamedataResult = self.verify_ltx_weapons(options);
-    let meshes_result: GamedataResult = self.verify_spawns(options);
+    let meshes_result: GamedataResult = self.verify_meshes(options);
     let textures_result: GamedataResult = self.verify_textures(options);
     let sounds_result: GamedataResult = self.verify_sounds(options);
     let resources_usage_result: GamedataResult = self.verify_resources_usage(options);
