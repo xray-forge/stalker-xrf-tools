@@ -24,17 +24,26 @@ impl GenericCommand for FormatLtxCommand {
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
-        Arg::new("silent")
-          .help("Turn of formatter logging")
-          .long("silent")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      )
-      .arg(
         Arg::new("check")
           .help("Turn of formatter logging")
           .short('c')
           .long("check")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("silent")
+          .help("Turn off formatter logging")
+          .long("silent")
+          .short('s')
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on formatter verbose logging")
+          .long("verbose")
+          .short('v')
           .required(false)
           .action(ArgAction::SetTrue),
       )
@@ -48,6 +57,7 @@ impl GenericCommand for FormatLtxCommand {
 
     let is_silent: bool = matches.get_flag("silent");
     let is_check: bool = matches.get_flag("check");
+    let is_verbose: bool = matches.get_flag("verbose");
 
     if path.is_dir() {
       let project: LtxProject = LtxProject::open_at_path(path).map_err(|error| {
@@ -63,7 +73,10 @@ impl GenericCommand for FormatLtxCommand {
         log::info!("Checking format of ltx folder: {:?}", path);
 
         let result: LtxProjectFormatResult =
-          project.check_format_all_files_opt(LtxFormatOptions { is_silent })?;
+          project.check_format_all_files_opt(LtxFormatOptions {
+            is_silent,
+            is_verbose,
+          })?;
 
         if result.invalid_files > 0 {
           return Err(
@@ -73,7 +86,10 @@ impl GenericCommand for FormatLtxCommand {
       } else {
         log::info!("Formatting ltx folder: {:?}", path);
 
-        project.format_all_files_opt(LtxFormatOptions { is_silent })?;
+        project.format_all_files_opt(LtxFormatOptions {
+          is_silent,
+          is_verbose,
+        })?;
       }
 
       Ok(())

@@ -52,7 +52,7 @@ impl LtxProject {
     let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
     let started_at: Instant = Instant::now();
 
-    if !options.is_silent {
+    if options.is_logging_enabled() {
       println!("Checking path: {:?}", self.root);
     }
 
@@ -61,7 +61,7 @@ impl LtxProject {
         result.invalid_files += 1;
         result.to_format.push(entry.path().into());
 
-        if !options.is_silent {
+        if options.is_logging_enabled() {
           println!("Not formatted: {:?}", entry.path());
         }
       } else {
@@ -73,7 +73,7 @@ impl LtxProject {
 
     result.duration = started_at.elapsed().as_millis();
 
-    if !options.is_silent {
+    if options.is_logging_enabled() {
       if result.invalid_files == 0 {
         println!(
           "All {} files are formatted, checked in {} sec",

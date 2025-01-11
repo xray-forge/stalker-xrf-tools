@@ -1,13 +1,16 @@
-use crate::{GamedataProject, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use colored::Colorize;
 use std::path::PathBuf;
 use xray_db::{OgfFile, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
-  pub fn verify_ltx_weapons(&self) -> GamedataResult {
+  pub fn verify_ltx_weapons(&mut self, options: &GamedataProjectVerifyOptions) -> GamedataResult {
     log::info!("Verify gamedata weapons");
 
-    println!("Verify gamedata LTX weapons");
+    if options.is_logging_enabled() {
+      println!("{}", "Verify gamedata LTX weapons".green());
+    }
 
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
 
@@ -22,7 +25,7 @@ impl GamedataProject {
       }
 
       let check_result: GamedataResult<bool> =
-        self.verify_ltx_weapon(&system_ltx, section_name, section);
+        self.verify_ltx_weapon(options, &system_ltx, section_name, section);
 
       if let Ok(is_valid) = check_result {
         if !is_valid {
@@ -33,28 +36,35 @@ impl GamedataProject {
       }
     }
 
-    log::info!(
-      "Verified gamedata weapons, {}/{} valid",
-      checked_weapons_count - invalid_weapons_count,
-      checked_weapons_count
-    );
+    if options.is_logging_enabled() {
+      log::info!(
+        "Verified gamedata weapons, {}/{} valid",
+        checked_weapons_count - invalid_weapons_count,
+        checked_weapons_count
+      );
 
-    println!(
-      "Verified gamedata weapons, {}/{} valid",
-      checked_weapons_count - invalid_weapons_count,
-      checked_weapons_count
-    );
+      println!(
+        "Verified gamedata weapons, {}/{} valid",
+        checked_weapons_count - invalid_weapons_count,
+        checked_weapons_count
+      );
+    }
 
     Ok(())
   }
 
   pub fn verify_ltx_weapon(
-    &self,
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
   ) -> GamedataResult<bool> {
     log::info!("Verify weapon ltx config [{section_name}]");
+
+    if options.is_verbose_logging_enabled() {
+      println!("Verify weapon ltx config [{section_name}]");
+    }
 
     let visual: Option<PathBuf> = self.get_section_ogf_visual(section, "visual");
     let hud_section: Option<&Section> = section.get("hud").and_then(|it| ltx.section(it));
@@ -89,7 +99,7 @@ impl GamedataProject {
     Ok(visual.is_some() && hud_visual.is_some())
   }
 
-  pub fn get_section_ogf_visual(&self, section: &Section, field_name: &str) -> Option<PathBuf> {
+  pub fn get_section_ogf_visual(&mut self, section: &Section, field_name: &str) -> Option<PathBuf> {
     section
       .get(field_name)
       .map(|it| {

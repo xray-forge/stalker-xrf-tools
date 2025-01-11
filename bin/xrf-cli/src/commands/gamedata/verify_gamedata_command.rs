@@ -1,7 +1,12 @@
 use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{value_parser, Arg, ArgMatches, Command};
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
+use colored::Colorize;
 use std::path::PathBuf;
-use xray_gamedata::{GamedataProject, GamedataProjectOpenOptions};
+use std::process;
+use xray_gamedata::{
+  GamedataProject, GamedataProjectOpenOptions, GamedataProjectVerificationResult,
+  GamedataProjectVerifyOptions,
+};
 
 #[derive(Default)]
 pub struct VerifyGamedataCommand;
@@ -14,10 +19,10 @@ impl GenericCommand for VerifyGamedataCommand {
   /// Create command to verify gamedata.
   fn init(&self) -> Command {
     Command::new(self.name())
-      .about("Command to gamedata root")
+      .about("Command to verify gamedata")
       .arg(
         Arg::new("root")
-          .help("Path gamedata folder")
+          .help("Paths to gamedata root(s)")
           .short('r')
           .long("root")
           .required(true)
@@ -26,12 +31,45 @@ impl GenericCommand for VerifyGamedataCommand {
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
+        Arg::new("ignore")
+          .help("Ignored assets in gamedata roots")
+          .short('i')
+          .long("ignore")
+          .required(false)
+          .value_delimiter(',')
+          .num_args(1..=10)
+          .value_parser(value_parser!(String)),
+      )
+      .arg(
         Arg::new("configs")
           .help("Path gamedata folder")
           .short('c')
           .long("configs")
           .required(false)
           .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("silent")
+          .help("Turn of logging")
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("strict")
+          .help("Turn on strict mode")
+          .short('s')
+          .long("strict")
+          .required(false)
+          .action(ArgAction::SetTrue),
       )
   }
 
@@ -43,7 +81,23 @@ impl GenericCommand for VerifyGamedataCommand {
       .cloned()
       .collect();
 
-    let config: PathBuf = matches
+    let ignored: Vec<String> = matches
+      .get_many::<String>("ignore")
+      .map(|it| it.cloned().collect::<Vec<String>>())
+      .unwrap_or_else(|| {
+        vec![
+          String::from(".git"),
+          String::from(".idea"),
+          String::from("particles_unpacked"),
+          String::from("textures_unpacked"),
+          String::from(".gitignore"),
+          String::from(".gitattributes"),
+          String::from("README.md"),
+          String::from("LICENSE"),
+        ]
+      });
+
+    let configs: PathBuf = matches
       .get_one::<PathBuf>("configs")
       .cloned()
       .unwrap_or_else(|| {
@@ -53,15 +107,56 @@ impl GenericCommand for VerifyGamedataCommand {
           .join("configs")
       });
 
-    println!("Verifying gamedata");
-    println!("Roots: {:?}", roots);
-    println!("Configs: {:?}", config);
+    let is_silent: bool = matches.get_flag("silent");
+    let is_verbose: bool = matches.get_flag("verbose");
+    let is_strict: bool = matches.get_flag("strict");
 
-    let project: Box<GamedataProject> = Box::new(GamedataProject::open(
-      &GamedataProjectOpenOptions::new(roots, config),
-    )?);
+    let open_options: GamedataProjectOpenOptions = GamedataProjectOpenOptions {
+      roots,
+      ignored,
+      configs,
+      is_verbose,
+      is_silent,
+      is_strict,
+    };
 
-    project.verify()?;
+    let verify_options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
+      is_verbose,
+      is_silent,
+      is_strict,
+    };
+
+    if open_options.is_logging_enabled() {
+      println!("{}", "Opening gamedata project".green());
+      println!(
+        "Roots: {:?}, ignored: {:?}",
+        open_options.roots, open_options.ignored,
+      );
+      println!("Configs: {:?}", open_options.configs);
+    }
+
+    let mut project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
+    let verify_result: GamedataProjectVerificationResult = project.verify(&verify_options)?;
+
+    if verify_result.is_valid {
+      if verify_options.is_logging_enabled() {
+        println!(
+          "Gamedata project verified in {} sec",
+          (verify_result.duration as f64) / 1000.0
+        );
+        println!("{}", "Project gamedata is valid".green());
+      }
+    } else {
+      if verify_options.is_logging_enabled() {
+        println!(
+          "Gamedata project checked in {} sec",
+          (verify_result.duration as f64) / 1000.0
+        );
+        println!("{}", "Project gamedata is invalid".red());
+      }
+
+      process::exit(1);
+    }
 
     Ok(())
   }

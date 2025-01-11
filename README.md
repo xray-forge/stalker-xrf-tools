@@ -9,7 +9,7 @@
 
 Set of [utility tools](https://xray-forge.github.io/stalker-xrf-book/tools/tools.html) to assist with xray engine mods
 development and debugging. <br/>
-Includes UI application for usability and manual usage and CLI variant for scripts / CI.
+Includes UI application (windows) for usability and manual usage and CLI (windows, linux) variant for scripts / CI.
 
 ## Application
 
@@ -29,8 +29,11 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/app
 Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli/cli.html).
 
 - [Archive commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/archive.html)
+- [Gamedata commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/gamedata.html)
 - [Icons commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/icons.html)
 - [LTX commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/ltx.html)
+- [OGF commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/ogf.html)
+- [OMF commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/omf.html)
 - [Particles commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/particles.html)
 - [Spawn commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/spawn.html)
 - [Translations commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/translations.html)

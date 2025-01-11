@@ -1,15 +1,16 @@
+use crate::project::gamedata_asset_descriptor::GamedataAssetDescriptor;
 use crate::project::gamedata_project_options::GamedataProjectOpenOptions;
 use crate::GamedataResult;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use xray_ltx::{LtxProject, LtxProjectOptions};
 
 pub struct GamedataProject {
+  pub assets: HashMap<String, GamedataAssetDescriptor>,
   pub roots: Vec<PathBuf>,
   pub configs: PathBuf,
-  pub assets: HashSet<PathBuf>,
   pub ltx_project: LtxProject,
 }
 
@@ -57,7 +58,13 @@ impl GamedataProject {
 
     Ok(Self {
       assets: Self::read_project_assets(
+        options,
         &roots.iter().map(|it| it.as_path()).collect::<Vec<&Path>>(),
+        &options
+          .ignored
+          .iter()
+          .map(|it| it.as_str())
+          .collect::<Vec<&str>>(),
       )?,
       roots,
       configs: options.configs.clone(),

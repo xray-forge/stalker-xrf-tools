@@ -1,7 +1,14 @@
+pub(crate) mod gamedata_asset_descriptor;
 pub(crate) mod gamedata_project;
 pub(crate) mod gamedata_project_assets;
 pub(crate) mod gamedata_project_options;
+pub(crate) mod gamedata_project_result;
 pub(crate) mod gamedata_project_section;
 pub(crate) mod gamedata_project_verify;
 pub(crate) mod gamedata_project_verify_ltx;
+pub(crate) mod gamedata_project_verify_meshes;
+pub(crate) mod gamedata_project_verify_resources;
+pub(crate) mod gamedata_project_verify_sounds;
+pub(crate) mod gamedata_project_verify_spawn;
+pub(crate) mod gamedata_project_verify_textures;
 pub(crate) mod gamedata_project_verify_weapons;
