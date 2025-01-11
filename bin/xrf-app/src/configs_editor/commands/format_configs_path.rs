@@ -14,7 +14,10 @@ pub async fn format_configs_path(path: &str) -> TauriResult<Value> {
   log::info!("Formatting ltx folder: {:?}", path);
 
   let result: LtxProjectFormatResult = project
-    .format_all_files_opt(LtxFormatOptions { is_silent: true })
+    .format_all_files_opt(LtxFormatOptions {
+      is_silent: true,
+      is_verbose: false,
+    })
     .map_err(error_to_string)?;
 
   Ok(json!(result))
