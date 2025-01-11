@@ -5,6 +5,10 @@ use xray_ltx::{
 };
 
 impl GamedataProject {
+  // todo: Add used LTX files paths based on system ltx / spawn files.
+  // todo: Add used LTX files paths based on system ltx / spawn files.
+  // todo: Add used LTX files paths based on system ltx / spawn files.
+
   pub fn verify_ltx_format(
     &self,
     options: &GamedataProjectVerifyOptions,

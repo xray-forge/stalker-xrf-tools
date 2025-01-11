@@ -56,6 +56,10 @@ impl GamedataProject {
       );
     }
 
+    // todo: Make sure config is part of one of asset roots.
+    // todo: Make sure config is part of one of asset roots.
+    // todo: Make sure config is part of one of asset roots.
+
     Ok(Self {
       assets: Self::read_project_assets(
         options,

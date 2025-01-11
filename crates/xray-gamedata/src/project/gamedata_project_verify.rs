@@ -25,8 +25,12 @@ impl GamedataProject {
     let spawns_results: GamedataResult = self.verify_spawns(options);
     let weapons_result: GamedataResult = self.verify_ltx_weapons(options);
     let meshes_result: GamedataResult = self.verify_meshes(options);
+    let animations_result: GamedataResult = self.verify_animations(options);
     let textures_result: GamedataResult = self.verify_textures(options);
     let sounds_result: GamedataResult = self.verify_sounds(options);
+    let levels_result: GamedataResult = self.verify_levels(options);
+    let weathers_result: GamedataResult = self.verify_weathers(options);
+    let shaders_result: GamedataResult = self.verify_shaders(options);
     let resources_usage_result: GamedataResult = self.verify_resources_usage(options);
 
     let is_everything_valid: bool = format_result.is_ok()
@@ -34,8 +38,12 @@ impl GamedataProject {
       && spawns_results.is_ok()
       && weapons_result.is_ok()
       && meshes_result.is_ok()
+      && animations_result.is_ok()
       && textures_result.is_ok()
       && sounds_result.is_ok()
+      && levels_result.is_ok()
+      && weathers_result.is_ok()
+      && shaders_result.is_ok()
       && resources_usage_result.is_ok();
 
     Ok(GamedataProjectVerificationResult {

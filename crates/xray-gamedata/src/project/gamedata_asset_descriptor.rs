@@ -5,7 +5,7 @@ use std::path::PathBuf;
 pub struct GamedataAssetDescriptor {
   pub root_index: usize,
   pub hits: usize,
-  pub extension: GamedataAssetExtension,
+  pub extension: GamedataAssetType,
 }
 
 impl GamedataAssetDescriptor {
@@ -13,14 +13,14 @@ impl GamedataAssetDescriptor {
     Self {
       root_index,
       hits: 0,
-      extension: GamedataAssetExtension::Unknown,
+      extension: GamedataAssetType::Unknown,
     }
   }
 
   pub fn new_with_extension(root_index: usize, relative_path: &str) -> Self {
-    let extension: GamedataAssetExtension = GamedataAssetExtension::from_path(relative_path);
+    let extension: GamedataAssetType = GamedataAssetType::from_path(relative_path);
 
-    if extension == GamedataAssetExtension::Unknown {
+    if extension == GamedataAssetType::Unknown {
       log::warn!("Unknown extension asset: {}", relative_path);
     }
 
@@ -39,7 +39,7 @@ impl GamedataAssetDescriptor {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum GamedataAssetExtension {
+pub enum GamedataAssetType {
   Ai,
   Anm,
   CForm,
@@ -75,7 +75,7 @@ pub enum GamedataAssetExtension {
   XrPack,
 }
 
-impl GamedataAssetExtension {
+impl GamedataAssetType {
   pub fn from_path(path: &str) -> Self {
     if let Some(extension) = PathBuf::from(path.to_lowercase())
       .extension()

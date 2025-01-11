@@ -1,4 +1,4 @@
-use crate::project::gamedata_asset_descriptor::GamedataAssetExtension;
+use crate::project::gamedata_asset_descriptor::GamedataAssetType;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use std::path::Path;
@@ -11,7 +11,7 @@ impl GamedataProject {
       .assets
       .iter()
       .filter(|(relative_path, descriptor)| {
-        descriptor.extension == GamedataAssetExtension::Spawn && relative_path.starts_with("spawns")
+        descriptor.extension == GamedataAssetType::Spawn && relative_path.starts_with("spawns")
       })
       .map(|(key, _)| key.clone())
       .collect::<Vec<_>>();
