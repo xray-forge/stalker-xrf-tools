@@ -2,7 +2,9 @@
   <configuration default="false" name="run: unpack archive" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
     <option name="command" value="run --package xrf-cli --bin xrf-cli --  unpack-archive -p E:\Documents\Projects\stalker-xrf-engine\target\game_link\ -d .\target\assets\resources --parallel 30" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-    <envs />
+    <envs>
+      <env name="RUST_LOG" value="warn" />
+    </envs>
     <option name="emulateTerminal" value="true" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />

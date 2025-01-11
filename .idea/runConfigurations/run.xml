@@ -2,7 +2,9 @@
   <configuration default="false" name="run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
     <option name="command" value="run --package xrf-cli --bin xrf-cli-tool" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-    <envs />
+    <envs>
+      <env name="RUST_LOG" value="warn" />
+    </envs>
     <option name="emulateTerminal" value="true" />
     <option name="channel" value="STABLE" />
     <option name="requiredFeatures" value="true" />

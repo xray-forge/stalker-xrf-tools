@@ -10,3 +10,4 @@ thiserror = "2.0.10"
 walkdir = "2.5.0"
 xray-db = { path = "../xray-db" }
 xray-ltx = { path = "../xray-ltx" }
+regex = "1.11.1"

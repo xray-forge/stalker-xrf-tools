@@ -2,7 +2,9 @@
   <configuration default="false" name="tauri: dev" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="application">
     <option name="command" value="tauri dev" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$/bin/xrf-app" />
-    <envs />
+    <envs>
+      <env name="RUST_LOG" value="info" />
+    </envs>
     <option name="emulateTerminal" value="true" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />

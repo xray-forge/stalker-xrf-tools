@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: pack spawn" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
-    <option name="command" value="run --package xrf-cli --bin xrf-cli -- pack-spawn -p .\target\assets\unpacked_spawn -d .\target\assets\packed.spawn -f" />
+  <configuration default="false" name="run: pack particles" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
+    <option name="command" value="run --package xrf-cli --bin xrf-cli -- pack-particles -p .\target\assets\unpacked_particles -d .\target\assets\packed_particles.xr -f" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs>
       <env name="RUST_LOG" value="warn" />

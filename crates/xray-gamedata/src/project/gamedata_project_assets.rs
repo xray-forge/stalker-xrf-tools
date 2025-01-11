@@ -37,7 +37,7 @@ impl GamedataProject {
 
           if !assets.contains_key(relative) {
             assets.insert(
-              relative.into(),
+              relative.to_lowercase(),
               GamedataAssetDescriptor::new_with_extension(index, relative),
             );
           }
@@ -63,7 +63,8 @@ impl GamedataProject {
     prefix: &str,
     relative_path: &str,
   ) -> Option<PathBuf> {
-    let asset_path: PathBuf = PathBuf::from(prefix).join(relative_path);
+    let asset_path: PathBuf =
+      PathBuf::from(prefix.to_lowercase()).join(relative_path.to_lowercase());
 
     if let Some(descriptor) = self.assets.get_mut(asset_path.to_str().unwrap()) {
       descriptor.add_hit();
@@ -86,7 +87,7 @@ impl GamedataProject {
   }
 
   pub fn add_asset_hit_by_relative_path(&mut self, relative_path: &str) -> GamedataResult {
-    if let Some(descriptor) = self.assets.get_mut(relative_path) {
+    if let Some(descriptor) = self.assets.get_mut(&relative_path.to_lowercase()) {
       descriptor.hits += 1;
       Ok(())
     } else {

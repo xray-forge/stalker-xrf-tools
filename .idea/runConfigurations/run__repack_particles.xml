@@ -3,7 +3,9 @@
     <option name="buildProfileId" value="dev" />
     <option name="command" value="run --package xrf-cli --bin xrf-cli -- repack-particles -p C:\Projects\gamedata_raw\particles.xr -d .\target\assets\repacked_particles.xr" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-    <envs />
+    <envs>
+      <env name="RUST_LOG" value="warn" />
+    </envs>
     <option name="emulateTerminal" value="true" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />

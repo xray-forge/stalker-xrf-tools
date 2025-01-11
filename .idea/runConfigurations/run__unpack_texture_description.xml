@@ -2,7 +2,9 @@
   <configuration default="false" name="run: unpack texture description" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="cli">
     <option name="command" value="run --package xrf-cli --bin xrf-cli -- unpack-texture-description --description C:\Projects\stalker-xrf-engine\src\engine\forms\textures_descr --base C:\Projects\stalker-xrf-resources-extended\textures --output C:\Projects\stalker-xrf-engine\src\resources\textures" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-    <envs />
+    <envs>
+      <env name="RUST_LOG" value="warn" />
+    </envs>
     <option name="emulateTerminal" value="true" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />

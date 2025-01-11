@@ -29,6 +29,8 @@ use commands::particle::repack_particles::RepackParticlesCommand;
 use commands::particle::reunpack_particles::ReUnpackParticlesCommand;
 use commands::particle::unpack_particles::UnpackParticlesCommand;
 use commands::particle::verify_particles::VerifyParticlesFileCommand;
+use env_logger::Builder;
+use log::LevelFilter;
 use std::error::Error;
 use std::{env, process};
 
@@ -110,17 +112,17 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
 
 /// Configure environment logger, fallback to info level.
 pub fn setup_logger() {
-  unsafe {
-    if env::var("RUST_LOG").is_err() {
-      env::set_var(
-        "RUST_LOG",
-        match cfg!(debug_assertions) {
-          true => "info",
-          false => "error",
-        },
-      )
-    }
+  let mut logger: Builder = env_logger::builder();
+
+  if let Ok(rust_log) = env::var("RUST_LOG") {
+    logger.parse_filters(&rust_log);
+  } else {
+    match cfg!(debug_assertions) {
+      true => logger.filter_level(LevelFilter::Warn),
+      false => logger.filter_level(LevelFilter::Error),
+    };
   }
 
-  env_logger::init();
+  logger.default_format();
+  logger.init();
 }

@@ -1,12 +1,19 @@
 use crate::constants::NO_SOUND;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataProjectWeaponVerificationResult,
+  GamedataResult,
+};
 use colored::Colorize;
+use regex::Regex;
 use std::path::PathBuf;
 use xray_db::{OgfFile, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
-  pub fn verify_ltx_weapons(&mut self, options: &GamedataProjectVerifyOptions) -> GamedataResult {
+  pub fn verify_ltx_weapons(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+  ) -> GamedataResult<GamedataProjectWeaponVerificationResult> {
     log::info!("Verify gamedata weapons");
 
     if options.is_logging_enabled() {
@@ -63,7 +70,9 @@ impl GamedataProject {
       );
     }
 
-    Ok(())
+    Ok(GamedataProjectWeaponVerificationResult {
+      is_valid: invalid_weapons_count == 0,
+    })
   }
 
   pub fn verify_ltx_weapon(
@@ -124,12 +133,6 @@ impl GamedataProject {
       .verify_weapon_sounds(options, ltx, section_name, section)
       .is_ok_and(|it| it)
     {
-      log::warn!("Weapon sounds are invalid: [{section_name}]");
-
-      if options.is_logging_enabled() {
-        eprintln!("Weapon sounds are invalid: [{section_name}]");
-      }
-
       is_weapon_valid = false;
     }
 
@@ -188,49 +191,133 @@ impl GamedataProject {
       }
 
       // Layered sounds from OXR/COC.
-      if ltx.has_section(field_name) {
-        // todo: Check sound layer structure here and linked sounds?
-        //
-        // [wpn_abakan_snd_shoot]
-        // snd_1_layer = weapons\abakan\abakan_shoot
-        // snd_1_layer1 = weapons\abakan\abakan_shoot1
+      if let Some(section) = ltx.section(field_value) {
+        if !self
+          .verify_weapon_sound_layer(options, ltx, field_value, section)
+          .is_ok_and(|it| it)
+        {
+          are_sounds_valid = false;
+        }
+
         continue;
       }
 
-      // Sounds field is 1-3 comma separated values:
-      let mut sound_object_path: String = String::from(
-        *field_value
-          .split(",")
-          .collect::<Vec<&str>>()
-          .first()
-          .unwrap_or(&"~failed-to-parse~"),
-      );
-
-      if !sound_object_path.ends_with(".ogg") {
-        sound_object_path.push_str(".ogg");
-      }
-
-      // todo: Check OGG file, check existing.
-      if let Some(sound_path) = self.get_prefixed_relative_asset_path("sounds", &sound_object_path)
+      if !self
+        .verify_weapon_sound_asset(options, section_name, field_name, field_value)
+        .is_ok_and(|it| it)
       {
-        if sound_path.is_file() && sound_path.exists() {
-          if options.is_verbose_logging_enabled() {
-            eprintln!("Sound verified in weapon section: [{section_name}] : {field_name} -> {sound_object_path}");
-          }
-        } else {
-          are_sounds_valid = true
-        }
-      } else {
-        log::warn!("Sound not found in weapon section: [{section_name}] : {field_name} -> {sound_object_path}");
-
-        if options.is_logging_enabled() {
-          eprintln!("Sound not found in weapon section: [{section_name}] : {field_name} -> {sound_object_path}");
-        }
-
-        are_sounds_valid = true;
+        are_sounds_valid = false
       }
     }
 
     Ok(are_sounds_valid)
+  }
+
+  pub fn verify_weapon_sound_layer(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+    _: &Ltx,
+    section_name: &str,
+    section: &Section,
+  ) -> GamedataResult<bool> {
+    // Check sound layer structure here and linked sounds:
+    //
+    // [wpn_abakan_snd_shoot]
+    // snd_1_layer = weapons\abakan\abakan_shoot
+    // snd_1_layer1 = weapons\abakan\abakan_shoot1
+
+    let mut is_valid: bool = true;
+
+    for (field_name, field_value) in section {
+      if !self
+        .verify_weapon_sound_layer_field_name(options, section_name, field_name, field_value)
+        .is_ok_and(|it| it)
+      {
+        is_valid = false
+      }
+
+      if !self
+        .verify_weapon_sound_asset(options, section_name, field_name, field_value)
+        .is_ok_and(|it| it)
+      {
+        is_valid = false
+      }
+    }
+
+    Ok(is_valid)
+  }
+
+  fn verify_weapon_sound_layer_field_name(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+    section_name: &str,
+    field_name: &str,
+    field_value: &str,
+  ) -> GamedataResult<bool> {
+    let mut is_valid: bool = true;
+
+    if !Regex::new(r"^snd_([1-9]([0-9]+)?)_layer([1-9]([0-9]+)?)?$")
+      .unwrap()
+      .is_match(field_name)
+    {
+      is_valid = false;
+
+      log::warn!(
+          "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value}"
+        );
+
+      if options.is_logging_enabled() {
+        eprintln!(
+            "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value}"
+          );
+      }
+    }
+
+    Ok(is_valid)
+  }
+
+  fn verify_weapon_sound_asset(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+    section_name: &str,
+    field_name: &str,
+    field_value: &str,
+  ) -> GamedataResult<bool> {
+    let mut is_valid: bool = true;
+
+    // Sounds field is 1-3 comma separated values:
+    let mut sound_object_value: String = String::from(
+      *field_value
+        .split(",")
+        .collect::<Vec<&str>>()
+        .first()
+        .unwrap_or(&"~failed-to-parse~"),
+    );
+
+    // Support variant with and without extension in ltx files.
+    if !sound_object_value.ends_with(".ogg") {
+      sound_object_value.push_str(".ogg");
+    }
+
+    // todo: Check OGG file, check existing.
+    if let Some(sound_path) = self.get_prefixed_relative_asset_path("sounds", &sound_object_value) {
+      if sound_path.is_file() && sound_path.exists() {
+        if options.is_verbose_logging_enabled() {
+          eprintln!("Sound verified in weapon section: [{section_name}] : {field_name} -> {sound_object_value}");
+        }
+      } else {
+        is_valid = false
+      }
+    } else {
+      log::warn!("Sound not found in weapon section: [{section_name}] : {field_name} -> {sound_object_value}");
+
+      if options.is_logging_enabled() {
+        eprintln!("Sound not found in weapon section: [{section_name}] : {field_name} -> {sound_object_value}");
+      }
+
+      is_valid = false;
+    }
+
+    Ok(is_valid)
   }
 }
