@@ -75,6 +75,11 @@ impl GamedataProject {
           .expect("Correct root setup")
           .join(asset_path),
       );
+    } else {
+      log::warn!(
+        "Trying to get not existing asset path: {}",
+        asset_path.to_str().unwrap()
+      );
     }
 
     None

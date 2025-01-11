@@ -5,7 +5,7 @@ use std::path::Path;
 use xray_db::{SpawnFile, XRayByteOrder};
 
 impl GamedataProject {
-  /// Verify all.spawn files in spawns directories, not level spawn files.
+  /// Verify spawn files in spawns directories, not levels spawn files.
   pub fn verify_spawns(&mut self, options: &GamedataProjectVerifyOptions) -> GamedataResult {
     let spawn_files: Vec<String> = self
       .assets
