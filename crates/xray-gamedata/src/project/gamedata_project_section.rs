@@ -11,4 +11,12 @@ impl GamedataProject {
         || section.contains_key("flame_particles")
         || section.contains_key("flame"))
   }
+
+  pub fn is_player_hud_section(section: &Section) -> bool {
+    section.contains_key("visual")
+      && section.contains_key("position")
+      && section.contains_key("orientation")
+      && section.contains_key("ancor_0")
+      && section.contains_key("ancor_1")
+  }
 }

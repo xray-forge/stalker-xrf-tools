@@ -94,4 +94,22 @@ impl GamedataProject {
       )))
     }
   }
+
+  pub fn get_ogf_visual_path(&mut self, visual_path: &str) -> Option<PathBuf> {
+    self.get_mesh_path(visual_path, ".ogf")
+  }
+
+  pub fn get_omf_visual_path(&mut self, visual_path: &str) -> Option<PathBuf> {
+    self.get_mesh_path(visual_path, ".omf")
+  }
+
+  pub fn get_mesh_path(&mut self, visual_path: &str, extension: &str) -> Option<PathBuf> {
+    let mut visual_path: String = String::from(visual_path);
+
+    if !visual_path.ends_with(extension) {
+      visual_path.push_str(extension);
+    }
+
+    self.get_prefixed_relative_asset_path("meshes", &visual_path)
+  }
 }

@@ -9,8 +9,8 @@ pub enum ChunkError {
   Invalid { message: String },
   #[error("Chunk parsing error: {message:}")]
   Parsing { message: String },
-  #[error("Chunk with ID {id} not found: {message:}")]
-  NotFoundChunk { message: String, id: u32 },
+  #[error("Chunk not found: {message:}")]
+  NotFoundChunk { message: String },
   #[error("Chunk string reading error, no null terminator: {message:}")]
   NoNullTerminator { message: String },
   #[error("Chunk is not ended, {remaining:?} bytes remain: {message:}")]
@@ -41,13 +41,12 @@ impl ChunkError {
     }
   }
 
-  pub fn new_not_found_chunk_error<T>(message: T, id: u32) -> Self
+  pub fn new_not_found_chunk_error<T>(message: T) -> Self
   where
     T: Into<String>,
   {
     Self::NotFoundChunk {
       message: message.into(),
-      id,
     }
   }
 

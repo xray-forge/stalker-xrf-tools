@@ -5,7 +5,6 @@ use crate::{
 };
 use colored::Colorize;
 use regex::Regex;
-use std::path::PathBuf;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
@@ -52,9 +51,8 @@ impl GamedataProject {
 
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata weapons, {}/{} valid",
+        "Verified gamedata weapons, {}/{checked_weapons_count} valid",
         checked_weapons_count - invalid_weapons_count,
-        checked_weapons_count
       );
     }
 
@@ -105,7 +103,10 @@ impl GamedataProject {
   ) -> GamedataResult<bool> {
     let mut is_valid: bool = true;
 
-    if let Some(visual) = &self.get_section_ogf_visual(section, "visual") {
+    if let Some(visual) = &section
+      .get("visual")
+      .and_then(|it| self.get_ogf_visual_path(it))
+    {
       if let Err(error) = OgfFile::read_from_path::<XRayByteOrder>(visual) {
         if options.is_logging_enabled() {
           eprintln!(
@@ -119,7 +120,7 @@ impl GamedataProject {
     } else {
       if options.is_logging_enabled() {
         eprintln!(
-          "Not found visual: [{section_name}] - {:?}",
+          "Not found weapon visual: [{section_name}] - {:?}",
           section.get("visual")
         );
       }
@@ -141,8 +142,11 @@ impl GamedataProject {
       }
     };
 
-    if let Some(visual_path) = self.get_section_ogf_visual(hud_section, "item_visual") {
-      match OgfFile::read_from_path::<XRayByteOrder>(&visual_path) {
+    if let Some(visual_path) = &hud_section
+      .get("item_visual")
+      .and_then(|it| self.get_ogf_visual_path(it))
+    {
+      match OgfFile::read_from_path::<XRayByteOrder>(visual_path) {
         Ok(hud_visual) => {
           if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
             let mut ref_animations: Vec<String> = Vec::new();
@@ -150,7 +154,7 @@ impl GamedataProject {
             for motion_ref in &motion_refs {
               match OmfFile::read_motions_from_path::<XRayByteOrder>(
                 &self
-                  .get_omf_visual(motion_ref)
+                  .get_omf_visual_path(motion_ref)
                   .expect("Motion file for weapon not found in project assets"),
               ) {
                 Ok(motions) => ref_animations.extend(motions),
@@ -171,13 +175,7 @@ impl GamedataProject {
                 continue;
               }
 
-              let animation_name: String = String::from(
-                *field_value
-                  .split(",")
-                  .collect::<Vec<&str>>()
-                  .first()
-                  .unwrap_or(&field_value),
-              );
+              let animation_name: String = Self::get_weapon_animation_name(field_value);
 
               if !ref_animations.contains(&animation_name) {
                 // todo: Check available motions from outfit sections here.
@@ -343,13 +341,7 @@ impl GamedataProject {
     let mut is_valid: bool = true;
 
     // Sounds field is 1-3 comma separated values:
-    let mut sound_object_value: String = String::from(
-      *field_value
-        .split(",")
-        .collect::<Vec<&str>>()
-        .first()
-        .unwrap_or(&field_value),
-    );
+    let mut sound_object_value: String = Self::get_weapon_animation_name(field_value);
 
     // Support variant with and without extension in ltx files.
     if !sound_object_value.ends_with(".ogg") {
@@ -378,32 +370,5 @@ impl GamedataProject {
     }
 
     Ok(is_valid)
-  }
-}
-
-impl GamedataProject {
-  pub fn get_section_ogf_visual(&mut self, section: &Section, field_name: &str) -> Option<PathBuf> {
-    section
-      .get(field_name)
-      .map(|it| {
-        let mut visual_path: String = String::from(it);
-
-        if !it.ends_with(".ogf") {
-          visual_path.push_str(".ogf");
-        }
-
-        visual_path
-      })
-      .and_then(|it| self.get_prefixed_relative_asset_path("meshes", &it))
-  }
-
-  pub fn get_omf_visual(&mut self, visual_path: &str) -> Option<PathBuf> {
-    let mut visual_path: String = String::from(visual_path);
-
-    if !visual_path.ends_with(".omf") {
-      visual_path.push_str(".omf");
-    }
-
-    self.get_prefixed_relative_asset_path("meshes", &visual_path)
   }
 }

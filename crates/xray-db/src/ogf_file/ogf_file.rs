@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
 use xray_chunk::{
-  find_one_of_optional_chunk_by_id, find_optional_chunk_by_id, find_required_chunk_by_id,
-  ChunkReader,
+  find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id, find_optional_chunk_by_id,
+  find_required_chunk_by_id, ChunkReader,
 };
 
 /// FMesh in c++ codebase.
@@ -70,5 +70,32 @@ impl OgfFile {
         None => None,
       },
     })
+  }
+
+  /// Read only list of motion refs specifically and skip other data parts.
+  pub fn read_motion_refs_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Vec<String>> {
+    Self::read_motions_refs_from_file::<T>(File::open(path)?)
+  }
+
+  /// Read only list of motion refs specifically and skip other data parts.
+  pub fn read_motions_refs_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Vec<String>> {
+    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    let chunks: Vec<ChunkReader> = reader.read_children();
+
+    log::info!(
+      "Reading ogf file motion refs, {} chunks, {} bytes",
+      chunks.len(),
+      reader.read_bytes_len(),
+    );
+
+    let (chunk_id, mut chunk) = find_one_of_required_chunks_by_id(
+      &chunks,
+      &[
+        OgfKinematicsChunk::CHUNK_ID,
+        OgfKinematicsChunk::CHUNK_ID_OLD,
+      ],
+    )?;
+
+    Ok(OgfKinematicsChunk::read::<T>(&mut chunk, chunk_id)?.motion_refs)
   }
 }

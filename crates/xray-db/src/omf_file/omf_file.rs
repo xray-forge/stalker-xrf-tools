@@ -87,11 +87,15 @@ impl OmfFile {
       reader.read_bytes_len(),
     );
 
-    let motions = OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
-      &chunks,
-      OmfMotionsChunk::CHUNK_ID,
-    )?)?;
-
-    Ok(motions.motions.iter().map(|it| it.name.clone()).collect())
+    Ok(
+      OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
+        &chunks,
+        OmfMotionsChunk::CHUNK_ID,
+      )?)?
+      .motions
+      .iter()
+      .map(|it| it.name.clone())
+      .collect(),
+    )
   }
 }
