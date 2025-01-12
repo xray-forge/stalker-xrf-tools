@@ -106,8 +106,16 @@ impl GamedataProject {
     let mut is_valid: bool = true;
 
     if let Some(visual) = &self.get_section_ogf_visual(section, "visual") {
-      // Motion refs are not included in check?
-      OgfFile::read_from_path::<XRayByteOrder>(visual)?;
+      if let Err(error) = OgfFile::read_from_path::<XRayByteOrder>(visual) {
+        if options.is_logging_enabled() {
+          eprintln!(
+            "Failed to read weapon visual: [{section_name}] - {:?} - {error}",
+            section.get("visual")
+          );
+        }
+
+        is_valid = false;
+      }
     } else {
       if options.is_logging_enabled() {
         eprintln!(
@@ -134,59 +142,65 @@ impl GamedataProject {
     };
 
     if let Some(visual_path) = self.get_section_ogf_visual(hud_section, "item_visual") {
-      if let Ok(hud_visual) = OgfFile::read_from_path::<XRayByteOrder>(&visual_path) {
-        if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
-          let mut ref_animations: Vec<String> = Vec::new();
+      match OgfFile::read_from_path::<XRayByteOrder>(&visual_path) {
+        Ok(hud_visual) => {
+          if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
+            let mut ref_animations: Vec<String> = Vec::new();
 
-          for motion_ref in &motion_refs {
-            match OmfFile::read_motions_from_path::<XRayByteOrder>(
-              &self
-                .get_omf_visual(motion_ref)
-                .expect("Motion file for weapon not found in project assets"),
-            ) {
-              Ok(motions) => ref_animations.extend(motions),
-              Err(error) => {
-                if options.is_logging_enabled() {
-                  eprintln!(
-                    "Error reading OMF motions for weapon hud: [{section_name}] : {visual_path:?} - {error:}"
-                  );
+            for motion_ref in &motion_refs {
+              match OmfFile::read_motions_from_path::<XRayByteOrder>(
+                &self
+                  .get_omf_visual(motion_ref)
+                  .expect("Motion file for weapon not found in project assets"),
+              ) {
+                Ok(motions) => ref_animations.extend(motions),
+                Err(error) => {
+                  if options.is_logging_enabled() {
+                    eprintln!(
+                      "Error reading OMF motions for weapon hud: [{section_name}] : {visual_path:?} - {error:}"
+                    );
+                  }
+
+                  is_valid = false;
                 }
-
-                is_valid = false;
               }
             }
-          }
 
-          for (field_name, field_value) in hud_section {
-            if !field_name.starts_with("anm_") {
-              continue;
+            for (field_name, field_value) in hud_section {
+              if !field_name.starts_with("anm_") {
+                continue;
+              }
+
+              let animation_name: String = String::from(
+                *field_value
+                  .split(",")
+                  .collect::<Vec<&str>>()
+                  .first()
+                  .unwrap_or(&field_value),
+              );
+
+              if !ref_animations.contains(&animation_name) {
+                // todo: Check available motions from outfit sections here.
+              }
+            }
+          } else {
+            if options.is_logging_enabled() {
+              eprintln!("Missing motion refs for weapon hud: [{section_name}] : {visual_path:?}");
             }
 
-            let animation_name: String = String::from(
-              *field_value
-                .split(",")
-                .collect::<Vec<&str>>()
-                .first()
-                .unwrap_or(&field_value),
-            );
-
-            if !ref_animations.contains(&animation_name) {
-              // todo: Check available motions from outfit sections here.
-            }
+            is_valid = false;
           }
-        } else {
+        }
+        Err(error) => {
           if options.is_logging_enabled() {
-            eprintln!("Missing motion refs for weapon hud: [{section_name}] : {visual_path:?}");
+            eprintln!(
+              "Failed to read weapon hud visual: [{section_name}] - {:?} - {error}",
+              section.get("visual")
+            );
           }
 
           is_valid = false;
         }
-      } else {
-        if options.is_logging_enabled() {
-          eprintln!("Could not read hud visual: [{section_name}] : {visual_path:?}");
-        }
-
-        is_valid = false;
       }
     } else {
       if options.is_logging_enabled() {
