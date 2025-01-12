@@ -8,7 +8,7 @@ use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  find_chunk_by_id, read_f32_chunk, read_null_terminated_win_string_chunk, read_u16_chunk,
+  find_optional_chunk_by_id, read_f32_chunk, read_null_terminated_win_string_chunk, read_u16_chunk,
   read_u32_chunk, ChunkReader, ChunkWriter,
 };
 use xray_ltx::{Ltx, Section};
@@ -44,29 +44,29 @@ impl ParticleGroup {
 
     let particle_group: Self = Self {
       version: read_u16_chunk::<T>(
-        &mut find_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)
+        &mut find_optional_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)
           .expect("Particle group version chunk not found"),
       )?,
       name: read_null_terminated_win_string_chunk(
-        &mut find_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)
+        &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)
           .expect("Particle group name chunk not found"),
       )?,
       flags: read_u32_chunk::<T>(
-        &mut find_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
+        &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
           .expect("Particle group flags chunk not found"),
       )?,
       effects: ParticleGroupEffect::read_list::<T>(
-        &mut find_chunk_by_id(&chunks, Self::EFFECTS_CHUNK_ID)
+        &mut find_optional_chunk_by_id(&chunks, Self::EFFECTS_CHUNK_ID)
           .expect("Particle group effects chunk not found"),
       )?,
       time_limit: read_f32_chunk::<T>(
-        &mut find_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)
+        &mut find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)
           .expect("Particle group time limit chunk not found"),
       )?,
-      description: find_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
+      description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
         ParticleDescription::read::<T>(&mut it).expect("Invalid description chunk data")
       }),
-      effects_old: find_chunk_by_id(&chunks, Self::EFFECTS2_CHUNK_ID).map(|mut it| {
+      effects_old: find_optional_chunk_by_id(&chunks, Self::EFFECTS2_CHUNK_ID).map(|mut it| {
         ParticleGroupEffectOld::read_list::<T>(&mut it)
           .expect("Invalid old group effects chunk data")
       }),

@@ -7,9 +7,9 @@ use xray_ltx::LtxError;
 
 #[derive(ThisError, Debug)]
 pub enum GamedataError {
-  #[error("Gamedata check error: \"{message:?}\"")]
+  #[error("Gamedata check error: \"{message:}\"")]
   Check { message: String },
-  #[error("Gamedata asset error: \"{message:?}\"")]
+  #[error("Gamedata asset error: \"{message:}\"")]
   Asset { message: String },
   #[error("Database error: \"{0}\"")]
   Database(#[from] DatabaseError),

@@ -1,7 +1,8 @@
 use crate::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use std::io::Read;
+use xray_chunk::{assert_chunk_read, ChunkReader, ChunkWriter};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -9,6 +10,7 @@ pub struct OgfMotion {
   pub name: String,
   pub count: u32,
   pub flags: u8,
+  pub remaining: Vec<u8>,
 }
 
 impl OgfMotion {
@@ -16,15 +18,18 @@ impl OgfMotion {
     let name: String = reader.read_null_terminated_win_string()?;
     let count: u32 = reader.read_u32::<T>()?;
     let flags: u8 = reader.read_u8()?;
+    let mut remaining: Vec<u8> = Vec::new();
 
-    if reader.read_bytes_remain() > 0 {
-      // todo: Read all data
-      // todo: Check is ended
+    reader.read_to_end(&mut remaining)?;
 
-      log::warn!("Some data remains and was not read for motion {name} ({flags})")
-    }
+    assert_chunk_read(reader, "Chunk data should be read for OgfMotion")?;
 
-    Ok(Self { name, count, flags })
+    Ok(Self {
+      name,
+      count,
+      flags,
+      remaining,
+    })
   }
 
   pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> DatabaseResult {

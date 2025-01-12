@@ -7,10 +7,12 @@ use xray_ltx::LtxError;
 /// Error while working with DB data parsing/reading/writing/importing/exporting.
 #[derive(ThisError, Debug)]
 pub enum DatabaseError {
-  #[error("Database not implemented error: {message:?}")]
+  #[error("Database not implemented error: {message:}")]
   NotImplemented { message: String },
   #[error("Database parse error: {message:?}")]
   Parse { message: String },
+  #[error("Database not expected error: {message:}")]
+  NotExpected { message: String },
   #[error("Database chunk error: {0}")]
   Chunk(#[from] ChunkError),
   #[error("Database generic error: {0}")]
@@ -32,6 +34,15 @@ impl DatabaseError {
   }
 
   pub fn new_parse_error<T>(message: T) -> Self
+  where
+    T: Into<String>,
+  {
+    Self::Parse {
+      message: message.into(),
+    }
+  }
+
+  pub fn new_not_expected_error<T>(message: T) -> Self
   where
     T: Into<String>,
   {

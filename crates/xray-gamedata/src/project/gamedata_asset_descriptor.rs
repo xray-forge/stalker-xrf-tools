@@ -5,7 +5,7 @@ use std::path::PathBuf;
 pub struct GamedataAssetDescriptor {
   pub root_index: usize,
   pub hits: usize,
-  pub extension: GamedataAssetType,
+  pub asset_type: GamedataAssetType,
 }
 
 impl GamedataAssetDescriptor {
@@ -13,7 +13,7 @@ impl GamedataAssetDescriptor {
     Self {
       root_index,
       hits: 0,
-      extension: GamedataAssetType::Unknown,
+      asset_type: GamedataAssetType::Unknown,
     }
   }
 
@@ -27,7 +27,7 @@ impl GamedataAssetDescriptor {
     Self {
       root_index,
       hits: 0,
-      extension,
+      asset_type: extension,
     }
   }
 }

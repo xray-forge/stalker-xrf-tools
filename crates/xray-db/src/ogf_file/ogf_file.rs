@@ -1,18 +1,23 @@
 use crate::ogf_file::chunks::ogf_description_chunk::OgfDescriptionChunk;
 use crate::ogf_file::chunks::ogf_header_chunk::OgfHeaderChunk;
+use crate::ogf_file::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
 use crate::DatabaseResult;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
-use xray_chunk::{find_chunk_by_id, ChunkReader};
+use xray_chunk::{
+  find_one_of_optional_chunk_by_id, find_optional_chunk_by_id, find_required_chunk_by_id,
+  ChunkReader,
+};
 
 /// FMesh in c++ codebase.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfFile {
   pub header: OgfHeaderChunk,
   pub description: Option<OgfDescriptionChunk>,
+  pub kinematics: Option<OgfKinematicsChunk>,
 }
 
 impl OgfFile {
@@ -32,27 +37,38 @@ impl OgfFile {
       reader.read_bytes_len(),
     );
 
-    // for chunk in &chunks {
-    //   log::info!(
-    //     "Ogf chunk: {} ({:#x}) - {} bytes",
-    //      chunk.id,
-    //      chunk.id,
-    //      chunk.size
-    //   );
-    // }
+    for chunk in &chunks {
+      log::info!(
+        "Ogf chunk: {} ({:#x}) - {} bytes",
+        chunk.id,
+        chunk.id,
+        chunk.size
+      );
+    }
 
     Self::read_from_chunks::<T>(&chunks)
   }
 
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> DatabaseResult<Self> {
     Ok(Self {
-      header: OgfHeaderChunk::read::<T>(
-        &mut find_chunk_by_id(chunks, OgfHeaderChunk::CHUNK_ID)
-          .expect("OGF header chunk not found"),
-      )?,
-      description: find_chunk_by_id(chunks, OgfDescriptionChunk::CHUNK_ID).map(|mut it| {
-        OgfDescriptionChunk::read::<T>(&mut it).expect("OGF description chunk is invalid")
-      }),
+      header: OgfHeaderChunk::read::<T>(&mut find_required_chunk_by_id(
+        chunks,
+        OgfHeaderChunk::CHUNK_ID,
+      )?)?,
+      description: match find_optional_chunk_by_id(chunks, OgfDescriptionChunk::CHUNK_ID) {
+        Some(mut it) => Some(OgfDescriptionChunk::read::<T>(&mut it)?),
+        None => None,
+      },
+      kinematics: match find_one_of_optional_chunk_by_id(
+        chunks,
+        &[
+          OgfKinematicsChunk::CHUNK_ID,
+          OgfKinematicsChunk::CHUNK_ID_OLD,
+        ],
+      ) {
+        Some((id, mut it)) => Some(OgfKinematicsChunk::read::<T>(&mut it, id)?),
+        None => None,
+      },
     })
   }
 }

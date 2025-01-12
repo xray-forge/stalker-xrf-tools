@@ -13,8 +13,6 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<LtxProjectFormatResult> {
-    log::info!("Verify gamedata LTX files formatting");
-
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX files formatting".green());
     }
@@ -33,8 +31,6 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<LtxProjectVerifyResult> {
-    log::info!("Verify gamedata LTX schemas");
-
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX schemas".green());
     };

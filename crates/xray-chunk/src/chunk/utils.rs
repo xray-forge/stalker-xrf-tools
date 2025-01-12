@@ -1,11 +1,45 @@
 use crate::chunk::reader::ChunkReader;
-use crate::ChunkResult;
+use crate::{ChunkError, ChunkResult};
 use byteorder::{ByteOrder, ReadBytesExt};
 use std::io::Read;
 
+/// Assert chunk ended and has no remaining data or fail with error.
+pub fn assert_chunk_read(chunk: &ChunkReader, message: &str) -> ChunkResult<()> {
+  if chunk.is_ended() {
+    Ok(())
+  } else {
+    Err(ChunkError::new_not_ended_chunk_error(
+      message,
+      chunk.read_bytes_remain(),
+    ))
+  }
+}
+
 /// Find chink in list by id.
-pub fn find_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<ChunkReader> {
+pub fn find_optional_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<ChunkReader> {
   chunks.iter().find(|it| it.id == id).cloned()
+}
+
+/// Find chink in list by id.
+pub fn find_one_of_optional_chunk_by_id(
+  chunks: &[ChunkReader],
+  ids: &[u32],
+) -> Option<(u32, ChunkReader)> {
+  for id in ids {
+    if let Some(chunk) = chunks.iter().find(|it| it.id == *id).cloned() {
+      return Some((*id, chunk));
+    }
+  }
+
+  None
+}
+
+/// Find chink in list by id.
+pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> ChunkResult<ChunkReader> {
+  match chunks.iter().find(|it| it.id == id).cloned() {
+    None => Err(ChunkError::new_not_found_chunk_error("S", id)),
+    Some(it) => Ok(it),
+  }
 }
 
 /// Read chunk as u16 value, verify remaining data is 0.

@@ -3,10 +3,8 @@ use colored::Colorize;
 
 impl GamedataProject {
   pub fn verify_resources_usage(&self, options: &GamedataProjectVerifyOptions) -> GamedataResult {
-    log::info!("Verify gamedata resources usage");
-
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata resources usage".green());
+      println!("{}", "Verify gamedata resources usage:".green());
 
       println!(
         "Resources usage: {} / {}",
@@ -16,9 +14,9 @@ impl GamedataProject {
     }
 
     if options.is_verbose_logging_enabled() {
-      for (path, descriptor) in &self.assets {
+      for (_descriptor, descriptor) in &self.assets {
         if descriptor.hits == 0 {
-          println!("Unused resource: -{}", path.red());
+          // println!("Unused resource: -{}", path.red());
         }
       }
     }

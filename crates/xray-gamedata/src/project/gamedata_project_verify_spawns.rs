@@ -11,12 +11,10 @@ impl GamedataProject {
       .assets
       .iter()
       .filter(|(relative_path, descriptor)| {
-        descriptor.extension == GamedataAssetType::Spawn && relative_path.starts_with("spawns")
+        descriptor.asset_type == GamedataAssetType::Spawn && relative_path.starts_with("spawns")
       })
       .map(|(key, _)| key.clone())
       .collect::<Vec<_>>();
-
-    log::info!("Verify gamedata spawns: {}", spawn_files.len());
 
     if options.is_logging_enabled() {
       println!(
@@ -27,8 +25,6 @@ impl GamedataProject {
     }
 
     if spawn_files.is_empty() {
-      log::info!("No spawn files found in gamedata root");
-
       if options.is_logging_enabled() {
         println!("No spawn files found in gamedata root");
       }
@@ -52,7 +48,7 @@ impl GamedataProject {
     }
 
     if options.is_logging_enabled() {
-      log::info!(
+      println!(
         "Verified gamedata spawn files: {}/{}",
         total_spawns - invalid_spawns,
         total_spawns
@@ -67,16 +63,12 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     path: &Path,
   ) -> GamedataResult<bool> {
-    log::info!("Verify gamedata spawn file: {path:?}");
-
     if options.is_verbose_logging_enabled() {
       println!("Verify spawn file: {path:?}");
     }
 
     match SpawnFile::read_from_path::<XRayByteOrder>(path) {
       Ok(_) => {
-        log::info!("Successfully verified spawn: {path:?}",);
-
         if options.is_verbose_logging_enabled() {
           println!("Verify spawn file: {path:?}");
         }
@@ -84,8 +76,6 @@ impl GamedataProject {
         Ok(true)
       }
       Err(error) => {
-        log::warn!("Spawn file validation failed: {path:?} -> {error:?}");
-
         if options.is_logging_enabled() {
           eprintln!("Spawn file validation failed: {path:?} -> {error:?}");
         }

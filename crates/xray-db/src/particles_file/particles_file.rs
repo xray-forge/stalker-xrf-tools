@@ -11,7 +11,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{find_chunk_by_id, ChunkReader, ChunkWriter};
+use xray_chunk::{find_optional_chunk_by_id, ChunkReader, ChunkWriter};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -53,15 +53,15 @@ impl ParticlesFile {
 
     Ok(Self {
       header: ParticlesHeaderChunk::read::<T>(
-        &mut find_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)
+        &mut find_optional_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)
           .expect("Particles header chunk not found"),
       )?,
       effects: ParticlesEffectsChunk::read::<T>(
-        &mut find_chunk_by_id(chunks, ParticlesEffectsChunk::CHUNK_ID)
+        &mut find_optional_chunk_by_id(chunks, ParticlesEffectsChunk::CHUNK_ID)
           .expect("Particles effects chunk not found"),
       )?,
       groups: ParticlesGroupsChunk::read::<T>(
-        &mut find_chunk_by_id(chunks, ParticlesGroupsChunk::CHUNK_ID)
+        &mut find_optional_chunk_by_id(chunks, ParticlesGroupsChunk::CHUNK_ID)
           .expect("Particles groups chunk not found"),
       )?,
     })

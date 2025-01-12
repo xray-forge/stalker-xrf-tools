@@ -11,8 +11,6 @@ impl GamedataProject {
     roots: &[&Path],
     ignored: &[&str],
   ) -> GamedataResult<HashMap<String, GamedataAssetDescriptor>> {
-    log::info!("Reading project assets map in roots: {:?}", roots);
-
     if options.is_logging_enabled() {
       println!("Reading project assets map in roots: {:?}", roots);
     }

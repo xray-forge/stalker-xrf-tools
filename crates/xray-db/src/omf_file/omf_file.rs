@@ -6,7 +6,7 @@ use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
-use xray_chunk::{find_chunk_by_id, ChunkReader};
+use xray_chunk::{find_required_chunk_by_id, ChunkReader};
 
 // c++ CKinematicsAnimated
 #[derive(Debug, Serialize, Deserialize)]
@@ -50,14 +50,13 @@ impl OmfFile {
     );
 
     let parameters: OmfParametersChunk = OmfParametersChunk::read::<T>(
-      &mut find_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)
-        .expect("OMF parameters chunk not found"),
+      &mut find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?,
     )?;
 
-    let motions: OmfMotionsChunk = OmfMotionsChunk::read::<T>(
-      &mut find_chunk_by_id(chunks, OmfMotionsChunk::CHUNK_ID)
-        .expect("OMF motions chunk not found"),
-    )?;
+    let motions: OmfMotionsChunk = OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
+      chunks,
+      OmfMotionsChunk::CHUNK_ID,
+    )?)?;
 
     if parameters.motions.len() != motions.motions.len() {
       return Err(DatabaseError::new_parse_error(format!(
@@ -71,5 +70,28 @@ impl OmfFile {
       parameters,
       motions,
     })
+  }
+
+  /// Read only list of motions specifically and skip other data parts.
+  pub fn read_motions_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Vec<String>> {
+    Self::read_motions_from_file::<T>(File::open(path)?)
+  }
+
+  pub fn read_motions_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Vec<String>> {
+    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    let chunks: Vec<ChunkReader> = reader.read_children();
+
+    log::info!(
+      "Reading omf file motions, {} chunks, {} bytes",
+      chunks.len(),
+      reader.read_bytes_len(),
+    );
+
+    let motions = OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
+      &chunks,
+      OmfMotionsChunk::CHUNK_ID,
+    )?)?;
+
+    Ok(motions.motions.iter().map(|it| it.name.clone()).collect())
   }
 }

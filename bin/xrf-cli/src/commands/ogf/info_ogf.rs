@@ -53,6 +53,10 @@ impl GenericCommand for InfoOgfCommand {
       println!("Description: {:?}", description);
     }
 
+    if let Some(kinematics) = ogf_file.kinematics {
+      println!("Motion refs: {:?}", kinematics.motion_refs);
+    }
+
     Ok(())
   }
 }

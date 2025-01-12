@@ -162,7 +162,9 @@ impl ChunkReader {
 
       Ok(value)
     } else {
-      panic!("No null terminator found in file");
+      Err(ChunkError::new_no_null_terminator_error(
+        "Failed to read null terminated string",
+      ))
     }
   }
 

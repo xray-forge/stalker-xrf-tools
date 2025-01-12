@@ -11,14 +11,11 @@ impl GamedataProject {
     &mut self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<GamedataProjectVerificationResult> {
-    log::info!(
-      "Verifying gamedata project: {:?} | {:?}",
-      self.roots,
-      self.configs
-    );
-
     if options.is_logging_enabled() {
-      println!("Running gamedata verification");
+      println!(
+        "Verifying gamedata project: {:?} | {:?}",
+        self.roots, self.configs
+      );
     }
 
     let started_at: Instant = Instant::now();
