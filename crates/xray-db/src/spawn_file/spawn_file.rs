@@ -12,7 +12,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{find_optional_chunk_by_id, ChunkReader, ChunkWriter};
+use xray_chunk::{find_required_chunk_by_id, ChunkReader, ChunkWriter};
 
 /// Descriptor of generic spawn file used by xray game engine.
 ///
@@ -55,26 +55,26 @@ impl SpawnFile {
 
     let spawn_file: Self = {
       Self {
-        header: SpawnHeaderChunk::read::<T>(
-          &mut find_optional_chunk_by_id(chunks, SpawnHeaderChunk::CHUNK_ID)
-            .expect("Header chunk not found"),
-        )?,
-        alife_spawn: SpawnALifeSpawnsChunk::read::<T>(
-          &mut find_optional_chunk_by_id(chunks, SpawnALifeSpawnsChunk::CHUNK_ID)
-            .expect("ALife spawns chunk not found"),
-        )?,
-        artefact_spawn: SpawnArtefactSpawnsChunk::read::<T>(
-          &mut find_optional_chunk_by_id(chunks, SpawnArtefactSpawnsChunk::CHUNK_ID)
-            .expect("Artefact spawns chunk not found"),
-        )?,
-        patrols: SpawnPatrolsChunk::read::<T>(
-          &mut find_optional_chunk_by_id(chunks, SpawnPatrolsChunk::CHUNK_ID)
-            .expect("Patrol chunk not found"),
-        )?,
-        graphs: SpawnGraphsChunk::read::<T>(
-          &mut find_optional_chunk_by_id(chunks, SpawnGraphsChunk::CHUNK_ID)
-            .expect("Graphs chunk not found"),
-        )?,
+        header: SpawnHeaderChunk::read::<T>(&mut find_required_chunk_by_id(
+          chunks,
+          SpawnHeaderChunk::CHUNK_ID,
+        )?)?,
+        alife_spawn: SpawnALifeSpawnsChunk::read::<T>(&mut find_required_chunk_by_id(
+          chunks,
+          SpawnALifeSpawnsChunk::CHUNK_ID,
+        )?)?,
+        artefact_spawn: SpawnArtefactSpawnsChunk::read::<T>(&mut find_required_chunk_by_id(
+          chunks,
+          SpawnArtefactSpawnsChunk::CHUNK_ID,
+        )?)?,
+        patrols: SpawnPatrolsChunk::read::<T>(&mut find_required_chunk_by_id(
+          chunks,
+          SpawnPatrolsChunk::CHUNK_ID,
+        )?)?,
+        graphs: SpawnGraphsChunk::read::<T>(&mut find_required_chunk_by_id(
+          chunks,
+          SpawnGraphsChunk::CHUNK_ID,
+        )?)?,
       }
     };
 
