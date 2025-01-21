@@ -1,13 +1,17 @@
+use crate::project::resources::verify_resources_result::GamedataResourcesVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 
 impl GamedataProject {
-  pub fn verify_resources_usage(&self, options: &GamedataProjectVerifyOptions) -> GamedataResult {
+  pub fn verify_resources_usage(
+    &self,
+    options: &GamedataProjectVerifyOptions,
+  ) -> GamedataResult<GamedataResourcesVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata resources usage:".green());
 
       println!(
-        "Resources usage: {} / {}",
+        "Confirmed resources usage: {} / {}",
         self.assets.values().filter(|it| it.hits > 0).count(),
         self.assets.len()
       );
@@ -21,6 +25,6 @@ impl GamedataProject {
       }
     }
 
-    Ok(())
+    Ok(GamedataResourcesVerificationResult {})
   }
 }

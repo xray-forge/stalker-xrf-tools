@@ -1,4 +1,5 @@
 use crate::project::gamedata_asset_descriptor::GamedataAssetType;
+use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use std::path::Path;
@@ -6,7 +7,10 @@ use xray_db::{SpawnFile, XRayByteOrder};
 
 impl GamedataProject {
   /// Verify spawn files in spawns directories, not levels spawn files.
-  pub fn verify_spawns(&mut self, options: &GamedataProjectVerifyOptions) -> GamedataResult {
+  pub fn verify_spawns(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+  ) -> GamedataResult<GamedataSpawnsVerificationResult> {
     let spawn_files: Vec<String> = self
       .assets
       .iter()
@@ -31,7 +35,10 @@ impl GamedataProject {
 
       // todo: Verify result struct.
 
-      return Ok(());
+      return Ok(GamedataSpawnsVerificationResult {
+        total_spawns: 0,
+        invalid_spawns: 0,
+      });
     }
 
     let mut total_spawns: usize = 0;
@@ -55,7 +62,10 @@ impl GamedataProject {
       );
     }
 
-    Ok(())
+    Ok(GamedataSpawnsVerificationResult {
+      total_spawns: total_spawns as u64,
+      invalid_spawns: invalid_spawns as u64,
+    })
   }
 
   pub fn verify_spawn(

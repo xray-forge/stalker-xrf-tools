@@ -1,8 +1,7 @@
 use crate::constants::NO_SOUND;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataProjectWeaponVerificationResult,
-  GamedataResult,
-};
+use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
+use crate::project::weapons::weapons_utils::get_weapon_animation_name;
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use regex::Regex;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
@@ -12,7 +11,7 @@ impl GamedataProject {
   pub fn verify_ltx_weapons(
     &mut self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataProjectWeaponVerificationResult> {
+  ) -> GamedataResult<GamedataWeaponVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX weapons:".green());
     }
@@ -56,8 +55,9 @@ impl GamedataProject {
       );
     }
 
-    Ok(GamedataProjectWeaponVerificationResult {
-      is_valid: invalid_weapons_count == 0,
+    Ok(GamedataWeaponVerificationResult {
+      checked_weapons_count: checked_weapons_count as u64,
+      invalid_weapons_count: invalid_weapons_count as u64,
     })
   }
 
@@ -175,7 +175,7 @@ impl GamedataProject {
                 continue;
               }
 
-              let animation_name: String = Self::get_weapon_animation_name(field_value);
+              let animation_name: String = get_weapon_animation_name(field_value);
 
               if !ref_animations.contains(&animation_name) {
                 // todo: Check available motions from outfit sections here.
@@ -341,7 +341,7 @@ impl GamedataProject {
     let mut is_valid: bool = true;
 
     // Sounds field is 1-3 comma separated values:
-    let mut sound_object_value: String = Self::get_weapon_animation_name(field_value);
+    let mut sound_object_value: String = get_weapon_animation_name(field_value);
 
     // Support variant with and without extension in ltx files.
     if !sound_object_value.ends_with(".ogg") {

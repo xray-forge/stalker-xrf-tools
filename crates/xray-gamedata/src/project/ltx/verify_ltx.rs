@@ -1,3 +1,6 @@
+use crate::project::ltx::verify_ltx_result::{
+  GamedataLtxFormatVerificationResult, GamedataLtxVerificationResult,
+};
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use xray_ltx::{
@@ -12,33 +15,36 @@ impl GamedataProject {
   pub fn verify_ltx_format(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<LtxProjectFormatResult> {
+  ) -> GamedataResult<GamedataLtxFormatVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX files formatting".green());
     }
 
-    Ok(
+    let result: LtxProjectFormatResult =
       self
         .ltx_project
         .check_format_all_files_opt(LtxFormatOptions {
           is_silent: options.is_silent,
           is_verbose: options.is_verbose,
-        })?,
-    )
+        })?;
+
+    Ok(GamedataLtxFormatVerificationResult { inner: result })
   }
 
   pub fn verify_ltx_schemes(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<LtxProjectVerifyResult> {
+  ) -> GamedataResult<GamedataLtxVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX schemas".green());
     };
 
-    Ok(self.ltx_project.verify_entries_opt(LtxVerifyOptions {
+    let result: LtxProjectVerifyResult = self.ltx_project.verify_entries_opt(LtxVerifyOptions {
       is_silent: options.is_silent,
       is_verbose: options.is_verbose,
       is_strict: options.is_strict,
-    })?)
+    })?;
+
+    Ok(GamedataLtxVerificationResult { inner: result })
   }
 }

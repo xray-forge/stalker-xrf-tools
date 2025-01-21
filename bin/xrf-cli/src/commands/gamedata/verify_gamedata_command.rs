@@ -4,8 +4,8 @@ use colored::Colorize;
 use std::path::PathBuf;
 use std::process;
 use xray_gamedata::{
-  GamedataProject, GamedataProjectOpenOptions, GamedataProjectVerificationResult,
-  GamedataProjectVerifyOptions,
+  GamedataProject, GamedataProjectOpenOptions, GamedataProjectVerifyOptions,
+  GamedataVerificationResult,
 };
 
 #[derive(Default)]
@@ -136,9 +136,9 @@ impl GenericCommand for VerifyGamedataCommand {
     }
 
     let mut project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
-    let verify_result: GamedataProjectVerificationResult = project.verify(&verify_options)?;
+    let verify_result: GamedataVerificationResult = project.verify(&verify_options)?;
 
-    if verify_result.is_valid {
+    if verify_result.is_valid() {
       if verify_options.is_logging_enabled() {
         println!(
           "Gamedata project verified in {} sec",
@@ -153,6 +153,10 @@ impl GenericCommand for VerifyGamedataCommand {
           (verify_result.duration as f64) / 1000.0
         );
         println!("{}", "Project gamedata is invalid".red());
+
+        for message in verify_result.get_failure_messages() {
+          println!("- {}", message);
+        }
       }
 
       process::exit(1);

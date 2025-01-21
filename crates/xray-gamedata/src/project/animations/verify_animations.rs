@@ -1,4 +1,6 @@
+use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
 use crate::project::gamedata_asset_descriptor::GamedataAssetType;
+use crate::project::weapons::weapons_utils::get_weapon_animation_name;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use std::collections::{HashMap, HashSet};
@@ -7,11 +9,16 @@ use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
-  pub fn verify_animations(&mut self, options: &GamedataProjectVerifyOptions) -> GamedataResult {
+  pub fn verify_animations(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+  ) -> GamedataResult<GamedataAnimationsVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata animations:".green(),);
     }
 
+    // todo: For now just mark files as used.
+    // todo: For now just mark files as used.
     // todo: For now just mark files as used.
     for descriptor in self.assets.values_mut() {
       if descriptor.asset_type == GamedataAssetType::Anm {
@@ -19,15 +26,17 @@ impl GamedataProject {
       }
     }
 
-    self.verify_player_hud_animations(options)?;
+    let is_hud_animation_valid: bool = self.verify_player_hud_animations(options)?;
 
-    Ok(())
+    Ok(GamedataAnimationsVerificationResult {
+      is_hud_animation_valid,
+    })
   }
 
   pub fn verify_player_hud_animations(
     &mut self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult {
+  ) -> GamedataResult<bool> {
     if options.is_logging_enabled() {
       println!("Verify player hud animations");
     }
@@ -67,7 +76,7 @@ impl GamedataProject {
       );
     }
 
-    Ok(())
+    Ok(invalid_huds_count == 0)
   }
 
   pub fn verify_player_hud_animation(
@@ -101,11 +110,13 @@ impl GamedataProject {
             match OmfFile::read_motions_from_path::<XRayByteOrder>(linked_visual) {
               Ok(motions) => {
                 for motion in motions {
-                  if let Some(existing) = hud_motions.get(&motion) {
+                  if let Some(_existing) = hud_motions.get(&motion) {
                     if options.is_logging_enabled() {
+                      /*
                       eprintln!(
                         "Hud [{section_name}] overwriting '{motion}' ({existing} -> {linked_visual:?})",
                       );
+                      */
                     }
                   }
 
@@ -198,7 +209,7 @@ impl GamedataProject {
               continue;
             }
 
-            let weapon_motion_name: String = Self::get_weapon_animation_name(field_value);
+            let weapon_motion_name: String = get_weapon_animation_name(field_value);
 
             if !motions.contains(&&weapon_motion_name) {
               if options.is_logging_enabled() {
@@ -268,19 +279,5 @@ impl GamedataProject {
     }
 
     Ok(assets)
-  }
-}
-
-impl GamedataProject {
-  /// Get weapon animation from LTX field value with comma-separated parameters.
-  /// First param is motion name.
-  pub fn get_weapon_animation_name(value: &str) -> String {
-    String::from(
-      *value
-        .split(",")
-        .collect::<Vec<&str>>()
-        .first()
-        .unwrap_or(&value),
-    )
   }
 }
