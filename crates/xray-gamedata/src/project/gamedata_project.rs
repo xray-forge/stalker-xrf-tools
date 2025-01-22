@@ -1,5 +1,5 @@
-use crate::project::gamedata_asset_descriptor::GamedataAssetDescriptor;
-use crate::project::gamedata_project_options::GamedataProjectOpenOptions;
+use crate::asset::asset_descriptor::AssetDescriptor;
+use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 use crate::GamedataResult;
 use std::collections::HashMap;
 use std::io;
@@ -8,14 +8,14 @@ use std::path::{Path, PathBuf};
 use xray_ltx::{LtxProject, LtxProjectOptions};
 
 pub struct GamedataProject {
-  pub assets: HashMap<String, GamedataAssetDescriptor>,
+  pub assets: HashMap<String, AssetDescriptor>,
   pub roots: Vec<PathBuf>,
   pub configs: PathBuf,
   pub ltx_project: LtxProject,
 }
 
 impl GamedataProject {
-  pub fn open(options: &GamedataProjectOpenOptions) -> GamedataResult<Self> {
+  pub fn open(options: &GamedataProjectReadOptions) -> GamedataResult<Self> {
     let roots: Vec<PathBuf> = options
       .roots
       .iter()

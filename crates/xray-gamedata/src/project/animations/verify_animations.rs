@@ -1,6 +1,8 @@
+use crate::asset::asset_type::AssetType;
 use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
-use crate::project::gamedata_asset_descriptor::GamedataAssetType;
-use crate::project::weapons::weapons_utils::get_weapon_animation_name;
+use crate::project::weapons::weapons_utils::{
+  get_weapon_animation_name, is_player_hud_section, is_weapon_section,
+};
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use std::collections::{HashMap, HashSet};
@@ -21,7 +23,7 @@ impl GamedataProject {
     // todo: For now just mark files as used.
     // todo: For now just mark files as used.
     for descriptor in self.assets.values_mut() {
-      if descriptor.asset_type == GamedataAssetType::Anm {
+      if descriptor.asset_type == AssetType::Anm {
         descriptor.hits += 1;
       }
     }
@@ -47,7 +49,7 @@ impl GamedataProject {
     let mut invalid_huds_count: usize = 0;
 
     for (section_name, section) in &system_ltx.sections {
-      if !Self::is_player_hud_section(section) {
+      if !is_player_hud_section(section) {
         continue;
       }
 
@@ -91,7 +93,7 @@ impl GamedataProject {
 
     if let Some(visual_path) = &section
       .get("visual")
-      .and_then(|it| self.get_ogf_visual_path(it))
+      .and_then(|it| self.get_ogf_visual_path_hit(it))
     {
       if options.is_verbose_logging_enabled() {
         println!("Read player hud motion refs - [{section_name}] {visual_path:?}");
@@ -182,7 +184,9 @@ impl GamedataProject {
 
     Ok(is_valid)
   }
+}
 
+impl GamedataProject {
   pub fn verify_hud_weapons_animations(
     &mut self,
     options: &GamedataProjectVerifyOptions,
@@ -198,7 +202,7 @@ impl GamedataProject {
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
 
     for (weapon_section_name, weapon_section) in &system_ltx.sections {
-      if !Self::is_weapon_section(weapon_section) {
+      if !is_weapon_section(weapon_section) {
         continue;
       }
 
@@ -237,9 +241,7 @@ impl GamedataProject {
 
     Ok(is_valid)
   }
-}
 
-impl GamedataProject {
   pub fn read_player_hud_motion_refs(
     &mut self,
     visual_path: &Path,
@@ -261,7 +263,7 @@ impl GamedataProject {
           .assets
           .iter()
           .filter(|(path, descriptor)| {
-            descriptor.asset_type == GamedataAssetType::Omf && path.starts_with(&matching_base)
+            descriptor.asset_type == AssetType::Omf && path.starts_with(&matching_base)
           })
           .map(|(path, _)| path.to_string())
           .collect();
@@ -269,11 +271,11 @@ impl GamedataProject {
         for omf in matching_omf {
           assets.insert(
             self
-              .get_relative_asset_path(&omf)
+              .get_absolute_asset_path_hit(&omf)
               .expect("Defined assets from pattern matching should be existing"),
           );
         }
-      } else if let Some(visual_path) = self.get_omf_visual_path(motion_ref) {
+      } else if let Some(visual_path) = self.get_omf_visual_path_hit(motion_ref) {
         assets.insert(visual_path);
       }
     }

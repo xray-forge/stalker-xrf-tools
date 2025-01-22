@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 #[derive(Default)]
-pub struct GamedataProjectOpenOptions {
+pub struct GamedataProjectReadOptions {
   pub roots: Vec<PathBuf>,
   pub ignored: Vec<String>,
   pub configs: PathBuf,
@@ -10,7 +10,7 @@ pub struct GamedataProjectOpenOptions {
   pub is_strict: bool,
 }
 
-impl GamedataProjectOpenOptions {
+impl GamedataProjectReadOptions {
   pub fn is_logging_enabled(&self) -> bool {
     !self.is_silent
   }

@@ -18,6 +18,9 @@ pub struct SpawnPatrolsChunk {
 impl SpawnPatrolsChunk {
   pub const CHUNK_ID: u32 = 3;
 
+  pub const META_NESTED_CHUNK_ID: u32 = 0;
+  pub const DATA_NESTED_CHUNK_ID: u32 = 1;
+
   /// Read patrols list from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
@@ -25,8 +28,8 @@ impl SpawnPatrolsChunk {
       reader.read_bytes_remain()
     );
 
-    let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
-    let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
+    let mut meta_reader: ChunkReader = reader.read_child_by_index(Self::META_NESTED_CHUNK_ID)?;
+    let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_NESTED_CHUNK_ID)?;
 
     let count: u32 = meta_reader.read_u32::<T>()?;
     let patrols: Vec<Patrol> = Patrol::read_list::<T>(&mut data_reader, count)?;
@@ -53,8 +56,16 @@ impl SpawnPatrolsChunk {
     meta_writer.write_u32::<T>(self.patrols.len() as u32)?;
     Patrol::write_list::<T>(&self.patrols, &mut data_writer)?;
 
-    writer.write_all(meta_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
-    writer.write_all(data_writer.flush_chunk_into_buffer::<T>(1)?.as_slice())?;
+    writer.write_all(
+      meta_writer
+        .flush_chunk_into_buffer::<T>(Self::META_NESTED_CHUNK_ID)?
+        .as_slice(),
+    )?;
+    writer.write_all(
+      data_writer
+        .flush_chunk_into_buffer::<T>(Self::DATA_NESTED_CHUNK_ID)?
+        .as_slice(),
+    )?;
 
     log::info!("Written patrols chunk, {:?} bytes", writer.bytes_written());
 

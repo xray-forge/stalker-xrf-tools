@@ -36,12 +36,12 @@ impl ChunkWriter {
   }
 
   /// Flush all the written data as chunk into the file.
-  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, index: usize) -> ChunkResult<Vec<u8>> {
+  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, id: u32) -> ChunkResult<Vec<u8>> {
     self.buffer.flush()?;
 
     let mut buffer: Vec<u8> = Vec::new();
 
-    buffer.write_u32::<T>(index as u32)?;
+    buffer.write_u32::<T>(id)?;
     buffer.write_u32::<T>(self.buffer.len() as u32)?;
     buffer.write_all(self.buffer.as_slice())?;
 

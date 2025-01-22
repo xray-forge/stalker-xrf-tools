@@ -2,44 +2,7 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct GamedataAssetDescriptor {
-  pub root_index: usize,
-  pub hits: usize,
-  pub asset_type: GamedataAssetType,
-}
-
-impl GamedataAssetDescriptor {
-  pub fn new(root_index: usize) -> Self {
-    Self {
-      root_index,
-      hits: 0,
-      asset_type: GamedataAssetType::Unknown,
-    }
-  }
-
-  pub fn new_with_extension(root_index: usize, relative_path: &str) -> Self {
-    let extension: GamedataAssetType = GamedataAssetType::from_path(relative_path);
-
-    if extension == GamedataAssetType::Unknown {
-      log::warn!("Unknown extension asset: {}", relative_path);
-    }
-
-    Self {
-      root_index,
-      hits: 0,
-      asset_type: extension,
-    }
-  }
-}
-
-impl GamedataAssetDescriptor {
-  pub fn add_hit(&mut self) {
-    self.hits += 1;
-  }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum GamedataAssetType {
+pub enum AssetType {
   Ai,
   Anm,
   CForm,
@@ -75,7 +38,7 @@ pub enum GamedataAssetType {
   XrPack,
 }
 
-impl GamedataAssetType {
+impl AssetType {
   pub fn from_path(path: &str) -> Self {
     if let Some(extension) = PathBuf::from(path.to_lowercase())
       .extension()

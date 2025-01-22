@@ -59,7 +59,7 @@ impl Patrol {
 
       patrol.write::<T>(&mut patrol_writer)?;
 
-      writer.write_all(&patrol_writer.flush_chunk_into_buffer::<T>(index)?)?;
+      writer.write_all(&patrol_writer.flush_chunk_into_buffer::<T>(index as u32)?)?;
     }
 
     Ok(())

@@ -48,7 +48,11 @@ impl ParticlesGroupsChunk {
 
       group.write::<T>(&mut group_writer)?;
 
-      writer.write_all(group_writer.flush_chunk_into_buffer::<T>(index)?.as_slice())?;
+      writer.write_all(
+        group_writer
+          .flush_chunk_into_buffer::<T>(index as u32)?
+          .as_slice(),
+      )?;
     }
 
     log::info!("Written groups chunk, {} bytes", writer.bytes_written());

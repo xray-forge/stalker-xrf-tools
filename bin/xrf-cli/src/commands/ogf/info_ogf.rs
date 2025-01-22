@@ -1,6 +1,6 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use xray_db::{OgfFile, XRayByteOrder};
 
 #[derive(Default)]
@@ -33,7 +33,7 @@ impl GenericCommand for InfoOgfCommand {
 
     println!("Read ogf file {:?}", path);
 
-    let ogf_file: OgfFile = OgfFile::read_from_path::<XRayByteOrder>(path)?;
+    let ogf_file: OgfFile = OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?;
 
     println!("Ogf file information");
 
@@ -46,15 +46,31 @@ impl GenericCommand for InfoOgfCommand {
       ogf_file.header.bounding_sphere
     );
 
-    println!("Boundaries box: {:?}", ogf_file.header.bounding_box,);
+    println!("Boundaries box: {:?}", ogf_file.header.bounding_box);
     println!("Boundaries sphere: {:?}", ogf_file.header.bounding_sphere);
 
-    if let Some(description) = ogf_file.description {
+    if let Some(texture) = &ogf_file.texture {
+      println!("Texture name: {:?}", texture.texture_name);
+      println!("Shader name: {:?}", texture.shader_name);
+    }
+
+    if let Some(description) = &ogf_file.description {
       println!("Description: {:?}", description);
     }
 
-    if let Some(kinematics) = ogf_file.kinematics {
+    if let Some(kinematics) = &ogf_file.kinematics {
       println!("Motion refs: {:?}", kinematics.motion_refs);
+    }
+
+    if let Some(children) = &ogf_file.children {
+      println!("OGF children ({}):", children.nested.len());
+
+      for (index, child) in children.nested.iter().enumerate() {
+        if let Some(texture) = &child.texture {
+          println!("[{index}] texture name: {:?}", texture.texture_name);
+          println!("[{index}] shader name: {:?}", texture.shader_name);
+        }
+      }
     }
 
     Ok(())

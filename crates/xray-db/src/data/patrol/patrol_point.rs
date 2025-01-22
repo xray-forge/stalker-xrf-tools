@@ -76,7 +76,7 @@ impl PatrolPoint {
       point_chunk_writer.write_all(&point_index_writer.flush_chunk_into_buffer::<T>(0)?)?;
       point_chunk_writer.write_all(&point_writer.flush_chunk_into_buffer::<T>(1)?)?;
 
-      writer.write_all(&point_chunk_writer.flush_chunk_into_buffer::<T>(index)?)?;
+      writer.write_all(&point_chunk_writer.flush_chunk_into_buffer::<T>(index as u32)?)?;
     }
 
     Ok(())

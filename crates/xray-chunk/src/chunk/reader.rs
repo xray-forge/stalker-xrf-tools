@@ -26,8 +26,8 @@ impl ChunkReader {
   }
 
   /// Create chunk based on file slice boundaries.
-  pub fn from_slice(file: FileSlice) -> ChunkResult<ChunkReader> {
-    if file.is_empty() {
+  pub fn from_slice(slice: FileSlice) -> ChunkResult<ChunkReader> {
+    if slice.is_empty() {
       return Err(ChunkError::new_invalid_chunk_error(
         "Trying to create chunk from empty file",
       ));
@@ -35,10 +35,10 @@ impl ChunkReader {
 
     Ok(ChunkReader {
       id: 0,
-      size: file.len() as u64,
-      position: file.start_pos(),
+      size: slice.len() as u64,
+      position: slice.start_pos(),
       is_compressed: false,
-      file: Box::new(file),
+      file: Box::new(slice),
     })
   }
 }

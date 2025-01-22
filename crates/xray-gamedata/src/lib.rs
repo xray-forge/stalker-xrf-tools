@@ -1,3 +1,4 @@
+pub(crate) mod asset;
 pub(crate) mod constants;
 pub(crate) mod error;
 pub(crate) mod project;

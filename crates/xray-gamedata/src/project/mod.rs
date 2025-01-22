@@ -1,10 +1,8 @@
 pub(crate) mod animations;
-pub(crate) mod gamedata_asset_descriptor;
 pub(crate) mod gamedata_generic_result;
 pub(crate) mod gamedata_project;
 pub(crate) mod gamedata_project_assets;
 pub(crate) mod gamedata_project_options;
-pub(crate) mod gamedata_project_section;
 pub(crate) mod gamedata_project_verify;
 pub(crate) mod gamedata_verification_result;
 pub(crate) mod levels;

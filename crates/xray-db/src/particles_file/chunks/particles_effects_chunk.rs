@@ -50,7 +50,7 @@ impl ParticlesEffectsChunk {
 
       writer.write_all(
         effect_writer
-          .flush_chunk_into_buffer::<T>(index)?
+          .flush_chunk_into_buffer::<T>(index as u32)?
           .as_slice(),
       )?;
     }

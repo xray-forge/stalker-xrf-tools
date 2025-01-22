@@ -1,7 +1,9 @@
+use crate::ogf_file::chunks::ogf_children_chunk::OgfChildrenChunk;
 use crate::ogf_file::chunks::ogf_description_chunk::OgfDescriptionChunk;
 use crate::ogf_file::chunks::ogf_header_chunk::OgfHeaderChunk;
 use crate::ogf_file::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
-use crate::DatabaseResult;
+use crate::ogf_file::chunks::ogf_texture_chunk::OgfTextureChunk;
+use crate::{DatabaseError, DatabaseResult};
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
@@ -16,19 +18,29 @@ use xray_chunk::{
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfFile {
   pub header: OgfHeaderChunk,
+  pub texture: Option<OgfTextureChunk>,
+  pub children: Option<OgfChildrenChunk>,
   pub description: Option<OgfDescriptionChunk>,
   pub kinematics: Option<OgfKinematicsChunk>,
 }
 
 impl OgfFile {
-  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
-    log::info!("Reading ogf path: {:?}", path);
+  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
+    log::info!("Reading ogf path: {:?}", path.as_ref());
 
-    Self::read_from_file::<T>(File::open(path)?)
+    Self::read_from_file::<T>(File::open(&path).map_err(|error| {
+      DatabaseError::new_not_found_error(format!(
+        "OGF file was not read: {:?}, error: {error}",
+        path.as_ref(),
+      ))
+    })?)
   }
 
   pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
-    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    Self::read_from_chunk::<T>(&mut ChunkReader::from_file(file)?)
+  }
+
+  pub fn read_from_chunk<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     log::info!(
@@ -55,6 +67,14 @@ impl OgfFile {
         chunks,
         OgfHeaderChunk::CHUNK_ID,
       )?)?,
+      texture: match find_optional_chunk_by_id(chunks, OgfTextureChunk::CHUNK_ID) {
+        Some(mut it) => Some(OgfTextureChunk::read::<T>(&mut it)?),
+        None => None,
+      },
+      children: match find_optional_chunk_by_id(chunks, OgfChildrenChunk::CHUNK_ID) {
+        Some(mut it) => Some(OgfChildrenChunk::read::<T>(&mut it)?),
+        None => None,
+      },
       description: match find_optional_chunk_by_id(chunks, OgfDescriptionChunk::CHUNK_ID) {
         Some(mut it) => Some(OgfDescriptionChunk::read::<T>(&mut it)?),
         None => None,

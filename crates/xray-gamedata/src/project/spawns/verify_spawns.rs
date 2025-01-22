@@ -1,4 +1,4 @@
-use crate::project::gamedata_asset_descriptor::GamedataAssetType;
+use crate::asset::asset_type::AssetType;
 use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
@@ -15,7 +15,7 @@ impl GamedataProject {
       .assets
       .iter()
       .filter(|(relative_path, descriptor)| {
-        descriptor.asset_type == GamedataAssetType::Spawn && relative_path.starts_with("spawns")
+        descriptor.asset_type == AssetType::Spawn && relative_path.starts_with("spawns")
       })
       .map(|(key, _)| key.clone())
       .collect::<Vec<_>>();
@@ -47,10 +47,12 @@ impl GamedataProject {
     for relative_path in &spawn_files {
       total_spawns += 1;
 
-      if let Some(spawn_path) = self.get_relative_asset_path(relative_path) {
+      if let Some(spawn_path) = self.get_absolute_asset_path_hit(relative_path) {
         if !self.verify_spawn(options, &spawn_path)? {
           invalid_spawns += 1;
         }
+      } else {
+        invalid_spawns += 1;
       }
     }
 

@@ -4,7 +4,7 @@ use colored::Colorize;
 use std::path::PathBuf;
 use std::process;
 use xray_gamedata::{
-  GamedataProject, GamedataProjectOpenOptions, GamedataProjectVerifyOptions,
+  GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
   GamedataVerificationResult,
 };
 
@@ -111,7 +111,10 @@ impl GenericCommand for VerifyGamedataCommand {
     let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
 
-    let open_options: GamedataProjectOpenOptions = GamedataProjectOpenOptions {
+    // todo: Parallel argument, only in silent mode.
+    // todo: Modular selection to verify only some elements.
+
+    let open_options: GamedataProjectReadOptions = GamedataProjectReadOptions {
       roots,
       ignored,
       configs,

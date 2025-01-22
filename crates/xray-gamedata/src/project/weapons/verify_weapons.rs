@@ -1,9 +1,10 @@
 use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
-use crate::project::weapons::weapons_utils::get_weapon_animation_name;
+use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use regex::Regex;
+use std::path::Path;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
@@ -22,7 +23,7 @@ impl GamedataProject {
     let mut invalid_weapons_count: usize = 0;
 
     for (section_name, section) in &system_ltx.sections {
-      if Self::is_weapon_section(section) {
+      if is_weapon_section(section) {
         checked_weapons_count += 1;
       } else {
         continue;
@@ -105,9 +106,9 @@ impl GamedataProject {
 
     if let Some(visual) = &section
       .get("visual")
-      .and_then(|it| self.get_ogf_visual_path(it))
+      .and_then(|it| self.get_ogf_visual_path_hit(it))
     {
-      if let Err(error) = OgfFile::read_from_path::<XRayByteOrder>(visual) {
+      if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, &Path>(visual) {
         if options.is_logging_enabled() {
           eprintln!(
             "Failed to read weapon visual: [{section_name}] - {:?} - {error}",
@@ -144,9 +145,9 @@ impl GamedataProject {
 
     if let Some(visual_path) = &hud_section
       .get("item_visual")
-      .and_then(|it| self.get_ogf_visual_path(it))
+      .and_then(|it| self.get_ogf_visual_path_hit(it))
     {
-      match OgfFile::read_from_path::<XRayByteOrder>(visual_path) {
+      match OgfFile::read_from_path::<XRayByteOrder, &Path>(visual_path) {
         Ok(hud_visual) => {
           if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
             let mut ref_animations: Vec<String> = Vec::new();
@@ -154,7 +155,7 @@ impl GamedataProject {
             for motion_ref in &motion_refs {
               match OmfFile::read_motions_from_path::<XRayByteOrder>(
                 &self
-                  .get_omf_visual_path(motion_ref)
+                  .get_omf_visual_path_hit(motion_ref)
                   .expect("Motion file for weapon not found in project assets"),
               ) {
                 Ok(motions) => ref_animations.extend(motions),
@@ -349,7 +350,9 @@ impl GamedataProject {
     }
 
     // todo: Check OGG file, check existing.
-    if let Some(sound_path) = self.get_prefixed_relative_asset_path("sounds", &sound_object_value) {
+    if let Some(sound_path) =
+      self.get_prefixed_absolute_asset_path_hit("sounds", &sound_object_value)
+    {
       if sound_path.is_file() && sound_path.exists() {
         if options.is_verbose_logging_enabled() {
           eprintln!(

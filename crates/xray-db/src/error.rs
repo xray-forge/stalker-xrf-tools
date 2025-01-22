@@ -7,6 +7,8 @@ use xray_ltx::LtxError;
 /// Error while working with DB data parsing/reading/writing/importing/exporting.
 #[derive(ThisError, Debug)]
 pub enum DatabaseError {
+  #[error("Database not found error: {message:}")]
+  NotFound { message: String },
   #[error("Database not implemented error: {message:}")]
   NotImplemented { message: String },
   #[error("Database parse error: {message:?}")]
@@ -24,6 +26,15 @@ pub enum DatabaseError {
 }
 
 impl DatabaseError {
+  pub fn new_not_found_error<T>(message: T) -> Self
+  where
+    T: Into<String>,
+  {
+    Self::NotFound {
+      message: message.into(),
+    }
+  }
+
   pub fn new_not_implemented_error<T>(message: T) -> Self
   where
     T: Into<String>,
