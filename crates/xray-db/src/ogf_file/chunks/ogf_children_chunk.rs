@@ -49,7 +49,5 @@ impl OgfChildrenChunk {
     }
 
     todo!("Implement OGF file writer here");
-
-    Ok(())
   }
 }

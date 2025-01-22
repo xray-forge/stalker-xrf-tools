@@ -106,7 +106,7 @@ impl GamedataProject {
 
     if let Some(visual) = &section
       .get("visual")
-      .and_then(|it| self.get_ogf_visual_path_hit(it))
+      .and_then(|it| self.get_ogf_path_hit(it))
     {
       if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, &Path>(visual) {
         if options.is_logging_enabled() {
@@ -145,7 +145,7 @@ impl GamedataProject {
 
     if let Some(visual_path) = &hud_section
       .get("item_visual")
-      .and_then(|it| self.get_ogf_visual_path_hit(it))
+      .and_then(|it| self.get_ogf_path_hit(it))
     {
       match OgfFile::read_from_path::<XRayByteOrder, &Path>(visual_path) {
         Ok(hud_visual) => {
@@ -155,7 +155,7 @@ impl GamedataProject {
             for motion_ref in &motion_refs {
               match OmfFile::read_motions_from_path::<XRayByteOrder>(
                 &self
-                  .get_omf_visual_path_hit(motion_ref)
+                  .get_omf_path_hit(motion_ref)
                   .expect("Motion file for weapon not found in project assets"),
               ) {
                 Ok(motions) => ref_animations.extend(motions),

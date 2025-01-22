@@ -93,7 +93,7 @@ impl GamedataProject {
 
     if let Some(visual_path) = &section
       .get("visual")
-      .and_then(|it| self.get_ogf_visual_path_hit(it))
+      .and_then(|it| self.get_ogf_path_hit(it))
     {
       if options.is_verbose_logging_enabled() {
         println!("Read player hud motion refs - [{section_name}] {visual_path:?}");
@@ -275,7 +275,7 @@ impl GamedataProject {
               .expect("Defined assets from pattern matching should be existing"),
           );
         }
-      } else if let Some(visual_path) = self.get_omf_visual_path_hit(motion_ref) {
+      } else if let Some(visual_path) = self.get_omf_path_hit(motion_ref) {
         assets.insert(visual_path);
       }
     }

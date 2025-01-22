@@ -148,11 +148,11 @@ impl GamedataProject {
       })
   }
 
-  pub fn get_ogf_visual_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
+  pub fn get_ogf_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
     self.get_mesh_path_hit(visual_path, ".ogf")
   }
 
-  pub fn get_omf_visual_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
+  pub fn get_omf_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
     self.get_mesh_path_hit(visual_path, ".omf")
   }
 
@@ -164,6 +164,20 @@ impl GamedataProject {
     }
 
     self.get_prefixed_absolute_asset_path_hit("meshes", &visual_path)
+  }
+
+  pub fn get_dds_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
+    self.get_texture_path_hit(visual_path, ".dds")
+  }
+
+  pub fn get_texture_path_hit(&mut self, texture_path: &str, extension: &str) -> Option<PathBuf> {
+    let mut texture_path: String = String::from(texture_path);
+
+    if !texture_path.ends_with(extension) {
+      texture_path.push_str(extension);
+    }
+
+    self.get_prefixed_absolute_asset_path_hit("textures", &texture_path)
   }
 
   pub fn add_asset_hit_by_relative_path(&mut self, relative_path: &str) -> GamedataResult {

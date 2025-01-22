@@ -36,10 +36,14 @@ impl GamedataProject {
 
       checked_meshes_count += 1;
 
-      if let Some(path) = self.get_absolute_asset_path_hit(&path) {
-        match self.verify_mesh(options, &path) {
+      if let Some(path) = self.get_absolute_asset_path(&path) {
+        match self.verify_mesh_by_path(options, &path) {
           Ok(is_valid) => {
             if !is_valid {
+              if options.is_logging_enabled() {
+                println!("Mesh is not valid: {:?}", path);
+              }
+
               invalid_meshes_count += 1;
             }
           }
@@ -52,6 +56,10 @@ impl GamedataProject {
           }
         }
       } else {
+        if options.is_logging_enabled() {
+          println!("Mesh path not found: {:?}", path);
+        }
+
         invalid_meshes_count += 1;
       }
     }
@@ -69,21 +77,60 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_mesh(
-    &self,
+  pub fn verify_mesh_by_path(
+    &mut self,
     options: &GamedataProjectVerifyOptions,
     path: &Path,
   ) -> GamedataResult<bool> {
-    let ogf: OgfFile = OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?;
-
-    self.verify_mesh_textures(options, &ogf)
+    self.verify_mesh(
+      options,
+      &OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?,
+    )
   }
 
-  pub fn verify_mesh_textures(
-    &self,
+  pub fn verify_mesh(
+    &mut self,
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
   ) -> GamedataResult<bool> {
-    Ok(true)
+    let mut is_valid: bool = true;
+
+    if !self.verify_mesh_textures(options, ogf)? {
+      is_valid = false;
+    }
+
+    if let Some(children) = &ogf.children {
+      for child in &children.nested {
+        if !self.verify_mesh(options, child)? {
+          is_valid = false;
+        }
+      }
+    }
+
+    // todo: Verify LOD?
+
+    Ok(is_valid)
+  }
+
+  pub fn verify_mesh_textures(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+    ogf: &OgfFile,
+  ) -> GamedataResult<bool> {
+    let mut is_valid: bool = true;
+
+    if let Some(texture) = &ogf.texture {
+      if self.get_dds_path_hit(&texture.texture_name).is_none() {
+        if options.is_logging_enabled() {
+          eprintln!("Cannot read OGF texture: {}", texture.texture_name);
+        }
+
+        is_valid = false;
+      }
+
+      // todo: Shader check?
+    }
+
+    Ok(is_valid)
   }
 }
