@@ -2,8 +2,8 @@ use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
 
 #[derive(Default)]
 pub struct GamedataWeaponVerificationResult {
-  pub checked_weapons_count: u64,
-  pub invalid_weapons_count: u64,
+  pub checked_weapons_count: u32,
+  pub invalid_weapons_count: u32,
 }
 
 impl GamedataGenericVerificationResult for GamedataWeaponVerificationResult {

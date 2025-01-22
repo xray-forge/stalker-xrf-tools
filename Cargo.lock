@@ -502,8 +502,9 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "bcdec_rs"
-version = "0.1.2"
-source = "git+https://github.com/ScanMountGoat/image_dds.git?rev=1ddcb46a5ff6e4858df586e3dd5cfd5201ba62ec#1ddcb46a5ff6e4858df586e3dd5cfd5201ba62ec"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f09c37bc0e9f0924b7dae9988265ef3c76c88538f41a3b06caf4bed07cee5226"
 
 [[package]]
 name = "better_scoped_tls"
@@ -2339,8 +2340,9 @@ dependencies = [
 
 [[package]]
 name = "image_dds"
-version = "0.6.2"
-source = "git+https://github.com/ScanMountGoat/image_dds.git?rev=1ddcb46a5ff6e4858df586e3dd5cfd5201ba62ec#1ddcb46a5ff6e4858df586e3dd5cfd5201ba62ec"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e2b9fbc4237464c255c72f468bddaa25b2502c40a34a8fbc0fd9a9addfacc37"
 dependencies = [
  "bcdec_rs",
  "bytemuck",
@@ -6614,7 +6616,11 @@ name = "xray-gamedata"
 version = "0.1.0"
 dependencies = [
  "colored",
+ "ddsfile",
+ "image 0.25.5",
+ "image_dds",
  "log",
+ "rayon",
  "regex",
  "thiserror 2.0.11",
  "walkdir",

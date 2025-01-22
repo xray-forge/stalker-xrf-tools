@@ -2,12 +2,14 @@ use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
 
 #[derive(Default)]
 pub struct GamedataAnimationsVerificationResult {
-  pub is_hud_animation_valid: bool,
+  pub duration: u128,
+  pub invalid_huds_count: u32,
+  pub checked_huds_count: u32,
 }
 
 impl GamedataGenericVerificationResult for GamedataAnimationsVerificationResult {
   fn is_valid(&self) -> bool {
-    self.is_hud_animation_valid
+    self.invalid_huds_count == 0
   }
 
   fn get_failure_message(&self) -> String {

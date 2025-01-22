@@ -1,4 +1,5 @@
 use crate::asset::asset_descriptor::AssetDescriptor;
+use crate::asset::asset_type::AssetType;
 use crate::error::GamedataError;
 use crate::{GamedataProject, GamedataProjectReadOptions, GamedataResult};
 use std::collections::HashMap;
@@ -54,6 +55,21 @@ impl GamedataProject {
 }
 
 impl GamedataProject {
+  /// Get list of all asset relative paths by provided type.
+  pub fn get_all_asset_paths_by_type(&self, asset_type: AssetType) -> Vec<String> {
+    self
+      .assets
+      .iter()
+      .filter_map(|(path, descriptor)| {
+        if descriptor.asset_type == asset_type {
+          Some(path.clone())
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<_>>()
+  }
+
   pub fn get_absolute_asset_path(&self, relative_path: &str) -> Option<PathBuf> {
     self.get_prefixed_absolute_asset_path("", relative_path)
   }

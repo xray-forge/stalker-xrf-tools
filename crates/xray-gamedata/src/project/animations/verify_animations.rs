@@ -7,6 +7,7 @@ use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::time::Instant;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
@@ -19,34 +20,40 @@ impl GamedataProject {
       println!("{}", "Verify gamedata animations:".green(),);
     }
 
-    // todo: For now just mark files as used.
-    // todo: For now just mark files as used.
-    // todo: For now just mark files as used.
-    for descriptor in self.assets.values_mut() {
-      if descriptor.asset_type == AssetType::Anm {
-        descriptor.hits += 1;
-      }
+    let started_at: Instant = Instant::now();
+
+    let (checked_huds_count, invalid_huds_count) = self.verify_player_hud_animations(options)?;
+
+    let duration: u128 = started_at.elapsed().as_millis();
+
+    if options.is_logging_enabled() {
+      println!(
+        "Verified gamedata animations in {} sec, {}/{} huds are valid",
+        (duration as f64) / 1000.0,
+        checked_huds_count - invalid_huds_count,
+        invalid_huds_count
+      );
     }
 
-    let is_hud_animation_valid: bool = self.verify_player_hud_animations(options)?;
-
     Ok(GamedataAnimationsVerificationResult {
-      is_hud_animation_valid,
+      duration,
+      checked_huds_count,
+      invalid_huds_count,
     })
   }
 
   pub fn verify_player_hud_animations(
     &mut self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<bool> {
+  ) -> GamedataResult<(u32, u32)> {
     if options.is_logging_enabled() {
       println!("Verify player hud animations");
     }
 
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
 
-    let mut checked_huds_count: usize = 0;
-    let mut invalid_huds_count: usize = 0;
+    let mut checked_huds_count: u32 = 0;
+    let mut invalid_huds_count: u32 = 0;
 
     for (section_name, section) in &system_ltx.sections {
       if !is_player_hud_section(section) {
@@ -78,7 +85,7 @@ impl GamedataProject {
       );
     }
 
-    Ok(invalid_huds_count == 0)
+    Ok((checked_huds_count, invalid_huds_count))
   }
 
   pub fn verify_player_hud_animation(

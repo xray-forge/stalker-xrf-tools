@@ -209,7 +209,7 @@ mod tests {
     );
     assert_eq!(
       result.unwrap_err().to_string(),
-      String::from("Chunk invalid error: \"Trying to create chunk from empty file\""),
+      String::from("Chunk invalid error: Trying to create chunk from empty file"),
       "Expect input error"
     );
 

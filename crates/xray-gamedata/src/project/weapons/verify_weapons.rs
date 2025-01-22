@@ -19,8 +19,8 @@ impl GamedataProject {
 
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
 
-    let mut checked_weapons_count: usize = 0;
-    let mut invalid_weapons_count: usize = 0;
+    let mut checked_weapons_count: u32 = 0;
+    let mut invalid_weapons_count: u32 = 0;
 
     for (section_name, section) in &system_ltx.sections {
       if is_weapon_section(section) {
@@ -57,8 +57,8 @@ impl GamedataProject {
     }
 
     Ok(GamedataWeaponVerificationResult {
-      checked_weapons_count: checked_weapons_count as u64,
-      invalid_weapons_count: invalid_weapons_count as u64,
+      checked_weapons_count,
+      invalid_weapons_count,
     })
   }
 

@@ -139,7 +139,7 @@ mod tests {
     assert_eq!(
       ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader).map_err(|error| error.to_string()),
       Err(String::from(
-        "Database not implemented error: \"Unknown version in particles header chunk, expected v1 only\"",
+        "Database not implemented error: Unknown version in particles header chunk, expected v1 only",
       ))
     );
 

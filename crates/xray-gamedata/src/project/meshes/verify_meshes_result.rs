@@ -2,6 +2,7 @@ use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
 
 #[derive(Default)]
 pub struct GamedataMeshesVerificationResult {
+  pub duration: u128,
   pub invalid_meshes: u64,
   pub checked_meshes: u64,
 }

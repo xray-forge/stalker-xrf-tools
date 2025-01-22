@@ -3,6 +3,7 @@ use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResu
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use std::path::Path;
+use std::time::Instant;
 use xray_db::{OgfFile, XRayByteOrder};
 
 impl GamedataProject {
@@ -14,22 +15,11 @@ impl GamedataProject {
       println!("{}", "Verify gamedata meshes:".green());
     }
 
+    let started_at: Instant = Instant::now();
     let mut checked_meshes_count: usize = 0;
     let mut invalid_meshes_count: usize = 0;
 
-    let meshes: Vec<String> = self
-      .assets
-      .iter()
-      .filter_map(|(path, descriptor)| {
-        if descriptor.asset_type == AssetType::Ogf {
-          Some(path.clone())
-        } else {
-          None
-        }
-      })
-      .collect::<Vec<_>>();
-
-    for path in meshes {
+    for path in self.get_all_asset_paths_by_type(AssetType::Ogf) {
       if options.is_verbose_logging_enabled() {
         println!("Verify gamedata mesh: {}", path);
       }
@@ -64,14 +54,19 @@ impl GamedataProject {
       }
     }
 
+    let duration: u128 = started_at.elapsed().as_millis();
+
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata meshes, {}/{checked_meshes_count} valid",
+        "Verified gamedata meshes in {} sec, {}/{} valid",
+        (duration as f64) / 1000.0,
         checked_meshes_count - invalid_meshes_count,
+        checked_meshes_count
       );
     }
 
     Ok(GamedataMeshesVerificationResult {
+      duration,
       invalid_meshes: invalid_meshes_count as u64,
       checked_meshes: checked_meshes_count as u64,
     })
