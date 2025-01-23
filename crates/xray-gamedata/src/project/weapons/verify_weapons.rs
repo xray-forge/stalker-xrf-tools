@@ -153,21 +153,27 @@ impl GamedataProject {
             let mut ref_animations: Vec<String> = Vec::new();
 
             for motion_ref in &motion_refs {
-              match OmfFile::read_motions_from_path::<XRayByteOrder>(
-                &self
-                  .get_omf_path_hit(motion_ref)
-                  .expect("Motion file for weapon not found in project assets"),
-              ) {
-                Ok(motions) => ref_animations.extend(motions),
-                Err(error) => {
-                  if options.is_logging_enabled() {
-                    eprintln!(
-                      "Error reading OMF motions for weapon hud: [{section_name}] : {visual_path:?} - {error:}"
-                    );
-                  }
+              if let Some(motion_file_path) = self.get_omf_path_hit(motion_ref) {
+                match OmfFile::read_motions_from_path::<XRayByteOrder>(&motion_file_path) {
+                  Ok(motions) => ref_animations.extend(motions),
+                  Err(error) => {
+                    if options.is_logging_enabled() {
+                      eprintln!(
+                        "Error reading OMF motions for weapon hud: [{section_name}] : {visual_path:?} - {error:}"
+                      );
+                    }
 
-                  is_valid = false;
+                    is_valid = false;
+                  }
                 }
+              } else {
+                if options.is_logging_enabled() {
+                  eprintln!(
+                    "Error reading OMF motions for weapon hud: [{section_name}] : {visual_path:?}, no asset found"
+                  );
+                }
+
+                is_valid = false;
               }
             }
 

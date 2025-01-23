@@ -89,7 +89,7 @@ impl GamedataProject {
       options,
       &Dds::read(&mut File::open(path)?).map_err(|error| {
         GamedataError::new_check_error(format!(
-          "Failed to read texture by path '{:?}, error: {:?}'",
+          "Failed to read texture by path {:?}, error: {:?}",
           path, error
         ))
       })?,

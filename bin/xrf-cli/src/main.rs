@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         if let Err(error) = &result {
           eprintln!(
-            "Execution of command '{}' failed, error: \"{}\"",
+            "Execution of command '{}' failed, error: {}",
             it.name(),
             error
           );

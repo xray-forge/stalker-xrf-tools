@@ -1,7 +1,7 @@
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncluded;
-use crate::{Ltx, LtxError, LtxResult};
-use encoding_rs::WINDOWS_1251;
+use crate::file::utils::read_data_as_string;
+use crate::{Ltx, LtxResult};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -36,26 +36,7 @@ impl Ltx {
 
   /// Read from a reader as generic ltx with LTX descriptor filled.
   pub fn read_from<R: Read>(reader: &mut R) -> LtxResult<Self> {
-    let mut raw_data: Vec<u8> = Vec::new();
-    let raw_data_read: usize = reader.read_to_end(&mut raw_data)?;
-
-    assert_eq!(
-      raw_data_read,
-      raw_data.len(),
-      "Expected raw data size to match in-memory buffer"
-    );
-
-    let (cow, encoding_used, had_errors) = WINDOWS_1251.decode(&raw_data);
-
-    if had_errors {
-      Err(LtxError::new_read_error(format!(
-        "Failed to decode LTX file data from reader with {:?} encoding, {} bytes",
-        encoding_used,
-        raw_data.len()
-      )))
-    } else {
-      LtxParser::new(cow.to_string().chars()).parse()
-    }
+    LtxParser::new(read_data_as_string(reader)?.to_string().chars()).parse()
   }
 }
 
@@ -72,11 +53,7 @@ impl Ltx {
 
   /// Load include statements from a reader.
   pub fn read_included_from<R: Read>(reader: &mut R) -> LtxResult<LtxIncluded> {
-    let mut data: String = String::new();
-
-    reader.read_to_string(&mut data).map_err(LtxError::Io)?;
-
-    LtxParser::new(data.chars()).parse_includes()
+    LtxParser::new(read_data_as_string(reader)?.chars()).parse_includes()
   }
 }
 
@@ -93,12 +70,7 @@ impl Ltx {
 
   /// Load formatted LTX as string from reader.
   pub fn format_from<R: Read>(reader: &mut R) -> LtxResult<String> {
-    let mut data: String = String::new();
-
-    // todo: Probably can fail with non utf-8 encoding.
-    reader.read_to_string(&mut data)?;
-
-    LtxParser::new(data.chars()).parse_into_formatted()
+    LtxParser::new(read_data_as_string(reader)?.chars()).parse_into_formatted()
   }
 }
 

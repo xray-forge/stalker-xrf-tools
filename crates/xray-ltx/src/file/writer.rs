@@ -1,17 +1,17 @@
 use crate::file::configuration::constants::ROOT_SECTION;
 use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
+use crate::file::utils::read_data_as_string;
 use crate::{Ltx, LtxResult};
-use std::fs::OpenOptions;
+use std::fs;
 use std::io::Write;
 use std::path::Path;
-use std::{fs, io};
 
 impl Ltx {
   /// Format single LTX file by provided path
   pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> LtxResult<bool> {
     let formatted: String = Ltx::format_from_file(&filename)?;
     let existing: String =
-      io::read_to_string(&mut OpenOptions::new().read(true).open(filename.as_ref())?)?;
+      read_data_as_string(&mut fs::OpenOptions::new().read(true).open(filename.as_ref())?)?;
 
     if existing == formatted {
       Ok(false)
@@ -27,7 +27,7 @@ impl Ltx {
   /// Write to a file
   pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> LtxResult {
     self.write_to(
-      &mut OpenOptions::new()
+      &mut fs::OpenOptions::new()
         .write(true)
         .truncate(true)
         .create(true)

@@ -28,6 +28,7 @@ impl GamedataProject {
       sounds_result: self.verify_sounds(options),
       levels_result: self.verify_levels(options),
       weathers_result: self.verify_weathers(options),
+      scripts_result: self.verify_scripts(options),
       shaders_result: self.verify_shaders(options),
       resources_result: self.verify_resources_usage(options),
       // todo: Verify lua syntax and format with scripts check.

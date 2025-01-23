@@ -70,7 +70,7 @@ impl AssetType {
         "ps" | "s" | "s_" | "h" | "vs" | "cs" | "hs" | "ds" | "gs" => Self::Shader,
         "ps_static" => Self::PsStatic,
         "script" => Self::Script,
-        "seq" | "seq_" => Self::Script,
+        "seq" | "seq_" => Self::Seq,
         "snd_static" => Self::SndStatic,
         "spawn" => Self::Spawn,
         "thm" => Self::Thm,

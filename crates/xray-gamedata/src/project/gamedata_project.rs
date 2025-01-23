@@ -1,6 +1,6 @@
 use crate::asset::asset_descriptor::AssetDescriptor;
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
-use crate::GamedataResult;
+use crate::{GamedataError, GamedataResult};
 use std::collections::HashMap;
 use std::io;
 use std::io::ErrorKind;
@@ -77,7 +77,13 @@ impl GamedataProject {
         LtxProjectOptions {
           is_with_schemes_check: true,
         },
-      )?,
+      )
+      .map_err(|error| {
+        GamedataError::new_asset_error(format!(
+          "Failed to open gamedata project ltx configs: {}",
+          error
+        ))
+      })?,
     })
   }
 }

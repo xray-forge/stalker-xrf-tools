@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 pub fn read_dds_by_path(path: &Path) -> TextureResult<Dds> {
   Dds::read(&mut File::open(path)?).map_err(|error| {
     TextureError::new_processing_error(format!(
-      "Failed to read texture by path '{:?}, error: {:?}'",
+      "Failed to read texture by path {:?}, error: {:?}",
       path, error,
     ))
   })

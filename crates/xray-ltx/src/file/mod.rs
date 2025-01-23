@@ -8,4 +8,5 @@ pub(crate) mod parser;
 pub(crate) mod reader;
 pub(crate) mod section;
 pub(crate) mod types;
+pub(crate) mod utils;
 pub(crate) mod writer;

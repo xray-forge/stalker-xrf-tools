@@ -5,9 +5,9 @@ use thiserror::Error as ThisError;
 /// Error while working with LTX document.
 #[derive(ThisError, Debug)]
 pub enum LtxError {
-  #[error("Ltx convert error: {message:?}")]
+  #[error("Ltx convert error: {message:}")]
   Convert { message: String },
-  #[error("Ltx format error: {message:?}")]
+  #[error("Ltx format error: {message:}")]
   Format { message: String },
   #[error("Ltx parse error: {line:?}:{col:?} {message:?}")]
   Parse {
@@ -15,16 +15,16 @@ pub enum LtxError {
     col: usize,
     message: String,
   },
-  #[error("Ltx read error: {message:?}")]
+  #[error("Ltx read error: {message:}")]
   Read { message: String },
-  #[error("Ltx scheme error: '{at:?}' [{section:?}] {field:?} : {message:?}")]
+  #[error("Ltx scheme error: '{at:?}' [{section:}] {field:} : {message:}")]
   Scheme {
     section: String,
     field: String,
     message: String,
     at: Option<String>,
   },
-  #[error("Ltx verify error: {message:?}")]
+  #[error("Ltx verify error: {message:}")]
   Verify { message: String },
   #[error("Ltx IO error: {0}")]
   Io(#[from] IoError),

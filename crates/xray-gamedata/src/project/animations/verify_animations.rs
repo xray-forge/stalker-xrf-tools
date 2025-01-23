@@ -108,9 +108,9 @@ impl GamedataProject {
 
       match self.read_player_hud_motion_refs(visual_path) {
         Ok(linked_visuals) => {
-          if options.is_logging_enabled() {
+          if options.is_verbose_logging_enabled() {
             println!(
-              "Player hud ogf [{visual_path:?} contains {} linked omf files to read",
+              "Player hud ogf [{visual_path:?} contains {} linked omf files to check",
               linked_visuals.len()
             );
           }

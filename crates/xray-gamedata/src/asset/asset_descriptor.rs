@@ -19,10 +19,6 @@ impl AssetDescriptor {
   pub fn new_with_extension(root_index: usize, relative_path: &str) -> Self {
     let extension: AssetType = AssetType::from_path(relative_path);
 
-    if extension == AssetType::Unknown {
-      log::warn!("Unknown extension asset: {}", relative_path);
-    }
-
     Self {
       root_index,
       hits: 0,
