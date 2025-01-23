@@ -70,6 +70,7 @@ impl GenericCommand for VerifyLtxCommand {
       path,
       LtxProjectOptions {
         is_with_schemes_check: true,
+        is_strict_check: true,
       },
     )?;
 

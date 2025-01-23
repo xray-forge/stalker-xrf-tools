@@ -9,7 +9,7 @@ use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;
 use indexmap::map::Entry;
-use walkdir::DirEntry;
+use std::path::PathBuf;
 
 /// Parser of LTX scheme definitions.
 #[derive(Clone, Debug)]
@@ -17,11 +17,11 @@ pub struct LtxSchemeParser {}
 
 impl LtxSchemeParser {
   /// Parse LTX sections scheme definitions from list of files.
-  pub fn parse_from_files(files: &[DirEntry]) -> Result<LtxSectionSchemes, LtxError> {
+  pub fn parse_from_files(files: &[PathBuf]) -> Result<LtxSectionSchemes, LtxError> {
     let mut schemes: LtxSectionSchemes = Default::default();
 
     for file in files {
-      let ltx: Ltx = Ltx::read_from_path(file.path())?
+      let ltx: Ltx = Ltx::read_from_path(file)?
         .into_included()?
         .into_inherited()?;
 

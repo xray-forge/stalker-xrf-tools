@@ -17,13 +17,13 @@ pub struct LtxProject {
   /// Root path of the project.
   pub root: PathBuf,
   /// List of entry LTX files in the project, entry points that are not included in any file.
-  pub ltx_file_entries: Vec<DirEntry>,
+  pub ltx_file_entries: Vec<PathBuf>,
   /// List of all LTX files in the project.
-  pub ltx_files: Vec<DirEntry>,
+  pub ltx_files: Vec<PathBuf>,
   /// List of all LTX scheme files in the project.
-  pub ltx_scheme_files: Vec<DirEntry>,
+  pub ltx_scheme_files: Vec<PathBuf>,
   /// List of all LTX scheme files in the project.
-  pub ltx_scheme_file_entries: Vec<DirEntry>,
+  pub ltx_scheme_file_entries: Vec<PathBuf>,
   /// Map of section schemes declared in the project.
   pub ltx_scheme_declarations: LtxSectionSchemes,
 }
@@ -31,11 +31,11 @@ pub struct LtxProject {
 impl LtxProject {
   /// Initialize project on provided root.
   pub fn open_at_path_opt(root: &Path, options: LtxProjectOptions) -> LtxResult<Self> {
-    let mut ltx_files: Vec<DirEntry> = Vec::new();
-    let mut ltx_scheme_files: Vec<DirEntry> = Vec::new();
+    let mut ltx_files: Vec<PathBuf> = Vec::new();
+    let mut ltx_scheme_files: Vec<PathBuf> = Vec::new();
     let mut included: Vec<PathBuf> = Vec::new();
 
-    // Filter all the entries that are not accessed by other files and represent entry points.
+    // Read LTX files and shallow-add include statements links.
     for entry in WalkDir::new(root) {
       let entry: DirEntry = entry.map_err(|error| LtxError::Io(error.into_io_error().unwrap()))?;
       let entry_path: &Path = entry.path();
@@ -60,32 +60,58 @@ impl LtxProject {
           }
 
           if options.is_with_schemes_check && Self::is_ltx_scheme_path(entry_path) {
-            ltx_scheme_files.push(entry.clone())
+            ltx_scheme_files.push(entry.path().into())
           }
 
-          ltx_files.push(entry);
+          ltx_files.push(entry.path().into());
         }
       }
     }
 
-    // Filter our entries not included in other files.
-    let ltx_file_entries: Vec<DirEntry> = ltx_files
-      .iter()
-      .filter_map(|it| {
-        if included.contains(&PathBuf::from(it.path())) {
-          None
-        } else {
-          Some(it.clone())
+    let mut ltx_file_entries: Vec<PathBuf> = Vec::new();
+    let mut ltx_file_entries_failures: Vec<(PathBuf, PathBuf)> = Vec::new();
+
+    // Filter our entries not included in other files and consider them entry-points.
+    for ltx_file_path in ltx_files.iter() {
+      if included.contains(ltx_file_path) {
+        continue;
+      }
+
+      // To make checks more strict and consistent, verify typos with case-insensitive Windows OS.
+      // Linux / sane logics fail when assuming that `ExAmPlE.TxT` is same as `example.txt`.
+      // Part of strict checking because original gamedata has such failures.
+      if options.is_strict_check {
+        if let Some(matching_path) = included.iter().find(|it| {
+          it.to_str()
+            .unwrap()
+            .eq_ignore_ascii_case(ltx_file_path.to_str().unwrap())
+        }) {
+          ltx_file_entries_failures.push((ltx_file_path.clone(), matching_path.clone()));
+          continue;
         }
-      })
-      .collect();
+      }
+
+      ltx_file_entries.push(ltx_file_path.clone());
+    }
+
+    // Prepare big message with list of files referenced in case-insensitive check.
+    if !ltx_file_entries_failures.is_empty() {
+      return Err(LtxError::new_convert_error(format!(
+        "Cannot read LTX project safely, detected case-insensitive #include statements:\n{}",
+        ltx_file_entries_failures
+          .iter()
+          .map(|(first, second)| format!("  - {:?} incorrectly imported as {:?}", first, second))
+          .collect::<Vec<_>>()
+          .join("\n")
+      )));
+    }
 
     // Filter our entries not included in other files.
-    let ltx_scheme_file_entries: Vec<DirEntry> = if options.is_with_schemes_check {
+    let ltx_scheme_file_entries: Vec<PathBuf> = if options.is_with_schemes_check {
       ltx_scheme_files
         .iter()
         .filter_map(|it| {
-          if included.contains(&PathBuf::from(it.path())) {
+          if included.contains(&PathBuf::from(it)) {
             None
           } else {
             Some(it.clone())

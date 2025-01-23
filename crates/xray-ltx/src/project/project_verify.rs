@@ -21,16 +21,14 @@ impl LtxProject {
 
     // For each file entry in the project:
     for entry in &self.ltx_file_entries {
-      let entry_path: &Path = entry.path();
-
       // Do not check scheme definitions for scheme files - makes no sense.
-      if Self::is_ltx_scheme_path(entry_path) {
+      if Self::is_ltx_scheme_path(entry) {
         continue;
       } else {
         result.total_files += 1;
       }
 
-      let ltx: Ltx = Ltx::read_from_file_full(entry_path)?;
+      let ltx: Ltx = Ltx::read_from_file_full(entry)?;
 
       // For each section in file:
       for (section_name, section) in &ltx {
@@ -57,7 +55,7 @@ impl LtxProject {
                 .or_else(|| scheme_definition.fields.get(LTX_SYMBOL_ANY))
               {
                 if options.is_verbose && !options.is_silent {
-                  println!("Checking {:?} [{section_name}] {field_name}", entry_path);
+                  println!("Checking {:?} [{section_name}] {field_name}", entry);
                 }
 
                 result.checked_fields += 1;
@@ -71,7 +69,7 @@ impl LtxProject {
                         section_name,
                         message,
                         field,
-                        entry_path.to_str().unwrap(),
+                        entry.to_str().unwrap(),
                       ));
                     }
                     error => return Err(error),
@@ -84,7 +82,7 @@ impl LtxProject {
                   section_name,
                   field_name,
                   "Unexpected field, definition is required in strict mode",
-                  entry_path.to_str().unwrap(),
+                  entry.to_str().unwrap(),
                 ));
               }
             }
@@ -101,7 +99,7 @@ impl LtxProject {
                     section_name,
                     field_name,
                     "Required field was not provided",
-                    entry_path.to_str().unwrap(),
+                    entry.to_str().unwrap(),
                   ));
                 }
               }
@@ -113,7 +111,7 @@ impl LtxProject {
               section_name,
               "*",
               format!("Required schema '{scheme_name}' definition is not found"),
-              entry_path.to_str().unwrap(),
+              entry.to_str().unwrap(),
             ));
           }
 
@@ -128,7 +126,7 @@ impl LtxProject {
             section_name,
             "*",
             "Expected '$schema' field to be defined in strict mode check",
-            entry_path.to_str().unwrap(),
+            entry.to_str().unwrap(),
           ));
         } else {
           result.skipped_sections += 1

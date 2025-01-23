@@ -16,12 +16,12 @@ impl LtxProject {
     }
 
     for entry in &self.ltx_files {
-      if Ltx::format_file(entry.path(), true)? {
+      if Ltx::format_file(entry, true)? {
         result.invalid_files += 1;
-        result.to_format.push(entry.path().into());
+        result.to_format.push(entry.clone());
 
         if !options.is_silent {
-          println!("Formatted: {:?}", entry.path());
+          println!("Formatted: {:?}", entry);
         }
       } else {
         result.valid_files += 1;
@@ -57,12 +57,12 @@ impl LtxProject {
     }
 
     for entry in &self.ltx_files {
-      if Ltx::format_file(entry.path(), false)? {
+      if Ltx::format_file(entry, false)? {
         result.invalid_files += 1;
-        result.to_format.push(entry.path().into());
+        result.to_format.push(entry.clone());
 
         if options.is_logging_enabled() {
-          println!("Not formatted: {:?}", entry.path());
+          println!("Not formatted: {:?}", entry);
         }
       } else {
         result.valid_files += 1;

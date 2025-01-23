@@ -76,6 +76,7 @@ impl GamedataProject {
         &options.configs,
         LtxProjectOptions {
           is_with_schemes_check: true,
+          is_strict_check: false,
         },
       )
       .map_err(|error| {
