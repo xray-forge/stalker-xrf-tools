@@ -2,6 +2,7 @@ use crate::asset::asset_type::AssetType;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::{GamedataError, GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
+use encoding_rs::WINDOWS_1251;
 use full_moon::parse;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
@@ -45,7 +46,7 @@ impl GamedataProject {
                 *invalid_scripts_count.lock().unwrap() += 1;
               }
             }
-            Err(_error) => {
+            Err(_) => {
               if options.is_logging_enabled() {
                 println!("Script verification failed: {:?}", path);
               }
@@ -87,9 +88,7 @@ impl GamedataProject {
     _options: &GamedataProjectVerifyOptions,
     path: &Path,
   ) -> GamedataResult<bool> {
-    let mut code: String = String::new();
-
-    File::open(path)?.read_to_string(&mut code)?;
+    let code: String = Self::read_script_code(path)?;
 
     parse(&code).map_err(|it| {
       GamedataError::new_check_error(format!(
@@ -103,5 +102,31 @@ impl GamedataProject {
     })?;
 
     Ok(true)
+  }
+}
+
+impl GamedataProject {
+  pub fn read_script_code(path: &Path) -> GamedataResult<String> {
+    let mut raw_data: Vec<u8> = Vec::new();
+    let raw_data_read: usize = File::open(path)?.read_to_end(&mut raw_data)?;
+
+    assert_eq!(
+      raw_data_read,
+      raw_data.len(),
+      "Expected raw data size to match in-memory buffer"
+    );
+
+    let (cow, encoding_used, had_errors) = WINDOWS_1251.decode(&raw_data);
+
+    if had_errors {
+      Err(GamedataError::new_asset_error(format!(
+        "Failed to read and decode script {:?} with {:?} encoding, {} bytes",
+        path,
+        encoding_used,
+        raw_data.len()
+      )))
+    } else {
+      Ok(cow.to_string())
+    }
   }
 }

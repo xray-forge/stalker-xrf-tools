@@ -12,6 +12,8 @@ pub async fn verify_configs_path(path: &str) -> TauriResult<Value> {
     &PathBuf::from(path),
     LtxProjectOptions {
       is_with_schemes_check: true,
+      // todo: Probably should be provided as parameter.
+      is_strict_check: false,
     },
   )
   .map_err(error_to_string)?;

@@ -409,9 +409,15 @@ impl<'a> LtxParser<'a> {
       String::from(&include[10..include.len() - 1])
     } else if include.starts_with("#include(\"") && include.ends_with("\")") {
       String::from(&include[10..include.len() - 2])
-    } else if let Some(closing_index) = include[10..].find("\"") {
-      // Closing index is -10 positions:
-      String::from(&include[10..closing_index + 10])
+    } else if include.len() > 10 {
+      if let Some(closing_index) = include[10..].find("\"") {
+        // Closing index is -10 positions:
+        String::from(&include[10..closing_index + 10])
+      } else {
+        return self.error(format!(
+          "Expected correct '#include \"config.ltx\"' statement, got '{include}'"
+        ));
+      }
     } else {
       return self.error(format!(
         "Expected correct '#include \"config.ltx\"' statement, got '{include}'"

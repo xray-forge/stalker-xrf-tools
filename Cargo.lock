@@ -6696,6 +6696,7 @@ version = "0.1.0"
 dependencies = [
  "colored",
  "ddsfile",
+ "encoding_rs",
  "full_moon",
  "log",
  "rayon",

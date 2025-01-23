@@ -13,7 +13,7 @@ impl GamedataGenericVerificationResult for GamedataLtxFormatVerificationResult {
 
   fn get_failure_message(&self) -> String {
     format!(
-      "{}/{} files have invalid format",
+      "{}/{} files have invalid formatting",
       self.inner.invalid_files, self.inner.total_files
     )
   }
