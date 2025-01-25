@@ -3,14 +3,17 @@ use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResu
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use std::path::Path;
+use std::time::Instant;
 use xray_db::{SpawnFile, XRayByteOrder};
 
 impl GamedataProject {
   /// Verify spawn files in spawns directories, not levels spawn files.
   pub fn verify_spawns(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<GamedataSpawnsVerificationResult> {
+    let started_at: Instant = Instant::now();
+
     let spawn_files: Vec<String> = self
       .assets
       .iter()
@@ -36,18 +39,19 @@ impl GamedataProject {
       // todo: Verify result struct.
 
       return Ok(GamedataSpawnsVerificationResult {
+        duration: started_at.elapsed().as_millis(),
         total_spawns: 0,
         invalid_spawns: 0,
       });
     }
 
-    let mut total_spawns: usize = 0;
-    let mut invalid_spawns: usize = 0;
+    let mut total_spawns: u32 = 0;
+    let mut invalid_spawns: u32 = 0;
 
     for relative_path in &spawn_files {
       total_spawns += 1;
 
-      if let Some(spawn_path) = self.get_absolute_asset_path_hit(relative_path) {
+      if let Some(spawn_path) = self.get_absolute_asset_path(relative_path) {
         if !self.verify_spawn(options, &spawn_path)? {
           invalid_spawns += 1;
         }
@@ -56,17 +60,21 @@ impl GamedataProject {
       }
     }
 
+    let duration: u128 = started_at.elapsed().as_millis();
+
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata spawn files: {}/{}",
+        "Verified gamedata spawn files in {} sec, {}/{} are valid",
+        (duration as f64) / 1000.0,
         total_spawns - invalid_spawns,
         total_spawns
       );
     }
 
     Ok(GamedataSpawnsVerificationResult {
-      total_spawns: total_spawns as u64,
-      invalid_spawns: invalid_spawns as u64,
+      duration,
+      total_spawns,
+      invalid_spawns,
     })
   }
 

@@ -1,7 +1,7 @@
 use crate::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_vector_read, ChunkReader, ChunkWriter};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,13 +12,20 @@ pub struct OgfMotionMark {
 
 impl OgfMotionMark {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
-    let name: String = reader.read_null_terminated_win_string()?;
+    let name: String = reader.read_rn_terminated_win_string()?;
+
     let count: u32 = reader.read_u32::<T>()?;
-    let mut intervals: Vec<(f32, f32)> = Vec::new();
+    let mut intervals: Vec<(f32, f32)> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       intervals.push((reader.read_f32::<T>()?, reader.read_f32::<T>()?));
     }
+
+    assert_chunk_vector_read(
+      &intervals,
+      count as usize,
+      "Expected correct count of OGF mark intervals to be read",
+    )?;
 
     Ok(Self { name, intervals })
   }

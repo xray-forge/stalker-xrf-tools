@@ -58,6 +58,15 @@ impl GenericCommand for InfoOgfCommand {
       println!("Description: {:?}", description);
     }
 
+    if let Some(bones) = &ogf_file.bones {
+      println!("Bones: {:?}", bones.bones.len());
+
+      for (index, bone) in bones.bones.iter().enumerate() {
+        println!("[{index}] name: {:?}", bone.name);
+        println!("[{index}] parent: {:?}", bone.parent);
+      }
+    }
+
     if let Some(kinematics) = &ogf_file.kinematics {
       println!("Motion refs: {:?}", kinematics.motion_refs);
     }

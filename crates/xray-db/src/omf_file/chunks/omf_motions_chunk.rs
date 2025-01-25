@@ -47,7 +47,7 @@ impl OmfMotionsChunk {
     Ok(Self { motions })
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, _writer: &mut ChunkWriter, _version: u16) -> DatabaseResult {
     Ok(())
   }
 }

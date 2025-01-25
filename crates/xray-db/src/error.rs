@@ -11,8 +11,10 @@ pub enum DatabaseError {
   NotFound { message: String },
   #[error("Database not implemented error: {message:}")]
   NotImplemented { message: String },
-  #[error("Database parse error: {message:?}")]
+  #[error("Database parse error: {message:}")]
   Parse { message: String },
+  #[error("Database read error: {message:}")]
+  Read { message: String },
   #[error("Database not expected error: {message:}")]
   NotExpected { message: String },
   #[error("Database chunk error: {0}")]
@@ -49,6 +51,15 @@ impl DatabaseError {
     T: Into<String>,
   {
     Self::Parse {
+      message: message.into(),
+    }
+  }
+
+  pub fn new_read_error<T>(message: T) -> Self
+  where
+    T: Into<String>,
+  {
+    Self::Read {
       message: message.into(),
     }
   }

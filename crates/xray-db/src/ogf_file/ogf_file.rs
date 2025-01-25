@@ -1,3 +1,4 @@
+use crate::ogf_file::chunks::ogf_bones_chunk::OgfBonesChunk;
 use crate::ogf_file::chunks::ogf_children_chunk::OgfChildrenChunk;
 use crate::ogf_file::chunks::ogf_description_chunk::OgfDescriptionChunk;
 use crate::ogf_file::chunks::ogf_header_chunk::OgfHeaderChunk;
@@ -19,6 +20,7 @@ use xray_chunk::{
 pub struct OgfFile {
   pub header: OgfHeaderChunk,
   pub texture: Option<OgfTextureChunk>,
+  pub bones: Option<OgfBonesChunk>,
   pub children: Option<OgfChildrenChunk>,
   pub description: Option<OgfDescriptionChunk>,
   pub kinematics: Option<OgfKinematicsChunk>,
@@ -69,6 +71,10 @@ impl OgfFile {
       )?)?,
       texture: match find_optional_chunk_by_id(chunks, OgfTextureChunk::CHUNK_ID) {
         Some(mut it) => Some(OgfTextureChunk::read::<T>(&mut it)?),
+        None => None,
+      },
+      bones: match find_optional_chunk_by_id(chunks, OgfBonesChunk::CHUNK_ID) {
+        Some(mut it) => Some(OgfBonesChunk::read::<T>(&mut it)?),
         None => None,
       },
       children: match find_optional_chunk_by_id(chunks, OgfChildrenChunk::CHUNK_ID) {

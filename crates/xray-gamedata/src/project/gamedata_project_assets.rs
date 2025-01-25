@@ -164,12 +164,94 @@ impl GamedataProject {
       })
   }
 
+  pub fn get_prefixed_masked_assets(
+    &self,
+    prefix: &str,
+    mask: &str,
+  ) -> Vec<(PathBuf, &AssetDescriptor)> {
+    let asset_mask: PathBuf = PathBuf::from(prefix.to_lowercase()).join(mask.to_lowercase());
+    let split: Vec<&str> = asset_mask.to_str().unwrap().split('*').collect::<Vec<_>>();
+
+    if split.len() != 2 {
+      return Vec::new();
+    }
+
+    self
+      .assets
+      .iter()
+      .filter_map(|(path, descriptor)| {
+        if path.starts_with(split.first().unwrap()) && path.ends_with(split.last().unwrap()) {
+          Some((
+            self
+              .roots
+              .get(descriptor.root_index)
+              .expect("Correct root setup")
+              .join(path),
+            descriptor,
+          ))
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<_>>()
+  }
+
+  pub fn get_prefixed_masked_assets_mut(
+    &mut self,
+    prefix: &str,
+    mask: &str,
+  ) -> Vec<(PathBuf, &mut AssetDescriptor)> {
+    let asset_mask: PathBuf = PathBuf::from(prefix.to_lowercase()).join(mask.to_lowercase());
+    let split: Vec<&str> = asset_mask.to_str().unwrap().split('*').collect::<Vec<_>>();
+
+    if split.len() != 2 {
+      return Vec::new();
+    }
+
+    self
+      .assets
+      .iter_mut()
+      .filter_map(|(path, descriptor)| {
+        if path.starts_with(split.first().unwrap()) && path.ends_with(split.last().unwrap()) {
+          Some((
+            self
+              .roots
+              .get(descriptor.root_index)
+              .expect("Correct root setup")
+              .join(path),
+            descriptor,
+          ))
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<_>>()
+  }
+
   pub fn get_ogf_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
     self.get_mesh_path_hit(visual_path, ".ogf")
   }
 
   pub fn get_omf_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
     self.get_mesh_path_hit(visual_path, ".omf")
+  }
+
+  pub fn get_omf_paths_hit(&mut self, visual_path: &str) -> Vec<PathBuf> {
+    let mut paths: Vec<PathBuf> = Vec::new();
+
+    if visual_path.ends_with("*.omf") {
+      let visuals: Vec<(PathBuf, &mut AssetDescriptor)> =
+        self.get_prefixed_masked_assets_mut("meshes", visual_path);
+
+      for (path, descriptor) in visuals {
+        descriptor.add_hit();
+        paths.push(path);
+      }
+    } else if let Some(path) = self.get_mesh_path_hit(visual_path, ".omf") {
+      paths.push(path);
+    }
+
+    paths
   }
 
   pub fn get_mesh_path_hit(&mut self, visual_path: &str, extension: &str) -> Option<PathBuf> {

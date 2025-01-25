@@ -1,3 +1,4 @@
+pub(crate) mod ogf_bone;
 pub(crate) mod ogf_box;
 pub(crate) mod ogf_color;
 pub(crate) mod ogf_header;

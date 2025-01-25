@@ -2,9 +2,9 @@ use crate::asset::asset_type::AssetType;
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::Instant;
-use xray_db::{OgfFile, XRayByteOrder};
+use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 
 impl GamedataProject {
   pub fn verify_meshes(
@@ -16,8 +16,8 @@ impl GamedataProject {
     }
 
     let started_at: Instant = Instant::now();
-    let mut checked_meshes_count: usize = 0;
-    let mut invalid_meshes_count: usize = 0;
+    let mut checked_meshes_count: u32 = 0;
+    let mut invalid_meshes_count: u32 = 0;
 
     for path in self.get_all_asset_paths_by_type(AssetType::Ogf) {
       if options.is_verbose_logging_enabled() {
@@ -31,7 +31,7 @@ impl GamedataProject {
           Ok(is_valid) => {
             if !is_valid {
               if options.is_logging_enabled() {
-                println!("Mesh is not valid: {:?}", path);
+                eprintln!("Mesh is not valid: {:?}", path);
               }
 
               invalid_meshes_count += 1;
@@ -39,7 +39,7 @@ impl GamedataProject {
           }
           Err(error) => {
             if options.is_logging_enabled() {
-              println!("Mesh verification failed: {:?} - {error}", path);
+              eprintln!("Mesh verification failed: {:?} - {error}", path);
             }
 
             invalid_meshes_count += 1;
@@ -47,7 +47,7 @@ impl GamedataProject {
         }
       } else {
         if options.is_logging_enabled() {
-          println!("Mesh path not found: {:?}", path);
+          eprintln!("Mesh path not found: {:?}", path);
         }
 
         invalid_meshes_count += 1;
@@ -67,8 +67,8 @@ impl GamedataProject {
 
     Ok(GamedataMeshesVerificationResult {
       duration,
-      invalid_meshes: invalid_meshes_count as u64,
-      checked_meshes: checked_meshes_count as u64,
+      invalid_meshes_count,
+      checked_meshes_count,
     })
   }
 
@@ -94,10 +94,58 @@ impl GamedataProject {
       is_valid = false;
     }
 
+    // Verify all nested children in mesh object.
     if let Some(children) = &ogf.children {
       for child in &children.nested {
         if !self.verify_mesh(options, child)? {
           is_valid = false;
+        }
+      }
+    }
+
+    // Verify all motion refs injected in OGF file.
+    if let Some(kinematics) = &ogf.kinematics {
+      for motion_ref in &kinematics.motion_refs {
+        let motion_paths: Vec<PathBuf> = self.get_omf_paths_hit(motion_ref);
+
+        if motion_paths.is_empty() {
+          if options.is_logging_enabled() {
+            eprintln!("Mesh motion refs not found by path: {motion_ref}");
+          }
+
+          is_valid = false;
+        } else {
+          for motion_path in motion_paths {
+            match OmfFile::read_from_path::<XRayByteOrder, &Path>(&motion_path) {
+              Ok(omf) => match self.verify_mesh_motion(options, ogf, &omf) {
+                Ok(result) => {
+                  if !result {
+                    is_valid = false;
+                  }
+                }
+                Err(error) => {
+                  if options.is_logging_enabled() {
+                    eprintln!(
+                      "Mesh motion file failed to read: {:?}, error: {}",
+                      motion_path, error
+                    );
+                  }
+
+                  is_valid = false;
+                }
+              },
+              Err(error) => {
+                if options.is_logging_enabled() {
+                  eprintln!(
+                    "Mesh motion file failed to read: {:?}, error: {}",
+                    motion_path, error
+                  );
+                }
+
+                is_valid = false;
+              }
+            }
+          }
         }
       }
     }
@@ -124,6 +172,31 @@ impl GamedataProject {
       }
 
       // todo: Shader check?
+    }
+
+    Ok(is_valid)
+  }
+
+  pub fn verify_mesh_motion(
+    &mut self,
+    options: &GamedataProjectVerifyOptions,
+    ogf: &OgfFile,
+    omf: &OmfFile,
+  ) -> GamedataResult<bool> {
+    let mut is_valid: bool = true;
+
+    if let Some(bones) = &ogf.bones {
+      if bones.bones.len() != omf.get_bones_count() {
+        if options.is_logging_enabled() {
+          eprintln!(
+            "Not matching bones count in ogf and omf: {} <-> {}",
+            bones.bones.len(),
+            omf.get_bones_count()
+          );
+        }
+
+        is_valid = false;
+      }
     }
 
     Ok(is_valid)

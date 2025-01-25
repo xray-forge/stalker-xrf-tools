@@ -5,6 +5,7 @@ use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
 use regex::Regex;
 use std::path::Path;
+use std::time::Instant;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_ltx::{Ltx, Section};
 
@@ -17,6 +18,7 @@ impl GamedataProject {
       println!("{}", "Verify gamedata LTX weapons:".green());
     }
 
+    let started_at: Instant = Instant::now();
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
 
     let mut checked_weapons_count: u32 = 0;
@@ -49,14 +51,18 @@ impl GamedataProject {
       }
     }
 
+    let duration: u128 = started_at.elapsed().as_millis();
+
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata weapons, {}/{checked_weapons_count} valid",
+        "Verified gamedata weapons in {} sec, {}/{checked_weapons_count} valid",
+        (duration as f64) / 1000.0,
         checked_weapons_count - invalid_weapons_count,
       );
     }
 
     Ok(GamedataWeaponVerificationResult {
+      duration,
       checked_weapons_count,
       invalid_weapons_count,
     })

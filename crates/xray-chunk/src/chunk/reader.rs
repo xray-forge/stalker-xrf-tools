@@ -138,13 +138,17 @@ impl ChunkReader {
     let offset: u64 = self.file.stream_position()?;
     let mut buffer: Vec<u8> = Vec::new();
 
-    self.file.read_to_end(&mut buffer)?;
+    // todo: Fix this mess with full read, smaller chunks should be better.
+    self.file.read_to_end(&mut buffer).map_err(|error| {
+      ChunkError::new_parsing_chunk_error(format!("Failed to read null terminated string: {error}"))
+    })?;
 
     if let Some(position) = buffer.iter().position(|&x| x == 0x00) {
       let slice: &[u8] = &buffer[..position];
       let (transformed, _, had_errors) = WINDOWS_1251.decode(slice);
 
       if had_errors {
+        // todo: Replace with result.
         panic!("Unexpected errors when decoding windows-1251 string data");
       }
 
@@ -158,12 +162,62 @@ impl ChunkReader {
       self
         .file
         .seek(SeekFrom::Start(offset + position as u64 + 1))
-        .expect("Correct object seek movement");
+        .expect("Correct object seek movement when reading null terminated string");
 
       Ok(value)
     } else {
       Err(ChunkError::new_no_null_terminator_error(
         "Failed to read null terminated string",
+      ))
+    }
+  }
+
+  /// Read \r\n terminated windows encoded string from file bytes.
+  pub fn read_rn_terminated_win_string(&mut self) -> ChunkResult<String> {
+    let offset: u64 = self.file.stream_position()?;
+    let mut buffer: Vec<u8> = Vec::new();
+
+    // todo: Fix this mess with full read, smaller chunks should be better.
+    self.file.read_to_end(&mut buffer).map_err(|error| {
+      ChunkError::new_parsing_chunk_error(format!(
+        "Failed to read \\r\\n terminated string: {error}"
+      ))
+    })?;
+
+    if let Some(position) = buffer.iter().position(|&x| x == 0x0D) {
+      if position == buffer.len() - 1 || buffer[position + 1] != 0x0A {
+        return Err(ChunkError::new_parsing_chunk_error(format!(
+          "Failed to read \\r\\n terminated string,\
+             string should have proper ending, index: {}, length: {}",
+          position,
+          buffer.len()
+        )));
+      }
+
+      let slice: &[u8] = &buffer[..position];
+      let (transformed, _, had_errors) = WINDOWS_1251.decode(slice);
+
+      if had_errors {
+        // todo: Replace with result.
+        panic!("Unexpected errors when decoding windows-1251 string data");
+      }
+
+      // Try with windows 1251 conversion:
+      let value: String = match transformed {
+        Cow::Borrowed(value) => value.to_owned(),
+        Cow::Owned(value) => value,
+      };
+
+      // Put seek right after string - length plus zero terminator.
+      self
+        .file
+        .seek(SeekFrom::Start(offset + position as u64 + 2))
+        .expect("Correct object seek movement when reading \\r\\n string");
+
+      Ok(value)
+    } else {
+      Err(ChunkError::new_no_null_terminator_error(
+        "Failed to read \\r\\n terminated string",
       ))
     }
   }

@@ -15,6 +15,15 @@ pub fn assert_chunk_read(chunk: &ChunkReader, message: &str) -> ChunkResult<()> 
   }
 }
 
+/// Assert chunk vector read with correct len.
+pub fn assert_chunk_vector_read<T>(data: &[T], expected: usize, message: &str) -> ChunkResult<()> {
+  if data.len() == expected {
+    Ok(())
+  } else {
+    Err(ChunkError::new_invalid_chunk_error(message))
+  }
+}
+
 /// Find chink in list by id.
 pub fn find_optional_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<ChunkReader> {
   chunks.iter().find(|it| it.id == id).cloned()

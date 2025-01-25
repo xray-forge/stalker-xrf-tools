@@ -16,6 +16,8 @@ pub struct OmfFile {
 }
 
 impl OmfFile {
+  pub const SUPPORTED_VERSIONS: [u16; 2] = [3, 4];
+
   pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
     Self::read_from_file::<T>(File::open(&path).map_err(|error| {
       DatabaseError::new_not_found_error(format!(
@@ -56,12 +58,18 @@ impl OmfFile {
 
     let parameters: OmfParametersChunk = OmfParametersChunk::read::<T>(
       &mut find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?,
-    )?;
+    )
+    .map_err(|error| {
+      DatabaseError::new_read_error(format!("Failed to read OMF parameters: {error}"))
+    })?;
 
     let motions: OmfMotionsChunk = OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
       chunks,
       OmfMotionsChunk::CHUNK_ID,
-    )?)?;
+    )?)
+    .map_err(|error| {
+      DatabaseError::new_read_error(format!("Failed to read OMF motions: {error}"))
+    })?;
 
     if parameters.motions.len() != motions.motions.len() {
       return Err(DatabaseError::new_parse_error(format!(
@@ -76,7 +84,9 @@ impl OmfFile {
       motions,
     })
   }
+}
 
+impl OmfFile {
   /// Read only list of motions specifically and skip other data parts.
   pub fn read_motions_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Vec<String>> {
     Self::read_motions_from_file::<T>(File::open(path)?)
@@ -102,5 +112,16 @@ impl OmfFile {
       .map(|it| it.name.clone())
       .collect(),
     )
+  }
+}
+
+impl OmfFile {
+  pub fn get_bones_count(&self) -> usize {
+    self
+      .parameters
+      .parts
+      .iter()
+      .map(|it| it.get_bones().len())
+      .sum::<usize>()
   }
 }

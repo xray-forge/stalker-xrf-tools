@@ -13,6 +13,9 @@ impl GamedataGenericVerificationResult for GamedataAnimationsVerificationResult 
   }
 
   fn get_failure_message(&self) -> String {
-    String::from("HUD animations are not valid")
+    format!(
+      "{}/{} HUD animations are invalid",
+      self.invalid_huds_count, self.checked_huds_count
+    )
   }
 }

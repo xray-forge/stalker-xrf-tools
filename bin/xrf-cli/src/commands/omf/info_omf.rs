@@ -62,16 +62,7 @@ impl GenericCommand for InfoOmfCommand {
     );
 
     for part in &omf_file.parameters.parts {
-      println!(
-        "Part '{}' bones: {}",
-        part.name,
-        part
-          .bones
-          .iter()
-          .map(|it| it.0.clone())
-          .collect::<Vec<String>>()
-          .join(",")
-      )
+      println!("Part '{}' bones: {}", part.name, part.get_bones().join(","))
     }
 
     Ok(())

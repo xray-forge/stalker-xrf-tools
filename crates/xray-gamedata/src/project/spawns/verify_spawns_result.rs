@@ -2,8 +2,9 @@ use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
 
 #[derive(Default)]
 pub struct GamedataSpawnsVerificationResult {
-  pub total_spawns: u64,
-  pub invalid_spawns: u64,
+  pub duration: u128,
+  pub total_spawns: u32,
+  pub invalid_spawns: u32,
 }
 
 impl GamedataGenericVerificationResult for GamedataSpawnsVerificationResult {

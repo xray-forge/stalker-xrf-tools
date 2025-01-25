@@ -46,7 +46,7 @@ impl GamedataProject {
     &mut self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<(u32, u32)> {
-    if options.is_logging_enabled() {
+    if options.is_verbose_logging_enabled() {
       println!("Verify player hud animations");
     }
 
@@ -60,7 +60,7 @@ impl GamedataProject {
         continue;
       }
 
-      if options.is_logging_enabled() {
+      if options.is_verbose_logging_enabled() {
         println!("Verify player hud config [{section_name}]");
       }
 
@@ -118,6 +118,14 @@ impl GamedataProject {
           for linked_visual in &linked_visuals {
             match OmfFile::read_motions_from_path::<XRayByteOrder>(linked_visual) {
               Ok(motions) => {
+                if motions.is_empty() {
+                  if options.is_logging_enabled() {
+                    eprintln!("No motions in visual: [{section_name}] - {linked_visual:?}",);
+                  }
+
+                  is_valid = false;
+                }
+
                 for motion in motions {
                   if let Some(_existing) = hud_motions.get(&motion) {
                     if options.is_logging_enabled() {
@@ -200,7 +208,7 @@ impl GamedataProject {
     section_name: &str,
     motions: &[&String],
   ) -> GamedataResult<bool> {
-    if options.is_logging_enabled() {
+    if options.is_verbose_logging_enabled() {
       println!("Verify weapons animations for [{section_name}]");
     }
 

@@ -1,6 +1,6 @@
 use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
 use crate::data::ogf::ogf_part::OgfPart;
-use crate::{DatabaseError, DatabaseResult};
+use crate::{DatabaseError, DatabaseResult, OmfFile};
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
@@ -14,7 +14,6 @@ pub struct OmfParametersChunk {
 
 impl OmfParametersChunk {
   pub const CHUNK_ID: u32 = 15; // 0x14, 0xF
-  pub const SUPPORTED_VERSION: u16 = 4;
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
@@ -24,15 +23,21 @@ impl OmfParametersChunk {
 
     let version: u16 = reader.read_u16::<T>()?;
 
-    if version != Self::SUPPORTED_VERSION {
+    if !OmfFile::SUPPORTED_VERSIONS.contains(&version) {
       return Err(DatabaseError::new_not_implemented_error(format!(
-        "Unexpected parameters version {version}, only version {} is implemented",
-        Self::SUPPORTED_VERSION
+        "Unexpected parameters version {version} on read, only versions {:?} is implemented",
+        OmfFile::SUPPORTED_VERSIONS
       )));
     }
 
-    let parts: Vec<OgfPart> = OgfPart::read_list::<T>(reader)?;
-    let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader)?;
+    let parts: Vec<OgfPart> = OgfPart::read_list::<T>(reader).map_err(|error| {
+      DatabaseError::new_read_error(format!("Failed to read ogf parts: {error}"))
+    })?;
+
+    let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader, version)
+      .map_err(|error| {
+        DatabaseError::new_read_error(format!("Failed to read ogf motion definitions: {error}"))
+      })?;
 
     assert!(
       reader.is_ended(),
