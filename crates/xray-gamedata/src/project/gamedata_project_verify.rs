@@ -18,18 +18,19 @@ impl GamedataProject {
 
     let mut result: GamedataVerificationResult = GamedataVerificationResult {
       duration: 0,
-      format_result: self.verify_ltx_format(options),
-      schemes_result: self.verify_ltx_schemes(options),
-      spawns_result: self.verify_spawns(options),
-      weapons_result: self.verify_ltx_weapons(options),
-      meshes_result: self.verify_meshes(options),
       animations_result: self.verify_animations(options),
-      textures_result: self.verify_textures(options),
-      sounds_result: self.verify_sounds(options),
+      format_result: self.verify_ltx_format(options),
       levels_result: self.verify_levels(options),
-      weathers_result: self.verify_weathers(options),
+      meshes_result: self.verify_meshes(options),
+      particles_result: self.verify_particles(options),
+      schemes_result: self.verify_ltx_schemes(options),
       scripts_result: self.verify_scripts(options),
       shaders_result: self.verify_shaders(options),
+      sounds_result: self.verify_sounds(options),
+      spawns_result: self.verify_spawns(options),
+      textures_result: self.verify_textures(options),
+      weapons_result: self.verify_ltx_weapons(options),
+      weathers_result: self.verify_weathers(options),
       // todo: Verify lua syntax and format with scripts check.
     };
 

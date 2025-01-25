@@ -28,10 +28,8 @@ impl GamedataProject {
 
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata animations in {} sec, {}/{} huds are valid",
+        "Verified gamedata animations in {} sec",
         (duration as f64) / 1000.0,
-        checked_huds_count - invalid_huds_count,
-        invalid_huds_count
       );
     }
 

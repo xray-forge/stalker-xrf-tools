@@ -31,7 +31,7 @@ impl GamedataProject {
 
         *checked_meshes_count.lock().unwrap() += 1;
 
-        if let Some(path) = self.get_absolute_asset_path(&path) {
+        if let Some(path) = self.get_absolute_asset_path(path) {
           match self.verify_mesh_by_path(options, &path) {
             Ok(is_valid) => {
               if !is_valid {

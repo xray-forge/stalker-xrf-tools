@@ -70,6 +70,21 @@ impl GamedataProject {
       .collect::<Vec<_>>()
   }
 
+  /// Get list of all asset relative paths by provided ending part.
+  pub fn get_all_asset_absolute_paths_by_ends_with(&self, filter: &str) -> Vec<PathBuf> {
+    self
+      .assets
+      .iter()
+      .filter_map(|(path, _)| {
+        if path.ends_with(filter) {
+          self.get_absolute_asset_path(&path)
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<_>>()
+  }
+
   pub fn get_absolute_asset_path(&self, relative_path: &str) -> Option<PathBuf> {
     self.get_prefixed_absolute_asset_path("", relative_path)
   }

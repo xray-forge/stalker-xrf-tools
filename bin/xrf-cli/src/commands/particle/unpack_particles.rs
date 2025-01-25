@@ -75,7 +75,8 @@ impl GenericCommand for UnpackParticlesCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder>(path)?;
+    let particles_file: ParticlesFile =
+      ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(path)?;
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.export_to_path(destination)?;

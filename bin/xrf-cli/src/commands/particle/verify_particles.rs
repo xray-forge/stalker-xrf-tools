@@ -47,8 +47,12 @@ impl GenericCommand for VerifyParticlesFileCommand {
     let particles_file_result: CommandResult<ParticlesFile> = if unpacked {
       ParticlesFile::import_from_path(path).map_err(Into::into)
     } else {
-      ParticlesFile::read_from_path::<XRayByteOrder>(path).map_err(Into::into)
+      ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(path).map_err(Into::into)
     };
+
+    // todo: Check nested textures.
+    // todo: Check nested textures.
+    // todo: Check nested textures.
 
     match particles_file_result {
       Ok(_) => {

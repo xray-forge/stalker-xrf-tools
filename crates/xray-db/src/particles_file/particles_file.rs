@@ -23,7 +23,7 @@ pub struct ParticlesFile {
 
 impl ParticlesFile {
   /// Read particles xr file from provided path.
-  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
+  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 

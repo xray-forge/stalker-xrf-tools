@@ -8,6 +8,7 @@ pub(crate) mod gamedata_verification_result;
 pub(crate) mod levels;
 pub(crate) mod ltx;
 pub(crate) mod meshes;
+pub(crate) mod particles;
 pub(crate) mod scripts;
 pub(crate) mod shaders;
 pub(crate) mod sounds;

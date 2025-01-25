@@ -6,6 +6,7 @@ use crate::project::ltx::verify_ltx_result::{
   GamedataLtxFormatVerificationResult, GamedataLtxVerificationResult,
 };
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
+use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
 use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
@@ -21,6 +22,7 @@ pub struct GamedataVerificationResult {
   pub format_result: GamedataResult<GamedataLtxFormatVerificationResult>,
   pub levels_result: GamedataResult<GamedataLevelVerificationResult>,
   pub meshes_result: GamedataResult<GamedataMeshesVerificationResult>,
+  pub particles_result: GamedataResult<GamedataParticlesVerificationResult>,
   pub schemes_result: GamedataResult<GamedataLtxVerificationResult>,
   pub scripts_result: GamedataResult<GamedataScriptsVerificationResult>,
   pub shaders_result: GamedataResult<GamedataShadersVerificationResult>,
@@ -34,29 +36,57 @@ pub struct GamedataVerificationResult {
 impl GamedataVerificationResult {
   pub fn is_valid(&self) -> bool {
     self
-      .format_result
+      .animations_result
       .as_ref()
-      .is_ok_and(GamedataLtxFormatVerificationResult::is_valid)
+      .is_ok_and(GamedataAnimationsVerificationResult::is_valid)
+      && self
+        .format_result
+        .as_ref()
+        .is_ok_and(GamedataLtxFormatVerificationResult::is_valid)
+      && self
+        .spawns_result
+        .as_ref()
+        .is_ok_and(GamedataSpawnsVerificationResult::is_valid)
+      && self
+        .meshes_result
+        .as_ref()
+        .is_ok_and(GamedataMeshesVerificationResult::is_valid)
+      && self
+        .levels_result
+        .as_ref()
+        .is_ok_and(GamedataLevelVerificationResult::is_valid)
+      && self
+        .particles_result
+        .as_ref()
+        .is_ok_and(GamedataParticlesVerificationResult::is_valid)
       && self
         .schemes_result
         .as_ref()
         .is_ok_and(GamedataLtxVerificationResult::is_valid)
-      && self.spawns_result.is_ok()
+      && self
+        .scripts_result
+        .as_ref()
+        .is_ok_and(GamedataScriptsVerificationResult::is_valid)
+      && self
+        .shaders_result
+        .as_ref()
+        .is_ok_and(GamedataShadersVerificationResult::is_valid)
+      && self
+        .sounds_result
+        .as_ref()
+        .is_ok_and(GamedataSoundsVerificationResult::is_valid)
+      && self
+        .textures_result
+        .as_ref()
+        .is_ok_and(GamedataTexturesVerificationResult::is_valid)
       && self
         .weapons_result
         .as_ref()
         .is_ok_and(GamedataWeaponVerificationResult::is_valid)
-      && self.meshes_result.is_ok()
       && self
-        .animations_result
+        .weathers_result
         .as_ref()
-        .is_ok_and(GamedataAnimationsVerificationResult::is_valid)
-      && self.textures_result.is_ok()
-      && self.scripts_result.is_ok()
-      && self.sounds_result.is_ok()
-      && self.levels_result.is_ok()
-      && self.weathers_result.is_ok()
-      && self.shaders_result.is_ok()
+        .is_ok_and(GamedataWeathersVerificationResult::is_valid)
   }
 
   pub fn get_failure_messages(&self) -> Vec<String> {
@@ -65,8 +95,9 @@ impl GamedataVerificationResult {
       Self::get_result_failure_message(&self.format_result, "format"),
       Self::get_result_failure_message(&self.levels_result, "levels"),
       Self::get_result_failure_message(&self.meshes_result, "meshes"),
-      Self::get_result_failure_message(&self.scripts_result, "scripts"),
+      Self::get_result_failure_message(&self.particles_result, "particles"),
       Self::get_result_failure_message(&self.schemes_result, "schemes"),
+      Self::get_result_failure_message(&self.scripts_result, "scripts"),
       Self::get_result_failure_message(&self.shaders_result, "shaders"),
       Self::get_result_failure_message(&self.sounds_result, "sounds"),
       Self::get_result_failure_message(&self.spawns_result, "spawns"),
