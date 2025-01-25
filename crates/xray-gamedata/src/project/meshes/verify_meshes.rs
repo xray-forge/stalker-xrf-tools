@@ -186,12 +186,30 @@ impl GamedataProject {
     let mut is_valid: bool = true;
 
     if let Some(bones) = &ogf.bones {
-      if bones.bones.len() != omf.get_bones_count() {
+      let omf_bones: Vec<&str> = omf.get_bones();
+
+      if bones.bones.len() != omf_bones.len() {
         if options.is_logging_enabled() {
           eprintln!(
-            "Not matching bones count in ogf and omf: {} <-> {}",
+            "Not matching bones count in ogf and reference omf: {} <-> {} : {:?} <-> {:?}",
             bones.bones.len(),
-            omf.get_bones_count()
+            omf_bones.len(),
+            bones.bones.iter().map(|it| &it.name).collect::<Vec<_>>(),
+            omf_bones
+          );
+        }
+
+        is_valid = false;
+      } else if bones
+        .bones
+        .iter()
+        .any(|it| !omf_bones.contains(&it.name.as_str()))
+      {
+        if options.is_logging_enabled() {
+          eprintln!(
+            "Missing bones in OMF file for OGF mesh: {:?} <-> {:?}",
+            bones.bones.iter().map(|it| &it.name).collect::<Vec<_>>(),
+            omf_bones
           );
         }
 

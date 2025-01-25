@@ -116,6 +116,15 @@ impl OmfFile {
 }
 
 impl OmfFile {
+  pub fn get_bones(&self) -> Vec<&str> {
+    self
+      .parameters
+      .parts
+      .iter()
+      .flat_map(|it| it.get_bones())
+      .collect::<Vec<_>>()
+  }
+
   pub fn get_bones_count(&self) -> usize {
     self
       .parameters

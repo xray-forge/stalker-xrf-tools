@@ -45,3 +45,13 @@ impl OgfBonesChunk {
     Ok(())
   }
 }
+
+impl OgfBonesChunk {
+  pub fn get_bone_names(&self) -> Vec<&str> {
+    self
+      .bones
+      .iter()
+      .map(|it| it.name.as_str())
+      .collect::<Vec<_>>()
+  }
+}
