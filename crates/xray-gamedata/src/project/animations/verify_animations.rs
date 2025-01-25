@@ -13,7 +13,7 @@ use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
   pub fn verify_animations(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<GamedataAnimationsVerificationResult> {
     if options.is_logging_enabled() {
@@ -43,7 +43,7 @@ impl GamedataProject {
   }
 
   pub fn verify_player_hud_animations(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<(u32, u32)> {
     if options.is_verbose_logging_enabled() {
@@ -89,7 +89,7 @@ impl GamedataProject {
   }
 
   pub fn verify_player_hud_animation(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     section_name: &str,
     section: &Section,
@@ -98,10 +98,7 @@ impl GamedataProject {
 
     let mut hud_motions: HashMap<String, String> = HashMap::new();
 
-    if let Some(visual_path) = &section
-      .get("visual")
-      .and_then(|it| self.get_ogf_path_hit(it))
-    {
+    if let Some(visual_path) = &section.get("visual").and_then(|it| self.get_ogf_path(it)) {
       if options.is_verbose_logging_enabled() {
         println!("Read player hud motion refs - [{section_name}] {visual_path:?}");
       }
@@ -203,7 +200,7 @@ impl GamedataProject {
 
 impl GamedataProject {
   pub fn verify_hud_weapons_animations(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     section_name: &str,
     motions: &[&String],
@@ -258,7 +255,7 @@ impl GamedataProject {
   }
 
   pub fn read_player_hud_motion_refs(
-    &mut self,
+    &self,
     visual_path: &Path,
   ) -> GamedataResult<HashSet<PathBuf>> {
     let motion_refs: Vec<String> =
@@ -286,11 +283,11 @@ impl GamedataProject {
         for omf in matching_omf {
           assets.insert(
             self
-              .get_absolute_asset_path_hit(&omf)
+              .get_absolute_asset_path(&omf)
               .expect("Defined assets from pattern matching should be existing"),
           );
         }
-      } else if let Some(visual_path) = self.get_omf_path_hit(motion_ref) {
+      } else if let Some(visual_path) = self.get_omf_path(motion_ref) {
         assets.insert(visual_path);
       }
     }

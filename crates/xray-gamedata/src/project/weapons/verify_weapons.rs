@@ -11,7 +11,7 @@ use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
   pub fn verify_ltx_weapons(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<GamedataWeaponVerificationResult> {
     if options.is_logging_enabled() {
@@ -69,7 +69,7 @@ impl GamedataProject {
   }
 
   pub fn verify_ltx_weapon(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     ltx: &Ltx,
     section_name: &str,
@@ -102,7 +102,7 @@ impl GamedataProject {
   }
 
   pub fn verify_weapon_hud(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     ltx: &Ltx,
     section_name: &str,
@@ -110,10 +110,7 @@ impl GamedataProject {
   ) -> GamedataResult<bool> {
     let mut is_valid: bool = true;
 
-    if let Some(visual) = &section
-      .get("visual")
-      .and_then(|it| self.get_ogf_path_hit(it))
-    {
+    if let Some(visual) = &section.get("visual").and_then(|it| self.get_ogf_path(it)) {
       if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, &Path>(visual) {
         if options.is_logging_enabled() {
           eprintln!(
@@ -151,7 +148,7 @@ impl GamedataProject {
 
     if let Some(visual_path) = &hud_section
       .get("item_visual")
-      .and_then(|it| self.get_ogf_path_hit(it))
+      .and_then(|it| self.get_ogf_path(it))
     {
       match OgfFile::read_from_path::<XRayByteOrder, &Path>(visual_path) {
         Ok(hud_visual) => {
@@ -159,7 +156,7 @@ impl GamedataProject {
             let mut ref_animations: Vec<String> = Vec::new();
 
             for motion_ref in &motion_refs {
-              if let Some(motion_file_path) = self.get_omf_path_hit(motion_ref) {
+              if let Some(motion_file_path) = self.get_omf_path(motion_ref) {
                 match OmfFile::read_motions_from_path::<XRayByteOrder>(&motion_file_path) {
                   Ok(motions) => ref_animations.extend(motions),
                   Err(error) => {
@@ -225,7 +222,7 @@ impl GamedataProject {
   }
 
   pub fn verify_weapon_sounds(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     ltx: &Ltx,
     section_name: &str,
@@ -282,7 +279,7 @@ impl GamedataProject {
   }
 
   pub fn verify_weapon_sound_layer(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     _: &Ltx,
     section_name: &str,
@@ -320,7 +317,7 @@ impl GamedataProject {
   }
 
   fn verify_weapon_sound_layer_field_name(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     section_name: &str,
     field_name: &str,
@@ -345,7 +342,7 @@ impl GamedataProject {
   }
 
   fn verify_weapon_sound_asset(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
     section_name: &str,
     field_name: &str,
@@ -362,9 +359,7 @@ impl GamedataProject {
     }
 
     // todo: Check OGG file, check existing.
-    if let Some(sound_path) =
-      self.get_prefixed_absolute_asset_path_hit("sounds", &sound_object_value)
-    {
+    if let Some(sound_path) = self.get_prefixed_absolute_asset_path("sounds", &sound_object_value) {
       if sound_path.is_file() && sound_path.exists() {
         if options.is_verbose_logging_enabled() {
           eprintln!(

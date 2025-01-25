@@ -14,7 +14,7 @@ use std::time::Instant;
 
 impl GamedataProject {
   pub fn verify_scripts(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<GamedataScriptsVerificationResult> {
     if options.is_logging_enabled() {

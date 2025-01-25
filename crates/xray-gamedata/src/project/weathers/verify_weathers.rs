@@ -4,7 +4,7 @@ use colored::Colorize;
 
 impl GamedataProject {
   pub fn verify_weathers(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<GamedataWeathersVerificationResult> {
     if options.is_logging_enabled() {

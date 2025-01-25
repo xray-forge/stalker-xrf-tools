@@ -3,7 +3,6 @@ use crate::asset::asset_type::AssetType;
 #[derive(Debug, Clone, PartialEq)]
 pub struct AssetDescriptor {
   pub root_index: usize,
-  pub hits: usize,
   pub asset_type: AssetType,
 }
 
@@ -11,7 +10,6 @@ impl AssetDescriptor {
   pub fn new(root_index: usize) -> Self {
     Self {
       root_index,
-      hits: 0,
       asset_type: AssetType::Unknown,
     }
   }
@@ -21,14 +19,7 @@ impl AssetDescriptor {
 
     Self {
       root_index,
-      hits: 0,
       asset_type: extension,
     }
-  }
-}
-
-impl AssetDescriptor {
-  pub fn add_hit(&mut self) {
-    self.hits += 1;
   }
 }

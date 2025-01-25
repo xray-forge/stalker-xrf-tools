@@ -74,10 +74,6 @@ impl GamedataProject {
     self.get_prefixed_absolute_asset_path("", relative_path)
   }
 
-  pub fn get_absolute_asset_path_hit(&mut self, relative_path: &str) -> Option<PathBuf> {
-    self.get_prefixed_absolute_asset_path_hit("", relative_path)
-  }
-
   pub fn get_prefixed_absolute_asset_path(
     &self,
     prefix: &str,
@@ -86,20 +82,6 @@ impl GamedataProject {
     self
       .get_prefixed_asset(prefix, relative_path)
       .map(|(path, _)| path)
-  }
-
-  pub fn get_prefixed_absolute_asset_path_hit(
-    &mut self,
-    prefix: &str,
-    relative_path: &str,
-  ) -> Option<PathBuf> {
-    self
-      .get_prefixed_asset_mut(prefix, relative_path)
-      .map(|(path, descriptor)| {
-        descriptor.add_hit();
-
-        path
-      })
   }
 
   pub fn get_prefixed_asset(
@@ -113,37 +95,6 @@ impl GamedataProject {
     self
       .assets
       .get(asset_path.to_str().unwrap())
-      .map(|descriptor| {
-        (
-          self
-            .roots
-            .get(descriptor.root_index)
-            .expect("Correct root setup")
-            .join(&asset_path),
-          descriptor,
-        )
-      })
-      .or_else(|| {
-        log::warn!(
-          "Trying to get not existing asset: {}",
-          asset_path.to_str().unwrap()
-        );
-
-        None
-      })
-  }
-
-  pub fn get_prefixed_asset_mut(
-    &mut self,
-    prefix: &str,
-    relative_path: &str,
-  ) -> Option<(PathBuf, &mut AssetDescriptor)> {
-    let asset_path: PathBuf =
-      PathBuf::from(prefix.to_lowercase()).join(relative_path.to_lowercase());
-
-    self
-      .assets
-      .get_mut(asset_path.to_str().unwrap())
       .map(|descriptor| {
         (
           self
@@ -196,98 +147,49 @@ impl GamedataProject {
       .collect::<Vec<_>>()
   }
 
-  pub fn get_prefixed_masked_assets_mut(
-    &mut self,
-    prefix: &str,
-    mask: &str,
-  ) -> Vec<(PathBuf, &mut AssetDescriptor)> {
-    let asset_mask: PathBuf = PathBuf::from(prefix.to_lowercase()).join(mask.to_lowercase());
-    let split: Vec<&str> = asset_mask.to_str().unwrap().split('*').collect::<Vec<_>>();
-
-    if split.len() != 2 {
-      return Vec::new();
-    }
-
-    self
-      .assets
-      .iter_mut()
-      .filter_map(|(path, descriptor)| {
-        if path.starts_with(split.first().unwrap()) && path.ends_with(split.last().unwrap()) {
-          Some((
-            self
-              .roots
-              .get(descriptor.root_index)
-              .expect("Correct root setup")
-              .join(path),
-            descriptor,
-          ))
-        } else {
-          None
-        }
-      })
-      .collect::<Vec<_>>()
+  pub fn get_ogf_path(&self, visual_path: &str) -> Option<PathBuf> {
+    self.get_mesh_path(visual_path, ".ogf")
   }
 
-  pub fn get_ogf_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
-    self.get_mesh_path_hit(visual_path, ".ogf")
+  pub fn get_omf_path(&self, visual_path: &str) -> Option<PathBuf> {
+    self.get_mesh_path(visual_path, ".omf")
   }
 
-  pub fn get_omf_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
-    self.get_mesh_path_hit(visual_path, ".omf")
-  }
-
-  pub fn get_omf_paths_hit(&mut self, visual_path: &str) -> Vec<PathBuf> {
+  pub fn get_omf_paths(&self, visual_path: &str) -> Vec<PathBuf> {
     let mut paths: Vec<PathBuf> = Vec::new();
 
     if visual_path.ends_with("*.omf") {
-      let visuals: Vec<(PathBuf, &mut AssetDescriptor)> =
-        self.get_prefixed_masked_assets_mut("meshes", visual_path);
-
-      for (path, descriptor) in visuals {
-        descriptor.add_hit();
+      for (path, _) in self.get_prefixed_masked_assets("meshes", visual_path) {
         paths.push(path);
       }
-    } else if let Some(path) = self.get_mesh_path_hit(visual_path, ".omf") {
+    } else if let Some(path) = self.get_mesh_path(visual_path, ".omf") {
       paths.push(path);
     }
 
     paths
   }
 
-  pub fn get_mesh_path_hit(&mut self, visual_path: &str, extension: &str) -> Option<PathBuf> {
+  pub fn get_mesh_path(&self, visual_path: &str, extension: &str) -> Option<PathBuf> {
     let mut visual_path: String = String::from(visual_path);
 
     if !visual_path.ends_with(extension) {
       visual_path.push_str(extension);
     }
 
-    self.get_prefixed_absolute_asset_path_hit("meshes", &visual_path)
+    self.get_prefixed_absolute_asset_path("meshes", &visual_path)
   }
 
-  pub fn get_dds_path_hit(&mut self, visual_path: &str) -> Option<PathBuf> {
-    self.get_texture_path_hit(visual_path, ".dds")
+  pub fn get_dds_path(&self, visual_path: &str) -> Option<PathBuf> {
+    self.get_texture_path(visual_path, ".dds")
   }
 
-  pub fn get_texture_path_hit(&mut self, texture_path: &str, extension: &str) -> Option<PathBuf> {
+  pub fn get_texture_path(&self, texture_path: &str, extension: &str) -> Option<PathBuf> {
     let mut texture_path: String = String::from(texture_path);
 
     if !texture_path.ends_with(extension) {
       texture_path.push_str(extension);
     }
 
-    self.get_prefixed_absolute_asset_path_hit("textures", &texture_path)
-  }
-
-  pub fn add_asset_hit_by_relative_path(&mut self, relative_path: &str) -> GamedataResult {
-    match self.assets.get_mut(&relative_path.to_lowercase()) {
-      Some(descriptor) => {
-        descriptor.hits += 1;
-
-        Ok(())
-      }
-      None => Err(GamedataError::new_check_error(format!(
-        "Failed to get asset descriptor '{relative_path}' in gamedata roots info"
-      ))),
-    }
+    self.get_prefixed_absolute_asset_path("textures", &texture_path)
   }
 }

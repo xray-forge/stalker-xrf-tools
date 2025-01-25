@@ -4,7 +4,7 @@ use colored::Colorize;
 
 impl GamedataProject {
   pub fn verify_levels(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> GamedataResult<GamedataLevelVerificationResult> {
     if options.is_logging_enabled() {

@@ -6,7 +6,6 @@ use crate::project::ltx::verify_ltx_result::{
   GamedataLtxFormatVerificationResult, GamedataLtxVerificationResult,
 };
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
-use crate::project::resources::verify_resources_result::GamedataResourcesVerificationResult;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
 use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
@@ -22,7 +21,6 @@ pub struct GamedataVerificationResult {
   pub format_result: GamedataResult<GamedataLtxFormatVerificationResult>,
   pub levels_result: GamedataResult<GamedataLevelVerificationResult>,
   pub meshes_result: GamedataResult<GamedataMeshesVerificationResult>,
-  pub resources_result: GamedataResult<GamedataResourcesVerificationResult>,
   pub schemes_result: GamedataResult<GamedataLtxVerificationResult>,
   pub scripts_result: GamedataResult<GamedataScriptsVerificationResult>,
   pub shaders_result: GamedataResult<GamedataShadersVerificationResult>,
@@ -59,7 +57,6 @@ impl GamedataVerificationResult {
       && self.levels_result.is_ok()
       && self.weathers_result.is_ok()
       && self.shaders_result.is_ok()
-      && self.resources_result.is_ok()
   }
 
   pub fn get_failure_messages(&self) -> Vec<String> {
@@ -68,7 +65,6 @@ impl GamedataVerificationResult {
       Self::get_result_failure_message(&self.format_result, "format"),
       Self::get_result_failure_message(&self.levels_result, "levels"),
       Self::get_result_failure_message(&self.meshes_result, "meshes"),
-      Self::get_result_failure_message(&self.resources_result, "resources"),
       Self::get_result_failure_message(&self.scripts_result, "scripts"),
       Self::get_result_failure_message(&self.schemes_result, "schemes"),
       Self::get_result_failure_message(&self.shaders_result, "shaders"),
