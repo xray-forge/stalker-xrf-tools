@@ -19,6 +19,7 @@ use commands::translation::verify_translations::VerifyTranslationsCommand;
 
 use crate::commands::gamedata::verify_gamedata_command::VerifyGamedataCommand;
 use crate::commands::ltx::format_ltx::FormatLtxCommand;
+use crate::commands::texture::info_dds::InfoDdsCommand;
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::Command;
 use commands::ogf::info_ogf::InfoOgfCommand;
@@ -63,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
           result
         }
       })
-      .expect("Valid used subcommand")?;
+      .expect("Valid subcommand")?;
   } else {
     panic!("Unexpected cli command provided, check --help for details")
   }
@@ -98,6 +99,7 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     UnpackSpawnFileCommand::new_box(),
     VerifySpawnFileCommand::new_box(),
     // Textures:
+    InfoDdsCommand::new_box(),
     PackEquipmentIconsCommand::new_box(),
     PackTextureDescriptionCommand::new_box(),
     UnpackEquipmentIconsCommand::new_box(),
