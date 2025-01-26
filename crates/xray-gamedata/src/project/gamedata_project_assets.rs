@@ -120,14 +120,7 @@ impl GamedataProject {
           descriptor,
         )
       })
-      .or_else(|| {
-        log::warn!(
-          "Trying to get not existing asset: {}",
-          asset_path.to_str().unwrap()
-        );
-
-        None
-      })
+      .or(None)
   }
 
   pub fn get_prefixed_masked_assets(
