@@ -9,7 +9,7 @@ pub struct ReUnpackParticlesCommand;
 
 impl GenericCommand for ReUnpackParticlesCommand {
   fn name(&self) -> &'static str {
-    "re-unpack-particle"
+    "re-unpack-particles"
   }
 
   /// Create command for re-unpack of particle file.

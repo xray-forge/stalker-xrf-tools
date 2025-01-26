@@ -8,7 +8,7 @@ pub struct VerifyParticlesFileCommand;
 
 impl GenericCommand for VerifyParticlesFileCommand {
   fn name(&self) -> &'static str {
-    "verify-particle"
+    "verify-particles"
   }
 
   /// Create command for verifying of particle file.

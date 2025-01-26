@@ -10,7 +10,7 @@ pub struct UnpackParticlesCommand;
 
 impl GenericCommand for UnpackParticlesCommand {
   fn name(&self) -> &'static str {
-    "unpack-particle"
+    "unpack-particles"
   }
 
   /// Create command to unpack particle xr file.

@@ -10,7 +10,7 @@ pub struct PackParticlesFileCommand;
 
 impl GenericCommand for PackParticlesFileCommand {
   fn name(&self) -> &'static str {
-    "pack-particle"
+    "pack-particles"
   }
 
   /// Create command packing of particle file.

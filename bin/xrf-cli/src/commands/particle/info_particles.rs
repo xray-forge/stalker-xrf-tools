@@ -8,7 +8,7 @@ pub struct InfoParticlesCommand;
 
 impl GenericCommand for InfoParticlesCommand {
   fn name(&self) -> &'static str {
-    "info-particle"
+    "info-particles"
   }
 
   /// Create command for printing particle file info.

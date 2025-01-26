@@ -9,7 +9,7 @@ pub struct RepackParticlesCommand;
 
 impl GenericCommand for RepackParticlesCommand {
   fn name(&self) -> &'static str {
-    "repack-particle"
+    "repack-particles"
   }
 
   /// Create command for repack of particle file.
