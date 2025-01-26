@@ -17,7 +17,7 @@ use commands::translation::initialize_translations::InitializeTranslationsComman
 use commands::translation::parse_translations::ParseTranslationsCommand;
 use commands::translation::verify_translations::VerifyTranslationsCommand;
 
-use crate::commands::gamedata::verify_gamedata_command::VerifyGamedataCommand;
+use crate::commands::gamedata::verify_gamedata::VerifyGamedataCommand;
 use crate::commands::ltx::format_ltx::FormatLtxCommand;
 use crate::commands::texture::info_dds::InfoDdsCommand;
 use crate::generic_command::{CommandResult, GenericCommand};

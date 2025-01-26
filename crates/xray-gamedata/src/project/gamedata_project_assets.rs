@@ -34,12 +34,10 @@ impl GamedataProject {
             continue;
           }
 
-          if !assets.contains_key(relative) {
-            assets.insert(
-              relative.to_lowercase(),
-              AssetDescriptor::new_with_extension(index, relative),
-            );
-          }
+          assets.insert(
+            relative.to_lowercase(),
+            AssetDescriptor::new_with_extension(index, relative),
+          );
         } else {
           log::warn!("Could not strip prefix: {:?}", entry_path);
         }

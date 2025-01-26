@@ -1,1 +1,1 @@
-pub(crate) mod verify_gamedata_command;
+pub(crate) mod verify_gamedata;
