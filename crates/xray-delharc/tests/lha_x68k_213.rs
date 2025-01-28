@@ -196,7 +196,6 @@ const SUBDIR_CASES: &[(
 #[test]
 fn test_lha_x68k_213() -> io::Result<()> {
   for (offset, name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/lha_x68k_213/{}", name))?;
     file.seek(SeekFrom::Start(*offset))?;
     let mut lha_reader = delharc::LhaDecodeReader::new(file)?;
@@ -239,7 +238,6 @@ fn test_lha_x68k_213() -> io::Result<()> {
   }
 
   for (name, headers) in SUBDIR_CASES {
-    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/lha_x68k_213/{}", name))?;
     for filen in 0.. {
       assert!(filen < headers.len());

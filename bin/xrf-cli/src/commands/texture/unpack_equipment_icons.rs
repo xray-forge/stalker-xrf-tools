@@ -69,12 +69,12 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
 
     let started_at: Instant = Instant::now();
 
-    println!("Opening DDS file: {:?}", source);
+    println!("Opening DDS file: {}", source.display());
 
     let source_dds: RgbaImage = read_dds_by_path(source)
       .and_then(|dds| {
         println!(
-          "Source DDS file details: {}x{}, mip-maps: {:?}, format: {:?}",
+          "Source DDS file details: {}x{}, mip-maps: {}, format: {:?}",
           dds.header.width,
           dds.header.height,
           dds.header.mip_map_count.unwrap_or(0),
@@ -86,7 +86,7 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
       .expect("Expected path to valid DDS source file");
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
 
-    println!("Unpacking equipment DDS file into: {:?}", output);
+    println!("Unpacking equipment DDS file into: {}", output.display());
 
     create_dir_all(output)?;
 
@@ -101,7 +101,7 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
     println!("Successfully DDS equipment file based on LTX sections");
 
     log::info!(
-      "Unpack equipment took: {:?}ms",
+      "Unpack equipment took: {}ms",
       started_at.elapsed().as_millis()
     );
 

@@ -23,7 +23,7 @@ impl SpawnArtefactSpawnsChunk {
   /// Parses binary data into artefact spawns chunk representation object.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading artefacts spawns chunk: {:?} bytes",
+      "Reading artefacts spawns chunk: {} bytes",
       reader.read_bytes_remain()
     );
 
@@ -56,7 +56,7 @@ impl SpawnArtefactSpawnsChunk {
     }
 
     log::info!(
-      "Written artefact spawns chunk, {:?} bytes",
+      "Written artefact spawns chunk, {} bytes",
       writer.bytes_written()
     );
 

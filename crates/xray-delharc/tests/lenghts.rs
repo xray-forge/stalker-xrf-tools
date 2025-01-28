@@ -121,7 +121,6 @@ fn test_lengths() -> io::Result<()> {
   assert!(lha_reader.is_absent());
   assert!(lha_reader.take_inner().is_none());
   for (name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/lengths/{}", name))?;
     let header = LhaHeader::read(&mut file)?.unwrap();
     let decoder = DecoderAny::new_from_header(&header, file);
@@ -129,10 +128,7 @@ fn test_lengths() -> io::Result<()> {
     loop {
       let mut sink = SinkSum::new();
       let header = lha_reader.header();
-      // println!("{:?}", header);
-      // for extra in header.iter_extra() {
-      //     println!("{:?}", extra);
-      // }
+
       assert!(lha_reader.is_decoder_supported());
       assert!(lha_reader.is_present());
       assert!(!lha_reader.is_absent());

@@ -58,7 +58,7 @@ impl ParticleAction {
       data: ParticleActionType::read_by_particle_type::<T>(reader, action_type).map_err(
         |error| {
           DatabaseError::new_parse_error(format!(
-            "Failed to read dynamic particle action data for action '{:?}': {}",
+            "Failed to read dynamic particle action data for action '{}': {}",
             action_type, error
           ))
         },

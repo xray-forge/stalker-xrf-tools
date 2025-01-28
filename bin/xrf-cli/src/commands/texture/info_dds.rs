@@ -32,10 +32,10 @@ impl GenericCommand for InfoDdsCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read dds file {:?}", path);
+    println!("Read dds file {}", path.display());
 
     let mut dds_file: File = File::open(path)?;
-    let dds: Dds = Dds::read(&mut dds_file)?;
+    let dds: Box<Dds> = Box::new(Dds::read(&mut dds_file)?);
 
     let file_size: u64 = dds_file.metadata()?.len();
     let data_size: usize = dds.data.len();

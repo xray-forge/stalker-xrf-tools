@@ -14,7 +14,6 @@ use std::io::ErrorKind::UnexpectedEof;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 
-#[derive(Debug)]
 pub struct ArchiveReader {
   pub path: PathBuf,
   pub file: File,
@@ -37,8 +36,9 @@ impl ArchiveReader {
         variable_regex: Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap(),
       }),
       Err(error) => Err(ArchiveError::new_read_error(format!(
-        "Failed to read archive file {:?}, {}",
-        path, error
+        "Failed to read archive file {}, {}",
+        path.display(),
+        error
       ))),
     }
   }
@@ -75,7 +75,7 @@ impl ArchiveReader {
       let chunk_size: u32 = self.file.read_u32::<XRayByteOrder>()?;
       let chunk_usize: usize = usize::try_from(chunk_size).map_err(|error| {
         ArchiveError::new_read_error(format!(
-          "Failed to read archive header chunk size: {:?}",
+          "Failed to read archive header chunk size: {}",
           error
         ))
       })?;

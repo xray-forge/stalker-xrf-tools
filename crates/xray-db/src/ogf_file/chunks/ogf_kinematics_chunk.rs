@@ -15,8 +15,9 @@ impl OgfKinematicsChunk {
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader, chunk_id: u32) -> DatabaseResult<Self> {
     log::info!(
-      "Reading motion refs chunk: {:?} bytes, chunk id {chunk_id} ",
-      reader.read_bytes_remain()
+      "Reading motion refs chunk: {} bytes, chunk id {} ",
+      reader.read_bytes_remain(),
+      chunk_id
     );
 
     let mut motion_refs: Vec<String> = Vec::new();

@@ -66,7 +66,6 @@ const TESTS_CASES: &[(&str, &str, u64, u64, u16, u32, &str, u8, CompressionMetho
 #[test]
 fn test_lha_amiga_212() -> io::Result<()> {
   for (name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/lha_amiga_212/{}", name))?;
     for filen in 0.. {
       assert!(filen <= 0);

@@ -29,7 +29,6 @@ const TESTS_CASES: &[(&str, &str, u64, u64, u16, u32, &str)] = &[
 #[test]
 fn test_lzs() -> io::Result<()> {
   for (name, path, size_c, size_o, crc16, crc32, modif) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/lzs/{}", name))?;
     loop {
       let mut sink = SinkSum::new();

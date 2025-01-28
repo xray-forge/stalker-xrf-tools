@@ -14,7 +14,7 @@ impl OgfTextureChunk {
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading texture chunk: {:?} bytes",
+      "Reading texture chunk: {} bytes",
       reader.read_bytes_remain()
     );
 

@@ -55,8 +55,8 @@ impl GenericCommand for PackParticlesFileCommand {
 
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting packing particle file {:?}", path);
-    log::info!("Pack destination {:?}", destination);
+    log::info!("Starting packing particle file {}", path.display());
+    log::info!("Pack destination {}", destination.display());
 
     // Apply force flag and delete existing particle output.
     if force && destination.exists() && destination.is_file() {
@@ -75,16 +75,16 @@ impl GenericCommand for PackParticlesFileCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile = ParticlesFile::import_from_path(path)?;
+    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::import_from_path(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.write_to_path::<XRayByteOrder>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read particle file took: {:?}ms", read_duration.as_millis());
+    log::info!("Read particle file took: {}ms", read_duration.as_millis());
     log::info!(
-      "Writing packed particle file took: {:?}ms",
+      "Writing packed particle file took: {}ms",
       write_duration.as_millis()
     );
 

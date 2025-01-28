@@ -26,7 +26,7 @@ pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Taur
   let dds_path: &String = dds_path_lock.as_ref().unwrap();
 
   let (image, preview_buffer) = open_dds_as_png(&PathBuf::from(dds_path))
-    .map_err(|error| format!("Failed to open provided image file: {:?}", error))?;
+    .map_err(|error| format!("Failed to open provided image file: {}", error))?;
 
   let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
     &Ltx::read_from_file_full(ltx_path).map_err(error_to_string)?,

@@ -6,6 +6,7 @@ use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use xray_ltx::{LtxProject, LtxProjectOptions};
+use xray_utils::path_vec_to_string;
 
 pub struct GamedataProject {
   pub assets: HashMap<String, AssetDescriptor>,
@@ -23,7 +24,7 @@ impl GamedataProject {
         if Self::is_valid_gamedata_dir(it) {
           true
         } else {
-          println!("Skipping invalid gamedata dir: {:?}", it);
+          println!("Skipping invalid gamedata dir: {}", it.display());
 
           false
         }
@@ -36,8 +37,8 @@ impl GamedataProject {
         io::Error::new(
           ErrorKind::NotFound,
           format!(
-            "Invalid gamedata roots provided: {:?}, at least one valid resources root is required",
-            options.roots
+            "Invalid gamedata roots provided: {}, at least one valid resources root is required",
+            path_vec_to_string(&options.roots)
           ),
         )
         .into(),
@@ -49,8 +50,8 @@ impl GamedataProject {
         io::Error::new(
           ErrorKind::NotFound,
           format!(
-            "Invalid gamedata configs folder provided: {:?}, existing folder with system.ltx is required",
-            options.configs
+            "Invalid gamedata configs folder provided: {}, existing folder with system.ltx is required",
+            options.configs.display()
           ),
         ).into(),
       );
@@ -68,7 +69,7 @@ impl GamedataProject {
           .ignored
           .iter()
           .map(|it| it.as_str())
-          .collect::<Vec<&str>>(),
+          .collect::<Vec<_>>(),
       )?,
       roots,
       configs: options.configs.clone(),

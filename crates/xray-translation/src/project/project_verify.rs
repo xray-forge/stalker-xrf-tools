@@ -14,10 +14,10 @@ impl TranslationProject {
     dir: &Path,
     options: &ProjectVerifyOptions,
   ) -> TranslationResult<ProjectVerifyResult> {
-    log::info!("Verifying dir {:?}", dir);
+    log::info!("Verifying dir {}", dir.display());
 
     if options.is_logging_enabled() {
-      println!("Verifying dir {:?}", dir);
+      println!("Verifying dir {}", dir.display());
     }
 
     let started_at: Instant = Instant::now();
@@ -43,8 +43,8 @@ impl TranslationProject {
     result.duration = started_at.elapsed().as_millis();
 
     log::info!(
-      "Verified dir {:?} in {} sec",
-      dir,
+      "Verified dir {} in {} sec",
+      dir.display(),
       (result.duration as f64) / 1000.0
     );
 
@@ -61,10 +61,10 @@ impl TranslationProject {
       if extension == "json" {
         return Self::verify_json_file(path, options);
       } else {
-        log::info!("Skip file {:?}", path);
+        log::info!("Skip file {}", path.display());
 
         if options.is_logging_enabled() {
-          println!("Skip file {:?}", path);
+          println!("Skip file {}", path.display());
         }
       }
     }
@@ -78,32 +78,36 @@ impl TranslationProject {
   ) -> TranslationResult<ProjectVerifyResult> {
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
 
-    log::info!("Verifying dynamic JSON file {:?}", path);
+    log::info!("Verifying dynamic JSON file {}", path.display());
 
     let started_at: Instant = Instant::now();
     let parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
 
-    let languages: Vec<&str> = if options.language == TranslationLanguage::All {
-      TranslationLanguage::get_all_str()
+    let languages: Vec<String> = if options.language == TranslationLanguage::All {
+      TranslationLanguage::get_all_strings()
     } else {
-      vec![options.language.as_str()]
+      vec![options.language.to_string()]
     };
 
     for language in languages {
       for (key, entry) in &parsed {
-        if let Some(possible_translation) = entry.get(language) {
+        if let Some(possible_translation) = entry.get(&language) {
           if possible_translation.is_none() {
             println!(
-              "Translation key missing: {:?} {:?} in {:?}",
-              key, language, path
+              "Translation key missing: {} {} in {}",
+              key,
+              language,
+              path.display()
             );
 
             result.missing_translations_count += 1;
           }
         } else {
           println!(
-            "Translation key missing: {:?} {:?} in {:?}",
-            key, language, path
+            "Translation key missing: {} {} in {}",
+            key,
+            language,
+            path.display()
           );
 
           result.missing_translations_count += 1;
@@ -115,8 +119,8 @@ impl TranslationProject {
     result.duration = started_at.elapsed().as_millis();
 
     log::info!(
-      "Verified file {:?} in {} sec",
-      path,
+      "Verified file {} in {} sec",
+      path.display(),
       (result.duration as f64) / 1000.0
     );
 

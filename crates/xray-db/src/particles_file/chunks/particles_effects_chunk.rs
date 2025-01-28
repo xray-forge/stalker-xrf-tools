@@ -25,7 +25,7 @@ impl ParticlesEffectsChunk {
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
     log::info!(
-      "Parsing effects chunk, {:?} bytes, {:?} chunks",
+      "Parsing effects chunk, {} bytes, {} chunks",
       reader.read_bytes_len(),
       chunks.len()
     );
@@ -66,7 +66,7 @@ impl ParticlesEffectsChunk {
 
   /// Import particles effects data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    log::info!("Importing particles effects: {:?}", path);
+    log::info!("Importing particles effects: {}", path.display());
 
     let ltx: Ltx = open_ltx_config(&path.join("effects.ltx"))?;
     let mut effects: Vec<ParticleEffect> = Vec::new();

@@ -84,7 +84,6 @@ const TESTS_CASES: &[(
 #[test]
 fn test_lha213() -> io::Result<()> {
   for (offset, name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/lha213/{}", name))?;
     file.seek(SeekFrom::Start(*offset))?;
     let mut lha_reader = delharc::LhaDecodeReader::new(file)?;

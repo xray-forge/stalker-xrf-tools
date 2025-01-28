@@ -99,7 +99,7 @@ impl ParticlesFile {
 
   /// Read spawn file from provided path.
   pub fn import_from_path(path: &Path) -> DatabaseResult<Self> {
-    log::info!("Importing particles file: {:?}", path);
+    log::info!("Importing particles file: {}", path.display());
 
     Ok(Self {
       header: ParticlesHeaderChunk::import(path)?,

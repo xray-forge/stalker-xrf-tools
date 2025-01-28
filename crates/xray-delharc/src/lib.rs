@@ -59,7 +59,7 @@ fn extract_to_stdout<P: AsRef<Path>>(
         let header = lha_reader.header();
         let filename = header.parse_pathname();
 
-        eprintln!("Path: {:?} modified: {} ", filename, header.parse_last_modified());
+        eprintln!("Path: {} modified: {} ", filename.display(), header.parse_last_modified());
 
         if filename.ends_with(matching_path.as_ref()) {
             if lha_reader.is_decoder_supported() {

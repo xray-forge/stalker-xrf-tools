@@ -112,8 +112,8 @@ impl LtxFieldScheme {
 
       if array_values.is_empty() && !self.is_optional {
         return Some(self.validation_error(&format!(
-          "Invalid value - expected non optional array of {:?}",
-          self.data_type.to_string(),
+          "Invalid value - expected non optional array of {}",
+          self.data_type,
         )));
       }
 

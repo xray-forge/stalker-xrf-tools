@@ -29,7 +29,7 @@ impl TranslationProject {
               Self::read_translation_json_by_path(entry_path)?,
             );
           } else {
-            log::warn!("Skip non json translation file {:?}", entry_path);
+            log::warn!("Skip non json translation file {}", entry_path.display());
           }
         }
       }

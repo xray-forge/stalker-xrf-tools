@@ -245,7 +245,6 @@ const TESTS_CASES: &[(
 fn test_lhmelt_16536() -> io::Result<()> {
   let mut lha_reader: delharc::LhaDecodeReader<fs::File> = Default::default();
   for (offset, name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/lhmelt_16536/{}", name))?;
     file.seek(SeekFrom::Start(*offset))?;
     assert!(lha_reader.begin_new(file)?);

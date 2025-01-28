@@ -14,7 +14,7 @@ impl PackDescriptionProcessor {
       XmlDescriptionCollection::get_descriptions(options)?;
     let mut count: u32 = 0;
 
-    println!("Packing for {:?} files", description.files.len());
+    println!("Packing for {} files", description.files.len());
 
     for file in description.files.values() {
       if Self::pack_xml_description(options, file)? {
@@ -37,14 +37,19 @@ impl PackDescriptionProcessor {
     let mut result: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
 
     if options.is_verbose {
-      println!("Packing file {:?} ({width}x{height})", full_name);
+      println!("Packing file {} ({width}x{height})", full_name.display());
     }
 
     for texture in &file.sprites {
       if options.is_verbose {
         println!(
-          "Packing texture {:?} -> {} at [x:{}, y:{}, w:{}, h:{}]",
-          full_name, texture.id, texture.x, texture.y, texture.w, texture.h
+          "Packing texture {} -> {} at [x:{}, y:{}, w:{}, h:{}]",
+          full_name.display(),
+          texture.id,
+          texture.x,
+          texture.y,
+          texture.w,
+          texture.h
         );
       }
 
@@ -73,13 +78,19 @@ impl PackDescriptionProcessor {
         Err(error) => {
           if options.is_strict {
             panic!(
-              "Failed to read texture dds {:?} for {:?} ({:?}): {:?}",
-              texture.id, file.name, full_name, error
+              "Failed to read texture dds {} for {} ({}): {}",
+              texture.id,
+              file.name,
+              full_name.display(),
+              error
             )
           } else {
             println!(
-              "Failed to read texture dds {:?} for {:?} ({:?}): {:?}",
-              texture.id, file.name, full_name, error
+              "Failed to read texture dds {} for {} ({}): {}",
+              texture.id,
+              file.name,
+              full_name.display(),
+              error
             )
           }
         }
@@ -89,7 +100,7 @@ impl PackDescriptionProcessor {
     let destination: PathBuf = options.output.join(format!("{}.dds", &file.name));
 
     if options.is_verbose {
-      println!("Saving file: {:?}", destination);
+      println!("Saving file: {}", destination.display());
     }
 
     assert_eq!(

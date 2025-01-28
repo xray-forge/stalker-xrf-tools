@@ -1,13 +1,14 @@
 use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 use std::io::{Read, Write};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Display)]
 #[serde(rename_all = "camelCase")]
+#[display("{x},{y},{z}")]
 pub struct Vector3d<T = f32> {
   pub x: T,
   pub y: T,
@@ -41,12 +42,6 @@ impl Vector3d<f32> {
 impl From<(f32, f32, f32)> for Vector3d<f32> {
   fn from(value: (f32, f32, f32)) -> Self {
     Vector3d::new(value.0, value.1, value.2)
-  }
-}
-
-impl Display for Vector3d<f32> {
-  fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(formatter, "{},{},{}", self.x, self.y, self.z)
   }
 }
 

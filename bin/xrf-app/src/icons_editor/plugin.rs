@@ -19,7 +19,7 @@ impl IconsEditorPlugin {
       })
       .register_uri_scheme_protocol("stream", move |application, request| {
         get_equipment_sprite_stream_response(application, &request).unwrap_or_else(|error| {
-          log::warn!("Failed to handle stream protocol request: {:?}", error);
+          log::warn!("Failed to handle stream protocol request: {}", error);
 
           Response::builder()
             .status(StatusCode::BAD_REQUEST)

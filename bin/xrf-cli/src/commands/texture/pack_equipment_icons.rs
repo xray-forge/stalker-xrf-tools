@@ -89,9 +89,9 @@ impl GenericCommand for PackEquipmentIconsCommand {
     }
 
     println!("Starting packing DDS icons file, parallel");
-    println!("System ltx: {:?}", system_ltx_path);
-    println!("Source icons dir: {:?}", source);
-    println!("Output dir: {:?}", output);
+    println!("System ltx: {}", system_ltx_path.display());
+    println!("Source icons dir: {}", source.display());
+    println!("Output dir: {}", output.display());
 
     let started_at: Instant = Instant::now();
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
@@ -106,14 +106,17 @@ impl GenericCommand for PackEquipmentIconsCommand {
       is_strict,
     };
 
-    log::info!("DDS format: {:?}", options.dds_compression_format);
+    log::info!("DDS format: {}", options.dds_compression_format);
 
     PackEquipmentProcessor::pack_sprites(options)?;
 
-    println!("Saved resulting file with combined icons {:?}", output);
+    println!(
+      "Saved resulting file with combined icons {}",
+      output.display()
+    );
 
     log::info!(
-      "Pack equipment took: {:?}ms",
+      "Pack equipment took: {}ms",
       started_at.elapsed().as_millis()
     );
 

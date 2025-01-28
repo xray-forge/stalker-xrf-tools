@@ -20,7 +20,7 @@ impl OgfDescriptionChunk {
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading description chunk: {:?} bytes",
+      "Reading description chunk: {} bytes",
       reader.read_bytes_remain()
     );
 

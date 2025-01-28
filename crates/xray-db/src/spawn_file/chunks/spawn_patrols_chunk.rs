@@ -24,7 +24,7 @@ impl SpawnPatrolsChunk {
   /// Read patrols list from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading patrols chunk, bytes {:?}",
+      "Reading patrols chunk, bytes {}",
       reader.read_bytes_remain()
     );
 
@@ -67,7 +67,7 @@ impl SpawnPatrolsChunk {
         .as_slice(),
     )?;
 
-    log::info!("Written patrols chunk, {:?} bytes", writer.bytes_written());
+    log::info!("Written patrols chunk, {} bytes", writer.bytes_written());
 
     Ok(())
   }

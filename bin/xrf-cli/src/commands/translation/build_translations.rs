@@ -87,8 +87,10 @@ impl GenericCommand for BuildTranslationsCommand {
 
     if !is_silent {
       println!(
-        "Building translation {:?}, language - {language}, sorted - {is_sorted}",
-        path
+        "Building translation {}, language - {}, sorted - {}",
+        path.display(),
+        language,
+        is_sorted
       )
     }
 

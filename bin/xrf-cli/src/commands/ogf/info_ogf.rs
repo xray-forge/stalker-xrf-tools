@@ -31,9 +31,9 @@ impl GenericCommand for InfoOgfCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read ogf file {:?}", path);
+    println!("Read ogf file {}", path.display());
 
-    let ogf_file: OgfFile = OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?;
+    let ogf_file: Box<OgfFile> = Box::new(OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?);
 
     println!("Ogf file information");
 
@@ -50,8 +50,8 @@ impl GenericCommand for InfoOgfCommand {
     println!("Boundaries sphere: {:?}", ogf_file.header.bounding_sphere);
 
     if let Some(texture) = &ogf_file.texture {
-      println!("Texture name: {:?}", texture.texture_name);
-      println!("Shader name: {:?}", texture.shader_name);
+      println!("Texture name: {}", texture.texture_name);
+      println!("Shader name: {}", texture.shader_name);
     }
 
     if let Some(description) = &ogf_file.description {
@@ -59,11 +59,11 @@ impl GenericCommand for InfoOgfCommand {
     }
 
     if let Some(bones) = &ogf_file.bones {
-      println!("Bones: {:?}", bones.bones.len());
+      println!("Bones: {}", bones.bones.len());
 
       for (index, bone) in bones.bones.iter().enumerate() {
-        println!("[{index}] name: {:?}", bone.name);
-        println!("[{index}] parent: {:?}", bone.parent);
+        println!("[{index}] name: {}", bone.name);
+        println!("[{index}] parent: {}", bone.parent);
       }
     }
 
@@ -76,8 +76,8 @@ impl GenericCommand for InfoOgfCommand {
 
       for (index, child) in children.nested.iter().enumerate() {
         if let Some(texture) = &child.texture {
-          println!("[{index}] texture name: {:?}", texture.texture_name);
-          println!("[{index}] shader name: {:?}", texture.shader_name);
+          println!("[{index}] texture name: {}", texture.texture_name);
+          println!("[{index}] shader name: {}", texture.shader_name);
         }
       }
     }

@@ -24,7 +24,7 @@ impl SpawnALifeSpawnsChunk {
   /// Read spawns chunk by position descriptor from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading alife spawns chunk, {:?} bytes",
+      "Reading alife spawns chunk, {} bytes",
       reader.read_bytes_remain()
     );
 
@@ -89,7 +89,7 @@ impl SpawnALifeSpawnsChunk {
     writer.write_all(vertex_writer.flush_chunk_into_buffer::<T>(2)?.as_slice())?;
 
     log::info!(
-      "Written alife spawns chunk, {:?} bytes",
+      "Written alife spawns chunk, {} bytes",
       writer.bytes_written()
     );
 

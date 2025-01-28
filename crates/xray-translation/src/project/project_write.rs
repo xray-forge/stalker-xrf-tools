@@ -17,12 +17,12 @@ impl TranslationProject {
     options: &ProjectBuildOptions,
   ) -> TranslationResult<File> {
     let target: PathBuf = destination
-      .join(language.as_str())
+      .join(language.to_string())
       .join(path.file_name().unwrap())
       .with_extension("xml");
 
     if options.is_verbose_logging_enabled() {
-      println!("Writing file ({:?}) {:?}", language, target);
+      println!("Writing file ({}) {}", language, target.display());
     }
 
     match fs::create_dir_all(target.parent().unwrap()) {
@@ -94,14 +94,14 @@ impl TranslationProject {
 
     if had_errors {
       log::info!(
-        "Unexpected errors when encoding {:?} string data for language {:?}",
+        "Unexpected errors when encoding {} string data for language {}",
         language.get_language_encoding(),
         language
       );
 
       if options.is_verbose_logging_enabled() {
         println!(
-          "Unexpected errors when encoding {:?} string data for language {:?}",
+          "Unexpected errors when encoding {} string data for language {}",
           language.get_language_encoding(),
           language
         );

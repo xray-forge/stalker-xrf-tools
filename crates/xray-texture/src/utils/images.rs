@@ -10,18 +10,16 @@ use std::path::{Path, PathBuf};
 pub fn read_dds_by_path(path: &Path) -> TextureResult<Dds> {
   Dds::read(&mut File::open(path)?).map_err(|error| {
     TextureError::new_processing_error(format!(
-      "Failed to read texture by path {:?}, error: {:?}",
-      path, error,
+      "Failed to read texture by path {}, error: {}",
+      path.display(),
+      error,
     ))
   })
 }
 
 pub fn dds_to_image(dds: &Dds) -> TextureResult<RgbaImage> {
   image_dds::image_from_dds(dds, 0).map_err(|error| {
-    TextureError::new_processing_error(format!(
-      "Failed to convert DDS to RGBA image : {:?}'",
-      error,
-    ))
+    TextureError::new_processing_error(format!("Failed to convert DDS to RGBA image: {}'", error,))
   })
 }
 

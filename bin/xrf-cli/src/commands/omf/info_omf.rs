@@ -31,34 +31,36 @@ impl GenericCommand for InfoOmfCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read omf file {:?}", path);
+    println!("Read omf file {}", path.display());
 
-    let omf_file: OmfFile = OmfFile::read_from_path::<XRayByteOrder, &Path>(path)?;
+    let omf_file: Box<OmfFile> = Box::new(OmfFile::read_from_path::<XRayByteOrder, &Path>(path)?);
 
     println!("Omf file information");
 
     println!("Version: {}", omf_file.parameters.version);
 
     println!(
-      "Motions: {} {:?}",
+      "Motions: {} {}",
       omf_file.motions.motions.len(),
       omf_file
         .motions
         .motions
         .iter()
-        .map(|it| &it.name)
-        .collect::<Vec<&String>>()
+        .map(|it| it.name.as_str())
+        .collect::<Vec<_>>()
+        .join(",")
     );
 
     println!("Bones total: {}", omf_file.parameters.get_bones_count());
     println!(
-      "Parts: {:?}",
+      "Parts: {}",
       omf_file
         .parameters
         .parts
         .iter()
-        .map(|it| &it.name)
-        .collect::<Vec<&String>>()
+        .map(|it| it.name.as_str())
+        .collect::<Vec<_>>()
+        .join(",")
     );
 
     for part in &omf_file.parameters.parts {

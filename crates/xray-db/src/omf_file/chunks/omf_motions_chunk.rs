@@ -14,7 +14,7 @@ impl OmfMotionsChunk {
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading motions chunk: {:?} bytes",
+      "Reading motions chunk: {} bytes",
       reader.read_bytes_remain()
     );
 

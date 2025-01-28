@@ -29,15 +29,19 @@ impl PackEquipmentProcessor {
 
           if options.is_verbose {
             println!(
-              "Packing icon: '{}':({}:{};{}x{}) as ({x}:{y};{w}x{h}), src: {}x{}, {:?}",
+              "Packing icon: '{}':({}:{};{}x{}) as ({}:{};{}x{}), src: {}x{}, {}",
               sprite_descriptor.section,
               sprite_descriptor.x,
               sprite_descriptor.y,
               sprite_descriptor.w,
               sprite_descriptor.h,
+              x,
+              y,
+              w,
+              h,
               sprite.width(),
               sprite.height(),
-              sprite_path,
+              sprite_path.display(),
             );
           }
 
@@ -86,13 +90,17 @@ impl PackEquipmentProcessor {
       Err(error) => {
         if options.is_strict {
           Err(TextureError::new_processing_error(format!(
-            "Expected icon to exist for assembling at path {:?} / {}, error: {:?}",
-            sprite_path, sprite.section, error
+            "Expected icon to exist for assembling at path {} / {}, error: {}",
+            sprite_path.display(),
+            sprite.section,
+            error
           )))
         } else {
           println!(
-            "Skip icon {:?} / '{}', reason: {:?}",
-            sprite_path, sprite.section, error
+            "Skip icon {} / '{}', reason: {}",
+            sprite_path.display(),
+            sprite.section,
+            error
           );
 
           Ok(None)
@@ -121,8 +129,12 @@ impl PackEquipmentProcessor {
 
     if image_width != width || image_height != height {
       log::info!(
-        "Rescaling image to bounds: {width}x{height} from {image_width}x{image_height} {:?}",
-        path
+        "Rescaling image to bounds: {}x{} from {}x{} {}",
+        width,
+        height,
+        image_width,
+        image_height,
+        path.display()
       );
 
       let rescaled_image: DynamicImage = image.resize(width, height, FilterType::Lanczos3);
@@ -131,8 +143,12 @@ impl PackEquipmentProcessor {
 
       if rescaled_width != width || rescaled_height != height {
         log::info!(
-          "Re-center rescaled image to bounds: {width}x{height} from {rescaled_width}x{rescaled_height} {:?}",
-          path
+          "Re-center rescaled image to bounds: {}x{} from {}x{} {}",
+          width,
+          height,
+          rescaled_width,
+          rescaled_height,
+          path.display()
         );
 
         let mut centered: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);

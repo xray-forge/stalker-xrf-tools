@@ -26,7 +26,7 @@ impl ParticlesHeaderChunk {
       version: reader.read_u16::<T>()?,
     };
 
-    log::info!("Read header chunk, {:?} bytes", reader.read_bytes_len());
+    log::info!("Read header chunk, {} bytes", reader.read_bytes_len());
 
     if header_chunk.version != 1 {
       return Err(DatabaseError::new_not_implemented_error(
@@ -51,7 +51,7 @@ impl ParticlesHeaderChunk {
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    log::info!("Importing particles header: {:?}", path);
+    log::info!("Importing particles header: {}", path.display());
 
     let ltx: Ltx = open_ltx_config(&path.join("header.ltx"))?;
     let section: &Section = ltx

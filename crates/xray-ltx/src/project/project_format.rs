@@ -12,7 +12,7 @@ impl LtxProject {
     let started_at: Instant = Instant::now();
 
     if !options.is_silent {
-      println!("Formatting path: {:?}", self.root);
+      println!("Formatting path: {}", self.root.display());
     }
 
     for entry in &self.ltx_files {
@@ -21,7 +21,7 @@ impl LtxProject {
         result.to_format.push(entry.clone());
 
         if !options.is_silent {
-          println!("Formatted: {:?}", entry);
+          println!("Formatted: {}", entry.display());
         }
       } else {
         result.valid_files += 1;
@@ -53,7 +53,7 @@ impl LtxProject {
     let started_at: Instant = Instant::now();
 
     if options.is_logging_enabled() {
-      println!("Checking path: {:?}", self.root);
+      println!("Checking path: {}", self.root.display());
     }
 
     for entry in &self.ltx_files {
@@ -62,7 +62,7 @@ impl LtxProject {
         result.to_format.push(entry.clone());
 
         if options.is_logging_enabled() {
-          println!("Not formatted: {:?}", entry);
+          println!("Not formatted: {}", entry.display());
         }
       } else {
         result.valid_files += 1;

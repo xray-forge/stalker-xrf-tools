@@ -18,10 +18,7 @@ impl OgfHeaderChunk {
   pub const CHUNK_ID: u32 = 1;
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
-    log::info!(
-      "Reading header chunk: {:?} bytes",
-      reader.read_bytes_remain()
-    );
+    log::info!("Reading header chunk: {} bytes", reader.read_bytes_remain());
 
     let version: u8 = reader.read_u8()?;
 

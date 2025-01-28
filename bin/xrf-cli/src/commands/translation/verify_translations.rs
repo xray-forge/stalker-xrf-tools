@@ -75,7 +75,11 @@ impl GenericCommand for VerifyTranslationsCommand {
     let is_strict: bool = matches.get_flag("strict");
 
     if !is_silent {
-      println!("Verifying translation {:?}, language - {language}", path)
+      println!(
+        "Verifying translation {}, language - {}",
+        path.display(),
+        language
+      )
     }
 
     let options: ProjectVerifyOptions = ProjectVerifyOptions {

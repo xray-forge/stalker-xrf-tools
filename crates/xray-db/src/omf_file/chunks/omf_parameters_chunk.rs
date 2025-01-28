@@ -17,7 +17,7 @@ impl OmfParametersChunk {
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading parameters chunk: {:?} bytes",
+      "Reading parameters chunk: {} bytes",
       reader.read_bytes_remain()
     );
 
@@ -25,7 +25,7 @@ impl OmfParametersChunk {
 
     if !OmfFile::SUPPORTED_VERSIONS.contains(&version) {
       return Err(DatabaseError::new_not_implemented_error(format!(
-        "Unexpected parameters version {version} on read, only versions {:?} is implemented",
+        "Unexpected parameters version {version} on read, only versions {:?} are implemented",
         OmfFile::SUPPORTED_VERSIONS
       )));
     }

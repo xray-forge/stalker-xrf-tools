@@ -21,8 +21,8 @@ impl OmfFile {
   pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
     Self::read_from_file::<T>(File::open(&path).map_err(|error| {
       DatabaseError::new_not_found_error(format!(
-        "OMF file was not read: {:?}, error: {error}",
-        path.as_ref(),
+        "OMF file was not read: {}, error: {error}",
+        path.as_ref().display(),
       ))
     })?)
   }

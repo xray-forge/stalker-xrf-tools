@@ -50,7 +50,7 @@ impl GenericCommand for InitializeTranslationsCommand {
     let is_verbose: bool = matches.get_flag("verbose");
 
     if !is_silent {
-      println!("Verifying translation {:?}", path)
+      println!("Verifying translation {}", path.display())
     }
 
     let options: ProjectInitializeOptions = ProjectInitializeOptions {

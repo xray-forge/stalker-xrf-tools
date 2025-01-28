@@ -25,7 +25,7 @@ impl ParticlesGroupsChunk {
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     log::info!(
-      "Parsed groups chunk, {:?} bytes, {:?} chunks",
+      "Parsed groups chunk, {} bytes, {} chunks",
       reader.read_bytes_len(),
       chunks.len()
     );
@@ -62,7 +62,7 @@ impl ParticlesGroupsChunk {
 
   /// Import particles groups data from provided path.
   pub fn import(path: &Path) -> DatabaseResult<Self> {
-    log::info!("Importing particles groups: {:?}", path);
+    log::info!("Importing particles groups: {}", path.display());
 
     let ltx: Ltx = open_ltx_config(&path.join("groups.ltx"))?;
     let mut groups: Vec<ParticleGroup> = Vec::new();

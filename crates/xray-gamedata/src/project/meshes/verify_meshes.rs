@@ -36,7 +36,7 @@ impl GamedataProject {
             Ok(is_valid) => {
               if !is_valid {
                 if options.is_logging_enabled() {
-                  eprintln!("Mesh is not valid: {:?}", path);
+                  eprintln!("Mesh is not valid: {}", path.display());
                 }
 
                 *invalid_meshes_count.lock().unwrap() += 1;
@@ -44,7 +44,7 @@ impl GamedataProject {
             }
             Err(error) => {
               if options.is_logging_enabled() {
-                eprintln!("Mesh verification failed: {:?} - {error}", path);
+                eprintln!("Mesh verification failed: {} - {}", path.display(), error);
               }
 
               *invalid_meshes_count.lock().unwrap() += 1;
@@ -52,7 +52,7 @@ impl GamedataProject {
           }
         } else {
           if options.is_logging_enabled() {
-            eprintln!("Mesh path not found: {:?}", path);
+            eprintln!("Mesh path not found: {}", path);
           }
 
           *invalid_meshes_count.lock().unwrap() += 1;
@@ -133,8 +133,9 @@ impl GamedataProject {
                 Err(error) => {
                   if options.is_logging_enabled() {
                     eprintln!(
-                      "Mesh motion file failed to read: {:?}, error: {}",
-                      motion_path, error
+                      "Mesh motion file failed to read: {}, error: {}",
+                      motion_path.display(),
+                      error
                     );
                   }
 
@@ -144,8 +145,9 @@ impl GamedataProject {
               Err(error) => {
                 if options.is_logging_enabled() {
                   eprintln!(
-                    "Mesh motion file failed to read: {:?}, error: {}",
-                    motion_path, error
+                    "Mesh motion file failed to read: {}, error: {}",
+                    motion_path.display(),
+                    error
                   );
                 }
 
@@ -198,11 +200,16 @@ impl GamedataProject {
       if bones.bones.len() != omf_bones.len() {
         if options.is_logging_enabled() {
           eprintln!(
-            "Not matching bones count in ogf and reference omf: {} <-> {} : {:?} <-> {:?}",
+            "Not matching bones count in ogf and reference omf: {} <-> {} : {} <-> {}",
             bones.bones.len(),
             omf_bones.len(),
-            bones.bones.iter().map(|it| &it.name).collect::<Vec<_>>(),
-            omf_bones
+            bones
+              .bones
+              .iter()
+              .map(|it| it.name.as_str())
+              .collect::<Vec<_>>()
+              .join(","),
+            omf_bones.join(",")
           );
         }
 
@@ -214,9 +221,14 @@ impl GamedataProject {
       {
         if options.is_logging_enabled() {
           eprintln!(
-            "Missing bones in OMF file for OGF mesh: {:?} <-> {:?}",
-            bones.bones.iter().map(|it| &it.name).collect::<Vec<_>>(),
-            omf_bones
+            "Missing bones in OMF file for OGF mesh: {} <-> {}",
+            bones
+              .bones
+              .iter()
+              .map(|it| it.name.as_str())
+              .collect::<Vec<_>>()
+              .join(","),
+            omf_bones.join(",")
           );
         }
 

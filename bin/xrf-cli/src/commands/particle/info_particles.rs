@@ -31,10 +31,10 @@ impl GenericCommand for InfoParticlesCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read particle file {:?}", path);
+    println!("Read particle file {}", path.display());
 
-    let particles_file: ParticlesFile =
-      ParticlesFile::read_from_path::<XRayByteOrder, &Path>(path)?;
+    let particles_file: Box<ParticlesFile> =
+      Box::new(ParticlesFile::read_from_path::<XRayByteOrder, &Path>(path)?);
 
     println!("Particles file information:");
 

@@ -15,4 +15,5 @@ xray-db = { path = "../../crates/xray-db" }
 xray-gamedata = { path = "../../crates/xray-gamedata" }
 xray-ltx = { path = "../../crates/xray-ltx" }
 xray-texture = { path = "../../crates/xray-texture" }
+xray-utils = { path = "../../crates/xray-utils" }
 xray-translation = { path = "../../crates/xray-translation" }

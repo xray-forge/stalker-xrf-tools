@@ -164,7 +164,6 @@ const SUBDIR_CASES: &[(
 #[test]
 fn test_lha_os2_208() -> io::Result<()> {
   for (name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/lha_os2_208/{}", name))?;
     for filen in 0.. {
       assert!(filen <= 0);
@@ -201,7 +200,6 @@ fn test_lha_os2_208() -> io::Result<()> {
   }
 
   for (name, headers) in SUBDIR_CASES {
-    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/lha_os2_208/{}", name))?;
     for filen in 0.. {
       assert!(filen < headers.len());

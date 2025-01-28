@@ -55,9 +55,10 @@ impl GamedataProject {
 
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata weapons in {} sec, {}/{checked_weapons_count} valid",
+        "Verified gamedata weapons in {} sec, {}/{} valid",
         (duration as f64) / 1000.0,
         checked_weapons_count - invalid_weapons_count,
+        checked_weapons_count
       );
     }
 
@@ -114,8 +115,10 @@ impl GamedataProject {
       if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, &Path>(visual) {
         if options.is_logging_enabled() {
           eprintln!(
-            "Failed to read weapon visual: [{section_name}] - {:?} - {error}",
-            section.get("visual")
+            "Failed to read weapon visual: [{}] - {:?} - {}",
+            section_name,
+            section.get("visual"),
+            error
           );
         }
 
@@ -124,7 +127,8 @@ impl GamedataProject {
     } else {
       if options.is_logging_enabled() {
         eprintln!(
-          "Not found weapon visual: [{section_name}] - {:?}",
+          "Not found weapon visual: [{}] - {:?}",
+          section_name,
           section.get("visual")
         );
       }
@@ -137,7 +141,8 @@ impl GamedataProject {
       None => {
         if options.is_logging_enabled() {
           eprintln!(
-            "Not found hud section: [{section_name}] - {:?}",
+            "Not found hud section: [{}] - {:?}",
+            section_name,
             section.get("hud")
           );
         }
@@ -193,7 +198,11 @@ impl GamedataProject {
             }
           } else {
             if options.is_logging_enabled() {
-              eprintln!("Missing motion refs for weapon hud: [{section_name}] : {visual_path:?}");
+              eprintln!(
+                "Missing motion refs for weapon hud: [{}] : {}",
+                section_name,
+                visual_path.display()
+              );
             }
 
             is_valid = false;
@@ -202,8 +211,10 @@ impl GamedataProject {
         Err(error) => {
           if options.is_logging_enabled() {
             eprintln!(
-              "Failed to read weapon hud visual: [{section_name}] - {:?} - {error}",
-              section.get("visual")
+              "Failed to read weapon hud visual: [{}] - {:?} - {}",
+              section_name,
+              section.get("visual"),
+              error
             );
           }
 

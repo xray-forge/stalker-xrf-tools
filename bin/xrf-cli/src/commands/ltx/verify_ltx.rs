@@ -64,15 +64,15 @@ impl GenericCommand for VerifyLtxCommand {
       return Err(LtxError::new_read_error("Failed to read provided path as directory").into());
     }
 
-    log::info!("Verifying ltx folder: {:?}", path);
+    log::info!("Verifying ltx folder: {}", path.display());
 
-    let project: LtxProject = LtxProject::open_at_path_opt(
+    let project: Box<LtxProject> = Box::new(LtxProject::open_at_path_opt(
       path,
       LtxProjectOptions {
         is_with_schemes_check: true,
         is_strict_check: true,
       },
-    )?;
+    )?);
 
     let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions {
       is_silent,

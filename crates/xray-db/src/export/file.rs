@@ -17,7 +17,7 @@ pub fn create_export_file(path: &Path) -> DatabaseResult<File> {
     Err(error) => Err(
       io::Error::new(
         error.kind(),
-        format!("Failed to create file for spawn output: {:?}", path),
+        format!("Failed to create file for spawn output: {}", path.display()),
       )
       .into(),
     ),

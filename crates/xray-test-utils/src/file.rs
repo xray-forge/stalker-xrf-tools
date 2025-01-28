@@ -25,7 +25,7 @@ pub fn overwrite_file(path: &Path) -> IoResult<File> {
     Ok(file) => Ok(file),
     Err(error) => Err(IoError::new(
       error.kind(),
-      format!("Failed to open test asset {:?}", path),
+      format!("Failed to open test asset {}", path.display()),
     )),
   }
 }

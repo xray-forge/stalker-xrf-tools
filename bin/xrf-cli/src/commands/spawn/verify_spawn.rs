@@ -31,7 +31,7 @@ impl GenericCommand for VerifySpawnFileCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    log::info!("Verify spawn file {:?}", path);
+    log::info!("Verify spawn file {}", path.display());
 
     match SpawnFile::read_from_path::<XRayByteOrder>(path) {
       Ok(_) => {

@@ -11,7 +11,7 @@ pub async fn open_xr_effects(
   path: &str,
   state: State<'_, ExportsEditorState>,
 ) -> TauriResult<Value> {
-  log::info!("Parsing effects exports folder: {:?}", path);
+  log::info!("Parsing effects exports folder: {}", path);
 
   let value: Vec<ExportDescriptor> = ExportsParser::new()
     .parse_effects_from_path(&PathBuf::from(path))

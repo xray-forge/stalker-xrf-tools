@@ -25,7 +25,7 @@ impl GamedataProject {
       .par_iter()
       .for_each(|path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify gamedata particles file: {:?}", path);
+          println!("Verify gamedata particles file: {}", path.display());
         }
 
         *checked_particles_count.lock().unwrap() += 1;
@@ -35,7 +35,7 @@ impl GamedataProject {
             Ok(result) => {
               if !result {
                 if options.is_logging_enabled() {
-                  eprintln!("Particle file is not valid: {:?}", path);
+                  eprintln!("Particle file is not valid: {}", path.display());
                 }
 
                 *invalid_particles_count.lock().unwrap() += 1;
@@ -43,7 +43,11 @@ impl GamedataProject {
             }
             Err(error) => {
               if options.is_logging_enabled() {
-                println!("Particles file verification failed: {:?} - {}", path, error);
+                println!(
+                  "Particles file verification failed: {} - {}",
+                  path.display(),
+                  error
+                );
               }
 
               *invalid_particles_count.lock().unwrap() += 1;
@@ -51,7 +55,11 @@ impl GamedataProject {
           },
           Err(error) => {
             if options.is_logging_enabled() {
-              eprintln!("Particles verification failed: {:?} - {error}", path);
+              eprintln!(
+                "Particles verification failed: {} - {}",
+                path.display(),
+                error
+              );
             }
 
             *invalid_particles_count.lock().unwrap() += 1;
@@ -98,8 +106,9 @@ impl GamedataProject {
               if !result {
                 if options.is_logging_enabled() {
                   println!(
-                    "Particle texture is not valid: {} - {:?}",
-                    particle.name, texture
+                    "Particle texture is not valid: {} - {}",
+                    particle.name,
+                    texture.display()
                   );
                 }
 
@@ -109,8 +118,10 @@ impl GamedataProject {
             Err(error) => {
               if options.is_logging_enabled() {
                 println!(
-                  "Particle texture verification failed: {} - {:?} - {}",
-                  particle.name, texture, error
+                  "Particle texture verification failed: {} - {} - {}",
+                  particle.name,
+                  texture.display(),
+                  error
                 );
               }
 
@@ -121,7 +132,7 @@ impl GamedataProject {
           // Just log message.
           if options.is_logging_enabled() {
             eprintln!(
-              "Not found texture for particle: {} - {:?}",
+              "Not found texture for particle: {} - {}",
               particle.name, texture_relative_path
             );
 

@@ -296,7 +296,6 @@ const TESTS_CASES: &[(
 #[test]
 fn test_regression() -> io::Result<()> {
   for (name, headers) in TESTS_CASES {
-    println!("-------------\n{:?}", name);
     let file = fs::File::open(format!("tests/regression/{}", name))?;
     let mut lha_reader = delharc::LhaDecodeReader::new(&file)?;
     for filen in 0.. {

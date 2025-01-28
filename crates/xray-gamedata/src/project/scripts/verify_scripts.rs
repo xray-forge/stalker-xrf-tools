@@ -40,7 +40,7 @@ impl GamedataProject {
             Ok(is_valid) => {
               if !is_valid {
                 if options.is_logging_enabled() {
-                  println!("Script is not valid: {:?}", path);
+                  println!("Script is not valid: {}", path.display());
                 }
 
                 *invalid_scripts_count.lock().unwrap() += 1;
@@ -48,7 +48,7 @@ impl GamedataProject {
             }
             Err(_) => {
               if options.is_logging_enabled() {
-                println!("Script verification failed: {:?}", path);
+                println!("Script verification failed: {}", path.display());
               }
 
               *invalid_scripts_count.lock().unwrap() += 1;
@@ -56,7 +56,7 @@ impl GamedataProject {
           }
         } else {
           if options.is_logging_enabled() {
-            println!("Script path not found: {:?}", path);
+            println!("Script path not found: {}", path);
           }
 
           *invalid_scripts_count.lock().unwrap() += 1;
@@ -68,12 +68,19 @@ impl GamedataProject {
     let invalid_scripts_count: u32 = *invalid_scripts_count.lock().unwrap();
 
     if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata scripts in {} sec, {}/{} valid",
-        (duration as f64) / 1000.0,
-        checked_scripts_count - invalid_scripts_count,
-        checked_scripts_count
-      );
+      if checked_scripts_count > 0 {
+        println!(
+          "Verified gamedata scripts in {} sec, {}/{} valid",
+          (duration as f64) / 1000.0,
+          checked_scripts_count - invalid_scripts_count,
+          checked_scripts_count
+        );
+      } else {
+        println!(
+          "Check gamedata scripts in {} sec, no scripts found",
+          (duration as f64) / 1000.0,
+        );
+      }
     }
 
     Ok(GamedataScriptsVerificationResult {
@@ -92,8 +99,8 @@ impl GamedataProject {
 
     parse(&code).map_err(|it| {
       GamedataError::new_check_error(format!(
-        "Failed to check lua script file: {:?}, errors: {}",
-        path,
+        "Failed to check lua script file: {}, errors: {}",
+        path.display(),
         it.iter()
           .map(|it| it.to_string())
           .collect::<Vec<_>>()
@@ -120,8 +127,8 @@ impl GamedataProject {
 
     if had_errors {
       Err(GamedataError::new_asset_error(format!(
-        "Failed to read and decode script {:?} with {:?} encoding, {} bytes",
-        path,
+        "Failed to read and decode script {} with {:?} encoding, {} bytes",
+        path.display(),
         encoding_used,
         raw_data.len()
       )))

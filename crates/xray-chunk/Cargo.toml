@@ -6,9 +6,9 @@ edition = "2021"
 [dependencies]
 bytes = "1.6.1"
 encoding_rs = { version = "0.8.33", features = ['alloc', 'fast-legacy-encode'] }
-parquet = "50.0.0"
+parquet = "54.0.0"
 byteorder = "1.5.0"
-fileslice = "0.4.0"
+fileslice = "0.5.0"
 thiserror = "2.0.10"
 
 [dev-dependencies]

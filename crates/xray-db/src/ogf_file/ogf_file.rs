@@ -28,12 +28,13 @@ pub struct OgfFile {
 
 impl OgfFile {
   pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
-    log::info!("Reading ogf path: {:?}", path.as_ref());
+    log::info!("Reading ogf path: {}", path.as_ref().display());
 
     Self::read_from_file::<T>(File::open(&path).map_err(|error| {
       DatabaseError::new_not_found_error(format!(
-        "OGF file was not read: {:?}, error: {error}",
-        path.as_ref(),
+        "OGF file was not read: {}, error: {}",
+        path.as_ref().display(),
+        error
       ))
     })?)
   }

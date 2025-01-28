@@ -78,13 +78,23 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
 
     let started_at: Instant = Instant::now();
 
-    log::info!("Unpacking texture descriptions from: {:?}", description);
-    log::info!("Paths: base {:?}, output {:?}", base, output);
-    log::info!("Parallel mode: {is_parallel}");
+    log::info!(
+      "Unpacking texture descriptions from: {}",
+      description.display()
+    );
+    log::info!(
+      "Paths: base {}, output {}",
+      base.display(),
+      output.display()
+    );
+    log::info!("Parallel mode: {}", is_parallel);
 
     println!(
-      "Unpacking texture descriptions: {:?}, from {:?} to {:?}, parallel - {is_parallel}",
-      description, base, output
+      "Unpacking texture descriptions: {}, from {} to {}, parallel - {}",
+      description.display(),
+      base.display(),
+      output.display(),
+      is_parallel
     );
 
     UnpackDescriptionProcessor::unpack_xml_descriptions(PackDescriptionOptions {
@@ -98,7 +108,7 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
     })?;
 
     log::info!(
-      "Unpack texture descriptions took: {:?}ms",
+      "Unpack texture descriptions took: {}ms",
       started_at.elapsed().as_millis()
     );
 

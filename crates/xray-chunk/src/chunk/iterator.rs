@@ -7,7 +7,6 @@ use std::io::{Result as IoResult, Seek, SeekFrom};
 
 /// Iterate over samples in provided file slice.
 /// Mutates parent object to keep track of what was read during execution.
-#[derive(Debug)]
 pub struct ChunkIterator<'lifetime> {
   pub index: u32,
   pub reader: &'lifetime mut ChunkReader,
@@ -71,7 +70,6 @@ impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
 }
 
 /// Iterate over data in chunk slice, which is stored like (size)(content)(size)(content).
-#[derive(Debug)]
 pub struct ChunkSizePackedIterator<'lifetime> {
   pub index: u32,
   pub next_seek: u64,

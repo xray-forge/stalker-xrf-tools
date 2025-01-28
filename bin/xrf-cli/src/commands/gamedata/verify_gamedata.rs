@@ -7,6 +7,7 @@ use xray_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
   GamedataVerificationResult,
 };
+use xray_utils::path_vec_to_string;
 
 #[derive(Default)]
 pub struct VerifyGamedataCommand;
@@ -132,10 +133,11 @@ impl GenericCommand for VerifyGamedataCommand {
     if open_options.is_logging_enabled() {
       println!("{}", "Opening gamedata project".green());
       println!(
-        "Roots: {:?}, ignored: {:?}",
-        open_options.roots, open_options.ignored,
+        "Roots: {}, ignored: [{}]",
+        path_vec_to_string(&open_options.roots),
+        open_options.ignored.join(", "),
       );
-      println!("Configs: {:?}", open_options.configs);
+      println!("Configs: {}", open_options.configs.display());
     }
 
     let mut project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);

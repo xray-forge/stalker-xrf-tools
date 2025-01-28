@@ -57,7 +57,7 @@ pub fn get_absolute_test_resource_as_file(file: &str, resource: &str) -> IoResul
     Ok(file) => Ok(file),
     Err(error) => Err(IoError::new(
       error.kind(),
-      format!("Failed to open test asset {:?}", path),
+      format!("Failed to open test asset {}", path.display()),
     )),
   }
 }
@@ -88,7 +88,7 @@ pub fn open_test_resource_as_slice(resource_path: &str) -> IoResult<FileSlice> {
     Ok(file) => Ok(FileSlice::new(file)),
     Err(error) => Err(IoError::new(
       error.kind(),
-      format!("Failed to open test asset {:?}", path),
+      format!("Failed to open test asset {}", path.display()),
     )),
   }
 }
@@ -101,7 +101,7 @@ pub fn open_test_resource_as_file(resource_path: &str) -> IoResult<File> {
     Ok(file) => Ok(file),
     Err(error) => Err(IoError::new(
       error.kind(),
-      format!("Failed to open test asset {:?}", path),
+      format!("Failed to open test asset {}", path.display()),
     )),
   }
 }
@@ -122,7 +122,7 @@ pub fn overwrite_test_relative_resource_as_file(resource_path: &str) -> IoResult
     Ok(file) => Ok(file),
     Err(error) => Err(IoError::new(
       error.kind(),
-      format!("Failed to open test asset {:?}", path),
+      format!("Failed to open test asset {}", path.display()),
     )),
   }
 }
@@ -141,7 +141,7 @@ pub fn overwrite_file(path: &Path) -> IoResult<File> {
     Ok(file) => Ok(file),
     Err(error) => Err(IoError::new(
       error.kind(),
-      format!("Failed to open test asset {:?}", path),
+      format!("Failed to open test asset {}", path.display()),
     )),
   }
 }

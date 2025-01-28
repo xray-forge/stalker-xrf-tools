@@ -71,7 +71,8 @@ pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> Databa
       Ok(value) => value,
       _ => {
         return Err(DatabaseError::new_parse_error(format!(
-          "Failed to parse ltx field '{field_name}' value, valid {:?} is expected",
+          "Failed to parse ltx field '{}' value, valid {} is expected",
+          field_name,
           std::any::type_name::<T>()
         )))
       }
@@ -91,7 +92,8 @@ pub fn read_ini_optional_field<T: FromStr>(
       Ok(parsed) => Some(parsed),
       _ => {
         return Err(DatabaseError::new_parse_error(format!(
-          "Failed to parse optional ltx field '{field_name}' value, correct {:?} is expected",
+          "Failed to parse optional ltx field '{}' value, correct {:?} is expected",
+          field_name,
           std::any::type_name::<T>()
         )))
       }

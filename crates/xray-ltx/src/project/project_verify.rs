@@ -16,7 +16,7 @@ impl LtxProject {
     let started_at: Instant = Instant::now();
 
     if !options.is_silent {
-      println!("Verify path: {:?}", self.root);
+      println!("Verify path: {}", self.root.display());
     }
 
     // For each file entry in the project:
@@ -55,7 +55,12 @@ impl LtxProject {
                 .or_else(|| scheme_definition.fields.get(LTX_SYMBOL_ANY))
               {
                 if options.is_verbose && !options.is_silent {
-                  println!("Checking {:?} [{section_name}] {field_name}", entry);
+                  println!(
+                    "Checking {} [{}] {}",
+                    entry.display(),
+                    section_name,
+                    field_name
+                  );
                 }
 
                 result.checked_fields += 1;

@@ -6,12 +6,12 @@ use xray_ltx::{LtxFormatOptions, LtxProject, LtxProjectFormatResult};
 
 #[tauri::command]
 pub async fn check_format_configs_path(path: &str) -> TauriResult<Value> {
-  log::info!("Open ltx folder: {:?}", path);
+  log::info!("Open ltx folder: {}", path);
 
   let project: LtxProject =
     LtxProject::open_at_path(&PathBuf::from(path)).map_err(error_to_string)?;
 
-  log::info!("Check format for ltx folder: {:?}", path);
+  log::info!("Check format for ltx folder: {}", path);
 
   let result: LtxProjectFormatResult = project
     .check_format_all_files_opt(LtxFormatOptions {

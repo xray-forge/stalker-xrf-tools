@@ -8,20 +8,21 @@ resolver = "2"
 path = "src/lib.rs"
 
 [dependencies]
-base64 = "0.21.7"
+base64 = "0.22.1"
 byteorder = "1.4.3"
+derive_more = "1.0.0"
 enum-map = "2.7.3"
-fileslice = "0.4.0"
+fileslice = "0.5.0"
 lazy_static = "1.4.0"
 log = "0.4.20"
 phf = { version = "0.11.2", features = ["macros"] }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
-uuid = { version = "1.7.0", features = ["v4", "serde"] }
+thiserror = "2.0.10"
 typetag = "0.2.1"
+uuid = { version = "1.7.0", features = ["v4", "serde"] }
 xray-chunk = { path = "../xray-chunk" }
 xray-ltx = { path = "../xray-ltx" }
-thiserror = "2.0.10"
 
 [dev-dependencies]
 xray-test-utils = { path = "../xray-test-utils" }

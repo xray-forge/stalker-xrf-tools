@@ -22,11 +22,11 @@ impl ArchiveProject {
     let mut files: HashMap<String, ArchiveFileReplicationDescriptor> = HashMap::new();
 
     if path.is_file() {
-      log::info!("Reading archive file: {:?}", path);
+      log::info!("Reading archive file: {}", path.display());
 
       archives.push(ArchiveReader::from_path_utf8(path)?.read_archive()?);
     } else {
-      log::info!("Reading archive folder: {:?}", path);
+      log::info!("Reading archive folder: {}", path.display());
 
       for entry in WalkDir::new(path)
         .into_iter()
@@ -38,7 +38,7 @@ impl ArchiveProject {
         let path: &Path = entry.path();
 
         if ArchiveDescriptor::is_valid_db_path(path) {
-          log::info!("Reading archive file: {:?}", path);
+          log::info!("Reading archive file: {}", path.display());
 
           archives.push(ArchiveReader::from_path_utf8(path)?.read_archive()?);
         }
@@ -47,8 +47,8 @@ impl ArchiveProject {
 
     if archives.is_empty() {
       return Err(ArchiveError::new_read_error(format!(
-        "Unable to read archives at location {:?}",
-        path
+        "Unable to read archives at location {}",
+        path.display()
       )));
     }
 

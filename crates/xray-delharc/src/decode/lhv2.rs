@@ -100,7 +100,6 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
 
     // number of codes to read
     let num_codes: usize = self.bit_reader.read_bits(5)?;
-    // println!("num codes: {:?}", num_codes);
 
     // single code only
     if num_codes == 0 {
@@ -119,15 +118,12 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
     // read actual lengths
     for p in code_lengths[0..num_codes.min(3)].iter_mut() {
       *p = self.read_code_length()?;
-      // println!("length: {:?}", *p);
     }
     // 2-bit skip value follows
     let skip: usize = self.bit_reader.read_bits(2)?;
-    // println!("skip: {:?}", skip);
 
     for p in code_lengths[3 + skip..num_codes].iter_mut() {
       *p = self.read_code_length()?;
-      // println!("length: {:?}", *p);
     }
 
     self
@@ -142,7 +138,6 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
 
     // number of codes to read
     let num_codes: usize = self.bit_reader.read_bits(9)?;
-    // println!("num codes: {:?}", num_codes);
 
     // single code only
     if num_codes == 0 {

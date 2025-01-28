@@ -61,10 +61,10 @@ impl GenericCommand for UnpackArchiveCommand {
       destination = env::current_dir().unwrap().join(destination);
     }
 
-    log::info!("Unpack source: {:?}", path);
-    log::info!("Unpack destination: {:?}", destination);
+    log::info!("Unpack source: {}", path.display());
+    log::info!("Unpack destination: {}", destination.display());
 
-    let archive_project: ArchiveProject = ArchiveProject::new(path).unwrap();
+    let archive_project: Box<ArchiveProject> = Box::new(ArchiveProject::new(path).unwrap());
 
     log::info!(
       "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",

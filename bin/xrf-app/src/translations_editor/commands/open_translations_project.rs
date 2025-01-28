@@ -11,7 +11,7 @@ pub async fn open_translations_project(
   path: &str,
   state: State<'_, TranslationsEditorState>,
 ) -> TauriResult<Value> {
-  log::info!("Opening translations project: {:?}", path);
+  log::info!("Opening translations project: {}", path);
 
   let translation: TranslationProjectJson =
     TranslationProject::read_project(&PathBuf::from(path)).map_err(error_to_string)?;

@@ -85,7 +85,6 @@ impl HuffTree {
   /// * If the number of created nodes would exceed [TreeEntry::MAX_INDEX], an error is being returned.
   /// * An error is returned if a built tree is incomplete.
   pub fn build_tree(&mut self, value_lengths: &[u8]) -> Result<(), &'static str> {
-    // println!("({}) {:?}", value_lengths.len(), value_lengths);
     if value_lengths.len() > TreeEntry::MAX_INDEX / 2 {
       return Err("too many code lengths");
     }

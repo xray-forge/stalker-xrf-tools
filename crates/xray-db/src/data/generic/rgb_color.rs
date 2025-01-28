@@ -1,13 +1,14 @@
 use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 use std::io::{Read, Write};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "camelCase")]
+#[display("{r},{g},{b}")]
 pub struct RgbColor {
   pub r: f32,
   pub g: f32,
@@ -33,12 +34,6 @@ impl RgbColor {
     writer.write_f32::<T>(self.b)?;
 
     Ok(())
-  }
-}
-
-impl Display for RgbColor {
-  fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(formatter, "{},{},{}", self.r, self.g, self.b)
   }
 }
 

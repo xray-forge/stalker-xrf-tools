@@ -18,7 +18,7 @@ pub async fn open_equipment_sprite(
   let name: &str = "equipment.png";
 
   let (image, preview_buffer) = open_dds_as_png(&PathBuf::from(equipment_dds_path))
-    .map_err(|error| format!("Failed to open provided image file: {:?}", error))?;
+    .map_err(|error| format!("Failed to open provided image file: {}", error))?;
 
   log::info!("Opened equipment dds file");
 

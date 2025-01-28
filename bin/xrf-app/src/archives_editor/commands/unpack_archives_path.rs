@@ -6,12 +6,12 @@ use xray_archive::ArchiveProject;
 
 #[tauri::command]
 pub async fn unpack_archives_path(from: &str, destination: &str) -> TauriResult<Value> {
-  log::info!("Open archive folder: {:?}", from);
+  log::info!("Open archive folder: {}", from);
 
   let project: ArchiveProject =
     ArchiveProject::new(&PathBuf::from(from)).map_err(error_to_string)?;
 
-  log::info!("Unpacking archive to: {:?}", destination);
+  log::info!("Unpacking archive to: {}", destination);
 
   match project
     .unpack_parallel(&PathBuf::from(destination), 32)

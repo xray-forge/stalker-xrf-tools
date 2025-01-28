@@ -19,8 +19,8 @@ impl XmlDescriptionCollection {
   pub fn get_descriptions(options: &PackDescriptionOptions) -> TextureResult<Self> {
     if options.description.is_dir() {
       println!(
-        "Check texture descriptions from dir: {:?}",
-        options.description
+        "Check texture descriptions from dir: {}",
+        options.description.display()
       );
 
       let mut files: HashMap<String, TextureFileDescriptor> = HashMap::new();
@@ -66,7 +66,7 @@ impl XmlDescriptionCollection {
     path: &Path,
   ) -> TextureResult<HashMap<String, TextureFileDescriptor>> {
     if options.is_verbose {
-      println!("Found texture description: {:?}", path);
+      println!("Found texture description: {}", path.display());
     }
 
     let mut descriptions: HashMap<String, TextureFileDescriptor> = HashMap::new();
@@ -86,10 +86,10 @@ impl XmlDescriptionCollection {
       Ok(doc) => doc,
       Err(error) => {
         if options.is_strict {
-          panic!("Failed to parse xml: {:?} - {:?}", path, error)
+          panic!("Failed to parse xml: {} - {}", path.display(), error)
         }
 
-        println!("Error parsing XML file: {:?} - {:?}", path, error);
+        println!("Error parsing XML file: {} - {}", path.display(), error);
         return Ok(HashMap::new());
       }
     };
@@ -121,20 +121,21 @@ impl XmlDescriptionCollection {
               file_description.add_sprite(sprite);
             } else {
               println!(
-                "Skip texture node: {:?} ({:?})",
+                "Skip texture node: {} ({})",
                 node.attribute("id").unwrap_or("unknown"),
                 node
                   .attributes()
                   .map(|it| format!("{}={}", it.name(), it.value()))
-                  .collect::<Vec<String>>(),
+                  .collect::<Vec<String>>()
+                  .join(","),
               );
             }
           }
 
           if file_description.sprites.is_empty() {
             println!(
-              "Skip definitions node \"{file_name}\" without textures (in {:?})",
-              path
+              "Skip definitions node \"{file_name}\" without textures (in {})",
+              path.display()
             );
           } else {
             match descriptions.get_mut(&file_description.name) {
@@ -158,7 +159,10 @@ impl XmlDescriptionCollection {
         }
       }
     } else {
-      println!("Got no 'w' tag for file '{:?}'", options.description);
+      println!(
+        "Got no 'w' tag for file '{}'",
+        options.description.display()
+      );
     }
 
     Ok(descriptions)

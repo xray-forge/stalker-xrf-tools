@@ -13,6 +13,7 @@ members = [
     "crates/xray-test-utils",
     "crates/xray-texture",
     "crates/xray-translation",
+    "crates/xray-utils",
 ]
 
 [profile.release]

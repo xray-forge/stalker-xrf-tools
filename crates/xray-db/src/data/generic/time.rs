@@ -2,13 +2,14 @@ use crate::constants::NIL;
 use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
 use std::io::{Read, Write};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "camelCase")]
+#[display("{year},{month},{day},{hour},{minute},{second},{millis}")]
 pub struct Time {
   pub year: u8,
   pub month: u8,
@@ -96,16 +97,6 @@ impl Time {
       Ok(time) => Some(time),
       Err(_) => return Err(DatabaseError::new_parse_error("Failed to parse time")),
     })
-  }
-}
-
-impl Display for Time {
-  fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-    write!(
-      formatter,
-      "{},{},{},{},{},{},{}",
-      self.year, self.month, self.day, self.hour, self.minute, self.second, self.millis
-    )
   }
 }
 

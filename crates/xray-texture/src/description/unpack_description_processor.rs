@@ -17,10 +17,10 @@ impl UnpackDescriptionProcessor {
       XmlDescriptionCollection::get_descriptions(&options)?;
     let count: Mutex<u32> = Mutex::new(0);
 
-    println!("Unpacking for {:?} files", description.files.len());
+    println!("Unpacking for {} files", description.files.len());
 
     if options.is_parallel {
-      println!("Unpacking for {:?} files", description.files.len());
+      println!("Unpacking for {} files", description.files.len());
 
       description.files.par_iter().for_each(|(_, file)| {
         if Self::unpack_xml_description(&options, file).is_ok_and(|it| it) {
@@ -48,7 +48,7 @@ impl UnpackDescriptionProcessor {
     let destination: PathBuf = options.output.join(&file.name);
 
     if options.is_verbose {
-      println!("Unpacking {:?}", full_name);
+      println!("Unpacking {}", full_name.display());
     }
 
     let dds: TextureResult<RgbaImage> =
@@ -61,7 +61,7 @@ impl UnpackDescriptionProcessor {
 
       for sprite in &file.sprites {
         if options.is_verbose {
-          println!("Unpacking {:?} -> {}", full_name, sprite.id);
+          println!("Unpacking {} -> {}", full_name.display(), sprite.id);
         }
 
         let (max_x, max_y) = sprite.get_dimension_boundaries();
@@ -69,19 +69,23 @@ impl UnpackDescriptionProcessor {
         if max_x > dds.width() || max_y > dds.height() {
           if options.is_strict {
             panic!(
-              "Unexpected texture '{}' (x:{max_x}, y:{max_y}) boundaries are bigger than source DDS file ({}x{} - {:?})",
-              sprite.id,
-              dds.width(),
-              dds.height(),
-              full_name
-            );
+                            "Unexpected texture '{}' (x:{}, y:{}) boundaries are bigger than source DDS file ({}x{} - {})",
+                            sprite.id,
+                            max_x,
+                            max_y,
+                            dds.width(),
+                            dds.height(),
+                            full_name.display()
+                        );
           } else {
             println!(
-              "[WARN] - exceeding sprite size '{}' (x:{max_x}, y:{max_y}) ({}x{} - {:?})",
+              "[WARN] - exceeding sprite size '{}' (x:{}, y:{}) ({}x{} - {})",
               sprite.id,
+              max_x,
+              max_y,
               dds.width(),
               dds.height(),
-              full_name
+              full_name.display()
             );
           }
         } else {
@@ -95,12 +99,15 @@ impl UnpackDescriptionProcessor {
 
       Ok(true)
     } else if options.is_strict {
-      panic!("Could not find file for texture unpacking: {:?}", full_name)
+      panic!(
+        "Could not find file for texture unpacking: {}",
+        full_name.display()
+      )
     } else {
       println!(
-        "Skip file {:?}, not able to read: {:?}",
-        full_name,
-        dds.unwrap_err().to_string()
+        "Skip file {}, not able to read: {}",
+        full_name.display(),
+        dds.unwrap_err()
       );
 
       Ok(false)

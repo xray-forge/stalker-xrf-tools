@@ -1,6 +1,7 @@
 use crate::types::GamedataResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationResult};
 use std::time::Instant;
+use xray_utils::path_vec_to_string;
 
 impl GamedataProject {
   pub fn verify(
@@ -9,8 +10,9 @@ impl GamedataProject {
   ) -> GamedataResult<GamedataVerificationResult> {
     if options.is_logging_enabled() {
       println!(
-        "Verifying gamedata project: {:?} | {:?}",
-        self.roots, self.configs
+        "Verifying gamedata project: [{}] | {}",
+        path_vec_to_string(&self.roots),
+        self.configs.display()
       );
     }
 

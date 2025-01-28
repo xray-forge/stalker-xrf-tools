@@ -44,25 +44,24 @@ impl GenericCommand for RepackParticlesCommand {
       .get_one::<PathBuf>("dest")
       .expect("Expected valid output path to be provided");
 
-    log::info!("Starting parsing particle file {:?}", path);
-    log::info!("Repack into {:?}", destination);
+    log::info!("Starting parsing particle file {}", path.display());
+    log::info!("Repack into {}", destination.display());
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile =
-      ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(path)?;
+    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::read_from_path::<
+      XRayByteOrder,
+      &PathBuf,
+    >(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.write_to_path::<XRayByteOrder>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read particle file took: {:?}ms", read_duration.as_millis());
-    log::info!(
-      "Write particle file took: {:?}ms",
-      write_duration.as_millis()
-    );
+    log::info!("Read particle file took: {}ms", read_duration.as_millis());
+    log::info!("Write particle file took: {}ms", write_duration.as_millis());
 
-    log::info!("Particles file was repacked into {:?}", destination);
+    log::info!("Particles file was repacked into {}", destination.display());
 
     Ok(())
   }

@@ -32,44 +32,78 @@ use crate::data::particle::particle_action::particle_action_vortex::ParticleActi
 use crate::error::DatabaseError;
 use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
+use derive_more::Display;
 use enum_map::Enum;
 use xray_chunk::ChunkReader;
 use xray_ltx::Ltx;
 
-#[derive(Copy, Clone, Debug, Enum, PartialEq)]
+#[derive(Copy, Clone, Debug, Enum, PartialEq, Display)]
 pub enum ParticleActionType {
+  #[display("Avoid")]
   Avoid = 0,
+  #[display("Bounce")]
   Bounce = 1,
+  #[display("CallActionList")]
   CallActionList = 2,
+  #[display("CopyVertex")]
   CopyVertex = 3,
+  #[display("Damping")]
   Damping = 4,
+  #[display("Explosion")]
   Explosion = 5,
+  #[display("Follow")]
   Follow = 6,
+  #[display("Gravitate")]
   Gravitate = 7,
+  #[display("Gravity")]
   Gravity = 8,
+  #[display("Jet")]
   Jet = 9,
+  #[display("KillOld")]
   KillOld = 10,
+  #[display("MatchVelocity")]
   MatchVelocity = 11,
+  #[display("Move")]
   Move = 12,
+  #[display("OrbitLine")]
   OrbitLine = 13,
+  #[display("OrbitPoint")]
   OrbitPoint = 14,
+  #[display("RandomAccel")]
   RandomAccel = 15,
+  #[display("RandomDisplace")]
   RandomDisplace = 16,
+  #[display("RandomVelocity")]
   RandomVelocity = 17,
+  #[display("Restore")]
   Restore = 18,
+  #[display("Sink")]
   Sink = 19,
+  #[display("SinkVelocity")]
   SinkVelocity = 20,
+  #[display("Source")]
   Source = 21,
+  #[display("SpeedLimit")]
   SpeedLimit = 22,
+  #[display("TargetColor")]
   TargetColor = 23,
+  #[display("TargetSize")]
   TargetSize = 24,
+  #[display("TargetRotate")]
   TargetRotate = 25,
+  #[display("TargetRotateD")]
   TargetRotateD = 26,
+  #[display("TargetVelocity")]
   TargetVelocity = 27,
+  #[display("TargetVelocityD")]
   TargetVelocityD = 28,
+  #[display("Vortex")]
   Vortex = 29,
+  #[display("Turbulence")]
   Turbulence = 30,
+  #[display("Scatter")]
   Scatter = 31,
+  #[display("Unknown")]
   Unknown = -1,
 }
 
@@ -155,7 +189,7 @@ impl ParticleActionType {
       Self::Scatter => Box::new(ParticleActionScatter::read::<T>(reader)?),
       Self::Unknown | Self::CallActionList => {
         return Err(DatabaseError::new_parse_error(format!(
-          "Not implemented parser for particle action reading: {:?}",
+          "Not implemented parser for particle action reading: {}",
           particle_action_type
         )));
       }
@@ -204,7 +238,7 @@ impl ParticleActionType {
       Self::Scatter => Box::new(ParticleActionScatter::import(section_name, ltx)?),
       Self::Unknown | Self::CallActionList => {
         return Err(DatabaseError::new_parse_error(format!(
-          "Not implemented parser for particle action importing: {:?}",
+          "Not implemented parser for particle action importing: {}",
           particle_action_type
         )));
       }

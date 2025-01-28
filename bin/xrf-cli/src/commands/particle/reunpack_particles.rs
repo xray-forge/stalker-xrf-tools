@@ -44,11 +44,11 @@ impl GenericCommand for ReUnpackParticlesCommand {
       .get_one::<PathBuf>("dest")
       .expect("Expected valid output path to be provided");
 
-    log::info!("Starting importing particle file {:?}", path);
-    log::info!("Re-unpack into {:?}", destination);
+    log::info!("Starting importing particle file {}", path.display());
+    log::info!("Re-unpack into {}", destination.display());
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile = ParticlesFile::import_from_path(path)?;
+    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::import_from_path(path)?);
     let import_duration: Duration = started_at.elapsed();
 
     particles_file.export_to_path(destination)?;
@@ -56,15 +56,18 @@ impl GenericCommand for ReUnpackParticlesCommand {
     let export_duration: Duration = started_at.elapsed() - import_duration;
 
     log::info!(
-      "Import particle file took: {:?}ms",
+      "Import particle file took: {}ms",
       import_duration.as_millis()
     );
     log::info!(
-      "Export particle file took: {:?}ms",
+      "Export particle file took: {}ms",
       export_duration.as_millis()
     );
 
-    log::info!("Particles file was re-unpacked into {:?}", destination);
+    log::info!(
+      "Particles file was re-unpacked into {}",
+      destination.display()
+    );
 
     Ok(())
   }

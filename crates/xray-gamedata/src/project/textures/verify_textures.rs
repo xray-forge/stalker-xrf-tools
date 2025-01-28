@@ -37,7 +37,7 @@ impl GamedataProject {
             Ok(is_valid) => {
               if !is_valid {
                 if options.is_logging_enabled() {
-                  println!("Texture is not valid: {:?}", path);
+                  println!("Texture is not valid: {}", path.display());
                 }
 
                 *invalid_textures_count.lock().unwrap() += 1;
@@ -45,7 +45,11 @@ impl GamedataProject {
             }
             Err(error) => {
               if options.is_logging_enabled() {
-                println!("Texture verification failed: {:?} - {error}", path);
+                println!(
+                  "Texture verification failed: {} - {}",
+                  path.display(),
+                  error
+                );
               }
 
               *invalid_textures_count.lock().unwrap() += 1;
@@ -53,7 +57,7 @@ impl GamedataProject {
           }
         } else {
           if options.is_logging_enabled() {
-            println!("Texture path not found: {:?}", path);
+            println!("Texture path not found: {}", path);
           }
 
           *invalid_textures_count.lock().unwrap() += 1;
@@ -89,8 +93,9 @@ impl GamedataProject {
       options,
       &Dds::read(&mut File::open(path)?).map_err(|error| {
         GamedataError::new_check_error(format!(
-          "Failed to read texture by path {:?}, error: {:?}",
-          path, error
+          "Failed to read texture by path {}, error: {}",
+          path.display(),
+          error
         ))
       })?,
     )

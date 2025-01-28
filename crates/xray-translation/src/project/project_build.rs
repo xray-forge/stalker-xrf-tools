@@ -19,10 +19,10 @@ impl TranslationProject {
     dir: &Path,
     options: &ProjectBuildOptions,
   ) -> TranslationResult<ProjectBuildResult> {
-    log::info!("Building dir {:?}", dir);
+    log::info!("Building dir {}", dir.display());
 
     if options.is_logging_enabled() {
-      println!("Building dir {:?}", dir);
+      println!("Building dir {}", dir.display());
     }
 
     let started_at: Instant = Instant::now();
@@ -45,8 +45,8 @@ impl TranslationProject {
     result.duration = started_at.elapsed().as_millis();
 
     log::info!(
-      "Built dir {:?} in {} sec",
-      dir,
+      "Built dir {} in {} sec",
+      dir.display(),
       (result.duration as f64) / 1_000.0
     );
 
@@ -68,10 +68,10 @@ impl TranslationProject {
       } else if extension == "json" {
         Self::build_json_file(path, options)?;
       } else {
-        log::info!("Skip file {:?}", path);
+        log::info!("Skip file {}", path.display());
 
         if options.is_logging_enabled() {
-          println!("Skip file {:?}", path);
+          println!("Skip file {}", path.display());
         }
       }
     }
@@ -79,8 +79,8 @@ impl TranslationProject {
     result.duration = started_at.elapsed().as_millis();
 
     log::info!(
-      "Built file {:?} in {} sec",
-      path,
+      "Built file {} in {} sec",
+      path.display(),
       (result.duration as f64) / 1000.0
     );
 
@@ -92,26 +92,26 @@ impl TranslationProject {
 
     if let Some(locale) = locale {
       if options.is_logging_enabled() {
-        println!("Building XML based translations {:?}", path);
+        println!("Building XML based translations {}", path.display());
       }
 
       // All locales needed or file locale matches current one.
       if options.language == TranslationLanguage::All || locale == options.language {
-        log::info!("Building dynamic XML file {:?} ({:?})", path, locale);
+        log::info!("Building dynamic XML file {} ({})", path.display(), locale);
 
         copy(
           &mut File::open(path)?,
           &mut Self::prepare_target_xml_translation_file(path, &options.output, &locale, options)?,
         )?;
       } else {
-        log::info!("Skip dynamic XML file {:?}", path);
+        log::info!("Skip dynamic XML file {}", path.display());
       }
     } else {
-      log::info!("Building static XML file {:?}", path);
+      log::info!("Building static XML file {}", path.display());
 
       // Just plain XML to copy from one place to another.
       if options.is_logging_enabled() {
-        println!("Copy static XML translations {:?}", path);
+        println!("Copy static XML translations {}", path.display());
       }
 
       if options.language == TranslationLanguage::All {
@@ -143,10 +143,10 @@ impl TranslationProject {
   }
 
   pub fn build_json_file(path: &Path, options: &ProjectBuildOptions) -> TranslationResult {
-    log::info!("Building dynamic JSON file {:?}", path);
+    log::info!("Building dynamic JSON file {}", path.display());
 
     if options.is_logging_enabled() {
-      println!("Building JSON based translations {:?}", path);
+      println!("Building JSON based translations {}", path.display());
     }
 
     let parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
@@ -188,7 +188,7 @@ impl TranslationProject {
     let mut serializer: Serializer<String> = Serializer::new(&mut buffer);
     let mut compiled: TranslationCompiledXml = TranslationCompiledXml::default();
 
-    let language: &str = language.as_str();
+    let language: String = language.to_string();
 
     if options.is_verbose_logging_enabled() {
       println!(
@@ -198,7 +198,7 @@ impl TranslationProject {
     }
 
     for (key, entry) in source {
-      match entry.get(language) {
+      match entry.get(&language) {
         None => {
           compiled.string.push(TranslationEntryCompiled {
             id: key.clone(),

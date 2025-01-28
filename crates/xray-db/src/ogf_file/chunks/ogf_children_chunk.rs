@@ -13,7 +13,7 @@ impl OgfChildrenChunk {
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
     log::info!(
-      "Reading children chunk: {:?} bytes",
+      "Reading children chunk: {} bytes",
       reader.read_bytes_remain()
     );
 

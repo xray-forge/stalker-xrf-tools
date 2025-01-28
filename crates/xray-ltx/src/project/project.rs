@@ -100,7 +100,11 @@ impl LtxProject {
         "Cannot read LTX project safely, detected case-insensitive #include statements:\n{}",
         ltx_file_entries_failures
           .iter()
-          .map(|(first, second)| format!("  - {:?} incorrectly imported as {:?}", first, second))
+          .map(|(first, second)| format!(
+            "  - {} incorrectly imported as {}",
+            first.display(),
+            second.display()
+          ))
           .collect::<Vec<_>>()
           .join("\n")
       )));

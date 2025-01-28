@@ -1,35 +1,31 @@
 use crate::{TranslationError, TranslationResult};
+use derive_more::Display;
 use encoding_rs::{Encoding, WINDOWS_1250, WINDOWS_1251};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Display)]
 pub enum TranslationLanguage {
+  #[display("all")]
   All,
+  #[display("eng")]
   English,
+  #[display("rus")]
   Russian,
+  #[display("ukr")]
   Ukrainian,
+  #[display("pol")]
   Polish,
+  #[display("fra")]
   French,
+  #[display("ger")]
   German,
+  #[display("ita")]
   Italian,
+  #[display("spa")]
   Spanish,
 }
 
 impl TranslationLanguage {
-  pub fn as_str(&self) -> &'static str {
-    match self {
-      Self::All => "all",
-      Self::English => "eng",
-      Self::French => "fra",
-      Self::German => "ger",
-      Self::Italian => "ita",
-      Self::Polish => "pol",
-      Self::Russian => "rus",
-      Self::Spanish => "spa",
-      Self::Ukrainian => "ukr",
-    }
-  }
-
   pub fn get_language_encoding(&self) -> String {
     match self {
       Self::Russian | Self::Ukrainian => String::from("windows-1251"),
@@ -57,8 +53,8 @@ impl TranslationLanguage {
     ]
   }
 
-  pub fn get_all_str<'a>() -> Vec<&'a str> {
-    Self::get_all().iter().map(|it| it.as_str()).collect()
+  pub fn get_all_strings() -> Vec<String> {
+    Self::get_all().iter().map(|it| it.to_string()).collect()
   }
 
   pub fn from_str_single(language: &str) -> TranslationResult<Self> {

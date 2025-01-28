@@ -83,7 +83,7 @@ impl ExportsParser {
     let mut expressions: Vec<ExportDescriptor> = Vec::new();
 
     for path in files {
-      log::info!("Parsing exports from: {:?}", path);
+      log::info!("Parsing exports from: {}", path.display());
 
       let (program, source_map, comments) = self.open_ts_source_file(path)?;
 

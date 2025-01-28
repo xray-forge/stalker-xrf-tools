@@ -55,8 +55,8 @@ impl GenericCommand for UnpackParticlesCommand {
 
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting particle spawn file {:?}", path);
-    log::info!("Unpack destination {:?}", destination);
+    log::info!("Starting particle spawn file {}", path.display());
+    log::info!("Unpack destination {}", destination.display());
 
     // Apply force flag and delete existing directories.
     if force && destination.exists() && destination.is_dir() {
@@ -75,17 +75,19 @@ impl GenericCommand for UnpackParticlesCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let particles_file: ParticlesFile =
-      ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(path)?;
+    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::read_from_path::<
+      XRayByteOrder,
+      &PathBuf,
+    >(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.export_to_path(destination)?;
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read particle file took: {:?}ms", read_duration.as_millis());
+    log::info!("Read particle file took: {}ms", read_duration.as_millis());
     log::info!(
-      "Export particle file took: {:?}ms",
+      "Export particle file took: {}ms",
       unpack_duration.as_millis()
     );
 

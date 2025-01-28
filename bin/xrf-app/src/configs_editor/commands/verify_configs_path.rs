@@ -6,7 +6,7 @@ use xray_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyO
 
 #[tauri::command]
 pub async fn verify_configs_path(path: &str) -> TauriResult<Value> {
-  log::info!("Open ltx folder: {:?}", path);
+  log::info!("Open ltx folder: {}", path);
 
   let project: LtxProject = LtxProject::open_at_path_opt(
     &PathBuf::from(path),
@@ -18,7 +18,7 @@ pub async fn verify_configs_path(path: &str) -> TauriResult<Value> {
   )
   .map_err(error_to_string)?;
 
-  log::info!("Verifying ltx folder: {:?}", path);
+  log::info!("Verifying ltx folder: {}", path);
 
   let result: LtxProjectVerifyResult = project
     .verify_entries_opt(LtxVerifyOptions {

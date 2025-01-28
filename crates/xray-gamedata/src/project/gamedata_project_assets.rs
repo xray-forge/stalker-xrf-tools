@@ -5,6 +5,7 @@ use crate::{GamedataProject, GamedataProjectReadOptions, GamedataResult};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
+use xray_utils::path_vec_to_string;
 
 impl GamedataProject {
   pub fn read_project_assets(
@@ -13,7 +14,10 @@ impl GamedataProject {
     ignored: &[&str],
   ) -> GamedataResult<HashMap<String, AssetDescriptor>> {
     if options.is_logging_enabled() {
-      println!("Reading project assets map in roots: {:?}", roots);
+      println!(
+        "Reading project assets map in roots: {}",
+        path_vec_to_string(roots)
+      );
     }
 
     let mut assets: HashMap<String, AssetDescriptor> = HashMap::new();
@@ -39,7 +43,7 @@ impl GamedataProject {
             AssetDescriptor::new_with_extension(index, relative),
           );
         } else {
-          log::warn!("Could not strip prefix: {:?}", entry_path);
+          log::warn!("Could not strip prefix: {}", entry_path.display());
         }
       }
     }

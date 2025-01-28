@@ -60,17 +60,18 @@ impl GenericCommand for FormatLtxCommand {
     let is_verbose: bool = matches.get_flag("verbose");
 
     if path.is_dir() {
-      let project: LtxProject = LtxProject::open_at_path(path).map_err(|error| {
+      let project: Box<LtxProject> = Box::new(LtxProject::open_at_path(path).map_err(|error| {
         println!(
-          "Failed to format project at {:?}, reason: {:?}",
-          path, error
+          "Failed to format project at {}, reason: {}",
+          path.display(),
+          error
         );
 
         error
-      })?;
+      })?);
 
       if is_check {
-        log::info!("Checking format of ltx folder: {:?}", path);
+        log::info!("Checking format of ltx folder: {}", path.display());
 
         let result: LtxProjectFormatResult =
           project.check_format_all_files_opt(LtxFormatOptions {
@@ -84,7 +85,7 @@ impl GenericCommand for FormatLtxCommand {
           );
         }
       } else {
-        log::info!("Formatting ltx folder: {:?}", path);
+        log::info!("Formatting ltx folder: {}", path.display());
 
         project.format_all_files_opt(LtxFormatOptions {
           is_silent,
@@ -95,19 +96,19 @@ impl GenericCommand for FormatLtxCommand {
       Ok(())
     } else {
       log::info!(
-        "Formatting ltx file: {:?}, --check={is_check}, --silent={is_silent}",
-        path
+        "Formatting ltx file: {}, --check={is_check}, --silent={is_silent}",
+        path.display()
       );
 
       // todo: Check single file?
       match Ltx::format_file(path, true) {
         Ok(_) => {
-          println!("Successfully formatted ltx in '{:?}'", path);
+          println!("Successfully formatted ltx in '{}'", path.display());
 
           Ok(())
         }
         Err(error) => {
-          println!("Failed to format {:?}, reason: {:?}", path, error);
+          println!("Failed to format {}, reason: {}", path.display(), error);
 
           Err(Box::new(error))
         }

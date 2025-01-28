@@ -31,9 +31,9 @@ impl GenericCommand for InfoSpawnCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read spawn file {:?}", path);
+    println!("Read spawn file {}", path.display());
 
-    let spawn_file: SpawnFile = SpawnFile::read_from_path::<XRayByteOrder>(path)?;
+    let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::read_from_path::<XRayByteOrder>(path)?);
 
     println!("Spawn file information:");
 

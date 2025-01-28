@@ -30,10 +30,7 @@ impl SpawnGraphsChunk {
 
   /// Read graphs chunk by position descriptor.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
-    log::info!(
-      "Reading graphs chunk, bytes {:?}",
-      reader.read_bytes_remain()
-    );
+    log::info!("Reading graphs chunk, bytes {}", reader.read_bytes_remain());
 
     let mut levels: Vec<GraphLevel> = Vec::new();
     let mut vertices: Vec<GraphVertex> = Vec::new();
@@ -61,7 +58,7 @@ impl SpawnGraphsChunk {
     let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::read_list::<T>(reader)?;
 
     log::info!(
-      "Read graphs ver {:?}, {:?} bytes",
+      "Read graphs ver {}, {} bytes",
       header.version,
       reader.read_bytes_len(),
     );
@@ -110,7 +107,7 @@ impl SpawnGraphsChunk {
 
     GraphCrossTable::write_list::<T>(&self.cross_tables, writer)?;
 
-    log::info!("Written graphs chunk, {:?} bytes", writer.bytes_written());
+    log::info!("Written graphs chunk, {} bytes", writer.bytes_written());
 
     Ok(())
   }

@@ -82,9 +82,9 @@ impl LtxIncludeConvertor {
       },
       Err(error) => {
         return Err(LtxError::new_convert_error(format!(
-          "Failed to parse ltx file, nested file {:?} in {:?} error: {error}",
-          path.as_os_str(),
-          into.path.as_ref().unwrap(),
+          "Failed to parse ltx file, nested file {} in {} error: {error}",
+          path.display(),
+          into.path.as_ref().unwrap().display(),
         )))
       }
     };
@@ -100,9 +100,10 @@ impl LtxIncludeConvertor {
             existing.merge(value);
           } else {
             return Err(LtxError::new_convert_error(format!(
-              "Failed to include ltx file '{:?}' in {:?}, duplicate section '{key}' found",
-              path,
-              into.path.as_ref().unwrap()
+              "Failed to include ltx file '{}' in {}, duplicate section '{}' found",
+              path.display(),
+              into.path.as_ref().unwrap().display(),
+              key
             )));
           }
         }

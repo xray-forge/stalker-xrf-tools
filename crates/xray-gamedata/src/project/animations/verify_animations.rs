@@ -160,7 +160,8 @@ impl GamedataProject {
     } else {
       if options.is_logging_enabled() {
         eprintln!(
-          "Not found hud visual: [{section_name}] - {:?}",
+          "Not found hud visual: [{}] - {:?}",
+          section_name,
           section.get("visual")
         );
       }

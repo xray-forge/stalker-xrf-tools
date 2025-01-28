@@ -14,10 +14,10 @@ impl TranslationProject {
     dir: &Path,
     options: &ProjectInitializeOptions,
   ) -> TranslationResult<ProjectInitializeResult> {
-    log::info!("Initializing dir {:?}", dir);
+    log::info!("Initializing dir {}", dir.display());
 
     if options.is_logging_enabled() {
-      println!("Initializing dir {:?}", dir);
+      println!("Initializing dir {}", dir.display());
     }
 
     let started_at: Instant = Instant::now();
@@ -40,8 +40,8 @@ impl TranslationProject {
     result.duration = started_at.elapsed().as_millis();
 
     log::info!(
-      "Initialize dir {:?} in {} sec",
-      dir,
+      "Initialize dir {} in {} sec",
+      dir.display(),
       (result.duration as f64) / 1000.0
     );
 
@@ -58,10 +58,10 @@ impl TranslationProject {
       if extension == "json" {
         return Self::initialize_json_file(path, options);
       } else {
-        log::info!("Skip file {:?}", path);
+        log::info!("Skip file {}", path.display());
 
         if options.is_logging_enabled() {
-          println!("Skip file {:?}", path);
+          println!("Skip file {}", path.display());
         }
       }
     }
@@ -76,34 +76,34 @@ impl TranslationProject {
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();
     let mut initialized_count: u32 = 0;
 
-    log::info!("Initializing dynamic JSON file {:?}", path);
+    log::info!("Initializing dynamic JSON file {}", path.display());
 
     let started_at: Instant = Instant::now();
     let mut parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
 
-    let all_languages: Vec<&str> = TranslationLanguage::get_all_str();
+    let all_languages: Vec<String> = TranslationLanguage::get_all_strings();
 
     for (key, value) in &mut parsed {
       for language in &all_languages {
-        match value.get_mut(*language) {
+        match value.get_mut(language) {
           None => {
             initialized_count += 1;
 
-            log::info!("Initializing missing key: {:?} - {:?}", key, language);
+            log::info!("Initializing missing key: {key} - {language}");
 
             if options.is_logging_enabled() {
-              println!("Initializing missing key: {:?} - {:?}", key, language);
+              println!("Initializing missing key: {key} - {language}");
             }
 
-            value.insert(String::from(*language), None);
+            value.insert(String::from(language), None);
           }
           _ => {
             // Nothing.
           }
         }
 
-        if !value.contains_key(*language) {
-          value.insert(String::from(*language), None);
+        if !value.contains_key(language) {
+          value.insert(String::from(language), None);
         }
       }
     }
@@ -120,14 +120,15 @@ impl TranslationProject {
 
     if initialized_count > 0 {
       log::info!(
-        "Initialized file {:?} in {} sec, {initialized_count} keys added",
-        path,
-        (result.duration as f64) / 1000.0
+        "Initialized file {} in {} sec, {} keys added",
+        path.display(),
+        (result.duration as f64) / 1000.0,
+        initialized_count
       );
     } else {
       log::info!(
-        "Skip file {:?}, checked in {} sec",
-        path,
+        "Skip file {}, checked in {} sec",
+        path.display(),
         (result.duration as f64) / 1000.0
       );
     }

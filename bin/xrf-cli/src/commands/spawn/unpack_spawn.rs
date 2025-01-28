@@ -55,8 +55,8 @@ impl GenericCommand for UnpackSpawnFileCommand {
 
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting parsing spawn file {:?}", path);
-    log::info!("Unpack destination {:?}", destination);
+    log::info!("Starting parsing spawn file {}", path.display());
+    log::info!("Unpack destination {}", destination.display());
 
     // Apply force flag and delete existing directories.
     if force && destination.exists() && destination.is_dir() {
@@ -75,18 +75,15 @@ impl GenericCommand for UnpackSpawnFileCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let spawn_file: SpawnFile = SpawnFile::read_from_path::<XRayByteOrder>(path)?;
+    let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::read_from_path::<XRayByteOrder>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     spawn_file.export_to_path::<XRayByteOrder>(destination)?;
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read spawn file took: {:?}ms", read_duration.as_millis());
-    log::info!(
-      "Export spawn file took: {:?}ms",
-      unpack_duration.as_millis()
-    );
+    log::info!("Read spawn file took: {}ms", read_duration.as_millis());
+    log::info!("Export spawn file took: {}ms", unpack_duration.as_millis());
 
     Ok(())
   }
