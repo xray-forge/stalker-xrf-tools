@@ -207,7 +207,7 @@ impl LtxFieldDataType {
 }
 
 impl Display for LtxFieldDataType {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+  fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let type_string: String = match self {
       Self::TypeAny => String::from("any"),
       Self::TypeBool => String::from("bool"),
@@ -230,6 +230,6 @@ impl Display for LtxFieldDataType {
       Self::TypeVector => String::from("vector"),
     };
 
-    write!(f, "{}", type_string)
+    write!(formatter, "{}", type_string)
   }
 }

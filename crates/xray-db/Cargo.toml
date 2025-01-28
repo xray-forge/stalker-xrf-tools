@@ -10,7 +10,7 @@ path = "src/lib.rs"
 [dependencies]
 base64 = "0.22.1"
 byteorder = "1.4.3"
-derive_more = "1.0.0"
+derive_more = { version = "1.0.0", features = ["display"] }
 enum-map = "2.7.3"
 fileslice = "0.5.0"
 lazy_static = "1.4.0"
