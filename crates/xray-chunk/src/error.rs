@@ -5,15 +5,17 @@ use thiserror::Error as ThisError;
 /// Error while working with DB data parsing/reading/writing/importing/exporting.
 #[derive(ThisError, Debug)]
 pub enum ChunkError {
-  #[error("Chunk invalid error: {message:}")]
+  #[error("Chunk invalid error: {message}")]
   Invalid { message: String },
-  #[error("Chunk parsing error: {message:}")]
+  #[error("Chunk parsing error: {message}")]
   Parsing { message: String },
-  #[error("Chunk not found: {message:}")]
+  #[error("Chunk encoding error: {message}")]
+  Encoding { message: String },
+  #[error("Chunk not found error: {message}")]
   NotFoundChunk { message: String },
-  #[error("Chunk string reading error, no null terminator: {message:}")]
-  NoNullTerminator { message: String },
-  #[error("Chunk is not ended, {remaining:?} bytes remain: {message:}")]
+  #[error("Chunk terminator error: {message}")]
+  NoTerminator { message: String },
+  #[error("Chunk is not ended, {remaining} bytes remain: {message}")]
   NotEnded { message: String, remaining: u64 },
   #[error("Ltx read error: {0}")]
   Generic(#[from] Box<dyn Error>),
@@ -59,11 +61,20 @@ impl ChunkError {
     }
   }
 
-  pub fn new_no_null_terminator_error<T>(message: T) -> Self
+  pub fn new_encoding_chunk_error<T>(message: T) -> Self
   where
     T: Into<String>,
   {
-    Self::NoNullTerminator {
+    Self::Encoding {
+      message: message.into(),
+    }
+  }
+
+  pub fn new_no_terminator_error<T>(message: T) -> Self
+  where
+    T: Into<String>,
+  {
+    Self::NoTerminator {
       message: message.into(),
     }
   }

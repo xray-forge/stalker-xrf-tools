@@ -1,14 +1,12 @@
-use crate::chunk::interface::ChunkDataSource;
-use crate::chunk::iterator::ChunkIterator;
-use crate::types::U32Bytes;
+use crate::chunk::chunk_iterator::ChunkIterator;
+use crate::chunk::source::chunk_data_source::ChunkDataSource;
+use crate::chunk::source::chunk_memory_source::InMemoryChunkDataSource;
 use crate::{ChunkError, ChunkResult};
-use byteorder::{ByteOrder, ReadBytesExt};
-use encoding_rs::WINDOWS_1251;
 use fileslice::FileSlice;
-use std::borrow::Cow;
+use parquet::file::reader::Length;
 use std::fmt;
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::SeekFrom;
 
 #[derive(Clone, PartialEq)]
 pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
@@ -16,73 +14,91 @@ pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
   pub size: u64,
   pub position: u64,
   pub is_compressed: bool,
-  pub file: Box<T>,
+  pub source: Box<T>,
 }
 
-impl ChunkReader {
+impl ChunkReader<FileSlice> {
   /// Create chunk based on whole file.
-  pub fn from_file(file: File) -> ChunkResult<ChunkReader> {
+  pub fn from_file(file: File) -> ChunkResult<Self> {
     Self::from_slice(FileSlice::new(file))
   }
 
   /// Create chunk based on file slice boundaries.
-  pub fn from_slice(slice: FileSlice) -> ChunkResult<ChunkReader> {
+  pub fn from_slice(slice: FileSlice) -> ChunkResult<Self> {
     if slice.is_empty() {
       return Err(ChunkError::new_invalid_chunk_error(
-        "Trying to create chunk from empty file",
+        "Failed to create chunk from empty source",
       ));
     }
 
-    Ok(ChunkReader {
+    Ok(Self {
       id: 0,
       size: slice.len() as u64,
       position: slice.start_pos(),
       is_compressed: false,
-      file: Box::new(slice),
+      source: Box::new(slice),
     })
   }
 }
 
-impl ChunkReader {
-  /// Get start position of the chunk seek.
-  pub fn start_pos(&self) -> u64 {
-    self.file.start_pos()
+impl ChunkReader<InMemoryChunkDataSource> {
+  /// Create chunk based on whole file.
+  pub fn from_bytes(buf: &[u8]) -> ChunkResult<Self> {
+    Self::from_source(InMemoryChunkDataSource::from_buffer(buf))
+  }
+
+  /// Create chunk based on source.
+  pub fn from_source(source: InMemoryChunkDataSource) -> ChunkResult<Self> {
+    Ok(Self {
+      id: 0,
+      size: source.len(),
+      position: 0,
+      is_compressed: false,
+      source: Box::new(source),
+    })
+  }
+}
+
+impl<T: ChunkDataSource> ChunkReader<T> {
+  /// Get current position of the chunk seek.
+  pub fn cursor_pos(&self) -> u64 {
+    self.source.cursor_pos()
   }
 
   /// Get end position of the chunk seek.
   pub fn end_pos(&self) -> u64 {
-    self.file.end_pos()
-  }
-
-  /// Get current position of the chunk seek.
-  pub fn cursor_pos(&self) -> u64 {
-    self.file.cursor_pos()
+    self.source.end_pos()
   }
 
   /// Whether chunk is ended and contains no more data to read.
   pub fn is_ended(&self) -> bool {
-    self.file.cursor_pos() == self.file.end_pos()
+    self.source.cursor_pos() == self.source.end_pos()
   }
 
   /// Whether chunk contains data to read.
   pub fn has_data(&self) -> bool {
-    self.file.cursor_pos() < self.file.end_pos()
+    self.source.cursor_pos() < self.source.end_pos()
   }
 
   /// Get summary of bytes read from chunk based on current seek position.
   pub fn read_bytes_len(&self) -> u64 {
-    self.file.cursor_pos() - self.file.start_pos()
+    self.source.cursor_pos() - self.source.start_pos()
   }
 
   /// Get summary of bytes remaining based on current seek position.
   pub fn read_bytes_remain(&self) -> u64 {
-    self.file.end_pos() - self.file.cursor_pos()
+    self.source.end_pos() - self.source.cursor_pos()
+  }
+
+  /// Reset seek position in chunk file.
+  pub fn reset_pos(&mut self) -> ChunkResult<u64> {
+    Ok(self.source.set_seek(SeekFrom::Start(0))?)
   }
 }
 
 impl ChunkReader {
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_child_by_index(&mut self, index: u32) -> ChunkResult<ChunkReader> {
+  pub fn read_child_by_index(&mut self, index: u32) -> ChunkResult<Self> {
     for (iteration, chunk) in ChunkIterator::new(self).enumerate() {
       if index as usize == iteration {
         return Ok(chunk);
@@ -95,139 +111,13 @@ impl ChunkReader {
   }
 
   /// Get list of all child samples in current chunk, do not mutate current chunk.
-  pub fn get_children_cloned(&self) -> Vec<ChunkReader> {
+  pub fn get_children_cloned(&self) -> Vec<Self> {
     ChunkIterator::new(&mut self.clone()).collect()
   }
 
   /// Read list of all child samples in current chunk and advance further.
-  pub fn read_children(&mut self) -> Vec<ChunkReader> {
+  pub fn read_children(&mut self) -> Vec<Self> {
     ChunkIterator::new(self).collect()
-  }
-
-  /// Reset seek position in chunk file.
-  #[allow(dead_code)]
-  pub fn reset_pos(&mut self) -> ChunkResult<u64> {
-    Ok(self.file.seek(SeekFrom::Start(0))?)
-  }
-}
-
-impl ChunkReader {
-  pub fn read_u32_bytes(&mut self) -> ChunkResult<U32Bytes> {
-    Ok((
-      self.read_u8()?,
-      self.read_u8()?,
-      self.read_u8()?,
-      self.read_u8()?,
-    ))
-  }
-
-  /// Read serialized vector from chunk, where u32 count N is followed by N u16 entries.
-  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> ChunkResult<Vec<u16>> {
-    let mut vector: Vec<u16> = Vec::new();
-    let count: u32 = self.read_u32::<T>()?;
-
-    for _ in 0..count {
-      vector.push(self.read_u16::<T>()?)
-    }
-
-    Ok(vector)
-  }
-
-  /// Read null terminated windows encoded string from file bytes.
-  pub fn read_null_terminated_win_string(&mut self) -> ChunkResult<String> {
-    let offset: u64 = self.file.stream_position()?;
-    let mut buffer: Vec<u8> = Vec::new();
-
-    // todo: Fix this mess with full read, smaller chunks should be better.
-    self.file.read_to_end(&mut buffer).map_err(|error| {
-      ChunkError::new_parsing_chunk_error(format!("Failed to read null terminated string: {error}"))
-    })?;
-
-    if let Some(position) = buffer.iter().position(|&x| x == 0x00) {
-      let slice: &[u8] = &buffer[..position];
-      let (transformed, _, had_errors) = WINDOWS_1251.decode(slice);
-
-      if had_errors {
-        // todo: Replace with result.
-        panic!("Unexpected errors when decoding windows-1251 string data");
-      }
-
-      // Try with windows 1251 conversion:
-      let value: String = match transformed {
-        Cow::Borrowed(value) => value.to_owned(),
-        Cow::Owned(value) => value,
-      };
-
-      // Put seek right after string - length plus zero terminator.
-      self
-        .file
-        .seek(SeekFrom::Start(offset + position as u64 + 1))
-        .expect("Correct object seek movement when reading null terminated string");
-
-      Ok(value)
-    } else {
-      Err(ChunkError::new_no_null_terminator_error(
-        "Failed to read null terminated string",
-      ))
-    }
-  }
-
-  /// Read \r\n terminated windows encoded string from file bytes.
-  pub fn read_rn_terminated_win_string(&mut self) -> ChunkResult<String> {
-    let offset: u64 = self.file.stream_position()?;
-    let mut buffer: Vec<u8> = Vec::new();
-
-    // todo: Fix this mess with full read, smaller chunks should be better.
-    self.file.read_to_end(&mut buffer).map_err(|error| {
-      ChunkError::new_parsing_chunk_error(format!(
-        "Failed to read \\r\\n terminated string: {error}"
-      ))
-    })?;
-
-    if let Some(position) = buffer.iter().position(|&x| x == 0x0D) {
-      if position == buffer.len() - 1 || buffer[position + 1] != 0x0A {
-        return Err(ChunkError::new_parsing_chunk_error(format!(
-          "Failed to read \\r\\n terminated string,\
-             string should have proper ending, index: {}, length: {}",
-          position,
-          buffer.len()
-        )));
-      }
-
-      let slice: &[u8] = &buffer[..position];
-      let (transformed, _, had_errors) = WINDOWS_1251.decode(slice);
-
-      if had_errors {
-        // todo: Replace with result.
-        panic!("Unexpected errors when decoding windows-1251 string data");
-      }
-
-      // Try with windows 1251 conversion:
-      let value: String = match transformed {
-        Cow::Borrowed(value) => value.to_owned(),
-        Cow::Owned(value) => value,
-      };
-
-      // Put seek right after string - length plus zero terminator.
-      self
-        .file
-        .seek(SeekFrom::Start(offset + position as u64 + 2))
-        .expect("Correct object seek movement when reading \\r\\n string");
-
-      Ok(value)
-    } else {
-      Err(ChunkError::new_no_null_terminator_error(
-        "Failed to read \\r\\n terminated string",
-      ))
-    }
-  }
-
-  pub fn read_bytes(&mut self, count: usize) -> ChunkResult<Vec<u8>> {
-    let mut buffer: Vec<u8> = vec![0; count];
-
-    self.read_exact(&mut buffer)?;
-
-    Ok(buffer)
   }
 }
 
@@ -243,7 +133,7 @@ impl fmt::Debug for ChunkReader {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::ChunkReader;
+  use crate::chunk::reader::chunk_reader::ChunkReader;
   use crate::types::ChunkResult;
   use fileslice::FileSlice;
   use xray_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};

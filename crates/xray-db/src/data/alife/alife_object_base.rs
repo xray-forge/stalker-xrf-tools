@@ -104,8 +104,8 @@ impl AlifeObjectBase {
     let inherited: Box<dyn AlifeObjectWriter> =
       AlifeClass::read_by_class::<T>(&mut spawn_reader, &class)?;
 
-    let update_data_length: u16 = update_reader.file.read_u16::<T>()?;
-    let update_size: u16 = update_reader.file.read_u16::<T>()?;
+    let update_data_length: u16 = update_reader.read_u16::<T>()?;
+    let update_size: u16 = update_reader.read_u16::<T>()?;
 
     assert_eq!(update_data_length as u64 + 2, update_reader.size);
     assert_eq!(update_size, 0);
