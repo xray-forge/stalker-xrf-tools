@@ -4,9 +4,9 @@ use thiserror::Error as ThisError;
 /// Error while working with translation file
 #[derive(ThisError, Debug)]
 pub enum TranslationError {
-  #[error("Translation: {message:?}")]
+  #[error("Translation: {message:}")]
   UnknownLanguage { message: String },
-  #[error("Translation: {message:?}")]
+  #[error("Translation: {message:}")]
   InvalidSourceJson { message: String },
   #[error("Database IO error: {0}")]
   Io(#[from] IoError),

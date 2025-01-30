@@ -1,7 +1,7 @@
 use crate::{TranslationError, TranslationResult};
 use derive_more::Display;
-use encoding_rs::{Encoding, WINDOWS_1250, WINDOWS_1251};
 use std::str::FromStr;
+use xray_utils::{get_windows1250_encoder, get_windows1251_encoder, XrayEncoding};
 
 #[derive(Clone, Debug, PartialEq, Display)]
 pub enum TranslationLanguage {
@@ -33,10 +33,10 @@ impl TranslationLanguage {
     }
   }
 
-  pub fn get_language_encoder(&self) -> &'static Encoding {
+  pub fn get_language_encoder(&self) -> XrayEncoding {
     match self {
-      Self::Russian | Self::Ukrainian => WINDOWS_1251,
-      _ => WINDOWS_1250,
+      Self::Russian | Self::Ukrainian => get_windows1251_encoder(),
+      _ => get_windows1250_encoder(),
     }
   }
 

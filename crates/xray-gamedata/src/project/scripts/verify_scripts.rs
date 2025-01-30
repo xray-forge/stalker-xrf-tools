@@ -2,15 +2,14 @@ use crate::asset::asset_type::AssetType;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::{GamedataError, GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
 use colored::Colorize;
-use encoding_rs::WINDOWS_1251;
 use full_moon::parse;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use std::fs::File;
-use std::io::Read;
 use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
+use xray_utils::read_as_string_from_windows1251_encoded;
 
 impl GamedataProject {
   pub fn verify_scripts(
@@ -95,7 +94,7 @@ impl GamedataProject {
     _options: &GamedataProjectVerifyOptions,
     path: &Path,
   ) -> GamedataResult<bool> {
-    let code: String = Self::read_script_code(path)?;
+    let code: String = read_as_string_from_windows1251_encoded(&mut File::open(path)?)?;
 
     parse(&code).map_err(|it| {
       GamedataError::new_check_error(format!(
@@ -109,31 +108,5 @@ impl GamedataProject {
     })?;
 
     Ok(true)
-  }
-}
-
-impl GamedataProject {
-  pub fn read_script_code(path: &Path) -> GamedataResult<String> {
-    let mut raw_data: Vec<u8> = Vec::new();
-    let raw_data_read: usize = File::open(path)?.read_to_end(&mut raw_data)?;
-
-    assert_eq!(
-      raw_data_read,
-      raw_data.len(),
-      "Expected raw data size to match in-memory buffer"
-    );
-
-    let (cow, encoding_used, had_errors) = WINDOWS_1251.decode(&raw_data);
-
-    if had_errors {
-      Err(GamedataError::new_asset_error(format!(
-        "Failed to read and decode script {} with {:?} encoding, {} bytes",
-        path.display(),
-        encoding_used,
-        raw_data.len()
-      )))
-    } else {
-      Ok(cow.to_string())
-    }
   }
 }

@@ -6,13 +6,13 @@ use crate::types::XRayByteOrder;
 use crate::{ArchiveError, ArchiveResult};
 use byteorder::ReadBytesExt;
 use delharc::decode::{Decoder, Lh1Decoder};
-use encoding_rs::{Encoding, UTF_8};
 use regex::Regex;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::ErrorKind::UnexpectedEof;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
+use xray_utils::{decode_bytes_to_string_without_bom_handling, get_utf8_encoder, XrayEncoding};
 
 pub struct ArchiveReader {
   pub path: PathBuf,
@@ -20,12 +20,12 @@ pub struct ArchiveReader {
   pub section_regex: Regex,
   pub variable_regex: Regex,
   pub root_regex: Regex,
-  pub encoding: &'static Encoding,
+  pub encoding: XrayEncoding,
 }
 
 impl ArchiveReader {
   /// Create chunk based on whole file.
-  pub fn from_path(path: &Path, encoding: &'static Encoding) -> ArchiveResult<Self> {
+  pub fn from_path(path: &Path, encoding: XrayEncoding) -> ArchiveResult<Self> {
     match File::open(path) {
       Ok(file) => Ok(Self {
         encoding,
@@ -45,7 +45,7 @@ impl ArchiveReader {
 
   /// Create chunk based on whole file.
   pub fn from_path_utf8(path: &Path) -> ArchiveResult<Self> {
-    Self::from_path(path, UTF_8)
+    Self::from_path(path, get_utf8_encoder())
   }
 }
 
@@ -67,7 +67,7 @@ impl ArchiveReader {
     let mut root_path: String = String::new();
 
     loop {
-      let raw_chunk_id = match self.file.read_u32::<XRayByteOrder>() {
+      let raw_chunk_id: u32 = match self.file.read_u32::<XRayByteOrder>() {
         Ok(data) => data,
         Err(error) if error.kind() == UnexpectedEof => break,
         Err(error) => panic!("Error reading file: {}", error),
@@ -99,7 +99,7 @@ impl ArchiveReader {
           let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
 
           root_path = self
-            .read_root_path(chunk_data.as_slice())
+            .read_root_path(chunk_data.as_slice())?
             .expect("[header].entry_point must be specified in header chunk when it exists");
         }
         _ => {
@@ -116,20 +116,15 @@ impl ArchiveReader {
     }))
   }
 
-  fn read_root_path(&self, chunk_data: &[u8]) -> Option<String> {
+  // Just Result instead of optional?
+  fn read_root_path(&self, chunk_data: &[u8]) -> ArchiveResult<Option<String>> {
     // let section_regex= Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap();
     // let variable_regex= Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap();
     // let root_regex = Regex::new(r"^\$\w+?\$\\").unwrap();
 
-    let (text, had_errors) = self.encoding.decode_without_bom_handling(chunk_data);
-
-    if had_errors {
-      panic!("Unable to decode header: {}", text);
-    }
-
     let mut last_section_name: String = String::new();
 
-    for line in text.lines() {
+    for line in decode_bytes_to_string_without_bom_handling(chunk_data, self.encoding)?.lines() {
       let section_captures = self.section_regex.captures(line);
       match (section_captures, last_section_name.as_str()) {
         (None, "header") => {
@@ -138,12 +133,12 @@ impl ArchiveReader {
           if let Some(captures) = variable_captures {
             if &captures["name"] == "entry_point" {
               let entry_point = captures["value"].to_string();
-              return Some(
+              return Ok(Some(
                 self
                   .root_regex
                   .replace(entry_point.as_str(), "")
                   .to_string(),
-              );
+              ));
             }
           }
         }
@@ -154,7 +149,7 @@ impl ArchiveReader {
       }
     }
 
-    None
+    Ok(None)
   }
 
   fn read_chunk<T: Read>(
@@ -188,10 +183,10 @@ impl ArchiveReader {
 
   fn read_file_descriptors<T: Read>(
     reader: &mut T,
-    encoding: &'static Encoding,
+    encoding: XrayEncoding,
   ) -> ArchiveResult<HashMap<String, ArchiveFileDescriptor>> {
     let mut file_descriptors: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
-    let mut name_buf: [u8; 520] = [0u8; 260 * 2];
+    let mut name_buf: [u8; 520] = [0u8; 520];
 
     loop {
       let header_size: u16 = match reader.read_u16::<XRayByteOrder>() {
@@ -216,19 +211,12 @@ impl ArchiveReader {
       };
 
       let offset: u32 = reader.read_u32::<XRayByteOrder>()?;
-      let (name, had_errors) = encoding.decode_without_bom_handling(name_bytes);
-
-      if had_errors {
-        panic!(
-          "Had errors decoding file name '{}' raw bytes: {:?}",
-          name, &name_bytes
-        );
-      }
+      let name: String = decode_bytes_to_string_without_bom_handling(name_bytes, encoding)?;
 
       file_descriptors.insert(
-        name.clone().into(),
+        name.clone(),
         ArchiveFileDescriptor {
-          name: name.into(),
+          name,
           offset,
           size_real,
           size_compressed,

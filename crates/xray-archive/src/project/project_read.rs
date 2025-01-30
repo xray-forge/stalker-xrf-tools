@@ -23,7 +23,7 @@ impl ArchiveProject {
       ));
     }
 
-    return match self.files.get(filename) {
+    match self.files.get(filename) {
       None => Err(ArchiveError::new_read_error_with_code(
         ARCHIVE_READ_ERROR_NOT_FOUND,
         format!("File '{filename}' is not found in the archive project"),
@@ -35,15 +35,12 @@ impl ArchiveProject {
             format!("File '{filename}' is too big to be read - {}, {ALLOWED_PROJECT_READ_SIZE} is maximum allowed", file_descriptor.size_real),
           ));
         } else if file_descriptor.size_real != file_descriptor.size_compressed {
-          return Err(
-            ArchiveError::new_read_error_with_code(
-              ARCHIVE_READ_ERROR_INVALID_FORMAT,
-              format!(
-                "File '{filename}' is compressed, reading compressed files is not supported yet"
-              ),
-            )
-            .into(),
-          );
+          return Err(ArchiveError::new_read_error_with_code(
+            ARCHIVE_READ_ERROR_INVALID_FORMAT,
+            format!(
+              "File '{filename}' is compressed, reading compressed files is not supported yet"
+            ),
+          ));
         }
 
         let mut source_file: File = File::open(file_descriptor.source.as_path())?;
@@ -61,7 +58,7 @@ impl ArchiveProject {
           file_descriptor.size_real,
         ))
       }
-    };
+    }
   }
 
   pub fn can_read_file(&self, filename: &str) -> bool {

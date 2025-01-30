@@ -1,17 +1,18 @@
 use crate::file::configuration::constants::ROOT_SECTION;
 use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
-use crate::file::utils::read_data_as_string;
 use crate::{Ltx, LtxResult};
 use std::fs;
 use std::io::Write;
 use std::path::Path;
+use xray_utils::read_as_string_from_windows1251_encoded;
 
 impl Ltx {
   /// Format single LTX file by provided path
   pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> LtxResult<bool> {
     let formatted: String = Ltx::format_from_file(&filename)?;
-    let existing: String =
-      read_data_as_string(&mut fs::OpenOptions::new().read(true).open(filename.as_ref())?)?;
+    let existing: String = read_as_string_from_windows1251_encoded(
+      &mut fs::OpenOptions::new().read(true).open(filename.as_ref())?,
+    )?;
 
     if existing == formatted {
       Ok(false)

@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-env_logger = "0.11.1"
 log = "0.4.20"
 serde = { version = "1.0.197", features = ["derive"] }
 swc_common = { version = "0.33.20", features = ["tty-emitter"] }
