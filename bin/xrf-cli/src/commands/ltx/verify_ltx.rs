@@ -1,7 +1,8 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_ltx::{LtxError, LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
+use xray_error::XRayError;
+use xray_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 
 #[derive(Default)]
 pub struct VerifyLtxCommand;
@@ -61,7 +62,7 @@ impl GenericCommand for VerifyLtxCommand {
     if !path.is_dir() {
       println!("Expected configs root directory path for validation as --path parameter");
 
-      return Err(LtxError::new_read_error("Failed to read provided path as directory").into());
+      return Err(XRayError::new_read_error("Failed to read provided path as directory").into());
     }
 
     log::info!("Verifying ltx folder: {}", path.display());
@@ -84,7 +85,7 @@ impl GenericCommand for VerifyLtxCommand {
       Ok(())
     } else {
       Err(
-        LtxError::new_verify_error(format!(
+        XRayError::new_verify_error(format!(
           "Failed to verify ltx files, got {} errors",
           result.errors.len()
         ))

@@ -29,12 +29,11 @@ use crate::data::alife::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::alife_zone_visual::AlifeZoneVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::DatabaseError;
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use derive_more::Display;
 use enum_map::Enum;
 use xray_chunk::ChunkReader;
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, Enum, PartialEq, Display)]
@@ -150,7 +149,7 @@ impl AlifeClass {
   pub fn read_by_class<T: ByteOrder>(
     reader: &mut ChunkReader,
     alife_class: &Self,
-  ) -> DatabaseResult<Box<dyn AlifeObjectWriter>> {
+  ) -> XRayResult<Box<dyn AlifeObjectWriter>> {
     Ok(match alife_class {
       Self::SeActor => {
         let object: AlifeActor = AlifeActor::read::<T>(reader)?;
@@ -300,7 +299,7 @@ impl AlifeClass {
         Box::new(object)
       }
       _ => {
-        return Err(DatabaseError::new_parse_error(format!(
+        return Err(XRayError::new_parsing_error(format!(
           "Not implemented parser for {}",
           alife_class
         )));
@@ -313,7 +312,7 @@ impl AlifeClass {
     alife_class: &Self,
     section_name: &str,
     ltx: &Ltx,
-  ) -> DatabaseResult<Box<dyn AlifeObjectWriter>> {
+  ) -> XRayResult<Box<dyn AlifeObjectWriter>> {
     Ok(match alife_class {
       Self::SeActor => Box::new(AlifeActor::import(section_name, ltx)?),
       Self::CseAlifeObjectBreakable => Box::new(AlifeObjectBreakable::import(section_name, ltx)?),
@@ -358,7 +357,7 @@ impl AlifeClass {
         ltx,
       )?),
       _ => {
-        return Err(DatabaseError::new_parse_error(format!(
+        return Err(XRayError::new_parsing_error(format!(
           "Not implemented parser for {}",
           alife_class
         )));

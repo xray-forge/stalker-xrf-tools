@@ -1,7 +1,7 @@
-use crate::{DatabaseError, DatabaseResult};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{assert_chunk_read, ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfKinematicsChunk {
@@ -13,7 +13,7 @@ impl OgfKinematicsChunk {
   pub const CHUNK_ID: u32 = 24;
   pub const CHUNK_ID_OLD: u32 = 19;
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, chunk_id: u32) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, chunk_id: u32) -> XRayResult<Self> {
     log::info!(
       "Reading motion refs chunk: {} bytes, chunk id {} ",
       reader.read_bytes_remain(),
@@ -41,7 +41,7 @@ impl OgfKinematicsChunk {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     if self.source_chunk_id == OgfKinematicsChunk::CHUNK_ID {
       writer.write_u32::<T>(self.motion_refs.len() as u32)?;
 
@@ -50,7 +50,7 @@ impl OgfKinematicsChunk {
       }
     } else {
       if self.motion_refs.len() != 1 {
-        return Err(DatabaseError::new_not_expected_error(
+        return Err(XRayError::new_unexpected_error(
           "Motions ref chunk writing error, expected vector with 1 value",
         ));
       }

@@ -6,7 +6,7 @@ members = [
     "crates/xray-archive",
     "crates/xray-chunk",
     "crates/xray-db",
-    "crates/xray-delharc",
+    "crates/xray-delharc", "crates/xray-error", "crates/xray-error-derive",
     "crates/xray-export",
     "crates/xray-gamedata",
     "crates/xray-ltx",

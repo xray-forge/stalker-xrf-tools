@@ -1,6 +1,6 @@
 use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
 use crate::project::project_unpack_result::ArchiveUnpackResult;
-use crate::{ArchiveProject, ArchiveResult};
+use crate::ArchiveProject;
 use minilzo_rs::LZO;
 use std::cmp::{max, min};
 use std::collections::HashSet;
@@ -10,9 +10,10 @@ use std::io::ErrorKind::AlreadyExists;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
+use xray_error::XRayResult;
 
 impl ArchiveProject {
-  pub fn unpack(&self, destination: &Path) -> ArchiveResult<ArchiveUnpackResult> {
+  pub fn unpack(&self, destination: &Path) -> XRayResult<ArchiveUnpackResult> {
     let start: Instant = Instant::now();
     let lzo: LZO = LZO::init().unwrap();
 
@@ -60,7 +61,7 @@ impl ArchiveProject {
     &self,
     destination: &Path,
     concurrency: usize,
-  ) -> ArchiveResult<ArchiveUnpackResult> {
+  ) -> XRayResult<ArchiveUnpackResult> {
     let start: Instant = Instant::now();
 
     let mut unpacked_files_count: usize = 0;
@@ -116,7 +117,7 @@ impl ArchiveProject {
     lzo: &LZO,
     destination: &Path,
     file_descriptor: &ArchiveFileReplicationDescriptor,
-  ) -> ArchiveResult {
+  ) -> XRayResult {
     let mut file_path: PathBuf = destination.into();
 
     file_path.push(&file_descriptor.destination);
@@ -180,7 +181,7 @@ impl ArchiveProject {
     Ok(())
   }
 
-  fn unpack_dirs(&self, destination: &Path) -> ArchiveResult {
+  fn unpack_dirs(&self, destination: &Path) -> XRayResult {
     let mut set: HashSet<PathBuf> = HashSet::new();
 
     let destination_path: PathBuf = destination.into();

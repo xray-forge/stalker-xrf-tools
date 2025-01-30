@@ -1,12 +1,11 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::meta::particle_action_type::ParticleActionType;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 /// C++ src/xrParticles/particle_actions_collection_io.cpp
@@ -22,14 +21,14 @@ impl ParticleAction {
   pub const META_TYPE: &'static str = "particle_action";
 
   /// Read list of particle action data from chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut actions: Vec<Self> = Vec::new();
 
     let count: u32 = reader.read_u32::<T>()?;
 
     for _ in 0..count {
       actions.push(Self::read::<T>(reader).map_err(|error| {
-        DatabaseError::new_parse_error(format!("Failed to read particle effect action: {}", error))
+        XRayError::new_parsing_error(format!("Failed to read particle effect action: {}", error))
       })?);
     }
 
@@ -48,7 +47,7 @@ impl ParticleAction {
   }
 
   /// Read effect particle action data from chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let action_type_raw: u32 = reader.read_u32::<T>()?;
     let action_type: ParticleActionType = ParticleActionType::from_u32(action_type_raw);
 
@@ -57,7 +56,7 @@ impl ParticleAction {
       action_type: reader.read_u32::<T>()?,
       data: ParticleActionType::read_by_particle_type::<T>(reader, action_type).map_err(
         |error| {
-          DatabaseError::new_parse_error(format!(
+          XRayError::new_parsing_error(format!(
             "Failed to read dynamic particle action data for action '{}': {}",
             action_type, error
           ))
@@ -71,7 +70,7 @@ impl ParticleAction {
   }
 
   /// Write particle action data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(self.action_type)?;
 
     writer.write_u32::<T>(self.action_flags)?;
@@ -83,7 +82,7 @@ impl ParticleAction {
   }
 
   /// Write particle action data into chunk writer.
-  pub fn write_list<T: ByteOrder>(actions: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(actions: &[Self], writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(actions.len() as u32)?;
 
     for action in actions {
@@ -94,9 +93,9 @@ impl ParticleAction {
   }
 
   /// Import particle action data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
+      XRayError::new_parsing_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
@@ -125,7 +124,7 @@ impl ParticleAction {
   }
 
   /// Export particle action data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)

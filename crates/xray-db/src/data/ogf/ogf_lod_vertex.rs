@@ -1,8 +1,8 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,11 +15,11 @@ pub struct OgfLodVertex {
 }
 
 impl OgfLodVertex {
-  pub fn read<T: ByteOrder>(_: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(_: &mut ChunkReader) -> XRayResult<Self> {
     todo!("Implement")
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
     todo!("Implement")
   }
 }

@@ -6,15 +6,14 @@ use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_effect_editor_data::ParticleEffectEditorData;
 use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-use crate::error::DatabaseError;
 use crate::export::file_import::{read_ini_optional_field, read_ltx_field};
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
   find_optional_chunk_by_id, read_f32_chunk, read_f32_vector_chunk,
   read_null_terminated_win_string_chunk, read_u16_chunk, read_u32_chunk, ChunkReader, ChunkWriter,
 };
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
@@ -59,7 +58,7 @@ impl ParticleEffect {
 
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     let effect: Self = {
@@ -69,24 +68,21 @@ impl ParticleEffect {
             .expect("Particle name chunk not found"),
         )
         .map_err(|error| {
-          DatabaseError::new_parse_error(format!(
-            "Failed to read particle version chunk: {}",
-            error
-          ))
+          XRayError::new_parsing_error(format!("Failed to read particle version chunk: {}", error))
         })?,
         name: read_null_terminated_win_string_chunk(
           &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)
             .expect("Particle name chunk not found"),
         )
         .map_err(|error| {
-          DatabaseError::new_parse_error(format!("Failed to read particle name chunk: {}", error))
+          XRayError::new_parsing_error(format!("Failed to read particle name chunk: {}", error))
         })?,
         max_particles: read_u32_chunk::<T>(
           &mut find_optional_chunk_by_id(&chunks, Self::MAX_PARTICLES_CHUNK_ID)
             .expect("Particle max particles chunk not found"),
         )
         .map_err(|error| {
-          DatabaseError::new_parse_error(format!(
+          XRayError::new_parsing_error(format!(
             "Failed to read particle max_particles chunk: {}",
             error
           ))
@@ -96,17 +92,14 @@ impl ParticleEffect {
             .expect("Particle effect actions chunk not found"),
         )
         .map_err(|error| {
-          DatabaseError::new_parse_error(format!(
-            "Failed to read particle actions chunk: {}",
-            error
-          ))
+          XRayError::new_parsing_error(format!("Failed to read particle actions chunk: {}", error))
         })?,
         flags: read_u32_chunk::<T>(
           &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
             .expect("Particle flags chunk not found"),
         )
         .map_err(|error| {
-          DatabaseError::new_parse_error(format!("Failed to read particle flags chunk: {}", error))
+          XRayError::new_parsing_error(format!("Failed to read particle flags chunk: {}", error))
         })?,
         frame: find_optional_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID).map(|mut it| {
           ParticleEffectFrame::read::<T>(&mut it)
@@ -117,7 +110,7 @@ impl ParticleEffect {
             .expect("Particle frame sprite chunk not found"),
         )
         .map_err(|error| {
-          DatabaseError::new_parse_error(format!("Failed to read particle sprite chunk: {}", error))
+          XRayError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error))
         })?,
         time_limit: find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID).map(|mut it| {
           read_f32_chunk::<T>(&mut it)
@@ -163,7 +156,7 @@ impl ParticleEffect {
   }
 
   /// Write particle effect data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -234,9 +227,9 @@ impl ParticleEffect {
   }
 
   /// Import particle effect data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
+      XRayError::new_parsing_error(format!(
         "Particle effect section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
@@ -265,7 +258,7 @@ impl ParticleEffect {
       }
 
       if action_index >= Self::EFFECT_ACTIONS_LIMIT {
-        return Err(DatabaseError::new_parse_error(
+        return Err(XRayError::new_parsing_error(
           "Failed to parse particle effect - reached maximum nested actions limit",
         ));
       }
@@ -298,7 +291,7 @@ impl ParticleEffect {
   }
 
   /// Export particle effect data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -386,12 +379,12 @@ mod tests {
   use crate::data::particle::particle_effect_editor_data::ParticleEffectEditorData;
   use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
@@ -399,7 +392,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -510,7 +503,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleEffect = ParticleEffect {
       version: 1,
       name: String::from("test-particle-effect"),

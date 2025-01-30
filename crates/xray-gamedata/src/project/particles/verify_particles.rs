@@ -1,17 +1,18 @@
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use rayon::prelude::*;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::Instant;
 use xray_db::{ParticlesFile, XRayByteOrder};
+use xray_error::XRayResult;
 
 impl GamedataProject {
   pub fn verify_particles(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataParticlesVerificationResult> {
+  ) -> XRayResult<GamedataParticlesVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata particles:".green(),);
     }
@@ -91,7 +92,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     particles_file: &ParticlesFile,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     for particle in &particles_file.effects.effects {

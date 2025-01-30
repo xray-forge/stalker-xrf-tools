@@ -1,13 +1,13 @@
-use crate::types::GamedataResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationResult};
 use std::time::Instant;
+use xray_error::XRayResult;
 use xray_utils::path_vec_to_string;
 
 impl GamedataProject {
   pub fn verify(
     &mut self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataVerificationResult> {
+  ) -> XRayResult<GamedataVerificationResult> {
     if options.is_logging_enabled() {
       println!(
         "Verifying gamedata project: [{}] | {}",

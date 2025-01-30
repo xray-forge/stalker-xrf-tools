@@ -2,45 +2,37 @@ use crate::project::project_constants::{
   ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
 };
 use crate::project::project_read_result::ProjectReadResult;
-use crate::{
-  ArchiveError, ArchiveProject, ArchiveResult, ARCHIVE_READ_ERROR_INVALID_FORMAT,
-  ARCHIVE_READ_ERROR_NOT_FOUND,
-};
+use crate::ArchiveProject;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::PathBuf;
+use xray_error::{XRayError, XRayResult};
 
 impl ArchiveProject {
   /// Read single file from project as string.
-  pub fn read_file_as_string(&self, filename: &str) -> ArchiveResult<ProjectReadResult> {
+  pub fn read_file_as_string(&self, filename: &str) -> XRayResult<ProjectReadResult> {
     log::info!("Trying to read file from archive: {filename}");
 
     if !self.can_read_file(filename) {
-      return Err(ArchiveError::new_read_error_with_code(
-        ARCHIVE_READ_ERROR_INVALID_FORMAT,
-        format!("File '{filename}' cannot be read, extension is not allowed to be read"),
-      ));
+      return Err(XRayError::new_read_error(format!(
+        "File '{filename}' cannot be read, file extension is not allowed to be read"
+      )));
     }
 
     match self.files.get(filename) {
-      None => Err(ArchiveError::new_read_error_with_code(
-        ARCHIVE_READ_ERROR_NOT_FOUND,
-        format!("File '{filename}' is not found in the archive project"),
-      )),
+      None => Err(XRayError::new_read_error(format!(
+        "File '{filename}' is not found in the archive project"
+      ))),
       Some(file_descriptor) => {
         if file_descriptor.size_real > ALLOWED_PROJECT_READ_SIZE {
-          return Err(ArchiveError::new_read_error_with_code(
-            ARCHIVE_READ_ERROR_NOT_FOUND,
+          return Err(XRayError::new_read_error(
             format!("File '{filename}' is too big to be read - {}, {ALLOWED_PROJECT_READ_SIZE} is maximum allowed", file_descriptor.size_real),
           ));
         } else if file_descriptor.size_real != file_descriptor.size_compressed {
-          return Err(ArchiveError::new_read_error_with_code(
-            ARCHIVE_READ_ERROR_INVALID_FORMAT,
-            format!(
-              "File '{filename}' is compressed, reading compressed files is not supported yet"
-            ),
-          ));
+          return Err(XRayError::new_read_error(format!(
+            "File '{filename}' is compressed, reading compressed files is not supported yet"
+          )));
         }
 
         let mut source_file: File = File::open(file_descriptor.source.as_path())?;

@@ -1,18 +1,17 @@
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
-use crate::{
-  dds_to_image, read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions, TextureResult,
-};
+use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions};
 use image::{GenericImageView, RgbaImage};
 use rayon::prelude::*;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use std::sync::Mutex;
+use xray_error::XRayResult;
 
 pub struct UnpackDescriptionProcessor {}
 
 impl UnpackDescriptionProcessor {
-  pub fn unpack_xml_descriptions(options: PackDescriptionOptions) -> TextureResult<()> {
+  pub fn unpack_xml_descriptions(options: PackDescriptionOptions) -> XRayResult<()> {
     let description: XmlDescriptionCollection =
       XmlDescriptionCollection::get_descriptions(&options)?;
     let count: Mutex<u32> = Mutex::new(0);
@@ -43,7 +42,7 @@ impl UnpackDescriptionProcessor {
   pub fn unpack_xml_description(
     options: &PackDescriptionOptions,
     file: &TextureFileDescriptor,
-  ) -> TextureResult<bool> {
+  ) -> XRayResult<bool> {
     let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
     let destination: PathBuf = options.output.join(&file.name);
 
@@ -51,7 +50,7 @@ impl UnpackDescriptionProcessor {
       println!("Unpacking {}", full_name.display());
     }
 
-    let dds: TextureResult<RgbaImage> =
+    let dds: XRayResult<RgbaImage> =
       read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
 
     if let Ok(dds) = dds {

@@ -3,9 +3,10 @@ use crate::file::inherit::LtxInheritConvertor;
 use crate::file::section::section_entry::SectionEntry;
 use crate::file::section::section_setter::SectionSetter;
 use crate::file::types::{LtxIncluded, LtxSections};
-use crate::{LtxResult, Section, ROOT_SECTION};
+use crate::{Section, ROOT_SECTION};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
+use xray_error::XRayResult;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ltx {
@@ -22,12 +23,12 @@ impl Ltx {
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_included(self) -> LtxResult<Self> {
+  pub fn into_included(self) -> XRayResult<Self> {
     LtxIncludeConvertor::convert(self)
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_inherited(self) -> LtxResult<Self> {
+  pub fn into_inherited(self) -> XRayResult<Self> {
     LtxInheritConvertor::convert(self)
   }
 
@@ -201,12 +202,13 @@ impl<'q> IndexMut<&'q str> for Ltx {
 #[cfg(test)]
 mod test {
   use crate::file::ltx::Ltx;
-  use crate::{LtxError, LtxResult, Section, ROOT_SECTION};
+  use crate::{Section, ROOT_SECTION};
+  use xray_error::{XRayError, XRayResult};
 
   #[test]
   fn load_from_str_with_empty_general_section() {
     let input = "[sec1]\nkey1=val1\n";
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -229,7 +231,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_input() {
     let input: &str = "";
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -242,7 +244,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_lines() {
     let input: &str = "\n\n\n";
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -255,7 +257,7 @@ mod test {
   #[test]
   fn load_from_str_with_valid_input() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar\n";
-    let opt: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let opt: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
 
@@ -279,7 +281,7 @@ mod test {
   #[test]
   fn load_from_str_without_ending_newline() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar";
-    let opt: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let opt: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
   }
@@ -287,12 +289,12 @@ mod test {
   #[test]
   fn parse_error_numbers() {
     let invalid_input: &str = "\n\n[not_closed";
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(invalid_input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(invalid_input);
 
     assert!(ltx.is_err());
 
     match ltx.unwrap_err() {
-      LtxError::Parse { line, col, .. } => {
+      XRayError::LtxParse { line, col, .. } => {
         assert_eq!(line, 3);
         assert_eq!(col, 12);
       }
@@ -387,7 +389,7 @@ key = value ; comment
   }
 
   #[test]
-  fn includes_no_duplicates() -> LtxResult {
+  fn includes_no_duplicates() -> XRayResult {
     let input = "
 #include \"file1.ltx\"
 #include \"file1.ltx\"
@@ -401,14 +403,14 @@ name = hello
     assert!(ltx.is_err());
     assert_eq!(
       ltx.unwrap_err().to_string(),
-      "Ltx parse error: 4:1 \"Failed to parse include statement in ltx file, including 'file1.ltx' more than once\""
+      "Ltx parse error: 4:1 Failed to parse include statement in ltx file, including 'file1.ltx' more than once"
     );
 
     Ok(())
   }
 
   #[test]
-  fn includes_valid() -> LtxResult {
+  fn includes_valid() -> XRayResult {
     let input = "
 #include
 
@@ -416,19 +418,19 @@ name = hello
 name = hello
 ";
 
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
       ltx.unwrap_err().to_string(),
-      "Ltx parse error: 3:1 \"Expected correct '#include \\\"config.ltx\\\"' statement, got '#include'\""
+      "Ltx parse error: 3:1 Expected correct '#include \"config.ltx\"' statement, got '#include'"
     );
 
     Ok(())
   }
 
   #[test]
-  fn includes_only_ltx() -> LtxResult {
+  fn includes_only_ltx() -> XRayResult {
     let input = "
 #include \"file1.ini\"
 
@@ -436,19 +438,19 @@ name = hello
 name = hello
 ";
 
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
       ltx.unwrap_err().to_string(),
-      "Ltx parse error: 3:1 \"Included file should have .ltx extension, got 'file1.ini'\""
+      "Ltx parse error: 3:1 Included file should have .ltx extension, got 'file1.ini'"
     );
 
     Ok(())
   }
 
   #[test]
-  fn includes_empty() -> LtxResult {
+  fn includes_empty() -> XRayResult {
     let input = "
 #include \"\"
 
@@ -456,12 +458,12 @@ name = hello
 name = hello
 ";
 
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
       ltx.unwrap_err().to_string(),
-      "Ltx parse error: 3:1 \"Expected valid file name in include statement, got empty file name\""
+      "Ltx parse error: 3:1 Expected valid file name in include statement, got empty file name"
     );
 
     Ok(())
@@ -558,7 +560,7 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn load_from_str_with_crlf() {
     let input: &str = "key1=val1\r\nkey2=val2\r\n";
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -675,7 +677,7 @@ a3 = n3
   }
 
   #[test]
-  fn duplicate_sections() -> LtxResult {
+  fn duplicate_sections() -> XRayResult {
     // https://github.com/zonyitoo/rust-ini/issues/49
 
     let input = r"
@@ -686,13 +688,13 @@ foo = a
 foo = c
 ";
 
-    let ltx: LtxResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
-      ltx.unwrap_err().to_string(),
-      "Ltx parse error: 6:1 \"Duplicate sections are not allowed, looks like 'peer' is declared twice\""
-    );
+            ltx.unwrap_err().to_string(),
+            "Ltx parse error: 6:1 Duplicate sections are not allowed, looks like 'peer' is declared twice"
+        );
 
     Ok(())
   }

@@ -1,13 +1,13 @@
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
-use crate::TextureResult;
 use roxmltree::{Document, Node, ParsingOptions};
 use std::collections::HashMap;
 use std::fs;
 use std::fs::{File, ReadDir};
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use xray_error::XRayResult;
 
 pub struct XmlDescriptionCollection {
   pub files: HashMap<String, TextureFileDescriptor>,
@@ -16,7 +16,7 @@ pub struct XmlDescriptionCollection {
 impl XmlDescriptionCollection {
   /// Get descriptions from provided options.
   /// Handle both directory and single file as inputs.
-  pub fn get_descriptions(options: &PackDescriptionOptions) -> TextureResult<Self> {
+  pub fn get_descriptions(options: &PackDescriptionOptions) -> XRayResult<Self> {
     if options.description.is_dir() {
       println!(
         "Check texture descriptions from dir: {}",
@@ -64,7 +64,7 @@ impl XmlDescriptionCollection {
   pub fn get_description(
     options: &PackDescriptionOptions,
     path: &Path,
-  ) -> TextureResult<HashMap<String, TextureFileDescriptor>> {
+  ) -> XRayResult<HashMap<String, TextureFileDescriptor>> {
     if options.is_verbose {
       println!("Found texture description: {}", path.display());
     }

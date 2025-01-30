@@ -10,8 +10,8 @@ full_moon = "1.2.0"
 log = "0.4.22"
 rayon = "1.10.0"
 regex = "1.11.1"
-thiserror = "2.0.10"
 walkdir = "2.5.0"
 xray-db = { path = "../xray-db" }
+xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
 xray-utils = { path = "../xray-utils" }

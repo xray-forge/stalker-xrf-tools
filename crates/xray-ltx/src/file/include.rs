@@ -1,7 +1,7 @@
-use crate::error::LtxError;
-use crate::{Ltx, LtxResult};
+use crate::Ltx;
 use std::io;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR_STR};
+use xray_error::{XRayError, XRayResult};
 
 /// Converter object to process and inject all child #include statements.
 #[derive(Default)]
@@ -13,7 +13,7 @@ impl LtxIncludeConvertor {
   }
 
   /// Cast LTX file to fully parsed with include sections.
-  pub fn convert(ltx: Ltx) -> LtxResult<Ltx> {
+  pub fn convert(ltx: Ltx) -> XRayResult<Ltx> {
     Self::new().convert_ltx(ltx)
   }
 
@@ -25,9 +25,9 @@ impl LtxIncludeConvertor {
 
 impl LtxIncludeConvertor {
   /// Convert ltx file with inclusion of nested files.
-  fn convert_ltx(&self, ltx: Ltx) -> LtxResult<Ltx> {
+  fn convert_ltx(&self, ltx: Ltx) -> XRayResult<Ltx> {
     if ltx.directory.is_none() {
-      return Err(LtxError::new_convert_error(
+      return Err(XRayError::new_convert_error(
         "Failed to parse ltx file, parent directory is not specified",
       ));
     }
@@ -62,7 +62,7 @@ impl LtxIncludeConvertor {
           if key.is_empty() {
             existing.merge(value);
           } else {
-            return Err(LtxError::new_convert_error(format!(
+            return Err(XRayError::new_convert_error(format!(
               "Failed to equipment ltx file, duplicate section {key} found",
             )));
           }
@@ -74,14 +74,14 @@ impl LtxIncludeConvertor {
   }
 
   /// Include children ltx into provided ltx.
-  fn include_children(&self, into: &mut Ltx, path: &Path) -> LtxResult {
+  fn include_children(&self, into: &mut Ltx, path: &Path) -> XRayResult {
     let ltx: Ltx = match self.parse_nested_file(path) {
       Ok(value) => match value {
         Some(ltx) => ltx,
         None => return Ok(()),
       },
       Err(error) => {
-        return Err(LtxError::new_convert_error(format!(
+        return Err(XRayError::new_convert_error(format!(
           "Failed to parse ltx file, nested file {} in {} error: {error}",
           path.display(),
           into.path.as_ref().unwrap().display(),
@@ -99,7 +99,7 @@ impl LtxIncludeConvertor {
           if key.is_empty() {
             existing.merge(value);
           } else {
-            return Err(LtxError::new_convert_error(format!(
+            return Err(XRayError::new_convert_error(format!(
               "Failed to include ltx file '{}' in {}, duplicate section '{}' found",
               path.display(),
               into.path.as_ref().unwrap().display(),
@@ -115,12 +115,15 @@ impl LtxIncludeConvertor {
 
   /// Open nested file for importing in current context.
   /// Skips '.ts' variant of configuration file as None.
-  fn parse_nested_file(&self, path: &Path) -> LtxResult<Option<Ltx>> {
+  fn parse_nested_file(&self, path: &Path) -> XRayResult<Option<Ltx>> {
     match Ltx::read_from_path(path) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {
-        LtxError::Io(ref io_error) => {
-          if io_error.kind() == io::ErrorKind::NotFound {
+        XRayError::Io {
+          ref kind,
+          message: _,
+        } => {
+          if *kind == io::ErrorKind::NotFound {
             if self.is_raw_ts_variant_existing(path) {
               Ok(None)
             } else {

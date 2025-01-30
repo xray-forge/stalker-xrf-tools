@@ -1,10 +1,9 @@
-use crate::error::DatabaseError;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
 use std::str::FromStr;
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +19,7 @@ impl RgbColor {
     Self { r, g, b }
   }
 
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
     Ok(Self {
       r: reader.read_f32::<T>()?,
       g: reader.read_f32::<T>()?,
@@ -28,7 +27,7 @@ impl RgbColor {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
     writer.write_f32::<T>(self.r)?;
     writer.write_f32::<T>(self.g)?;
     writer.write_f32::<T>(self.b)?;
@@ -38,13 +37,13 @@ impl RgbColor {
 }
 
 impl FromStr for RgbColor {
-  type Err = DatabaseError;
+  type Err = XRayError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = s.split(',').collect();
 
     if parts.len() != 3 {
-      return Err(DatabaseError::new_parse_error(
+      return Err(XRayError::new_parsing_error(
         "Failed to parse rgb color from string, expected 3 numbers",
       ));
     }
@@ -53,19 +52,19 @@ impl FromStr for RgbColor {
       r: parts[0]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse color R value",
         )))?,
       g: parts[1]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse color G value",
         )))?,
       b: parts[2]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse color B value",
         )))?,
     })

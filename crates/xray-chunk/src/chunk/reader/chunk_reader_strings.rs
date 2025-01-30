@@ -1,18 +1,19 @@
 use crate::chunk::source::chunk_data_source::ChunkDataSource;
-use crate::{ChunkError, ChunkReader, ChunkResult};
+use crate::ChunkReader;
 use std::io::{Read, SeekFrom};
+use xray_error::{XRayError, XRayResult};
 use xray_utils::encode_windows1251_bytes_to_string;
 
 const STRING_READ_BUFFER_SIZE: usize = 256;
 
 impl<D: ChunkDataSource> ChunkReader<D> {
   /// Read null terminated windows encoded string from file bytes.
-  pub fn read_null_terminated_win_string(&mut self) -> ChunkResult<String> {
+  pub fn read_null_terminated_win_string(&mut self) -> XRayResult<String> {
     self.read_null_terminated_win_string_limited(10_240)
   }
 
   /// Read null terminated windows encoded string from file bytes with size limit.
-  pub fn read_null_terminated_win_string_limited(&mut self, limit: usize) -> ChunkResult<String> {
+  pub fn read_null_terminated_win_string_limited(&mut self, limit: usize) -> XRayResult<String> {
     let mut buffer: [u8; STRING_READ_BUFFER_SIZE] = [0u8; STRING_READ_BUFFER_SIZE];
     let mut collected: Vec<u8> = Vec::new();
 
@@ -20,13 +21,13 @@ impl<D: ChunkDataSource> ChunkReader<D> {
       let bytes_read: usize = self.read(&mut buffer)?;
 
       if collected.len() + bytes_read > limit {
-        return Err(ChunkError::new_parsing_chunk_error(
+        return Err(XRayError::new_parsing_error(
           "Cannot parse string, reading data over buffer size limit",
         ));
       }
 
       if bytes_read == 0 {
-        return Err(ChunkError::new_no_terminator_error(
+        return Err(XRayError::new_no_terminator_error(
           "Null terminator is not found in buffer, no data to be read",
         ));
       }
@@ -48,13 +49,13 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
   /// Read \r\n terminated windows encoded string from file bytes.
   #[inline(never)]
-  pub fn read_rn_terminated_win_string(&mut self) -> ChunkResult<String> {
+  pub fn read_rn_terminated_win_string(&mut self) -> XRayResult<String> {
     self.read_rn_terminated_win_string_limited(10_240)
   }
 
   /// Read \r\n terminated windows encoded string from file bytes.
   #[inline(never)]
-  pub fn read_rn_terminated_win_string_limited(&mut self, limit: usize) -> ChunkResult<String> {
+  pub fn read_rn_terminated_win_string_limited(&mut self, limit: usize) -> XRayResult<String> {
     let mut buffer: [u8; STRING_READ_BUFFER_SIZE] = [0u8; STRING_READ_BUFFER_SIZE];
     let mut collected: Vec<u8> = Vec::new();
 
@@ -62,13 +63,13 @@ impl<D: ChunkDataSource> ChunkReader<D> {
       let bytes_read: usize = self.read(&mut buffer)?;
 
       if collected.len() + bytes_read > limit {
-        return Err(ChunkError::new_parsing_chunk_error(
+        return Err(XRayError::new_parsing_error(
           "Cannot parse string, reading data over buffer size limit",
         ));
       }
 
       if bytes_read == 0 {
-        return Err(ChunkError::new_no_terminator_error(
+        return Err(XRayError::new_no_terminator_error(
           "RN sequence is not found in buffer, no data to be read",
         ));
       }
@@ -93,10 +94,10 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 mod tests {
   use crate::chunk::reader::chunk_reader::ChunkReader;
   use crate::chunk::source::chunk_memory_source::InMemoryChunkDataSource;
-  use crate::types::ChunkResult;
+  use xray_error::XRayResult;
 
   #[test]
-  fn test_read_null_terminated_string_empty() -> ChunkResult {
+  fn test_read_null_terminated_string_empty() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[])?;
 
     assert_eq!(chunk.read_bytes_remain(), 0, "Expect 0 bytes remaining");
@@ -107,7 +108,7 @@ mod tests {
         .read_null_terminated_win_string()
         .unwrap_err()
         .to_string(),
-      "Chunk terminator error: Null terminator is not found in buffer, no data to be read",
+      "Missing terminator error: Null terminator is not found in buffer, no data to be read",
       "Expect error on empty read"
     );
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -116,7 +117,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_null_terminated_string_empty_null() -> ChunkResult {
+  fn test_read_null_terminated_string_empty_null() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -134,7 +135,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_null_terminated_string_empty_remaining_data() -> ChunkResult {
+  fn test_read_null_terminated_string_empty_remaining_data() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 0, 0, 0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -152,7 +153,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_null_terminated_strings_few() -> ChunkResult {
+  fn test_read_null_terminated_strings_few() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_bytes(&[b'a', b'b', b'c', 0, b'c', b'b', b'a', 0])?;
 
@@ -179,7 +180,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_null_terminated_string_over_limit() -> ChunkResult {
+  fn test_read_null_terminated_string_over_limit() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'a'; 1024])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -194,7 +195,7 @@ mod tests {
         .read_null_terminated_win_string_limited(500)
         .unwrap_err()
         .to_string(),
-      "Chunk parsing error: Cannot parse string, reading data over buffer size limit",
+      "Parsing error: Cannot parse string, reading data over buffer size limit",
       "Expect buffer limit error"
     );
 
@@ -202,7 +203,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_rn_terminated_string_empty() -> ChunkResult {
+  fn test_read_rn_terminated_string_empty() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[])?;
 
     assert_eq!(chunk.read_bytes_remain(), 0, "Expect 0 bytes remaining");
@@ -213,7 +214,7 @@ mod tests {
         .read_rn_terminated_win_string()
         .unwrap_err()
         .to_string(),
-      "Chunk terminator error: RN sequence is not found in buffer, no data to be read",
+      "Missing terminator error: RN sequence is not found in buffer, no data to be read",
       "Expect error on empty read"
     );
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -222,7 +223,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_rn_terminated_string_empty_null() -> ChunkResult {
+  fn test_read_rn_terminated_string_empty_null() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -240,7 +241,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_rn_terminated_string_empty_remaining_data() -> ChunkResult {
+  fn test_read_rn_terminated_string_empty_remaining_data() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_bytes(&[b'\r', b'\n', 0, 0, 0])?;
 
@@ -259,7 +260,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_rn_terminated_strings_few() -> ChunkResult {
+  fn test_read_rn_terminated_strings_few() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[
       b'a', b'b', b'c', b'\r', b'\n', b'c', b'b', b'a', b'\r', b'\n',
     ])?;
@@ -287,7 +288,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_rn_terminated_string_over_limit() -> ChunkResult {
+  fn test_read_rn_terminated_string_over_limit() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'a'; 1024])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -302,7 +303,7 @@ mod tests {
         .read_rn_terminated_win_string_limited(500)
         .unwrap_err()
         .to_string(),
-      "Chunk parsing error: Cannot parse string, reading data over buffer size limit",
+      "Parsing error: Cannot parse string, reading data over buffer size limit",
       "Expect buffer limit error"
     );
 

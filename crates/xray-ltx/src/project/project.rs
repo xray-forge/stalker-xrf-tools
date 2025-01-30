@@ -5,9 +5,10 @@ use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::project::project_options::LtxProjectOptions;
 use crate::scheme::parser::LtxSchemeParser;
-use crate::{Ltx, LtxError, LtxResult};
+use crate::Ltx;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
+use xray_error::{XRayError, XRayResult};
 
 /// Handler of LTX configs root.
 /// Iteration and filtering of de-duplicated ltx files.
@@ -30,14 +31,14 @@ pub struct LtxProject {
 
 impl LtxProject {
   /// Initialize project on provided root.
-  pub fn open_at_path_opt(root: &Path, options: LtxProjectOptions) -> LtxResult<Self> {
+  pub fn open_at_path_opt(root: &Path, options: LtxProjectOptions) -> XRayResult<Self> {
     let mut ltx_files: Vec<PathBuf> = Vec::new();
     let mut ltx_scheme_files: Vec<PathBuf> = Vec::new();
     let mut included: Vec<PathBuf> = Vec::new();
 
     // Read LTX files and shallow-add include statements links.
     for entry in WalkDir::new(root) {
-      let entry: DirEntry = entry.map_err(|error| LtxError::Io(error.into_io_error().unwrap()))?;
+      let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
       let entry_path: &Path = entry.path();
 
       if let Some(extension) = entry_path.extension() {
@@ -45,7 +46,7 @@ impl LtxProject {
           let parent: &Path = match entry_path.parent() {
             Some(parent) => parent,
             None => {
-              return Err(LtxError::new_convert_error(
+              return Err(XRayError::new_convert_error(
                 "Failed to parse parent directory of ltx file.",
               ))
             }
@@ -96,7 +97,7 @@ impl LtxProject {
 
     // Prepare big message with list of files referenced in case-insensitive check.
     if !ltx_file_entries_failures.is_empty() {
-      return Err(LtxError::new_convert_error(format!(
+      return Err(XRayError::new_convert_error(format!(
         "Cannot read LTX project safely, detected case-insensitive #include statements:\n{}",
         ltx_file_entries_failures
           .iter()
@@ -141,7 +142,7 @@ impl LtxProject {
   }
 
   /// Initialize project on provided root with default options.
-  pub fn open_at_path(root: &Path) -> LtxResult<Self> {
+  pub fn open_at_path(root: &Path) -> XRayResult<Self> {
     Self::open_at_path_opt(root, Default::default())
   }
 }
@@ -157,7 +158,7 @@ impl LtxProject {
       })
   }
 
-  pub fn get_system_ltx(&self) -> LtxResult<Ltx> {
+  pub fn get_system_ltx(&self) -> XRayResult<Ltx> {
     Ltx::read_from_file_full(self.root.join("system.ltx"))
   }
 }

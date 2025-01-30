@@ -4,7 +4,6 @@ use crate::ogf_file::chunks::ogf_description_chunk::OgfDescriptionChunk;
 use crate::ogf_file::chunks::ogf_header_chunk::OgfHeaderChunk;
 use crate::ogf_file::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
 use crate::ogf_file::chunks::ogf_texture_chunk::OgfTextureChunk;
-use crate::{DatabaseError, DatabaseResult};
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
@@ -14,6 +13,7 @@ use xray_chunk::{
   find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id, find_optional_chunk_by_id,
   find_required_chunk_by_id, ChunkReader,
 };
+use xray_error::{XRayError, XRayResult};
 
 /// FMesh in c++ codebase.
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,11 +27,11 @@ pub struct OgfFile {
 }
 
 impl OgfFile {
-  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
+  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> XRayResult<Self> {
     log::info!("Reading ogf path: {}", path.as_ref().display());
 
     Self::read_from_file::<T>(File::open(&path).map_err(|error| {
-      DatabaseError::new_not_found_error(format!(
+      XRayError::new_not_found_error(format!(
         "OGF file was not read: {}, error: {}",
         path.as_ref().display(),
         error
@@ -39,11 +39,11 @@ impl OgfFile {
     })?)
   }
 
-  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
     Self::read_from_chunk::<T>(&mut ChunkReader::from_file(file)?)
   }
 
-  pub fn read_from_chunk<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read_from_chunk<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     log::info!(
@@ -64,7 +64,7 @@ impl OgfFile {
     Self::read_from_chunks::<T>(&chunks)
   }
 
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> DatabaseResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
     Ok(Self {
       header: OgfHeaderChunk::read::<T>(&mut find_required_chunk_by_id(
         chunks,
@@ -100,12 +100,12 @@ impl OgfFile {
   }
 
   /// Read only list of motion refs specifically and skip other data parts.
-  pub fn read_motion_refs_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Vec<String>> {
+  pub fn read_motion_refs_from_path<T: ByteOrder>(path: &Path) -> XRayResult<Vec<String>> {
     Self::read_motions_refs_from_file::<T>(File::open(path)?)
   }
 
   /// Read only list of motion refs specifically and skip other data parts.
-  pub fn read_motions_refs_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Vec<String>> {
+  pub fn read_motions_refs_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 

@@ -1,10 +1,10 @@
 use crate::asset::asset_descriptor::AssetDescriptor;
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
-use crate::{GamedataError, GamedataResult};
 use std::collections::HashMap;
 use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{LtxProject, LtxProjectOptions};
 use xray_utils::path_vec_to_string;
 
@@ -16,7 +16,7 @@ pub struct GamedataProject {
 }
 
 impl GamedataProject {
-  pub fn open(options: &GamedataProjectReadOptions) -> GamedataResult<Self> {
+  pub fn open(options: &GamedataProjectReadOptions) -> XRayResult<Self> {
     let roots: Vec<PathBuf> = options
       .roots
       .iter()
@@ -81,7 +81,7 @@ impl GamedataProject {
         },
       )
       .map_err(|error| {
-        GamedataError::new_asset_error(format!(
+        XRayError::new_asset_error(format!(
           "Failed to open gamedata project ltx configs: {}",
           error
         ))

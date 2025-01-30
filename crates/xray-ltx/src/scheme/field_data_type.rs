@@ -1,6 +1,6 @@
 use crate::file::configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
-use crate::{LtxError, LtxResult};
 use std::fmt::Display;
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {
@@ -27,7 +27,7 @@ pub enum LtxFieldDataType {
 
 impl LtxFieldDataType {
   /// Parse data type enum variant from provided string option.
-  pub fn from_field_data(field_name: &str, section_name: &str, data: &str) -> LtxResult<Self> {
+  pub fn from_field_data(field_name: &str, section_name: &str, data: &str) -> XRayResult<Self> {
     let mut data: &str = data;
 
     // Respect optionals.
@@ -81,12 +81,12 @@ impl LtxFieldDataType {
 }
 
 impl LtxFieldDataType {
-  fn parse_enum(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
+  fn parse_enum(field_name: &str, section_name: &str, value: &str) -> XRayResult<LtxFieldDataType> {
     let mut allowed_values: Vec<String> = Vec::new();
 
     match value.split_once(':') {
       None => {
-        return Err(LtxError::new_read_error(format!(
+        return Err(XRayError::new_read_error(format!(
           "Failed to read scheme enum type for field '{section_name}', expected ':' separated type and values"
         )))
       }
@@ -106,7 +106,7 @@ impl LtxFieldDataType {
     }
 
     if allowed_values.is_empty() {
-      Err(LtxError::new_scheme_error(
+      Err(XRayError::new_ltx_scheme_error(
         section_name,
         field_name,
         "Failed to parse enum type, expected comma separated list of possible values after 'enum:'",
@@ -116,16 +116,20 @@ impl LtxFieldDataType {
     }
   }
 
-  fn parse_const(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
+  fn parse_const(
+    field_name: &str,
+    section_name: &str,
+    value: &str,
+  ) -> XRayResult<LtxFieldDataType> {
     match value.split_once(':') {
-      None => Err(LtxError::new_read_error(format!(
+      None => Err(XRayError::new_read_error(format!(
         "Failed to read scheme const type for field '{section_name}', expected ':' prepended value"
       ))),
       Some((_, const_value)) => {
         let const_value: &str = const_value.trim();
 
         if const_value.is_empty() {
-          Err(LtxError::new_scheme_error(
+          Err(XRayError::new_ltx_scheme_error(
             section_name,
             field_name,
             "Failed to parse const type, expected actual data after 'const:'",
@@ -137,13 +141,17 @@ impl LtxFieldDataType {
     }
   }
 
-  fn parse_tuple(field_name: &str, section_name: &str, value: &str) -> LtxResult<LtxFieldDataType> {
+  fn parse_tuple(
+    field_name: &str,
+    section_name: &str,
+    value: &str,
+  ) -> XRayResult<LtxFieldDataType> {
     let mut types: Vec<LtxFieldDataType> = Vec::new();
     let mut types_raw: Vec<String> = Vec::new();
 
     match value.split_once(':') {
       None => {
-        return Err(LtxError::new_read_error(format!(
+        return Err(XRayError::new_read_error(format!(
         "Failed to read scheme tuple type for field '{section_name}', expected ':' separated types"
       )))
       }
@@ -164,7 +172,7 @@ impl LtxFieldDataType {
         {
           match tuple_entry? {
             Self::TypeTuple(_, _) => {
-              return Err(LtxError::new_read_error(format!(
+              return Err(XRayError::new_read_error(format!(
                 "Failed to read scheme for field '{section_name}', tuple cannot contain nested tuples"
               )))
             }
@@ -178,7 +186,7 @@ impl LtxFieldDataType {
     }
 
     if types.is_empty() {
-      Err(LtxError::new_scheme_error(
+      Err(XRayError::new_ltx_scheme_error(
         section_name,
         field_name,
         "Failed to parse tuple type, expected comma separated list of possible values after 'tuple:'",
@@ -199,7 +207,7 @@ impl LtxFieldDataType {
     field_name: &str,
     section_name: &str,
     data: Option<&str>,
-  ) -> LtxResult<LtxFieldDataType> {
+  ) -> XRayResult<LtxFieldDataType> {
     data.map_or(Ok(Self::TypeAny), |data| {
       Self::from_field_data(field_name, section_name, data)
     })

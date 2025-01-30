@@ -1,19 +1,19 @@
 use crate::types::TranslationJson;
 use crate::{
-  ProjectInitializeOptions, ProjectInitializeResult, TranslationError, TranslationLanguage,
-  TranslationProject, TranslationResult,
+  ProjectInitializeOptions, ProjectInitializeResult, TranslationLanguage, TranslationProject,
 };
 use std::ffi::OsStr;
 use std::io::Write;
 use std::path::Path;
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
+use xray_error::XRayResult;
 
 impl TranslationProject {
   pub fn initialize_dir(
     dir: &Path,
     options: &ProjectInitializeOptions,
-  ) -> TranslationResult<ProjectInitializeResult> {
+  ) -> XRayResult<ProjectInitializeResult> {
     log::info!("Initializing dir {}", dir.display());
 
     if options.is_logging_enabled() {
@@ -27,7 +27,7 @@ impl TranslationProject {
     for entry in WalkDir::new(dir) {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
-        Err(error) => return Err(TranslationError::Io(error.into_io_error().unwrap())),
+        Err(error) => return Err(error.into_io_error().unwrap().into()),
       };
 
       let entry_path: &Path = entry.path();
@@ -51,7 +51,7 @@ impl TranslationProject {
   pub fn initialize_file(
     path: &Path,
     options: &ProjectInitializeOptions,
-  ) -> TranslationResult<ProjectInitializeResult> {
+  ) -> XRayResult<ProjectInitializeResult> {
     let extension: Option<&OsStr> = path.extension();
 
     if let Some(extension) = extension {
@@ -72,7 +72,7 @@ impl TranslationProject {
   pub fn initialize_json_file(
     path: &Path,
     options: &ProjectInitializeOptions,
-  ) -> TranslationResult<ProjectInitializeResult> {
+  ) -> XRayResult<ProjectInitializeResult> {
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();
     let mut initialized_count: u32 = 0;
 

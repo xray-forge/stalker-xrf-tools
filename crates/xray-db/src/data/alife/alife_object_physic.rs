@@ -2,12 +2,11 @@ use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -22,7 +21,7 @@ pub struct AlifeObjectPhysic {
 
 impl AlifeObjectReader for AlifeObjectPhysic {
   /// Read alife physic object from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
@@ -33,10 +32,11 @@ impl AlifeObjectReader for AlifeObjectPhysic {
   }
 
   /// Import alife physic object data from ltx config section.
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "ALife object '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "ALife object '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -54,7 +54,7 @@ impl AlifeObjectReader for AlifeObjectPhysic {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectPhysic {
   /// Write alife physic object into the chunk.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
     self.skeleton.write(writer)?;
 
@@ -66,7 +66,7 @@ impl AlifeObjectWriter for AlifeObjectPhysic {
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     self.base.export(section_name, ltx)?;
     self.skeleton.export(section_name, ltx)?;
 
@@ -88,16 +88,16 @@ mod tests {
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

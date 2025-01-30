@@ -1,9 +1,10 @@
 use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
 use crate::data::ogf::ogf_part::OgfPart;
-use crate::{DatabaseError, DatabaseResult, OmfFile};
+use crate::OmfFile;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OmfParametersChunk {
@@ -15,7 +16,7 @@ pub struct OmfParametersChunk {
 impl OmfParametersChunk {
   pub const CHUNK_ID: u32 = 15; // 0x14, 0xF
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading parameters chunk: {} bytes",
       reader.read_bytes_remain()
@@ -24,19 +25,19 @@ impl OmfParametersChunk {
     let version: u16 = reader.read_u16::<T>()?;
 
     if !OmfFile::SUPPORTED_VERSIONS.contains(&version) {
-      return Err(DatabaseError::new_not_implemented_error(format!(
-        "Unexpected parameters version {version} on read, only versions {:?} are implemented",
+      return Err(XRayError::new_not_implemented_error(format!(
+        "Unexpected parameters version {} on read, only versions {:?} are implemented",
+        version,
         OmfFile::SUPPORTED_VERSIONS
       )));
     }
 
-    let parts: Vec<OgfPart> = OgfPart::read_list::<T>(reader).map_err(|error| {
-      DatabaseError::new_read_error(format!("Failed to read ogf parts: {error}"))
-    })?;
+    let parts: Vec<OgfPart> = OgfPart::read_list::<T>(reader)
+      .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf parts: {error}")))?;
 
     let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader, version)
       .map_err(|error| {
-        DatabaseError::new_read_error(format!("Failed to read ogf motion definitions: {error}"))
+        XRayError::new_read_error(format!("Failed to read ogf motion definitions: {error}"))
       })?;
 
     assert!(
@@ -52,7 +53,7 @@ impl OmfParametersChunk {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
     todo!("Implement")
   }
 }

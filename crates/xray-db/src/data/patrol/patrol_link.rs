@@ -1,9 +1,8 @@
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -15,7 +14,7 @@ pub struct PatrolLink {
 
 impl PatrolLink {
   /// Read links from chunk file.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut links: Vec<Self> = Vec::new();
 
     while reader.has_data() {
@@ -35,7 +34,7 @@ impl PatrolLink {
   }
 
   /// Read patrol link from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let index: u32 = reader.read_u32::<T>()?;
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -57,7 +56,7 @@ impl PatrolLink {
   }
 
   /// Write list patrol links into chunk writer.
-  pub fn write_list<T: ByteOrder>(links: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(links: &[Self], writer: &mut ChunkWriter) -> XRayResult {
     for link in links {
       link.write::<T>(writer)?;
     }
@@ -66,7 +65,7 @@ impl PatrolLink {
   }
 
   /// Write patrol link data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(self.index)?;
     writer.write_u32::<T>(self.links.len() as u32)?;
 
@@ -79,9 +78,9 @@ impl PatrolLink {
   }
 
   /// Import patrol point link from ltx config.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
+      XRayError::new_parsing_error(format!(
         "Patrol point link section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
@@ -105,7 +104,7 @@ impl PatrolLink {
   }
 
   /// Export patrol link data into ltx.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("index", self.index.to_string())
@@ -126,13 +125,13 @@ impl PatrolLink {
 mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -141,7 +140,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -176,7 +175,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult {
+  fn test_read_write_list() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -217,7 +216,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
@@ -238,7 +237,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],

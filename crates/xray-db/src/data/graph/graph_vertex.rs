@@ -1,12 +1,11 @@
-use xray_chunk::{ChunkReader, ChunkWriter};
-
 use crate::data::generic::vector_3d::Vector3d;
-use crate::error::DatabaseError;
 use crate::export::file_export::export_vector_to_string;
 use crate::export::file_import::{read_ini_u32_bytes_field, read_ltx_field};
-use crate::types::{DatabaseResult, U32Bytes};
+use crate::types::U32Bytes;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -25,7 +24,7 @@ pub struct GraphVertex {
 
 impl GraphVertex {
   /// Read graph vertex data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       level_point: Vector3d::read::<T>(reader)?,
       game_point: Vector3d::read::<T>(reader)?,
@@ -40,7 +39,7 @@ impl GraphVertex {
   }
 
   /// Write graph vertex data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.level_point.write::<T>(writer)?;
     self.game_point.write::<T>(writer)?;
 
@@ -56,10 +55,11 @@ impl GraphVertex {
   }
 
   /// Import graph vertex from ltx file.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Graph vertex section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Graph vertex section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -106,13 +106,13 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -121,7 +121,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -166,7 +166,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let original: GraphVertex = GraphVertex {
       level_point: Vector3d::new(32.5, 523.6, 342.3),
       game_point: Vector3d::new(0.23, -4.0, 123.0),
@@ -196,7 +196,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: GraphVertex = GraphVertex {
       level_point: Vector3d::new(25.5, 15.6, 43.3),
       game_point: Vector3d::new(0.44, -4.0, 1000.0),

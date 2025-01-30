@@ -1,11 +1,10 @@
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -13,6 +12,8 @@ use xray_ltx::{Ltx, Section};
 pub struct AlifeGraphPoint {
   pub connection_point_name: String,
   pub connection_level_name: String,
+  // todo: Use U32Bytes?
+  // todo: Use U32Bytes?
   // todo: Use U32Bytes?
   pub location0: u8,
   pub location1: u8,
@@ -22,7 +23,7 @@ pub struct AlifeGraphPoint {
 
 impl AlifeObjectReader for AlifeGraphPoint {
   /// Read graph point data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       connection_point_name: reader.read_null_terminated_win_string()?,
       connection_level_name: reader.read_null_terminated_win_string()?,
@@ -34,10 +35,11 @@ impl AlifeObjectReader for AlifeGraphPoint {
   }
 
   /// Import graph data from ltx file section.
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "ALife object '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "ALife object '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -56,7 +58,7 @@ impl AlifeObjectReader for AlifeGraphPoint {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeGraphPoint {
   /// Write graph point data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.connection_point_name)?;
     writer.write_null_terminated_win_string(&self.connection_level_name)?;
     writer.write_u8(self.location0)?;
@@ -68,7 +70,7 @@ impl AlifeObjectWriter for AlifeGraphPoint {
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("connection_point_name", &self.connection_point_name)
@@ -87,16 +89,16 @@ mod tests {
   use crate::data::alife::alife_graph_point::AlifeGraphPoint;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

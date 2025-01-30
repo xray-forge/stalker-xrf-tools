@@ -1,5 +1,6 @@
 use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
 use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use xray_error::XRayResult;
 
 use crate::project::levels::verify_levels_result::GamedataLevelVerificationResult;
 use crate::project::ltx::verify_ltx_result::{
@@ -14,23 +15,22 @@ use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResu
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
 use crate::project::weathers::verify_weathers_result::GamedataWeathersVerificationResult;
-use crate::GamedataResult;
 
 pub struct GamedataVerificationResult {
   pub duration: u128,
-  pub animations_result: GamedataResult<GamedataAnimationsVerificationResult>,
-  pub format_result: GamedataResult<GamedataLtxFormatVerificationResult>,
-  pub levels_result: GamedataResult<GamedataLevelVerificationResult>,
-  pub meshes_result: GamedataResult<GamedataMeshesVerificationResult>,
-  pub particles_result: GamedataResult<GamedataParticlesVerificationResult>,
-  pub schemes_result: GamedataResult<GamedataLtxVerificationResult>,
-  pub scripts_result: GamedataResult<GamedataScriptsVerificationResult>,
-  pub shaders_result: GamedataResult<GamedataShadersVerificationResult>,
-  pub sounds_result: GamedataResult<GamedataSoundsVerificationResult>,
-  pub spawns_result: GamedataResult<GamedataSpawnsVerificationResult>,
-  pub textures_result: GamedataResult<GamedataTexturesVerificationResult>,
-  pub weapons_result: GamedataResult<GamedataWeaponVerificationResult>,
-  pub weathers_result: GamedataResult<GamedataWeathersVerificationResult>,
+  pub animations_result: XRayResult<GamedataAnimationsVerificationResult>,
+  pub format_result: XRayResult<GamedataLtxFormatVerificationResult>,
+  pub levels_result: XRayResult<GamedataLevelVerificationResult>,
+  pub meshes_result: XRayResult<GamedataMeshesVerificationResult>,
+  pub particles_result: XRayResult<GamedataParticlesVerificationResult>,
+  pub schemes_result: XRayResult<GamedataLtxVerificationResult>,
+  pub scripts_result: XRayResult<GamedataScriptsVerificationResult>,
+  pub shaders_result: XRayResult<GamedataShadersVerificationResult>,
+  pub sounds_result: XRayResult<GamedataSoundsVerificationResult>,
+  pub spawns_result: XRayResult<GamedataSpawnsVerificationResult>,
+  pub textures_result: XRayResult<GamedataTexturesVerificationResult>,
+  pub weapons_result: XRayResult<GamedataWeaponVerificationResult>,
+  pub weathers_result: XRayResult<GamedataWeathersVerificationResult>,
 }
 
 impl GamedataVerificationResult {
@@ -110,7 +110,7 @@ impl GamedataVerificationResult {
     .collect()
   }
 
-  fn get_result_failure_message<T>(result: &GamedataResult<T>, comment: &str) -> Option<String>
+  fn get_result_failure_message<T>(result: &XRayResult<T>, comment: &str) -> Option<String>
   where
     T: GamedataGenericVerificationResult,
   {

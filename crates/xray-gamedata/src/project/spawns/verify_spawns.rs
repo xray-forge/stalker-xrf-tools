@@ -1,17 +1,18 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use std::path::Path;
 use std::time::Instant;
 use xray_db::{SpawnFile, XRayByteOrder};
+use xray_error::XRayResult;
 
 impl GamedataProject {
   /// Verify spawn files in spawns directories, not levels spawn files.
   pub fn verify_spawns(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataSpawnsVerificationResult> {
+  ) -> XRayResult<GamedataSpawnsVerificationResult> {
     let started_at: Instant = Instant::now();
 
     let spawn_files: Vec<String> = self
@@ -82,7 +83,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     path: &Path,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     if options.is_verbose_logging_enabled() {
       println!("Verify spawn file: {path:?}");
     }

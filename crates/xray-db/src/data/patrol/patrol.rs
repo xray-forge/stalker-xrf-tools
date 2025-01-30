@@ -1,12 +1,11 @@
 use crate::data::patrol::patrol_link::PatrolLink;
 use crate::data::patrol::patrol_point::PatrolPoint;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 /// Patrols list is represented by list of samples containing patrol chunk.
@@ -31,10 +30,7 @@ pub struct Patrol {
 
 impl Patrol {
   /// Read chunk as list of patrol samples.
-  pub fn read_list<T: ByteOrder>(
-    reader: &mut ChunkReader,
-    count: u32,
-  ) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, count: u32) -> XRayResult<Vec<Self>> {
     let mut read_patrols_count: u32 = 0;
     let mut patrols: Vec<Self> = Vec::new();
 
@@ -53,7 +49,7 @@ impl Patrol {
   }
 
   /// Write list of patrols into chunk writer.
-  pub fn write_list<T: ByteOrder>(patrols: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(patrols: &[Self], writer: &mut ChunkWriter) -> XRayResult {
     for (index, patrol) in patrols.iter().enumerate() {
       let mut patrol_writer: ChunkWriter = ChunkWriter::new();
 
@@ -66,7 +62,7 @@ impl Patrol {
   }
 
   /// Read chunk as patrol.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(0)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(1)?;
 
@@ -93,7 +89,7 @@ impl Patrol {
   }
 
   /// Write single patrol entity into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -124,10 +120,11 @@ impl Patrol {
     patrols_ltx: &Ltx,
     patrol_points_ltx: &Ltx,
     patrol_links_ltx: &Ltx,
-  ) -> DatabaseResult<Self> {
+  ) -> XRayResult<Self> {
     let section: &Section = patrols_ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Patrol section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Patrol section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -170,7 +167,7 @@ impl Patrol {
     patrols_ltx: &mut Ltx,
     patrol_points_ltx: &mut Ltx,
     patrol_links_ltx: &mut Ltx,
-  ) -> DatabaseResult {
+  ) -> XRayResult {
     patrols_ltx
       .with_section(section_name)
       .set("name", &self.name)
@@ -204,13 +201,13 @@ mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -219,7 +216,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -271,7 +268,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult {
+  fn test_read_write_list() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -348,7 +345,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let original: Patrol = Patrol {
       name: String::from("patrol-name-exp"),
       points: vec![
@@ -412,7 +409,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: Patrol = Patrol {
       name: String::from("patrol-name-serde"),
       points: vec![

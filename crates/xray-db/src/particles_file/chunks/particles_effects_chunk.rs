@@ -1,12 +1,12 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect::ParticleEffect;
 use crate::export::file::{create_export_file, open_ltx_config};
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 use xray_ltx::Ltx;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,7 +20,7 @@ impl ParticlesEffectsChunk {
 
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
@@ -42,7 +42,7 @@ impl ParticlesEffectsChunk {
   }
 
   /// Write particle effects data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     for (index, effect) in self.effects.iter().enumerate() {
       let mut effect_writer: ChunkWriter = ChunkWriter::new();
 
@@ -65,7 +65,7 @@ impl ParticlesEffectsChunk {
   }
 
   /// Import particles effects data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<Self> {
+  pub fn import(path: &Path) -> XRayResult<Self> {
     log::info!("Importing particles effects: {}", path.display());
 
     let ltx: Ltx = open_ltx_config(&path.join("effects.ltx"))?;
@@ -85,7 +85,7 @@ impl ParticlesEffectsChunk {
   }
 
   /// Export particles effects data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult {
+  pub fn export(&self, path: &Path) -> XRayResult {
     let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for effect in &self.effects {

@@ -1,7 +1,7 @@
-use crate::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
 /// ogf_desc c++ class
 #[derive(Debug, Serialize, Deserialize)]
@@ -18,7 +18,7 @@ pub struct OgfDescriptionChunk {
 impl OgfDescriptionChunk {
   pub const CHUNK_ID: u32 = 18;
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading description chunk: {} bytes",
       reader.read_bytes_remain()
@@ -43,7 +43,7 @@ impl OgfDescriptionChunk {
     Ok(description)
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.source_file)?;
     writer.write_null_terminated_win_string(&self.convertor)?;
     writer.write_u32::<T>(self.built_at)?;

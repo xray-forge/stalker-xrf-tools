@@ -3,7 +3,6 @@ use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::archive::archive_header::ArchiveHeader;
 use crate::types::XRayByteOrder;
-use crate::{ArchiveError, ArchiveResult};
 use byteorder::ReadBytesExt;
 use delharc::decode::{Decoder, Lh1Decoder};
 use regex::Regex;
@@ -12,7 +11,8 @@ use std::fs::File;
 use std::io::ErrorKind::UnexpectedEof;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
-use xray_utils::{decode_bytes_to_string_without_bom_handling, get_utf8_encoder, XrayEncoding};
+use xray_error::{XRayError, XRayResult};
+use xray_utils::{decode_bytes_to_string_without_bom_handling, get_utf8_encoder, XRayEncoding};
 
 pub struct ArchiveReader {
   pub path: PathBuf,
@@ -20,12 +20,12 @@ pub struct ArchiveReader {
   pub section_regex: Regex,
   pub variable_regex: Regex,
   pub root_regex: Regex,
-  pub encoding: XrayEncoding,
+  pub encoding: XRayEncoding,
 }
 
 impl ArchiveReader {
   /// Create chunk based on whole file.
-  pub fn from_path(path: &Path, encoding: XrayEncoding) -> ArchiveResult<Self> {
+  pub fn from_path(path: &Path, encoding: XRayEncoding) -> XRayResult<Self> {
     match File::open(path) {
       Ok(file) => Ok(Self {
         encoding,
@@ -35,7 +35,7 @@ impl ArchiveReader {
         section_regex: Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap(),
         variable_regex: Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap(),
       }),
-      Err(error) => Err(ArchiveError::new_read_error(format!(
+      Err(error) => Err(XRayError::new_read_error(format!(
         "Failed to read archive file {}, {}",
         path.display(),
         error
@@ -44,13 +44,13 @@ impl ArchiveReader {
   }
 
   /// Create chunk based on whole file.
-  pub fn from_path_utf8(path: &Path) -> ArchiveResult<Self> {
+  pub fn from_path_utf8(path: &Path) -> XRayResult<Self> {
     Self::from_path(path, get_utf8_encoder())
   }
 }
 
 impl ArchiveReader {
-  pub fn read_archive(&mut self) -> ArchiveResult<ArchiveDescriptor> {
+  pub fn read_archive(&mut self) -> XRayResult<ArchiveDescriptor> {
     let header: ArchiveHeader = self.read_archive_header()?.unwrap();
 
     Ok(ArchiveDescriptor {
@@ -62,7 +62,7 @@ impl ArchiveReader {
 }
 
 impl ArchiveReader {
-  fn read_archive_header(&mut self) -> ArchiveResult<Option<ArchiveHeader>> {
+  fn read_archive_header(&mut self) -> XRayResult<Option<ArchiveHeader>> {
     let mut file_descriptors = None;
     let mut root_path: String = String::new();
 
@@ -74,7 +74,7 @@ impl ArchiveReader {
       };
       let chunk_size: u32 = self.file.read_u32::<XRayByteOrder>()?;
       let chunk_usize: usize = usize::try_from(chunk_size).map_err(|error| {
-        ArchiveError::new_read_error(format!(
+        XRayError::new_read_error(format!(
           "Failed to read archive header chunk size: {}",
           error
         ))
@@ -117,7 +117,7 @@ impl ArchiveReader {
   }
 
   // Just Result instead of optional?
-  fn read_root_path(&self, chunk_data: &[u8]) -> ArchiveResult<Option<String>> {
+  fn read_root_path(&self, chunk_data: &[u8]) -> XRayResult<Option<String>> {
     // let section_regex= Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap();
     // let variable_regex= Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap();
     // let root_regex = Regex::new(r"^\$\w+?\$\\").unwrap();
@@ -156,7 +156,7 @@ impl ArchiveReader {
     file: &mut T,
     chunk_usize: usize,
     compressed: bool,
-  ) -> ArchiveResult<Vec<u8>> {
+  ) -> XRayResult<Vec<u8>> {
     match compressed {
       true => {
         let decoded_len: u32 = file.read_u32::<XRayByteOrder>()?;
@@ -183,8 +183,8 @@ impl ArchiveReader {
 
   fn read_file_descriptors<T: Read>(
     reader: &mut T,
-    encoding: XrayEncoding,
-  ) -> ArchiveResult<HashMap<String, ArchiveFileDescriptor>> {
+    encoding: XRayEncoding,
+  ) -> XRayResult<HashMap<String, ArchiveFileDescriptor>> {
     let mut file_descriptors: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
     let mut name_buf: [u8; 520] = [0u8; 520];
 

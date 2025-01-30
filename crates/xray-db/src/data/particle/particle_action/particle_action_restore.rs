@@ -1,11 +1,10 @@
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -15,15 +14,15 @@ pub struct ParticleActionRestore {
 }
 
 impl ParticleActionReader for ParticleActionRestore {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionRestore> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionRestore> {
     Ok(ParticleActionRestore {
       time_left: reader.read_f32::<T>()?,
     })
   }
 
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
+      XRayError::new_parsing_error(format!(
         "Particle action section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
@@ -37,13 +36,13 @@ impl ParticleActionReader for ParticleActionRestore {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionRestore {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<XRayByteOrder>(self.time_left)?;
 
     Ok(())
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("time_left", self.time_left.to_string());

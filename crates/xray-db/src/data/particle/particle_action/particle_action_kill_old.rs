@@ -1,11 +1,10 @@
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -16,17 +15,18 @@ pub struct ParticleActionKillOld {
 }
 
 impl ParticleActionReader for ParticleActionKillOld {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionKillOld> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionKillOld> {
     Ok(ParticleActionKillOld {
       age_limit: reader.read_f32::<T>()?,
       kill_less_than: reader.read_u32::<T>()?,
     })
   }
 
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle action section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle action section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -40,14 +40,14 @@ impl ParticleActionReader for ParticleActionKillOld {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionKillOld {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<XRayByteOrder>(self.age_limit)?;
     writer.write_u32::<XRayByteOrder>(self.kill_less_than)?;
 
     Ok(())
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("age_limit", self.age_limit.to_string())

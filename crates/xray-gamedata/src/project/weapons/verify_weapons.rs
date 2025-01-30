@@ -1,19 +1,20 @@
 use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
 use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use regex::Regex;
 use std::path::Path;
 use std::time::Instant;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
+use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
   pub fn verify_ltx_weapons(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataWeaponVerificationResult> {
+  ) -> XRayResult<GamedataWeaponVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX weapons:".green());
     }
@@ -75,7 +76,7 @@ impl GamedataProject {
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     if options.is_verbose_logging_enabled() {
       println!("Verify weapon ltx config [{section_name}]");
     }
@@ -108,7 +109,7 @@ impl GamedataProject {
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     if let Some(visual) = &section.get("visual").and_then(|it| self.get_ogf_path(it)) {
@@ -238,7 +239,7 @@ impl GamedataProject {
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut are_sounds_valid: bool = true;
 
     for sound_section in [
@@ -295,7 +296,7 @@ impl GamedataProject {
     _: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     // Check sound layer structure here and linked sounds:
     //
     // [wpn_abakan_snd_shoot]
@@ -333,7 +334,7 @@ impl GamedataProject {
     section_name: &str,
     field_name: &str,
     field_value: &str,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     if !Regex::new(r"^snd_([1-9]([0-9]+)?)_layer([1-9]([0-9]+)?)?$")
@@ -358,7 +359,7 @@ impl GamedataProject {
     section_name: &str,
     field_name: &str,
     field_value: &str,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     // Sounds field is 1-3 comma separated values:

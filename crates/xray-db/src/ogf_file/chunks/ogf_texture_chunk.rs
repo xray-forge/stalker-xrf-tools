@@ -1,7 +1,7 @@
-use crate::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfTextureChunk {
@@ -12,7 +12,7 @@ pub struct OgfTextureChunk {
 impl OgfTextureChunk {
   pub const CHUNK_ID: u32 = 2;
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading texture chunk: {} bytes",
       reader.read_bytes_remain()
@@ -32,7 +32,7 @@ impl OgfTextureChunk {
     Ok(texture)
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.texture_name)?;
     writer.write_null_terminated_win_string(&self.shader_name)?;
 

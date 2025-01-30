@@ -1,15 +1,16 @@
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
-use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds, TextureResult};
+use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
 use std::path::PathBuf;
+use xray_error::XRayResult;
 
 pub struct PackDescriptionProcessor {}
 
 impl PackDescriptionProcessor {
   /// Pack list of xml files by options.
-  pub fn pack_xml_descriptions(options: &PackDescriptionOptions) -> TextureResult {
+  pub fn pack_xml_descriptions(options: &PackDescriptionOptions) -> XRayResult {
     let description: XmlDescriptionCollection =
       XmlDescriptionCollection::get_descriptions(options)?;
     let mut count: u32 = 0;
@@ -30,7 +31,7 @@ impl PackDescriptionProcessor {
   pub fn pack_xml_description(
     options: &PackDescriptionOptions,
     file: &TextureFileDescriptor,
-  ) -> TextureResult<bool> {
+  ) -> XRayResult<bool> {
     let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
 
     let (width, height) = file.get_dimension_boundaries();

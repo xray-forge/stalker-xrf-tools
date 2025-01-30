@@ -2,12 +2,11 @@ use crate::data::alife::alife_object_smart_cover::AlifeObjectSmartCover;
 use crate::data::alife::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 /// Represents script extension of base server smart cover class.
@@ -21,7 +20,7 @@ pub struct AlifeSmartCover {
 
 impl AlifeObjectReader for AlifeSmartCover {
   /// Read smart cover data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read::<T>(reader)?;
 
     let last_description: String = reader.read_null_terminated_win_string()?;
@@ -43,10 +42,11 @@ impl AlifeObjectReader for AlifeSmartCover {
   }
 
   /// Import smart cover data from ltx config section.
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "ALife object '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "ALife object '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -65,7 +65,7 @@ impl AlifeObjectReader for AlifeSmartCover {
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeSmartCover {
   /// Write smart cover data into the writer.
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
     writer.write_null_terminated_win_string(&self.last_description)?;
@@ -80,7 +80,7 @@ impl AlifeObjectWriter for AlifeSmartCover {
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     self.base.export(section_name, ltx)?;
 
     ltx
@@ -105,16 +105,16 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

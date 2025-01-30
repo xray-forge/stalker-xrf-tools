@@ -1,7 +1,8 @@
-use crate::{TextureError, TextureResult, INVENTORY_ICON_GRID_SQUARE_BASE};
+use crate::INVENTORY_ICON_GRID_SQUARE_BASE;
 use image::{ImageBuffer, Rgba, RgbaImage};
 use serde::Serialize;
 use std::cmp::max;
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -82,11 +83,11 @@ impl InventorySpriteDescriptor {
   /// Prepare combined equipment image base with suitable base size.
   pub fn create_equipment_sprite_base_for_ltx(
     ltx: &Ltx,
-  ) -> TextureResult<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+  ) -> XRayResult<ImageBuffer<Rgba<u8>, Vec<u8>>> {
     let (max_width, max_height) = Self::get_equipment_sprite_boundaries_from_ltx(ltx);
 
     if max_width > 32 * 1024 || max_height > 32 * 1024 {
-      Err(TextureError::new_processing_error(format!(
+      Err(XRayError::new_texture_processing_error(format!(
         "Trying to create too large resulting dds file over 32k*32k ({max_width}x{max_height}), it is not supported",
       )))
     } else {

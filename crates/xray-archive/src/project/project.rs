@@ -1,12 +1,12 @@
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
 use crate::archive::reader::ArchiveReader;
-use crate::{ArchiveError, ArchiveResult};
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
 use walkdir::WalkDir;
+use xray_error::{XRayError, XRayResult};
 
 // todo: Add reading from fsgame.ltx file.
 #[derive(Serialize)]
@@ -17,7 +17,7 @@ pub struct ArchiveProject {
 }
 
 impl ArchiveProject {
-  pub fn new(path: &Path) -> ArchiveResult<Self> {
+  pub fn new(path: &Path) -> XRayResult<Self> {
     let mut archives: Vec<ArchiveDescriptor> = Vec::new();
     let mut files: HashMap<String, ArchiveFileReplicationDescriptor> = HashMap::new();
 
@@ -46,7 +46,7 @@ impl ArchiveProject {
     }
 
     if archives.is_empty() {
-      return Err(ArchiveError::new_read_error(format!(
+      return Err(XRayError::new_read_error(format!(
         "Unable to read archives at location {}",
         path.display()
       )));

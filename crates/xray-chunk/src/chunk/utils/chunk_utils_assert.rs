@@ -1,12 +1,12 @@
 use crate::chunk::reader::chunk_reader::ChunkReader;
-use crate::{ChunkError, ChunkResult};
+use xray_error::{XRayError, XRayResult};
 
 /// Assert chunk ended and has no remaining data or fail with error.
-pub fn assert_chunk_read(chunk: &ChunkReader, message: &str) -> ChunkResult<()> {
+pub fn assert_chunk_read(chunk: &ChunkReader, message: &str) -> XRayResult {
   if chunk.is_ended() {
     Ok(())
   } else {
-    Err(ChunkError::new_not_ended_chunk_error(
+    Err(XRayError::new_chunk_not_ended_error(
       message,
       chunk.read_bytes_remain(),
     ))
@@ -14,10 +14,10 @@ pub fn assert_chunk_read(chunk: &ChunkReader, message: &str) -> ChunkResult<()> 
 }
 
 /// Assert chunk vector read with correct len.
-pub fn assert_chunk_vector_read<T>(data: &[T], expected: usize, message: &str) -> ChunkResult<()> {
+pub fn assert_chunk_vector_read<T>(data: &[T], expected: usize, message: &str) -> XRayResult {
   if data.len() == expected {
     Ok(())
   } else {
-    Err(ChunkError::new_invalid_chunk_error(message))
+    Err(XRayError::new_invalid_error(message))
   }
 }

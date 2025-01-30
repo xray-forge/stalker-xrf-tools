@@ -1,11 +1,10 @@
 use crate::constants::NIL;
-use crate::error::DatabaseError;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
 use std::str::FromStr;
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "camelCase")]
@@ -22,7 +21,7 @@ pub struct Time {
 
 impl Time {
   /// Read optional time object from the chunk.
-  pub fn read_optional<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Option<Self>> {
+  pub fn read_optional<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Option<Self>> {
     if reader.read_u8()? == 1 {
       Ok(Some(Self::read::<T>(reader)?))
     } else {
@@ -31,10 +30,7 @@ impl Time {
   }
 
   /// Write optional time object into the writer.
-  pub fn write_optional<T: ByteOrder>(
-    time: Option<&Self>,
-    writer: &mut dyn Write,
-  ) -> DatabaseResult {
+  pub fn write_optional<T: ByteOrder>(time: Option<&Self>, writer: &mut dyn Write) -> XRayResult {
     if time.is_some() {
       writer.write_u8(1)?;
 
@@ -47,7 +43,7 @@ impl Time {
   }
 
   /// Read time object from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
     let year: u8 = reader.read_u8()?;
     let month: u8 = reader.read_u8()?;
     let day: u8 = reader.read_u8()?;
@@ -68,7 +64,7 @@ impl Time {
   }
 
   /// Write time object into the chunk.
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
     writer.write_u8(self.year)?;
     writer.write_u8(self.month)?;
     writer.write_u8(self.day)?;
@@ -88,50 +84,50 @@ impl Time {
   }
 
   /// Import optional time from string value.
-  pub fn import_from_string(value: &str) -> DatabaseResult<Option<Self>> {
+  pub fn import_from_string(value: &str) -> XRayResult<Option<Self>> {
     if value.trim() == NIL {
       return Ok(None);
     }
 
     Ok(match Self::from_str(value) {
       Ok(time) => Some(time),
-      Err(_) => return Err(DatabaseError::new_parse_error("Failed to parse time")),
+      Err(_) => return Err(XRayError::new_parsing_error("Failed to parse time")),
     })
   }
 }
 
 impl FromStr for Time {
-  type Err = DatabaseError;
+  type Err = XRayError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = s.split(',').map(|it| it.trim()).collect();
 
     if parts.len() != 7 {
-      return Err(DatabaseError::new_parse_error(
+      return Err(XRayError::new_parsing_error(
         "Failed to parse time object from string",
       ));
     }
 
     Ok(Self {
-      year: parts[0].parse().or(Err(DatabaseError::new_parse_error(
+      year: parts[0].parse().or(Err(XRayError::new_parsing_error(
         "Failed to parse years value",
       )))?,
-      month: parts[1].parse().or(Err(DatabaseError::new_parse_error(
+      month: parts[1].parse().or(Err(XRayError::new_parsing_error(
         "Failed to parse months value",
       )))?,
-      day: parts[2].parse().or(Err(DatabaseError::new_parse_error(
+      day: parts[2].parse().or(Err(XRayError::new_parsing_error(
         "Failed to parse days value",
       )))?,
-      hour: parts[3].parse().or(Err(DatabaseError::new_parse_error(
+      hour: parts[3].parse().or(Err(XRayError::new_parsing_error(
         "Failed to parse hours value",
       )))?,
-      minute: parts[4].parse().or(Err(DatabaseError::new_parse_error(
+      minute: parts[4].parse().or(Err(XRayError::new_parsing_error(
         "Failed to parse minutes value",
       )))?,
-      second: parts[5].parse().or(Err(DatabaseError::new_parse_error(
+      second: parts[5].parse().or(Err(XRayError::new_parsing_error(
         "Failed to parse seconds value",
       )))?,
-      millis: parts[6].parse().or(Err(DatabaseError::new_parse_error(
+      millis: parts[6].parse().or(Err(XRayError::new_parsing_error(
         "Failed to parse millis value",
       )))?,
     })
@@ -141,13 +137,13 @@ impl FromStr for Time {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::time::Time;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
@@ -155,7 +151,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -192,7 +188,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_some() -> DatabaseResult {
+  fn test_read_write_optional_some() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
@@ -233,7 +229,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_none() -> DatabaseResult {
+  fn test_read_write_optional_none() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
@@ -261,7 +257,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_to_str() -> DatabaseResult {
+  fn test_import_export_to_str() -> XRayResult {
     let original: Time = Time {
       year: 20,
       month: 6,
@@ -287,7 +283,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> DatabaseResult {
+  fn test_from_to_str() -> XRayResult {
     let original: Time = Time {
       year: 22,
       month: 6,
@@ -305,7 +301,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: Time = Time {
       year: 22,
       month: 6,

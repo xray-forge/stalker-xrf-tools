@@ -1,12 +1,11 @@
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -20,7 +19,7 @@ pub struct ParticleActionBounce {
 
 impl ParticleActionReader for ParticleActionBounce {
   /// Read particle_action bounce.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       position: ParticleDomain::read::<T>(reader)?,
       one_minus_friction: reader.read_f32::<T>()?,
@@ -29,10 +28,11 @@ impl ParticleActionReader for ParticleActionBounce {
     })
   }
 
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle action section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle action section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -48,7 +48,7 @@ impl ParticleActionReader for ParticleActionBounce {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionBounce {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.position.write::<XRayByteOrder>(writer)?;
 
     writer.write_f32::<XRayByteOrder>(self.one_minus_friction)?;
@@ -58,7 +58,7 @@ impl ParticleActionWriter for ParticleActionBounce {
     Ok(())
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("position", self.position.to_string())
@@ -78,12 +78,12 @@ mod tests {
   use crate::data::particle::particle_action::particle_action_bounce::ParticleActionBounce;
   use crate::data::particle::particle_domain::ParticleDomain;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -92,7 +92,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -159,7 +159,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
@@ -214,7 +214,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleActionBounce = ParticleActionBounce {
       position: ParticleDomain {
         domain_type: 0,

@@ -1,12 +1,12 @@
 use crate::data::alife::alife_object_base::AlifeObjectBase;
 use crate::export::file::{create_export_file, open_ltx_config};
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
 use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 use xray_ltx::Ltx;
 
 /// ALife spawns chunk has the following structure:
@@ -22,7 +22,7 @@ impl SpawnALifeSpawnsChunk {
   pub const CHUNK_ID: u32 = 1;
 
   /// Read spawns chunk by position descriptor from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading alife spawns chunk, {} bytes",
       reader.read_bytes_remain()
@@ -65,7 +65,7 @@ impl SpawnALifeSpawnsChunk {
   }
 
   /// Write alife chunk data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut count_writer: ChunkWriter = ChunkWriter::new();
     let mut objects_writer: ChunkWriter = ChunkWriter::new();
     let mut vertex_writer: ChunkWriter = ChunkWriter::new();
@@ -97,7 +97,7 @@ impl SpawnALifeSpawnsChunk {
   }
 
   /// Import alife spawns data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<Self> {
+  pub fn import(path: &Path) -> XRayResult<Self> {
     let ltx: Ltx = open_ltx_config(&path.join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
@@ -111,7 +111,7 @@ impl SpawnALifeSpawnsChunk {
   }
 
   /// Export alife spawns data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult {
+  pub fn export(&self, path: &Path) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     for object in &self.objects {
@@ -147,16 +147,16 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::cls_id::ClsId;
   use crate::spawn_file::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_empty() -> DatabaseResult {
+  fn test_read_write_empty() -> XRayResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_empty.chunk");
 
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk { objects: vec![] };
@@ -190,7 +190,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {

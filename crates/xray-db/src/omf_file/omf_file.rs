@@ -1,12 +1,12 @@
 use crate::omf_file::chunks::omf_motions_chunk::OmfMotionsChunk;
 use crate::omf_file::chunks::omf_parameters_chunk::OmfParametersChunk;
-use crate::{DatabaseError, DatabaseResult};
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
 use xray_chunk::{find_required_chunk_by_id, ChunkReader};
+use xray_error::{XRayError, XRayResult};
 
 // c++ CKinematicsAnimated
 #[derive(Debug, Serialize, Deserialize)]
@@ -18,16 +18,16 @@ pub struct OmfFile {
 impl OmfFile {
   pub const SUPPORTED_VERSIONS: [u16; 2] = [3, 4];
 
-  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
+  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(&path).map_err(|error| {
-      DatabaseError::new_not_found_error(format!(
+      XRayError::new_not_found_error(format!(
         "OMF file was not read: {}, error: {error}",
         path.as_ref().display(),
       ))
     })?)
   }
 
-  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 
@@ -49,7 +49,7 @@ impl OmfFile {
     Self::read_from_chunks::<T>(&chunks)
   }
 
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> DatabaseResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
     assert_eq!(
       chunks.len(),
       2,
@@ -60,19 +60,17 @@ impl OmfFile {
       &mut find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?,
     )
     .map_err(|error| {
-      DatabaseError::new_read_error(format!("Failed to read OMF parameters: {error}"))
+      XRayError::new_read_error(format!("Failed to read OMF parameters: {error}"))
     })?;
 
     let motions: OmfMotionsChunk = OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
       chunks,
       OmfMotionsChunk::CHUNK_ID,
     )?)
-    .map_err(|error| {
-      DatabaseError::new_read_error(format!("Failed to read OMF motions: {error}"))
-    })?;
+    .map_err(|error| XRayError::new_read_error(format!("Failed to read OMF motions: {error}")))?;
 
     if parameters.motions.len() != motions.motions.len() {
-      return Err(DatabaseError::new_parse_error(format!(
+      return Err(XRayError::new_parsing_error(format!(
         "Unexpected data stored in OMF file, count of motions and motions definitions mismatch: {} got, {} expected",
         parameters.motions.len(),
         motions.motions.len()
@@ -88,11 +86,11 @@ impl OmfFile {
 
 impl OmfFile {
   /// Read only list of motions specifically and skip other data parts.
-  pub fn read_motions_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Vec<String>> {
+  pub fn read_motions_from_path<T: ByteOrder>(path: &Path) -> XRayResult<Vec<String>> {
     Self::read_motions_from_file::<T>(File::open(path)?)
   }
 
-  pub fn read_motions_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Vec<String>> {
+  pub fn read_motions_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 

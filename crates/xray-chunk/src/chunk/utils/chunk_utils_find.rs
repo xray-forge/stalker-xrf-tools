@@ -1,4 +1,5 @@
-use crate::{ChunkError, ChunkReader, ChunkResult};
+use crate::ChunkReader;
+use xray_error::{XRayError, XRayResult};
 
 /// Find chink in list by id.
 pub fn find_optional_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<ChunkReader> {
@@ -20,9 +21,9 @@ pub fn find_one_of_optional_chunk_by_id(
 }
 
 /// Find required chunk in list by id.
-pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> ChunkResult<ChunkReader> {
+pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XRayResult<ChunkReader> {
   match chunks.iter().find(|it| it.id == id).cloned() {
-    None => Err(ChunkError::new_not_found_chunk_error(format!(
+    None => Err(XRayError::new_not_found_error(format!(
       "Chunk with ID {id} was not found"
     ))),
     Some(it) => Ok(it),
@@ -33,14 +34,15 @@ pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> ChunkResult
 pub fn find_one_of_required_chunks_by_id(
   chunks: &[ChunkReader],
   ids: &[u32],
-) -> ChunkResult<(u32, ChunkReader)> {
+) -> XRayResult<(u32, ChunkReader)> {
   for id in ids {
     if let Some(chunk) = chunks.iter().find(|it| it.id == *id).cloned() {
       return Ok((*id, chunk));
     }
   }
 
-  Err(ChunkError::new_not_found_chunk_error(format!(
-    "Chunk with one of IDs {ids:?} was not found"
+  Err(XRayError::new_not_found_error(format!(
+    "Chunk with one of IDs {:?} was not found",
+    ids
   )))
 }

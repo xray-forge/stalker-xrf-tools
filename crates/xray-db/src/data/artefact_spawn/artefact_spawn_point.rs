@@ -1,9 +1,9 @@
 use crate::data::generic::vector_3d::Vector3d;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -16,7 +16,7 @@ pub struct ArtefactSpawnPoint {
 
 impl ArtefactSpawnPoint {
   /// Read artefact spawn point from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       position: Vector3d::read::<T>(reader)?,
       level_vertex_id: reader.read_u32::<T>()?,
@@ -25,7 +25,7 @@ impl ArtefactSpawnPoint {
   }
 
   /// Write artefact spawn point data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.position.write::<T>(writer)?;
 
     writer.write_u32::<T>(self.level_vertex_id)?;
@@ -35,7 +35,7 @@ impl ArtefactSpawnPoint {
   }
 
   /// Import artefact spawn point data from ltx section.
-  pub fn import(section: &Section) -> DatabaseResult<Self> {
+  pub fn import(section: &Section) -> XRayResult<Self> {
     Ok(Self {
       position: read_ltx_field("position", section)?,
       level_vertex_id: read_ltx_field("level_vertex_id", section)?,
@@ -58,13 +58,13 @@ mod tests {
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -73,7 +73,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(10.5, 20.3, -40.5),
       level_vertex_id: 1000,
@@ -111,7 +111,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(11.5, 12.3, -10.5),
       level_vertex_id: 1001,
@@ -138,7 +138,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: ArtefactSpawnPoint = ArtefactSpawnPoint {
       position: Vector3d::new(21.5, 22.3, -20.5),
       level_vertex_id: 1001,

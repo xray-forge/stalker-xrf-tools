@@ -1,12 +1,11 @@
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,7 +19,7 @@ pub struct ParticleActionTurbulence {
 }
 
 impl ParticleActionReader for ParticleActionTurbulence {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionTurbulence> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionTurbulence> {
     Ok(ParticleActionTurbulence {
       frequency: reader.read_f32::<T>()?,
       octaves: reader.read_i32::<T>()?,
@@ -30,10 +29,11 @@ impl ParticleActionReader for ParticleActionTurbulence {
     })
   }
 
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle action section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle action section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -50,7 +50,7 @@ impl ParticleActionReader for ParticleActionTurbulence {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTurbulence {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<XRayByteOrder>(self.frequency)?;
     writer.write_i32::<XRayByteOrder>(self.octaves)?;
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
@@ -61,7 +61,7 @@ impl ParticleActionWriter for ParticleActionTurbulence {
     Ok(())
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("frequency", self.frequency.to_string())

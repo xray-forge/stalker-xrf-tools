@@ -1,10 +1,9 @@
-use crate::error::DatabaseError;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
 use std::str::FromStr;
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Display)]
 #[serde(rename_all = "camelCase")]
@@ -21,7 +20,7 @@ impl Vector3d<f32> {
   }
 
   /// Read vector coordinates from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
     Ok(Self {
       x: reader.read_f32::<T>()?,
       y: reader.read_f32::<T>()?,
@@ -30,7 +29,7 @@ impl Vector3d<f32> {
   }
 
   /// Write vector coordinates into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
     writer.write_f32::<T>(self.x)?;
     writer.write_f32::<T>(self.y)?;
     writer.write_f32::<T>(self.z)?;
@@ -46,13 +45,13 @@ impl From<(f32, f32, f32)> for Vector3d<f32> {
 }
 
 impl FromStr for Vector3d<f32> {
-  type Err = DatabaseError;
+  type Err = XRayError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = s.split(',').collect();
 
     if parts.len() != 3 {
-      return Err(DatabaseError::new_parse_error(
+      return Err(XRayError::new_parsing_error(
         "Failed to parse 3d vector from string, expected 3 numbers",
       ));
     }
@@ -61,19 +60,19 @@ impl FromStr for Vector3d<f32> {
       x: parts[0]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector X value",
         )))?,
       y: parts[1]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector Y value",
         )))?,
       z: parts[2]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector Z value",
         )))?,
     })
@@ -83,13 +82,13 @@ impl FromStr for Vector3d<f32> {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
@@ -97,7 +96,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -136,7 +135,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> DatabaseResult {
+  fn test_from_to_str() -> XRayResult {
     let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,
@@ -150,7 +149,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,

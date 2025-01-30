@@ -1,12 +1,11 @@
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particle::particle_domain::ParticleDomain;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -16,16 +15,17 @@ pub struct ParticleActionRandomVelocity {
 }
 
 impl ParticleActionReader for ParticleActionRandomVelocity {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       gen_vel: ParticleDomain::read::<T>(reader)?,
     })
   }
 
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle action section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle action section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -38,13 +38,13 @@ impl ParticleActionReader for ParticleActionRandomVelocity {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionRandomVelocity {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.gen_vel.write::<XRayByteOrder>(writer)?;
 
     Ok(())
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("gen_vel", self.gen_vel.to_string());

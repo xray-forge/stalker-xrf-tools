@@ -1,11 +1,10 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 /// `GameGraph::SLevel::load` in xray codebase.
@@ -21,7 +20,7 @@ pub struct GraphLevel {
 
 impl GraphLevel {
   /// Read graph level data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       name: reader.read_null_terminated_win_string()?,
       offset: Vector3d::read::<T>(reader)?,
@@ -32,7 +31,7 @@ impl GraphLevel {
   }
 
   /// Write graph level data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
 
     self.offset.write::<T>(writer)?;
@@ -45,10 +44,11 @@ impl GraphLevel {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Graph level section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Graph level section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -79,7 +79,6 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_level::GraphLevel;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -87,6 +86,7 @@ mod tests {
   use std::path::Path;
   use uuid::uuid;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -95,7 +95,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -136,7 +136,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let original: GraphLevel = GraphLevel {
       id: 78,
       name: String::from("test-level-exported"),
@@ -162,7 +162,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: GraphLevel = GraphLevel {
       id: 243,
       name: String::from("test-level-example"),

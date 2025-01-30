@@ -1,8 +1,8 @@
 use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
-use crate::{DatabaseError, DatabaseResult};
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{assert_chunk_vector_read, ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -19,16 +19,13 @@ pub struct OgfMotionDefinition {
 }
 
 impl OgfMotionDefinition {
-  pub fn read_list<T: ByteOrder>(
-    reader: &mut ChunkReader,
-    version: u16,
-  ) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XRayResult<Vec<Self>> {
     let count: u16 = reader.read_u16::<T>()?;
     let mut definitions: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       definitions.push(Self::read::<T>(reader, version).map_err(|error| {
-        DatabaseError::new_read_error(format!("Failed to read ogf motion: {error}"))
+        XRayError::new_read_error(format!("Failed to read ogf motion: {error}"))
       })?);
     }
 
@@ -41,7 +38,7 @@ impl OgfMotionDefinition {
     Ok(definitions)
   }
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XRayResult<Self> {
     let name: String = reader.read_null_terminated_win_string()?;
     let flags: u32 = reader.read_u32::<T>()?;
     let bone_or_part: u16 = reader.read_u16::<T>()?;
@@ -57,7 +54,7 @@ impl OgfMotionDefinition {
 
       for _ in 0..count {
         marks.push(OgfMotionMark::read::<T>(reader).map_err(|error| {
-          DatabaseError::new_read_error(format!("Failed to read ogf motion mark: {error}"))
+          XRayError::new_read_error(format!("Failed to read ogf motion mark: {error}"))
         })?);
       }
 
@@ -87,7 +84,7 @@ impl OgfMotionDefinition {
     Ok(motion)
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
     todo!("Implement")
   }
 }

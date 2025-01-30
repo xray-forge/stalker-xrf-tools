@@ -1,8 +1,8 @@
 use crate::data::ogf::ogf_motion::OgfMotion;
-use crate::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{read_u32_chunk, ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OmfMotionsChunk {
@@ -12,7 +12,7 @@ pub struct OmfMotionsChunk {
 impl OmfMotionsChunk {
   pub const CHUNK_ID: u32 = 14; // 0x1A, 0xE
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading motions chunk: {} bytes",
       reader.read_bytes_remain()
@@ -47,7 +47,7 @@ impl OmfMotionsChunk {
     Ok(Self { motions })
   }
 
-  pub fn write<T: ByteOrder>(&self, _writer: &mut ChunkWriter, _version: u16) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, _writer: &mut ChunkWriter, _version: u16) -> XRayResult {
     Ok(())
   }
 }

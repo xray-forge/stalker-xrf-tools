@@ -1,11 +1,11 @@
 use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
 use crate::export::file::{create_export_file, open_ltx_config};
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 use xray_ltx::Ltx;
 
 /// Artefacts spawns samples.
@@ -21,7 +21,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading artefacts spawns chunk: {} bytes",
       reader.read_bytes_remain()
@@ -48,7 +48,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Write artefact spawns into chunk writer.
   /// Writes artefact spawns data in binary format.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(self.nodes.len() as u32)?;
 
     for node in &self.nodes {
@@ -65,7 +65,7 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Import artefact spawns data from provided path.
   /// Parse ltx files and populate spawn file.
-  pub fn import(path: &Path) -> DatabaseResult<Self> {
+  pub fn import(path: &Path) -> XRayResult<Self> {
     let ltx: Ltx = open_ltx_config(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
@@ -79,7 +79,7 @@ impl SpawnArtefactSpawnsChunk {
   }
 
   /// Export artefact spawns data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult {
+  pub fn export(&self, path: &Path) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     for (index, node) in self.nodes.iter().enumerate() {
@@ -109,16 +109,16 @@ mod tests {
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {

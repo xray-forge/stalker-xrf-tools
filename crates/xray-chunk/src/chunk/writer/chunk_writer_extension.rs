@@ -1,17 +1,18 @@
-use crate::{ChunkResult, ChunkWriter, U32Bytes};
+use crate::{ChunkWriter, U32Bytes};
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::io::Write;
+use xray_error::XRayResult;
 use xray_utils::encode_string_to_windows1251_bytes;
 
 impl ChunkWriter {
   /// Write null terminated windows1251 encoded string.
-  pub fn write_null_terminated_win_string(&mut self, data: &str) -> ChunkResult<usize> {
+  pub fn write_null_terminated_win_string(&mut self, data: &str) -> XRayResult<usize> {
     Ok(self.write(&encode_string_to_windows1251_bytes(data)?)? + self.write(&[0u8])?)
   }
 
   /// Write 4 bytes value as 4 separate byte entries.
   /// Preserves write/read order for 4 values, not dependent on ByteOrder.
-  pub fn write_u32_bytes(&mut self, data: &U32Bytes) -> ChunkResult<usize> {
+  pub fn write_u32_bytes(&mut self, data: &U32Bytes) -> XRayResult<usize> {
     self.write_u8(data.0)?;
     self.write_u8(data.1)?;
     self.write_u8(data.2)?;
@@ -21,7 +22,7 @@ impl ChunkWriter {
   }
 
   /// Write serialized vector into vector, where u32 count N is followed by N u16 entries.
-  pub fn write_u16_vector<T: ByteOrder>(&mut self, data: &[u16]) -> ChunkResult<usize> {
+  pub fn write_u16_vector<T: ByteOrder>(&mut self, data: &[u16]) -> XRayResult<usize> {
     self.write_u32::<T>(data.len() as u32)?;
 
     for it in data {
@@ -34,11 +35,11 @@ impl ChunkWriter {
 
 #[cfg(test)]
 mod tests {
-  use crate::types::ChunkResult;
   use crate::{ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
 
   #[test]
-  fn test_write_null_terminated_string_empty() -> ChunkResult {
+  fn test_write_null_terminated_string_empty() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     assert_eq!(
@@ -53,7 +54,7 @@ mod tests {
   }
 
   #[test]
-  fn test_write_null_terminated_string_sample() -> ChunkResult {
+  fn test_write_null_terminated_string_sample() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     assert_eq!(
@@ -72,7 +73,7 @@ mod tests {
   }
 
   #[test]
-  fn test_write_u32_bytes() -> ChunkResult {
+  fn test_write_u32_bytes() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     assert_eq!(
@@ -87,7 +88,7 @@ mod tests {
   }
 
   #[test]
-  fn test_write_u16_vector_empty() -> ChunkResult {
+  fn test_write_u16_vector_empty() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     assert_eq!(
@@ -106,7 +107,7 @@ mod tests {
   }
 
   #[test]
-  fn test_write_u16_vector_samples() -> ChunkResult {
+  fn test_write_u16_vector_samples() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     assert_eq!(

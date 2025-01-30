@@ -1,0 +1,10 @@
+[package]
+name = "xray-error"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+image = "0.25.1"
+thiserror = "2.0.11"
+xray-error-derive = { path = "../xray-error-derive" }
+serde = { version = "1.0.197", features = ["derive"] }

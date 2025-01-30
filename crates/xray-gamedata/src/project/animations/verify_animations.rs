@@ -3,19 +3,20 @@ use crate::project::animations::verify_animations_result::GamedataAnimationsVeri
 use crate::project::weapons::weapons_utils::{
   get_weapon_animation_name, is_player_hud_section, is_weapon_section,
 };
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
+use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
   pub fn verify_animations(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataAnimationsVerificationResult> {
+  ) -> XRayResult<GamedataAnimationsVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata animations:".green(),);
     }
@@ -43,7 +44,7 @@ impl GamedataProject {
   pub fn verify_player_hud_animations(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<(u32, u32)> {
+  ) -> XRayResult<(u32, u32)> {
     if options.is_verbose_logging_enabled() {
       println!("Verify player hud animations");
     }
@@ -91,7 +92,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     section_name: &str,
     section: &Section,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     let mut hud_motions: HashMap<String, String> = HashMap::new();
@@ -203,7 +204,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     section_name: &str,
     motions: &[&String],
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     if options.is_verbose_logging_enabled() {
       println!("Verify weapons animations for [{section_name}]");
     }
@@ -253,10 +254,7 @@ impl GamedataProject {
     Ok(is_valid)
   }
 
-  pub fn read_player_hud_motion_refs(
-    &self,
-    visual_path: &Path,
-  ) -> GamedataResult<HashSet<PathBuf>> {
+  pub fn read_player_hud_motion_refs(&self, visual_path: &Path) -> XRayResult<HashSet<PathBuf>> {
     let motion_refs: Vec<String> =
       OgfFile::read_motion_refs_from_path::<XRayByteOrder>(visual_path)?;
 

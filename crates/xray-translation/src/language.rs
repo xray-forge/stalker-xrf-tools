@@ -1,7 +1,7 @@
-use crate::{TranslationError, TranslationResult};
 use derive_more::Display;
 use std::str::FromStr;
-use xray_utils::{get_windows1250_encoder, get_windows1251_encoder, XrayEncoding};
+use xray_error::{XRayError, XRayResult};
+use xray_utils::{get_windows1250_encoder, get_windows1251_encoder, XRayEncoding};
 
 #[derive(Clone, Debug, PartialEq, Display)]
 pub enum TranslationLanguage {
@@ -33,7 +33,7 @@ impl TranslationLanguage {
     }
   }
 
-  pub fn get_language_encoder(&self) -> XrayEncoding {
+  pub fn get_language_encoder(&self) -> XRayEncoding {
     match self {
       Self::Russian | Self::Ukrainian => get_windows1251_encoder(),
       _ => get_windows1250_encoder(),
@@ -57,9 +57,9 @@ impl TranslationLanguage {
     Self::get_all().iter().map(|it| it.to_string()).collect()
   }
 
-  pub fn from_str_single(language: &str) -> TranslationResult<Self> {
+  pub fn from_str_single(language: &str) -> XRayResult<Self> {
     match Self::from_str(language)? {
-      Self::All => Err(TranslationError::new_unknown_language_error(String::from(
+      Self::All => Err(XRayError::new_unknown_language_error(String::from(
         "Unexpected language 'all' provided'",
       ))),
       language => Ok(language),
@@ -68,7 +68,7 @@ impl TranslationLanguage {
 }
 
 impl FromStr for TranslationLanguage {
-  type Err = TranslationError;
+  type Err = XRayError;
 
   fn from_str(language: &str) -> Result<Self, Self::Err> {
     match language {
@@ -81,8 +81,8 @@ impl FromStr for TranslationLanguage {
       "rus" => Ok(Self::Russian),
       "spa" => Ok(Self::Spanish),
       "ukr" => Ok(Self::Ukrainian),
-      language => Err(TranslationError::new_unknown_language_error(format!(
-        "Unexpected language '{language} provided'",
+      language => Err(XRayError::new_unknown_language_error(format!(
+        "Unexpected language '{language}' provided",
       ))),
     }
   }

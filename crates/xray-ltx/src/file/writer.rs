@@ -1,14 +1,15 @@
 use crate::file::configuration::constants::ROOT_SECTION;
 use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
-use crate::{Ltx, LtxResult};
+use crate::Ltx;
 use std::fs;
 use std::io::Write;
 use std::path::Path;
+use xray_error::XRayResult;
 use xray_utils::read_as_string_from_windows1251_encoded;
 
 impl Ltx {
   /// Format single LTX file by provided path
-  pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> LtxResult<bool> {
+  pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> XRayResult<bool> {
     let formatted: String = Ltx::format_from_file(&filename)?;
     let existing: String = read_as_string_from_windows1251_encoded(
       &mut fs::OpenOptions::new().read(true).open(filename.as_ref())?,
@@ -26,7 +27,7 @@ impl Ltx {
   }
 
   /// Write to a file
-  pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> LtxResult {
+  pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> XRayResult {
     self.write_to(
       &mut fs::OpenOptions::new()
         .write(true)
@@ -37,7 +38,7 @@ impl Ltx {
   }
 
   /// Write to a writer with options
-  pub fn write_to<W: Write>(&self, writer: &mut W) -> LtxResult {
+  pub fn write_to<W: Write>(&self, writer: &mut W) -> XRayResult {
     let mut firstline: bool = true;
 
     // Write include statements.

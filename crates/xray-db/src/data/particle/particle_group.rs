@@ -2,15 +2,14 @@ use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect_description::ParticleDescription;
 use crate::data::particle::particle_group_effect::ParticleGroupEffect;
 use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
   find_optional_chunk_by_id, read_f32_chunk, read_null_terminated_win_string_chunk, read_u16_chunk,
   read_u32_chunk, ChunkReader, ChunkWriter,
 };
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,7 +38,7 @@ impl ParticleGroup {
   pub const EFFECTS2_CHUNK_ID: u32 = 7;
 
   /// Read group from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     let particle_group: Self = Self {
@@ -82,7 +81,7 @@ impl ParticleGroup {
   }
 
   /// Write particle group data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -121,10 +120,11 @@ impl ParticleGroup {
   }
 
   /// Import particles group data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle group section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle group section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -160,7 +160,7 @@ impl ParticleGroup {
   }
 
   /// Export particles group data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)

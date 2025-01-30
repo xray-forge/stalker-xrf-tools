@@ -4,7 +4,6 @@ use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsC
 use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
 use crate::spawn_file::chunks::spawn_header_chunk::SpawnHeaderChunk;
 use crate::spawn_file::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
@@ -13,6 +12,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use xray_chunk::{find_required_chunk_by_id, ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
 /// Descriptor of generic spawn file used by xray game engine.
 ///
@@ -34,19 +34,19 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   /// Read spawn file from provided path.
-  pub fn read_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
+  pub fn read_from_path<T: ByteOrder>(path: &Path) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read spawn file from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
 
     Self::read_from_chunks::<T>(&reader.read_children())
   }
 
   /// Read spawn file from chunks.
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> DatabaseResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
     assert_eq!(
       chunks.len(),
       5,
@@ -92,13 +92,13 @@ impl SpawnFile {
   }
 
   /// Write spawn file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
+  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> XRayResult {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
     self.write_to::<T>(&mut create_export_file(path)?)
   }
 
   /// Write spawn file data to the writer.
-  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
     let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
     self.header.write::<T>(&mut header_chunk_writer)?;
     header_chunk_writer.flush_chunk_into::<T>(writer, SpawnHeaderChunk::CHUNK_ID)?;
@@ -126,7 +126,7 @@ impl SpawnFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
+  pub fn import_from_path<T: ByteOrder>(path: &Path) -> XRayResult<Self> {
     Ok(Self {
       header: SpawnHeaderChunk::import(path)?,
       alife_spawn: SpawnALifeSpawnsChunk::import(path)?,
@@ -137,7 +137,7 @@ impl SpawnFile {
   }
 
   /// Export unpacked alife spawn file into provided path.
-  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
+  pub fn export_to_path<T: ByteOrder>(&self, path: &Path) -> XRayResult {
     fs::create_dir_all(path)?;
 
     self.header.export(path)?;

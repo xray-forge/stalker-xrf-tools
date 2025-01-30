@@ -1,6 +1,5 @@
-use crate::error::DatabaseError;
-use crate::types::DatabaseResult;
 use serde::{Deserialize, Serialize};
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +19,7 @@ impl AlifeSmartCoverLoophole {
   }
 
   /// Read list of loopholes from string.
-  pub fn string_to_list(value: &str) -> DatabaseResult<Vec<Self>> {
+  pub fn string_to_list(value: &str) -> XRayResult<Vec<Self>> {
     let mut loopholes: Vec<Self> = Vec::new();
 
     for it in value.split(',').map(|it| it.trim()) {
@@ -32,15 +31,15 @@ impl AlifeSmartCoverLoophole {
           enabled: match partial.last().unwrap().parse::<u8>() {
             Ok(parsed) => parsed,
             Err(_) => {
-              return Err(DatabaseError::new_parse_error(
+              return Err(XRayError::new_parsing_error(
                 "Failed to parse loophole enabled status",
               ))
             }
           },
         })
       } else {
-        return Err(DatabaseError::new_parse_error(
-          "Invalid value provided for loopholes parsion, ':' separated values expected",
+        return Err(XRayError::new_parsing_error(
+          "Invalid value provided for loopholes parsing, ':' separated values expected",
         ));
       }
     }

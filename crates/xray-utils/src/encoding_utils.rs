@@ -4,25 +4,25 @@ use std::borrow::Cow;
 use std::io;
 use std::io::{ErrorKind, Read};
 
-pub type XrayEncoding = &'static Encoding;
+pub type XRayEncoding = &'static Encoding;
 
 /// Return encoding factory for windows1250.
-pub fn get_windows1250_encoder() -> XrayEncoding {
+pub fn get_windows1250_encoder() -> XRayEncoding {
   WINDOWS_1250
 }
 
 /// Return encoding factory for windows1251.
-pub fn get_windows1251_encoder() -> XrayEncoding {
+pub fn get_windows1251_encoder() -> XRayEncoding {
   WINDOWS_1251
 }
 
 /// Return encoding factory for UTF-8.
-pub fn get_utf8_encoder() -> XrayEncoding {
+pub fn get_utf8_encoder() -> XRayEncoding {
   UTF_8
 }
 
 /// Try encoding provided u8 raw bytes as string value.
-pub fn decode_bytes_to_string(bytes: &[u8], encoding: XrayEncoding) -> io::Result<String> {
+pub fn decode_bytes_to_string(bytes: &[u8], encoding: XRayEncoding) -> io::Result<String> {
   let (cow, _, had_errors) = encoding.decode(bytes);
 
   if had_errors {
@@ -42,7 +42,7 @@ pub fn decode_bytes_to_string(bytes: &[u8], encoding: XrayEncoding) -> io::Resul
 /// Try encoding provided u8 raw bytes as string value.
 pub fn decode_bytes_to_string_without_bom_handling(
   bytes: &[u8],
-  encoding: XrayEncoding,
+  encoding: XRayEncoding,
 ) -> io::Result<String> {
   let (cow, had_errors) = encoding.decode_without_bom_handling(bytes);
 
@@ -61,7 +61,7 @@ pub fn decode_bytes_to_string_without_bom_handling(
 }
 
 /// Try encoding provided string value as bytes.
-pub fn encode_string_to_bytes(string: &str, encoding: XrayEncoding) -> io::Result<Vec<u8>> {
+pub fn encode_string_to_bytes(string: &str, encoding: XRayEncoding) -> io::Result<Vec<u8>> {
   let (transformed, _, had_errors) = encoding.encode(string);
 
   if had_errors {
@@ -84,7 +84,7 @@ pub fn encode_string_to_bytes(string: &str, encoding: XrayEncoding) -> io::Resul
 /// Read whole encoded reader content to a string.
 pub fn read_as_string_from_encoded<R: Read>(
   reader: &mut R,
-  encoding: XrayEncoding,
+  encoding: XRayEncoding,
 ) -> io::Result<String> {
   let mut raw_data: Vec<u8> = Vec::new();
 

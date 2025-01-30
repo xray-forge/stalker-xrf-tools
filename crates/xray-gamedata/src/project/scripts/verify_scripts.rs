@@ -1,6 +1,6 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
-use crate::{GamedataError, GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use full_moon::parse;
 use rayon::iter::IntoParallelRefIterator;
@@ -9,13 +9,14 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
+use xray_error::{XRayError, XRayResult};
 use xray_utils::read_as_string_from_windows1251_encoded;
 
 impl GamedataProject {
   pub fn verify_scripts(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataScriptsVerificationResult> {
+  ) -> XRayResult<GamedataScriptsVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata scripts:".green(),);
     }
@@ -93,11 +94,11 @@ impl GamedataProject {
     &self,
     _options: &GamedataProjectVerifyOptions,
     path: &Path,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let code: String = read_as_string_from_windows1251_encoded(&mut File::open(path)?)?;
 
     parse(&code).map_err(|it| {
-      GamedataError::new_check_error(format!(
+      XRayError::new_verify_error(format!(
         "Failed to check lua script file: {}, errors: {}",
         path.display(),
         it.iter()

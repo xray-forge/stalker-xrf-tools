@@ -4,19 +4,20 @@ use std::fs::File;
 use std::io::Read;
 
 use crate::types::{TranslationJson, TranslationProjectJson};
-use crate::{TranslationError, TranslationLanguage, TranslationResult};
+use crate::TranslationLanguage;
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
+use xray_error::XRayResult;
 
 impl TranslationProject {
-  pub fn read_project(dir: &Path) -> TranslationResult<TranslationProjectJson> {
+  pub fn read_project(dir: &Path) -> XRayResult<TranslationProjectJson> {
     let mut project_json: TranslationProjectJson = Default::default();
 
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(dir) {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
-        Err(error) => return Err(TranslationError::Io(error.into_io_error().unwrap())),
+        Err(error) => return Err(error.into_io_error().unwrap().into()),
       };
 
       let entry_path: &Path = entry.path();
@@ -40,7 +41,7 @@ impl TranslationProject {
     Ok(project_json)
   }
 
-  pub fn read_translation_json_by_path(path: &Path) -> TranslationResult<TranslationJson> {
+  pub fn read_translation_json_by_path(path: &Path) -> XRayResult<TranslationJson> {
     let mut data: Vec<u8> = Vec::new();
 
     File::open(path)?.read_to_end(&mut data)?;

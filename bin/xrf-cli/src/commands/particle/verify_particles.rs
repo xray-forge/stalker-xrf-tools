@@ -1,7 +1,8 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_db::{DatabaseError, ParticlesFile, XRayByteOrder};
+use xray_db::{ParticlesFile, XRayByteOrder};
+use xray_error::XRayError;
 
 #[derive(Default)]
 pub struct VerifyParticlesFileCommand;
@@ -68,11 +69,8 @@ impl GenericCommand for VerifyParticlesFileCommand {
         log::error!("Provided particle file is invalid: {}", error);
 
         Err(
-          DatabaseError::new_parse_error(format!(
-            "Verification of particle file failed: {}",
-            error
-          ))
-          .into(),
+          XRayError::new_parsing_error(format!("Verification of particle file failed: {}", error))
+            .into(),
         )
       }
     }

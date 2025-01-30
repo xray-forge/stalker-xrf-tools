@@ -1,18 +1,19 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::Instant;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
+use xray_error::XRayResult;
 
 impl GamedataProject {
   pub fn verify_meshes(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataMeshesVerificationResult> {
+  ) -> XRayResult<GamedataMeshesVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata meshes:".green());
     }
@@ -83,7 +84,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     path: &Path,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     self.verify_mesh(
       options,
       &OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?,
@@ -94,7 +95,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     if !self.verify_mesh_textures(options, ogf)? {
@@ -168,7 +169,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     if let Some(texture) = &ogf.texture {
@@ -191,7 +192,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
     omf: &OmfFile,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     if let Some(bones) = &ogf.bones {

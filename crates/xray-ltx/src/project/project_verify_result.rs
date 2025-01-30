@@ -1,5 +1,5 @@
-use crate::LtxError;
 use serde::Serialize;
+use xray_error::XRayError;
 
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -7,7 +7,7 @@ pub struct LtxProjectVerifyResult {
   pub checked_fields: usize,
   pub checked_sections: usize,
   pub duration: u128,
-  pub errors: Vec<LtxError>,
+  pub errors: Vec<XRayError>,
   pub invalid_sections: usize,
   pub skipped_sections: usize,
   pub total_files: usize,

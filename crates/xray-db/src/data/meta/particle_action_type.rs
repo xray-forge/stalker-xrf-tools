@@ -29,12 +29,11 @@ use crate::data::particle::particle_action::particle_action_target_size::Particl
 use crate::data::particle::particle_action::particle_action_target_velocity::ParticleActionTargetVelocity;
 use crate::data::particle::particle_action::particle_action_turbulence::ParticleActionTurbulence;
 use crate::data::particle::particle_action::particle_action_vortex::ParticleActionVortex;
-use crate::error::DatabaseError;
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use derive_more::Display;
 use enum_map::Enum;
 use xray_chunk::ChunkReader;
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::Ltx;
 
 #[derive(Copy, Clone, Debug, Enum, PartialEq, Display)]
@@ -152,7 +151,7 @@ impl ParticleActionType {
   pub fn read_by_particle_type<T: ByteOrder>(
     reader: &mut ChunkReader,
     particle_action_type: Self,
-  ) -> DatabaseResult<Box<dyn ParticleActionWriter>> {
+  ) -> XRayResult<Box<dyn ParticleActionWriter>> {
     Ok(match particle_action_type {
       Self::Avoid => Box::new(ParticleActionAvoid::read::<T>(reader)?),
       Self::Bounce => Box::new(ParticleActionBounce::read::<T>(reader)?),
@@ -188,7 +187,7 @@ impl ParticleActionType {
       Self::Turbulence => Box::new(ParticleActionTurbulence::read::<T>(reader)?),
       Self::Scatter => Box::new(ParticleActionScatter::read::<T>(reader)?),
       Self::Unknown | Self::CallActionList => {
-        return Err(DatabaseError::new_parse_error(format!(
+        return Err(XRayError::new_parsing_error(format!(
           "Not implemented parser for particle action reading: {}",
           particle_action_type
         )));
@@ -201,7 +200,7 @@ impl ParticleActionType {
     particle_action_type: Self,
     section_name: &str,
     ltx: &Ltx,
-  ) -> DatabaseResult<Box<dyn ParticleActionWriter>> {
+  ) -> XRayResult<Box<dyn ParticleActionWriter>> {
     Ok(match particle_action_type {
       Self::Avoid => Box::new(ParticleActionAvoid::import(section_name, ltx)?),
       Self::Bounce => Box::new(ParticleActionBounce::import(section_name, ltx)?),
@@ -237,7 +236,7 @@ impl ParticleActionType {
       Self::Turbulence => Box::new(ParticleActionTurbulence::import(section_name, ltx)?),
       Self::Scatter => Box::new(ParticleActionScatter::import(section_name, ltx)?),
       Self::Unknown | Self::CallActionList => {
-        return Err(DatabaseError::new_parse_error(format!(
+        return Err(XRayError::new_parsing_error(format!(
           "Not implemented parser for particle action importing: {}",
           particle_action_type
         )));

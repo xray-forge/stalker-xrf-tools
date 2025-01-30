@@ -16,8 +16,8 @@ log = "0.4.20"
 minilzo-rs = "0.6.1"
 regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }
-thiserror = "2.0.10"
 walkdir = "2.5.0"
+xray-error = { path = "../xray-error" }
 xray-utils = { path = "../xray-utils" }
 
 [dev-dependencies]

@@ -1,7 +1,8 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xray_ltx::{Ltx, LtxError, LtxFormatOptions, LtxProject, LtxProjectFormatResult};
+use xray_error::XRayError;
+use xray_ltx::{Ltx, LtxFormatOptions, LtxProject, LtxProjectFormatResult};
 
 #[derive(Default)]
 pub struct FormatLtxCommand;
@@ -81,7 +82,7 @@ impl GenericCommand for FormatLtxCommand {
 
         if result.invalid_files > 0 {
           return Err(
-            LtxError::new_verify_error("Project includes LTX files with invalid format").into(),
+            XRayError::new_verify_error("Project includes LTX files with invalid format").into(),
           );
         }
       } else {

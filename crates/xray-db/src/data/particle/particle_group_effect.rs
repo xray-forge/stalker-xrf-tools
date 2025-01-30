@@ -1,10 +1,9 @@
 use crate::constants::META_TYPE_FIELD;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -25,7 +24,7 @@ impl ParticleGroupEffect {
   pub const EFFECT_ACTIONS_LIMIT: usize = 10_000;
 
   /// Read list of effect groups data from chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut effects: Vec<Self> = Vec::new();
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -49,7 +48,7 @@ impl ParticleGroupEffect {
   }
 
   /// Read group effect from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_group = Self {
       name: reader.read_null_terminated_win_string()?,
       on_play_child_name: reader.read_null_terminated_win_string()?,
@@ -64,7 +63,7 @@ impl ParticleGroupEffect {
   }
 
   /// Write effects list data into the writer.
-  pub fn write_list<T: ByteOrder>(effects: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(effects: &[Self], writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(effects.len() as u32)?;
 
     for effect in effects {
@@ -75,7 +74,7 @@ impl ParticleGroupEffect {
   }
 
   /// Write effect data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_null_terminated_win_string(&self.on_play_child_name)?;
     writer.write_null_terminated_win_string(&self.on_birth_child_name)?;
@@ -88,7 +87,7 @@ impl ParticleGroupEffect {
   }
 
   /// Import list of particles group effect data from provided path.
-  pub fn import_list(section_name: &str, ltx: &Ltx) -> DatabaseResult<Vec<Self>> {
+  pub fn import_list(section_name: &str, ltx: &Ltx) -> XRayResult<Vec<Self>> {
     let mut effect_index: usize = 0;
     let mut effects: Vec<Self> = Vec::new();
 
@@ -103,7 +102,7 @@ impl ParticleGroupEffect {
       }
 
       if effect_index >= Self::EFFECT_ACTIONS_LIMIT {
-        return Err(DatabaseError::new_parse_error(
+        return Err(XRayError::new_parsing_error(
           "Failed to parse particle effects - reached maximum nested actions limit",
         ));
       }
@@ -113,10 +112,11 @@ impl ParticleGroupEffect {
   }
 
   /// Import particles group effect data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle group effect section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle group effect section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -142,7 +142,7 @@ impl ParticleGroupEffect {
   }
 
   /// Export list of particles group effect data into provided path.
-  pub fn export_list(effects_old: &[Self], section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export_list(effects_old: &[Self], section_name: &str, ltx: &mut Ltx) -> XRayResult {
     for (index, effect) in effects_old.iter().enumerate() {
       effect.export(&Self::get_effect_section(section_name, index), ltx)?
     }
@@ -151,7 +151,7 @@ impl ParticleGroupEffect {
   }
 
   /// Export particles group effect data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -177,13 +177,13 @@ impl ParticleGroupEffect {
 mod tests {
   use crate::data::particle::particle_group_effect::ParticleGroupEffect;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -192,7 +192,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult {
+  fn test_read_write_list() -> XRayResult {
     let filename: String = String::from("read_write_list.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -258,7 +258,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -304,7 +304,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -331,7 +331,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_list() -> DatabaseResult {
+  fn test_import_export_list() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export_list.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -379,7 +379,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleGroupEffect = ParticleGroupEffect {
       name: String::from("effect_old_name_serialize"),
       on_play_child_name: String::from("effect_old_on_play_child_name_serialize"),

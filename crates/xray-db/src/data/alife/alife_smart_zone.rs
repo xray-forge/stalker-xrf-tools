@@ -1,10 +1,10 @@
 use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 use xray_ltx::Ltx;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -15,14 +15,14 @@ pub struct AlifeSmartZone {
 
 impl AlifeObjectReader for AlifeSmartZone {
   /// Read generic alife smart zone object from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
     })
   }
 
   /// Import generic alife smart zone object from ltx config section.
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectSpaceRestrictor::import(section_name, ltx)?,
     })
@@ -31,14 +31,14 @@ impl AlifeObjectReader for AlifeSmartZone {
 
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeSmartZone {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
     Ok(())
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     self.base.export(section_name, ltx)?;
 
     Ok(())
@@ -54,16 +54,16 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

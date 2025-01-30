@@ -1,13 +1,14 @@
 use crate::project::weathers::verify_weathers_result::GamedataWeathersVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use std::time::Instant;
+use xray_error::XRayResult;
 
 impl GamedataProject {
   pub fn verify_weathers(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataWeathersVerificationResult> {
+  ) -> XRayResult<GamedataWeathersVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata weathers (todo):".green(),);
     }

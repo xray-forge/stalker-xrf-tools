@@ -1,11 +1,12 @@
 use crate::chunk::source::chunk_data_source::ChunkDataSource;
 use crate::types::U32Bytes;
-use crate::{ChunkReader, ChunkResult};
+use crate::ChunkReader;
 use byteorder::{ByteOrder, ReadBytesExt};
+use xray_error::XRayResult;
 
 impl<D: ChunkDataSource> ChunkReader<D> {
   /// Read u32 as 4 separate bytes with preserved order.
-  pub fn read_u32_bytes(&mut self) -> ChunkResult<U32Bytes> {
+  pub fn read_u32_bytes(&mut self) -> XRayResult<U32Bytes> {
     Ok((
       self.read_u8()?,
       self.read_u8()?,
@@ -15,7 +16,7 @@ impl<D: ChunkDataSource> ChunkReader<D> {
   }
 
   /// Read serialized vector from chunk, where u32 count N is followed by N u16 entries.
-  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> ChunkResult<Vec<u16>> {
+  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> XRayResult<Vec<u16>> {
     let count: u32 = self.read_u32::<T>()?;
     let mut vector: Vec<u16> = Vec::with_capacity(count as usize);
 
@@ -27,7 +28,7 @@ impl<D: ChunkDataSource> ChunkReader<D> {
   }
 
   /// Read raw bytes.
-  pub fn read_bytes(&mut self, count: usize) -> ChunkResult<Vec<u8>> {
+  pub fn read_bytes(&mut self, count: usize) -> XRayResult<Vec<u8>> {
     Ok(self.source.read_bytes(count)?)
   }
 }
@@ -36,11 +37,11 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 mod tests {
   use crate::chunk::reader::chunk_reader::ChunkReader;
   use crate::chunk::source::chunk_memory_source::InMemoryChunkDataSource;
-  use crate::types::ChunkResult;
   use crate::XRayByteOrder;
+  use xray_error::XRayResult;
 
   #[test]
-  fn test_read_u32_bytes() -> ChunkResult {
+  fn test_read_u32_bytes() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 1, 2, 3])?;
 
     assert_eq!(chunk.read_bytes_remain(), 4, "Expect 4 bytes remaining");
@@ -57,7 +58,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_u16_vector() -> ChunkResult {
+  fn test_read_u16_vector() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_bytes(&[4, 0, 0, 0, 0, 0, 1, 0, 2, 0, 3, 0])?;
 
@@ -75,7 +76,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_bytes() -> ChunkResult {
+  fn test_read_bytes() -> XRayResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_bytes(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])?;
 

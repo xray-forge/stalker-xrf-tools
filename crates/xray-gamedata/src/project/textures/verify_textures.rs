@@ -1,6 +1,6 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
-use crate::{GamedataError, GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
@@ -8,12 +8,13 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
+use xray_error::{XRayError, XRayResult};
 
 impl GamedataProject {
   pub fn verify_textures(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataTexturesVerificationResult> {
+  ) -> XRayResult<GamedataTexturesVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata textures:".green());
     }
@@ -88,11 +89,11 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     path: &Path,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     self.verify_texture(
       options,
       &Dds::read(&mut File::open(path)?).map_err(|error| {
-        GamedataError::new_check_error(format!(
+        XRayError::new_verify_error(format!(
           "Failed to read texture by path {}, error: {}",
           path.display(),
           error
@@ -105,7 +106,7 @@ impl GamedataProject {
     &self,
     _options: &GamedataProjectVerifyOptions,
     dds: &Dds,
-  ) -> GamedataResult<bool> {
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     if let Some(header10) = &dds.header10 {

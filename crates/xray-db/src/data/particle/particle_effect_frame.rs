@@ -1,10 +1,9 @@
 use crate::constants::META_TYPE_FIELD;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -21,7 +20,7 @@ impl ParticleEffectFrame {
   pub const META_TYPE: &'static str = "particle_effect_frame";
 
   /// Read frame data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_frame: Self = Self {
       texture_size: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
       reserved: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
@@ -36,7 +35,7 @@ impl ParticleEffectFrame {
   }
 
   /// Write frame data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<T>(self.texture_size.0)?;
     writer.write_f32::<T>(self.texture_size.1)?;
     writer.write_f32::<T>(self.reserved.0)?;
@@ -49,7 +48,7 @@ impl ParticleEffectFrame {
   }
 
   /// Import optional particle effect frame data from provided path.
-  pub fn import_optional(section_name: &str, ltx: &Ltx) -> DatabaseResult<Option<Self>> {
+  pub fn import_optional(section_name: &str, ltx: &Ltx) -> XRayResult<Option<Self>> {
     if ltx.has_section(section_name) {
       Self::import(section_name, ltx).map(Some)
     } else {
@@ -58,10 +57,11 @@ impl ParticleEffectFrame {
   }
 
   /// Import particle effect frame data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle group '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle group '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -89,13 +89,13 @@ impl ParticleEffectFrame {
         texture_size[0]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseError::new_parse_error(
+          .or(Err(XRayError::new_parsing_error(
             "Failed to parse texture_size W value",
           )))?,
         texture_size[1]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseError::new_parse_error(
+          .or(Err(XRayError::new_parsing_error(
             "Failed to parse texture_size H value",
           )))?,
       ),
@@ -103,13 +103,13 @@ impl ParticleEffectFrame {
         reserved[0]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseError::new_parse_error(
+          .or(Err(XRayError::new_parsing_error(
             "Failed to parse reserved X value",
           )))?,
         reserved[1]
           .trim()
           .parse::<f32>()
-          .or(Err(DatabaseError::new_parse_error(
+          .or(Err(XRayError::new_parsing_error(
             "Failed to parse reserved Y value",
           )))?,
       ),
@@ -120,7 +120,7 @@ impl ParticleEffectFrame {
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export_optional(data: Option<&Self>, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export_optional(data: Option<&Self>, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     if let Some(data) = data {
       data.export(section_name, ltx)
     } else {
@@ -129,7 +129,7 @@ impl ParticleEffectFrame {
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -153,13 +153,13 @@ impl ParticleEffectFrame {
 mod tests {
   use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -168,7 +168,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -211,7 +211,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -236,7 +236,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleEffectFrame = ParticleEffectFrame {
       texture_size: (74.0, 236.5),
       reserved: (263.5, 5369.5),

@@ -1,10 +1,7 @@
 use crate::types::{
   TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant,
 };
-use crate::{
-  ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject,
-  TranslationResult,
-};
+use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
 use quick_xml::se::Serializer;
 use serde::Serialize;
 use std::ffi::OsStr;
@@ -13,13 +10,11 @@ use std::io::{copy, Write};
 use std::path::Path;
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
+use xray_error::XRayResult;
 use xray_utils::encode_string_to_bytes;
 
 impl TranslationProject {
-  pub fn build_dir(
-    dir: &Path,
-    options: &ProjectBuildOptions,
-  ) -> TranslationResult<ProjectBuildResult> {
+  pub fn build_dir(dir: &Path, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
     log::info!("Building dir {}", dir.display());
 
     if options.is_logging_enabled() {
@@ -54,10 +49,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn build_file(
-    path: &Path,
-    options: &ProjectBuildOptions,
-  ) -> TranslationResult<ProjectBuildResult> {
+  pub fn build_file(path: &Path, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
     let extension: Option<&OsStr> = path.extension();
     let started_at: Instant = Instant::now();
 
@@ -88,7 +80,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn build_xml_file(path: &Path, options: &ProjectBuildOptions) -> TranslationResult {
+  pub fn build_xml_file(path: &Path, options: &ProjectBuildOptions) -> XRayResult {
     let locale = Self::get_locale_from_path(path);
 
     if let Some(locale) = locale {
@@ -143,7 +135,7 @@ impl TranslationProject {
     Ok(())
   }
 
-  pub fn build_json_file(path: &Path, options: &ProjectBuildOptions) -> TranslationResult {
+  pub fn build_json_file(path: &Path, options: &ProjectBuildOptions) -> XRayResult {
     log::info!("Building dynamic JSON file {}", path.display());
 
     if options.is_logging_enabled() {

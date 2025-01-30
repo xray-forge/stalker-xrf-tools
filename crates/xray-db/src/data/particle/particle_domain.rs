@@ -1,11 +1,10 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::error::DatabaseError;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -21,7 +20,7 @@ pub struct ParticleDomain {
 
 impl ParticleDomain {
   /// Read particle domain from chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       domain_type: reader.read_u32::<T>()?,
       coordinates: (Vector3d::read::<T>(reader)?, Vector3d::read::<T>(reader)?),
@@ -33,7 +32,7 @@ impl ParticleDomain {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<XRayByteOrder>(self.domain_type)?;
 
     self.coordinates.0.write::<T>(writer)?;
@@ -77,13 +76,13 @@ impl Display for ParticleDomain {
 }
 
 impl FromStr for ParticleDomain {
-  type Err = DatabaseError;
+  type Err = XRayError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = s.split(',').collect();
 
     if parts.len() != 17 {
-      return Err(DatabaseError::new_parse_error(
+      return Err(XRayError::new_parsing_error(
         "Failed to parse particle domain from string, expected 17 numbers",
       ));
     }
@@ -92,7 +91,7 @@ impl FromStr for ParticleDomain {
       domain_type: parts[0]
         .trim()
         .parse::<u32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector domain_type value",
         )))?,
       coordinates: (
@@ -100,19 +99,19 @@ impl FromStr for ParticleDomain {
           x: parts[1]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 0 vector x value",
             )))?,
           y: parts[2]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 0 vector y value",
             )))?,
           z: parts[3]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 0 vector z value",
             )))?,
         },
@@ -120,19 +119,19 @@ impl FromStr for ParticleDomain {
           x: parts[4]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 1 vector x value",
             )))?,
           y: parts[5]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 1 vector y value",
             )))?,
           z: parts[6]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 1 vector z value",
             )))?,
         },
@@ -142,19 +141,19 @@ impl FromStr for ParticleDomain {
           x: parts[7]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 0 vector x value",
             )))?,
           y: parts[8]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 0 vector y value",
             )))?,
           z: parts[9]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 0 vector z value",
             )))?,
         },
@@ -162,19 +161,19 @@ impl FromStr for ParticleDomain {
           x: parts[10]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 1 vector x value",
             )))?,
           y: parts[11]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 1 vector y value",
             )))?,
           z: parts[12]
             .trim()
             .parse::<f32>()
-            .or(Err(DatabaseError::new_parse_error(
+            .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 1 vector z value",
             )))?,
         },
@@ -182,25 +181,25 @@ impl FromStr for ParticleDomain {
       radius1: parts[13]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius1 value",
         )))?,
       radius2: parts[14]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius2 value",
         )))?,
       radius1_sqr: parts[15]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius1_sqr value",
         )))?,
       radius2_sqr: parts[16]
         .trim()
         .parse::<f32>()
-        .or(Err(DatabaseError::new_parse_error(
+        .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius2_sqr value",
         )))?,
     })
@@ -211,13 +210,13 @@ impl FromStr for ParticleDomain {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particle::particle_domain::ParticleDomain;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
@@ -225,7 +224,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -293,7 +292,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> DatabaseResult {
+  fn test_from_to_str() -> XRayResult {
     let original: ParticleDomain = ParticleDomain {
       domain_type: 23,
       coordinates: (
@@ -333,7 +332,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleDomain = ParticleDomain {
       domain_type: 52,
       coordinates: (

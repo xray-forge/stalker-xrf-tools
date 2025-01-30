@@ -3,7 +3,6 @@ use crate::particles_file::chunks::particles_effects_chunk::ParticlesEffectsChun
 use crate::particles_file::chunks::particles_firstgen_chunk::ParticlesFirstgenChunk;
 use crate::particles_file::chunks::particles_groups_chunk::ParticlesGroupsChunk;
 use crate::particles_file::chunks::particles_header_chunk::ParticlesHeaderChunk;
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
@@ -12,6 +11,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use xray_chunk::{find_optional_chunk_by_id, ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -23,12 +23,12 @@ pub struct ParticlesFile {
 
 impl ParticlesFile {
   /// Read particles xr file from provided path.
-  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> DatabaseResult<Self> {
+  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read particles xr from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> DatabaseResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
     let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 
@@ -42,7 +42,7 @@ impl ParticlesFile {
   }
 
   /// Read particles from chunks.
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> DatabaseResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
     assert!(
       !chunks
         .iter()
@@ -68,13 +68,13 @@ impl ParticlesFile {
   }
 
   /// Write particles file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
+  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> XRayResult {
     fs::create_dir_all(path.parent().expect("Parent directory"))?;
     self.write_to::<T>(&mut create_export_file(path)?)
   }
 
   /// Write particles file data to the writer.
-  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
     log::info!(
       "Writing particles file: version {}, {} effects, {} groups",
       self.header.version,
@@ -98,7 +98,7 @@ impl ParticlesFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path(path: &Path) -> DatabaseResult<Self> {
+  pub fn import_from_path(path: &Path) -> XRayResult<Self> {
     log::info!("Importing particles file: {}", path.display());
 
     Ok(Self {
@@ -109,7 +109,7 @@ impl ParticlesFile {
   }
 
   /// Export unpacked ALife spawn file into provided path.
-  pub fn export_to_path(&self, path: &Path) -> DatabaseResult {
+  pub fn export_to_path(&self, path: &Path) -> XRayResult {
     fs::create_dir_all(path)?;
 
     self.header.export(path)?;

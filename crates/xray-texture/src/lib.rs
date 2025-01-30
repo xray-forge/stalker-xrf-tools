@@ -1,8 +1,6 @@
 pub(crate) mod data;
 pub(crate) mod description;
 pub(crate) mod equipment;
-pub(crate) mod error;
-pub(crate) mod types;
 pub(crate) mod utils;
 
 pub use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
@@ -12,8 +10,6 @@ pub use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 pub use crate::description::pack_description_options::PackDescriptionOptions;
 pub use crate::description::pack_description_processor::PackDescriptionProcessor;
 pub use crate::description::unpack_description_processor::UnpackDescriptionProcessor;
-
-pub use crate::error::*;
 
 pub use crate::equipment::equipment_constants::INVENTORY_ICON_GRID_SQUARE_BASE;
 pub use crate::equipment::pack_equipment_options::PackEquipmentOptions;
@@ -32,5 +28,3 @@ pub use image::RgbaImage;
 pub use image_dds::image::GenericImage;
 pub use image_dds::image::GenericImageView;
 pub use image_dds::ImageFormat;
-
-pub use types::TextureResult;

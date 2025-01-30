@@ -1,8 +1,9 @@
 use crate::project::ltx::verify_ltx_result::{
   GamedataLtxFormatVerificationResult, GamedataLtxVerificationResult,
 };
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
+use xray_error::XRayResult;
 use xray_ltx::{
   LtxFormatOptions, LtxProjectFormatResult, LtxProjectVerifyResult, LtxVerifyOptions,
 };
@@ -15,7 +16,7 @@ impl GamedataProject {
   pub fn verify_ltx_format(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataLtxFormatVerificationResult> {
+  ) -> XRayResult<GamedataLtxFormatVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX files formatting".green());
     }
@@ -34,7 +35,7 @@ impl GamedataProject {
   pub fn verify_ltx_schemes(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> GamedataResult<GamedataLtxVerificationResult> {
+  ) -> XRayResult<GamedataLtxVerificationResult> {
     if options.is_logging_enabled() {
       println!("{}", "Verify gamedata LTX schemas".green());
     };

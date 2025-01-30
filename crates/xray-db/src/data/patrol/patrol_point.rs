@@ -1,11 +1,10 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
@@ -21,7 +20,7 @@ pub struct PatrolPoint {
 
 impl PatrolPoint {
   /// Read points from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut points: Vec<Self> = Vec::new();
 
     for (index, mut point_reader) in ChunkIterator::new(reader).enumerate() {
@@ -45,7 +44,7 @@ impl PatrolPoint {
   }
 
   /// Read patrol point data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let point: Self = Self {
       name: reader.read_null_terminated_win_string()?,
       position: Vector3d::read::<T>(reader)?,
@@ -63,7 +62,7 @@ impl PatrolPoint {
   }
 
   /// Write list of patrol points into chunk writer.
-  pub fn write_list<T: ByteOrder>(points: &[Self], writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(points: &[Self], writer: &mut ChunkWriter) -> XRayResult {
     for (index, point) in points.iter().enumerate() {
       let mut point_chunk_writer: ChunkWriter = ChunkWriter::new();
 
@@ -83,7 +82,7 @@ impl PatrolPoint {
   }
 
   /// Write patrol point data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
 
     self.position.write::<T>(writer)?;
@@ -96,9 +95,9 @@ impl PatrolPoint {
   }
 
   /// Import patrol point data from ltx config.
-  pub fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
+      XRayError::new_parsing_error(format!(
         "Patrol point section '{section_name}' should be defined in ltx file ({})",
         file!()
       ))
@@ -114,7 +113,7 @@ impl PatrolPoint {
   }
 
   /// Export patrol point data into ltx.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("name", &self.name)
@@ -132,13 +131,13 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -147,7 +146,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -183,7 +182,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult {
+  fn test_read_write_list() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -228,7 +227,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -252,7 +251,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-serialized"),
       position: Vector3d::new(5.5, -2.3, 6.0),

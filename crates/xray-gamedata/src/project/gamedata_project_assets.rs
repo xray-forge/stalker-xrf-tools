@@ -1,10 +1,10 @@
 use crate::asset::asset_descriptor::AssetDescriptor;
 use crate::asset::asset_type::AssetType;
-use crate::error::GamedataError;
-use crate::{GamedataProject, GamedataProjectReadOptions, GamedataResult};
+use crate::{GamedataProject, GamedataProjectReadOptions};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
+use xray_error::{XRayError, XRayResult};
 use xray_utils::path_vec_to_string;
 
 impl GamedataProject {
@@ -12,7 +12,7 @@ impl GamedataProject {
     options: &GamedataProjectReadOptions,
     roots: &[&Path],
     ignored: &[&str],
-  ) -> GamedataResult<HashMap<String, AssetDescriptor>> {
+  ) -> XRayResult<HashMap<String, AssetDescriptor>> {
     if options.is_logging_enabled() {
       println!(
         "Reading project assets map in roots: {}",
@@ -24,8 +24,7 @@ impl GamedataProject {
 
     for (index, root) in roots.iter().enumerate() {
       for entry in WalkDir::new(root) {
-        let entry: DirEntry =
-          entry.map_err(|error| GamedataError::Io(error.into_io_error().unwrap()))?;
+        let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
         let entry_path: &Path = entry.path();
 
         // Dirs are skipped.
@@ -33,7 +32,13 @@ impl GamedataProject {
           continue;
         }
 
-        if let Some(relative) = entry_path.strip_prefix(root)?.to_str() {
+        if let Some(relative) = entry_path
+          .strip_prefix(root)
+          .map_err(|_| {
+            XRayError::new_unexpected_error("Failed to strip prefix from gamedata root path")
+          })?
+          .to_str()
+        {
           if ignored.iter().any(|it| relative.starts_with(it)) {
             continue;
           }

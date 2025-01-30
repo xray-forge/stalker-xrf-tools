@@ -1,10 +1,10 @@
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use uuid::Uuid;
 use xray_chunk::{ChunkReader, ChunkSizePackedIterator, ChunkWriter};
+use xray_error::XRayResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +20,7 @@ pub struct GraphCrossTable {
 
 impl GraphCrossTable {
   /// Read cross tables list data from the chunk.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut cross_tables: Vec<Self> = Vec::new();
 
     for mut cross_table_chunk in ChunkSizePackedIterator::new(reader) {
@@ -36,10 +36,7 @@ impl GraphCrossTable {
   }
 
   /// Write cross tables list data into the writer.
-  pub fn write_list<T: ByteOrder>(
-    cross_tables: &[Self],
-    writer: &mut ChunkWriter,
-  ) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(cross_tables: &[Self], writer: &mut ChunkWriter) -> XRayResult {
     for table in cross_tables {
       let mut table_writer: ChunkWriter = ChunkWriter::new();
 
@@ -53,7 +50,7 @@ impl GraphCrossTable {
   }
 
   /// Read cross table data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       version: reader.read_u32::<T>()?,
       nodes_count: reader.read_u32::<T>()?,
@@ -65,7 +62,7 @@ impl GraphCrossTable {
   }
 
   /// Write cross table data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(self.version)?;
     writer.write_u32::<T>(self.nodes_count)?;
     writer.write_u32::<T>(self.vertices_count)?;
@@ -77,7 +74,7 @@ impl GraphCrossTable {
   }
 
   /// Export cross-tables as separate gct chunk file.
-  pub fn import_list<T: ByteOrder>(file: &mut File) -> DatabaseResult<Vec<Self>> {
+  pub fn import_list<T: ByteOrder>(file: &mut File) -> XRayResult<Vec<Self>> {
     let mut cross_tables: Vec<Self> = Vec::new();
 
     for mut cross_table_reader in
@@ -95,7 +92,7 @@ impl GraphCrossTable {
   }
 
   /// Export cross-tables as separate gct chunk file.
-  pub fn export_list<T: ByteOrder>(cross_tables: &[Self], file: &mut File) -> DatabaseResult {
+  pub fn export_list<T: ByteOrder>(cross_tables: &[Self], file: &mut File) -> XRayResult {
     let mut cross_tables_writer: ChunkWriter = ChunkWriter::new();
 
     for cross_table in cross_tables {
@@ -116,7 +113,6 @@ impl GraphCrossTable {
 #[cfg(test)]
 mod tests {
   use crate::data::graph::graph_cross_table::GraphCrossTable;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -124,6 +120,7 @@ mod tests {
   use std::path::Path;
   use uuid::uuid;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
@@ -132,7 +129,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult {
+  fn test_read_write_list() -> XRayResult {
     let filename: String = String::from("read_write_list.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -195,7 +192,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -240,7 +237,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.gct");
     let mut file: File =
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
@@ -285,7 +282,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: GraphCrossTable = GraphCrossTable {
       version: 24,
       nodes_count: 436,

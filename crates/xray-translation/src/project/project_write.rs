@@ -4,9 +4,10 @@ use std::fs::File;
 use std::io::ErrorKind::AlreadyExists;
 
 use crate::types::{TranslationJson, TranslationVariant};
-use crate::{ProjectBuildOptions, TranslationError, TranslationLanguage, TranslationResult};
+use crate::{ProjectBuildOptions, TranslationLanguage};
 use serde_json::{Map, Value};
 use std::path::{Path, PathBuf};
+use xray_error::XRayResult;
 
 impl TranslationProject {
   pub fn prepare_target_xml_translation_file(
@@ -14,7 +15,7 @@ impl TranslationProject {
     destination: &Path,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
-  ) -> TranslationResult<File> {
+  ) -> XRayResult<File> {
     let target: PathBuf = destination
       .join(language.to_string())
       .join(path.file_name().unwrap())
@@ -41,7 +42,7 @@ impl TranslationProject {
     )
   }
 
-  pub fn prepare_target_json_translation_file(path: &Path) -> Result<File, TranslationError> {
+  pub fn prepare_target_json_translation_file(path: &Path) -> XRayResult<File> {
     Ok(
       File::options()
         .read(false)

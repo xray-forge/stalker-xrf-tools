@@ -11,8 +11,8 @@ path = "src/lib.rs"
 fxhash = "0.2.1"
 indexmap = "2.2.5"
 serde = { version = "1.0.197", features = ["derive"] }
-thiserror = "2.0.10"
 walkdir = "2.5.0"
+xray-error = { path = "../xray-error" }
 xray-utils = { path = "../xray-utils" }
 
 [dev-dependencies]

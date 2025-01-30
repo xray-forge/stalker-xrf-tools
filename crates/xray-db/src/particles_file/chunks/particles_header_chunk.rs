@@ -1,12 +1,11 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::export::file::{create_export_file, open_ltx_config};
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
-use crate::DatabaseError;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -21,7 +20,7 @@ impl ParticlesHeaderChunk {
 
   /// Read version chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let header_chunk: Self = Self {
       version: reader.read_u16::<T>()?,
     };
@@ -29,7 +28,7 @@ impl ParticlesHeaderChunk {
     log::info!("Read header chunk, {} bytes", reader.read_bytes_len());
 
     if header_chunk.version != 1 {
-      return Err(DatabaseError::new_not_implemented_error(
+      return Err(XRayError::new_not_implemented_error(
         "Unknown version in particles header chunk, expected v1 only",
       ));
     }
@@ -40,7 +39,7 @@ impl ParticlesHeaderChunk {
   }
 
   /// Write particle header into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u16::<T>(self.version)?;
 
     log::info!("Written header chunk, {} bytes", writer.bytes_written());
@@ -50,7 +49,7 @@ impl ParticlesHeaderChunk {
 
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
-  pub fn import(path: &Path) -> DatabaseResult<Self> {
+  pub fn import(path: &Path) -> XRayResult<Self> {
     log::info!("Importing particles header: {}", path.display());
 
     let ltx: Ltx = open_ltx_config(&path.join("header.ltx"))?;
@@ -75,7 +74,7 @@ impl ParticlesHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  pub fn export(&self, path: &Path) -> DatabaseResult {
+  pub fn export(&self, path: &Path) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -94,13 +93,13 @@ impl ParticlesHeaderChunk {
 #[cfg(test)]
 mod tests {
   use crate::particles_file::chunks::particles_header_chunk::ParticlesHeaderChunk;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_directory,
@@ -109,7 +108,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_incorrect() -> DatabaseResult {
+  fn test_read_write_incorrect() -> XRayResult {
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
 
@@ -137,17 +136,17 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader).map_err(|error| error.to_string()),
-      Err(String::from(
-        "Database not implemented error: Unknown version in particles header chunk, expected v1 only",
-      ))
+      ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader)
+        .unwrap_err()
+        .to_string(),
+      "Not implemented error: Unknown version in particles header chunk, expected v1 only",
     );
 
     Ok(())
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
@@ -182,7 +181,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let export_folder: &Path =
@@ -198,7 +197,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> DatabaseResult {
+  fn test_serialize_deserialize() -> XRayResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let mut file: File = overwrite_test_relative_resource_as_file(

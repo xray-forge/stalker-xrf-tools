@@ -1,19 +1,14 @@
 use crate::project::project_verify_result::ProjectVerifyResult;
 use crate::types::TranslationJson;
-use crate::{
-  ProjectVerifyOptions, TranslationError, TranslationLanguage, TranslationProject,
-  TranslationResult,
-};
+use crate::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
+use xray_error::XRayResult;
 
 impl TranslationProject {
-  pub fn verify_dir(
-    dir: &Path,
-    options: &ProjectVerifyOptions,
-  ) -> TranslationResult<ProjectVerifyResult> {
+  pub fn verify_dir(dir: &Path, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {
     log::info!("Verifying dir {}", dir.display());
 
     if options.is_logging_enabled() {
@@ -27,7 +22,7 @@ impl TranslationProject {
     for entry in WalkDir::new(dir) {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
-        Err(error) => return Err(TranslationError::Io(error.into_io_error().unwrap())),
+        Err(error) => return Err(error.into_io_error().unwrap().into()),
       };
 
       let entry_path: &Path = entry.path();
@@ -54,7 +49,7 @@ impl TranslationProject {
   pub fn verify_file(
     path: &Path,
     options: &ProjectVerifyOptions,
-  ) -> TranslationResult<ProjectVerifyResult> {
+  ) -> XRayResult<ProjectVerifyResult> {
     let extension: Option<&OsStr> = path.extension();
 
     if let Some(extension) = extension {
@@ -75,7 +70,7 @@ impl TranslationProject {
   pub fn verify_json_file(
     path: &Path,
     options: &ProjectVerifyOptions,
-  ) -> TranslationResult<ProjectVerifyResult> {
+  ) -> XRayResult<ProjectVerifyResult> {
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
 
     log::info!("Verifying dynamic JSON file {}", path.display());

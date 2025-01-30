@@ -1,12 +1,12 @@
 use crate::data::patrol::patrol::Patrol;
 use crate::export::file::{create_export_file, open_ltx_config};
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 use xray_ltx::Ltx;
 
 /// `CPatrolPathStorage::load` in xray engine.
@@ -22,7 +22,7 @@ impl SpawnPatrolsChunk {
   pub const DATA_NESTED_CHUNK_ID: u32 = 1;
 
   /// Read patrols list from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading patrols chunk, bytes {}",
       reader.read_bytes_remain()
@@ -49,7 +49,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Write patrols data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -73,7 +73,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(path: &Path) -> DatabaseResult<Self> {
+  pub fn import(path: &Path) -> XRayResult<Self> {
     let patrols_ltx: Ltx = open_ltx_config(&path.join("patrols.ltx"))?;
     let patrol_points_ltx: Ltx = open_ltx_config(&path.join("patrol_points.ltx"))?;
     let patrol_links_ltx: Ltx = open_ltx_config(&path.join("patrol_links.ltx"))?;
@@ -95,7 +95,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  pub fn export(&self, path: &Path) -> DatabaseResult {
+  pub fn export(&self, path: &Path) -> XRayResult {
     let mut patrols_ltx: Ltx = Ltx::new();
     let mut patrol_points_ltx: Ltx = Ltx::new();
     let mut patrol_links_ltx: Ltx = Ltx::new();
@@ -136,16 +136,16 @@ mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
   use crate::spawn_file::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnPatrolsChunk = SpawnPatrolsChunk {

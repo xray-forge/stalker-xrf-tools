@@ -1,11 +1,10 @@
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -17,7 +16,7 @@ pub struct ParticleActionMatchVelocity {
 }
 
 impl ParticleActionReader for ParticleActionMatchVelocity {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<ParticleActionMatchVelocity> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionMatchVelocity> {
     Ok(ParticleActionMatchVelocity {
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
@@ -25,10 +24,11 @@ impl ParticleActionReader for ParticleActionMatchVelocity {
     })
   }
 
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "Particle action section '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "Particle action section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -43,7 +43,7 @@ impl ParticleActionReader for ParticleActionMatchVelocity {
 
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionMatchVelocity {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
     writer.write_f32::<XRayByteOrder>(self.epsilon)?;
     writer.write_f32::<XRayByteOrder>(self.max_radius)?;
@@ -51,7 +51,7 @@ impl ParticleActionWriter for ParticleActionMatchVelocity {
     Ok(())
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("magnitude", self.magnitude.to_string())

@@ -5,12 +5,12 @@ use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
 use crate::export::file::{create_export_file, open_binary_file, open_ltx_config};
-use crate::types::DatabaseResult;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 use xray_ltx::Ltx;
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
@@ -29,7 +29,7 @@ impl SpawnGraphsChunk {
   pub const CHUNK_ID: u32 = 4;
 
   /// Read graphs chunk by position descriptor.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!("Reading graphs chunk, bytes {}", reader.read_bytes_remain());
 
     let mut levels: Vec<GraphLevel> = Vec::new();
@@ -86,7 +86,7 @@ impl SpawnGraphsChunk {
   }
 
   /// Write whole graphs chunk into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.header.write::<T>(writer)?;
 
     for level in &self.levels {
@@ -113,7 +113,7 @@ impl SpawnGraphsChunk {
   }
 
   /// Import graphs data from provided path.
-  pub fn import<T: ByteOrder>(path: &Path) -> DatabaseResult<Self> {
+  pub fn import<T: ByteOrder>(path: &Path) -> XRayResult<Self> {
     let header: GraphHeader =
       GraphHeader::import("header", &open_ltx_config(&path.join("graphs_header.ltx"))?)?;
 
@@ -163,7 +163,7 @@ impl SpawnGraphsChunk {
 
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
-  pub fn export<T: ByteOrder>(&self, path: &Path) -> DatabaseResult {
+  pub fn export<T: ByteOrder>(&self, path: &Path) -> XRayResult {
     let mut graphs_header_ltx: Ltx = Ltx::new();
 
     self.header.export(&mut graphs_header_ltx);
@@ -245,17 +245,17 @@ mod tests {
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use uuid::uuid;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
 
   #[test]
-  fn test_read_write_empty() -> DatabaseResult {
+  fn test_read_write_empty() -> XRayResult {
     let filename: String = String::from("read_write_empty.chunk");
 
     let original: SpawnGraphsChunk = SpawnGraphsChunk {
@@ -308,7 +308,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let filename: String = String::from("read_write.chunk");
 
     let original: SpawnGraphsChunk = SpawnGraphsChunk {

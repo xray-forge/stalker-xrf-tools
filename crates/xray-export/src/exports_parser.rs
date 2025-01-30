@@ -12,7 +12,6 @@ use crate::extern_descriptor::ExportDescriptor;
 use walkdir::WalkDir;
 extern crate swc_common;
 extern crate swc_ecma_parser;
-use crate::{ExportError, ExportResult};
 use swc_common::comments::{Comments, SingleThreadedComments};
 use swc_common::errors::DiagnosticBuilder;
 use swc_common::sync::Lrc;
@@ -22,6 +21,7 @@ use swc_common::{
 };
 use swc_ecma_ast::{Expr, ModuleItem, Program, Stmt};
 use swc_ecma_parser::{lexer::Lexer, Parser, StringInput, Syntax};
+use xray_error::{XRayError, XRayResult};
 
 #[derive(Default)]
 pub struct ExportsParser {}
@@ -51,27 +51,27 @@ impl ExportsParser {
 }
 
 impl ExportsParser {
-  pub fn parse_conditions(&self, files: &[PathBuf]) -> ExportResult<Vec<ExportDescriptor>> {
+  pub fn parse_conditions(&self, files: &[PathBuf]) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_exports(files, Self::is_xr_conditions_literal)
   }
 
-  pub fn parse_conditions_from_path(&self, path: &Path) -> ExportResult<Vec<ExportDescriptor>> {
+  pub fn parse_conditions_from_path(&self, path: &Path) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_conditions(&Self::read_exporting_sources_from_path(path)?)
   }
 
-  pub fn parse_dialogs(&self, files: &[PathBuf]) -> ExportResult<Vec<ExportDescriptor>> {
+  pub fn parse_dialogs(&self, files: &[PathBuf]) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_exports(files, |value| Some(value.into()))
   }
 
-  pub fn parse_dialogs_from_path(&self, path: &Path) -> ExportResult<Vec<ExportDescriptor>> {
+  pub fn parse_dialogs_from_path(&self, path: &Path) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_dialogs(&Self::read_exporting_sources_from_path(path)?)
   }
 
-  pub fn parse_effects(&self, files: &[PathBuf]) -> ExportResult<Vec<ExportDescriptor>> {
+  pub fn parse_effects(&self, files: &[PathBuf]) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_exports(files, Self::is_xr_effect_literal)
   }
 
-  pub fn parse_effects_from_path(&self, path: &Path) -> ExportResult<Vec<ExportDescriptor>> {
+  pub fn parse_effects_from_path(&self, path: &Path) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_effects(&Self::read_exporting_sources_from_path(path)?)
   }
 
@@ -79,7 +79,7 @@ impl ExportsParser {
     &self,
     files: &[PathBuf],
     filter: fn(&str) -> Option<String>,
-  ) -> ExportResult<Vec<ExportDescriptor>> {
+  ) -> XRayResult<Vec<ExportDescriptor>> {
     let mut expressions: Vec<ExportDescriptor> = Vec::new();
 
     for path in files {
@@ -156,7 +156,7 @@ impl ExportsParser {
 }
 
 impl ExportsParser {
-  pub fn read_exporting_sources_from_path(path: &Path) -> ExportResult<Vec<PathBuf>> {
+  pub fn read_exporting_sources_from_path(path: &Path) -> XRayResult<Vec<PathBuf>> {
     let mut files: Vec<PathBuf> = Vec::new();
 
     for entry in WalkDir::new(path)
@@ -179,7 +179,7 @@ impl ExportsParser {
   fn open_ts_source_file(
     &self,
     path: &Path,
-  ) -> ExportResult<(Program, Lrc<SourceMap>, Box<dyn Comments>)> {
+  ) -> XRayResult<(Program, Lrc<SourceMap>, Box<dyn Comments>)> {
     let source_map: Lrc<SourceMap> = Default::default();
     let handler: Handler =
       Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(source_map.clone()));
@@ -207,7 +207,7 @@ impl ExportsParser {
     }
 
     if !diagnostics.is_empty() {
-      return Err(ExportError::new_parse_error(format!(
+      return Err(XRayError::new_parsing_error(format!(
         "Failed to parse target files: {}",
         diagnostics
           .iter()

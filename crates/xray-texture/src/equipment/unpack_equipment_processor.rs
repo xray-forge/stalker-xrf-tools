@@ -1,11 +1,12 @@
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
-use crate::{save_image_as_ui_dds, TextureResult, UnpackEquipmentOptions};
+use crate::{save_image_as_ui_dds, UnpackEquipmentOptions};
 use image::GenericImageView;
+use xray_error::XRayResult;
 
 pub struct UnpackEquipmentProcessor {}
 
 impl UnpackEquipmentProcessor {
-  pub fn unpack_sprites(options: UnpackEquipmentOptions) -> TextureResult {
+  pub fn unpack_sprites(options: UnpackEquipmentOptions) -> XRayResult {
     let mut count: u32 = 0;
 
     for (section_name, section) in &options.ltx.sections {
@@ -26,7 +27,7 @@ impl UnpackEquipmentProcessor {
   pub fn unpack_sprite(
     options: &UnpackEquipmentOptions,
     sprite: &InventorySpriteDescriptor,
-  ) -> TextureResult<bool> {
+  ) -> XRayResult<bool> {
     let (x, y, w, h) = sprite.get_boundaries();
 
     if options.is_verbose {

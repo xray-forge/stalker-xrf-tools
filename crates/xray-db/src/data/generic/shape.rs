@@ -1,11 +1,10 @@
 use crate::data::generic::vector_3d::Vector3d;
 use crate::export::file_import::read_ltx_field;
-use crate::types::{DatabaseResult, Matrix3d, Sphere3d};
-use crate::DatabaseError;
+use crate::types::{Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
-use xray_chunk::ChunkError;
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 /// Shape enumeration stored in objects descriptors.
@@ -17,7 +16,7 @@ pub enum Shape {
 
 impl Shape {
   /// Read list of shapes from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
     let count: u8 = reader.read_u8().expect("Count flag to be read");
 
@@ -35,7 +34,7 @@ impl Shape {
   }
 
   /// Read shape from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
     let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
 
     Ok(match shape_type {
@@ -47,7 +46,7 @@ impl Shape {
         Vector3d::read::<T>(reader)?,
       )),
       _ => {
-        return Err(DatabaseError::new_parse_error(
+        return Err(XRayError::new_parsing_error(
           "Unexpected shape type provided",
         ))
       }
@@ -55,7 +54,7 @@ impl Shape {
   }
 
   /// Write list of shapes data into the chunk reader.
-  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut dyn Write) -> DatabaseResult {
+  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut dyn Write) -> XRayResult {
     writer.write_u8(shapes.len() as u8)?;
 
     for shape in shapes {
@@ -66,7 +65,7 @@ impl Shape {
   }
 
   /// Write shape data into the chunk reader.
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
     match self {
       Self::Sphere(data) => {
         writer.write_u8(0)?;
@@ -89,7 +88,7 @@ impl Shape {
   }
 
   /// Import shape objects from ltx config file.
-  pub fn import_list(section: &Section) -> DatabaseResult<Vec<Self>> {
+  pub fn import_list(section: &Section) -> XRayResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
     let count: usize = read_ltx_field("shapes_count", section)?;
 
@@ -114,7 +113,7 @@ impl Shape {
         }
         _ => {
           return Err(
-            ChunkError::new_parsing_chunk_error(format!(
+            XRayError::new_parsing_error(format!(
               "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
             ))
             .into(),
@@ -162,13 +161,13 @@ mod tests {
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -177,7 +176,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write_list() -> DatabaseResult {
+  fn test_read_write_list() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -237,7 +236,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_sphere() -> DatabaseResult {
+  fn test_read_write_sphere() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_sphere.chunk");
 
@@ -273,7 +272,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_box() -> DatabaseResult {
+  fn test_read_write_box() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_box.chunk");
 
@@ -323,7 +322,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "test_import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
@@ -372,7 +371,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_sphere() -> DatabaseResult {
+  fn test_serialize_deserialize_sphere() -> XRayResult {
     let original: Shape = Shape::Sphere((
       Vector3d {
         x: 243.5,
@@ -401,7 +400,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_box() -> DatabaseResult {
+  fn test_serialize_deserialize_box() -> XRayResult {
     let original: Shape = Shape::Box((
       Vector3d {
         x: 175.5,

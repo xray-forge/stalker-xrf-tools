@@ -1,19 +1,17 @@
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::utils::images::dds_to_image;
-use crate::{
-  read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, PackEquipmentResult, TextureError,
-  TextureResult,
-};
+use crate::{read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, PackEquipmentResult};
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba, RgbaImage};
 use path_absolutize::*;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use xray_error::{XRayError, XRayResult};
 
 pub struct PackEquipmentProcessor {}
 
 impl PackEquipmentProcessor {
-  pub fn pack_sprites(options: PackEquipmentOptions) -> TextureResult<PackEquipmentResult> {
+  pub fn pack_sprites(options: PackEquipmentOptions) -> XRayResult<PackEquipmentResult> {
     let started_at: Instant = Instant::now();
 
     let mut count: u32 = 0;
@@ -81,7 +79,7 @@ impl PackEquipmentProcessor {
   pub fn read_sprite(
     options: &PackEquipmentOptions,
     sprite: &InventorySpriteDescriptor,
-  ) -> TextureResult<Option<(PathBuf, DynamicImage)>> {
+  ) -> XRayResult<Option<(PathBuf, DynamicImage)>> {
     let (_, _, w, h) = sprite.get_boundaries();
     let sprite_path: PathBuf = Self::read_sprite_path(options, sprite);
 
@@ -89,7 +87,7 @@ impl PackEquipmentProcessor {
       Ok(icon) => Ok(Some((sprite_path, icon))),
       Err(error) => {
         if options.is_strict {
-          Err(TextureError::new_processing_error(format!(
+          Err(XRayError::new_texture_processing_error(format!(
             "Expected icon to exist for assembling at path {} / {}, error: {}",
             sprite_path.display(),
             sprite.section,
@@ -110,11 +108,7 @@ impl PackEquipmentProcessor {
   }
 
   /// Read rescaled png or dds icon to inject into one large equipment file.
-  pub fn read_sprite_from_path(
-    path: &Path,
-    width: u32,
-    height: u32,
-  ) -> TextureResult<DynamicImage> {
+  pub fn read_sprite_from_path(path: &Path, width: u32, height: u32) -> XRayResult<DynamicImage> {
     let image: DynamicImage = if path
       .extension()
       .is_some_and(|extension| extension.eq("png"))

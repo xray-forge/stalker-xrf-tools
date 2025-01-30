@@ -2,12 +2,11 @@ use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::generic::shape::Shape;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::error::DatabaseError;
 use crate::export::file_import::read_ltx_field;
-use crate::types::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -20,7 +19,7 @@ pub struct AlifeObjectSpaceRestrictor {
 
 impl AlifeObjectReader for AlifeObjectSpaceRestrictor {
   /// Read generic space restrictor data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectAbstract::read::<T>(reader)?,
       shape: Shape::read_list::<T>(reader)?,
@@ -29,10 +28,11 @@ impl AlifeObjectReader for AlifeObjectSpaceRestrictor {
   }
 
   /// Import generic space restrictor data from the chunk.
-  fn import(section_name: &str, ltx: &Ltx) -> DatabaseResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      DatabaseError::new_parse_error(format!(
-        "ALife object '{section_name}' should be defined in ltx file ({})",
+      XRayError::new_parsing_error(format!(
+        "ALife object '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -47,7 +47,7 @@ impl AlifeObjectReader for AlifeObjectSpaceRestrictor {
 
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
-  fn write(&self, writer: &mut ChunkWriter) -> DatabaseResult {
+  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
     Shape::write_list::<XRayByteOrder>(&self.shape, writer)?;
@@ -58,7 +58,7 @@ impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> DatabaseResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     self.base.export(section_name, ltx)?;
 
     ltx
@@ -80,11 +80,11 @@ mod tests {
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
   use crate::export::file::open_ltx_config;
-  use crate::types::DatabaseResult;
   use fileslice::FileSlice;
   use std::fs::File;
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
@@ -92,7 +92,7 @@ mod tests {
   };
 
   #[test]
-  fn test_read_write() -> DatabaseResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -145,7 +145,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> DatabaseResult {
+  fn test_import_export() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();

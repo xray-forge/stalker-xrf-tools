@@ -12,7 +12,6 @@ tauri-build = { version = "2.0.0-rc.8", features = [
 
 [dependencies]
 env_logger = "0.11.2"
-image = "0.24.9"
 log = "0.4.21"
 percent-encoding = "2.3.1"
 serde = { version = "1.0.197", features = ["derive"] }
@@ -24,8 +23,8 @@ tauri-plugin-shell = "2.0.0-rc"
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-export = { path = "../../crates/xray-export" }
-xray-texture = { path = "../../crates/xray-texture" }
 xray-ltx = { path = "../../crates/xray-ltx" }
+xray-texture = { path = "../../crates/xray-texture" }
 xray-translation = { path = "../../crates/xray-translation" }
 
 [features]

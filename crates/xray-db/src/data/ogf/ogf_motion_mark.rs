@@ -1,7 +1,7 @@
-use crate::DatabaseResult;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{assert_chunk_vector_read, ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -11,7 +11,7 @@ pub struct OgfMotionMark {
 }
 
 impl OgfMotionMark {
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> DatabaseResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let name: String = reader.read_rn_terminated_win_string()?;
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -30,7 +30,7 @@ impl OgfMotionMark {
     Ok(Self { name, intervals })
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> DatabaseResult {
+  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
     todo!("Implement")
   }
 }

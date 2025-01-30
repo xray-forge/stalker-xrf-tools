@@ -1,17 +1,21 @@
 use crate::file::configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::verify_options::LtxVerifyOptions;
-use crate::{Ltx, LtxError, LtxProject, LtxProjectVerifyResult, LtxResult};
+use crate::{Ltx, LtxProject, LtxProjectVerifyResult};
 use fxhash::FxBuildHasher;
 use indexmap::IndexSet;
 use std::path::Path;
 use std::time::Instant;
+use xray_error::{XRayError, XRayResult};
 
 impl LtxProject {
   /// Verify all the entries in current ltx project.
   /// Make sure that:
   /// - All included files exist or `.ts` counterpart is declared
   /// - All the inherited sections are valid and declared before inherit attempt
-  pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> LtxResult<LtxProjectVerifyResult> {
+  pub fn verify_entries_opt(
+    &self,
+    options: LtxVerifyOptions,
+  ) -> XRayResult<LtxProjectVerifyResult> {
     let mut result: LtxProjectVerifyResult = LtxProjectVerifyResult::new();
     let started_at: Instant = Instant::now();
 
@@ -67,10 +71,10 @@ impl LtxProject {
 
                 if let Some(error) = field_definition.validate_value(&ltx, value) {
                   match error {
-                    LtxError::Scheme { message, field, .. } => {
+                    XRayError::LtxScheme { message, field, .. } => {
                       section_has_error = true;
 
-                      result.errors.push(LtxError::new_scheme_error_at(
+                      result.errors.push(XRayError::new_scheme_error_at(
                         section_name,
                         message,
                         field,
@@ -83,7 +87,7 @@ impl LtxProject {
               } else if scheme_definition.is_strict {
                 section_has_error = true;
 
-                result.errors.push(LtxError::new_scheme_error_at(
+                result.errors.push(XRayError::new_scheme_error_at(
                   section_name,
                   field_name,
                   "Unexpected field, definition is required in strict mode",
@@ -100,7 +104,7 @@ impl LtxProject {
                 {
                   section_has_error = true;
 
-                  result.errors.push(LtxError::new_scheme_error_at(
+                  result.errors.push(XRayError::new_scheme_error_at(
                     section_name,
                     field_name,
                     "Required field was not provided",
@@ -112,7 +116,7 @@ impl LtxProject {
           } else {
             section_has_error = true;
 
-            result.errors.push(LtxError::new_scheme_error_at(
+            result.errors.push(XRayError::new_scheme_error_at(
               section_name,
               "*",
               format!("Required schema '{scheme_name}' definition is not found"),
@@ -127,7 +131,7 @@ impl LtxProject {
           }
         } else if options.is_strict {
           result.invalid_sections += 1;
-          result.errors.push(LtxError::new_scheme_error_at(
+          result.errors.push(XRayError::new_scheme_error_at(
             section_name,
             "*",
             "Expected '$schema' field to be defined in strict mode check",
@@ -166,12 +170,12 @@ impl LtxProject {
   }
 
   /// Verify all the section/field entries in current ltx project.
-  pub fn verify_entries(&self) -> LtxResult<LtxProjectVerifyResult> {
+  pub fn verify_entries(&self) -> XRayResult<LtxProjectVerifyResult> {
     self.verify_entries_opt(Default::default())
   }
 
   /// Format single LTX file by provided path
-  pub fn verify_file(path: &Path) -> LtxResult<()> {
+  pub fn verify_file(path: &Path) -> XRayResult<()> {
     Ltx::read_from_file_full(path)?;
 
     Ok(())
