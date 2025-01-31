@@ -111,7 +111,10 @@ impl Ltx {
 
   /// Iterate with sections
   pub fn sections(&self) -> impl DoubleEndedIterator<Item = &str> {
-    self.sections.keys().map(|s| s.as_str())
+    self
+      .sections
+      .keys()
+      .map(|section_name| section_name.as_str())
   }
 
   /// Set key-value to a section
@@ -130,7 +133,7 @@ impl Ltx {
     self
       .sections
       .get(&section.into())
-      .and_then(|props| props.get(key))
+      .and_then(|section| section.get(key))
   }
 
   /// Get the first value from the sections with key, return the default value if it does not exist
@@ -149,7 +152,7 @@ impl Ltx {
     self
       .sections
       .get_mut(&section.into())
-      .and_then(|prop| prop.get_mut(key).map(|it| it.as_mut_str()))
+      .and_then(|section| section.get_mut(key).map(|it| it.as_mut_str()))
   }
 
   /// Delete the first section with key, return the properties if it exists
@@ -165,7 +168,9 @@ impl Ltx {
   where
     S: Into<String>,
   {
-    self.section_mut(section).and_then(|prop| prop.remove(key))
+    self
+      .section_mut(section)
+      .and_then(|section| section.remove(key))
   }
 
   /// Total sections count
@@ -184,8 +189,8 @@ impl<'q> Index<&'q str> for Ltx {
 
   fn index<'a>(&'a self, index: &'q str) -> &'a Section {
     match self.section(index) {
-      Some(p) => p,
-      None => panic!("Section `{}` does not exist", index),
+      Some(section) => section,
+      None => panic!("Section '{}' does not exist", index),
     }
   }
 }
@@ -193,8 +198,8 @@ impl<'q> Index<&'q str> for Ltx {
 impl<'q> IndexMut<&'q str> for Ltx {
   fn index_mut<'a>(&'a mut self, index: &'q str) -> &'a mut Section {
     match self.section_mut(index) {
-      Some(p) => p,
-      None => panic!("Section `{}` does not exist", index),
+      Some(section) => section,
+      None => panic!("Section '{}' does not exist", index),
     }
   }
 }

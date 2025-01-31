@@ -92,7 +92,7 @@ impl ExportsParser {
         &source_map,
         &comments,
         filter,
-      ));
+      )?);
     }
 
     expressions.sort_by(|a, b| a.name.cmp(&b.name));
@@ -106,7 +106,7 @@ impl ExportsParser {
     source_map: &SourceMap,
     comments: &dyn Comments,
     filter: fn(&str) -> Option<String>,
-  ) -> Vec<ExportDescriptor> {
+  ) -> XRayResult<Vec<ExportDescriptor>> {
     let mut expressions: Vec<ExportDescriptor> = Vec::new();
 
     if let Program::Module(module) = &program {
@@ -140,8 +140,11 @@ impl ExportsParser {
                     line: loc.line,
                     name: effect_name,
                     parameters: get_parameters_from_arrow_expression(
-                      call_expression.args.get(1).unwrap(),
-                    ),
+                      call_expression
+                        .args
+                        .get(1)
+                        .expect("Expect1 index argument declaration"),
+                    )?,
                   });
                 }
               }
@@ -151,7 +154,7 @@ impl ExportsParser {
       }
     }
 
-    expressions
+    Ok(expressions)
   }
 }
 

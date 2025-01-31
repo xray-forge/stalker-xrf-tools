@@ -11,3 +11,4 @@ swc_ecma_ast = "0.112.6"
 swc_ecma_parser = "0.143.10"
 walkdir = "2.5.0"
 xray-error = { path = "../xray-error" }
+xray-utils = { path = "../xray-utils" }

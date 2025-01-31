@@ -12,7 +12,9 @@ use std::io::ErrorKind::UnexpectedEof;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use xray_error::{XRayError, XRayResult};
-use xray_utils::{decode_bytes_to_string_without_bom_handling, get_utf8_encoder, XRayEncoding};
+use xray_utils::{
+  assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder, XRayEncoding,
+};
 
 pub struct ArchiveReader {
   pub path: PathBuf,
@@ -70,7 +72,7 @@ impl ArchiveReader {
       let raw_chunk_id: u32 = match self.file.read_u32::<XRayByteOrder>() {
         Ok(data) => data,
         Err(error) if error.kind() == UnexpectedEof => break,
-        Err(error) => panic!("Error reading file: {}", error),
+        Err(error) => return Err(XRayError::new_read_error(error.to_string())),
       };
       let chunk_size: u32 = self.file.read_u32::<XRayByteOrder>()?;
       let chunk_usize: usize = usize::try_from(chunk_size).map_err(|error| {
@@ -201,7 +203,7 @@ impl ArchiveReader {
       let name_size: u16 = header_size - 16;
 
       let name_bytes = {
-        assert!((name_size as usize) < name_buf.len(), "Name is too long");
+        assert((name_size as usize) < name_buf.len(), "Name is too long")?;
 
         reader
           .read_exact(&mut name_buf[..(name_size as usize)])

@@ -1,5 +1,5 @@
 use crate::data::patrol::patrol::Patrol;
-use crate::export::file::{create_export_file, open_ltx_config};
+use crate::export::file::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -74,9 +74,9 @@ impl SpawnPatrolsChunk {
 
   /// Import patrols data from provided path.
   pub fn import(path: &Path) -> XRayResult<Self> {
-    let patrols_ltx: Ltx = open_ltx_config(&path.join("patrols.ltx"))?;
-    let patrol_points_ltx: Ltx = open_ltx_config(&path.join("patrol_points.ltx"))?;
-    let patrol_links_ltx: Ltx = open_ltx_config(&path.join("patrol_links.ltx"))?;
+    let patrols_ltx: Ltx = Ltx::read_from_path(&path.join("patrols.ltx"))?;
+    let patrol_points_ltx: Ltx = Ltx::read_from_path(&path.join("patrol_points.ltx"))?;
+    let patrol_links_ltx: Ltx = Ltx::read_from_path(&path.join("patrol_links.ltx"))?;
 
     let mut patrols: Vec<Patrol> = Vec::new();
 

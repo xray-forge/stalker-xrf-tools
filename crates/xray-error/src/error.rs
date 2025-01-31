@@ -10,6 +10,9 @@ use xray_error_derive::ErrorConstructors;
 #[derive(ThisError, Debug, ErrorConstructors, Serialize)]
 pub enum XRayError {
   #[constructor]
+  #[error("Assertion error: {message}")]
+  Assertion { message: String },
+  #[constructor]
   #[error("Asset error: {message}")]
   Asset { message: String },
   #[constructor]

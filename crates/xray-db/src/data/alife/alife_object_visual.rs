@@ -66,7 +66,6 @@ mod tests {
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use std::fs::File;
   use std::path::Path;
@@ -134,7 +133,7 @@ mod tests {
 
     ltx.write_to(&mut file)?;
 
-    let source: Ltx = open_ltx_config(config_path)?;
+    let source: Ltx = Ltx::read_from_path(config_path)?;
 
     assert_eq!(AlifeObjectVisual::import("first", &source)?, first);
     assert_eq!(AlifeObjectVisual::import("second", &source)?, second);

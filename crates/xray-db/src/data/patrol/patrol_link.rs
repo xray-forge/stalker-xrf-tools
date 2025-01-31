@@ -124,7 +124,6 @@ impl PatrolLink {
 #[cfg(test)]
 mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -229,7 +228,7 @@ mod tests {
     original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read: PatrolLink = PatrolLink::import("data", &open_ltx_config(config_path)?)?;
+    let read: PatrolLink = PatrolLink::import("data", &Ltx::read_from_path(config_path)?)?;
 
     assert_eq!(read, original);
 

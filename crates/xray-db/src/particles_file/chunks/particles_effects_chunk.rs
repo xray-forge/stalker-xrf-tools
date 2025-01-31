@@ -1,6 +1,6 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect::ParticleEffect;
-use crate::export::file::{create_export_file, open_ltx_config};
+use crate::export::file::create_export_file;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
@@ -68,7 +68,7 @@ impl ParticlesEffectsChunk {
   pub fn import(path: &Path) -> XRayResult<Self> {
     log::info!("Importing particles effects: {}", path.display());
 
-    let ltx: Ltx = open_ltx_config(&path.join("effects.ltx"))?;
+    let ltx: Ltx = Ltx::read_from_path(&path.join("effects.ltx"))?;
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
     for (section_name, section) in &ltx {

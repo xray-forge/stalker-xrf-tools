@@ -78,7 +78,6 @@ impl GraphHeader {
 #[cfg(test)]
 mod tests {
   use crate::data::graph::graph_header::GraphHeader;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -156,7 +155,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphHeader::import("header", &open_ltx_config(config_path)?)?,
+      GraphHeader::import("header", &Ltx::read_from_path(config_path)?)?,
       original
     );
 

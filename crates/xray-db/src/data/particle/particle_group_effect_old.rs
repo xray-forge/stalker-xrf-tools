@@ -166,7 +166,6 @@ impl ParticleGroupEffectOld {
 #[cfg(test)]
 mod tests {
   use crate::data::particle::particle_group_effect_old::ParticleGroupEffectOld;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -303,7 +302,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      ParticleGroupEffectOld::import("data", &open_ltx_config(config_path)?)?,
+      ParticleGroupEffectOld::import("data", &Ltx::read_from_path(config_path)?)?,
       original
     );
 
@@ -345,7 +344,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      ParticleGroupEffectOld::import_list("data", &open_ltx_config(config_path)?)?,
+      ParticleGroupEffectOld::import_list("data", &Ltx::read_from_path(config_path)?)?,
       original
     );
 

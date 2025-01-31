@@ -23,6 +23,7 @@ uuid = { version = "1.7.0", features = ["v4", "serde"] }
 xray-chunk = { path = "../xray-chunk" }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
+xray-utils = { path = "../xray-utils" }
 
 [dev-dependencies]
 xray-test-utils = { path = "../xray-test-utils" }

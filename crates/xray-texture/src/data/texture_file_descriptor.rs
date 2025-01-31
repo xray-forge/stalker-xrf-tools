@@ -1,5 +1,7 @@
 use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 use std::cmp::max;
+use xray_error::XRayResult;
+use xray_utils::assert_equal;
 
 pub struct TextureFileDescriptor {
   pub name: String,
@@ -21,7 +23,7 @@ impl TextureFileDescriptor {
     self.sprites.push(texture);
   }
 
-  pub fn get_dimension_boundaries(&self) -> (u32, u32) {
+  pub fn get_dimension_boundaries(&self) -> XRayResult<(u32, u32)> {
     let mut max_width: u32 = 0;
     let mut max_height: u32 = 0;
 
@@ -36,17 +38,17 @@ impl TextureFileDescriptor {
     max_width = max_width + (4 - max_width % 4);
     max_height = max_height + (4 - max_height % 4);
 
-    assert_eq!(
+    assert_equal(
       max_width % 4,
       0,
-      "DirectX compression requires texture width to be multiple of 4"
-    );
-    assert_eq!(
+      "DirectX compression requires texture width to be multiple of 4",
+    )?;
+    assert_equal(
       max_height % 4,
       0,
-      "DirectX compression requires texture height to be multiple of 4"
-    );
+      "DirectX compression requires texture height to be multiple of 4",
+    )?;
 
-    (max_width, max_height)
+    Ok((max_width, max_height))
   }
 }

@@ -13,6 +13,7 @@ use std::io::Write;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert;
 
 /// Generic abstract alife object base.
 #[derive(Debug, Serialize, Deserialize)]
@@ -79,10 +80,10 @@ impl AlifeObjectBase {
       spawn_reader.read_u16::<T>()?
     };
 
-    assert!(
+    assert(
       version > MINIMAL_SUPPORTED_SPAWN_VERSION,
-      "Unexpected version of alife object in spawn file, flag is {script_flags}"
-    );
+      "Unexpected version of ALife object in spawn file, flag is {script_flags}",
+    )?;
 
     let game_type: u16 = spawn_reader.read_u16::<T>()?;
     let script_version: u16 = spawn_reader.read_u16::<T>()?;

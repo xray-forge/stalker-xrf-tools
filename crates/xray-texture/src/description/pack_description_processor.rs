@@ -5,6 +5,7 @@ use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
 use std::path::PathBuf;
 use xray_error::XRayResult;
+use xray_utils::assert_equal;
 
 pub struct PackDescriptionProcessor {}
 
@@ -34,7 +35,7 @@ impl PackDescriptionProcessor {
   ) -> XRayResult<bool> {
     let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
 
-    let (width, height) = file.get_dimension_boundaries();
+    let (width, height) = file.get_dimension_boundaries()?;
     let mut result: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
 
     if options.is_verbose {
@@ -61,16 +62,16 @@ impl PackDescriptionProcessor {
 
       match read_dds_by_path(&texture_path).and_then(|dds| dds_to_image(&dds)) {
         Ok(texture_dds) => {
-          assert_eq!(
+          assert_equal(
             texture_dds.width(),
             texture.w,
-            "XML file texture width and actual DDS size should match"
-          );
-          assert_eq!(
+            "XML file texture width and actual DDS size should match",
+          )?;
+          assert_equal(
             texture_dds.height(),
             texture.h,
-            "XML file texture height and actual DDS size should match"
-          );
+            "XML file texture height and actual DDS size should match",
+          )?;
 
           result
             .copy_from(&texture_dds, texture.x, texture.y)
@@ -104,16 +105,16 @@ impl PackDescriptionProcessor {
       println!("Saving file: {}", destination.display());
     }
 
-    assert_eq!(
+    assert_equal(
       result.width() % 4,
       0,
-      "DirectX compression requires texture width to be multiple of 4"
-    );
-    assert_eq!(
+      "DirectX compression requires texture width to be multiple of 4",
+    )?;
+    assert_equal(
       result.height() % 4,
       0,
-      "DirectX compression requires texture height to be multiple of 4"
-    );
+      "DirectX compression requires texture height to be multiple of 4",
+    )?;
 
     save_image_as_ui_dds(&destination, &result, options.dds_compression_format)?;
 

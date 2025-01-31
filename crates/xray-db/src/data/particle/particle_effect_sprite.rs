@@ -78,7 +78,6 @@ impl ParticleEffectSprite {
 #[cfg(test)]
 mod tests {
   use crate::data::particle::particle_effect_sprite::ParticleEffectSprite;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -149,7 +148,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      ParticleEffectSprite::import("data", &open_ltx_config(config_path)?)?,
+      ParticleEffectSprite::import("data", &Ltx::read_from_path(config_path)?)?,
       sprite
     );
 

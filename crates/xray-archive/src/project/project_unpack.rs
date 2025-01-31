@@ -11,6 +11,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 use xray_error::XRayResult;
+use xray_utils::{assert, assert_equal, assert_not_equal};
 
 impl ArchiveProject {
   pub fn unpack(&self, destination: &Path) -> XRayResult<ArchiveUnpackResult> {
@@ -147,7 +148,7 @@ impl ArchiveProject {
 
       let actual_crc: u32 = crc32fast::hash(decompressed_buf.as_slice());
 
-      assert_eq!(file_descriptor.crc, actual_crc, "CRCs do not match");
+      assert_equal(file_descriptor.crc, actual_crc, "CRCs do not match")?;
 
       dest_file
         .write_all(decompressed_buf.as_slice())
@@ -160,11 +161,11 @@ impl ArchiveProject {
         let to_read: usize = min(buf.len(), remaining_bytes);
         let read: usize = source_file.read(&mut buf[..to_read])?;
 
-        assert!(
+        assert(
           read <= remaining_bytes,
-          "Must not read more bytes than remaining"
-        );
-        assert_ne!(read, 0, "Unexpected End Of File");
+          "Must not read more bytes than remaining",
+        )?;
+        assert_not_equal(read, 0, "Unexpected End Of File")?;
 
         let written: usize = dest_file
           .write(&buf[..read])
@@ -172,7 +173,7 @@ impl ArchiveProject {
 
         remaining_bytes -= read;
 
-        assert_ne!(written, 0, "Unable to write bytes");
+        assert_not_equal(written, 0, "Unable to write bytes")?;
       }
     }
 

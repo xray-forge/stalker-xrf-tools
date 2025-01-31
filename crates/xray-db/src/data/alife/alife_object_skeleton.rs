@@ -78,7 +78,6 @@ mod tests {
   use crate::data::alife::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -150,7 +149,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ltx_config(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(AlifeObjectSkeleton::import("first", &source)?, first);
     assert_eq!(AlifeObjectSkeleton::import("second", &source)?, second);

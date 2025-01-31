@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 /// Shape enumeration stored in objects descriptors.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -24,11 +25,11 @@ impl Shape {
       shapes.push(Self::read::<T>(reader)?);
     }
 
-    assert_eq!(
+    assert_equal(
       shapes.len(),
       count as usize,
-      "Declared and read shapes count should be equal"
-    );
+      "Declared and read shapes count should be equal",
+    )?;
 
     Ok(shapes)
   }
@@ -160,7 +161,6 @@ impl Shape {
 mod tests {
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -363,7 +363,7 @@ mod tests {
     ltx.write_to(&mut overwrite_file(config_path)?)?;
 
     assert_eq!(
-      Shape::import_list(open_ltx_config(config_path)?.section("data").unwrap(),)?,
+      Shape::import_list(Ltx::read_from_path(config_path)?.section("data").unwrap(),)?,
       original
     );
 

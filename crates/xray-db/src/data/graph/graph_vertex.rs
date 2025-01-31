@@ -105,7 +105,6 @@ impl GraphVertex {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_vertex::GraphVertex;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -188,7 +187,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphVertex::import("graph_vertex", &open_ltx_config(config_path)?)?,
+      GraphVertex::import("graph_vertex", &Ltx::read_from_path(config_path)?)?,
       original
     );
 

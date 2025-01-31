@@ -65,7 +65,6 @@ impl GraphLevelPoint {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -135,7 +134,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphLevelPoint::import("graph_level_point", &open_ltx_config(config_path)?)?,
+      GraphLevelPoint::import("graph_level_point", &Ltx::read_from_path(config_path)?)?,
       original
     );
 

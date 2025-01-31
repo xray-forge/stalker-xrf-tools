@@ -4,7 +4,7 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
-use crate::export::file::{create_export_file, open_binary_file, open_ltx_config};
+use crate::export::file::{create_export_file, open_binary_file};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -114,31 +114,33 @@ impl SpawnGraphsChunk {
 
   /// Import graphs data from provided path.
   pub fn import<T: ByteOrder>(path: &Path) -> XRayResult<Self> {
-    let header: GraphHeader =
-      GraphHeader::import("header", &open_ltx_config(&path.join("graphs_header.ltx"))?)?;
+    let header: GraphHeader = GraphHeader::import(
+      "header",
+      &Ltx::read_from_path(&path.join("graphs_header.ltx"))?,
+    )?;
 
-    let levels_ltx: Ltx = open_ltx_config(&path.join("graphs_levels.ltx"))?;
+    let levels_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_levels.ltx"))?;
     let mut levels: Vec<GraphLevel> = Vec::new();
 
     for index in 0..header.levels_count {
       levels.push(GraphLevel::import(&index.to_string(), &levels_ltx)?);
     }
 
-    let vertices_ltx: Ltx = open_ltx_config(&path.join("graphs_vertices.ltx"))?;
+    let vertices_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_vertices.ltx"))?;
     let mut vertices: Vec<GraphVertex> = Vec::new();
 
     for index in 0..header.vertices_count {
       vertices.push(GraphVertex::import(&index.to_string(), &vertices_ltx)?);
     }
 
-    let points_ltx: Ltx = open_ltx_config(&path.join("graphs_points.ltx"))?;
+    let points_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_points.ltx"))?;
     let mut points: Vec<GraphLevelPoint> = Vec::new();
 
     for index in 0..header.points_count {
       points.push(GraphLevelPoint::import(&index.to_string(), &points_ltx)?);
     }
 
-    let edges_ltx: Ltx = open_ltx_config(&path.join("graphs_edges.ltx"))?;
+    let edges_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_edges.ltx"))?;
     let mut edges: Vec<GraphEdge> = Vec::new();
 
     for index in 0..header.edges_count {

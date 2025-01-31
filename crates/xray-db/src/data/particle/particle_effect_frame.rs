@@ -152,7 +152,6 @@ impl ParticleEffectFrame {
 #[cfg(test)]
 mod tests {
   use crate::data::particle::particle_effect_frame::ParticleEffectFrame;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -228,7 +227,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     let read: ParticleEffectFrame =
-      ParticleEffectFrame::import("data", &open_ltx_config(config_path)?)?;
+      ParticleEffectFrame::import("data", &Ltx::read_from_path(config_path)?)?;
 
     assert_eq!(read, original);
 

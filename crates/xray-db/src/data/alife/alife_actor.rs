@@ -8,6 +8,7 @@ use typetag::serde;
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -26,10 +27,11 @@ impl AlifeObjectReader for AlifeActor {
       save_marker: reader.read_u16::<XRayByteOrder>()?,
     };
 
-    assert_eq!(
-      object.save_marker, 1,
-      "Unexpected save data for actor object provided"
-    );
+    assert_equal(
+      object.save_marker,
+      1,
+      "Unexpected save data for actor object provided",
+    )?;
 
     Ok(object)
   }

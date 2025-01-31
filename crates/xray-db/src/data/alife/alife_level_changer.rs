@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -44,10 +45,11 @@ impl AlifeObjectReader for AlifeLevelChanger {
       save_marker: reader.read_u16::<T>()?,
     };
 
-    assert_eq!(
-      object.save_marker, 26,
-      "Unexpected script data provided for level changer"
-    );
+    assert_equal(
+      object.save_marker,
+      26,
+      "Unexpected script data provided for level changer",
+    )?;
 
     Ok(object)
   }

@@ -1,6 +1,6 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_group::ParticleGroup;
-use crate::export::file::{create_export_file, open_ltx_config};
+use crate::export::file::create_export_file;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
@@ -64,7 +64,7 @@ impl ParticlesGroupsChunk {
   pub fn import(path: &Path) -> XRayResult<Self> {
     log::info!("Importing particles groups: {}", path.display());
 
-    let ltx: Ltx = open_ltx_config(&path.join("groups.ltx"))?;
+    let ltx: Ltx = Ltx::read_from_path(&path.join("groups.ltx"))?;
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     for (section_name, section) in &ltx {

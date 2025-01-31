@@ -1,5 +1,5 @@
 use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
-use crate::export::file::{create_export_file, open_ltx_config};
+use crate::export::file::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -66,7 +66,7 @@ impl SpawnArtefactSpawnsChunk {
   /// Import artefact spawns data from provided path.
   /// Parse ltx files and populate spawn file.
   pub fn import(path: &Path) -> XRayResult<Self> {
-    let ltx: Ltx = open_ltx_config(&path.join("artefact_spawns.ltx"))?;
+    let ltx: Ltx = Ltx::read_from_path(&path.join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
     for (_, props) in &ltx {

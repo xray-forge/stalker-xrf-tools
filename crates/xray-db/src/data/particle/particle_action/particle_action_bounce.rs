@@ -77,7 +77,6 @@ mod tests {
   use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particle::particle_action::particle_action_bounce::ParticleActionBounce;
   use crate::data::particle::particle_domain::ParticleDomain;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -206,7 +205,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = open_ltx_config(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionBounce::import("data", &source)?, original);
 

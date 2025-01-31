@@ -1,6 +1,7 @@
 use crate::file::configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
 use std::fmt::Display;
 use xray_error::{XRayError, XRayResult};
+use xray_utils::assert_equal;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {
@@ -192,11 +193,11 @@ impl LtxFieldDataType {
         "Failed to parse tuple type, expected comma separated list of possible values after 'tuple:'",
       ))
     } else {
-      assert_eq!(
+      assert_equal(
         types_raw.len(),
         types.len(),
-        "Expected same count of raw and converted types for tuple type definition"
-      );
+        "Expected same count of raw and converted types for tuple type definition",
+      )?;
 
       Ok(Self::TypeTuple(types, types_raw))
     }

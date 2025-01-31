@@ -1,5 +1,5 @@
 use crate::constants::META_TYPE_FIELD;
-use crate::export::file::{create_export_file, open_ltx_config};
+use crate::export::file::create_export_file;
 use crate::export::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -52,7 +52,7 @@ impl ParticlesHeaderChunk {
   pub fn import(path: &Path) -> XRayResult<Self> {
     log::info!("Importing particles header: {}", path.display());
 
-    let ltx: Ltx = open_ltx_config(&path.join("header.ltx"))?;
+    let ltx: Ltx = Ltx::read_from_path(&path.join("header.ltx"))?;
     let section: &Section = ltx
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");

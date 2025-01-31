@@ -200,7 +200,6 @@ mod tests {
   use crate::data::patrol::patrol::Patrol;
   use crate::data::patrol::patrol_link::PatrolLink;
   use crate::data::patrol::patrol_point::PatrolPoint;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -398,9 +397,9 @@ mod tests {
 
     let read: Patrol = Patrol::import(
       &original.name,
-      &open_ltx_config(patrol_config_path)?,
-      &open_ltx_config(points_config_path)?,
-      &open_ltx_config(links_config_path)?,
+      &Ltx::read_from_path(patrol_config_path)?,
+      &Ltx::read_from_path(points_config_path)?,
+      &Ltx::read_from_path(links_config_path)?,
     )?;
 
     assert_eq!(read, original);

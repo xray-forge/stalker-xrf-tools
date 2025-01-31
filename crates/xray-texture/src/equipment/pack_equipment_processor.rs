@@ -7,6 +7,7 @@ use path_absolutize::*;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
+use xray_utils::{assert, assert_equal};
 
 pub struct PackEquipmentProcessor {}
 
@@ -49,16 +50,16 @@ impl PackEquipmentProcessor {
       }
     }
 
-    assert_eq!(
+    assert_equal(
       image.width() % 4,
       0,
-      "DirectX compression requires texture width to be multiple of 4"
-    );
-    assert_eq!(
+      "DirectX compression requires texture width to be multiple of 4",
+    )?;
+    assert_equal(
       image.height() % 4,
       0,
-      "DirectX compression requires texture height to be multiple of 4"
-    );
+      "DirectX compression requires texture height to be multiple of 4",
+    )?;
 
     save_image_as_ui_dds(&options.output, &image, options.dds_compression_format)?;
 
@@ -147,14 +148,14 @@ impl PackEquipmentProcessor {
 
         let mut centered: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
 
-        assert!(
+        assert(
           rescaled_width <= width,
-          "Unexpected width {rescaled_width} > {width} when rescaling"
-        );
-        assert!(
+          "Unexpected width {rescaled_width} > {width} when rescaling",
+        )?;
+        assert(
           rescaled_height <= height,
-          "Unexpected height {rescaled_height} > {height} when rescaling"
-        );
+          "Unexpected height {rescaled_height} > {height} when rescaling",
+        )?;
 
         centered.copy_from(
           &rescaled_image,

@@ -57,7 +57,6 @@ impl GraphEdge {
 #[cfg(test)]
 mod tests {
   use crate::data::graph::graph_edge::GraphEdge;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -127,7 +126,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphEdge::import("graph_edge", &open_ltx_config(config_path)?)?,
+      GraphEdge::import("graph_edge", &Ltx::read_from_path(config_path)?)?,
       original
     );
 

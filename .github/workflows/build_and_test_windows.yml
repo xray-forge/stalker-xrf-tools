@@ -22,6 +22,7 @@ jobs:
         node-version: [ 20.x ]
 
     steps:
+      - uses: dtolnay/rust-toolchain@stable
       - uses: davidB/rust-cargo-make@v1
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
@@ -51,7 +52,7 @@ jobs:
           retention-days: 1
 
       - name: Install tauri CLI
-        run: cargo install tauri-cli --version="2.0.0-rc.6" --locked
+        run: cargo install tauri-cli --version="2.2.7" --locked
 
       - name: Build application
         run: cargo make build-app-release

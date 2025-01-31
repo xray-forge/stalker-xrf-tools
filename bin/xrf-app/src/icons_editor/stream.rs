@@ -4,17 +4,19 @@ use tauri::http::header::{ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_LENGTH, CONTENT_T
 use tauri::http::response::Builder;
 use tauri::http::Result as HttpResult;
 use tauri::http::{Request, Response};
-use tauri::{AppHandle, Manager, Runtime, State};
+use tauri::{AppHandle, Manager, Runtime, State, UriSchemeContext};
 
 pub fn get_equipment_sprite_stream_response<R: Runtime>(
-  application: &AppHandle<R>,
+  context: UriSchemeContext<R>,
   request: &Request<Vec<u8>>,
 ) -> HttpResult<Response<Vec<u8>>> {
-  let handle: &AppHandle<R> = application.app_handle();
-  let my_state: State<IconsEditorState> = handle.state::<IconsEditorState>();
+  let handle: &AppHandle<R> = context.app_handle();
+  let icons_editor_state: State<IconsEditorState> = handle.state::<IconsEditorState>();
 
-  let sprite_lock: MutexGuard<Option<String>> = my_state.equipment_sprite_name.lock().unwrap();
-  let preview_lock: MutexGuard<Option<Vec<u8>>> = my_state.equipment_sprite_preview.lock().unwrap();
+  let sprite_lock: MutexGuard<Option<String>> =
+    icons_editor_state.equipment_sprite_name.lock().unwrap();
+  let preview_lock: MutexGuard<Option<Vec<u8>>> =
+    icons_editor_state.equipment_sprite_preview.lock().unwrap();
 
   let preview: Option<&Vec<u8>> = preview_lock.as_ref();
   let sprite_name: Option<&String> = sprite_lock.as_ref();

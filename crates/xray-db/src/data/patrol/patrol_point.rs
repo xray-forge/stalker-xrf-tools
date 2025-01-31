@@ -130,7 +130,6 @@ impl PatrolPoint {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::patrol::patrol_point::PatrolPoint;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -243,7 +242,7 @@ mod tests {
     original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read: PatrolPoint = PatrolPoint::import("data", &open_ltx_config(config_path)?)?;
+    let read: PatrolPoint = PatrolPoint::import("data", &Ltx::read_from_path(config_path)?)?;
 
     assert_eq!(read, original);
 

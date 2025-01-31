@@ -1,6 +1,8 @@
 use crate::ast::ast_to_string::{ts_type_ref_to_string, ts_type_to_string};
 use crate::extern_descriptor::ExportParameterDescriptor;
 use swc_ecma_ast::{Callee, Expr, ExprOrSpread, Lit, Pat, TsType, TsTypeAnn};
+use xray_error::XRayResult;
+use xray_utils::assert_equal;
 
 pub fn get_expression_callee_name(callee: &Callee) -> Option<String> {
   if let Callee::Expr(callee_expression) = callee {
@@ -26,7 +28,7 @@ pub fn get_expression_parameter_as_string_name(expression: &ExprOrSpread) -> Opt
 
 pub fn get_parameters_from_arrow_expression(
   expression: &ExprOrSpread,
-) -> Vec<ExportParameterDescriptor> {
+) -> XRayResult<Vec<ExportParameterDescriptor>> {
   if let Expr::Arrow(arrow) = expression.expr.as_ref() {
     if arrow.params.len() == 3 {
       let third = arrow.params.get(2).unwrap();
@@ -63,7 +65,7 @@ pub fn get_parameters_from_arrow_expression(
             }
           }
 
-          return params;
+          return Ok(params);
         }
         Pat::Array(array_pattern) => {
           if let Some(type_annotation) = array_pattern.type_ann.as_ref() {
@@ -89,22 +91,22 @@ pub fn get_parameters_from_arrow_expression(
     }
   }
 
-  Vec::new()
+  Ok(Vec::new())
 }
 
 pub fn get_parameters_descriptors_from_annotations(
   names: &[String],
   type_annotation: &TsTypeAnn,
-) -> Vec<ExportParameterDescriptor> {
+) -> XRayResult<Vec<ExportParameterDescriptor>> {
   let mut parameters: Vec<ExportParameterDescriptor> = Vec::new();
 
   match type_annotation.type_ann.as_ref() {
     TsType::TsTupleType(tuple_type) => {
-      assert_eq!(
+      assert_equal(
         names.len(),
         tuple_type.elem_types.len(),
-        "Expected same types count as array params"
-      );
+        "Expected same types count as array params",
+      )?;
 
       for (index, name) in names.iter().enumerate() {
         parameters.push(ExportParameterDescriptor {
@@ -119,5 +121,5 @@ pub fn get_parameters_descriptors_from_annotations(
     }
   }
 
-  parameters
+  Ok(parameters)
 }

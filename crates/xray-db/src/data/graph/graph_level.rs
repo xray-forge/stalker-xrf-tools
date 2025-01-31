@@ -78,7 +78,6 @@ impl GraphLevel {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_level::GraphLevel;
-  use crate::export::file::open_ltx_config;
   use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
@@ -154,7 +153,7 @@ mod tests {
     ltx.write_to(&mut file)?;
 
     assert_eq!(
-      GraphLevel::import("graph_level", &open_ltx_config(config_path)?)?,
+      GraphLevel::import("graph_level", &Ltx::read_from_path(config_path)?)?,
       original
     );
 
