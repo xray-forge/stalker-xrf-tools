@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.0", features = ["derive", "default"] }
+clap = { version = "4.5.27", features = ["derive", "default"] }
 colored = "3.0.0"
 ddsfile = "0.5.2"
-env_logger = "0.11.1"
-log = "0.4.20"
-tokio = { version = "1.35.1", features = ["full"] }
+env_logger = "0.11.6"
+log = "0.4.25"
+tokio = { version = "1.43.0", features = ["full"] }
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-gamedata = { path = "../../crates/xray-gamedata" }

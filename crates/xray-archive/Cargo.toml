@@ -9,16 +9,13 @@ path = "src/lib.rs"
 
 [dependencies]
 bounded_join_set = "0.2.0"
-byteorder = "1.4.3"
-crc32fast = "1.3.2"
+byteorder = "1.5.0"
+crc32fast = "1.4.2"
 delharc = { path = "../xray-delharc", features = ["lh1"] }
-log = "0.4.20"
+log = "0.4.25"
 minilzo-rs = "0.6.1"
-regex = "1.10.3"
-serde = { version = "1.0.197", features = ["derive"] }
+regex = "1.11.1"
+serde = { version = "1.0.217", features = ["derive"] }
 walkdir = "2.5.0"
 xray-error = { path = "../xray-error" }
 xray-utils = { path = "../xray-utils" }
-
-[dev-dependencies]
-xray-test-utils = { path = "../xray-test-utils" }

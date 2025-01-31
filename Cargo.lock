@@ -6987,7 +6987,6 @@ dependencies = [
  "serde",
  "walkdir",
  "xray-error",
- "xray-test-utils",
  "xray-utils",
 ]
 
