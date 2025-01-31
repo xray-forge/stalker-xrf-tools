@@ -11,12 +11,12 @@ use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 
 impl GamedataProject {
-  pub fn verify_ltx_weapons(
+  pub fn verify_weapons(
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataWeaponVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata LTX weapons:".green());
+      println!("{}", "Verify weapons:".green());
     }
 
     let started_at: Instant = Instant::now();

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 colored = "3.0.0"
+derive_more = { version = "1.0.0", features = ["display"] }
 ddsfile = "0.5.2"
 full_moon = "1.2.0"
 log = "0.4.22"

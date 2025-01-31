@@ -15,10 +15,6 @@ pub struct RgbColor {
 }
 
 impl RgbColor {
-  pub fn new(r: f32, g: f32, b: f32) -> Self {
-    Self { r, g, b }
-  }
-
   pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
     Ok(Self {
       r: reader.read_f32::<T>()?,

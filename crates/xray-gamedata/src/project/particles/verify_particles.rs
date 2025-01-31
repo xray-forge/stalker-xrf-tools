@@ -14,7 +14,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataParticlesVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata particles:".green(),);
+      println!("{}", "Verify particles:".green());
     }
 
     let started_at: Instant = Instant::now();
@@ -26,7 +26,7 @@ impl GamedataProject {
       .par_iter()
       .for_each(|path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify gamedata particles file: {}", path.display());
+          println!("Verify particles file: {}", path.display());
         }
 
         *checked_particles_count.lock().unwrap() += 1;
@@ -97,7 +97,7 @@ impl GamedataProject {
 
     for particle in &particles_file.effects.effects {
       if options.is_verbose_logging_enabled() {
-        println!("Verify gamedata particle: {}", particle.name);
+        println!("Verify particle: {}", particle.name);
       }
 
       for texture_relative_path in particle.sprite.texture_name.split(",") {

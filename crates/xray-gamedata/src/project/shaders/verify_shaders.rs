@@ -9,7 +9,8 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataShadersVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata shaders (todo):".green(),);
+      println!("{}", "Verify shaders:".green());
+      println!("  - todo");
     }
 
     Ok(GamedataShadersVerificationResult {})

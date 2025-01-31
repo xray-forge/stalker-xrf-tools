@@ -15,7 +15,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataMeshesVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata meshes:".green());
+      println!("{}", "Verify meshes:".green());
     }
 
     let started_at: Instant = Instant::now();
@@ -27,7 +27,7 @@ impl GamedataProject {
       .par_iter()
       .for_each(|path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify gamedata mesh: {}", path);
+          println!("Verify mesh: {}", path);
         }
 
         *checked_meshes_count.lock().unwrap() += 1;

@@ -18,7 +18,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataAnimationsVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata animations:".green(),);
+      println!("{}", "Verify animations:".green(),);
     }
 
     let started_at: Instant = Instant::now();

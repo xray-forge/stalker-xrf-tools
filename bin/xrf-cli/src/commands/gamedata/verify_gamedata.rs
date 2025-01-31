@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process;
 use xray_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
-  GamedataVerificationResult,
+  GamedataVerificationResult, GamedataVerificationType,
 };
 use xray_utils::path_vec_to_string;
 
@@ -48,6 +48,14 @@ impl GenericCommand for VerifyGamedataCommand {
           .long("configs")
           .required(false)
           .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("checks")
+          .help("List of checks to perform")
+          .long("checks")
+          .value_delimiter(',')
+          .num_args(0..=15)
+          .value_parser(value_parser!(GamedataVerificationType)),
       )
       .arg(
         Arg::new("silent")
@@ -108,12 +116,14 @@ impl GenericCommand for VerifyGamedataCommand {
           .join("configs")
       });
 
+    let checks: Vec<GamedataVerificationType> = matches
+      .get_many::<GamedataVerificationType>("checks")
+      .map(|it| it.cloned().collect::<Vec<_>>())
+      .unwrap_or_else(GamedataVerificationType::get_all);
+
     let is_silent: bool = matches.get_flag("silent");
     let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
-
-    // todo: Parallel argument, only in silent mode.
-    // todo: Modular selection to verify only some elements.
 
     let open_options: GamedataProjectReadOptions = GamedataProjectReadOptions {
       roots,
@@ -128,6 +138,7 @@ impl GenericCommand for VerifyGamedataCommand {
       is_verbose,
       is_silent,
       is_strict,
+      checks,
     };
 
     if open_options.is_logging_enabled() {
@@ -145,23 +156,24 @@ impl GenericCommand for VerifyGamedataCommand {
 
     if verify_result.is_valid() {
       if verify_options.is_logging_enabled() {
+        println!("{}", "Project gamedata is valid".green());
         println!(
           "Gamedata project verified in {} sec",
           (verify_result.duration as f64) / 1000.0
         );
-        println!("{}", "Project gamedata is valid".green());
       }
     } else {
       if verify_options.is_logging_enabled() {
-        println!(
-          "Gamedata project checked in {} sec",
-          (verify_result.duration as f64) / 1000.0
-        );
         println!("{}", "Project gamedata is invalid".red());
 
         for message in verify_result.get_failure_messages() {
           println!("- {}", message);
         }
+
+        println!(
+          "Gamedata project checked in {} sec",
+          (verify_result.duration as f64) / 1000.0
+        );
       }
 
       process::exit(1);

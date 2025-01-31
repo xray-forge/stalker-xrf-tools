@@ -9,7 +9,8 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataSoundsVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata sounds (todo):".green());
+      println!("{}", "Verify sounds:".green());
+      println!("  - todo")
     }
 
     Ok(GamedataSoundsVerificationResult {})

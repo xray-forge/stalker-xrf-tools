@@ -16,7 +16,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataTexturesVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata textures:".green());
+      println!("{}", "Verify textures:".green());
     }
 
     let started_at: Instant = Instant::now();
@@ -28,7 +28,7 @@ impl GamedataProject {
       .par_iter()
       .for_each(|path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify gamedata texture: {}", path);
+          println!("Verify texture: {}", path);
         }
 
         *checked_textures_count.lock().unwrap() += 1;

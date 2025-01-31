@@ -18,7 +18,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataScriptsVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata scripts:".green(),);
+      println!("{}", "Verify scripts:".green());
     }
 
     let started_at: Instant = Instant::now();
@@ -30,7 +30,7 @@ impl GamedataProject {
       .par_iter()
       .for_each(|path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify gamedata script: {}", path);
+          println!("Verify script: {}", path);
         }
 
         *checked_scripts_count.lock().unwrap() += 1;

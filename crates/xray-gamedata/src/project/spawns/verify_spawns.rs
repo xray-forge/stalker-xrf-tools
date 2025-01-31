@@ -25,11 +25,7 @@ impl GamedataProject {
       .collect::<Vec<_>>();
 
     if options.is_logging_enabled() {
-      println!(
-        "{} {}",
-        "Verify gamedata spawns:".green(),
-        spawn_files.len()
-      );
+      println!("{} {}", "Verify spawns:".green(), spawn_files.len());
     }
 
     if spawn_files.is_empty() {

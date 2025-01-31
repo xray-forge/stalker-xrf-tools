@@ -1,3 +1,4 @@
+use crate::project::gamedata_verification_type::GamedataVerificationType;
 use std::path::PathBuf;
 
 #[derive(Default)]
@@ -25,6 +26,7 @@ pub struct GamedataProjectVerifyOptions {
   pub is_verbose: bool,
   pub is_silent: bool,
   pub is_strict: bool,
+  pub checks: Vec<GamedataVerificationType>,
 }
 
 impl GamedataProjectVerifyOptions {

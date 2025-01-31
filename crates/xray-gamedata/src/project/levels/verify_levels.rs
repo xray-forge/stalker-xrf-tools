@@ -9,7 +9,8 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataLevelVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata levels (todo):".green(),);
+      println!("{}", "Verify levels:".green());
+      println!("  - todo");
     }
 
     // todo: For now just mark files as used.

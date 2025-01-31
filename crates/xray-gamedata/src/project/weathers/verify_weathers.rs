@@ -10,7 +10,8 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataWeathersVerificationResult> {
     if options.is_logging_enabled() {
-      println!("{}", "Verify gamedata weathers (todo):".green(),);
+      println!("{}", "Verify weathers:".green());
+      println!("  - todo");
     }
 
     let started_at: Instant = Instant::now();
