@@ -6,7 +6,9 @@ members = [
     "crates/xray-archive",
     "crates/xray-chunk",
     "crates/xray-db",
-    "crates/xray-delharc", "crates/xray-error", "crates/xray-error-derive",
+    "crates/xray-delharc",
+    "crates/xray-error",
+    "crates/xray-error-derive",
     "crates/xray-export",
     "crates/xray-gamedata",
     "crates/xray-ltx",
@@ -20,5 +22,5 @@ members = [
 panic = "abort"
 codegen-units = 1
 lto = true
-opt-level = "s"
+opt-level = "z"
 strip = true
