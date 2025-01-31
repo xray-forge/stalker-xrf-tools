@@ -49,10 +49,11 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli
 
 ### Release
 
-APP: `cargo make build-app-release`
+APP: `cargo make build-app-release`\
 CLI: `cargo make build-cli-release`
 
 ### Dev
 
-APP-BACKEND: `cargo make serve-backend`
+APP-BACKEND: `cargo make serve-backend`\
 APP-UI: `cargo make serve-ui`
+CLI: `cargo make build-cli`
