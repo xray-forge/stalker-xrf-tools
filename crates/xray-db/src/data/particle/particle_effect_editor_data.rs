@@ -1,12 +1,12 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::export::file_import::read_ltx_field;
-use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use xray_chunk::{read_till_end_binary_chunk, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::{decode_bytes_from_base64, encode_bytes_to_base64};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -67,7 +67,7 @@ impl ParticleEffectEditorData {
     );
 
     Ok(Self {
-      value: bytes_from_base64(&read_ltx_field::<String>("value", section)?)?,
+      value: decode_bytes_from_base64(&read_ltx_field::<String>("value", section)?)?,
     })
   }
 
@@ -85,7 +85,7 @@ impl ParticleEffectEditorData {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
-      .set("value", bytes_to_base64(&self.value));
+      .set("value", encode_bytes_to_base64(&self.value));
 
     Ok(())
   }

@@ -1,14 +1,14 @@
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use crate::export::file_import::read_ltx_field;
-use crate::export::string::{string_from_base64, string_to_base64};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::{decode_string_from_base64, encode_string_to_base64};
 
-/// Generic alife object abstraction data.
+/// Generic ALife object abstraction data.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AlifeObjectAbstract {
@@ -23,7 +23,7 @@ pub struct AlifeObjectAbstract {
 }
 
 impl AlifeObjectReader for AlifeObjectAbstract {
-  /// Read generic alife object base data from the chunk reader.
+  /// Read generic ALife object base data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       game_vertex_id: reader.read_u16::<T>()?,
@@ -37,7 +37,7 @@ impl AlifeObjectReader for AlifeObjectAbstract {
     })
   }
 
-  /// Import generic alife object base data from ltx config section.
+  /// Import generic ALife object base data from ltx config section.
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -53,7 +53,7 @@ impl AlifeObjectReader for AlifeObjectAbstract {
       direct_control: read_ltx_field("direct_control", section)?,
       level_vertex_id: read_ltx_field("level_vertex_id", section)?,
       flags: read_ltx_field("flags", section)?,
-      custom_data: string_from_base64(&read_ltx_field::<String>("custom_data", section)?)?,
+      custom_data: decode_string_from_base64(&read_ltx_field::<String>("custom_data", section)?)?,
       story_id: read_ltx_field("story_id", section)?,
       spawn_story_id: read_ltx_field("spawn_story_id", section)?,
     })
@@ -85,7 +85,7 @@ impl AlifeObjectWriter for AlifeObjectAbstract {
       .set("direct_control", self.direct_control.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
       .set("flags", self.flags.to_string())
-      .set("custom_data", &string_to_base64(&self.custom_data))
+      .set("custom_data", encode_string_to_base64(&self.custom_data))
       .set("story_id", self.story_id.to_string())
       .set("spawn_story_id", self.spawn_story_id.to_string());
 

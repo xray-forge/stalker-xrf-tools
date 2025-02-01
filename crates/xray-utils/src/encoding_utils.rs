@@ -1,10 +1,16 @@
+use base64::engine::{general_purpose, GeneralPurpose};
+use base64::{alphabet, Engine};
 use encoding_rs::{Encoding, UTF_8};
 use encoding_rs::{WINDOWS_1250, WINDOWS_1251};
 use std::borrow::Cow;
 use std::io;
 use std::io::{ErrorKind, Read};
+use xray_error::{XRayError, XRayResult};
 
 pub type XRayEncoding = &'static Encoding;
+
+pub const CUSTOM_B64_ENGINE: GeneralPurpose =
+  GeneralPurpose::new(&alphabet::URL_SAFE, general_purpose::NO_PAD);
 
 /// Return encoding factory for windows1250.
 pub fn get_windows1250_encoder() -> XRayEncoding {
@@ -106,4 +112,37 @@ pub fn encode_windows1251_bytes_to_string(bytes: &[u8]) -> io::Result<String> {
 /// Try encoding provided string as windows1251 bytes.
 pub fn encode_string_to_windows1251_bytes(string: &str) -> io::Result<Vec<u8>> {
   encode_string_to_bytes(string, WINDOWS_1251)
+}
+
+/// Encode str as b64 value.
+pub fn encode_string_to_base64(string: &str) -> String {
+  CUSTOM_B64_ENGINE.encode(string)
+}
+
+/// Encode bytes as b64 value.
+pub fn encode_bytes_to_base64(bytes: &[u8]) -> String {
+  CUSTOM_B64_ENGINE.encode(bytes)
+}
+
+/// Decode b64 as bytes.
+pub fn decode_bytes_from_base64(string: &str) -> XRayResult<Vec<u8>> {
+  CUSTOM_B64_ENGINE.decode(string).map_err(|error| {
+    XRayError::new_parsing_error(format!(
+      "Failed to decode bytes value from base 64: {}",
+      error
+    ))
+  })
+}
+
+/// Decode b64 as string.
+pub fn decode_string_from_base64(string: &str) -> XRayResult<String> {
+  Ok(match CUSTOM_B64_ENGINE.decode(string) {
+    Ok(value) => String::from_utf8_lossy(&value).into_owned(),
+    Err(error) => {
+      return Err(XRayError::new_parsing_error(format!(
+        "Failed to decode string value from base 64: {}",
+        error
+      )))
+    }
+  })
 }

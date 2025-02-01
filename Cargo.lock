@@ -7001,7 +7001,6 @@ dependencies = [
 name = "xray-db"
 version = "0.1.0"
 dependencies = [
- "base64 0.22.1",
  "byteorder",
  "derive_more 1.0.0",
  "enum-map",
@@ -7127,6 +7126,7 @@ dependencies = [
 name = "xray-utils"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "encoding_rs",
  "xray-error",
 ]

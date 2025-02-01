@@ -48,13 +48,11 @@ impl<D: ChunkDataSource> ChunkReader<D> {
   }
 
   /// Read \r\n terminated windows encoded string from file bytes.
-  #[inline(never)]
   pub fn read_rn_terminated_win_string(&mut self) -> XRayResult<String> {
     self.read_rn_terminated_win_string_limited(10_240)
   }
 
   /// Read \r\n terminated windows encoded string from file bytes.
-  #[inline(never)]
   pub fn read_rn_terminated_win_string_limited(&mut self, limit: usize) -> XRayResult<String> {
     let mut buffer: [u8; STRING_READ_BUFFER_SIZE] = [0u8; STRING_READ_BUFFER_SIZE];
     let mut collected: Vec<u8> = Vec::new();

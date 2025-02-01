@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use xray_error::{XRayError, XRayResult};
 
 /// Assert condition.
+#[inline(always)]
 pub fn assert(condition: bool, message: &str) -> XRayResult {
   if condition {
     Ok(())
@@ -11,6 +12,7 @@ pub fn assert(condition: bool, message: &str) -> XRayResult {
 }
 
 /// Assert data values are equal.
+#[inline(always)]
 pub fn assert_equal<T: PartialEq + Debug>(first: T, second: T, message: &str) -> XRayResult {
   if first == second {
     Ok(())
@@ -23,6 +25,7 @@ pub fn assert_equal<T: PartialEq + Debug>(first: T, second: T, message: &str) ->
 }
 
 /// Assert data values are not equal.
+#[inline(always)]
 pub fn assert_not_equal<T: PartialEq + Debug>(first: T, second: T, message: &str) -> XRayResult {
   if first != second {
     Ok(())

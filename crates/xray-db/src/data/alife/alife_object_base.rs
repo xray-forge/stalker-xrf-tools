@@ -6,14 +6,13 @@ use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::cls_id::ClsId;
 use crate::export::file_import::read_ltx_field;
-use crate::export::string::{bytes_from_base64, bytes_to_base64};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::assert;
+use xray_utils::{assert, decode_bytes_from_base64, encode_bytes_to_base64};
 
 /// Generic abstract alife object base.
 #[derive(Debug, Serialize, Deserialize)]
@@ -244,7 +243,7 @@ impl AlifeObjectBase {
       client_data_size: read_ltx_field("client_data_size", section)?,
       spawn_id: read_ltx_field("spawn_id", section)?,
       inherited: AlifeClass::import_by_class(&AlifeClass::from_cls_id(&clsid), section_name, ltx)?,
-      update_data: bytes_from_base64(&read_ltx_field::<String>("update_data", section)?)?,
+      update_data: decode_bytes_from_base64(&read_ltx_field::<String>("update_data", section)?)?,
     })
   }
 
@@ -276,7 +275,7 @@ impl AlifeObjectBase {
 
     ltx
       .with_section(section_name)
-      .set("update_data", bytes_to_base64(&self.update_data));
+      .set("update_data", encode_bytes_to_base64(&self.update_data));
 
     Ok(())
   }
