@@ -1,4 +1,4 @@
-use crate::file::section::section::Section;
+use crate::file::file_section::section::Section;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;
 use fxhash::FxBuildHasher;

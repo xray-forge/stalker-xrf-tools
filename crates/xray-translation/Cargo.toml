@@ -12,3 +12,6 @@ serde_json = "1.0.138"
 walkdir = "2.5.0"
 xray-error = { path = "../xray-error" }
 xray-utils = { path = "../xray-utils" }
+
+[lints]
+workspace = true

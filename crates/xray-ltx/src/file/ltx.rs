@@ -1,7 +1,7 @@
+use crate::file::file_section::section_entry::SectionEntry;
+use crate::file::file_section::section_setter::SectionSetter;
 use crate::file::include::LtxIncludeConvertor;
 use crate::file::inherit::LtxInheritConvertor;
-use crate::file::section::section_entry::SectionEntry;
-use crate::file::section::section_setter::SectionSetter;
 use crate::file::types::{LtxIncluded, LtxSections};
 use crate::{Section, ROOT_SECTION};
 use std::ops::{Index, IndexMut};

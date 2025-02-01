@@ -7,3 +7,6 @@ edition = "2021"
 base64 = "0.22.1"
 encoding_rs = "0.8.35"
 xray-error = { path = "../xray-error" }
+
+[lints]
+workspace = true

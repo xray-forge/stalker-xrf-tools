@@ -113,12 +113,9 @@ impl Shape {
           )));
         }
         _ => {
-          return Err(
-            XRayError::new_parsing_error(format!(
-              "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
-            ))
-            .into(),
-          )
+          return Err(XRayError::new_parsing_error(format!(
+            "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
+          )))
         }
       }
     }

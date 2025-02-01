@@ -18,3 +18,6 @@ xray-error = { path = "../../crates/xray-error" }
 xray-texture = { path = "../../crates/xray-texture" }
 xray-translation = { path = "../../crates/xray-translation" }
 xray-utils = { path = "../../crates/xray-utils" }
+
+[lints]
+workspace = true

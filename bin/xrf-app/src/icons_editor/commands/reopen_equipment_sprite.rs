@@ -2,7 +2,6 @@ use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState}
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
 use serde_json::{json, Value};
-use std::path::PathBuf;
 use std::sync::MutexGuard;
 use tauri::State;
 use xray_ltx::Ltx;
@@ -25,7 +24,7 @@ pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Taur
   let ltx_path: &String = ltx_path_lock.as_ref().unwrap();
   let dds_path: &String = dds_path_lock.as_ref().unwrap();
 
-  let (image, preview_buffer) = open_dds_as_png(&PathBuf::from(dds_path))
+  let (image, preview_buffer) = open_dds_as_png(dds_path)
     .map_err(|error| format!("Failed to open provided image file: {}", error))?;
 
   let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(

@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 /*! A library for parsing and extracting content of [LHA/LZH](https://en.wikipedia.org/wiki/LHA_(file_format)) archives.
 
 This library is for easy parsing of LHA headers and allows to read files compressed with some of the

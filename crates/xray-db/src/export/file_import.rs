@@ -105,9 +105,9 @@ pub fn read_ini_u32_bytes_field(field: &str, section: &Section) -> XRayResult<U3
     import_sized_vector_from_string(4, &read_ltx_field::<String>(field, section)?)?;
 
   Ok((
-    *vertex_type.get(0).unwrap(),
-    *vertex_type.get(1).unwrap(),
-    *vertex_type.get(2).unwrap(),
-    *vertex_type.get(3).unwrap(),
+    vertex_type[0],
+    vertex_type[1],
+    vertex_type[2],
+    vertex_type[3],
   ))
 }

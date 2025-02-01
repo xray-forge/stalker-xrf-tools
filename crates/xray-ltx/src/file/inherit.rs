@@ -1,4 +1,4 @@
-use crate::file::section::section::Section;
+use crate::file::file_section::section::Section;
 use crate::file::types::LtxSections;
 use crate::Ltx;
 use xray_error::{XRayError, XRayResult};

@@ -30,3 +30,6 @@ xray-translation = { path = "../../crates/xray-translation" }
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+
+[lints]
+workspace = true

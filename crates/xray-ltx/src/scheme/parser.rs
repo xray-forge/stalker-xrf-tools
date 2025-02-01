@@ -1,8 +1,8 @@
-use crate::file::configuration::constants::{
+use crate::file::file_configuration::constants::{
   LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME,
 };
+use crate::file::file_section::section::Section;
 use crate::file::ltx::Ltx;
-use crate::file::section::section::Section;
 use crate::file::types::LtxSectionSchemes;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::scheme::field_scheme::LtxFieldScheme;

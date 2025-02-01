@@ -16,3 +16,6 @@ xray-db = { path = "../xray-db" }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
 xray-utils = { path = "../xray-utils" }
+
+[lints]
+workspace = true

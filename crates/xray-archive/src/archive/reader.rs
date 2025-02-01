@@ -113,7 +113,7 @@ impl ArchiveReader {
 
     Ok(file_descriptors.map(|file_descriptors| ArchiveHeader {
       archive_path: self.path.clone(),
-      output_root_path: PathBuf::from(root_path),
+      output_root_path: root_path.into(),
       files: file_descriptors,
     }))
   }

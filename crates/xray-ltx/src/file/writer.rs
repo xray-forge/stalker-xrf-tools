@@ -1,5 +1,5 @@
-use crate::file::configuration::constants::ROOT_SECTION;
-use crate::file::configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
+use crate::file::file_configuration::constants::ROOT_SECTION;
+use crate::file::file_configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
 use crate::Ltx;
 use std::fs;
 use std::io::Write;
@@ -88,7 +88,7 @@ impl Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::file::configuration::line_separator::DEFAULT_LINE_SEPARATOR;
+  use crate::file::file_configuration::line_separator::DEFAULT_LINE_SEPARATOR;
   use crate::{Ltx, ROOT_SECTION};
 
   #[test]

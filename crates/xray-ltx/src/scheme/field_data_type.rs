@@ -1,4 +1,4 @@
-use crate::file::configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
+use crate::file::file_configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
 use std::fmt::Display;
 use xray_error::{XRayError, XRayResult};
 use xray_utils::assert_equal;

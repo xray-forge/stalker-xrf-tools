@@ -12,3 +12,6 @@ swc_ecma_parser = "7.0.1"
 walkdir = "2.5.0"
 xray-error = { path = "../xray-error" }
 xray-utils = { path = "../xray-utils" }
+
+[lints]
+workspace = true

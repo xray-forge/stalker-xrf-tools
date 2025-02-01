@@ -1,5 +1,5 @@
+use crate::file::file_section::section::Section;
 use crate::file::ltx::Ltx;
-use crate::file::section::section::Section;
 use indexmap::map::{IntoIter, Iter, IterMut};
 
 pub struct PropertyIter<'a> {

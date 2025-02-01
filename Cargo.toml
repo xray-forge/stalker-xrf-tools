@@ -24,3 +24,10 @@ codegen-units = 1
 lto = true
 opt-level = "z"
 strip = true
+
+[workspace.lints.rust]
+unused = "allow"
+
+[workspace.lints.clippy]
+extra_unused_type_parameters = "allow"
+doc_lazy_continuation = "allow"

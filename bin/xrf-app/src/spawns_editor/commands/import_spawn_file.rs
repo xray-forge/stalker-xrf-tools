@@ -1,6 +1,6 @@
 use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use tauri::State;
 use xray_db::{SpawnFile, XRayByteOrder};
 

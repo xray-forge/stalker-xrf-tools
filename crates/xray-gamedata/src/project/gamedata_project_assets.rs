@@ -132,7 +132,7 @@ impl GamedataProject {
       .iter()
       .filter_map(|(path, _)| {
         if path.ends_with(filter) {
-          self.get_absolute_asset_path(&path)
+          self.get_absolute_asset_path(path)
         } else {
           None
         }

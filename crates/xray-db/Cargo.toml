@@ -25,3 +25,6 @@ xray-utils = { path = "../xray-utils" }
 
 [dev-dependencies]
 xray-test-utils = { path = "../xray-test-utils" }
+
+[lints]
+workspace = true

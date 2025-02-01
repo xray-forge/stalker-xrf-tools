@@ -1,7 +1,7 @@
 use crate::exports_editor::state::{ExportsDeclarations, ExportsEditorState};
 use crate::types::TauriResult;
+use crate::utils::error_to_string;
 use serde_json::{json, Value};
-use std::path::PathBuf;
 use tauri::State;
 use xray_export::ExportsParser;
 
@@ -18,14 +18,14 @@ pub async fn open_xr_exports(
 
   let declaration: ExportsDeclarations = ExportsDeclarations {
     conditions: parser
-      .parse_conditions_from_path(&PathBuf::from(conditions_path))
-      .map_err(|x| x.to_string())?,
+      .parse_conditions_from_path(conditions_path)
+      .map_err(error_to_string)?,
     dialogs: parser
-      .parse_dialogs_from_path(&PathBuf::from(dialogs_path))
-      .map_err(|x| x.to_string())?,
+      .parse_dialogs_from_path(dialogs_path)
+      .map_err(error_to_string)?,
     effects: parser
-      .parse_effects_from_path(&PathBuf::from(effects_path))
-      .map_err(|x| x.to_string())?,
+      .parse_effects_from_path(effects_path)
+      .map_err(error_to_string)?,
   };
 
   let json: Value = json!(declaration);

@@ -12,7 +12,7 @@ pub struct ChunkIterator<'lifetime> {
   pub reader: &'lifetime mut ChunkReader,
 }
 
-impl<'lifetime> ChunkIterator<'lifetime> {
+impl ChunkIterator<'_> {
   pub fn new(reader: &mut ChunkReader) -> ChunkIterator {
     reader.source.seek(SeekFrom::Start(0)).unwrap();
 
@@ -21,7 +21,7 @@ impl<'lifetime> ChunkIterator<'lifetime> {
 }
 
 /// Iterates over chunk and read child samples.
-impl<'lifetime> Iterator for ChunkIterator<'lifetime> {
+impl Iterator for ChunkIterator<'_> {
   type Item = ChunkReader;
 
   fn next(&mut self) -> Option<ChunkReader> {
@@ -76,7 +76,7 @@ pub struct ChunkSizePackedIterator<'lifetime> {
   pub reader: &'lifetime mut ChunkReader,
 }
 
-impl<'lifetime> ChunkSizePackedIterator<'lifetime> {
+impl ChunkSizePackedIterator<'_> {
   pub fn new(reader: &mut ChunkReader) -> ChunkSizePackedIterator {
     ChunkSizePackedIterator {
       index: 0,
@@ -86,7 +86,7 @@ impl<'lifetime> ChunkSizePackedIterator<'lifetime> {
   }
 }
 
-impl<'lifetime> Iterator for ChunkSizePackedIterator<'lifetime> {
+impl Iterator for ChunkSizePackedIterator<'_> {
   type Item = ChunkReader;
 
   fn next(&mut self) -> Option<ChunkReader> {

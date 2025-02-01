@@ -1,11 +1,11 @@
-use crate::file::configuration::constants::{
+use crate::file::file_configuration::constants::{
   LTX_SYMBOL_COMMENT, LTX_SYMBOL_INCLUDE, LTX_SYMBOL_INHERIT, LTX_SYMBOL_SECTION_CLOSE,
   LTX_SYMBOL_SECTION_OPEN,
 };
-use crate::file::configuration::line_separator::LineSeparator;
+use crate::file::file_configuration::line_separator::LineSeparator;
+use crate::file::file_section::section::Section;
+use crate::file::file_section::section_entry::SectionEntry;
 use crate::file::formatter::LtxFormatter;
-use crate::file::section::section::Section;
-use crate::file::section::section_entry::SectionEntry;
 use crate::{Ltx, ROOT_SECTION};
 use std::str::Chars;
 use xray_error::{XRayError, XRayResult};
@@ -18,7 +18,7 @@ pub struct LtxParser<'a> {
   column: usize,
 }
 
-impl<'a> Default for LtxParser<'a> {
+impl Default for LtxParser<'_> {
   fn default() -> Self {
     Self {
       char: None,
@@ -212,7 +212,7 @@ impl<'a> LtxParser<'a> {
   }
 }
 
-impl<'a> LtxParser<'a> {
+impl LtxParser<'_> {
   fn bump(&mut self) {
     self.char = self.reader.next();
 
@@ -323,7 +323,7 @@ impl<'a> LtxParser<'a> {
   }
 }
 
-impl<'a> LtxParser<'a> {
+impl LtxParser<'_> {
   /// Parse section name, inherited sections and comment from the line.
   fn parse_section_from_line(
     &self,

@@ -1,4 +1,4 @@
-use crate::project::project::TranslationProject;
+use crate::project::translation_project::TranslationProject;
 use std::fs;
 use std::fs::File;
 use std::io::ErrorKind::AlreadyExists;

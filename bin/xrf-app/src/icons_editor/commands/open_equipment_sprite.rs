@@ -2,7 +2,6 @@ use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState}
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
 use serde_json::{json, Value};
-use std::path::PathBuf;
 use tauri::State;
 use xray_ltx::Ltx;
 use xray_texture::{open_dds_as_png, InventorySpriteDescriptor};
@@ -17,7 +16,7 @@ pub async fn open_equipment_sprite(
 
   let name: &str = "equipment.png";
 
-  let (image, preview_buffer) = open_dds_as_png(&PathBuf::from(equipment_dds_path))
+  let (image, preview_buffer) = open_dds_as_png(equipment_dds_path)
     .map_err(|error| format!("Failed to open provided image file: {}", error))?;
 
   log::info!("Opened equipment dds file");
