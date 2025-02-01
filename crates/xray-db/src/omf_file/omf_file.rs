@@ -1,7 +1,6 @@
 use crate::omf_file::chunks::omf_motions_chunk::OmfMotionsChunk;
 use crate::omf_file::chunks::omf_parameters_chunk::OmfParametersChunk;
 use byteorder::ByteOrder;
-use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
@@ -28,7 +27,7 @@ impl OmfFile {
   }
 
   pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
-    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     log::info!(
@@ -91,7 +90,7 @@ impl OmfFile {
   }
 
   pub fn read_motions_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
-    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     log::info!(

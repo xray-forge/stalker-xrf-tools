@@ -5,7 +5,6 @@ use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
 use crate::spawn_file::chunks::spawn_header_chunk::SpawnHeaderChunk;
 use crate::spawn_file::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
 use byteorder::ByteOrder;
-use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
@@ -40,7 +39,7 @@ impl SpawnFile {
 
   /// Read spawn file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
-    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
 
     Self::read_from_chunks::<T>(&reader.read_children())
   }

@@ -124,7 +124,6 @@ impl PatrolLink {
 #[cfg(test)]
 mod tests {
   use crate::data::patrol::patrol_link::PatrolLink;
-  use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
@@ -137,6 +136,7 @@ mod tests {
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
+  use xray_test_utils::FileSlice;
 
   #[test]
   fn test_read_write() -> XRayResult {

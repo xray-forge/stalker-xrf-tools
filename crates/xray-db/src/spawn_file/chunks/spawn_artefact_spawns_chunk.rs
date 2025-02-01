@@ -109,13 +109,13 @@ mod tests {
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::spawn_file::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
-  use fileslice::FileSlice;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+  use xray_test_utils::FileSlice;
 
   #[test]
   fn test_read_write() -> XRayResult {

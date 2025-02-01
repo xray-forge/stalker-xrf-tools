@@ -5,7 +5,6 @@ use crate::ogf_file::chunks::ogf_header_chunk::OgfHeaderChunk;
 use crate::ogf_file::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
 use crate::ogf_file::chunks::ogf_texture_chunk::OgfTextureChunk;
 use byteorder::ByteOrder;
-use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
@@ -106,7 +105,7 @@ impl OgfFile {
 
   /// Read only list of motion refs specifically and skip other data parts.
   pub fn read_motions_refs_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
-    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     log::info!(

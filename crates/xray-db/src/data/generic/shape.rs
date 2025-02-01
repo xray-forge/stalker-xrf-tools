@@ -161,7 +161,6 @@ impl Shape {
 mod tests {
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
-  use fileslice::FileSlice;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
@@ -174,6 +173,7 @@ mod tests {
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
+  use xray_test_utils::FileSlice;
 
   #[test]
   fn test_read_write_list() -> XRayResult {

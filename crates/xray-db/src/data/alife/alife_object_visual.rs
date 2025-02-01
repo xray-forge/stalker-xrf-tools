@@ -66,7 +66,6 @@ mod tests {
   use crate::data::alife::alife_object_visual::AlifeObjectVisual;
   use crate::data::meta::alife_object_generic::AlifeObjectWriter;
   use crate::data::meta::alife_object_reader::AlifeObjectReader;
-  use fileslice::FileSlice;
   use std::fs::File;
   use std::path::Path;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
@@ -76,6 +75,7 @@ mod tests {
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
+  use xray_test_utils::FileSlice;
 
   #[test]
   fn test_read_write() -> XRayResult {

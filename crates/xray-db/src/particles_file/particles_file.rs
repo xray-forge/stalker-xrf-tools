@@ -4,7 +4,6 @@ use crate::particles_file::chunks::particles_firstgen_chunk::ParticlesFirstgenCh
 use crate::particles_file::chunks::particles_groups_chunk::ParticlesGroupsChunk;
 use crate::particles_file::chunks::particles_header_chunk::ParticlesHeaderChunk;
 use byteorder::ByteOrder;
-use fileslice::FileSlice;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
@@ -29,7 +28,7 @@ impl ParticlesFile {
 
   /// Read particles xr from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
-    let mut reader: ChunkReader = ChunkReader::from_slice(FileSlice::new(file))?;
+    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     log::info!(

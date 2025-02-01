@@ -247,7 +247,6 @@ mod tests {
   use crate::data::graph::graph_level_point::GraphLevelPoint;
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::spawn_file::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
-  use fileslice::FileSlice;
   use uuid::uuid;
   use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
@@ -255,6 +254,7 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+  use xray_test_utils::FileSlice;
 
   #[test]
   fn test_read_write_empty() -> XRayResult {
