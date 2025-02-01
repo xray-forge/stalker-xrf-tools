@@ -99,8 +99,8 @@ impl Time {
 impl FromStr for Time {
   type Err = XRayError;
 
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    let parts: Vec<&str> = s.split(',').map(|it| it.trim()).collect();
+  fn from_str(string: &str) -> Result<Self, Self::Err> {
+    let parts: Vec<&str> = string.split(',').map(|it| it.trim()).collect();
 
     if parts.len() != 7 {
       return Err(XRayError::new_parsing_error(

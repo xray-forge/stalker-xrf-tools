@@ -1,20 +1,9 @@
 use crate::chunk::source::chunk_data_source::ChunkDataSource;
-use crate::types::U32Bytes;
 use crate::ChunkReader;
 use byteorder::{ByteOrder, ReadBytesExt};
 use xray_error::XRayResult;
 
 impl<D: ChunkDataSource> ChunkReader<D> {
-  /// Read u32 as 4 separate bytes with preserved order.
-  pub fn read_u32_bytes(&mut self) -> XRayResult<U32Bytes> {
-    Ok((
-      self.read_u8()?,
-      self.read_u8()?,
-      self.read_u8()?,
-      self.read_u8()?,
-    ))
-  }
-
   /// Read serialized vector from chunk, where u32 count N is followed by N u16 entries.
   pub fn read_u16_vector<T: ByteOrder>(&mut self) -> XRayResult<Vec<u16>> {
     let count: u32 = self.read_u32::<T>()?;
@@ -39,23 +28,6 @@ mod tests {
   use crate::chunk::source::chunk_memory_source::InMemoryChunkDataSource;
   use crate::XRayByteOrder;
   use xray_error::XRayResult;
-
-  #[test]
-  fn test_read_u32_bytes() -> XRayResult {
-    let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 1, 2, 3])?;
-
-    assert_eq!(chunk.read_bytes_remain(), 4, "Expect 4 bytes remaining");
-    assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
-
-    assert_eq!(
-      chunk.read_u32_bytes()?,
-      (0, 1, 2, 3),
-      "Expect correctly read 4 bytes"
-    );
-    assert_eq!(chunk.cursor_pos(), 4, "Expect 4 bytes read");
-
-    Ok(())
-  }
 
   #[test]
   fn test_read_u16_vector() -> XRayResult {

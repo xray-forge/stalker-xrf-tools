@@ -1,13 +1,13 @@
 use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::export::file_export::export_vector_to_string;
-use crate::export::file_import::{import_vector_from_string, read_ltx_field};
+use crate::export::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::{vector_from_string, vector_to_string};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,7 +24,7 @@ pub struct AlifeObjectCreature {
 }
 
 impl AlifeObjectReader for AlifeObjectCreature {
-  /// Read alife creature object data from the chunk reader.
+  /// Read ALife creature object data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
@@ -39,7 +39,7 @@ impl AlifeObjectReader for AlifeObjectCreature {
     })
   }
 
-  /// Import alife creature object from ltx config section.
+  /// Import ALife creature object from ltx config section.
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -55,11 +55,11 @@ impl AlifeObjectReader for AlifeObjectCreature {
       squad: read_ltx_field("squad", section)?,
       group: read_ltx_field("group", section)?,
       health: read_ltx_field("health", section)?,
-      dynamic_out_restrictions: import_vector_from_string(&read_ltx_field::<String>(
+      dynamic_out_restrictions: vector_from_string(&read_ltx_field::<String>(
         "dynamic_out_restrictions",
         section,
       )?)?,
-      dynamic_in_restrictions: import_vector_from_string(&read_ltx_field::<String>(
+      dynamic_in_restrictions: vector_from_string(&read_ltx_field::<String>(
         "dynamic_in_restrictions",
         section,
       )?)?,
@@ -71,7 +71,7 @@ impl AlifeObjectReader for AlifeObjectCreature {
 
 #[typetag::serde]
 impl AlifeObjectWriter for AlifeObjectCreature {
-  /// Write alife creature object data into the chunk writer.
+  /// Write ALife creature object data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
@@ -101,11 +101,11 @@ impl AlifeObjectWriter for AlifeObjectCreature {
       .set("health", self.health.to_string())
       .set(
         "dynamic_out_restrictions",
-        export_vector_to_string(&self.dynamic_out_restrictions),
+        vector_to_string(&self.dynamic_out_restrictions),
       )
       .set(
         "dynamic_in_restrictions",
-        export_vector_to_string(&self.dynamic_in_restrictions),
+        vector_to_string(&self.dynamic_in_restrictions),
       )
       .set("killer_id", self.killer_id.to_string())
       .set("game_death_time", self.game_death_time.to_string());

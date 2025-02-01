@@ -70,8 +70,8 @@ impl TranslationLanguage {
 impl FromStr for TranslationLanguage {
   type Err = XRayError;
 
-  fn from_str(language: &str) -> Result<Self, Self::Err> {
-    match language {
+  fn from_str(string: &str) -> Result<Self, Self::Err> {
+    match string {
       "all" => Ok(Self::All),
       "eng" => Ok(Self::English),
       "fra" => Ok(Self::French),

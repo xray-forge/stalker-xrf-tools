@@ -1,12 +1,12 @@
+use crate::data::generic::u32_bytes::U32Bytes;
 use crate::data::generic::vector_3d::Vector3d;
-use crate::export::file_export::export_vector_to_string;
-use crate::export::file_import::{read_ini_u32_bytes_field, read_ltx_field};
-use crate::types::U32Bytes;
+use crate::export::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::vector_to_string;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -30,7 +30,7 @@ impl GraphVertex {
       game_point: Vector3d::read::<T>(reader)?,
       level_id: reader.read_u8()?,
       level_vertex_id: reader.read_u24::<T>()?,
-      vertex_type: reader.read_u32_bytes()?,
+      vertex_type: U32Bytes::read::<T>(reader)?,
       edges_offset: reader.read_u32::<T>()?,
       level_points_offset: reader.read_u32::<T>()?,
       edges_count: reader.read_u8()?,
@@ -45,7 +45,7 @@ impl GraphVertex {
 
     writer.write_u8(self.level_id)?;
     writer.write_u24::<T>(self.level_vertex_id)?;
-    writer.write_u32_bytes(&self.vertex_type)?;
+    self.vertex_type.write::<T>(writer)?;
     writer.write_u32::<T>(self.edges_offset)?;
     writer.write_u32::<T>(self.level_points_offset)?;
     writer.write_u8(self.edges_count)?;
@@ -69,7 +69,7 @@ impl GraphVertex {
       game_point: read_ltx_field("game_point", section)?,
       level_id: read_ltx_field("level_id", section)?,
       level_vertex_id: read_ltx_field("level_vertex_id", section)?,
-      vertex_type: read_ini_u32_bytes_field("vertex_type", section)?,
+      vertex_type: read_ltx_field("vertex_type", section)?,
       edges_offset: read_ltx_field("edge_offset", section)?,
       level_points_offset: read_ltx_field("level_point_offset", section)?,
       edges_count: read_ltx_field("edge_count", section)?,
@@ -91,7 +91,7 @@ impl GraphVertex {
       .set("level_point_count", self.level_points_count.to_string())
       .set(
         "vertex_type",
-        export_vector_to_string(&[
+        vector_to_string(&[
           self.vertex_type.0,
           self.vertex_type.1,
           self.vertex_type.2,
@@ -129,7 +129,7 @@ mod tests {
       game_point: Vector3d::new(0.5, -4.0, 1000.0),
       level_id: 255,
       level_vertex_id: 4000,
-      vertex_type: (1, 2, 3, 4),
+      vertex_type: (1, 2, 3, 4).into(),
       edges_offset: 540,
       level_points_offset: 4000,
       edges_count: 252,
@@ -171,7 +171,7 @@ mod tests {
       game_point: Vector3d::new(0.23, -4.0, 123.0),
       level_id: 53,
       level_vertex_id: 5462,
-      vertex_type: (1, 2, 3, 4),
+      vertex_type: (1, 2, 3, 4).into(),
       edges_offset: 5643,
       level_points_offset: 2134,
       edges_count: 14,
@@ -201,7 +201,7 @@ mod tests {
       game_point: Vector3d::new(0.44, -4.0, 1000.0),
       level_id: 213,
       level_vertex_id: 5234,
-      vertex_type: (1, 2, 3, 4),
+      vertex_type: (1, 2, 3, 4).into(),
       edges_offset: 3242,
       level_points_offset: 6345,
       edges_count: 211,

@@ -78,8 +78,8 @@ impl Display for ParticleDomain {
 impl FromStr for ParticleDomain {
   type Err = XRayError;
 
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    let parts: Vec<&str> = s.split(',').collect();
+  fn from_str(string: &str) -> Result<Self, Self::Err> {
+    let parts: Vec<&str> = string.split(',').collect();
 
     if parts.len() != 17 {
       return Err(XRayError::new_parsing_error(

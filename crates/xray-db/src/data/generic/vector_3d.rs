@@ -47,8 +47,8 @@ impl From<(f32, f32, f32)> for Vector3d<f32> {
 impl FromStr for Vector3d<f32> {
   type Err = XRayError;
 
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    let parts: Vec<&str> = s.split(',').collect();
+  fn from_str(string: &str) -> Result<Self, Self::Err> {
+    let parts: Vec<&str> = string.split(',').collect();
 
     if parts.len() != 3 {
       return Err(XRayError::new_parsing_error(
