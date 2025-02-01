@@ -1,5 +1,4 @@
 use crate::data::patrol::patrol::Patrol;
-use crate::export::file::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -8,6 +7,7 @@ use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
+use xray_utils::open_export_file;
 
 /// `CPatrolPathStorage::load` in xray engine.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -73,10 +73,10 @@ impl SpawnPatrolsChunk {
   }
 
   /// Import patrols data from provided path.
-  pub fn import(path: &Path) -> XRayResult<Self> {
-    let patrols_ltx: Ltx = Ltx::read_from_path(&path.join("patrols.ltx"))?;
-    let patrol_points_ltx: Ltx = Ltx::read_from_path(&path.join("patrol_points.ltx"))?;
-    let patrol_links_ltx: Ltx = Ltx::read_from_path(&path.join("patrol_links.ltx"))?;
+  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+    let patrols_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrols.ltx"))?;
+    let patrol_points_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_points.ltx"))?;
+    let patrol_links_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_links.ltx"))?;
 
     let mut patrols: Vec<Patrol> = Vec::new();
 
@@ -95,7 +95,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  pub fn export(&self, path: &Path) -> XRayResult {
+  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut patrols_ltx: Ltx = Ltx::new();
     let mut patrol_points_ltx: Ltx = Ltx::new();
     let mut patrol_links_ltx: Ltx = Ltx::new();
@@ -109,9 +109,13 @@ impl SpawnPatrolsChunk {
       )?;
     }
 
-    patrols_ltx.write_to(&mut create_export_file(&path.join("patrols.ltx"))?)?;
-    patrol_points_ltx.write_to(&mut create_export_file(&path.join("patrol_points.ltx"))?)?;
-    patrol_links_ltx.write_to(&mut create_export_file(&path.join("patrol_links.ltx"))?)?;
+    patrols_ltx.write_to(&mut open_export_file(path.as_ref().join("patrols.ltx"))?)?;
+    patrol_points_ltx.write_to(&mut open_export_file(
+      path.as_ref().join("patrol_points.ltx"),
+    )?)?;
+    patrol_links_ltx.write_to(&mut open_export_file(
+      path.as_ref().join("patrol_links.ltx"),
+    )?)?;
 
     log::info!("Exported patrols chunk");
 

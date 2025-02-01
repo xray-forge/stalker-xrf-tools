@@ -2,7 +2,7 @@ use image::ImageError;
 use serde::Serialize;
 use std::error::Error;
 use std::io;
-use std::io::Error as IoError;
+use std::io::{Error as IoError, ErrorKind};
 use thiserror::Error as ThisError;
 use xray_error_derive::ErrorConstructors;
 
@@ -131,6 +131,16 @@ impl XRayError {
       field: field.into(),
       message: message.into(),
       at: Some(at.into()),
+    }
+  }
+
+  pub fn new_io_error<T>(message: T, kind: ErrorKind) -> Self
+  where
+    T: Into<String>,
+  {
+    Self::Io {
+      message: message.into(),
+      kind,
     }
   }
 }

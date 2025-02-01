@@ -34,7 +34,7 @@ impl GenericCommand for VerifySpawnFileCommand {
 
     log::info!("Verify spawn file {}", path.display());
 
-    match SpawnFile::read_from_path::<XRayByteOrder>(path) {
+    match SpawnFile::read_from_path::<XRayByteOrder, &PathBuf>(path) {
       Ok(_) => {
         log::info!("Provided spawn file is valid");
 

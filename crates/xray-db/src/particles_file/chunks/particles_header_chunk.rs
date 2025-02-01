@@ -1,5 +1,4 @@
 use crate::constants::META_TYPE_FIELD;
-use crate::export::file::create_export_file;
 use crate::export::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -7,6 +6,7 @@ use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::open_export_file;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -49,10 +49,10 @@ impl ParticlesHeaderChunk {
 
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
-  pub fn import(path: &Path) -> XRayResult<Self> {
-    log::info!("Importing particles header: {}", path.display());
+  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+    log::info!("Importing particles header: {}", path.as_ref().display());
 
-    let ltx: Ltx = Ltx::read_from_path(&path.join("header.ltx"))?;
+    let ltx: Ltx = Ltx::read_from_path(&path.as_ref().join("header.ltx"))?;
     let section: &Section = ltx
       .section("header")
       .expect("Patrol section 'header' should be defined in ltx file");
@@ -74,7 +74,7 @@ impl ParticlesHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  pub fn export(&self, path: &Path) -> XRayResult {
+  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -82,7 +82,7 @@ impl ParticlesHeaderChunk {
       .set(META_TYPE_FIELD, Self::META_TYPE)
       .set("version", self.version.to_string());
 
-    ltx.write_to(&mut create_export_file(&path.join("header.ltx"))?)?;
+    ltx.write_to(&mut open_export_file(&path.as_ref().join("header.ltx"))?)?;
 
     log::info!("Exported header chunk");
 

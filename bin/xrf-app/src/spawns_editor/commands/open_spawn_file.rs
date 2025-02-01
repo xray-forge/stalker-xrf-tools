@@ -11,7 +11,7 @@ pub async fn open_spawn_file(
 ) -> TauriResult<Value> {
   log::info!("Opening spawn file");
 
-  match SpawnFile::read_from_path::<XRayByteOrder>(Path::new(path)) {
+  match SpawnFile::read_from_path::<XRayByteOrder, &Path>(Path::new(path)) {
     Ok(file) => {
       log::info!("Opened spawn file");
 

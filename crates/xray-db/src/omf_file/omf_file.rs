@@ -17,7 +17,7 @@ pub struct OmfFile {
 impl OmfFile {
   pub const SUPPORTED_VERSIONS: [u16; 2] = [3, 4];
 
-  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(&path).map_err(|error| {
       XRayError::new_not_found_error(format!(
         "OMF file was not read: {}, error: {error}",
@@ -85,7 +85,7 @@ impl OmfFile {
 
 impl OmfFile {
   /// Read only list of motions specifically and skip other data parts.
-  pub fn read_motions_from_path<T: ByteOrder>(path: &Path) -> XRayResult<Vec<String>> {
+  pub fn read_motions_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Vec<String>> {
     Self::read_motions_from_file::<T>(File::open(path)?)
   }
 

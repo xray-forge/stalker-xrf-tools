@@ -1,6 +1,5 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_group::ParticleGroup;
-use crate::export::file::create_export_file;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
@@ -8,6 +7,7 @@ use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
+use xray_utils::open_export_file;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -61,10 +61,10 @@ impl ParticlesGroupsChunk {
   }
 
   /// Import particles groups data from provided path.
-  pub fn import(path: &Path) -> XRayResult<Self> {
-    log::info!("Importing particles groups: {}", path.display());
+  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+    log::info!("Importing particles groups: {}", path.as_ref().display());
 
-    let ltx: Ltx = Ltx::read_from_path(&path.join("groups.ltx"))?;
+    let ltx: Ltx = Ltx::read_from_path(&path.as_ref().join("groups.ltx"))?;
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     for (section_name, section) in &ltx {
@@ -81,14 +81,14 @@ impl ParticlesGroupsChunk {
   }
 
   /// Export particles groups data into provided path.
-  pub fn export(&self, path: &Path) -> XRayResult {
+  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for group in &self.groups {
       group.export(&group.name, &mut particles_effects_ltx)?;
     }
 
-    particles_effects_ltx.write_to(&mut create_export_file(&path.join("groups.ltx"))?)?;
+    particles_effects_ltx.write_to(&mut open_export_file(&path.as_ref().join("groups.ltx"))?)?;
 
     log::info!("Exported groups chunk");
 

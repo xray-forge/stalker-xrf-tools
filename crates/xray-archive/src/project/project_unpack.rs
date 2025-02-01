@@ -14,7 +14,7 @@ use xray_error::XRayResult;
 use xray_utils::{assert, assert_equal, assert_not_equal};
 
 impl ArchiveProject {
-  pub fn unpack(&self, destination: &Path) -> XRayResult<ArchiveUnpackResult> {
+  pub fn unpack<P: AsRef<Path>>(&self, destination: P) -> XRayResult<ArchiveUnpackResult> {
     let start: Instant = Instant::now();
     let lzo: LZO = LZO::init().unwrap();
 
@@ -22,14 +22,14 @@ impl ArchiveProject {
     let unpacked_files_chunk: usize = max(self.files.len() / 100 * 5, 5);
 
     // Prepare structure of folders for further unpacking.
-    self.unpack_dirs(destination)?;
+    self.unpack_dirs(destination.as_ref())?;
 
     let prepared_at: Duration = start.elapsed();
 
     // Unpack each separate file.
     for file_descriptor in self.files.values() {
       if file_descriptor.size_real > 0 {
-        Self::unpack_file(&lzo, destination, file_descriptor).unwrap();
+        Self::unpack_file(&lzo, destination.as_ref(), file_descriptor)?;
       }
 
       unpacked_files_count += 1;
@@ -50,7 +50,7 @@ impl ArchiveProject {
         .iter()
         .map(|it| it.path.to_str().unwrap().into())
         .collect(),
-      destination: destination.to_str().unwrap().into(),
+      destination: destination.as_ref().to_str().unwrap().into(),
       duration: unpacked_at.as_millis(),
       prepare_duration: prepared_at.as_millis(),
       unpack_duration: unpacked_at.as_millis() - prepared_at.as_millis(),
@@ -182,18 +182,16 @@ impl ArchiveProject {
     Ok(())
   }
 
-  fn unpack_dirs(&self, destination: &Path) -> XRayResult {
+  fn unpack_dirs<P: AsRef<Path>>(&self, destination: P) -> XRayResult {
     let mut set: HashSet<PathBuf> = HashSet::new();
-
-    let destination_path: PathBuf = destination.into();
 
     for descriptor in self.files.values() {
       set.insert(
-        destination_path
+        PathBuf::from(destination.as_ref())
           .join(&descriptor.destination)
           .join(&descriptor.name)
           .parent()
-          .unwrap()
+          .expect("Unpacked archive dire parent expected")
           .into(),
       );
     }

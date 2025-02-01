@@ -12,20 +12,20 @@ pub fn read_file_as_string(file: &mut File) -> IoResult<String> {
 }
 
 /// Create and open file by path, overwrite existing one.
-pub fn overwrite_file(path: &Path) -> IoResult<File> {
-  std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
+pub fn overwrite_file<P: AsRef<Path>>(path: P) -> IoResult<File> {
+  std::fs::create_dir_all(path.as_ref().parent().expect("Parent directory"))?;
 
   match OpenOptions::new()
     .create(true)
     .write(true)
     .truncate(true)
     .read(true)
-    .open(path)
+    .open(path.as_ref())
   {
     Ok(file) => Ok(file),
     Err(error) => Err(IoError::new(
       error.kind(),
-      format!("Failed to open test asset {}", path.display()),
+      format!("Failed to open test asset {}", path.as_ref().display()),
     )),
   }
 }

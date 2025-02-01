@@ -175,7 +175,7 @@ impl LtxProject {
   }
 
   /// Format single LTX file by provided path
-  pub fn verify_file(path: &Path) -> XRayResult<()> {
+  pub fn verify_file<P: AsRef<Path>>(path: P) -> XRayResult<()> {
     Ltx::read_from_file_full(path)?;
 
     Ok(())

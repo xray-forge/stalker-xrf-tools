@@ -99,24 +99,33 @@ impl GamedataProject {
 
     if let Some(visual_path) = &section.get("visual").and_then(|it| self.get_ogf_path(it)) {
       if options.is_verbose_logging_enabled() {
-        println!("Read player hud motion refs - [{section_name}] {visual_path:?}");
+        println!(
+          "Read player hud motion refs - [{}] {}",
+          section_name,
+          visual_path.display()
+        );
       }
 
       match self.read_player_hud_motion_refs(visual_path) {
         Ok(linked_visuals) => {
           if options.is_verbose_logging_enabled() {
             println!(
-              "Player hud ogf [{visual_path:?} contains {} linked omf files to check",
+              "Player hud ogf [{} contains {} linked omf files to check",
+              visual_path.display(),
               linked_visuals.len()
             );
           }
 
           for linked_visual in &linked_visuals {
-            match OmfFile::read_motions_from_path::<XRayByteOrder>(linked_visual) {
+            match OmfFile::read_motions_from_path::<XRayByteOrder, &PathBuf>(linked_visual) {
               Ok(motions) => {
                 if motions.is_empty() {
                   if options.is_logging_enabled() {
-                    eprintln!("No motions in visual: [{section_name}] - {linked_visual:?}",);
+                    eprintln!(
+                      "No motions in visual: [{}] - {}",
+                      section_name,
+                      linked_visual.display()
+                    );
                   }
 
                   is_valid = false;
@@ -139,7 +148,10 @@ impl GamedataProject {
               Err(error) => {
                 if options.is_logging_enabled() {
                   eprintln!(
-                    "Failed to read linked visual: [{section_name}] - {linked_visual:?} - {error}",
+                    "Failed to read linked visual: [{}] - {} - {}",
+                    section_name,
+                    linked_visual.display(),
+                    error
                   );
                 }
 
@@ -151,7 +163,10 @@ impl GamedataProject {
         Err(error) => {
           if options.is_logging_enabled() {
             eprintln!(
-              "Failed to read linked visuals: [{section_name}] - {visual_path:?} - {error}",
+              "Failed to read linked visuals: [{}] - {} - {}",
+              section_name,
+              visual_path.display(),
+              error
             );
           }
 
@@ -254,9 +269,12 @@ impl GamedataProject {
     Ok(is_valid)
   }
 
-  pub fn read_player_hud_motion_refs(&self, visual_path: &Path) -> XRayResult<HashSet<PathBuf>> {
+  pub fn read_player_hud_motion_refs<P: AsRef<Path>>(
+    &self,
+    visual_path: P,
+  ) -> XRayResult<HashSet<PathBuf>> {
     let motion_refs: Vec<String> =
-      OgfFile::read_motion_refs_from_path::<XRayByteOrder>(visual_path)?;
+      OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(visual_path)?;
 
     let mut assets: HashSet<PathBuf> = HashSet::new();
 

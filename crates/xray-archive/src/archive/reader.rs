@@ -27,26 +27,26 @@ pub struct ArchiveReader {
 
 impl ArchiveReader {
   /// Create chunk based on whole file.
-  pub fn from_path(path: &Path, encoding: XRayEncoding) -> XRayResult<Self> {
-    match File::open(path) {
+  pub fn from_path<P: AsRef<Path>>(path: P, encoding: XRayEncoding) -> XRayResult<Self> {
+    match File::open(path.as_ref()) {
       Ok(file) => Ok(Self {
         encoding,
         file,
-        path: path.into(),
+        path: path.as_ref().into(),
         root_regex: Regex::new(r"^\$\w+?\$\\").unwrap(),
         section_regex: Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap(),
         variable_regex: Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap(),
       }),
       Err(error) => Err(XRayError::new_read_error(format!(
         "Failed to read archive file {}, {}",
-        path.display(),
+        path.as_ref().display(),
         error
       ))),
     }
   }
 
   /// Create chunk based on whole file.
-  pub fn from_path_utf8(path: &Path) -> XRayResult<Self> {
+  pub fn from_path_utf8<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     Self::from_path(path, get_utf8_encoder())
   }
 }

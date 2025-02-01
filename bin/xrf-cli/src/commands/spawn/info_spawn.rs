@@ -33,7 +33,8 @@ impl GenericCommand for InfoSpawnCommand {
 
     println!("Read spawn file {}", path.display());
 
-    let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::read_from_path::<XRayByteOrder>(path)?);
+    let spawn_file: Box<SpawnFile> =
+      Box::new(SpawnFile::read_from_path::<XRayByteOrder, &PathBuf>(path)?);
 
     println!("Spawn file information:");
 

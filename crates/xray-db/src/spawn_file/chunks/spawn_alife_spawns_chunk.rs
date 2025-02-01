@@ -1,5 +1,4 @@
 use crate::data::alife::alife_object_base::AlifeObjectBase;
-use crate::export::file::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -8,6 +7,7 @@ use std::path::Path;
 use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
+use xray_utils::open_export_file;
 
 /// ALife spawns chunk has the following structure:
 /// 0 - count
@@ -96,9 +96,9 @@ impl SpawnALifeSpawnsChunk {
     Ok(())
   }
 
-  /// Import alife spawns data from provided path.
-  pub fn import(path: &Path) -> XRayResult<Self> {
-    let ltx: Ltx = Ltx::read_from_path(&path.join("alife_spawns.ltx"))?;
+  /// Import ALife spawns data from provided path.
+  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+    let ltx: Ltx = Ltx::read_from_path(&path.as_ref().join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
     for (section_name, _) in ltx.iter() {
@@ -110,15 +110,17 @@ impl SpawnALifeSpawnsChunk {
     Ok(Self { objects })
   }
 
-  /// Export alife spawns data into provided path.
-  pub fn export(&self, path: &Path) -> XRayResult {
+  /// Export ALife spawns data into provided path.
+  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     for object in &self.objects {
       object.export(&object.index.to_string(), &mut ltx)?;
     }
 
-    ltx.write_to(&mut create_export_file(&path.join("alife_spawns.ltx"))?)?;
+    ltx.write_to(&mut open_export_file(
+      &path.as_ref().join("alife_spawns.ltx"),
+    )?)?;
 
     log::info!("Exported alife spawns chunk");
 

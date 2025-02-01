@@ -54,7 +54,7 @@ impl GenericCommand for RepackParticlesCommand {
     >(path)?);
     let read_duration: Duration = started_at.elapsed();
 
-    particles_file.write_to_path::<XRayByteOrder>(destination)?;
+    particles_file.write_to_path::<XRayByteOrder, &PathBuf>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 

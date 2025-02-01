@@ -18,8 +18,8 @@ pub fn assert_equal<T: PartialEq + Debug>(first: T, second: T, message: &str) ->
     Ok(())
   } else {
     Err(XRayError::new_assertion_error(format!(
-      "Expected values to be equal, left - {:?}, right - {:?}. {message}",
-      first, second
+      "Expected values to be equal, left - {:?}, right - {:?}. {}",
+      first, second, message
     )))
   }
 }
@@ -31,8 +31,8 @@ pub fn assert_not_equal<T: PartialEq + Debug>(first: T, second: T, message: &str
     Ok(())
   } else {
     Err(XRayError::new_assertion_error(format!(
-      "Expected values not to be equal, left - {:?}, right - {:?}. {message}",
-      first, second
+      "Expected values not to be equal, left - {:?}, right - {:?}. {}",
+      first, second, message
     )))
   }
 }

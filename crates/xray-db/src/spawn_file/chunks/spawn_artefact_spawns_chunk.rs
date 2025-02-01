@@ -1,5 +1,4 @@
 use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
-use crate::export::file::create_export_file;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -7,6 +6,7 @@ use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
+use xray_utils::open_export_file;
 
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
@@ -65,12 +65,12 @@ impl SpawnArtefactSpawnsChunk {
 
   /// Import artefact spawns data from provided path.
   /// Parse ltx files and populate spawn file.
-  pub fn import(path: &Path) -> XRayResult<Self> {
-    let ltx: Ltx = Ltx::read_from_path(&path.join("artefact_spawns.ltx"))?;
+  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+    let ltx: Ltx = Ltx::read_from_path(&path.as_ref().join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
-    for (_, props) in &ltx {
-      nodes.push(ArtefactSpawnPoint::import(props)?);
+    for (_, section) in &ltx {
+      nodes.push(ArtefactSpawnPoint::import(section)?);
     }
 
     log::info!("Imported artefact spawns chunk");
@@ -79,14 +79,16 @@ impl SpawnArtefactSpawnsChunk {
   }
 
   /// Export artefact spawns data into provided path.
-  pub fn export(&self, path: &Path) -> XRayResult {
+  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
-    for (index, node) in self.nodes.iter().enumerate() {
-      node.export(&index.to_string(), &mut ltx);
+    for (index, spawn_point) in self.nodes.iter().enumerate() {
+      spawn_point.export(&index.to_string(), &mut ltx);
     }
 
-    ltx.write_to(&mut create_export_file(&path.join("artefact_spawns.ltx"))?)?;
+    ltx.write_to(&mut open_export_file(
+      &path.as_ref().join("artefact_spawns.ltx"),
+    )?)?;
 
     log::info!("Exported artefact spawns chunk");
 

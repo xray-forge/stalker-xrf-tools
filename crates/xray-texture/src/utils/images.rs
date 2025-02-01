@@ -4,14 +4,14 @@ use image::{ExtendedColorType, ImageEncoder, ImageFormat, RgbaImage};
 use image_dds::{dds_from_image, ImageFormat as DDSImageFormat};
 use std::fs::File;
 use std::io::{BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use xray_error::{XRayError, XRayResult};
 
-pub fn read_dds_by_path(path: &Path) -> XRayResult<Dds> {
-  Dds::read(&mut File::open(path)?).map_err(|error| {
+pub fn read_dds_by_path<P: AsRef<Path>>(path: P) -> XRayResult<Dds> {
+  Dds::read(&mut File::open(path.as_ref())?).map_err(|error| {
     XRayError::new_texture_processing_error(format!(
       "Failed to read texture by path {}, error: {}",
-      path.display(),
+      path.as_ref().display(),
       error,
     ))
   })
@@ -44,9 +44,8 @@ pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> XRayResult {
   Ok(image.save_with_format(path, ImageFormat::Png)?)
 }
 
-pub fn open_dds_as_png(path: &Path) -> XRayResult<(RgbaImage, Vec<u8>)> {
-  let image: RgbaImage =
-    read_dds_by_path(&PathBuf::from(path)).and_then(|dds| dds_to_image(&dds))?;
+pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XRayResult<(RgbaImage, Vec<u8>)> {
+  let image: RgbaImage = read_dds_by_path(path).and_then(|dds| dds_to_image(&dds))?;
 
   let mut buffer: Vec<u8> = Vec::new();
 

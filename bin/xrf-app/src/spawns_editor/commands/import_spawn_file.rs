@@ -1,6 +1,6 @@
 use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tauri::State;
 use xray_db::{SpawnFile, XRayByteOrder};
 
@@ -11,7 +11,7 @@ pub async fn import_spawn_file(
 ) -> TauriResult<String> {
   log::info!("Importing spawn file");
 
-  match SpawnFile::import_from_path::<XRayByteOrder>(Path::new(path)) {
+  match SpawnFile::import_from_path::<XRayByteOrder, &Path>(Path::new(path)) {
     Ok(file) => {
       log::info!("Imported spawn file");
 

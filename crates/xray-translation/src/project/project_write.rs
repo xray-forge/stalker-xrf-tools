@@ -42,7 +42,7 @@ impl TranslationProject {
     )
   }
 
-  pub fn prepare_target_json_translation_file(path: &Path) -> XRayResult<File> {
+  pub fn prepare_target_json_translation_file<P: AsRef<Path>>(path: P) -> XRayResult<File> {
     Ok(
       File::options()
         .read(false)

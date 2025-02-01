@@ -74,8 +74,8 @@ impl LtxIncludeConvertor {
   }
 
   /// Include children ltx into provided ltx.
-  fn include_children(&self, into: &mut Ltx, path: &Path) -> XRayResult {
-    let ltx: Ltx = match self.parse_nested_file(path) {
+  fn include_children<P: AsRef<Path>>(&self, into: &mut Ltx, path: P) -> XRayResult {
+    let ltx: Ltx = match self.parse_nested_file(path.as_ref()) {
       Ok(value) => match value {
         Some(ltx) => ltx,
         None => return Ok(()),
@@ -83,7 +83,7 @@ impl LtxIncludeConvertor {
       Err(error) => {
         return Err(XRayError::new_convert_error(format!(
           "Failed to parse ltx file, nested file {} in {} error: {error}",
-          path.display(),
+          path.as_ref().display(),
           into.path.as_ref().unwrap().display(),
         )))
       }
@@ -101,7 +101,7 @@ impl LtxIncludeConvertor {
           } else {
             return Err(XRayError::new_convert_error(format!(
               "Failed to include ltx file '{}' in {}, duplicate section '{}' found",
-              path.display(),
+              path.as_ref().display(),
               into.path.as_ref().unwrap().display(),
               key
             )));
@@ -115,8 +115,8 @@ impl LtxIncludeConvertor {
 
   /// Open nested file for importing in current context.
   /// Skips '.ts' variant of configuration file as None.
-  fn parse_nested_file(&self, path: &Path) -> XRayResult<Option<Ltx>> {
-    match Ltx::read_from_path(path) {
+  fn parse_nested_file<P: AsRef<Path>>(&self, path: P) -> XRayResult<Option<Ltx>> {
+    match Ltx::read_from_path(path.as_ref()) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {
         XRayError::Io {
@@ -139,9 +139,13 @@ impl LtxIncludeConvertor {
   }
 
   /// Check if similar TS counterpart exists for provided ltx path.
-  fn is_raw_ts_variant_existing(&self, path: &Path) -> bool {
-    if path.extension().is_some_and(|extension| extension == "ltx") {
-      path.with_extension("ts").exists()
+  fn is_raw_ts_variant_existing<P: AsRef<Path>>(&self, path: P) -> bool {
+    if path
+      .as_ref()
+      .extension()
+      .is_some_and(|extension| extension == "ltx")
+    {
+      path.as_ref().with_extension("ts").exists()
     } else {
       false
     }

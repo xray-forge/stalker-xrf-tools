@@ -1,4 +1,3 @@
-use crate::export::file::create_export_file;
 use crate::particles_file::chunks::particles_effects_chunk::ParticlesEffectsChunk;
 use crate::particles_file::chunks::particles_firstgen_chunk::ParticlesFirstgenChunk;
 use crate::particles_file::chunks::particles_groups_chunk::ParticlesGroupsChunk;
@@ -11,6 +10,7 @@ use std::io::Write;
 use std::path::Path;
 use xray_chunk::{find_optional_chunk_by_id, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+use xray_utils::open_export_file;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,7 +22,7 @@ pub struct ParticlesFile {
 
 impl ParticlesFile {
   /// Read particles xr file from provided path.
-  pub fn read_from_path<T: ByteOrder, D: AsRef<Path>>(path: D) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
@@ -67,9 +67,10 @@ impl ParticlesFile {
   }
 
   /// Write particles file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder>(&self, path: &Path) -> XRayResult {
-    fs::create_dir_all(path.parent().expect("Parent directory"))?;
-    self.write_to::<T>(&mut create_export_file(path)?)
+  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: P) -> XRayResult {
+    fs::create_dir_all(path.as_ref().parent().expect("Parent directory"))?;
+
+    self.write_to::<T>(&mut open_export_file(path)?)
   }
 
   /// Write particles file data to the writer.
@@ -97,8 +98,8 @@ impl ParticlesFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path(path: &Path) -> XRayResult<Self> {
-    log::info!("Importing particles file: {}", path.display());
+  pub fn import_from_path<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+    log::info!("Importing particles file: {}", path.as_ref().display());
 
     Ok(Self {
       header: ParticlesHeaderChunk::import(path)?,
@@ -108,7 +109,7 @@ impl ParticlesFile {
   }
 
   /// Export unpacked ALife spawn file into provided path.
-  pub fn export_to_path(&self, path: &Path) -> XRayResult {
+  pub fn export_to_path<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     fs::create_dir_all(path)?;
 
     self.header.export(path)?;

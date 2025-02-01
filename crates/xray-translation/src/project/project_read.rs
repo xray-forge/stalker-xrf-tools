@@ -10,7 +10,7 @@ use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayResult;
 
 impl TranslationProject {
-  pub fn read_project(dir: &Path) -> XRayResult<TranslationProjectJson> {
+  pub fn read_project<P: AsRef<Path>>(dir: P) -> XRayResult<TranslationProjectJson> {
     let mut project_json: TranslationProjectJson = Default::default();
 
     // Filter all the entries that are not accessed by other files and represent entry points.
@@ -41,7 +41,7 @@ impl TranslationProject {
     Ok(project_json)
   }
 
-  pub fn read_translation_json_by_path(path: &Path) -> XRayResult<TranslationJson> {
+  pub fn read_translation_json_by_path<P: AsRef<Path>>(path: P) -> XRayResult<TranslationJson> {
     let mut data: Vec<u8> = Vec::new();
 
     File::open(path)?.read_to_end(&mut data)?;
@@ -49,8 +49,8 @@ impl TranslationProject {
     Ok(serde_json::from_slice(&data).expect("Expected valid JSON source file with standard format"))
   }
 
-  pub fn can_read_path(&self, path: &Path) -> bool {
-    if let Some(extension) = path.extension() {
+  pub fn can_read_path<P: AsRef<Path>>(&self, path: P) -> bool {
+    if let Some(extension) = path.as_ref().extension() {
       for allowed in ALLOWED_PROJECT_READ_EXTENSIONS {
         if (*allowed).eq(extension) {
           return true;
@@ -61,8 +61,8 @@ impl TranslationProject {
     false
   }
 
-  pub fn get_locale_from_path(path: &Path) -> Option<TranslationLanguage> {
-    match path.file_name() {
+  pub fn get_locale_from_path<P: AsRef<Path>>(path: P) -> Option<TranslationLanguage> {
+    match path.as_ref().file_name() {
       Some(name) => {
         if let Some(name) = name.to_str() {
           let parts: Vec<&str> = name.split('.').collect();

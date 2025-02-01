@@ -4,14 +4,15 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
-use crate::export::file::{create_export_file, open_binary_file};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::fs::File;
 use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
+use xray_utils::open_export_file;
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -113,43 +114,43 @@ impl SpawnGraphsChunk {
   }
 
   /// Import graphs data from provided path.
-  pub fn import<T: ByteOrder>(path: &Path) -> XRayResult<Self> {
+  pub fn import<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     let header: GraphHeader = GraphHeader::import(
       "header",
-      &Ltx::read_from_path(&path.join("graphs_header.ltx"))?,
+      &Ltx::read_from_path(path.as_ref().join("graphs_header.ltx"))?,
     )?;
 
-    let levels_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_levels.ltx"))?;
+    let levels_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("graphs_levels.ltx"))?;
     let mut levels: Vec<GraphLevel> = Vec::new();
 
     for index in 0..header.levels_count {
       levels.push(GraphLevel::import(&index.to_string(), &levels_ltx)?);
     }
 
-    let vertices_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_vertices.ltx"))?;
+    let vertices_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("graphs_vertices.ltx"))?;
     let mut vertices: Vec<GraphVertex> = Vec::new();
 
     for index in 0..header.vertices_count {
       vertices.push(GraphVertex::import(&index.to_string(), &vertices_ltx)?);
     }
 
-    let points_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_points.ltx"))?;
+    let points_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("graphs_points.ltx"))?;
     let mut points: Vec<GraphLevelPoint> = Vec::new();
 
     for index in 0..header.points_count {
       points.push(GraphLevelPoint::import(&index.to_string(), &points_ltx)?);
     }
 
-    let edges_ltx: Ltx = Ltx::read_from_path(&path.join("graphs_edges.ltx"))?;
+    let edges_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("graphs_edges.ltx"))?;
     let mut edges: Vec<GraphEdge> = Vec::new();
 
     for index in 0..header.edges_count {
       edges.push(GraphEdge::import(&index.to_string(), &edges_ltx)?);
     }
 
-    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::import_list::<T>(
-      &mut open_binary_file(&path.join("graphs_cross_tables.gct"))?,
-    )?;
+    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::import_list::<T>(&mut File::open(
+      path.as_ref().join("graphs_cross_tables.gct"),
+    )?)?;
 
     log::info!("Imported graphs chunk");
 
@@ -165,12 +166,14 @@ impl SpawnGraphsChunk {
 
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
-  pub fn export<T: ByteOrder>(&self, path: &Path) -> XRayResult {
+  pub fn export<T: ByteOrder, P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut graphs_header_ltx: Ltx = Ltx::new();
 
     self.header.export(&mut graphs_header_ltx);
 
-    graphs_header_ltx.write_to(&mut create_export_file(&path.join("graphs_header.ltx"))?)?;
+    graphs_header_ltx.write_to(&mut open_export_file(
+      path.as_ref().join("graphs_header.ltx"),
+    )?)?;
 
     let mut graphs_level_ltx: Ltx = Ltx::new();
 
@@ -178,7 +181,9 @@ impl SpawnGraphsChunk {
       level.export(&index.to_string(), &mut graphs_level_ltx);
     }
 
-    graphs_level_ltx.write_to(&mut create_export_file(&path.join("graphs_levels.ltx"))?)?;
+    graphs_level_ltx.write_to(&mut open_export_file(
+      path.as_ref().join("graphs_levels.ltx"),
+    )?)?;
 
     log::info!("Exported graph levels");
 
@@ -188,7 +193,9 @@ impl SpawnGraphsChunk {
       vertex.export(&index.to_string(), &mut graphs_vertices_ltx);
     }
 
-    graphs_vertices_ltx.write_to(&mut create_export_file(&path.join("graphs_vertices.ltx"))?)?;
+    graphs_vertices_ltx.write_to(&mut open_export_file(
+      path.as_ref().join("graphs_vertices.ltx"),
+    )?)?;
 
     log::info!("Exported graph vertices");
 
@@ -198,7 +205,9 @@ impl SpawnGraphsChunk {
       point.export(&index.to_string(), &mut graphs_points_ltx);
     }
 
-    graphs_points_ltx.write_to(&mut create_export_file(&path.join("graphs_points.ltx"))?)?;
+    graphs_points_ltx.write_to(&mut open_export_file(
+      path.as_ref().join("graphs_points.ltx"),
+    )?)?;
 
     log::info!("Exported graph points");
 
@@ -208,13 +217,15 @@ impl SpawnGraphsChunk {
       edge.export(&index.to_string(), &mut graphs_edges_ltx);
     }
 
-    graphs_edges_ltx.write_to(&mut create_export_file(&path.join("graphs_edges.ltx"))?)?;
+    graphs_edges_ltx.write_to(&mut open_export_file(
+      path.as_ref().join("graphs_edges.ltx"),
+    )?)?;
 
     log::info!("Exported graph edges");
 
     GraphCrossTable::export_list::<T>(
       &self.cross_tables,
-      &mut create_export_file(&path.join("graphs_cross_tables.gct"))?,
+      &mut open_export_file(path.as_ref().join("graphs_cross_tables.gct"))?,
     )?;
 
     log::info!("Exported graph cross tables");

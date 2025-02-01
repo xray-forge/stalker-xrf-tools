@@ -75,26 +75,28 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_spawn(
+  pub fn verify_spawn<P: AsRef<Path>>(
     &self,
     options: &GamedataProjectVerifyOptions,
-    path: &Path,
+    path: P,
   ) -> XRayResult<bool> {
+    let file_path: String = path.as_ref().display().to_string();
+
     if options.is_verbose_logging_enabled() {
-      println!("Verify spawn file: {path:?}");
+      println!("Verify spawn file: {}", file_path);
     }
 
-    match SpawnFile::read_from_path::<XRayByteOrder>(path) {
+    match SpawnFile::read_from_path::<XRayByteOrder, P>(path) {
       Ok(_) => {
         if options.is_verbose_logging_enabled() {
-          println!("Verify spawn file: {path:?}");
+          println!("Verify spawn file: {}", file_path);
         }
 
         Ok(true)
       }
       Err(error) => {
         if options.is_logging_enabled() {
-          eprintln!("Spawn file validation failed: {path:?} -> {error:?}");
+          eprintln!("Spawn file validation failed: {} -> {}", file_path, error);
         }
 
         Ok(false)

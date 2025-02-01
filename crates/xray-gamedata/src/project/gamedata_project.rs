@@ -87,11 +87,11 @@ impl GamedataProject {
 }
 
 impl GamedataProject {
-  pub fn is_valid_gamedata_dir(path: &Path) -> bool {
-    path.exists() && path.is_dir()
+  pub fn is_valid_gamedata_dir<P: AsRef<Path>>(path: P) -> bool {
+    path.as_ref().exists() && path.as_ref().is_dir()
   }
 
-  pub fn is_valid_configs_dir(path: &Path) -> bool {
-    path.exists() && path.is_dir() && path.join("system.ltx").exists()
+  pub fn is_valid_configs_dir<P: AsRef<Path>>(path: P) -> bool {
+    path.as_ref().exists() && path.as_ref().is_dir() && path.as_ref().join("system.ltx").exists()
   }
 }

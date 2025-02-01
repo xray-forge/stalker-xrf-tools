@@ -1,6 +1,5 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particle::particle_effect::ParticleEffect;
-use crate::export::file::create_export_file;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
@@ -8,6 +7,7 @@ use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
+use xray_utils::open_export_file;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -65,10 +65,10 @@ impl ParticlesEffectsChunk {
   }
 
   /// Import particles effects data from provided path.
-  pub fn import(path: &Path) -> XRayResult<Self> {
-    log::info!("Importing particles effects: {}", path.display());
+  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+    log::info!("Importing particles effects: {}", path.as_ref().display());
 
-    let ltx: Ltx = Ltx::read_from_path(&path.join("effects.ltx"))?;
+    let ltx: Ltx = Ltx::read_from_path(&path.as_ref().join("effects.ltx"))?;
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
     for (section_name, section) in &ltx {
@@ -85,14 +85,14 @@ impl ParticlesEffectsChunk {
   }
 
   /// Export particles effects data into provided path.
-  pub fn export(&self, path: &Path) -> XRayResult {
+  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for effect in &self.effects {
       effect.export(&effect.name, &mut particles_effects_ltx)?;
     }
 
-    particles_effects_ltx.write_to(&mut create_export_file(&path.join("effects.ltx"))?)?;
+    particles_effects_ltx.write_to(&mut open_export_file(&path.as_ref().join("effects.ltx"))?)?;
 
     log::info!("Exported effects chunk");
 

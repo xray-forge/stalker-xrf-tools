@@ -1,17 +1,12 @@
-use std::default::Default;
-use std::path::{Path, PathBuf};
-use std::rc::Rc;
-
 use crate::ast::ast_utils::{
   get_expression_callee_name, get_expression_parameter_as_string_name,
   get_parameters_from_arrow_expression,
 };
 use crate::constants::{XR_CONDITIONS_PREFIX, XR_EFFECT_PREFIX, XR_EXTERN_EXPRESSION};
 use crate::extern_descriptor::ExportDescriptor;
-
-use walkdir::WalkDir;
-extern crate swc_common;
-extern crate swc_ecma_parser;
+use std::default::Default;
+use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use swc_common::comments::{Comments, SingleThreadedComments};
 use swc_common::errors::DiagnosticBuilder;
 use swc_common::sync::Lrc;
@@ -21,6 +16,7 @@ use swc_common::{
 };
 use swc_ecma_ast::{Expr, ModuleItem, Program, Stmt};
 use swc_ecma_parser::{lexer::Lexer, Parser, StringInput, Syntax};
+use walkdir::WalkDir;
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Default)]
@@ -33,9 +29,13 @@ impl ExportsParser {
 }
 
 impl ExportsParser {
-  pub fn is_valid_ts_export_source_path(path: &Path) -> bool {
-    if path.extension().is_some_and(|extension| extension == "ts") {
-      !path.to_str().unwrap().ends_with(".test.ts")
+  pub fn is_valid_ts_export_source_path<P: AsRef<Path>>(path: P) -> bool {
+    if path
+      .as_ref()
+      .extension()
+      .is_some_and(|extension| extension == "ts")
+    {
+      !path.as_ref().to_str().unwrap().ends_with(".test.ts")
     } else {
       false
     }
@@ -51,11 +51,14 @@ impl ExportsParser {
 }
 
 impl ExportsParser {
-  pub fn parse_conditions(&self, files: &[PathBuf]) -> XRayResult<Vec<ExportDescriptor>> {
-    self.parse_exports(files, Self::is_xr_conditions_literal)
+  pub fn parse_conditions(&self, paths: &[PathBuf]) -> XRayResult<Vec<ExportDescriptor>> {
+    self.parse_exports(paths, Self::is_xr_conditions_literal)
   }
 
-  pub fn parse_conditions_from_path(&self, path: &Path) -> XRayResult<Vec<ExportDescriptor>> {
+  pub fn parse_conditions_from_path<P: AsRef<Path>>(
+    &self,
+    path: P,
+  ) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_conditions(&Self::read_exporting_sources_from_path(path)?)
   }
 
@@ -63,7 +66,10 @@ impl ExportsParser {
     self.parse_exports(files, |value| Some(value.into()))
   }
 
-  pub fn parse_dialogs_from_path(&self, path: &Path) -> XRayResult<Vec<ExportDescriptor>> {
+  pub fn parse_dialogs_from_path<P: AsRef<Path>>(
+    &self,
+    path: P,
+  ) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_dialogs(&Self::read_exporting_sources_from_path(path)?)
   }
 
@@ -71,7 +77,10 @@ impl ExportsParser {
     self.parse_exports(files, Self::is_xr_effect_literal)
   }
 
-  pub fn parse_effects_from_path(&self, path: &Path) -> XRayResult<Vec<ExportDescriptor>> {
+  pub fn parse_effects_from_path<P: AsRef<Path>>(
+    &self,
+    path: P,
+  ) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_effects(&Self::read_exporting_sources_from_path(path)?)
   }
 
@@ -159,7 +168,7 @@ impl ExportsParser {
 }
 
 impl ExportsParser {
-  pub fn read_exporting_sources_from_path(path: &Path) -> XRayResult<Vec<PathBuf>> {
+  pub fn read_exporting_sources_from_path<P: AsRef<Path>>(path: P) -> XRayResult<Vec<PathBuf>> {
     let mut files: Vec<PathBuf> = Vec::new();
 
     for entry in WalkDir::new(path)

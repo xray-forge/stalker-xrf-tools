@@ -16,7 +16,7 @@ pub async fn export_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) 
     let file: &SpawnFile = lock.as_ref().unwrap();
 
     file
-      .export_to_path::<XRayByteOrder>(Path::new(path))
+      .export_to_path::<XRayByteOrder, &Path>(Path::new(path))
       .map_err(error_to_string)
   } else {
     Err(String::from("No spawn file open for saving"))

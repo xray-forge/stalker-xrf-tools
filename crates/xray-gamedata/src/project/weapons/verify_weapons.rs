@@ -163,12 +163,15 @@ impl GamedataProject {
 
             for motion_ref in &motion_refs {
               if let Some(motion_file_path) = self.get_omf_path(motion_ref) {
-                match OmfFile::read_motions_from_path::<XRayByteOrder>(&motion_file_path) {
+                match OmfFile::read_motions_from_path::<XRayByteOrder, &Path>(&motion_file_path) {
                   Ok(motions) => ref_animations.extend(motions),
                   Err(error) => {
                     if options.is_logging_enabled() {
                       eprintln!(
-                        "Error reading OMF motions for weapon hud: [{section_name}] : {visual_path:?} - {error:}"
+                        "Error reading OMF motions for weapon hud: [{}] : {} - {}",
+                        section_name,
+                        visual_path.display(),
+                        error
                       );
                     }
 
@@ -178,7 +181,9 @@ impl GamedataProject {
               } else {
                 if options.is_logging_enabled() {
                   eprintln!(
-                    "Error reading OMF motions for weapon hud: [{section_name}] : {visual_path:?}, no asset found"
+                    "Error reading OMF motions for weapon hud: [{}] : {}, no asset found",
+                    section_name,
+                    visual_path.display()
                   );
                 }
 

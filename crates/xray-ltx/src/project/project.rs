@@ -31,13 +31,13 @@ pub struct LtxProject {
 
 impl LtxProject {
   /// Initialize project on provided root.
-  pub fn open_at_path_opt(root: &Path, options: LtxProjectOptions) -> XRayResult<Self> {
+  pub fn open_at_path_opt<P: AsRef<Path>>(root: P, options: LtxProjectOptions) -> XRayResult<Self> {
     let mut ltx_files: Vec<PathBuf> = Vec::new();
     let mut ltx_scheme_files: Vec<PathBuf> = Vec::new();
     let mut included: Vec<PathBuf> = Vec::new();
 
     // Read LTX files and shallow-add include statements links.
-    for entry in WalkDir::new(root) {
+    for entry in WalkDir::new(root.as_ref()) {
       let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
       let entry_path: &Path = entry.path();
 
@@ -128,7 +128,7 @@ impl LtxProject {
     };
 
     Ok(Self {
-      root: PathBuf::from(root),
+      root: root.as_ref().into(),
       ltx_files,
       ltx_file_entries,
       ltx_scheme_declarations: if options.is_with_schemes_check {
@@ -142,20 +142,19 @@ impl LtxProject {
   }
 
   /// Initialize project on provided root with default options.
-  pub fn open_at_path(root: &Path) -> XRayResult<Self> {
+  pub fn open_at_path<P: AsRef<Path>>(root: P) -> XRayResult<Self> {
     Self::open_at_path_opt(root, Default::default())
   }
 }
 
 impl LtxProject {
   /// Check if provided LTX file is scheme definition file.
-  pub fn is_ltx_scheme_path(path: &Path) -> bool {
+  pub fn is_ltx_scheme_path<P: AsRef<Path>>(path: P) -> bool {
     path
+      .as_ref()
       .file_name()
       .and_then(|name| name.to_str())
-      .map_or(false, |name| {
-        name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION)
-      })
+      .is_some_and(|name| name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION))
   }
 
   pub fn get_system_ltx(&self) -> XRayResult<Ltx> {
