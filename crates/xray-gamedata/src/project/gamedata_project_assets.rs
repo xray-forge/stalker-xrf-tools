@@ -10,7 +10,7 @@ use xray_utils::path_vec_to_string;
 impl GamedataProject {
   pub fn read_project_assets(
     options: &GamedataProjectReadOptions,
-    roots: &[&Path],
+    roots: &mut Vec<PathBuf>,
     ignored: &[&str],
   ) -> XRayResult<HashMap<String, AssetDescriptor>> {
     if options.is_logging_enabled() {
@@ -43,9 +43,57 @@ impl GamedataProject {
             continue;
           }
 
+          // todo: Descriptor with lowercase?
           assets.insert(
             relative.to_lowercase(),
             AssetDescriptor::new_with_extension(index, relative),
+          );
+        } else {
+          log::warn!("Could not strip prefix: {}", entry_path.display());
+        }
+      }
+    }
+
+    if options
+      .roots
+      .iter()
+      .all(|it| !options.configs.starts_with(it))
+    {
+      if options.is_logging_enabled() {
+        println!(
+          "Reading project configs map in root: {}",
+          options.configs.display()
+        );
+      }
+
+      let config_root_index: usize = roots.len();
+      let configs_parent: &Path = match options.configs.parent() {
+        Some(it) => it,
+        None => return Err(XRayError::new_unexpected_error("No configs parent found")),
+      };
+
+      roots.push(configs_parent.into());
+
+      for entry in WalkDir::new(&options.configs) {
+        let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
+        let entry_path: &Path = entry.path();
+
+        // Dirs are skipped.
+        if entry_path.is_dir() || entry_path.extension().is_none_or(|it| it != "ltx") {
+          continue;
+        }
+
+        if let Some(relative) = entry_path
+          .strip_prefix(configs_parent)
+          .map_err(|_| {
+            XRayError::new_unexpected_error("Failed to strip prefix from gamedata configs path")
+          })?
+          .to_str()
+        {
+          // todo: Descriptor with lowercase?
+          assets.insert(
+            relative.to_lowercase(),
+            AssetDescriptor::new_with_extension(config_root_index, relative),
           );
         } else {
           log::warn!("Could not strip prefix: {}", entry_path.display());

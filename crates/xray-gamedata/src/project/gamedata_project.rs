@@ -17,7 +17,7 @@ pub struct GamedataProject {
 
 impl GamedataProject {
   pub fn open(options: &GamedataProjectReadOptions) -> XRayResult<Self> {
-    let roots: Vec<PathBuf> = options
+    let mut roots: Vec<PathBuf> = options
       .roots
       .iter()
       .filter(|it| {
@@ -57,14 +57,10 @@ impl GamedataProject {
       );
     }
 
-    // todo: Make sure config is part of one of asset roots.
-    // todo: Make sure config is part of one of asset roots.
-    // todo: Make sure config is part of one of asset roots.
-
     Ok(Self {
       assets: Self::read_project_assets(
         options,
-        &roots.iter().map(|it| it.as_path()).collect::<Vec<&Path>>(),
+        &mut roots,
         &options
           .ignored
           .iter()
