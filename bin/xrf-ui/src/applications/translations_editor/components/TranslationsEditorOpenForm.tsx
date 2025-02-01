@@ -13,7 +13,7 @@ export function TranslationsEditorOpenForm({
   translationsContext: { project, translationsActions } = useManager(TranslationsManager),
   projectContext: { xrfProjectPath } = useManager(ProjectManager),
 }): ReactElement {
-  const log: Logger = useLogger("translations-editor_open");
+  const log: Logger = useLogger("translations_editor_open");
 
   const [translationsPath, setTranslationsPath, onSelectTranslationsPath] = usePathState({
     title: "Provide path to equipment_editor dds",
@@ -51,7 +51,7 @@ export function TranslationsEditorOpenForm({
       padding={4}
     >
       <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container item>
-        <Typography>Provide equipment details</Typography>
+        <Typography>Provide translations details</Typography>
       </Grid>
 
       <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>

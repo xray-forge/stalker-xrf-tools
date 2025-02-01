@@ -18,7 +18,7 @@ export function EquipmentGridDetails({ gridMapper, cell, onClose }: IEquipmentGr
 
   const list = items?.map((it, index) => (
     <Grid key={index} marginTop={"4px"}>
-      {it.name}
+      {it.section}
     </Grid>
   ));
 

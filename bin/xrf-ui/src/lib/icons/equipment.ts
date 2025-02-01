@@ -1,5 +1,5 @@
 export interface IEquipmentSectionDescriptor {
-  name: string;
+  section: string;
   w: number;
   h: number;
   x: number;

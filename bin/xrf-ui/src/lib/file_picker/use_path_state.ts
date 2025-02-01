@@ -1,4 +1,4 @@
-import { DialogFilter, FileResponse, open } from "@tauri-apps/plugin-dialog";
+import { DialogFilter, open } from "@tauri-apps/plugin-dialog";
 import { Dispatch, MouseEvent, SetStateAction, useCallback, useState } from "react";
 
 import { Optional } from "@/core/types/general";
@@ -20,14 +20,14 @@ export function usePathState({
         return;
       }
 
-      const pathResponse: Optional<FileResponse> = await open({
+      const pathResponse: Optional<string> = await open({
         title,
         filters: filters ? filters : undefined,
         directory: isDirectory,
       });
 
       if (pathResponse) {
-        setPathState(pathResponse.path);
+        setPathState(pathResponse);
       }
     },
     [title, isDirectory, isDisabled]
