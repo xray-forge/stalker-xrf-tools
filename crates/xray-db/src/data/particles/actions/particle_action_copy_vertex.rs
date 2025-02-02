@@ -1,25 +1,32 @@
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionCopyVertex {
   pub copy_position: u32,
 }
 
-impl ParticleActionReader for ParticleActionCopyVertex {
+impl ChunkReadWrite for ParticleActionCopyVertex {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       copy_position: reader.read_u32::<T>()?,
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.copy_position)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionCopyVertex {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -32,15 +39,6 @@ impl ParticleActionReader for ParticleActionCopyVertex {
     Ok(Self {
       copy_position: read_ltx_field("copy_position", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionCopyVertex {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_u32::<XRayByteOrder>(self.copy_position)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {

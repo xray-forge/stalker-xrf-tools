@@ -1,10 +1,9 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -14,13 +13,21 @@ pub struct ParticleActionGravity {
   pub direction: Vector3d,
 }
 
-impl ParticleActionReader for ParticleActionGravity {
+impl ChunkReadWrite for ParticleActionGravity {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       direction: reader.read_xr::<T, _>()?,
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_xr::<T, _>(&self.direction)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionGravity {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -33,15 +40,6 @@ impl ParticleActionReader for ParticleActionGravity {
     Ok(Self {
       direction: read_ltx_field("direction", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionGravity {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<XRayByteOrder, _>(&self.direction)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
@@ -56,13 +54,12 @@ impl ParticleActionWriter for ParticleActionGravity {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::meta::particle_action_reader::ParticleActionReader;
-  use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particles::actions::particle_action_gravity::ParticleActionGravity;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -85,7 +82,7 @@ mod tests {
       },
     };
 
-    original.write(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 12);
 

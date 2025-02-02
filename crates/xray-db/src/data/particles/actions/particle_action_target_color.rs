@@ -1,14 +1,13 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionTargetColor {
   pub color: Vector3d,
@@ -19,9 +18,9 @@ pub struct ParticleActionTargetColor {
   pub time_to: f32,
 }
 
-impl ParticleActionReader for ParticleActionTargetColor {
+impl ChunkReadWrite for ParticleActionTargetColor {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionTargetColor> {
-    Ok(ParticleActionTargetColor {
+    Ok(Self {
       color: reader.read_xr::<T, _>()?,
       alpha: reader.read_f32::<T>()?,
       scale: reader.read_f32::<T>()?,
@@ -31,6 +30,18 @@ impl ParticleActionReader for ParticleActionTargetColor {
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_xr::<T, _>(&self.color)?;
+    writer.write_f32::<T>(self.alpha)?;
+    writer.write_f32::<T>(self.scale)?;
+    writer.write_f32::<T>(self.time_from)?;
+    writer.write_f32::<T>(self.time_to)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionTargetColor {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -47,19 +58,6 @@ impl ParticleActionReader for ParticleActionTargetColor {
       time_from: read_ltx_field("time_from", section)?,
       time_to: read_ltx_field("time_to", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionTargetColor {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<XRayByteOrder, _>(&self.color)?;
-    writer.write_f32::<XRayByteOrder>(self.alpha)?;
-    writer.write_f32::<XRayByteOrder>(self.scale)?;
-    writer.write_f32::<XRayByteOrder>(self.time_from)?;
-    writer.write_f32::<XRayByteOrder>(self.time_to)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {

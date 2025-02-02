@@ -1,14 +1,13 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionTurbulence {
   pub frequency: f32,
@@ -18,9 +17,9 @@ pub struct ParticleActionTurbulence {
   pub offset: Vector3d,
 }
 
-impl ParticleActionReader for ParticleActionTurbulence {
+impl ChunkReadWrite for ParticleActionTurbulence {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionTurbulence> {
-    Ok(ParticleActionTurbulence {
+    Ok(Self {
       frequency: reader.read_f32::<T>()?,
       octaves: reader.read_i32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
@@ -29,6 +28,18 @@ impl ParticleActionReader for ParticleActionTurbulence {
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_f32::<T>(self.frequency)?;
+    writer.write_i32::<T>(self.octaves)?;
+    writer.write_f32::<T>(self.magnitude)?;
+    writer.write_f32::<T>(self.epsilon)?;
+    writer.write_xr::<T, _>(&self.offset)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionTurbulence {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -45,19 +56,6 @@ impl ParticleActionReader for ParticleActionTurbulence {
       epsilon: read_ltx_field("epsilon", section)?,
       offset: read_ltx_field("offset", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionTurbulence {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_f32::<XRayByteOrder>(self.frequency)?;
-    writer.write_i32::<XRayByteOrder>(self.octaves)?;
-    writer.write_f32::<XRayByteOrder>(self.magnitude)?;
-    writer.write_f32::<XRayByteOrder>(self.epsilon)?;
-    writer.write_xr::<XRayByteOrder, _>(&self.offset)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {

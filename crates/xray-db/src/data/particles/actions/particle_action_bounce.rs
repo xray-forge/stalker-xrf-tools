@@ -1,10 +1,9 @@
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particles::particle_domain::ParticleDomain;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -17,7 +16,7 @@ pub struct ParticleActionBounce {
   pub cutoff_sqr: f32,
 }
 
-impl ParticleActionReader for ParticleActionBounce {
+impl ChunkReadWrite for ParticleActionBounce {
   /// Read particle_action bounce.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
@@ -28,6 +27,17 @@ impl ParticleActionReader for ParticleActionBounce {
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_xr::<T, _>(&self.position)?;
+    writer.write_f32::<T>(self.one_minus_friction)?;
+    writer.write_f32::<T>(self.resilience)?;
+    writer.write_f32::<T>(self.cutoff_sqr)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionBounce {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -43,18 +53,6 @@ impl ParticleActionReader for ParticleActionBounce {
       resilience: read_ltx_field("resilience", section)?,
       cutoff_sqr: read_ltx_field("cutoff_sqr", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionBounce {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<XRayByteOrder, _>(&self.position)?;
-    writer.write_f32::<XRayByteOrder>(self.one_minus_friction)?;
-    writer.write_f32::<XRayByteOrder>(self.resilience)?;
-    writer.write_f32::<XRayByteOrder>(self.cutoff_sqr)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
@@ -72,14 +70,13 @@ impl ParticleActionWriter for ParticleActionBounce {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::meta::particle_action_reader::ParticleActionReader;
-  use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particles::actions::particle_action_bounce::ParticleActionBounce;
   use crate::data::particles::particle_domain::ParticleDomain;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -131,7 +128,7 @@ mod tests {
       cutoff_sqr: 4.35,
     };
 
-    original.write(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 80);
 

@@ -1,14 +1,13 @@
 use crate::data::generic::vector_3d::Vector3d;
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionDamping {
   pub damping: Vector3d,
@@ -16,7 +15,7 @@ pub struct ParticleActionDamping {
   pub v_high_sqr: f32,
 }
 
-impl ParticleActionReader for ParticleActionDamping {
+impl ChunkReadWrite for ParticleActionDamping {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       damping: reader.read_xr::<T, _>()?,
@@ -25,6 +24,16 @@ impl ParticleActionReader for ParticleActionDamping {
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_xr::<T, _>(&self.damping)?;
+    writer.write_f32::<T>(self.v_low_sqr)?;
+    writer.write_f32::<T>(self.v_high_sqr)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionDamping {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -39,17 +48,6 @@ impl ParticleActionReader for ParticleActionDamping {
       v_low_sqr: read_ltx_field("v_low_sqr", section)?,
       v_high_sqr: read_ltx_field("v_high_sqr", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionDamping {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<XRayByteOrder, _>(&self.damping)?;
-    writer.write_f32::<XRayByteOrder>(self.v_low_sqr)?;
-    writer.write_f32::<XRayByteOrder>(self.v_high_sqr)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
@@ -66,13 +64,12 @@ impl ParticleActionWriter for ParticleActionDamping {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::meta::particle_action_reader::ParticleActionReader;
-  use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particles::actions::particle_action_damping::ParticleActionDamping;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -97,7 +94,7 @@ mod tests {
       v_high_sqr: 55.3,
     };
 
-    original.write(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 20);
 

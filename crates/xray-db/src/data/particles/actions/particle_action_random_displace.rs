@@ -1,26 +1,33 @@
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
 use crate::data::particles::particle_domain::ParticleDomain;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionRandomDisplace {
   pub gen_disp: ParticleDomain,
 }
 
-impl ParticleActionReader for ParticleActionRandomDisplace {
+impl ChunkReadWrite for ParticleActionRandomDisplace {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionRandomDisplace> {
-    Ok(ParticleActionRandomDisplace {
+    Ok(Self {
       gen_disp: reader.read_xr::<T, _>()?,
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_xr::<T, _>(&self.gen_disp)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionRandomDisplace {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -33,15 +40,6 @@ impl ParticleActionReader for ParticleActionRandomDisplace {
     Ok(Self {
       gen_disp: read_ltx_field("gen_disp", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionRandomDisplace {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<XRayByteOrder, _>(&self.gen_disp)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {

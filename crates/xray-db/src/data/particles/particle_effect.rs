@@ -116,13 +116,14 @@ impl ChunkReadWrite for ParticleEffect {
             error
           ))
         })?,
-        actions: ParticleAction::read_list::<T>(
-          &mut find_optional_chunk_by_id(&chunks, Self::ACTION_LIST_CHUNK_ID)
-            .expect("Particle effect actions chunk not found"),
-        )
-        .map_err(|error| {
-          XRayError::new_parsing_error(format!("Failed to read particle actions chunk: {}", error))
-        })?,
+        actions: find_required_chunk_by_id(&chunks, Self::ACTION_LIST_CHUNK_ID)?
+          .read_xr_list::<T, _>()
+          .map_err(|error| {
+            XRayError::new_parsing_error(format!(
+              "Failed to read particle actions chunk: {}",
+              error
+            ))
+          })?,
         flags: read_u32_chunk::<T>(
           &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
             .expect("Particle flags chunk not found"),
@@ -194,7 +195,7 @@ impl ChunkReadWrite for ParticleEffect {
     max_particles_chunk_writer.flush_chunk_into::<T>(writer, Self::MAX_PARTICLES_CHUNK_ID)?;
 
     let mut actions_chunk_writer: ChunkWriter = ChunkWriter::new();
-    ParticleAction::write_list::<T>(&self.actions, &mut actions_chunk_writer)?;
+    actions_chunk_writer.write_xr_list::<T, _>(&self.actions)?;
     actions_chunk_writer.flush_chunk_into::<T>(writer, Self::ACTION_LIST_CHUNK_ID)?;
 
     let mut flags_chunk_writer: ChunkWriter = ChunkWriter::new();
@@ -256,7 +257,8 @@ impl LtxImportExport for ParticleEffect {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
-        "Particle effect section '{section_name}' should be defined in ltx file ({})",
+        "Particle effect section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -368,10 +370,11 @@ impl LtxImportExport for ParticleEffect {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::meta::particle_action_type::ParticleActionType;
   use crate::data::particles::actions::particle_action::ParticleAction;
   use crate::data::particles::actions::particle_action_copy_vertex::ParticleActionCopyVertex;
   use crate::data::particles::actions::particle_action_damping::ParticleActionDamping;
+  use crate::data::particles::particle_action_generic::ParticleActionGeneric;
+  use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::data::particles::particle_effect::ParticleEffect;
   use crate::data::particles::particle_effect_collision::ParticleEffectCollision;
   use crate::data::particles::particle_effect_description::ParticleDescription;
@@ -403,7 +406,7 @@ mod tests {
         ParticleAction {
           action_flags: 31,
           action_type: ParticleActionType::Damping as u32,
-          data: Box::new(ParticleActionDamping {
+          data: ParticleActionGeneric::Damping(Box::new(ParticleActionDamping {
             damping: Vector3d {
               x: 1.5,
               y: 2.5,
@@ -411,12 +414,14 @@ mod tests {
             },
             v_low_sqr: 1.1,
             v_high_sqr: 1.25,
-          }),
+          })),
         },
         ParticleAction {
           action_flags: 453,
           action_type: ParticleActionType::CopyVertex as u32,
-          data: Box::new(ParticleActionCopyVertex { copy_position: 1 }),
+          data: ParticleActionGeneric::CopyVertex(Box::new(ParticleActionCopyVertex {
+            copy_position: 1,
+          })),
         },
       ],
       flags: 140,
@@ -511,7 +516,7 @@ mod tests {
         ParticleAction {
           action_flags: 31,
           action_type: ParticleActionType::Damping as u32,
-          data: Box::new(ParticleActionDamping {
+          data: ParticleActionGeneric::Damping(Box::new(ParticleActionDamping {
             damping: Vector3d {
               x: 2.5,
               y: 3.5,
@@ -519,12 +524,14 @@ mod tests {
             },
             v_low_sqr: 5.2,
             v_high_sqr: 6.5,
-          }),
+          })),
         },
         ParticleAction {
           action_flags: 461,
           action_type: ParticleActionType::CopyVertex as u32,
-          data: Box::new(ParticleActionCopyVertex { copy_position: 0 }),
+          data: ParticleActionGeneric::CopyVertex(Box::new(ParticleActionCopyVertex {
+            copy_position: 0,
+          })),
         },
       ],
       flags: 150,

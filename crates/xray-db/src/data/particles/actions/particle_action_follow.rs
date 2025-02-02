@@ -1,9 +1,8 @@
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -15,7 +14,7 @@ pub struct ParticleActionFollow {
   pub max_radius: f32,
 }
 
-impl ParticleActionReader for ParticleActionFollow {
+impl ChunkReadWrite for ParticleActionFollow {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       magnitude: reader.read_f32::<T>()?,
@@ -24,6 +23,16 @@ impl ParticleActionReader for ParticleActionFollow {
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_f32::<T>(self.magnitude)?;
+    writer.write_f32::<T>(self.epsilon)?;
+    writer.write_f32::<T>(self.max_radius)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionFollow {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -39,17 +48,6 @@ impl ParticleActionReader for ParticleActionFollow {
       max_radius: read_ltx_field("max_radius", section)?,
     })
   }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionFollow {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_f32::<XRayByteOrder>(self.magnitude)?;
-    writer.write_f32::<XRayByteOrder>(self.epsilon)?;
-    writer.write_f32::<XRayByteOrder>(self.max_radius)?;
-
-    Ok(())
-  }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
@@ -64,13 +62,12 @@ impl ParticleActionWriter for ParticleActionFollow {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::meta::particle_action_reader::ParticleActionReader;
-  use crate::data::meta::particle_action_writer::ParticleActionWriter;
   use crate::data::particles::actions::particle_action_follow::ParticleActionFollow;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -91,7 +88,7 @@ mod tests {
       max_radius: 4.05,
     };
 
-    original.write(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 12);
 

@@ -1,27 +1,35 @@
-use crate::data::meta::particle_action_reader::ParticleActionReader;
-use crate::data::meta::particle_action_writer::ParticleActionWriter;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionKillOld {
   pub age_limit: f32,
   pub kill_less_than: u32,
 }
 
-impl ParticleActionReader for ParticleActionKillOld {
+impl ChunkReadWrite for ParticleActionKillOld {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionKillOld> {
-    Ok(ParticleActionKillOld {
+    Ok(Self {
       age_limit: reader.read_f32::<T>()?,
       kill_less_than: reader.read_u32::<T>()?,
     })
   }
 
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_f32::<T>(self.age_limit)?;
+    writer.write_u32::<T>(self.kill_less_than)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionKillOld {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -35,16 +43,6 @@ impl ParticleActionReader for ParticleActionKillOld {
       age_limit: read_ltx_field("age_limit", section)?,
       kill_less_than: read_ltx_field("kill_less_than", section)?,
     })
-  }
-}
-
-#[typetag::serde]
-impl ParticleActionWriter for ParticleActionKillOld {
-  fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_f32::<XRayByteOrder>(self.age_limit)?;
-    writer.write_u32::<XRayByteOrder>(self.kill_less_than)?;
-
-    Ok(())
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
