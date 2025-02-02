@@ -20,7 +20,7 @@ pub struct ParticleActionAvoid {
 impl ParticleActionReader for ParticleActionAvoid {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      position: ParticleDomain::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
       look_ahead: reader.read_f32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
@@ -48,8 +48,7 @@ impl ParticleActionReader for ParticleActionAvoid {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionAvoid {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.position.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.position)?;
     writer.write_f32::<XRayByteOrder>(self.look_ahead)?;
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
     writer.write_f32::<XRayByteOrder>(self.epsilon)?;

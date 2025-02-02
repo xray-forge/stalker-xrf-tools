@@ -2,9 +2,10 @@ use crate::constants::META_TYPE_FIELD;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,32 +22,47 @@ impl ParticleGroupEffectOld {
 
   pub const EFFECT_ACTIONS_LIMIT: usize = 10_000;
 
-  /// Read list of old effect groups data from chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
-    let mut effects: Vec<Self> = Vec::new();
+  pub fn get_effect_old_section(section_name: &str, index: usize) -> String {
+    format!("{section_name}.effect_old.{index}")
+  }
+}
 
+impl ChunkReadWriteList for ParticleGroupEffectOld {
+  /// Read list of old effect groups data from chunk reader.
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let count: u32 = reader.read_u32::<T>()?;
+
+    let mut effects: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       effects.push(Self::read::<T>(reader)?);
     }
 
-    assert_eq!(
+    assert_equal(
       effects.len(),
       count as usize,
-      "Should read same count of effects as declared in chunk"
-    );
-
-    assert!(
-      reader.is_ended(),
-      "Expect particle effects list chunk to be ended"
-    );
+      "Should read same count of effects as declared in chunk",
+    )?;
+    assert_chunk_read(reader, "Expect particle effects list chunk to be ended")?;
 
     Ok(effects)
   }
 
+  /// Write old effects list data into the writer.
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XRayResult {
+    writer.write_u32::<T>(list.len() as u32)?;
+
+    for effect in list {
+      effect.write::<T>(writer)?;
+    }
+
+    Ok(())
+  }
+}
+
+impl ChunkReadWrite for ParticleGroupEffectOld {
   /// Read old group effect from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_group = Self {
       name: reader.read_null_terminated_win_string()?,
       on_play_child_name: reader.read_null_terminated_win_string()?,
@@ -58,19 +74,8 @@ impl ParticleGroupEffectOld {
     Ok(particle_group)
   }
 
-  /// Write old effects list data into the writer.
-  pub fn write_list<T: ByteOrder>(effects: &[Self], writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_u32::<T>(effects.len() as u32)?;
-
-    for effect in effects {
-      effect.write::<T>(writer)?;
-    }
-
-    Ok(())
-  }
-
   /// Write old effect data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_null_terminated_win_string(&self.on_play_child_name)?;
     writer.write_f32::<T>(self.time_0)?;
@@ -79,7 +84,10 @@ impl ParticleGroupEffectOld {
 
     Ok(())
   }
+}
 
+// todo: Import / export with trait.
+impl ParticleGroupEffectOld {
   /// Import list of particles group effect data from provided path.
   pub fn import_list(section_name: &str, ltx: &Ltx) -> XRayResult<Vec<Self>> {
     let mut effect_index: usize = 0;
@@ -117,12 +125,11 @@ impl ParticleGroupEffectOld {
 
     let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
-    assert_eq!(
-      meta_type,
+    assert_equal(
+      meta_type.as_str(),
       Self::META_TYPE,
-      "Expected corrected meta type field for '{}' importing",
-      Self::META_TYPE
-    );
+      "Expected corrected meta type field for particle effect importing",
+    )?;
 
     Ok(Self {
       name: read_ltx_field("name", section)?,
@@ -157,12 +164,6 @@ impl ParticleGroupEffectOld {
   }
 }
 
-impl ParticleGroupEffectOld {
-  pub fn get_effect_old_section(section_name: &str, index: usize) -> String {
-    format!("{section_name}.effect_old.{index}")
-  }
-}
-
 #[cfg(test)]
 mod tests {
   use crate::data::particles::particle_group_effect_old::ParticleGroupEffectOld;
@@ -170,7 +171,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -209,7 +210,7 @@ mod tests {
       },
     ];
 
-    ParticleGroupEffectOld::write_list::<XRayByteOrder>(&original, &mut writer)?;
+    ParticleGroupEffectOld::write_list::<XRayByteOrder>(&mut writer, &original)?;
 
     assert_eq!(writer.bytes_written(), 200);
 

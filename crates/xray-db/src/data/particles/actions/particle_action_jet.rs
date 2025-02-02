@@ -23,7 +23,7 @@ impl ParticleActionReader for ParticleActionJet {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionJet> {
     Ok(ParticleActionJet {
       center: reader.read_xr::<T, _>()?,
-      acc: ParticleDomain::read::<T>(reader)?,
+      acc: reader.read_xr::<T, _>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
       max_radius: reader.read_f32::<T>()?,
@@ -53,9 +53,7 @@ impl ParticleActionReader for ParticleActionJet {
 impl ParticleActionWriter for ParticleActionJet {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_xr::<XRayByteOrder, _>(&self.center)?;
-
-    self.acc.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.acc)?;
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
     writer.write_f32::<XRayByteOrder>(self.epsilon)?;
     writer.write_f32::<XRayByteOrder>(self.max_radius)?;

@@ -2,15 +2,18 @@ use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::particle_effect_description::ParticleDescription;
 use crate::data::particles::particle_group_effect::ParticleGroupEffect;
 use crate::data::particles::particle_group_effect_old::ParticleGroupEffectOld;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  find_optional_chunk_by_id, read_f32_chunk, read_null_terminated_win_string_chunk, read_u16_chunk,
-  read_u32_chunk, ChunkReader, ChunkWriter,
+  find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
+  read_null_terminated_win_string_chunk, read_u16_chunk, read_u32_chunk, ChunkReadWrite,
+  ChunkReader, ChunkWriter,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -37,36 +40,40 @@ impl ParticleGroup {
   pub const DESCRIPTION_CHUNK_ID: u32 = 6;
   pub const EFFECTS2_CHUNK_ID: u32 = 7;
 
+  fn get_description_section(section_name: &str) -> String {
+    format!("{section_name}.description")
+  }
+}
+
+impl ChunkReadWrite for ParticleGroup {
   /// Read group from chunk reader binary data.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     let particle_group: Self = Self {
-      version: read_u16_chunk::<T>(
-        &mut find_optional_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)
-          .expect("Particle group version chunk not found"),
-      )?,
-      name: read_null_terminated_win_string_chunk(
-        &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)
-          .expect("Particle group name chunk not found"),
-      )?,
-      flags: read_u32_chunk::<T>(
-        &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
-          .expect("Particle group flags chunk not found"),
-      )?,
-      effects: ParticleGroupEffect::read_list::<T>(
-        &mut find_optional_chunk_by_id(&chunks, Self::EFFECTS_CHUNK_ID)
-          .expect("Particle group effects chunk not found"),
-      )?,
-      time_limit: read_f32_chunk::<T>(
-        &mut find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)
-          .expect("Particle group time limit chunk not found"),
-      )?,
+      version: read_u16_chunk::<T>(&mut find_required_chunk_by_id(
+        &chunks,
+        Self::VERSION_CHUNK_ID,
+      )?)?,
+      name: read_null_terminated_win_string_chunk(&mut find_required_chunk_by_id(
+        &chunks,
+        Self::NAME_CHUNK_ID,
+      )?)?,
+      flags: read_u32_chunk::<T>(&mut find_required_chunk_by_id(
+        &chunks,
+        Self::FLAGS_CHUNK_ID,
+      )?)?,
+      effects: find_required_chunk_by_id(&chunks, Self::EFFECTS_CHUNK_ID)?
+        .read_xr_list::<T, _>()?,
+      time_limit: read_f32_chunk::<T>(&mut find_required_chunk_by_id(
+        &chunks,
+        Self::TIME_LIMIT_CHUNK_ID,
+      )?)?,
       description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
         ParticleDescription::read::<T>(&mut it).expect("Invalid description chunk data")
       }),
       effects_old: find_optional_chunk_by_id(&chunks, Self::EFFECTS2_CHUNK_ID).map(|mut it| {
-        ParticleGroupEffectOld::read_list::<T>(&mut it)
+        it.read_xr_list::<T, _>()
           .expect("Invalid old group effects chunk data")
       }),
     };
@@ -81,7 +88,7 @@ impl ParticleGroup {
   }
 
   /// Write particle group data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -95,7 +102,7 @@ impl ParticleGroup {
     flags_chunk_writer.flush_chunk_into::<T>(writer, Self::FLAGS_CHUNK_ID)?;
 
     let mut effects_chunk_writer: ChunkWriter = ChunkWriter::new();
-    ParticleGroupEffect::write_list::<T>(&self.effects, &mut effects_chunk_writer)?;
+    effects_chunk_writer.write_xr_list::<T, _>(&self.effects)?;
     effects_chunk_writer.flush_chunk_into::<T>(writer, Self::EFFECTS_CHUNK_ID)?;
 
     let mut time_limit_chunk_writer: ChunkWriter = ChunkWriter::new();
@@ -111,16 +118,18 @@ impl ParticleGroup {
     if let Some(effects_old) = &self.effects_old {
       if !effects_old.is_empty() {
         let mut effects_old_chunk_writer: ChunkWriter = ChunkWriter::new();
-        ParticleGroupEffectOld::write_list::<T>(effects_old, &mut effects_old_chunk_writer)?;
+        effects_old_chunk_writer.write_xr_list::<T, _>(effects_old)?;
         effects_old_chunk_writer.flush_chunk_into::<T>(writer, Self::DESCRIPTION_CHUNK_ID)?;
       }
     }
 
     Ok(())
   }
+}
 
+impl LtxImportExport for ParticleGroup {
   /// Import particles group data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Particle group section '{}' should be defined in ltx file ({})",
@@ -131,12 +140,11 @@ impl ParticleGroup {
 
     let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
-    assert_eq!(
-      meta_type,
+    assert_equal(
+      meta_type.as_str(),
       Self::META_TYPE,
-      "Expected corrected meta type field for '{}' importing",
-      Self::META_TYPE
-    );
+      "Expected corrected meta type field for particle group importing",
+    )?;
 
     let effects_old: Vec<ParticleGroupEffectOld> =
       ParticleGroupEffectOld::import_list(section_name, ltx)?;
@@ -160,7 +168,7 @@ impl ParticleGroup {
   }
 
   /// Export particles group data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -180,11 +188,5 @@ impl ParticleGroup {
     }
 
     Ok(())
-  }
-}
-
-impl ParticleGroup {
-  fn get_description_section(section_name: &str) -> String {
-    format!("{section_name}.description")
   }
 }

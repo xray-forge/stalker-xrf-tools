@@ -28,11 +28,11 @@ pub struct ParticleActionSource {
 impl ParticleActionReader for ParticleActionSource {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionSource> {
     Ok(ParticleActionSource {
-      position: ParticleDomain::read::<T>(reader)?,
-      velocity: ParticleDomain::read::<T>(reader)?,
-      rot: ParticleDomain::read::<T>(reader)?,
-      size: ParticleDomain::read::<T>(reader)?,
-      color: ParticleDomain::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
+      velocity: reader.read_xr::<T, _>()?,
+      rot: reader.read_xr::<T, _>()?,
+      size: reader.read_xr::<T, _>()?,
+      color: reader.read_xr::<T, _>()?,
       alpha: reader.read_f32::<T>()?,
       particle_rate: reader.read_f32::<T>()?,
       age: reader.read_f32::<T>()?,
@@ -70,18 +70,16 @@ impl ParticleActionReader for ParticleActionSource {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionSource {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.position.write::<XRayByteOrder>(writer)?;
-    self.velocity.write::<XRayByteOrder>(writer)?;
-    self.rot.write::<XRayByteOrder>(writer)?;
-    self.size.write::<XRayByteOrder>(writer)?;
-    self.color.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.position)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.velocity)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.rot)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.size)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.color)?;
     writer.write_f32::<XRayByteOrder>(self.alpha)?;
     writer.write_f32::<XRayByteOrder>(self.particle_rate)?;
     writer.write_f32::<XRayByteOrder>(self.age)?;
     writer.write_f32::<XRayByteOrder>(self.age_sigma)?;
     writer.write_xr::<XRayByteOrder, _>(&self.parent_vel)?;
-
     writer.write_f32::<XRayByteOrder>(self.parent_motion)?;
 
     Ok(())

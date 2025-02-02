@@ -19,7 +19,7 @@ impl ParticleActionReader for ParticleActionSink {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionSink> {
     Ok(ParticleActionSink {
       kill_inside: reader.read_u32::<T>()?,
-      position: ParticleDomain::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
     })
   }
 
@@ -43,8 +43,7 @@ impl ParticleActionReader for ParticleActionSink {
 impl ParticleActionWriter for ParticleActionSink {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<XRayByteOrder>(self.kill_inside)?;
-
-    self.position.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.position)?;
 
     Ok(())
   }

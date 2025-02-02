@@ -1,14 +1,14 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::particle_group::ParticleGroup;
-use crate::export::FileImportExport;
+use crate::export::{FileImportExport, LtxImportExport};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::{assert, open_export_file};
+use xray_utils::open_export_file;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -33,13 +33,13 @@ impl ChunkReadWrite for ParticlesGroupsChunk {
       chunks.len()
     );
 
-    for mut chunk in chunks {
-      groups.push(ParticleGroup::read::<T>(&mut chunk)?);
+    for mut chunk_reader in chunks {
+      groups.push(chunk_reader.read_xr::<T, _>()?);
     }
 
     groups.sort_by(|first, second| first.name.cmp(&second.name));
 
-    assert(reader.is_ended(), "Expect groups chunk to be ended")?;
+    assert_chunk_read(reader, "Expect groups chunk to be ended")?;
 
     Ok(Self { groups })
   }
@@ -49,13 +49,8 @@ impl ChunkReadWrite for ParticlesGroupsChunk {
     for (index, group) in self.groups.iter().enumerate() {
       let mut group_writer: ChunkWriter = ChunkWriter::new();
 
-      group.write::<T>(&mut group_writer)?;
-
-      writer.write_all(
-        group_writer
-          .flush_chunk_into_buffer::<T>(index as u32)?
-          .as_slice(),
-      )?;
+      group_writer.write_xr::<T, _>(group)?;
+      writer.write_all(&group_writer.flush_chunk_into_buffer::<T>(index as u32)?)?;
     }
 
     log::info!("Written groups chunk, {} bytes", writer.bytes_written());

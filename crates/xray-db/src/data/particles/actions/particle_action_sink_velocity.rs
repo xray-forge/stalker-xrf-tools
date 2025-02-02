@@ -19,7 +19,7 @@ impl ParticleActionReader for ParticleActionSinkVelocity {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionSinkVelocity> {
     Ok(ParticleActionSinkVelocity {
       kill_inside: reader.read_u32::<T>()?,
-      velocity: ParticleDomain::read::<T>(reader)?,
+      velocity: reader.read_xr::<T, _>()?,
     })
   }
 
@@ -43,8 +43,7 @@ impl ParticleActionReader for ParticleActionSinkVelocity {
 impl ParticleActionWriter for ParticleActionSinkVelocity {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<XRayByteOrder>(self.kill_inside)?;
-
-    self.velocity.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.velocity)?;
 
     Ok(())
   }

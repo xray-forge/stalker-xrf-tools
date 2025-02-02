@@ -21,7 +21,7 @@ impl ParticleActionReader for ParticleActionBounce {
   /// Read particle_action bounce.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      position: ParticleDomain::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
       one_minus_friction: reader.read_f32::<T>()?,
       resilience: reader.read_f32::<T>()?,
       cutoff_sqr: reader.read_f32::<T>()?,
@@ -49,8 +49,7 @@ impl ParticleActionReader for ParticleActionBounce {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionBounce {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.position.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.position)?;
     writer.write_f32::<XRayByteOrder>(self.one_minus_friction)?;
     writer.write_f32::<XRayByteOrder>(self.resilience)?;
     writer.write_f32::<XRayByteOrder>(self.cutoff_sqr)?;

@@ -3,7 +3,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -18,9 +18,9 @@ pub struct ParticleDomain {
   pub radius2_sqr: f32,
 }
 
-impl ParticleDomain {
+impl ChunkReadWrite for ParticleDomain {
   /// Read particle domain from chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       domain_type: reader.read_u32::<T>()?,
       coordinates: (reader.read_xr::<T, _>()?, reader.read_xr::<T, _>()?),
@@ -32,7 +32,7 @@ impl ParticleDomain {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<XRayByteOrder>(self.domain_type)?;
     writer.write_xr::<T, _>(&self.coordinates.0)?;
     writer.write_xr::<T, _>(&self.coordinates.1)?;
@@ -212,7 +212,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

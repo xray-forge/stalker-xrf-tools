@@ -17,7 +17,7 @@ pub struct ParticleActionRandomDisplace {
 impl ParticleActionReader for ParticleActionRandomDisplace {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionRandomDisplace> {
     Ok(ParticleActionRandomDisplace {
-      gen_disp: ParticleDomain::read::<T>(reader)?,
+      gen_disp: reader.read_xr::<T, _>()?,
     })
   }
 
@@ -39,7 +39,7 @@ impl ParticleActionReader for ParticleActionRandomDisplace {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionRandomDisplace {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.gen_disp.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.gen_disp)?;
 
     Ok(())
   }
