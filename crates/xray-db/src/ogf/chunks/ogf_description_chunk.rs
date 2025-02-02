@@ -27,12 +27,12 @@ impl ChunkReadWrite for OgfDescriptionChunk {
     );
 
     let description: Self = Self {
-      source_file: reader.read_null_terminated_win_string()?,
-      convertor: reader.read_null_terminated_win_string()?,
+      source_file: reader.read_w1251_string()?,
+      convertor: reader.read_w1251_string()?,
       built_at: reader.read_u32::<T>()?,
-      creator: reader.read_null_terminated_win_string()?,
+      creator: reader.read_w1251_string()?,
       created_at: reader.read_u32::<T>()?,
-      editor: reader.read_null_terminated_win_string()?,
+      editor: reader.read_w1251_string()?,
       edited_at: reader.read_u32::<T>()?,
     };
 
@@ -42,12 +42,12 @@ impl ChunkReadWrite for OgfDescriptionChunk {
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.source_file)?;
-    writer.write_null_terminated_win_string(&self.convertor)?;
+    writer.write_w1251_string(&self.source_file)?;
+    writer.write_w1251_string(&self.convertor)?;
     writer.write_u32::<T>(self.built_at)?;
-    writer.write_null_terminated_win_string(&self.creator)?;
+    writer.write_w1251_string(&self.creator)?;
     writer.write_u32::<T>(self.created_at)?;
-    writer.write_null_terminated_win_string(&self.editor)?;
+    writer.write_w1251_string(&self.editor)?;
     writer.write_u32::<T>(self.edited_at)?;
 
     Ok(())

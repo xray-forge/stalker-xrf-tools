@@ -23,12 +23,12 @@ impl AlifeObjectReader for AlifeSmartCover {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let base: AlifeObjectSmartCover = AlifeObjectSmartCover::read::<T>(reader)?;
 
-    let last_description: String = reader.read_null_terminated_win_string()?;
+    let last_description: String = reader.read_w1251_string()?;
     let count: u8 = reader.read_u8()?;
     let mut loopholes: Vec<AlifeSmartCoverLoophole> = Vec::new();
 
     for _ in 0..count {
-      let name: String = reader.read_null_terminated_win_string()?;
+      let name: String = reader.read_w1251_string()?;
       let enabled: u8 = reader.read_u8()?;
 
       loopholes.push(AlifeSmartCoverLoophole { name, enabled })
@@ -68,11 +68,11 @@ impl AlifeObjectWriter for AlifeSmartCover {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
-    writer.write_null_terminated_win_string(&self.last_description)?;
+    writer.write_w1251_string(&self.last_description)?;
     writer.write_u8(self.loopholes.len() as u8)?;
 
     for loophole in &self.loopholes {
-      writer.write_null_terminated_win_string(&loophole.name)?;
+      writer.write_w1251_string(&loophole.name)?;
       writer.write_u8(loophole.enabled)?;
     }
 

@@ -27,13 +27,13 @@ impl AlifeObjectReader<AlifeObjectTraderAbstract> for AlifeObjectTraderAbstract 
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       money: reader.read_u32::<XRayByteOrder>()?,
-      specific_character: reader.read_null_terminated_win_string()?,
+      specific_character: reader.read_w1251_string()?,
       trader_flags: reader.read_u32::<XRayByteOrder>()?,
-      character_profile: reader.read_null_terminated_win_string()?,
+      character_profile: reader.read_w1251_string()?,
       community_index: reader.read_u32::<XRayByteOrder>()?,
       rank: reader.read_u32::<XRayByteOrder>()?,
       reputation: reader.read_u32::<XRayByteOrder>()?,
-      character_name: reader.read_null_terminated_win_string()?,
+      character_name: reader.read_w1251_string()?,
       dead_body_can_take: reader.read_u8()?,
       dead_body_closed: reader.read_u8()?,
     })
@@ -69,13 +69,13 @@ impl AlifeObjectWriter for AlifeObjectTraderAbstract {
   /// Write trader data into the chunk.
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<XRayByteOrder>(self.money)?;
-    writer.write_null_terminated_win_string(&self.specific_character)?;
+    writer.write_w1251_string(&self.specific_character)?;
     writer.write_u32::<XRayByteOrder>(self.trader_flags)?;
-    writer.write_null_terminated_win_string(&self.character_profile)?;
+    writer.write_w1251_string(&self.character_profile)?;
     writer.write_u32::<XRayByteOrder>(self.community_index)?;
     writer.write_u32::<XRayByteOrder>(self.rank)?;
     writer.write_u32::<XRayByteOrder>(self.reputation)?;
-    writer.write_null_terminated_win_string(&self.character_name)?;
+    writer.write_w1251_string(&self.character_name)?;
     writer.write_u8(self.dead_body_can_take)?;
     writer.write_u8(self.dead_body_closed)?;
 

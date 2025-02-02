@@ -27,7 +27,7 @@ impl AlifeObjectReader for AlifeObjectPhysic {
       skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
       physic_type: reader.read_u32::<XRayByteOrder>()?,
       mass: reader.read_f32::<XRayByteOrder>()?,
-      fixed_bones: reader.read_null_terminated_win_string()?,
+      fixed_bones: reader.read_w1251_string()?,
     })
   }
 
@@ -60,7 +60,7 @@ impl AlifeObjectWriter for AlifeObjectPhysic {
 
     writer.write_u32::<XRayByteOrder>(self.physic_type)?;
     writer.write_f32::<XRayByteOrder>(self.mass)?;
-    writer.write_null_terminated_win_string(&self.fixed_bones)?;
+    writer.write_w1251_string(&self.fixed_bones)?;
 
     Ok(())
   }

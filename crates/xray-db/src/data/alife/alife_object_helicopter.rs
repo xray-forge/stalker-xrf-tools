@@ -27,8 +27,8 @@ impl AlifeObjectReader for AlifeObjectHelicopter {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       motion: AlifeObjectMotion::read::<T>(reader)?,
       skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
-      startup_animation: reader.read_null_terminated_win_string()?,
-      engine_sound: reader.read_null_terminated_win_string()?,
+      startup_animation: reader.read_w1251_string()?,
+      engine_sound: reader.read_w1251_string()?,
     })
   }
 
@@ -60,8 +60,8 @@ impl AlifeObjectWriter for AlifeObjectHelicopter {
     self.motion.write(writer)?;
     self.skeleton.write(writer)?;
 
-    writer.write_null_terminated_win_string(&self.startup_animation)?;
-    writer.write_null_terminated_win_string(&self.engine_sound)?;
+    writer.write_w1251_string(&self.startup_animation)?;
+    writer.write_w1251_string(&self.engine_sound)?;
 
     Ok(())
   }

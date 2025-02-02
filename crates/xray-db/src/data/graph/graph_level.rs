@@ -22,21 +22,21 @@ impl GraphLevel {
   /// Read graph level data from the chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      name: reader.read_null_terminated_win_string()?,
+      name: reader.read_w1251_string()?,
       offset: reader.read_xr::<T, _>()?,
       id: reader.read_u8()?,
-      section: reader.read_null_terminated_win_string()?,
+      section: reader.read_w1251_string()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
     })
   }
 
   /// Write graph level data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.name)?;
+    writer.write_w1251_string(&self.name)?;
 
     writer.write_xr::<T, _>(&self.offset)?;
     writer.write_u8(self.id)?;
-    writer.write_null_terminated_win_string(&self.section)?;
+    writer.write_w1251_string(&self.section)?;
     writer.write_u128::<T>(self.guid.as_u128())?;
 
     Ok(())

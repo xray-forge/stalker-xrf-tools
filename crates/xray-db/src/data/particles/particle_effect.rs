@@ -10,8 +10,8 @@ use crate::file_import::{read_ini_optional_field, read_ltx_field};
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  find_optional_chunk_by_id, read_f32_chunk, read_f32_vector_chunk,
-  read_null_terminated_win_string_chunk, read_u16_chunk, read_u32_chunk, ChunkReader, ChunkWriter,
+  find_optional_chunk_by_id, read_f32_chunk, read_f32_vector_chunk, read_u16_chunk, read_u32_chunk,
+  read_w1251_string_chunk, ChunkReader, ChunkWriter,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
@@ -70,7 +70,7 @@ impl ParticleEffect {
         .map_err(|error| {
           XRayError::new_parsing_error(format!("Failed to read particle version chunk: {}", error))
         })?,
-        name: read_null_terminated_win_string_chunk(
+        name: read_w1251_string_chunk(
           &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)
             .expect("Particle name chunk not found"),
         )
@@ -162,7 +162,7 @@ impl ParticleEffect {
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
 
     let mut name_chunk_writer: ChunkWriter = ChunkWriter::new();
-    name_chunk_writer.write_null_terminated_win_string(&self.name)?;
+    name_chunk_writer.write_w1251_string(&self.name)?;
     name_chunk_writer.flush_chunk_into::<T>(writer, Self::NAME_CHUNK_ID)?;
 
     let mut max_particles_chunk_writer: ChunkWriter = ChunkWriter::new();

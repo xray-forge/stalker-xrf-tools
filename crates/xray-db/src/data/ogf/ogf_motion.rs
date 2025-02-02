@@ -15,7 +15,7 @@ pub struct OgfMotion {
 
 impl OgfMotion {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let name: String = reader.read_null_terminated_win_string()?;
+    let name: String = reader.read_w1251_string()?;
     let count: u32 = reader.read_u32::<T>()?;
     let flags: u8 = reader.read_u8()?;
     let mut remaining: Vec<u8> = Vec::new();

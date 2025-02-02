@@ -24,7 +24,7 @@ impl AlifeObjectReader for AlifeObjectInventoryBox {
       base: AlifeObjectDynamicVisual::read::<T>(reader)?,
       can_take: reader.read_u8()?,
       is_closed: reader.read_u8()?,
-      tip: reader.read_null_terminated_win_string()?,
+      tip: reader.read_w1251_string()?,
     })
   }
 
@@ -55,7 +55,7 @@ impl AlifeObjectWriter for AlifeObjectInventoryBox {
 
     writer.write_u8(self.can_take)?;
     writer.write_u8(self.is_closed)?;
-    writer.write_null_terminated_win_string(&self.tip)?;
+    writer.write_w1251_string(&self.tip)?;
 
     Ok(())
   }

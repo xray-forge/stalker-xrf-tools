@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use xray_error::XRayResult;
-use xray_utils::read_as_string_from_windows1251_encoded;
+use xray_utils::read_as_string_from_w1251_encoded;
 
 impl Ltx {
   /// Read LTX from a string.
@@ -37,7 +37,7 @@ impl Ltx {
 
   /// Read from a reader as generic ltx with LTX descriptor filled.
   pub fn read_from<R: Read>(reader: &mut R) -> XRayResult<Self> {
-    LtxParser::new(read_as_string_from_windows1251_encoded(reader)?.chars()).parse()
+    LtxParser::new(read_as_string_from_w1251_encoded(reader)?.chars()).parse()
   }
 }
 
@@ -54,7 +54,7 @@ impl Ltx {
 
   /// Load include statements from a reader.
   pub fn read_included_from<R: Read>(reader: &mut R) -> XRayResult<LtxIncluded> {
-    LtxParser::new(read_as_string_from_windows1251_encoded(reader)?.chars()).parse_includes()
+    LtxParser::new(read_as_string_from_w1251_encoded(reader)?.chars()).parse_includes()
   }
 }
 
@@ -71,7 +71,7 @@ impl Ltx {
 
   /// Load formatted LTX as string from reader.
   pub fn format_from<R: Read>(reader: &mut R) -> XRayResult<String> {
-    LtxParser::new(read_as_string_from_windows1251_encoded(reader)?.chars()).parse_into_formatted()
+    LtxParser::new(read_as_string_from_w1251_encoded(reader)?.chars()).parse_into_formatted()
   }
 }
 

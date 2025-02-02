@@ -31,7 +31,7 @@ impl AlifeObjectReader for AlifeObjectAbstract {
       direct_control: reader.read_u32::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
       flags: reader.read_u32::<T>()?,
-      custom_data: reader.read_null_terminated_win_string()?,
+      custom_data: reader.read_w1251_string()?,
       story_id: reader.read_u32::<T>()?,
       spawn_story_id: reader.read_u32::<T>()?,
     })
@@ -69,7 +69,7 @@ impl AlifeObjectWriter for AlifeObjectAbstract {
     writer.write_u32::<XRayByteOrder>(self.direct_control)?;
     writer.write_u32::<XRayByteOrder>(self.level_vertex_id)?;
     writer.write_u32::<XRayByteOrder>(self.flags)?;
-    writer.write_null_terminated_win_string(&self.custom_data)?;
+    writer.write_w1251_string(&self.custom_data)?;
     writer.write_u32::<XRayByteOrder>(self.story_id)?;
     writer.write_u32::<XRayByteOrder>(self.spawn_story_id)?;
 

@@ -12,7 +12,7 @@ pub struct OgfMotionMark {
 
 impl OgfMotionMark {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let name: String = reader.read_rn_terminated_win_string()?;
+    let name: String = reader.read_w1251_rn_string()?;
 
     let count: u32 = reader.read_u32::<T>()?;
     let mut intervals: Vec<(f32, f32)> = Vec::with_capacity(count as usize);

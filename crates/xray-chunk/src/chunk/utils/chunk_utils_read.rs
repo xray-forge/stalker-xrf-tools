@@ -57,8 +57,8 @@ pub fn read_till_end_binary_chunk(reader: &mut ChunkReader) -> XRayResult<Vec<u8
 }
 
 /// Read chunk as containing string, verify remaining data is 0.
-pub fn read_null_terminated_win_string_chunk(reader: &mut ChunkReader) -> XRayResult<String> {
-  let data: String = reader.read_null_terminated_win_string()?;
+pub fn read_w1251_string_chunk(reader: &mut ChunkReader) -> XRayResult<String> {
+  let data: String = reader.read_w1251_string()?;
 
   assert_chunk_read(reader, "All data should be read in string chunk")?;
 

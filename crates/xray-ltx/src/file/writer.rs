@@ -5,13 +5,13 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use xray_error::XRayResult;
-use xray_utils::read_as_string_from_windows1251_encoded;
+use xray_utils::read_as_string_from_w1251_encoded;
 
 impl Ltx {
   /// Format single LTX file by provided path
   pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> XRayResult<bool> {
     let formatted: String = Ltx::format_from_file(&filename)?;
-    let existing: String = read_as_string_from_windows1251_encoded(
+    let existing: String = read_as_string_from_w1251_encoded(
       &mut fs::OpenOptions::new().read(true).open(filename.as_ref())?,
     )?;
 

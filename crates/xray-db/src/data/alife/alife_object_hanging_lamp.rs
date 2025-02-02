@@ -45,22 +45,22 @@ impl AlifeObjectReader for AlifeObjectHangingLamp {
       skeleton: AlifeObjectSkeleton::read::<T>(reader)?,
       main_color: reader.read_u32::<T>()?,
       main_brightness: reader.read_f32::<T>()?,
-      color_animator: reader.read_null_terminated_win_string()?,
+      color_animator: reader.read_w1251_string()?,
       main_range: reader.read_f32::<T>()?,
       light_flags: reader.read_u16::<T>()?,
-      startup_animation: reader.read_null_terminated_win_string()?,
-      fixed_bones: reader.read_null_terminated_win_string()?,
+      startup_animation: reader.read_w1251_string()?,
+      fixed_bones: reader.read_w1251_string()?,
       health: reader.read_f32::<T>()?,
       virtual_size: reader.read_f32::<T>()?,
       ambient_radius: reader.read_f32::<T>()?,
       ambient_power: reader.read_f32::<T>()?,
-      ambient_texture: reader.read_null_terminated_win_string()?,
-      light_texture: reader.read_null_terminated_win_string()?,
-      light_bone: reader.read_null_terminated_win_string()?,
+      ambient_texture: reader.read_w1251_string()?,
+      light_texture: reader.read_w1251_string()?,
+      light_bone: reader.read_w1251_string()?,
       spot_cone_angle: reader.read_f32::<T>()?,
-      glow_texture: reader.read_null_terminated_win_string()?,
+      glow_texture: reader.read_w1251_string()?,
       glow_radius: reader.read_f32::<T>()?,
-      light_ambient_bone: reader.read_null_terminated_win_string()?,
+      light_ambient_bone: reader.read_w1251_string()?,
       volumetric_quality: reader.read_f32::<T>()?,
       volumetric_intensity: reader.read_f32::<T>()?,
       volumetric_distance: reader.read_f32::<T>()?,
@@ -114,24 +114,24 @@ impl AlifeObjectWriter for AlifeObjectHangingLamp {
 
     writer.write_u32::<XRayByteOrder>(self.main_color)?;
     writer.write_f32::<XRayByteOrder>(self.main_brightness)?;
-    writer.write_null_terminated_win_string(&self.color_animator)?;
+    writer.write_w1251_string(&self.color_animator)?;
     writer.write_f32::<XRayByteOrder>(self.main_range)?;
     writer.write_u16::<XRayByteOrder>(self.light_flags)?;
-    writer.write_null_terminated_win_string(&self.startup_animation)?;
-    writer.write_null_terminated_win_string(&self.fixed_bones)?;
+    writer.write_w1251_string(&self.startup_animation)?;
+    writer.write_w1251_string(&self.fixed_bones)?;
     writer.write_f32::<XRayByteOrder>(self.health)?;
 
     writer.write_f32::<XRayByteOrder>(self.virtual_size)?;
     writer.write_f32::<XRayByteOrder>(self.ambient_radius)?;
     writer.write_f32::<XRayByteOrder>(self.ambient_power)?;
-    writer.write_null_terminated_win_string(&self.ambient_texture)?;
-    writer.write_null_terminated_win_string(&self.light_texture)?;
-    writer.write_null_terminated_win_string(&self.light_bone)?;
+    writer.write_w1251_string(&self.ambient_texture)?;
+    writer.write_w1251_string(&self.light_texture)?;
+    writer.write_w1251_string(&self.light_bone)?;
     writer.write_f32::<XRayByteOrder>(self.spot_cone_angle)?;
-    writer.write_null_terminated_win_string(&self.glow_texture)?;
+    writer.write_w1251_string(&self.glow_texture)?;
     writer.write_f32::<XRayByteOrder>(self.glow_radius)?;
 
-    writer.write_null_terminated_win_string(&self.light_ambient_bone)?;
+    writer.write_w1251_string(&self.light_ambient_bone)?;
     writer.write_f32::<XRayByteOrder>(self.volumetric_quality)?;
     writer.write_f32::<XRayByteOrder>(self.volumetric_intensity)?;
     writer.write_f32::<XRayByteOrder>(self.volumetric_distance)?;

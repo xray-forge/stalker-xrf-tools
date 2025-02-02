@@ -23,8 +23,8 @@ impl AlifeObjectReader for AlifeObjectItemPda {
     Ok(Self {
       base: AlifeObjectItem::read::<T>(reader)?,
       owner: reader.read_u16::<XRayByteOrder>()?,
-      character: reader.read_null_terminated_win_string()?,
-      info_portion: reader.read_null_terminated_win_string()?,
+      character: reader.read_w1251_string()?,
+      info_portion: reader.read_w1251_string()?,
     })
   }
 
@@ -54,8 +54,8 @@ impl AlifeObjectWriter for AlifeObjectItemPda {
     self.base.write(writer)?;
 
     writer.write_u16::<XRayByteOrder>(self.owner)?;
-    writer.write_null_terminated_win_string(&self.character)?;
-    writer.write_null_terminated_win_string(&self.info_portion)?;
+    writer.write_w1251_string(&self.character)?;
+    writer.write_w1251_string(&self.info_portion)?;
 
     Ok(())
   }

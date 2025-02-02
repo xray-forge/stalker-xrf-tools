@@ -20,7 +20,7 @@ impl AlifeObjectReader for AlifeObjectSkeleton {
   /// Read skeleton data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let object = Self {
-      name: reader.read_null_terminated_win_string()?,
+      name: reader.read_w1251_string()?,
       flags: reader.read_u8()?,
       source_id: reader.read_u16::<XRayByteOrder>()?,
     };
@@ -54,7 +54,7 @@ impl AlifeObjectReader for AlifeObjectSkeleton {
 impl AlifeObjectWriter for AlifeObjectSkeleton {
   /// Write skeleton data into the chunk writer.
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.name)?;
+    writer.write_w1251_string(&self.name)?;
     writer.write_u8(self.flags)?;
     writer.write_u16::<XRayByteOrder>(self.source_id)?;
 

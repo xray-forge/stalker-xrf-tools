@@ -81,7 +81,7 @@ impl ChunkReadWrite for Patrol {
     let mut links_reader: ChunkReader =
       data_reader.read_child_by_index(Self::DATA_LIST_CHUNK_ID)?;
 
-    let name: String = meta_reader.read_null_terminated_win_string()?;
+    let name: String = meta_reader.read_w1251_string()?;
 
     assert_equal(
       name.len() + 1,
@@ -116,7 +116,7 @@ impl ChunkReadWrite for Patrol {
     let mut points_writer: ChunkWriter = ChunkWriter::new();
     let mut links_writer: ChunkWriter = ChunkWriter::new();
 
-    meta_writer.write_null_terminated_win_string(&self.name)?;
+    meta_writer.write_w1251_string(&self.name)?;
     writer.write_all(&meta_writer.flush_chunk_into_buffer::<T>(Self::META_CHUNK_ID)?)?;
 
     point_count_writer.write_u32::<T>(self.points.len() as u32)?;

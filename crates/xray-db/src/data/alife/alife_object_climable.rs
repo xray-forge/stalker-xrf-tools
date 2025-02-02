@@ -20,7 +20,7 @@ impl AlifeObjectReader for AlifeObjectClimable {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectShape::read::<T>(reader)?,
-      game_material: reader.read_null_terminated_win_string()?,
+      game_material: reader.read_w1251_string()?,
     })
   }
 
@@ -47,7 +47,7 @@ impl AlifeObjectWriter for AlifeObjectClimable {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
-    writer.write_null_terminated_win_string(&self.game_material)?;
+    writer.write_w1251_string(&self.game_material)?;
 
     Ok(())
   }

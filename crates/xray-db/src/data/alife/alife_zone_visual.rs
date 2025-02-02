@@ -28,11 +28,11 @@ impl AlifeObjectReader for AlifeZoneVisual {
       visual: AlifeObjectVisual::read::<T>(reader)?,
       idle_animation: reader
         .has_data()
-        .then(|| reader.read_null_terminated_win_string().unwrap())
+        .then(|| reader.read_w1251_string().unwrap())
         .unwrap_or(String::new()),
       attack_animation: reader
         .has_data()
-        .then(|| reader.read_null_terminated_win_string().unwrap())
+        .then(|| reader.read_w1251_string().unwrap())
         .unwrap_or(String::new()),
       last_spawn_time: reader.read_xr_optional::<T, Time>()?,
     })
@@ -68,8 +68,8 @@ impl AlifeObjectWriter for AlifeZoneVisual {
     self.base.write(writer)?;
     self.visual.write(writer)?;
 
-    writer.write_null_terminated_win_string(&self.idle_animation)?;
-    writer.write_null_terminated_win_string(&self.attack_animation)?;
+    writer.write_w1251_string(&self.idle_animation)?;
+    writer.write_w1251_string(&self.attack_animation)?;
     writer.write_xr_optional::<XRayByteOrder, Time>(self.last_spawn_time.as_ref())?;
 
     Ok(())

@@ -7,9 +7,8 @@ use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
-  read_null_terminated_win_string_chunk, read_u16_chunk, read_u32_chunk, ChunkReadWrite,
-  ChunkReader, ChunkWriter,
+  find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk, read_u16_chunk,
+  read_u32_chunk, read_w1251_string_chunk, ChunkReadWrite, ChunkReader, ChunkWriter,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
@@ -55,7 +54,7 @@ impl ChunkReadWrite for ParticleGroup {
         &chunks,
         Self::VERSION_CHUNK_ID,
       )?)?,
-      name: read_null_terminated_win_string_chunk(&mut find_required_chunk_by_id(
+      name: read_w1251_string_chunk(&mut find_required_chunk_by_id(
         &chunks,
         Self::NAME_CHUNK_ID,
       )?)?,
@@ -94,7 +93,7 @@ impl ChunkReadWrite for ParticleGroup {
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
 
     let mut name_chunk_writer: ChunkWriter = ChunkWriter::new();
-    name_chunk_writer.write_null_terminated_win_string(&self.name)?;
+    name_chunk_writer.write_w1251_string(&self.name)?;
     name_chunk_writer.flush_chunk_into::<T>(writer, Self::NAME_CHUNK_ID)?;
 
     let mut flags_chunk_writer: ChunkWriter = ChunkWriter::new();

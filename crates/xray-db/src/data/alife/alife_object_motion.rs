@@ -17,7 +17,7 @@ impl AlifeObjectReader for AlifeObjectMotion {
   /// Read motion object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      motion_name: reader.read_null_terminated_win_string()?,
+      motion_name: reader.read_w1251_string()?,
     })
   }
 
@@ -41,7 +41,7 @@ impl AlifeObjectReader for AlifeObjectMotion {
 impl AlifeObjectWriter for AlifeObjectMotion {
   /// Write motion object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.motion_name)?;
+    writer.write_w1251_string(&self.motion_name)?;
 
     Ok(())
   }

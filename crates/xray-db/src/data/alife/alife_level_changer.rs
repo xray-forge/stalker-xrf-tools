@@ -37,11 +37,11 @@ impl AlifeObjectReader for AlifeLevelChanger {
       dest_position: reader.read_xr::<T, _>()?,
       dest_direction: reader.read_xr::<T, _>()?,
       angle_y: reader.read_f32::<T>()?,
-      dest_level_name: reader.read_null_terminated_win_string()?,
-      dest_graph_point: reader.read_null_terminated_win_string()?,
+      dest_level_name: reader.read_w1251_string()?,
+      dest_graph_point: reader.read_w1251_string()?,
       silent_mode: reader.read_u8()?,
       enabled: reader.read_u8()?,
-      hint: reader.read_null_terminated_win_string()?,
+      hint: reader.read_w1251_string()?,
       save_marker: reader.read_u16::<T>()?,
     };
 
@@ -93,12 +93,12 @@ impl AlifeObjectWriter for AlifeLevelChanger {
     writer.write_xr::<XRayByteOrder, _>(&self.dest_direction)?;
 
     writer.write_f32::<XRayByteOrder>(self.angle_y)?;
-    writer.write_null_terminated_win_string(&self.dest_level_name)?;
-    writer.write_null_terminated_win_string(&self.dest_graph_point)?;
+    writer.write_w1251_string(&self.dest_level_name)?;
+    writer.write_w1251_string(&self.dest_graph_point)?;
     writer.write_u8(self.silent_mode)?;
 
     writer.write_u8(self.enabled)?;
-    writer.write_null_terminated_win_string(&self.hint)?;
+    writer.write_w1251_string(&self.hint)?;
     writer.write_u16::<XRayByteOrder>(self.save_marker)?;
 
     Ok(())

@@ -25,8 +25,8 @@ impl AlifeObjectReader for AlifeGraphPoint {
   /// Read graph point data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      connection_point_name: reader.read_null_terminated_win_string()?,
-      connection_level_name: reader.read_null_terminated_win_string()?,
+      connection_point_name: reader.read_w1251_string()?,
+      connection_level_name: reader.read_w1251_string()?,
       location0: reader.read_u8()?,
       location1: reader.read_u8()?,
       location2: reader.read_u8()?,
@@ -59,8 +59,8 @@ impl AlifeObjectReader for AlifeGraphPoint {
 impl AlifeObjectWriter for AlifeGraphPoint {
   /// Write graph point data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.connection_point_name)?;
-    writer.write_null_terminated_win_string(&self.connection_level_name)?;
+    writer.write_w1251_string(&self.connection_point_name)?;
+    writer.write_w1251_string(&self.connection_level_name)?;
     writer.write_u8(self.location0)?;
     writer.write_u8(self.location1)?;
     writer.write_u8(self.location2)?;

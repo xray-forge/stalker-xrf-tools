@@ -100,17 +100,17 @@ pub fn read_as_string_from_encoded<R: Read>(
 }
 
 /// Try encoding provided u8 raw bytes as window 1251 string and convert into regular rust string.
-pub fn read_as_string_from_windows1251_encoded<R: Read>(reader: &mut R) -> io::Result<String> {
+pub fn read_as_string_from_w1251_encoded<R: Read>(reader: &mut R) -> io::Result<String> {
   read_as_string_from_encoded(reader, WINDOWS_1251)
 }
 
 /// Try encoding provided u8 raw bytes as window 1251 string and convert into regular rust string.
-pub fn encode_windows1251_bytes_to_string(bytes: &[u8]) -> io::Result<String> {
+pub fn encode_w1251_bytes_to_string(bytes: &[u8]) -> io::Result<String> {
   decode_bytes_to_string(bytes, WINDOWS_1251)
 }
 
 /// Try encoding provided string as windows1251 bytes.
-pub fn encode_string_to_windows1251_bytes(string: &str) -> io::Result<Vec<u8>> {
+pub fn encode_string_to_w1251_bytes(string: &str) -> io::Result<Vec<u8>> {
   encode_string_to_bytes(string, WINDOWS_1251)
 }
 

@@ -28,7 +28,7 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
     Ok(Self {
       base: AlifeObjectDynamic::read::<T>(reader)?,
       shape: reader.read_xr_list::<T, Shape>()?,
-      description: reader.read_null_terminated_win_string()?,
+      description: reader.read_w1251_string()?,
       hold_position_time: reader.read_f32::<XRayByteOrder>()?,
       enter_min_enemy_distance: reader.read_f32::<XRayByteOrder>()?,
       exit_min_enemy_distance: reader.read_f32::<XRayByteOrder>()?,
@@ -67,7 +67,7 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
     self.base.write(writer)?;
 
     writer.write_xr_list::<XRayByteOrder, Shape>(&self.shape)?;
-    writer.write_null_terminated_win_string(&self.description)?;
+    writer.write_w1251_string(&self.description)?;
     writer.write_f32::<XRayByteOrder>(self.hold_position_time)?;
     writer.write_f32::<XRayByteOrder>(self.enter_min_enemy_distance)?;
     writer.write_f32::<XRayByteOrder>(self.exit_min_enemy_distance)?;

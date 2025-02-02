@@ -2,7 +2,7 @@ use crate::{ChunkReadWrite, ChunkReadWriteList, ChunkReadWriteOptional, ChunkWri
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::io::Write;
 use xray_error::XRayResult;
-use xray_utils::encode_string_to_windows1251_bytes;
+use xray_utils::encode_string_to_w1251_bytes;
 
 impl ChunkWriter {
   #[inline(always)]
@@ -24,8 +24,8 @@ impl ChunkWriter {
   }
 
   /// Write null terminated windows1251 encoded string.
-  pub fn write_null_terminated_win_string(&mut self, data: &str) -> XRayResult<usize> {
-    Ok(self.write(&encode_string_to_windows1251_bytes(data)?)? + self.write(&[0u8])?)
+  pub fn write_w1251_string(&mut self, data: &str) -> XRayResult<usize> {
+    Ok(self.write(&encode_string_to_w1251_bytes(data)?)? + self.write(&[0u8])?)
   }
 
   /// Write serialized vector into vector, where u32 count N is followed by N u16 entries.
@@ -46,14 +46,10 @@ mod tests {
   use xray_error::XRayResult;
 
   #[test]
-  fn test_write_null_terminated_string_empty() -> XRayResult {
+  fn test_write_w1251_string_empty() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    assert_eq!(
-      writer.write_null_terminated_win_string("")?,
-      1,
-      "Expect 1 byte written"
-    );
+    assert_eq!(writer.write_w1251_string("")?, 1, "Expect 1 byte written");
     assert_eq!(writer.buffer, [0], "Expect null terminated empty written");
     assert_eq!(writer.bytes_written(), 1, "Expect 1 byte written");
 
@@ -61,11 +57,11 @@ mod tests {
   }
 
   #[test]
-  fn test_write_null_terminated_string_sample() -> XRayResult {
+  fn test_write_w1251_string_sample() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     assert_eq!(
-      writer.write_null_terminated_win_string("abc")?,
+      writer.write_w1251_string("abc")?,
       4,
       "Expect 4 bytes written"
     );

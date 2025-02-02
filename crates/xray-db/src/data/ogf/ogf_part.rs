@@ -33,16 +33,13 @@ impl OgfPart {
   }
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let name: String = reader.read_null_terminated_win_string()?;
+    let name: String = reader.read_w1251_string()?;
     let count: u16 = reader.read_u16::<T>()?;
 
     let mut bones: Vec<(String, u32)> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
-      bones.push((
-        reader.read_null_terminated_win_string()?,
-        reader.read_u32::<T>()?,
-      ));
+      bones.push((reader.read_w1251_string()?, reader.read_u32::<T>()?));
     }
 
     Ok(Self { name, bones })

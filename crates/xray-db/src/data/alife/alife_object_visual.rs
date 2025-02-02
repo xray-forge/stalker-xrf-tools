@@ -18,7 +18,7 @@ impl AlifeObjectReader for AlifeObjectVisual {
   /// Read visual object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      visual_name: reader.read_null_terminated_win_string()?,
+      visual_name: reader.read_w1251_string()?,
       visual_flags: reader.read_u8()?,
     })
   }
@@ -44,7 +44,7 @@ impl AlifeObjectReader for AlifeObjectVisual {
 impl AlifeObjectWriter for AlifeObjectVisual {
   /// Write visual alife object data into the writer.
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.visual_name)?;
+    writer.write_w1251_string(&self.visual_name)?;
     writer.write_u8(self.visual_flags)?;
 
     Ok(())

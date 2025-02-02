@@ -64,8 +64,8 @@ impl ChunkReadWrite for ParticleGroupEffectOld {
   /// Read old group effect from chunk reader binary data.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_group = Self {
-      name: reader.read_null_terminated_win_string()?,
-      on_play_child_name: reader.read_null_terminated_win_string()?,
+      name: reader.read_w1251_string()?,
+      on_play_child_name: reader.read_w1251_string()?,
       time_0: reader.read_f32::<T>()?,
       time_1: reader.read_f32::<T>()?,
       flags: reader.read_u32::<T>()?,
@@ -76,8 +76,8 @@ impl ChunkReadWrite for ParticleGroupEffectOld {
 
   /// Write old effect data into the writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.name)?;
-    writer.write_null_terminated_win_string(&self.on_play_child_name)?;
+    writer.write_w1251_string(&self.name)?;
+    writer.write_w1251_string(&self.on_play_child_name)?;
     writer.write_f32::<T>(self.time_0)?;
     writer.write_f32::<T>(self.time_1)?;
     writer.write_u32::<T>(self.flags)?;

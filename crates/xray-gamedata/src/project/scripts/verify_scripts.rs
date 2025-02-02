@@ -10,7 +10,7 @@ use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
-use xray_utils::read_as_string_from_windows1251_encoded;
+use xray_utils::read_as_string_from_w1251_encoded;
 
 impl GamedataProject {
   pub fn verify_scripts(
@@ -95,7 +95,7 @@ impl GamedataProject {
     _options: &GamedataProjectVerifyOptions,
     path: &Path,
   ) -> XRayResult<bool> {
-    let code: String = read_as_string_from_windows1251_encoded(&mut File::open(path)?)?;
+    let code: String = read_as_string_from_w1251_encoded(&mut File::open(path)?)?;
 
     parse(&code).map_err(|it| {
       XRayError::new_verify_error(format!(

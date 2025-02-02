@@ -21,7 +21,7 @@ impl AlifeObjectReader for AlifeObjectDynamicVisual {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectAbstract::read::<T>(reader)?,
-      visual_name: reader.read_null_terminated_win_string()?,
+      visual_name: reader.read_w1251_string()?,
       visual_flags: reader.read_u8()?,
     })
   }
@@ -50,7 +50,7 @@ impl AlifeObjectWriter for AlifeObjectDynamicVisual {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
-    writer.write_null_terminated_win_string(&self.visual_name)?;
+    writer.write_w1251_string(&self.visual_name)?;
     writer.write_u8(self.visual_flags)?;
 
     Ok(())

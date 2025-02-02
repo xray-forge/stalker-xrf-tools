@@ -60,10 +60,10 @@ impl AlifeObjectBase {
 
     assert_eq!(net_action, NET_ACTION_SPAWN);
 
-    let section: String = spawn_reader.read_null_terminated_win_string()?;
+    let section: String = spawn_reader.read_w1251_string()?;
     let clsid: ClsId = ClsId::from_section(&section);
     let class: AlifeClass = AlifeClass::from_cls_id(&clsid);
-    let name: String = spawn_reader.read_null_terminated_win_string()?;
+    let name: String = spawn_reader.read_w1251_string()?;
     let script_game_id: u8 = spawn_reader.read_u8()?;
     let script_rp: u8 = spawn_reader.read_u8()?;
     let position: Vector3d = spawn_reader.read_xr::<T, _>()?;
@@ -159,8 +159,8 @@ impl AlifeObjectBase {
 
     object_data_writer.write_u16::<T>(self.net_action)?;
 
-    object_data_writer.write_null_terminated_win_string(&self.section)?;
-    object_data_writer.write_null_terminated_win_string(&self.name)?;
+    object_data_writer.write_w1251_string(&self.section)?;
+    object_data_writer.write_w1251_string(&self.name)?;
     object_data_writer.write_u8(self.script_game_id)?;
     object_data_writer.write_u8(self.script_rp)?;
 

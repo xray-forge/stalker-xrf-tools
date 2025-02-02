@@ -19,8 +19,8 @@ impl ParticleEffectSprite {
   /// Read effect sprite data from chunk redder.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_sprite: Self = Self {
-      shader_name: reader.read_null_terminated_win_string()?,
-      texture_name: reader.read_null_terminated_win_string()?,
+      shader_name: reader.read_w1251_string()?,
+      texture_name: reader.read_w1251_string()?,
     };
 
     assert!(
@@ -33,8 +33,8 @@ impl ParticleEffectSprite {
 
   /// Write sprite data into the writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.shader_name)?;
-    writer.write_null_terminated_win_string(&self.texture_name)?;
+    writer.write_w1251_string(&self.shader_name)?;
+    writer.write_w1251_string(&self.texture_name)?;
 
     Ok(())
   }

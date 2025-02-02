@@ -39,7 +39,7 @@ impl OgfMotionDefinition {
   }
 
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XRayResult<Self> {
-    let name: String = reader.read_null_terminated_win_string()?;
+    let name: String = reader.read_w1251_string()?;
     let flags: u32 = reader.read_u32::<T>()?;
     let bone_or_part: u16 = reader.read_u16::<T>()?;
     let motion: u16 = reader.read_u16::<T>()?;

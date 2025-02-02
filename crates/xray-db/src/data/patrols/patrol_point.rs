@@ -80,7 +80,7 @@ impl ChunkReadWrite for PatrolPoint {
   /// Read patrol point data from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let point: Self = Self {
-      name: reader.read_null_terminated_win_string()?,
+      name: reader.read_w1251_string()?,
       position: reader.read_xr::<T, _>()?,
       flags: reader.read_u32::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
@@ -94,7 +94,7 @@ impl ChunkReadWrite for PatrolPoint {
 
   /// Write patrol point data into chunk writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.name)?;
+    writer.write_w1251_string(&self.name)?;
 
     writer.write_xr::<T, _>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;

@@ -21,8 +21,8 @@ impl ParticleDescription {
   /// Read particle effect description data from chunk redder.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_description: Self = Self {
-      creator: reader.read_null_terminated_win_string()?,
-      editor: reader.read_null_terminated_win_string()?,
+      creator: reader.read_w1251_string()?,
+      editor: reader.read_w1251_string()?,
       created_time: reader.read_u32::<T>()?,
       edit_time: reader.read_u32::<T>()?,
     };
@@ -37,8 +37,8 @@ impl ParticleDescription {
 
   /// Write particle effect description data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_null_terminated_win_string(&self.creator)?;
-    writer.write_null_terminated_win_string(&self.editor)?;
+    writer.write_w1251_string(&self.creator)?;
+    writer.write_w1251_string(&self.editor)?;
     writer.write_u32::<T>(self.created_time)?;
     writer.write_u32::<T>(self.edit_time)?;
 
