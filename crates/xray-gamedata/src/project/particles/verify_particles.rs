@@ -31,7 +31,7 @@ impl GamedataProject {
 
         *checked_particles_count.lock().unwrap() += 1;
 
-        match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(path) {
+        match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(&path) {
           Ok(particles_file) => match self.verify_particle(options, &particles_file) {
             Ok(result) => {
               if !result {

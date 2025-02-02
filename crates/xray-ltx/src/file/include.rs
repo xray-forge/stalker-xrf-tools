@@ -74,8 +74,8 @@ impl LtxIncludeConvertor {
   }
 
   /// Include children ltx into provided ltx.
-  fn include_children<P: AsRef<Path>>(&self, into: &mut Ltx, path: P) -> XRayResult {
-    let ltx: Ltx = match self.parse_nested_file(path.as_ref()) {
+  fn include_children<P: AsRef<Path>>(&self, into: &mut Ltx, path: &P) -> XRayResult {
+    let ltx: Ltx = match self.parse_nested_file(path) {
       Ok(value) => match value {
         Some(ltx) => ltx,
         None => return Ok(()),
@@ -115,7 +115,7 @@ impl LtxIncludeConvertor {
 
   /// Open nested file for importing in current context.
   /// Skips '.ts' variant of configuration file as None.
-  fn parse_nested_file<P: AsRef<Path>>(&self, path: P) -> XRayResult<Option<Ltx>> {
+  fn parse_nested_file<P: AsRef<Path>>(&self, path: &P) -> XRayResult<Option<Ltx>> {
     match Ltx::read_from_path(path.as_ref()) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {
@@ -139,7 +139,7 @@ impl LtxIncludeConvertor {
   }
 
   /// Check if similar TS counterpart exists for provided ltx path.
-  fn is_raw_ts_variant_existing<P: AsRef<Path>>(&self, path: P) -> bool {
+  fn is_raw_ts_variant_existing<P: AsRef<Path>>(&self, path: &P) -> bool {
     if path
       .as_ref()
       .extension()

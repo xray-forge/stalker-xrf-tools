@@ -46,11 +46,11 @@ impl GenericCommand for UnpackSpawnFileCommand {
   /// Unpack provided *.spawn file.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     let destination: &PathBuf = matches
-      .get_one::<PathBuf>("dest")
+      .get_one::<_>("dest")
       .expect("Expected valid output path to be provided");
 
     let force: bool = matches.get_flag("force");
@@ -75,11 +75,10 @@ impl GenericCommand for UnpackSpawnFileCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let spawn_file: Box<SpawnFile> =
-      Box::new(SpawnFile::read_from_path::<XRayByteOrder, &PathBuf>(path)?);
+    let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::read_from_path::<XRayByteOrder, _>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
-    spawn_file.export_to_path::<XRayByteOrder, &PathBuf>(destination)?;
+    spawn_file.export_to_path::<XRayByteOrder, _>(destination)?;
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 

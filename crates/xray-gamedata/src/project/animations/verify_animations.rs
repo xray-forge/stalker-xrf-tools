@@ -271,10 +271,9 @@ impl GamedataProject {
 
   pub fn read_player_hud_motion_refs<P: AsRef<Path>>(
     &self,
-    visual_path: P,
+    path: &P,
   ) -> XRayResult<HashSet<PathBuf>> {
-    let motion_refs: Vec<String> =
-      OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(visual_path)?;
+    let motion_refs: Vec<String> = OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path)?;
 
     let mut assets: HashSet<PathBuf> = HashSet::new();
 

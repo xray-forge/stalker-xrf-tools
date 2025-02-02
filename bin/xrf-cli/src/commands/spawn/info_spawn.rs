@@ -28,13 +28,12 @@ impl GenericCommand for InfoSpawnCommand {
   /// Print information about spawn file.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     println!("Read spawn file {}", path.display());
 
-    let spawn_file: Box<SpawnFile> =
-      Box::new(SpawnFile::read_from_path::<XRayByteOrder, &PathBuf>(path)?);
+    let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::read_from_path::<XRayByteOrder, _>(path)?);
 
     println!("Spawn file information:");
 

@@ -46,11 +46,11 @@ impl GenericCommand for UnpackParticlesCommand {
   /// Unpack provided particle file.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     let destination: &PathBuf = matches
-      .get_one::<PathBuf>("dest")
+      .get_one::<_>("dest")
       .expect("Expected valid output path to be provided");
 
     let force: bool = matches.get_flag("force");
@@ -75,10 +75,8 @@ impl GenericCommand for UnpackParticlesCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::read_from_path::<
-      XRayByteOrder,
-      &PathBuf,
-    >(path)?);
+    let particles_file: Box<ParticlesFile> =
+      Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.export_to_path(destination)?;

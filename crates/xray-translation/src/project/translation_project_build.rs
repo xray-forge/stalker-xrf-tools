@@ -7,7 +7,7 @@ use serde::Serialize;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{copy, Write};
-use std::path::Path;
+use std::path::{Display, Path};
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayResult;
@@ -34,7 +34,7 @@ impl TranslationProject {
       let entry_path: &Path = entry.path();
 
       if entry_path.is_file() {
-        Self::build_file(entry_path, options)?;
+        Self::build_file(&entry_path, options)?;
       }
     }
 
@@ -49,8 +49,11 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn build_file(path: &Path, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
-    let extension: Option<&OsStr> = path.extension();
+  pub fn build_file<P: AsRef<Path>>(
+    path: &P,
+    options: &ProjectBuildOptions,
+  ) -> XRayResult<ProjectBuildResult> {
+    let extension: Option<&OsStr> = path.as_ref().extension();
     let started_at: Instant = Instant::now();
 
     let mut result: ProjectBuildResult = ProjectBuildResult::new();
@@ -61,10 +64,10 @@ impl TranslationProject {
       } else if extension == "json" {
         Self::build_json_file(path, options)?;
       } else {
-        log::info!("Skip file {}", path.display());
+        log::info!("Skip file {}", path.as_ref().display());
 
         if options.is_logging_enabled() {
-          println!("Skip file {}", path.display());
+          println!("Skip file {}", path.as_ref().display());
         }
       }
     }
@@ -73,38 +76,39 @@ impl TranslationProject {
 
     log::info!(
       "Built file {} in {} sec",
-      path.display(),
+      path.as_ref().display(),
       (result.duration as f64) / 1000.0
     );
 
     Ok(result)
   }
 
-  pub fn build_xml_file(path: &Path, options: &ProjectBuildOptions) -> XRayResult {
-    let locale = Self::get_locale_from_path(path);
+  pub fn build_xml_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XRayResult {
+    let path_display: Display = path.as_ref().display();
+    let locale: Option<TranslationLanguage> = Self::get_locale_from_path(path);
 
     if let Some(locale) = locale {
       if options.is_logging_enabled() {
-        println!("Building XML based translations {}", path.display());
+        println!("Building XML based translations {}", path_display);
       }
 
       // All locales needed or file locale matches current one.
       if options.language == TranslationLanguage::All || locale == options.language {
-        log::info!("Building dynamic XML file {} ({})", path.display(), locale);
+        log::info!("Building dynamic XML file {} ({})", path_display, locale);
 
         copy(
           &mut File::open(path)?,
           &mut Self::prepare_target_xml_translation_file(path, &options.output, &locale, options)?,
         )?;
       } else {
-        log::info!("Skip dynamic XML file {}", path.display());
+        log::info!("Skip dynamic XML file {}", path_display);
       }
     } else {
-      log::info!("Building static XML file {}", path.display());
+      log::info!("Building static XML file {}", path.as_ref().display());
 
       // Just plain XML to copy from one place to another.
       if options.is_logging_enabled() {
-        println!("Copy static XML translations {}", path.display());
+        println!("Copy static XML translations {}", path_display);
       }
 
       if options.language == TranslationLanguage::All {
@@ -135,11 +139,12 @@ impl TranslationProject {
     Ok(())
   }
 
-  pub fn build_json_file(path: &Path, options: &ProjectBuildOptions) -> XRayResult {
-    log::info!("Building dynamic JSON file {}", path.display());
-
+  pub fn build_json_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XRayResult {
     if options.is_logging_enabled() {
-      println!("Building JSON based translations {}", path.display());
+      println!(
+        "Building JSON based translations {}",
+        path.as_ref().display()
+      );
     }
 
     let parsed: TranslationJson = Self::read_translation_json_by_path(path)?;

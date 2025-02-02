@@ -1,6 +1,6 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use xray_db::{OmfFile, XRayByteOrder};
 
 #[derive(Default)]
@@ -33,7 +33,7 @@ impl GenericCommand for InfoOmfCommand {
 
     println!("Read omf file {}", path.display());
 
-    let omf_file: Box<OmfFile> = Box::new(OmfFile::read_from_path::<XRayByteOrder, &Path>(path)?);
+    let omf_file: Box<OmfFile> = Box::new(OmfFile::read_from_path::<XRayByteOrder, _>(path)?);
 
     println!("Omf file information");
 

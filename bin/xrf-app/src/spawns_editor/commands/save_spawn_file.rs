@@ -16,7 +16,7 @@ pub fn save_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> Tauri
     let file: &SpawnFile = lock.as_ref().unwrap();
 
     file
-      .write_to_path::<XRayByteOrder, &Path>(Path::new(path))
+      .write_to_path::<XRayByteOrder, _>(&Path::new(path))
       .map_err(error_to_string)
   } else {
     Err(String::from("No spawn file open for saving"))

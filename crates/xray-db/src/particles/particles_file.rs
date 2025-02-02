@@ -1,3 +1,4 @@
+use crate::export::FileImportExport;
 use crate::particles::chunks::particles_effects_chunk::ParticlesEffectsChunk;
 use crate::particles::chunks::particles_firstgen_chunk::ParticlesFirstgenChunk;
 use crate::particles::chunks::particles_groups_chunk::ParticlesGroupsChunk;
@@ -8,9 +9,9 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{find_optional_chunk_by_id, ChunkReader, ChunkWriter};
+use xray_chunk::{find_required_chunk_by_id, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
-use xray_utils::open_export_file;
+use xray_utils::{assert, assert_equal, open_export_file};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,53 +22,38 @@ pub struct ParticlesFile {
 }
 
 impl ParticlesFile {
-  /// Read particles xr file from provided path.
-  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  /// Read particles from provided path.
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
-  /// Read particles xr from file.
+  /// Read particles from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
-    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
-    let chunks: Vec<ChunkReader> = reader.read_children();
-
-    log::info!(
-      "Reading particles file, {} chunks, {} bytes",
-      chunks.len(),
-      reader.read_bytes_len(),
-    );
-
-    Self::read_from_chunks::<T>(&chunks)
+    Self::read_from_chunks::<T>(&ChunkReader::from_file(file)?.read_children())
   }
 
   /// Read particles from chunks.
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
-    assert!(
+    assert(
       !chunks
         .iter()
         .any(|it| it.id == ParticlesFirstgenChunk::CHUNK_ID),
-      "Unexpected first-gen chunk in particles file, unpacking not implemented"
-    );
-    assert_eq!(chunks.len(), 3, "Unexpected chunks in particles file root");
+      "Unexpected first-gen chunk in particles file, unpacking not implemented",
+    )?;
+    assert_equal(chunks.len(), 3, "Unexpected chunks in particles file root")?;
 
     Ok(Self {
-      header: ParticlesHeaderChunk::read::<T>(
-        &mut find_optional_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)
-          .expect("Particles header chunk not found"),
-      )?,
-      effects: ParticlesEffectsChunk::read::<T>(
-        &mut find_optional_chunk_by_id(chunks, ParticlesEffectsChunk::CHUNK_ID)
-          .expect("Particles effects chunk not found"),
-      )?,
-      groups: ParticlesGroupsChunk::read::<T>(
-        &mut find_optional_chunk_by_id(chunks, ParticlesGroupsChunk::CHUNK_ID)
-          .expect("Particles groups chunk not found"),
-      )?,
+      header: find_required_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)?
+        .read_xr::<T, _>()?,
+      effects: find_required_chunk_by_id(chunks, ParticlesEffectsChunk::CHUNK_ID)?
+        .read_xr::<T, _>()?,
+      groups: find_required_chunk_by_id(chunks, ParticlesGroupsChunk::CHUNK_ID)?
+        .read_xr::<T, _>()?,
     })
   }
 
   /// Write particles file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     fs::create_dir_all(path.as_ref().parent().expect("Parent directory"))?;
 
     self.write_to::<T>(&mut open_export_file(path)?)
@@ -83,15 +69,15 @@ impl ParticlesFile {
     );
 
     let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
-    self.header.write::<T>(&mut header_chunk_writer)?;
+    header_chunk_writer.write_xr::<T, _>(&self.header)?;
     header_chunk_writer.flush_chunk_into::<T>(writer, ParticlesHeaderChunk::CHUNK_ID)?;
 
     let mut effects_chunk_writer: ChunkWriter = ChunkWriter::new();
-    self.effects.write::<T>(&mut effects_chunk_writer)?;
+    effects_chunk_writer.write_xr::<T, _>(&self.effects)?;
     effects_chunk_writer.flush_chunk_into::<T>(writer, ParticlesEffectsChunk::CHUNK_ID)?;
 
     let mut group_chunk_writer: ChunkWriter = ChunkWriter::new();
-    self.groups.write::<T>(&mut group_chunk_writer)?;
+    group_chunk_writer.write_xr::<T, _>(&self.groups)?;
     group_chunk_writer.flush_chunk_into::<T>(writer, ParticlesGroupsChunk::CHUNK_ID)?;
 
     Ok(())

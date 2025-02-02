@@ -29,12 +29,12 @@ impl GenericCommand for VerifySpawnFileCommand {
   /// Verify *.spawn file based on provided arguments.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     log::info!("Verify spawn file {}", path.display());
 
-    match SpawnFile::read_from_path::<XRayByteOrder, &PathBuf>(path) {
+    match SpawnFile::read_from_path::<XRayByteOrder, _>(path) {
       Ok(_) => {
         log::info!("Provided spawn file is valid");
 

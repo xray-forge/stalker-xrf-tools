@@ -27,7 +27,7 @@ impl TranslationProject {
           if extension == "json" {
             project_json.insert(
               entry_path.to_str().unwrap().into(),
-              Self::read_translation_json_by_path(entry_path)?,
+              Self::read_translation_json_by_path(&entry_path)?,
             );
           } else {
             log::warn!("Skip non json translation file {}", entry_path.display());
@@ -41,7 +41,7 @@ impl TranslationProject {
     Ok(project_json)
   }
 
-  pub fn read_translation_json_by_path<P: AsRef<Path>>(path: P) -> XRayResult<TranslationJson> {
+  pub fn read_translation_json_by_path<P: AsRef<Path>>(path: &P) -> XRayResult<TranslationJson> {
     let mut data: Vec<u8> = Vec::new();
 
     File::open(path)?.read_to_end(&mut data)?;
@@ -49,7 +49,7 @@ impl TranslationProject {
     Ok(serde_json::from_slice(&data).expect("Expected valid JSON source file with standard format"))
   }
 
-  pub fn can_read_path<P: AsRef<Path>>(&self, path: P) -> bool {
+  pub fn can_read_path<P: AsRef<Path>>(&self, path: &P) -> bool {
     if let Some(extension) = path.as_ref().extension() {
       for allowed in ALLOWED_PROJECT_READ_EXTENSIONS {
         if (*allowed).eq(extension) {
@@ -61,7 +61,7 @@ impl TranslationProject {
     false
   }
 
-  pub fn get_locale_from_path<P: AsRef<Path>>(path: P) -> Option<TranslationLanguage> {
+  pub fn get_locale_from_path<P: AsRef<Path>>(path: &P) -> Option<TranslationLanguage> {
     match path.as_ref().file_name() {
       Some(name) => {
         if let Some(name) = name.to_str() {

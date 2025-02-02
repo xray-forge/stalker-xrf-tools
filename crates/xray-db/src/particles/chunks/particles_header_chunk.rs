@@ -1,9 +1,10 @@
 use crate::constants::META_TYPE_FIELD;
+use crate::export::FileImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::open_export_file;
@@ -17,10 +18,12 @@ pub struct ParticlesHeaderChunk {
 impl ParticlesHeaderChunk {
   pub const META_TYPE: &'static str = "particles_header";
   pub const CHUNK_ID: u32 = 1;
+}
 
+impl ChunkReadWrite for ParticlesHeaderChunk {
   /// Read version chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let header_chunk: Self = Self {
       version: reader.read_u16::<T>()?,
     };
@@ -39,17 +42,19 @@ impl ParticlesHeaderChunk {
   }
 
   /// Write particle header into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u16::<T>(self.version)?;
 
     log::info!("Written header chunk, {} bytes", writer.bytes_written());
 
     Ok(())
   }
+}
 
+impl FileImportExport for ParticlesHeaderChunk {
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
-  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     log::info!("Importing particles header: {}", path.as_ref().display());
 
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("header.ltx"))?;
@@ -74,7 +79,7 @@ impl ParticlesHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -92,12 +97,13 @@ impl ParticlesHeaderChunk {
 
 #[cfg(test)]
 mod tests {
+  use crate::export::FileImportExport;
   use crate::particles::chunks::particles_header_chunk::ParticlesHeaderChunk;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -187,9 +193,9 @@ mod tests {
     let export_folder: &Path =
       &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
 
-    original.export(export_folder)?;
+    original.export(&export_folder)?;
 
-    let read: ParticlesHeaderChunk = ParticlesHeaderChunk::import(export_folder)?;
+    let read: ParticlesHeaderChunk = ParticlesHeaderChunk::import(&export_folder)?;
 
     assert_eq!(read, original);
 

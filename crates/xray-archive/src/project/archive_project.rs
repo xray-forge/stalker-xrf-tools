@@ -17,20 +17,18 @@ pub struct ArchiveProject {
 }
 
 impl ArchiveProject {
-  pub fn new<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
-    let path_ref: &Path = path.as_ref();
-
+  pub fn new<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let mut archives: Vec<ArchiveDescriptor> = Vec::new();
     let mut files: HashMap<String, ArchiveFileReplicationDescriptor> = HashMap::new();
 
-    if path_ref.is_file() {
-      log::info!("Reading archive file: {}", path_ref.display());
+    if path.as_ref().is_file() {
+      log::info!("Reading archive file: {}", path.as_ref().display());
 
-      archives.push(ArchiveReader::from_path_utf8(path_ref)?.read_archive()?);
+      archives.push(ArchiveReader::from_path_utf8(path)?.read_archive()?);
     } else {
-      log::info!("Reading archive folder: {}", path_ref.display());
+      log::info!("Reading archive folder: {}", path.as_ref().display());
 
-      for entry in WalkDir::new(path_ref)
+      for entry in WalkDir::new(path)
         .into_iter()
         .filter_map(|entry| match entry {
           Ok(entry) => Some(entry),
@@ -39,10 +37,10 @@ impl ArchiveProject {
       {
         let path: &Path = entry.path();
 
-        if ArchiveDescriptor::is_valid_db_path(path) {
+        if ArchiveDescriptor::is_valid_db_path(&path) {
           log::info!("Reading archive file: {}", path.display());
 
-          archives.push(ArchiveReader::from_path_utf8(path)?.read_archive()?);
+          archives.push(ArchiveReader::from_path_utf8(&path)?.read_archive()?);
         }
       }
     }
@@ -50,7 +48,7 @@ impl ArchiveProject {
     if archives.is_empty() {
       return Err(XRayError::new_read_error(format!(
         "Unable to read archives at location {}",
-        path_ref.display()
+        path.as_ref().display()
       )));
     }
 

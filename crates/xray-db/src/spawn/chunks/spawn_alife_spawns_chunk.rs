@@ -104,7 +104,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
 
 impl FileImportExport for SpawnALifeSpawnsChunk {
   /// Import ALife spawns data from provided path.
-  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
@@ -118,7 +118,7 @@ impl FileImportExport for SpawnALifeSpawnsChunk {
   }
 
   /// Export ALife spawns data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     for object in &self.objects {

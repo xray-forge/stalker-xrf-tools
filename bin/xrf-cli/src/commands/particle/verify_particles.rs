@@ -38,7 +38,7 @@ impl GenericCommand for VerifyParticlesFileCommand {
   /// Verify particle file based on provided arguments.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     let unpacked: bool = matches.get_flag("unpacked");
@@ -52,7 +52,7 @@ impl GenericCommand for VerifyParticlesFileCommand {
     let particles_file_result: CommandResult<ParticlesFile> = if unpacked {
       ParticlesFile::import_from_path(path).map_err(Into::into)
     } else {
-      ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(path).map_err(Into::into)
+      ParticlesFile::read_from_path::<XRayByteOrder, _>(path).map_err(Into::into)
     };
 
     match particles_file_result {

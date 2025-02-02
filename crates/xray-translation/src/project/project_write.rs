@@ -10,15 +10,16 @@ use std::path::{Path, PathBuf};
 use xray_error::XRayResult;
 
 impl TranslationProject {
-  pub fn prepare_target_xml_translation_file(
-    path: &Path,
-    destination: &Path,
+  pub fn prepare_target_xml_translation_file<P1: AsRef<Path>, P2: AsRef<Path>>(
+    path: &P1,
+    destination: &P2,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
   ) -> XRayResult<File> {
     let target: PathBuf = destination
+      .as_ref()
       .join(language.to_string())
-      .join(path.file_name().unwrap())
+      .join(path.as_ref().file_name().unwrap())
       .with_extension("xml");
 
     if options.is_verbose_logging_enabled() {
@@ -42,7 +43,7 @@ impl TranslationProject {
     )
   }
 
-  pub fn prepare_target_json_translation_file<P: AsRef<Path>>(path: P) -> XRayResult<File> {
+  pub fn prepare_target_json_translation_file<P: AsRef<Path>>(path: &P) -> XRayResult<File> {
     Ok(
       File::options()
         .read(false)

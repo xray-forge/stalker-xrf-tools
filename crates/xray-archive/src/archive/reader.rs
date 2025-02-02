@@ -27,7 +27,7 @@ pub struct ArchiveReader {
 
 impl ArchiveReader {
   /// Create chunk based on whole file.
-  pub fn from_path<P: AsRef<Path>>(path: P, encoding: XRayEncoding) -> XRayResult<Self> {
+  pub fn from_path<P: AsRef<Path>>(path: &P, encoding: XRayEncoding) -> XRayResult<Self> {
     match File::open(path.as_ref()) {
       Ok(file) => Ok(Self {
         encoding,
@@ -46,7 +46,7 @@ impl ArchiveReader {
   }
 
   /// Create chunk based on whole file.
-  pub fn from_path_utf8<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  pub fn from_path_utf8<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     Self::from_path(path, get_utf8_encoder())
   }
 }

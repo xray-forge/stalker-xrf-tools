@@ -119,7 +119,7 @@ impl ChunkReadWrite for SpawnGraphsChunk {
 
 impl FileImportExport for SpawnGraphsChunk {
   /// Import graphs data from provided path.
-  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let header: GraphHeader = GraphHeader::import(
       "header",
       &Ltx::read_from_path(path.as_ref().join("graphs_header.ltx"))?,
@@ -171,7 +171,7 @@ impl FileImportExport for SpawnGraphsChunk {
 
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
-  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut graphs_header_ltx: Ltx = Ltx::new();
 
     self.header.export(&mut graphs_header_ltx);

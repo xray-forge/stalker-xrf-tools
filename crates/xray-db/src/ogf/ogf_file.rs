@@ -100,7 +100,7 @@ impl OgfFile {
 
   /// Read only list of motion refs specifically and skip other data parts.
   pub fn read_motion_refs_from_path<T: ByteOrder, P: AsRef<Path>>(
-    path: P,
+    path: &P,
   ) -> XRayResult<Vec<String>> {
     Self::read_motions_refs_from_file::<T>(File::open(path)?)
   }

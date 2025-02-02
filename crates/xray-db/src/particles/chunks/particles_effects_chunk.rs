@@ -1,13 +1,14 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::particle_effect::ParticleEffect;
+use crate::export::FileImportExport;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::open_export_file;
+use xray_utils::{assert, open_export_file};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -17,10 +18,12 @@ pub struct ParticlesEffectsChunk {
 
 impl ParticlesEffectsChunk {
   pub const CHUNK_ID: u32 = 3;
+}
 
+impl ChunkReadWrite for ParticlesEffectsChunk {
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
@@ -36,13 +39,13 @@ impl ParticlesEffectsChunk {
 
     effects.sort_by(|first, second| first.name.cmp(&second.name));
 
-    assert!(reader.is_ended(), "Expect effects chunk to be ended");
+    assert(reader.is_ended(), "Expect effects chunk to be ended")?;
 
     Ok(Self { effects })
   }
 
   /// Write particle effects data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     for (index, effect) in self.effects.iter().enumerate() {
       let mut effect_writer: ChunkWriter = ChunkWriter::new();
 
@@ -63,9 +66,11 @@ impl ParticlesEffectsChunk {
 
     Ok(())
   }
+}
 
+impl FileImportExport for ParticlesEffectsChunk {
   /// Import particles effects data from provided path.
-  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     log::info!("Importing particles effects: {}", path.as_ref().display());
 
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("effects.ltx"))?;
@@ -85,7 +90,7 @@ impl ParticlesEffectsChunk {
   }
 
   /// Export particles effects data into provided path.
-  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for effect in &self.effects {

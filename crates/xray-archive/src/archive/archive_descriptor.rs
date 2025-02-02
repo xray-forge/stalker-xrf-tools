@@ -12,7 +12,7 @@ pub struct ArchiveDescriptor {
 }
 
 impl ArchiveDescriptor {
-  pub fn is_valid_db_path<P: AsRef<Path>>(path: P) -> bool {
+  pub fn is_valid_db_path<P: AsRef<Path>>(path: &P) -> bool {
     match path.as_ref().extension() {
       None => false,
       Some(ext) => {

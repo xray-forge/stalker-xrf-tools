@@ -1,6 +1,6 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use xray_db::{ParticlesFile, XRayByteOrder};
 
 #[derive(Default)]
@@ -28,13 +28,13 @@ impl GenericCommand for InfoParticlesCommand {
   /// Print information about particle file.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     println!("Read particle file {}", path.display());
 
     let particles_file: Box<ParticlesFile> =
-      Box::new(ParticlesFile::read_from_path::<XRayByteOrder, &Path>(path)?);
+      Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
 
     println!("Particles file information:");
 

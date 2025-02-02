@@ -70,7 +70,7 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
 impl FileImportExport for SpawnArtefactSpawnsChunk {
   /// Import artefact spawns data from provided path.
   /// Parse ltx files and populate spawn file.
-  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
 
@@ -84,7 +84,7 @@ impl FileImportExport for SpawnArtefactSpawnsChunk {
   }
 
   /// Export artefact spawns data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     for (index, spawn_point) in self.nodes.iter().enumerate() {

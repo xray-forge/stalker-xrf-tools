@@ -3,9 +3,9 @@ use xray_error::XRayResult;
 use xray_ltx::Ltx;
 
 pub trait FileImportExport: Sized {
-  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self>;
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self>;
 
-  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult;
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult;
 }
 
 pub trait LtxImportExport: Sized {

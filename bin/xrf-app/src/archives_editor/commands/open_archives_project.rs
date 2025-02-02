@@ -12,7 +12,7 @@ pub async fn open_archives_project(
 ) -> TauriResult<Value> {
   log::info!("Opening archives project");
 
-  let project: ArchiveProject = ArchiveProject::new(Path::new(path))
+  let project: ArchiveProject = ArchiveProject::new(&Path::new(path))
     .map_err(|error| format!("Failed to open provided archive project: {}", error))?;
 
   log::info!("Opened archives project");

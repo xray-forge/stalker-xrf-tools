@@ -1,13 +1,14 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::particle_group::ParticleGroup;
+use crate::export::FileImportExport;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::open_export_file;
+use xray_utils::{assert, open_export_file};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -17,10 +18,12 @@ pub struct ParticlesGroupsChunk {
 
 impl ParticlesGroupsChunk {
   pub const CHUNK_ID: u32 = 4;
+}
 
+impl ChunkReadWrite for ParticlesGroupsChunk {
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
@@ -36,13 +39,13 @@ impl ParticlesGroupsChunk {
 
     groups.sort_by(|first, second| first.name.cmp(&second.name));
 
-    assert!(reader.is_ended(), "Expect groups chunk to be ended");
+    assert(reader.is_ended(), "Expect groups chunk to be ended")?;
 
     Ok(Self { groups })
   }
 
   /// Write particle groups data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     for (index, group) in self.groups.iter().enumerate() {
       let mut group_writer: ChunkWriter = ChunkWriter::new();
 
@@ -59,9 +62,11 @@ impl ParticlesGroupsChunk {
 
     Ok(())
   }
+}
 
+impl FileImportExport for ParticlesGroupsChunk {
   /// Import particles groups data from provided path.
-  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     log::info!("Importing particles groups: {}", path.as_ref().display());
 
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("groups.ltx"))?;
@@ -81,7 +86,7 @@ impl ParticlesGroupsChunk {
   }
 
   /// Export particles groups data into provided path.
-  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for group in &self.groups {

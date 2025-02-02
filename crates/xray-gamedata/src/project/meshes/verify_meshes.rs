@@ -124,7 +124,7 @@ impl GamedataProject {
           is_valid = false;
         } else {
           for motion_path in motion_paths {
-            match OmfFile::read_from_path::<XRayByteOrder, &Path>(&motion_path) {
+            match OmfFile::read_from_path::<XRayByteOrder, _>(&motion_path) {
               Ok(omf) => match self.verify_mesh_motion(options, ogf, &omf) {
                 Ok(result) => {
                   if !result {

@@ -11,7 +11,7 @@ pub async fn import_spawn_file(
 ) -> TauriResult<String> {
   log::info!("Importing spawn file");
 
-  match SpawnFile::import_from_path::<XRayByteOrder, &Path>(Path::new(path)) {
+  match SpawnFile::import_from_path::<XRayByteOrder, _>(&Path::new(path)) {
     Ok(file) => {
       log::info!("Imported spawn file");
 

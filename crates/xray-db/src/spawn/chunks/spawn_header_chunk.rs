@@ -64,7 +64,7 @@ impl ChunkReadWrite for SpawnHeaderChunk {
 impl FileImportExport for SpawnHeaderChunk {
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
-  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("header.ltx"))?;
     let section: &Section = ltx
       .section("header")
@@ -81,7 +81,7 @@ impl FileImportExport for SpawnHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -188,9 +188,9 @@ mod tests {
     let export_folder: &Path =
       &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
 
-    original.export(export_folder)?;
+    original.export(&export_folder)?;
 
-    assert_eq!(SpawnHeaderChunk::import(export_folder)?, original);
+    assert_eq!(SpawnHeaderChunk::import(&export_folder)?, original);
 
     Ok(())
   }

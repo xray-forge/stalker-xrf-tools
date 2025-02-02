@@ -4,20 +4,18 @@ use crate::{
 };
 use std::ffi::OsStr;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Display, Path};
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayResult;
 
 impl TranslationProject {
-  pub fn initialize_dir(
-    dir: &Path,
+  pub fn initialize_dir<P: AsRef<Path>>(
+    dir: &P,
     options: &ProjectInitializeOptions,
   ) -> XRayResult<ProjectInitializeResult> {
-    log::info!("Initializing dir {}", dir.display());
-
     if options.is_logging_enabled() {
-      println!("Initializing dir {}", dir.display());
+      println!("Initializing dir {}", dir.as_ref().display());
     }
 
     let started_at: Instant = Instant::now();
@@ -33,7 +31,7 @@ impl TranslationProject {
       let entry_path: &Path = entry.path();
 
       if entry_path.is_file() {
-        Self::initialize_file(entry_path, options)?;
+        Self::initialize_file(&entry_path, options)?;
       }
     }
 
@@ -41,27 +39,27 @@ impl TranslationProject {
 
     log::info!(
       "Initialize dir {} in {} sec",
-      dir.display(),
+      dir.as_ref().display(),
       (result.duration as f64) / 1000.0
     );
 
     Ok(result)
   }
 
-  pub fn initialize_file(
-    path: &Path,
+  pub fn initialize_file<P: AsRef<Path>>(
+    path: &P,
     options: &ProjectInitializeOptions,
   ) -> XRayResult<ProjectInitializeResult> {
-    let extension: Option<&OsStr> = path.extension();
+    let extension: Option<&OsStr> = path.as_ref().extension();
 
     if let Some(extension) = extension {
       if extension == "json" {
         return Self::initialize_json_file(path, options);
       } else {
-        log::info!("Skip file {}", path.display());
+        log::info!("Skip file {}", path.as_ref().display());
 
         if options.is_logging_enabled() {
-          println!("Skip file {}", path.display());
+          println!("Skip file {}", path.as_ref().display());
         }
       }
     }
@@ -69,14 +67,16 @@ impl TranslationProject {
     Ok(ProjectInitializeResult::new())
   }
 
-  pub fn initialize_json_file(
-    path: &Path,
+  pub fn initialize_json_file<P: AsRef<Path>>(
+    path: &P,
     options: &ProjectInitializeOptions,
   ) -> XRayResult<ProjectInitializeResult> {
+    let path_display: Display = path.as_ref().display();
+
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();
     let mut initialized_count: u32 = 0;
 
-    log::info!("Initializing dynamic JSON file {}", path.display());
+    log::info!("Initializing dynamic JSON file {}", path_display);
 
     let started_at: Instant = Instant::now();
     let mut parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
@@ -121,14 +121,14 @@ impl TranslationProject {
     if initialized_count > 0 {
       log::info!(
         "Initialized file {} in {} sec, {} keys added",
-        path.display(),
+        path_display,
         (result.duration as f64) / 1000.0,
         initialized_count
       );
     } else {
       log::info!(
         "Skip file {}, checked in {} sec",
-        path.display(),
+        path_display,
         (result.duration as f64) / 1000.0
       );
     }

@@ -37,23 +37,22 @@ impl GenericCommand for RepackSpawnCommand {
   /// Repack provided *.spawn file and validate it.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid input path to be provided");
 
     let destination: &PathBuf = matches
-      .get_one::<PathBuf>("dest")
+      .get_one::<_>("dest")
       .expect("Expected valid output path to be provided");
 
     log::info!("Starting parsing spawn file {}", path.display());
     log::info!("Repack into {}", destination.display());
 
     let started_at: Instant = Instant::now();
-    let spawn_file: Box<SpawnFile> =
-      Box::new(SpawnFile::read_from_path::<XRayByteOrder, &PathBuf>(path)?);
+    let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::read_from_path::<XRayByteOrder, _>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     spawn_file
-      .write_to_path::<XRayByteOrder, &PathBuf>(destination)
+      .write_to_path::<XRayByteOrder, _>(destination)
       .expect("Correctly written spawn file");
 
     let write_duration: Duration = started_at.elapsed() - read_duration;

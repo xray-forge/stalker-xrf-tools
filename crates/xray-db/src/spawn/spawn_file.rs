@@ -34,7 +34,7 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   /// Read spawn file from provided path.
-  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
@@ -80,7 +80,7 @@ impl SpawnFile {
   }
 
   /// Write spawn file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     fs::create_dir_all(path.as_ref().parent().expect("Spawn file parent directory"))?;
     self.write_to::<T>(&mut open_export_file(path)?)
   }
@@ -112,25 +112,25 @@ impl SpawnFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  pub fn import_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     Ok(Self {
-      header: SpawnHeaderChunk::import(path.as_ref())?,
-      alife_spawn: SpawnALifeSpawnsChunk::import(path.as_ref())?,
-      artefact_spawn: SpawnArtefactSpawnsChunk::import(path.as_ref())?,
-      patrols: SpawnPatrolsChunk::import(path.as_ref())?,
-      graphs: SpawnGraphsChunk::import(path.as_ref())?,
+      header: SpawnHeaderChunk::import(path)?,
+      alife_spawn: SpawnALifeSpawnsChunk::import(path)?,
+      artefact_spawn: SpawnArtefactSpawnsChunk::import(path)?,
+      patrols: SpawnPatrolsChunk::import(path)?,
+      graphs: SpawnGraphsChunk::import(path)?,
     })
   }
 
   /// Export unpacked ALife spawn file into provided path.
-  pub fn export_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: P) -> XRayResult {
-    fs::create_dir_all(path.as_ref())?;
+  pub fn export_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+    fs::create_dir_all(path)?;
 
-    self.header.export(path.as_ref())?;
-    self.alife_spawn.export(path.as_ref())?;
-    self.artefact_spawn.export(path.as_ref())?;
-    self.patrols.export(path.as_ref())?;
-    self.graphs.export(path.as_ref())?;
+    self.header.export(path)?;
+    self.alife_spawn.export(path)?;
+    self.artefact_spawn.export(path)?;
+    self.patrols.export(path)?;
+    self.graphs.export(path)?;
 
     Ok(())
   }

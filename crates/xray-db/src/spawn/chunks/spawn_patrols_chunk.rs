@@ -77,7 +77,7 @@ impl ChunkReadWrite for SpawnPatrolsChunk {
 
 impl FileImportExport for SpawnPatrolsChunk {
   /// Import patrols data from provided path.
-  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let patrols_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrols.ltx"))?;
     let patrol_points_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_points.ltx"))?;
     let patrol_links_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_links.ltx"))?;
@@ -99,7 +99,7 @@ impl FileImportExport for SpawnPatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut patrols_ltx: Ltx = Ltx::new();
     let mut patrol_points_ltx: Ltx = Ltx::new();
     let mut patrol_links_ltx: Ltx = Ltx::new();

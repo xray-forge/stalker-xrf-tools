@@ -46,11 +46,11 @@ impl GenericCommand for PackParticlesFileCommand {
   /// Pack particle file based on provided arguments.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     let destination: &PathBuf = matches
-      .get_one::<PathBuf>("dest")
+      .get_one::<_>("dest")
       .expect("Expected valid output path to be provided");
 
     let force: bool = matches.get_flag("force");
@@ -78,7 +78,7 @@ impl GenericCommand for PackParticlesFileCommand {
     let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::import_from_path(path)?);
     let read_duration: Duration = started_at.elapsed();
 
-    particles_file.write_to_path::<XRayByteOrder, &PathBuf>(destination)?;
+    particles_file.write_to_path::<XRayByteOrder, _>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
