@@ -1,9 +1,10 @@
-use crate::export::file_import::read_ltx_field;
+use crate::export::FileImportExport;
+use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use uuid::Uuid;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 use xray_utils::open_export_file;
@@ -20,10 +21,12 @@ pub struct SpawnHeaderChunk {
 
 impl SpawnHeaderChunk {
   pub const CHUNK_ID: u32 = 0;
+}
 
+impl ChunkReadWrite for SpawnHeaderChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!("Parsing header chunk, {} bytes", reader.read_bytes_remain());
 
     let header: Self = Self {
@@ -45,7 +48,7 @@ impl SpawnHeaderChunk {
 
   /// Write header data into chunk writer.
   /// Writes header data in binary format.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid.as_u128())?;
     writer.write_u128::<T>(self.graph_guid.as_u128())?;
@@ -56,10 +59,12 @@ impl SpawnHeaderChunk {
 
     Ok(())
   }
+}
 
+impl FileImportExport for SpawnHeaderChunk {
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
-  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("header.ltx"))?;
     let section: &Section = ltx
       .section("header")
@@ -76,7 +81,7 @@ impl SpawnHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -97,13 +102,14 @@ impl SpawnHeaderChunk {
 
 #[cfg(test)]
 mod tests {
+  use crate::export::FileImportExport;
   use crate::spawn::chunks::spawn_header_chunk::SpawnHeaderChunk;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::{uuid, Uuid};
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

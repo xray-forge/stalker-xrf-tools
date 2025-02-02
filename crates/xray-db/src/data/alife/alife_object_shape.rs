@@ -4,7 +4,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReadableList, ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 

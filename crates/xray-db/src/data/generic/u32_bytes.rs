@@ -2,14 +2,14 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
-use xray_chunk::{ChunkReadable, ChunkReader, ChunkWritable, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::vector_from_string_sized;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct U32Bytes(pub u8, pub u8, pub u8, pub u8);
 
-impl ChunkReadable for U32Bytes {
+impl ChunkReadWrite for U32Bytes {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(U32Bytes(
       reader.read_u8()?,
@@ -18,9 +18,7 @@ impl ChunkReadable for U32Bytes {
       reader.read_u8()?,
     ))
   }
-}
 
-impl ChunkWritable for U32Bytes {
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u8(self.0)?;
     writer.write_u8(self.1)?;

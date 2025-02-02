@@ -1,10 +1,11 @@
 use crate::data::patrols::patrol::Patrol;
+use crate::export::FileImportExport;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
 use xray_utils::open_export_file;
@@ -17,12 +18,13 @@ pub struct SpawnPatrolsChunk {
 
 impl SpawnPatrolsChunk {
   pub const CHUNK_ID: u32 = 3;
-
   pub const META_NESTED_CHUNK_ID: u32 = 0;
   pub const DATA_NESTED_CHUNK_ID: u32 = 1;
+}
 
+impl ChunkReadWrite for SpawnPatrolsChunk {
   /// Read patrols list from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading patrols chunk, bytes {}",
       reader.read_bytes_remain()
@@ -49,7 +51,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Write patrols data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -71,9 +73,11 @@ impl SpawnPatrolsChunk {
 
     Ok(())
   }
+}
 
+impl FileImportExport for SpawnPatrolsChunk {
   /// Import patrols data from provided path.
-  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     let patrols_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrols.ltx"))?;
     let patrol_points_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_points.ltx"))?;
     let patrol_links_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_links.ltx"))?;
@@ -95,7 +99,7 @@ impl SpawnPatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut patrols_ltx: Ltx = Ltx::new();
     let mut patrol_points_ltx: Ltx = Ltx::new();
     let mut patrol_links_ltx: Ltx = Ltx::new();
@@ -140,7 +144,7 @@ mod tests {
   use crate::data::patrols::patrol_link::PatrolLink;
   use crate::data::patrols::patrol_point::PatrolPoint;
   use crate::spawn::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,

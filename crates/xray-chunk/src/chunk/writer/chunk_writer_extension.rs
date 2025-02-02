@@ -1,4 +1,4 @@
-use crate::{ChunkWritable, ChunkWritableList, ChunkWritableOptional, ChunkWriter};
+use crate::{ChunkReadWrite, ChunkReadWriteList, ChunkReadWriteOptional, ChunkWriter};
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::io::Write;
 use xray_error::XRayResult;
@@ -6,12 +6,12 @@ use xray_utils::encode_string_to_windows1251_bytes;
 
 impl ChunkWriter {
   #[inline(always)]
-  pub fn write_xr<T: ByteOrder, W: ChunkWritable>(&mut self, writable: &W) -> XRayResult {
+  pub fn write_xr<T: ByteOrder, W: ChunkReadWrite>(&mut self, writable: &W) -> XRayResult {
     writable.write::<T>(self)
   }
 
   #[inline(always)]
-  pub fn write_xr_optional<T: ByteOrder, W: ChunkWritableOptional>(
+  pub fn write_xr_optional<T: ByteOrder, W: ChunkReadWriteOptional>(
     &mut self,
     writable: Option<&W>,
   ) -> XRayResult {
@@ -19,7 +19,7 @@ impl ChunkWriter {
   }
 
   #[inline(always)]
-  pub fn write_xr_list<T: ByteOrder, W: ChunkWritableList>(&mut self, list: &[W]) -> XRayResult {
+  pub fn write_xr_list<T: ByteOrder, W: ChunkReadWriteList>(&mut self, list: &[W]) -> XRayResult {
     W::write_list::<T>(self, list)
   }
 

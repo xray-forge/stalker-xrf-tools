@@ -6,7 +6,7 @@ use crate::data::particles::particle_effect_description::ParticleDescription;
 use crate::data::particles::particle_effect_editor_data::ParticleEffectEditorData;
 use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
-use crate::export::file_import::{read_ini_optional_field, read_ltx_field};
+use crate::file_import::{read_ini_optional_field, read_ltx_field};
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{

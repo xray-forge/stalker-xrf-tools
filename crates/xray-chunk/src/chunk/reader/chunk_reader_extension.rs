@@ -1,24 +1,24 @@
-use crate::chunk::chunk_trait::{ChunkReadable, ChunkReadableList};
+use crate::chunk::chunk_trait::ChunkReadWrite;
 use crate::chunk::source::chunk_data_source::ChunkDataSource;
-use crate::{ChunkReadableOptional, ChunkReader};
+use crate::{ChunkReadWriteList, ChunkReadWriteOptional, ChunkReader};
 use byteorder::{ByteOrder, ReadBytesExt};
 use xray_error::XRayResult;
 
 impl ChunkReader {
   #[inline(always)]
-  pub fn read_xr<T: ByteOrder, C: ChunkReadable>(&mut self) -> XRayResult<C> {
+  pub fn read_xr<T: ByteOrder, C: ChunkReadWrite>(&mut self) -> XRayResult<C> {
     C::read::<T>(self)
   }
 
   #[inline(always)]
-  pub fn read_xr_optional<T: ByteOrder, C: ChunkReadableOptional>(
+  pub fn read_xr_optional<T: ByteOrder, C: ChunkReadWriteOptional>(
     &mut self,
   ) -> XRayResult<Option<C>> {
     C::read_optional::<T>(self)
   }
 
   #[inline(always)]
-  pub fn read_xr_list<T: ByteOrder, C: ChunkReadableList>(&mut self) -> XRayResult<Vec<C>> {
+  pub fn read_xr_list<T: ByteOrder, C: ChunkReadWriteList>(&mut self) -> XRayResult<Vec<C>> {
     C::read_list::<T>(self)
   }
 }

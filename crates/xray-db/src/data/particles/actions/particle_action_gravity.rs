@@ -1,7 +1,7 @@
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::particle_action_reader::ParticleActionReader;
 use crate::data::meta::particle_action_writer::ParticleActionWriter;
-use crate::export::file_import::read_ltx_field;
+use crate::file_import::read_ltx_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};

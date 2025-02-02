@@ -3,10 +3,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use xray_chunk::{
-  ChunkReadable, ChunkReadableOptional, ChunkReader, ChunkWritable, ChunkWritableOptional,
-  ChunkWriter,
-};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
@@ -22,7 +19,7 @@ pub struct Time {
   pub millis: u16,
 }
 
-impl ChunkReadableOptional for Time {
+impl ChunkReadWriteOptional for Time {
   /// Read optional time object from the chunk.
   fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Option<Self>> {
     if reader.read_u8()? == 1 {
@@ -31,9 +28,7 @@ impl ChunkReadableOptional for Time {
       Ok(None)
     }
   }
-}
 
-impl ChunkWritableOptional for Time {
   /// Write optional time object into the writer.
   fn write_optional<T: ByteOrder>(writer: &mut ChunkWriter, time: Option<&Self>) -> XRayResult {
     if time.is_some() {
@@ -48,7 +43,7 @@ impl ChunkWritableOptional for Time {
   }
 }
 
-impl ChunkReadable for Time {
+impl ChunkReadWrite for Time {
   /// Read time object from chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let year: u8 = reader.read_u8()?;
@@ -69,9 +64,7 @@ impl ChunkReadable for Time {
       millis,
     })
   }
-}
 
-impl ChunkWritable for Time {
   /// Write time object into the chunk.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u8(self.year)?;
@@ -150,8 +143,7 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
   use xray_chunk::{
-    ChunkReadable, ChunkReadableOptional, ChunkReader, ChunkWritable, ChunkWritableOptional,
-    ChunkWriter, XRayByteOrder,
+    ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter, XRayByteOrder,
   };
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;

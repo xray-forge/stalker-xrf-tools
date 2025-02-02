@@ -2,7 +2,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use xray_chunk::{ChunkReadable, ChunkReader, ChunkWritable, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Display)]
@@ -20,7 +20,7 @@ impl Vector3d<f32> {
   }
 }
 
-impl ChunkReadable for Vector3d<f32> {
+impl ChunkReadWrite for Vector3d<f32> {
   /// Read vector coordinates from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
@@ -29,9 +29,7 @@ impl ChunkReadable for Vector3d<f32> {
       z: reader.read_f32::<T>()?,
     })
   }
-}
 
-impl ChunkWritable for Vector3d<f32> {
   /// Write vector coordinates into the writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<T>(self.x)?;
@@ -90,7 +88,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
-  use xray_chunk::{ChunkReadable, ChunkReader, ChunkWritable, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

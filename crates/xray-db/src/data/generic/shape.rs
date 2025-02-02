@@ -1,10 +1,8 @@
-use crate::export::file_import::read_ltx_field;
+use crate::file_import::read_ltx_field;
 use crate::types::{Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{
-  ChunkReadable, ChunkReadableList, ChunkReader, ChunkWritable, ChunkWritableList, ChunkWriter,
-};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
@@ -16,7 +14,7 @@ pub enum Shape {
   Box(Matrix3d),
 }
 
-impl ChunkReadable for Shape {
+impl ChunkReadWrite for Shape {
   /// Read shape from the chunk reader.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
@@ -36,29 +34,7 @@ impl ChunkReadable for Shape {
       }
     })
   }
-}
 
-impl ChunkReadableList for Shape {
-  /// Read list of shapes from the chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
-    let mut shapes: Vec<Self> = Vec::new();
-    let count: u8 = reader.read_u8().expect("Count flag to be read");
-
-    for _ in 0..count {
-      shapes.push(Self::read::<T>(reader)?);
-    }
-
-    assert_equal(
-      shapes.len(),
-      count as usize,
-      "Declared and read shapes count should be equal",
-    )?;
-
-    Ok(shapes)
-  }
-}
-
-impl ChunkWritable for Shape {
   /// Write shape data into the chunk reader.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     match self {
@@ -83,7 +59,25 @@ impl ChunkWritable for Shape {
   }
 }
 
-impl ChunkWritableList for Shape {
+impl ChunkReadWriteList for Shape {
+  /// Read list of shapes from the chunk reader.
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+    let mut shapes: Vec<Self> = Vec::new();
+    let count: u8 = reader.read_u8().expect("Count flag to be read");
+
+    for _ in 0..count {
+      shapes.push(Self::read::<T>(reader)?);
+    }
+
+    assert_equal(
+      shapes.len(),
+      count as usize,
+      "Declared and read shapes count should be equal",
+    )?;
+
+    Ok(shapes)
+  }
+
   /// Write list of shapes data into the chunk reader.
   fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, shapes: &[Self]) -> XRayResult {
     writer.write_u8(shapes.len() as u8)?;
@@ -171,10 +165,7 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{
-    ChunkReadable, ChunkReadableList, ChunkReader, ChunkWritable, ChunkWritableList, ChunkWriter,
-    XRayByteOrder,
-  };
+  use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;

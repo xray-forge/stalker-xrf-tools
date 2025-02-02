@@ -1,6 +1,6 @@
 use crate::data::generic::u32_bytes::U32Bytes;
 use crate::data::generic::vector_3d::Vector3d;
-use crate::export::file_import::read_ltx_field;
+use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter};

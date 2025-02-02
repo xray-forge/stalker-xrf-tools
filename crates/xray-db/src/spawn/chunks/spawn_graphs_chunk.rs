@@ -4,12 +4,13 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
+use crate::export::FileImportExport;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fs::File;
 use std::path::Path;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
 use xray_utils::open_export_file;
@@ -28,9 +29,11 @@ pub struct SpawnGraphsChunk {
 
 impl SpawnGraphsChunk {
   pub const CHUNK_ID: u32 = 4;
+}
 
+impl ChunkReadWrite for SpawnGraphsChunk {
   /// Read graphs chunk by position descriptor.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!("Reading graphs chunk, bytes {}", reader.read_bytes_remain());
 
     let mut levels: Vec<GraphLevel> = Vec::new();
@@ -87,7 +90,7 @@ impl SpawnGraphsChunk {
   }
 
   /// Write whole graphs chunk into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.header.write::<T>(writer)?;
 
     for level in &self.levels {
@@ -112,9 +115,11 @@ impl SpawnGraphsChunk {
 
     Ok(())
   }
+}
 
+impl FileImportExport for SpawnGraphsChunk {
   /// Import graphs data from provided path.
-  pub fn import<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     let header: GraphHeader = GraphHeader::import(
       "header",
       &Ltx::read_from_path(path.as_ref().join("graphs_header.ltx"))?,
@@ -148,9 +153,9 @@ impl SpawnGraphsChunk {
       edges.push(GraphEdge::import(&index.to_string(), &edges_ltx)?);
     }
 
-    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::import_list::<T>(&mut File::open(
-      path.as_ref().join("graphs_cross_tables.gct"),
-    )?)?;
+    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::import_list::<XRayByteOrder>(
+      &mut File::open(path.as_ref().join("graphs_cross_tables.gct"))?,
+    )?;
 
     log::info!("Imported graphs chunk");
 
@@ -166,7 +171,7 @@ impl SpawnGraphsChunk {
 
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
-  pub fn export<T: ByteOrder, P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut graphs_header_ltx: Ltx = Ltx::new();
 
     self.header.export(&mut graphs_header_ltx);
@@ -223,7 +228,7 @@ impl SpawnGraphsChunk {
 
     log::info!("Exported graph edges");
 
-    GraphCrossTable::export_list::<T>(
+    GraphCrossTable::export_list::<XRayByteOrder>(
       &self.cross_tables,
       &mut open_export_file(path.as_ref().join("graphs_cross_tables.gct"))?,
     )?;
@@ -259,7 +264,7 @@ mod tests {
   use crate::data::graph::graph_vertex::GraphVertex;
   use crate::spawn::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
   use uuid::uuid;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,

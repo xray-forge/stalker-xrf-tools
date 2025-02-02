@@ -1,13 +1,14 @@
 use crate::data::alife::alife_object_base::AlifeObjectBase;
+use crate::export::FileImportExport;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::open_export_file;
+use xray_utils::{assert_equal, open_export_file};
 
 /// ALife spawns chunk has the following structure:
 /// 0 - count
@@ -20,17 +21,22 @@ pub struct SpawnALifeSpawnsChunk {
 
 impl SpawnALifeSpawnsChunk {
   pub const CHUNK_ID: u32 = 1;
+  pub const COUNT_CHUNK_ID: u32 = 0;
+  pub const OBJECTS_CHUNK_ID: u32 = 1;
+  pub const VERTEX_CHUNK_ID: u32 = 2;
+}
 
+impl ChunkReadWrite for SpawnALifeSpawnsChunk {
   /// Read spawns chunk by position descriptor from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
-      "Reading alife spawns chunk, {} bytes",
+      "Reading ALife spawns chunk, {} bytes",
       reader.read_bytes_remain()
     );
 
-    let mut count_reader: ChunkReader = reader.read_child_by_index(0)?;
-    let mut objects_reader: ChunkReader = reader.read_child_by_index(1)?;
-    let edges_reader: ChunkReader = reader.read_child_by_index(2)?;
+    let mut count_reader: ChunkReader = reader.read_child_by_index(Self::COUNT_CHUNK_ID)?;
+    let mut objects_reader: ChunkReader = reader.read_child_by_index(Self::OBJECTS_CHUNK_ID)?;
+    let vertex_reader: ChunkReader = reader.read_child_by_index(Self::VERTEX_CHUNK_ID)?;
 
     let count: u32 = count_reader.read_u32::<T>()?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
@@ -39,33 +45,20 @@ impl SpawnALifeSpawnsChunk {
       objects.push(AlifeObjectBase::read::<T>(&mut object_reader)?)
     }
 
-    assert_eq!(objects.len(), count as usize);
-    assert!(
-      count_reader.is_ended(),
-      "Expect count chunk to be ended, {} remain",
-      count_reader.read_bytes_remain()
-    );
-    assert!(
-      objects_reader.is_ended(),
-      "Expect objects chunk to be ended, {} remain",
-      objects_reader.read_bytes_remain()
-    );
-    assert!(
-      edges_reader.is_ended(),
-      "Parsing of edges in spawn chunk is not implemented"
-    );
-
-    assert!(
-      reader.is_ended(),
-      "Expect alife spawns chunk to be ended, {} remain",
-      reader.read_bytes_remain()
-    );
+    assert_equal(objects.len(), count as usize, "Expect all object read")?;
+    assert_chunk_read(&count_reader, "Expect count chunk to be ended")?;
+    assert_chunk_read(&objects_reader, "Expect objects chunk to be ended")?;
+    assert_chunk_read(
+      &vertex_reader,
+      "Parsing of edges in spawn chunk is not implemented",
+    )?;
+    assert_chunk_read(&reader, "Expect ALife spawns chunk to be ended")?;
 
     Ok(Self { objects })
   }
 
-  /// Write alife chunk data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  /// Write ALife chunk data into the writer.
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut count_writer: ChunkWriter = ChunkWriter::new();
     let mut objects_writer: ChunkWriter = ChunkWriter::new();
     let mut vertex_writer: ChunkWriter = ChunkWriter::new();
@@ -84,20 +77,34 @@ impl SpawnALifeSpawnsChunk {
       )?;
     }
 
-    writer.write_all(count_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
-    writer.write_all(objects_writer.flush_chunk_into_buffer::<T>(1)?.as_slice())?;
-    writer.write_all(vertex_writer.flush_chunk_into_buffer::<T>(2)?.as_slice())?;
+    writer.write_all(
+      count_writer
+        .flush_chunk_into_buffer::<T>(Self::COUNT_CHUNK_ID)?
+        .as_slice(),
+    )?;
+    writer.write_all(
+      objects_writer
+        .flush_chunk_into_buffer::<T>(Self::OBJECTS_CHUNK_ID)?
+        .as_slice(),
+    )?;
+    writer.write_all(
+      vertex_writer
+        .flush_chunk_into_buffer::<T>(Self::VERTEX_CHUNK_ID)?
+        .as_slice(),
+    )?;
 
     log::info!(
-      "Written alife spawns chunk, {} bytes",
+      "Written ALife spawns chunk, {} bytes",
       writer.bytes_written()
     );
 
     Ok(())
   }
+}
 
+impl FileImportExport for SpawnALifeSpawnsChunk {
   /// Import ALife spawns data from provided path.
-  pub fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObjectBase> = Vec::new();
 
@@ -105,13 +112,13 @@ impl SpawnALifeSpawnsChunk {
       objects.push(AlifeObjectBase::import(section_name, &ltx)?);
     }
 
-    log::info!("Imported alife spawns chunk");
+    log::info!("Imported ALife spawns chunk");
 
     Ok(Self { objects })
   }
 
   /// Export ALife spawns data into provided path.
-  pub fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
     for object in &self.objects {
@@ -122,7 +129,7 @@ impl SpawnALifeSpawnsChunk {
       path.as_ref().join("alife_spawns.ltx"),
     )?)?;
 
-    log::info!("Exported alife spawns chunk");
+    log::info!("Exported ALife spawns chunk");
 
     Ok(())
   }
@@ -149,7 +156,7 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::cls_id::ClsId;
   use crate::spawn::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_slice,

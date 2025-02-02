@@ -3,7 +3,7 @@ use crate::data::alife::alife_object_visual::AlifeObjectVisual;
 use crate::data::generic::time::Time;
 use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
-use crate::export::file_import::read_ltx_field;
+use crate::file_import::read_ltx_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};

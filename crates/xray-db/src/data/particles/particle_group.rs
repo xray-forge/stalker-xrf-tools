@@ -2,7 +2,7 @@ use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::particle_effect_description::ParticleDescription;
 use crate::data::particles::particle_group_effect::ParticleGroupEffect;
 use crate::data::particles::particle_group_effect_old::ParticleGroupEffectOld;
-use crate::export::file_import::read_ltx_field;
+use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{

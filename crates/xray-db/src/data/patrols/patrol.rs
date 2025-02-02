@@ -1,6 +1,6 @@
 use crate::data::patrols::patrol_link::PatrolLink;
 use crate::data::patrols::patrol_point::PatrolPoint;
-use crate::export::file_import::read_ltx_field;
+use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
