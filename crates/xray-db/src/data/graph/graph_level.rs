@@ -34,7 +34,7 @@ impl GraphLevel {
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
 
-    writer.write_xr::<T, Vector3d>(&self.offset)?;
+    writer.write_xr::<T, _>(&self.offset)?;
     writer.write_u8(self.id)?;
     writer.write_null_terminated_win_string(&self.section)?;
     writer.write_u128::<T>(self.guid.as_u128())?;

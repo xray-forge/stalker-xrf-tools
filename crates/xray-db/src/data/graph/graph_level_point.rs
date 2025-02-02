@@ -26,7 +26,7 @@ impl GraphLevelPoint {
 
   /// Write level point data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<T, Vector3d>(&self.position)?;
+    writer.write_xr::<T, _>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 

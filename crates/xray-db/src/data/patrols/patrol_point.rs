@@ -1,11 +1,15 @@
 use crate::data::generic::vector_3d::Vector3d;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
-use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
+use xray_chunk::{
+  assert_chunk_read, ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter,
+};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -19,51 +23,39 @@ pub struct PatrolPoint {
 }
 
 impl PatrolPoint {
+  pub const INDEX_CHUNK_ID: u32 = 0;
+  pub const DATA_CHUNK_ID: u32 = 1;
+}
+
+impl ChunkReadWriteList for PatrolPoint {
   /// Read points from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut points: Vec<Self> = Vec::new();
 
     for (index, mut point_reader) in ChunkIterator::new(reader).enumerate() {
-      let mut index_reader: ChunkReader = point_reader.read_child_by_index(0)?;
-      let mut points_reader: ChunkReader = point_reader.read_child_by_index(1)?;
+      let mut index_reader: ChunkReader = point_reader.read_child_by_index(Self::INDEX_CHUNK_ID)?;
+      let mut data_reader: ChunkReader = point_reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
 
-      assert_eq!(index, index_reader.read_u32::<T>()? as usize);
+      assert_equal(
+        index,
+        index_reader.read_u32::<T>()? as usize,
+        "Expect correct patrol point index",
+      )?;
 
-      points.push(Self::read::<T>(&mut points_reader)?);
+      points.push(Self::read::<T>(&mut data_reader)?);
 
-      assert!(index_reader.is_ended());
-      assert!(point_reader.is_ended());
+      assert_chunk_read(&index_reader, "Patrol point index chunk should be read")?;
+      assert_chunk_read(&point_reader, "Patrol point data chunk should be read")?;
     }
 
-    assert!(
-      reader.is_ended(),
-      "Chunk data should be read for patrol points list"
-    );
+    assert_chunk_read(reader, "Patrol points chunk should be read")?;
 
     Ok(points)
   }
 
-  /// Read patrol point data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let point: Self = Self {
-      name: reader.read_null_terminated_win_string()?,
-      position: reader.read_xr::<T, _>()?,
-      flags: reader.read_u32::<T>()?,
-      level_vertex_id: reader.read_u32::<T>()?,
-      game_vertex_id: reader.read_u16::<T>()?,
-    };
-
-    assert!(
-      reader.is_ended(),
-      "Chunk data should be read for patrol point"
-    );
-
-    Ok(point)
-  }
-
   /// Write list of patrol points into chunk writer.
-  pub fn write_list<T: ByteOrder>(points: &[Self], writer: &mut ChunkWriter) -> XRayResult {
-    for (index, point) in points.iter().enumerate() {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XRayResult {
+    for (index, point) in list.iter().enumerate() {
       let mut point_chunk_writer: ChunkWriter = ChunkWriter::new();
 
       let mut point_index_writer: ChunkWriter = ChunkWriter::new();
@@ -72,32 +64,54 @@ impl PatrolPoint {
       point_index_writer.write_u32::<T>(index as u32)?;
       point.write::<T>(&mut point_writer)?;
 
-      point_chunk_writer.write_all(&point_index_writer.flush_chunk_into_buffer::<T>(0)?)?;
-      point_chunk_writer.write_all(&point_writer.flush_chunk_into_buffer::<T>(1)?)?;
+      point_chunk_writer
+        .write_all(&point_index_writer.flush_chunk_into_buffer::<T>(Self::INDEX_CHUNK_ID)?)?;
+      point_chunk_writer
+        .write_all(&point_writer.flush_chunk_into_buffer::<T>(Self::DATA_CHUNK_ID)?)?;
 
       writer.write_all(&point_chunk_writer.flush_chunk_into_buffer::<T>(index as u32)?)?;
     }
 
     Ok(())
   }
+}
+
+impl ChunkReadWrite for PatrolPoint {
+  /// Read patrol point data from the chunk reader.
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+    let point: Self = Self {
+      name: reader.read_null_terminated_win_string()?,
+      position: reader.read_xr::<T, _>()?,
+      flags: reader.read_u32::<T>()?,
+      level_vertex_id: reader.read_u32::<T>()?,
+      game_vertex_id: reader.read_u16::<T>()?,
+    };
+
+    assert_chunk_read(reader, "Chunk data should be read for patrol point")?;
+
+    Ok(point)
+  }
 
   /// Write patrol point data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
 
-    writer.write_xr::<T, Vector3d>(&self.position)?;
+    writer.write_xr::<T, _>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_u16::<T>(self.game_vertex_id)?;
 
     Ok(())
   }
+}
 
+impl LtxImportExport for PatrolPoint {
   /// Import patrol point data from ltx config.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
-        "Patrol point section '{section_name}' should be defined in ltx file ({})",
+        "Patrol point section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
@@ -112,7 +126,7 @@ impl PatrolPoint {
   }
 
   /// Export patrol point data into ltx.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("name", &self.name)
@@ -129,11 +143,12 @@ impl PatrolPoint {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::patrols::patrol_point::PatrolPoint;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -170,11 +185,12 @@ mod tests {
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 40 + 8);
-
-    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read: PatrolPoint = PatrolPoint::read::<XRayByteOrder>(&mut reader)?;
-
-    assert_eq!(read, original);
+    assert_eq!(
+      PatrolPoint::read::<XRayByteOrder>(
+        &mut ChunkReader::from_slice(file)?.read_child_by_index(0)?
+      )?,
+      original
+    );
 
     Ok(())
   }
@@ -201,7 +217,7 @@ mod tests {
       },
     ];
 
-    PatrolPoint::write_list::<XRayByteOrder>(&original, &mut writer)?;
+    PatrolPoint::write_list::<XRayByteOrder>(&mut writer, &original)?;
 
     assert_eq!(writer.bytes_written(), 140);
 
@@ -215,11 +231,12 @@ mod tests {
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.bytes_remaining(), 140 + 8);
-
-    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read: Vec<PatrolPoint> = PatrolPoint::read_list::<XRayByteOrder>(&mut reader)?;
-
-    assert_eq!(original, read);
+    assert_eq!(
+      PatrolPoint::read_list::<XRayByteOrder>(
+        &mut ChunkReader::from_slice(file)?.read_child_by_index(0)?
+      )?,
+      original
+    );
 
     Ok(())
   }
@@ -241,9 +258,10 @@ mod tests {
     original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read: PatrolPoint = PatrolPoint::import("data", &Ltx::read_from_path(config_path)?)?;
-
-    assert_eq!(read, original);
+    assert_eq!(
+      PatrolPoint::import("data", &Ltx::read_from_path(config_path)?)?,
+      original
+    );
 
     Ok(())
   }
@@ -258,7 +276,7 @@ mod tests {
       game_vertex_id: 321,
     };
 
-    let mut file: File = overwrite_file(&get_absolute_test_sample_file_path(
+    let mut file: File = overwrite_file(get_absolute_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

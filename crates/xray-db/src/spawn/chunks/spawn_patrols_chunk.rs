@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::open_export_file;
+use xray_utils::{assert_equal, open_export_file};
 
 /// `CPatrolPathStorage::load` in xray engine.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -34,18 +34,17 @@ impl ChunkReadWrite for SpawnPatrolsChunk {
     let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_NESTED_CHUNK_ID)?;
 
     let count: u32 = meta_reader.read_u32::<T>()?;
-    let patrols: Vec<Patrol> = Patrol::read_list::<T>(&mut data_reader, count)?;
+    let patrols: Vec<Patrol> = data_reader.read_xr_list::<T, _>()?;
 
-    assert_eq!(count, patrols.len() as u32);
+    assert_equal(
+      count,
+      patrols.len() as u32,
+      "Expect defined count of patrols to be read",
+    )?;
 
-    assert!(meta_reader.is_ended());
-    assert!(data_reader.is_ended());
-
-    assert!(
-      reader.is_ended(),
-      "Expect patrols chunk to be ended, {} remain",
-      reader.read_bytes_remain()
-    );
+    assert_chunk_read(&meta_reader, "Expect patrol meta chunk to be ended")?;
+    assert_chunk_read(&data_reader, "Expect patrol data chunk to be ended")?;
+    assert_chunk_read(reader, "Expect patrols chunk to be ended")?;
 
     Ok(Self { patrols })
   }
@@ -56,7 +55,7 @@ impl ChunkReadWrite for SpawnPatrolsChunk {
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
     meta_writer.write_u32::<T>(self.patrols.len() as u32)?;
-    Patrol::write_list::<T>(&self.patrols, &mut data_writer)?;
+    data_writer.write_xr_list::<T, _>(&self.patrols)?;
 
     writer.write_all(
       meta_writer

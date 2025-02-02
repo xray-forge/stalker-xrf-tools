@@ -20,8 +20,8 @@ impl OgfBox {
   }
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<T, Vector3d>(&self.min)?;
-    writer.write_xr::<T, Vector3d>(&self.max)?;
+    writer.write_xr::<T, _>(&self.min)?;
+    writer.write_xr::<T, _>(&self.max)?;
 
     Ok(())
   }

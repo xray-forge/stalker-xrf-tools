@@ -98,16 +98,17 @@ impl<T: ChunkDataSource> ChunkReader<T> {
 
 impl ChunkReader {
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_child_by_index(&mut self, index: u32) -> XRayResult<Self> {
+  pub fn read_child_by_index(&mut self, id: u32) -> XRayResult<Self> {
     for (iteration, chunk) in ChunkIterator::new(self).enumerate() {
-      if index as usize == iteration {
+      if id as usize == iteration {
         return Ok(chunk);
       }
     }
 
-    Err(XRayError::new_invalid_error(
-      "Attempt to read chunk with index out of bonds",
-    ))
+    Err(XRayError::new_invalid_error(format!(
+      "Attempt to read not existing chunk with id {} in chunk {}",
+      id, self.id
+    )))
   }
 
   /// Get list of all child samples in current chunk, do not mutate current chunk.

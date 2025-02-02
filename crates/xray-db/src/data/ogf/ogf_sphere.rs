@@ -20,7 +20,7 @@ impl OgfSphere {
   }
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<T, Vector3d>(&self.position)?;
+    writer.write_xr::<T, _>(&self.position)?;
     writer.write_f32::<T>(self.radius)?;
 
     Ok(())

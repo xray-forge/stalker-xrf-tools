@@ -34,10 +34,10 @@ impl ParticleDomain {
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<XRayByteOrder>(self.domain_type)?;
-    writer.write_xr::<T, Vector3d>(&self.coordinates.0)?;
-    writer.write_xr::<T, Vector3d>(&self.coordinates.1)?;
-    writer.write_xr::<T, Vector3d>(&self.basis.0)?;
-    writer.write_xr::<T, Vector3d>(&self.basis.1)?;
+    writer.write_xr::<T, _>(&self.coordinates.0)?;
+    writer.write_xr::<T, _>(&self.coordinates.1)?;
+    writer.write_xr::<T, _>(&self.basis.0)?;
+    writer.write_xr::<T, _>(&self.basis.1)?;
     writer.write_f32::<XRayByteOrder>(self.radius1)?;
     writer.write_f32::<XRayByteOrder>(self.radius2)?;
     writer.write_f32::<XRayByteOrder>(self.radius1_sqr)?;

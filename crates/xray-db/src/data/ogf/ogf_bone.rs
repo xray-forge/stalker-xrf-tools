@@ -33,12 +33,12 @@ impl OgfBone {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_null_terminated_win_string(&self.parent)?;
 
-    writer.write_xr::<T, Vector3d>(&self.rotation.0)?;
-    writer.write_xr::<T, Vector3d>(&self.rotation.1)?;
-    writer.write_xr::<T, Vector3d>(&self.rotation.2)?;
+    writer.write_xr::<T, _>(&self.rotation.0)?;
+    writer.write_xr::<T, _>(&self.rotation.1)?;
+    writer.write_xr::<T, _>(&self.rotation.2)?;
 
-    writer.write_xr::<T, Vector3d>(&self.translate)?;
-    writer.write_xr::<T, Vector3d>(&self.half_size)?;
+    writer.write_xr::<T, _>(&self.translate)?;
+    writer.write_xr::<T, _>(&self.half_size)?;
 
     Ok(())
   }

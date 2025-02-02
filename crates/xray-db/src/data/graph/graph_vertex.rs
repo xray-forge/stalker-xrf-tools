@@ -40,8 +40,8 @@ impl GraphVertex {
 
   /// Write graph vertex data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_xr::<T, Vector3d>(&self.level_point)?;
-    writer.write_xr::<T, Vector3d>(&self.game_point)?;
+    writer.write_xr::<T, _>(&self.level_point)?;
+    writer.write_xr::<T, _>(&self.game_point)?;
     writer.write_u8(self.level_id)?;
     writer.write_u24::<T>(self.level_vertex_id)?;
     writer.write_xr::<T, U32Bytes>(&self.vertex_type)?;
