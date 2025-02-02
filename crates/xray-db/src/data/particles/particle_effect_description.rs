@@ -1,10 +1,12 @@
 use crate::constants::META_TYPE_FIELD;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -17,9 +19,11 @@ pub struct ParticleDescription {
 
 impl ParticleDescription {
   pub const META_TYPE: &'static str = "particle_description";
+}
 
+impl ChunkReadWrite for ParticleDescription {
   /// Read particle effect description data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_description: Self = Self {
       creator: reader.read_w1251_string()?,
       editor: reader.read_w1251_string()?,
@@ -27,16 +31,13 @@ impl ParticleDescription {
       edit_time: reader.read_u32::<T>()?,
     };
 
-    assert!(
-      reader.is_ended(),
-      "Expect particle description chunk to be ended"
-    );
+    assert_chunk_read(reader, "Expect particle description chunk to be ended")?;
 
     Ok(particle_description)
   }
 
   /// Write particle effect description data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_w1251_string(&self.creator)?;
     writer.write_w1251_string(&self.editor)?;
     writer.write_u32::<T>(self.created_time)?;
@@ -44,18 +45,11 @@ impl ParticleDescription {
 
     Ok(())
   }
+}
 
-  /// Import optional particle effect collision data from provided path.
-  pub fn import_optional(section_name: &str, ltx: &Ltx) -> XRayResult<Option<Self>> {
-    if ltx.has_section(section_name) {
-      Self::import(section_name, ltx).map(Some)
-    } else {
-      Ok(None)
-    }
-  }
-
+impl LtxImportExport for ParticleDescription {
   /// Import particle effect description data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Particle effect description section '{}' should be defined in ltx file ({})",
@@ -66,12 +60,11 @@ impl ParticleDescription {
 
     let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
-    assert_eq!(
-      meta_type,
+    assert_equal(
+      meta_type.as_str(),
       Self::META_TYPE,
-      "Expected corrected meta type field for '{}' importing",
-      Self::META_TYPE
-    );
+      "Expected corrected meta type field for particle effect description importing",
+    )?;
 
     Ok(Self {
       creator: read_ltx_field("creator", section)?,
@@ -81,17 +74,8 @@ impl ParticleDescription {
     })
   }
 
-  /// Export particle effect collision data into provided path.
-  pub fn export_optional(data: Option<&Self>, section_name: &str, ltx: &mut Ltx) -> XRayResult {
-    if let Some(data) = data {
-      data.export(section_name, ltx)
-    } else {
-      Ok(())
-    }
-  }
-
   /// Export particle effect description data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)

@@ -1,10 +1,12 @@
 use crate::constants::META_TYPE_FIELD;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,47 +17,48 @@ pub struct ParticleEffectSprite {
 
 impl ParticleEffectSprite {
   pub const META_TYPE: &'static str = "particle_effect_sprite";
+}
 
+impl ChunkReadWrite for ParticleEffectSprite {
   /// Read effect sprite data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_sprite: Self = Self {
       shader_name: reader.read_w1251_string()?,
       texture_name: reader.read_w1251_string()?,
     };
 
-    assert!(
-      reader.is_ended(),
-      "Expect particle effect sprite chunk to be ended"
-    );
+    assert_chunk_read(reader, "Expect particle effect sprite chunk to be ended")?;
 
     Ok(particle_sprite)
   }
 
   /// Write sprite data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_w1251_string(&self.shader_name)?;
     writer.write_w1251_string(&self.texture_name)?;
 
     Ok(())
   }
+}
 
+impl LtxImportExport for ParticleEffectSprite {
   /// Import particle effect sprite data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
-        "Particle sprite section '{section_name}' should be defined in ltx file ({})",
+        "Particle sprite section '{}' should be defined in ltx file ({})",
+        section_name,
         file!()
       ))
     })?;
 
     let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
-    assert_eq!(
-      meta_type,
+    assert_equal(
+      meta_type.as_str(),
       Self::META_TYPE,
-      "Expected corrected meta type field for '{}' importing",
-      Self::META_TYPE
-    );
+      "Expected corrected meta type field for particle effect sprite importing",
+    )?;
 
     Ok(Self {
       shader_name: read_ltx_field("shader_name", section)?,
@@ -64,7 +67,7 @@ impl ParticleEffectSprite {
   }
 
   /// Export particle effect sprite data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -78,11 +81,12 @@ impl ParticleEffectSprite {
 #[cfg(test)]
 mod tests {
   use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;

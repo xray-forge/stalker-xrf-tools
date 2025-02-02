@@ -77,7 +77,7 @@ impl FromStr for ParticleDomain {
   type Err = XRayError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
-    let parts: Vec<&str> = string.split(',').collect();
+    let parts: Vec<&str> = string.split(',').map(str::trim).collect();
 
     if parts.len() != 17 {
       return Err(XRayError::new_parsing_error(
@@ -87,7 +87,6 @@ impl FromStr for ParticleDomain {
 
     Ok(Self {
       domain_type: parts[0]
-        .trim()
         .parse::<u32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector domain_type value",
@@ -95,19 +94,16 @@ impl FromStr for ParticleDomain {
       coordinates: (
         Vector3d {
           x: parts[1]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 0 vector x value",
             )))?,
           y: parts[2]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 0 vector y value",
             )))?,
           z: parts[3]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 0 vector z value",
@@ -115,19 +111,16 @@ impl FromStr for ParticleDomain {
         },
         Vector3d {
           x: parts[4]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 1 vector x value",
             )))?,
           y: parts[5]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 1 vector y value",
             )))?,
           z: parts[6]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse coordinates 1 vector z value",
@@ -137,19 +130,16 @@ impl FromStr for ParticleDomain {
       basis: (
         Vector3d {
           x: parts[7]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 0 vector x value",
             )))?,
           y: parts[8]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 0 vector y value",
             )))?,
           z: parts[9]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 0 vector z value",
@@ -157,19 +147,16 @@ impl FromStr for ParticleDomain {
         },
         Vector3d {
           x: parts[10]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 1 vector x value",
             )))?,
           y: parts[11]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 1 vector y value",
             )))?,
           z: parts[12]
-            .trim()
             .parse::<f32>()
             .or(Err(XRayError::new_parsing_error(
               "Failed to parse basis 1 vector z value",
@@ -177,25 +164,21 @@ impl FromStr for ParticleDomain {
         },
       ),
       radius1: parts[13]
-        .trim()
         .parse::<f32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius1 value",
         )))?,
       radius2: parts[14]
-        .trim()
         .parse::<f32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius2 value",
         )))?,
       radius1_sqr: parts[15]
-        .trim()
         .parse::<f32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius1_sqr value",
         )))?,
       radius2_sqr: parts[16]
-        .trim()
         .parse::<f32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse vector radius2_sqr value",

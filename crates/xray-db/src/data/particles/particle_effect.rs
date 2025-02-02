@@ -6,15 +6,18 @@ use crate::data::particles::particle_effect_description::ParticleDescription;
 use crate::data::particles::particle_effect_editor_data::ParticleEffectEditorData;
 use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
+use crate::export::LtxImportExport;
 use crate::file_import::{read_ini_optional_field, read_ltx_field};
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  find_optional_chunk_by_id, read_f32_chunk, read_f32_vector_chunk, read_u16_chunk, read_u32_chunk,
-  read_w1251_string_chunk, ChunkReader, ChunkWriter,
+  assert_chunk_read, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
+  read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk, ChunkReadWrite,
+  ChunkReader, ChunkWriter,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
 #[derive(Debug, Serialize, Deserialize)]
@@ -56,9 +59,35 @@ impl ParticleEffect {
   pub const EDITOR_DATA_CHUNK_ID: u32 = 36;
   pub const ROTATION_CHUNK_ID: u32 = 37;
 
+  fn get_action_section(section_name: &str, index: usize) -> String {
+    format!("{section_name}.action.{index}")
+  }
+
+  fn get_sprite_section(section_name: &str) -> String {
+    format!("{section_name}.sprite")
+  }
+
+  fn get_frame_section(section_name: &str) -> String {
+    format!("{section_name}.frame")
+  }
+
+  fn get_collision_section(section_name: &str) -> String {
+    format!("{section_name}.collision")
+  }
+
+  fn get_description_section(section_name: &str) -> String {
+    format!("{section_name}.description")
+  }
+
+  fn get_editor_data_section(section_name: &str) -> String {
+    format!("{section_name}.editor_data")
+  }
+}
+
+impl ChunkReadWrite for ParticleEffect {
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children();
 
     let effect: Self = {
@@ -102,22 +131,20 @@ impl ParticleEffect {
           XRayError::new_parsing_error(format!("Failed to read particle flags chunk: {}", error))
         })?,
         frame: find_optional_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID).map(|mut it| {
-          ParticleEffectFrame::read::<T>(&mut it)
+          it.read_xr::<T, _>()
             .expect("Invalid frame chunk data in particle effect")
         }),
-        sprite: ParticleEffectSprite::read::<T>(
-          &mut find_optional_chunk_by_id(&chunks, Self::SPRITE_CHUNK_ID)
-            .expect("Particle frame sprite chunk not found"),
-        )
-        .map_err(|error| {
-          XRayError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error))
-        })?,
+        sprite: find_required_chunk_by_id(&chunks, Self::SPRITE_CHUNK_ID)?
+          .read_xr::<T, _>()
+          .map_err(|error| {
+            XRayError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error))
+          })?,
         time_limit: find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID).map(|mut it| {
           read_f32_chunk::<T>(&mut it)
             .expect("Invalid frame time limit chunk data in particle effect")
         }),
         collision: find_optional_chunk_by_id(&chunks, Self::COLLISION_CHUNK_ID).map(|mut it| {
-          ParticleEffectCollision::read::<T>(&mut it)
+          it.read_xr::<T, _>()
             .expect("Invalid collision chunk data in particle effect")
         }),
         velocity_scale: find_optional_chunk_by_id(&chunks, Self::VELOCITY_SCALE_CHUNK_ID).map(
@@ -129,7 +156,7 @@ impl ParticleEffect {
         ),
         description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(
           |mut it| {
-            ParticleDescription::read::<T>(&mut it)
+            it.read_xr::<T, _>()
               .expect("Invalid description chunk data in particle effect")
           },
         ),
@@ -140,23 +167,20 @@ impl ParticleEffect {
         }),
         editor_data: find_optional_chunk_by_id(&chunks, Self::EDITOR_DATA_CHUNK_ID).map(
           |mut it| {
-            ParticleEffectEditorData::read::<T>(&mut it)
+            it.read_xr::<T, _>()
               .expect("Invalid editor data chunk in particle effect")
           },
         ),
       }
     };
 
-    assert!(
-      reader.is_ended(),
-      "Expect particle effect chunk to be ended"
-    );
+    assert_chunk_read(reader, "Expect particle effect chunk to be ended")?;
 
     Ok(effect)
   }
 
   /// Write particle effect data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -179,12 +203,12 @@ impl ParticleEffect {
 
     if let Some(frame) = &self.frame {
       let mut frame_chunk_writer: ChunkWriter = ChunkWriter::new();
-      frame.write::<T>(&mut frame_chunk_writer)?;
+      frame_chunk_writer.write_xr::<T, _>(frame)?;
       frame_chunk_writer.flush_chunk_into::<T>(writer, Self::FRAME_CHUNK_ID)?;
     }
 
     let mut sprite_chunk_writer: ChunkWriter = ChunkWriter::new();
-    self.sprite.write::<T>(&mut sprite_chunk_writer)?;
+    sprite_chunk_writer.write_xr::<T, _>(&self.sprite)?;
     sprite_chunk_writer.flush_chunk_into::<T>(writer, Self::SPRITE_CHUNK_ID)?;
 
     if let Some(time_limit) = self.time_limit {
@@ -195,7 +219,7 @@ impl ParticleEffect {
 
     if let Some(collision) = &self.collision {
       let mut collision_chunk_writer: ChunkWriter = ChunkWriter::new();
-      collision.write::<T>(&mut collision_chunk_writer)?;
+      collision_chunk_writer.write_xr::<T, _>(collision)?;
       collision_chunk_writer.flush_chunk_into::<T>(writer, Self::COLLISION_CHUNK_ID)?;
     }
 
@@ -207,7 +231,7 @@ impl ParticleEffect {
 
     if let Some(description) = &self.description {
       let mut description_chunk_writer: ChunkWriter = ChunkWriter::new();
-      description.write::<T>(&mut description_chunk_writer)?;
+      description_chunk_writer.write_xr::<T, _>(description)?;
       description_chunk_writer.flush_chunk_into::<T>(writer, Self::DESCRIPTION_CHUNK_ID)?;
     }
 
@@ -219,15 +243,17 @@ impl ParticleEffect {
 
     if let Some(editor_data) = &self.editor_data {
       let mut editor_data_chunk_writer: ChunkWriter = ChunkWriter::new();
-      editor_data.write::<T>(&mut editor_data_chunk_writer)?;
+      editor_data_chunk_writer.write_xr::<T, _>(editor_data)?;
       editor_data_chunk_writer.flush_chunk_into::<T>(writer, Self::EDITOR_DATA_CHUNK_ID)?;
     }
 
     Ok(())
   }
+}
 
+impl LtxImportExport for ParticleEffect {
   /// Import particle effect data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Particle effect section '{section_name}' should be defined in ltx file ({})",
@@ -237,12 +263,11 @@ impl ParticleEffect {
 
     let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
-    assert_eq!(
-      meta_type,
+    assert_equal(
+      meta_type.as_str(),
       Self::META_TYPE,
-      "Expected corrected meta type field for '{}' importing",
-      Self::META_TYPE
-    );
+      "Expected corrected meta type field for particle effect importing",
+    )?;
 
     let mut action_index: usize = 0;
     let mut actions: Vec<ParticleAction> = Vec::new();
@@ -291,7 +316,7 @@ impl ParticleEffect {
   }
 
   /// Export particle effect data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -316,53 +341,27 @@ impl ParticleEffect {
     }
 
     ParticleEffectFrame::export_optional(
-      self.frame.as_ref(),
       &Self::get_frame_section(section_name),
       ltx,
+      self.frame.as_ref(),
     )?;
     ParticleEffectCollision::export_optional(
-      self.collision.as_ref(),
       &Self::get_collision_section(section_name),
       ltx,
+      self.collision.as_ref(),
     )?;
     ParticleDescription::export_optional(
-      self.description.as_ref(),
       &Self::get_description_section(section_name),
       ltx,
+      self.description.as_ref(),
     )?;
     ParticleEffectEditorData::export_optional(
-      self.editor_data.as_ref(),
       &Self::get_editor_data_section(section_name),
       ltx,
+      self.editor_data.as_ref(),
     )?;
 
     Ok(())
-  }
-}
-
-impl ParticleEffect {
-  fn get_action_section(section_name: &str, index: usize) -> String {
-    format!("{section_name}.action.{index}")
-  }
-
-  fn get_sprite_section(section_name: &str) -> String {
-    format!("{section_name}.sprite")
-  }
-
-  fn get_frame_section(section_name: &str) -> String {
-    format!("{section_name}.frame")
-  }
-
-  fn get_collision_section(section_name: &str) -> String {
-    format!("{section_name}.collision")
-  }
-
-  fn get_description_section(section_name: &str) -> String {
-    format!("{section_name}.description")
-  }
-
-  fn get_editor_data_section(section_name: &str) -> String {
-    format!("{section_name}.editor_data")
   }
 }
 
@@ -382,7 +381,7 @@ mod tests {
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{

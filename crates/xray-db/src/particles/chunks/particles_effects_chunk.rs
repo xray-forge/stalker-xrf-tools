@@ -1,6 +1,6 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::particle_effect::ParticleEffect;
-use crate::export::FileImportExport;
+use crate::export::{FileImportExport, LtxImportExport};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;

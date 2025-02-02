@@ -1,8 +1,9 @@
 use crate::constants::META_TYPE_FIELD;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -18,9 +19,11 @@ pub struct ParticleEffectFrame {
 
 impl ParticleEffectFrame {
   pub const META_TYPE: &'static str = "particle_effect_frame";
+}
 
+impl ChunkReadWrite for ParticleEffectFrame {
   /// Read frame data from chunk redder.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_frame: Self = Self {
       texture_size: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
       reserved: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
@@ -35,7 +38,7 @@ impl ParticleEffectFrame {
   }
 
   /// Write frame data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<T>(self.texture_size.0)?;
     writer.write_f32::<T>(self.texture_size.1)?;
     writer.write_f32::<T>(self.reserved.0)?;
@@ -46,18 +49,11 @@ impl ParticleEffectFrame {
 
     Ok(())
   }
+}
 
-  /// Import optional particle effect frame data from provided path.
-  pub fn import_optional(section_name: &str, ltx: &Ltx) -> XRayResult<Option<Self>> {
-    if ltx.has_section(section_name) {
-      Self::import(section_name, ltx).map(Some)
-    } else {
-      Ok(None)
-    }
-  }
-
+impl LtxImportExport for ParticleEffectFrame {
   /// Import particle effect frame data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Particle group '{}' should be defined in ltx file ({})",
@@ -120,16 +116,7 @@ impl ParticleEffectFrame {
   }
 
   /// Export particle effect frame data into provided path.
-  pub fn export_optional(data: Option<&Self>, section_name: &str, ltx: &mut Ltx) -> XRayResult {
-    if let Some(data) = data {
-      data.export(section_name, ltx)
-    } else {
-      Ok(())
-    }
-  }
-
-  /// Export particle effect frame data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -152,11 +139,12 @@ impl ParticleEffectFrame {
 #[cfg(test)]
 mod tests {
   use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
