@@ -82,6 +82,17 @@ impl FromStr for Vector3d<f32> {
 }
 
 #[cfg(test)]
+impl Vector3d {
+  pub fn new_mock() -> Self {
+    Self {
+      x: 1.1150,
+      y: -0.255,
+      z: 1.753,
+    }
+  }
+}
+
+#[cfg(test)]
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use serde_json::json;

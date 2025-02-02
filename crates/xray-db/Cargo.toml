@@ -9,7 +9,7 @@ path = "src/lib.rs"
 
 [dependencies]
 byteorder = "1.5.0"
-derive_more = { version = "1.0.0", features = ["display"] }
+derive_more = { version = "1.0.0", features = ["display", "from_str"] }
 enum-map = "2.7.3"
 lazy_static = "1.5.0"
 log = "0.4.25"

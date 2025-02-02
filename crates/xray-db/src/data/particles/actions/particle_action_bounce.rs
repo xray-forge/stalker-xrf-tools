@@ -1,3 +1,4 @@
+use crate::data::particles::particle_action_type::ParticleActionType;
 use crate::data::particles::particle_domain::ParticleDomain;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
@@ -10,6 +11,8 @@ use xray_ltx::{Ltx, Section};
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionBounce {
+  pub action_flags: u32,
+  pub action_type: ParticleActionType,
   pub position: ParticleDomain,
   pub one_minus_friction: f32,
   pub resilience: f32,
@@ -20,6 +23,8 @@ impl ChunkReadWrite for ParticleActionBounce {
   /// Read particle_action bounce.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
+      action_flags: reader.read_u32::<T>()?,
+      action_type: reader.read_xr::<T, _>()?,
       position: reader.read_xr::<T, _>()?,
       one_minus_friction: reader.read_f32::<T>()?,
       resilience: reader.read_f32::<T>()?,
@@ -28,6 +33,8 @@ impl ChunkReadWrite for ParticleActionBounce {
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.action_flags)?;
+    writer.write_xr::<T, _>(&self.action_type)?;
     writer.write_xr::<T, _>(&self.position)?;
     writer.write_f32::<T>(self.one_minus_friction)?;
     writer.write_f32::<T>(self.resilience)?;
@@ -48,6 +55,8 @@ impl LtxImportExport for ParticleActionBounce {
     })?;
 
     Ok(Self {
+      action_flags: read_ltx_field("action_flags", section)?,
+      action_type: read_ltx_field("action_type", section)?,
       position: read_ltx_field("position", section)?,
       one_minus_friction: read_ltx_field("one_minus_friction", section)?,
       resilience: read_ltx_field("resilience", section)?,
@@ -58,6 +67,8 @@ impl LtxImportExport for ParticleActionBounce {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
+      .set("action_flags", self.action_flags.to_string())
+      .set("action_type", self.action_type.to_string())
       .set("position", self.position.to_string())
       .set("one_minus_friction", self.one_minus_friction.to_string())
       .set("resilience", self.resilience.to_string())
@@ -69,8 +80,8 @@ impl LtxImportExport for ParticleActionBounce {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particles::actions::particle_action_bounce::ParticleActionBounce;
+  use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::data::particles::particle_domain::ParticleDomain;
   use crate::export::LtxImportExport;
   use serde_json::json;
@@ -92,37 +103,9 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticleActionBounce = ParticleActionBounce {
-      position: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: 100.50,
-            y: 200.60,
-            z: 300.70,
-          },
-          Vector3d {
-            x: 10.5,
-            y: 20.6,
-            z: 30.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: 2.5,
-            y: 3.6,
-            z: 4.7,
-          },
-          Vector3d {
-            x: 6.5,
-            y: 7.6,
-            z: 8.7,
-          },
-        ),
-        radius1: 100.0,
-        radius2: 25.0,
-        radius1_sqr: 10.0,
-        radius2_sqr: 5.0,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Bounce,
+      position: ParticleDomain::new_mock(),
       one_minus_friction: 61.2,
       resilience: 1.0,
       cutoff_sqr: 4.35,
@@ -130,18 +113,18 @@ mod tests {
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 80);
+    assert_eq!(writer.bytes_written(), 88);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 80);
+    assert_eq!(bytes_written, 88);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 80 + 8);
+    assert_eq!(file.bytes_remaining(), 88 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
@@ -159,37 +142,9 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionBounce = ParticleActionBounce {
-      position: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: 844.5,
-            y: 7834.6,
-            z: 478.7,
-          },
-          Vector3d {
-            x: 373.5,
-            y: 375.6,
-            z: 475.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: 345.5,
-            y: 367.6,
-            z: 475.7,
-          },
-          Vector3d {
-            x: 347.5,
-            y: 476.6,
-            z: 475.7,
-          },
-        ),
-        radius1: 100.0,
-        radius2: 25.0,
-        radius1_sqr: 10.0,
-        radius2_sqr: 5.0,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Bounce,
+      position: ParticleDomain::new_mock(),
       one_minus_friction: 30.2,
       resilience: 1.0,
       cutoff_sqr: 0.290,
@@ -201,7 +156,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionBounce::import("data", &source)?, original);
 
@@ -211,37 +166,9 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleActionBounce = ParticleActionBounce {
-      position: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: -1.5,
-            y: -2.6,
-            z: -3.7,
-          },
-          Vector3d {
-            x: 10.5,
-            y: 20.6,
-            z: 30.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: -2.5,
-            y: -3.6,
-            z: -4.7,
-          },
-          Vector3d {
-            x: 6.5,
-            y: 7.6,
-            z: 8.7,
-          },
-        ),
-        radius1: 100.0,
-        radius2: 25.0,
-        radius1_sqr: 10.0,
-        radius2_sqr: 5.0,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Bounce,
+      position: ParticleDomain::new_mock(),
       one_minus_friction: 24.30,
       resilience: 1.1,
       cutoff_sqr: 0.453,

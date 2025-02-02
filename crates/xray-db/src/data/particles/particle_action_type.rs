@@ -1,8 +1,12 @@
-use crate::data::particles::particle_action_generic::ParticleActionGeneric;
-use derive_more::Display;
+use crate::data::particles::particle_action::ParticleAction;
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use derive_more::{Display, FromStr};
 use enum_map::Enum;
+use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_error::XRayResult;
 
-#[derive(Copy, Clone, Debug, Enum, PartialEq, Display)]
+#[derive(Copy, Clone, Debug, Enum, PartialEq, Display, FromStr, Serialize, Deserialize)]
 pub enum ParticleActionType {
   #[display("Avoid")]
   Avoid = 0,
@@ -73,38 +77,50 @@ pub enum ParticleActionType {
 }
 
 impl ParticleActionType {
-  pub fn get_action_type(action: &ParticleActionGeneric) -> Self {
+  pub fn get_action_type(action: &ParticleAction) -> Self {
     match action {
-      ParticleActionGeneric::Avoid(_) => Self::Avoid,
-      ParticleActionGeneric::Bounce(_) => Self::Bounce,
-      ParticleActionGeneric::CopyVertex(_) => Self::CopyVertex,
-      ParticleActionGeneric::Damping(_) => Self::Damping,
-      ParticleActionGeneric::Explosion(_) => Self::Explosion,
-      ParticleActionGeneric::Follow(_) => Self::Follow,
-      ParticleActionGeneric::Gravitate(_) => Self::Gravitate,
-      ParticleActionGeneric::Gravity(_) => Self::Gravity,
-      ParticleActionGeneric::Jet(_) => Self::Jet,
-      ParticleActionGeneric::KillOld(_) => Self::KillOld,
-      ParticleActionGeneric::MatchVelocity(_) => Self::MatchVelocity,
-      ParticleActionGeneric::Move(_) => Self::Move,
-      ParticleActionGeneric::OrbitLine(_) => Self::OrbitLine,
-      ParticleActionGeneric::OrbitPoint(_) => Self::OrbitPoint,
-      ParticleActionGeneric::RandomAccel(_) => Self::RandomAccel,
-      ParticleActionGeneric::RandomDisplace(_) => Self::RandomDisplace,
-      ParticleActionGeneric::RandomVelocity(_) => Self::RandomVelocity,
-      ParticleActionGeneric::Restore(_) => Self::Restore,
-      ParticleActionGeneric::Sink(_) => Self::Sink,
-      ParticleActionGeneric::SinkVelocity(_) => Self::SinkVelocity,
-      ParticleActionGeneric::Source(_) => Self::Source,
-      ParticleActionGeneric::SpeedLimit(_) => Self::SpeedLimit,
-      ParticleActionGeneric::TargetColor(_) => Self::TargetColor,
-      ParticleActionGeneric::TargetSize(_) => Self::TargetSize,
-      ParticleActionGeneric::TargetRotate(_) => Self::TargetRotate,
-      ParticleActionGeneric::TargetVelocity(_) => Self::TargetVelocity,
-      ParticleActionGeneric::Vortex(_) => Self::Vortex,
-      ParticleActionGeneric::Turbulence(_) => Self::Turbulence,
-      ParticleActionGeneric::Scatter(_) => Self::Scatter,
+      ParticleAction::Avoid(_) => Self::Avoid,
+      ParticleAction::Bounce(_) => Self::Bounce,
+      ParticleAction::CopyVertex(_) => Self::CopyVertex,
+      ParticleAction::Damping(_) => Self::Damping,
+      ParticleAction::Explosion(_) => Self::Explosion,
+      ParticleAction::Follow(_) => Self::Follow,
+      ParticleAction::Gravitate(_) => Self::Gravitate,
+      ParticleAction::Gravity(_) => Self::Gravity,
+      ParticleAction::Jet(_) => Self::Jet,
+      ParticleAction::KillOld(_) => Self::KillOld,
+      ParticleAction::MatchVelocity(_) => Self::MatchVelocity,
+      ParticleAction::Move(_) => Self::Move,
+      ParticleAction::OrbitLine(_) => Self::OrbitLine,
+      ParticleAction::OrbitPoint(_) => Self::OrbitPoint,
+      ParticleAction::RandomAccel(_) => Self::RandomAccel,
+      ParticleAction::RandomDisplace(_) => Self::RandomDisplace,
+      ParticleAction::RandomVelocity(_) => Self::RandomVelocity,
+      ParticleAction::Restore(_) => Self::Restore,
+      ParticleAction::Sink(_) => Self::Sink,
+      ParticleAction::SinkVelocity(_) => Self::SinkVelocity,
+      ParticleAction::Source(_) => Self::Source,
+      ParticleAction::SpeedLimit(_) => Self::SpeedLimit,
+      ParticleAction::TargetColor(_) => Self::TargetColor,
+      ParticleAction::TargetSize(_) => Self::TargetSize,
+      ParticleAction::TargetRotate(_) => Self::TargetRotate,
+      ParticleAction::TargetVelocity(_) => Self::TargetVelocity,
+      ParticleAction::Vortex(_) => Self::Vortex,
+      ParticleAction::Turbulence(_) => Self::Turbulence,
+      ParticleAction::Scatter(_) => Self::Scatter,
     }
+  }
+}
+
+impl ChunkReadWrite for ParticleActionType {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+    Ok(Self::from(reader.read_u32::<T>()?))
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(*self as u32)?;
+
+    Ok(())
   }
 }
 

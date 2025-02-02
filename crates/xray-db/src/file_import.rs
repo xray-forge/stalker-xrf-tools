@@ -4,24 +4,21 @@ use xray_ltx::Section;
 
 /// Read value from ltx section and parse it as provided T type.
 pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> XRayResult<T> {
-  Ok(
-    match section
-      .get(field_name)
-      .ok_or_else(|| {
-        XRayError::new_parsing_error(format!("Field '{field_name}' was not found in ltx file"))
-      })?
-      .parse::<T>()
-    {
-      Ok(value) => value,
-      _ => {
-        return Err(XRayError::new_parsing_error(format!(
-          "Failed to parse ltx field '{}' value, valid {} is expected",
-          field_name,
-          std::any::type_name::<T>()
-        )))
-      }
-    },
-  )
+  let value: &str = section.get(field_name).ok_or_else(|| {
+    XRayError::new_parsing_error(format!("Field '{field_name}' was not found in ltx file"))
+  })?;
+
+  Ok(match value.parse::<T>() {
+    Ok(value) => value,
+    _ => {
+      return Err(XRayError::new_parsing_error(format!(
+        "Failed to parse ltx field '{}' value '{}', valid {} is expected",
+        field_name,
+        value,
+        std::any::type_name::<T>(),
+      )))
+    }
+  })
 }
 
 /// Read optional value from ltx section and parse it as provided T type.

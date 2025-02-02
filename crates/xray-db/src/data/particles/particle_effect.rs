@@ -1,6 +1,6 @@
 use crate::constants::META_TYPE_FIELD;
 use crate::data::generic::vector_3d::Vector3d;
-use crate::data::particles::actions::particle_action::ParticleAction;
+use crate::data::particles::particle_action::ParticleAction;
 use crate::data::particles::particle_effect_collision::ParticleEffectCollision;
 use crate::data::particles::particle_effect_description::ParticleDescription;
 use crate::data::particles::particle_effect_editor_data::ParticleEffectEditorData;
@@ -370,10 +370,9 @@ impl LtxImportExport for ParticleEffect {
 #[cfg(test)]
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::particles::actions::particle_action::ParticleAction;
   use crate::data::particles::actions::particle_action_copy_vertex::ParticleActionCopyVertex;
   use crate::data::particles::actions::particle_action_damping::ParticleActionDamping;
-  use crate::data::particles::particle_action_generic::ParticleActionGeneric;
+  use crate::data::particles::particle_action::ParticleAction;
   use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::data::particles::particle_effect::ParticleEffect;
   use crate::data::particles::particle_effect_collision::ParticleEffectCollision;
@@ -403,26 +402,18 @@ mod tests {
       name: String::from("test-particle-effect"),
       max_particles: 5,
       actions: vec![
-        ParticleAction {
+        ParticleAction::Damping(Box::new(ParticleActionDamping {
           action_flags: 31,
-          action_type: ParticleActionType::Damping as u32,
-          data: ParticleActionGeneric::Damping(Box::new(ParticleActionDamping {
-            damping: Vector3d {
-              x: 1.5,
-              y: 2.5,
-              z: 3.5,
-            },
-            v_low_sqr: 1.1,
-            v_high_sqr: 1.25,
-          })),
-        },
-        ParticleAction {
+          action_type: ParticleActionType::Damping,
+          damping: Vector3d::new_mock(),
+          v_low_sqr: 1.1,
+          v_high_sqr: 1.25,
+        })),
+        ParticleAction::CopyVertex(Box::new(ParticleActionCopyVertex {
           action_flags: 453,
-          action_type: ParticleActionType::CopyVertex as u32,
-          data: ParticleActionGeneric::CopyVertex(Box::new(ParticleActionCopyVertex {
-            copy_position: 1,
-          })),
-        },
+          action_type: ParticleActionType::CopyVertex,
+          copy_position: 1,
+        })),
       ],
       flags: 140,
       frame: Some(ParticleEffectFrame {
@@ -442,22 +433,14 @@ mod tests {
         collide_resilience: 45.2535,
         collide_sqr_cutoff: 25.6313,
       }),
-      velocity_scale: Some(Vector3d {
-        x: 45.5,
-        y: 46.6,
-        z: 47.7,
-      }),
+      velocity_scale: Some(Vector3d::new_mock()),
       description: Some(ParticleDescription {
         creator: String::from("test-creator-name"),
         editor: String::from("test-editor-name"),
         created_time: 425,
         edit_time: 450,
       }),
-      rotation: Some(Vector3d {
-        x: 1.0,
-        y: 4.0,
-        z: 6.0,
-      }),
+      rotation: Some(Vector3d::new_mock()),
       editor_data: Some(ParticleEffectEditorData {
         value: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       }),
@@ -513,26 +496,18 @@ mod tests {
       name: String::from("test-particle-effect"),
       max_particles: 5,
       actions: vec![
-        ParticleAction {
+        ParticleAction::Damping(Box::new(ParticleActionDamping {
           action_flags: 31,
-          action_type: ParticleActionType::Damping as u32,
-          data: ParticleActionGeneric::Damping(Box::new(ParticleActionDamping {
-            damping: Vector3d {
-              x: 2.5,
-              y: 3.5,
-              z: 4.5,
-            },
-            v_low_sqr: 5.2,
-            v_high_sqr: 6.5,
-          })),
-        },
-        ParticleAction {
-          action_flags: 461,
-          action_type: ParticleActionType::CopyVertex as u32,
-          data: ParticleActionGeneric::CopyVertex(Box::new(ParticleActionCopyVertex {
-            copy_position: 0,
-          })),
-        },
+          action_type: ParticleActionType::CopyVertex,
+          damping: Vector3d::new_mock(),
+          v_low_sqr: 5.2,
+          v_high_sqr: 6.5,
+        })),
+        ParticleAction::CopyVertex(Box::new(ParticleActionCopyVertex {
+          action_flags: 453,
+          action_type: ParticleActionType::CopyVertex,
+          copy_position: 0,
+        })),
       ],
       flags: 150,
       frame: Some(ParticleEffectFrame {
@@ -552,22 +527,14 @@ mod tests {
         collide_resilience: 455.2535,
         collide_sqr_cutoff: 255.6313,
       }),
-      velocity_scale: Some(Vector3d {
-        x: 455.5,
-        y: 465.6,
-        z: 475.7,
-      }),
+      velocity_scale: Some(Vector3d::new_mock()),
       description: Some(ParticleDescription {
         creator: String::from("test-creator-name"),
         editor: String::from("test-editor-name"),
         created_time: 433,
         edit_time: 444,
       }),
-      rotation: Some(Vector3d {
-        x: 4.5,
-        y: 6.5,
-        z: 8.5,
-      }),
+      rotation: Some(Vector3d::new_mock()),
       editor_data: Some(ParticleEffectEditorData {
         value: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
       }),

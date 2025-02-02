@@ -1,4 +1,5 @@
 use crate::data::generic::vector_3d::Vector3d;
+use crate::data::particles::particle_action_type::ParticleActionType;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -10,6 +11,8 @@ use xray_ltx::{Ltx, Section};
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionExplosion {
+  pub action_flags: u32,
+  pub action_type: ParticleActionType,
   pub center: Vector3d,
   pub velocity: f32,
   pub magnitude: f32,
@@ -21,6 +24,8 @@ pub struct ParticleActionExplosion {
 impl ChunkReadWrite for ParticleActionExplosion {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
+      action_flags: reader.read_u32::<T>()?,
+      action_type: reader.read_xr::<T, _>()?,
       center: reader.read_xr::<T, _>()?,
       velocity: reader.read_f32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
@@ -31,6 +36,8 @@ impl ChunkReadWrite for ParticleActionExplosion {
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.action_flags)?;
+    writer.write_xr::<T, _>(&self.action_type)?;
     writer.write_xr::<T, _>(&self.center)?;
     writer.write_f32::<T>(self.velocity)?;
     writer.write_f32::<T>(self.magnitude)?;
@@ -53,6 +60,8 @@ impl LtxImportExport for ParticleActionExplosion {
     })?;
 
     Ok(Self {
+      action_flags: read_ltx_field("action_flags", section)?,
+      action_type: read_ltx_field("action_type", section)?,
       center: read_ltx_field("center", section)?,
       velocity: read_ltx_field("velocity", section)?,
       magnitude: read_ltx_field("magnitude", section)?,
@@ -65,6 +74,8 @@ impl LtxImportExport for ParticleActionExplosion {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
+      .set("action_flags", self.action_flags.to_string())
+      .set("action_type", self.action_type.to_string())
       .set("center", self.center.to_string())
       .set("velocity", self.velocity.to_string())
       .set("magnitude", self.magnitude.to_string())
@@ -80,6 +91,7 @@ impl LtxImportExport for ParticleActionExplosion {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particles::actions::particle_action_explosion::ParticleActionExplosion;
+  use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
@@ -100,11 +112,9 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticleActionExplosion = ParticleActionExplosion {
-      center: Vector3d {
-        x: 1.5,
-        y: 2.5,
-        z: 3.5,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Explosion,
+      center: Vector3d::new_mock(),
       velocity: 36.3,
       magnitude: 20.0,
       st_dev: 0.2,
@@ -114,18 +124,18 @@ mod tests {
 
     ParticleActionExplosion::write::<XRayByteOrder>(&original, &mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 32);
+    assert_eq!(writer.bytes_written(), 40);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 32);
+    assert_eq!(bytes_written, 40);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 32 + 8);
+    assert_eq!(file.bytes_remaining(), 40 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
@@ -143,11 +153,9 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionExplosion = ParticleActionExplosion {
-      center: Vector3d {
-        x: 10.5,
-        y: 20.5,
-        z: 30.5,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Explosion,
+      center: Vector3d::new_mock(),
       velocity: 30.5,
       magnitude: 1.0,
       st_dev: 0.14,
@@ -161,7 +169,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionExplosion::import("data", &source)?, original);
 
@@ -171,11 +179,9 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleActionExplosion = ParticleActionExplosion {
-      center: Vector3d {
-        x: 5.51,
-        y: 6.52,
-        z: 7.53,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Explosion,
+      center: Vector3d::new_mock(),
       velocity: 36.422,
       magnitude: 1.2,
       st_dev: 0.12,

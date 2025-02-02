@@ -1,3 +1,4 @@
+use crate::data::particles::particle_action_type::ParticleActionType;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
@@ -9,6 +10,8 @@ use xray_ltx::{Ltx, Section};
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionGravitate {
+  pub action_flags: u32,
+  pub action_type: ParticleActionType,
   pub magnitude: f32,
   pub epsilon: f32,
   pub max_radius: f32,
@@ -17,6 +20,8 @@ pub struct ParticleActionGravitate {
 impl ChunkReadWrite for ParticleActionGravitate {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
+      action_flags: reader.read_u32::<T>()?,
+      action_type: reader.read_xr::<T, _>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
       max_radius: reader.read_f32::<T>()?,
@@ -24,6 +29,8 @@ impl ChunkReadWrite for ParticleActionGravitate {
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.action_flags)?;
+    writer.write_xr::<T, _>(&self.action_type)?;
     writer.write_f32::<T>(self.magnitude)?;
     writer.write_f32::<T>(self.epsilon)?;
     writer.write_f32::<T>(self.max_radius)?;
@@ -43,6 +50,8 @@ impl LtxImportExport for ParticleActionGravitate {
     })?;
 
     Ok(Self {
+      action_flags: read_ltx_field("action_flags", section)?,
+      action_type: read_ltx_field("action_type", section)?,
       magnitude: read_ltx_field("magnitude", section)?,
       epsilon: read_ltx_field("epsilon", section)?,
       max_radius: read_ltx_field("max_radius", section)?,
@@ -52,6 +61,8 @@ impl LtxImportExport for ParticleActionGravitate {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
+      .set("action_flags", self.action_flags.to_string())
+      .set("action_type", self.action_type.to_string())
       .set("magnitude", self.magnitude.to_string())
       .set("epsilon", self.epsilon.to_string())
       .set("max_radius", self.max_radius.to_string());
@@ -63,6 +74,7 @@ impl LtxImportExport for ParticleActionGravitate {
 #[cfg(test)]
 mod tests {
   use crate::data::particles::actions::particle_action_gravitate::ParticleActionGravitate;
+  use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
@@ -83,6 +95,8 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticleActionGravitate = ParticleActionGravitate {
+      action_flags: 1,
+      action_type: ParticleActionType::Gravitate,
       magnitude: 2400.45,
       epsilon: 0.0001,
       max_radius: 40.05,
@@ -90,18 +104,18 @@ mod tests {
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 12);
+    assert_eq!(writer.bytes_written(), 20);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 12);
+    assert_eq!(bytes_written, 20);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 12 + 8);
+    assert_eq!(file.bytes_remaining(), 20 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
@@ -119,6 +133,8 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionGravitate = ParticleActionGravitate {
+      action_flags: 1,
+      action_type: ParticleActionType::Gravitate,
       magnitude: 2400.453,
       epsilon: 0.00001,
       max_radius: 230.05,
@@ -140,6 +156,8 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleActionGravitate = ParticleActionGravitate {
+      action_flags: 1,
+      action_type: ParticleActionType::Gravitate,
       magnitude: 2100.453,
       epsilon: 0.000001,
       max_radius: 680.4,

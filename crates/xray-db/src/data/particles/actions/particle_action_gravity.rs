@@ -1,7 +1,8 @@
 use crate::data::generic::vector_3d::Vector3d;
+use crate::data::particles::particle_action_type::ParticleActionType;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
-use byteorder::ByteOrder;
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
@@ -10,17 +11,23 @@ use xray_ltx::{Ltx, Section};
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionGravity {
+  pub action_flags: u32,
+  pub action_type: ParticleActionType,
   pub direction: Vector3d,
 }
 
 impl ChunkReadWrite for ParticleActionGravity {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
+      action_flags: reader.read_u32::<T>()?,
+      action_type: reader.read_xr::<T, _>()?,
       direction: reader.read_xr::<T, _>()?,
     })
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.action_flags)?;
+    writer.write_xr::<T, _>(&self.action_type)?;
     writer.write_xr::<T, _>(&self.direction)?;
 
     Ok(())
@@ -38,6 +45,8 @@ impl LtxImportExport for ParticleActionGravity {
     })?;
 
     Ok(Self {
+      action_flags: read_ltx_field("action_flags", section)?,
+      action_type: read_ltx_field("action_type", section)?,
       direction: read_ltx_field("direction", section)?,
     })
   }
@@ -45,6 +54,8 @@ impl LtxImportExport for ParticleActionGravity {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
+      .set("action_flags", self.action_flags.to_string())
+      .set("action_type", self.action_type.to_string())
       .set("direction", self.direction.to_string());
 
     Ok(())
@@ -55,6 +66,7 @@ impl LtxImportExport for ParticleActionGravity {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particles::actions::particle_action_gravity::ParticleActionGravity;
+  use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
@@ -75,27 +87,25 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticleActionGravity = ParticleActionGravity {
-      direction: Vector3d {
-        x: 450.25,
-        y: 465.38,
-        z: 456.87,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Gravity,
+      direction: Vector3d::new_mock(),
     };
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 12);
+    assert_eq!(writer.bytes_written(), 20);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 12);
+    assert_eq!(bytes_written, 20);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 12 + 8);
+    assert_eq!(file.bytes_remaining(), 20 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
@@ -113,11 +123,9 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionGravity = ParticleActionGravity {
-      direction: Vector3d {
-        x: 4500.25,
-        y: 4650.38,
-        z: 4560.87,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Gravity,
+      direction: Vector3d::new_mock(),
     };
 
     original.export("data", &mut ltx)?;
@@ -136,11 +144,9 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleActionGravity = ParticleActionGravity {
-      direction: Vector3d {
-        x: 45.25,
-        y: 46.38,
-        z: 46.87,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Gravity,
+      direction: Vector3d::new_mock(),
     };
 
     let mut file: File = overwrite_test_relative_resource_as_file(

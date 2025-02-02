@@ -1,5 +1,5 @@
 pub(crate) mod actions;
-pub(crate) mod particle_action_generic;
+pub(crate) mod particle_action;
 pub(crate) mod particle_action_type;
 pub(crate) mod particle_domain;
 pub(crate) mod particle_effect;

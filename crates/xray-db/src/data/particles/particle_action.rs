@@ -1,3 +1,4 @@
+use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::actions::particle_action_avoid::ParticleActionAvoid;
 use crate::data::particles::actions::particle_action_bounce::ParticleActionBounce;
 use crate::data::particles::actions::particle_action_copy_vertex::ParticleActionCopyVertex;
@@ -33,13 +34,14 @@ use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
-pub enum ParticleActionGeneric {
+pub enum ParticleAction {
   Avoid(Box<ParticleActionAvoid>),
   Bounce(Box<ParticleActionBounce>),
   CopyVertex(Box<ParticleActionCopyVertex>),
@@ -71,7 +73,46 @@ pub enum ParticleActionGeneric {
   Scatter(Box<ParticleActionScatter>),
 }
 
-impl ChunkReadWrite for ParticleActionGeneric {
+impl ParticleAction {
+  pub const META_TYPE: &'static str = "particle_action";
+}
+
+impl ChunkReadWriteList for ParticleAction {
+  /// Read list of particle action data from chunk reader.
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+    let count: u32 = reader.read_u32::<T>()?;
+
+    let mut actions: Vec<Self> = Vec::with_capacity(count as usize);
+
+    for _ in 0..count {
+      actions.push(reader.read_xr::<T, _>().map_err(|error| {
+        XRayError::new_parsing_error(format!("Failed to read particle effect action: {}", error))
+      })?);
+    }
+
+    assert_equal(
+      actions.len(),
+      count as usize,
+      "Should read same count of action as declared in chunk",
+    )?;
+    assert_chunk_read(reader, "Expect particle actions list chunk to be ended")?;
+
+    Ok(actions)
+  }
+
+  /// Write particle action data into chunk writer.
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, actions: &[Self]) -> XRayResult {
+    writer.write_u32::<T>(actions.len() as u32)?;
+
+    for action in actions {
+      writer.write_xr::<T, _>(action)?;
+    }
+
+    Ok(())
+  }
+}
+
+impl ChunkReadWrite for ParticleAction {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let action_type_raw: u32 = reader.read_u32::<T>()?;
     let action_type: ParticleActionType = ParticleActionType::from(action_type_raw);
@@ -127,40 +168,40 @@ impl ChunkReadWrite for ParticleActionGeneric {
     writer.write_u32::<T>(ParticleActionType::get_action_type(self) as u32)?;
 
     match self {
-      ParticleActionGeneric::Avoid(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Bounce(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::CopyVertex(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Damping(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Explosion(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Follow(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Gravitate(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Gravity(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Jet(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::KillOld(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::MatchVelocity(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Move(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::OrbitLine(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::OrbitPoint(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::RandomAccel(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::RandomDisplace(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::RandomVelocity(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Restore(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Sink(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::SinkVelocity(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Source(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::SpeedLimit(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::TargetColor(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::TargetSize(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::TargetRotate(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::TargetVelocity(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Vortex(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Turbulence(action) => writer.write_xr::<T, _>(action.deref()),
-      ParticleActionGeneric::Scatter(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Avoid(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Bounce(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::CopyVertex(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Damping(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Explosion(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Follow(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Gravitate(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Gravity(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Jet(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::KillOld(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::MatchVelocity(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Move(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::OrbitLine(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::OrbitPoint(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::RandomAccel(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::RandomDisplace(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::RandomVelocity(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Restore(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Sink(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::SinkVelocity(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Source(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::SpeedLimit(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::TargetColor(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::TargetSize(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::TargetRotate(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::TargetVelocity(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Vortex(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Turbulence(action) => writer.write_xr::<T, _>(action.deref()),
+      ParticleAction::Scatter(action) => writer.write_xr::<T, _>(action.deref()),
     }
   }
 }
 
-impl LtxImportExport for ParticleActionGeneric {
+impl LtxImportExport for ParticleAction {
   fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
@@ -169,6 +210,15 @@ impl LtxImportExport for ParticleActionGeneric {
         file!()
       ))
     })?;
+
+    let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
+
+    assert_equal(
+      meta_type.as_str(),
+      Self::META_TYPE,
+      "Expected corrected meta type field for particle action import",
+    )?;
+
     let action_type_raw: u32 = read_ltx_field("action_type", section)?;
     let action_type: ParticleActionType = ParticleActionType::from(action_type_raw);
 
@@ -274,36 +324,40 @@ impl LtxImportExport for ParticleActionGeneric {
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+    ltx
+      .with_section(section_name)
+      .set(META_TYPE_FIELD, Self::META_TYPE);
+
     match self {
-      ParticleActionGeneric::Avoid(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Bounce(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::CopyVertex(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Damping(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Explosion(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Follow(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Gravitate(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Gravity(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Jet(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::KillOld(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::MatchVelocity(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Move(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::OrbitLine(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::OrbitPoint(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::RandomAccel(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::RandomDisplace(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::RandomVelocity(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Restore(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Sink(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::SinkVelocity(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Source(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::SpeedLimit(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::TargetColor(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::TargetSize(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::TargetRotate(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::TargetVelocity(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Vortex(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Turbulence(action) => action.export(section_name, ltx),
-      ParticleActionGeneric::Scatter(action) => action.export(section_name, ltx),
+      ParticleAction::Avoid(action) => action.export(section_name, ltx),
+      ParticleAction::Bounce(action) => action.export(section_name, ltx),
+      ParticleAction::CopyVertex(action) => action.export(section_name, ltx),
+      ParticleAction::Damping(action) => action.export(section_name, ltx),
+      ParticleAction::Explosion(action) => action.export(section_name, ltx),
+      ParticleAction::Follow(action) => action.export(section_name, ltx),
+      ParticleAction::Gravitate(action) => action.export(section_name, ltx),
+      ParticleAction::Gravity(action) => action.export(section_name, ltx),
+      ParticleAction::Jet(action) => action.export(section_name, ltx),
+      ParticleAction::KillOld(action) => action.export(section_name, ltx),
+      ParticleAction::MatchVelocity(action) => action.export(section_name, ltx),
+      ParticleAction::Move(action) => action.export(section_name, ltx),
+      ParticleAction::OrbitLine(action) => action.export(section_name, ltx),
+      ParticleAction::OrbitPoint(action) => action.export(section_name, ltx),
+      ParticleAction::RandomAccel(action) => action.export(section_name, ltx),
+      ParticleAction::RandomDisplace(action) => action.export(section_name, ltx),
+      ParticleAction::RandomVelocity(action) => action.export(section_name, ltx),
+      ParticleAction::Restore(action) => action.export(section_name, ltx),
+      ParticleAction::Sink(action) => action.export(section_name, ltx),
+      ParticleAction::SinkVelocity(action) => action.export(section_name, ltx),
+      ParticleAction::Source(action) => action.export(section_name, ltx),
+      ParticleAction::SpeedLimit(action) => action.export(section_name, ltx),
+      ParticleAction::TargetColor(action) => action.export(section_name, ltx),
+      ParticleAction::TargetSize(action) => action.export(section_name, ltx),
+      ParticleAction::TargetRotate(action) => action.export(section_name, ltx),
+      ParticleAction::TargetVelocity(action) => action.export(section_name, ltx),
+      ParticleAction::Vortex(action) => action.export(section_name, ltx),
+      ParticleAction::Turbulence(action) => action.export(section_name, ltx),
+      ParticleAction::Scatter(action) => action.export(section_name, ltx),
     }
   }
 }

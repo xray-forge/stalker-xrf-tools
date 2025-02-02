@@ -1,3 +1,4 @@
+use crate::data::particles::particle_action_type::ParticleActionType;
 use crate::data::particles::particle_domain::ParticleDomain;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
@@ -10,6 +11,8 @@ use xray_ltx::{Ltx, Section};
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleActionAvoid {
+  pub action_flags: u32,
+  pub action_type: ParticleActionType,
   pub position: ParticleDomain,
   pub look_ahead: f32,
   pub magnitude: f32,
@@ -19,6 +22,8 @@ pub struct ParticleActionAvoid {
 impl ChunkReadWrite for ParticleActionAvoid {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
+      action_flags: reader.read_u32::<T>()?,
+      action_type: reader.read_xr::<T, _>()?,
       position: reader.read_xr::<T, _>()?,
       look_ahead: reader.read_f32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
@@ -27,6 +32,8 @@ impl ChunkReadWrite for ParticleActionAvoid {
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.action_flags)?;
+    writer.write_xr::<T, _>(&self.action_type)?;
     writer.write_xr::<T, _>(&self.position)?;
     writer.write_f32::<T>(self.look_ahead)?;
     writer.write_f32::<T>(self.magnitude)?;
@@ -47,6 +54,8 @@ impl LtxImportExport for ParticleActionAvoid {
     })?;
 
     Ok(Self {
+      action_flags: read_ltx_field("action_flags", section)?,
+      action_type: read_ltx_field("action_type", section)?,
       position: read_ltx_field("position", section)?,
       look_ahead: read_ltx_field("look_ahead", section)?,
       magnitude: read_ltx_field("magnitude", section)?,
@@ -57,6 +66,8 @@ impl LtxImportExport for ParticleActionAvoid {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
+      .set("action_flags", self.action_flags.to_string())
+      .set("action_type", self.action_type.to_string())
       .set("position", self.position.to_string())
       .set("look_ahead", self.look_ahead.to_string())
       .set("magnitude", self.magnitude.to_string())
@@ -68,8 +79,8 @@ impl LtxImportExport for ParticleActionAvoid {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particles::actions::particle_action_avoid::ParticleActionAvoid;
+  use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::data::particles::particle_domain::ParticleDomain;
   use crate::export::LtxImportExport;
   use serde_json::json;
@@ -91,37 +102,9 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticleActionAvoid = ParticleActionAvoid {
-      position: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: 100.50,
-            y: 200.60,
-            z: 300.70,
-          },
-          Vector3d {
-            x: 10.5,
-            y: 20.6,
-            z: 30.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: 2.5,
-            y: 3.6,
-            z: 4.7,
-          },
-          Vector3d {
-            x: 6.5,
-            y: 7.6,
-            z: 8.7,
-          },
-        ),
-        radius1: 100.0,
-        radius2: 25.0,
-        radius1_sqr: 10.0,
-        radius2_sqr: 5.0,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Avoid,
+      position: ParticleDomain::new_mock(),
       look_ahead: 65.25,
       magnitude: 40.35,
       epsilon: 0.001,
@@ -129,18 +112,18 @@ mod tests {
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 80);
+    assert_eq!(writer.bytes_written(), 88);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 80);
+    assert_eq!(bytes_written, 88);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 80 + 8);
+    assert_eq!(file.bytes_remaining(), 88 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
@@ -158,37 +141,9 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     let original: ParticleActionAvoid = ParticleActionAvoid {
-      position: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: 35.5,
-            y: 32.6,
-            z: 33.7,
-          },
-          Vector3d {
-            x: 105.5,
-            y: 260.6,
-            z: 305.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: 252.5,
-            y: 345.6,
-            z: 400.7,
-          },
-          Vector3d {
-            x: 600.5,
-            y: 700.6,
-            z: 800.7,
-          },
-        ),
-        radius1: 100.0,
-        radius2: 25.0,
-        radius1_sqr: 10.0,
-        radius2_sqr: 5.0,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Avoid,
+      position: ParticleDomain::new_mock(),
       look_ahead: 65.25,
       magnitude: 40.35,
       epsilon: 0.001,
@@ -200,7 +155,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionAvoid::import("data", &source)?, original);
 
@@ -210,37 +165,9 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleActionAvoid = ParticleActionAvoid {
-      position: ParticleDomain {
-        domain_type: 0,
-        coordinates: (
-          Vector3d {
-            x: 1.5,
-            y: 2.6,
-            z: 3.7,
-          },
-          Vector3d {
-            x: 10.5,
-            y: 20.6,
-            z: 30.7,
-          },
-        ),
-        basis: (
-          Vector3d {
-            x: 2.5,
-            y: 3.6,
-            z: 4.7,
-          },
-          Vector3d {
-            x: 6.5,
-            y: 7.6,
-            z: 8.7,
-          },
-        ),
-        radius1: 100.0,
-        radius2: 25.0,
-        radius1_sqr: 10.0,
-        radius2_sqr: 5.0,
-      },
+      action_flags: 1,
+      action_type: ParticleActionType::Avoid,
+      position: ParticleDomain::new_mock(),
       look_ahead: 65.25,
       magnitude: 40.35,
       epsilon: 0.001,

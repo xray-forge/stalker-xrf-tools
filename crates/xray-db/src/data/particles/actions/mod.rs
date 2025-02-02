@@ -1,4 +1,3 @@
-pub(crate) mod particle_action;
 pub(crate) mod particle_action_avoid;
 pub(crate) mod particle_action_bounce;
 pub(crate) mod particle_action_copy_vertex;

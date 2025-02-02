@@ -188,8 +188,44 @@ impl FromStr for ParticleDomain {
 }
 
 #[cfg(test)]
+impl ParticleDomain {
+  pub fn new_mock() -> Self {
+    Self {
+      domain_type: 1,
+      coordinates: (
+        Vector3d {
+          x: 1.5,
+          y: 1.25,
+          z: 1.75,
+        },
+        Vector3d {
+          x: 2.5,
+          y: 2.1,
+          z: 2.8,
+        },
+      ),
+      basis: (
+        Vector3d {
+          x: 0.5,
+          y: -1.3,
+          z: 0.4,
+        },
+        Vector3d {
+          x: 2.3,
+          y: 0.3,
+          z: 3.3,
+        },
+      ),
+      radius1: 100.0,
+      radius2: 400.0,
+      radius1_sqr: 10.0,
+      radius2_sqr: 20.0,
+    }
+  }
+}
+
+#[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particles::particle_domain::ParticleDomain;
   use serde_json::json;
   use std::fs::File;
@@ -209,37 +245,7 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let original: ParticleDomain = ParticleDomain {
-      domain_type: 6,
-      coordinates: (
-        Vector3d {
-          x: 10.36,
-          y: 20.85,
-          z: 30.56,
-        },
-        Vector3d {
-          x: -12.5,
-          y: -23.6,
-          z: -34.7,
-        },
-      ),
-      basis: (
-        Vector3d {
-          x: 20.58,
-          y: 30.66,
-          z: 40.75,
-        },
-        Vector3d {
-          x: -6.53,
-          y: -7.63,
-          z: -8.75,
-        },
-      ),
-      radius1: 11.0,
-      radius2: 21.5,
-      radius1_sqr: 1.0,
-      radius2_sqr: 2.0,
-    };
+    let original: ParticleDomain = ParticleDomain::new_mock();
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
@@ -274,77 +280,25 @@ mod tests {
 
   #[test]
   fn test_from_to_str() -> XRayResult {
-    let original: ParticleDomain = ParticleDomain {
-      domain_type: 23,
-      coordinates: (
-        Vector3d {
-          x: 120.36,
-          y: 220.85,
-          z: 320.56,
-        },
-        Vector3d {
-          x: -132.5,
-          y: -233.6,
-          z: -334.7,
-        },
-      ),
-      basis: (
-        Vector3d {
-          x: 240.58,
-          y: 340.66,
-          z: 440.75,
-        },
-        Vector3d {
-          x: -65.53,
-          y: -75.63,
-          z: -85.75,
-        },
-      ),
-      radius1: 25.0,
-      radius2: 46.5,
-      radius1_sqr: 2.0,
-      radius2_sqr: 4.0,
-    };
+    let original: ParticleDomain = ParticleDomain::new_mock();
 
-    assert_eq!(original.to_string(), "23,120.36,220.85,320.56,-132.5,-233.6,-334.7,240.58,340.66,440.75,-65.53,-75.63,-85.75,25,46.5,2,4");
-    assert_eq!(ParticleDomain::from_str("23,120.36,220.85,320.56,-132.5,-233.6,-334.7,240.58,340.66,440.75,-65.53,-75.63,-85.75,25,46.5,2,4")?, original);
+    assert_eq!(
+      original.to_string(),
+      "1,1.5,1.25,1.75,2.5,2.1,2.8,0.5,-1.3,0.4,2.3,0.3,3.3,100,400,10,20"
+    );
+    assert_eq!(
+      ParticleDomain::from_str(
+        "1,1.5,1.25,1.75,2.5,2.1,2.8,0.5,-1.3,0.4,2.3,0.3,3.3,100,400,10,20"
+      )?,
+      original
+    );
 
     Ok(())
   }
 
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
-    let original: ParticleDomain = ParticleDomain {
-      domain_type: 52,
-      coordinates: (
-        Vector3d {
-          x: 410.36,
-          y: 420.85,
-          z: 430.56,
-        },
-        Vector3d {
-          x: -512.5,
-          y: -523.6,
-          z: -534.7,
-        },
-      ),
-      basis: (
-        Vector3d {
-          x: 420.58,
-          y: 430.66,
-          z: 440.75,
-        },
-        Vector3d {
-          x: -56.53,
-          y: -57.63,
-          z: -58.75,
-        },
-      ),
-      radius1: 546.0,
-      radius2: 632.5,
-      radius1_sqr: 21.0,
-      radius2_sqr: 25.0,
-    };
+    let original: ParticleDomain = ParticleDomain::new_mock();
 
     let mut file: File = overwrite_test_relative_resource_as_file(
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
