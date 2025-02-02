@@ -22,7 +22,7 @@ pub struct ParticleActionJet {
 impl ParticleActionReader for ParticleActionJet {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionJet> {
     Ok(ParticleActionJet {
-      center: Vector3d::read::<T>(reader)?,
+      center: reader.read_xr::<T, _>()?,
       acc: ParticleDomain::read::<T>(reader)?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
@@ -52,7 +52,8 @@ impl ParticleActionReader for ParticleActionJet {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionJet {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.center.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.center)?;
+
     self.acc.write::<XRayByteOrder>(writer)?;
 
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;

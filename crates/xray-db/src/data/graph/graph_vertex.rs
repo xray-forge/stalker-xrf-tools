@@ -26,11 +26,11 @@ impl GraphVertex {
   /// Read graph vertex data from the chunk.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      level_point: Vector3d::read::<T>(reader)?,
-      game_point: Vector3d::read::<T>(reader)?,
+      level_point: reader.read_xr::<T, _>()?,
+      game_point: reader.read_xr::<T, _>()?,
       level_id: reader.read_u8()?,
       level_vertex_id: reader.read_u24::<T>()?,
-      vertex_type: U32Bytes::read::<T>(reader)?,
+      vertex_type: reader.read_xr::<T, U32Bytes>()?,
       edges_offset: reader.read_u32::<T>()?,
       level_points_offset: reader.read_u32::<T>()?,
       edges_count: reader.read_u8()?,
@@ -40,12 +40,11 @@ impl GraphVertex {
 
   /// Write graph vertex data into chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.level_point.write::<T>(writer)?;
-    self.game_point.write::<T>(writer)?;
-
+    writer.write_xr::<T, Vector3d>(&self.level_point)?;
+    writer.write_xr::<T, Vector3d>(&self.game_point)?;
     writer.write_u8(self.level_id)?;
     writer.write_u24::<T>(self.level_vertex_id)?;
-    self.vertex_type.write::<T>(writer)?;
+    writer.write_xr::<T, U32Bytes>(&self.vertex_type)?;
     writer.write_u32::<T>(self.edges_offset)?;
     writer.write_u32::<T>(self.level_points_offset)?;
     writer.write_u8(self.edges_count)?;

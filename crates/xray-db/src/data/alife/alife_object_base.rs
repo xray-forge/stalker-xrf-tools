@@ -66,8 +66,8 @@ impl AlifeObjectBase {
     let name: String = spawn_reader.read_null_terminated_win_string()?;
     let script_game_id: u8 = spawn_reader.read_u8()?;
     let script_rp: u8 = spawn_reader.read_u8()?;
-    let position: Vector3d = Vector3d::read::<T>(&mut spawn_reader)?;
-    let direction: Vector3d = Vector3d::read::<T>(&mut spawn_reader)?;
+    let position: Vector3d = spawn_reader.read_xr::<T, _>()?;
+    let direction: Vector3d = spawn_reader.read_xr::<T, _>()?;
     let respawn_time: u16 = spawn_reader.read_u16::<T>()?;
     let id: u16 = spawn_reader.read_u16::<T>()?;
     let parent_id: u16 = spawn_reader.read_u16::<T>()?;
@@ -164,8 +164,8 @@ impl AlifeObjectBase {
     object_data_writer.write_u8(self.script_game_id)?;
     object_data_writer.write_u8(self.script_rp)?;
 
-    self.position.write::<T>(&mut object_data_writer)?;
-    self.direction.write::<T>(&mut object_data_writer)?;
+    object_data_writer.write_xr::<T, Vector3d>(&self.position)?;
+    object_data_writer.write_xr::<T, Vector3d>(&self.direction)?;
 
     object_data_writer.write_u16::<T>(self.respawn_time)?;
     object_data_writer.write_u16::<T>(self.id)?;

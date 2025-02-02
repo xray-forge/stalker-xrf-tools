@@ -22,7 +22,7 @@ pub struct ParticleActionTargetColor {
 impl ParticleActionReader for ParticleActionTargetColor {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionTargetColor> {
     Ok(ParticleActionTargetColor {
-      color: Vector3d::read::<T>(reader)?,
+      color: reader.read_xr::<T, _>()?,
       alpha: reader.read_f32::<T>()?,
       scale: reader.read_f32::<T>()?,
       // CS / COP only:
@@ -53,8 +53,7 @@ impl ParticleActionReader for ParticleActionTargetColor {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTargetColor {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.color.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.color)?;
     writer.write_f32::<XRayByteOrder>(self.alpha)?;
     writer.write_f32::<XRayByteOrder>(self.scale)?;
     writer.write_f32::<XRayByteOrder>(self.time_from)?;

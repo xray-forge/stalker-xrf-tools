@@ -19,7 +19,7 @@ pub struct ParticleActionDamping {
 impl ParticleActionReader for ParticleActionDamping {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      damping: Vector3d::read::<T>(reader)?,
+      damping: reader.read_xr::<T, _>()?,
       v_low_sqr: reader.read_f32::<T>()?,
       v_high_sqr: reader.read_f32::<T>()?,
     })
@@ -45,8 +45,7 @@ impl ParticleActionReader for ParticleActionDamping {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionDamping {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.damping.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.damping)?;
     writer.write_f32::<XRayByteOrder>(self.v_low_sqr)?;
     writer.write_f32::<XRayByteOrder>(self.v_high_sqr)?;
 

@@ -1,9 +1,10 @@
-use crate::data::generic::vector_3d::Vector3d;
 use crate::export::file_import::read_ltx_field;
 use crate::types::{Matrix3d, Sphere3d};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io::{Read, Write};
+use xray_chunk::{
+  ChunkReadable, ChunkReadableList, ChunkReader, ChunkWritable, ChunkWritableList, ChunkWriter,
+};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
@@ -15,9 +16,31 @@ pub enum Shape {
   Box(Matrix3d),
 }
 
-impl Shape {
+impl ChunkReadable for Shape {
+  /// Read shape from the chunk reader.
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+    let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
+
+    Ok(match shape_type {
+      0 => Self::Sphere((reader.read_xr::<T, _>()?, reader.read_f32::<T>()?)),
+      1 => Self::Box((
+        reader.read_xr::<T, _>()?,
+        reader.read_xr::<T, _>()?,
+        reader.read_xr::<T, _>()?,
+        reader.read_xr::<T, _>()?,
+      )),
+      _ => {
+        return Err(XRayError::new_parsing_error(
+          "Unexpected shape type provided",
+        ))
+      }
+    })
+  }
+}
+
+impl ChunkReadableList for Shape {
   /// Read list of shapes from the chunk reader.
-  pub fn read_list<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
     let count: u8 = reader.read_u8().expect("Count flag to be read");
 
@@ -33,40 +56,11 @@ impl Shape {
 
     Ok(shapes)
   }
+}
 
-  /// Read shape from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
-    let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
-
-    Ok(match shape_type {
-      0 => Self::Sphere((Vector3d::read::<T>(reader)?, reader.read_f32::<T>()?)),
-      1 => Self::Box((
-        Vector3d::read::<T>(reader)?,
-        Vector3d::read::<T>(reader)?,
-        Vector3d::read::<T>(reader)?,
-        Vector3d::read::<T>(reader)?,
-      )),
-      _ => {
-        return Err(XRayError::new_parsing_error(
-          "Unexpected shape type provided",
-        ))
-      }
-    })
-  }
-
-  /// Write list of shapes data into the chunk reader.
-  pub fn write_list<T: ByteOrder>(shapes: &[Self], writer: &mut dyn Write) -> XRayResult {
-    writer.write_u8(shapes.len() as u8)?;
-
-    for shape in shapes {
-      shape.write::<T>(writer)?;
-    }
-
-    Ok(())
-  }
-
+impl ChunkWritable for Shape {
   /// Write shape data into the chunk reader.
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     match self {
       Self::Sphere(data) => {
         writer.write_u8(0)?;
@@ -87,7 +81,22 @@ impl Shape {
 
     Ok(())
   }
+}
 
+impl ChunkWritableList for Shape {
+  /// Write list of shapes data into the chunk reader.
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, shapes: &[Self]) -> XRayResult {
+    writer.write_u8(shapes.len() as u8)?;
+
+    for shape in shapes {
+      shape.write::<T>(writer)?;
+    }
+
+    Ok(())
+  }
+}
+
+impl Shape {
   /// Import shape objects from ltx config file.
   pub fn import_list(section: &Section) -> XRayResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
@@ -162,7 +171,10 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{
+    ChunkReadable, ChunkReadableList, ChunkReader, ChunkWritable, ChunkWritableList, ChunkWriter,
+    XRayByteOrder,
+  };
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -210,7 +222,7 @@ mod tests {
       )),
     ];
 
-    Shape::write_list::<XRayByteOrder>(&original, &mut writer)?;
+    Shape::write_list::<XRayByteOrder>(&mut writer, &original)?;
 
     assert_eq!(writer.bytes_written(), 67);
 

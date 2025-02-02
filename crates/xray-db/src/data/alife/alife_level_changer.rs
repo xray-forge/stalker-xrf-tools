@@ -34,8 +34,8 @@ impl AlifeObjectReader for AlifeLevelChanger {
       base: AlifeObjectSpaceRestrictor::read::<T>(reader)?,
       dest_game_vertex_id: reader.read_u16::<T>()?,
       dest_level_vertex_id: reader.read_u32::<T>()?,
-      dest_position: Vector3d::read::<T>(reader)?,
-      dest_direction: Vector3d::read::<T>(reader)?,
+      dest_position: reader.read_xr::<T, _>()?,
+      dest_direction: reader.read_xr::<T, _>()?,
       angle_y: reader.read_f32::<T>()?,
       dest_level_name: reader.read_null_terminated_win_string()?,
       dest_graph_point: reader.read_null_terminated_win_string()?,
@@ -89,8 +89,8 @@ impl AlifeObjectWriter for AlifeLevelChanger {
     writer.write_u16::<XRayByteOrder>(self.dest_game_vertex_id)?;
     writer.write_u32::<XRayByteOrder>(self.dest_level_vertex_id)?;
 
-    self.dest_position.write::<XRayByteOrder>(writer)?;
-    self.dest_direction.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.dest_position)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.dest_direction)?;
 
     writer.write_f32::<XRayByteOrder>(self.angle_y)?;
     writer.write_null_terminated_win_string(&self.dest_level_name)?;

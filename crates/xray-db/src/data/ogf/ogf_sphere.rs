@@ -14,14 +14,13 @@ pub struct OgfSphere {
 impl OgfSphere {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      position: Vector3d::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
       radius: reader.read_f32::<T>()?,
     })
   }
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.position.write::<T>(writer)?;
-
+    writer.write_xr::<T, Vector3d>(&self.position)?;
     writer.write_f32::<T>(self.radius)?;
 
     Ok(())

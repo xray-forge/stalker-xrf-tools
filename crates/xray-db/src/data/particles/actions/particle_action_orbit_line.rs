@@ -21,8 +21,8 @@ pub struct ParticleActionOrbitLine {
 impl ParticleActionReader for ParticleActionOrbitLine {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionOrbitLine> {
     Ok(ParticleActionOrbitLine {
-      position: Vector3d::read::<T>(reader)?,
-      axis: Vector3d::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
+      axis: reader.read_xr::<T, _>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
       max_radius: reader.read_f32::<T>()?,
@@ -51,9 +51,8 @@ impl ParticleActionReader for ParticleActionOrbitLine {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionOrbitLine {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.position.write::<XRayByteOrder>(writer)?;
-    self.axis.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.position)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.axis)?;
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
     writer.write_f32::<XRayByteOrder>(self.epsilon)?;
     writer.write_f32::<XRayByteOrder>(self.max_radius)?;

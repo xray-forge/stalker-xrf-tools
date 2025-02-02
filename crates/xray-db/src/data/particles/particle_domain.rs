@@ -23,8 +23,8 @@ impl ParticleDomain {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       domain_type: reader.read_u32::<T>()?,
-      coordinates: (Vector3d::read::<T>(reader)?, Vector3d::read::<T>(reader)?),
-      basis: (Vector3d::read::<T>(reader)?, Vector3d::read::<T>(reader)?),
+      coordinates: (reader.read_xr::<T, _>()?, reader.read_xr::<T, _>()?),
+      basis: (reader.read_xr::<T, _>()?, reader.read_xr::<T, _>()?),
       radius1: reader.read_f32::<T>()?,
       radius2: reader.read_f32::<T>()?,
       radius1_sqr: reader.read_f32::<T>()?,
@@ -34,12 +34,10 @@ impl ParticleDomain {
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<XRayByteOrder>(self.domain_type)?;
-
-    self.coordinates.0.write::<T>(writer)?;
-    self.coordinates.1.write::<T>(writer)?;
-    self.basis.0.write::<T>(writer)?;
-    self.basis.1.write::<T>(writer)?;
-
+    writer.write_xr::<T, Vector3d>(&self.coordinates.0)?;
+    writer.write_xr::<T, Vector3d>(&self.coordinates.1)?;
+    writer.write_xr::<T, Vector3d>(&self.basis.0)?;
+    writer.write_xr::<T, Vector3d>(&self.basis.1)?;
     writer.write_f32::<XRayByteOrder>(self.radius1)?;
     writer.write_f32::<XRayByteOrder>(self.radius2)?;
     writer.write_f32::<XRayByteOrder>(self.radius1_sqr)?;

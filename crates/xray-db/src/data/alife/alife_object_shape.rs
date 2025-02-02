@@ -4,7 +4,7 @@ use crate::data::meta::alife_object_generic::AlifeObjectWriter;
 use crate::data::meta::alife_object_reader::AlifeObjectReader;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadableList, ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -46,7 +46,7 @@ impl AlifeObjectWriter for AlifeObjectShape {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
-    Shape::write_list::<XRayByteOrder>(&self.shape, writer)?;
+    writer.write_xr_list::<XRayByteOrder, Shape>(&self.shape)?;
 
     Ok(())
   }

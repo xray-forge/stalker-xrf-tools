@@ -1,10 +1,28 @@
-use crate::ChunkWriter;
+use crate::{ChunkWritable, ChunkWritableList, ChunkWritableOptional, ChunkWriter};
 use byteorder::{ByteOrder, WriteBytesExt};
 use std::io::Write;
 use xray_error::XRayResult;
 use xray_utils::encode_string_to_windows1251_bytes;
 
 impl ChunkWriter {
+  #[inline(always)]
+  pub fn write_xr<T: ByteOrder, W: ChunkWritable>(&mut self, writable: &W) -> XRayResult {
+    writable.write::<T>(self)
+  }
+
+  #[inline(always)]
+  pub fn write_xr_optional<T: ByteOrder, W: ChunkWritableOptional>(
+    &mut self,
+    writable: Option<&W>,
+  ) -> XRayResult {
+    W::write_optional::<T>(self, writable)
+  }
+
+  #[inline(always)]
+  pub fn write_xr_list<T: ByteOrder, W: ChunkWritableList>(&mut self, list: &[W]) -> XRayResult {
+    W::write_list::<T>(self, list)
+  }
+
   /// Write null terminated windows1251 encoded string.
   pub fn write_null_terminated_win_string(&mut self, data: &str) -> XRayResult<usize> {
     Ok(self.write(&encode_string_to_windows1251_bytes(data)?)? + self.write(&[0u8])?)

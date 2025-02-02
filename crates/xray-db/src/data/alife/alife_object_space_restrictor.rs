@@ -22,7 +22,7 @@ impl AlifeObjectReader for AlifeObjectSpaceRestrictor {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectAbstract::read::<T>(reader)?,
-      shape: Shape::read_list::<T>(reader)?,
+      shape: reader.read_xr_list::<T, Shape>()?,
       restrictor_type: reader.read_u8()?,
     })
   }
@@ -50,8 +50,7 @@ impl AlifeObjectWriter for AlifeObjectSpaceRestrictor {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
-    Shape::write_list::<XRayByteOrder>(&self.shape, writer)?;
-
+    writer.write_xr_list::<XRayByteOrder, Shape>(&self.shape)?;
     writer.write_u8(self.restrictor_type)?;
 
     Ok(())

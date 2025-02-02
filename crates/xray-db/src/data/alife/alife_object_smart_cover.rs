@@ -27,7 +27,7 @@ impl AlifeObjectReader<AlifeObjectSmartCover> for AlifeObjectSmartCover {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       base: AlifeObjectDynamic::read::<T>(reader)?,
-      shape: Shape::read_list::<T>(reader)?,
+      shape: reader.read_xr_list::<T, Shape>()?,
       description: reader.read_null_terminated_win_string()?,
       hold_position_time: reader.read_f32::<XRayByteOrder>()?,
       enter_min_enemy_distance: reader.read_f32::<XRayByteOrder>()?,
@@ -66,8 +66,7 @@ impl AlifeObjectWriter for AlifeObjectSmartCover {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
     self.base.write(writer)?;
 
-    Shape::write_list::<XRayByteOrder>(&self.shape, writer)?;
-
+    writer.write_xr_list::<XRayByteOrder, Shape>(&self.shape)?;
     writer.write_null_terminated_win_string(&self.description)?;
     writer.write_f32::<XRayByteOrder>(self.hold_position_time)?;
     writer.write_f32::<XRayByteOrder>(self.enter_min_enemy_distance)?;

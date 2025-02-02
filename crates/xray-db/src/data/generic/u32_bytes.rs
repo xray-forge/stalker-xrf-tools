@@ -1,16 +1,16 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
-use std::io::{Read, Write};
 use std::str::FromStr;
+use xray_chunk::{ChunkReadable, ChunkReader, ChunkWritable, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::vector_from_string_sized;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct U32Bytes(pub u8, pub u8, pub u8, pub u8);
 
-impl U32Bytes {
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
+impl ChunkReadable for U32Bytes {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(U32Bytes(
       reader.read_u8()?,
       reader.read_u8()?,
@@ -18,8 +18,10 @@ impl U32Bytes {
       reader.read_u8()?,
     ))
   }
+}
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
+impl ChunkWritable for U32Bytes {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u8(self.0)?;
     writer.write_u8(self.1)?;
     writer.write_u8(self.2)?;

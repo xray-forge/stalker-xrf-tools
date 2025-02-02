@@ -23,7 +23,7 @@ impl GraphLevel {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       name: reader.read_null_terminated_win_string()?,
-      offset: Vector3d::read::<T>(reader)?,
+      offset: reader.read_xr::<T, _>()?,
       id: reader.read_u8()?,
       section: reader.read_null_terminated_win_string()?,
       guid: Uuid::from_u128(reader.read_u128::<T>()?),
@@ -34,8 +34,7 @@ impl GraphLevel {
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
 
-    self.offset.write::<T>(writer)?;
-
+    writer.write_xr::<T, Vector3d>(&self.offset)?;
     writer.write_u8(self.id)?;
     writer.write_null_terminated_win_string(&self.section)?;
     writer.write_u128::<T>(self.guid.as_u128())?;

@@ -20,12 +20,12 @@ impl OgfBone {
       name: reader.read_null_terminated_win_string()?,
       parent: reader.read_null_terminated_win_string()?,
       rotation: (
-        Vector3d::read::<T>(reader)?,
-        Vector3d::read::<T>(reader)?,
-        Vector3d::read::<T>(reader)?,
+        reader.read_xr::<T, _>()?,
+        reader.read_xr::<T, _>()?,
+        reader.read_xr::<T, _>()?,
       ),
-      translate: Vector3d::read::<T>(reader)?,
-      half_size: Vector3d::read::<T>(reader)?,
+      translate: reader.read_xr::<T, _>()?,
+      half_size: reader.read_xr::<T, _>()?,
     })
   }
 
@@ -33,12 +33,12 @@ impl OgfBone {
     writer.write_null_terminated_win_string(&self.name)?;
     writer.write_null_terminated_win_string(&self.parent)?;
 
-    self.rotation.0.write::<T>(writer)?;
-    self.rotation.1.write::<T>(writer)?;
-    self.rotation.2.write::<T>(writer)?;
+    writer.write_xr::<T, Vector3d>(&self.rotation.0)?;
+    writer.write_xr::<T, Vector3d>(&self.rotation.1)?;
+    writer.write_xr::<T, Vector3d>(&self.rotation.2)?;
 
-    self.translate.write::<T>(writer)?;
-    self.half_size.write::<T>(writer)?;
+    writer.write_xr::<T, Vector3d>(&self.translate)?;
+    writer.write_xr::<T, Vector3d>(&self.half_size)?;
 
     Ok(())
   }

@@ -1,8 +1,8 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::io::{Read, Write};
 use std::str::FromStr;
+use xray_chunk::{ChunkReadable, ChunkReader, ChunkWritable, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
@@ -14,16 +14,18 @@ pub struct RgbColor {
   pub b: f32,
 }
 
-impl RgbColor {
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
+impl ChunkReadable for RgbColor {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       r: reader.read_f32::<T>()?,
       g: reader.read_f32::<T>()?,
       b: reader.read_f32::<T>()?,
     })
   }
+}
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
+impl ChunkWritable for RgbColor {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_f32::<T>(self.r)?;
     writer.write_f32::<T>(self.g)?;
     writer.write_f32::<T>(self.b)?;

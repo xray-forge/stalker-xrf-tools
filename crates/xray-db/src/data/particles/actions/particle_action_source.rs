@@ -37,7 +37,7 @@ impl ParticleActionReader for ParticleActionSource {
       particle_rate: reader.read_f32::<T>()?,
       age: reader.read_f32::<T>()?,
       age_sigma: reader.read_f32::<T>()?,
-      parent_vel: Vector3d::read::<T>(reader)?,
+      parent_vel: reader.read_xr::<T, _>()?,
       parent_motion: reader.read_f32::<T>()?,
     })
   }
@@ -80,8 +80,7 @@ impl ParticleActionWriter for ParticleActionSource {
     writer.write_f32::<XRayByteOrder>(self.particle_rate)?;
     writer.write_f32::<XRayByteOrder>(self.age)?;
     writer.write_f32::<XRayByteOrder>(self.age_sigma)?;
-
-    self.parent_vel.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.parent_vel)?;
 
     writer.write_f32::<XRayByteOrder>(self.parent_motion)?;
 

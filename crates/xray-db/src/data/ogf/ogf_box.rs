@@ -14,14 +14,14 @@ pub struct OgfBox {
 impl OgfBox {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      min: Vector3d::read::<T>(reader)?,
-      max: Vector3d::read::<T>(reader)?,
+      min: reader.read_xr::<T, _>()?,
+      max: reader.read_xr::<T, _>()?,
     })
   }
 
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.min.write::<T>(writer)?;
-    self.max.write::<T>(writer)?;
+    writer.write_xr::<T, Vector3d>(&self.min)?;
+    writer.write_xr::<T, Vector3d>(&self.max)?;
 
     Ok(())
   }

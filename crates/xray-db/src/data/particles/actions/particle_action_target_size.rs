@@ -18,8 +18,8 @@ pub struct ParticleActionTargetSize {
 impl ParticleActionReader for ParticleActionTargetSize {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionTargetSize> {
     Ok(ParticleActionTargetSize {
-      size: Vector3d::read::<T>(reader)?,
-      scale: Vector3d::read::<T>(reader)?,
+      size: reader.read_xr::<T, _>()?,
+      scale: reader.read_xr::<T, _>()?,
     })
   }
 
@@ -42,8 +42,8 @@ impl ParticleActionReader for ParticleActionTargetSize {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTargetSize {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.size.write::<XRayByteOrder>(writer)?;
-    self.scale.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.size)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.scale)?;
 
     Ok(())
   }

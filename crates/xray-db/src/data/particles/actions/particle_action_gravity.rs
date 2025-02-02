@@ -17,7 +17,7 @@ pub struct ParticleActionGravity {
 impl ParticleActionReader for ParticleActionGravity {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      direction: Vector3d::read::<T>(reader)?,
+      direction: reader.read_xr::<T, _>()?,
     })
   }
 
@@ -39,7 +39,7 @@ impl ParticleActionReader for ParticleActionGravity {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionGravity {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.direction.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.direction)?;
 
     Ok(())
   }

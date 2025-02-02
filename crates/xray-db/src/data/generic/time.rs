@@ -2,8 +2,11 @@ use crate::constants::NIL;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::io::{Read, Write};
 use std::str::FromStr;
+use xray_chunk::{
+  ChunkReadable, ChunkReadableOptional, ChunkReader, ChunkWritable, ChunkWritableOptional,
+  ChunkWriter,
+};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
@@ -19,18 +22,20 @@ pub struct Time {
   pub millis: u16,
 }
 
-impl Time {
+impl ChunkReadableOptional for Time {
   /// Read optional time object from the chunk.
-  pub fn read_optional<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Option<Self>> {
+  fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Option<Self>> {
     if reader.read_u8()? == 1 {
       Ok(Some(Self::read::<T>(reader)?))
     } else {
       Ok(None)
     }
   }
+}
 
+impl ChunkWritableOptional for Time {
   /// Write optional time object into the writer.
-  pub fn write_optional<T: ByteOrder>(time: Option<&Self>, writer: &mut dyn Write) -> XRayResult {
+  fn write_optional<T: ByteOrder>(writer: &mut ChunkWriter, time: Option<&Self>) -> XRayResult {
     if time.is_some() {
       writer.write_u8(1)?;
 
@@ -41,9 +46,11 @@ impl Time {
 
     Ok(())
   }
+}
 
+impl ChunkReadable for Time {
   /// Read time object from chunk.
-  pub fn read<T: ByteOrder>(reader: &mut dyn Read) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let year: u8 = reader.read_u8()?;
     let month: u8 = reader.read_u8()?;
     let day: u8 = reader.read_u8()?;
@@ -62,9 +69,11 @@ impl Time {
       millis,
     })
   }
+}
 
+impl ChunkWritable for Time {
   /// Write time object into the chunk.
-  pub fn write<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u8(self.year)?;
     writer.write_u8(self.month)?;
     writer.write_u8(self.day)?;
@@ -75,7 +84,9 @@ impl Time {
 
     Ok(())
   }
+}
 
+impl Time {
   /// Cast optional time object to serialized string.
   pub fn export_to_string(time: Option<&Self>) -> String {
     time
@@ -84,15 +95,12 @@ impl Time {
   }
 
   /// Import optional time from string value.
-  pub fn import_from_string(value: &str) -> XRayResult<Option<Self>> {
+  pub fn from_str_optional(value: &str) -> XRayResult<Option<Self>> {
     if value.trim() == NIL {
       return Ok(None);
     }
 
-    Ok(match Self::from_str(value) {
-      Ok(time) => Some(time),
-      Err(_) => return Err(XRayError::new_parsing_error("Failed to parse time")),
-    })
+    Self::from_str(value).map(Some)
   }
 }
 
@@ -141,7 +149,10 @@ mod tests {
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{
+    ChunkReadable, ChunkReadableOptional, ChunkReader, ChunkWritable, ChunkWritableOptional,
+    ChunkWriter, XRayByteOrder,
+  };
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -203,7 +214,7 @@ mod tests {
       millis: 250,
     };
 
-    Time::write_optional::<XRayByteOrder>(Some(&original), &mut writer)?;
+    writer.write_xr_optional::<XRayByteOrder, Time>(Some(&original))?;
 
     assert_eq!(writer.bytes_written(), 9);
 
@@ -234,7 +245,7 @@ mod tests {
     let filename: String =
       get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
 
-    Time::write_optional::<XRayByteOrder>(None, &mut writer)?;
+    Time::write_optional::<XRayByteOrder>(&mut writer, None)?;
 
     assert_eq!(writer.bytes_written(), 1);
 
@@ -273,11 +284,11 @@ mod tests {
       "20,6,1,15,15,23,100"
     );
     assert_eq!(
-      Time::import_from_string("20,6,1,15,15,23,100")?,
+      Time::from_str_optional("20,6,1,15,15,23,100")?,
       Some(original)
     );
     assert_eq!(Time::export_to_string(None), "nil");
-    assert_eq!(Time::import_from_string("nil")?, None);
+    assert_eq!(Time::from_str_optional("nil")?, None);
 
     Ok(())
   }

@@ -18,7 +18,7 @@ pub struct ParticleActionTargetRotate {
 impl ParticleActionReader for ParticleActionTargetRotate {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<ParticleActionTargetRotate> {
     Ok(ParticleActionTargetRotate {
-      rot: Vector3d::read::<T>(reader)?,
+      rot: reader.read_xr::<T, _>()?,
       scale: reader.read_f32::<T>()?,
     })
   }
@@ -42,8 +42,7 @@ impl ParticleActionReader for ParticleActionTargetRotate {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionTargetRotate {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.rot.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.rot)?;
     writer.write_f32::<XRayByteOrder>(self.scale)?;
 
     Ok(())

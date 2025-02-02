@@ -24,7 +24,7 @@ impl AlifeObjectReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
     Ok(Self {
       base: AlifeObjectCustomZone::read::<T>(reader)?,
       motion: AlifeObjectMotion::read::<T>(reader)?,
-      last_spawn_time: Time::read_optional::<T>(reader)?,
+      last_spawn_time: reader.read_xr_optional::<T, Time>()?,
     })
   }
 
@@ -41,7 +41,7 @@ impl AlifeObjectReader<AlifeObjectTorridZone> for AlifeObjectTorridZone {
     Ok(Self {
       base: AlifeObjectCustomZone::import(section_name, ltx)?,
       motion: AlifeObjectMotion::import(section_name, ltx)?,
-      last_spawn_time: Time::import_from_string(&read_ltx_field::<String>(
+      last_spawn_time: Time::from_str_optional(&read_ltx_field::<String>(
         "last_spawn_time",
         section,
       )?)?,
@@ -56,7 +56,7 @@ impl AlifeObjectWriter for AlifeObjectTorridZone {
     self.base.write(writer)?;
     self.motion.write(writer)?;
 
-    Time::write_optional::<XRayByteOrder>(self.last_spawn_time.as_ref(), writer)?;
+    writer.write_xr_optional::<XRayByteOrder, Time>(self.last_spawn_time.as_ref())?;
 
     Ok(())
   }

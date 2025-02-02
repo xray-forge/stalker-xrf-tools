@@ -25,7 +25,7 @@ impl ParticleActionReader for ParticleActionTurbulence {
       octaves: reader.read_i32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
-      offset: Vector3d::read::<T>(reader)?,
+      offset: reader.read_xr::<T, _>()?,
     })
   }
 
@@ -55,8 +55,7 @@ impl ParticleActionWriter for ParticleActionTurbulence {
     writer.write_i32::<XRayByteOrder>(self.octaves)?;
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
     writer.write_f32::<XRayByteOrder>(self.epsilon)?;
-
-    self.offset.write::<XRayByteOrder>(writer)?;
+    writer.write_xr::<XRayByteOrder, _>(&self.offset)?;
 
     Ok(())
   }

@@ -18,7 +18,7 @@ impl GraphLevelPoint {
   /// Read level point from the chunk reader.
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      position: Vector3d::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
       level_vertex_id: reader.read_u32::<T>()?,
       distance: reader.read_f32::<T>()?,
     })
@@ -26,8 +26,7 @@ impl GraphLevelPoint {
 
   /// Write level point data into the chunk writer.
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.position.write::<T>(writer)?;
-
+    writer.write_xr::<T, Vector3d>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 

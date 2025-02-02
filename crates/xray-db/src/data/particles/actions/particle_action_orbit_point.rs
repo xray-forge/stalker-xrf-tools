@@ -20,7 +20,7 @@ pub struct ParticleActionOrbitPoint {
 impl ParticleActionReader for ParticleActionOrbitPoint {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      center: Vector3d::read::<T>(reader)?,
+      center: reader.read_xr::<T, _>()?,
       magnitude: reader.read_f32::<T>()?,
       epsilon: reader.read_f32::<T>()?,
       max_radius: reader.read_f32::<T>()?,
@@ -48,8 +48,7 @@ impl ParticleActionReader for ParticleActionOrbitPoint {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionOrbitPoint {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.center.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.center)?;
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
     writer.write_f32::<XRayByteOrder>(self.epsilon)?;
     writer.write_f32::<XRayByteOrder>(self.max_radius)?;

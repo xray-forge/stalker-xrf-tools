@@ -22,7 +22,7 @@ pub struct ParticleActionExplosion {
 impl ParticleActionReader for ParticleActionExplosion {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
-      center: Vector3d::read::<T>(reader)?,
+      center: reader.read_xr::<T, _>()?,
       velocity: reader.read_f32::<T>()?,
       magnitude: reader.read_f32::<T>()?,
       st_dev: reader.read_f32::<T>()?,
@@ -54,8 +54,7 @@ impl ParticleActionReader for ParticleActionExplosion {
 #[typetag::serde]
 impl ParticleActionWriter for ParticleActionExplosion {
   fn write(&self, writer: &mut ChunkWriter) -> XRayResult {
-    self.center.write::<XRayByteOrder>(writer)?;
-
+    writer.write_xr::<XRayByteOrder, _>(&self.center)?;
     writer.write_f32::<XRayByteOrder>(self.velocity)?;
     writer.write_f32::<XRayByteOrder>(self.magnitude)?;
     writer.write_f32::<XRayByteOrder>(self.st_dev)?;

@@ -47,7 +47,7 @@ impl PatrolPoint {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let point: Self = Self {
       name: reader.read_null_terminated_win_string()?,
-      position: Vector3d::read::<T>(reader)?,
+      position: reader.read_xr::<T, _>()?,
       flags: reader.read_u32::<T>()?,
       level_vertex_id: reader.read_u32::<T>()?,
       game_vertex_id: reader.read_u16::<T>()?,
@@ -85,8 +85,7 @@ impl PatrolPoint {
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.name)?;
 
-    self.position.write::<T>(writer)?;
-
+    writer.write_xr::<T, Vector3d>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_u16::<T>(self.game_vertex_id)?;

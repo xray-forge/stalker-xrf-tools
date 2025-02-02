@@ -201,7 +201,7 @@ impl ParticleEffect {
 
     if let Some(velocity_scale) = &self.velocity_scale {
       let mut velocity_scale_chunk_writer: ChunkWriter = ChunkWriter::new();
-      velocity_scale.write::<T>(&mut velocity_scale_chunk_writer)?;
+      velocity_scale_chunk_writer.write_xr::<T, Vector3d>(velocity_scale)?;
       velocity_scale_chunk_writer.flush_chunk_into::<T>(writer, Self::VELOCITY_SCALE_CHUNK_ID)?;
     }
 
@@ -213,7 +213,7 @@ impl ParticleEffect {
 
     if let Some(rotation) = &self.rotation {
       let mut rotation_chunk_writer: ChunkWriter = ChunkWriter::new();
-      rotation.write::<T>(&mut rotation_chunk_writer)?;
+      rotation_chunk_writer.write_xr::<T, Vector3d>(rotation)?;
       rotation_chunk_writer.flush_chunk_into::<T>(writer, Self::ROTATION_CHUNK_ID)?;
     }
 
