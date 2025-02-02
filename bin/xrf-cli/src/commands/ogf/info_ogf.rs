@@ -1,6 +1,6 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{value_parser, Arg, ArgMatches, Command};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use xray_db::{OgfFile, XRayByteOrder};
 
 #[derive(Default)]
@@ -28,12 +28,12 @@ impl GenericCommand for InfoOgfCommand {
   /// Print information about ogf file.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
     println!("Read ogf file {}", path.display());
 
-    let ogf_file: Box<OgfFile> = Box::new(OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?);
+    let ogf_file: Box<OgfFile> = Box::new(OgfFile::read_from_path::<XRayByteOrder, _>(path)?);
 
     println!("Ogf file information");
 
@@ -62,8 +62,8 @@ impl GenericCommand for InfoOgfCommand {
       println!("Bones: {}", bones.bones.len());
 
       for (index, bone) in bones.bones.iter().enumerate() {
-        println!("[{index}] name: {}", bone.name);
-        println!("[{index}] parent: {}", bone.parent);
+        println!("[{}] name: {}", index, bone.name);
+        println!("[{}] parent: {}", index, bone.parent);
       }
     }
 
@@ -76,8 +76,8 @@ impl GenericCommand for InfoOgfCommand {
 
       for (index, child) in children.nested.iter().enumerate() {
         if let Some(texture) = &child.texture {
-          println!("[{index}] texture name: {}", texture.texture_name);
-          println!("[{index}] shader name: {}", texture.shader_name);
+          println!("[{}] texture name: {}", index, texture.texture_name);
+          println!("[{}] shader name: {}", index, texture.shader_name);
         }
       }
     }

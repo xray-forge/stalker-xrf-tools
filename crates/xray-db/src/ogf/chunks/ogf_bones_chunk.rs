@@ -1,7 +1,9 @@
 use crate::data::ogf::ogf_bone::OgfBone;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, assert_chunk_vector_read, ChunkReader, ChunkWriter};
+use xray_chunk::{
+  assert_chunk_read, assert_chunk_vector_read, ChunkReadWrite, ChunkReader, ChunkWriter,
+};
 use xray_error::XRayResult;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -12,7 +14,17 @@ pub struct OgfBonesChunk {
 impl OgfBonesChunk {
   pub const CHUNK_ID: u32 = 13;
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  pub fn get_bone_names(&self) -> Vec<&str> {
+    self
+      .bones
+      .iter()
+      .map(|it| it.name.as_str())
+      .collect::<Vec<_>>()
+  }
+}
+
+impl ChunkReadWrite for OgfBonesChunk {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!("Reading bones chunk: {} bytes", reader.read_bytes_remain());
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -32,7 +44,7 @@ impl OgfBonesChunk {
     Ok(Self { bones })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u32::<T>(self.bones.len() as u32)?;
 
     for bone in &self.bones {
@@ -40,15 +52,5 @@ impl OgfBonesChunk {
     }
 
     Ok(())
-  }
-}
-
-impl OgfBonesChunk {
-  pub fn get_bone_names(&self) -> Vec<&str> {
-    self
-      .bones
-      .iter()
-      .map(|it| it.name.as_str())
-      .collect::<Vec<_>>()
   }
 }

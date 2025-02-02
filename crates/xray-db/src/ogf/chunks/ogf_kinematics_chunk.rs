@@ -9,6 +9,7 @@ pub struct OgfKinematicsChunk {
   pub motion_refs: Vec<String>,
 }
 
+// todo: Conditional read + implement chunk RW.
 impl OgfKinematicsChunk {
   pub const CHUNK_ID: u32 = 24;
   pub const CHUNK_ID_OLD: u32 = 19;

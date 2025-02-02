@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -11,28 +11,21 @@ pub struct OgfTextureChunk {
 
 impl OgfTextureChunk {
   pub const CHUNK_ID: u32 = 2;
+}
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    log::info!(
-      "Reading texture chunk: {} bytes",
-      reader.read_bytes_remain()
-    );
-
+impl ChunkReadWrite for OgfTextureChunk {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let texture: Self = Self {
       texture_name: reader.read_null_terminated_win_string()?,
       shader_name: reader.read_null_terminated_win_string()?,
     };
 
-    assert!(
-      reader.is_ended(),
-      "Expect all data to be read from ogf texture, {} remain",
-      reader.read_bytes_remain()
-    );
+    assert_chunk_read(reader, "Expect all data to be read from ogf texture")?;
 
     Ok(texture)
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.texture_name)?;
     writer.write_null_terminated_win_string(&self.shader_name)?;
 

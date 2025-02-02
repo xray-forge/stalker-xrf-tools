@@ -20,32 +20,15 @@ impl OmfFile {
   pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     Self::read_from_file::<T>(File::open(&path).map_err(|error| {
       XRayError::new_not_found_error(format!(
-        "OMF file was not read: {}, error: {error}",
+        "OMF file was not read: {}, error: {}",
         path.as_ref().display(),
+        error
       ))
     })?)
   }
 
   pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
-    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
-    let chunks: Vec<ChunkReader> = reader.read_children();
-
-    log::info!(
-      "Reading omf file, {} chunks, {} bytes",
-      chunks.len(),
-      reader.read_bytes_len(),
-    );
-
-    for chunk in &chunks {
-      log::info!(
-        "Omf chunk: {} ({:#x}) - {} bytes",
-        chunk.id,
-        chunk.id,
-        chunk.size
-      );
-    }
-
-    Self::read_from_chunks::<T>(&chunks)
+    Self::read_from_chunks::<T>(&ChunkReader::from_file(file)?.read_children())
   }
 
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
@@ -55,18 +38,16 @@ impl OmfFile {
       "Unexpected chunks count in omf file, expected 2"
     );
 
-    let parameters: OmfParametersChunk = OmfParametersChunk::read::<T>(
-      &mut find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?,
-    )
-    .map_err(|error| {
-      XRayError::new_read_error(format!("Failed to read OMF parameters: {error}"))
-    })?;
+    let parameters: OmfParametersChunk =
+      find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?
+        .read_xr::<T, _>()
+        .map_err(|error| {
+          XRayError::new_read_error(format!("Failed to read OMF parameters: {error}"))
+        })?;
 
-    let motions: OmfMotionsChunk = OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
-      chunks,
-      OmfMotionsChunk::CHUNK_ID,
-    )?)
-    .map_err(|error| XRayError::new_read_error(format!("Failed to read OMF motions: {error}")))?;
+    let motions: OmfMotionsChunk = find_required_chunk_by_id(chunks, OmfMotionsChunk::CHUNK_ID)?
+      .read_xr::<T, _>()
+      .map_err(|error| XRayError::new_read_error(format!("Failed to read OMF motions: {error}")))?;
 
     if parameters.motions.len() != motions.motions.len() {
       return Err(XRayError::new_parsing_error(format!(
@@ -100,14 +81,12 @@ impl OmfFile {
     );
 
     Ok(
-      OmfMotionsChunk::read::<T>(&mut find_required_chunk_by_id(
-        &chunks,
-        OmfMotionsChunk::CHUNK_ID,
-      )?)?
-      .motions
-      .iter()
-      .map(|it| it.name.clone())
-      .collect(),
+      find_required_chunk_by_id(&chunks, OmfMotionsChunk::CHUNK_ID)?
+        .read_xr::<T, OmfMotionsChunk>()?
+        .motions
+        .iter()
+        .map(|it| it.name.clone())
+        .collect(),
     )
   }
 }

@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
 /// ogf_desc c++ class
@@ -17,8 +17,10 @@ pub struct OgfDescriptionChunk {
 
 impl OgfDescriptionChunk {
   pub const CHUNK_ID: u32 = 18;
+}
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+impl ChunkReadWrite for OgfDescriptionChunk {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading description chunk: {} bytes",
       reader.read_bytes_remain()
@@ -34,16 +36,12 @@ impl OgfDescriptionChunk {
       edited_at: reader.read_u32::<T>()?,
     };
 
-    assert!(
-      reader.is_ended(),
-      "Expect all data to be read from ogf description, {} remain",
-      reader.read_bytes_remain()
-    );
+    assert_chunk_read(reader, "Expect all data to be read from ogf description")?;
 
     Ok(description)
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_null_terminated_win_string(&self.source_file)?;
     writer.write_null_terminated_win_string(&self.convertor)?;
     writer.write_u32::<T>(self.built_at)?;

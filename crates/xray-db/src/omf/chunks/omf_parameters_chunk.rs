@@ -3,7 +3,7 @@ use crate::data::ogf::ogf_part::OgfPart;
 use crate::OmfFile;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -16,7 +16,13 @@ pub struct OmfParametersChunk {
 impl OmfParametersChunk {
   pub const CHUNK_ID: u32 = 15; // 0x14, 0xF
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  pub fn get_bones_count(&self) -> usize {
+    self.parts.iter().map(|it| it.bones.len()).sum()
+  }
+}
+
+impl ChunkReadWrite for OmfParametersChunk {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading parameters chunk: {} bytes",
       reader.read_bytes_remain()
@@ -53,13 +59,7 @@ impl OmfParametersChunk {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
     todo!("Implement")
-  }
-}
-
-impl OmfParametersChunk {
-  pub fn get_bones_count(&self) -> usize {
-    self.parts.iter().map(|it| it.bones.len()).sum()
   }
 }

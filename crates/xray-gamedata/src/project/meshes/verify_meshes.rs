@@ -80,15 +80,12 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_mesh_by_path(
+  pub fn verify_mesh_by_path<P: AsRef<Path>>(
     &self,
     options: &GamedataProjectVerifyOptions,
-    path: &Path,
+    path: &P,
   ) -> XRayResult<bool> {
-    self.verify_mesh(
-      options,
-      &OgfFile::read_from_path::<XRayByteOrder, &Path>(path)?,
-    )
+    self.verify_mesh(options, &OgfFile::read_from_path::<XRayByteOrder, _>(path)?)
   }
 
   pub fn verify_mesh(

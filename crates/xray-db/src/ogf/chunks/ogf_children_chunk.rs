@@ -1,7 +1,7 @@
 use crate::OgfFile;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkIterator, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -11,8 +11,10 @@ pub struct OgfChildrenChunk {
 
 impl OgfChildrenChunk {
   pub const CHUNK_ID: u32 = 9;
+}
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+impl ChunkReadWrite for OgfChildrenChunk {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!(
       "Reading children chunk: {} bytes",
       reader.read_bytes_remain()
@@ -40,7 +42,7 @@ impl OgfChildrenChunk {
     Ok(Self { nested: children })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     for (index, _child) in self.nested.iter().enumerate() {
       let mut child_writer: ChunkWriter = ChunkWriter::new();
 

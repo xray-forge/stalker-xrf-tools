@@ -113,7 +113,7 @@ impl GamedataProject {
     let mut is_valid: bool = true;
 
     if let Some(visual) = &section.get("visual").and_then(|it| self.get_ogf_path(it)) {
-      if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, &Path>(visual) {
+      if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, _>(visual) {
         if options.is_logging_enabled() {
           eprintln!(
             "Failed to read weapon visual: [{}] - {:?} - {}",
@@ -156,7 +156,7 @@ impl GamedataProject {
       .get("item_visual")
       .and_then(|it| self.get_ogf_path(it))
     {
-      match OgfFile::read_from_path::<XRayByteOrder, &Path>(visual_path) {
+      match OgfFile::read_from_path::<XRayByteOrder, _>(visual_path) {
         Ok(hud_visual) => {
           if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
             let mut ref_animations: Vec<String> = Vec::new();
