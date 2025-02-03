@@ -8,7 +8,7 @@ pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> XRayRe
     XRayError::new_parsing_error(format!("Field '{field_name}' was not found in ltx file"))
   })?;
 
-  Ok(match value.parse::<T>() {
+  Ok(match T::from_str(value) {
     Ok(value) => value,
     _ => {
       return Err(XRayError::new_parsing_error(format!(

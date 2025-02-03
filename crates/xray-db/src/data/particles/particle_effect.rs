@@ -20,7 +20,7 @@ use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleEffect {
   pub version: u16,
@@ -380,15 +380,17 @@ mod tests {
   use crate::data::particles::particle_effect_editor_data::ParticleEffectEditorData;
   use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
   use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -471,20 +473,73 @@ mod tests {
 
     let read: ParticleEffect = ParticleEffect::read::<XRayByteOrder>(&mut reader)?;
 
-    assert_eq!(read.version, original.version);
-    assert_eq!(read.name, original.name);
-    assert_eq!(read.max_particles, original.max_particles);
-    assert_eq!(read.flags, original.flags);
-    assert_eq!(read.frame, original.frame);
-    assert_eq!(read.sprite, original.sprite);
-    assert_eq!(read.time_limit, original.time_limit);
-    assert_eq!(read.collision, original.collision);
-    assert_eq!(read.velocity_scale, original.velocity_scale);
-    assert_eq!(read.description, original.description);
-    assert_eq!(read.rotation, original.rotation);
-    assert_eq!(read.editor_data, original.editor_data);
+    assert_eq!(read, original);
 
-    assert_eq!(read.actions.len(), original.actions.len());
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+    let original: ParticleEffect = ParticleEffect {
+      version: 1,
+      name: String::from("test-particle-effect"),
+      max_particles: 6,
+      actions: vec![
+        ParticleAction::Damping(Box::new(ParticleActionDamping {
+          action_flags: 33,
+          action_type: ParticleActionType::Damping,
+          damping: Vector3d::new_mock(),
+          v_low_sqr: 1.1,
+          v_high_sqr: 1.25,
+        })),
+        ParticleAction::CopyVertex(Box::new(ParticleActionCopyVertex {
+          action_flags: 34,
+          action_type: ParticleActionType::CopyVertex,
+          copy_position: 1,
+        })),
+      ],
+      flags: 140,
+      frame: Some(ParticleEffectFrame {
+        texture_size: (451.0, 361.0),
+        reserved: (45.2, 51.2),
+        frame_dimension_x: 320,
+        frame_count: 60,
+        frame_speed: 29.7,
+      }),
+      sprite: ParticleEffectSprite {
+        shader_name: String::from("test-shader-name"),
+        texture_name: String::from("test-texture-name"),
+      },
+      time_limit: Some(450.1),
+      collision: Some(ParticleEffectCollision {
+        collide_one_minus_friction: 0.55,
+        collide_resilience: 45.2535,
+        collide_sqr_cutoff: 25.6313,
+      }),
+      velocity_scale: Some(Vector3d::new_mock()),
+      description: Some(ParticleDescription {
+        creator: String::from("test-creator-name"),
+        editor: String::from("test-editor-name"),
+        created_time: 456,
+        edit_time: 458,
+      }),
+      rotation: Some(Vector3d::new_mock()),
+      editor_data: Some(ParticleEffectEditorData {
+        value: vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
+      }),
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(ParticleEffect::import("data", &source)?, original);
 
     Ok(())
   }
@@ -550,23 +605,10 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-
-    let read: ParticleEffect = serde_json::from_str::<ParticleEffect>(&serialized).unwrap();
-
-    assert_eq!(read.version, original.version);
-    assert_eq!(read.name, original.name);
-    assert_eq!(read.max_particles, original.max_particles);
-    assert_eq!(read.flags, original.flags);
-    assert_eq!(read.frame, original.frame);
-    assert_eq!(read.sprite, original.sprite);
-    assert_eq!(read.time_limit, original.time_limit);
-    assert_eq!(read.collision, original.collision);
-    assert_eq!(read.velocity_scale, original.velocity_scale);
-    assert_eq!(read.description, original.description);
-    assert_eq!(read.rotation, original.rotation);
-    assert_eq!(read.editor_data, original.editor_data);
-
-    assert_eq!(read.actions.len(), original.actions.len());
+    assert_eq!(
+      serde_json::from_str::<ParticleEffect>(&serialized).unwrap(),
+      original
+    );
 
     Ok(())
   }

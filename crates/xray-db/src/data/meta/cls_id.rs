@@ -1,9 +1,7 @@
 #![allow(dead_code)]
-use crate::data::meta::alife_class::AlifeClass;
-use crate::data::meta::map::{CLS_ID_TO_CLASS, SECTION_TO_CLS_ID};
+use crate::data::meta::map::SECTION_TO_CLS_ID;
 use enum_map::Enum;
 use serde::{Deserialize, Serialize};
-use std::ops::Index;
 
 /// todo: Add script to parse system ltx and read all the data from ltx/txt file instead.
 #[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize, Eq)]
@@ -114,12 +112,5 @@ impl ClsId {
       .get(section_name)
       .cloned()
       .expect("Unexpected section provided for clsid matching")
-  }
-}
-
-impl AlifeClass {
-  pub fn from_cls_id(cls_id: &ClsId) -> AlifeClass {
-    // todo: Implement with From<T> trait?
-    CLS_ID_TO_CLASS.index(cls_id.clone()).clone()
   }
 }

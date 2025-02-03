@@ -1,4 +1,4 @@
-use crate::data::alife::alife_object::AlifeObjectBase;
+use crate::data::alife::alife_object::AlifeObject;
 use crate::export::{FileImportExport, LtxImportExport};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,7 @@ use xray_utils::{assert_equal, open_export_file};
 /// 2 - edges
 #[derive(Serialize, Deserialize)]
 pub struct SpawnALifeSpawnsChunk {
-  pub objects: Vec<AlifeObjectBase>,
+  pub objects: Vec<AlifeObject>,
 }
 
 impl SpawnALifeSpawnsChunk {
@@ -39,10 +39,10 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
     let vertex_reader: ChunkReader = reader.read_child_by_index(Self::VERTEX_CHUNK_ID)?;
 
     let count: u32 = count_reader.read_u32::<T>()?;
-    let mut objects: Vec<AlifeObjectBase> = Vec::with_capacity(count as usize);
+    let mut objects: Vec<AlifeObject> = Vec::with_capacity(count as usize);
 
     for mut object_reader in ChunkIterator::new(&mut objects_reader) {
-      objects.push(AlifeObjectBase::read::<T>(&mut object_reader)?)
+      objects.push(AlifeObject::read::<T>(&mut object_reader)?)
     }
 
     assert_equal(objects.len(), count as usize, "Expect all object read")?;
@@ -106,10 +106,10 @@ impl FileImportExport for SpawnALifeSpawnsChunk {
   /// Import ALife spawns data from provided path.
   fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("alife_spawns.ltx"))?;
-    let mut objects: Vec<AlifeObjectBase> = Vec::with_capacity(ltx.sections.len());
+    let mut objects: Vec<AlifeObject> = Vec::with_capacity(ltx.sections.len());
 
     for (section_name, _) in &ltx {
-      objects.push(AlifeObjectBase::import(section_name, &ltx)?);
+      objects.push(AlifeObject::import(section_name, &ltx)?);
     }
 
     log::info!("Imported ALife spawns chunk");
@@ -147,12 +147,13 @@ impl fmt::Debug for SpawnALifeSpawnsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::alife::alife_object::AlifeObjectBase;
-  use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::alife_object_item::AlifeObjectItem;
-  use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
-  use crate::data::alife::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
+  use crate::data::alife::alife_object::AlifeObject;
+  use crate::data::alife::alife_object_inherited::AlifeObjectInherited;
+  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
+  use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
+  use crate::data::alife::inherited::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
+  use crate::data::alife::inherited::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::cls_id::ClsId;
   use crate::spawn::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
@@ -204,7 +205,7 @@ mod tests {
 
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {
       objects: vec![
-        AlifeObjectBase {
+        AlifeObject {
           index: 21,
           id: 2334,
           net_action: 1,
@@ -224,29 +225,31 @@ mod tests {
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
-          inherited: Box::new(AlifeObjectItemCustomOutfit {
-            base: AlifeObjectItem {
-              base: AlifeObjectDynamicVisual {
-                base: AlifeObjectAbstract {
-                  game_vertex_id: 43543,
-                  distance: 523.33,
-                  direct_control: 423,
-                  level_vertex_id: 142,
-                  flags: 34,
-                  custom_data: String::from("custom-data"),
-                  story_id: 256973,
-                  spawn_story_id: 356490,
+          inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(
+            AlifeObjectItemCustomOutfit {
+              base: AlifeObjectItem {
+                base: AlifeObjectDynamicVisual {
+                  base: AlifeObjectAbstract {
+                    game_vertex_id: 43543,
+                    distance: 523.33,
+                    direct_control: 423,
+                    level_vertex_id: 142,
+                    flags: 34,
+                    custom_data: String::from("custom-data"),
+                    story_id: 256973,
+                    spawn_story_id: 356490,
+                  },
+                  visual_name: String::from("visual-name"),
+                  visual_flags: 0,
                 },
-                visual_name: String::from("visual-name"),
-                visual_flags: 0,
+                condition: 1.0,
+                upgrades_count: 0,
               },
-              condition: 1.0,
-              upgrades_count: 0,
             },
-          }),
+          )),
           update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         },
-        AlifeObjectBase {
+        AlifeObject {
           index: 22,
           id: 2335,
           net_action: 1,
@@ -266,20 +269,22 @@ mod tests {
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
-          inherited: Box::new(AlifeObjectSpaceRestrictor {
-            base: AlifeObjectAbstract {
-              game_vertex_id: 5473,
-              distance: 45.5,
-              direct_control: 373574,
-              level_vertex_id: 253,
-              flags: 0,
-              custom_data: String::from("custom-data"),
-              story_id: 3564,
-              spawn_story_id: 38754,
+          inherited: AlifeObjectInherited::CseAlifeSpaceRestrictor(Box::new(
+            AlifeObjectSpaceRestrictor {
+              base: AlifeObjectAbstract {
+                game_vertex_id: 5473,
+                distance: 45.5,
+                direct_control: 373574,
+                level_vertex_id: 253,
+                flags: 0,
+                custom_data: String::from("custom-data"),
+                story_id: 3564,
+                spawn_story_id: 38754,
+              },
+              shape: vec![],
+              restrictor_type: 0,
             },
-            shape: vec![],
-            restrictor_type: 0,
-          }),
+          )),
           update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8],
         },
       ],
@@ -311,7 +316,7 @@ mod tests {
     assert_eq!(read.objects.len(), original.objects.len());
 
     for (index, object) in read.objects.iter().enumerate() {
-      let another: &AlifeObjectBase = original.objects.get(index).unwrap();
+      let another: &AlifeObject = original.objects.get(index).unwrap();
 
       assert_eq!(object.index, another.index);
       assert_eq!(object.id, another.id);

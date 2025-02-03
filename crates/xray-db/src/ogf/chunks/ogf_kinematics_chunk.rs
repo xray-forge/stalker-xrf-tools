@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
-#[derive(Copy, Clone, Debug, Enum, PartialEq, Display, FromStr, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Enum, PartialEq, FromStr, Display, Serialize, Deserialize)]
 pub enum ParticleActionType {
   #[display("Avoid")]
   Avoid = 0,

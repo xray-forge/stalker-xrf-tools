@@ -148,7 +148,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(ParticleActionDamping::import("data", &source)?, original);
 

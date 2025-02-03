@@ -34,6 +34,7 @@ use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
+use std::str::FromStr;
 use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
@@ -114,8 +115,7 @@ impl ChunkReadWriteList for ParticleAction {
 
 impl ChunkReadWrite for ParticleAction {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let action_type_raw: u32 = reader.read_u32::<T>()?;
-    let action_type: ParticleActionType = ParticleActionType::from(action_type_raw);
+    let action_type: ParticleActionType = ParticleActionType::from(reader.read_u32::<T>()?);
 
     Ok(match action_type {
       ParticleActionType::Avoid => Self::Avoid(Box::new(reader.read_xr::<T, _>()?)),
@@ -219,8 +219,11 @@ impl LtxImportExport for ParticleAction {
       "Expected corrected meta type field for particle action import",
     )?;
 
-    let action_type_raw: u32 = read_ltx_field("action_type", section)?;
-    let action_type: ParticleActionType = ParticleActionType::from(action_type_raw);
+    let action_type: ParticleActionType =
+      ParticleActionType::from_str(read_ltx_field::<String>("action_type", section)?.as_str())
+        .map_err(|_| {
+          XRayError::new_parsing_error("Failed to parse particle action type from LTX field")
+        })?;
 
     Ok(match action_type {
       ParticleActionType::Avoid => {

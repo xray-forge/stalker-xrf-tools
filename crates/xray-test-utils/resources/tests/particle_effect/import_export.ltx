@@ -1,0 +1,54 @@
+[data]
+$type = particle_effect
+version = 1
+name = test-particle-effect
+actions_count = 2
+max_particles = 6
+flags = 140
+time_limit = 450.1
+rotation = 1.115,-0.255,1.753
+velocity_scale = 1.115,-0.255,1.753
+
+[data.sprite]
+$type = particle_effect_sprite
+shader_name = test-shader-name
+texture_name = test-texture-name
+
+[data.action.0]
+$type = particle_action
+action_flags = 33
+action_type = Damping
+damping = 1.115,-0.255,1.753
+v_low_sqr = 1.1
+v_high_sqr = 1.25
+
+[data.action.1]
+$type = particle_action
+action_flags = 34
+action_type = CopyVertex
+copy_position = 1
+
+[data.frame]
+$type = particle_effect_frame
+texture_size = 451,361
+reserved = 45.2,51.2
+frame_dimension_x = 320
+frame_count = 60
+frame_speed = 29.7
+
+[data.collision]
+$type = particle_effect_collision
+collide_one_minus_friction = 0.55
+collide_resilience = 45.2535
+collide_sqr_cutoff = 25.6313
+
+[data.description]
+$type = particle_description
+creator = test-creator-name
+editor = test-editor-name
+created_time = 456
+edit_time = 458
+
+[data.editor_data]
+$type = editor_data
+value = AQIDBAUGBwgJ

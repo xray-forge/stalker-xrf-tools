@@ -206,7 +206,7 @@ mod tests {
       millis: 250,
     };
 
-    writer.write_xr_optional::<XRayByteOrder, Time>(Some(&original))?;
+    writer.write_xr_optional::<XRayByteOrder, _>(Some(&original))?;
 
     assert_eq!(writer.bytes_written(), 9);
 
