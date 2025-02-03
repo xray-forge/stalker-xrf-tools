@@ -91,11 +91,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -158,6 +164,115 @@ mod tests {
 
     assert_eq!(
       AlifeObjectAnomalyZone::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone {
+      base: AlifeObjectCustomZone {
+        base: AlifeObjectSpaceRestrictor {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 4,
+            distance: 250.3,
+            direct_control: 40,
+            level_vertex_id: 70,
+            flags: 32,
+            custom_data: "".to_string(),
+            story_id: 523,
+            spawn_story_id: 11,
+          },
+          shape: vec![
+            Shape::Sphere((Vector3d::new(0.5, 0.5, 0.5), 1.0)),
+            Shape::Box((
+              Vector3d::new(40.1, 1.1, 32.1),
+              Vector3d::new(1.1, 2.2, 30.3),
+              Vector3d::new(4.0, 50.0, 1.4),
+              Vector3d::new(90.2, 8.3, 1.0),
+            )),
+          ],
+          restrictor_type: 4,
+        },
+        max_power: 29.003,
+        owner_id: 10,
+        enabled_time: 47,
+        disabled_time: 63,
+        start_time_shift: 3614,
+      },
+      offline_interactive_radius: -25.1,
+      artefact_spawn_count: 6,
+      artefact_position_offset: 5,
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectAnomalyZone::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone {
+      base: AlifeObjectCustomZone {
+        base: AlifeObjectSpaceRestrictor {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 241,
+            distance: 55.3,
+            direct_control: 4,
+            level_vertex_id: 87,
+            flags: 12,
+            custom_data: "".to_string(),
+            story_id: 6211,
+            spawn_story_id: 143,
+          },
+          shape: vec![
+            Shape::Sphere((Vector3d::new(0.5, 0.5, 0.5), 1.0)),
+            Shape::Box((
+              Vector3d::new(24.1, 10.1, 32.1),
+              Vector3d::new(21.1, 20.2, 13.3),
+              Vector3d::new(24.0, 50.0, 11.4),
+              Vector3d::new(29.2, 80.3, 11.0),
+            )),
+          ],
+          restrictor_type: 4,
+        },
+        max_power: 255.33,
+        owner_id: 31,
+        enabled_time: 74,
+        disabled_time: 475,
+        start_time_shift: 8,
+      },
+      offline_interactive_radius: -2.1,
+      artefact_spawn_count: 6,
+      artefact_position_offset: 55,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectAnomalyZone>(&serialized).unwrap(),
       original
     );
 

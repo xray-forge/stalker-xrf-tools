@@ -48,8 +48,8 @@ impl LtxImportExport for AlifeObjectDynamicVisual {
 
     Ok(Self {
       base: AlifeObjectAbstract::import(section_name, ltx)?,
-      visual_name: read_ltx_field("visual_name", section)?,
-      visual_flags: read_ltx_field("visual_flags", section)?,
+      visual_name: read_ltx_field("dynamic_visual.visual_name", section)?,
+      visual_flags: read_ltx_field("dynamic_visual.visual_flags", section)?,
     })
   }
 
@@ -59,8 +59,8 @@ impl LtxImportExport for AlifeObjectDynamicVisual {
 
     ltx
       .with_section(section_name)
-      .set("visual_name", &self.visual_name)
-      .set("visual_flags", self.visual_flags.to_string());
+      .set("dynamic_visual.visual_name", &self.visual_name)
+      .set("dynamic_visual.visual_flags", self.visual_flags.to_string());
 
     Ok(())
   }

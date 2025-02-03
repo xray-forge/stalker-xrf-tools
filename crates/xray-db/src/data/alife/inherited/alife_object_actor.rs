@@ -81,11 +81,18 @@ mod tests {
   use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::inherited::alife_object_skeleton::AlifeObjectSkeleton;
   use crate::data::alife::inherited::alife_object_trader_abstract::AlifeObjectTraderAbstract;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
+  use std::path::Path;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -158,6 +165,134 @@ mod tests {
 
     assert_eq!(
       AlifeObjectActor::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
+    let mut file: File = overwrite_file(config_path)?;
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectActor = AlifeObjectActor {
+      base: AlifeObjectCreature {
+        base: AlifeObjectDynamicVisual {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 6,
+            distance: 25.25,
+            direct_control: 3,
+            level_vertex_id: 5286,
+            flags: 45,
+            custom_data: String::from("custom-data"),
+            story_id: 10,
+            spawn_story_id: 33,
+          },
+          visual_name: String::from("visual-name"),
+          visual_flags: 14,
+        },
+        team: 1,
+        squad: 3,
+        group: 2,
+        health: 1.0,
+        dynamic_out_restrictions: vec![1, 2, 3, 4],
+        dynamic_in_restrictions: vec![5, 6, 7, 8],
+        killer_id: 0,
+        game_death_time: 0,
+      },
+      trader: AlifeObjectTraderAbstract {
+        money: 6000,
+        specific_character: String::from("specific-character"),
+        trader_flags: 25,
+        character_profile: String::from("character-profile"),
+        community_index: 1,
+        rank: 2,
+        reputation: 4,
+        character_name: String::from("character-name"),
+        dead_body_can_take: 1,
+        dead_body_closed: 0,
+      },
+      skeleton: AlifeObjectSkeleton {
+        name: String::from("skeleton-name"),
+        flags: 45,
+        source_id: 10,
+      },
+      holder_id: 4,
+    };
+
+    original.export("first", &mut ltx)?;
+
+    ltx.write_to(&mut file)?;
+
+    let source: Ltx = Ltx::read_from_path(config_path)?;
+
+    assert_eq!(AlifeObjectActor::import("first", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectActor = AlifeObjectActor {
+      base: AlifeObjectCreature {
+        base: AlifeObjectDynamicVisual {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 8,
+            distance: 594.25,
+            direct_control: 367,
+            level_vertex_id: 253,
+            flags: 155,
+            custom_data: String::from("custom-data"),
+            story_id: 5346,
+            spawn_story_id: 254,
+          },
+          visual_name: String::from("visual-name"),
+          visual_flags: 235,
+        },
+        team: 1,
+        squad: 67,
+        group: 66,
+        health: 1.0,
+        dynamic_out_restrictions: vec![1, 2, 3, 4],
+        dynamic_in_restrictions: vec![5, 6, 7, 8],
+        killer_id: 6532,
+        game_death_time: 0,
+      },
+      trader: AlifeObjectTraderAbstract {
+        money: 56255,
+        specific_character: String::from("specific-character"),
+        trader_flags: 37,
+        character_profile: String::from("character-profile"),
+        community_index: 5,
+        rank: 6,
+        reputation: 3,
+        character_name: String::from("character-name"),
+        dead_body_can_take: 0,
+        dead_body_closed: 1,
+      },
+      skeleton: AlifeObjectSkeleton {
+        name: String::from("skeleton-name"),
+        flags: 35,
+        source_id: 67,
+      },
+      holder_id: 0,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectActor>(&serialized).unwrap(),
       original
     );
 

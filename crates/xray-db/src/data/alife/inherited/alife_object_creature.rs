@@ -70,20 +70,20 @@ impl LtxImportExport for AlifeObjectCreature {
 
     Ok(Self {
       base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
-      team: read_ltx_field("team", section)?,
-      squad: read_ltx_field("squad", section)?,
-      group: read_ltx_field("group", section)?,
-      health: read_ltx_field("health", section)?,
+      team: read_ltx_field("creature.team", section)?,
+      squad: read_ltx_field("creature.squad", section)?,
+      group: read_ltx_field("creature.group", section)?,
+      health: read_ltx_field("creature.health", section)?,
       dynamic_out_restrictions: vector_from_string(&read_ltx_field::<String>(
-        "dynamic_out_restrictions",
+        "creature.dynamic_out_restrictions",
         section,
       )?)?,
       dynamic_in_restrictions: vector_from_string(&read_ltx_field::<String>(
-        "dynamic_in_restrictions",
+        "creature.dynamic_in_restrictions",
         section,
       )?)?,
-      killer_id: read_ltx_field("killer_id", section)?,
-      game_death_time: read_ltx_field("game_death_time", section)?,
+      killer_id: read_ltx_field("creature.killer_id", section)?,
+      game_death_time: read_ltx_field("creature.game_death_time", section)?,
     })
   }
 
@@ -93,20 +93,20 @@ impl LtxImportExport for AlifeObjectCreature {
 
     ltx
       .with_section(section_name)
-      .set("team", self.team.to_string())
-      .set("squad", self.squad.to_string())
-      .set("group", self.group.to_string())
-      .set("health", self.health.to_string())
+      .set("creature.team", self.team.to_string())
+      .set("creature.squad", self.squad.to_string())
+      .set("creature.group", self.group.to_string())
+      .set("creature.health", self.health.to_string())
       .set(
-        "dynamic_out_restrictions",
+        "creature.dynamic_out_restrictions",
         vector_to_string(&self.dynamic_out_restrictions),
       )
       .set(
-        "dynamic_in_restrictions",
+        "creature.dynamic_in_restrictions",
         vector_to_string(&self.dynamic_in_restrictions),
       )
-      .set("killer_id", self.killer_id.to_string())
-      .set("game_death_time", self.game_death_time.to_string());
+      .set("creature.killer_id", self.killer_id.to_string())
+      .set("creature.game_death_time", self.game_death_time.to_string());
 
     Ok(())
   }

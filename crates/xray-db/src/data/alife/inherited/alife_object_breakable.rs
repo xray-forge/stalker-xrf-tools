@@ -45,7 +45,7 @@ impl LtxImportExport for AlifeObjectBreakable {
 
     Ok(Self {
       base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
-      health: read_ltx_field("health", section)?,
+      health: read_ltx_field("breakable.health", section)?,
     })
   }
 
@@ -55,7 +55,7 @@ impl LtxImportExport for AlifeObjectBreakable {
 
     ltx
       .with_section(section_name)
-      .set("health", self.health.to_string());
+      .set("breakable.health", self.health.to_string());
 
     Ok(())
   }
@@ -66,11 +66,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::inherited::alife_object_breakable::AlifeObjectBreakable;
   use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -79,7 +85,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectBreakable = AlifeObjectBreakable {
+    let original: AlifeObjectBreakable = AlifeObjectBreakable {
       base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 3200,
@@ -97,7 +103,7 @@ mod tests {
       health: 1.0,
     };
 
-    object.write::<XRayByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 55);
 
@@ -116,7 +122,82 @@ mod tests {
 
     assert_eq!(
       AlifeObjectBreakable::read::<XRayByteOrder>(&mut reader)?,
-      object
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectBreakable = AlifeObjectBreakable {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 1,
+          distance: 25.0,
+          direct_control: 6321,
+          level_vertex_id: 246567,
+          flags: 67,
+          custom_data: String::from("custom-data"),
+          story_id: 154,
+          spawn_story_id: 364,
+        },
+        visual_name: String::from("visual-name"),
+        visual_flags: 12,
+      },
+      health: 0.5,
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectBreakable::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectBreakable = AlifeObjectBreakable {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 5,
+          distance: 3.0,
+          direct_control: 265,
+          level_vertex_id: 37465,
+          flags: 354,
+          custom_data: String::from("custom-data"),
+          story_id: 3645,
+          spawn_story_id: 36445,
+        },
+        visual_name: String::from("visual-name"),
+        visual_flags: 34,
+      },
+      health: 0.63,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectBreakable>(&serialized).unwrap(),
+      original
     );
 
     Ok(())

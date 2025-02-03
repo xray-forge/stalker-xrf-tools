@@ -136,6 +136,21 @@ impl FromStr for Time {
 }
 
 #[cfg(test)]
+impl Time {
+  pub fn new_mock() -> Self {
+    Self {
+      year: 4,
+      month: 6,
+      day: 14,
+      hour: 12,
+      minute: 30,
+      second: 10,
+      millis: 510,
+    }
+  }
+}
+
+#[cfg(test)]
 mod tests {
   use crate::data::generic::time::Time;
   use serde_json::json;

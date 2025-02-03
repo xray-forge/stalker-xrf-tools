@@ -49,7 +49,7 @@ impl LtxImportExport for AlifeObjectSpaceRestrictor {
     Ok(Self {
       base: AlifeObjectAbstract::import(section_name, ltx)?,
       shape: Shape::import_list(section)?,
-      restrictor_type: read_ltx_field("restrictor_type", section)?,
+      restrictor_type: read_ltx_field("space_restrictor.restrictor_type", section)?,
     })
   }
 
@@ -59,9 +59,10 @@ impl LtxImportExport for AlifeObjectSpaceRestrictor {
 
     Shape::export_list(&self.shape, section_name, ltx);
 
-    ltx
-      .with_section(section_name)
-      .set("restrictor_type", self.restrictor_type.to_string());
+    ltx.with_section(section_name).set(
+      "space_restrictor.restrictor_type",
+      self.restrictor_type.to_string(),
+    );
 
     Ok(())
   }
@@ -74,11 +75,14 @@ mod tests {
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::export::LtxImportExport;
+  use serde_json::json;
   use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
@@ -193,6 +197,50 @@ mod tests {
     assert_eq!(
       AlifeObjectSpaceRestrictor::import("second", &source)?,
       second
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor {
+      base: AlifeObjectAbstract {
+        game_vertex_id: 4,
+        distance: 2.7,
+        direct_control: 10,
+        level_vertex_id: 25,
+        flags: 64,
+        custom_data: String::from("test-custom-data"),
+        story_id: 256,
+        spawn_story_id: 3,
+      },
+      shape: vec![
+        Shape::Sphere((Vector3d::new(54.5, 0.5, 11.5), 1.0)),
+        Shape::Box((
+          Vector3d::new(23.5, 2.5, 73.1),
+          Vector3d::new(25.1, 1.2, 2.3),
+          Vector3d::new(21.0, 7.0, 3.4),
+          Vector3d::new(26.2, 3.3, 4.1),
+        )),
+      ],
+      restrictor_type: 6,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectSpaceRestrictor>(&serialized).unwrap(),
+      original
     );
 
     Ok(())

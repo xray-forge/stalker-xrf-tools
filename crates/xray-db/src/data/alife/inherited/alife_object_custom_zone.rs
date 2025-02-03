@@ -57,11 +57,11 @@ impl LtxImportExport for AlifeObjectCustomZone {
 
     Ok(Self {
       base: AlifeObjectSpaceRestrictor::import(section_name, ltx)?,
-      max_power: read_ltx_field("max_power", section)?,
-      owner_id: read_ltx_field("owner_id", section)?,
-      enabled_time: read_ltx_field("enabled_time", section)?,
-      disabled_time: read_ltx_field("disabled_time", section)?,
-      start_time_shift: read_ltx_field("start_time_shift", section)?,
+      max_power: read_ltx_field("custom_zone.max_power", section)?,
+      owner_id: read_ltx_field("custom_zone.owner_id", section)?,
+      enabled_time: read_ltx_field("custom_zone.enabled_time", section)?,
+      disabled_time: read_ltx_field("custom_zone.disabled_time", section)?,
+      start_time_shift: read_ltx_field("custom_zone.start_time_shift", section)?,
     })
   }
 
@@ -71,11 +71,14 @@ impl LtxImportExport for AlifeObjectCustomZone {
 
     ltx
       .with_section(section_name)
-      .set("max_power", self.max_power.to_string())
-      .set("owner_id", self.owner_id.to_string())
-      .set("enabled_time", self.enabled_time.to_string())
-      .set("disabled_time", self.disabled_time.to_string())
-      .set("start_time_shift", self.start_time_shift.to_string());
+      .set("custom_zone.max_power", self.max_power.to_string())
+      .set("custom_zone.owner_id", self.owner_id.to_string())
+      .set("custom_zone.enabled_time", self.enabled_time.to_string())
+      .set("custom_zone.disabled_time", self.disabled_time.to_string())
+      .set(
+        "custom_zone.start_time_shift",
+        self.start_time_shift.to_string(),
+      );
 
     Ok(())
   }

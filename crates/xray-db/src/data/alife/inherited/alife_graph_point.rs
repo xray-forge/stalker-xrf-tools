@@ -58,12 +58,12 @@ impl LtxImportExport for AlifeGraphPoint {
     })?;
 
     Ok(Self {
-      connection_point_name: read_ltx_field("connection_point_name", section)?,
-      connection_level_name: read_ltx_field("connection_point_name", section)?,
-      location0: read_ltx_field("location0", section)?,
-      location1: read_ltx_field("location1", section)?,
-      location2: read_ltx_field("location2", section)?,
-      location3: read_ltx_field("location3", section)?,
+      connection_point_name: read_ltx_field("graph_point.connection_point_name", section)?,
+      connection_level_name: read_ltx_field("graph_point.connection_level_name", section)?,
+      location0: read_ltx_field("graph_point.location0", section)?,
+      location1: read_ltx_field("graph_point.location1", section)?,
+      location2: read_ltx_field("graph_point.location2", section)?,
+      location3: read_ltx_field("graph_point.location3", section)?,
     })
   }
 
@@ -71,12 +71,18 @@ impl LtxImportExport for AlifeGraphPoint {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
-      .set("connection_point_name", &self.connection_point_name)
-      .set("connection_level_name", &self.connection_level_name)
-      .set("location0", self.location0.to_string())
-      .set("location1", self.location1.to_string())
-      .set("location2", self.location2.to_string())
-      .set("location3", self.location3.to_string());
+      .set(
+        "graph_point.connection_point_name",
+        &self.connection_point_name,
+      )
+      .set(
+        "graph_point.connection_level_name",
+        &self.connection_level_name,
+      )
+      .set("graph_point.location0", self.location0.to_string())
+      .set("graph_point.location1", self.location1.to_string())
+      .set("graph_point.location2", self.location2.to_string())
+      .set("graph_point.location3", self.location3.to_string());
 
     Ok(())
   }
@@ -85,11 +91,17 @@ impl LtxImportExport for AlifeGraphPoint {
 #[cfg(test)]
 mod tests {
   use crate::data::alife::inherited::alife_graph_point::AlifeGraphPoint;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -126,6 +138,63 @@ mod tests {
 
     assert_eq!(
       AlifeGraphPoint::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeGraphPoint = AlifeGraphPoint {
+      connection_point_name: String::from("point-name"),
+      connection_level_name: String::from("level-name"),
+      location0: 0,
+      location1: 10,
+      location2: 20,
+      location3: 30,
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeGraphPoint::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeGraphPoint = AlifeGraphPoint {
+      connection_point_name: String::from("point-name"),
+      connection_level_name: String::from("level-name"),
+      location0: 0,
+      location1: 100,
+      location2: 200,
+      location3: 255,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeGraphPoint>(&serialized).unwrap(),
       original
     );
 

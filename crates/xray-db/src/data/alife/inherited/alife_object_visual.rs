@@ -43,8 +43,8 @@ impl LtxImportExport for AlifeObjectVisual {
     })?;
 
     Ok(Self {
-      visual_name: read_ltx_field("visual_name", section)?,
-      visual_flags: read_ltx_field("visual_flags", section)?,
+      visual_name: read_ltx_field("visual.visual_name", section)?,
+      visual_flags: read_ltx_field("visual.visual_flags", section)?,
     })
   }
 
@@ -52,8 +52,8 @@ impl LtxImportExport for AlifeObjectVisual {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
-      .set("visual_name", &self.visual_name)
-      .set("visual_flags", self.visual_flags.to_string());
+      .set("visual.visual_name", &self.visual_name)
+      .set("visual.visual_flags", self.visual_flags.to_string());
 
     Ok(())
   }
@@ -63,11 +63,14 @@ impl LtxImportExport for AlifeObjectVisual {
 mod tests {
   use crate::data::alife::inherited::alife_object_visual::AlifeObjectVisual;
   use crate::export::LtxImportExport;
+  use serde_json::json;
   use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
@@ -134,6 +137,32 @@ mod tests {
 
     assert_eq!(AlifeObjectVisual::import("first", &source)?, first);
     assert_eq!(AlifeObjectVisual::import("second", &source)?, second);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectVisual = AlifeObjectVisual {
+      visual_name: String::from("visual-name"),
+      visual_flags: 6,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectVisual>(&serialized).unwrap(),
+      original
+    );
 
     Ok(())
   }

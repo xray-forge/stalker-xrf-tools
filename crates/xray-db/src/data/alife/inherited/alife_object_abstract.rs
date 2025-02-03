@@ -189,7 +189,7 @@ mod tests {
       &ltx_filename,
     )?)?;
 
-    let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
     assert_eq!(AlifeObjectAbstract::import("first", &source)?, first);
     assert_eq!(AlifeObjectAbstract::import("second", &source)?, second);

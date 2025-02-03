@@ -76,11 +76,17 @@ mod tests {
   use crate::data::generic::shape::Shape;
   use crate::data::generic::time::Time;
   use crate::data::generic::vector_3d::Vector3d;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -154,6 +160,137 @@ mod tests {
 
     assert_eq!(
       AlifeAnomalousZone::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeAnomalousZone = AlifeAnomalousZone {
+      base: AlifeObjectAnomalyZone {
+        base: AlifeObjectCustomZone {
+          base: AlifeObjectSpaceRestrictor {
+            base: AlifeObjectAbstract {
+              game_vertex_id: 25,
+              distance: 234.0,
+              direct_control: 4,
+              level_vertex_id: 7357,
+              flags: 66,
+              custom_data: String::from("custom-data"),
+              story_id: 25,
+              spawn_story_id: 7685,
+            },
+            shape: vec![
+              Shape::Sphere((Vector3d::new(2.5, 5.1, 1.5), 1.0)),
+              Shape::Box((
+                Vector3d::new(6.1, 1.1, 3.1),
+                Vector3d::new(1.1, 3.2, 3.3),
+                Vector3d::new(4.0, 7.0, 6.4),
+                Vector3d::new(69.2, 28.3, 33.0),
+              )),
+            ],
+            restrictor_type: 4,
+          },
+          max_power: 1.0,
+          owner_id: 64,
+          enabled_time: 235,
+          disabled_time: 3457,
+          start_time_shift: 253,
+        },
+        offline_interactive_radius: 330.0,
+        artefact_spawn_count: 4,
+        artefact_position_offset: 12,
+      },
+      last_spawn_time: Some(Time {
+        year: 22,
+        month: 10,
+        day: 25,
+        hour: 20,
+        minute: 30,
+        second: 45,
+        millis: 310,
+      }),
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeAnomalousZone::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeAnomalousZone = AlifeAnomalousZone {
+      base: AlifeObjectAnomalyZone {
+        base: AlifeObjectCustomZone {
+          base: AlifeObjectSpaceRestrictor {
+            base: AlifeObjectAbstract {
+              game_vertex_id: 3,
+              distance: 25.0,
+              direct_control: 2346,
+              level_vertex_id: 7357,
+              flags: 55,
+              custom_data: String::from("custom-data"),
+              story_id: 8567,
+              spawn_story_id: 7685,
+            },
+            shape: vec![
+              Shape::Sphere((Vector3d::new(2.5, 5.1, 1.5), 1.0)),
+              Shape::Box((
+                Vector3d::new(4.1, 1.1, 3.1),
+                Vector3d::new(2.1, 1.2, 2.3),
+                Vector3d::new(4.0, 5.0, 6.4),
+                Vector3d::new(3.2, 4.3, 5.0),
+              )),
+            ],
+            restrictor_type: 4,
+          },
+          max_power: 1.0,
+          owner_id: 25,
+          enabled_time: 13,
+          disabled_time: 12,
+          start_time_shift: 15,
+        },
+        offline_interactive_radius: 330.0,
+        artefact_spawn_count: 4,
+        artefact_position_offset: 12,
+      },
+      last_spawn_time: Some(Time {
+        year: 22,
+        month: 10,
+        day: 24,
+        hour: 20,
+        minute: 30,
+        second: 50,
+        millis: 250,
+      }),
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeAnomalousZone>(&serialized).unwrap(),
       original
     );
 

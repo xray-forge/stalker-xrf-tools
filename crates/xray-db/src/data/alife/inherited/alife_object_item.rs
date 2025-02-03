@@ -57,8 +57,8 @@ impl LtxImportExport for AlifeObjectItem {
 
     Ok(Self {
       base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
-      condition: read_ltx_field("condition", section)?,
-      upgrades_count: read_ltx_field("upgrades_count", section)?,
+      condition: read_ltx_field("item.condition", section)?,
+      upgrades_count: read_ltx_field("item.upgrades_count", section)?,
     })
   }
 
@@ -68,9 +68,8 @@ impl LtxImportExport for AlifeObjectItem {
 
     ltx
       .with_section(section_name)
-      .set("condition", self.condition.to_string())
-      .set("is_closed", self.upgrades_count.to_string())
-      .set("upgrades_count", self.upgrades_count.to_string());
+      .set("item.condition", self.condition.to_string())
+      .set("item.upgrades_count", self.upgrades_count.to_string());
 
     Ok(())
   }
