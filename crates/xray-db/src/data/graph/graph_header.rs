@@ -1,8 +1,9 @@
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -17,9 +18,9 @@ pub struct GraphHeader {
   pub levels_count: u8,
 }
 
-impl GraphHeader {
+impl ChunkReadWrite for GraphHeader {
   /// Read header data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       version: reader.read_u8()?,
       vertices_count: reader.read_u16::<T>()?,
@@ -31,7 +32,7 @@ impl GraphHeader {
   }
 
   /// Write graph edge data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u8(self.version)?;
     writer.write_u16::<T>(self.vertices_count)?;
     writer.write_u32::<T>(self.edges_count)?;
@@ -41,9 +42,11 @@ impl GraphHeader {
 
     Ok(())
   }
+}
 
+impl LtxImportExport for GraphHeader {
   /// Import graph header from ltx file.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Graph section '{}' should be defined in ltx file ({})",
@@ -63,27 +66,30 @@ impl GraphHeader {
   }
 
   /// Export graph header data into level ltx.
-  pub fn export(&self, ltx: &mut Ltx) {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
-      .with_section("header")
+      .with_section(section_name)
       .set("version", self.version.to_string())
       .set("vertex_count", self.vertices_count.to_string())
       .set("edges_count", self.edges_count.to_string())
       .set("point_count", self.points_count.to_string())
       .set("level_count", self.levels_count.to_string())
       .set("guid", self.guid.to_string());
+
+    Ok(())
   }
 }
 
 #[cfg(test)]
 mod tests {
   use crate::data::graph::graph_header::GraphHeader;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -151,7 +157,7 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    original.export(&mut ltx);
+    original.export("header", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
     assert_eq!(

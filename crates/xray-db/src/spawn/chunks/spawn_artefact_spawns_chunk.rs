@@ -1,13 +1,13 @@
 use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
-use crate::export::FileImportExport;
+use crate::export::{FileImportExport, LtxImportExport};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::Path;
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::open_export_file;
+use xray_utils::{assert_equal, open_export_file};
 
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
@@ -30,21 +30,20 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
       reader.read_bytes_remain()
     );
 
-    let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
     let count: u32 = reader.read_u32::<T>()?;
+    let mut nodes: Vec<ArtefactSpawnPoint> = Vec::with_capacity(count as usize);
 
     // Parsing CLevelPoint structure, 20 bytes per one.
     for _ in 0..count {
       nodes.push(ArtefactSpawnPoint::read::<T>(reader)?);
     }
 
-    assert_eq!(nodes.len() as u64, count as u64);
-
-    assert!(
-      reader.is_ended(),
-      "Expect artefact spawns chunk to be ended, {} remain",
-      reader.read_bytes_remain()
-    );
+    assert_equal(
+      nodes.len() as u64,
+      count as u64,
+      "Expected defined count of nodes to be read",
+    )?;
+    assert_chunk_read(reader, "Expect artefact spawns chunk to be ended")?;
 
     Ok(Self { nodes })
   }
@@ -72,10 +71,10 @@ impl FileImportExport for SpawnArtefactSpawnsChunk {
   /// Parse ltx files and populate spawn file.
   fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("artefact_spawns.ltx"))?;
-    let mut nodes: Vec<ArtefactSpawnPoint> = Vec::new();
+    let mut nodes: Vec<ArtefactSpawnPoint> = Vec::with_capacity(ltx.sections.len());
 
-    for (_, section) in &ltx {
-      nodes.push(ArtefactSpawnPoint::import(section)?);
+    for (name, _) in &ltx.sections {
+      nodes.push(ArtefactSpawnPoint::import(name, &ltx)?);
     }
 
     log::info!("Imported artefact spawns chunk");
@@ -88,7 +87,7 @@ impl FileImportExport for SpawnArtefactSpawnsChunk {
     let mut ltx: Ltx = Ltx::new();
 
     for (index, spawn_point) in self.nodes.iter().enumerate() {
-      spawn_point.export(&index.to_string(), &mut ltx);
+      spawn_point.export(&index.to_string(), &mut ltx)?;
     }
 
     ltx.write_to(&mut open_export_file(

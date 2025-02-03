@@ -26,7 +26,8 @@ impl ChunkReadWrite for OgfHeaderChunk {
 
     if version != 4 {
       return Err(XRayError::new_not_implemented_error(format!(
-        "Unexpected version '{version}' of OGF file, only version 4 is supported"
+        "Unexpected version '{}' of OGF file, only version 4 is supported",
+        version
       )));
     }
 
@@ -34,8 +35,8 @@ impl ChunkReadWrite for OgfHeaderChunk {
       version,
       model_type: reader.read_u8()?,
       shader_id: reader.read_u16::<T>()?,
-      bounding_box: OgfBox::read::<T>(reader)?,
-      bounding_sphere: OgfSphere::read::<T>(reader)?,
+      bounding_box: reader.read_xr::<T, _>()?,
+      bounding_sphere: reader.read_xr::<T, _>()?,
     };
 
     assert_chunk_read(
@@ -50,9 +51,8 @@ impl ChunkReadWrite for OgfHeaderChunk {
     writer.write_u8(self.version)?;
     writer.write_u8(self.model_type)?;
     writer.write_u16::<T>(self.shader_id)?;
-
-    self.bounding_box.write::<T>(writer)?;
-    self.bounding_sphere.write::<T>(writer)?;
+    writer.write_xr::<T, _>(&self.bounding_box)?;
+    writer.write_xr::<T, _>(&self.bounding_sphere)?;
 
     Ok(())
   }

@@ -1,7 +1,7 @@
 use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_vector_read, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_vector_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -18,6 +18,9 @@ pub struct OgfMotionDefinition {
   pub marks: Vec<OgfMotionMark>,
 }
 
+// todo: Version based switcher?
+// todo: Version based switcher?
+// todo: Version based switcher?
 impl OgfMotionDefinition {
   pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XRayResult<Vec<Self>> {
     let count: u16 = reader.read_u16::<T>()?;

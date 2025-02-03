@@ -18,7 +18,7 @@ impl OmfFile {
   pub const SUPPORTED_VERSIONS: [u16; 2] = [3, 4];
 
   pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
-    Self::read_from_file::<T>(File::open(&path).map_err(|error| {
+    Self::read_from_file::<T>(File::open(path).map_err(|error| {
       XRayError::new_not_found_error(format!(
         "OMF file was not read: {}, error: {}",
         path.as_ref().display(),

@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Read;
-use xray_chunk::{assert_chunk_read, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -13,8 +13,8 @@ pub struct OgfMotion {
   pub remaining: Vec<u8>,
 }
 
-impl OgfMotion {
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+impl ChunkReadWrite for OgfMotion {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let name: String = reader.read_w1251_string()?;
     let count: u32 = reader.read_u32::<T>()?;
     let flags: u8 = reader.read_u8()?;
@@ -32,7 +32,7 @@ impl OgfMotion {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
     todo!("Implement")
   }
 }

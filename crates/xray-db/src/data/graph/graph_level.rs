@@ -1,9 +1,10 @@
 use crate::data::generic::vector_3d::Vector3d;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -18,9 +19,9 @@ pub struct GraphLevel {
   pub guid: Uuid,
 }
 
-impl GraphLevel {
+impl ChunkReadWrite for GraphLevel {
   /// Read graph level data from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       name: reader.read_w1251_string()?,
       offset: reader.read_xr::<T, _>()?,
@@ -31,7 +32,7 @@ impl GraphLevel {
   }
 
   /// Write graph level data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_w1251_string(&self.name)?;
 
     writer.write_xr::<T, _>(&self.offset)?;
@@ -41,9 +42,11 @@ impl GraphLevel {
 
     Ok(())
   }
+}
 
+impl LtxImportExport for GraphLevel {
   /// Import patrols data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Graph level section '{}' should be defined in ltx file ({})",
@@ -62,7 +65,7 @@ impl GraphLevel {
   }
 
   /// Export graph level data into ltx.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("name", &self.name)
@@ -70,6 +73,8 @@ impl GraphLevel {
       .set("offset", self.offset.to_string())
       .set("id", self.id.to_string())
       .set("guid", self.guid.to_string());
+
+    Ok(())
   }
 }
 
@@ -77,12 +82,13 @@ impl GraphLevel {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_level::GraphLevel;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -148,7 +154,7 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    original.export("graph_level", &mut ltx);
+    original.export("graph_level", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
     assert_eq!(

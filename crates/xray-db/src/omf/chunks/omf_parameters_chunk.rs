@@ -3,7 +3,7 @@ use crate::data::ogf::ogf_part::OgfPart;
 use crate::OmfFile;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,19 +38,19 @@ impl ChunkReadWrite for OmfParametersChunk {
       )));
     }
 
-    let parts: Vec<OgfPart> = OgfPart::read_list::<T>(reader)
+    let parts: Vec<OgfPart> = reader
+      .read_xr_list::<T, _>()
       .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf parts: {error}")))?;
 
     let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader, version)
       .map_err(|error| {
-        XRayError::new_read_error(format!("Failed to read ogf motion definitions: {error}"))
+        XRayError::new_read_error(format!("Failed to read ogf motion definitions: {}", error))
       })?;
 
-    assert!(
-      reader.is_ended(),
-      "Expect all data to be read from omf parameters chunk, {} remain",
-      reader.read_bytes_remain()
-    );
+    assert_chunk_read(
+      reader,
+      "Expect all data to be read from omf parameters chunk",
+    )?;
 
     Ok(Self {
       version,

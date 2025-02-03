@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReader, ChunkWriter};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -9,11 +9,15 @@ pub struct OgfKinematicsChunk {
   pub motion_refs: Vec<String>,
 }
 
-// todo: Conditional read + implement chunk RW.
 impl OgfKinematicsChunk {
   pub const CHUNK_ID: u32 = 24;
   pub const CHUNK_ID_OLD: u32 = 19;
+}
 
+// todo: Conditional read + implement chunk RW.
+// todo: Conditional read + implement chunk RW.
+// todo: Conditional read + implement chunk RW.
+impl OgfKinematicsChunk {
   pub fn read<T: ByteOrder>(reader: &mut ChunkReader, chunk_id: u32) -> XRayResult<Self> {
     log::info!(
       "Reading motion refs chunk: {} bytes, chunk id {} ",

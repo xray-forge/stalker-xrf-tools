@@ -1,9 +1,10 @@
 use crate::data::generic::u32_bytes::U32Bytes;
 use crate::data::generic::vector_3d::Vector3d;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::vector_to_string;
@@ -22,9 +23,9 @@ pub struct GraphVertex {
   pub level_points_count: u8,
 }
 
-impl GraphVertex {
+impl ChunkReadWrite for GraphVertex {
   /// Read graph vertex data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       level_point: reader.read_xr::<T, _>()?,
       game_point: reader.read_xr::<T, _>()?,
@@ -39,7 +40,7 @@ impl GraphVertex {
   }
 
   /// Write graph vertex data into chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_xr::<T, _>(&self.level_point)?;
     writer.write_xr::<T, _>(&self.game_point)?;
     writer.write_u8(self.level_id)?;
@@ -52,9 +53,11 @@ impl GraphVertex {
 
     Ok(())
   }
+}
 
+impl LtxImportExport for GraphVertex {
   /// Import graph vertex from ltx file.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Graph vertex section '{}' should be defined in ltx file ({})",
@@ -77,7 +80,7 @@ impl GraphVertex {
   }
 
   /// Export graph vertex data into ltx.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("level_point", self.level_point.to_string())
@@ -97,6 +100,8 @@ impl GraphVertex {
           self.vertex_type.3,
         ]),
       );
+
+    Ok(())
   }
 }
 
@@ -104,11 +109,12 @@ impl GraphVertex {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_vertex::GraphVertex;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -124,8 +130,8 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     let original: GraphVertex = GraphVertex {
-      level_point: Vector3d::new(10.5, 11.6, 12.3),
-      game_point: Vector3d::new(0.5, -4.0, 1000.0),
+      level_point: Vector3d::new_mock(),
+      game_point: Vector3d::new_mock(),
       level_id: 255,
       level_vertex_id: 4000,
       vertex_type: (1, 2, 3, 4).into(),
@@ -166,8 +172,8 @@ mod tests {
   #[test]
   fn test_import_export() -> XRayResult {
     let original: GraphVertex = GraphVertex {
-      level_point: Vector3d::new(32.5, 523.6, 342.3),
-      game_point: Vector3d::new(0.23, -4.0, 123.0),
+      level_point: Vector3d::new_mock(),
+      game_point: Vector3d::new_mock(),
       level_id: 53,
       level_vertex_id: 5462,
       vertex_type: (1, 2, 3, 4).into(),
@@ -182,7 +188,7 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    original.export("graph_vertex", &mut ltx);
+    original.export("graph_vertex", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
     assert_eq!(
@@ -196,8 +202,8 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
     let original: GraphVertex = GraphVertex {
-      level_point: Vector3d::new(25.5, 15.6, 43.3),
-      game_point: Vector3d::new(0.44, -4.0, 1000.0),
+      level_point: Vector3d::new_mock(),
+      game_point: Vector3d::new_mock(),
       level_id: 213,
       level_vertex_id: 5234,
       vertex_type: (1, 2, 3, 4).into(),

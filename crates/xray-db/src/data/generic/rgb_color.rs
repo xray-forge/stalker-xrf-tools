@@ -36,7 +36,7 @@ impl FromStr for RgbColor {
   type Err = XRayError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
-    let parts: Vec<&str> = string.split(',').collect();
+    let parts: Vec<&str> = string.split(',').map(str::trim).collect();
 
     if parts.len() != 3 {
       return Err(XRayError::new_parsing_error(
@@ -46,19 +46,16 @@ impl FromStr for RgbColor {
 
     Ok(Self {
       r: parts[0]
-        .trim()
         .parse::<f32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse color R value",
         )))?,
       g: parts[1]
-        .trim()
         .parse::<f32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse color G value",
         )))?,
       b: parts[2]
-        .trim()
         .parse::<f32>()
         .or(Err(XRayError::new_parsing_error(
           "Failed to parse color B value",

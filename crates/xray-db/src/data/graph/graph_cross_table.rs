@@ -3,7 +3,10 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use uuid::Uuid;
-use xray_chunk::{ChunkReader, ChunkSizePackedIterator, ChunkWriter};
+use xray_chunk::{
+  assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator,
+  ChunkWriter,
+};
 use xray_error::XRayResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -18,61 +21,8 @@ pub struct GraphCrossTable {
   pub data: Vec<u8>,
 }
 
+// todo: Import/export list functionality?
 impl GraphCrossTable {
-  /// Read cross tables list data from the chunk.
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
-    let mut cross_tables: Vec<Self> = Vec::new();
-
-    for mut cross_table_chunk in ChunkSizePackedIterator::new(reader) {
-      cross_tables.push(Self::read::<T>(&mut cross_table_chunk)?);
-
-      assert!(
-        cross_table_chunk.is_ended(),
-        "Expect cross table chunk to be ended"
-      );
-    }
-
-    Ok(cross_tables)
-  }
-
-  /// Write cross tables list data into the writer.
-  pub fn write_list<T: ByteOrder>(cross_tables: &[Self], writer: &mut ChunkWriter) -> XRayResult {
-    for table in cross_tables {
-      let mut table_writer: ChunkWriter = ChunkWriter::new();
-
-      table.write::<T>(&mut table_writer)?;
-
-      writer.write_u32::<T>(table_writer.bytes_written() as u32 + 4)?;
-      writer.write_all(&table_writer.buffer)?;
-    }
-
-    Ok(())
-  }
-
-  /// Read cross table data from the chunk.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    Ok(Self {
-      version: reader.read_u32::<T>()?,
-      nodes_count: reader.read_u32::<T>()?,
-      vertices_count: reader.read_u32::<T>()?,
-      level_guid: Uuid::from_u128(reader.read_u128::<T>()?),
-      game_guid: Uuid::from_u128(reader.read_u128::<T>()?),
-      data: reader.read_bytes(reader.read_bytes_remain() as usize)?,
-    })
-  }
-
-  /// Write cross table data into the writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_u32::<T>(self.version)?;
-    writer.write_u32::<T>(self.nodes_count)?;
-    writer.write_u32::<T>(self.vertices_count)?;
-    writer.write_u128::<T>(self.level_guid.as_u128())?;
-    writer.write_u128::<T>(self.game_guid.as_u128())?;
-    writer.write_all(&self.data)?;
-
-    Ok(())
-  }
-
   /// Export cross-tables as separate gct chunk file.
   pub fn import_list<T: ByteOrder>(file: &mut File) -> XRayResult<Vec<Self>> {
     let mut cross_tables: Vec<Self> = Vec::new();
@@ -80,12 +30,8 @@ impl GraphCrossTable {
     for mut cross_table_reader in
       ChunkSizePackedIterator::new(&mut ChunkReader::from_file(file.try_clone().unwrap())?)
     {
-      cross_tables.push(Self::read::<T>(&mut cross_table_reader)?);
-
-      assert!(
-        cross_table_reader.is_ended(),
-        "Expect cross table chunk to be ended"
-      );
+      cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
+      assert_chunk_read(&cross_table_reader, "Expect cross table chunk to be ended")?;
     }
 
     Ok(cross_tables)
@@ -97,14 +43,66 @@ impl GraphCrossTable {
 
     for cross_table in cross_tables {
       let mut cross_table_writer: ChunkWriter = ChunkWriter::new();
-
-      cross_table.write::<T>(&mut cross_table_writer)?;
+      cross_table_writer.write_xr::<T, _>(cross_table)?;
 
       cross_tables_writer.write_u32::<T>(cross_table_writer.bytes_written() as u32 + 4)?;
       cross_tables_writer.write_all(&cross_table_writer.flush_raw_into_buffer()?)?;
     }
 
     cross_tables_writer.flush_raw_into(file)?;
+
+    Ok(())
+  }
+}
+
+impl ChunkReadWriteList for GraphCrossTable {
+  /// Read cross tables list data from the chunk.
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+    let mut cross_tables: Vec<Self> = Vec::new();
+
+    for mut cross_table_reader in ChunkSizePackedIterator::new(reader) {
+      cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
+      assert_chunk_read(&cross_table_reader, "Expect cross table chunk to be ended")?;
+    }
+
+    Ok(cross_tables)
+  }
+
+  /// Write cross tables list data into the writer.
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, cross_tables: &[Self]) -> XRayResult {
+    for table in cross_tables {
+      let mut table_writer: ChunkWriter = ChunkWriter::new();
+      table_writer.write_xr::<T, _>(table)?;
+
+      writer.write_u32::<T>(table_writer.bytes_written() as u32 + 4)?;
+      writer.write_all(&table_writer.buffer)?;
+    }
+
+    Ok(())
+  }
+}
+
+impl ChunkReadWrite for GraphCrossTable {
+  /// Read cross table data from the chunk.
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+    Ok(Self {
+      version: reader.read_u32::<T>()?,
+      nodes_count: reader.read_u32::<T>()?,
+      vertices_count: reader.read_u32::<T>()?,
+      level_guid: Uuid::from_u128(reader.read_u128::<T>()?),
+      game_guid: Uuid::from_u128(reader.read_u128::<T>()?),
+      data: reader.read_bytes(reader.read_bytes_remain() as usize)?,
+    })
+  }
+
+  /// Write cross table data into the writer.
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.version)?;
+    writer.write_u32::<T>(self.nodes_count)?;
+    writer.write_u32::<T>(self.vertices_count)?;
+    writer.write_u128::<T>(self.level_guid.as_u128())?;
+    writer.write_u128::<T>(self.game_guid.as_u128())?;
+    writer.write_all(&self.data)?;
 
     Ok(())
   }
@@ -118,7 +116,7 @@ mod tests {
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
   use uuid::uuid;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
@@ -160,7 +158,7 @@ mod tests {
       },
     ];
 
-    GraphCrossTable::write_list::<XRayByteOrder>(&original, &mut writer)?;
+    GraphCrossTable::write_list::<XRayByteOrder>(&mut writer, &original)?;
 
     assert_eq!(writer.bytes_written(), 166);
 

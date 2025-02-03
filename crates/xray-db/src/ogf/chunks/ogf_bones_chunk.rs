@@ -31,7 +31,7 @@ impl ChunkReadWrite for OgfBonesChunk {
     let mut bones: Vec<OgfBone> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
-      bones.push(OgfBone::read::<T>(reader)?);
+      bones.push(reader.read_xr::<T, _>()?);
     }
 
     assert_chunk_read(reader, "Expect all data to be read from ogf bones chunk")?;
@@ -48,7 +48,7 @@ impl ChunkReadWrite for OgfBonesChunk {
     writer.write_u32::<T>(self.bones.len() as u32)?;
 
     for bone in &self.bones {
-      bone.write::<T>(writer)?;
+      writer.write_xr::<T, _>(bone)?
     }
 
     Ok(())

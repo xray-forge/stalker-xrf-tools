@@ -1,6 +1,8 @@
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_vector_read, ChunkReader, ChunkWriter};
+use xray_chunk::{
+  assert_chunk_vector_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter,
+};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -11,7 +13,17 @@ pub struct OgfPart {
 }
 
 impl OgfPart {
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  pub fn get_bones(&self) -> Vec<&str> {
+    self
+      .bones
+      .iter()
+      .map(|it| it.0.as_str())
+      .collect::<Vec<_>>()
+  }
+}
+
+impl ChunkReadWriteList for OgfPart {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let count: u16 = reader.read_u16::<T>()?;
     let mut parts: Vec<Self> = Vec::with_capacity(count as usize);
 
@@ -32,7 +44,13 @@ impl OgfPart {
     Ok(parts)
   }
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn write_list<T: ByteOrder>(_: &mut ChunkWriter, _: &[Self]) -> XRayResult {
+    todo!()
+  }
+}
+
+impl ChunkReadWrite for OgfPart {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let name: String = reader.read_w1251_string()?;
     let count: u16 = reader.read_u16::<T>()?;
 
@@ -45,17 +63,7 @@ impl OgfPart {
     Ok(Self { name, bones })
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
     todo!("Implement")
-  }
-}
-
-impl OgfPart {
-  pub fn get_bones(&self) -> Vec<&str> {
-    self
-      .bones
-      .iter()
-      .map(|it| it.0.as_str())
-      .collect::<Vec<_>>()
   }
 }

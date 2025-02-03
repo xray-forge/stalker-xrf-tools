@@ -37,7 +37,7 @@ impl ChunkReadWrite for OmfMotionsChunk {
     let mut motions: Vec<OgfMotion> = Vec::new();
 
     for chunk in &mut chunks[1..] {
-      motions.push(OgfMotion::read::<T>(chunk)?);
+      motions.push(chunk.read_xr::<T, _>()?);
     }
 
     assert!(

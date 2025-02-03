@@ -1,5 +1,5 @@
-use crate::data::alife::alife_object_base::AlifeObjectBase;
-use crate::export::FileImportExport;
+use crate::data::alife::alife_object::AlifeObjectBase;
+use crate::export::{FileImportExport, LtxImportExport};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -39,7 +39,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
     let vertex_reader: ChunkReader = reader.read_child_by_index(Self::VERTEX_CHUNK_ID)?;
 
     let count: u32 = count_reader.read_u32::<T>()?;
-    let mut objects: Vec<AlifeObjectBase> = Vec::new();
+    let mut objects: Vec<AlifeObjectBase> = Vec::with_capacity(count as usize);
 
     for mut object_reader in ChunkIterator::new(&mut objects_reader) {
       objects.push(AlifeObjectBase::read::<T>(&mut object_reader)?)
@@ -52,7 +52,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
       &vertex_reader,
       "Parsing of edges in spawn chunk is not implemented",
     )?;
-    assert_chunk_read(&reader, "Expect ALife spawns chunk to be ended")?;
+    assert_chunk_read(reader, "Expect ALife spawns chunk to be ended")?;
 
     Ok(Self { objects })
   }
@@ -106,9 +106,9 @@ impl FileImportExport for SpawnALifeSpawnsChunk {
   /// Import ALife spawns data from provided path.
   fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("alife_spawns.ltx"))?;
-    let mut objects: Vec<AlifeObjectBase> = Vec::new();
+    let mut objects: Vec<AlifeObjectBase> = Vec::with_capacity(ltx.sections.len());
 
-    for (section_name, _) in ltx.iter() {
+    for (section_name, _) in &ltx {
       objects.push(AlifeObjectBase::import(section_name, &ltx)?);
     }
 
@@ -147,8 +147,8 @@ impl fmt::Debug for SpawnALifeSpawnsChunk {
 
 #[cfg(test)]
 mod tests {
+  use crate::data::alife::alife_object::AlifeObjectBase;
   use crate::data::alife::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::alife_object_base::AlifeObjectBase;
   use crate::data::alife::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::alife_object_item::AlifeObjectItem;
   use crate::data::alife::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;

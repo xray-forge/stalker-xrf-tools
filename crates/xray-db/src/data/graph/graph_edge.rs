@@ -1,7 +1,8 @@
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -12,9 +13,9 @@ pub struct GraphEdge {
   pub distance: f32,
 }
 
-impl GraphEdge {
+impl ChunkReadWrite for GraphEdge {
   /// Read edge from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       game_vertex_id: reader.read_u16::<T>()?,
       distance: reader.read_f32::<T>()?,
@@ -22,15 +23,17 @@ impl GraphEdge {
   }
 
   /// Write graph edge data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_u16::<T>(self.game_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 
     Ok(())
   }
+}
 
+impl LtxImportExport for GraphEdge {
   /// Import graph edge from ltx file.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Graph section '{}' should be defined in ltx file ({})",
@@ -46,22 +49,25 @@ impl GraphEdge {
   }
 
   /// Export graph edge data into ltx.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("game_vertex_id", self.game_vertex_id.to_string())
       .set("distance", self.distance.to_string());
+
+    Ok(())
   }
 }
 
 #[cfg(test)]
 mod tests {
   use crate::data::graph::graph_edge::GraphEdge;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -121,7 +127,7 @@ mod tests {
       overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
-    original.export("graph_edge", &mut ltx);
+    original.export("graph_edge", &mut ltx)?;
 
     ltx.write_to(&mut file)?;
 

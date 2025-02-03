@@ -101,7 +101,7 @@ impl FromStr for Time {
   type Err = XRayError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
-    let parts: Vec<&str> = string.split(',').map(|it| it.trim()).collect();
+    let parts: Vec<&str> = string.split(',').map(str::trim).collect();
 
     if parts.len() != 7 {
       return Err(XRayError::new_parsing_error(

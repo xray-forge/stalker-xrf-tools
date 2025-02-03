@@ -1,8 +1,9 @@
 use crate::data::generic::vector_3d::Vector3d;
+use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
@@ -14,9 +15,9 @@ pub struct GraphLevelPoint {
   pub distance: f32,
 }
 
-impl GraphLevelPoint {
+impl ChunkReadWrite for GraphLevelPoint {
   /// Read level point from the chunk reader.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     Ok(Self {
       position: reader.read_xr::<T, _>()?,
       level_vertex_id: reader.read_u32::<T>()?,
@@ -25,16 +26,18 @@ impl GraphLevelPoint {
   }
 
   /// Write level point data into the chunk writer.
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_xr::<T, _>(&self.position)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 
     Ok(())
   }
+}
 
+impl LtxImportExport for GraphLevelPoint {
   /// Import graph level point from ltx file.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
       XRayError::new_parsing_error(format!(
         "Graph level point section '{}' should be defined in ltx file ({})",
@@ -51,12 +54,14 @@ impl GraphLevelPoint {
   }
 
   /// Export graph level point data into ltx file.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
       .set("position", self.position.to_string())
       .set("level_vertex_id", self.level_vertex_id.to_string())
       .set("distance", self.distance.to_string());
+
+    Ok(())
   }
 }
 
@@ -64,11 +69,12 @@ impl GraphLevelPoint {
 mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::graph::graph_level_point::GraphLevelPoint;
+  use crate::export::LtxImportExport;
   use serde_json::json;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
   use xray_test_utils::file::read_file_as_string;
@@ -129,7 +135,7 @@ mod tests {
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
-    original.export("graph_level_point", &mut ltx);
+    original.export("graph_level_point", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
     assert_eq!(

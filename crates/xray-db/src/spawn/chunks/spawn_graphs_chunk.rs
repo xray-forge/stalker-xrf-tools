@@ -4,16 +4,16 @@ use crate::data::graph::graph_header::GraphHeader;
 use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
-use crate::export::FileImportExport;
+use crate::export::{FileImportExport, LtxImportExport};
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fs::File;
 use std::path::Path;
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::open_export_file;
+use xray_utils::{assert_equal, open_export_file};
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -36,30 +36,33 @@ impl ChunkReadWrite for SpawnGraphsChunk {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     log::info!("Reading graphs chunk, bytes {}", reader.read_bytes_remain());
 
-    let mut levels: Vec<GraphLevel> = Vec::new();
-    let mut vertices: Vec<GraphVertex> = Vec::new();
-    let mut edges: Vec<GraphEdge> = Vec::new();
-    let mut points: Vec<GraphLevelPoint> = Vec::new();
+    let header: GraphHeader = reader.read_xr::<T, _>()?;
 
-    let header: GraphHeader = GraphHeader::read::<T>(reader)?;
+    let mut levels: Vec<GraphLevel> = Vec::with_capacity(header.levels_count as usize);
 
     for _ in 0..header.levels_count {
-      levels.push(GraphLevel::read::<T>(reader)?)
+      levels.push(reader.read_xr::<T, _>()?)
     }
+
+    let mut vertices: Vec<GraphVertex> = Vec::with_capacity(header.vertices_count as usize);
 
     for _ in 0..header.vertices_count {
-      vertices.push(GraphVertex::read::<T>(reader)?);
+      vertices.push(reader.read_xr::<T, _>()?);
     }
+
+    let mut edges: Vec<GraphEdge> = Vec::with_capacity(header.edges_count as usize);
 
     for _ in 0..header.edges_count {
-      edges.push(GraphEdge::read::<T>(reader)?);
+      edges.push(reader.read_xr::<T, _>()?);
     }
+
+    let mut points: Vec<GraphLevelPoint> = Vec::with_capacity(header.points_count as usize);
 
     for _ in 0..header.points_count {
-      points.push(GraphLevelPoint::read::<T>(reader)?);
+      points.push(reader.read_xr::<T, _>()?);
     }
 
-    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::read_list::<T>(reader)?;
+    let cross_tables: Vec<GraphCrossTable> = reader.read_xr_list::<T, _>()?;
 
     log::info!(
       "Read graphs ver {}, {} bytes",
@@ -67,17 +70,27 @@ impl ChunkReadWrite for SpawnGraphsChunk {
       reader.read_bytes_len(),
     );
 
-    assert_eq!(levels.len(), header.levels_count as usize);
-    assert_eq!(vertices.len(), header.vertices_count as usize);
-    assert_eq!(edges.len(), header.edges_count as usize);
-    assert_eq!(points.len(), header.points_count as usize);
-    assert_eq!(cross_tables.len(), header.levels_count as usize);
-
-    assert!(
-      reader.is_ended(),
-      "Expect graphs chunk to be ended, {} remain",
-      reader.read_bytes_remain()
-    );
+    assert_equal(
+      levels.len(),
+      header.levels_count as usize,
+      "Expect correct levels count to be read",
+    )?;
+    assert_equal(
+      vertices.len(),
+      header.vertices_count as usize,
+      "Expect correct vertices count to be read",
+    )?;
+    assert_equal(
+      edges.len(),
+      header.edges_count as usize,
+      "Expect correct edges count to be read",
+    )?;
+    assert_equal(
+      points.len(),
+      header.points_count as usize,
+      "Expect correct points count to be read",
+    )?;
+    assert_chunk_read(reader, "Expect graphs chunk to be ended")?;
 
     Ok(Self {
       header,
@@ -94,22 +107,22 @@ impl ChunkReadWrite for SpawnGraphsChunk {
     self.header.write::<T>(writer)?;
 
     for level in &self.levels {
-      level.write::<T>(writer)?;
+      writer.write_xr::<T, _>(level)?;
     }
 
     for vertex in &self.vertices {
-      vertex.write::<T>(writer)?;
+      writer.write_xr::<T, _>(vertex)?;
     }
 
     for edge in &self.edges {
-      edge.write::<T>(writer)?;
+      writer.write_xr::<T, _>(edge)?;
     }
 
     for point in &self.points {
-      point.write::<T>(writer)?;
+      writer.write_xr::<T, _>(point)?;
     }
 
-    GraphCrossTable::write_list::<T>(&self.cross_tables, writer)?;
+    writer.write_xr_list::<T, _>(&self.cross_tables)?;
 
     log::info!("Written graphs chunk, {} bytes", writer.bytes_written());
 
@@ -174,7 +187,7 @@ impl FileImportExport for SpawnGraphsChunk {
   fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut graphs_header_ltx: Ltx = Ltx::new();
 
-    self.header.export(&mut graphs_header_ltx);
+    self.header.export("header", &mut graphs_header_ltx)?;
 
     graphs_header_ltx.write_to(&mut open_export_file(
       path.as_ref().join("graphs_header.ltx"),
@@ -183,7 +196,7 @@ impl FileImportExport for SpawnGraphsChunk {
     let mut graphs_level_ltx: Ltx = Ltx::new();
 
     for (index, level) in self.levels.iter().enumerate() {
-      level.export(&index.to_string(), &mut graphs_level_ltx);
+      level.export(&index.to_string(), &mut graphs_level_ltx)?;
     }
 
     graphs_level_ltx.write_to(&mut open_export_file(
@@ -195,7 +208,7 @@ impl FileImportExport for SpawnGraphsChunk {
     let mut graphs_vertices_ltx: Ltx = Ltx::new();
 
     for (index, vertex) in self.vertices.iter().enumerate() {
-      vertex.export(&index.to_string(), &mut graphs_vertices_ltx);
+      vertex.export(&index.to_string(), &mut graphs_vertices_ltx)?;
     }
 
     graphs_vertices_ltx.write_to(&mut open_export_file(
@@ -207,7 +220,7 @@ impl FileImportExport for SpawnGraphsChunk {
     let mut graphs_points_ltx: Ltx = Ltx::new();
 
     for (index, point) in self.points.iter().enumerate() {
-      point.export(&index.to_string(), &mut graphs_points_ltx);
+      point.export(&index.to_string(), &mut graphs_points_ltx)?;
     }
 
     graphs_points_ltx.write_to(&mut open_export_file(
@@ -219,7 +232,7 @@ impl FileImportExport for SpawnGraphsChunk {
     let mut graphs_edges_ltx: Ltx = Ltx::new();
 
     for (index, edge) in self.edges.iter().enumerate() {
-      edge.export(&index.to_string(), &mut graphs_edges_ltx);
+      edge.export(&index.to_string(), &mut graphs_edges_ltx)?;
     }
 
     graphs_edges_ltx.write_to(&mut open_export_file(
