@@ -93,7 +93,7 @@ mod tests {
   use crate::data::particles::actions::particle_action_explosion::ParticleActionExplosion;
   use crate::data::particles::particle_action_type::ParticleActionType;
   use crate::export::LtxImportExport;
-  use serde_json::json;
+  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
@@ -193,7 +193,7 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(original).to_string().as_bytes())?;
+    file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
@@ -201,7 +201,7 @@ mod tests {
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
       original,
-      serde_json::from_str::<ParticleActionExplosion>(&serialized).unwrap()
+      serde_json::from_str::<ParticleActionExplosion>(&serialized)?
     );
 
     Ok(())

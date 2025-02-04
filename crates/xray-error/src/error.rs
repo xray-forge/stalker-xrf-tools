@@ -1,7 +1,6 @@
 use image::ImageError;
 use serde::Serialize;
 use std::error::Error;
-use std::io;
 use std::io::{Error as IoError, ErrorKind};
 use thiserror::Error as ThisError;
 use xray_error_derive::ErrorConstructors;
@@ -75,11 +74,14 @@ pub enum XRayError {
   #[constructor]
   #[error("Generic error: {message}")]
   Generic { message: String },
+  #[constructor]
+  #[error("Serde error: {message}")]
+  Serde { message: String },
   #[error("IO error: {message}")]
   Io {
     message: String,
     #[serde(skip_serializing)]
-    kind: io::ErrorKind,
+    kind: ErrorKind,
   },
 }
 
@@ -150,6 +152,14 @@ impl From<IoError> for XRayError {
     Self::Io {
       message: value.to_string(),
       kind: value.kind(),
+    }
+  }
+}
+
+impl From<serde_json::error::Error> for XRayError {
+  fn from(value: serde_json::error::Error) -> Self {
+    Self::Serde {
+      message: value.to_string(),
     }
   }
 }

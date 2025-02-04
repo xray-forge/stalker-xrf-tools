@@ -1,1 +1,6 @@
-{"actionFlags":1,"actionType":"SpeedLimit","maxSpeed":2.1500000953674316,"minSpeed":1.25}
+{
+  "actionFlags": 1,
+  "actionType": "SpeedLimit",
+  "minSpeed": 1.25,
+  "maxSpeed": 2.15
+}

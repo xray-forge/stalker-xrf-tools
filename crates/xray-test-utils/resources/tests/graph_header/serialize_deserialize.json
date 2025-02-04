@@ -1,1 +1,8 @@
-{"edgesCount":12513,"guid":"67e55044-10b1-426f-9247-bb680e5fe0c8","levelsCount":31,"pointsCount":43231,"version":12,"verticesCount":2341}
+{
+  "version": 12,
+  "verticesCount": 2341,
+  "edgesCount": 12513,
+  "pointsCount": 43231,
+  "guid": "67e55044-10b1-426f-9247-bb680e5fe0c8",
+  "levelsCount": 31
+}

@@ -1,1 +1,61 @@
-{"artefactPositionOffset":55,"artefactSpawnCount":6,"base":{"base":{"base":{"customData":"","directControl":4,"distance":55.29999923706055,"flags":12,"gameVertexId":241,"levelVertexId":87,"spawnStoryId":143,"storyId":6211},"restrictorType":4,"shape":[{"Sphere":[{"x":0.5,"y":0.5,"z":0.5},1.0]},{"Box":[{"x":24.100000381469727,"y":10.100000381469727,"z":32.099998474121094},{"x":21.100000381469727,"y":20.200000762939453,"z":13.300000190734863},{"x":24.0,"y":50.0,"z":11.399999618530273},{"x":29.200000762939453,"y":80.30000305175781,"z":11.0}]}]},"disabledTime":475,"enabledTime":74,"maxPower":255.3300018310547,"ownerId":31,"startTimeShift":8},"offlineInteractiveRadius":-2.0999999046325684}
+{
+  "base": {
+    "base": {
+      "base": {
+        "gameVertexId": 241,
+        "distance": 55.3,
+        "directControl": 4,
+        "levelVertexId": 87,
+        "flags": 12,
+        "customData": "",
+        "storyId": 6211,
+        "spawnStoryId": 143
+      },
+      "shape": [
+        {
+          "Sphere": [
+            {
+              "x": 0.5,
+              "y": 0.5,
+              "z": 0.5
+            },
+            1.0
+          ]
+        },
+        {
+          "Box": [
+            {
+              "x": 24.1,
+              "y": 10.1,
+              "z": 32.1
+            },
+            {
+              "x": 21.1,
+              "y": 20.2,
+              "z": 13.3
+            },
+            {
+              "x": 24.0,
+              "y": 50.0,
+              "z": 11.4
+            },
+            {
+              "x": 29.2,
+              "y": 80.3,
+              "z": 11.0
+            }
+          ]
+        }
+      ],
+      "restrictorType": 4
+    },
+    "maxPower": 255.33,
+    "ownerId": 31,
+    "enabledTime": 74,
+    "disabledTime": 475,
+    "startTimeShift": 8
+  },
+  "offlineInteractiveRadius": -2.1,
+  "artefactSpawnCount": 6,
+  "artefactPositionOffset": 55
+}

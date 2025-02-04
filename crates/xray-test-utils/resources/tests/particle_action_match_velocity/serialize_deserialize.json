@@ -1,1 +1,7 @@
-{"actionFlags":1,"actionType":"MatchVelocity","epsilon":0.00009999999747378752,"magnitude":4.004000186920166,"maxRadius":25.0}
+{
+  "actionFlags": 1,
+  "actionType": "MatchVelocity",
+  "magnitude": 4.004,
+  "epsilon": 0.0001,
+  "maxRadius": 25.0
+}

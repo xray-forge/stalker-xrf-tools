@@ -1,1 +1,8 @@
-{"connectionLevelName":"level-name","connectionPointName":"point-name","location0":0,"location1":100,"location2":200,"location3":255}
+{
+  "connectionPointName": "point-name",
+  "connectionLevelName": "level-name",
+  "location0": 0,
+  "location1": 100,
+  "location2": 200,
+  "location3": 255
+}

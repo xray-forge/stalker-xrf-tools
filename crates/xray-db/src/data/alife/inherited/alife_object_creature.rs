@@ -118,7 +118,7 @@ mod tests {
   use crate::data::alife::inherited::alife_object_creature::AlifeObjectCreature;
   use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::export::LtxImportExport;
-  use serde_json::json;
+  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
@@ -136,7 +136,7 @@ mod tests {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let object: AlifeObjectCreature = AlifeObjectCreature {
+    let original: AlifeObjectCreature = AlifeObjectCreature {
       base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 1001,
@@ -161,7 +161,7 @@ mod tests {
       game_death_time: 0,
     };
 
-    object.write::<XRayByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 87);
 
@@ -179,7 +179,7 @@ mod tests {
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
     let read_object: AlifeObjectCreature = AlifeObjectCreature::read::<XRayByteOrder>(&mut reader)?;
 
-    assert_eq!(read_object, object);
+    assert_eq!(read_object, original);
 
     Ok(())
   }
@@ -256,7 +256,7 @@ mod tests {
 
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
-    let object: AlifeObjectCreature = AlifeObjectCreature {
+    let original: AlifeObjectCreature = AlifeObjectCreature {
       base: AlifeObjectDynamicVisual {
         base: AlifeObjectAbstract {
           game_vertex_id: 3215,
@@ -285,15 +285,16 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(object).to_string().as_bytes())?;
+    file.write_all(to_string_pretty(&original)?.as_bytes())?;
+
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      object,
-      serde_json::from_str::<AlifeObjectCreature>(&serialized).unwrap()
+      original,
+      serde_json::from_str::<AlifeObjectCreature>(&serialized)?
     );
 
     Ok(())

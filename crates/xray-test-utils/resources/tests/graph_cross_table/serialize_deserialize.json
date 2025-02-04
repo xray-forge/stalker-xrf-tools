@@ -1,1 +1,7 @@
-{"gameGuid":"89e55024-10b1-426f-9247-bb680e5fe0b8","levelGuid":"78e55023-10b1-426f-9247-bb680e5fe0b7","nodesCount":436,"version":24,"verticesCount":26324}
+{
+  "version": 24,
+  "nodesCount": 436,
+  "verticesCount": 26324,
+  "levelGuid": "78e55023-10b1-426f-9247-bb680e5fe0b7",
+  "gameGuid": "89e55024-10b1-426f-9247-bb680e5fe0b8"
+}

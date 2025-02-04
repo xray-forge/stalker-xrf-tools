@@ -7024,6 +7024,7 @@ version = "0.1.0"
 dependencies = [
  "image",
  "serde",
+ "serde_json",
  "thiserror 2.0.11",
  "xray-error-derive",
 ]

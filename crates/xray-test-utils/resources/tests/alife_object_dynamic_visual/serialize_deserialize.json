@@ -1,1 +1,14 @@
-{"base":{"customData":"custom_data_serde","directControl":25313,"distance":523.0999755859375,"flags":342,"gameVertexId":325,"levelVertexId":235,"spawnStoryId":45672,"storyId":235},"visualFlags":33,"visualName":"visual-name-serde"}
+{
+  "base": {
+    "gameVertexId": 325,
+    "distance": 523.1,
+    "directControl": 25313,
+    "levelVertexId": 235,
+    "flags": 342,
+    "customData": "custom_data_serde",
+    "storyId": 235,
+    "spawnStoryId": 45672
+  },
+  "visualName": "visual-name-serde",
+  "visualFlags": 33
+}

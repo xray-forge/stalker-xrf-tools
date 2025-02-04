@@ -1,1 +1,4 @@
-{"visualFlags":6,"visualName":"visual-name"}
+{
+  "visualName": "visual-name",
+  "visualFlags": 6
+}

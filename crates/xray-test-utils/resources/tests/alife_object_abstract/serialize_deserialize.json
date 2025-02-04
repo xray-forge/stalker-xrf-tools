@@ -1,1 +1,10 @@
-{"customData":"[custom_data_section] field1 = 1\r\n field2 = 2\r\n","directControl":262342,"distance":23.25,"flags":34,"gameVertexId":1005,"levelVertexId":25341,"spawnStoryId":36,"storyId":433}
+{
+  "gameVertexId": 1005,
+  "distance": 23.25,
+  "directControl": 262342,
+  "levelVertexId": 25341,
+  "flags": 34,
+  "customData": "[custom_data_section] field1 = 1\r\n field2 = 2\r\n",
+  "storyId": 433,
+  "spawnStoryId": 36
+}

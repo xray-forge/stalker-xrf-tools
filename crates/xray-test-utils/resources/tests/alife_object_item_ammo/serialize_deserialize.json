@@ -1,1 +1,21 @@
-{"ammoLeft":17,"base":{"base":{"base":{"customData":"custom_data","directControl":17,"distance":15.25,"flags":19,"gameVertexId":5,"levelVertexId":18,"spawnStoryId":27,"storyId":26},"visualFlags":16,"visualName":"cdef"},"condition":0.4000000059604645,"upgradesCount":2}}
+{
+  "base": {
+    "base": {
+      "base": {
+        "gameVertexId": 5,
+        "distance": 15.25,
+        "directControl": 17,
+        "levelVertexId": 18,
+        "flags": 19,
+        "customData": "custom_data",
+        "storyId": 26,
+        "spawnStoryId": 27
+      },
+      "visualName": "cdef",
+      "visualFlags": 16
+    },
+    "condition": 0.4,
+    "upgradesCount": 2
+  },
+  "ammoLeft": 17
+}

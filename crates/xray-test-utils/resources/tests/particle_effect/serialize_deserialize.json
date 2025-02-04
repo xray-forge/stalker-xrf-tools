@@ -1,1 +1,85 @@
-{"actions":[{"actionFlags":31,"actionType":"CopyVertex","damping":{"x":1.1150000095367432,"y":-0.2549999952316284,"z":1.753000020980835},"type":"Damping","vHighSqr":6.5,"vLowSqr":5.199999809265137},{"actionFlags":453,"actionType":"CopyVertex","copyPosition":0,"type":"CopyVertex"}],"collision":{"collideOneMinusFriction":0.5400000214576721,"collideResilience":455.2535095214844,"collideSqrCutoff":255.6313018798828},"description":{"createdTime":433,"creator":"test-creator-name","editTime":444,"editor":"test-editor-name"},"editorData":{"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]},"flags":150,"frame":{"frameCount":80,"frameDimensionX":640,"frameSpeed":29.700000762939453,"reserved":[41.20000076293945,42.20000076293945],"textureSize":[460.0,380.0]},"maxParticles":5,"name":"test-particle-effect","rotation":{"x":1.1150000095367432,"y":-0.2549999952316284,"z":1.753000020980835},"sprite":{"shaderName":"test-shader-name","textureName":"test-texture-name"},"timeLimit":460.1000061035156,"velocityScale":{"x":1.1150000095367432,"y":-0.2549999952316284,"z":1.753000020980835},"version":1}
+{
+  "version": 1,
+  "name": "test-particle-effect",
+  "maxParticles": 5,
+  "actions": [
+    {
+      "type": "Damping",
+      "actionFlags": 31,
+      "actionType": "CopyVertex",
+      "damping": {
+        "x": 1.115,
+        "y": -0.255,
+        "z": 1.753
+      },
+      "vLowSqr": 5.2,
+      "vHighSqr": 6.5
+    },
+    {
+      "type": "CopyVertex",
+      "actionFlags": 453,
+      "actionType": "CopyVertex",
+      "copyPosition": 0
+    }
+  ],
+  "flags": 150,
+  "frame": {
+    "textureSize": [
+      460.0,
+      380.0
+    ],
+    "reserved": [
+      41.2,
+      42.2
+    ],
+    "frameDimensionX": 640,
+    "frameCount": 80,
+    "frameSpeed": 29.7
+  },
+  "sprite": {
+    "shaderName": "test-shader-name",
+    "textureName": "test-texture-name"
+  },
+  "timeLimit": 460.1,
+  "collision": {
+    "collideOneMinusFriction": 0.54,
+    "collideResilience": 455.2535,
+    "collideSqrCutoff": 255.6313
+  },
+  "velocityScale": {
+    "x": 1.115,
+    "y": -0.255,
+    "z": 1.753
+  },
+  "description": {
+    "creator": "test-creator-name",
+    "editor": "test-editor-name",
+    "createdTime": 433,
+    "editTime": 444
+  },
+  "rotation": {
+    "x": 1.115,
+    "y": -0.255,
+    "z": 1.753
+  },
+  "editorData": {
+    "value": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ]
+  }
+}

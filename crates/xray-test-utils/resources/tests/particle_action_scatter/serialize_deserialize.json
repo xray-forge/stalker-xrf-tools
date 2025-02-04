@@ -1,1 +1,12 @@
-{"actionFlags":1,"actionType":"Scatter","center":{"x":1.1150000095367432,"y":-0.2549999952316284,"z":1.753000020980835},"epsilon":9.999999974752427e-7,"magnitude":3.299999952316284,"maxRadius":13.0}
+{
+  "actionFlags": 1,
+  "actionType": "Scatter",
+  "center": {
+    "x": 1.115,
+    "y": -0.255,
+    "z": 1.753
+  },
+  "magnitude": 3.3,
+  "epsilon": 0.000001,
+  "maxRadius": 13.0
+}

@@ -1,1 +1,56 @@
-{"base":{"base":{"customData":"custom-data","directControl":5,"distance":25.399999618530273,"flags":16,"gameVertexId":14,"levelVertexId":55,"spawnStoryId":52,"storyId":45},"restrictorType":3,"shape":[{"Sphere":[{"x":22.5,"y":13.5,"z":31.5},15.0]},{"Box":[{"x":25.100000381469727,"y":21.100000381469727,"z":33.099998474121094},{"x":25.100000381469727,"y":22.200000762939453,"z":33.29999923706055},{"x":25.0,"y":25.0,"z":36.400001525878906},{"x":25.200000762939453,"y":28.299999237060547,"z":37.0}]}]},"disabledTime":251,"enabledTime":12,"maxPower":2.0,"ownerId":6,"startTimeShift":45}
+{
+  "base": {
+    "base": {
+      "gameVertexId": 14,
+      "distance": 25.4,
+      "directControl": 5,
+      "levelVertexId": 55,
+      "flags": 16,
+      "customData": "custom-data",
+      "storyId": 45,
+      "spawnStoryId": 52
+    },
+    "shape": [
+      {
+        "Sphere": [
+          {
+            "x": 22.5,
+            "y": 13.5,
+            "z": 31.5
+          },
+          15.0
+        ]
+      },
+      {
+        "Box": [
+          {
+            "x": 25.1,
+            "y": 21.1,
+            "z": 33.1
+          },
+          {
+            "x": 25.1,
+            "y": 22.2,
+            "z": 33.3
+          },
+          {
+            "x": 25.0,
+            "y": 25.0,
+            "z": 36.4
+          },
+          {
+            "x": 25.2,
+            "y": 28.3,
+            "z": 37.0
+          }
+        ]
+      }
+    ],
+    "restrictorType": 3
+  },
+  "maxPower": 2.0,
+  "ownerId": 6,
+  "enabledTime": 12,
+  "disabledTime": 251,
+  "startTimeShift": 45
+}

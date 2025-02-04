@@ -1,1 +1,13 @@
-{"actionFlags":1,"actionType":"TargetColor","alpha":12.399999618530273,"color":{"x":1.1150000095367432,"y":-0.2549999952316284,"z":1.753000020980835},"scale":10.199999809265137,"timeFrom":10.0,"timeTo":20.0}
+{
+  "actionFlags": 1,
+  "actionType": "TargetColor",
+  "color": {
+    "x": 1.115,
+    "y": -0.255,
+    "z": 1.753
+  },
+  "alpha": 12.4,
+  "scale": 10.2,
+  "timeFrom": 10.0,
+  "timeTo": 20.0
+}

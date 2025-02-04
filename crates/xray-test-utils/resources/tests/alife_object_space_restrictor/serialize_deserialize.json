@@ -1,1 +1,49 @@
-{"base":{"customData":"test-custom-data","directControl":10,"distance":2.700000047683716,"flags":64,"gameVertexId":4,"levelVertexId":25,"spawnStoryId":3,"storyId":256},"restrictorType":6,"shape":[{"Sphere":[{"x":54.5,"y":0.5,"z":11.5},1.0]},{"Box":[{"x":23.5,"y":2.5,"z":73.0999984741211},{"x":25.100000381469727,"y":1.2000000476837158,"z":2.299999952316284},{"x":21.0,"y":7.0,"z":3.4000000953674316},{"x":26.200000762939453,"y":3.299999952316284,"z":4.099999904632568}]}]}
+{
+  "base": {
+    "gameVertexId": 4,
+    "distance": 2.7,
+    "directControl": 10,
+    "levelVertexId": 25,
+    "flags": 64,
+    "customData": "test-custom-data",
+    "storyId": 256,
+    "spawnStoryId": 3
+  },
+  "shape": [
+    {
+      "Sphere": [
+        {
+          "x": 54.5,
+          "y": 0.5,
+          "z": 11.5
+        },
+        1.0
+      ]
+    },
+    {
+      "Box": [
+        {
+          "x": 23.5,
+          "y": 2.5,
+          "z": 73.1
+        },
+        {
+          "x": 25.1,
+          "y": 1.2,
+          "z": 2.3
+        },
+        {
+          "x": 21.0,
+          "y": 7.0,
+          "z": 3.4
+        },
+        {
+          "x": 26.2,
+          "y": 3.3,
+          "z": 4.1
+        }
+      ]
+    }
+  ],
+  "restrictorType": 6
+}

@@ -1,1 +1,26 @@
-{"base":{"base":{"customData":"custom-data","directControl":126,"distance":253.52999877929688,"flags":263,"gameVertexId":25,"levelVertexId":6,"spawnStoryId":235,"storyId":253},"visualFlags":253,"visualName":"visual-name"},"engineSound":"engine-sound","motion":{"motionName":"motion-name"},"skeleton":{"flags":14,"name":"skeleton-name","sourceId":253},"startupAnimation":"startup-animation"}
+{
+  "base": {
+    "base": {
+      "gameVertexId": 25,
+      "distance": 253.53,
+      "directControl": 126,
+      "levelVertexId": 6,
+      "flags": 263,
+      "customData": "custom-data",
+      "storyId": 253,
+      "spawnStoryId": 235
+    },
+    "visualName": "visual-name",
+    "visualFlags": 253
+  },
+  "motion": {
+    "motionName": "motion-name"
+  },
+  "skeleton": {
+    "name": "skeleton-name",
+    "flags": 14,
+    "sourceId": 253
+  },
+  "startupAnimation": "startup-animation",
+  "engineSound": "engine-sound"
+}

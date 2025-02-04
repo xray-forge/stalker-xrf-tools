@@ -1,1 +1,18 @@
-{"base":{"base":{"customData":"custom_data","directControl":235,"distance":516.25,"flags":45,"gameVertexId":15,"levelVertexId":737,"spawnStoryId":44,"storyId":364},"visualFlags":25,"visualName":"abcd"},"condition":0.6499999761581421,"upgradesCount":2}
+{
+  "base": {
+    "base": {
+      "gameVertexId": 15,
+      "distance": 516.25,
+      "directControl": 235,
+      "levelVertexId": 737,
+      "flags": 45,
+      "customData": "custom_data",
+      "storyId": 364,
+      "spawnStoryId": 44
+    },
+    "visualName": "abcd",
+    "visualFlags": 25
+  },
+  "condition": 0.65,
+  "upgradesCount": 2
+}

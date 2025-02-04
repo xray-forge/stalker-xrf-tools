@@ -1,1 +1,9 @@
-{"flags":67423,"name":"effect_old_name_serialize","onBirthChildName":"effect_on_birth_child_name_serialize","onDeadChildName":"effect_on_dead_child_name_serialize","onPlayChildName":"effect_old_on_play_child_name_serialize","time0":7654.5,"time1":2351.25}
+{
+  "name": "effect_old_name_serialize",
+  "onPlayChildName": "effect_old_on_play_child_name_serialize",
+  "onBirthChildName": "effect_on_birth_child_name_serialize",
+  "onDeadChildName": "effect_on_dead_child_name_serialize",
+  "time0": 7654.5,
+  "time1": 2351.25,
+  "flags": 67423
+}

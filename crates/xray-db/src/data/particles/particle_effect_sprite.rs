@@ -82,7 +82,7 @@ impl LtxImportExport for ParticleEffectSprite {
 mod tests {
   use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
   use crate::export::LtxImportExport;
-  use serde_json::json;
+  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
@@ -101,12 +101,12 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let sprite: ParticleEffectSprite = ParticleEffectSprite {
+    let original: ParticleEffectSprite = ParticleEffectSprite {
       shader_name: String::from("shader_name"),
       texture_name: String::from("texture_name"),
     };
 
-    sprite.write::<XRayByteOrder>(&mut writer)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 25);
 
@@ -132,7 +132,7 @@ mod tests {
     let read_sprite: ParticleEffectSprite =
       ParticleEffectSprite::read::<XRayByteOrder>(&mut reader)?;
 
-    assert_eq!(read_sprite, sprite);
+    assert_eq!(read_sprite, original);
 
     Ok(())
   }
@@ -143,17 +143,17 @@ mod tests {
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
-    let sprite: ParticleEffectSprite = ParticleEffectSprite {
+    let original: ParticleEffectSprite = ParticleEffectSprite {
       shader_name: String::from("shader-name-test"),
       texture_name: String::from("texture-name-test"),
     };
 
-    sprite.export("data", &mut ltx)?;
+    original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
     assert_eq!(
       ParticleEffectSprite::import("data", &Ltx::read_from_path(config_path)?)?,
-      sprite
+      original
     );
 
     Ok(())
@@ -161,7 +161,7 @@ mod tests {
 
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
-    let sprite: ParticleEffectSprite = ParticleEffectSprite {
+    let original: ParticleEffectSprite = ParticleEffectSprite {
       shader_name: String::from("shader_name"),
       texture_name: String::from("texture_name"),
     };
@@ -170,15 +170,15 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
     )?;
 
-    file.write_all(json!(sprite).to_string().as_bytes())?;
+    file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
 
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
     assert_eq!(
-      sprite,
-      serde_json::from_str::<ParticleEffectSprite>(&serialized).unwrap()
+      original,
+      serde_json::from_str::<ParticleEffectSprite>(&serialized)?
     );
 
     Ok(())

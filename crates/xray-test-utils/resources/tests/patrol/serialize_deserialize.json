@@ -1,1 +1,42 @@
-{"links":[{"index":0,"links":[[32,34.5],[24,53.25]]}],"name":"patrol-name-serde","points":[{"flags":83,"gameVertexId":457,"levelVertexId":4657,"name":"patrol-point-1-serde","position":{"x":4.5,"y":-5.420000076293945,"z":-3.200000047683716}},{"flags":53,"gameVertexId":15211,"levelVertexId":6345,"name":"patrol-point-2-serde","position":{"x":6.210000038146973,"y":-5.340000152587891,"z":3.2300000190734863}}]}
+{
+  "name": "patrol-name-serde",
+  "points": [
+    {
+      "name": "patrol-point-1-serde",
+      "position": {
+        "x": 4.5,
+        "y": -5.42,
+        "z": -3.2
+      },
+      "flags": 83,
+      "levelVertexId": 4657,
+      "gameVertexId": 457
+    },
+    {
+      "name": "patrol-point-2-serde",
+      "position": {
+        "x": 6.21,
+        "y": -5.34,
+        "z": 3.23
+      },
+      "flags": 53,
+      "levelVertexId": 6345,
+      "gameVertexId": 15211
+    }
+  ],
+  "links": [
+    {
+      "index": 0,
+      "links": [
+        [
+          32,
+          34.5
+        ],
+        [
+          24,
+          53.25
+        ]
+      ]
+    }
+  ]
+}
