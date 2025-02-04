@@ -91,11 +91,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -153,6 +159,105 @@ mod tests {
 
     assert_eq!(
       AlifeObjectCustomZone::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectCustomZone = AlifeObjectCustomZone {
+      base: AlifeObjectSpaceRestrictor {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 14,
+          distance: 25.4,
+          direct_control: 5,
+          level_vertex_id: 362,
+          flags: 16,
+          custom_data: String::from("custom-data"),
+          story_id: 45,
+          spawn_story_id: 52,
+        },
+        shape: vec![
+          Shape::Sphere((Vector3d::new(2.5, 3.5, 1.5), 1.0)),
+          Shape::Box((
+            Vector3d::new(11.1, 21.1, 33.1),
+            Vector3d::new(11.1, 22.2, 33.3),
+            Vector3d::new(14.0, 25.0, 36.4),
+            Vector3d::new(19.2, 28.3, 37.0),
+          )),
+        ],
+        restrictor_type: 3,
+      },
+      max_power: 2.0,
+      owner_id: 53,
+      enabled_time: 25,
+      disabled_time: 677,
+      start_time_shift: 63,
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectCustomZone::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectCustomZone = AlifeObjectCustomZone {
+      base: AlifeObjectSpaceRestrictor {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 14,
+          distance: 25.4,
+          direct_control: 5,
+          level_vertex_id: 55,
+          flags: 16,
+          custom_data: String::from("custom-data"),
+          story_id: 45,
+          spawn_story_id: 52,
+        },
+        shape: vec![
+          Shape::Sphere((Vector3d::new(22.5, 13.5, 31.5), 15.0)),
+          Shape::Box((
+            Vector3d::new(25.1, 21.1, 33.1),
+            Vector3d::new(25.1, 22.2, 33.3),
+            Vector3d::new(25.0, 25.0, 36.4),
+            Vector3d::new(25.2, 28.3, 37.0),
+          )),
+        ],
+        restrictor_type: 3,
+      },
+      max_power: 2.0,
+      owner_id: 6,
+      enabled_time: 12,
+      disabled_time: 251,
+      start_time_shift: 45,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectCustomZone>(&serialized).unwrap(),
       original
     );
 

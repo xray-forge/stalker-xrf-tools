@@ -51,9 +51,9 @@ impl LtxImportExport for AlifeObjectInventoryBox {
 
     Ok(Self {
       base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
-      can_take: read_ltx_field("can_take", section)?,
-      is_closed: read_ltx_field("is_closed", section)?,
-      tip: read_ltx_field("tip", section)?,
+      can_take: read_ltx_field("inventory_box.can_take", section)?,
+      is_closed: read_ltx_field("inventory_box.is_closed", section)?,
+      tip: read_ltx_field("inventory_box.tip", section)?,
     })
   }
 
@@ -63,9 +63,9 @@ impl LtxImportExport for AlifeObjectInventoryBox {
 
     ltx
       .with_section(section_name)
-      .set("can_take", self.can_take.to_string())
-      .set("is_closed", self.is_closed.to_string())
-      .set("tip", &self.tip);
+      .set("inventory_box.can_take", self.can_take.to_string())
+      .set("inventory_box.is_closed", self.is_closed.to_string())
+      .set("inventory_box.tip", &self.tip);
 
     Ok(())
   }
@@ -76,11 +76,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::inherited::alife_object_inventory_box::AlifeObjectInventoryBox;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -128,6 +134,85 @@ mod tests {
 
     assert_eq!(
       AlifeObjectInventoryBox::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectInventoryBox = AlifeObjectInventoryBox {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 236,
+          distance: 15.0,
+          direct_control: 15,
+          level_vertex_id: 16,
+          flags: 31,
+          custom_data: String::from("custom-data"),
+          story_id: 152,
+          spawn_story_id: 20,
+        },
+        visual_name: String::from("visual-name"),
+        visual_flags: 20,
+      },
+      can_take: 1,
+      is_closed: 0,
+      tip: String::from("some-tip"),
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectInventoryBox::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectInventoryBox = AlifeObjectInventoryBox {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 25,
+          distance: 1.0,
+          direct_control: 25,
+          level_vertex_id: 62,
+          flags: 64,
+          custom_data: String::from("custom-data"),
+          story_id: 15,
+          spawn_story_id: 0,
+        },
+        visual_name: String::from("visual-name"),
+        visual_flags: 23,
+      },
+      can_take: 1,
+      is_closed: 1,
+      tip: String::from("some-tip"),
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectInventoryBox>(&serialized).unwrap(),
       original
     );
 

@@ -113,27 +113,27 @@ impl LtxImportExport for AlifeObjectHangingLamp {
     Ok(Self {
       base: AlifeObjectDynamicVisual::import(section_name, ltx)?,
       skeleton: AlifeObjectSkeleton::import(section_name, ltx)?,
-      main_color: read_ltx_field("main_color", section)?,
-      main_brightness: read_ltx_field("main_brightness", section)?,
-      color_animator: read_ltx_field("color_animator", section)?,
-      main_range: read_ltx_field("main_range", section)?,
-      light_flags: read_ltx_field("light_flags", section)?,
-      startup_animation: read_ltx_field("startup_animation", section)?,
-      fixed_bones: read_ltx_field("fixed_bones", section)?,
-      health: read_ltx_field("health", section)?,
-      virtual_size: read_ltx_field("virtual_size", section)?,
-      ambient_radius: read_ltx_field("ambient_radius", section)?,
-      ambient_power: read_ltx_field("ambient_power", section)?,
-      ambient_texture: read_ltx_field("ambient_texture", section)?,
-      light_texture: read_ltx_field("light_texture", section)?,
-      light_bone: read_ltx_field("light_bone", section)?,
-      spot_cone_angle: read_ltx_field("spot_cone_angle", section)?,
-      glow_texture: read_ltx_field("glow_texture", section)?,
-      glow_radius: read_ltx_field("glow_radius", section)?,
-      light_ambient_bone: read_ltx_field("light_ambient_bone", section)?,
-      volumetric_quality: read_ltx_field("volumetric_quality", section)?,
-      volumetric_intensity: read_ltx_field("volumetric_intensity", section)?,
-      volumetric_distance: read_ltx_field("volumetric_distance", section)?,
+      main_color: read_ltx_field("hanging_lamp.main_color", section)?,
+      main_brightness: read_ltx_field("hanging_lamp.main_brightness", section)?,
+      color_animator: read_ltx_field("hanging_lamp.color_animator", section)?,
+      main_range: read_ltx_field("hanging_lamp.main_range", section)?,
+      light_flags: read_ltx_field("hanging_lamp.light_flags", section)?,
+      startup_animation: read_ltx_field("hanging_lamp.startup_animation", section)?,
+      fixed_bones: read_ltx_field("hanging_lamp.fixed_bones", section)?,
+      health: read_ltx_field("hanging_lamp.health", section)?,
+      virtual_size: read_ltx_field("hanging_lamp.virtual_size", section)?,
+      ambient_radius: read_ltx_field("hanging_lamp.ambient_radius", section)?,
+      ambient_power: read_ltx_field("hanging_lamp.ambient_power", section)?,
+      ambient_texture: read_ltx_field("hanging_lamp.ambient_texture", section)?,
+      light_texture: read_ltx_field("hanging_lamp.light_texture", section)?,
+      light_bone: read_ltx_field("hanging_lamp.light_bone", section)?,
+      spot_cone_angle: read_ltx_field("hanging_lamp.spot_cone_angle", section)?,
+      glow_texture: read_ltx_field("hanging_lamp.glow_texture", section)?,
+      glow_radius: read_ltx_field("hanging_lamp.glow_radius", section)?,
+      light_ambient_bone: read_ltx_field("hanging_lamp.light_ambient_bone", section)?,
+      volumetric_quality: read_ltx_field("hanging_lamp.volumetric_quality", section)?,
+      volumetric_intensity: read_ltx_field("hanging_lamp.volumetric_intensity", section)?,
+      volumetric_distance: read_ltx_field("hanging_lamp.volumetric_distance", section)?,
     })
   }
 
@@ -144,30 +144,45 @@ impl LtxImportExport for AlifeObjectHangingLamp {
 
     ltx
       .with_section(section_name)
-      .set("main_color", self.main_color.to_string())
-      .set("main_brightness", self.main_brightness.to_string())
-      .set("color_animator", &self.color_animator)
-      .set("main_range", self.main_range.to_string())
-      .set("light_flags", self.light_flags.to_string())
-      .set("startup_animation", &self.startup_animation)
-      .set("fixed_bones", &self.fixed_bones)
-      .set("health", self.health.to_string())
-      .set("virtual_size", self.virtual_size.to_string())
-      .set("ambient_radius", self.ambient_radius.to_string())
-      .set("ambient_power", self.ambient_power.to_string())
-      .set("ambient_texture", &self.ambient_texture)
-      .set("light_texture", &self.light_texture)
-      .set("light_bone", &self.light_bone)
-      .set("spot_cone_angle", self.spot_cone_angle.to_string())
-      .set("glow_texture", &self.glow_texture)
-      .set("glow_radius", self.glow_radius.to_string())
-      .set("light_ambient_bone", &self.light_ambient_bone)
-      .set("volumetric_quality", self.volumetric_quality.to_string())
+      .set("hanging_lamp.main_color", self.main_color.to_string())
       .set(
-        "volumetric_intensity",
+        "hanging_lamp.main_brightness",
+        self.main_brightness.to_string(),
+      )
+      .set("hanging_lamp.color_animator", &self.color_animator)
+      .set("hanging_lamp.main_range", self.main_range.to_string())
+      .set("hanging_lamp.light_flags", self.light_flags.to_string())
+      .set("hanging_lamp.startup_animation", &self.startup_animation)
+      .set("hanging_lamp.fixed_bones", &self.fixed_bones)
+      .set("hanging_lamp.health", self.health.to_string())
+      .set("hanging_lamp.virtual_size", self.virtual_size.to_string())
+      .set(
+        "hanging_lamp.ambient_radius",
+        self.ambient_radius.to_string(),
+      )
+      .set("hanging_lamp.ambient_power", self.ambient_power.to_string())
+      .set("hanging_lamp.ambient_texture", &self.ambient_texture)
+      .set("hanging_lamp.light_texture", &self.light_texture)
+      .set("hanging_lamp.light_bone", &self.light_bone)
+      .set(
+        "hanging_lamp.spot_cone_angle",
+        self.spot_cone_angle.to_string(),
+      )
+      .set("hanging_lamp.glow_texture", &self.glow_texture)
+      .set("hanging_lamp.glow_radius", self.glow_radius.to_string())
+      .set("hanging_lamp.light_ambient_bone", &self.light_ambient_bone)
+      .set(
+        "hanging_lamp.volumetric_quality",
+        self.volumetric_quality.to_string(),
+      )
+      .set(
+        "hanging_lamp.volumetric_intensity",
         self.volumetric_intensity.to_string(),
       )
-      .set("volumetric_distance", self.volumetric_distance.to_string());
+      .set(
+        "hanging_lamp.volumetric_distance",
+        self.volumetric_distance.to_string(),
+      );
 
     Ok(())
   }
@@ -179,11 +194,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::inherited::alife_object_hanging_lamp::AlifeObjectHangingLamp;
   use crate::data::alife::inherited::alife_object_skeleton::AlifeObjectSkeleton;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -254,6 +275,131 @@ mod tests {
 
     assert_eq!(
       AlifeObjectHangingLamp::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectHangingLamp = AlifeObjectHangingLamp {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 1,
+          distance: 52.124,
+          direct_control: 354,
+          level_vertex_id: 3456,
+          flags: 25,
+          custom_data: String::from("custom-data"),
+          story_id: 345,
+          spawn_story_id: 346,
+        },
+        visual_name: String::from("visual-name"),
+        visual_flags: 156,
+      },
+      skeleton: AlifeObjectSkeleton {
+        name: String::from("skeleton-name"),
+        flags: 32,
+        source_id: 346,
+      },
+      main_color: 364,
+      main_brightness: 1.0,
+      color_animator: String::from("color-animator"),
+      main_range: 0.5,
+      light_flags: 425,
+      startup_animation: String::from("setup-animation"),
+      fixed_bones: String::from("fixed-bones"),
+      health: 1.0,
+      virtual_size: 0.27,
+      ambient_radius: 24.0,
+      ambient_power: 52.0,
+      ambient_texture: String::from("ambient-texture"),
+      light_texture: String::from("light-texture"),
+      light_bone: String::from("light-bone"),
+      spot_cone_angle: 25.23,
+      glow_texture: String::from("glow-texture"),
+      glow_radius: 16.43,
+      light_ambient_bone: String::from("light-ambient-bone"),
+      volumetric_quality: 21.3,
+      volumetric_intensity: 22.2,
+      volumetric_distance: 23.1,
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectHangingLamp::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectHangingLamp = AlifeObjectHangingLamp {
+      base: AlifeObjectDynamicVisual {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 16,
+          distance: 263.124,
+          direct_control: 25,
+          level_vertex_id: 634,
+          flags: 76,
+          custom_data: String::from("custom-data"),
+          story_id: 6987,
+          spawn_story_id: 15,
+        },
+        visual_name: String::from("visual-name"),
+        visual_flags: 168,
+      },
+      skeleton: AlifeObjectSkeleton {
+        name: String::from("skeleton-name"),
+        flags: 25,
+        source_id: 15,
+      },
+      main_color: 25,
+      main_brightness: 1.0,
+      color_animator: String::from("color-animator"),
+      main_range: 0.54,
+      light_flags: 52,
+      startup_animation: String::from("setup-animation"),
+      fixed_bones: String::from("fixed-bones"),
+      health: 1.0,
+      virtual_size: 0.75,
+      ambient_radius: 24.0,
+      ambient_power: 13.0,
+      ambient_texture: String::from("ambient-texture"),
+      light_texture: String::from("light-texture"),
+      light_bone: String::from("light-bone"),
+      spot_cone_angle: 56.23,
+      glow_texture: String::from("glow-texture"),
+      glow_radius: 16.43,
+      light_ambient_bone: String::from("light-ambient-bone"),
+      volumetric_quality: 10.3,
+      volumetric_intensity: 20.2,
+      volumetric_distance: 30.1,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectHangingLamp>(&serialized).unwrap(),
       original
     );
 

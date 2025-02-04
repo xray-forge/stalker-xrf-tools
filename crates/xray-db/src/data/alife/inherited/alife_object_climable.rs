@@ -45,7 +45,7 @@ impl LtxImportExport for AlifeObjectClimable {
 
     Ok(Self {
       base: AlifeObjectShape::import(section_name, ltx)?,
-      game_material: read_ltx_field("game_material", section)?,
+      game_material: read_ltx_field("climbable.game_material", section)?,
     })
   }
 
@@ -55,7 +55,7 @@ impl LtxImportExport for AlifeObjectClimable {
 
     ltx
       .with_section(section_name)
-      .set("game_material", &self.game_material);
+      .set("climbable.game_material", &self.game_material);
 
     Ok(())
   }
@@ -68,11 +68,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_shape::AlifeObjectShape;
   use crate::data::generic::shape::Shape;
   use crate::data::generic::vector_3d::Vector3d;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -125,6 +131,95 @@ mod tests {
 
     assert_eq!(
       AlifeObjectClimable::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectClimable = AlifeObjectClimable {
+      base: AlifeObjectShape {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 364,
+          distance: 64.23,
+          direct_control: 20,
+          level_vertex_id: 10,
+          flags: 6,
+          custom_data: String::from("custom-data"),
+          story_id: 4,
+          spawn_story_id: 53,
+        },
+        shape: vec![
+          Shape::Sphere((Vector3d::new(54.5, 0.5, 11.5), 1.0)),
+          Shape::Box((
+            Vector3d::new(5.5, 6.5, 3.1),
+            Vector3d::new(5.1, 3.2, 2.3),
+            Vector3d::new(5.0, 6.0, 2.4),
+            Vector3d::new(5.2, 3.3, 3.0),
+          )),
+        ],
+      },
+      game_material: String::from("dest-material"),
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectClimable::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectClimable = AlifeObjectClimable {
+      base: AlifeObjectShape {
+        base: AlifeObjectAbstract {
+          game_vertex_id: 253,
+          distance: 47.23,
+          direct_control: 5,
+          level_vertex_id: 50,
+          flags: 64,
+          custom_data: String::from("custom-data"),
+          story_id: 75,
+          spawn_story_id: 35,
+        },
+        shape: vec![
+          Shape::Sphere((Vector3d::new(54.5, 0.5, 11.5), 1.0)),
+          Shape::Box((
+            Vector3d::new(7.5, 2.5, 4.1),
+            Vector3d::new(7.1, 3.2, 4.3),
+            Vector3d::new(7.0, 3.0, 4.4),
+            Vector3d::new(7.2, 3.3, 4.0),
+          )),
+        ],
+      },
+      game_material: String::from("dest-material"),
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectClimable>(&serialized).unwrap(),
       original
     );
 

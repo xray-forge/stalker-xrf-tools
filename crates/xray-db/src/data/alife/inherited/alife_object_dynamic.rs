@@ -48,11 +48,17 @@ impl LtxImportExport for AlifeObjectDynamic {
 mod tests {
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
   use crate::data::alife::inherited::alife_object_dynamic::AlifeObjectDynamic;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -93,6 +99,71 @@ mod tests {
     let read_object: AlifeObjectDynamic = AlifeObjectDynamic::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectDynamic = AlifeObjectDynamic {
+      base: AlifeObjectAbstract {
+        game_vertex_id: 5,
+        distance: 5.25,
+        direct_control: 52,
+        level_vertex_id: 636,
+        flags: 25,
+        custom_data: String::from("custom_data"),
+        story_id: 26,
+        spawn_story_id: 36,
+      },
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectDynamic::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectDynamic = AlifeObjectDynamic {
+      base: AlifeObjectAbstract {
+        game_vertex_id: 73,
+        distance: 1.25,
+        direct_control: 73435,
+        level_vertex_id: 3456,
+        flags: 3,
+        custom_data: String::from("custom_data"),
+        story_id: 54,
+        spawn_story_id: 64,
+      },
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectDynamic>(&serialized).unwrap(),
+      original
+    );
 
     Ok(())
   }
