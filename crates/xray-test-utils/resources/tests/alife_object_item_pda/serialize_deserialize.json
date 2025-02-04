@@ -1,0 +1,23 @@
+{
+  "base": {
+    "base": {
+      "base": {
+        "gameVertexId": 1756,
+        "distance": 867.25,
+        "directControl": 2535,
+        "levelVertexId": 3623,
+        "flags": 463,
+        "customData": "custom_data",
+        "storyId": 6513,
+        "spawnStoryId": 365
+      },
+      "visualName": "zxcvb",
+      "visualFlags": 152
+    },
+    "condition": 0.364,
+    "upgradesCount": 3
+  },
+  "owner": 3511,
+  "character": "character",
+  "infoPortion": "info-portion"
+}

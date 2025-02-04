@@ -95,7 +95,6 @@ impl ChunkReadWrite for PatrolPoint {
   /// Write patrol point data into chunk writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     writer.write_w1251_string(&self.name)?;
-
     writer.write_xr::<T, _>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;
     writer.write_u32::<T>(self.level_vertex_id)?;
@@ -159,34 +158,57 @@ mod tests {
   use xray_test_utils::FileSlice;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write_list() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
-    let original: PatrolPoint = PatrolPoint {
-      name: String::from("patrol-point-name"),
-      position: Vector3d::new(1.5, -2.3, 1.0),
-      flags: 33,
-      level_vertex_id: 4500,
-      game_vertex_id: 555,
-    };
+    let original: Vec<PatrolPoint> = vec![
+      PatrolPoint {
+        name: String::from("wp00|a=probe_stand"),
+        position: Vector3d::new(-39.898224, 24.269588, 324.09656),
+        flags: 1,
+        level_vertex_id: 866599,
+        game_vertex_id: 60,
+      },
+      PatrolPoint {
+        name: String::from("wp01|a=probe_stand"),
+        position: Vector3d::new(-32.18162, 24.257412, 315.80127),
+        flags: 2,
+        level_vertex_id: 882385,
+        game_vertex_id: 60,
+      },
+      PatrolPoint {
+        name: String::from("wp01|a=probe_way"),
+        position: Vector3d::new(-22.432571, 24.097664, 335.9503),
+        flags: 8,
+        level_vertex_id: 901200,
+        game_vertex_id: 237,
+      },
+      PatrolPoint {
+        name: String::from("wp02|a=probe_stand"),
+        position: Vector3d::new(-36.36119, 24.754417, 344.12573),
+        flags: 4,
+        level_vertex_id: 873987,
+        game_vertex_id: 237,
+      },
+    ];
 
-    original.write::<XRayByteOrder>(&mut writer)?;
+    PatrolPoint::write_list::<XRayByteOrder>(&mut writer, &original)?;
 
-    assert_eq!(writer.bytes_written(), 40);
+    assert_eq!(writer.bytes_written(), 274);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 40);
+    assert_eq!(bytes_written, 274);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 40 + 8);
+    assert_eq!(file.bytes_remaining(), 274 + 8);
     assert_eq!(
-      PatrolPoint::read::<XRayByteOrder>(
+      PatrolPoint::read_list::<XRayByteOrder>(
         &mut ChunkReader::from_slice(file)?.read_child_by_index(0)?
       )?,
       original
@@ -196,43 +218,34 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> XRayResult {
+  fn test_read_write() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
-    let original: Vec<PatrolPoint> = vec![
-      PatrolPoint {
-        name: String::from("patrol-point-name-1"),
-        position: Vector3d::new(1.5, -2.3, 1.0),
-        flags: 33,
-        level_vertex_id: 7304,
-        game_vertex_id: 55,
-      },
-      PatrolPoint {
-        name: String::from("patrol-point-name-2"),
-        position: Vector3d::new(2.25, 4.3, 1.5),
-        flags: 64,
-        level_vertex_id: 8415,
-        game_vertex_id: 66,
-      },
-    ];
+    let original: PatrolPoint = PatrolPoint {
+      name: String::from("wp01|a=probe_way"),
+      position: Vector3d::new(-22.432571, 24.097664, 335.9503),
+      flags: 8,
+      level_vertex_id: 901200,
+      game_vertex_id: 237,
+    };
 
-    PatrolPoint::write_list::<XRayByteOrder>(&mut writer, &original)?;
+    original.write::<XRayByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 140);
+    assert_eq!(writer.bytes_written(), 39);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 140);
+    assert_eq!(bytes_written, 39);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 140 + 8);
+    assert_eq!(file.bytes_remaining(), 39 + 8);
     assert_eq!(
-      PatrolPoint::read_list::<XRayByteOrder>(
+      PatrolPoint::read::<XRayByteOrder>(
         &mut ChunkReader::from_slice(file)?.read_child_by_index(0)?
       )?,
       original

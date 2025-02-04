@@ -1,0 +1,20 @@
+{
+  "base": {
+    "base": {
+      "base": {
+        "gameVertexId": 11,
+        "distance": 22.25,
+        "directControl": 33,
+        "levelVertexId": 44,
+        "flags": 55,
+        "customData": "custom_data",
+        "storyId": 66,
+        "spawnStoryId": 77
+      },
+      "visualName": "cdef",
+      "visualFlags": 5
+    },
+    "condition": 0.15,
+    "upgradesCount": 2
+  }
+}

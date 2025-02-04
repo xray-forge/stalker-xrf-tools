@@ -60,12 +60,12 @@ impl LtxImportExport for AlifeObjectItemWeapon {
 
     Ok(Self {
       base: AlifeObjectItem::import(section_name, ltx)?,
-      ammo_current: read_ltx_field("ammo_current", section)?,
-      ammo_elapsed: read_ltx_field("ammo_elapsed", section)?,
-      weapon_state: read_ltx_field("weapon_state", section)?,
-      addon_flags: read_ltx_field("addon_flags", section)?,
-      ammo_type: read_ltx_field("ammo_type", section)?,
-      elapsed_grenades: read_ltx_field("elapsed_grenades", section)?,
+      ammo_current: read_ltx_field("item_weapon.ammo_current", section)?,
+      ammo_elapsed: read_ltx_field("item_weapon.ammo_elapsed", section)?,
+      weapon_state: read_ltx_field("item_weapon.weapon_state", section)?,
+      addon_flags: read_ltx_field("item_weapon.addon_flags", section)?,
+      ammo_type: read_ltx_field("item_weapon.ammo_type", section)?,
+      elapsed_grenades: read_ltx_field("item_weapon.elapsed_grenades", section)?,
     })
   }
 
@@ -75,12 +75,15 @@ impl LtxImportExport for AlifeObjectItemWeapon {
 
     ltx
       .with_section(section_name)
-      .set("ammo_current", self.ammo_current.to_string())
-      .set("ammo_elapsed", self.ammo_elapsed.to_string())
-      .set("weapon_state", self.weapon_state.to_string())
-      .set("addon_flags", self.addon_flags.to_string())
-      .set("ammo_type", self.ammo_type.to_string())
-      .set("elapsed_grenades", self.elapsed_grenades.to_string());
+      .set("item_weapon.ammo_current", self.ammo_current.to_string())
+      .set("item_weapon.ammo_elapsed", self.ammo_elapsed.to_string())
+      .set("item_weapon.weapon_state", self.weapon_state.to_string())
+      .set("item_weapon.addon_flags", self.addon_flags.to_string())
+      .set("item_weapon.ammo_type", self.ammo_type.to_string())
+      .set(
+        "item_weapon.elapsed_grenades",
+        self.elapsed_grenades.to_string(),
+      );
 
     Ok(())
   }
@@ -92,11 +95,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
   use crate::data::alife::inherited::alife_object_item_weapon::AlifeObjectItemWeapon;
+  use crate::export::LtxImportExport;
+  use serde_json::to_string_pretty;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -151,6 +160,99 @@ mod tests {
 
     assert_eq!(
       AlifeObjectItemWeapon::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectItemWeapon = AlifeObjectItemWeapon {
+      base: AlifeObjectItem {
+        base: AlifeObjectDynamicVisual {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 67,
+            distance: 3.2511,
+            direct_control: 4,
+            level_vertex_id: 5,
+            flags: 6,
+            custom_data: String::from("custom_data"),
+            story_id: 12,
+            spawn_story_id: 16,
+          },
+          visual_name: String::from("asdfgh"),
+          visual_flags: 25,
+        },
+        condition: 0.387,
+        upgrades_count: 0,
+      },
+      ammo_current: 35,
+      ammo_elapsed: 5,
+      weapon_state: 2,
+      addon_flags: 1,
+      ammo_type: 4,
+      elapsed_grenades: 4,
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectItemWeapon::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectItemWeapon = AlifeObjectItemWeapon {
+      base: AlifeObjectItem {
+        base: AlifeObjectDynamicVisual {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 63,
+            distance: 3745.2511,
+            direct_control: 2135,
+            level_vertex_id: 2543,
+            flags: 42,
+            custom_data: String::from("custom_data"),
+            story_id: 152,
+            spawn_story_id: 1428,
+          },
+          visual_name: String::from("asdfgh"),
+          visual_flags: 40,
+        },
+        condition: 0.4,
+        upgrades_count: 2,
+      },
+      ammo_current: 21,
+      ammo_elapsed: 9,
+      weapon_state: 2,
+      addon_flags: 12,
+      ammo_type: 3,
+      elapsed_grenades: 1,
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(to_string_pretty(&original)?.as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectItemWeapon>(&serialized)?,
       original
     );
 

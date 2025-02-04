@@ -161,9 +161,9 @@ impl Patrol {
     let mut points: Vec<PatrolPoint> = Vec::new();
     let mut links: Vec<PatrolLink> = Vec::new();
 
-    for section in points_list.split(',').map(|it| it.trim()) {
+    for (index, section) in points_list.split(',').map(str::trim).enumerate() {
       points.push(PatrolPoint::import(
-        &format!("{}.{}", name, section),
+        &format!("{}.{}.{}", name, index, section),
         patrol_points_ltx,
       )?);
     }
@@ -211,8 +211,11 @@ impl Patrol {
       )
       .set("links_count", self.links.len().to_string());
 
-    for point in &self.points {
-      point.export(&format!("{}.{}", self.name, point.name), patrol_points_ltx)?;
+    for (index, point) in self.points.iter().enumerate() {
+      point.export(
+        &format!("{}.{}.{}", self.name, index, point.name),
+        patrol_points_ltx,
+      )?;
     }
 
     for (index, link) in self.links.iter().enumerate() {
@@ -388,6 +391,13 @@ mod tests {
           name: String::from("patrol-point-2-exp"),
           position: Vector3d::new(4.5, -5.3, 4.5),
           flags: 12,
+          level_vertex_id: 23421,
+          game_vertex_id: 5233,
+        },
+        PatrolPoint {
+          name: String::from("patrol-point-1-exp"),
+          position: Vector3d::new(3.5, -7.3, 1.5),
+          flags: 6,
           level_vertex_id: 23421,
           game_vertex_id: 5233,
         },

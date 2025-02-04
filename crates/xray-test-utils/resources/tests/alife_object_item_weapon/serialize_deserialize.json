@@ -1,0 +1,26 @@
+{
+  "base": {
+    "base": {
+      "base": {
+        "gameVertexId": 63,
+        "distance": 3745.2512,
+        "directControl": 2135,
+        "levelVertexId": 2543,
+        "flags": 42,
+        "customData": "custom_data",
+        "storyId": 152,
+        "spawnStoryId": 1428
+      },
+      "visualName": "asdfgh",
+      "visualFlags": 40
+    },
+    "condition": 0.4,
+    "upgradesCount": 2
+  },
+  "ammoCurrent": 21,
+  "ammoElapsed": 9,
+  "weaponState": 2,
+  "addonFlags": 12,
+  "ammoType": 3,
+  "elapsedGrenades": 1
+}
