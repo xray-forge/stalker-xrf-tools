@@ -21,9 +21,13 @@ pub struct SpawnALifeSpawnsChunk {
 
 impl SpawnALifeSpawnsChunk {
   pub const CHUNK_ID: u32 = 1;
+
   pub const COUNT_CHUNK_ID: u32 = 0;
   pub const OBJECTS_CHUNK_ID: u32 = 1;
   pub const VERTEX_CHUNK_ID: u32 = 2;
+
+  pub const OBJECT_INDEX_CHUNK_ID: u32 = 0;
+  pub const OBJECT_DATA_CHUNK_ID: u32 = 1;
 }
 
 impl ChunkReadWrite for SpawnALifeSpawnsChunk {
@@ -42,7 +46,24 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
     let mut objects: Vec<AlifeObject> = Vec::with_capacity(count as usize);
 
     for mut object_reader in ChunkIterator::new(&mut objects_reader) {
-      objects.push(AlifeObject::read::<T>(&mut object_reader)?)
+      let mut index_reader: ChunkReader =
+        object_reader.read_child_by_index(Self::OBJECT_INDEX_CHUNK_ID)?;
+      let index: u16 = index_reader.read_u16::<T>()?;
+
+      assert_equal(
+        index as u32,
+        object_reader.id,
+        "Expected index and chunk ID to be equal",
+      )?;
+      assert_chunk_read(&index_reader, "Expect ALife object index to be read")?;
+
+      let mut data_reader: ChunkReader =
+        object_reader.read_child_by_index(Self::OBJECT_DATA_CHUNK_ID)?;
+      let data: AlifeObject = data_reader.read_xr::<T, _>()?;
+
+      objects.push(data);
+
+      assert_chunk_read(&data_reader, "Expect ALife object data to be read")?;
     }
 
     assert_equal(objects.len(), count as usize, "Expect all object read")?;
@@ -66,9 +87,23 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
     count_writer.write_u32::<T>(self.objects.len() as u32)?;
 
     for (index, object) in self.objects.iter().enumerate() {
-      let mut object_writer = ChunkWriter::new();
+      let mut object_writer: ChunkWriter = ChunkWriter::new();
 
-      object.write::<T>(&mut object_writer)?;
+      let mut index_writer: ChunkWriter = ChunkWriter::new();
+      index_writer.write_u16::<T>(index as u16)?;
+      object_writer.write_all(
+        index_writer
+          .flush_chunk_into_buffer::<T>(Self::OBJECT_INDEX_CHUNK_ID)?
+          .as_slice(),
+      )?;
+
+      let mut data_writer: ChunkWriter = ChunkWriter::new();
+      object.write::<T>(&mut data_writer)?;
+      object_writer.write_all(
+        data_writer
+          .flush_chunk_into_buffer::<T>(Self::OBJECT_DATA_CHUNK_ID)?
+          .as_slice(),
+      )?;
 
       objects_writer.write_all(
         object_writer
@@ -121,8 +156,8 @@ impl FileImportExport for SpawnALifeSpawnsChunk {
   fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let mut ltx: Ltx = Ltx::new();
 
-    for object in &self.objects {
-      object.export(&object.index.to_string(), &mut ltx)?;
+    for (index, object) in self.objects.iter().enumerate() {
+      object.export(&index.to_string(), &mut ltx)?;
     }
 
     ltx.write_to(&mut open_export_file(
@@ -206,7 +241,6 @@ mod tests {
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {
       objects: vec![
         AlifeObject {
-          index: 21,
           id: 2334,
           net_action: 1,
           section: String::from("exo_outfit"),
@@ -250,7 +284,6 @@ mod tests {
           update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         },
         AlifeObject {
-          index: 22,
           id: 2335,
           net_action: 1,
           section: String::from("space_restrictor"),
@@ -316,28 +349,7 @@ mod tests {
     assert_eq!(read.objects.len(), original.objects.len());
 
     for (index, object) in read.objects.iter().enumerate() {
-      let another: &AlifeObject = original.objects.get(index).unwrap();
-
-      assert_eq!(object.index, another.index);
-      assert_eq!(object.id, another.id);
-      assert_eq!(object.net_action, another.net_action);
-      assert_eq!(object.section, another.section);
-      assert_eq!(object.clsid, another.clsid);
-      assert_eq!(object.name, another.name);
-      assert_eq!(object.script_game_id, another.script_game_id);
-      assert_eq!(object.script_rp, another.script_rp);
-      assert_eq!(object.position, another.position);
-      assert_eq!(object.direction, another.direction);
-      assert_eq!(object.respawn_time, another.respawn_time);
-      assert_eq!(object.parent_id, another.parent_id);
-      assert_eq!(object.phantom_id, another.phantom_id);
-      assert_eq!(object.script_flags, another.script_flags);
-      assert_eq!(object.version, another.version);
-      assert_eq!(object.game_type, another.game_type);
-      assert_eq!(object.script_version, another.script_version);
-      assert_eq!(object.client_data_size, another.client_data_size);
-      assert_eq!(object.spawn_id, another.spawn_id);
-      assert_eq!(object.update_data, another.update_data);
+      assert_eq!(object, original.objects.get(index).unwrap());
     }
 
     Ok(())

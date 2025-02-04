@@ -21,7 +21,6 @@ use xray_utils::{
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AlifeObject {
-  pub index: u16,
   pub id: u16,
   pub net_action: u16,
   pub section: String,
@@ -45,8 +44,6 @@ pub struct AlifeObject {
 }
 
 impl AlifeObject {
-  pub const INDEX_CHUNK_ID: u32 = 0;
-  pub const DATA_CHUNK_ID: u32 = 1;
   pub const DATA_SPAWN_CHUNK_ID: u32 = 0;
   pub const DATA_UPDATE_CHUNK_ID: u32 = 1;
 }
@@ -54,15 +51,7 @@ impl AlifeObject {
 impl ChunkReadWrite for AlifeObject {
   /// Read generic ALife object data from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let mut index_reader: ChunkReader = reader.read_child_by_index(Self::INDEX_CHUNK_ID)?;
-
-    let index: u16 = index_reader.read_u16::<T>()?;
-
-    let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
-    let mut spawn_reader: ChunkReader =
-      data_reader.read_child_by_index(Self::DATA_SPAWN_CHUNK_ID)?;
-    let mut update_reader: ChunkReader =
-      data_reader.read_child_by_index(Self::DATA_UPDATE_CHUNK_ID)?;
+    let mut spawn_reader: ChunkReader = reader.read_child_by_index(Self::DATA_SPAWN_CHUNK_ID)?;
 
     let data_length: u16 = spawn_reader.read_u16::<T>()?;
 
@@ -132,6 +121,7 @@ impl ChunkReadWrite for AlifeObject {
     let inherited: AlifeObjectInherited =
       AlifeObjectInherited::read::<T>(&mut spawn_reader, &class)?;
 
+    let mut update_reader: ChunkReader = reader.read_child_by_index(Self::DATA_UPDATE_CHUNK_ID)?;
     let update_data_length: u16 = update_reader.read_u16::<T>()?;
     let update_size: u16 = update_reader.read_u16::<T>()?;
 
@@ -149,14 +139,11 @@ impl ChunkReadWrite for AlifeObject {
     let update_data: Vec<u8> =
       update_reader.read_bytes(update_reader.read_bytes_remain() as usize)?;
 
-    assert_chunk_read(&index_reader, "Expect ALife object index to be read")?;
-    assert_chunk_read(&data_reader, "Expect ALife object data to be read")?;
     assert_chunk_read(&spawn_reader, "Expect ALife object spawn data to be read")?;
     assert_chunk_read(&update_reader, "Expect ALife object update data to be read")?;
     assert_chunk_read(reader, "Expect ALife object chunk to be read")?;
 
     Ok(Self {
-      index,
       net_action,
       section,
       clsid,
@@ -182,17 +169,12 @@ impl ChunkReadWrite for AlifeObject {
 
   /// Write ALife object data into the writer.
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    let mut index_writer: ChunkWriter = ChunkWriter::new();
-    let mut data_writer: ChunkWriter = ChunkWriter::new();
-
     let mut data_spawn_writer: ChunkWriter = ChunkWriter::new();
     let mut data_update_writer: ChunkWriter = ChunkWriter::new();
 
     let mut object_data_writer: ChunkWriter = ChunkWriter::new();
     let mut inherited_data_writer: ChunkWriter = ChunkWriter::new();
     let mut updated_data_writer: ChunkWriter = ChunkWriter::new();
-
-    index_writer.write_u16::<T>(self.index)?;
 
     object_data_writer.write_u16::<T>(self.net_action)?;
 
@@ -229,19 +211,16 @@ impl ChunkReadWrite for AlifeObject {
     data_update_writer.write_u16::<T>(updated_data_writer.bytes_written() as u16)?;
     data_update_writer.write_all(updated_data_writer.flush_raw_into_buffer()?.as_slice())?;
 
-    data_writer.write_all(
+    writer.write_all(
       data_spawn_writer
-        .flush_chunk_into_buffer::<T>(0)?
+        .flush_chunk_into_buffer::<T>(Self::DATA_SPAWN_CHUNK_ID)?
         .as_slice(),
     )?;
-    data_writer.write_all(
+    writer.write_all(
       data_update_writer
-        .flush_chunk_into_buffer::<T>(1)?
+        .flush_chunk_into_buffer::<T>(Self::DATA_UPDATE_CHUNK_ID)?
         .as_slice(),
     )?;
-
-    writer.write_all(index_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
-    writer.write_all(data_writer.flush_chunk_into_buffer::<T>(1)?.as_slice())?;
 
     Ok(())
   }
@@ -262,7 +241,6 @@ impl LtxImportExport for AlifeObject {
     let clsid: ClsId = ClsId::from_section(&object_section);
 
     Ok(Self {
-      index: read_ltx_field("index", section)?,
       id: read_ltx_field("id", section)?,
       net_action: read_ltx_field("net_action", section)?,
       clsid: clsid.clone(),
@@ -290,7 +268,6 @@ impl LtxImportExport for AlifeObject {
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
     ltx
       .with_section(section_name)
-      .set("index", self.index.to_string())
       .set("id", self.id.to_string())
       .set("net_action", self.net_action.to_string())
       .set("section", &self.section)
@@ -307,8 +284,7 @@ impl LtxImportExport for AlifeObject {
       .set("game_type", self.game_type.to_string())
       .set("script_version", self.script_version.to_string())
       .set("client_data_size", self.client_data_size.to_string())
-      .set("spawn_id", self.spawn_id.to_string())
-      .set("index", self.index.to_string());
+      .set("spawn_id", self.spawn_id.to_string());
 
     self.inherited.export(section_name, ltx)?;
 
@@ -350,7 +326,6 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: AlifeObject = AlifeObject {
-      index: 10,
       id: 340,
       net_action: 1,
       section: String::from("dolg_heavy_outfit"),
@@ -396,18 +371,18 @@ mod tests {
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
-    assert_eq!(writer.bytes_written(), 203);
+    assert_eq!(writer.bytes_written(), 185);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
       &mut overwrite_test_relative_resource_as_file(&filename)?,
       0,
     )?;
 
-    assert_eq!(bytes_written, 203);
+    assert_eq!(bytes_written, 185);
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
-    assert_eq!(file.bytes_remaining(), 203 + 8);
+    assert_eq!(file.bytes_remaining(), 185 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
@@ -422,7 +397,6 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
 
     let original: AlifeObject = AlifeObject {
-      index: 11,
       id: 345,
       net_action: 1,
       section: String::from("dolg_heavy_outfit"),
@@ -482,7 +456,6 @@ mod tests {
   #[test]
   fn test_serialize_deserialize() -> XRayResult {
     let original: AlifeObject = AlifeObject {
-      index: 10,
       id: 341,
       net_action: 1,
       section: String::from("dolg_heavy_outfit"),
