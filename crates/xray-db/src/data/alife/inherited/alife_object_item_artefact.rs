@@ -50,11 +50,17 @@ mod tests {
   use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
   use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
   use crate::data::alife::inherited::alife_object_item_artefact::AlifeObjectItemArtefact;
+  use crate::export::LtxImportExport;
+  use serde_json::json;
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
   use xray_test_utils::FileSlice;
 
@@ -103,6 +109,87 @@ mod tests {
 
     assert_eq!(
       AlifeObjectItemArtefact::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: AlifeObjectItemArtefact = AlifeObjectItemArtefact {
+      base: AlifeObjectItem {
+        base: AlifeObjectDynamicVisual {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 8,
+            distance: 1.25,
+            direct_control: 4,
+            level_vertex_id: 75,
+            flags: 33,
+            custom_data: String::from("custom_data"),
+            story_id: 25,
+            spawn_story_id: 754,
+          },
+          visual_name: String::from("cdef"),
+          visual_flags: 6,
+        },
+        condition: 0.25,
+        upgrades_count: 5,
+      },
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
+      &ltx_filename,
+    )?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(AlifeObjectItemArtefact::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: AlifeObjectItemArtefact = AlifeObjectItemArtefact {
+      base: AlifeObjectItem {
+        base: AlifeObjectDynamicVisual {
+          base: AlifeObjectAbstract {
+            game_vertex_id: 173,
+            distance: 76.25,
+            direct_control: 73,
+            level_vertex_id: 87,
+            flags: 5,
+            custom_data: String::from("custom_data"),
+            story_id: 27,
+            spawn_story_id: 31,
+          },
+          visual_name: String::from("cdef"),
+          visual_flags: 3,
+        },
+        condition: 0.25,
+        upgrades_count: 5,
+      },
+    };
+
+    let mut file: File = overwrite_test_relative_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
+    )?;
+
+    file.write_all(json!(original).to_string().as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+
+    assert_eq!(
+      serde_json::from_str::<AlifeObjectItemArtefact>(&serialized).unwrap(),
       original
     );
 
