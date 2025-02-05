@@ -24,7 +24,8 @@ pub fn find_one_of_optional_chunk_by_id(
 pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XRayResult<ChunkReader> {
   match chunks.iter().find(|it| it.id == id).cloned() {
     None => Err(XRayError::new_not_found_error(format!(
-      "Chunk with ID {} was not found", id
+      "Chunk with ID {} was not found",
+      id
     ))),
     Some(it) => Ok(it),
   }
