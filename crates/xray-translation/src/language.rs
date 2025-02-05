@@ -1,9 +1,8 @@
-use derive_more::Display;
-use std::str::FromStr;
+use derive_more::{Display, FromStr};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{get_windows1250_encoder, get_windows1251_encoder, XRayEncoding};
 
-#[derive(Clone, Debug, PartialEq, Display)]
+#[derive(Clone, Debug, PartialEq, Display, FromStr)]
 pub enum TranslationLanguage {
   #[display("all")]
   All,
@@ -58,32 +57,11 @@ impl TranslationLanguage {
   }
 
   pub fn from_str_single(language: &str) -> XRayResult<Self> {
-    match Self::from_str(language)? {
+    match Self::from_str(language).map_err(|it| XRayError::new_parsing_error(it.to_string()))? {
       Self::All => Err(XRayError::new_unknown_language_error(String::from(
         "Unexpected language 'all' provided'",
       ))),
       language => Ok(language),
-    }
-  }
-}
-
-impl FromStr for TranslationLanguage {
-  type Err = XRayError;
-
-  fn from_str(string: &str) -> Result<Self, Self::Err> {
-    match string {
-      "all" => Ok(Self::All),
-      "eng" => Ok(Self::English),
-      "fra" => Ok(Self::French),
-      "ger" => Ok(Self::German),
-      "ita" => Ok(Self::Italian),
-      "pol" => Ok(Self::Polish),
-      "rus" => Ok(Self::Russian),
-      "spa" => Ok(Self::Spanish),
-      "ukr" => Ok(Self::Ukrainian),
-      language => Err(XRayError::new_unknown_language_error(format!(
-        "Unexpected language '{language}' provided",
-      ))),
     }
   }
 }

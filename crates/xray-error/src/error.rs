@@ -1,7 +1,5 @@
-use image::ImageError;
 use serde::Serialize;
-use std::error::Error;
-use std::io::{Error as IoError, ErrorKind};
+use std::io::ErrorKind;
 use thiserror::Error as ThisError;
 use xray_error_derive::ErrorConstructors;
 
@@ -143,39 +141,6 @@ impl XRayError {
     Self::Io {
       message: message.into(),
       kind,
-    }
-  }
-}
-
-impl From<IoError> for XRayError {
-  fn from(value: IoError) -> Self {
-    Self::Io {
-      message: value.to_string(),
-      kind: value.kind(),
-    }
-  }
-}
-
-impl From<serde_json::error::Error> for XRayError {
-  fn from(value: serde_json::error::Error) -> Self {
-    Self::Serde {
-      message: value.to_string(),
-    }
-  }
-}
-
-impl From<ImageError> for XRayError {
-  fn from(value: ImageError) -> Self {
-    Self::TextureProcessing {
-      message: value.to_string(),
-    }
-  }
-}
-
-impl From<Box<dyn Error + Send + Sync>> for XRayError {
-  fn from(value: Box<dyn Error + Send + Sync>) -> Self {
-    Self::Generic {
-      message: value.to_string(),
     }
   }
 }

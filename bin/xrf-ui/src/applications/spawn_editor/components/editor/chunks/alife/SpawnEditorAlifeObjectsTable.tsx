@@ -15,6 +15,7 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
       { field: "scriptVersion", headerName: "script version" },
       { field: "version", headerName: "version" },
       { field: "clsid", headerName: "clsid" },
+      { field: "type", headerName: "type", width: 200 },
       { field: "name", headerName: "name", width: 200 },
       { field: "section", headerName: "section", width: 160 },
       { field: "gameType", headerName: "game type" },
@@ -50,10 +51,11 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
 
   const rows: GridRowsProp = useMemo(
     () =>
-      objects.map((it) => ({
+      objects.map((it, index) => ({
         ...it,
-        id: it.index,
+        id: index,
         innerId: it.id,
+        type: it.inherited.type,
       })),
     objects
   );

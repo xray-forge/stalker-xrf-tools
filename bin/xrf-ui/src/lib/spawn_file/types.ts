@@ -113,8 +113,10 @@ export interface IAlifeObjectBase {
   direction: IVector3d;
   gameType: number;
   id: number;
-  index: number;
-  inherited: unknown;
+  inherited: {
+    [index: string]: unknown;
+    type: string;
+  };
   name: string;
   netAction: number;
   parentId: number;
@@ -127,7 +129,7 @@ export interface IAlifeObjectBase {
   scriptVersion: number;
   section: string;
   spawnId: number;
-  updateData: unknown;
+  updateData: Array<unknown>;
   version: number;
 }
 

@@ -7,10 +7,10 @@ pub struct AssetDescriptor {
 }
 
 impl AssetDescriptor {
-  pub fn new(root_index: usize) -> Self {
+  pub fn new(root_index: usize, asset_type: AssetType) -> Self {
     Self {
       root_index,
-      asset_type: AssetType::Unknown,
+      asset_type,
     }
   }
 
