@@ -45,7 +45,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
     let count: u32 = count_reader.read_u32::<T>()?;
     let mut objects: Vec<AlifeObject> = Vec::with_capacity(count as usize);
 
-    for mut object_reader in ChunkIterator::new(&mut objects_reader) {
+    for mut object_reader in ChunkIterator::from_start(&mut objects_reader) {
       let mut index_reader: ChunkReader =
         object_reader.read_child_by_index(Self::OBJECT_INDEX_CHUNK_ID)?;
       let index: u16 = index_reader.read_u16::<T>()?;

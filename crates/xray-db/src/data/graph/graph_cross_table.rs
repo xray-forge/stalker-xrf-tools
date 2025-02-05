@@ -28,7 +28,7 @@ impl GraphCrossTable {
     let mut cross_tables: Vec<Self> = Vec::new();
 
     for mut cross_table_reader in
-      ChunkSizePackedIterator::new(&mut ChunkReader::from_file(file.try_clone().unwrap())?)
+      ChunkSizePackedIterator::from_current(&mut ChunkReader::from_file(file.try_clone().unwrap())?)
     {
       cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
       assert_chunk_read(&cross_table_reader, "Expect cross table chunk to be ended")?;
@@ -60,7 +60,7 @@ impl ChunkReadWriteList for GraphCrossTable {
   fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut cross_tables: Vec<Self> = Vec::new();
 
-    for mut cross_table_reader in ChunkSizePackedIterator::new(reader) {
+    for mut cross_table_reader in ChunkSizePackedIterator::from_current(reader) {
       cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
       assert_chunk_read(&cross_table_reader, "Expect cross table chunk to be ended")?;
     }

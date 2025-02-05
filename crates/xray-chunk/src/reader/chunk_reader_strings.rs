@@ -1,5 +1,5 @@
-use crate::chunk::source::chunk_data_source::ChunkDataSource;
-use crate::ChunkReader;
+use crate::reader::chunk_reader::ChunkReader;
+use crate::source::chunk_data_source::ChunkDataSource;
 use std::io::{Read, SeekFrom};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::encode_w1251_bytes_to_string;
@@ -90,8 +90,8 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::chunk_reader::ChunkReader;
-  use crate::chunk::source::chunk_memory_source::InMemoryChunkDataSource;
+  use crate::reader::chunk_reader::ChunkReader;
+  use crate::source::chunk_memory_source::InMemoryChunkDataSource;
   use xray_error::XRayResult;
 
   #[test]

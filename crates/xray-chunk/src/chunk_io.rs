@@ -1,9 +1,9 @@
-use crate::chunk::reader::chunk_reader::ChunkReader;
-use crate::ChunkDataSource;
+use crate::reader::chunk_reader::ChunkReader;
 use bytes::Bytes;
 use fileslice::FileSlice;
 use parquet::file::reader::{ChunkReader as ParquetChunkReader, Length};
 use std::io::Read;
+use crate::source::chunk_data_source::ChunkDataSource;
 
 impl<T: ChunkDataSource> Length for ChunkReader<T> {
   fn len(&self) -> u64 {

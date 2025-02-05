@@ -41,6 +41,14 @@ impl GenericCommand for UnpackSpawnFileCommand {
           .required(false)
           .action(ArgAction::SetTrue),
       )
+      .arg(
+        Arg::new("silent")
+          .help("Disable any logging")
+          .short('s')
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
   }
 
   /// Unpack provided *.spawn file.
@@ -53,10 +61,13 @@ impl GenericCommand for UnpackSpawnFileCommand {
       .get_one::<_>("dest")
       .expect("Expected valid output path to be provided");
 
+    let is_silent: bool = matches.get_flag("silent");
     let force: bool = matches.get_flag("force");
 
-    log::info!("Starting parsing spawn file {}", path.display());
-    log::info!("Unpack destination {}", destination.display());
+    if !is_silent {
+      println!("Starting parsing spawn file: {}", path.display());
+      println!("Unpack destination: {}", destination.display());
+    }
 
     // Apply force flag and delete existing directories.
     if force && destination.exists() && destination.is_dir() {
@@ -82,8 +93,10 @@ impl GenericCommand for UnpackSpawnFileCommand {
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read spawn file took: {}ms", read_duration.as_millis());
-    log::info!("Export spawn file took: {}ms", unpack_duration.as_millis());
+    if !is_silent {
+      println!("Read spawn file took: {}ms", read_duration.as_millis());
+      println!("Export spawn file took: {}ms", unpack_duration.as_millis());
+    }
 
     Ok(())
   }

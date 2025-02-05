@@ -22,7 +22,7 @@ impl ChunkReadWrite for OgfChildrenChunk {
 
     let mut children: Vec<OgfFile> = Vec::new();
 
-    for (index, mut object_reader) in (0..).zip(ChunkIterator::new(reader)) {
+    for (index, mut object_reader) in (0..).zip(ChunkIterator::from_start(reader)) {
       if object_reader.id != index {
         return Err(XRayError::new_unexpected_error(format!(
           "Invalid data in OGF children chunk, expected index {}, got {}",

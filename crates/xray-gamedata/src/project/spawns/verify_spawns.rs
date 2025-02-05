@@ -86,7 +86,7 @@ impl GamedataProject {
       println!("Verify spawn file: {}", file_path);
     }
 
-    match SpawnFile::read_from_path::<XRayByteOrder, P>(&path) {
+    match SpawnFile::read_from_path::<XRayByteOrder, P>(path) {
       Ok(_) => {
         if options.is_verbose_logging_enabled() {
           println!("Verify spawn file: {}", file_path);

@@ -45,7 +45,7 @@ impl ChunkReadWriteList for Patrol {
   fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut patrols: Vec<Self> = Vec::new();
 
-    for mut patrol_reader in ChunkIterator::new(reader) {
+    for mut patrol_reader in ChunkIterator::from_start(reader) {
       patrols.push(Self::read::<T>(&mut patrol_reader)?);
     }
 

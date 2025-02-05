@@ -1,5 +1,5 @@
-use crate::chunk::chunk_trait::ChunkReadWrite;
-use crate::chunk::source::chunk_data_source::ChunkDataSource;
+use crate::chunk_trait::ChunkReadWrite;
+use crate::source::chunk_data_source::ChunkDataSource;
 use crate::{ChunkReadWriteList, ChunkReadWriteOptional, ChunkReader};
 use byteorder::{ByteOrder, ReadBytesExt};
 use xray_error::XRayResult;
@@ -44,8 +44,8 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::chunk_reader::ChunkReader;
-  use crate::chunk::source::chunk_memory_source::InMemoryChunkDataSource;
+  use crate::reader::chunk_reader::ChunkReader;
+  use crate::source::chunk_memory_source::InMemoryChunkDataSource;
   use crate::XRayByteOrder;
   use xray_error::XRayResult;
 

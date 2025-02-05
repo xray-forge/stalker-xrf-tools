@@ -1,4 +1,4 @@
-use crate::chunk::reader::chunk_reader::ChunkReader;
+use crate::reader::chunk_reader::ChunkReader;
 use xray_error::{XRayError, XRayResult};
 
 /// Assert chunk ended and has no remaining data or fail with error.

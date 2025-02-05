@@ -1,4 +1,4 @@
-use crate::ChunkReader;
+use crate::reader::chunk_reader::ChunkReader;
 use xray_error::{XRayError, XRayResult};
 
 /// Find chink in list by id.
@@ -24,7 +24,7 @@ pub fn find_one_of_optional_chunk_by_id(
 pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XRayResult<ChunkReader> {
   match chunks.iter().find(|it| it.id == id).cloned() {
     None => Err(XRayError::new_not_found_error(format!(
-      "Chunk with ID {id} was not found"
+      "Chunk with ID {} was not found", id
     ))),
     Some(it) => Ok(it),
   }
@@ -42,7 +42,7 @@ pub fn find_one_of_required_chunks_by_id(
   }
 
   Err(XRayError::new_not_found_error(format!(
-    "Chunk with one of IDs {:?} was not found",
-    ids
+    "Chunk with one of IDs {} was not found",
+    ids.iter().map(u32::to_string).collect::<Vec<_>>().join(",")
   )))
 }

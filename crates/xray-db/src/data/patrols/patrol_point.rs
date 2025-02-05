@@ -32,7 +32,7 @@ impl ChunkReadWriteList for PatrolPoint {
   fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
     let mut points: Vec<Self> = Vec::new();
 
-    for (index, mut point_reader) in ChunkIterator::new(reader).enumerate() {
+    for (index, mut point_reader) in ChunkIterator::from_start(reader).enumerate() {
       let mut index_reader: ChunkReader = point_reader.read_child_by_index(Self::INDEX_CHUNK_ID)?;
       let mut data_reader: ChunkReader = point_reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
 

@@ -1,6 +1,6 @@
-use crate::chunk::chunk_iterator::ChunkIterator;
-use crate::chunk::source::chunk_data_source::ChunkDataSource;
-use crate::chunk::source::chunk_memory_source::InMemoryChunkDataSource;
+use crate::iterator::chunk_iterator::ChunkIterator;
+use crate::source::chunk_data_source::ChunkDataSource;
+use crate::source::chunk_memory_source::InMemoryChunkDataSource;
 use fileslice::FileSlice;
 use parquet::file::reader::Length;
 use std::fmt;
@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::SeekFrom;
 use xray_error::{XRayError, XRayResult};
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
   pub id: u32,
   pub size: u64,
@@ -99,7 +99,7 @@ impl<T: ChunkDataSource> ChunkReader<T> {
 impl ChunkReader {
   /// Navigates to chunk with index and constructs chunk representation.
   pub fn read_child_by_index(&mut self, id: u32) -> XRayResult<Self> {
-    for (iteration, chunk) in ChunkIterator::new(self).enumerate() {
+    for (iteration, chunk) in ChunkIterator::from_start(self).enumerate() {
       if id as usize == iteration {
         return Ok(chunk);
       }
@@ -113,12 +113,12 @@ impl ChunkReader {
 
   /// Get list of all child samples in current chunk, do not mutate current chunk.
   pub fn get_children_cloned(&self) -> Vec<Self> {
-    ChunkIterator::new(&mut self.clone()).collect()
+    ChunkIterator::from_start(&mut self.clone()).collect()
   }
 
   /// Read list of all child samples in current chunk and advance further.
   pub fn read_children(&mut self) -> Vec<Self> {
-    ChunkIterator::new(self).collect()
+    ChunkIterator::from_start(self).collect()
   }
 }
 
@@ -134,7 +134,7 @@ impl fmt::Debug for ChunkReader {
 
 #[cfg(test)]
 mod tests {
-  use crate::chunk::reader::chunk_reader::ChunkReader;
+  use crate::reader::chunk_reader::ChunkReader;
   use fileslice::FileSlice;
   use xray_error::XRayResult;
   use xray_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
