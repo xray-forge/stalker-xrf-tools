@@ -36,7 +36,7 @@ impl<D: ChunkDataSource> ChunkReader<D> {
         let extra_bytes: i64 = (bytes_read - position - 1) as i64;
 
         collected.extend_from_slice(&buffer[..position]);
-        self.source.set_seek(SeekFrom::Current(-extra_bytes))?;
+        self.data.set_seek(SeekFrom::Current(-extra_bytes))?;
 
         break;
       } else {
@@ -76,7 +76,7 @@ impl<D: ChunkDataSource> ChunkReader<D> {
         let extra_bytes: i64 = (bytes_read - (position + 2)) as i64;
 
         collected.extend_from_slice(&buffer[..position]);
-        self.source.set_seek(SeekFrom::Current(-extra_bytes))?;
+        self.data.set_seek(SeekFrom::Current(-extra_bytes))?;
 
         break;
       } else {

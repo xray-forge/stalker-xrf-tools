@@ -38,7 +38,7 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
   /// Read raw bytes.
   pub fn read_bytes(&mut self, count: usize) -> XRayResult<Vec<u8>> {
-    Ok(self.source.read_bytes(count)?)
+    Ok(self.data.read_bytes(count)?)
   }
 }
 

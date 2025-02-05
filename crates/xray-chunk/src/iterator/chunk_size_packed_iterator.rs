@@ -12,9 +12,8 @@ pub struct ChunkSizePackedIterator<'a, T: ChunkDataSource = FileSlice> {
 impl<T: ChunkDataSource> ChunkSizePackedIterator<'_, T> {
   pub fn from_start(reader: &mut ChunkReader<T>) -> ChunkSizePackedIterator<T> {
     reader
-      .source
-      .set_seek(SeekFrom::Start(0))
-      .expect("Packed iterator stream position seeking expected");
+      .reset_pos()
+      .expect("Iterator reader position reset expected");
 
     ChunkSizePackedIterator { index: 0, reader }
   }
@@ -32,11 +31,7 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
       return None;
     }
 
-    let position: u64 = self
-      .reader
-      .source
-      .get_seek()
-      .expect("Iterator seek position");
+    let position: u64 = self.reader.data.get_seek().expect("Iterator seek position");
 
     let size: u64 = self
       .reader
@@ -49,7 +44,7 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
     self.index += 1;
     self
       .reader
-      .source
+      .data
       .set_seek(SeekFrom::Current(size as i64 - 4))
       .expect("Iterator seek position");
 
@@ -57,8 +52,7 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
       id,
       size,
       position,
-      is_compressed: false,
-      source: Box::new(self.reader.source.slice(position + 4..position + size)),
+      data: Box::new(self.reader.data.slice(position + 4..position + size)),
     })
   }
 }
@@ -141,7 +135,7 @@ mod tests {
         8, 0, 0, 0, 255, 255, 255, 255, 12, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255,
       ]))?;
 
-    chunk_reader.source.set_seek(SeekFrom::Start(8))?;
+    chunk_reader.data.set_seek(SeekFrom::Start(8))?;
 
     let mut vec: Vec<ChunkReader<InMemoryChunkDataSource>> = Vec::new();
 

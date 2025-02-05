@@ -13,8 +13,7 @@ pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
   pub id: u32,
   pub size: u64,
   pub position: u64,
-  pub is_compressed: bool,
-  pub source: Box<T>,
+  pub data: Box<T>,
 }
 
 impl ChunkReader<FileSlice> {
@@ -35,8 +34,7 @@ impl ChunkReader<FileSlice> {
       id: 0,
       size: slice.len() as u64,
       position: slice.start_pos(),
-      is_compressed: false,
-      source: Box::new(slice),
+      data: Box::new(slice),
     })
   }
 }
@@ -53,50 +51,59 @@ impl ChunkReader<InMemoryChunkDataSource> {
       id: 0,
       size: source.len(),
       position: 0,
-      is_compressed: false,
-      source: Box::new(source),
+      data: Box::new(source),
     })
   }
 }
 
 impl<T: ChunkDataSource> ChunkReader<T> {
+  /// Assert data in chink is read and nothing remains to read.
+  pub fn assert_read(&self, message: &str) -> XRayResult {
+    if self.is_ended() {
+      Ok(())
+    } else {
+      Err(XRayError::new_chunk_not_ended_error(
+        message,
+        self.read_bytes_remain(),
+      ))
+    }
+  }
+
   /// Get current position of the chunk seek.
   pub fn cursor_pos(&self) -> u64 {
-    self.source.cursor_pos()
+    self.data.cursor_pos()
   }
 
   /// Get end position of the chunk seek.
   pub fn end_pos(&self) -> u64 {
-    self.source.end_pos()
+    self.data.end_pos()
   }
 
   /// Whether chunk is ended and contains no more data to read.
   pub fn is_ended(&self) -> bool {
-    self.source.cursor_pos() == self.source.end_pos()
+    self.data.cursor_pos() == self.data.end_pos()
   }
 
   /// Whether chunk contains data to read.
   pub fn has_data(&self) -> bool {
-    self.source.cursor_pos() < self.source.end_pos()
+    self.data.cursor_pos() < self.data.end_pos()
   }
 
   /// Get summary of bytes read from chunk based on current seek position.
   pub fn read_bytes_len(&self) -> u64 {
-    self.source.cursor_pos() - self.source.start_pos()
+    self.data.cursor_pos() - self.data.start_pos()
   }
 
   /// Get summary of bytes remaining based on current seek position.
   pub fn read_bytes_remain(&self) -> u64 {
-    self.source.end_pos() - self.source.cursor_pos()
+    self.data.end_pos() - self.data.cursor_pos()
   }
 
   /// Reset seek position in chunk file.
   pub fn reset_pos(&mut self) -> XRayResult<u64> {
-    Ok(self.source.set_seek(SeekFrom::Start(0))?)
+    Ok(self.data.set_seek(SeekFrom::Start(0))?)
   }
-}
 
-impl ChunkReader {
   /// Navigates to chunk with index and constructs chunk representation.
   pub fn read_child_by_index(&mut self, id: u32) -> XRayResult<Self> {
     for (iteration, chunk) in ChunkIterator::from_start(self).enumerate() {
@@ -118,7 +125,7 @@ impl ChunkReader {
 
   /// Read list of all child samples in current chunk and advance further.
   pub fn read_children(&mut self) -> Vec<Self> {
-    ChunkIterator::from_start(self).collect()
+    ChunkIterator::<T>::from_start(self).collect()
   }
 }
 
@@ -126,8 +133,8 @@ impl fmt::Debug for ChunkReader {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(
       formatter,
-      "Chunk {{ index: {}, size: {}, position: {}, is_compressed: {} }}",
-      self.id, self.size, self.position, self.is_compressed
+      "Chunk {{ index: {}, size: {}, position: {} }}",
+      self.id, self.size, self.position
     )
   }
 }
@@ -190,11 +197,11 @@ mod tests {
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
-    assert_eq!(chunks.get(0).unwrap().size, 0);
-    assert_eq!(chunks.get(1).unwrap().size, 0);
-    assert_eq!(chunks.get(2).unwrap().size, 0);
-    assert_eq!(chunks.get(3).unwrap().size, 0);
-    assert_eq!(chunks.get(4).unwrap().size, 0);
+    assert_eq!(chunks[0].size, 0);
+    assert_eq!(chunks[1].size, 0);
+    assert_eq!(chunks[2].size, 0);
+    assert_eq!(chunks[3].size, 0);
+    assert_eq!(chunks[4].size, 0);
 
     Ok(())
   }
@@ -206,16 +213,16 @@ mod tests {
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
-    assert_eq!(chunks.get(0).unwrap().size, 0);
-    assert_eq!(chunks.get(0).unwrap().id, 4);
-    assert_eq!(chunks.get(1).unwrap().size, 0);
-    assert_eq!(chunks.get(1).unwrap().id, 3);
-    assert_eq!(chunks.get(2).unwrap().size, 0);
-    assert_eq!(chunks.get(2).unwrap().id, 2);
-    assert_eq!(chunks.get(3).unwrap().size, 0);
-    assert_eq!(chunks.get(3).unwrap().id, 1);
-    assert_eq!(chunks.get(4).unwrap().size, 0);
-    assert_eq!(chunks.get(4).unwrap().id, 0);
+    assert_eq!(chunks[0].size, 0);
+    assert_eq!(chunks[0].id, 4);
+    assert_eq!(chunks[1].size, 0);
+    assert_eq!(chunks[1].id, 3);
+    assert_eq!(chunks[2].size, 0);
+    assert_eq!(chunks[2].id, 2);
+    assert_eq!(chunks[3].size, 0);
+    assert_eq!(chunks[3].id, 1);
+    assert_eq!(chunks[4].size, 0);
+    assert_eq!(chunks[4].id, 0);
 
     Ok(())
   }
@@ -234,11 +241,11 @@ mod tests {
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
-    assert_eq!(chunks.get(0).unwrap().size, 8);
-    assert_eq!(chunks.get(1).unwrap().size, 24);
-    assert_eq!(chunks.get(2).unwrap().size, 16);
-    assert_eq!(chunks.get(3).unwrap().size, 0);
-    assert_eq!(chunks.get(4).unwrap().size, 40);
+    assert_eq!(chunks[0].size, 8);
+    assert_eq!(chunks[1].size, 24);
+    assert_eq!(chunks[2].size, 16);
+    assert_eq!(chunks[3].size, 0);
+    assert_eq!(chunks[4].size, 40);
 
     Ok(())
   }

@@ -1,4 +1,3 @@
-use crate::constants::CFS_COMPRESS_MARK;
 use crate::reader::chunk_reader::ChunkReader;
 use crate::{ChunkDataSource, XRayByteOrder};
 use byteorder::ReadBytesExt;
@@ -14,9 +13,8 @@ pub struct ChunkIterator<'a, T: ChunkDataSource = FileSlice> {
 impl<T: ChunkDataSource> ChunkIterator<'_, T> {
   pub fn from_start(reader: &mut ChunkReader<T>) -> ChunkIterator<T> {
     reader
-      .source
-      .set_seek(SeekFrom::Start(0))
-      .expect("Iterator stream position seeking expected");
+      .reset_pos()
+      .expect("Iterator reader position reset expected");
 
     ChunkIterator { reader }
   }
@@ -46,28 +44,23 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
       .read_u32::<XRayByteOrder>()
       .expect("Chunk size read");
 
-    let position: u64 = self
-      .reader
-      .source
-      .get_seek()
-      .expect("Iterator seek position");
+    let position: u64 = self.reader.data.get_seek().expect("Iterator seek position");
 
-    if id & CFS_COMPRESS_MARK != 0 {
+    if id & (1 << 31) != 0 {
       todo!("Parsing not implemented compressed chunk");
     }
 
     self
       .reader
-      .source
+      .data
       .set_seek(SeekFrom::Current(size as i64))
       .unwrap();
 
     Some(Self::Item {
       id,
-      is_compressed: false,
       size: size as u64,
       position,
-      source: Box::new(self.reader.source.slice(position..(position + size as u64))),
+      data: Box::new(self.reader.data.slice(position..(position + size as u64))),
     })
   }
 }

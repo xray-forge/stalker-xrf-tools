@@ -4,6 +4,7 @@ use parquet::file::reader::Length;
 use std::io::{Cursor, Read, Result as IoResult, Seek, SeekFrom};
 use std::ops::RangeBounds;
 
+#[derive(Clone)]
 pub struct InMemoryChunkDataSource {
   pub cursor: Cursor<Vec<u8>>,
 }

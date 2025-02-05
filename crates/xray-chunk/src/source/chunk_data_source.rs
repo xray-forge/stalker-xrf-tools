@@ -2,7 +2,7 @@ use byteorder::ReadBytesExt;
 use std::io::{Read, Result as IoResult, SeekFrom};
 use std::ops::RangeBounds;
 
-pub trait ChunkDataSource: ReadBytesExt + Read {
+pub trait ChunkDataSource: ReadBytesExt + Read + Clone {
   fn start_pos(&self) -> u64;
 
   fn cursor_pos(&self) -> u64;
