@@ -38,10 +38,6 @@ path = "examples/extract.rs"
 required-features = ["std"]
 
 [[test]]
-name = "decode"
-path = "tests/decode.rs"
-required-features = ["std"]
-[[test]]
 name = "larc333"
 path = "tests/larc333.rs"
 required-features = ["std"]

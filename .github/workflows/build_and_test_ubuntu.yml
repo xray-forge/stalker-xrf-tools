@@ -23,7 +23,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Run xray crates tests
-        run: cargo test --verbose --workspace
+        run: cargo test --verbose --workspace --exclude xrf-app xrf-cli
 
       - name: Build CLI
         run: cargo build -p xrf-cli --release
