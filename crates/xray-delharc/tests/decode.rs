@@ -61,5 +61,13 @@ fn test_decoder<R: io::Read, D: Decoder<R>>(
     sink.write_all(target).unwrap();
     target_size -= len
   }
+
+  println!(
+    "compare crc32 {} - {} ({})",
+    sink.crc32.get_crc(),
+    crc_validate,
+    buf_size
+  );
+
   assert_eq!(sink.crc32.get_crc(), crc_validate);
 }
