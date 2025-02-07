@@ -245,6 +245,7 @@ const TESTS_CASES: &[(
 fn test_lhmelt_16536() -> io::Result<()> {
   let mut lha_reader: delharc::LhaDecodeReader<fs::File> = Default::default();
   for (offset, name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
+    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/lhmelt_16536/{}", name))?;
     file.seek(SeekFrom::Start(*offset))?;
     assert!(lha_reader.begin_new(file)?);
@@ -253,17 +254,19 @@ fn test_lhmelt_16536() -> io::Result<()> {
       let mut sink = SinkSum::new();
       let header = lha_reader.header();
       assert_eq!(header.level, *level);
-      let path = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
+      let path1 = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
       if filen == 1 {
         assert_eq!(header.msdos_attrs, MsDosAttrs::SUBDIR);
         assert_eq!(header.compression_method().unwrap(), CompressionMethod::Lhd);
         assert_eq!(header.compressed_size, 0);
         assert_eq!(header.original_size, 0);
-        let mut fullpath = PathBuf::from(path);
+        let mut fullpath = PathBuf::from(path1);
         fullpath.pop();
+        let fullpath = &fullpath.to_str().unwrap();
+        assert_eq!(&header.parse_pathname().to_str().unwrap(), fullpath);
         assert_eq!(
-          &header.parse_pathname().to_str().unwrap(),
-          &fullpath.to_str().unwrap()
+          &header.parse_pathname_to_str(),
+          &fullpath.replace(&std::path::MAIN_SEPARATOR.to_string(), "/")
         );
         let last_modified = format!("{}", header.parse_last_modified());
         if header.level == 2 {
@@ -277,7 +280,9 @@ fn test_lhmelt_16536() -> io::Result<()> {
         assert_eq!(header.compression_method().unwrap(), *compr);
         assert_eq!(header.compressed_size, *size_c);
         assert_eq!(header.original_size, *size_o);
-        assert_eq!(&header.parse_pathname().to_str().unwrap(), &path);
+        assert_eq!(&header.parse_pathname().to_str().unwrap(), &path1);
+        let path2 = path.replace("*", "/");
+        assert_eq!(&header.parse_pathname_to_str(), &path2);
         let last_modified = format!("{}", header.parse_last_modified());
         assert_eq!(&last_modified, modif);
         assert_eq!(header.file_crc, *crc16);

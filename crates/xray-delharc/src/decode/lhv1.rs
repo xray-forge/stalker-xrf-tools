@@ -1,8 +1,11 @@
 use crate::bitstream::*;
 use crate::decode::Decoder;
+use crate::error::LhaResult;
 use crate::ringbuf::*;
+use crate::stub_io::Read;
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
 use core::num::NonZeroU16;
-use std::io::{self, Read};
 
 mod dyntree;
 use dyntree::*;
@@ -32,12 +35,12 @@ impl<R: Read> Lh1Decoder<R> {
   }
 
   #[inline]
-  fn read_command(&mut self) -> io::Result<u16> {
+  fn read_command(&mut self) -> LhaResult<u16, R> {
     self.command_tree.read_entry(&mut self.bit_reader)
   }
 
   #[inline]
-  fn read_offset(&mut self) -> io::Result<u16> {
+  fn read_offset(&mut self) -> LhaResult<u16, R> {
     let bits9 = self.bit_reader.read_bits(9)?;
     let (mut offset, bits) = decode_offset(bits9);
     offset |= self.bit_reader.read_bits::<u16>(bits)?;
@@ -49,7 +52,7 @@ impl<R: Read> Lh1Decoder<R> {
     target: I,
     offset: usize,
     count: usize,
-  ) -> io::Result<()> {
+  ) -> LhaResult<(), R> {
     let history_iter = self.ringbuf.iter_from_offset(offset);
     let count_after = count - target.len().min(count);
     for (t, s) in target.zip(history_iter).take(count) {
@@ -60,12 +63,17 @@ impl<R: Read> Lh1Decoder<R> {
   }
 }
 
-impl<R: Read> Decoder<R> for Lh1Decoder<R> {
+impl<R: Read> Decoder<R> for Lh1Decoder<R>
+where
+  R::Error: core::fmt::Debug,
+{
+  type Error = R::Error;
+
   fn into_inner(self) -> R {
     self.bit_reader.into_inner()
   }
 
-  fn fill_buffer(&mut self, buf: &mut [u8]) -> io::Result<()> {
+  fn fill_buffer(&mut self, buf: &mut [u8]) -> LhaResult<(), R> {
     let buflen = buf.len();
     let mut target = buf.iter_mut();
     if let Some((offset, count)) = self.copy_progress {
@@ -92,7 +100,7 @@ impl<R: Read> Decoder<R> for Lh1Decoder<R> {
 }
 
 /// Returns (incomplete offset, additional bits to read)
-#[inline]
+#[inline(always)]
 fn decode_offset(bits9: u16) -> (u16, u32) {
   match bits9 & 0b111100000 {
     /* 000xxxxxx -> 000000 xxxxxx */
@@ -116,10 +124,12 @@ fn decode_offset(bits9: u16) -> (u16, u32) {
   }
 }
 
+#[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
   use super::*;
   use std::fs;
+  use std::io;
 
   #[test]
   fn lhav1_works() {

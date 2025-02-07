@@ -169,7 +169,9 @@ impl ArchiveReader {
         let mut res: Lh1Decoder<&[u8]> = Lh1Decoder::new(compressed_buf.as_slice());
         let mut decompressed_buf: Vec<u8> = vec![0u8; decoded_len as usize];
 
-        res.fill_buffer(&mut decompressed_buf)?;
+        res
+          .fill_buffer(&mut decompressed_buf)
+          .map_err(|error| XRayError::new_parsing_error(error.to_string()))?;
 
         Ok(decompressed_buf)
       }

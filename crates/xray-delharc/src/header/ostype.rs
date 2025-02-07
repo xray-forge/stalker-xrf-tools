@@ -1,6 +1,7 @@
-use core::convert::TryFrom;
 use core::fmt;
+#[cfg(feature = "std")]
 use std::error::Error;
+#[cfg(feature = "std")]
 use std::io;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9,7 +10,9 @@ pub struct UnrecognizedOsType(pub u8);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[non_exhaustive]
 #[repr(u8)]
+#[derive(Default)]
 pub enum OsType {
+  #[default]
   Generic = 0x00,
   MsDos = b'M',
   Win95 = b'w',
@@ -29,12 +32,6 @@ pub enum OsType {
   Os386 = b'3',
   Human68k = b'H',
   Xosk = b'X',
-}
-
-impl Default for OsType {
-  fn default() -> OsType {
-    OsType::Generic
-  }
 }
 
 impl From<OsType> for u8 {
@@ -71,6 +68,7 @@ impl TryFrom<u8> for OsType {
   }
 }
 
+#[cfg(feature = "std")]
 impl Error for UnrecognizedOsType {}
 
 impl fmt::Display for UnrecognizedOsType {
@@ -79,6 +77,7 @@ impl fmt::Display for UnrecognizedOsType {
   }
 }
 
+#[cfg(feature = "std")]
 impl From<UnrecognizedOsType> for io::Error {
   fn from(e: UnrecognizedOsType) -> Self {
     io::Error::new(io::ErrorKind::InvalidData, e)

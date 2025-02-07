@@ -293,9 +293,12 @@ const TESTS_CASES: &[(
   ),
 ];
 
+const CRASH_TESTS: &[&str] = &["clusterfuzz-1.bin"];
+
 #[test]
 fn test_regression() -> io::Result<()> {
   for (name, headers) in TESTS_CASES {
+    println!("-------------\n{:?}", name);
     let file = fs::File::open(format!("tests/regression/{}", name))?;
     let mut lha_reader = delharc::LhaDecodeReader::new(&file)?;
     for filen in 0.. {
@@ -334,6 +337,16 @@ fn test_regression() -> io::Result<()> {
         break;
       }
     }
+  }
+
+  for name in CRASH_TESTS {
+    println!("-------------\n{:?}", name);
+    let file = fs::File::open(format!("tests/regression/{}", name))?;
+    let mut lha_reader = delharc::LhaDecodeReader::new(&file)?;
+    assert!(lha_reader.is_decoder_supported());
+    let mut sink = SinkSum::new();
+    let err = io::copy(&mut lha_reader, &mut sink).unwrap_err();
+    assert_eq!(&err.to_string(), "temporary codelen table has invalid size");
   }
   Ok(())
 }

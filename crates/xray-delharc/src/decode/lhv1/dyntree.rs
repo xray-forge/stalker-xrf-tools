@@ -1,8 +1,10 @@
 //! # Dynamic Huffman Coding.
 use crate::bitstream::BitRead;
+use crate::error::LhaError;
 use crate::statictree::entry::*;
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 use core::fmt;
-use std::io;
 
 #[derive(Clone)]
 pub struct DynHuffTree {
@@ -11,6 +13,9 @@ pub struct DynHuffTree {
   groups: Groups,
 }
 
+#[cfg(feature = "no_xray_patch")]
+const REORDER_LIMIT: u16 = 32 * 1024;
+#[cfg(not(feature = "no_xray_patch"))]
 const REORDER_LIMIT: u16 = 16 * 1024;
 const NUM_LEAVES: usize = 314;
 const NUM_NODES: usize = NUM_LEAVES * 2 - 1;
@@ -204,13 +209,13 @@ impl TreeNode {
     }
   }
 
-  #[inline]
+  #[inline(always)]
   fn make_branch(&mut self, child_index: usize) {
     debug_assert!(child_index < NUM_NODES);
     self.entry.set_as_branch(child_index);
   }
 
-  #[inline]
+  #[inline(always)]
   fn is_leaf(&self) -> bool {
     self.entry.is_leaf()
   }
@@ -370,18 +375,17 @@ impl DynHuffTree {
     }
   }
 
+  #[allow(clippy::manual_swap)]
   #[inline]
   fn promote_to_leader(&mut self, node_index: usize) -> usize {
-    let (node, head) = self.nodes[..node_index as usize + 1]
-      .split_last_mut()
-      .unwrap();
+    let (node, head) = self.nodes[..node_index + 1].split_last_mut().unwrap();
     let leader_index = self.groups.get_leader_index(node.group);
 
     if leader_index == node_index {
       return node_index;
     }
     // swap the new leader with the old one
-    let prev_leader = &mut head[leader_index as usize];
+    let prev_leader = &mut head[leader_index];
     let entry = node.entry;
     node.entry = prev_leader.entry;
     prev_leader.entry = entry;
@@ -457,7 +461,7 @@ impl DynHuffTree {
     }
   }
 
-  pub fn read_entry<R: BitRead>(&mut self, mut path: R) -> io::Result<u16> {
+  pub fn read_entry<R: BitRead>(&mut self, mut path: R) -> Result<u16, LhaError<R::Error>> {
     let nodes = &self.nodes;
     let mut node = &nodes[0];
     loop {
@@ -509,6 +513,7 @@ impl fmt::Display for DynHuffTree {
   }
 }
 
+#[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
   use super::*;

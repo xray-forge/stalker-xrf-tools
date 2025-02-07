@@ -1,5 +1,5 @@
 use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{value_parser, Arg, ArgMatches, Command};
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use std::env;
 use std::path::PathBuf;
 use tokio::runtime::Runtime;
@@ -40,6 +40,21 @@ impl GenericCommand for UnpackArchiveCommand {
           .default_value("32")
           .value_parser(value_parser!(usize)),
       )
+      .arg(
+        Arg::new("dry")
+          .help("Run in dry mode without actually unpacking to disk")
+          .long("dry")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("silent")
+          .help("Disable any logging")
+          .short('s')
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
   }
 
   /// Unpack xray engine database archive.
@@ -62,30 +77,45 @@ impl GenericCommand for UnpackArchiveCommand {
       .get_one::<usize>("parallel")
       .expect("Expected valid parallel threads count to be provided");
 
-    log::info!("Unpack source: {}", path.display());
-    log::info!("Unpack destination: {}", destination.display());
+    let is_silent: bool = matches.get_flag("silent");
+    let is_dry: bool = matches.get_flag("dry");
+
+    if !is_silent {
+      if is_dry {
+        println!("Unpack in dry mode");
+      }
+
+      println!("Unpack source: {}", path.display());
+      println!("Unpack destination: {}", destination.display());
+    }
 
     let archive_project: Box<ArchiveProject> = Box::new(ArchiveProject::new(path)?);
 
-    log::info!(
-      "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",
-      archive_project.archives.len(),
-      archive_project.files.len(),
-      (archive_project.get_compressed_size() as f64) / 1024.0 / 1024.0,
-      (archive_project.get_real_size() as f64) / 1024.0 / 1024.0,
-    );
+    if !is_silent {
+      println!(
+        "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",
+        archive_project.archives.len(),
+        archive_project.files.len(),
+        (archive_project.get_compressed_size() as f64) / 1024.0 / 1024.0,
+        (archive_project.get_real_size() as f64) / 1024.0 / 1024.0,
+      );
 
-    log::info!("Unpacking files, parallel {parallel}");
+      println!("Unpacking files, parallel {parallel}");
+    }
 
-    let result: ArchiveUnpackResult =
-      Runtime::new()?.block_on(archive_project.unpack_parallel(&destination, parallel))?;
+    if !is_dry {
+      let result: ArchiveUnpackResult =
+        Runtime::new()?.block_on(archive_project.unpack_parallel(&destination, parallel))?;
 
-    log::info!(
-      "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",
-      result.duration as f64 / 1000.0,
-      result.prepare_duration as f64 / 1000.0,
-      result.unpack_duration as f64 / 1000.0,
-    );
+      if !is_silent {
+        println!(
+          "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",
+          result.duration as f64 / 1000.0,
+          result.prepare_duration as f64 / 1000.0,
+          result.unpack_duration as f64 / 1000.0,
+        );
+      }
+    }
 
     Ok(())
   }

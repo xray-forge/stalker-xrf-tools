@@ -1,6 +1,7 @@
-use core::convert::TryFrom;
 use core::fmt;
+#[cfg(feature = "std")]
 use std::error::Error;
+#[cfg(feature = "std")]
 use std::io;
 
 #[non_exhaustive]
@@ -77,6 +78,7 @@ impl CompressionMethod {
   }
 }
 
+#[cfg(feature = "std")]
 impl Error for UnrecognizedCompressionMethod {}
 
 impl fmt::Display for UnrecognizedCompressionMethod {
@@ -89,10 +91,11 @@ impl fmt::Display for CompressionMethod {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     let strid = self.as_identifier();
     assert!(strid.is_ascii());
-    unsafe { std::str::from_utf8_unchecked(strid) }.fmt(f)
+    unsafe { core::str::from_utf8_unchecked(strid) }.fmt(f)
   }
 }
 
+#[cfg(feature = "std")]
 impl From<UnrecognizedCompressionMethod> for io::Error {
   fn from(e: UnrecognizedCompressionMethod) -> Self {
     io::Error::new(io::ErrorKind::InvalidData, e)

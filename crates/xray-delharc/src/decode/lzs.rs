@@ -1,8 +1,11 @@
 use crate::bitstream::*;
 use crate::decode::Decoder;
+use crate::error::LhaResult;
 use crate::ringbuf::*;
+use crate::stub_io::Read;
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
 use core::num::NonZeroU16;
-use std::io::{self, Read};
 
 const RING_BUFFER_SIZE: usize = 2048;
 const START_OFFSET: isize = -17;
@@ -18,7 +21,7 @@ pub struct LzsDecoder<R> {
 impl<R: Read> LzsDecoder<R> {
   pub fn new(rd: R) -> LzsDecoder<R> {
     let bit_reader = BitStream::new(rd);
-    let mut ringbuf = Box::new(RingArrayBuf::default());
+    let mut ringbuf: Box<RingArrayBuf<RING_BUFFER_SIZE>> = Box::default();
     ringbuf.set_cursor(START_OFFSET);
     LzsDecoder {
       bit_reader,
@@ -32,7 +35,7 @@ impl<R: Read> LzsDecoder<R> {
     target: I,
     pos: usize,
     count: usize,
-  ) -> io::Result<()> {
+  ) -> LhaResult<(), R> {
     let history_iter = self.ringbuf.iter_from_pos(pos);
     let real_count = target.len().min(count);
     for (t, s) in target.zip(history_iter).take(real_count) {
@@ -44,12 +47,17 @@ impl<R: Read> LzsDecoder<R> {
   }
 }
 
-impl<R: Read> Decoder<R> for LzsDecoder<R> {
+impl<R: Read> Decoder<R> for LzsDecoder<R>
+where
+  R::Error: core::fmt::Debug,
+{
+  type Error = R::Error;
+
   fn into_inner(self) -> R {
     self.bit_reader.into_inner()
   }
 
-  fn fill_buffer(&mut self, buf: &mut [u8]) -> io::Result<()> {
+  fn fill_buffer(&mut self, buf: &mut [u8]) -> LhaResult<(), R> {
     let buflen = buf.len();
     let mut target = buf.iter_mut();
     if let Some((pos, count)) = self.copy_progress {

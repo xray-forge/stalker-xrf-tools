@@ -35,8 +35,7 @@ use log::LevelFilter;
 use std::error::Error;
 use std::{env, process};
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
   setup_logger();
 
   let mut command: Command = Command::new("xrf-tool").about("XRF forge CLI tools application");

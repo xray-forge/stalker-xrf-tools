@@ -33,6 +33,7 @@ const TESTS_CASES: &[(&str, &str, u64, u64, u16, u32, &str, u8, CompressionMetho
 #[test]
 fn test_unlha32() -> io::Result<()> {
   for (name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
+    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/unlha32/{}", name))?;
     for filen in 0.. {
       assert!(filen <= 0);
@@ -44,7 +45,7 @@ fn test_unlha32() -> io::Result<()> {
       assert_eq!(header.compression_method().unwrap(), *compr);
       assert_eq!(header.compressed_size, *size_c);
       assert_eq!(header.original_size, *size_o);
-      assert_eq!(&header.parse_pathname().to_str().unwrap(), &path);
+      assert_eq!(&header.parse_pathname_to_str(), &path);
       let last_modified = format!("{}", header.parse_last_modified());
       assert_eq!(&last_modified, modif);
       assert_eq!(header.file_crc, *crc16);

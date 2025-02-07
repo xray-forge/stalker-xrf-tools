@@ -1,5 +1,3 @@
-#![allow(clippy::all)]
-
 /*! A library for parsing and extracting content of [LHA/LZH](https://en.wikipedia.org/wiki/LHA_(file_format)) archives.
 
 This library is for easy parsing of LHA headers and allows to read files compressed with some of the
@@ -16,18 +14,22 @@ extended header data and may be explored by the user program in case extra archi
 
 LHA header levels: 0, 1, 2 and 3 are recognized.
 
+
 ## Compression methods
 
 You may include or opt out of some of the decoders:
 
 ```toml
 [dependencies.delharc]
-version = "0.5"
+version = "0.6"
 default-features = false
-features = ["lh1"] # select desired features
+features = ["std", "lh1"] # select desired features
 ```
 
 `lh1` and `lz` features are enabled by **default**.
+
+When using `default-features = false` the `std` feature needs to be added back along with other
+compression method features. Otherwise the library will be compiled in the `no_std` mode.
 
 | identifier | decoder            | feature | description
 |------------|--------------------|---------|------------
@@ -46,6 +48,10 @@ features = ["lh1"] # select desired features
 | `-pm1-`    | unsupported        | N/A     | PMarc, 8 Kb sliding window, static huffman
 | `-pm2-`    | unsupported        | N/A     | PMarc, 4 Kb sliding window, static huffman
 
+*/
+#![cfg_attr(
+  feature = "std",
+  doc = r##"
 ## Example
 
 ```no_run
@@ -61,7 +67,7 @@ fn extract_to_stdout<P: AsRef<Path>>(
         let header = lha_reader.header();
         let filename = header.parse_pathname();
 
-        eprintln!("Path: {} modified: {} ", filename.display(), header.parse_last_modified());
+        eprintln!("Path: {:?} modified: {} ", filename, header.parse_last_modified());
 
         if filename.ends_with(matching_path.as_ref()) {
             if lha_reader.is_decoder_supported() {
@@ -87,30 +93,69 @@ fn extract_to_stdout<P: AsRef<Path>>(
     Ok(false)
 }
 ```
+"##
+)]
+/*!
+## No std
+
+With `std` feature enabled, [`error::LhaError`] converts to [`std::io::Error`] via the [`From`] trait
+and [`stub_io::Read`] is implemented for all types that implement [`std::io::Read`].
+
+In this instance to read decompressed files, callers should access the [`LhaDecodeReader`] using
+[`std::io::Read`] trait methods.
+
+Without the `std` feature enabled `delharc` is compiled without the `std` library.
+The extern crate `alloc` is still required though. Because [`std::io`] is missing,
+in this instance callers should interface the [`LhaDecodeReader`] using [`stub_io::Read`]
+trait directly. [`stub_io::Read`] is implemented initially for `&[u8]` slices and `Box<R: Read>`
+and can be implemented for other types.
+
+When compiled without `std`: [`stub_io::Read`], [`stub_io::Take`] and `UnexpectedEofError` are
+re-exported directly under the crate root. `UnexpectedEofError` is only available in `no_std`.
+
+```ignore
+use delharc::{LhaDecodeReader, LhaError, LhaResult, Read, UnexpectedEofError};
+const DATA: &[u8] = include_bytes!("file.lzh");
+//...
+let lha_reader = LhaDecodeReader::new(DATA).unwrap();
+```
 */
 // http://archive.gamedev.net/archive/reference/articles/article295.html
+#![cfg_attr(not(feature = "std"), no_std)]
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 pub(crate) mod bitstream;
 pub mod crc;
 pub mod decode;
+mod error;
 pub mod header;
 pub(crate) mod ringbuf;
 pub(crate) mod statictree;
+pub mod stub_io;
 
 pub use decode::LhaDecodeReader;
+pub use error::{LhaError, LhaResult};
 pub use header::{CompressionMethod, LhaHeader, MsDosAttrs, OsType, TimestampResult};
+#[cfg(not(feature = "std"))]
+pub use stub_io::{Read, Take, UnexpectedEofError};
 
+#[cfg(feature = "std")]
 use std::fs::File;
-use std::io;
+#[cfg(feature = "std")]
 use std::path::Path;
 
-/// Attempts to open a file from a filesystem in read-only mode and on success returns an instance of
+#[cfg(feature = "std")]
+/// Attempt to open a file from a filesystem in read-only mode and on success return an instance of
 /// [LhaDecodeReader] with the first parsed LHA file header, ready to decode the content of the first
 /// archived file.
+///
+/// # `no_std`
+/// Available only with `std` feature enabled.
 ///
 /// # Errors
 /// This function will return an error if an opened file is not an LHA/LZH file or the header couldn't
 /// be recognized. Other errors may also be returned from [File::open] and from attempts to read the file.
-pub fn parse_file<P: AsRef<Path>>(path: P) -> io::Result<LhaDecodeReader<File>> {
+pub fn parse_file<P: AsRef<Path>>(path: P) -> std::io::Result<LhaDecodeReader<File>> {
   let file = File::open(path)?;
   Ok(LhaDecodeReader::new(file)?)
 }

@@ -1,11 +1,12 @@
 use super::*;
 use crate::crc::Crc16;
+use crate::error::{LhaError, LhaResult};
+use crate::stub_io::Read;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+use core::fmt::Write;
 use core::num::Wrapping;
 use core::slice;
-use std::borrow::Cow;
-use std::fmt::Write;
-use std::io::{self, Read};
-use std::path::PathBuf;
 
 /// Raw identifiers of extra headers.
 pub mod ext {
@@ -71,52 +72,62 @@ struct LhaRawBaseHeader {
   lha_level: u8,
 }
 
-struct Parser<R> {
-  rd: R,
+struct Parser<'a, R> {
+  rd: &'a mut R,
   crc: Crc16,
   csum: Wrapping<u8>,
   len: usize,
 }
 
-impl<R: Read> Parser<R> {
+impl<R: Read> Parser<'_, R> {
   // NOTE: does not update wrapping sum
-  fn read_u8_or_none(&mut self) -> io::Result<Option<u8>> {
-    self.rd.by_ref().bytes().next().transpose().map(|mb| {
-      mb.map(|byte| {
-        self.update_checksums_no_wrapping_sum(slice::from_ref(&byte));
-        byte
-      })
-    })
+  fn read_u8_or_none(&mut self) -> LhaResult<Option<u8>, R> {
+    let mut byte = 0u8;
+    if 0
+      == self
+        .rd
+        .read_all(slice::from_mut(&mut byte))
+        .map_err(LhaError::Io)?
+    {
+      return Ok(None);
+    }
+    // self.rd.by_ref().bytes().next().transpose().map(|mb|
+    //     mb.map(|byte| {
+    self.update_checksums_no_wrapping_sum(slice::from_ref(&byte));
+    // byte
+    //     })
+    // )
+    Ok(Some(byte))
   }
 
-  fn read_u8(&mut self) -> io::Result<u8> {
+  fn read_u8(&mut self) -> LhaResult<u8, R> {
     let mut byte: u8 = 0;
     self.read_exact(slice::from_mut(&mut byte))?;
     Ok(byte)
   }
 
-  fn read_u16(&mut self) -> io::Result<u16> {
+  fn read_u16(&mut self) -> LhaResult<u16, R> {
     let mut buf = [0u8; 2];
     self.read_exact(&mut buf)?;
     Ok(u16::from_le_bytes(buf))
   }
 
-  fn read_u32(&mut self) -> io::Result<u32> {
+  fn read_u32(&mut self) -> LhaResult<u32, R> {
     let mut buf = [0u8; 4];
     self.read_exact(&mut buf)?;
     Ok(u32::from_le_bytes(buf))
   }
 
-  fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {
-    self.rd.read_exact(buf)?;
+  fn read_exact(&mut self, buf: &mut [u8]) -> LhaResult<(), R> {
+    self.rd.read_exact(buf).map_err(LhaError::Io)?;
     self.update_checksums(buf);
     Ok(())
   }
 
-  fn read_limit(&mut self, limit: usize) -> io::Result<Box<[u8]>> {
+  fn read_limit(&mut self, limit: usize) -> LhaResult<Box<[u8]>, R> {
     let mut buf = Vec::with_capacity(limit);
     self.read_limit_no_checksums(limit, &mut buf)?;
-    self.update_checksums(&mut buf);
+    self.update_checksums(&buf);
     Ok(buf.into_boxed_slice())
   }
 
@@ -130,19 +141,26 @@ impl<R: Read> Parser<R> {
     self.crc.digest(buf);
   }
 
-  fn read_limit_no_checksums(&mut self, limit: usize, buf: &mut Vec<u8>) -> io::Result<()> {
-    if self.rd.by_ref().take(limit as u64).read_to_end(buf)? != limit {
-      return Err(io::Error::new(
-        io::ErrorKind::UnexpectedEof,
-        "file is too short",
-      ));
+  fn read_limit_no_checksums(&mut self, limit: usize, buf: &mut Vec<u8>) -> LhaResult<(), R> {
+    buf
+      .try_reserve_exact(limit)
+      .map_err(|_| LhaError::HeaderParse("memory allocation failed"))?;
+    // TODO: use BorrowedBuf once stabilized
+    let spare =
+      unsafe { core::mem::transmute::<_, &mut [u8]>(&mut buf.spare_capacity_mut()[..limit]) };
+    self.rd.read_exact(spare).map_err(LhaError::Io)?;
+    unsafe {
+      buf.set_len(buf.len() + limit);
     }
+    // if self.rd.by_ref().take(limit as u64).read_to_end(buf)? != limit {
+    //     return Err(LhaError::HeaderParse("file is too short"))
+    // }
     Ok(())
   }
 }
 
 impl LhaHeader {
-  /// Attempts to parse the LHA header. Returns `Ok(Some(LhaHeader))` on success. Returns `Ok(None)`
+  /// Attempt to parse the LHA header. Return `Ok(Some(LhaHeader))` on success. Return `Ok(None)`
   /// if the end of archive marker (a `0` byte) was encountered.
   ///
   /// The method validates all length and checksum fields of the header, but does not parse extra
@@ -158,7 +176,7 @@ impl LhaHeader {
   ///
   /// # Errors
   /// Returns an error from the underlying reading operations or because a malformed header was encountered.
-  pub fn read<R: Read>(rd: R) -> io::Result<Option<LhaHeader>> {
+  pub fn read<R: Read>(rd: &mut R) -> LhaResult<Option<LhaHeader>, R> {
     let mut parser = Parser {
       rd,
       crc: Crc16::default(),
@@ -179,20 +197,14 @@ impl LhaHeader {
       struct_slice_mut(&mut raw_header)
     })?;
     if raw_header.lha_level > 3 {
-      return Err(io::Error::new(
-        io::ErrorKind::InvalidData,
-        "unknown header level",
-      ));
+      return Err(LhaError::HeaderParse("unknown header level"));
     }
 
     // read filename if level 0 or 1
     let filename = if raw_header.lha_level < 2 {
       let filename_len = parser.read_u8()? as usize;
       if (header_len as usize) < parser.len + filename_len {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidData,
-          "wrong header size",
-        ));
+        return Err(LhaError::HeaderParse("wrong header size"));
       }
       parser.read_limit(filename_len)?
     } else {
@@ -216,10 +228,7 @@ impl LhaHeader {
         min_len -= 2; // no extra headers
       }
       if (header_len as usize) < min_len {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidData,
-          "wrong header size",
-        ));
+        return Err(LhaError::HeaderParse("wrong header size"));
       }
       let mut extended_len = (header_len as usize) - min_len;
       if extended_len != 0 && raw_header.lha_level == 0 {
@@ -249,7 +258,7 @@ impl LhaHeader {
         long_header_len = parser.read_u32()?;
         first_header_len = parser.read_u32()?;
         if header_len != 4 || csum != 0 {
-          return Err(io::Error::new(io::ErrorKind::InvalidData, "invalid header"));
+          return Err(LhaError::HeaderParse("invalid header"));
         }
       }
       _ => {}
@@ -258,16 +267,10 @@ impl LhaHeader {
     // validate level 0 and 1 header checksum
     if raw_header.lha_level < 2 {
       if csum != parser.csum.0 {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidData,
-          "invalid header level checksum",
-        ));
+        return Err(LhaError::HeaderParse("invalid header level checksum"));
       }
     } else if long_header_len < parser.len as u32 + first_header_len {
-      return Err(io::Error::new(
-        io::ErrorKind::InvalidData,
-        "wrong header size",
-      ));
+      return Err(LhaError::HeaderParse("wrong header size"));
     }
 
     let mut msdos_attrs = MsDosAttrs::from_bits_retain(raw_header.msdos_attrs as u16);
@@ -279,25 +282,16 @@ impl LhaHeader {
     let mut extra_header_len = first_header_len as usize;
     while extra_header_len != 0 {
       if extra_header_len < min_header_len {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidData,
-          "wrong extra header size",
-        ));
+        return Err(LhaError::HeaderParse("wrong extra header size"));
       }
       // check long header length (level 2, 3)
       if long_header_len != 0 {
         if (long_header_len as usize) < parser.len + extra_header_len - 2 {
-          return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            "wrong header size",
-          ));
+          return Err(LhaError::HeaderParse("wrong header size"));
         }
       } else if compressed_size < (extra_headers.len() + extra_header_len) as u64 {
         // otherwise check skip size (level 1)
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidData,
-          "wrong header size",
-        ));
+        return Err(LhaError::HeaderParse("wrong header size"));
       }
       parser.read_limit_no_checksums(extra_header_len, &mut extra_headers)?;
       let start = extra_headers.len() - extra_header_len;
@@ -306,10 +300,7 @@ impl LhaHeader {
         // we need to extract the CRC-16 from header and clear it in order to calculate checksum
         [EXT_HEADER_COMMON, data @ ..] => {
           if header_crc.is_some() {
-            return Err(io::Error::new(
-              io::ErrorKind::InvalidData,
-              "double common CRC-16 header",
-            ));
+            return Err(LhaError::HeaderParse("double common CRC-16 header"));
           }
           if let Some(crc) = data.get_mut(0..2) {
             header_crc = read_u16(crc);
@@ -326,12 +317,9 @@ impl LhaHeader {
           }
         }
         [EXT_HEADER_MSDOS_SIZE, data @ ..] if raw_header.lha_level >= 2 && data.len() >= 16 => {
-          match (read_u64(&data[0..8]), read_u64(&data[8..16])) {
-            (Some(compr), Some(orig)) => {
-              compressed_size = compr;
-              original_size = orig;
-            }
-            _ => {}
+          if let (Some(compr), Some(orig)) = (read_u64(&data[0..8]), read_u64(&data[8..16])) {
+            compressed_size = compr;
+            original_size = orig;
           }
         }
         _ => {}
@@ -345,38 +333,27 @@ impl LhaHeader {
     }
 
     // validate long header length
-    if long_header_len != 0 {
-      if long_header_len != parser.len as u32 {
-        if raw_header.lha_level == 2 && long_header_len == parser.len as u32 + 1 {
-          // read padding byte
-          parser.read_u8()?;
-        } else if raw_header.lha_level == 2 && long_header_len + 2 != parser.len as u32 {
-          // some packers (Osk) don't include self in the header length
-          return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            "wrong length of headers",
-          ));
-        }
+    if long_header_len != 0 && long_header_len != parser.len as u32 {
+      if raw_header.lha_level == 2 && long_header_len == parser.len as u32 + 1 {
+        // read padding byte
+        parser.read_u8()?;
+      } else if raw_header.lha_level == 2 && long_header_len + 2 != parser.len as u32 {
+        // some packers (Osk) don't include self in the header length
+        return Err(LhaError::HeaderParse("wrong length of headers"));
       }
     }
 
     // validate headers CRC
     if let Some(crc) = header_crc {
       if crc != parser.crc.sum16() {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidData,
-          "wrong header CRC-16 checksum",
-        ));
+        return Err(LhaError::HeaderParse("wrong header CRC-16 checksum"));
       }
     }
 
     // adjust compressed size for level 1
     if raw_header.lha_level == 1 {
       if extra_headers.len() as u64 > compressed_size {
-        return Err(io::Error::new(
-          io::ErrorKind::InvalidData,
-          "wrong length of skip size",
-        ));
+        return Err(LhaError::HeaderParse("wrong length of skip size"));
       }
       compressed_size -= extra_headers.len() as u64;
     }
@@ -401,7 +378,7 @@ impl LhaHeader {
     }))
   }
 
-  /// Returns an iterator that will iterate through extra headers, yielding the headers' raw
+  /// Return an iterator that will iterate through extra headers, yielding the headers' raw
   /// data, excluding the next header length field.
   ///
   /// # Note
@@ -448,6 +425,7 @@ pub(super) fn split_data_at_nil_or_end(data: &[u8]) -> (&[u8], Option<&[u8]>) {
   }
 }
 
+#[cfg(feature = "std")]
 pub(super) fn parse_pathname(data: &[u8], path: &mut PathBuf) {
   path.reserve(data.len());
   // split by all possible path separators
@@ -459,16 +437,43 @@ pub(super) fn parse_pathname(data: &[u8], path: &mut PathBuf) {
   }
 }
 
+pub(super) fn parse_pathname_to_str(data: &[u8], path: &mut String) {
+  path.reserve(data.len());
+  // split by all possible path separators
+  for part in data.split(|&c| c == 0xFF || c == b'/' || c == b'\\') {
+    match part {
+      b"." | b".." | [] => {} // ignore malicious and empty paths
+      name => {
+        if !path.is_empty() {
+          path.push('/');
+        }
+        path.push_str(parse_str_nilterm(name, false, false).as_ref())
+      }
+    }
+  }
+}
+
+#[cfg(feature = "std")]
+#[inline(always)]
+fn is_separator(c: char) -> bool {
+  std::path::is_separator(c)
+}
+
+#[cfg(not(feature = "std"))]
+fn is_separator(c: char) -> bool {
+  c == '/' || c == '\\'
+}
+
 pub(super) fn parse_str_nilterm(data: &[u8], nilterm: bool, ignore_sep: bool) -> Cow<str> {
   if let Some(index) = data
     .iter()
-    .position(|&c| c < 0x20 || c >= 0x7f || (!ignore_sep && std::path::is_separator(c as char)))
+    .position(|&c| !(0x20..0x7f).contains(&c) || (!ignore_sep && is_separator(c as char)))
   {
     let mut out = String::with_capacity(data.len() * 3);
     let (head, rest) = data.split_at(index);
     out.push_str(unsafe {
       // safe because head was validated
-      std::str::from_utf8_unchecked(head)
+      core::str::from_utf8_unchecked(head)
     });
     for byte in rest.iter() {
       match byte {
@@ -478,7 +483,7 @@ pub(super) fn parse_str_nilterm(data: &[u8], nilterm: bool, ignore_sep: bool) ->
         }
         &ch => {
           let c = ch as char;
-          if !ignore_sep && std::path::is_separator(c) {
+          if !ignore_sep && is_separator(c) {
             out.push('_');
           } else {
             out.push(c);
@@ -490,7 +495,7 @@ pub(super) fn parse_str_nilterm(data: &[u8], nilterm: bool, ignore_sep: bool) ->
   } else {
     unsafe {
       // safe because data was validated
-      Cow::Borrowed(std::str::from_utf8_unchecked(data))
+      Cow::Borrowed(core::str::from_utf8_unchecked(data))
     }
   }
 }
@@ -503,10 +508,11 @@ unsafe fn struct_slice_mut<T: Copy>(obj: &mut T) -> &mut [u8] {
   core::slice::from_raw_parts_mut(obj as *mut T as *mut u8, len)
 }
 
+#[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
   use super::*;
-  use std::path::{PathBuf, MAIN_SEPARATOR};
+  use std::path::MAIN_SEPARATOR;
 
   fn parse_filename(data: &[u8]) -> Cow<str> {
     parse_str_nilterm(data, false, false)
@@ -608,6 +614,63 @@ mod tests {
     assert!(path.is_relative());
     let expect = format!("foo{}b%91ar{}baz", MAIN_SEPARATOR, MAIN_SEPARATOR);
     assert_eq!(expect, path.to_str().unwrap());
+    path.clear();
+  }
+
+  #[test]
+  fn path_parser_to_str_works() {
+    let mut path = String::new();
+    parse_pathname_to_str(b"", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(b"/", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br"\", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br".", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br"..", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br"./..", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br".\..", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br"/..\./", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br"\../.\", &mut path);
+    assert!(!path.starts_with('/'));
+    assert_eq!("", &path);
+    parse_pathname_to_str(br"foo/bar\baz", &mut path);
+    assert!(!path.starts_with('/'));
+    let expect = "foo/bar/baz";
+    assert_eq!(expect, &path);
+    path.clear();
+    parse_pathname_to_str(br"\foo/bar\baz/", &mut path);
+    assert!(!path.starts_with('/'));
+    let expect = "foo/bar/baz";
+    assert_eq!(expect, &path);
+    path.clear();
+    parse_pathname_to_str(br"/foo\bar/baz\", &mut path);
+    assert!(!path.starts_with('/'));
+    let expect = "foo/bar/baz";
+    assert_eq!(expect, &path);
+    path.clear();
+    parse_pathname_to_str(b"foo\xffbar\xffbaz", &mut path);
+    assert!(!path.starts_with('/'));
+    let expect = "foo/bar/baz";
+    assert_eq!(expect, &path);
+    path.clear();
+    parse_pathname_to_str(b"\xfffoo\xffb\x91ar\xffbaz\xff", &mut path);
+    assert!(!path.starts_with('/'));
+    let expect = "foo/b%91ar/baz";
+    assert_eq!(expect, &path);
     path.clear();
   }
 }

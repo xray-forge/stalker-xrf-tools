@@ -72,6 +72,7 @@ const TESTS_CASES: &[(
 #[test]
 fn test_lha255e() -> io::Result<()> {
   for (offset, name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
+    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/lha255e/{}", name))?;
     file.seek(SeekFrom::Start(*offset))?;
     let mut lha_reader = delharc::LhaDecodeReader::new(file)?;
@@ -80,8 +81,10 @@ fn test_lha255e() -> io::Result<()> {
       let header = lha_reader.header();
       assert_eq!(header.level, *level);
       assert_eq!(header.msdos_attrs, MsDosAttrs::ARCHIVE);
-      let path = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
-      assert_eq!(&header.parse_pathname().to_str().unwrap(), &path);
+      let path1 = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
+      assert_eq!(&header.parse_pathname().to_str().unwrap(), &path1);
+      let path1 = path.replace("*", "/");
+      assert_eq!(&header.parse_pathname_to_str(), &path1);
       if *level == 0 {
         assert_eq!(header.parse_os_type()?, OsType::Generic);
       } else {

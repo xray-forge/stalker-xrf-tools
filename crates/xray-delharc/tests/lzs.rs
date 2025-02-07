@@ -29,6 +29,7 @@ const TESTS_CASES: &[(&str, &str, u64, u64, u16, u32, &str)] = &[
 #[test]
 fn test_lzs() -> io::Result<()> {
   for (name, path, size_c, size_o, crc16, crc32, modif) in TESTS_CASES {
+    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/lzs/{}", name))?;
     loop {
       let mut sink = SinkSum::new();
@@ -36,6 +37,7 @@ fn test_lzs() -> io::Result<()> {
       assert_eq!(header.level, 0);
       assert_eq!(header.msdos_attrs, MsDosAttrs::ARCHIVE);
       assert_eq!(&header.parse_pathname().to_str().unwrap(), path);
+      assert_eq!(&header.parse_pathname_to_str(), path);
       assert_eq!(OsType::Generic, header.parse_os_type()?);
       assert_eq!(CompressionMethod::Lzs, header.compression_method().unwrap());
       assert_eq!(header.compressed_size, *size_c);

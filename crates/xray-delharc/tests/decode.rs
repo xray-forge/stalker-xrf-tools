@@ -27,7 +27,7 @@ fn test_decode() {
   test_decoder(&mut decoder, size as usize, CRC32, usize::max_value());
 
   for (name, compression, offset) in TESTS_CASES {
-    println!("-------------\n{}", name);
+    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/decode/{}", name)).unwrap();
     let compressed_size = file.metadata().unwrap().len();
     for limit in [usize::max_value(), 128, 31, 3, 2, 1].iter().copied() {
@@ -35,6 +35,7 @@ fn test_decode() {
         DecoderAny::new_from_compression(*compression, file.take(compressed_size - offset));
       assert!(decoder.is_supported());
       test_decoder(&mut decoder, size as usize, CRC32, limit);
+      // println!("{:?}", decoder);
       file = decoder.into_inner().into_inner();
       assert_eq!(
         compressed_size - offset,

@@ -46,8 +46,11 @@ When reading, the following bit paths will result in finding the particular leav
 ```
 */
 use crate::bitstream::BitRead;
+use crate::error::LhaError;
+#[cfg(not(feature = "std"))]
+use alloc::{string::String, vec::Vec};
+use core::cmp::Ordering;
 use core::fmt;
-use std::io;
 
 pub mod entry;
 use entry::*;
@@ -85,6 +88,7 @@ impl HuffTree {
   /// * If the number of created nodes would exceed [TreeEntry::MAX_INDEX], an error is being returned.
   /// * An error is returned if a built tree is incomplete.
   pub fn build_tree(&mut self, value_lengths: &[u8]) -> Result<(), &'static str> {
+    // println!("({}) {:?}", value_lengths.len(), value_lengths);
     if value_lengths.len() > TreeEntry::MAX_INDEX / 2 {
       return Err("too many code lengths");
     }
@@ -96,7 +100,8 @@ impl HuffTree {
     let mut max_allocated: usize = 1; // start with a single (root) node
     for current_len in 1u8.. {
       // add missing branches
-      for _ in tree.len()..max_allocated {
+      let max_limit = max_allocated;
+      for _ in tree.len()..max_limit {
         match TreeEntry::branch(max_allocated) {
           Ok(branch) => tree.push(branch),
           Err(e) => {
@@ -115,11 +120,15 @@ impl HuffTree {
           .copied()
           .zip(0..)
           .fold(false, |mut more, (len, value)| {
-            if len == current_len {
-              tree.push(TreeEntry::leaf(value));
-            } else if len > current_len {
-              // there are more leaves to process
-              more = true;
+            match len.cmp(&current_len) {
+              Ordering::Equal => {
+                tree.push(TreeEntry::leaf(value));
+              }
+              Ordering::Greater => {
+                // there are more leaves to process
+                more = true;
+              }
+              Ordering::Less => {}
             }
             more
           });
@@ -153,7 +162,7 @@ impl HuffTree {
   ///
   /// # Panics
   /// Panics if a tree has not been built or otherwise initialized as a single value tree.
-  pub fn read_entry<R: BitRead>(&self, mut path: R) -> io::Result<u16> {
+  pub fn read_entry<R: BitRead>(&self, mut path: R) -> Result<u16, LhaError<R::Error>> {
     let tree = &self.tree;
     let mut node = &tree[0]; // panics if tree uninitialized
     loop {
@@ -203,6 +212,7 @@ impl fmt::Display for HuffTree {
   }
 }
 
+#[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -273,7 +283,7 @@ mod tests {
     let mut path = BitStream::new(bits);
     let mut res = Vec::new();
     for _ in 0..9 {
-      res.push(tree.read_entry(path.by_ref()).unwrap());
+      res.push(tree.read_entry(&mut path).unwrap());
     }
     assert_eq!(res, [3, 5, 6, 8, 9, 10, 13, 14, 15]);
 

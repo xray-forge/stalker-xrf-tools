@@ -34,7 +34,7 @@ impl TimestampResult {
     false
   }
 
-  /// Returns a `Naive` date and time variant as is or `Utc` variant as naive date time in the UTC time zone.
+  /// Return a `Naive` date and time variant as is or `Utc` variant as naive date time in the UTC time zone.
   pub fn to_naive_utc(&self) -> Option<NaiveDateTime> {
     match self {
       TimestampResult::Naive(dt) => Some(*dt),
@@ -43,7 +43,7 @@ impl TimestampResult {
     }
   }
 
-  /// Returns a `Naive` date and time variant as is or `Utc` variant as naive date time in the `Local` time zone.
+  /// Return a `Naive` date and time variant as is or `Utc` variant as naive date time in the `Local` time zone.
   pub fn to_naive_local(&self) -> Option<NaiveDateTime> {
     match self {
       TimestampResult::Naive(dt) => Some(*dt),
@@ -52,7 +52,7 @@ impl TimestampResult {
     }
   }
 
-  /// Returns a date time in the UTC time zone.
+  /// Return a date time in the UTC time zone.
   ///
   /// In this instance the `Naive` date and time variant is assumed to be in the UTC time zone.
   pub fn to_utc(&self) -> Option<DateTime<Utc>> {
@@ -63,9 +63,14 @@ impl TimestampResult {
     }
   }
 
-  /// Returns a date time in the `Local` time zone.
+  #[cfg(feature = "std")]
+  /// Return a date time in the `Local` time zone.
   ///
   /// In this instance the `Naive` date and time variant is assumed to be in the `Local` time zone.
+  ///
+  /// # `no_std`
+  ///
+  /// This method is only available with `std` feature enabled.
   pub fn to_local(&self) -> Option<DateTime<Local>> {
     match self {
       TimestampResult::Naive(dt) => Local.from_local_datetime(dt).single(),

@@ -196,6 +196,7 @@ const SUBDIR_CASES: &[(
 #[test]
 fn test_lha_x68k_213() -> io::Result<()> {
   for (offset, name, path, size_c, size_o, crc16, crc32, modif, level, compr) in TESTS_CASES {
+    println!("-------------\n{:?}", name);
     let mut file = fs::File::open(format!("tests/lha_x68k_213/{}", name))?;
     file.seek(SeekFrom::Start(*offset))?;
     let mut lha_reader = delharc::LhaDecodeReader::new(file)?;
@@ -204,7 +205,6 @@ fn test_lha_x68k_213() -> io::Result<()> {
       let mut sink = SinkSum::new();
       let header = lha_reader.header();
       assert_eq!(header.level, *level);
-      let path = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
       if header.level == 0 && *compr == CompressionMethod::Lhd {
         assert_eq!(header.msdos_attrs, MsDosAttrs::SUBDIR);
       } else {
@@ -213,7 +213,10 @@ fn test_lha_x68k_213() -> io::Result<()> {
       assert_eq!(header.compression_method().unwrap(), *compr);
       assert_eq!(header.compressed_size, *size_c);
       assert_eq!(header.original_size, *size_o);
-      assert_eq!(&header.parse_pathname().to_str().unwrap(), &path);
+      let path1 = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
+      assert_eq!(&header.parse_pathname().to_str().unwrap(), &path1);
+      let path1 = path.replace("*", "/");
+      assert_eq!(&header.parse_pathname_to_str(), &path1);
       let last_modified = format!("{}", header.parse_last_modified());
       assert_eq!(&last_modified, modif);
       assert_eq!(header.file_crc, *crc16);
@@ -238,6 +241,7 @@ fn test_lha_x68k_213() -> io::Result<()> {
   }
 
   for (name, headers) in SUBDIR_CASES {
+    println!("-------------\n{:?}", name);
     let mut lha_reader = delharc::parse_file(format!("tests/lha_x68k_213/{}", name))?;
     for filen in 0.. {
       assert!(filen < headers.len());
@@ -245,7 +249,6 @@ fn test_lha_x68k_213() -> io::Result<()> {
       let mut sink = SinkSum::new();
       let header = lha_reader.header();
       assert_eq!(header.level, *level);
-      let path = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
       if header.compression_method().unwrap() == CompressionMethod::Lhd {
         assert_eq!(header.msdos_attrs, MsDosAttrs::SUBDIR);
       } else {
@@ -254,7 +257,10 @@ fn test_lha_x68k_213() -> io::Result<()> {
       assert_eq!(header.compression_method().unwrap(), *compr);
       assert_eq!(header.compressed_size, *size_c);
       assert_eq!(header.original_size, *size_o);
-      assert_eq!(&header.parse_pathname().to_str().unwrap(), &path);
+      let path1 = path.replace("*", &std::path::MAIN_SEPARATOR.to_string());
+      assert_eq!(&header.parse_pathname().to_str().unwrap(), &path1);
+      let path1 = path.replace("*", "/");
+      assert_eq!(&header.parse_pathname_to_str(), &path1);
       let last_modified = format!("{}", header.parse_last_modified());
       assert_eq!(&last_modified, modif);
       assert_eq!(header.file_crc, *crc16);

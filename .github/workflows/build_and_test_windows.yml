@@ -37,8 +37,8 @@ jobs:
       - name: Run formatter
         run: cargo fmt --all -- --check
 
-      - name: Run xray crates tests
-        run: cargo test --verbose -p xray-db xray-ltx
+      - name: Run xray workspace tests
+        run: cargo test --verbose --workspace
 
       - name: Build CLI
         run: cargo make build-cli-release
