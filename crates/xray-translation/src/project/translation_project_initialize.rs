@@ -7,7 +7,7 @@ use std::io::Write;
 use std::path::{Display, Path};
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 
 impl TranslationProject {
   pub fn initialize_dir<P: AsRef<Path>>(
@@ -23,15 +23,12 @@ impl TranslationProject {
 
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(dir) {
-      let entry: DirEntry = match entry {
-        Ok(entry) => entry,
-        Err(error) => return Err(error.into_io_error().unwrap().into()),
-      };
+      let entry: DirEntry = entry.map_err(|error| {
+        XRayError::from(error.into_io_error().expect("WalkDir error transformed"))
+      })?;
 
-      let entry_path: &Path = entry.path();
-
-      if entry_path.is_file() {
-        Self::initialize_file(&entry_path, options)?;
+      if entry.path().is_file() {
+        Self::initialize_file(&entry.path(), options)?;
       }
     }
 

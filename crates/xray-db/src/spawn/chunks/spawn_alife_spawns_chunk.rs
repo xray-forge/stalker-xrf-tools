@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{assert_chunk_read, ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::{assert_equal, open_export_file};
+use xray_utils::{assert_equal, assert_length, open_export_file};
 
 /// ALife spawns chunk has the following structure:
 /// 0 - count
@@ -55,7 +55,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
         object_reader.id,
         "Expected index and chunk ID to be equal",
       )?;
-      assert_chunk_read(&index_reader, "Expect ALife object index to be read")?;
+      index_reader.assert_read("Expect ALife object index to be read")?;
 
       let mut data_reader: ChunkReader =
         object_reader.read_child_by_index(Self::OBJECT_DATA_CHUNK_ID)?;
@@ -63,17 +63,15 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
 
       objects.push(data);
 
-      assert_chunk_read(&data_reader, "Expect ALife object data to be read")?;
+      data_reader.assert_read("Expect ALife object data to be read")?;
     }
 
-    assert_equal(objects.len(), count as usize, "Expect all object read")?;
-    assert_chunk_read(&count_reader, "Expect count chunk to be ended")?;
-    assert_chunk_read(&objects_reader, "Expect objects chunk to be ended")?;
-    assert_chunk_read(
-      &vertex_reader,
-      "Parsing of edges in spawn chunk is not implemented",
-    )?;
-    assert_chunk_read(reader, "Expect ALife spawns chunk to be ended")?;
+    assert_length(&objects, count as usize, "Expect all object read")?;
+
+    count_reader.assert_read("Expect count chunk to be ended")?;
+    objects_reader.assert_read("Expect objects chunk to be ended")?;
+    vertex_reader.assert_read("Parsing of edges in spawn chunk is not implemented")?;
+    reader.assert_read("Expect ALife spawns chunk to be ended")?;
 
     Ok(Self { objects })
   }

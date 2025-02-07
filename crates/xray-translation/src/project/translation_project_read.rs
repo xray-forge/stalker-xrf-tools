@@ -17,7 +17,14 @@ impl TranslationProject {
     for entry in WalkDir::new(dir) {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
-        Err(error) => return Err(error.into_io_error().unwrap().into()),
+        Err(error) => {
+          return Err(
+            error
+              .into_io_error()
+              .expect("WalkError transformation")
+              .into(),
+          )
+        }
       };
 
       let entry_path: &Path = entry.path();
@@ -26,7 +33,10 @@ impl TranslationProject {
         if let Some(extension) = entry_path.extension() {
           if extension == "json" {
             project_json.insert(
-              entry_path.to_str().unwrap().into(),
+              entry_path
+                .to_str()
+                .expect("Entry path when read translation")
+                .into(),
               Self::read_translation_json_by_path(&entry_path)?,
             );
           } else {
@@ -69,7 +79,11 @@ impl TranslationProject {
           let parts_count: usize = parts.len();
 
           if parts_count > 2 {
-            return match TranslationLanguage::from_str_single(parts.get(parts_count - 2).unwrap()) {
+            return match TranslationLanguage::from_str_single(
+              parts
+                .get(parts_count - 2)
+                .expect("Language path in translation file"),
+            ) {
               Ok(locale) => Some(locale),
               Err(_) => None,
             };

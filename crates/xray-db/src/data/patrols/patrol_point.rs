@@ -4,9 +4,7 @@ use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
-use xray_chunk::{
-  assert_chunk_read, ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter,
-};
+use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
@@ -44,11 +42,11 @@ impl ChunkReadWriteList for PatrolPoint {
 
       points.push(Self::read::<T>(&mut data_reader)?);
 
-      assert_chunk_read(&index_reader, "Patrol point index chunk should be read")?;
-      assert_chunk_read(&point_reader, "Patrol point data chunk should be read")?;
+      index_reader.assert_read("Patrol point index chunk should be read")?;
+      point_reader.assert_read("Patrol point data chunk should be read")?;
     }
 
-    assert_chunk_read(reader, "Patrol points chunk should be read")?;
+    reader.assert_read("Patrol points chunk should be read")?;
 
     Ok(points)
   }
@@ -87,7 +85,7 @@ impl ChunkReadWrite for PatrolPoint {
       game_vertex_id: reader.read_u16::<T>()?,
     };
 
-    assert_chunk_read(reader, "Chunk data should be read for patrol point")?;
+    reader.assert_read("Chunk data should be read for patrol point")?;
 
     Ok(point)
   }

@@ -1,7 +1,7 @@
 use crate::OgfFile;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,7 +33,7 @@ impl ChunkReadWrite for OgfChildrenChunk {
       children.push(OgfFile::read_from_chunk::<T>(&mut object_reader)?);
     }
 
-    assert_chunk_read(reader, "Expect all data to be read from ogf children")?;
+    reader.assert_read("Expect all data to be read from ogf children")?;
 
     Ok(Self { nested: children })
   }

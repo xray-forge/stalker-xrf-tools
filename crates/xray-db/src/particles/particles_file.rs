@@ -11,7 +11,7 @@ use std::io::Write;
 use std::path::Path;
 use xray_chunk::{find_required_chunk_by_id, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
-use xray_utils::{assert, assert_equal, open_export_file};
+use xray_utils::{assert, assert_length, open_export_file};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -40,7 +40,7 @@ impl ParticlesFile {
         .any(|it| it.id == ParticlesFirstgenChunk::CHUNK_ID),
       "Unexpected first-gen chunk in particles file, unpacking not implemented",
     )?;
-    assert_equal(chunks.len(), 3, "Unexpected chunks in particles file root")?;
+    assert_length(chunks, 3, "Unexpected chunks in particles file root")?;
 
     Ok(Self {
       header: find_required_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)?

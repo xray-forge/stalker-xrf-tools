@@ -5,12 +5,12 @@ use xray_error::XRayResult;
 use xray_utils::encode_string_to_w1251_bytes;
 
 impl ChunkWriter {
-  #[inline(always)]
+  #[inline]
   pub fn write_xr<T: ByteOrder, W: ChunkReadWrite>(&mut self, writable: &W) -> XRayResult {
     writable.write::<T>(self)
   }
 
-  #[inline(always)]
+  #[inline]
   pub fn write_xr_optional<T: ByteOrder, W: ChunkReadWriteOptional>(
     &mut self,
     writable: Option<&W>,
@@ -18,7 +18,7 @@ impl ChunkWriter {
     W::write_optional::<T>(self, writable)
   }
 
-  #[inline(always)]
+  #[inline]
   pub fn write_xr_list<T: ByteOrder, W: ChunkReadWriteList>(&mut self, list: &[W]) -> XRayResult {
     W::write_list::<T>(self, list)
   }

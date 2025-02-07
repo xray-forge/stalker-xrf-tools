@@ -3,7 +3,7 @@ use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
@@ -31,7 +31,7 @@ impl ChunkReadWrite for ParticleDescription {
       edit_time: reader.read_u32::<T>()?,
     };
 
-    assert_chunk_read(reader, "Expect particle description chunk to be ended")?;
+    reader.assert_read("Expect particle description chunk to be ended")?;
 
     Ok(particle_description)
   }

@@ -5,12 +5,10 @@ use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
-use xray_chunk::{
-  assert_chunk_read, ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter,
-};
+use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::assert_equal;
+use xray_utils::{assert_equal, assert_length};
 
 /// Patrols list is represented by list of samples containing patrol chunk.
 /// 0...N, where N is chunk.
@@ -49,7 +47,7 @@ impl ChunkReadWriteList for Patrol {
       patrols.push(Self::read::<T>(&mut patrol_reader)?);
     }
 
-    assert_chunk_read(reader, "Chunk data should be read for patrols list")?;
+    reader.assert_read("Chunk data should be read for patrols list")?;
 
     Ok(patrols)
   }
@@ -93,12 +91,12 @@ impl ChunkReadWrite for Patrol {
     let points: Vec<PatrolPoint> = points_reader.read_xr_list::<T, _>()?;
     let links: Vec<PatrolLink> = links_reader.read_xr_list::<T, _>()?;
 
-    assert_equal(
-      points_count,
-      points.len() as u32,
+    assert_length(
+      &points,
+      points_count as usize,
       "Expected defined count of patrol points to be read",
     )?;
-    assert_chunk_read(reader, "Expect patrol chunk to be ended")?;
+    reader.assert_read("Expect patrol chunk to be ended")?;
 
     Ok(Self {
       name,
@@ -159,7 +157,7 @@ impl Patrol {
     let links_count: usize = read_ltx_field("links_count", section)?;
 
     let mut points: Vec<PatrolPoint> = Vec::new();
-    let mut links: Vec<PatrolLink> = Vec::new();
+    let mut links: Vec<PatrolLink> = Vec::with_capacity(links_count);
 
     for (index, section) in points_list.split(',').map(str::trim).enumerate() {
       points.push(PatrolPoint::import(
@@ -175,8 +173,8 @@ impl Patrol {
       )?);
     }
 
-    assert_equal(
-      links.len(),
+    assert_length(
+      &links,
       links_count,
       "Expect defined count of patrols to be imported",
     )?;

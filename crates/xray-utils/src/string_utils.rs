@@ -2,21 +2,25 @@ use std::str::FromStr;
 use xray_error::{XRayError, XRayResult};
 
 /// Stringify provided vector as comma-separated values.
+#[inline]
 pub fn vector_to_string<T: ToString>(slice: &[T]) -> String {
   vector_to_string_sep(slice, ",")
 }
 
 /// Stringify provided vector as pattern-separated values.
+#[inline]
 pub fn vector_to_string_sep<T: ToString>(slice: &[T], sep: &str) -> String {
   slice.iter().map(T::to_string).collect::<Vec<_>>().join(sep)
 }
 
 /// Parse vector of values from string.
+#[inline]
 pub fn vector_from_string<T: FromStr>(string: &str) -> XRayResult<Vec<T>> {
   vector_from_string_sep(string, ",")
 }
 
 /// Parse vector of values from string with separator.
+#[inline]
 pub fn vector_from_string_sep<T: FromStr>(string: &str, sep: &str) -> XRayResult<Vec<T>> {
   let source: &str = string.trim();
 
@@ -42,11 +46,13 @@ pub fn vector_from_string_sep<T: FromStr>(string: &str, sep: &str) -> XRayResult
 }
 
 /// Read vector of values from serialized by comma string.
+#[inline]
 pub fn vector_from_string_sized<T: FromStr>(string: &str, size: usize) -> XRayResult<Vec<T>> {
   vector_from_string_sep_sized(string, ",", size)
 }
 
 /// Read vector of values from serialized by separator string.
+#[inline]
 pub fn vector_from_string_sep_sized<T: FromStr>(
   string: &str,
   sep: &str,

@@ -10,7 +10,7 @@ use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::{
@@ -139,9 +139,9 @@ impl ChunkReadWrite for AlifeObject {
     let update_data: Vec<u8> =
       update_reader.read_bytes(update_reader.read_bytes_remain() as usize)?;
 
-    assert_chunk_read(&spawn_reader, "Expect ALife object spawn data to be read")?;
-    assert_chunk_read(&update_reader, "Expect ALife object update data to be read")?;
-    assert_chunk_read(reader, "Expect ALife object chunk to be read")?;
+    spawn_reader.assert_read("Expect ALife object spawn data to be read")?;
+    update_reader.assert_read("Expect ALife object update data to be read")?;
+    reader.assert_read("Expect ALife object chunk to be read")?;
 
     Ok(Self {
       net_action,

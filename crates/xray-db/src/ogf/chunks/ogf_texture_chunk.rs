@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,7 +20,7 @@ impl ChunkReadWrite for OgfTextureChunk {
       shader_name: reader.read_w1251_string()?,
     };
 
-    assert_chunk_read(reader, "Expect all data to be read from ogf texture")?;
+    reader.assert_read("Expect all data to be read from ogf texture")?;
 
     Ok(texture)
   }

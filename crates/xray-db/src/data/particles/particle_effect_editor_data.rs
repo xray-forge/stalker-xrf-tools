@@ -4,9 +4,7 @@ use crate::file_import::read_ltx_field;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
-use xray_chunk::{
-  assert_chunk_read, read_till_end_binary_chunk, ChunkReadWrite, ChunkReader, ChunkWriter,
-};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::{assert_equal, decode_bytes_from_base64, encode_bytes_to_base64};
@@ -25,10 +23,10 @@ impl ChunkReadWrite for ParticleEffectEditorData {
   /// Read particle effect editor data data from chunk redder.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
     let particle_description: Self = Self {
-      value: read_till_end_binary_chunk(reader)?,
+      value: reader.read_remaining()?,
     };
 
-    assert_chunk_read(reader, "Expect particle editor data chunk to be ended")?;
+    reader.assert_read("Expect particle editor data chunk to be ended")?;
 
     Ok(particle_description)
   }

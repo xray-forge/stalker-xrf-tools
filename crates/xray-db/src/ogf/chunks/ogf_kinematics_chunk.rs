@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -35,10 +35,7 @@ impl OgfKinematicsChunk {
       motion_refs.push(reader.read_w1251_string()?);
     }
 
-    assert_chunk_read(
-      reader,
-      "Expect all data to be read from ogf motion refs chunk",
-    )?;
+    reader.assert_read("Expect all data to be read from ogf motion refs chunk")?;
 
     Ok(Self {
       source_chunk_id: chunk_id,

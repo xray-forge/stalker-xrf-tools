@@ -83,7 +83,7 @@ impl<const N: usize> Default for RingArrayBuf<N> {
 impl<const N: usize> Index<usize> for RingArrayBuf<N> {
   type Output = u8;
 
-  #[inline(always)]
+  #[inline]
   fn index(&self, index: usize) -> &Self::Output {
     self.buffer.index(index & index_mask!(N))
   }
@@ -92,7 +92,7 @@ impl<const N: usize> Index<usize> for RingArrayBuf<N> {
 impl<const N: usize> RingBuffer for RingArrayBuf<N> {
   const BUFFER_SIZE: usize = N;
 
-  #[inline(always)]
+  #[inline]
   fn cursor(&self) -> usize {
     self.cursor
   }

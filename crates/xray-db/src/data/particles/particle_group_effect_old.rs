@@ -2,10 +2,10 @@ use crate::constants::META_TYPE_FIELD;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::assert_equal;
+use xray_utils::{assert_equal, assert_length};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,12 +38,12 @@ impl ChunkReadWriteList for ParticleGroupEffectOld {
       effects.push(Self::read::<T>(reader)?);
     }
 
-    assert_equal(
-      effects.len(),
+    assert_length(
+      &effects,
       count as usize,
       "Should read same count of effects as declared in chunk",
     )?;
-    assert_chunk_read(reader, "Expect particle effects list chunk to be ended")?;
+    reader.assert_read("Expect particle effects list chunk to be ended")?;
 
     Ok(effects)
   }

@@ -52,6 +52,9 @@ pub enum XRayError {
   #[error("Invalid source: {message}")]
   InvalidSource { message: String },
   #[constructor]
+  #[error("Serialization error: {message}")]
+  Serialization { message: String },
+  #[constructor]
   #[error("Texture processing error: {message}")]
   TextureProcessing { message: String },
   #[error("Chunk is not ended, {remaining} bytes remain: {message}")]

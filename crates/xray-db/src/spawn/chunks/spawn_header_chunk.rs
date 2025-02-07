@@ -4,7 +4,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use uuid::Uuid;
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 use xray_utils::open_export_file;
@@ -37,7 +37,7 @@ impl ChunkReadWrite for SpawnHeaderChunk {
       levels_count: reader.read_u32::<T>()?,
     };
 
-    assert_chunk_read(reader, "Expect header chunk to be ended")?;
+    reader.assert_read("Expect header chunk to be ended")?;
 
     Ok(header)
   }

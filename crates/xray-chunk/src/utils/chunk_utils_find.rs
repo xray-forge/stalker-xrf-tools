@@ -2,11 +2,13 @@ use crate::reader::chunk_reader::ChunkReader;
 use xray_error::{XRayError, XRayResult};
 
 /// Find chink in list by id.
+#[inline]
 pub fn find_optional_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<ChunkReader> {
   chunks.iter().find(|it| it.id == id).cloned()
 }
 
 /// Find chink in list by id.
+#[inline]
 pub fn find_one_of_optional_chunk_by_id(
   chunks: &[ChunkReader],
   ids: &[u32],
@@ -21,6 +23,7 @@ pub fn find_one_of_optional_chunk_by_id(
 }
 
 /// Find required chunk in list by id.
+#[inline]
 pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XRayResult<ChunkReader> {
   match chunks.iter().find(|it| it.id == id).cloned() {
     None => Err(XRayError::new_not_found_error(format!(
@@ -32,6 +35,7 @@ pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XRayResult<
 }
 
 /// Find required chunk in list by one of ids.
+#[inline]
 pub fn find_one_of_required_chunks_by_id(
   chunks: &[ChunkReader],
   ids: &[u32],

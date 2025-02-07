@@ -35,10 +35,10 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 use std::str::FromStr;
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::assert_equal;
+use xray_utils::{assert_equal, assert_length};
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -91,12 +91,12 @@ impl ChunkReadWriteList for ParticleAction {
       })?);
     }
 
-    assert_equal(
-      actions.len(),
+    assert_length(
+      &actions,
       count as usize,
       "Should read same count of action as declared in chunk",
     )?;
-    assert_chunk_read(reader, "Expect particle actions list chunk to be ended")?;
+    reader.assert_read("Expect particle actions list chunk to be ended")?;
 
     Ok(actions)
   }

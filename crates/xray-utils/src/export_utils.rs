@@ -3,6 +3,7 @@ use std::path::Path;
 use xray_error::{XRayError, XRayResult};
 
 /// Create file for exporting by provided path.
+#[inline]
 pub fn open_export_file<T: AsRef<Path>>(path: T) -> XRayResult<File> {
   OpenOptions::new()
     .create(true)

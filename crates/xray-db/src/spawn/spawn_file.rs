@@ -12,7 +12,7 @@ use std::io::Write;
 use std::path::Path;
 use xray_chunk::{find_required_chunk_by_id, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
-use xray_utils::{assert_equal, open_export_file};
+use xray_utils::{assert_equal, assert_length, open_export_file};
 
 /// Descriptor of generic spawn file used by xray game engine.
 ///
@@ -45,8 +45,8 @@ impl SpawnFile {
 
   /// Read spawn file from chunks.
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
-    assert_equal(
-      chunks.len(),
+    assert_length(
+      chunks,
       5,
       "Unexpected chunks count in spawn file root, expected 5",
     )?;
@@ -64,12 +64,11 @@ impl SpawnFile {
       }
     };
 
-    assert_equal(
-      spawn_file.header.objects_count,
-      spawn_file.alife_spawn.objects.len() as u32,
+    assert_length(
+      &spawn_file.alife_spawn.objects,
+      spawn_file.header.objects_count as usize,
       "Expected correct objects count",
     )?;
-
     assert_equal(
       spawn_file.header.levels_count,
       spawn_file.graphs.header.levels_count as u32,

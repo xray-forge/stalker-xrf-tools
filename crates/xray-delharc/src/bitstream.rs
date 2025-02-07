@@ -46,7 +46,7 @@ pub struct BitStream<R> {
 macro_rules! impl_ubits {
   ($ty:ty) => {
     impl UBits for $ty {
-      #[inline(always)]
+      #[inline]
       fn from_bits(bitbuf: BitBuf) -> Self {
         bitbuf as $ty
       }
@@ -152,7 +152,7 @@ impl<R: Read> BitRead for BitStream<R> {
   }
 }
 
-#[inline(always)]
+#[inline]
 const fn bitsize<T>() -> u32 {
   mem::size_of::<T>() as u32 * 8
 }

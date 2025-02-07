@@ -204,13 +204,13 @@ impl TreeNode {
     }
   }
 
-  #[inline(always)]
+  #[inline]
   fn make_branch(&mut self, child_index: usize) {
     debug_assert!(child_index < NUM_NODES);
     self.entry.set_as_branch(child_index);
   }
 
-  #[inline(always)]
+  #[inline]
   fn is_leaf(&self) -> bool {
     self.entry.is_leaf()
   }

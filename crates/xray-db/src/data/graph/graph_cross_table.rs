@@ -4,8 +4,7 @@ use std::fs::File;
 use std::io::Write;
 use uuid::Uuid;
 use xray_chunk::{
-  assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator,
-  ChunkWriter,
+  ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator, ChunkWriter,
 };
 use xray_error::XRayResult;
 
@@ -28,10 +27,14 @@ impl GraphCrossTable {
     let mut cross_tables: Vec<Self> = Vec::new();
 
     for mut cross_table_reader in
-      ChunkSizePackedIterator::from_current(&mut ChunkReader::from_file(file.try_clone().unwrap())?)
+      ChunkSizePackedIterator::from_current(&mut ChunkReader::from_file(
+        file
+          .try_clone()
+          .expect("Cross tables list import should clone file"),
+      )?)
     {
       cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
-      assert_chunk_read(&cross_table_reader, "Expect cross table chunk to be ended")?;
+      cross_table_reader.assert_read("Expect cross table chunk to be ended")?;
     }
 
     Ok(cross_tables)
@@ -62,7 +65,7 @@ impl ChunkReadWriteList for GraphCrossTable {
 
     for mut cross_table_reader in ChunkSizePackedIterator::from_current(reader) {
       cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
-      assert_chunk_read(&cross_table_reader, "Expect cross table chunk to be ended")?;
+      cross_table_reader.assert_read("Expect cross table chunk to be ended")?;
     }
 
     Ok(cross_tables)

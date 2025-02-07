@@ -45,26 +45,27 @@ impl GenericCommand for UnpackArchiveCommand {
   /// Unpack xray engine database archive.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
-      .get_one::<PathBuf>("path")
+      .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
-    let mut destination: PathBuf = matches
-      .get_one::<PathBuf>("dest")
-      .expect("Expected valid output path to be provided")
-      .clone();
+    let destination: &PathBuf = matches
+      .get_one::<_>("dest")
+      .expect("Expected valid output path to be provided");
+
+    let destination: PathBuf = if destination.is_relative() {
+      env::current_dir()?.join(destination)
+    } else {
+      destination.clone()
+    };
 
     let parallel: usize = *matches
       .get_one::<usize>("parallel")
       .expect("Expected valid parallel threads count to be provided");
 
-    if destination.is_relative() {
-      destination = env::current_dir().unwrap().join(destination);
-    }
-
     log::info!("Unpack source: {}", path.display());
     log::info!("Unpack destination: {}", destination.display());
 
-    let archive_project: Box<ArchiveProject> = Box::new(ArchiveProject::new(path).unwrap());
+    let archive_project: Box<ArchiveProject> = Box::new(ArchiveProject::new(path)?);
 
     log::info!(
       "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",

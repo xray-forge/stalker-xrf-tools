@@ -19,14 +19,19 @@ impl TranslationProject {
     let target: PathBuf = destination
       .as_ref()
       .join(language.to_string())
-      .join(path.as_ref().file_name().unwrap())
+      .join(
+        path
+          .as_ref()
+          .file_name()
+          .expect("Target xml file path name"),
+      )
       .with_extension("xml");
 
     if options.is_verbose_logging_enabled() {
       println!("Writing file ({}) {}", language, target.display());
     }
 
-    match fs::create_dir_all(target.parent().unwrap()) {
+    match fs::create_dir_all(target.parent().expect("Target xml file parent dir")) {
       Ok(_) => {}
       Err(error) if error.kind() == AlreadyExists => {}
       Err(error) => return Err(error.into()),

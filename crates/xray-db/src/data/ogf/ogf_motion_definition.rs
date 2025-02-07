@@ -1,8 +1,9 @@
 use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_vector_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+use xray_utils::assert_length;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,7 +33,7 @@ impl OgfMotionDefinition {
       })?);
     }
 
-    assert_chunk_vector_read(
+    assert_length(
       &definitions,
       count as usize,
       "Expected correct count of OGF motions to be read",
@@ -61,7 +62,7 @@ impl OgfMotionDefinition {
         })?);
       }
 
-      assert_chunk_vector_read(
+      assert_length(
         &marks,
         count as usize,
         "Expected correct count of OGF motion marks to be read",

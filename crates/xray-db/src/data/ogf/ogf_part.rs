@@ -1,9 +1,8 @@
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{
-  assert_chunk_vector_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter,
-};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+use xray_utils::assert_length;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -35,7 +34,7 @@ impl ChunkReadWriteList for OgfPart {
       );
     }
 
-    assert_chunk_vector_read(
+    assert_length(
       &parts,
       count as usize,
       "Expected correct count of OGF parts to be read",

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::assert_equal;
+use xray_utils::assert_length;
 
 /// Shape enumeration stored in objects descriptors.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -69,8 +69,8 @@ impl ChunkReadWriteList for Shape {
       shapes.push(Self::read::<T>(reader)?);
     }
 
-    assert_equal(
-      shapes.len(),
+    assert_length(
+      &shapes,
       count as usize,
       "Declared and read shapes count should be equal",
     )?;

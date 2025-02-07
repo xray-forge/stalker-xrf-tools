@@ -10,7 +10,7 @@ use std::io::{copy, Write};
 use std::path::{Display, Path};
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 use xray_utils::encode_string_to_bytes;
 
 impl TranslationProject {
@@ -26,15 +26,11 @@ impl TranslationProject {
 
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(dir) {
-      let entry: DirEntry = match entry {
-        Ok(entry) => entry,
-        Err(error) => return Err(error.into_io_error().unwrap().into()),
-      };
+      let entry: DirEntry =
+        entry.map_err(|error| XRayError::new_serialization_error(error.to_string()))?;
 
-      let entry_path: &Path = entry.path();
-
-      if entry_path.is_file() {
-        Self::build_file(&entry_path, options)?;
+      if entry.path().is_file() {
+        Self::build_file(&entry.path(), options)?;
       }
     }
 
@@ -152,7 +148,7 @@ impl TranslationProject {
     if options.language == TranslationLanguage::All {
       for language in TranslationLanguage::get_all() {
         let data: Vec<u8> = encode_string_to_bytes(
-          &Self::compile_translation_json_by_language(&parsed, &language, options),
+          &Self::compile_translation_json_by_language(&parsed, &language, options)?,
           language.get_language_encoder(),
         )?;
 
@@ -161,7 +157,7 @@ impl TranslationProject {
       }
     } else {
       let data: Vec<u8> = encode_string_to_bytes(
-        &Self::compile_translation_json_by_language(&parsed, &options.language, options),
+        &Self::compile_translation_json_by_language(&parsed, &options.language, options)?,
         options.language.get_language_encoder(),
       )?;
 
@@ -176,7 +172,7 @@ impl TranslationProject {
     source: &TranslationJson,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
-  ) -> String {
+  ) -> XRayResult<String> {
     let mut buffer: String = format!(
       "<?xml version=\"1.0\" encoding=\"{}\" ?>\n\n",
       language.get_language_encoding()
@@ -219,9 +215,11 @@ impl TranslationProject {
     serializer.expand_empty_elements(true);
     serializer.indent(' ', 2);
 
-    compiled.serialize(serializer).unwrap();
+    compiled
+      .serialize(serializer)
+      .map_err(|error| XRayError::new_serialization_error(error.to_string()))?;
 
-    buffer
+    Ok(buffer)
   }
 
   fn compile_translation_entry_by_ref(variant: &TranslationVariant) -> String {

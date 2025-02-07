@@ -4,10 +4,10 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::Path;
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::{assert_equal, open_export_file};
+use xray_utils::{assert_length, open_export_file};
 
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
@@ -38,12 +38,12 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
       nodes.push(ArtefactSpawnPoint::read::<T>(reader)?);
     }
 
-    assert_equal(
-      nodes.len() as u64,
-      count as u64,
+    assert_length(
+      &nodes,
+      count as usize,
       "Expected defined count of nodes to be read",
     )?;
-    assert_chunk_read(reader, "Expect artefact spawns chunk to be ended")?;
+    reader.assert_read("Expect artefact spawns chunk to be ended")?;
 
     Ok(Self { nodes })
   }

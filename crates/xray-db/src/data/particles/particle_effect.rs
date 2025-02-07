@@ -11,9 +11,9 @@ use crate::file_import::{read_ini_optional_field, read_ltx_field};
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  assert_chunk_read, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
-  read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk, ChunkReadWrite,
-  ChunkReader, ChunkWriter,
+  find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk, read_f32_vector_chunk,
+  read_u16_chunk, read_u32_chunk, read_w1251_string_chunk, ChunkReadWrite, ChunkReader,
+  ChunkWriter,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
@@ -175,7 +175,7 @@ impl ChunkReadWrite for ParticleEffect {
       }
     };
 
-    assert_chunk_read(reader, "Expect particle effect chunk to be ended")?;
+    reader.assert_read("Expect particle effect chunk to be ended")?;
 
     Ok(effect)
   }

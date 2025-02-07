@@ -2,22 +2,23 @@ use crate::chunk_trait::ChunkReadWrite;
 use crate::source::chunk_data_source::ChunkDataSource;
 use crate::{ChunkReadWriteList, ChunkReadWriteOptional, ChunkReader};
 use byteorder::{ByteOrder, ReadBytesExt};
+use std::io::Read;
 use xray_error::XRayResult;
 
 impl ChunkReader {
-  #[inline(always)]
+  #[inline]
   pub fn read_xr<T: ByteOrder, C: ChunkReadWrite>(&mut self) -> XRayResult<C> {
     C::read::<T>(self)
   }
 
-  #[inline(always)]
+  #[inline]
   pub fn read_xr_optional<T: ByteOrder, C: ChunkReadWriteOptional>(
     &mut self,
   ) -> XRayResult<Option<C>> {
     C::read_optional::<T>(self)
   }
 
-  #[inline(always)]
+  #[inline]
   pub fn read_xr_list<T: ByteOrder, C: ChunkReadWriteList>(&mut self) -> XRayResult<Vec<C>> {
     C::read_list::<T>(self)
   }
@@ -39,6 +40,15 @@ impl<D: ChunkDataSource> ChunkReader<D> {
   /// Read raw bytes.
   pub fn read_bytes(&mut self, count: usize) -> XRayResult<Vec<u8>> {
     Ok(self.data.read_bytes(count)?)
+  }
+
+  /// Read all remaining raw bytes.
+  pub fn read_remaining(&mut self) -> XRayResult<Vec<u8>> {
+    let mut buf: Vec<u8> = Vec::new();
+
+    self.read_to_end(&mut buf)?;
+
+    Ok(buf)
   }
 }
 
@@ -81,6 +91,21 @@ mod tests {
       "Expect correctly read raw bytes"
     );
     assert_eq!(chunk.cursor_pos(), 10, "Expect 10 bytes read");
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_read_remaining() -> XRayResult {
+    assert_eq!(
+      ChunkReader::from_bytes(&[0, 1, 2])?.read_remaining()?,
+      vec![0, 1, 2]
+    );
+    assert_eq!(ChunkReader::from_bytes(&[0])?.read_remaining()?, vec![0]);
+    assert_eq!(
+      ChunkReader::from_bytes(&[])?.read_remaining()?,
+      Vec::<u8>::new()
+    );
 
     Ok(())
   }

@@ -1,7 +1,8 @@
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_vector_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+use xray_utils::assert_length;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,7 +22,7 @@ impl ChunkReadWrite for OgfMotionMark {
       intervals.push((reader.read_f32::<T>()?, reader.read_f32::<T>()?));
     }
 
-    assert_chunk_vector_read(
+    assert_length(
       &intervals,
       count as usize,
       "Expected correct count of OGF mark intervals to be read",

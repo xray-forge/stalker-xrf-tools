@@ -10,10 +10,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fs::File;
 use std::path::Path;
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
-use xray_utils::{assert_equal, open_export_file};
+use xray_utils::{assert_length, open_export_file};
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -70,27 +70,27 @@ impl ChunkReadWrite for SpawnGraphsChunk {
       reader.read_bytes_len(),
     );
 
-    assert_equal(
-      levels.len(),
+    assert_length(
+      &levels,
       header.levels_count as usize,
       "Expect correct levels count to be read",
     )?;
-    assert_equal(
-      vertices.len(),
+    assert_length(
+      &vertices,
       header.vertices_count as usize,
       "Expect correct vertices count to be read",
     )?;
-    assert_equal(
-      edges.len(),
+    assert_length(
+      &edges,
       header.edges_count as usize,
       "Expect correct edges count to be read",
     )?;
-    assert_equal(
-      points.len(),
+    assert_length(
+      &points,
       header.points_count as usize,
       "Expect correct points count to be read",
     )?;
-    assert_chunk_read(reader, "Expect graphs chunk to be ended")?;
+    reader.assert_read("Expect graphs chunk to be ended")?;
 
     Ok(Self {
       header,

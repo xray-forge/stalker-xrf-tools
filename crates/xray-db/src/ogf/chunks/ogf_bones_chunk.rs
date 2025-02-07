@@ -1,10 +1,9 @@
 use crate::data::ogf::ogf_bone::OgfBone;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{
-  assert_chunk_read, assert_chunk_vector_read, ChunkReadWrite, ChunkReader, ChunkWriter,
-};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+use xray_utils::assert_length;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfBonesChunk {
@@ -34,8 +33,8 @@ impl ChunkReadWrite for OgfBonesChunk {
       bones.push(reader.read_xr::<T, _>()?);
     }
 
-    assert_chunk_read(reader, "Expect all data to be read from ogf bones chunk")?;
-    assert_chunk_vector_read(
+    reader.assert_read("Expect all data to be read from ogf bones chunk")?;
+    assert_length(
       &bones,
       count as usize,
       "Expected correct count of bones to be read",

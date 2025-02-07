@@ -13,21 +13,25 @@ pub const CUSTOM_B64_ENGINE: GeneralPurpose =
   GeneralPurpose::new(&alphabet::URL_SAFE, general_purpose::NO_PAD);
 
 /// Return encoding factory for windows1250.
+#[inline]
 pub fn get_windows1250_encoder() -> XRayEncoding {
   WINDOWS_1250
 }
 
 /// Return encoding factory for windows1251.
+#[inline]
 pub fn get_windows1251_encoder() -> XRayEncoding {
   WINDOWS_1251
 }
 
 /// Return encoding factory for UTF-8.
+#[inline]
 pub fn get_utf8_encoder() -> XRayEncoding {
   UTF_8
 }
 
 /// Try encoding provided u8 raw bytes as string value.
+#[inline]
 pub fn decode_bytes_to_string(bytes: &[u8], encoding: XRayEncoding) -> io::Result<String> {
   let (cow, _, had_errors) = encoding.decode(bytes);
 
@@ -46,6 +50,7 @@ pub fn decode_bytes_to_string(bytes: &[u8], encoding: XRayEncoding) -> io::Resul
 }
 
 /// Try encoding provided u8 raw bytes as string value.
+#[inline]
 pub fn decode_bytes_to_string_without_bom_handling(
   bytes: &[u8],
   encoding: XRayEncoding,
@@ -67,6 +72,7 @@ pub fn decode_bytes_to_string_without_bom_handling(
 }
 
 /// Try encoding provided string value as bytes.
+#[inline]
 pub fn encode_string_to_bytes(string: &str, encoding: XRayEncoding) -> io::Result<Vec<u8>> {
   let (transformed, _, had_errors) = encoding.encode(string);
 
@@ -88,6 +94,7 @@ pub fn encode_string_to_bytes(string: &str, encoding: XRayEncoding) -> io::Resul
 }
 
 /// Read whole encoded reader content to a string.
+#[inline]
 pub fn read_as_string_from_encoded<R: Read>(
   reader: &mut R,
   encoding: XRayEncoding,
@@ -100,31 +107,37 @@ pub fn read_as_string_from_encoded<R: Read>(
 }
 
 /// Try encoding provided u8 raw bytes as window 1251 string and convert into regular rust string.
+#[inline]
 pub fn read_as_string_from_w1251_encoded<R: Read>(reader: &mut R) -> io::Result<String> {
   read_as_string_from_encoded(reader, WINDOWS_1251)
 }
 
 /// Try encoding provided u8 raw bytes as window 1251 string and convert into regular rust string.
+#[inline]
 pub fn encode_w1251_bytes_to_string(bytes: &[u8]) -> io::Result<String> {
   decode_bytes_to_string(bytes, WINDOWS_1251)
 }
 
 /// Try encoding provided string as windows1251 bytes.
+#[inline]
 pub fn encode_string_to_w1251_bytes(string: &str) -> io::Result<Vec<u8>> {
   encode_string_to_bytes(string, WINDOWS_1251)
 }
 
 /// Encode str as b64 value.
+#[inline]
 pub fn encode_string_to_base64(string: &str) -> String {
   CUSTOM_B64_ENGINE.encode(string)
 }
 
 /// Encode bytes as b64 value.
+#[inline]
 pub fn encode_bytes_to_base64(bytes: &[u8]) -> String {
   CUSTOM_B64_ENGINE.encode(bytes)
 }
 
 /// Decode b64 as bytes.
+#[inline]
 pub fn decode_bytes_from_base64(string: &str) -> XRayResult<Vec<u8>> {
   CUSTOM_B64_ENGINE.decode(string).map_err(|error| {
     XRayError::new_parsing_error(format!(
@@ -135,6 +148,7 @@ pub fn decode_bytes_from_base64(string: &str) -> XRayResult<Vec<u8>> {
 }
 
 /// Decode b64 as string.
+#[inline]
 pub fn decode_string_from_base64(string: &str) -> XRayResult<String> {
   Ok(match CUSTOM_B64_ENGINE.decode(string) {
     Ok(value) => String::from_utf8_lossy(&value).into_owned(),

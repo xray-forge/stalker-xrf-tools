@@ -1,7 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io::Read;
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -18,11 +17,9 @@ impl ChunkReadWrite for OgfMotion {
     let name: String = reader.read_w1251_string()?;
     let count: u32 = reader.read_u32::<T>()?;
     let flags: u8 = reader.read_u8()?;
-    let mut remaining: Vec<u8> = Vec::new();
+    let remaining: Vec<u8> = reader.read_remaining()?;
 
-    reader.read_to_end(&mut remaining)?;
-
-    assert_chunk_read(reader, "Chunk data should be read for OgfMotion")?;
+    reader.assert_read("Chunk data should be read for OgfMotion")?;
 
     Ok(Self {
       name,

@@ -2,7 +2,7 @@ use crate::data::ogf::ogf_box::OgfBox;
 use crate::data::ogf::ogf_sphere::OgfSphere;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,10 +39,7 @@ impl ChunkReadWrite for OgfHeaderChunk {
       bounding_sphere: reader.read_xr::<T, _>()?,
     };
 
-    assert_chunk_read(
-      reader,
-      "Expect all data to be read from ogf header, {} remain",
-    )?;
+    reader.assert_read("Expect all data to be read from ogf header, {} remain")?;
 
     Ok(header)
   }

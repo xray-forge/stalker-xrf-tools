@@ -5,7 +5,7 @@ use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
 use xray_utils::open_export_file;
@@ -39,7 +39,7 @@ impl ChunkReadWrite for ParticlesGroupsChunk {
 
     groups.sort_by(|first, second| first.name.cmp(&second.name));
 
-    assert_chunk_read(reader, "Expect groups chunk to be ended")?;
+    reader.assert_read("Expect groups chunk to be ended")?;
 
     Ok(Self { groups })
   }

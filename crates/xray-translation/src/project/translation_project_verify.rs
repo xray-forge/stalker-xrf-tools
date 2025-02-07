@@ -22,7 +22,14 @@ impl TranslationProject {
     for entry in WalkDir::new(dir) {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
-        Err(error) => return Err(error.into_io_error().unwrap().into()),
+        Err(error) => {
+          return Err(
+            error
+              .into_io_error()
+              .expect("WalkDir error transformation")
+              .into(),
+          )
+        }
       };
 
       let entry_path: &Path = entry.path();

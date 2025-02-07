@@ -3,7 +3,7 @@ use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
@@ -29,7 +29,7 @@ impl ChunkReadWrite for ParticleEffectCollision {
       collide_sqr_cutoff: reader.read_f32::<T>()?,
     };
 
-    assert_chunk_read(reader, "Expect particle collision chunk to be ended")?;
+    reader.assert_read("Expect particle collision chunk to be ended")?;
 
     Ok(particle_collision)
   }

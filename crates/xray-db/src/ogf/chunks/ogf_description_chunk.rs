@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
 /// ogf_desc c++ class
@@ -21,11 +21,6 @@ impl OgfDescriptionChunk {
 
 impl ChunkReadWrite for OgfDescriptionChunk {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    log::info!(
-      "Reading description chunk: {} bytes",
-      reader.read_bytes_remain()
-    );
-
     let description: Self = Self {
       source_file: reader.read_w1251_string()?,
       convertor: reader.read_w1251_string()?,
@@ -36,7 +31,7 @@ impl ChunkReadWrite for OgfDescriptionChunk {
       edited_at: reader.read_u32::<T>()?,
     };
 
-    assert_chunk_read(reader, "Expect all data to be read from ogf description")?;
+    reader.assert_read("Expect all data to be read from ogf description")?;
 
     Ok(description)
   }

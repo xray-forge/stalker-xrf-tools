@@ -57,18 +57,6 @@ impl ChunkReader<InMemoryChunkDataSource> {
 }
 
 impl<T: ChunkDataSource> ChunkReader<T> {
-  /// Assert data in chink is read and nothing remains to read.
-  pub fn assert_read(&self, message: &str) -> XRayResult {
-    if self.is_ended() {
-      Ok(())
-    } else {
-      Err(XRayError::new_chunk_not_ended_error(
-        message,
-        self.read_bytes_remain(),
-      ))
-    }
-  }
-
   /// Get current position of the chunk seek.
   pub fn cursor_pos(&self) -> u64 {
     self.data.cursor_pos()
@@ -126,6 +114,19 @@ impl<T: ChunkDataSource> ChunkReader<T> {
   /// Read list of all child samples in current chunk and advance further.
   pub fn read_children(&mut self) -> Vec<Self> {
     ChunkIterator::<T>::from_start(self).collect()
+  }
+
+  /// Assert data in chink is read and nothing remains to read.
+  #[inline]
+  pub fn assert_read(&self, message: &str) -> XRayResult {
+    if self.is_ended() {
+      Ok(())
+    } else {
+      Err(XRayError::new_chunk_not_ended_error(
+        message,
+        self.read_bytes_remain(),
+      ))
+    }
   }
 }
 

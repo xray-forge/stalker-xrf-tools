@@ -3,7 +3,7 @@ use crate::data::ogf::ogf_part::OgfPart;
 use crate::OmfFile;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -23,11 +23,6 @@ impl OmfParametersChunk {
 
 impl ChunkReadWrite for OmfParametersChunk {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    log::info!(
-      "Reading parameters chunk: {} bytes",
-      reader.read_bytes_remain()
-    );
-
     let version: u16 = reader.read_u16::<T>()?;
 
     if !OmfFile::SUPPORTED_VERSIONS.contains(&version) {
@@ -40,17 +35,14 @@ impl ChunkReadWrite for OmfParametersChunk {
 
     let parts: Vec<OgfPart> = reader
       .read_xr_list::<T, _>()
-      .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf parts: {error}")))?;
+      .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf parts: {}", error)))?;
 
     let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader, version)
       .map_err(|error| {
         XRayError::new_read_error(format!("Failed to read ogf motion definitions: {}", error))
       })?;
 
-    assert_chunk_read(
-      reader,
-      "Expect all data to be read from omf parameters chunk",
-    )?;
+    reader.assert_read("Expect all data to be read from omf parameters chunk")?;
 
     Ok(Self {
       version,

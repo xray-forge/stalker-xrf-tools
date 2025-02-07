@@ -14,7 +14,6 @@ pub use crate::reader::chunk_reader::*;
 pub use crate::source::chunk_data_source::*;
 pub use crate::source::chunk_memory_source::*;
 pub use crate::types::*;
-pub use crate::utils::chunk_utils_assert::*;
 pub use crate::utils::chunk_utils_find::*;
 pub use crate::utils::chunk_utils_read::*;
 pub use crate::writer::chunk_writer::*;

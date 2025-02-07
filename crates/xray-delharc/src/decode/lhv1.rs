@@ -92,7 +92,7 @@ impl<R: Read> Decoder<R> for Lh1Decoder<R> {
 }
 
 /// Returns (incomplete offset, additional bits to read)
-#[inline(always)]
+#[inline]
 fn decode_offset(bits9: u16) -> (u16, u32) {
   match bits9 & 0b111100000 {
     /* 000xxxxxx -> 000000 xxxxxx */

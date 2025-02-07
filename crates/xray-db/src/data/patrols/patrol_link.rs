@@ -2,10 +2,10 @@ use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xray_chunk::{assert_chunk_read, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::assert_equal;
+use xray_utils::assert_length;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -23,7 +23,7 @@ impl ChunkReadWriteList for PatrolLink {
       links.push(Self::read::<T>(reader)?);
     }
 
-    assert_chunk_read(reader, "Chunk data should be read for patrol links")?;
+    reader.assert_read("Chunk data should be read for patrol links")?;
 
     Ok(links)
   }
@@ -44,7 +44,7 @@ impl ChunkReadWrite for PatrolLink {
     let index: u32 = reader.read_u32::<T>()?;
     let count: u32 = reader.read_u32::<T>()?;
 
-    let mut vertices: Vec<(u32, f32)> = Vec::new();
+    let mut vertices: Vec<(u32, f32)> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       let to: u32 = reader.read_u32::<T>()?; // from->to in u16.
@@ -53,8 +53,8 @@ impl ChunkReadWrite for PatrolLink {
       vertices.push((to, weight));
     }
 
-    assert_equal(
-      vertices.len(),
+    assert_length(
+      &vertices,
       count as usize,
       "Expected correct count of patrol links to be read",
     )?;
@@ -102,8 +102,8 @@ impl LtxImportExport for PatrolLink {
       ))
     }
 
-    assert_equal(
-      links.len(),
+    assert_length(
+      &links,
       count,
       "Expected to import exact count of patrol links",
     )?;
