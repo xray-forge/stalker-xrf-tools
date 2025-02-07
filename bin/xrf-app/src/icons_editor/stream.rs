@@ -21,36 +21,34 @@ pub fn get_equipment_sprite_stream_response<R: Runtime>(
   let preview: Option<&Vec<u8>> = preview_lock.as_ref();
   let sprite_name: Option<&String> = sprite_lock.as_ref();
 
-  if preview.is_none() || sprite_name.is_none() {
+  if let (Some(preview), Some(sprite_name)) = (preview, sprite_name) {
+    let uri: String = percent_encoding::percent_decode(request.uri().path().as_bytes())
+      .decode_utf8_lossy()
+      .to_string();
+
+    if !uri.ends_with(&format!("/{}", sprite_name)) {
+      log::info!("Incorrect asset request: {uri}");
+
+      return Response::builder().status(404).body(Vec::new());
+    }
+
+    let mut response: Builder = Response::builder();
+
+    if let Some(referer) = request
+      .headers()
+      .get(REFERER)
+      .map(|header| header.to_str().unwrap())
+    {
+      response = response.header(ACCESS_CONTROL_ALLOW_ORIGIN, referer.trim_matches('/'))
+    }
+
+    response
+      .header(CONTENT_TYPE, "image/png")
+      .header(CONTENT_LENGTH, preview.len())
+      .body(preview.clone())
+  } else {
     log::info!("Incorrect asset request while not existing");
-    return Response::builder().status(404).body(Vec::new());
+
+    Response::builder().status(404).body(Vec::new())
   }
-
-  let preview: &Vec<u8> = preview.unwrap();
-  let sprite_name: &String = sprite_name.unwrap();
-
-  let uri: String = percent_encoding::percent_decode(request.uri().path().as_bytes())
-    .decode_utf8_lossy()
-    .to_string();
-
-  if !uri.ends_with(&format!("/{}", sprite_name)) {
-    log::info!("Incorrect asset request: {uri}");
-
-    return Response::builder().status(404).body(Vec::new());
-  }
-
-  let mut response: Builder = Response::builder();
-
-  if let Some(referer) = request
-    .headers()
-    .get(REFERER)
-    .map(|header| header.to_str().unwrap())
-  {
-    response = response.header(ACCESS_CONTROL_ALLOW_ORIGIN, referer.trim_matches('/'))
-  }
-
-  response
-    .header(CONTENT_TYPE, "image/png")
-    .header(CONTENT_LENGTH, preview.len())
-    .body(preview.clone())
 }
