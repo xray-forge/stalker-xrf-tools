@@ -15,8 +15,7 @@ pub enum LineSeparator {
 }
 
 #[cfg(not(windows))]
-static DEFAULT_LINE_SEPARATOR: &str = "\n";
-
+pub static DEFAULT_LINE_SEPARATOR: &str = "\n";
 #[cfg(windows)]
 pub static DEFAULT_LINE_SEPARATOR: &str = "\r\n";
 
