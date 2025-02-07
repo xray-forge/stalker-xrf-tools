@@ -2,6 +2,7 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
+import { AnyObject } from "@/core/types/general";
 import { IArtefactSpawnNode } from "@/lib/spawn_file";
 
 interface ISpawnEditorArtefactsNodesTableProps {
@@ -18,7 +19,7 @@ export function SpawnEditorArtefactsNodesTable({ nodes }: ISpawnEditorArtefactsN
         field: "position",
         headerName: "position",
         width: 240,
-        valueGetter: (it) => (it.value ? JSON.stringify(it.value) : null),
+        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
       },
     ],
     []

@@ -2,6 +2,7 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
+import { AnyObject } from "@/core/types/general";
 import { IPatrol } from "@/lib/spawn_file";
 
 interface ISpawnEditorPatrolsTableProps {
@@ -20,7 +21,7 @@ export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolsTab
         field: "position",
         headerName: "position",
         width: 160,
-        valueGetter: (it) => (it.row.position ? JSON.stringify(it.row.position) : null),
+        valueGetter: (it: AnyObject) => (it.row.position ? JSON.stringify(it.row.position) : null),
       },
     ],
     [patrols]

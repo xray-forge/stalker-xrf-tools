@@ -2,6 +2,7 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
+import { AnyObject } from "@/core/types/general";
 import { IAlifeObjectBase } from "@/lib/spawn_file";
 
 interface ISpawnEditorAlifeObjectsTableProps {
@@ -32,17 +33,17 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
       {
         field: "direction",
         headerName: "direction",
-        valueGetter: (it) => (it.value ? JSON.stringify(it.value) : null),
+        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
       },
       {
         field: "position",
         headerName: "position",
-        valueGetter: (it) => (it.value ? JSON.stringify(it.value) : null),
+        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
       },
       {
         field: "inherited",
         headerName: "inherited",
-        valueGetter: (it) => (it.row.inherited ? JSON.stringify(it.row.inherited) : null),
+        valueGetter: (it: AnyObject) => (it.row.inherited ? JSON.stringify(it.row.inherited) : null),
       },
       { field: "updateData", headerName: "update data" },
     ],

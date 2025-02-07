@@ -2,6 +2,7 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
+import { AnyObject } from "@/core/types/general";
 import { IGraphVertex } from "@/lib/spawn_file";
 
 interface ISpawnEditorGraphVerticesTableProps {
@@ -22,12 +23,12 @@ export function SpawnEditorGraphVerticesTable({ vertices }: ISpawnEditorGraphVer
       {
         field: "gamePoint",
         headerName: "game point",
-        valueGetter: (it) => (it.value ? JSON.stringify(it.value) : null),
+        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
       },
       {
         field: "levelPoint",
         headerName: "level point",
-        valueGetter: (it) => (it.value ? JSON.stringify(it.value) : null),
+        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
       },
     ],
     []
