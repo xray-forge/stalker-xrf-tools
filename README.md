@@ -44,7 +44,7 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli
 
 - rust
 - cargo-make (`cargo install --force cargo-make`)
-- tauri-cli (`cargo install --force tauri-cli@1.5.11`),
+- tauri-cli (`cargo install --force tauri-cli@2.5.0`),
   [tauri installation](https://tauri.app/v1/guides/getting-started/prerequisites)
 
 ### Release
