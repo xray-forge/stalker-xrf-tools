@@ -64,7 +64,7 @@ export function ExportsOpenForm({
       height={"100%"}
       padding={4}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
+      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
         <Typography>Provide paths to ltx project</Typography>
       </Grid>
 

@@ -10,7 +10,7 @@ export interface IExportsViewerDeclarationProps {
 
 export function ExportsEditorDeclaration({ descriptor }: IExportsViewerDeclarationProps): ReactElement {
   return (
-    <Grid key={descriptor.name} width={"100%"} maxWidth={"100%"} paddingRight={1} item>
+    <Grid key={descriptor.name} width={"100%"} maxWidth={"100%"} paddingRight={1}>
       <Card elevation={2}>
         <Grid direction={"column"} padding={1} gap={1} container>
           <Typography variant={"h6"} color={"primary"}>

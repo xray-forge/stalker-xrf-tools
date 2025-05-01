@@ -15,7 +15,7 @@ export function IconsEditorDescriptionUnpackPage(): ReactElement {
       height={"100%"}
       padding={4}
     >
-      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container item>
+      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container>
         <Typography>Provide description file to unpack</Typography>
       </Grid>
 

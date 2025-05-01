@@ -109,7 +109,7 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
       height={"100%"}
       padding={4}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
+      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
         <Typography>Provide LTX files directory to {isCheck ? "check format" : "format"}</Typography>
       </Grid>
 
@@ -121,7 +121,7 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
         marginBottom={2}
         container
       >
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container>
           <OutlinedInput
             size={"small"}
             disabled={isLoading}

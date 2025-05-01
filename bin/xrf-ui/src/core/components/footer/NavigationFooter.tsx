@@ -22,7 +22,7 @@ export function NavigationFooter({
   }, []);
 
   return (
-    <Grid direction={"row"} justifyContent={"center"} container item>
+    <Grid direction={"row"} justifyContent={"center"} container>
       <IconButton onClick={onOpenGithubLink}>
         <GitHubIcon />
       </IconButton>

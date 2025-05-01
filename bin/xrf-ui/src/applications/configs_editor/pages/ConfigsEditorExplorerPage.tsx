@@ -22,12 +22,12 @@ export function ConfigsEditorExplorerPage({ projectContext: { xrfConfigsPath } =
       width={"100%"}
       height={"100%"}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
+      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
         <Typography>Provide LTX files directory to open</Typography>
       </Grid>
 
       <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container>
           <OutlinedInput
             size={"small"}
             placeholder={"Configs directory"}
@@ -45,7 +45,7 @@ export function ConfigsEditorExplorerPage({ projectContext: { xrfConfigsPath } =
           />
         </Grid>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
           <Button variant={"contained"}>Open</Button>
         </Grid>
       </Grid>

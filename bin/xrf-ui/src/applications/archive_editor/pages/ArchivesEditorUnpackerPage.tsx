@@ -105,12 +105,12 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
       height={"100%"}
       padding={4}
     >
-      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container item>
+      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container>
         <Typography>Provide archives to unpack</Typography>
       </Grid>
 
       <Grid direction={"row"} justifyContent={"center"} alignItems={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={1} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={1} container>
           <OutlinedInput
             size={"small"}
             disabled={isLoading}
@@ -144,7 +144,7 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
           />
         </Grid>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
           <Button variant={"contained"} disabled={isLoading || !archivesPath} onClick={onUnpackArchivesPathClicked}>
             Unpack
           </Button>

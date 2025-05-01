@@ -14,7 +14,7 @@ export function NavigationError(): ReactElement {
       width={"100%"}
       height={"100%"}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container item>
+      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
         <Typography>XRF navigation error</Typography>
       </Grid>
 

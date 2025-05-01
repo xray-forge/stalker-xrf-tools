@@ -42,6 +42,7 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli
 
 ### Requirements
 
+- node-js
 - rust
 - cargo-make (`cargo install --force cargo-make`)
 - tauri-cli (`cargo install --force tauri-cli@2.5.0`),

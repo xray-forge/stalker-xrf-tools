@@ -50,12 +50,12 @@ export function TranslationsEditorOpenForm({
       height={"100%"}
       padding={4}
     >
-      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container item>
+      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container>
         <Typography>Provide translations details</Typography>
       </Grid>
 
       <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={2} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={2} container>
           <FilePickerInput
             label={"Translations path"}
             value={translationsPath}
@@ -64,7 +64,7 @@ export function TranslationsEditorOpenForm({
           />
         </Grid>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container item>
+        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
           <Button
             disabled={project.isLoading || !translationsPath}
             variant={"contained"}

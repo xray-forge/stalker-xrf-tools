@@ -19,7 +19,7 @@ export function ArchivesMenu({
   );
 
   const onSelectListItem = useCallback(
-    (_: SyntheticEvent, file: Optional<string>) => {
+    (_: Optional<SyntheticEvent>, file: Optional<string>) => {
       if (file) {
         // trim '~/' root
         return fileActions.open(file.slice(2));

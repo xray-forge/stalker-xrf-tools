@@ -14,7 +14,7 @@ export function ApplicationNavigatorHeader({ title, helpLink }: IApplicationNavi
   }, [helpLink]);
 
   return (
-    <Grid direction={"row"} justifyContent={"center"} container item>
+    <Grid direction={"row"} justifyContent={"center"} container>
       <Typography variant={"h6"}>{title}</Typography>
 
       <IconButton size={"small"} sx={{ margin: "0 4px" }} onClick={onOpenLink}>
