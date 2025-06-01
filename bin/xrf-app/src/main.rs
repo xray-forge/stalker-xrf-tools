@@ -16,6 +16,8 @@ use crate::exports_editor::plugin::ExportsEditorPlugin;
 use crate::icons_editor::plugin::IconsEditorPlugin;
 use crate::spawns_editor::plugin::SpawnsEditorPlugin;
 use crate::translations_editor::plugin::TranslationsEditorPlugin;
+use env_logger::Builder;
+use log::LevelFilter;
 use std::env;
 
 fn main() {
@@ -38,17 +40,17 @@ fn main() {
 
 /// Configure environment logger, fallback to info level.
 pub fn setup_logger() {
-  if env::var("RUST_LOG").is_err() {
-    unsafe {
-      env::set_var(
-        "RUST_LOG",
-        match cfg!(debug_assertions) {
-          true => "info",
-          false => "error",
-        },
-      )
-    }
+  let mut logger: Builder = env_logger::builder();
+
+  if let Ok(rust_log) = env::var("RUST_LOG") {
+    logger.parse_filters(&rust_log);
+  } else {
+    match cfg!(debug_assertions) {
+      true => logger.filter_level(LevelFilter::Warn),
+      false => logger.filter_level(LevelFilter::Error),
+    };
   }
 
-  env_logger::init();
+  logger.default_format();
+  logger.init();
 }
