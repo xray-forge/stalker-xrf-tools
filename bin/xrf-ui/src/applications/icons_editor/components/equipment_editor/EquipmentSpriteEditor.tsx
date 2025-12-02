@@ -18,7 +18,7 @@ export function EquipmentSpriteEditor(): ReactElement {
     >
       <EquipmentSpriteEditorToolbar />
 
-      <Grid flexGrow={1} flexWrap={"nowrap"} container>
+      <Grid flexGrow={1} flexWrap={"nowrap"} width={"100%"} container>
         <EquipmentSpriteEditorMenu />
         <EquipmentSpriteEditorWorkspace />
       </Grid>

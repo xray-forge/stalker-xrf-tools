@@ -17,7 +17,7 @@ pub fn get_expression_callee_name(callee: &Callee) -> Option<String> {
 pub fn get_expression_parameter_as_string_name(expression: &ExprOrSpread) -> Option<String> {
   if let Expr::Lit(literal) = expression.expr.as_ref() {
     return if let Lit::Str(string_literal) = literal {
-      Some(string_literal.value.to_string())
+      Some(string_literal.value.to_string_lossy().to_string())
     } else {
       None
     };

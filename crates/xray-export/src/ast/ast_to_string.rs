@@ -21,7 +21,10 @@ pub fn ts_type_to_string(ts_type: &TsType) -> String {
 }
 
 pub fn ts_literal_type_to_string(literal_type: &TsLitType) -> String {
-  format!("\"{}\"", literal_type.lit.as_str().unwrap().value)
+  format!(
+    "\"{}\"",
+    literal_type.lit.as_str().unwrap().value.to_string_lossy()
+  )
 }
 
 fn ts_type_operator_to_string(type_operator: &TsTypeOperator) -> String {

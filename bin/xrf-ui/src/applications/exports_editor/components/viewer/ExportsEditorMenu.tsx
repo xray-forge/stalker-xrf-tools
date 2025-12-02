@@ -23,6 +23,13 @@ export function ExportsEditorMenu({
     []
   );
 
+  const onNavigateClicked = useCallback(
+    (to: string) => {
+      navigate(`/exports_editor/exports/${to}`, { replace: true });
+    },
+    [navigate]
+  );
+
   const onCloseClicked = useCallback(() => {
     navigate("/exports_editor", { replace: true });
 
@@ -30,11 +37,16 @@ export function ExportsEditorMenu({
   }, [exportsActions, redirect]);
 
   return (
-    <Drawer variant={"permanent"} open={true} sx={{ height: "100%" }} PaperProps={{ sx: { position: "relative" } }}>
+    <Drawer
+      variant={"permanent"}
+      open={true}
+      sx={{ height: "100%" }}
+      slotProps={{ paper: { sx: { position: "relative" } } }}
+    >
       <List disablePadding>
         {sections.map(([text, icon]) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton onClick={() => navigate(text.toLowerCase(), { replace: true })}>
+            <ListItemButton onClick={() => onNavigateClicked(text.toLowerCase())}>
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>

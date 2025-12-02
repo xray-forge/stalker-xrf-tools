@@ -7,14 +7,13 @@ import { default as LooksIcon1 } from "@mui/icons-material/LooksOne";
 import { default as LooksIcon2 } from "@mui/icons-material/LooksTwo";
 import { default as SaveIcon } from "@mui/icons-material/Save";
 import { Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import {  } from "@tauri-apps/api";
+import * as dialog from "@tauri-apps/plugin-dialog";
 import { useManager } from "dreamstate";
 import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, redirect, useNavigate } from "react-router-dom";
 
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 import { Optional } from "@/core/types/general";
-import * as dialog from "@tauri-apps/plugin-dialog"
 
 export function SpawnEditorMenu({
   spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
@@ -54,6 +53,13 @@ export function SpawnEditorMenu({
     }
   }, [spawnActions, redirect]);
 
+  const onNavigateClicked = useCallback(
+    (to: string) => {
+      navigate(`/spawn_editor/editor/${to}`, { replace: true });
+    },
+    [navigate]
+  );
+
   const onCloseClicked = useCallback(() => {
     navigate("/spawn_editor", { replace: true });
 
@@ -61,11 +67,16 @@ export function SpawnEditorMenu({
   }, [spawnActions, redirect]);
 
   return (
-    <Drawer variant={"permanent"} open={true} sx={{ height: "100%" }} PaperProps={{ sx: { position: "relative" } }}>
+    <Drawer
+      variant={"permanent"}
+      open={true}
+      sx={{ height: "100%" }}
+      slotProps={{ paper: { sx: { position: "relative" } } }}
+    >
       <List disablePadding>
         {sections.map(([text, icon]) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton onClick={() => navigate(text.toLowerCase(), { replace: true })}>
+            <ListItemButton onClick={() => onNavigateClicked(text.toLowerCase())}>
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
