@@ -12,12 +12,12 @@ byteorder = "1.5.0"
 derive_more = { version = "1.0.0", features = ["display", "from_str"] }
 enum-map = "2.7.3"
 lazy_static = "1.5.0"
-log = "0.4.25"
-phf = { version = "0.11.3", features = ["macros"] }
-serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.138"
-typetag = "0.2.19"
-uuid = { version = "1.12.1", features = ["v4", "serde"] }
+log = "0.4.28"
+phf = { version = "0.13.1", features = ["macros"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+typetag = "0.2.21"
+uuid = { version = "1.18.1", features = ["v4", "serde"] }
 xray-chunk = { path = "../xray-chunk" }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }

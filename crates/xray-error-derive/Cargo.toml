@@ -7,10 +7,10 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-convert_case = "0.7.1"
-proc-macro2 = "1.0.93"
-quote = "1.0.38"
-syn = "2.0.96"
+convert_case = "0.10.0"
+proc-macro2 = "1.0.103"
+quote = "1.0.42"
+syn = "2.0.111"
 
 [lints]
 workspace = true

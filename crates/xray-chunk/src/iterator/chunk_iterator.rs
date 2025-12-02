@@ -11,7 +11,7 @@ pub struct ChunkIterator<'a, T: ChunkDataSource = FileSlice> {
 }
 
 impl<T: ChunkDataSource> ChunkIterator<'_, T> {
-  pub fn from_start(reader: &mut ChunkReader<T>) -> ChunkIterator<T> {
+  pub fn from_start(reader: &mut ChunkReader<T>) -> ChunkIterator<'_, T> {
     reader
       .reset_pos()
       .expect("Iterator reader position reset expected");
@@ -19,7 +19,7 @@ impl<T: ChunkDataSource> ChunkIterator<'_, T> {
     ChunkIterator { reader }
   }
 
-  pub fn from_current(reader: &mut ChunkReader<T>) -> ChunkIterator<T> {
+  pub fn from_current(reader: &mut ChunkReader<T>) -> ChunkIterator<'_, T> {
     ChunkIterator { reader }
   }
 }

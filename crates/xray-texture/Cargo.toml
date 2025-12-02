@@ -5,13 +5,13 @@ edition = "2021"
 
 [dependencies]
 ddsfile = "0.5.2"
-image = "0.25.5"
-image_dds = "0.7.1"
-log = "0.4.25"
+image = "0.25.9"
+image_dds = "0.7.2"
+log = "0.4.28"
 path-absolutize = "3.1.1"
-rayon = "1.10.0"
-roxmltree = "0.20.0"
-serde = { version = "1.0.217", features = ["derive"] }
+rayon = "1.11.0"
+roxmltree = "0.21.1"
+serde = { version = "1.0.228", features = ["derive"] }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
 xray-utils = { path = "../xray-utils" }

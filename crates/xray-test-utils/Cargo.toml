@@ -7,7 +7,7 @@ edition = "2021"
 path = "src/lib.rs"
 
 [dependencies]
-fileslice = "0.5.0"
+fileslice = "0.7.0"
 
 [lints]
 workspace = true
