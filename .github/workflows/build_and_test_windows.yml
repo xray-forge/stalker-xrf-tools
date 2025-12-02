@@ -38,7 +38,7 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Run xray workspace tests
-        run: cargo test --verbose --workspace --exclude xrf-app xrf-cli
+        run: cargo test --verbose
 
       - name: Build CLI
         run: cargo make build-cli-release
