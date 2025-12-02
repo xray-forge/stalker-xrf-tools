@@ -83,7 +83,7 @@ mod test {
   use std::fs::File;
   use std::io::Write;
   use std::path::PathBuf;
-  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::file::read_file_as_normalized_win_endl_string;
   use xray_test_utils::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
 
   #[test]
@@ -105,7 +105,7 @@ mod test {
     let formatted: String =
       Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_1.ltx")).unwrap();
 
-    let expected: String = read_file_as_string(
+    let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_1.ltx").unwrap(),
     )
     .unwrap();
@@ -118,7 +118,7 @@ mod test {
     let formatted: String =
       Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_2.ltx")).unwrap();
 
-    let expected: String = read_file_as_string(
+    let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_2.ltx").unwrap(),
     )
     .unwrap();
@@ -131,7 +131,7 @@ mod test {
     let formatted: String =
       Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_3.ltx")).unwrap();
 
-    let expected: String = read_file_as_string(
+    let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_3.ltx").unwrap(),
     )
     .unwrap();
@@ -144,7 +144,7 @@ mod test {
     let formatted: String =
       Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_4.ltx")).unwrap();
 
-    let expected: String = read_file_as_string(
+    let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_4.ltx").unwrap(),
     )
     .unwrap();
