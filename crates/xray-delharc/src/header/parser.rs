@@ -464,7 +464,7 @@ fn is_separator(c: char) -> bool {
   c == '/' || c == '\\'
 }
 
-pub(super) fn parse_str_nilterm(data: &[u8], nilterm: bool, ignore_sep: bool) -> Cow<str> {
+pub(super) fn parse_str_nilterm(data: &[u8], nilterm: bool, ignore_sep: bool) -> Cow<'_, str> {
   if let Some(index) = data
     .iter()
     .position(|&c| !(0x20..0x7f).contains(&c) || (!ignore_sep && is_separator(c as char)))

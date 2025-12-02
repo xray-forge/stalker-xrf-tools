@@ -26,14 +26,14 @@ impl Section {
   }
 
   /// Get an iterator of the properties.
-  pub fn iter(&self) -> PropertyIter {
+  pub fn iter(&self) -> PropertyIter<'_> {
     PropertyIter {
       inner: self.data.iter(),
     }
   }
 
   /// Get a mutable iterator of the properties.
-  pub fn iter_mut(&mut self) -> PropertyIterMut {
+  pub fn iter_mut(&mut self) -> PropertyIterMut<'_> {
     PropertyIterMut {
       inner: self.data.iter_mut(),
     }

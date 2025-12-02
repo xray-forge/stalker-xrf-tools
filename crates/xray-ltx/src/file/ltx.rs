@@ -38,7 +38,7 @@ impl Ltx {
   }
 
   /// Set with a specified section, `None` is for the general section
-  pub fn with_section<S>(&mut self, section: S) -> SectionSetter
+  pub fn with_section<S>(&mut self, section: S) -> SectionSetter<'_>
   where
     S: Into<String>,
   {
@@ -46,7 +46,7 @@ impl Ltx {
   }
 
   /// Set with general section, a simple wrapper of `with_section(ROOT_SECTION)`
-  pub fn with_root_section(&mut self) -> SectionSetter {
+  pub fn with_root_section(&mut self) -> SectionSetter<'_> {
     self.with_section(ROOT_SECTION)
   }
 
