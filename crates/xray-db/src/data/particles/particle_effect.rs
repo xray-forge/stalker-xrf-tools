@@ -7,7 +7,7 @@ use crate::data::particles::particle_effect_editor_data::ParticleEffectEditorDat
 use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
 use crate::export::LtxImportExport;
-use crate::file_import::{read_ini_optional_field, read_ltx_field};
+use crate::file_import::{read_ltx_field, read_ltx_optional_field};
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
@@ -299,17 +299,17 @@ impl LtxImportExport for ParticleEffect {
       flags: read_ltx_field("flags", section)?,
       frame: ParticleEffectFrame::import_optional(&Self::get_frame_section(section_name), ltx)?,
       sprite: ParticleEffectSprite::import(&Self::get_sprite_section(section_name), ltx)?,
-      time_limit: read_ini_optional_field("time_limit", section)?,
+      time_limit: read_ltx_optional_field("time_limit", section)?,
       collision: ParticleEffectCollision::import_optional(
         &Self::get_collision_section(section_name),
         ltx,
       )?,
-      velocity_scale: read_ini_optional_field("velocity_scale", section)?,
+      velocity_scale: read_ltx_optional_field("velocity_scale", section)?,
       description: ParticleDescription::import_optional(
         &Self::get_description_section(section_name),
         ltx,
       )?,
-      rotation: read_ini_optional_field("rotation", section)?,
+      rotation: read_ltx_optional_field("rotation", section)?,
       editor_data: ParticleEffectEditorData::import_optional(
         &Self::get_editor_data_section(section_name),
         ltx,

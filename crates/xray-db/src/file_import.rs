@@ -22,7 +22,7 @@ pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> XRayRe
 }
 
 /// Read optional value from ltx section and parse it as provided T type.
-pub fn read_ini_optional_field<T: FromStr>(
+pub fn read_ltx_optional_field<T: FromStr>(
   field_name: &str,
   section: &Section,
 ) -> XRayResult<Option<T>> {

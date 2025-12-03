@@ -11,7 +11,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use xray_chunk::{find_required_chunk_by_id, ChunkReader, ChunkWriter};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 use xray_utils::{assert_equal, assert_length, open_export_file};
 
 /// Descriptor of generic spawn file used by xray game engine.
@@ -80,8 +80,17 @@ impl SpawnFile {
 
   /// Write spawn file data to the file by provided path.
   pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
-    fs::create_dir_all(path.as_ref().parent().expect("Spawn file parent directory"))?;
-    self.write_to::<T>(&mut open_export_file(path)?)
+    let path_ref: &Path = path.as_ref();
+
+    if let Some(parent) = path_ref.parent() {
+      fs::create_dir_all(parent)?;
+      self.write_to::<T>(&mut open_export_file(path)?)
+    } else {
+      Err(XRayError::new_not_found_error(format!(
+        "Spawn file parent directory was not found for {:?}",
+        path_ref.to_str()
+      )))
+    }
   }
 
   /// Write spawn file data to the writer.

@@ -80,11 +80,11 @@ impl OgfFile {
   pub fn read_motion_refs_from_path<T: ByteOrder, P: AsRef<Path>>(
     path: &P,
   ) -> XRayResult<Vec<String>> {
-    Self::read_motions_refs_from_file::<T>(File::open(path)?)
+    Self::read_motion_refs_from_file::<T>(File::open(path)?)
   }
 
   /// Read only list of motion refs specifically and skip other data parts.
-  pub fn read_motions_refs_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
+  pub fn read_motion_refs_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
     let mut reader: ChunkReader = ChunkReader::from_file(file)?;
     let chunks: Vec<ChunkReader> = reader.read_children();
 
