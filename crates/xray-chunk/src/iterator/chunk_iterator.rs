@@ -60,7 +60,7 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
       id,
       size: size as u64,
       position,
-      data: Box::new(self.reader.data.slice(position..(position + size as u64))),
+      data: self.reader.data.slice(position..(position + size as u64)),
     })
   }
 }

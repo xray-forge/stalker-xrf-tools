@@ -13,7 +13,7 @@ pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
   pub id: u32,
   pub size: u64,
   pub position: u64,
-  pub data: Box<T>,
+  pub data: T,
 }
 
 impl ChunkReader<FileSlice> {
@@ -34,7 +34,7 @@ impl ChunkReader<FileSlice> {
       id: 0,
       size: slice.len() as u64,
       position: slice.start_pos(),
-      data: Box::new(slice),
+      data: slice,
     })
   }
 }
@@ -51,7 +51,7 @@ impl ChunkReader<InMemoryChunkDataSource> {
       id: 0,
       size: source.len(),
       position: 0,
-      data: Box::new(source),
+      data: source,
     })
   }
 }
