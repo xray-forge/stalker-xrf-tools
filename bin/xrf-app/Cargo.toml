@@ -3,7 +3,7 @@ name = "xrf-app"
 version = "0.1.0"
 description = "XRF development tools"
 authors = ["Neloreck"]
-edition = "2021"
+edition = "2024"
 
 [build-dependencies]
 tauri-build = { version = "2.5.3", features = [
