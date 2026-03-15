@@ -27,7 +27,7 @@ export class ThemeManager extends ContextManager<IThemeContext> {
   public log: Logger = new Logger("theme");
 
   /**
-   * Send generic message on manager provision start and subscribe to events.
+   * Send a generic message on manager provision start and subscribe to events.
    */
   public onProvisionStarted(): void {
     const { theme } = this.context;
@@ -36,15 +36,15 @@ export class ThemeManager extends ContextManager<IThemeContext> {
   }
 
   /**
-   * Unsubscribe from events after provision end.
+   * Unsubscribe from events after the provision end.
    */
   public onProvisionEnded(): void {
-    this.log.info("Theme provision ended.");
+    this.log.info("Theme provision ended");
   }
 
   /**
    * Toggle application theme mode and save it into local storage.
-   * Apply it to document body.
+   * Apply it to the document body.
    */
   public async toggleTheme(): Promise<void> {
     const { theme } = this.context;
