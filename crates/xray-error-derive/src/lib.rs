@@ -56,11 +56,11 @@ pub fn error_constructors_derive(input: TokenStream) -> TokenStream {
     }
   });
 
-  let gen = quote! {
+  let generated = quote! {
       impl #name {
           #(#constructors)*
       }
   };
 
-  gen.into()
+  generated.into()
 }

@@ -1,8 +1,11 @@
-use derive_more::{Display, FromStr};
+use derive_more::Display;
+use std::str::FromStr;
 use xray_error::{XRayError, XRayResult};
-use xray_utils::{get_windows1250_encoder, get_windows1251_encoder, XRayEncoding};
+use xray_utils::{XRayEncoding, get_windows1250_encoder, get_windows1251_encoder};
 
-#[derive(Clone, Debug, PartialEq, Display, FromStr)]
+pub const MULTILANGUAGE: &str = "multilang";
+
+#[derive(Clone, Debug, PartialEq, Display)]
 pub enum TranslationLanguage {
   #[display("all")]
   All,
@@ -22,6 +25,25 @@ pub enum TranslationLanguage {
   Italian,
   #[display("spa")]
   Spanish,
+}
+
+impl FromStr for TranslationLanguage {
+  type Err = String;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s {
+      "all" => Ok(Self::All),
+      "eng" => Ok(Self::English),
+      "rus" => Ok(Self::Russian),
+      "ukr" => Ok(Self::Ukrainian),
+      "pol" => Ok(Self::Polish),
+      "fra" => Ok(Self::French),
+      "ger" => Ok(Self::German),
+      "ita" => Ok(Self::Italian),
+      "spa" => Ok(Self::Spanish),
+      _ => Err(format!("Unknown language: {}", s)),
+    }
+  }
 }
 
 impl TranslationLanguage {
@@ -63,5 +85,40 @@ impl TranslationLanguage {
       ))),
       language => Ok(language),
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::TranslationLanguage;
+  use std::str::FromStr;
+
+  #[test]
+  fn test_from_str() {
+    assert_eq!(
+      TranslationLanguage::from_str("eng").unwrap(),
+      TranslationLanguage::English
+    );
+    assert_eq!(
+      TranslationLanguage::from_str("ukr").unwrap(),
+      TranslationLanguage::Ukrainian
+    );
+    assert_eq!(
+      TranslationLanguage::from_str("all").unwrap(),
+      TranslationLanguage::All
+    );
+  }
+
+  #[test]
+  fn test_from_str_single() {
+    assert!(TranslationLanguage::from_str_single("all").is_err());
+    assert_eq!(
+      TranslationLanguage::from_str_single("eng").unwrap(),
+      TranslationLanguage::English
+    );
+    assert_eq!(
+      TranslationLanguage::from_str_single("spa").unwrap(),
+      TranslationLanguage::Spanish
+    );
   }
 }
