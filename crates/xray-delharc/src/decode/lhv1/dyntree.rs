@@ -519,7 +519,7 @@ mod tests {
   use super::*;
   use crate::bitstream::BitStream;
   use rand::distributions::{Uniform, WeightedIndex};
-  use rand::{thread_rng, Rng, RngCore};
+  use rand::{Rng, RngCore, thread_rng};
   use std::collections::{HashMap, HashSet};
 
   fn validate_tree(tree: &DynHuffTree) {

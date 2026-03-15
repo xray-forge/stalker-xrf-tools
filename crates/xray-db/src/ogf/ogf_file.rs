@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
 use xray_chunk::{
-  find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id, find_optional_chunk_by_id,
-  find_required_chunk_by_id, ChunkReader,
+  ChunkReader, find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id,
+  find_optional_chunk_by_id, find_required_chunk_by_id,
 };
 use xray_error::{XRayError, XRayResult};
 

@@ -1,6 +1,6 @@
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
-use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds, PackDescriptionOptions};
+use crate::{PackDescriptionOptions, dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImageView, RgbaImage};
 use rayon::prelude::*;
 use std::fs::create_dir_all;
@@ -68,14 +68,14 @@ impl UnpackDescriptionProcessor {
         if max_x > dds.width() || max_y > dds.height() {
           if options.is_strict {
             panic!(
-                            "Unexpected texture '{}' (x:{}, y:{}) boundaries are bigger than source DDS file ({}x{} - {})",
-                            sprite.id,
-                            max_x,
-                            max_y,
-                            dds.width(),
-                            dds.height(),
-                            full_name.display()
-                        );
+              "Unexpected texture '{}' (x:{}, y:{}) boundaries are bigger than source DDS file ({}x{} - {})",
+              sprite.id,
+              max_x,
+              max_y,
+              dds.width(),
+              dds.height(),
+              full_name.display()
+            );
           } else {
             println!(
               "[WARN] - exceeding sprite size '{}' (x:{}, y:{}) ({}x{} - {})",

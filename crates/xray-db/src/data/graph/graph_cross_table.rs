@@ -121,13 +121,13 @@ mod tests {
   use uuid::uuid;
   use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_file, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
-  use xray_test_utils::FileSlice;
 
   #[test]
   fn test_read_write_list() -> XRayResult {

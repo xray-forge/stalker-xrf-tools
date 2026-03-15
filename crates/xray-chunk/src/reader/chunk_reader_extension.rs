@@ -54,9 +54,9 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
 #[cfg(test)]
 mod tests {
+  use crate::XRayByteOrder;
   use crate::reader::chunk_reader::ChunkReader;
   use crate::source::chunk_memory_source::InMemoryChunkDataSource;
-  use crate::XRayByteOrder;
   use xray_error::XRayResult;
 
   #[test]

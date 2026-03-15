@@ -13,7 +13,7 @@ use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{
-  assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder, XRayEncoding,
+  XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder,
 };
 
 pub struct ArchiveReader {

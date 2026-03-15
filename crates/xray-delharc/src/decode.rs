@@ -1,6 +1,6 @@
 //! # Decoding algorithms.
 use crate::error::{LhaError, LhaResult};
-use crate::stub_io::{discard_to_end, Read, Take};
+use crate::stub_io::{Read, Take, discard_to_end};
 use core::fmt;
 
 use crate::crc::Crc16;

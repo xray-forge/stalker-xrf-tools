@@ -1,6 +1,6 @@
+use crate::OmfFile;
 use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
 use crate::data::ogf::ogf_part::OgfPart;
-use crate::OmfFile;
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};

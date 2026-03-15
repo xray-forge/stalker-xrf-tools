@@ -1,6 +1,6 @@
 use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
-use enum_map::{enum_map, EnumMap};
+use enum_map::{EnumMap, enum_map};
 use lazy_static::lazy_static;
 use phf::phf_map;
 

@@ -1,5 +1,5 @@
-use base64::engine::{general_purpose, GeneralPurpose};
-use base64::{alphabet, Engine};
+use base64::engine::{GeneralPurpose, general_purpose};
+use base64::{Engine, alphabet};
 use encoding_rs::{Encoding, UTF_8};
 use encoding_rs::{WINDOWS_1250, WINDOWS_1251};
 use std::borrow::Cow;
@@ -156,7 +156,7 @@ pub fn decode_string_from_base64(string: &str) -> XRayResult<String> {
       return Err(XRayError::new_parsing_error(format!(
         "Failed to decode string value from base 64: {}",
         error
-      )))
+      )));
     }
   })
 }

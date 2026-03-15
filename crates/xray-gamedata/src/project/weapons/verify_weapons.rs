@@ -350,8 +350,8 @@ impl GamedataProject {
 
       if options.is_logging_enabled() {
         eprintln!(
-            "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value}"
-          );
+          "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value}"
+        );
       }
     }
 

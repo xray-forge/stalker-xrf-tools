@@ -1,5 +1,5 @@
 use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{value_parser, Arg, ArgMatches, Command};
+use clap::{Arg, ArgMatches, Command, value_parser};
 use ddsfile::Dds;
 use std::fs::File;
 use std::path::PathBuf;

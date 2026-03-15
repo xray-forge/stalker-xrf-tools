@@ -16,7 +16,7 @@ pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> XRayRe
         field_name,
         value,
         std::any::type_name::<T>(),
-      )))
+      )));
     }
   })
 }
@@ -36,7 +36,7 @@ pub fn read_ltx_optional_field<T: FromStr>(
           "Failed to parse optional ltx field '{}' value, correct {:?} is expected",
           field_name,
           std::any::type_name::<T>()
-        )))
+        )));
       }
     },
     None => None,

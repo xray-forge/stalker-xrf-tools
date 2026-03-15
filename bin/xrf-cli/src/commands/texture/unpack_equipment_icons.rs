@@ -1,12 +1,12 @@
 use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use std::time::Instant;
 use xray_ltx::Ltx;
 use xray_texture::{
-  dds_to_image, read_dds_by_path, ImageFormat, RgbaImage, UnpackEquipmentOptions,
-  UnpackEquipmentProcessor,
+  ImageFormat, RgbaImage, UnpackEquipmentOptions, UnpackEquipmentProcessor, dds_to_image,
+  read_dds_by_path,
 };
 
 #[derive(Default)]

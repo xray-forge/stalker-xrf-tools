@@ -9,7 +9,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use xray_chunk::{find_required_chunk_by_id, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
 use xray_error::XRayResult;
 use xray_utils::{assert, assert_length, open_export_file};
 

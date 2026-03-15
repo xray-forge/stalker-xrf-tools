@@ -159,7 +159,7 @@ impl ChunkReadWrite for ParticleAction {
         return Err(XRayError::new_unexpected_error(format!(
           "Unexpected action type provided for reading: {}",
           action_type
-        )))
+        )));
       }
     })
   }
@@ -321,7 +321,7 @@ impl LtxImportExport for ParticleAction {
         return Err(XRayError::new_unexpected_error(format!(
           "Unexpected action type provided for reading: {}",
           action_type
-        )))
+        )));
       }
     })
   }

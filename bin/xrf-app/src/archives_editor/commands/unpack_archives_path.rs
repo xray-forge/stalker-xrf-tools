@@ -1,6 +1,6 @@
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::path::Path;
 use xray_archive::ArchiveProject;
 

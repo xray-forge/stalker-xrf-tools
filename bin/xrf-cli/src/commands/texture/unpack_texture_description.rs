@@ -1,5 +1,5 @@
 use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::time::Instant;
 use xray_texture::{ImageFormat, PackDescriptionOptions, UnpackDescriptionProcessor};

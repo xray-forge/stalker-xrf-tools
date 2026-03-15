@@ -1,8 +1,8 @@
 use crate::icons_editor::state::IconsEditorState;
 use std::sync::MutexGuard;
+use tauri::http::Result as HttpResult;
 use tauri::http::header::{ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_LENGTH, CONTENT_TYPE, REFERER};
 use tauri::http::response::Builder;
-use tauri::http::Result as HttpResult;
 use tauri::http::{Request, Response};
 use tauri::{AppHandle, Manager, Runtime, State, UriSchemeContext};
 

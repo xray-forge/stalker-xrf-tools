@@ -3,7 +3,7 @@ use crate::file::file_section::section_setter::SectionSetter;
 use crate::file::include::LtxIncludeConvertor;
 use crate::file::inherit::LtxInheritConvertor;
 use crate::file::types::{LtxIncluded, LtxSections};
-use crate::{Section, ROOT_SECTION};
+use crate::{ROOT_SECTION, Section};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
 use xray_error::XRayResult;
@@ -207,7 +207,7 @@ impl<'q> IndexMut<&'q str> for Ltx {
 #[cfg(test)]
 mod test {
   use crate::file::ltx::Ltx;
-  use crate::{Section, ROOT_SECTION};
+  use crate::{ROOT_SECTION, Section};
   use xray_error::{XRayError, XRayResult};
 
   #[test]
@@ -697,9 +697,9 @@ foo = c
 
     assert!(ltx.is_err());
     assert_eq!(
-            ltx.unwrap_err().to_string(),
-            "Ltx parse error: 6:1 Duplicate sections are not allowed, looks like 'peer' is declared twice"
-        );
+      ltx.unwrap_err().to_string(),
+      "Ltx parse error: 6:1 Duplicate sections are not allowed, looks like 'peer' is declared twice"
+    );
 
     Ok(())
   }

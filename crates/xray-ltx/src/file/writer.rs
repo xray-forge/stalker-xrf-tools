@@ -1,6 +1,6 @@
-use crate::file::file_configuration::constants::ROOT_SECTION;
-use crate::file::file_configuration::line_separator::{LineSeparator, DEFAULT_KV_SEPARATOR};
 use crate::Ltx;
+use crate::file::file_configuration::constants::ROOT_SECTION;
+use crate::file::file_configuration::line_separator::{DEFAULT_KV_SEPARATOR, LineSeparator};
 use std::fs;
 use std::io::Write;
 use std::path::Path;

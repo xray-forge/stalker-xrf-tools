@@ -11,11 +11,11 @@ use swc_common::comments::{Comments, SingleThreadedComments};
 use swc_common::errors::DiagnosticBuilder;
 use swc_common::sync::Lrc;
 use swc_common::{
-  errors::{ColorConfig, Handler},
   Loc, SourceFile, SourceMap,
+  errors::{ColorConfig, Handler},
 };
 use swc_ecma_ast::{Expr, ModuleItem, Program, Stmt};
-use swc_ecma_parser::{lexer::Lexer, Parser, StringInput, Syntax};
+use swc_ecma_parser::{Parser, StringInput, Syntax, lexer::Lexer};
 use walkdir::WalkDir;
 use xray_error::{XRayError, XRayResult};
 

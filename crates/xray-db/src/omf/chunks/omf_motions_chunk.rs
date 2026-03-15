@@ -1,7 +1,7 @@
 use crate::data::ogf::ogf_motion::OgfMotion;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xray_chunk::{read_u32_chunk, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, read_u32_chunk};
 use xray_error::XRayResult;
 
 #[derive(Debug, Serialize, Deserialize)]

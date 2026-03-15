@@ -4,7 +4,7 @@ use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
-use xray_chunk::{find_required_chunk_by_id, ChunkReader};
+use xray_chunk::{ChunkReader, find_required_chunk_by_id};
 use xray_error::{XRayError, XRayResult};
 
 // c++ CKinematicsAnimated

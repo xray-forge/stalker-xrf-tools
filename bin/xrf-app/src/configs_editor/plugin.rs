@@ -1,5 +1,5 @@
-use tauri::plugin::TauriPlugin;
 use tauri::Runtime;
+use tauri::plugin::TauriPlugin;
 
 pub struct ConfigsEditorPlugin {}
 

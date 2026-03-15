@@ -1,6 +1,6 @@
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::utils::images::dds_to_image;
-use crate::{read_dds_by_path, save_image_as_ui_dds, PackEquipmentOptions, PackEquipmentResult};
+use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_image_as_ui_dds};
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba, RgbaImage};
 use path_absolutize::*;

@@ -89,7 +89,7 @@ impl LtxFieldDataType {
       None => {
         return Err(XRayError::new_read_error(format!(
           "Failed to read scheme enum type for field '{section_name}', expected ':' separated type and values"
-        )))
+        )));
       }
       Some((_, allowed_values_string)) => {
         for allowed in allowed_values_string.trim().split(',').filter_map(|it| {
@@ -153,8 +153,8 @@ impl LtxFieldDataType {
     match value.split_once(':') {
       None => {
         return Err(XRayError::new_read_error(format!(
-        "Failed to read scheme tuple type for field '{section_name}', expected ':' separated types"
-      )))
+          "Failed to read scheme tuple type for field '{section_name}', expected ':' separated types"
+        )));
       }
       Some((_, allowed_values_string)) => {
         for (tuple_entry, tuple_entry_raw) in
@@ -175,12 +175,12 @@ impl LtxFieldDataType {
             Self::TypeTuple(_, _) => {
               return Err(XRayError::new_read_error(format!(
                 "Failed to read scheme for field '{section_name}', tuple cannot contain nested tuples"
-              )))
+              )));
             }
             schema => {
               types.push(schema);
               types_raw.push(tuple_entry_raw.into());
-            },
+            }
           }
         }
       }

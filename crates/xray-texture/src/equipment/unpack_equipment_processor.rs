@@ -1,5 +1,5 @@
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
-use crate::{save_image_as_ui_dds, UnpackEquipmentOptions};
+use crate::{UnpackEquipmentOptions, save_image_as_ui_dds};
 use image::GenericImageView;
 use xray_error::XRayResult;
 

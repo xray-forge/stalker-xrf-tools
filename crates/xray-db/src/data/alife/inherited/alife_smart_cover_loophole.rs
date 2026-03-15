@@ -33,7 +33,7 @@ impl AlifeSmartCoverLoophole {
             Err(_) => {
               return Err(XRayError::new_parsing_error(
                 "Failed to parse loophole enabled status",
-              ))
+              ));
             }
           },
         })

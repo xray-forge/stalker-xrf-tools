@@ -1,5 +1,5 @@
-use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::Ltx;
+use crate::scheme::field_data_type::LtxFieldDataType;
 use std::cmp;
 use xray_error::XRayError;
 
@@ -416,8 +416,8 @@ impl LtxFieldScheme {
 #[cfg(test)]
 mod tests {
   use super::LtxFieldScheme;
-  use crate::scheme::field_data_type::LtxFieldDataType;
   use crate::Ltx;
+  use crate::scheme::field_data_type::LtxFieldDataType;
 
   #[test]
   fn test_u32_validation() {
@@ -430,12 +430,16 @@ mod tests {
     assert!(scheme.validate_u32_type(&u32::MIN.to_string()).is_none());
     assert!(scheme.validate_u32_type(&i32::MAX.to_string()).is_none());
 
-    assert!(scheme
-      .validate_u32_type(&((u32::MIN as i64) - 1).to_string())
-      .is_some());
-    assert!(scheme
-      .validate_u32_type(&((u32::MAX as i64) + 1).to_string())
-      .is_some());
+    assert!(
+      scheme
+        .validate_u32_type(&((u32::MIN as i64) - 1).to_string())
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_u32_type(&((u32::MAX as i64) + 1).to_string())
+        .is_some()
+    );
 
     assert!(scheme.validate_u32_type("a").is_some());
     assert!(scheme.validate_u32_type("true").is_some());
@@ -454,12 +458,16 @@ mod tests {
     assert!(scheme.validate_i32_type(&i32::MIN.to_string()).is_none());
     assert!(scheme.validate_i32_type(&i32::MAX.to_string()).is_none());
 
-    assert!(scheme
-      .validate_i32_type(&((i32::MIN as i64) - 1).to_string())
-      .is_some());
-    assert!(scheme
-      .validate_i32_type(&((i32::MAX as i64) + 1).to_string())
-      .is_some());
+    assert!(
+      scheme
+        .validate_i32_type(&((i32::MIN as i64) - 1).to_string())
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_i32_type(&((i32::MAX as i64) + 1).to_string())
+        .is_some()
+    );
 
     assert!(scheme.validate_i32_type("a").is_some());
     assert!(scheme.validate_i32_type("true").is_some());
@@ -478,12 +486,16 @@ mod tests {
     assert!(scheme.validate_u16_type(&u16::MIN.to_string()).is_none());
     assert!(scheme.validate_u16_type(&u16::MAX.to_string()).is_none());
 
-    assert!(scheme
-      .validate_u16_type(&((u16::MIN as i32) - 1).to_string())
-      .is_some());
-    assert!(scheme
-      .validate_u16_type(&((u16::MAX as i32) + 1).to_string())
-      .is_some());
+    assert!(
+      scheme
+        .validate_u16_type(&((u16::MIN as i32) - 1).to_string())
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_u16_type(&((u16::MAX as i32) + 1).to_string())
+        .is_some()
+    );
 
     assert!(scheme.validate_u16_type("a").is_some());
     assert!(scheme.validate_u16_type("true").is_some());
@@ -502,12 +514,16 @@ mod tests {
     assert!(scheme.validate_i16_type(&i16::MIN.to_string()).is_none());
     assert!(scheme.validate_i16_type(&i16::MAX.to_string()).is_none());
 
-    assert!(scheme
-      .validate_i16_type(&((i16::MIN as i32) - 1).to_string())
-      .is_some());
-    assert!(scheme
-      .validate_i16_type(&((i16::MAX as i32) + 1).to_string())
-      .is_some());
+    assert!(
+      scheme
+        .validate_i16_type(&((i16::MIN as i32) - 1).to_string())
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_i16_type(&((i16::MAX as i32) + 1).to_string())
+        .is_some()
+    );
 
     assert!(scheme.validate_i16_type("a").is_some());
     assert!(scheme.validate_i16_type("true").is_some());
@@ -526,12 +542,16 @@ mod tests {
     assert!(scheme.validate_u8_type(&u8::MIN.to_string()).is_none());
     assert!(scheme.validate_u8_type(&u8::MAX.to_string()).is_none());
 
-    assert!(scheme
-      .validate_u8_type(&((u8::MIN as i32) - 1).to_string())
-      .is_some());
-    assert!(scheme
-      .validate_u8_type(&((u8::MAX as i32) + 1).to_string())
-      .is_some());
+    assert!(
+      scheme
+        .validate_u8_type(&((u8::MIN as i32) - 1).to_string())
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_u8_type(&((u8::MAX as i32) + 1).to_string())
+        .is_some()
+    );
 
     assert!(scheme.validate_u8_type("a").is_some());
     assert!(scheme.validate_u8_type("true").is_some());
@@ -550,12 +570,16 @@ mod tests {
     assert!(scheme.validate_i8_type(&i8::MIN.to_string()).is_none());
     assert!(scheme.validate_i8_type(&i8::MAX.to_string()).is_none());
 
-    assert!(scheme
-      .validate_i8_type(&((i8::MIN as i32) - 1).to_string())
-      .is_some());
-    assert!(scheme
-      .validate_i8_type(&((i8::MAX as i32) + 1).to_string())
-      .is_some());
+    assert!(
+      scheme
+        .validate_i8_type(&((i8::MIN as i32) - 1).to_string())
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_i8_type(&((i8::MAX as i32) + 1).to_string())
+        .is_some()
+    );
 
     assert!(scheme.validate_i8_type("a").is_some());
     assert!(scheme.validate_i8_type("true").is_some());
@@ -744,12 +768,16 @@ mod tests {
       ],
     );
 
-    assert!(scheme
-      .validate_tuple_type("15.25, xxx, abc, true")
-      .is_none());
-    assert!(scheme
-      .validate_tuple_type("-12.50, xxx, def, false")
-      .is_none());
+    assert!(
+      scheme
+        .validate_tuple_type("15.25, xxx, abc, true")
+        .is_none()
+    );
+    assert!(
+      scheme
+        .validate_tuple_type("-12.50, xxx, def, false")
+        .is_none()
+    );
     assert!(scheme.validate_tuple_type("0, xxx, a, true").is_none());
     assert!(scheme.validate_tuple_type("0, xxx, a").is_none());
     assert!(scheme.validate_tuple_type("0, xxx").is_none());
@@ -764,12 +792,16 @@ mod tests {
     assert!(scheme.validate_tuple_type("e").is_some());
     assert!(scheme.validate_tuple_type("f").is_some());
     assert!(scheme.validate_tuple_type("10,xxx,,,,,,,,,,").is_some());
-    assert!(scheme
-      .validate_tuple_type("10,xxx,test,true,true")
-      .is_some());
-    assert!(scheme
-      .validate_tuple_type("10,xxx,test,true_true")
-      .is_some());
+    assert!(
+      scheme
+        .validate_tuple_type("10,xxx,test,true,true")
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_tuple_type("10,xxx,test,true_true")
+        .is_some()
+    );
     assert!(scheme.validate_tuple_type("10xxx,,,true_true").is_some());
     assert!(scheme.validate_tuple_type("10,,,1").is_some());
     assert!(scheme.validate_tuple_type("a,b").is_some());

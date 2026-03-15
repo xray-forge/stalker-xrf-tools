@@ -1,7 +1,7 @@
 use ddsfile::Dds;
 use image::codecs::png::PngEncoder;
 use image::{ExtendedColorType, ImageEncoder, ImageFormat, RgbaImage};
-use image_dds::{dds_from_image, ImageFormat as DDSImageFormat};
+use image_dds::{ImageFormat as DDSImageFormat, dds_from_image};
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;

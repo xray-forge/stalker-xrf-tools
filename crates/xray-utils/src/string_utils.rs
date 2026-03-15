@@ -37,7 +37,7 @@ pub fn vector_from_string_sep<T: FromStr>(string: &str, sep: &str) -> XRayResult
         return Err(XRayError::new_parsing_error(format!(
           "Failed to parse vector from string value \"{}\"",
           it
-        )))
+        )));
       }
     });
   }

@@ -25,6 +25,6 @@ pub use utils::images::save_image_as_ui_dds;
 pub use utils::images::save_image_as_ui_png;
 
 pub use image::RgbaImage;
+pub use image_dds::ImageFormat;
 pub use image_dds::image::GenericImage;
 pub use image_dds::image::GenericImageView;
-pub use image_dds::ImageFormat;

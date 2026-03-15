@@ -32,7 +32,7 @@ pub fn files_are_equal(first: File, second: File) -> IoResult<bool> {
         if first_read == second_read
           && first_buffer[..first_read] == second_buffer[..second_read] =>
       {
-        continue
+        continue;
       }
       _ => return Ok(false),
     }

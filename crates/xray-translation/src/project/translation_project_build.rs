@@ -6,7 +6,7 @@ use quick_xml::se::Serializer;
 use serde::Serialize;
 use std::ffi::OsStr;
 use std::fs::File;
-use std::io::{copy, Write};
+use std::io::{Write, copy};
 use std::path::{Display, Path};
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};

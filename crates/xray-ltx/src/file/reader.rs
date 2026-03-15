@@ -1,6 +1,6 @@
+use crate::Ltx;
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncluded;
-use crate::Ltx;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -77,8 +77,8 @@ impl Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::file::types::LtxIncluded;
   use crate::Ltx;
+  use crate::file::types::LtxIncluded;
   use std::env::temp_dir;
   use std::fs::File;
   use std::io::Write;

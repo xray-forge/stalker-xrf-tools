@@ -48,8 +48,8 @@ impl<E: std::error::Error + 'static> std::error::Error for LhaError<E> {
 #[cfg(feature = "std")]
 impl From<LhaError<io::Error>> for io::Error {
   fn from(err: LhaError<io::Error>) -> Self {
-    use io::{Error, ErrorKind};
     use LhaError::*;
+    use io::{Error, ErrorKind};
     match err {
       Io(e) => e,
       HeaderParse(e) => Error::new(ErrorKind::InvalidData, e),

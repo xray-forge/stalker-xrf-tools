@@ -1,3 +1,4 @@
+use crate::Ltx;
 use crate::file::file_configuration::constants::{
   LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME,
 };
@@ -5,7 +6,6 @@ use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::project::ltx_project_options::LtxProjectOptions;
 use crate::scheme::parser::LtxSchemeParser;
-use crate::Ltx;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
@@ -48,7 +48,7 @@ impl LtxProject {
             None => {
               return Err(XRayError::new_convert_error(
                 "Failed to parse parent directory of ltx file.",
-              ))
+              ));
             }
           };
 

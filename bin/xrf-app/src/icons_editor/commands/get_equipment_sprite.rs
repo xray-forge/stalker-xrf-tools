@@ -1,6 +1,6 @@
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
 use crate::types::TauriResult;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::MutexGuard;
 use tauri::State;
 use xray_texture::InventorySpriteDescriptor;

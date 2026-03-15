@@ -1,4 +1,4 @@
-use chrono::{prelude::*, LocalResult};
+use chrono::{LocalResult, prelude::*};
 use core::fmt;
 
 /// The type returned when parsing last modified timestamp.

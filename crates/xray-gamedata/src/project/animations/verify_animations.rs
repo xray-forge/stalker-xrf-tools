@@ -244,7 +244,9 @@ impl GamedataProject {
 
             if !motions.contains(&&weapon_motion_name) {
               if options.is_logging_enabled() {
-                eprintln!("Hud [{section_name}] weapon [{weapon_section_name}] {field_name}={weapon_motion_name} -> animation motion is not found")
+                eprintln!(
+                  "Hud [{section_name}] weapon [{weapon_section_name}] {field_name}={weapon_motion_name} -> animation motion is not found"
+                )
               }
 
               is_valid = false;

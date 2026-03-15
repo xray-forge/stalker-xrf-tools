@@ -1,7 +1,7 @@
 //! # **LHA** header and related types.
 #[cfg(not(feature = "std"))]
 use alloc::{borrow::Cow, boxed::Box, string::String};
-use chrono::{prelude::*, LocalResult};
+use chrono::{LocalResult, prelude::*};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 #[cfg(feature = "std")]

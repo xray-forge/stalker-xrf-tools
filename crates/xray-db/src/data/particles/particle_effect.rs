@@ -11,9 +11,8 @@ use crate::file_import::{read_ltx_field, read_ltx_optional_field};
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk, read_f32_vector_chunk,
-  read_u16_chunk, read_u32_chunk, read_w1251_string_chunk, ChunkReadWrite, ChunkReader,
-  ChunkWriter,
+  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id,
+  read_f32_chunk, read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
@@ -387,12 +386,12 @@ mod tests {
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
+  use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
-  use xray_test_utils::FileSlice;
 
   #[test]
   fn test_read_write() -> XRayResult {

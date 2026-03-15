@@ -28,7 +28,7 @@ impl TranslationProject {
               .into_io_error()
               .expect("WalkDir error transformation")
               .into(),
-          )
+          );
         }
       };
 

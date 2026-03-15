@@ -1,6 +1,6 @@
 use crate::Ltx;
 use std::io;
-use std::path::{Path, PathBuf, MAIN_SEPARATOR_STR};
+use std::path::{MAIN_SEPARATOR_STR, Path, PathBuf};
 use xray_error::{XRayError, XRayResult};
 
 /// Converter object to process and inject all child #include statements.
@@ -85,7 +85,7 @@ impl LtxIncludeConvertor {
           "Failed to parse ltx file, nested file {} in {} error: {error}",
           path.as_ref().display(),
           into.path.as_ref().unwrap().display(),
-        )))
+        )));
       }
     };
 
