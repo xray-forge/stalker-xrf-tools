@@ -7141,9 +7141,9 @@ dependencies = [
  "quick-xml 0.38.4",
  "serde",
  "serde_json",
- "tempfile",
  "walkdir",
  "xray-error",
+ "xray-test-utils",
  "xray-utils",
 ]
 

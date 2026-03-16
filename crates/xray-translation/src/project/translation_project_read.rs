@@ -202,38 +202,19 @@ mod tests {
   use crate::project::translation_project::TranslationProject;
   use crate::types::{TranslationProjectJson, TranslationVariant};
   use crate::{TranslationEntry, TranslationJson};
-  use std::fs;
   use std::path::PathBuf;
-  use tempfile::{TempDir, tempdir};
+  use xray_test_utils::utils::{
+    get_absolute_test_resource_path, get_absolute_test_sample_file_path,
+  };
 
   #[test]
   fn test_read_xml_project() {
-    let dir: TempDir = tempdir().expect("Expected temp dir");
-    let base_xml_path: PathBuf = dir.path().join("multilang.xml");
-    let eng_xml_path: PathBuf = dir.path().join("multilang.eng.xml");
-    let ukr_xml_path: PathBuf = dir.path().join("multilang.ukr.xml");
-
-    let eng_content: &str = r#"<?xml version="1.0" encoding="windows-1250" ?>
-<string_table>
-  <string id="st_multilang_example">
-    <text>eng text</text>
-  </string>
-</string_table>"#;
-
-    // Use a hex string or something to ensure we are testing encoding if needed,
-    // but for now let's just use regular strings that should be valid in both.
-    let ukr_content: &str = r#"<?xml version="1.0" encoding="windows-1251" ?>
-<string_table>
-  <string id="st_multilang_example">
-    <text>ukr text</text>
-  </string>
-</string_table>"#;
-
-    fs::write(&eng_xml_path, eng_content).expect("Expected written data");
-    fs::write(&ukr_xml_path, ukr_content).expect("Expected written data");
+    let base_xml_path: PathBuf =
+      get_absolute_test_sample_file_path(file!(), "multilang.multilang.xml");
 
     let project_json: TranslationProjectJson =
-      TranslationProject::read_project(dir.path()).expect("Expected project data");
+      TranslationProject::read_project(base_xml_path.parent().expect("Parent dir expected"))
+        .expect("Expected project data");
 
     assert_eq!(project_json.len(), 1);
 
@@ -258,27 +239,18 @@ mod tests {
 
   #[test]
   fn test_get_xml_name_from_path() {
-    let dir: TempDir = tempdir().expect("Expected temp dir");
-    let generic_xml_path: PathBuf = dir.path().join("some.path.xml");
-    let eng_xml_path: PathBuf = dir.path().join("example.eng.xml");
-    let ukr_xml_path: PathBuf = dir.path().join("example.ukr.xml");
-
-    fs::write(&generic_xml_path, "test").expect("Expected written data");
-    fs::write(&eng_xml_path, "test").expect("Expected written data");
-    fs::write(&ukr_xml_path, "test").expect("Expected written data");
+    let dir: PathBuf = get_absolute_test_resource_path(file!());
+    let generic_xml_path: PathBuf = dir.join("some.path.xml");
+    let eng_xml_path: PathBuf = dir.join("example.eng.xml");
+    let ukr_xml_path: PathBuf = dir.join("example.ukr.xml");
 
     assert_eq!(
       TranslationProject::get_xml_name_from_path(&generic_xml_path).expect("Expected path"),
-      dir
-        .path()
-        .join("some.path.xml")
-        .to_str()
-        .expect("Expected path"),
+      dir.join("some.path.xml").to_str().expect("Expected path"),
     );
     assert_eq!(
       TranslationProject::get_xml_name_from_path(&eng_xml_path).expect("Expected path"),
       dir
-        .path()
         .join("example.multilang.xml")
         .to_str()
         .expect("Expected path"),
@@ -286,7 +258,6 @@ mod tests {
     assert_eq!(
       TranslationProject::get_xml_name_from_path(&ukr_xml_path).expect("Expected path"),
       dir
-        .path()
         .join("example.multilang.xml")
         .to_str()
         .expect("Expected path"),

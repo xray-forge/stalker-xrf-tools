@@ -14,7 +14,7 @@ xray-error = { path = "../xray-error" }
 xray-utils = { path = "../xray-utils" }
 
 [dev-dependencies]
-tempfile = "3.10.1"
+xray-test-utils = { path = "../xray-test-utils" }
 
 [lints]
 workspace = true
