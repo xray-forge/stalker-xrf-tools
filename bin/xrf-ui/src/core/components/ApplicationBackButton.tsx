@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Card, Grid } from "@mui/material";
+import { Box, Button, ButtonGroup, Card } from "@mui/material";
 import { ReactElement, useCallback } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -13,13 +13,13 @@ export function ApplicationBackButton({ disabled, path }: ISpawnBackButtonProps)
 
   return (
     <Card sx={{ minWidth: 200, marginTop: 2, marginBottom: 2, flexShrink: 0 }}>
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <ButtonGroup orientation={"vertical"}>
           <Button disabled={disabled} onClick={onClick}>
             Back
           </Button>
         </ButtonGroup>
-      </Grid>
+      </Box>
     </Card>
   );
 }

@@ -1,5 +1,6 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
+  Box,
   Button,
   FormControl,
   Grid,
@@ -54,21 +55,23 @@ export function ExportsOpenForm({
   }, [exportsActions, xrfProjectPath, exportsActions]);
 
   return (
-    <Grid
-      justifyContent={"safe center"}
-      alignItems={"safe center"}
-      direction={"column"}
-      flexWrap={"nowrap"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
-      padding={4}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "safe center",
+        alignItems: "safe center",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        width: "100%",
+        height: "100%",
+        padding: 4,
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
         <Typography>Provide paths to ltx project</Typography>
       </Grid>
 
-      <Grid gap={1} alignItems={"center"} justifyContent={"center"} container>
+      <Grid container sx={{ gap: 1, alignItems: "center", justifyContent: "center" }}>
         <FormControl sx={{ m: "8px 0" }} size={"small"} variant={"outlined"}>
           <InputLabel size={"small"}>Project</InputLabel>
           <OutlinedInput
@@ -98,6 +101,6 @@ export function ExportsOpenForm({
       </Grid>
 
       <ApplicationBackButton path={"/exports_editor"} />
-    </Grid>
+    </Box>
   );
 }

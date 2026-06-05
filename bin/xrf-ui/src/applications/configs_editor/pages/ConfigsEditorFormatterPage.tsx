@@ -1,6 +1,7 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
   Alert,
+  Box,
   Button,
   Checkbox,
   CircularProgress,
@@ -99,29 +100,24 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
   }, [xrfConfigsPath]);
 
   return (
-    <Grid
-      justifyContent={"safe center"}
-      alignItems={"safe center"}
-      direction={"column"}
-      flexWrap={"nowrap"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
-      padding={4}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "safe center",
+        alignItems: "safe center",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        width: "100%",
+        height: "100%",
+        padding: 4,
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
         <Typography>Provide LTX files directory to {isCheck ? "check format" : "format"}</Typography>
       </Grid>
 
-      <Grid
-        direction={"row"}
-        justifyContent={"center"}
-        alignItems={"flex-start"}
-        width={"auto"}
-        marginBottom={2}
-        container
-      >
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container>
+      <Grid container sx={{ justifyContent: "center", alignItems: "flex-start", width: "auto", marginBottom: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto", marginRight: 1 }}>
           <OutlinedInput
             size={"small"}
             disabled={isLoading}
@@ -138,32 +134,25 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
             onClick={onSelectConfigsPathClicked}
           />
 
-          <Grid
-            direction={"row"}
-            justifyContent={"flex-start"}
-            alignItems={"center"}
-            width={"auto"}
-            marginBottom={2}
-            container
-          >
+          <Grid container sx={{ justifyContent: "flex-start", alignItems: "center", width: "auto", marginBottom: 2 }}>
             <FormControlLabel
               control={<Checkbox disabled={isLoading} checked={isCheck} onChange={onCheckModeChange} />}
               label={"Check mode (readonly)"}
             />
           </Grid>
-        </Grid>
+        </Box>
 
-        <Grid position={"relative"} top={2}>
+        <Box sx={{ position: "relative", top: 2 }}>
           <Button variant={"contained"} disabled={isLoading || !configsPath} onClick={onFormatPathClicked}>
             Format
           </Button>
-        </Grid>
+        </Box>
       </Grid>
 
       {isLoading ? <CircularProgress size={24} /> : null}
 
       {result ? (
-        <Grid>
+        <Box>
           {result.toFormat.length ? (
             isCheck ? (
               <Alert severity={"error"}>There are files with invalid formatting.</Alert>
@@ -173,13 +162,13 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
           ) : (
             <Alert severity={"success"}>All files are in correct format.</Alert>
           )}
-        </Grid>
+        </Box>
       ) : null}
 
       {error ? (
-        <Grid maxWidth={540}>
+        <Box sx={{ maxWidth: 540 }}>
           <Alert severity={"error"}>{error}</Alert>
-        </Grid>
+        </Box>
       ) : null}
 
       <ApplicationBackButton path={"/configs_editor"} />
@@ -189,6 +178,6 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
           <ConfigsFormatResult isCheck={isCheck} result={result} />
         </Paper>
       ) : null}
-    </Grid>
+    </Box>
   );
 }

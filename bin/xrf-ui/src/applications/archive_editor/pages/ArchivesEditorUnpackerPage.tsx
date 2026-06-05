@@ -1,6 +1,7 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
   Alert,
+  Box,
   Button,
   CircularProgress,
   Grid,
@@ -95,22 +96,33 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
   }, [xrfProjectPath]);
 
   return (
-    <Grid
-      justifyContent={"safe center"}
-      alignItems={"safe center"}
-      direction={"column"}
-      flexWrap={"nowrap"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
-      padding={4}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "safe center",
+        alignItems: "safe center",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        width: "100%",
+        height: "100%",
+        padding: 4,
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
         <Typography>Provide archives to unpack</Typography>
       </Grid>
 
-      <Grid direction={"row"} justifyContent={"center"} alignItems={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={1} container>
+      <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "auto", marginBottom: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            width: "auto",
+            marginRight: 1,
+            gap: 1,
+          }}
+        >
           <OutlinedInput
             size={"small"}
             disabled={isLoading}
@@ -142,27 +154,27 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
             }
             onClick={onSelectArchivesPathClicked}
           />
-        </Grid>
+        </Box>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
           <Button variant={"contained"} disabled={isLoading || !archivesPath} onClick={onUnpackArchivesPathClicked}>
             Unpack
           </Button>
-        </Grid>
+        </Box>
       </Grid>
 
       {isLoading ? <CircularProgress size={24} /> : null}
 
       {result ? (
-        <Grid>
+        <Box>
           <Alert severity={"success"}>Archives unpacked.</Alert>
-        </Grid>
+        </Box>
       ) : null}
 
       {error ? (
-        <Grid maxWidth={540}>
+        <Box sx={{ maxWidth: 540 }}>
           <Alert severity={"error"}>{error}</Alert>
-        </Grid>
+        </Box>
       ) : null}
 
       <ApplicationBackButton disabled={isLoading} path={"/archives_editor"} />
@@ -172,6 +184,6 @@ export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } 
           <ArchivesUnpackResult result={result} />
         </Paper>
       ) : null}
-    </Grid>
+    </Box>
   );
 }

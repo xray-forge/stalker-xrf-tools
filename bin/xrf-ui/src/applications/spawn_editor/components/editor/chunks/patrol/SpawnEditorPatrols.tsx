@@ -15,7 +15,7 @@ export function SpawnEditorPatrols({
 
   const activeTable: ReactElement = useMemo(() => {
     if (!spawnFile) {
-      return <Grid>No file</Grid>;
+      return <Box>No file</Box>;
     }
 
     switch (activeTab) {
@@ -29,13 +29,16 @@ export function SpawnEditorPatrols({
         return <SpawnEditorPatrolLinksTable patrols={spawnFile.patrols.patrols} />;
 
       default:
-        return <Grid>Unknown tab</Grid>;
+        return <Box>Unknown tab</Box>;
     }
   }, [activeTab, spawnFile?.patrols]);
 
   if (isLoading) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         <CircularProgress />
       </Grid>
     );
@@ -43,22 +46,27 @@ export function SpawnEditorPatrols({
 
   if (error || !spawnFile) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         {error ? String(error) : "No value."}
       </Grid>
     );
   }
 
   return (
-    <Grid
-      width={"auto"}
-      height={"100%"}
-      direction={"column"}
-      overflow={"auto"}
-      p={2}
-      flexGrow={1}
-      flexWrap={"nowrap"}
-      container
+    <Box
+      sx={{
+        display: "flex",
+        width: "auto",
+        height: "100%",
+        flexDirection: "column",
+        overflow: "auto",
+        p: 2,
+        flexGrow: 1,
+        flexWrap: "nowrap",
+      }}
     >
       <Typography variant={"h5"}>Patrols</Typography>
       <Divider sx={{ margin: "16px 0" }} />
@@ -69,9 +77,9 @@ export function SpawnEditorPatrols({
         <Tab value={"links"} label={"Links"} />
       </Tabs>
 
-      <Box marginBottom={1} />
+      <Box sx={{ marginBottom: 1 }} />
 
       {activeTable}
-    </Grid>
+    </Box>
   );
 }

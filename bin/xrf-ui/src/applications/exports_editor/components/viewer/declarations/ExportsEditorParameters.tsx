@@ -1,4 +1,4 @@
-import { Grid, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { purple } from "@mui/material/colors";
 import { ReactElement } from "react";
 
@@ -9,14 +9,14 @@ export interface IExportViewerParametersProps {
 }
 export function ExportsEditorParameters({ parameter }: IExportViewerParametersProps): ReactElement {
   return (
-    <Grid key={parameter.name}>
-      <Typography display={"inline"} variant={"body2"} color={purple["500"]}>
+    <Box key={parameter.name}>
+      <Typography sx={{ display: "inline" }} variant={"body2"} color={purple["500"]}>
         {parameter.name}:{" "}
       </Typography>
 
-      <Typography display={"inline"} variant={"body2"}>
+      <Typography sx={{ display: "inline" }} variant={"body2"}>
         {parameter.typing}
       </Typography>
-    </Grid>
+    </Box>
   );
 }

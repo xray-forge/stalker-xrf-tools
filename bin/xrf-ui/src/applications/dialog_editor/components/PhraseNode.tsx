@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { ChangeEvent, ReactElement, useCallback } from "react";
 import { Handle, Position } from "reactflow";
 
@@ -15,44 +15,44 @@ export function PhraseNode({ data, isConnectable }: IPhraseNodeProps): ReactElem
   }, []);
 
   return (
-    <Grid bgcolor={"red"} padding={2} component={"div"}>
-      <Grid>{data.label}</Grid>
+    <Box component={"div"} sx={{ bgcolor: "red", padding: 2 }}>
+      <Box>{data.label}</Box>
 
       <Handle type={"source"} position={Position.Top} isConnectable={isConnectable} />
 
       <br />
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>Text:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>Action:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>Precondition:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>Give info:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>Disable info:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>Is final:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
       <Handle type={"source"} position={Position.Bottom} isConnectable={isConnectable} />
-    </Grid>
+    </Box>
   );
 }

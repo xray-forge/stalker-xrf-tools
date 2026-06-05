@@ -1,4 +1,4 @@
-import { Button, FormHelperText, Grid, Typography } from "@mui/material";
+import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
 import { createLoadable, Loadable, useManager } from "dreamstate";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
@@ -85,22 +85,33 @@ export function IconsEditorEquipmentPackPage({
   }, []);
 
   return (
-    <Grid
-      justifyContent={"safe center"}
-      alignItems={"safe center"}
-      direction={"column"}
-      flexWrap={"nowrap"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
-      padding={4}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "safe center",
+        alignItems: "safe center",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        width: "100%",
+        height: "100%",
+        padding: 4,
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
         <Typography>Provide equipment details</Typography>
       </Grid>
 
-      <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={2} container>
+      <Grid container sx={{ justifyContent: "center", width: "auto", marginBottom: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            width: "auto",
+            marginRight: 1,
+            gap: 2,
+          }}
+        >
           <FilePickerInput
             label={"System ltx"}
             value={systemLtxPath || ""}
@@ -121,9 +132,9 @@ export function IconsEditorEquipmentPackPage({
             disabled={result.isLoading}
             onClick={onSelectOutputSpritePath}
           />
-        </Grid>
+        </Box>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
           <Button
             disabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
             variant={"contained"}
@@ -131,18 +142,18 @@ export function IconsEditorEquipmentPackPage({
           >
             Pack
           </Button>
-        </Grid>
+        </Box>
       </Grid>
 
       {result.error ? (
-        <Grid>
+        <Box>
           <FormHelperText error>{String(result.error)}</FormHelperText>
-        </Grid>
+        </Box>
       ) : null}
 
       {result.value ? <EquipmentPackResult result={result.value} /> : null}
 
       <ApplicationBackButton disabled={result.isLoading} path={"/icons_editor"} />
-    </Grid>
+    </Box>
   );
 }

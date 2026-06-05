@@ -1,4 +1,4 @@
-import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { useManager } from "dreamstate";
 import { ReactElement } from "react";
 
@@ -10,7 +10,10 @@ export function SpawnEditorHeader({
 }): ReactElement {
   if (isLoading) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         <CircularProgress />
       </Grid>
     );
@@ -18,17 +21,30 @@ export function SpawnEditorHeader({
 
   if (error || !spawnFile) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         {error ? String(error) : "No value."}
       </Grid>
     );
   }
 
   return (
-    <Grid width={"auto"} height={"100%"} direction={"column"} overflow={"auto"} p={2} flexGrow={1} container>
+    <Box
+      sx={{
+        display: "flex",
+        width: "auto",
+        height: "100%",
+        flexDirection: "column",
+        overflow: "auto",
+        p: 2,
+        flexGrow: 1,
+      }}
+    >
       <Typography variant={"h5"}>Header</Typography>
       <Divider sx={{ margin: "16px 0" }} />
       <SpawnEditorHeaderTable header={spawnFile.header} />
-    </Grid>
+    </Box>
   );
 }

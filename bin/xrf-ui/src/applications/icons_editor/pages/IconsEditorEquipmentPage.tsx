@@ -14,7 +14,7 @@ export function IconsEditorEquipmentPage({
   }
 
   return (
-    <Grid width={"100%"} height={"100%"} justifyContent={"center"} alignItems={"center"} container>
+    <Grid container sx={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}>
       <CircularProgress />
     </Grid>
   );

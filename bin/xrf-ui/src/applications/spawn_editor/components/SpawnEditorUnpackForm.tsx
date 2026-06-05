@@ -1,6 +1,7 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
   Alert,
+  Box,
   Button,
   CircularProgress,
   FormHelperText,
@@ -130,20 +131,31 @@ export function SpawnEditorUnpackForm({
   }, []);
 
   return (
-    <Grid
-      justifyContent={"center"}
-      alignItems={"center"}
-      direction={"column"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
         <Typography>Select *.spawn file to unpack</Typography>
       </Grid>
 
-      <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={1} container>
+      <Grid container sx={{ justifyContent: "center", width: "auto", marginBottom: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            width: "auto",
+            marginRight: 1,
+            gap: 1,
+          }}
+        >
           <OutlinedInput
             size={"small"}
             disabled={isSelecting || spawnFile.isLoading}
@@ -177,9 +189,9 @@ export function SpawnEditorUnpackForm({
             }
             onClick={onSelectOutputClicked}
           />
-        </Grid>
+        </Box>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
           <Button
             disabled={!spawnPath || !outputPath || isSelecting || spawnFile.isLoading}
             variant={"contained"}
@@ -187,26 +199,26 @@ export function SpawnEditorUnpackForm({
           >
             Unpack
           </Button>
-        </Grid>
+        </Box>
       </Grid>
 
       {spawnFile.error ? (
-        <Grid>
+        <Box>
           <FormHelperText error>{String(spawnFile.error)}</FormHelperText>
-        </Grid>
+        </Box>
       ) : null}
 
       {isFinishedSuccessfully ? (
-        <Grid p={"0 8px"} maxWidth={500}>
+        <Box sx={{ p: "0 8px", maxWidth: 500 }}>
           <Alert severity={"success"} variant={"outlined"}>
             Successfully unpacked spawn to {outputPath}
           </Alert>
-        </Grid>
+        </Box>
       ) : null}
 
       {spawnFile.isLoading ? <CircularProgress size={24} /> : null}
 
       <ApplicationBackButton disabled={spawnFile.isLoading || isSelecting} path={"/spawn_editor"} />
-    </Grid>
+    </Box>
   );
 }

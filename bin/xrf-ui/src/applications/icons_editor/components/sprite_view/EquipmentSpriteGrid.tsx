@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { SxProps } from "@mui/system";
 import { memo, ReactElement, useMemo } from "react";
 
@@ -44,35 +44,39 @@ export const EquipmentSpriteGrid = memo(
     );
 
     return (
-      <Grid position={"absolute"} left={0} top={0} right={0} bottom={0} bgcolor={"#66666608"}>
+      <Box sx={{ position: "absolute", left: 0, top: 0, right: 0, bottom: 0, bgcolor: "#66666608" }}>
         {gridMapper.grid.map((row, rowIndex) => (
-          <Grid display={"flex"} key={rowIndex}>
+          <Box key={rowIndex} sx={{ display: "flex" }}>
             {row.map((column, columnIndex) => (
-              <Grid
+              <Box
                 key={columnIndex}
                 className={
                   selectedCell && selectedCell[0] === rowIndex && selectedCell[1] === columnIndex ? "selected" : ""
                 }
-                display={"flex"}
-                flexWrap={"nowrap"}
-                justifyContent={"center"}
-                alignItems={"center"}
-                minHeight={gridMapper.gridSize}
-                maxHeight={gridMapper.gridSize}
-                minWidth={gridMapper.gridSize}
-                maxWidth={gridMapper.gridSize}
-                sx={sx}
                 onClick={() => onCellSelected(rowIndex, columnIndex)}
                 onMouseMove={() => onCellMovedOver(rowIndex, columnIndex)}
+                sx={[
+                  {
+                    display: "flex",
+                    flexWrap: "nowrap",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: gridMapper.gridSize,
+                    maxHeight: gridMapper.gridSize,
+                    minWidth: gridMapper.gridSize,
+                    maxWidth: gridMapper.gridSize,
+                  },
+                  sx,
+                ]}
               >
-                <Grid className={"coordinates"} display={"none"}>
+                <Box className={"coordinates"} sx={{ display: "none" }}>
                   {columnIndex}:{rowIndex}: ({column?.length ?? 0})
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     );
   }
 );

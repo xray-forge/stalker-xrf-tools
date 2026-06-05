@@ -1,4 +1,4 @@
-import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { useManager } from "dreamstate";
 import { ReactElement } from "react";
 
@@ -10,7 +10,10 @@ export function SpawnEditorAlife({
 }): ReactElement {
   if (isLoading) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         <CircularProgress />
       </Grid>
     );
@@ -18,26 +21,31 @@ export function SpawnEditorAlife({
 
   if (error || !spawnFile) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         {error ? String(error) : "No value."}
       </Grid>
     );
   }
 
   return (
-    <Grid
-      width={"auto"}
-      height={"100%"}
-      direction={"column"}
-      overflow={"auto"}
-      p={2}
-      flexGrow={1}
-      flexWrap={"nowrap"}
-      container
+    <Box
+      sx={{
+        display: "flex",
+        width: "auto",
+        height: "100%",
+        flexDirection: "column",
+        overflow: "auto",
+        p: 2,
+        flexGrow: 1,
+        flexWrap: "nowrap",
+      }}
     >
       <Typography variant={"h5"}>Alife</Typography>
       <Divider sx={{ margin: "16px 0" }} />
       <SpawnEditorAlifeObjectsTable objects={spawnFile.alifeSpawn.objects} />
-    </Grid>
+    </Box>
   );
 }

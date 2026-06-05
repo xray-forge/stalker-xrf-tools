@@ -7,13 +7,9 @@ import { ArchivesMenu } from "@/applications/archive_editor/components/editor/Ar
 export function ArchivesEditor(): ReactElement {
   return (
     <Grid
-      alignItems={"center"}
-      container={true}
-      direction={"row"}
-      flexWrap={"nowrap"}
-      height={"100%"}
-      justifyContent={"center"}
-      width={"100%"}
+      container
+      wrap={"nowrap"}
+      sx={{ alignItems: "center", height: "100%", justifyContent: "center", width: "100%" }}
     >
       <ArchivesMenu />
       <ArchivesFileContent />

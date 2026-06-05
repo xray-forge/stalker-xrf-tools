@@ -1,10 +1,13 @@
-import { TreeViewBaseItem } from "@mui/x-tree-view";
+import { TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
 
 import { Maybe } from "@/core/types/general";
 import { IArchiveFileReplicationDescriptor } from "@/lib/archive/types";
 
-export function parseTree(files: Array<IArchiveFileReplicationDescriptor>, separator: string): Array<TreeViewBaseItem> {
-  const node: TreeViewBaseItem = { id: "~", label: "root", children: [] };
+export function parseTree(
+  files: Array<IArchiveFileReplicationDescriptor>,
+  separator: string
+): Array<TreeViewDefaultItemModelProperties> {
+  const node: TreeViewDefaultItemModelProperties = { id: "~", label: "root", children: [] };
 
   for (const file of files) {
     const path: string = file.name;
@@ -18,21 +21,23 @@ export function parseTree(files: Array<IArchiveFileReplicationDescriptor>, separ
   return node.children!;
 }
 
-function createNode(path: Array<string>, parent: TreeViewBaseItem): void {
+function createNode(path: Array<string>, parent: TreeViewDefaultItemModelProperties): void {
   const name: Maybe<string> = path.shift();
 
   if (!name) {
     return;
   }
 
-  const element: Maybe<TreeViewBaseItem> = parent.children!.find((element: TreeViewBaseItem) => {
-    return element.label === name;
-  });
+  const element: Maybe<TreeViewDefaultItemModelProperties> = parent.children!.find(
+    (element: TreeViewDefaultItemModelProperties) => {
+      return element.label === name;
+    }
+  );
 
   if (element) {
     createNode(path, element);
   } else {
-    const node: TreeViewBaseItem = {
+    const node: TreeViewDefaultItemModelProperties = {
       id: parent.id + "\\" + name,
       label: name,
       children: [],
@@ -46,7 +51,7 @@ function createNode(path: Array<string>, parent: TreeViewBaseItem): void {
   }
 }
 
-function sortNode(node: TreeViewBaseItem): void {
+function sortNode(node: TreeViewDefaultItemModelProperties): void {
   for (const children of node.children!) {
     if (children.children?.length) {
       sortNode(children);

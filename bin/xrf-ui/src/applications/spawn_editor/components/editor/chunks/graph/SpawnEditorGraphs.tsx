@@ -18,7 +18,7 @@ export function SpawnEditorGraphs({
 
   const activeTable: ReactElement = useMemo(() => {
     if (!spawnFile) {
-      return <Grid>No file</Grid>;
+      return <Box>No file</Box>;
     }
 
     switch (activeTab) {
@@ -41,13 +41,16 @@ export function SpawnEditorGraphs({
         return <SpawnEditorGraphCrossTable crossTables={spawnFile.graphs.crossTables} />;
 
       default:
-        return <Grid>Unknown tab</Grid>;
+        return <Box>Unknown tab</Box>;
     }
   }, [activeTab, spawnFile?.graphs]);
 
   if (isLoading) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         <CircularProgress />
       </Grid>
     );
@@ -55,14 +58,27 @@ export function SpawnEditorGraphs({
 
   if (error || !spawnFile) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         {error ? String(error) : "No value."}
       </Grid>
     );
   }
 
   return (
-    <Grid width={"auto"} height={"100%"} direction={"column"} overflow={"auto"} p={2} flexGrow={1} container>
+    <Box
+      sx={{
+        display: "flex",
+        width: "auto",
+        height: "100%",
+        flexDirection: "column",
+        overflow: "auto",
+        p: 2,
+        flexGrow: 1,
+      }}
+    >
       <Typography variant={"h5"}>Graph</Typography>
 
       <Divider sx={{ margin: "16px 0" }} />
@@ -76,9 +92,9 @@ export function SpawnEditorGraphs({
         <Tab value={"cross_tables"} label={"Cross tables"} />
       </Tabs>
 
-      <Box marginBottom={1} />
+      <Box sx={{ marginBottom: 1 }} />
 
       {activeTable}
-    </Grid>
+    </Box>
   );
 }

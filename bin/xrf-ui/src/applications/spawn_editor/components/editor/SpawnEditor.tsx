@@ -12,13 +12,9 @@ import { SpawnEditorMenu } from "@/applications/spawn_editor/components/editor/S
 export function SpawnEditor(): ReactElement {
   return (
     <Grid
-      justifyContent={"center"}
-      alignItems={"center"}
-      direction={"row"}
-      container={true}
-      flexWrap={"nowrap"}
-      width={"100%"}
-      height={"100%"}
+      container
+      wrap={"nowrap"}
+      sx={{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}
     >
       <SpawnEditorMenu />
 

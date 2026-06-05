@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { ChangeEvent, ReactElement, useCallback } from "react";
 import { Handle, Position } from "reactflow";
 
@@ -15,22 +15,22 @@ export function DialogNode({ data, isConnectable }: IDialogNodeProps): ReactElem
   }, []);
 
   return (
-    <Grid bgcolor={"red"} padding={2} component={"div"}>
-      <Grid>{data.label}</Grid>
+    <Box component={"div"} sx={{ bgcolor: "red", padding: 2 }}>
+      <Box>{data.label}</Box>
 
       <br />
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>Has info:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
-      <Grid direction={"column"} container>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <label htmlFor={"text"}>No info:</label>
         <input className={"nodrag"} onChange={onChange} />
-      </Grid>
+      </Box>
 
       <Handle type={"source"} position={Position.Bottom} isConnectable={isConnectable} />
-    </Grid>
+    </Box>
   );
 }

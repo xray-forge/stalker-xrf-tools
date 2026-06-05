@@ -1,4 +1,4 @@
-import { Button, Grid } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import { useManager } from "dreamstate";
 import { ReactElement, useCallback } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
@@ -27,20 +27,20 @@ export function TranslationsEditorMenu({
   }
 
   return (
-    <Grid display={"flex"} direction={"column"} width={240} minWidth={240} justifySelf={"stretch"} container>
-      <Grid padding={3}>{Object.keys(translationsProject).length} files</Grid>
+    <Box sx={{ display: "flex", flexDirection: "column", width: 240, minWidth: 240, justifySelf: "stretch" }}>
+      <Box sx={{ padding: 3 }}>{Object.keys(translationsProject).length} files</Box>
 
-      <Grid flexGrow={1} container />
+      <Grid container sx={{ flexGrow: 1 }} />
 
-      <Grid margin={0} padding={"0 24px"} width={"100%"} gap={1} direction={"column"} container>
+      <Box sx={{ display: "flex", margin: 0, padding: "0 24px", width: "100%", gap: 1, flexDirection: "column" }}>
         todo
-      </Grid>
+      </Box>
 
-      <Grid padding={3}>
+      <Box sx={{ padding: 3 }}>
         <Button fullWidth={true} variant={"outlined"} disabled={isLoading} onClick={onCloseClick}>
           Close
         </Button>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }

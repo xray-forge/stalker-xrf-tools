@@ -1,6 +1,7 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
   Alert,
+  Box,
   Button,
   CircularProgress,
   Grid,
@@ -89,22 +90,24 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
   }, [xrfConfigsPath]);
 
   return (
-    <Grid
-      justifyContent={"safe center"}
-      alignItems={"safe center"}
-      direction={"column"}
-      flexWrap={"nowrap"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
-      padding={4}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "safe center",
+        alignItems: "safe center",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        width: "100%",
+        height: "100%",
+        padding: 4,
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
         <Typography>Provide LTX files directory to verify</Typography>
       </Grid>
 
-      <Grid direction={"row"} justifyContent={"center"} alignItems={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container>
+      <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "auto", marginBottom: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto", marginRight: 1 }}>
           <OutlinedInput
             size={"small"}
             disabled={isLoading}
@@ -120,31 +123,31 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
             }
             onClick={onSelectConfigsPathClicked}
           />
-        </Grid>
+        </Box>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
           <Button variant={"contained"} disabled={isLoading || !configsPath} onClick={onVerifyPathClicked}>
             Verify
           </Button>
-        </Grid>
+        </Box>
       </Grid>
 
       {isLoading ? <CircularProgress size={24} /> : null}
 
       {result ? (
-        <Grid>
+        <Box>
           {result.errors.length ? (
             <Alert severity={"error"}>Configs did not pass validation.</Alert>
           ) : (
             <Alert severity={"success"}>Configs passed validation.</Alert>
           )}
-        </Grid>
+        </Box>
       ) : null}
 
       {error ? (
-        <Grid maxWidth={540}>
+        <Box sx={{ maxWidth: 540 }}>
           <Alert severity={"error"}>{error}</Alert>
-        </Grid>
+        </Box>
       ) : null}
 
       <ApplicationBackButton path={"/configs_editor"} />
@@ -154,6 +157,6 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
           <ConfigsVerifyResult result={result} />
         </Paper>
       ) : null}
-    </Grid>
+    </Box>
   );
 }

@@ -1,6 +1,7 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
   Alert,
+  Box,
   Button,
   CircularProgress,
   Grid,
@@ -70,22 +71,33 @@ export function ArchivesEditorOpenForm({
   }, [xrfProjectPath]);
 
   return (
-    <Grid
-      justifyContent={"safe center"}
-      alignItems={"safe center"}
-      direction={"column"}
-      flexWrap={"nowrap"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
-      padding={4}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "safe center",
+        alignItems: "safe center",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        width: "100%",
+        height: "100%",
+        padding: 4,
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} flexShrink={0} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
         <Typography>Provide archives to open</Typography>
       </Grid>
 
-      <Grid direction={"row"} justifyContent={"center"} alignItems={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} gap={1} container>
+      <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "auto", marginBottom: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            width: "auto",
+            marginRight: 1,
+            gap: 1,
+          }}
+        >
           <OutlinedInput
             size={"small"}
             disabled={project.isLoading}
@@ -101,24 +113,24 @@ export function ArchivesEditorOpenForm({
             }
             onClick={onSelectArchivesPathClicked}
           />
-        </Grid>
+        </Box>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
           <Button variant={"contained"} disabled={project.isLoading || !archivesPath} onClick={onOpenPathClicked}>
             Open
           </Button>
-        </Grid>
+        </Box>
       </Grid>
 
       {project.isLoading ? <CircularProgress size={24} /> : null}
 
       {project.error ? (
-        <Grid maxWidth={540}>
+        <Box sx={{ maxWidth: 540 }}>
           <Alert severity={"error"}>{project.error.message}</Alert>
-        </Grid>
+        </Box>
       ) : null}
 
       <ApplicationBackButton disabled={project.isLoading} path={"/archives_editor"} />
-    </Grid>
+    </Box>
   );
 }

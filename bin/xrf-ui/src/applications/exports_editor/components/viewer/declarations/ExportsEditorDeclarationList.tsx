@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { ReactElement, useState } from "react";
 
 import { ExportsEditorDeclaration } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorDeclaration";
@@ -14,11 +14,13 @@ export function ExportsEditorDeclarationList({ descriptors }: IExportsViewerDecl
 
   return (
     <>
-      <Grid marginBottom={2} justifyContent={"flex-start"} container>
+      <Grid container sx={{ marginBottom: 2, justifyContent: "flex-start" }}>
         <ExportsFilterForm onFilterValueChangeDebounced={setFilter} />
       </Grid>
 
-      <Grid direction={"column"} flexGrow={1} gap={1} flexWrap={"nowrap"} sx={{ overflowY: "auto" }} container>
+      <Box
+        sx={{ display: "flex", flexDirection: "column", flexGrow: 1, gap: 1, flexWrap: "nowrap", overflowY: "auto" }}
+      >
         {descriptors
           .filter((descriptor) => {
             return filter ? descriptor.name.includes(filter) || descriptor.comment?.includes(filter) : true;
@@ -26,7 +28,7 @@ export function ExportsEditorDeclarationList({ descriptors }: IExportsViewerDecl
           .map((descriptor) => (
             <ExportsEditorDeclaration key={descriptor.name} descriptor={descriptor} />
           ))}
-      </Grid>
+      </Box>
     </>
   );
 }

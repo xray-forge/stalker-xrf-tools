@@ -43,7 +43,10 @@ export function ExportsViewerDialogs({
 
   if (isLoading) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         <CircularProgress />
       </Grid>
     );
@@ -51,22 +54,27 @@ export function ExportsViewerDialogs({
 
   if (error || !declarations) {
     return (
-      <Grid justifyContent={"center"} alignItems={"center"} width={"auto"} height={"100%"} flexGrow={1} container>
+      <Grid
+        container
+        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
+      >
         {error ? String(error) : "No value."}
       </Grid>
     );
   }
 
   return (
-    <Grid
-      width={"auto"}
-      height={"100%"}
-      direction={"column"}
-      flexWrap={"nowrap"}
-      overflow={"auto"}
-      p={2}
-      flexGrow={1}
-      container
+    <Box
+      sx={{
+        display: "flex",
+        width: "auto",
+        height: "100%",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        overflow: "auto",
+        p: 2,
+        flexGrow: 1,
+      }}
     >
       <Typography variant={"h5"}>Dialogs ({declarations.dialogs.length})</Typography>
       <Divider sx={{ margin: "16px 0" }} />
@@ -77,11 +85,13 @@ export function ExportsViewerDialogs({
         ))}
       </Tabs>
 
-      <Box marginBottom={2} />
+      <Box sx={{ marginBottom: 2 }} />
 
-      <Grid direction={"column"} flexGrow={1} gap={1} flexWrap={"nowrap"} sx={{ overflowY: "auto" }} container>
+      <Box
+        sx={{ display: "flex", flexDirection: "column", flexGrow: 1, gap: 1, flexWrap: "nowrap", overflowY: "auto" }}
+      >
         {list}
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }

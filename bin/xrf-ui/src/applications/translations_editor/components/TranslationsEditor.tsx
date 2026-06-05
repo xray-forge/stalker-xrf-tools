@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { ReactElement } from "react";
 
 import { TranslationsEditorMenu } from "@/applications/translations_editor/components/TranslationsEditorMenu";
@@ -7,21 +7,23 @@ import { TranslationsEditorWorkspace } from "@/applications/translations_editor/
 
 export function TranslationsEditor(): ReactElement {
   return (
-    <Grid
-      direction={"column"}
-      justifyContent={"center"}
-      alignItems={"center"}
-      width={"100%"}
-      height={"100%"}
-      wrap={"nowrap"}
-      container
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        height: "100%",
+        flexWrap: "nowrap",
+      }}
     >
       <TranslationsEditorToolbar />
 
-      <Grid flexGrow={1} flexWrap={"nowrap"} container>
+      <Grid container wrap={"nowrap"} sx={{ flexGrow: 1 }}>
         <TranslationsEditorMenu />
         <TranslationsEditorWorkspace />
       </Grid>
-    </Grid>
+    </Box>
   );
 }

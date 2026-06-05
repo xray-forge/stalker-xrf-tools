@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { ReactElement } from "react";
 
 import { EquipmentSpriteEditorMenu } from "@/applications/icons_editor/components/equipment_editor/EquipmentSpriteEditorMenu";
@@ -7,21 +7,23 @@ import { EquipmentSpriteEditorWorkspace } from "@/applications/icons_editor/comp
 
 export function EquipmentSpriteEditor(): ReactElement {
   return (
-    <Grid
-      direction={"column"}
-      justifyContent={"center"}
-      alignItems={"center"}
-      width={"100%"}
-      height={"100%"}
-      wrap={"nowrap"}
-      container
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        height: "100%",
+        flexWrap: "nowrap",
+      }}
     >
       <EquipmentSpriteEditorToolbar />
 
-      <Grid flexGrow={1} flexWrap={"nowrap"} width={"100%"} container>
+      <Grid container wrap={"nowrap"} sx={{ flexGrow: 1, width: "100%" }}>
         <EquipmentSpriteEditorMenu />
         <EquipmentSpriteEditorWorkspace />
       </Grid>
-    </Grid>
+    </Box>
   );
 }

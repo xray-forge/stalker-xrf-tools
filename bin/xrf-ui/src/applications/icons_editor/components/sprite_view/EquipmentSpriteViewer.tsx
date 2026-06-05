@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { SxProps } from "@mui/system";
 import { clamp } from "@mui/x-data-grid/internals";
 import { useManager } from "dreamstate";
@@ -144,34 +144,40 @@ export function EquipmentSpriteViewer({
   );
 
   return (
-    <Grid width={"100%"} height={"100%"} position={"relative"} overflow={"hidden"}>
-      <Grid
-        position={"absolute"}
-        display={"flex"}
-        justifyContent={"center"}
-        alignItems={"center"}
-        left={0}
-        top={0}
-        width={"100%"}
-        height={"100%"}
-        bgcolor={"#353535"}
+    <Box sx={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
+      <Box
+        sx={{
+          position: "absolute",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          left: 0,
+          top: 0,
+          width: "100%",
+          height: "100%",
+          bgcolor: "#353535",
+        }}
       >
         {spriteImage ? (
-          <Grid
-            position={"relative"}
+          <Box
             className={"sprite-preview"}
-            width={spriteImage.image.width}
-            minWidth={spriteImage.image.width}
-            height={"auto"}
-            left={0}
-            top={0}
-            sx={sx}
             onWheel={onWheel}
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}
             onMouseLeave={onMouseLeave}
             onContextMenu={onContextMenu}
             onMouseMove={onMouseMove}
+            sx={[
+              {
+                position: "relative",
+                width: spriteImage.image.width,
+                minWidth: spriteImage.image.width,
+                height: "auto",
+                left: 0,
+                top: 0,
+              },
+              sx,
+            ]}
           >
             <img src={spriteImage.image.src} width={"100%"} height={"100%"} draggable={false} />
 
@@ -184,7 +190,7 @@ export function EquipmentSpriteViewer({
                 onCellMovedOver={onMoveOverCell}
               />
             ) : null}
-          </Grid>
+          </Box>
         ) : (
           "loading..."
         )}
@@ -203,7 +209,7 @@ export function EquipmentSpriteViewer({
         />
 
         <EquipmentGridZoom zoom={zoomValue} onZoomDown={onZoomDown} onZoomUp={onZoomUp} />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }

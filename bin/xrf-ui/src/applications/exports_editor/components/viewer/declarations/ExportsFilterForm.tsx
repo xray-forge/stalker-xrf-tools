@@ -51,17 +51,19 @@ export function ExportsFilterForm({
         size={"small"}
         variant={"outlined"}
         value={filter}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position={"start"}>
-              <SearchIcon />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position={"end"} onClick={onClearFilter}>
-              <ClearIcon />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position={"start"}>
+                <SearchIcon />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position={"end"} onClick={onClearFilter}>
+                <ClearIcon />
+              </InputAdornment>
+            ),
+          },
         }}
         onChange={onValueChanged}
       />

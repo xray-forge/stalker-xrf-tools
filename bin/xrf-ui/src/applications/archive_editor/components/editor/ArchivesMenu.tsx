@@ -1,6 +1,6 @@
 import { default as CloseIcon } from "@mui/icons-material/Close";
-import { Divider, Drawer, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { RichTreeView, TreeViewBaseItem } from "@mui/x-tree-view";
+import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { RichTreeView, TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
 import { useManager } from "dreamstate";
 import { ReactElement, SyntheticEvent, useCallback, useMemo } from "react";
 
@@ -13,7 +13,7 @@ export function ArchivesMenu({
     ArchivesManager
   ),
 }): ReactElement {
-  const items: Array<TreeViewBaseItem> = useMemo(
+  const items: Array<TreeViewDefaultItemModelProperties> = useMemo(
     () => parseTree(Object.values(project?.files ?? {}), "\\"),
     [project?.files]
   );
@@ -33,7 +33,7 @@ export function ArchivesMenu({
       variant={"permanent"}
       open={true}
       sx={{ height: "100%", width: 320 }}
-      PaperProps={{ sx: { position: "relative" } }}
+      slotProps={{ paper: { sx: { position: "relative" } } }}
     >
       <List disablePadding>
         <ListItem disablePadding>
@@ -43,9 +43,9 @@ export function ArchivesMenu({
         </ListItem>
       </List>
 
-      <Grid padding={1} flexGrow={1} overflow={"auto"}>
+      <Box sx={{ padding: 1, flexGrow: 1, overflow: "auto" }}>
         <RichTreeView items={items} onSelectedItemsChange={onSelectListItem} />
-      </Grid>
+      </Box>
 
       <Divider />
 

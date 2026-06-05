@@ -6,7 +6,7 @@ export function TableToolbar(): ReactElement {
   return (
     <GridToolbarContainer>
       <GridToolbarColumnsButton />
-      <Box flexGrow={1} />
+      <Box sx={{ flexGrow: 1 }} />
       <GridToolbarQuickFilter />
     </GridToolbarContainer>
   );

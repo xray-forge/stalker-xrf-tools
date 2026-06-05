@@ -1,5 +1,5 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
-import { FormControl, Grid, IconButton, InputAdornment, InputLabel, OutlinedInput, Typography } from "@mui/material";
+import { Box, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Typography } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exists } from "@tauri-apps/plugin-fs";
 import { useManager } from "dreamstate";
@@ -80,7 +80,7 @@ export function SettingsForm({
   );
 
   return (
-    <Grid direction={"column"} padding={padding} gap={2} container>
+    <Box sx={{ display: "flex", flexDirection: "column", padding: padding, gap: 2 }}>
       {title ? <Typography variant={"h5"}>{title}</Typography> : null}
 
       {isWithProjectForm ? (
@@ -124,6 +124,6 @@ export function SettingsForm({
           />
         </FormControl>
       ) : null}
-    </Grid>
+    </Box>
   );
 }

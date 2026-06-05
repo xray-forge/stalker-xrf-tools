@@ -1,6 +1,6 @@
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { ReactElement } from "react";
 
 export function IconsEditorDescriptionPage(): ReactElement {
-  return <Grid> todo icon description editor </Grid>;
+  return <Box> todo icon description editor </Box>;
 }

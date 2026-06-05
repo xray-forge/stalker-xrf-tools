@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { ReactElement, useCallback } from "react";
 import { addEdge, Background, Connection, Controls, Edge, ReactFlow, useEdgesState, useNodesState } from "reactflow";
 
@@ -28,20 +28,10 @@ export function DialogEditorTestPage(): ReactElement {
   const onConnect = useCallback((params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   return (
-    <Grid
-      justifyContent={"center"}
-      alignItems={"center"}
-      direction={"row"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
-      gap={1}
-    >
-      <Grid width={120} padding={2} height={"100%"} borderRight={"1px solid red"}>
-        left menu
-      </Grid>
+    <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%", gap: 1 }}>
+      <Box sx={{ width: 120, padding: 2, height: "100%", borderRight: "1px solid red" }}>left menu</Box>
 
-      <Grid flexGrow={1} height={"100%"}>
+      <Box sx={{ flexGrow: 1, height: "100%" }}>
         <ReactFlow
           proOptions={proOptions}
           nodes={nodes}
@@ -54,7 +44,7 @@ export function DialogEditorTestPage(): ReactElement {
           <Controls position={"bottom-right"} />
           <Background gap={12} size={1} />
         </ReactFlow>
-      </Grid>
+      </Box>
     </Grid>
   );
 }

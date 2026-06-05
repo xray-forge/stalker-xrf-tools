@@ -1,4 +1,4 @@
-import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { useManager } from "dreamstate";
 
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
@@ -9,75 +9,83 @@ export function ArchivesFileContent({ archivesContext: { file } = useManager(Arc
     return (
       <Grid
         container
-        flexGrow={1}
-        alignItems={"center"}
-        justifyContent={"center"}
-        height={"100%"}
-        overflow={"auto"}
-        padding={2}
-        width={"auto"}
+        sx={{
+          flexGrow: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          overflow: "auto",
+          padding: 2,
+          width: "auto",
+        }}
       >
         <CircularProgress />
       </Grid>
     );
   } else if (file.error) {
     return (
-      <Grid
-        container
-        direction={"column"}
-        flexGrow={1}
-        height={"100%"}
-        overflow={"auto"}
-        padding={2}
-        width={"auto"}
-        wrap={"nowrap"}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+          height: "100%",
+          overflow: "auto",
+          padding: 2,
+          width: "auto",
+          flexWrap: "nowrap",
+        }}
       >
-        <Typography whiteSpace={"pre-line"}>{String(file.error)}</Typography>
-      </Grid>
+        <Typography sx={{ whiteSpace: "pre-line" }}>{String(file.error)}</Typography>
+      </Box>
     );
   } else if (file.value) {
     return (
-      <Grid
-        container
-        direction={"column"}
-        flexGrow={1}
-        height={"100%"}
-        overflow={"auto"}
-        padding={2}
-        width={"auto"}
-        wrap={"nowrap"}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+          height: "100%",
+          overflow: "auto",
+          padding: 2,
+          width: "auto",
+          flexWrap: "nowrap",
+        }}
       >
-        <Grid>
+        <Box>
           <Typography variant={"h5"}>
             {file.value.name} ({bytesToMegabytes(file.value.size).toFixed(3)} MB)
           </Typography>
-        </Grid>
+        </Box>
 
-        <Grid margin={"8px 0"}>
+        <Box sx={{ margin: "8px 0" }}>
           <Divider />
-        </Grid>
+        </Box>
 
-        <Grid>
-          <Typography whiteSpace={"pre-wrap"} variant={"body1"} component={"pre"} paragraph>
+        <Box>
+          <Typography sx={{ marginBottom: 2, whiteSpace: "pre-wrap" }} variant={"body1"} component={"pre"}>
             {file.value.content}
           </Typography>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <Grid
-      container
-      direction={"column"}
-      flexGrow={1}
-      height={"100%"}
-      overflow={"auto"}
-      padding={2}
-      width={"auto"}
-      wrap={"nowrap"}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1,
+        height: "100%",
+        overflow: "auto",
+        padding: 2,
+        width: "auto",
+        flexWrap: "nowrap",
+      }}
     >
       none
-    </Grid>
+    </Box>
   );
 }

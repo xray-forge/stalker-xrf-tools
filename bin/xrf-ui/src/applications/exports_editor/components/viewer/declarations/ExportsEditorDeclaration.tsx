@@ -1,4 +1,4 @@
-import { Card, Divider, Grid, Typography } from "@mui/material";
+import { Box, Card, Divider, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
 import { ExportsEditorParameters } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorParameters";
@@ -10,9 +10,9 @@ export interface IExportsViewerDeclarationProps {
 
 export function ExportsEditorDeclaration({ descriptor }: IExportsViewerDeclarationProps): ReactElement {
   return (
-    <Grid key={descriptor.name} width={"100%"} maxWidth={"100%"} paddingRight={1}>
+    <Box key={descriptor.name} sx={{ width: "100%", maxWidth: "100%", paddingRight: 1 }}>
       <Card elevation={2}>
-        <Grid direction={"column"} padding={1} gap={1} container>
+        <Box sx={{ display: "flex", flexDirection: "column", padding: 1, gap: 1 }}>
           <Typography variant={"h6"} color={"primary"}>
             {descriptor.name}
           </Typography>
@@ -20,18 +20,18 @@ export function ExportsEditorDeclaration({ descriptor }: IExportsViewerDeclarati
           <Divider sx={{ margin: "4px 0" }} />
 
           {descriptor.comment ? (
-            <Grid>
+            <Box>
               <Typography variant={"subtitle1"} color={"secondary"}>
                 Description:
               </Typography>
               <Typography variant={"body2"} sx={{ whiteSpace: "pre-wrap" }}>
                 {descriptor.comment.replace(/ *\* */g, "").trim()}
               </Typography>
-            </Grid>
+            </Box>
           ) : null}
 
           {descriptor.parameters.length ? (
-            <Grid>
+            <Box>
               <Typography variant={"subtitle1"} color={"secondary"}>
                 Types:
               </Typography>
@@ -39,19 +39,19 @@ export function ExportsEditorDeclaration({ descriptor }: IExportsViewerDeclarati
               {descriptor.parameters.map((parameter) => (
                 <ExportsEditorParameters key={parameter.name} parameter={parameter} />
               ))}
-            </Grid>
+            </Box>
           ) : null}
 
-          <Grid>
+          <Box>
             <Typography variant={"subtitle1"} color={"secondary"}>
               Location:
             </Typography>
             <Typography variant={"body2"} sx={{ whiteSpace: "pre-wrap" }}>
               {descriptor.filename} ({descriptor.line}:{descriptor.col})
             </Typography>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Card>
-    </Grid>
+    </Box>
   );
 }

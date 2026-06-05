@@ -1,19 +1,21 @@
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { ReactElement } from "react";
 
 export function TranslationsEditorWorkspace(): ReactElement {
   return (
-    <Grid
+    <Box
       className={"workspace"}
-      display={"flex"}
-      justifyContent={"center"}
-      alignItems={"center"}
-      maxWidth={"100%"}
-      maxHeight={"100%"}
-      flexGrow={1}
-      padding={1}
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        maxWidth: "100%",
+        maxHeight: "100%",
+        flexGrow: 1,
+        padding: 1,
+      }}
     >
       todo
-    </Grid>
+    </Box>
   );
 }

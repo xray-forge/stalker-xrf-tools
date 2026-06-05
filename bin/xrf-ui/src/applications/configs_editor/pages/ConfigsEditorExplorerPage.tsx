@@ -1,5 +1,5 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
-import { Button, Grid, IconButton, InputAdornment, OutlinedInput, Typography } from "@mui/material";
+import { Box, Button, Grid, IconButton, InputAdornment, OutlinedInput, Typography } from "@mui/material";
 import { useManager } from "dreamstate";
 import { useCallback, useState } from "react";
 
@@ -14,20 +14,22 @@ export function ConfigsEditorExplorerPage({ projectContext: { xrfConfigsPath } =
   const onSelectTargetDirectoryClicked = useCallback(() => {}, []);
 
   return (
-    <Grid
-      justifyContent={"center"}
-      alignItems={"center"}
-      direction={"column"}
-      container={true}
-      width={"100%"}
-      height={"100%"}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
+      }}
     >
-      <Grid direction={"row"} justifyContent={"center"} marginBottom={2} container>
+      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
         <Typography>Provide LTX files directory to open</Typography>
       </Grid>
 
-      <Grid direction={"row"} justifyContent={"center"} width={"auto"} marginBottom={2} container>
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} marginRight={1} container>
+      <Grid container sx={{ justifyContent: "center", width: "auto", marginBottom: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto", marginRight: 1 }}>
           <OutlinedInput
             size={"small"}
             placeholder={"Configs directory"}
@@ -43,14 +45,14 @@ export function ConfigsEditorExplorerPage({ projectContext: { xrfConfigsPath } =
             value={configsPath || ""}
             onClick={onSelectTargetDirectoryClicked}
           />
-        </Grid>
+        </Box>
 
-        <Grid direction={"column"} justifyContent={"center"} width={"auto"} container>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
           <Button variant={"contained"}>Open</Button>
-        </Grid>
+        </Box>
       </Grid>
 
       <ApplicationBackButton path={"/configs_editor"} />
-    </Grid>
+    </Box>
   );
 }
