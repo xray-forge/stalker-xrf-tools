@@ -13,6 +13,7 @@ export function ConfigsEditorExplorerPage() {
   const [configsPath] = useState<Optional<string>>(xrfConfigsPath);
 
   const onSelectTargetDirectory = useCallback(() => {}, []);
+
   const onSelectTargetDirectoryClicked = useCallback(() => {}, []);
 
   return (

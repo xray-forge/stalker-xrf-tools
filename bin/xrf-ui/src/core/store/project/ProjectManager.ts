@@ -1,6 +1,6 @@
 import { exists } from "@tauri-apps/plugin-fs";
 import { Injectable, OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local_storage";
@@ -23,10 +23,10 @@ export class ProjectManager {
   @OnProvision()
   public onProvision(): void {
     this.getXrfProjectPath().then((path) => {
-      this.xrfProjectPath = path;
+      runInAction(() => (this.xrfProjectPath = path));
     });
     this.getXrfConfigsPath().then((path) => {
-      this.xrfConfigsPath = path;
+      runInAction(() => (this.xrfConfigsPath = path));
     });
   }
 

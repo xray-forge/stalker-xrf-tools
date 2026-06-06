@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
@@ -27,11 +27,17 @@ export class SpawnFileManager {
 
     if (existing) {
       this.log.info("Existing spawn file detected");
-      this.spawnFile = createLoadable(existing);
-      this.isReady = true;
+
+      runInAction(() => {
+        this.spawnFile = createLoadable(existing);
+        this.isReady = true;
+      });
     } else {
       this.log.info("No existing spawn file");
-      this.isReady = true;
+
+      runInAction(() => {
+        this.isReady = true;
+      });
     }
   }
 
@@ -51,10 +57,11 @@ export class SpawnFileManager {
 
       this.log.info("Spawn file opened");
 
-      this.spawnFile = createLoadable(response, false);
+      runInAction(() => (this.spawnFile = createLoadable(response, false)));
     } catch (error) {
       this.log.error("Failed to open spawn file:", error);
-      this.spawnFile = createLoadable(null, false, error as Error);
+
+      runInAction(() => (this.spawnFile = createLoadable(null, false, error as Error)));
     }
   }
 
@@ -69,10 +76,10 @@ export class SpawnFileManager {
 
       this.log.info("Spawn file imported");
 
-      this.spawnFile = createLoadable(response, false);
+      runInAction(() => (this.spawnFile = createLoadable(response, false)));
     } catch (error) {
       this.log.error("Failed to import spawn file:", error);
-      this.spawnFile = this.spawnFile.asReady();
+      runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
     }
   }
 
@@ -85,10 +92,12 @@ export class SpawnFileManager {
     try {
       this.spawnFile = this.spawnFile.asLoading();
       await invoke(ESpawnsEditorCommand.EXPORT_SPAWN_FILE, { path });
-      this.spawnFile = this.spawnFile.asReady();
+
+      runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
     } catch (error) {
       this.log.error("Failed to export spawn file:", error);
-      this.spawnFile = this.spawnFile.asReady();
+
+      runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
     }
   }
 
@@ -101,10 +110,12 @@ export class SpawnFileManager {
     try {
       this.spawnFile = this.spawnFile.asLoading();
       await invoke(ESpawnsEditorCommand.SAVE_SPAWN_FILE, { path });
-      this.spawnFile = this.spawnFile.asReady();
+
+      runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
     } catch (error) {
       this.log.error("Failed to save spawn file:", error);
-      this.spawnFile = this.spawnFile.asReady();
+
+      runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
     }
   }
 
@@ -114,7 +125,8 @@ export class SpawnFileManager {
 
     try {
       await invoke(ESpawnsEditorCommand.CLOSE_SPAWN_FILE);
-      this.spawnFile = createLoadable(null);
+
+      runInAction(() => (this.spawnFile = createLoadable(null)));
     } catch (error) {
       this.log.error("Failed to close spawn file:", error);
     }

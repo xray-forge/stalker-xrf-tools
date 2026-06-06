@@ -43,7 +43,7 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
       {
         field: "inherited",
         headerName: "inherited",
-        valueGetter: (it: AnyObject) => (it.row.inherited ? JSON.stringify(it.row.inherited) : null),
+        valueGetter: (it: AnyObject) => (it?.row?.inherited ? JSON.stringify(it.row.inherited) : null),
       },
       { field: "updateData", headerName: "update data" },
     ],

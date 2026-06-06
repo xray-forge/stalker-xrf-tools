@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Injectable, OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
 import { ETranslationsEditorCommand } from "@/lib/ipc";
@@ -28,11 +28,17 @@ export class TranslationsManager {
 
     if (response) {
       this.log.info("Existing translations project detected");
-      this.isReady = true;
-      this.project = createLoadable(response);
+
+      runInAction(() => {
+        this.isReady = true;
+        this.project = createLoadable(response);
+      });
     } else {
       this.log.info("No existing translations project");
-      this.isReady = true;
+
+      runInAction(() => {
+        this.isReady = true;
+      });
     }
   }
 
@@ -49,10 +55,11 @@ export class TranslationsManager {
 
       this.log.info("Translations project opened:", response);
 
-      this.project = createLoadable(response);
+      runInAction(() => (this.project = createLoadable(response)));
     } catch (error) {
       this.log.error("Failed to open translations project:", error);
-      this.project = createLoadable(null, false, error as Error);
+
+      runInAction(() => (this.project = createLoadable(null, false, error as Error)));
     }
   }
 
@@ -64,7 +71,7 @@ export class TranslationsManager {
 
     await invoke(ETranslationsEditorCommand.CLOSE_TRANSLATIONS_PROJECT);
 
-    this.project = createLoadable(null);
+    runInAction(() => (this.project = createLoadable(null)));
 
     this.log.info("Translations project closed");
   }

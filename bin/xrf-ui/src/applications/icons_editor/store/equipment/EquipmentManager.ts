@@ -3,7 +3,7 @@ import { path } from "@tauri-apps/api";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
 import { OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons";
@@ -46,11 +46,14 @@ export class EquipmentManager {
 
     if (response) {
       this.log.info("Existing equipment sprite detected");
-      this.isReady = true;
-      this.spriteImage = createLoadable(await this.spriteFromResponse(response));
+      runInAction(() => (this.isReady = true));
+
+      const spriteImage: IEquipmentPngDescriptor = await this.spriteFromResponse(response);
+
+      runInAction(() => (this.spriteImage = createLoadable(spriteImage)));
     } else {
       this.log.info("No existing sprite detected file");
-      this.isReady = true;
+      runInAction(() => (this.isReady = true));
     }
   }
 
@@ -79,10 +82,13 @@ export class EquipmentManager {
 
       this.log.info("Equipment project opened:", response);
 
-      this.spriteImage = createLoadable(await this.spriteFromResponse(response));
+      const spriteImage: IEquipmentPngDescriptor = await this.spriteFromResponse(response);
+
+      runInAction(() => (this.spriteImage = createLoadable(spriteImage)));
     } catch (error) {
       this.log.error("Failed to open equipment editor project:", error);
-      this.spriteImage = createLoadable(null, false, error as Error);
+
+      runInAction(() => (this.spriteImage = createLoadable(null, false, error as Error)));
     }
   }
 
@@ -98,7 +104,10 @@ export class EquipmentManager {
       this.log.info("Equipment project reopened:", response);
 
       this.cleanupAssets();
-      this.spriteImage = createLoadable(await this.spriteFromResponse(response));
+
+      const spriteImage: IEquipmentPngDescriptor = await this.spriteFromResponse(response);
+
+      runInAction(() => (this.spriteImage = createLoadable(spriteImage)));
     } catch (error) {
       this.log.error("Failed to reopen equipment editor project:", error);
       throw error;
@@ -132,7 +141,7 @@ export class EquipmentManager {
       await this.reopenEquipmentProject();
     } finally {
       if (this.spriteImage.isLoading) {
-        this.spriteImage = this.spriteImage.asReady();
+        runInAction(() => (this.spriteImage = this.spriteImage.asReady()));
       }
     }
   }
@@ -149,10 +158,10 @@ export class EquipmentManager {
 
       this.log.info("Equipment project closed");
 
-      this.spriteImage = createLoadable(null);
+      runInAction(() => (this.spriteImage = createLoadable(null)));
     } catch (error) {
       this.log.error("Failed to close equipment editor project:", error);
-      this.spriteImage = this.spriteImage.asFailed(new Error(error as string));
+      runInAction(() => (this.spriteImage = this.spriteImage.asFailed(new Error(error as string))));
     }
   }
 

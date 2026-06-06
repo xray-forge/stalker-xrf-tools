@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
 import { IArchiveFileReadResult, IArchivesProject } from "@/lib/archive";
@@ -30,11 +30,17 @@ export class ArchivesManager {
 
     if (existing) {
       this.log.info("Existing archives project detected");
-      this.project = createLoadable(existing);
-      this.isReady = true;
+
+      runInAction(() => {
+        this.project = createLoadable(existing);
+        this.isReady = true;
+      });
     } else {
       this.log.info("No existing archives project");
-      this.isReady = true;
+
+      runInAction(() => {
+        this.isReady = true;
+      });
     }
   }
 
@@ -54,10 +60,11 @@ export class ArchivesManager {
 
       this.log.info("Archives project opened");
 
-      this.project = createLoadable(response, false);
+      runInAction(() => (this.project = createLoadable(response, false)));
     } catch (error) {
       this.log.error("Failed to open archives project:", error);
-      this.project = createLoadable(null, false, error as Error);
+
+      runInAction(() => (this.project = createLoadable(null, false, error as Error)));
     }
   }
 
@@ -67,7 +74,8 @@ export class ArchivesManager {
 
     try {
       await invoke(EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT);
-      this.project = createLoadable(null);
+
+      runInAction(() => (this.project = createLoadable(null)));
     } catch (error) {
       this.log.error("Failed to close archives project:", error);
     }
@@ -84,10 +92,11 @@ export class ArchivesManager {
 
       this.log.info("Opened file:", path);
 
-      this.file = createLoadable(result);
+      runInAction(() => (this.file = createLoadable(result)));
     } catch (error) {
       this.log.error("Failed to open archive file:", path, error);
-      this.file = createLoadable(null, false, new Error(String(error)));
+
+      runInAction(() => (this.file = createLoadable(null, false, new Error(String(error)))));
     }
   }
 }

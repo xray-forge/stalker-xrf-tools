@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Inject, Injectable, OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
@@ -37,18 +37,21 @@ export class ExportsManager {
 
     if (declarations) {
       this.log.info("Existing parsed exports detected");
-      this.declarations = createLoadable(declarations);
-      this.isReady = true;
+
+      runInAction(() => {
+        this.declarations = createLoadable(declarations);
+        this.isReady = true;
+      });
     } else {
       const projectPath: Optional<string> = this.projectManager.xrfProjectPath;
 
       if (projectPath) {
         this.openExports(projectPath).finally(() => {
-          this.isReady = true;
+          runInAction(() => (this.isReady = true));
         });
       } else {
         this.log.info("No existing parsed effects", projectPath);
-        this.isReady = true;
+        runInAction(() => (this.isReady = true));
       }
     }
   }
@@ -78,10 +81,10 @@ export class ExportsManager {
         dialogsPath,
       });
 
-      this.declarations = createLoadable(result);
+      runInAction(() => (this.declarations = createLoadable(result)));
     } catch (error) {
       this.log.error("Got error when parsing exports:", error);
-      this.declarations = createLoadable(null, false, new Error(error as string));
+      runInAction(() => (this.declarations = createLoadable(null, false, new Error(error as string))));
     }
   }
 
@@ -93,6 +96,6 @@ export class ExportsManager {
 
     await invoke(EExportsEditorCommand.CLOSE_XR_EXPORTS);
 
-    this.declarations = createLoadable(null);
+    runInAction(() => (this.declarations = createLoadable(null)));
   }
 }
