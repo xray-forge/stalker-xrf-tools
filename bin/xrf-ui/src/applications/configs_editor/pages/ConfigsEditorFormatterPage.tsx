@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ChangeEvent, MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ConfigsFormatResult } from "@/applications/configs_editor/components/ConfigsFormatResult";
@@ -26,8 +26,10 @@ import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectFormatResult } from "@/lib/ltx";
 
-export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } = useManager(ProjectManager) }) {
+export function ConfigsEditorFormatterPage() {
   const log: Logger = useLogger("configs-formatter");
+
+  const { xrfConfigsPath } = useInjection(ProjectManager);
 
   const [isCheck, setIsCheck] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +59,7 @@ export function ConfigsEditorFormatterPage({ projectContext: { xrfConfigsPath } 
         setConfigsPath(newXrfConfigsPath);
       }
     },
-    [isLoading]
+    [isLoading, log]
   );
 
   const onSelectConfigsPathClicked = useCallback(

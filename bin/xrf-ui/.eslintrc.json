@@ -20,7 +20,7 @@
     "plugin:react/recommended"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "jest", "import", "sort-keys-fix"],
+  "plugins": ["@typescript-eslint", "jest", "import", "react-hooks", "sort-keys-fix"],
   "rules": {
     "@typescript-eslint/no-misused-new": "off",
     "@typescript-eslint/ban-ts-comment": "off",
@@ -184,6 +184,7 @@
     "react/jsx-no-undef": "off",
     "react/no-unknown-property": "off",
     "react/react-in-jsx-scope": "off",
+    "react-hooks/exhaustive-deps": "warn",
     "react/prop-types": "off",
     "semi": "error",
     "space-in-parens": ["error", "never"],

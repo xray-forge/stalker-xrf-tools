@@ -1,12 +1,14 @@
 import { AppBar, Toolbar, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 
-export function EquipmentSpriteEditorToolbar({
-  equipmentContext: { spriteImage: { value: spriteImage } } = useManager(EquipmentManager),
-}): ReactElement {
+export function EquipmentSpriteEditorToolbar(): ReactElement {
+  const {
+    spriteImage: { value: spriteImage },
+  } = useInjection(EquipmentManager);
+
   return (
     <AppBar position={"relative"}>
       <Toolbar variant={"dense"}>

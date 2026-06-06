@@ -1,14 +1,14 @@
 import { CircularProgress, Grid } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { TranslationsEditor } from "@/applications/translations_editor/components/TranslationsEditor";
 import { TranslationsEditorOpenForm } from "@/applications/translations_editor/components/TranslationsEditorOpenForm";
 import { TranslationsManager } from "@/applications/translations_editor/store/translations";
 
-export function TranslationsEditorProjectPage({
-  translationsContext: { isReady, project } = useManager(TranslationsManager),
-}): ReactElement {
+export function TranslationsEditorProjectPage(): ReactElement {
+  const { isReady, project } = useInjection(TranslationsManager);
+
   if (isReady) {
     return project.value ? <TranslationsEditor /> : <TranslationsEditorOpenForm />;
   }

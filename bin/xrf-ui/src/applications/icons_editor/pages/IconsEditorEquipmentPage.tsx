@@ -1,14 +1,14 @@
 import { CircularProgress, Grid } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { EquipmentSpriteEditor } from "@/applications/icons_editor/components/equipment_editor/EquipmentSpriteEditor";
 import { IconsEditorEquipmentOpenForm } from "@/applications/icons_editor/components/equipment_editor/IconsEditorEquipmentOpenForm";
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 
-export function IconsEditorEquipmentPage({
-  equipmentContext: { isReady, spriteImage } = useManager(EquipmentManager),
-}): ReactElement {
+export function IconsEditorEquipmentPage(): ReactElement {
+  const { isReady, spriteImage } = useInjection(EquipmentManager);
+
   if (isReady) {
     return spriteImage.value ? <EquipmentSpriteEditor /> : <IconsEditorEquipmentOpenForm />;
   }

@@ -1,13 +1,15 @@
 import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { ExportsEditorDeclarationList } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorDeclarationList";
 import { ExportsManager } from "@/applications/exports_editor/store/exports";
 
-export function ExportsViewerEffects({
-  exportsContext: { declarations: { isLoading, error, value: declarations } } = useManager(ExportsManager),
-}): ReactElement {
+export function ExportsViewerEffects(): ReactElement {
+  const {
+    declarations: { isLoading, error, value: declarations },
+  } = useInjection(ExportsManager);
+
   if (isLoading) {
     return (
       <Grid

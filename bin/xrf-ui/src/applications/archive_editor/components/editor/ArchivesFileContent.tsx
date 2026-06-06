@@ -1,10 +1,12 @@
 import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
 import { bytesToMegabytes } from "@/lib/size";
 
-export function ArchivesFileContent({ archivesContext: { file } = useManager(ArchivesManager) }) {
+export function ArchivesFileContent() {
+  const { file } = useInjection(ArchivesManager);
+
   if (file.isLoading) {
     return (
       <Grid

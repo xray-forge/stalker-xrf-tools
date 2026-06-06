@@ -1,5 +1,5 @@
 import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect } from "react";
 
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
@@ -9,11 +9,11 @@ import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { Logger, useLogger } from "@/lib/logging";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf_path";
 
-export function IconsEditorEquipmentOpenForm({
-  equipmentContext: { spriteImage, equipmentActions } = useManager(EquipmentManager),
-  projectContext: { xrfProjectPath } = useManager(ProjectManager),
-}): ReactElement {
+export function IconsEditorEquipmentOpenForm(): ReactElement {
   const log: Logger = useLogger("equipment-editor-open");
+
+  const { xrfProjectPath } = useInjection(ProjectManager);
+  const { spriteImage, openEquipmentProject } = useInjection(EquipmentManager);
 
   const [spritePath, setSpritePath, onSelectEquipmentPath] = usePathState({
     title: "Provide path to equipment_editor dds",
@@ -29,11 +29,11 @@ export function IconsEditorEquipmentOpenForm({
 
   const onOpenEquipmentClicked = useCallback(() => {
     if (spritePath && systemLtxPath) {
-      equipmentActions.open(spritePath, systemLtxPath);
+      openEquipmentProject(spritePath, systemLtxPath);
     } else {
       log.info("Cannot open equipment_editor when have no provided paths:", { spritePath, systemLtxPath });
     }
-  }, [spritePath, systemLtxPath]);
+  }, [spritePath, systemLtxPath, openEquipmentProject, log]);
 
   useEffect(() => {
     if (xrfProjectPath) {

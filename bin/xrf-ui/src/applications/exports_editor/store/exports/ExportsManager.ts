@@ -1,10 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ContextManager, createActions, createLoadable, Loadable } from "dreamstate";
+import { Inject, Injectable, OnProvision } from "@wirestate/core";
+import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
 
-import { queryProjectPath } from "@/core/store/project";
+import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IExportsDeclarations } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
+import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import {
   getProjectExportConditionsPath,
@@ -12,49 +14,48 @@ import {
   getProjectExportEffectsPath,
 } from "@/lib/xrf_path";
 
-export interface IExportsContext {
-  exportsActions: {
-    open: (path: string) => Promise<void>;
-    close: () => Promise<void>;
-  };
-  isReady: boolean;
-  declarations: Loadable<Optional<IExportsDeclarations>>;
-}
+@Injectable()
+export class ExportsManager {
+  @Observable()
+  public isReady: boolean = false;
 
-export class ExportsManager extends ContextManager<IExportsContext> {
-  public context: IExportsContext = {
-    exportsActions: createActions({ open: (path) => this.openExports(path), close: () => this.closeExports() }),
-    isReady: false,
-    declarations: createLoadable(null),
-  };
+  @Observable()
+  public declarations: Loadable<Optional<IExportsDeclarations>> = createLoadable(null);
 
-  public log: Logger = new Logger("exports");
+  public readonly log: Logger = new Logger(this.constructor.name);
 
-  public async onProvisionStarted(): Promise<void> {
+  public constructor(
+    @Inject(ProjectManager)
+    private readonly projectManager: ProjectManager
+  ) {
+    makeObservable(this);
+  }
+
+  @OnProvision()
+  public async onProvision(): Promise<void> {
     const declarations: Optional<IExportsDeclarations> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
 
     if (declarations) {
       this.log.info("Existing parsed exports detected");
-      this.setContext({
-        declarations: createLoadable(declarations),
-        isReady: true,
-      });
+      this.declarations = createLoadable(declarations);
+      this.isReady = true;
     } else {
-      const projectPath: Optional<string> = queryProjectPath(this);
+      const projectPath: Optional<string> = this.projectManager.xrfProjectPath;
 
       if (projectPath) {
         this.openExports(projectPath).finally(() => {
-          this.setContext({ isReady: true });
+          this.isReady = true;
         });
       } else {
         this.log.info("No existing parsed effects", projectPath);
-        this.setContext({ isReady: true });
+        this.isReady = true;
       }
     }
   }
 
+  @BoundAction()
   public async openExports(path: string): Promise<void> {
-    if (this.context.declarations.isLoading) {
+    if (this.declarations.isLoading) {
       return this.log.info("Skip loading parsing on path:", path);
     }
 
@@ -69,7 +70,7 @@ export class ExportsManager extends ContextManager<IExportsContext> {
     this.log.info("Parsing on paths:", effectsPath, conditionsPath, dialogsPath);
 
     try {
-      this.setContext(({ declarations }) => ({ declarations: declarations.asLoading() }));
+      this.declarations = this.declarations.asLoading();
 
       const result: IExportsDeclarations = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
         effectsPath,
@@ -77,20 +78,21 @@ export class ExportsManager extends ContextManager<IExportsContext> {
         dialogsPath,
       });
 
-      this.setContext({ declarations: createLoadable(result) });
+      this.declarations = createLoadable(result);
     } catch (error) {
       this.log.error("Got error when parsing exports:", error);
-      this.setContext({ declarations: createLoadable(null, false, new Error(error as string)) });
+      this.declarations = createLoadable(null, false, new Error(error as string));
     }
   }
 
+  @BoundAction()
   public async closeExports(): Promise<void> {
     this.log.info("Closing exports");
 
-    this.setContext(({ declarations }) => ({ declarations: declarations.asLoading() }));
+    this.declarations = this.declarations.asLoading();
 
     await invoke(EExportsEditorCommand.CLOSE_XR_EXPORTS);
 
-    this.setContext({ declarations: createLoadable(null) });
+    this.declarations = createLoadable(null);
   }
 }

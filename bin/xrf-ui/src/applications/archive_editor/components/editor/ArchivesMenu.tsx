@@ -1,18 +1,20 @@
 import { default as CloseIcon } from "@mui/icons-material/Close";
 import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { RichTreeView, TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, SyntheticEvent, useCallback, useMemo } from "react";
 
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
 import { Optional } from "@/core/types/general";
 import { parseTree } from "@/lib/archive";
 
-export function ArchivesMenu({
-  archivesContext: { project: { value: project, isLoading }, archiveActions, fileActions } = useManager(
-    ArchivesManager
-  ),
-}): ReactElement {
+export function ArchivesMenu(): ReactElement {
+  const {
+    project: { value: project, isLoading },
+    closeArchivesProject,
+    openArchiveFile,
+  } = useInjection(ArchivesManager);
+
   const items: Array<TreeViewDefaultItemModelProperties> = useMemo(
     () => parseTree(Object.values(project?.files ?? {}), "\\"),
     [project?.files]
@@ -22,10 +24,10 @@ export function ArchivesMenu({
     (_: Optional<SyntheticEvent>, file: Optional<string>) => {
       if (file) {
         // trim '~/' root
-        return fileActions.open(file.slice(2));
+        return openArchiveFile(file.slice(2));
       }
     },
-    [fileActions]
+    [openArchiveFile]
   );
 
   return (
@@ -51,7 +53,7 @@ export function ArchivesMenu({
 
       <List disablePadding>
         <ListItem disablePadding>
-          <ListItemButton disabled={isLoading} onClick={archiveActions.close}>
+          <ListItemButton disabled={isLoading} onClick={closeArchivesProject}>
             <ListItemIcon>
               <CloseIcon />
             </ListItemIcon>

@@ -1,13 +1,15 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import { Box, Button, Grid, IconButton, InputAdornment, OutlinedInput, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { useCallback, useState } from "react";
 
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
 import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 
-export function ConfigsEditorExplorerPage({ projectContext: { xrfConfigsPath } = useManager(ProjectManager) }) {
+export function ConfigsEditorExplorerPage() {
+  const { xrfConfigsPath } = useInjection(ProjectManager);
+
   const [configsPath] = useState<Optional<string>>(xrfConfigsPath);
 
   const onSelectTargetDirectory = useCallback(() => {}, []);

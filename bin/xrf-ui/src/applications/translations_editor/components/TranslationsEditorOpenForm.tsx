@@ -1,5 +1,5 @@
 import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect } from "react";
 
 import { TranslationsManager } from "@/applications/translations_editor/store/translations";
@@ -9,11 +9,11 @@ import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { Logger, useLogger } from "@/lib/logging";
 import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf_path";
 
-export function TranslationsEditorOpenForm({
-  translationsContext: { project, translationsActions } = useManager(TranslationsManager),
-  projectContext: { xrfProjectPath } = useManager(ProjectManager),
-}): ReactElement {
-  const log: Logger = useLogger("translations_editor_open");
+export function TranslationsEditorOpenForm(): ReactElement {
+  const log: Logger = useLogger("translations-editor-open");
+
+  const { project, openTranslationsProject } = useInjection(TranslationsManager);
+  const { xrfProjectPath } = useInjection(ProjectManager);
 
   const [translationsPath, setTranslationsPath, onSelectTranslationsPath] = usePathState({
     title: "Provide path to equipment_editor dds",
@@ -23,13 +23,13 @@ export function TranslationsEditorOpenForm({
 
   const onOpenTranslationsClicked = useCallback(() => {
     if (translationsPath) {
-      translationsActions.open(translationsPath);
+      openTranslationsProject(translationsPath);
     } else {
       log.info("Cannot open translations when have no provided paths:", {
         translationsPath,
       });
     }
-  }, [translationsPath]);
+  }, [log, openTranslationsProject, translationsPath]);
 
   useEffect(() => {
     if (xrfProjectPath) {

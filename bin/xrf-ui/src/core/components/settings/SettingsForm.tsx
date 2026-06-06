@@ -2,10 +2,10 @@ import { default as FolderIcon } from "@mui/icons-material/Folder";
 import { Box, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Typography } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exists } from "@tauri-apps/plugin-fs";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, ReactNode, useCallback } from "react";
 
-import { IProjectContext, ProjectManager } from "@/core/store/project";
+import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getProjectConfigsPath } from "@/lib/xrf_path";
@@ -15,7 +15,6 @@ export interface ISettingsFormProps {
   isWithProjectForm?: boolean;
   isWithConfigsForm?: boolean;
   padding?: number | string;
-  projectContext?: IProjectContext;
 }
 
 export function SettingsForm({
@@ -23,56 +22,63 @@ export function SettingsForm({
   isWithProjectForm = true,
   isWithConfigsForm = true,
   padding = 2,
-  projectContext: { projectActions, xrfProjectPath, xrfConfigsPath } = useManager(ProjectManager),
 }: ISettingsFormProps): ReactElement {
   const log: Logger = useLogger("settings-modal");
 
-  const onSelectProjectPath = useCallback(async (event: MouseEvent<HTMLInputElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
+  const { xrfProjectPath, xrfConfigsPath, setXrfProjectPath, setXrfConfigsPath } = useInjection(ProjectManager);
 
-    const newXrfProjectPath: Optional<string> = (await open({
-      title: "Provide path to xrf project",
-      directory: true,
-    })) as Optional<string>;
+  const onSelectProjectPath = useCallback(
+    async (event: MouseEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
 
-    if (newXrfProjectPath) {
-      log.info("Selected new project path:", newXrfProjectPath);
+      const newXrfProjectPath: Optional<string> = (await open({
+        title: "Provide path to xrf project",
+        directory: true,
+      })) as Optional<string>;
 
-      projectActions.setXrfProjectPath(newXrfProjectPath);
+      if (newXrfProjectPath) {
+        log.info("Selected new project path:", newXrfProjectPath);
 
-      // Try to auto-guess configs folder from xrf directory.
-      if (!xrfConfigsPath) {
-        const newXrfConfigsPath: string = await getProjectConfigsPath(newXrfProjectPath);
+        setXrfProjectPath(newXrfProjectPath);
 
-        if (await exists(newXrfConfigsPath)) {
-          log.info("Automatically selected new configs path:", newXrfConfigsPath);
-          projectActions.setXrfConfigsPath(newXrfConfigsPath);
+        // Try to auto-guess configs folder from xrf directory.
+        if (!xrfConfigsPath) {
+          const newXrfConfigsPath: string = await getProjectConfigsPath(newXrfProjectPath);
+
+          if (await exists(newXrfConfigsPath)) {
+            log.info("Automatically selected new configs path:", newXrfConfigsPath);
+            setXrfConfigsPath(newXrfConfigsPath);
+          }
         }
       }
-    }
-  }, []);
+    },
+    [log, setXrfConfigsPath, setXrfProjectPath, xrfConfigsPath]
+  );
 
   const onSelectProjectPathClicked = useCallback(
     (event: MouseEvent<HTMLInputElement>) => onSelectProjectPath(event),
     [onSelectProjectPath]
   );
 
-  const onSelectConfigsPath = useCallback(async (event: MouseEvent<HTMLInputElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
+  const onSelectConfigsPath = useCallback(
+    async (event: MouseEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
 
-    const newXrfConfigsPath: Optional<string> = (await open({
-      title: "Provide path to xrf configs",
-      directory: true,
-    })) as Optional<string>;
+      const newXrfConfigsPath: Optional<string> = (await open({
+        title: "Provide path to xrf configs",
+        directory: true,
+      })) as Optional<string>;
 
-    if (newXrfConfigsPath) {
-      log.info("Selected new configs path:", newXrfConfigsPath);
+      if (newXrfConfigsPath) {
+        log.info("Selected new configs path:", newXrfConfigsPath);
 
-      projectActions.setXrfConfigsPath(newXrfConfigsPath);
-    }
-  }, []);
+        setXrfConfigsPath(newXrfConfigsPath);
+      }
+    },
+    [log, setXrfConfigsPath]
+  );
 
   const onSelectConfigsPathClicked = useCallback(
     (event: MouseEvent<HTMLInputElement>) => onSelectConfigsPath(event),

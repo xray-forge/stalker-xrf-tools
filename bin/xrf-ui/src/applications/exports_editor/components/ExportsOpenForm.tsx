@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback } from "react";
 
 import { ExportsManager } from "@/applications/exports_editor/store/exports";
@@ -20,26 +20,29 @@ import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 
-export function ExportsOpenForm({
-  exportsContext: { exportsActions, declarations } = useManager(ExportsManager),
-  projectContext: { projectActions, xrfProjectPath } = useManager(ProjectManager),
-}): ReactElement {
+export function ExportsOpenForm(): ReactElement {
   const log: Logger = useLogger("exports-open");
 
-  const onSelectProjectPath = useCallback(async (event: MouseEvent<HTMLInputElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
+  const { declarations, openExports } = useInjection(ExportsManager);
+  const { xrfProjectPath, setXrfProjectPath } = useInjection(ProjectManager);
 
-    const newXrfProjectPath: Optional<string> = (await open({
-      title: "Provide path to xrf project",
-      directory: true,
-    })) as Optional<string>;
+  const onSelectProjectPath = useCallback(
+    async (event: MouseEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
 
-    if (newXrfProjectPath) {
-      log.info("Selected new project path:", newXrfProjectPath);
-      projectActions.setXrfProjectPath(newXrfProjectPath);
-    }
-  }, []);
+      const newXrfProjectPath: Optional<string> = (await open({
+        title: "Provide path to xrf project",
+        directory: true,
+      })) as Optional<string>;
+
+      if (newXrfProjectPath) {
+        log.info("Selected new project path:", newXrfProjectPath);
+        setXrfProjectPath(newXrfProjectPath);
+      }
+    },
+    [log, setXrfProjectPath]
+  );
 
   const onSelectProjectPathClicked = useCallback(
     (event: MouseEvent<HTMLInputElement>) => onSelectProjectPath(event),
@@ -48,11 +51,11 @@ export function ExportsOpenForm({
 
   const onOpenExportsClicked = useCallback(() => {
     if (xrfProjectPath) {
-      exportsActions.open(xrfProjectPath);
+      openExports(xrfProjectPath);
     } else {
       log.info("Cannot open exports when have no project path");
     }
-  }, [exportsActions, xrfProjectPath, exportsActions]);
+  }, [log, openExports, xrfProjectPath]);
 
   return (
     <Box

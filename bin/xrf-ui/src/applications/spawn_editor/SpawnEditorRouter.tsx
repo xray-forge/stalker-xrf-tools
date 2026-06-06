@@ -1,5 +1,6 @@
-import { createProvider } from "dreamstate";
-import { ReactElement } from "react";
+import { Container, ContainerConfig } from "@wirestate/core";
+import { ContainerProvider, ContainerProviderScope, useContainer } from "@wirestate/react";
+import { ReactElement, useMemo } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { SpawnEditorNavigatorPage } from "@/applications/spawn_editor/pages/SpawnEditorNavigatorPage";
@@ -9,11 +10,12 @@ import { SpawnEditorUnpackPage } from "@/applications/spawn_editor/pages/SpawnEd
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn/SpawnFileManager";
 import { NavigationError } from "@/core/components/NavigationError";
 
-const SpawnEditorProvider = createProvider([SpawnFileManager]);
-
 export function SpawnEditorRouter(): ReactElement {
+  const parent: Container = useContainer();
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [SpawnFileManager] }), [parent]);
+
   return (
-    <SpawnEditorProvider>
+    <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>
       <Routes>
         <Route path={"/"} element={<SpawnEditorNavigatorPage />} />
         <Route path={"editor/*"} element={<SpawnEditorPage />} />
@@ -21,6 +23,6 @@ export function SpawnEditorRouter(): ReactElement {
         <Route path={"unpack"} element={<SpawnEditorUnpackPage />} />
         <Route path={"*"} element={<NavigationError />} />
       </Routes>
-    </SpawnEditorProvider>
+    </ContainerProvider>
   );
 }

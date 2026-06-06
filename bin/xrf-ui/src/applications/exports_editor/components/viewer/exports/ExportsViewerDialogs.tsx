@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, ReactNode, useLayoutEffect, useMemo } from "react";
 
 import { ExportsEditorDeclarationList } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorDeclarationList";
@@ -7,9 +7,11 @@ import { ExportsManager } from "@/applications/exports_editor/store/exports";
 import { IExportDescriptor } from "@/lib/exports";
 import { useTabState } from "@/lib/tab";
 
-export function ExportsViewerDialogs({
-  exportsContext: { declarations: { isLoading, error, value: declarations } } = useManager(ExportsManager),
-}): ReactElement {
+export function ExportsViewerDialogs(): ReactElement {
+  const {
+    declarations: { isLoading, error, value: declarations },
+  } = useInjection(ExportsManager);
+
   const [activeTab, setActiveTab, onActiveTabChange] = useTabState<string>("");
 
   const { list, dialogSections, dialogExports } = useMemo(() => {
@@ -39,7 +41,7 @@ export function ExportsViewerDialogs({
     if (!dialogExports[activeTab]) {
       setActiveTab(dialogSections[0] ?? "");
     }
-  }, [activeTab, dialogExports, dialogSections]);
+  }, [activeTab, dialogExports, dialogSections, setActiveTab]);
 
   if (isLoading) {
     return (

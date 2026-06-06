@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
@@ -22,11 +22,11 @@ import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf_path";
 
-export function SpawnEditorUnpackForm({
-  spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
-  projectContext: { xrfProjectPath } = useManager(ProjectManager),
-}): ReactElement {
+export function SpawnEditorUnpackForm(): ReactElement {
   const log: Logger = useLogger("spawn-unpack");
+
+  const { spawnFile, openSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileManager);
+  const { xrfProjectPath } = useInjection(ProjectManager);
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);
@@ -58,7 +58,7 @@ export function SpawnEditorUnpackForm({
         setIsSelecting(false);
       }
     },
-    [spawnFile]
+    [log, spawnFile.isLoading]
   );
 
   const onSelectSpawnFileClicked = useCallback(
@@ -91,7 +91,7 @@ export function SpawnEditorUnpackForm({
         setIsSelecting(false);
       }
     },
-    [spawnFile]
+    [log, spawnFile.isLoading]
   );
 
   const onSelectOutputClicked = useCallback(
@@ -109,16 +109,16 @@ export function SpawnEditorUnpackForm({
     }
 
     try {
-      await spawnActions.openSpawnFile(spawnPath);
-      await spawnActions.exportSpawnFile(outputPath);
+      await openSpawnFile(spawnPath);
+      await exportSpawnFile(outputPath);
 
       setIsFinishedSuccessfully(true);
     } catch (error) {
       log.error("Failed to unpack file:", error);
     } finally {
-      await spawnActions.closeSpawnFile();
+      await closeSpawnFile();
     }
-  }, [spawnPath, outputPath]);
+  }, [log, spawnPath, outputPath, openSpawnFile, exportSpawnFile, closeSpawnFile]);
 
   useEffect(() => {
     if (xrfProjectPath) {

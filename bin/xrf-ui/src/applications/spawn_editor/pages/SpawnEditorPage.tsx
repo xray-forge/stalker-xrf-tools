@@ -1,12 +1,14 @@
 import { CircularProgress, Grid } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { SpawnEditor } from "@/applications/spawn_editor/components/editor/SpawnEditor";
 import { SpawnEditorOpenForm } from "@/applications/spawn_editor/components/SpawnEditorOpenForm";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 
-export function SpawnEditorPage({ spawnContext: { spawnFile, isReady } = useManager(SpawnFileManager) }): ReactElement {
+export function SpawnEditorPage(): ReactElement {
+  const { spawnFile, isReady } = useInjection(SpawnFileManager);
+
   if (isReady) {
     return spawnFile.value ? <SpawnEditor /> : <SpawnEditorOpenForm />;
   }

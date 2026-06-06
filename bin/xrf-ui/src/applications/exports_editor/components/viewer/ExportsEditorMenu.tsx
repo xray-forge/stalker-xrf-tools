@@ -3,15 +3,15 @@ import { default as LooksIcon3 } from "@mui/icons-material/Looks3";
 import { default as LooksIcon1 } from "@mui/icons-material/LooksOne";
 import { default as LooksIcon2 } from "@mui/icons-material/LooksTwo";
 import { Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo } from "react";
-import { NavigateFunction, redirect, useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { ExportsManager } from "@/applications/exports_editor/store/exports";
 
-export function ExportsEditorMenu({
-  exportsContext: { exportsActions, declarations } = useManager(ExportsManager),
-}): ReactElement {
+export function ExportsEditorMenu(): ReactElement {
+  const { declarations, closeExports } = useInjection(ExportsManager);
+
   const navigate: NavigateFunction = useNavigate();
 
   const sections: Array<[string, ReactElement]> = useMemo(
@@ -33,8 +33,8 @@ export function ExportsEditorMenu({
   const onCloseClicked = useCallback(() => {
     navigate("/exports_editor", { replace: true });
 
-    return exportsActions.close();
-  }, [exportsActions, redirect]);
+    return closeExports();
+  }, [closeExports, navigate]);
 
   return (
     <Drawer

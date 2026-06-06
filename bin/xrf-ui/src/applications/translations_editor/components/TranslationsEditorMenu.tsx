@@ -1,26 +1,27 @@
 import { Box, Button, Grid } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { TranslationsManager } from "@/applications/translations_editor/store/translations";
 import { Logger, useLogger } from "@/lib/logging";
 
-export function TranslationsEditorMenu({
-  equipmentContext: { project: { isLoading, value: translationsProject }, translationsActions } = useManager(
-    TranslationsManager
-  ),
-}): ReactElement {
-  const navigate: NavigateFunction = useNavigate();
+export function TranslationsEditorMenu(): ReactElement {
   const log: Logger = useLogger("translations-editor-menu");
+  const navigate: NavigateFunction = useNavigate();
+
+  const {
+    project: { isLoading, value: translationsProject },
+    closeTranslationsProject,
+  } = useInjection(TranslationsManager);
 
   const onCloseClick = useCallback(async () => {
     log.info("Closing translations");
 
-    await translationsActions.close();
+    await closeTranslationsProject();
 
     navigate("/translations_editor", { replace: true });
-  }, [navigate, translationsActions]);
+  }, [log, navigate, closeTranslationsProject]);
 
   if (!translationsProject) {
     throw new Error("Unexpected rendering of translations menu.");

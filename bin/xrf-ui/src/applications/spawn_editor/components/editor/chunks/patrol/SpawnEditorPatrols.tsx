@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnEditorPatrolLinksTable } from "@/applications/spawn_editor/components/editor/chunks/patrol/SpawnEditorPatrolLinksTable";
@@ -8,9 +8,11 @@ import { SpawnEditorPatrolsTable } from "@/applications/spawn_editor/components/
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 import { useTabState } from "@/lib/tab";
 
-export function SpawnEditorPatrols({
-  spawnContext: { spawnFile: { value: spawnFile, isLoading, error } } = useManager(SpawnFileManager),
-}): ReactElement {
+export function SpawnEditorPatrols(): ReactElement {
+  const {
+    spawnFile: { value: spawnFile, isLoading, error },
+  } = useInjection(SpawnFileManager);
+
   const [activeTab, , onActiveTabChange] = useTabState<string>("patrols");
 
   const activeTable: ReactElement = useMemo(() => {

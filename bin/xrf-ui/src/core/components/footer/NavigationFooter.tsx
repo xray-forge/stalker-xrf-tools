@@ -2,21 +2,19 @@ import { default as GitHubIcon } from "@mui/icons-material/GitHub";
 import { default as LightModeIcon } from "@mui/icons-material/LightMode";
 import { Grid, IconButton } from "@mui/material";
 import { open } from "@tauri-apps/plugin-shell";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { SettingsModalButton } from "@/core/components/settings/SettingsModalButton";
-import { IThemeContext, ThemeManager } from "@/core/store/theme";
+import { ThemeManager } from "@/core/store/theme";
 
 interface INavigationFooterProps {
-  themeContext?: IThemeContext;
   isWithSettings?: boolean;
 }
 
-export function NavigationFooter({
-  themeContext: { themeActions } = useManager(ThemeManager),
-  isWithSettings = true,
-}: INavigationFooterProps): ReactElement {
+export function NavigationFooter({ isWithSettings = true }: INavigationFooterProps): ReactElement {
+  const { toggleTheme } = useInjection(ThemeManager);
+
   const onOpenGithubLink = useCallback(() => {
     open("https://github.com/xray-forge/stalker-xrf-tools").catch(console.error);
   }, []);
@@ -27,7 +25,7 @@ export function NavigationFooter({
         <GitHubIcon />
       </IconButton>
 
-      <IconButton onClick={themeActions.toggleTheme}>
+      <IconButton onClick={toggleTheme}>
         <LightModeIcon />
       </IconButton>
 

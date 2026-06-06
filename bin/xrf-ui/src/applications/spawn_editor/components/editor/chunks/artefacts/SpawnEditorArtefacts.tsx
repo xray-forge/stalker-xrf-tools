@@ -1,13 +1,15 @@
 import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { SpawnEditorArtefactsNodesTable } from "@/applications/spawn_editor/components/editor/chunks/artefacts/SpawnEditorArtefactsNodesTable";
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 
-export function SpawnEditorArtefacts({
-  spawnContext: { spawnFile: { value: spawnFile, isLoading, error } } = useManager(SpawnFileManager),
-}): ReactElement {
+export function SpawnEditorArtefacts(): ReactElement {
+  const {
+    spawnFile: { value: spawnFile, isLoading, error },
+  } = useInjection(SpawnFileManager);
+
   if (isLoading) {
     return (
       <Grid

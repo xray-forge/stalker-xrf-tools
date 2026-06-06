@@ -1,38 +1,43 @@
 import { Box, Button, Grid } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 import { Logger, useLogger } from "@/lib/logging";
 
-export function EquipmentSpriteEditorMenu({
-  equipmentContext: { spriteImage: { isLoading, value: spriteImage }, equipmentActions } = useManager(EquipmentManager),
-}): ReactElement {
-  const navigate: NavigateFunction = useNavigate();
+export function EquipmentSpriteEditorMenu(): ReactElement {
   const log: Logger = useLogger("equipment-editor-menu");
+  const navigate: NavigateFunction = useNavigate();
+
+  const {
+    spriteImage: { isLoading, value: spriteImage },
+    closeEquipmentProject,
+    repackAndOpenProject,
+    reopenEquipmentProject,
+  } = useInjection(EquipmentManager);
 
   const onRepackAndReopenClick = useCallback(async () => {
     try {
-      await equipmentActions.repackAndOpen();
+      await repackAndOpenProject();
     } catch (error) {
       log.error("Failed to repack and reopen DDS:", error);
     }
-  }, []);
+  }, [log, repackAndOpenProject]);
 
   const onReopenClick = useCallback(async () => {
     try {
-      await equipmentActions.reopen();
+      await reopenEquipmentProject();
     } catch (error) {
       log.error("Failed to reopen DDS:", error);
     }
-  }, []);
+  }, [log, reopenEquipmentProject]);
 
   const onCloseClick = useCallback(async () => {
-    await equipmentActions.close();
+    await closeEquipmentProject();
 
     navigate("/icons_editor", { replace: true });
-  }, [navigate, equipmentActions]);
+  }, [navigate, closeEquipmentProject]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: 240, minWidth: 240, justifySelf: "stretch" }}>

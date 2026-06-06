@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
@@ -22,11 +22,11 @@ import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/lib/xrf_path";
 
-export function SpawnEditorPackForm({
-  spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
-  projectContext: { xrfProjectPath } = useManager(ProjectManager),
-}): ReactElement {
+export function SpawnEditorPackForm(): ReactElement {
   const log: Logger = useLogger("spawn-pack");
+
+  const { spawnFile, importSpawnFile, saveSpawnFile, closeSpawnFile } = useInjection(SpawnFileManager);
+  const { xrfProjectPath } = useInjection(ProjectManager);
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);
@@ -58,7 +58,7 @@ export function SpawnEditorPackForm({
         setIsSelecting(false);
       }
     },
-    [spawnFile]
+    [log, spawnFile.isLoading]
   );
 
   const onSelectSpawnFileClicked = useCallback(
@@ -91,12 +91,12 @@ export function SpawnEditorPackForm({
         setIsSelecting(false);
       }
     },
-    [spawnFile]
+    [log, spawnFile.isLoading]
   );
 
   const onSelectInputClicked = useCallback(
     (event: MouseEvent<HTMLInputElement>) => onSelectInput(event),
-    [onSelectSpawnFile]
+    [onSelectInput]
   );
 
   const onPackClicked = useCallback(async () => {
@@ -109,16 +109,16 @@ export function SpawnEditorPackForm({
     }
 
     try {
-      await spawnActions.importSpawnFile(inputPath);
-      await spawnActions.saveSpawnFile(spawnPath);
+      await importSpawnFile(inputPath);
+      await saveSpawnFile(spawnPath);
 
       setIsFinishedSuccessfully(true);
     } catch (error) {
       log.error("Failed to pack file:", error);
     } finally {
-      await spawnActions.closeSpawnFile();
+      await closeSpawnFile();
     }
-  }, [spawnPath, inputPath]);
+  }, [log, inputPath, spawnPath, importSpawnFile, saveSpawnFile, closeSpawnFile]);
 
   useEffect(() => {
     if (xrfProjectPath) {

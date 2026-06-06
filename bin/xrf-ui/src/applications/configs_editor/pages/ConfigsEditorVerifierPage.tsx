@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs_editor/components/ConfigsVerifyResult";
@@ -24,8 +24,10 @@ import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectVerifyResult } from "@/lib/ltx";
 
-export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } = useManager(ProjectManager) }) {
+export function ConfigsEditorVerifierPage() {
   const log: Logger = useLogger("configs-verifier");
+
+  const { xrfConfigsPath } = useInjection(ProjectManager);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);
@@ -54,7 +56,7 @@ export function ConfigsEditorVerifierPage({ projectContext: { xrfConfigsPath } =
         setConfigsPath(newXrfConfigsPath);
       }
     },
-    [isLoading]
+    [isLoading, log]
   );
 
   const onSelectConfigsPathClicked = useCallback(

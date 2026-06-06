@@ -1,11 +1,29 @@
 import * as path from "path";
 
 import { default as react } from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { default as observerPlugin } from "mobx-react-observer/vite-plugin";
+import { defineConfig, Plugin } from "vite";
+
+function reactObserverPlugin(): Plugin {
+  const plugin: Plugin = observerPlugin() as Plugin;
+  const transform = plugin.transform;
+
+  return {
+    ...plugin,
+    name: "mobx-react-observer-tsx",
+    transform(code, id) {
+      if (id.endsWith(".tsx") && typeof transform === "function") {
+        return transform.call(this, code, id);
+      }
+
+      return null;
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-  plugins: [react()],
+  plugins: [react(), reactObserverPlugin()],
   build: {
     outDir: "target",
   },

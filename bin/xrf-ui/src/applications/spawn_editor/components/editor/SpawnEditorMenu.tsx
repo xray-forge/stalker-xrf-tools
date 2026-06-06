@@ -8,16 +8,16 @@ import { default as LooksIcon2 } from "@mui/icons-material/LooksTwo";
 import { default as SaveIcon } from "@mui/icons-material/Save";
 import { Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import * as dialog from "@tauri-apps/plugin-dialog";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo } from "react";
-import { NavigateFunction, redirect, useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 import { Optional } from "@/core/types/general";
 
-export function SpawnEditorMenu({
-  spawnContext: { spawnActions, spawnFile } = useManager(SpawnFileManager),
-}): ReactElement {
+export function SpawnEditorMenu(): ReactElement {
+  const { spawnFile, saveSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileManager);
+
   const navigate: NavigateFunction = useNavigate();
 
   const sections: Array<[string, ReactElement]> = useMemo(
@@ -38,9 +38,9 @@ export function SpawnEditorMenu({
     });
 
     if (path) {
-      await spawnActions.saveSpawnFile(path);
+      await saveSpawnFile(path);
     }
-  }, [spawnActions, redirect]);
+  }, [saveSpawnFile]);
 
   const onExportClicked = useCallback(async () => {
     const path: Optional<string> = (await dialog.open({
@@ -49,9 +49,9 @@ export function SpawnEditorMenu({
     })) as Optional<string>;
 
     if (path) {
-      await spawnActions.exportSpawnFile(path);
+      await exportSpawnFile(path);
     }
-  }, [spawnActions, redirect]);
+  }, [exportSpawnFile]);
 
   const onNavigateClicked = useCallback(
     (to: string) => {
@@ -63,8 +63,8 @@ export function SpawnEditorMenu({
   const onCloseClicked = useCallback(() => {
     navigate("/spawn_editor", { replace: true });
 
-    return spawnActions.closeSpawnFile();
-  }, [spawnActions, redirect]);
+    return closeSpawnFile();
+  }, [navigate]);
 
   return (
     <Drawer

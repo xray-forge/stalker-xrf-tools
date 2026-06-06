@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnEditorGraphCrossTable } from "@/applications/spawn_editor/components/editor/chunks/graph/SpawnEditorGraphCrossTable";
@@ -11,9 +11,11 @@ import { SpawnEditorGraphVerticesTable } from "@/applications/spawn_editor/compo
 import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
 import { useTabState } from "@/lib/tab";
 
-export function SpawnEditorGraphs({
-  spawnContext: { spawnFile: { value: spawnFile, isLoading, error } } = useManager(SpawnFileManager),
-}): ReactElement {
+export function SpawnEditorGraphs(): ReactElement {
+  const {
+    spawnFile: { value: spawnFile, isLoading, error },
+  } = useInjection(SpawnFileManager);
+
   const [activeTab, , onActiveTabChange] = useTabState<string>("header");
 
   const activeTable: ReactElement = useMemo(() => {

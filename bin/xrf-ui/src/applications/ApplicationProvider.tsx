@@ -1,19 +1,17 @@
 import { GlobalStyles, ThemeProvider } from "@mui/material";
 import { default as CssBaseline } from "@mui/material/CssBaseline";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactNode } from "react";
 
-import { IThemeContext, ThemeManager } from "@/core/store/theme";
+import { ThemeManager } from "@/core/store/theme";
 
 interface IApplicationProviderProps {
-  themeContext?: IThemeContext;
   children: ReactNode;
 }
 
-export function ApplicationProvider({
-  themeContext: { theme } = useManager(ThemeManager),
-  children,
-}: IApplicationProviderProps) {
+export function ApplicationProvider({ children }: IApplicationProviderProps) {
+  const { theme } = useInjection(ThemeManager);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme={true} />

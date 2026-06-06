@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archive_editor/components/ArchivesUnpackResult";
@@ -25,8 +25,10 @@ import { EArchivesEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf_path";
 
-export function ArchivesEditorUnpackerPage({ projectContext: { xrfProjectPath } = useManager(ProjectManager) }) {
+export function ArchivesEditorUnpackerPage() {
   const log: Logger = useLogger("archives-unpacker");
+
+  const { xrfProjectPath } = useInjection(ProjectManager);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);

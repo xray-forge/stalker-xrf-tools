@@ -1,5 +1,6 @@
-import { createProvider } from "dreamstate";
-import { ReactElement } from "react";
+import { Container, ContainerConfig } from "@wirestate/core";
+import { ContainerProvider, ContainerProviderScope, useContainer } from "@wirestate/react";
+import { ReactElement, useMemo } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { ArchivesEditorNavigatorPage } from "@/applications/archive_editor/pages/ArchivesEditorNavigatorPage";
@@ -8,11 +9,12 @@ import { ArchivesEditorUnpackerPage } from "@/applications/archive_editor/pages/
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
 import { NavigationError } from "@/core/components/NavigationError";
 
-const ArchivesEditorProvider = createProvider([ArchivesManager]);
-
 export function ArchivesEditorRouter(): ReactElement {
+  const parent: Container = useContainer();
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ArchivesManager] }), [parent]);
+
   return (
-    <ArchivesEditorProvider>
+    <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>
       <Routes>
         <Route path={"/"} element={<ArchivesEditorNavigatorPage />} />
         <Route path={"/editor"} element={<ArchivesEditorPage />} />
@@ -20,6 +22,6 @@ export function ArchivesEditorRouter(): ReactElement {
         <Route path={"/unpacker"} element={<ArchivesEditorUnpackerPage />} />
         <Route path={"*"} element={<NavigationError />} />
       </Routes>
-    </ArchivesEditorProvider>
+    </ContainerProvider>
   );
 }

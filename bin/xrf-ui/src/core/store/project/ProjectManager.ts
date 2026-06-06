@@ -1,53 +1,53 @@
 import { exists } from "@tauri-apps/plugin-fs";
-import { ContextManager, createActions, OnQuery } from "dreamstate";
+import { Injectable, OnProvision } from "@wirestate/core";
+import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
 
-import { EProjectQuery } from "@/core/store/project/queries";
 import { Optional } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local_storage";
 import { Logger } from "@/lib/logging";
 
-export interface IProjectContext {
-  projectActions: {
-    setXrfProjectPath(path: Optional<string>): void;
-    setXrfConfigsPath(path: Optional<string>): void;
-  };
-  xrfProjectPath: Optional<string>;
-  xrfConfigsPath: Optional<string>;
-}
+@Injectable()
+export class ProjectManager {
+  public readonly log: Logger = new Logger(this.constructor.name);
 
-export class ProjectManager extends ContextManager<IProjectContext> {
-  public log: Logger = new Logger("project");
+  @Observable()
+  public xrfProjectPath: Optional<string> = null;
 
-  public context: IProjectContext = {
-    projectActions: createActions({
-      setXrfProjectPath: (path) => this.setXrfProjectPath(path),
-      setXrfConfigsPath: (path) => this.setXrfConfigsPath(path),
-    }),
-    xrfProjectPath: null,
-    xrfConfigsPath: null,
-  };
+  @Observable()
+  public xrfConfigsPath: Optional<string> = null;
 
-  public onProvisionStarted(): void {
-    this.getXrfProjectPath().then((path) => this.setContext({ xrfProjectPath: path }));
-    this.getXrfConfigsPath().then((path) => this.setContext({ xrfConfigsPath: path }));
+  public constructor() {
+    makeObservable(this);
   }
 
+  @OnProvision()
+  public onProvision(): void {
+    this.getXrfProjectPath().then((path) => {
+      this.xrfProjectPath = path;
+    });
+    this.getXrfConfigsPath().then((path) => {
+      this.xrfConfigsPath = path;
+    });
+  }
+
+  @BoundAction()
   public setXrfProjectPath(path: Optional<string>): void {
     this.log.info("Set xrf project path:", path);
 
-    this.setContext({ xrfProjectPath: path });
-    setLocalStorageValue("xrf_project_path", path);
+    this.xrfProjectPath = path;
+    setLocalStorageValue("xrf-project-path", path);
   }
 
+  @BoundAction()
   public setXrfConfigsPath(path: Optional<string>): void {
     this.log.info("Set xrf configs path:", path);
 
-    this.setContext({ xrfConfigsPath: path });
-    setLocalStorageValue("xrf_configs_path", path);
+    this.xrfConfigsPath = path;
+    setLocalStorageValue("xrf-configs-path", path);
   }
 
   public async getXrfProjectPath(): Promise<Optional<string>> {
-    const xrfProjectPath: Optional<string> = getLocalStorageValue("xrf_project_path");
+    const xrfProjectPath: Optional<string> = getLocalStorageValue("xrf-project-path");
 
     if (xrfProjectPath && (await exists(xrfProjectPath))) {
       this.log.info("Loading xrf project path:", xrfProjectPath);
@@ -59,7 +59,7 @@ export class ProjectManager extends ContextManager<IProjectContext> {
   }
 
   public async getXrfConfigsPath(): Promise<Optional<string>> {
-    const xrfProjectPath: Optional<string> = getLocalStorageValue("xrf_configs_path");
+    const xrfProjectPath: Optional<string> = getLocalStorageValue("xrf-configs-path");
 
     if (xrfProjectPath && (await exists(xrfProjectPath))) {
       this.log.info("Loading xrf configs path:", xrfProjectPath);
@@ -68,10 +68,5 @@ export class ProjectManager extends ContextManager<IProjectContext> {
     }
 
     return null;
-  }
-
-  @OnQuery(EProjectQuery.PROJECT_PATH)
-  public onGetProjectPath(): Optional<string> {
-    return this.context.xrfProjectPath;
   }
 }

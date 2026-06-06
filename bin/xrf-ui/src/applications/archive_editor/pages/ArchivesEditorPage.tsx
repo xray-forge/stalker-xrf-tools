@@ -1,14 +1,14 @@
 import { CircularProgress, Grid } from "@mui/material";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { ArchivesEditorOpenForm } from "@/applications/archive_editor/components/ArchivesEditorOpenForm";
 import { ArchivesEditor } from "@/applications/archive_editor/components/editor/ArchivesEditor";
 import { ArchivesManager } from "@/applications/archive_editor/store/archives";
 
-export function ArchivesEditorPage({
-  archivesContext: { project, isReady } = useManager(ArchivesManager),
-}): ReactElement {
+export function ArchivesEditorPage(): ReactElement {
+  const { project, isReady } = useInjection(ArchivesManager);
+
   if (isReady) {
     return project.value ? <ArchivesEditor /> : <ArchivesEditorOpenForm />;
   }

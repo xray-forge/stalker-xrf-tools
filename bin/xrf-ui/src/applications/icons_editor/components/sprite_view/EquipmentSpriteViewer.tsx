@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { SxProps } from "@mui/system";
 import { clamp } from "@mui/x-data-grid/internals";
-import { useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useMemo, useState, WheelEvent } from "react";
 
 import { EquipmentGridControls } from "@/applications/icons_editor/components/sprite_view/EquipmentGridControls";
@@ -14,11 +14,15 @@ import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 import { Optional } from "@/core/types/general";
 import { GridMapper } from "@/lib/icons";
 
-export function EquipmentSpriteViewer({
-  equipmentContext: { spriteImage: { value: spriteImage }, gridSize, isGridVisible, equipmentActions } = useManager(
-    EquipmentManager
-  ),
-}): ReactElement {
+export function EquipmentSpriteViewer(): ReactElement {
+  const {
+    spriteImage: { value: spriteImage },
+    gridSize,
+    isGridVisible,
+    setGridSize,
+    setGridVisibility,
+  } = useInjection(EquipmentManager);
+
   const [holdingOrigin, setHoldingOrigin] = useState<Optional<[number, number]>>(null);
   const [zoomValue, setZoomValue] = useState(1);
   const [zoomOriginX, setZoomOriginX] = useState(0);
@@ -71,36 +75,33 @@ export function EquipmentSpriteViewer({
     setZoomValue((it) => clamp(it - 0.1, equipmentViewerConfig.ZOOM_IN_MIN, equipmentViewerConfig.ZOOM_IN_MAX));
   }, []);
 
-  const onWheel = useCallback(
-    (event: WheelEvent<HTMLDivElement>) => {
-      if (event.shiftKey) {
-        setZoomOriginY((it) =>
-          clamp(
-            event.deltaY > 0 ? it - 30 : it + 30,
-            equipmentViewerConfig.ZOOM_OFFSET_MIN,
-            equipmentViewerConfig.ZOOM_OFFSET_MAX
-          )
-        );
-      } else if (event.ctrlKey) {
-        setZoomOriginX((it) =>
-          clamp(
-            event.deltaY > 0 ? it - 30 : it + 30,
-            equipmentViewerConfig.ZOOM_OFFSET_MIN,
-            equipmentViewerConfig.ZOOM_OFFSET_MAX
-          )
-        );
-      } else {
-        setZoomValue((it) =>
-          clamp(
-            event.deltaY > 0 ? it - 0.1 : it + 0.1,
-            equipmentViewerConfig.ZOOM_IN_MIN,
-            equipmentViewerConfig.ZOOM_IN_MAX
-          )
-        );
-      }
-    },
-    [zoomValue]
-  );
+  const onWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
+    if (event.shiftKey) {
+      setZoomOriginY((it) =>
+        clamp(
+          event.deltaY > 0 ? it - 30 : it + 30,
+          equipmentViewerConfig.ZOOM_OFFSET_MIN,
+          equipmentViewerConfig.ZOOM_OFFSET_MAX
+        )
+      );
+    } else if (event.ctrlKey) {
+      setZoomOriginX((it) =>
+        clamp(
+          event.deltaY > 0 ? it - 30 : it + 30,
+          equipmentViewerConfig.ZOOM_OFFSET_MIN,
+          equipmentViewerConfig.ZOOM_OFFSET_MAX
+        )
+      );
+    } else {
+      setZoomValue((it) =>
+        clamp(
+          event.deltaY > 0 ? it - 0.1 : it + 0.1,
+          equipmentViewerConfig.ZOOM_IN_MIN,
+          equipmentViewerConfig.ZOOM_IN_MAX
+        )
+      );
+    }
+  }, []);
 
   const onMouseDown = useCallback((event: MouseEvent<HTMLDivElement>) => {
     setHoldingOrigin([event.pageX, event.pageY]);
@@ -204,8 +205,8 @@ export function EquipmentSpriteViewer({
         <EquipmentGridControls
           gridSize={gridSize}
           isGridVisible={isGridVisible}
-          onSetGridSize={equipmentActions.setGridSize}
-          onSetGridVisibility={equipmentActions.setGridVisibility}
+          onSetGridSize={setGridSize}
+          onSetGridVisibility={setGridVisibility}
         />
 
         <EquipmentGridZoom zoom={zoomValue} onZoomDown={onZoomDown} onZoomUp={onZoomUp} />

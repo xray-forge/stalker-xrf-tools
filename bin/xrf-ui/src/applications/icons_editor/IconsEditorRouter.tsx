@@ -1,5 +1,6 @@
-import { createProvider } from "dreamstate";
-import { ReactElement } from "react";
+import { Container, ContainerConfig } from "@wirestate/core";
+import { ContainerProvider, ContainerProviderScope, useContainer } from "@wirestate/react";
+import { ReactElement, useMemo } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { IconsEditorDescriptionOpenPage } from "@/applications/icons_editor/pages/IconsEditorDescriptionOpenPage";
@@ -12,11 +13,12 @@ import { IconsEditorNavigatorPage } from "@/applications/icons_editor/pages/Icon
 import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
 import { NavigationError } from "@/core/components/NavigationError";
 
-const EquipmentEditorProvider = createProvider([EquipmentManager]);
-
 export function IconsEditorRouter(): ReactElement {
+  const parent: Container = useContainer();
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [EquipmentManager] }), [parent]);
+
   return (
-    <EquipmentEditorProvider>
+    <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>
       <Routes>
         <Route path={"/"} element={<IconsEditorNavigatorPage />} />
 
@@ -30,6 +32,6 @@ export function IconsEditorRouter(): ReactElement {
 
         <Route path={"*"} element={<NavigationError />} />
       </Routes>
-    </EquipmentEditorProvider>
+    </ContainerProvider>
   );
 }

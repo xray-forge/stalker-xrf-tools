@@ -2,12 +2,14 @@ import { clamp } from "@mui/x-data-grid/internals";
 import { path } from "@tauri-apps/api";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
-import { ContextManager, createActions, createLoadable, Loadable } from "dreamstate";
+import { OnProvision } from "@wirestate/core";
+import { BoundAction, makeObservable, Observable } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons";
 import { blobToImage } from "@/lib/image";
 import { EIconsEditorCommand } from "@/lib/ipc";
+import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 
 export interface IEquipmentPngDescriptor {
@@ -19,64 +21,56 @@ export interface IEquipmentPngDescriptor {
   image: HTMLImageElement;
 }
 
-export interface IEquipmentContext {
-  equipmentActions: {
-    open(spritePath: string, systemLtxPath: string): Promise<void>;
-    pack(sourcePath: string, outputPath: string, systemLtxPath: string): Promise<IPackEquipmentResult>;
-    reopen(): Promise<void>;
-    repackAndOpen(): Promise<void>;
-    close(): Promise<void>;
-    setGridVisibility(isVisible: boolean): void;
-    setGridSize(size: number): void;
-  };
-  isReady: boolean;
-  isGridVisible: boolean;
-  gridSize: number;
-  spriteImage: Loadable<Optional<IEquipmentPngDescriptor>>;
-}
+export class EquipmentManager {
+  @Observable()
+  public gridSize: number = 50;
 
-export class EquipmentManager extends ContextManager<IEquipmentContext> {
-  public context: IEquipmentContext = {
-    equipmentActions: createActions({
-      open: (spritePath: string, systemLtxPath: string) => this.openEquipmentProject(spritePath, systemLtxPath),
-      pack: (sourcePath: string, outputPath: string, systemLtxPath: string) =>
-        this.packEquipmentSprite(sourcePath, outputPath, systemLtxPath),
-      reopen: () => this.reopenEquipmentProject(),
-      repackAndOpen: () => this.repackAndOpenProject(),
-      close: () => this.closeEquipmentProject(),
-      setGridVisibility: (isVisible: boolean) => this.setContext({ isGridVisible: isVisible }),
-      setGridSize: (size: number) => this.setContext({ gridSize: Math.round(clamp(size, 10, 100)) }),
-    }),
-    gridSize: 50,
-    isReady: false,
-    isGridVisible: true,
-    spriteImage: createLoadable(null),
-  };
+  @Observable()
+  public isReady: boolean = false;
 
-  public log: Logger = new Logger("equipment");
+  @Observable()
+  public isGridVisible: boolean = true;
 
-  public async onProvisionStarted(): Promise<void> {
+  @Observable()
+  public spriteImage: Loadable<Optional<IEquipmentPngDescriptor>> = createLoadable(null);
+
+  public readonly log: Logger = new Logger(this.constructor.name);
+
+  public constructor() {
+    makeObservable(this);
+  }
+
+  @OnProvision()
+  public async onProvision(): Promise<void> {
     const response: IEquipmentResponse = await invoke(EIconsEditorCommand.GET_EQUIPMENT_SPRITE);
 
     if (response) {
       this.log.info("Existing equipment sprite detected");
-
-      this.setContext({
-        isReady: true,
-        spriteImage: createLoadable(await this.spriteFromResponse(response)),
-      });
+      this.isReady = true;
+      this.spriteImage = createLoadable(await this.spriteFromResponse(response));
     } else {
       this.log.info("No existing sprite detected file");
-      this.setContext({ isReady: true });
+      this.isReady = true;
     }
   }
 
+  @BoundAction()
+  public setGridVisibility(isVisible: boolean): void {
+    this.isGridVisible = isVisible;
+  }
+
+  @BoundAction()
+  public setGridSize(size: number): void {
+    this.gridSize = Math.round(clamp(size, 10, 100));
+  }
+
+  @BoundAction()
   public async openEquipmentProject(equipmentDdsPath: string, systemLtxPath: string): Promise<void> {
     this.log.info("Opening equipment project:", equipmentDdsPath, systemLtxPath);
 
     try {
       this.cleanupAssets();
-      this.setContext({ spriteImage: createLoadable(null, true) });
+      this.spriteImage = createLoadable(null, true);
 
       const response: IEquipmentResponse = await invoke(EIconsEditorCommand.OPEN_EQUIPMENT_SPRITE, {
         equipmentDdsPath,
@@ -85,37 +79,35 @@ export class EquipmentManager extends ContextManager<IEquipmentContext> {
 
       this.log.info("Equipment project opened:", response);
 
-      this.setContext({
-        spriteImage: createLoadable(await this.spriteFromResponse(response)),
-      });
+      this.spriteImage = createLoadable(await this.spriteFromResponse(response));
     } catch (error) {
       this.log.error("Failed to open equipment editor project:", error);
-      this.setContext({ spriteImage: createLoadable(null, false, error as Error) });
+      this.spriteImage = createLoadable(null, false, error as Error);
     }
   }
 
+  @BoundAction()
   public async reopenEquipmentProject(): Promise<void> {
     this.log.info("Reopening equipment editor project");
 
     try {
-      this.setContext(({ spriteImage }) => ({ spriteImage: spriteImage.asLoading() }));
+      this.spriteImage = this.spriteImage.asLoading();
 
       const response: IEquipmentResponse = await invoke(EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE);
 
       this.log.info("Equipment project reopened:", response);
 
       this.cleanupAssets();
-      this.setContext({
-        spriteImage: createLoadable(await this.spriteFromResponse(response)),
-      });
+      this.spriteImage = createLoadable(await this.spriteFromResponse(response));
     } catch (error) {
       this.log.error("Failed to reopen equipment editor project:", error);
       throw error;
     }
   }
 
+  @BoundAction()
   public async repackAndOpenProject(): Promise<void> {
-    const { spriteImage } = this.context;
+    const { spriteImage } = this;
 
     if (!spriteImage.value || spriteImage.isLoading) {
       throw new Error("Invalid attempt to reopen project that is loading or not open.");
@@ -133,33 +125,34 @@ export class EquipmentManager extends ContextManager<IEquipmentContext> {
     }
 
     try {
-      this.setContext(({ spriteImage }) => ({ spriteImage: spriteImage.asLoading() }));
+      this.spriteImage = this.spriteImage.asLoading();
 
       await this.packEquipmentSprite(inputPath, spriteImage.value.path, spriteImage.value.ltxPath);
 
       await this.reopenEquipmentProject();
     } finally {
-      if (this.context.spriteImage.isLoading) {
-        this.setContext(({ spriteImage }) => ({ spriteImage: spriteImage.asReady() }));
+      if (this.spriteImage.isLoading) {
+        this.spriteImage = this.spriteImage.asReady();
       }
     }
   }
 
+  @BoundAction()
   public async closeEquipmentProject(): Promise<void> {
     this.log.info("Closing equipment project");
 
     try {
-      this.setContext(({ spriteImage }) => ({ spriteImage: spriteImage.asLoading() }));
+      this.spriteImage = this.spriteImage.asLoading();
       this.cleanupAssets();
 
       await invoke(EIconsEditorCommand.CLOSE_EQUIPMENT_SPRITE);
 
       this.log.info("Equipment project closed");
 
-      this.setContext({ spriteImage: createLoadable(null) });
+      this.spriteImage = createLoadable(null);
     } catch (error) {
       this.log.error("Failed to close equipment editor project:", error);
-      this.setContext(({ spriteImage }) => ({ spriteImage: spriteImage.asFailed(new Error(error as string)) }));
+      this.spriteImage = this.spriteImage.asFailed(new Error(error as string));
     }
   }
 
@@ -196,10 +189,8 @@ export class EquipmentManager extends ContextManager<IEquipmentContext> {
   }
 
   public cleanupAssets(): void {
-    const { spriteImage } = this.context;
-
-    if (spriteImage.value) {
-      URL.revokeObjectURL(spriteImage.value.image.src);
+    if (this.spriteImage.value) {
+      URL.revokeObjectURL(this.spriteImage.value.image.src);
     }
   }
 }

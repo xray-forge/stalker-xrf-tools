@@ -1,5 +1,5 @@
 import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
-import { createLoadable, Loadable, useManager } from "dreamstate";
+import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { EquipmentPackResult } from "@/applications/icons_editor/components/equipment_pack/EquipmentPackResult";
@@ -9,6 +9,7 @@ import { ProjectManager } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { IPackEquipmentResult } from "@/lib/icons";
+import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import {
   getPathIfExists,
@@ -17,11 +18,11 @@ import {
   getProjectSystemLtxPath,
 } from "@/lib/xrf_path";
 
-export function IconsEditorEquipmentPackPage({
-  equipmentContext: { equipmentActions } = useManager(EquipmentManager),
-  projectContext: { xrfProjectPath } = useManager(ProjectManager),
-}): ReactElement {
+export function IconsEditorEquipmentPackPage(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");
+
+  const { packEquipmentSprite } = useInjection(EquipmentManager);
+  const { xrfProjectPath } = useInjection(ProjectManager);
 
   const [result, setResult] = useState<Loadable<Optional<IPackEquipmentResult>>>(() => createLoadable(null));
 
@@ -48,7 +49,7 @@ export function IconsEditorEquipmentPackPage({
       try {
         setResult(createLoadable(null, true));
 
-        const packResult: IPackEquipmentResult = await equipmentActions.pack(
+        const packResult: IPackEquipmentResult = await packEquipmentSprite(
           inputIconsPath,
           outputSpritePath,
           systemLtxPath
@@ -66,7 +67,7 @@ export function IconsEditorEquipmentPackPage({
         systemLtxPath,
       });
     }
-  }, [inputIconsPath, outputSpritePath, systemLtxPath, log]);
+  }, [inputIconsPath, outputSpritePath, systemLtxPath, log, packEquipmentSprite]);
 
   useEffect(() => {
     if (xrfProjectPath) {
