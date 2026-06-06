@@ -21,11 +21,51 @@ function reactObserverPlugin(): Plugin {
   };
 }
 
+function getInitialVendorChunk(id: string): string | null {
+  const normalized: string = id.replaceAll("\\", "/");
+
+  if (normalized.includes("/node_modules/")) {
+    if (normalized.includes("/node_modules/react") || normalized.includes("/node_modules/scheduler")) {
+      return "vendor-react";
+    }
+
+    if (normalized.includes("/node_modules/@wirestate/")) {
+      return "vendor-wirestate";
+    }
+
+    if (normalized.includes("/node_modules/@mui/x-data-grid/")) {
+      return "vendor-mui-data-grid";
+    }
+
+    if (normalized.includes("/node_modules/@mui/") || normalized.includes("/node_modules/@emotion/")) {
+      return "vendor-mui";
+    }
+
+    return "vendor";
+  }
+
+  return null;
+}
+
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig({
   plugins: [react(), reactObserverPlugin()],
   build: {
     outDir: "target",
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: getInitialVendorChunk,
+              test: /node_modules[\\/]/,
+              tags: ["$initial" as const],
+              minSize: 50_000,
+            },
+          ],
+        },
+      },
+    },
   },
   resolve: {
     alias: {
@@ -44,4 +84,4 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
-}));
+});

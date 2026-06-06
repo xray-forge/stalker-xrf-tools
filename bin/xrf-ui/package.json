@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
+    "preview:prod": "npm run build && vite preview",
     "lint": "eslint . --ext .ts,.tsx,.js",
     "format": "prettier --write \"**/*.(js|ts|tsx|md)\" && eslint . --ext .ts,.tsx,.js --fix"
   },
