@@ -4,11 +4,11 @@ import { useInjection } from "@wirestate/react";
 import { useCallback, useState } from "react";
 
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 
 export function ConfigsEditorExplorerPage() {
-  const { xrfConfigsPath } = useInjection(ProjectManager);
+  const { xrfConfigsPath } = useInjection(ProjectService);
 
   const [configsPath] = useState<Optional<string>>(xrfConfigsPath);
 

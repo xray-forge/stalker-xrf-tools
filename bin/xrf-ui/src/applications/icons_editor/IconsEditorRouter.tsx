@@ -10,12 +10,12 @@ import { IconsEditorEquipmentPackPage } from "@/applications/icons_editor/pages/
 import { IconsEditorEquipmentPage } from "@/applications/icons_editor/pages/IconsEditorEquipmentPage";
 import { IconsEditorEquipmentUnpackPage } from "@/applications/icons_editor/pages/IconsEditorEquipmentUnpackPage";
 import { IconsEditorNavigatorPage } from "@/applications/icons_editor/pages/IconsEditorNavigatorPage";
-import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
+import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { NavigationError } from "@/core/components/NavigationError";
 
 export function IconsEditorRouter(): ReactElement {
   const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [EquipmentManager] }), [parent]);
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [EquipmentService] }), [parent]);
 
   return (
     <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>

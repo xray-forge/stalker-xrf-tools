@@ -14,16 +14,16 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
-import { ArchivesManager } from "@/applications/archive_editor/store/archives";
+import { ArchivesService } from "@/applications/archive_editor/store/archives";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectLinkedGamePath } from "@/lib/xrf_path";
 
 export function ArchivesEditorOpenForm() {
-  const { project, openArchivesProject } = useInjection(ArchivesManager);
-  const { xrfProjectPath } = useInjection(ProjectManager);
+  const { project, openArchivesProject } = useInjection(ArchivesService);
+  const { xrfProjectPath } = useInjection(ProjectService);
 
   const log: Logger = useLogger("archives-editor");
   const [archivesPath, setArchivesPath] = useState<Optional<string>>(null);

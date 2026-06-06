@@ -5,12 +5,12 @@ import { Route, Routes } from "react-router-dom";
 
 import { ExportsEditorNavigatorPage } from "@/applications/exports_editor/pages/ExportsEditorNavigatorPage";
 import { ExportsEditorPage } from "@/applications/exports_editor/pages/ExportsEditorPage";
-import { ExportsManager } from "@/applications/exports_editor/store/exports";
+import { ExportsService } from "@/applications/exports_editor/store/exports";
 import { NavigationError } from "@/core/components/NavigationError";
 
 export function ExportsEditorRouter(): ReactElement {
   const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ExportsManager] }), [parent]);
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ExportsService] }), [parent]);
 
   return (
     <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>

@@ -3,12 +3,12 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { ExportsEditorDeclarationList } from "@/applications/exports_editor/components/viewer/declarations/ExportsEditorDeclarationList";
-import { ExportsManager } from "@/applications/exports_editor/store/exports";
+import { ExportsService } from "@/applications/exports_editor/store/exports";
 
 export function ExportsViewerConditions(): ReactElement {
   const {
     declarations: { isLoading, error, value: declarations },
-  } = useInjection(ExportsManager);
+  } = useInjection(ExportsService);
 
   if (isLoading) {
     return (

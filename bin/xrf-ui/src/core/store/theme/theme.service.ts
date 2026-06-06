@@ -7,7 +7,7 @@ import { Logger } from "@/lib/logging";
 import { createApplicationTheme } from "@/lib/theme";
 
 @Injectable()
-export class ThemeManager {
+export class ThemeService {
   @Observable()
   public theme: Theme = createApplicationTheme(getLocalStorageValue("theme") === "light" ? "light" : "dark");
 

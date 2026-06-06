@@ -4,10 +4,10 @@ import { ReactElement } from "react";
 
 import { TranslationsEditor } from "@/applications/translations_editor/components/TranslationsEditor";
 import { TranslationsEditorOpenForm } from "@/applications/translations_editor/components/TranslationsEditorOpenForm";
-import { TranslationsManager } from "@/applications/translations_editor/store/translations";
+import { TranslationsService } from "@/applications/translations_editor/store/translations";
 
 export function TranslationsEditorProjectPage(): ReactElement {
-  const { isReady, project } = useInjection(TranslationsManager);
+  const { isReady, project } = useInjection(TranslationsService);
 
   if (isReady) {
     return project.value ? <TranslationsEditor /> : <TranslationsEditorOpenForm />;

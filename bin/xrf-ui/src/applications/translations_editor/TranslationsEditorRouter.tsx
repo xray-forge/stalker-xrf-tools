@@ -5,12 +5,12 @@ import { Route, Routes } from "react-router-dom";
 
 import { TranslationsEditorNavigatorPage } from "@/applications/translations_editor/pages/TranslationsEditorNavigatorPage";
 import { TranslationsEditorProjectPage } from "@/applications/translations_editor/pages/TranslationsEditorProjectPage";
-import { TranslationsManager } from "@/applications/translations_editor/store/translations";
+import { TranslationsService } from "@/applications/translations_editor/store/translations";
 import { NavigationError } from "@/core/components/NavigationError";
 
 export function TranslationsEditorRouter(): ReactElement {
   const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [TranslationsManager] }), [parent]);
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [TranslationsService] }), [parent]);
 
   return (
     <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>

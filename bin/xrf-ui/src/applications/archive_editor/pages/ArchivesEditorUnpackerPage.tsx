@@ -18,7 +18,7 @@ import { MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archive_editor/components/ArchivesUnpackResult";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IArchiveUnpackResult } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
@@ -28,7 +28,7 @@ import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "
 export function ArchivesEditorUnpackerPage() {
   const log: Logger = useLogger("archives-unpacker");
 
-  const { xrfProjectPath } = useInjection(ProjectManager);
+  const { xrfProjectPath } = useInjection(ProjectService);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);

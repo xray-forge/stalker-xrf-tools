@@ -1,5 +1,5 @@
 import { exists } from "@tauri-apps/plugin-fs";
-import { Injectable, OnProvision } from "@wirestate/core";
+import { Injectable, OnDeprovision, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
@@ -7,7 +7,7 @@ import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local_storage"
 import { Logger } from "@/lib/logging";
 
 @Injectable()
-export class ProjectManager {
+export class ProjectService {
   public readonly log: Logger = new Logger(this.constructor.name);
 
   @Observable()
@@ -22,12 +22,19 @@ export class ProjectManager {
 
   @OnProvision()
   public onProvision(): void {
+    this.log.info("Provisioning project service");
+
     this.getXrfProjectPath().then((path) => {
       runInAction(() => (this.xrfProjectPath = path));
     });
     this.getXrfConfigsPath().then((path) => {
       runInAction(() => (this.xrfConfigsPath = path));
     });
+  }
+
+  @OnDeprovision()
+  public onDeprovision(): void {
+    this.log.info("Deprovisioning project service");
   }
 
   @BoundAction()

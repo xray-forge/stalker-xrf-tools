@@ -5,13 +5,13 @@ import { ReactElement, useMemo } from "react";
 import { SpawnEditorPatrolLinksTable } from "@/applications/spawn_editor/components/editor/chunks/patrol/SpawnEditorPatrolLinksTable";
 import { SpawnEditorPatrolPointsTable } from "@/applications/spawn_editor/components/editor/chunks/patrol/SpawnEditorPatrolPointsTable";
 import { SpawnEditorPatrolsTable } from "@/applications/spawn_editor/components/editor/chunks/patrol/SpawnEditorPatrolsTable";
-import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
+import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { useTabState } from "@/lib/tab";
 
 export function SpawnEditorPatrols(): ReactElement {
   const {
     spawnFile: { value: spawnFile, isLoading, error },
-  } = useInjection(SpawnFileManager);
+  } = useInjection(SpawnFileService);
 
   const [activeTab, , onActiveTabChange] = useTabState<string>("patrols");
 

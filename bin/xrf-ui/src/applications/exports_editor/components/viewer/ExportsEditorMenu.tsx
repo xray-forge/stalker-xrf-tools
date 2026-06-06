@@ -7,10 +7,10 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { ExportsManager } from "@/applications/exports_editor/store/exports";
+import { ExportsService } from "@/applications/exports_editor/store/exports";
 
 export function ExportsEditorMenu(): ReactElement {
-  const { declarations, closeExports } = useInjection(ExportsManager);
+  const { declarations, closeExports } = useInjection(ExportsService);
 
   const navigate: NavigateFunction = useNavigate();
 

@@ -1,1 +1,1 @@
-export * from "@/core/store/project/ProjectManager";
+export * from "@/core/store/project/project.service";

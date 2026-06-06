@@ -4,10 +4,10 @@ import { ReactElement } from "react";
 
 import { EquipmentSpriteEditor } from "@/applications/icons_editor/components/equipment_editor/EquipmentSpriteEditor";
 import { IconsEditorEquipmentOpenForm } from "@/applications/icons_editor/components/equipment_editor/IconsEditorEquipmentOpenForm";
-import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
+import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 
 export function IconsEditorEquipmentPage(): ReactElement {
-  const { isReady, spriteImage } = useInjection(EquipmentManager);
+  const { isReady, spriteImage } = useInjection(EquipmentService);
 
   if (isReady) {
     return spriteImage.value ? <EquipmentSpriteEditor /> : <IconsEditorEquipmentOpenForm />;

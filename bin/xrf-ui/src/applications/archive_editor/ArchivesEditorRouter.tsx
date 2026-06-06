@@ -6,12 +6,12 @@ import { Route, Routes } from "react-router-dom";
 import { ArchivesEditorNavigatorPage } from "@/applications/archive_editor/pages/ArchivesEditorNavigatorPage";
 import { ArchivesEditorPage } from "@/applications/archive_editor/pages/ArchivesEditorPage";
 import { ArchivesEditorUnpackerPage } from "@/applications/archive_editor/pages/ArchivesEditorUnpackerPage";
-import { ArchivesManager } from "@/applications/archive_editor/store/archives";
+import { ArchivesService } from "@/applications/archive_editor/store/archives";
 import { NavigationError } from "@/core/components/NavigationError";
 
 export function ArchivesEditorRouter(): ReactElement {
   const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ArchivesManager] }), [parent]);
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ArchivesService] }), [parent]);
 
   return (
     <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>

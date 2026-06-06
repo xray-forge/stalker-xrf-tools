@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { TranslationsManager } from "@/applications/translations_editor/store/translations";
+import { TranslationsService } from "@/applications/translations_editor/store/translations";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function TranslationsEditorMenu(): ReactElement {
@@ -13,7 +13,7 @@ export function TranslationsEditorMenu(): ReactElement {
   const {
     project: { isLoading, value: translationsProject },
     closeTranslationsProject,
-  } = useInjection(TranslationsManager);
+  } = useInjection(TranslationsService);
 
   const onCloseClick = useCallback(async () => {
     log.info("Closing translations");

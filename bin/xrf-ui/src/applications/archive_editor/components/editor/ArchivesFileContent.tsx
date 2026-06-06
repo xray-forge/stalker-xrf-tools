@@ -1,11 +1,11 @@
 import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 
-import { ArchivesManager } from "@/applications/archive_editor/store/archives";
+import { ArchivesService } from "@/applications/archive_editor/store/archives";
 import { bytesToMegabytes } from "@/lib/size";
 
 export function ArchivesFileContent() {
-  const { file } = useInjection(ArchivesManager);
+  const { file } = useInjection(ArchivesService);
 
   if (file.isLoading) {
     return (

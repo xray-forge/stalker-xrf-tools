@@ -21,7 +21,7 @@ export interface IEquipmentPngDescriptor {
   image: HTMLImageElement;
 }
 
-export class EquipmentManager {
+export class EquipmentService {
   @Observable()
   public gridSize: number = 50;
 

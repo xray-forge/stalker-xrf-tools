@@ -3,12 +3,12 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { SpawnEditorAlifeObjectsTable } from "@/applications/spawn_editor/components/editor/chunks/alife/SpawnEditorAlifeObjectsTable";
-import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
+import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 
 export function SpawnEditorAlife(): ReactElement {
   const {
     spawnFile: { value: spawnFile, isLoading, error },
-  } = useInjection(SpawnFileManager);
+  } = useInjection(SpawnFileService);
 
   if (isLoading) {
     return (

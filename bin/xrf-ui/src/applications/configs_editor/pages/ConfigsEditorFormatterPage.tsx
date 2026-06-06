@@ -20,7 +20,7 @@ import { ChangeEvent, MouseEvent, useCallback, useEffect, useState } from "react
 
 import { ConfigsFormatResult } from "@/applications/configs_editor/components/ConfigsFormatResult";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
@@ -29,7 +29,7 @@ import { ILtxProjectFormatResult } from "@/lib/ltx";
 export function ConfigsEditorFormatterPage() {
   const log: Logger = useLogger("configs-formatter");
 
-  const { xrfConfigsPath } = useInjection(ProjectManager);
+  const { xrfConfigsPath } = useInjection(ProjectService);
 
   const [isCheck, setIsCheck] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

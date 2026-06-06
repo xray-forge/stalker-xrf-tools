@@ -3,14 +3,14 @@ import { default as CssBaseline } from "@mui/material/CssBaseline";
 import { useInjection } from "@wirestate/react";
 import { ReactNode } from "react";
 
-import { ThemeManager } from "@/core/store/theme";
+import { ThemeService } from "@/core/store/theme";
 
 interface IApplicationProviderProps {
   children: ReactNode;
 }
 
 export function ApplicationProvider({ children }: IApplicationProviderProps) {
-  const { theme } = useInjection(ThemeManager);
+  const { theme } = useInjection(ThemeService);
 
   return (
     <ThemeProvider theme={theme}>

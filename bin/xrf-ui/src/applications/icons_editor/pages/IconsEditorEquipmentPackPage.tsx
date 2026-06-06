@@ -3,9 +3,9 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { EquipmentPackResult } from "@/applications/icons_editor/components/equipment_pack/EquipmentPackResult";
-import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
+import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { IPackEquipmentResult } from "@/lib/icons";
@@ -21,8 +21,8 @@ import {
 export function IconsEditorEquipmentPackPage(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");
 
-  const { packEquipmentSprite } = useInjection(EquipmentManager);
-  const { xrfProjectPath } = useInjection(ProjectManager);
+  const { packEquipmentSprite } = useInjection(EquipmentService);
+  const { xrfProjectPath } = useInjection(ProjectService);
 
   const [result, setResult] = useState<Loadable<Optional<IPackEquipmentResult>>>(() => createLoadable(null));
 

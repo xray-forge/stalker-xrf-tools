@@ -15,9 +15,9 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
-import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
+import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf_path";
@@ -25,8 +25,8 @@ import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } fro
 export function SpawnEditorUnpackForm(): ReactElement {
   const log: Logger = useLogger("spawn-unpack");
 
-  const { spawnFile, openSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileManager);
-  const { xrfProjectPath } = useInjection(ProjectManager);
+  const { spawnFile, openSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileService);
+  const { xrfProjectPath } = useInjection(ProjectService);
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);

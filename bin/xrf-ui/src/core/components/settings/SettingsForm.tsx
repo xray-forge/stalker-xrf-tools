@@ -5,7 +5,7 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, ReactNode, useCallback } from "react";
 
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getProjectConfigsPath } from "@/lib/xrf_path";
@@ -25,7 +25,7 @@ export function SettingsForm({
 }: ISettingsFormProps): ReactElement {
   const log: Logger = useLogger("settings-modal");
 
-  const { xrfProjectPath, xrfConfigsPath, setXrfProjectPath, setXrfConfigsPath } = useInjection(ProjectManager);
+  const { xrfProjectPath, xrfConfigsPath, setXrfProjectPath, setXrfConfigsPath } = useInjection(ProjectService);
 
   const onSelectProjectPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {

@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
+import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function EquipmentSpriteEditorMenu(): ReactElement {
@@ -15,7 +15,7 @@ export function EquipmentSpriteEditorMenu(): ReactElement {
     closeEquipmentProject,
     repackAndOpenProject,
     reopenEquipmentProject,
-  } = useInjection(EquipmentManager);
+  } = useInjection(EquipmentService);
 
   const onRepackAndReopenClick = useCallback(async () => {
     try {

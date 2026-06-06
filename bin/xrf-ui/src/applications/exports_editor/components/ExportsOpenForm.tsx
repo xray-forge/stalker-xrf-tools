@@ -14,17 +14,17 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback } from "react";
 
-import { ExportsManager } from "@/applications/exports_editor/store/exports";
+import { ExportsService } from "@/applications/exports_editor/store/exports";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function ExportsOpenForm(): ReactElement {
   const log: Logger = useLogger("exports-open");
 
-  const { declarations, openExports } = useInjection(ExportsManager);
-  const { xrfProjectPath, setXrfProjectPath } = useInjection(ProjectManager);
+  const { declarations, openExports } = useInjection(ExportsService);
+  const { xrfProjectPath, setXrfProjectPath } = useInjection(ProjectService);
 
   const onSelectProjectPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {

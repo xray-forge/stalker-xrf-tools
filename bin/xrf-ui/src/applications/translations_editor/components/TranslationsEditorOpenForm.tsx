@@ -2,9 +2,9 @@ import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect } from "react";
 
-import { TranslationsManager } from "@/applications/translations_editor/store/translations";
+import { TranslationsService } from "@/applications/translations_editor/store/translations";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { Logger, useLogger } from "@/lib/logging";
 import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf_path";
@@ -12,8 +12,8 @@ import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf_path";
 export function TranslationsEditorOpenForm(): ReactElement {
   const log: Logger = useLogger("translations-editor-open");
 
-  const { project, openTranslationsProject } = useInjection(TranslationsManager);
-  const { xrfProjectPath } = useInjection(ProjectManager);
+  const { project, openTranslationsProject } = useInjection(TranslationsService);
+  const { xrfProjectPath } = useInjection(ProjectService);
 
   const [translationsPath, setTranslationsPath, onSelectTranslationsPath] = usePathState({
     title: "Provide path to equipment_editor dds",

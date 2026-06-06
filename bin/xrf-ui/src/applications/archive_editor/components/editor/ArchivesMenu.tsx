@@ -4,7 +4,7 @@ import { RichTreeView, TreeViewDefaultItemModelProperties } from "@mui/x-tree-vi
 import { useInjection } from "@wirestate/react";
 import { ReactElement, SyntheticEvent, useCallback, useMemo } from "react";
 
-import { ArchivesManager } from "@/applications/archive_editor/store/archives";
+import { ArchivesService } from "@/applications/archive_editor/store/archives";
 import { Optional } from "@/core/types/general";
 import { parseTree } from "@/lib/archive";
 
@@ -13,7 +13,7 @@ export function ArchivesMenu(): ReactElement {
     project: { value: project, isLoading },
     closeArchivesProject,
     openArchiveFile,
-  } = useInjection(ArchivesManager);
+  } = useInjection(ArchivesService);
 
   const items: Array<TreeViewDefaultItemModelProperties> = useMemo(
     () => parseTree(Object.values(project?.files ?? {}), "\\"),

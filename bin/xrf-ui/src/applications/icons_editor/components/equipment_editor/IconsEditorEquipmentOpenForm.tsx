@@ -2,9 +2,9 @@ import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect } from "react";
 
-import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
+import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { Logger, useLogger } from "@/lib/logging";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf_path";
@@ -12,8 +12,8 @@ import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } 
 export function IconsEditorEquipmentOpenForm(): ReactElement {
   const log: Logger = useLogger("equipment-editor-open");
 
-  const { xrfProjectPath } = useInjection(ProjectManager);
-  const { spriteImage, openEquipmentProject } = useInjection(EquipmentManager);
+  const { xrfProjectPath } = useInjection(ProjectService);
+  const { spriteImage, openEquipmentProject } = useInjection(EquipmentService);
 
   const [spritePath, setSpritePath, onSelectEquipmentPath] = usePathState({
     title: "Provide path to equipment_editor dds",

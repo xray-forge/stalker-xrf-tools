@@ -4,11 +4,11 @@ import { ReactElement, useMemo } from "react";
 
 import { ApplicationProvider } from "@/applications/ApplicationProvider";
 import { ApplicationRouter } from "@/applications/ApplicationRouter";
-import { ProjectManager } from "@/core/store/project";
-import { ThemeManager } from "@/core/store/theme";
+import { ProjectService } from "@/core/store/project";
+import { ThemeService } from "@/core/store/theme";
 
 export function Application(): ReactElement {
-  const config: ContainerConfig = useMemo(() => ({ bindings: [ProjectManager, ThemeManager] }), []);
+  const config: ContainerConfig = useMemo(() => ({ bindings: [ThemeService, ProjectService] }), []);
 
   return (
     <ContainerProvider config={config}>

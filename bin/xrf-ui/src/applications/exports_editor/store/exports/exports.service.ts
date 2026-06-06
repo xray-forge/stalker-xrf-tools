@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Inject, Injectable, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IExportsDeclarations } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
@@ -15,7 +15,7 @@ import {
 } from "@/lib/xrf_path";
 
 @Injectable()
-export class ExportsManager {
+export class ExportsService {
   @Observable()
   public isReady: boolean = false;
 
@@ -25,8 +25,8 @@ export class ExportsManager {
   public readonly log: Logger = new Logger(this.constructor.name);
 
   public constructor(
-    @Inject(ProjectManager)
-    private readonly projectManager: ProjectManager
+    @Inject(ProjectService)
+    private readonly projectService: ProjectService
   ) {
     makeObservable(this);
   }
@@ -43,7 +43,7 @@ export class ExportsManager {
         this.isReady = true;
       });
     } else {
-      const projectPath: Optional<string> = this.projectManager.xrfProjectPath;
+      const projectPath: Optional<string> = this.projectService.xrfProjectPath;
 
       if (projectPath) {
         this.openExports(projectPath).finally(() => {

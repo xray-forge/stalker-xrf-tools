@@ -10,7 +10,7 @@ import { EquipmentGridMoveOver } from "@/applications/icons_editor/components/sp
 import { EquipmentGridZoom } from "@/applications/icons_editor/components/sprite_view/EquipmentGridZoom";
 import { EquipmentSpriteGrid } from "@/applications/icons_editor/components/sprite_view/EquipmentSpriteGrid";
 import { equipmentViewerConfig } from "@/applications/icons_editor/configs/EquipmentViewerConfig";
-import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
+import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { Optional } from "@/core/types/general";
 import { GridMapper } from "@/lib/icons";
 
@@ -21,7 +21,7 @@ export function EquipmentSpriteViewer(): ReactElement {
     isGridVisible,
     setGridSize,
     setGridVisibility,
-  } = useInjection(EquipmentManager);
+  } = useInjection(EquipmentService);
 
   const [holdingOrigin, setHoldingOrigin] = useState<Optional<[number, number]>>(null);
   const [zoomValue, setZoomValue] = useState(1);

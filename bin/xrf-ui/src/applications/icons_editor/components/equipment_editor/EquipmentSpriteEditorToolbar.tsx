@@ -2,12 +2,12 @@ import { AppBar, Toolbar, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
-import { EquipmentManager } from "@/applications/icons_editor/store/equipment";
+import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 
 export function EquipmentSpriteEditorToolbar(): ReactElement {
   const {
     spriteImage: { value: spriteImage },
-  } = useInjection(EquipmentManager);
+  } = useInjection(EquipmentService);
 
   return (
     <AppBar position={"relative"}>

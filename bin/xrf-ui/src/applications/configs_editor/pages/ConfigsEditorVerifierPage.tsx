@@ -18,7 +18,7 @@ import { MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs_editor/components/ConfigsVerifyResult";
 import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
-import { ProjectManager } from "@/core/store/project";
+import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
@@ -27,7 +27,7 @@ import { ILtxProjectVerifyResult } from "@/lib/ltx";
 export function ConfigsEditorVerifierPage() {
   const log: Logger = useLogger("configs-verifier");
 
-  const { xrfConfigsPath } = useInjection(ProjectManager);
+  const { xrfConfigsPath } = useInjection(ProjectService);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);

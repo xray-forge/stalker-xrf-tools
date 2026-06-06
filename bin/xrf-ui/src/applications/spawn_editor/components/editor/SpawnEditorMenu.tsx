@@ -12,11 +12,11 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn";
+import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { Optional } from "@/core/types/general";
 
 export function SpawnEditorMenu(): ReactElement {
-  const { spawnFile, saveSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileManager);
+  const { spawnFile, saveSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileService);
 
   const navigate: NavigateFunction = useNavigate();
 

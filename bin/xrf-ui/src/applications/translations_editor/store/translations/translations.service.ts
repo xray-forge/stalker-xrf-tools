@@ -9,7 +9,7 @@ import { Logger } from "@/lib/logging";
 import { ITranslationsProjectJson } from "@/lib/translations";
 
 @Injectable()
-export class TranslationsManager {
+export class TranslationsService {
   @Observable()
   public isReady: boolean = false;
 

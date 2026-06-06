@@ -8,7 +8,7 @@ import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { ISpawnFile } from "@/lib/spawn_file";
 
-export class SpawnFileManager {
+export class SpawnFileService {
   @Observable()
   public isReady: boolean = false;
 

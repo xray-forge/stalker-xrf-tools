@@ -8,7 +8,7 @@ import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 
-export class ArchivesManager {
+export class ArchivesService {
   @Observable()
   public isReady: boolean = false;
 

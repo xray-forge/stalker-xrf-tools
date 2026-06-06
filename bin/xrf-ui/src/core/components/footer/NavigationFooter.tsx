@@ -6,14 +6,14 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { SettingsModalButton } from "@/core/components/settings/SettingsModalButton";
-import { ThemeManager } from "@/core/store/theme";
+import { ThemeService } from "@/core/store/theme";
 
 interface INavigationFooterProps {
   isWithSettings?: boolean;
 }
 
 export function NavigationFooter({ isWithSettings = true }: INavigationFooterProps): ReactElement {
-  const { toggleTheme } = useInjection(ThemeManager);
+  const { toggleTheme } = useInjection(ThemeService);
 
   const onOpenGithubLink = useCallback(() => {
     open("https://github.com/xray-forge/stalker-xrf-tools").catch(console.error);

@@ -1,1 +1,1 @@
-export * from "@/core/store/theme/ThemeManager";
+export * from "@/core/store/theme/theme.service";

@@ -7,12 +7,12 @@ import { SpawnEditorNavigatorPage } from "@/applications/spawn_editor/pages/Spaw
 import { SpawnEditorPackPage } from "@/applications/spawn_editor/pages/SpawnEditorPackPage";
 import { SpawnEditorPage } from "@/applications/spawn_editor/pages/SpawnEditorPage";
 import { SpawnEditorUnpackPage } from "@/applications/spawn_editor/pages/SpawnEditorUnpackPage";
-import { SpawnFileManager } from "@/applications/spawn_editor/store/spawn/SpawnFileManager";
+import { SpawnFileService } from "@/applications/spawn_editor/store/spawn/spawn-file.service";
 import { NavigationError } from "@/core/components/NavigationError";
 
 export function SpawnEditorRouter(): ReactElement {
   const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [SpawnFileManager] }), [parent]);
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [SpawnFileService] }), [parent]);
 
   return (
     <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>
