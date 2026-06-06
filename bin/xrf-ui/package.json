@@ -49,6 +49,7 @@
     "mobx-react-observer": "^2.0.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
-    "vite": "^8.0.16"
+    "vite": "^8.0.16",
+    "vite-plugin-inline-source": "^5.0.0"
   }
 }

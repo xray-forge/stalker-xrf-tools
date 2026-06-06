@@ -3,6 +3,7 @@ import * as path from "path";
 import { default as react } from "@vitejs/plugin-react";
 import { default as observerPlugin } from "mobx-react-observer/vite-plugin";
 import { defineConfig, Plugin } from "vite";
+import { default as inlineSource } from "vite-plugin-inline-source";
 
 function reactObserverPlugin(): Plugin {
   const plugin: Plugin = observerPlugin() as Plugin;
@@ -25,12 +26,12 @@ function getInitialVendorChunk(id: string): string | null {
   const normalized: string = id.replaceAll("\\", "/");
 
   if (normalized.includes("/node_modules/")) {
-    if (normalized.includes("/node_modules/react") || normalized.includes("/node_modules/scheduler")) {
-      return "vendor-react";
-    }
-
-    if (normalized.includes("/node_modules/@wirestate/")) {
-      return "vendor-wirestate";
+    if (
+      normalized.includes("/node_modules/react") ||
+      normalized.includes("/node_modules/scheduler") ||
+      normalized.includes("/node_modules/@wirestate/")
+    ) {
+      return "vendor-core";
     }
 
     if (normalized.includes("/node_modules/@mui/x-data-grid/")) {
@@ -49,7 +50,7 @@ function getInitialVendorChunk(id: string): string | null {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), reactObserverPlugin()],
+  plugins: [inlineSource({ optimizeJs: true }), react(), reactObserverPlugin()],
   build: {
     outDir: "target",
     rolldownOptions: {

@@ -1,19 +1,25 @@
-import { GlobalStyles, ThemeProvider } from "@mui/material";
+import { GlobalStyles } from "@mui/material";
 import { default as CssBaseline } from "@mui/material/CssBaseline";
-import { useInjection } from "@wirestate/react";
-import { ReactNode } from "react";
+import { Theme, ThemeProvider } from "@mui/material/styles";
+import { ReactNode, useMemo } from "react";
 
-import { ThemeService } from "@/core/store/theme";
+import { createApplicationTheme } from "@/lib/theme";
 
 interface IApplicationProviderProps {
   children: ReactNode;
 }
 
 export function ApplicationProvider({ children }: IApplicationProviderProps) {
-  const { theme } = useInjection(ThemeService);
+  const theme: Theme = useMemo(() => createApplicationTheme(), []);
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider
+      defaultMode={"dark"}
+      disableTransitionOnChange={true}
+      modeStorageKey={"theme"}
+      noSsr={true}
+      theme={theme}
+    >
       <CssBaseline enableColorScheme={true} />
       <GlobalStyles
         styles={{
