@@ -5,14 +5,18 @@ import { Optional } from "@/core/types/general";
  * @returns raw value from local storage
  */
 export function getLocalStorageValue(key: string): Optional<string> {
-  return localStorage.getItem(key);
+  return window.localStorage ? window.localStorage.getItem(key) : null;
 }
 
 export function setLocalStorageValue(key: string, value: Optional<string>): void {
+  if (!window.localStorage) {
+    return;
+  }
+
   if (value === null) {
-    localStorage.removeItem(key);
+    window.localStorage.removeItem(key);
   } else {
-    localStorage.setItem(key, value);
+    window.localStorage.setItem(key, value);
   }
 }
 
@@ -21,7 +25,11 @@ export function setLocalStorageValue(key: string, value: Optional<string>): void
  * @returns JSON parsed value from local storage
  */
 export function parseLocalStorageValue<T>(key: string): Optional<T> {
-  const raw: Optional<string> = localStorage.getItem(key) ?? null;
+  if (!window.localStorage) {
+    return null;
+  }
+
+  const raw: Optional<string> = window.localStorage.getItem(key) ?? null;
 
   return raw === null ? null : JSON.parse(raw);
 }
