@@ -14,17 +14,15 @@ script = "npm run --prefix ../xrf-ui build"
 [tasks.build]
 command = "cargo"
 args = ["tauri", "build", "--debug"]
-dependencies = ["build-ui"]
 
 [tasks.build-release]
 command = "cargo"
 args = ["tauri", "build"]
-dependencies = ["setup", "build-ui"]
+dependencies = ["setup"]
 
 [tasks.dev]
 command = "cargo"
 args = ["tauri", "dev"]
-dependencies = ["build-ui"]
 
 [tasks.serve-backend]
 command = "cargo"

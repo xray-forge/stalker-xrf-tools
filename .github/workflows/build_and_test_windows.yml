@@ -23,7 +23,6 @@ jobs:
 
     steps:
       - uses: dtolnay/rust-toolchain@stable
-      - uses: davidB/rust-cargo-make@v1
 
       - name: Configure Git line endings
         run: |
@@ -48,7 +47,7 @@ jobs:
         run: cargo test --verbose --workspace --lib
 
       - name: Build CLI
-        run: cargo make build-cli-release
+        run: cargo build -p xrf-cli --release --locked
 
       - name: Upload CLI build artifacts
         uses: actions/upload-artifact@v7
@@ -58,11 +57,12 @@ jobs:
           path: target/release/xrf-cli.exe
           retention-days: 1
 
-      - name: Install tauri CLI
-        run: cargo install tauri-cli --version="2.5.0" --locked
+      - name: Install UI dependencies
+        run: npm.cmd ci --prefix bin/xrf-ui
 
       - name: Build application
-        run: cargo make build-app-release
+        working-directory: bin/xrf-app
+        run: npm.cmd exec --prefix ../xrf-ui -- tauri build --ci --no-bundle
 
       - name: Upload application build artifacts
         uses: actions/upload-artifact@v7
