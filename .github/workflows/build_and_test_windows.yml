@@ -24,7 +24,14 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: davidB/rust-cargo-make@v1
+
+      - name: Configure Git line endings
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - uses: actions/checkout@v4
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
