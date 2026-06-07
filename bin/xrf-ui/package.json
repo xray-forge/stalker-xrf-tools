@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@11.5.2",
   "engines": {
     "node": ">=24"
   },
@@ -11,7 +12,7 @@
     "build": "tsc && vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "preview:prod": "npm run build && vite preview",
+    "preview:prod": "pnpm run build && vite preview",
     "lint": "eslint . --ext .ts,.tsx,.js",
     "format": "prettier --write \"**/*.(js|ts|tsx|md)\" && eslint . --ext .ts,.tsx,.js --fix"
   },

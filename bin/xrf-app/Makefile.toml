@@ -1,7 +1,7 @@
 [tasks.setup]
 script = [
   "cd ../xrf-ui",
-  "npm ci"
+  "pnpm install --frozen-lockfile"
 ]
 
 [tasks.doc]
@@ -9,7 +9,7 @@ command = "cargo"
 args = ["doc"]
 
 [tasks.build-ui]
-script = "npm run --prefix ../xrf-ui build"
+script = "pnpm --dir ../xrf-ui build"
 
 [tasks.build]
 command = "cargo"
@@ -29,4 +29,4 @@ command = "cargo"
 args = ["run", "--no-default-features"]
 
 [tasks.serve-ui]
-script = "npm run --prefix ../xrf-ui dev"
+script = "pnpm --dir ../xrf-ui dev"
