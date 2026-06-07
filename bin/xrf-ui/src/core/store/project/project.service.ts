@@ -1,5 +1,5 @@
 import { exists } from "@tauri-apps/plugin-fs";
-import { Injectable, OnDeprovision, OnProvision } from "@wirestate/core";
+import { Injectable, OnProvision, ProvisionId, WireStatus } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
 
 import { Optional } from "@/core/types/general";
@@ -9,6 +9,8 @@ import { Logger } from "@/lib/logging";
 @Injectable()
 export class ProjectService {
   public readonly log: Logger = new Logger(this.constructor.name);
+
+  public readonly status: WireStatus = WireStatus.for(this, { initialize: true });
 
   @Observable()
   public xrfProjectPath: Optional<string> = null;
@@ -21,20 +23,20 @@ export class ProjectService {
   }
 
   @OnProvision()
-  public onProvision(): void {
-    this.log.info("Provisioning project service");
-
+  public onProvision(provisionId: ProvisionId): void {
     this.getXrfProjectPath().then((path) => {
-      runInAction(() => (this.xrfProjectPath = path));
+      if (provisionId === this.status.provisionId) {
+        this.log.info("Loaded getXrfProjectPath:", path);
+        runInAction(() => (this.xrfProjectPath = path));
+      }
     });
-    this.getXrfConfigsPath().then((path) => {
-      runInAction(() => (this.xrfConfigsPath = path));
-    });
-  }
 
-  @OnDeprovision()
-  public onDeprovision(): void {
-    this.log.info("Deprovisioning project service");
+    this.getXrfConfigsPath().then((path) => {
+      if (provisionId === this.status.provisionId) {
+        this.log.info("Loaded getXrfConfigsPath:", path);
+        runInAction(() => (this.xrfConfigsPath = path));
+      }
+    });
   }
 
   @BoundAction()
@@ -57,8 +59,6 @@ export class ProjectService {
     const xrfProjectPath: Optional<string> = getLocalStorageValue("xrf-project-path");
 
     if (xrfProjectPath && (await exists(xrfProjectPath))) {
-      this.log.info("Loading xrf project path:", xrfProjectPath);
-
       return xrfProjectPath;
     }
 
@@ -69,8 +69,6 @@ export class ProjectService {
     const xrfProjectPath: Optional<string> = getLocalStorageValue("xrf-configs-path");
 
     if (xrfProjectPath && (await exists(xrfProjectPath))) {
-      this.log.info("Loading xrf configs path:", xrfProjectPath);
-
       return xrfProjectPath;
     }
 
