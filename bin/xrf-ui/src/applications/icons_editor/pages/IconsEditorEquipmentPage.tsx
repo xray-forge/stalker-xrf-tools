@@ -7,10 +7,10 @@ import { IconsEditorEquipmentOpenForm } from "@/applications/icons_editor/compon
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 
 export function IconsEditorEquipmentPage(): ReactElement {
-  const { isReady, spriteImage } = useInjection(EquipmentService);
+  const equipmentService: EquipmentService = useInjection(EquipmentService);
 
-  if (isReady) {
-    return spriteImage.value ? <EquipmentSpriteEditor /> : <IconsEditorEquipmentOpenForm />;
+  if (equipmentService.isReady) {
+    return equipmentService.spriteImage.value ? <EquipmentSpriteEditor /> : <IconsEditorEquipmentOpenForm />;
   }
 
   return (

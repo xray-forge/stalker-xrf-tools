@@ -10,26 +10,23 @@ export function TranslationsEditorMenu(): ReactElement {
   const log: Logger = useLogger("translations-editor-menu");
   const navigate: NavigateFunction = useNavigate();
 
-  const {
-    project: { isLoading, value: translationsProject },
-    closeTranslationsProject,
-  } = useInjection(TranslationsService);
+  const translationsService: TranslationsService = useInjection(TranslationsService);
 
   const onCloseClick = useCallback(async () => {
     log.info("Closing translations");
 
-    await closeTranslationsProject();
+    await translationsService.closeTranslationsProject();
 
     navigate("/translations_editor", { replace: true });
-  }, [log, navigate, closeTranslationsProject]);
+  }, [log, navigate, translationsService]);
 
-  if (!translationsProject) {
+  if (!translationsService.project.value) {
     throw new Error("Unexpected rendering of translations menu.");
   }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: 240, minWidth: 240, justifySelf: "stretch" }}>
-      <Box sx={{ padding: 3 }}>{Object.keys(translationsProject).length} files</Box>
+      <Box sx={{ padding: 3 }}>{Object.keys(translationsService.project.value).length} files</Box>
 
       <Grid container sx={{ flexGrow: 1 }} />
 
@@ -38,7 +35,12 @@ export function TranslationsEditorMenu(): ReactElement {
       </Box>
 
       <Box sx={{ padding: 3 }}>
-        <Button fullWidth={true} variant={"outlined"} disabled={isLoading} onClick={onCloseClick}>
+        <Button
+          fullWidth={true}
+          variant={"outlined"}
+          disabled={translationsService.project.isLoading}
+          onClick={onCloseClick}
+        >
           Close
         </Button>
       </Box>

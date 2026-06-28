@@ -5,9 +5,9 @@ import { ArchivesService } from "@/applications/archive_editor/store/archives";
 import { bytesToMegabytes } from "@/lib/size";
 
 export function ArchivesFileContent() {
-  const { file } = useInjection(ArchivesService);
+  const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  if (file.isLoading) {
+  if (archivesService.file.isLoading) {
     return (
       <Grid
         container
@@ -24,7 +24,7 @@ export function ArchivesFileContent() {
         <CircularProgress />
       </Grid>
     );
-  } else if (file.error) {
+  } else if (archivesService.file.error) {
     return (
       <Box
         sx={{
@@ -38,10 +38,10 @@ export function ArchivesFileContent() {
           flexWrap: "nowrap",
         }}
       >
-        <Typography sx={{ whiteSpace: "pre-line" }}>{String(file.error)}</Typography>
+        <Typography sx={{ whiteSpace: "pre-line" }}>{String(archivesService.file.error)}</Typography>
       </Box>
     );
-  } else if (file.value) {
+  } else if (archivesService.file.value) {
     return (
       <Box
         sx={{
@@ -57,7 +57,7 @@ export function ArchivesFileContent() {
       >
         <Box>
           <Typography variant={"h5"}>
-            {file.value.name} ({bytesToMegabytes(file.value.size).toFixed(3)} MB)
+            {archivesService.file.value.name} ({bytesToMegabytes(archivesService.file.value.size).toFixed(3)} MB)
           </Typography>
         </Box>
 
@@ -67,7 +67,7 @@ export function ArchivesFileContent() {
 
         <Box>
           <Typography sx={{ marginBottom: 2, whiteSpace: "pre-wrap" }} variant={"body1"} component={"pre"}>
-            {file.value.content}
+            {archivesService.file.value.content}
           </Typography>
         </Box>
       </Box>

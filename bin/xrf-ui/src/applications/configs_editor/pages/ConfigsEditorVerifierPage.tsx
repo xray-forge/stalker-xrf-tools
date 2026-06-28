@@ -16,12 +16,12 @@ import { ILtxProjectVerifyResult } from "@/lib/ltx";
 export function ConfigsEditorVerifierPage() {
   const log: Logger = useLogger("configs-verifier");
 
-  const { xrfConfigsPath } = useInjection(ProjectService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);
   const [result, setResult] = useState<Optional<ILtxProjectVerifyResult>>(null);
-  const [configsPath, setConfigsPath] = useState<Optional<string>>(xrfConfigsPath);
+  const [configsPath, setConfigsPath] = useState<Optional<string>>(projectService.xrfConfigsPath);
 
   const onSelectConfigsPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {
@@ -77,8 +77,8 @@ export function ConfigsEditorVerifierPage() {
   }, [configsPath, log]);
 
   useEffect(() => {
-    setConfigsPath(xrfConfigsPath);
-  }, [xrfConfigsPath]);
+    setConfigsPath(projectService.xrfConfigsPath);
+  }, [projectService.xrfConfigsPath]);
 
   return (
     <PickerForm

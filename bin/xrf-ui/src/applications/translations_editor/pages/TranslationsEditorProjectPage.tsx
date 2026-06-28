@@ -7,10 +7,10 @@ import { TranslationsEditorOpenForm } from "@/applications/translations_editor/c
 import { TranslationsService } from "@/applications/translations_editor/store/translations";
 
 export function TranslationsEditorProjectPage(): ReactElement {
-  const { isReady, project } = useInjection(TranslationsService);
+  const translationsService: TranslationsService = useInjection(TranslationsService);
 
-  if (isReady) {
-    return project.value ? <TranslationsEditor /> : <TranslationsEditorOpenForm />;
+  if (translationsService.isReady) {
+    return translationsService.project.value ? <TranslationsEditor /> : <TranslationsEditorOpenForm />;
   }
 
   return (

@@ -5,9 +5,8 @@ import { ReactElement } from "react";
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 
 export function EquipmentSpriteEditorToolbar(): ReactElement {
-  const {
-    spriteImage: { value: spriteImage },
-  } = useInjection(EquipmentService);
+  const equipmentService: EquipmentService = useInjection(EquipmentService);
+  const spriteImage = equipmentService.spriteImage.value;
 
   return (
     <AppBar position={"relative"}>

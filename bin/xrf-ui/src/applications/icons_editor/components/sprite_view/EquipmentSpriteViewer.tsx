@@ -15,13 +15,7 @@ import { Optional } from "@/core/types/general";
 import { GridMapper } from "@/lib/icons";
 
 export function EquipmentSpriteViewer(): ReactElement {
-  const {
-    spriteImage: { value: spriteImage },
-    gridSize,
-    isGridVisible,
-    setGridSize,
-    setGridVisibility,
-  } = useInjection(EquipmentService);
+  const equipmentService: EquipmentService = useInjection(EquipmentService);
 
   const [holdingOrigin, setHoldingOrigin] = useState<Optional<[number, number]>>(null);
   const [zoomValue, setZoomValue] = useState(1);
@@ -31,13 +25,18 @@ export function EquipmentSpriteViewer(): ReactElement {
   const [selectedCell, setSelectedCell] = useState<Optional<[number, number]>>(null);
   const [moveOverCell, setMoveOverCell] = useState<Optional<[number, number]>>(null);
 
-  const gridMapper: Optional<GridMapper> = useMemo(
-    () =>
-      spriteImage
-        ? new GridMapper(spriteImage.image.width, spriteImage.image.height, gridSize, spriteImage.descriptors)
-        : null,
-    [spriteImage, gridSize]
-  );
+  const gridMapper: Optional<GridMapper> = useMemo(() => {
+    if (!equipmentService.spriteImage.value) {
+      return null;
+    }
+
+    return new GridMapper(
+      equipmentService.spriteImage.value.image.width,
+      equipmentService.spriteImage.value.image.height,
+      equipmentService.gridSize,
+      equipmentService.spriteImage.value.descriptors
+    );
+  }, [equipmentService.spriteImage.value, equipmentService.gridSize]);
 
   const sx: SxProps = useMemo(
     () => ({
@@ -159,7 +158,7 @@ export function EquipmentSpriteViewer(): ReactElement {
           bgcolor: "#353535",
         }}
       >
-        {spriteImage ? (
+        {equipmentService.spriteImage.value ? (
           <Box
             className={"sprite-preview"}
             onWheel={onWheel}
@@ -171,8 +170,8 @@ export function EquipmentSpriteViewer(): ReactElement {
             sx={[
               {
                 position: "relative",
-                width: spriteImage.image.width,
-                minWidth: spriteImage.image.width,
+                width: equipmentService.spriteImage.value.image.width,
+                minWidth: equipmentService.spriteImage.value.image.width,
                 height: "auto",
                 left: 0,
                 top: 0,
@@ -180,12 +179,12 @@ export function EquipmentSpriteViewer(): ReactElement {
               sx,
             ]}
           >
-            <img src={spriteImage.image.src} width={"100%"} height={"100%"} draggable={false} />
+            <img src={equipmentService.spriteImage.value.image.src} width={"100%"} height={"100%"} draggable={false} />
 
             {gridMapper ? (
               <EquipmentSpriteGrid
                 selectedCell={selectedCell}
-                isGridVisible={isGridVisible}
+                isGridVisible={equipmentService.isGridVisible}
                 gridMapper={gridMapper}
                 onCellSelected={onSelectCell}
                 onCellMovedOver={onMoveOverCell}
@@ -203,10 +202,10 @@ export function EquipmentSpriteViewer(): ReactElement {
         {moveOverCell ? <EquipmentGridMoveOver cell={moveOverCell} /> : null}
 
         <EquipmentGridControls
-          gridSize={gridSize}
-          isGridVisible={isGridVisible}
-          onSetGridSize={setGridSize}
-          onSetGridVisibility={setGridVisibility}
+          gridSize={equipmentService.gridSize}
+          isGridVisible={equipmentService.isGridVisible}
+          onSetGridSize={equipmentService.setGridSize}
+          onSetGridVisibility={equipmentService.setGridVisibility}
         />
 
         <EquipmentGridZoom zoom={zoomValue} onZoomDown={onZoomDown} onZoomUp={onZoomUp} />

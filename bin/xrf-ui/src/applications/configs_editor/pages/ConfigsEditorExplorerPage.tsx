@@ -8,9 +8,9 @@ import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 
 export function ConfigsEditorExplorerPage() {
-  const { xrfConfigsPath } = useInjection(ProjectService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
-  const [configsPath] = useState<Optional<string>>(xrfConfigsPath);
+  const [configsPath] = useState<Optional<string>>(projectService.xrfConfigsPath);
 
   const onSelectTargetDirectory = useCallback(() => {}, []);
 

@@ -25,13 +25,13 @@ import { ILtxProjectFormatResult } from "@/lib/ltx";
 export function ConfigsEditorFormatterPage() {
   const log: Logger = useLogger("configs-formatter");
 
-  const { xrfConfigsPath } = useInjection(ProjectService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const [isCheck, setIsCheck] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
   const [result, setResult] = useState<Optional<ILtxProjectFormatResult>>(null);
-  const [configsPath, setConfigsPath] = useState<Optional<string>>(xrfConfigsPath);
+  const [configsPath, setConfigsPath] = useState<Optional<string>>(projectService.xrfConfigsPath);
 
   const onSelectConfigsPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {
@@ -94,8 +94,8 @@ export function ConfigsEditorFormatterPage() {
   }, []);
 
   useEffect(() => {
-    setConfigsPath(xrfConfigsPath);
-  }, [xrfConfigsPath]);
+    setConfigsPath(projectService.xrfConfigsPath);
+  }, [projectService.xrfConfigsPath]);
 
   return (
     <PickerForm

@@ -10,7 +10,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { ExportsService } from "@/applications/exports_editor/store/exports";
 
 export function ExportsEditorMenu(): ReactElement {
-  const { declarations, closeExports } = useInjection(ExportsService);
+  const exportsService: ExportsService = useInjection(ExportsService);
 
   const navigate: NavigateFunction = useNavigate();
 
@@ -33,8 +33,8 @@ export function ExportsEditorMenu(): ReactElement {
   const onCloseClicked = useCallback(() => {
     navigate("/exports_editor", { replace: true });
 
-    return closeExports();
-  }, [closeExports, navigate]);
+    return exportsService.closeExports();
+  }, [exportsService, navigate]);
 
   return (
     <Drawer
@@ -58,7 +58,7 @@ export function ExportsEditorMenu(): ReactElement {
 
       <List disablePadding>
         <ListItem disablePadding>
-          <ListItemButton disabled={declarations.isLoading} onClick={onCloseClicked}>
+          <ListItemButton disabled={exportsService.declarations.isLoading} onClick={onCloseClicked}>
             <ListItemIcon>
               <CloseIcon />
             </ListItemIcon>

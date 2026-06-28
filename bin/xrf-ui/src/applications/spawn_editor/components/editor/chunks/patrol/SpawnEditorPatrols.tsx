@@ -9,14 +9,13 @@ import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { useTabState } from "@/lib/tab";
 
 export function SpawnEditorPatrols(): ReactElement {
-  const {
-    spawnFile: { value: spawnFile, isLoading, error },
-  } = useInjection(SpawnFileService);
+  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
+  const { value: spawnFile, isLoading, error } = spawnFileService.spawnFile;
 
   const [activeTab, , onActiveTabChange] = useTabState<string>("patrols");
 
   const activeTable: ReactElement = useMemo(() => {
-    if (!spawnFile) {
+    if (!spawnFile?.patrols) {
       return <Box>No file</Box>;
     }
 

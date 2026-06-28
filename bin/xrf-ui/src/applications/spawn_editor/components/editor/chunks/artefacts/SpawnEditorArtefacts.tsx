@@ -6,11 +6,9 @@ import { SpawnEditorArtefactsNodesTable } from "@/applications/spawn_editor/comp
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 
 export function SpawnEditorArtefacts(): ReactElement {
-  const {
-    spawnFile: { value: spawnFile, isLoading, error },
-  } = useInjection(SpawnFileService);
+  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
-  if (isLoading) {
+  if (spawnFileService.spawnFile.isLoading) {
     return (
       <Grid
         container
@@ -21,13 +19,13 @@ export function SpawnEditorArtefacts(): ReactElement {
     );
   }
 
-  if (error || !spawnFile) {
+  if (spawnFileService.spawnFile.error || !spawnFileService.spawnFile.value) {
     return (
       <Grid
         container
         sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
       >
-        {error ? String(error) : "No value."}
+        {spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : "No value."}
       </Grid>
     );
   }
@@ -47,7 +45,7 @@ export function SpawnEditorArtefacts(): ReactElement {
     >
       <Typography variant={"h5"}>Artefacts</Typography>
       <Divider sx={{ margin: "16px 0" }} />
-      <SpawnEditorArtefactsNodesTable nodes={spawnFile.artefactSpawn.nodes} />
+      <SpawnEditorArtefactsNodesTable nodes={spawnFileService.spawnFile.value.artefactSpawn.nodes} />
     </Box>
   );
 }

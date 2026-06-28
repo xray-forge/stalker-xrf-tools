@@ -10,53 +10,63 @@ export function EquipmentSpriteEditorMenu(): ReactElement {
   const log: Logger = useLogger("equipment-editor-menu");
   const navigate: NavigateFunction = useNavigate();
 
-  const {
-    spriteImage: { isLoading, value: spriteImage },
-    closeEquipmentProject,
-    repackAndOpenProject,
-    reopenEquipmentProject,
-  } = useInjection(EquipmentService);
+  const equipmentService: EquipmentService = useInjection(EquipmentService);
 
   const onRepackAndReopenClick = useCallback(async () => {
     try {
-      await repackAndOpenProject();
+      await equipmentService.repackAndOpenProject();
     } catch (error) {
       log.error("Failed to repack and reopen DDS:", error);
     }
-  }, [log, repackAndOpenProject]);
+  }, [log, equipmentService]);
 
   const onReopenClick = useCallback(async () => {
     try {
-      await reopenEquipmentProject();
+      await equipmentService.reopenEquipmentProject();
     } catch (error) {
       log.error("Failed to reopen DDS:", error);
     }
-  }, [log, reopenEquipmentProject]);
+  }, [log, equipmentService]);
 
   const onCloseClick = useCallback(async () => {
-    await closeEquipmentProject();
+    await equipmentService.closeEquipmentProject();
 
     navigate("/icons_editor", { replace: true });
-  }, [navigate, closeEquipmentProject]);
+  }, [navigate, equipmentService]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: 240, minWidth: 240, justifySelf: "stretch" }}>
-      <Box sx={{ padding: 3 }}>Descriptors: {spriteImage?.descriptors.length ?? 0}</Box>
+      <Box sx={{ padding: 3 }}>Descriptors: {equipmentService.spriteImage.value?.descriptors.length ?? 0}</Box>
 
       <Grid container sx={{ flexGrow: 1 }} />
 
       <Box sx={{ display: "flex", margin: 0, padding: "0 24px", width: "100%", gap: 1, flexDirection: "column" }}>
-        <Button fullWidth={true} variant={"outlined"} disabled={isLoading} onClick={onReopenClick}>
+        <Button
+          fullWidth={true}
+          variant={"outlined"}
+          disabled={equipmentService.spriteImage.isLoading}
+          onClick={onReopenClick}
+        >
           Reload
         </Button>
 
-        <Button fullWidth={true} variant={"outlined"} disabled={isLoading} onClick={onRepackAndReopenClick}>
+        <Button
+          fullWidth={true}
+          variant={"outlined"}
+          disabled={equipmentService.spriteImage.isLoading}
+          onClick={onRepackAndReopenClick}
+        >
           Repack and reload
         </Button>
       </Box>
 
       <Box sx={{ padding: 3 }}>
-        <Button fullWidth={true} variant={"outlined"} disabled={isLoading} onClick={onCloseClick}>
+        <Button
+          fullWidth={true}
+          variant={"outlined"}
+          disabled={equipmentService.spriteImage.isLoading}
+          onClick={onCloseClick}
+        >
           Close
         </Button>
       </Box>

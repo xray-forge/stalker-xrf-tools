@@ -21,8 +21,8 @@ import {
 export function IconsEditorEquipmentPackPage(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");
 
-  const { packEquipmentSprite } = useInjection(EquipmentService);
-  const { xrfProjectPath } = useInjection(ProjectService);
+  const equipmentService: EquipmentService = useInjection(EquipmentService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const [result, setResult] = useState<Loadable<Optional<IPackEquipmentResult>>>(() => createLoadable(null));
 
@@ -49,7 +49,7 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
       try {
         setResult(createLoadable(null, true));
 
-        const packResult: IPackEquipmentResult = await packEquipmentSprite(
+        const packResult: IPackEquipmentResult = await equipmentService.packEquipmentSprite(
           inputIconsPath,
           outputSpritePath,
           systemLtxPath
@@ -67,19 +67,19 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
         systemLtxPath,
       });
     }
-  }, [inputIconsPath, outputSpritePath, systemLtxPath, log, packEquipmentSprite]);
+  }, [inputIconsPath, outputSpritePath, systemLtxPath, equipmentService, log]);
 
   useEffect(() => {
-    if (xrfProjectPath) {
-      getProjectEquipmentDDSPath(xrfProjectPath).then((outputPath) => {
+    if (projectService.xrfProjectPath) {
+      getProjectEquipmentDDSPath(projectService.xrfProjectPath).then((outputPath) => {
         setOutputSpritePath(outputPath);
       });
 
-      getPathIfExists(getProjectEquipmentSourcePath(xrfProjectPath)).then((sourcePath) => {
+      getPathIfExists(getProjectEquipmentSourcePath(projectService.xrfProjectPath)).then((sourcePath) => {
         setInputIconsPath(sourcePath);
       });
 
-      getPathIfExists(getProjectSystemLtxPath(xrfProjectPath)).then((ltxPath) => {
+      getPathIfExists(getProjectSystemLtxPath(projectService.xrfProjectPath)).then((ltxPath) => {
         setSystemLtxPath(ltxPath);
       });
     }

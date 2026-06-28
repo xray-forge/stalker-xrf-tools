@@ -9,25 +9,21 @@ import { Optional } from "@/core/types/general";
 import { parseTree } from "@/lib/archive";
 
 export function ArchivesMenu(): ReactElement {
-  const {
-    project: { value: project, isLoading },
-    closeArchivesProject,
-    openArchiveFile,
-  } = useInjection(ArchivesService);
+  const archivesService: ArchivesService = useInjection(ArchivesService);
 
   const items: Array<TreeViewDefaultItemModelProperties> = useMemo(
-    () => parseTree(Object.values(project?.files ?? {}), "\\"),
-    [project?.files]
+    () => parseTree(Object.values(archivesService.project.value?.files ?? {}), "\\"),
+    [archivesService.project.value?.files]
   );
 
   const onSelectListItem = useCallback(
     (_: Optional<SyntheticEvent>, file: Optional<string>) => {
       if (file) {
         // trim '~/' root
-        return openArchiveFile(file.slice(2));
+        return archivesService.openArchiveFile(file.slice(2));
       }
     },
-    [openArchiveFile]
+    [archivesService]
   );
 
   return (
@@ -53,7 +49,7 @@ export function ArchivesMenu(): ReactElement {
 
       <List disablePadding>
         <ListItem disablePadding>
-          <ListItemButton disabled={isLoading} onClick={closeArchivesProject}>
+          <ListItemButton disabled={archivesService.project.isLoading} onClick={archivesService.closeArchivesProject}>
             <ListItemIcon>
               <CloseIcon />
             </ListItemIcon>

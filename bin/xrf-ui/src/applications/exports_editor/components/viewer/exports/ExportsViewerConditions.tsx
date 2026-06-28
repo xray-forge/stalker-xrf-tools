@@ -6,11 +6,9 @@ import { ExportsEditorDeclarationList } from "@/applications/exports_editor/comp
 import { ExportsService } from "@/applications/exports_editor/store/exports";
 
 export function ExportsViewerConditions(): ReactElement {
-  const {
-    declarations: { isLoading, error, value: declarations },
-  } = useInjection(ExportsService);
+  const exportsService: ExportsService = useInjection(ExportsService);
 
-  if (isLoading) {
+  if (exportsService.declarations.isLoading) {
     return (
       <Grid
         container
@@ -21,13 +19,13 @@ export function ExportsViewerConditions(): ReactElement {
     );
   }
 
-  if (error || !declarations) {
+  if (exportsService.declarations.error || !exportsService.declarations.value) {
     return (
       <Grid
         container
         sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
       >
-        {error ? String(error) : "No value."}
+        {exportsService.declarations.error ? String(exportsService.declarations.error) : "No value."}
       </Grid>
     );
   }
@@ -45,9 +43,9 @@ export function ExportsViewerConditions(): ReactElement {
         flexGrow: 1,
       }}
     >
-      <Typography variant={"h5"}>Conditions ({declarations.conditions.length})</Typography>
+      <Typography variant={"h5"}>Conditions ({exportsService.declarations.value.conditions.length})</Typography>
       <Divider sx={{ margin: "16px 0" }} />
-      <ExportsEditorDeclarationList descriptors={declarations.conditions} />
+      <ExportsEditorDeclarationList descriptors={exportsService.declarations.value.conditions} />
     </Box>
   );
 }

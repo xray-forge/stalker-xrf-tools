@@ -14,8 +14,8 @@ import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } fro
 export function SpawnEditorUnpackForm(): ReactElement {
   const log: Logger = useLogger("spawn-unpack");
 
-  const { spawnFile, openSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileService);
-  const { xrfProjectPath } = useInjection(ProjectService);
+  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);
@@ -27,7 +27,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
       event.stopPropagation();
       event.preventDefault();
 
-      if (spawnFile.isLoading) {
+      if (spawnFileService.spawnFile.isLoading) {
         return;
       }
 
@@ -47,7 +47,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
         setIsSelecting(false);
       }
     },
-    [log, spawnFile.isLoading]
+    [log, spawnFileService.spawnFile.isLoading]
   );
 
   const onSelectSpawnFileClicked = useCallback(
@@ -60,7 +60,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
       event.stopPropagation();
       event.preventDefault();
 
-      if (spawnFile.isLoading) {
+      if (spawnFileService.spawnFile.isLoading) {
         return;
       }
 
@@ -80,7 +80,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
         setIsSelecting(false);
       }
     },
-    [log, spawnFile.isLoading]
+    [log, spawnFileService.spawnFile.isLoading]
   );
 
   const onSelectOutputClicked = useCallback(
@@ -98,38 +98,38 @@ export function SpawnEditorUnpackForm(): ReactElement {
     }
 
     try {
-      await openSpawnFile(spawnPath);
-      await exportSpawnFile(outputPath);
+      await spawnFileService.openSpawnFile(spawnPath);
+      await spawnFileService.exportSpawnFile(outputPath);
 
       setIsFinishedSuccessfully(true);
     } catch (error) {
       log.error("Failed to unpack file:", error);
     } finally {
-      await closeSpawnFile();
+      await spawnFileService.closeSpawnFile();
     }
-  }, [log, spawnPath, outputPath, openSpawnFile, exportSpawnFile, closeSpawnFile]);
+  }, [log, spawnPath, outputPath, spawnFileService]);
 
   useEffect(() => {
-    if (xrfProjectPath) {
-      getExistingProjectBuiltAllSpawnPath(xrfProjectPath).then((spawnPath) => {
+    if (projectService.xrfProjectPath) {
+      getExistingProjectBuiltAllSpawnPath(projectService.xrfProjectPath).then((spawnPath) => {
         setSpawnPath(spawnPath);
       });
 
-      getProjectAllSpawnUnpackPath(xrfProjectPath).then((outputPath) => setOutputPath(outputPath));
+      getProjectAllSpawnUnpackPath(projectService.xrfProjectPath).then((outputPath) => setOutputPath(outputPath));
     }
   }, []);
 
   return (
     <PickerForm
       title={"Select *.spawn file to unpack"}
-      error={spawnFile.error ? String(spawnFile.error) : undefined}
-      isLoading={spawnFile.isLoading}
+      error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
+      isLoading={spawnFileService.spawnFile.isLoading}
       backPath={"/spawn_editor"}
-      backDisabled={spawnFile.isLoading || isSelecting}
+      backDisabled={spawnFileService.spawnFile.isLoading || isSelecting}
       actions={
         <Button
           fullWidth
-          disabled={!spawnPath || !outputPath || isSelecting || spawnFile.isLoading}
+          disabled={!spawnPath || !outputPath || isSelecting || spawnFileService.spawnFile.isLoading}
           variant={"contained"}
           onClick={onUnpackClicked}
         >
@@ -146,11 +146,11 @@ export function SpawnEditorUnpackForm(): ReactElement {
     >
       <OutlinedInput
         size={"small"}
-        disabled={isSelecting || spawnFile.isLoading}
+        disabled={isSelecting || spawnFileService.spawnFile.isLoading}
         value={spawnPath ?? ""}
         placeholder={"Source"}
         readOnly={true}
-        error={Boolean(spawnFile.error)}
+        error={Boolean(spawnFileService.spawnFile.error)}
         endAdornment={
           <InputAdornment position={"end"} onClick={onSelectSpawnFile}>
             <IconButton edge={"end"}>
@@ -163,11 +163,11 @@ export function SpawnEditorUnpackForm(): ReactElement {
 
       <OutlinedInput
         size={"small"}
-        disabled={isSelecting || spawnFile.isLoading}
+        disabled={isSelecting || spawnFileService.spawnFile.isLoading}
         value={outputPath ?? ""}
         placeholder={"Destination"}
         readOnly={true}
-        error={Boolean(spawnFile.error)}
+        error={Boolean(spawnFileService.spawnFile.error)}
         endAdornment={
           <InputAdornment position={"end"} onClick={onSelectOutput}>
             <IconButton edge={"end"}>

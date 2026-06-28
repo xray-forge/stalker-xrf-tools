@@ -8,14 +8,12 @@ import { IExportDescriptor } from "@/lib/exports";
 import { useTabState } from "@/lib/tab";
 
 export function ExportsViewerDialogs(): ReactElement {
-  const {
-    declarations: { isLoading, error, value: declarations },
-  } = useInjection(ExportsService);
+  const exportsService: ExportsService = useInjection(ExportsService);
 
   const [activeTab, setActiveTab, onActiveTabChange] = useTabState<string>("");
 
   const { list, dialogSections, dialogExports } = useMemo(() => {
-    const dialogExports: Record<string, Array<IExportDescriptor>> = declarations?.dialogs.reduce(
+    const dialogExports: Record<string, Array<IExportDescriptor>> = exportsService.declarations.value?.dialogs.reduce(
       (acc, it) => {
         const nameParts: Array<string> = it.name.split(".");
         const key: string = nameParts[0] ?? "general";
@@ -35,7 +33,7 @@ export function ExportsViewerDialogs(): ReactElement {
     );
 
     return { dialogExports, dialogSections, list };
-  }, [activeTab, declarations?.dialogs]);
+  }, [activeTab, exportsService.declarations.value?.dialogs]);
 
   useLayoutEffect(() => {
     if (!dialogExports[activeTab]) {
@@ -43,7 +41,7 @@ export function ExportsViewerDialogs(): ReactElement {
     }
   }, [activeTab, dialogExports, dialogSections, setActiveTab]);
 
-  if (isLoading) {
+  if (exportsService.declarations.isLoading) {
     return (
       <Grid
         container
@@ -54,13 +52,13 @@ export function ExportsViewerDialogs(): ReactElement {
     );
   }
 
-  if (error || !declarations) {
+  if (exportsService.declarations.error || !exportsService.declarations.value) {
     return (
       <Grid
         container
         sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
       >
-        {error ? String(error) : "No value."}
+        {exportsService.declarations.error ? String(exportsService.declarations.error) : "No value."}
       </Grid>
     );
   }
@@ -78,7 +76,7 @@ export function ExportsViewerDialogs(): ReactElement {
         flexGrow: 1,
       }}
     >
-      <Typography variant={"h5"}>Dialogs ({declarations.dialogs.length})</Typography>
+      <Typography variant={"h5"}>Dialogs ({exportsService.declarations.value.dialogs.length})</Typography>
       <Divider sx={{ margin: "16px 0" }} />
 
       <Tabs value={activeTab || dialogSections[0]} onChange={onActiveTabChange}>

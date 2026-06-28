@@ -16,7 +16,7 @@ import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { Optional } from "@/core/types/general";
 
 export function SpawnEditorMenu(): ReactElement {
-  const { spawnFile, saveSpawnFile, exportSpawnFile, closeSpawnFile } = useInjection(SpawnFileService);
+  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
   const navigate: NavigateFunction = useNavigate();
 
@@ -38,9 +38,9 @@ export function SpawnEditorMenu(): ReactElement {
     });
 
     if (path) {
-      await saveSpawnFile(path);
+      await spawnFileService.saveSpawnFile(path);
     }
-  }, [saveSpawnFile]);
+  }, [spawnFileService]);
 
   const onExportClicked = useCallback(async () => {
     const path: Optional<string> = (await dialog.open({
@@ -49,9 +49,9 @@ export function SpawnEditorMenu(): ReactElement {
     })) as Optional<string>;
 
     if (path) {
-      await exportSpawnFile(path);
+      await spawnFileService.exportSpawnFile(path);
     }
-  }, [exportSpawnFile]);
+  }, [spawnFileService]);
 
   const onNavigateClicked = useCallback(
     (to: string) => {
@@ -63,8 +63,8 @@ export function SpawnEditorMenu(): ReactElement {
   const onCloseClicked = useCallback(() => {
     navigate("/spawn_editor", { replace: true });
 
-    return closeSpawnFile();
-  }, [navigate]);
+    return spawnFileService.closeSpawnFile();
+  }, [navigate, spawnFileService]);
 
   return (
     <Drawer
@@ -88,7 +88,7 @@ export function SpawnEditorMenu(): ReactElement {
 
       <List disablePadding>
         <ListItem disablePadding>
-          <ListItemButton disabled={spawnFile.isLoading} onClick={onSaveClicked}>
+          <ListItemButton disabled={spawnFileService.spawnFile.isLoading} onClick={onSaveClicked}>
             <ListItemIcon>
               <SaveIcon />
             </ListItemIcon>
@@ -97,7 +97,7 @@ export function SpawnEditorMenu(): ReactElement {
         </ListItem>
 
         <ListItem disablePadding>
-          <ListItemButton disabled={spawnFile.isLoading} onClick={onExportClicked}>
+          <ListItemButton disabled={spawnFileService.spawnFile.isLoading} onClick={onExportClicked}>
             <ListItemIcon>
               <ImportExportIcon />
             </ListItemIcon>
@@ -106,7 +106,7 @@ export function SpawnEditorMenu(): ReactElement {
         </ListItem>
 
         <ListItem disablePadding>
-          <ListItemButton disabled={spawnFile.isLoading} onClick={onCloseClicked}>
+          <ListItemButton disabled={spawnFileService.spawnFile.isLoading} onClick={onCloseClicked}>
             <ListItemIcon>
               <CloseIcon />
             </ListItemIcon>

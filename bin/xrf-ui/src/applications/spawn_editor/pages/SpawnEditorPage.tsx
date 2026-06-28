@@ -7,10 +7,10 @@ import { SpawnEditorOpenForm } from "@/applications/spawn_editor/components/Spaw
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 
 export function SpawnEditorPage(): ReactElement {
-  const { spawnFile, isReady } = useInjection(SpawnFileService);
+  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
-  if (isReady) {
-    return spawnFile.value ? <SpawnEditor /> : <SpawnEditorOpenForm />;
+  if (spawnFileService.isReady) {
+    return spawnFileService.spawnFile.value ? <SpawnEditor /> : <SpawnEditorOpenForm />;
   }
 
   return (

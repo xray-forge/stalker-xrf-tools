@@ -17,7 +17,7 @@ import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "
 export function ArchivesEditorUnpackerPage() {
   const log: Logger = useLogger("archives-unpacker");
 
-  const { xrfProjectPath } = useInjection(ProjectService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);
@@ -80,11 +80,13 @@ export function ArchivesEditorUnpackerPage() {
   }, [archivesPath, archivesUnpackPath, log]);
 
   useEffect(() => {
-    if (xrfProjectPath) {
-      getExistingProjectLinkedGamePath(xrfProjectPath).then((gamePath) => setArchivesPath(gamePath));
-      getProjectArchivesUnpackPath(xrfProjectPath).then((unpackPath) => setArchivesUnpackPath(unpackPath));
+    if (projectService.xrfProjectPath) {
+      getExistingProjectLinkedGamePath(projectService.xrfProjectPath).then((gamePath) => setArchivesPath(gamePath));
+      getProjectArchivesUnpackPath(projectService.xrfProjectPath).then((unpackPath) =>
+        setArchivesUnpackPath(unpackPath)
+      );
     }
-  }, [xrfProjectPath]);
+  }, [projectService.xrfProjectPath]);
 
   return (
     <PickerForm

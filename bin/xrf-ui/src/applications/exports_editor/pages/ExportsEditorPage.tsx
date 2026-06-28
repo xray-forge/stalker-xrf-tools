@@ -6,13 +6,10 @@ import { ExportsEditor } from "@/applications/exports_editor/components/viewer/E
 import { ExportsService } from "@/applications/exports_editor/store/exports";
 
 export function ExportsEditorPage() {
-  const {
-    isReady,
-    declarations: { value: declarations },
-  } = useInjection(ExportsService);
+  const exportsService: ExportsService = useInjection(ExportsService);
 
-  if (isReady) {
-    return declarations ? <ExportsEditor /> : <ExportsOpenForm />;
+  if (exportsService.isReady) {
+    return exportsService.declarations ? <ExportsEditor /> : <ExportsOpenForm />;
   }
 
   return (

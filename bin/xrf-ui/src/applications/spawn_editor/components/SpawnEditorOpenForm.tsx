@@ -14,8 +14,8 @@ import { getExistingProjectBuiltAllSpawnPath } from "@/lib/xrf_path";
 export function SpawnEditorOpenForm(): ReactElement {
   const log: Logger = useLogger("spawn-open");
 
-  const { spawnFile, resetSpawnFile, openSpawnFile } = useInjection(SpawnFileService);
-  const { xrfProjectPath } = useInjection(ProjectService);
+  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [spawnPath, setSpawnPath] = useState<Optional<string>>(null);
@@ -27,7 +27,7 @@ export function SpawnEditorOpenForm(): ReactElement {
 
       try {
         setIsSelecting(true);
-        resetSpawnFile();
+        spawnFileService.resetSpawnFile();
 
         const selected: Optional<string> = (await open({
           title: "Select spawn file",
@@ -41,7 +41,7 @@ export function SpawnEditorOpenForm(): ReactElement {
         setIsSelecting(false);
       }
     },
-    [log, resetSpawnFile]
+    [log, spawnFileService]
   );
 
   const onSelectSpawnFileClicked = useCallback(
@@ -51,15 +51,15 @@ export function SpawnEditorOpenForm(): ReactElement {
 
   const onOpenSpawnFile = useCallback(() => {
     if (spawnPath) {
-      openSpawnFile(spawnPath);
+      spawnFileService.openSpawnFile(spawnPath);
     } else {
       log.info("Cannot parse spawn file without path");
     }
-  }, [log, openSpawnFile, spawnPath]);
+  }, [log, spawnFileService, spawnPath]);
 
   useEffect(() => {
-    if (xrfProjectPath) {
-      getExistingProjectBuiltAllSpawnPath(xrfProjectPath).then((spawnPath) => {
+    if (projectService.xrfProjectPath) {
+      getExistingProjectBuiltAllSpawnPath(projectService.xrfProjectPath).then((spawnPath) => {
         setSpawnPath(spawnPath);
       });
     }
@@ -68,15 +68,15 @@ export function SpawnEditorOpenForm(): ReactElement {
   return (
     <PickerForm
       title={"Select *.spawn file to open"}
-      error={spawnFile.error ? String(spawnFile.error) : undefined}
-      isLoading={spawnFile.isLoading}
+      error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
+      isLoading={spawnFileService.spawnFile.isLoading}
       backPath={"/spawn_editor"}
-      backDisabled={spawnFile.isLoading || isSelecting}
+      backDisabled={spawnFileService.spawnFile.isLoading || isSelecting}
       actions={
         <Button
           variant={"contained"}
           fullWidth
-          disabled={!spawnPath || isSelecting || spawnFile.isLoading}
+          disabled={!spawnPath || isSelecting || spawnFileService.spawnFile.isLoading}
           onClick={onOpenSpawnFile}
         >
           Open
@@ -89,7 +89,7 @@ export function SpawnEditorOpenForm(): ReactElement {
         value={spawnPath ?? ""}
         placeholder={"Spawn file"}
         readOnly={true}
-        error={Boolean(spawnFile.error)}
+        error={Boolean(spawnFileService.spawnFile.error)}
         endAdornment={
           <InputAdornment position={"end"} onClick={onSelectSpawnFile}>
             <IconButton edge={"end"}>

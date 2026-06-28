@@ -7,10 +7,10 @@ import { ArchivesEditor } from "@/applications/archive_editor/components/editor/
 import { ArchivesService } from "@/applications/archive_editor/store/archives";
 
 export function ArchivesEditorPage(): ReactElement {
-  const { project, isReady } = useInjection(ArchivesService);
+  const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  if (isReady) {
-    return project.value ? <ArchivesEditor /> : <ArchivesEditorOpenForm />;
+  if (archivesService.isReady) {
+    return archivesService.project.value ? <ArchivesEditor /> : <ArchivesEditorOpenForm />;
   }
 
   return (

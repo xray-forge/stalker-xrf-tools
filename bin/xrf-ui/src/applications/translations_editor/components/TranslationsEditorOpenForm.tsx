@@ -12,28 +12,28 @@ import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf_path";
 export function TranslationsEditorOpenForm(): ReactElement {
   const log: Logger = useLogger("translations-editor-open");
 
-  const { project, openTranslationsProject } = useInjection(TranslationsService);
-  const { xrfProjectPath } = useInjection(ProjectService);
+  const translationsService: TranslationsService = useInjection(TranslationsService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const [translationsPath, setTranslationsPath, onSelectTranslationsPath] = usePathState({
     title: "Provide path to equipment_editor dds",
     filters: [{ name: "dds", extensions: ["dds"] }],
-    isDisabled: project.isLoading,
+    isDisabled: translationsService.project.isLoading,
   });
 
   const onOpenTranslationsClicked = useCallback(() => {
     if (translationsPath) {
-      openTranslationsProject(translationsPath);
+      translationsService.openTranslationsProject(translationsPath);
     } else {
       log.info("Cannot open translations when have no provided paths:", {
         translationsPath,
       });
     }
-  }, [log, openTranslationsProject, translationsPath]);
+  }, [log, translationsService, translationsPath]);
 
   useEffect(() => {
-    if (xrfProjectPath) {
-      getPathIfExists(getProjectTranslationsPath(xrfProjectPath)).then((translationsPath) => {
+    if (projectService.xrfProjectPath) {
+      getPathIfExists(getProjectTranslationsPath(projectService.xrfProjectPath)).then((translationsPath) => {
         setTranslationsPath(translationsPath);
       });
     }
@@ -42,13 +42,13 @@ export function TranslationsEditorOpenForm(): ReactElement {
   return (
     <PickerForm
       title={"Provide translations details"}
-      error={project.error ? String(project.error) : undefined}
-      isLoading={project.isLoading}
+      error={translationsService.project.error ? String(translationsService.project.error) : undefined}
+      isLoading={translationsService.project.isLoading}
       backPath={"/translations_editor"}
       actions={
         <Button
           fullWidth
-          disabled={project.isLoading || !translationsPath}
+          disabled={translationsService.project.isLoading || !translationsPath}
           variant={"contained"}
           onClick={onOpenTranslationsClicked}
         >
@@ -59,7 +59,7 @@ export function TranslationsEditorOpenForm(): ReactElement {
       <FilePickerInput
         label={"Translations path"}
         value={translationsPath}
-        disabled={project.isLoading}
+        disabled={translationsService.project.isLoading}
         onClick={onSelectTranslationsPath}
       />
     </PickerForm>

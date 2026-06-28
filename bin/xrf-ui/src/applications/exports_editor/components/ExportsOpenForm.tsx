@@ -13,8 +13,8 @@ import { Logger, useLogger } from "@/lib/logging";
 export function ExportsOpenForm(): ReactElement {
   const log: Logger = useLogger("exports-open");
 
-  const { declarations, openExports } = useInjection(ExportsService);
-  const { xrfProjectPath, setXrfProjectPath } = useInjection(ProjectService);
+  const exportsService: ExportsService = useInjection(ExportsService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const onSelectProjectPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {
@@ -28,10 +28,10 @@ export function ExportsOpenForm(): ReactElement {
 
       if (newXrfProjectPath) {
         log.info("Selected new project path:", newXrfProjectPath);
-        setXrfProjectPath(newXrfProjectPath);
+        projectService.setXrfProjectPath(newXrfProjectPath);
       }
     },
-    [log, setXrfProjectPath]
+    [log, projectService]
   );
 
   const onSelectProjectPathClicked = useCallback(
@@ -40,23 +40,23 @@ export function ExportsOpenForm(): ReactElement {
   );
 
   const onOpenExportsClicked = useCallback(() => {
-    if (xrfProjectPath) {
-      openExports(xrfProjectPath);
+    if (projectService.xrfProjectPath) {
+      exportsService.openExports(projectService.xrfProjectPath);
     } else {
       log.info("Cannot open exports when have no project path");
     }
-  }, [log, openExports, xrfProjectPath]);
+  }, [exportsService, log, projectService.xrfProjectPath]);
 
   return (
     <PickerForm
       title={"Provide paths to ltx project"}
-      error={declarations.error ? String(declarations.error) : undefined}
-      isLoading={declarations.isLoading}
+      error={exportsService.declarations.error ? String(exportsService.declarations.error) : undefined}
+      isLoading={exportsService.declarations.isLoading}
       backPath={"/exports_editor"}
       actions={
         <Button
           fullWidth={true}
-          disabled={!xrfProjectPath || declarations.isLoading}
+          disabled={!projectService.xrfProjectPath || exportsService.declarations.isLoading}
           variant={"contained"}
           onClick={onOpenExportsClicked}
         >
@@ -77,7 +77,7 @@ export function ExportsOpenForm(): ReactElement {
             </InputAdornment>
           }
           label={"Project"}
-          value={xrfProjectPath || ""}
+          value={projectService.xrfProjectPath || ""}
           readOnly={true}
           onClick={onSelectProjectPathClicked}
         />

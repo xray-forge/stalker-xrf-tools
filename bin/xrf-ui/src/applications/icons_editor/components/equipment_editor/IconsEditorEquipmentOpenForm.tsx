@@ -12,36 +12,36 @@ import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } 
 export function IconsEditorEquipmentOpenForm(): ReactElement {
   const log: Logger = useLogger("equipment-editor-open");
 
-  const { xrfProjectPath } = useInjection(ProjectService);
-  const { spriteImage, openEquipmentProject } = useInjection(EquipmentService);
+  const projectService: ProjectService = useInjection(ProjectService);
+  const equipmentService: EquipmentService = useInjection(EquipmentService);
 
   const [spritePath, setSpritePath, onSelectEquipmentPath] = usePathState({
     title: "Provide path to equipment_editor dds",
     filters: [{ name: "dds", extensions: ["dds"] }],
-    isDisabled: spriteImage.isLoading,
+    isDisabled: equipmentService.spriteImage.isLoading,
   });
 
   const [systemLtxPath, setSystemLtxPath, onSelectSystemLtxPath] = usePathState({
     title: "Provide path to system.ltx",
     filters: [{ name: "ltx", extensions: ["ltx"] }],
-    isDisabled: spriteImage.isLoading,
+    isDisabled: equipmentService.spriteImage.isLoading,
   });
 
   const onOpenEquipmentClicked = useCallback(() => {
     if (spritePath && systemLtxPath) {
-      openEquipmentProject(spritePath, systemLtxPath);
+      equipmentService.openEquipmentProject(spritePath, systemLtxPath);
     } else {
       log.info("Cannot open equipment_editor when have no provided paths:", { spritePath, systemLtxPath });
     }
-  }, [spritePath, systemLtxPath, openEquipmentProject, log]);
+  }, [spritePath, systemLtxPath, equipmentService, log]);
 
   useEffect(() => {
-    if (xrfProjectPath) {
-      getPathIfExists(getProjectEquipmentDDSPath(xrfProjectPath)).then((equipmentPath) => {
+    if (projectService.xrfProjectPath) {
+      getPathIfExists(getProjectEquipmentDDSPath(projectService.xrfProjectPath)).then((equipmentPath) => {
         setSpritePath(equipmentPath);
       });
 
-      getPathIfExists(getProjectSystemLtxPath(xrfProjectPath)).then((ltxPath) => {
+      getPathIfExists(getProjectSystemLtxPath(projectService.xrfProjectPath)).then((ltxPath) => {
         setSystemLtxPath(ltxPath);
       });
     }
@@ -50,13 +50,13 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
   return (
     <PickerForm
       title={"Provide equipment details"}
-      error={spriteImage.error ? String(spriteImage.error) : undefined}
-      isLoading={spriteImage.isLoading}
+      error={equipmentService.spriteImage.error ? String(equipmentService.spriteImage.error) : undefined}
+      isLoading={equipmentService.spriteImage.isLoading}
       backPath={"/icons_editor"}
       actions={
         <Button
           fullWidth
-          disabled={spriteImage.isLoading || !spritePath || !systemLtxPath}
+          disabled={equipmentService.spriteImage.isLoading || !spritePath || !systemLtxPath}
           variant={"contained"}
           onClick={onOpenEquipmentClicked}
         >
@@ -67,14 +67,14 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
       <FilePickerInput
         label={"System ltx"}
         value={systemLtxPath}
-        disabled={spriteImage.isLoading}
+        disabled={equipmentService.spriteImage.isLoading}
         onClick={onSelectSystemLtxPath}
       />
 
       <FilePickerInput
         label={"Equipment sprite"}
         value={spritePath}
-        disabled={spriteImage.isLoading}
+        disabled={equipmentService.spriteImage.isLoading}
         onClick={onSelectEquipmentPath}
       />
     </PickerForm>

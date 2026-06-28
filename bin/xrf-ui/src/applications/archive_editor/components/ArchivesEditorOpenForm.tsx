@@ -12,15 +12,15 @@ import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectLinkedGamePath } from "@/lib/xrf_path";
 
 export function ArchivesEditorOpenForm(): ReactElement {
-  const { project, openArchivesProject } = useInjection(ArchivesService);
-  const { xrfProjectPath } = useInjection(ProjectService);
+  const archivesService: ArchivesService = useInjection(ArchivesService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const log: Logger = useLogger("archives-editor");
   const [archivesPath, setArchivesPath] = useState<Optional<string>>(null);
 
   const onSelectConfigsPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {
-      if (project.isLoading) {
+      if (archivesService.project.isLoading) {
         return;
       }
 
@@ -38,7 +38,7 @@ export function ArchivesEditorOpenForm(): ReactElement {
         setArchivesPath(newXrfConfigsPath);
       }
     },
-    [log, project.isLoading]
+    [log, archivesService.project.isLoading]
   );
 
   const onSelectArchivesPathClicked = useCallback(
@@ -48,30 +48,30 @@ export function ArchivesEditorOpenForm(): ReactElement {
 
   const onOpenPathClicked = useCallback(async () => {
     if (archivesPath) {
-      openArchivesProject(archivesPath);
+      archivesService.openArchivesProject(archivesPath);
     } else {
       log.info("Cannot parse archives project without path");
     }
-  }, [archivesPath, log, openArchivesProject]);
+  }, [archivesPath, log, archivesService]);
 
   useEffect(() => {
-    if (xrfProjectPath) {
-      getExistingProjectLinkedGamePath(xrfProjectPath).then((gamePath) => setArchivesPath(gamePath));
+    if (projectService.xrfProjectPath) {
+      getExistingProjectLinkedGamePath(projectService.xrfProjectPath).then((gamePath) => setArchivesPath(gamePath));
     }
-  }, [xrfProjectPath]);
+  }, [projectService.xrfProjectPath]);
 
   return (
     <PickerForm
       title={"Provide archives to open"}
-      error={project.error ? project.error.message : undefined}
-      isLoading={project.isLoading}
-      backDisabled={project.isLoading}
+      error={archivesService.project.error ? archivesService.project.error.message : undefined}
+      isLoading={archivesService.project.isLoading}
+      backDisabled={archivesService.project.isLoading}
       backPath={"/archives_editor"}
       actions={
         <Button
           variant={"contained"}
           fullWidth={true}
-          disabled={project.isLoading || !archivesPath}
+          disabled={archivesService.project.isLoading || !archivesPath}
           onClick={onOpenPathClicked}
         >
           Open
@@ -80,13 +80,13 @@ export function ArchivesEditorOpenForm(): ReactElement {
     >
       <OutlinedInput
         size={"small"}
-        disabled={project.isLoading}
+        disabled={archivesService.project.isLoading}
         value={archivesPath || ""}
         placeholder={"Source"}
         readOnly={true}
         endAdornment={
           <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
-            <IconButton disabled={project.isLoading} edge={"end"}>
+            <IconButton disabled={archivesService.project.isLoading} edge={"end"}>
               <FolderIcon />
             </IconButton>
           </InputAdornment>

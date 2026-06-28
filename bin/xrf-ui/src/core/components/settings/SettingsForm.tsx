@@ -25,7 +25,7 @@ export function SettingsForm({
 }: ISettingsFormProps): ReactElement {
   const log: Logger = useLogger("settings-modal");
 
-  const { xrfProjectPath, xrfConfigsPath, setXrfProjectPath, setXrfConfigsPath } = useInjection(ProjectService);
+  const projectService: ProjectService = useInjection(ProjectService);
 
   const onSelectProjectPath = useCallback(
     async (event: MouseEvent<HTMLInputElement>) => {
@@ -40,20 +40,20 @@ export function SettingsForm({
       if (newXrfProjectPath) {
         log.info("Selected new project path:", newXrfProjectPath);
 
-        setXrfProjectPath(newXrfProjectPath);
+        projectService.setXrfProjectPath(newXrfProjectPath);
 
         // Try to auto-guess configs folder from xrf directory.
-        if (!xrfConfigsPath) {
+        if (!projectService.xrfConfigsPath) {
           const newXrfConfigsPath: string = await getProjectConfigsPath(newXrfProjectPath);
 
           if (await exists(newXrfConfigsPath)) {
             log.info("Automatically selected new configs path:", newXrfConfigsPath);
-            setXrfConfigsPath(newXrfConfigsPath);
+            projectService.setXrfConfigsPath(newXrfConfigsPath);
           }
         }
       }
     },
-    [log, setXrfConfigsPath, setXrfProjectPath, xrfConfigsPath]
+    [log, projectService]
   );
 
   const onSelectProjectPathClicked = useCallback(
@@ -74,10 +74,10 @@ export function SettingsForm({
       if (newXrfConfigsPath) {
         log.info("Selected new configs path:", newXrfConfigsPath);
 
-        setXrfConfigsPath(newXrfConfigsPath);
+        projectService.setXrfConfigsPath(newXrfConfigsPath);
       }
     },
-    [log, setXrfConfigsPath]
+    [log, projectService]
   );
 
   const onSelectConfigsPathClicked = useCallback(
@@ -103,7 +103,7 @@ export function SettingsForm({
               </InputAdornment>
             }
             label={"Project"}
-            value={xrfProjectPath || ""}
+            value={projectService.xrfProjectPath || ""}
             readOnly
             onClick={onSelectProjectPathClicked}
           />
@@ -124,7 +124,7 @@ export function SettingsForm({
               </InputAdornment>
             }
             label={"Configs"}
-            value={xrfConfigsPath || ""}
+            value={projectService.xrfConfigsPath || ""}
             readOnly
             onClick={onSelectConfigsPathClicked}
           />
