@@ -1,45 +1,58 @@
-import { Box, Button, ButtonGroup, Card } from "@mui/material";
-import { ReactElement } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import { default as ArchiveIcon } from "@mui/icons-material/Archive";
+import { default as ForumIcon } from "@mui/icons-material/Forum";
+import { default as ImageIcon } from "@mui/icons-material/Image";
+import { default as MapIcon } from "@mui/icons-material/Map";
+import { default as SettingsApplicationsIcon } from "@mui/icons-material/SettingsApplications";
+import { default as SwapHorizIcon } from "@mui/icons-material/SwapHoriz";
+import { default as TranslateIcon } from "@mui/icons-material/Translate";
+import { ReactElement, useMemo } from "react";
 
-import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
-import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
+import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 
 export function Root(): ReactElement {
-  const navigate: NavigateFunction = useNavigate();
+  const items = useMemo(
+    () => [
+      {
+        label: "Archive editor",
+        description: "Browse and unpack game archives",
+        icon: <ArchiveIcon />,
+        to: "/archives_editor",
+      },
+      { label: "Dialog editor", description: "Edit NPC dialog graphs", icon: <ForumIcon />, to: "/dialog_editor" },
+      {
+        label: "Configs editor",
+        description: "Explore, verify and format LTX",
+        icon: <SettingsApplicationsIcon />,
+        to: "/configs_editor",
+      },
+      {
+        label: "Exports editor",
+        description: "Inspect script exports",
+        icon: <SwapHorizIcon />,
+        to: "/exports_editor",
+      },
+      {
+        label: "Icon editor",
+        description: "Edit equipment and icon sprites",
+        icon: <ImageIcon />,
+        to: "/icons_editor",
+      },
+      { label: "Spawn editor", description: "Inspect spawn files", icon: <MapIcon />, to: "/spawn_editor" },
+      {
+        label: "Translation editor",
+        description: "Manage localization tables",
+        icon: <TranslateIcon />,
+        to: "/translations_editor",
+      },
+    ],
+    []
+  );
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-        gap: 1,
-      }}
-    >
-      <ApplicationNavigatorHeader
-        title={"XRF development tools"}
-        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/app.html"}
-      />
-
-      <Card sx={{ minWidth: 200 }}>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/archives_editor", { replace: true })}>Archive editor</Button>
-            <Button onClick={() => navigate("/dialog_editor", { replace: true })}>Dialog editor</Button>
-            <Button onClick={() => navigate("/configs_editor", { replace: true })}>Configs editor</Button>
-            <Button onClick={() => navigate("/exports_editor", { replace: true })}>Exports editor</Button>
-            <Button onClick={() => navigate("/icons_editor", { replace: true })}>Icon editor</Button>
-            <Button onClick={() => navigate("/spawn_editor", { replace: true })}>Spawn editor</Button>
-            <Button onClick={() => navigate("/translations_editor", { replace: true })}>Translation editor</Button>
-          </ButtonGroup>
-        </Box>
-      </Card>
-
-      <NavigationFooter />
-    </Box>
+    <ToolNavigator
+      title={"XRF development tools"}
+      helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/app.html"}
+      items={items}
+    />
   );
 }

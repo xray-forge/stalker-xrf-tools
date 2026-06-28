@@ -1,17 +1,13 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
 import {
   Alert,
-  Box,
   Button,
   Checkbox,
-  CircularProgress,
   FormControlLabel,
-  Grid,
   IconButton,
   InputAdornment,
   OutlinedInput,
   Paper,
-  Typography,
 } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -19,7 +15,7 @@ import { useInjection } from "@wirestate/react";
 import { ChangeEvent, MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ConfigsFormatResult } from "@/applications/configs_editor/components/ConfigsFormatResult";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { EConfigsEditorCommand } from "@/lib/ipc";
@@ -102,60 +98,19 @@ export function ConfigsEditorFormatterPage() {
   }, [xrfConfigsPath]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "safe center",
-        alignItems: "safe center",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        width: "100%",
-        height: "100%",
-        padding: 4,
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
-        <Typography>Provide LTX files directory to {isCheck ? "check format" : "format"}</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", alignItems: "flex-start", width: "auto", marginBottom: 2 }}>
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto", marginRight: 1 }}>
-          <OutlinedInput
-            size={"small"}
-            disabled={isLoading}
-            value={configsPath || ""}
-            placeholder={"Configs directory"}
-            readOnly={true}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
-                <IconButton edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            onClick={onSelectConfigsPathClicked}
-          />
-
-          <Grid container sx={{ justifyContent: "flex-start", alignItems: "center", width: "auto", marginBottom: 2 }}>
-            <FormControlLabel
-              control={<Checkbox disabled={isLoading} checked={isCheck} onChange={onCheckModeChange} />}
-              label={"Check mode (readonly)"}
-            />
-          </Grid>
-        </Box>
-
-        <Box sx={{ position: "relative", top: 2 }}>
-          <Button variant={"contained"} disabled={isLoading || !configsPath} onClick={onFormatPathClicked}>
-            Format
-          </Button>
-        </Box>
-      </Grid>
-
-      {isLoading ? <CircularProgress size={24} /> : null}
-
-      {result ? (
-        <Box>
-          {result.toFormat.length ? (
+    <PickerForm
+      title={`Provide LTX files directory to ${isCheck ? "check format" : "format"}`}
+      error={error ?? undefined}
+      isLoading={isLoading}
+      backPath={"/configs_editor"}
+      actions={
+        <Button variant={"contained"} fullWidth disabled={isLoading || !configsPath} onClick={onFormatPathClicked}>
+          Format
+        </Button>
+      }
+      status={
+        result ? (
+          result.toFormat.length ? (
             isCheck ? (
               <Alert severity={"error"}>There are files with invalid formatting.</Alert>
             ) : (
@@ -163,23 +118,37 @@ export function ConfigsEditorFormatterPage() {
             )
           ) : (
             <Alert severity={"success"}>All files are in correct format.</Alert>
-          )}
-        </Box>
-      ) : null}
+          )
+        ) : null
+      }
+      result={
+        result ? (
+          <Paper elevation={4}>
+            <ConfigsFormatResult isCheck={isCheck} result={result} />
+          </Paper>
+        ) : null
+      }
+    >
+      <OutlinedInput
+        size={"small"}
+        disabled={isLoading}
+        value={configsPath || ""}
+        placeholder={"Configs directory"}
+        readOnly={true}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
+            <IconButton edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectConfigsPathClicked}
+      />
 
-      {error ? (
-        <Box sx={{ maxWidth: 540 }}>
-          <Alert severity={"error"}>{error}</Alert>
-        </Box>
-      ) : null}
-
-      <ApplicationBackButton path={"/configs_editor"} />
-
-      {result ? (
-        <Paper elevation={4}>
-          <ConfigsFormatResult isCheck={isCheck} result={result} />
-        </Paper>
-      ) : null}
-    </Box>
+      <FormControlLabel
+        control={<Checkbox disabled={isLoading} checked={isCheck} onChange={onCheckModeChange} />}
+        label={"Check mode (readonly)"}
+      />
+    </PickerForm>
   );
 }

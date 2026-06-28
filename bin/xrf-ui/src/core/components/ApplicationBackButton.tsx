@@ -1,25 +1,24 @@
-import { Box, Button, ButtonGroup, Card } from "@mui/material";
+import { Button } from "@mui/material";
 import { ReactElement, useCallback } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-interface ISpawnBackButtonProps {
+interface IApplicationBackButtonProps {
   disabled?: boolean;
   path: string;
 }
 
-export function ApplicationBackButton({ disabled, path }: ISpawnBackButtonProps): ReactElement {
+export function ApplicationBackButton({ disabled, path }: IApplicationBackButtonProps): ReactElement {
   const navigate: NavigateFunction = useNavigate();
   const onClick = useCallback(() => navigate(path, { replace: true }), [navigate, path]);
 
   return (
-    <Card sx={{ minWidth: 200, marginTop: 2, marginBottom: 2, flexShrink: 0 }}>
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <ButtonGroup orientation={"vertical"}>
-          <Button disabled={disabled} onClick={onClick}>
-            Back
-          </Button>
-        </ButtonGroup>
-      </Box>
-    </Card>
+    <Button
+      variant={"outlined"}
+      disabled={disabled}
+      sx={{ minWidth: 200, marginTop: 2, marginBottom: 2, flexShrink: 0 }}
+      onClick={onClick}
+    >
+      Back
+    </Button>
   );
 }

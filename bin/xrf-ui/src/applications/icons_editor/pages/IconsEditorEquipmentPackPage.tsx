@@ -1,10 +1,10 @@
-import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { EquipmentPackResult } from "@/applications/icons_editor/components/equipment_pack/EquipmentPackResult";
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file_picker";
@@ -86,75 +86,44 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "safe center",
-        alignItems: "safe center",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        width: "100%",
-        height: "100%",
-        padding: 4,
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
-        <Typography>Provide equipment details</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", width: "auto", marginBottom: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "auto",
-            marginRight: 1,
-            gap: 2,
-          }}
+    <PickerForm
+      title={"Provide equipment details"}
+      error={result.error ? String(result.error) : undefined}
+      isLoading={result.isLoading}
+      backPath={"/icons_editor"}
+      backDisabled={result.isLoading}
+      actions={
+        <Button
+          fullWidth
+          disabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
+          variant={"contained"}
+          onClick={onPackEquipmentClicked}
         >
-          <FilePickerInput
-            label={"System ltx"}
-            value={systemLtxPath || ""}
-            disabled={result.isLoading}
-            onClick={onSelectSystemLtxPath}
-          />
+          Pack
+        </Button>
+      }
+      result={result.value ? <EquipmentPackResult result={result.value} /> : null}
+    >
+      <FilePickerInput
+        label={"System ltx"}
+        value={systemLtxPath || ""}
+        disabled={result.isLoading}
+        onClick={onSelectSystemLtxPath}
+      />
 
-          <FilePickerInput
-            label={"Input icons directory"}
-            value={inputIconsPath}
-            disabled={result.isLoading}
-            onClick={onSelectInputIconsPath}
-          />
+      <FilePickerInput
+        label={"Input icons directory"}
+        value={inputIconsPath}
+        disabled={result.isLoading}
+        onClick={onSelectInputIconsPath}
+      />
 
-          <FilePickerInput
-            label={"Output equipment_editor sprite"}
-            value={outputSpritePath}
-            disabled={result.isLoading}
-            onClick={onSelectOutputSpritePath}
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
-          <Button
-            disabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
-            variant={"contained"}
-            onClick={onPackEquipmentClicked}
-          >
-            Pack
-          </Button>
-        </Box>
-      </Grid>
-
-      {result.error ? (
-        <Box>
-          <FormHelperText error>{String(result.error)}</FormHelperText>
-        </Box>
-      ) : null}
-
-      {result.value ? <EquipmentPackResult result={result.value} /> : null}
-
-      <ApplicationBackButton disabled={result.isLoading} path={"/icons_editor"} />
-    </Box>
+      <FilePickerInput
+        label={"Output equipment_editor sprite"}
+        value={outputSpritePath}
+        disabled={result.isLoading}
+        onClick={onSelectOutputSpritePath}
+      />
+    </PickerForm>
   );
 }

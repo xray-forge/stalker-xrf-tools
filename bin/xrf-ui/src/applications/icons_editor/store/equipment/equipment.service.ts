@@ -2,8 +2,8 @@ import { clamp } from "@mui/x-data-grid/internals";
 import { path } from "@tauri-apps/api";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
-import { OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
+import { Injectable, OnProvision } from "@wirestate/core";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Optional } from "@/core/types/general";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons";
@@ -21,6 +21,7 @@ export interface IEquipmentPngDescriptor {
   image: HTMLImageElement;
 }
 
+@Injectable()
 export class EquipmentService {
   @Observable()
   public gridSize: number = 50;

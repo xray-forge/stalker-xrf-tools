@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Paper, Stack, TextField, Typography } from "@mui/material";
 import { ChangeEvent, ReactElement, useCallback } from "react";
 import { Handle, Position } from "reactflow";
 
@@ -15,22 +15,17 @@ export function DialogNode({ data, isConnectable }: IDialogNodeProps): ReactElem
   }, []);
 
   return (
-    <Box component={"div"} sx={{ bgcolor: "red", padding: 2 }}>
-      <Box>{data.label}</Box>
+    <Paper variant={"outlined"} sx={{ padding: 1.5, minWidth: 200 }}>
+      <Typography variant={"subtitle2"} gutterBottom>
+        {data.label}
+      </Typography>
 
-      <br />
-
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>Has info:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>No info:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
+      <Stack spacing={1}>
+        <TextField className={"nodrag"} label={"Has info"} size={"small"} fullWidth onChange={onChange} />
+        <TextField className={"nodrag"} label={"No info"} size={"small"} fullWidth onChange={onChange} />
+      </Stack>
 
       <Handle type={"source"} position={Position.Bottom} isConnectable={isConnectable} />
-    </Box>
+    </Paper>
   );
 }

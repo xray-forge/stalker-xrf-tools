@@ -1,42 +1,27 @@
-import { Box, Button, ButtonGroup, Card } from "@mui/material";
-import { ReactElement } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
+import { default as FactCheckIcon } from "@mui/icons-material/FactCheck";
+import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
+import { default as FormatAlignLeftIcon } from "@mui/icons-material/FormatAlignLeft";
+import { ReactElement, useMemo } from "react";
 
-import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
-import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
+import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 
 export function ConfigsEditorNavigatorPage(): ReactElement {
-  const navigate: NavigateFunction = useNavigate();
+  const items = useMemo(
+    () => [
+      { label: "Explorer", icon: <FolderOpenIcon />, to: "/configs_editor/explorer" },
+      { label: "Verifier", icon: <FactCheckIcon />, to: "/configs_editor/verifier" },
+      { label: "Formatter", icon: <FormatAlignLeftIcon />, to: "/configs_editor/formatter" },
+      { label: "Back", icon: <ArrowBackIcon />, to: "/", isSecondary: true },
+    ],
+    []
+  );
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-        gap: 1,
-      }}
-    >
-      <ApplicationNavigatorHeader
-        title={"XRF development tools"}
-        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/config_editor.html"}
-      />
-
-      <Card sx={{ minWidth: 200 }}>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/configs_editor/explorer", { replace: true })}>Explorer</Button>
-            <Button onClick={() => navigate("/configs_editor/verifier", { replace: true })}>Verifier</Button>
-            <Button onClick={() => navigate("/configs_editor/formatter", { replace: true })}>Formatter</Button>
-            <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
-          </ButtonGroup>
-        </Box>
-      </Card>
-
-      <NavigationFooter />
-    </Box>
+    <ToolNavigator
+      title={"XRF configs editor"}
+      helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/config_editor.html"}
+      items={items}
+    />
   );
 }

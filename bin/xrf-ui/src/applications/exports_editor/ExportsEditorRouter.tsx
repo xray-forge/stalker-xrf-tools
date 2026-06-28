@@ -1,5 +1,5 @@
 import { Container, ContainerConfig } from "@wirestate/core";
-import { ContainerProvider, ContainerProviderScope, useContainer } from "@wirestate/react";
+import { ContainerProvider, useContainer } from "@wirestate/react";
 import { ReactElement, useMemo } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -13,7 +13,7 @@ export function ExportsEditorRouter(): ReactElement {
   const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ExportsService] }), [parent]);
 
   return (
-    <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>
+    <ContainerProvider config={config}>
       <Routes>
         <Route path={"/"} element={<ExportsEditorNavigatorPage />} />
         <Route path={"/exports/*"} element={<ExportsEditorPage />} />

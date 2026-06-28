@@ -1,23 +1,12 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Grid,
-  IconButton,
-  InputAdornment,
-  OutlinedInput,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Alert, Button, IconButton, InputAdornment, OutlinedInput, Paper } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archive_editor/components/ArchivesUnpackResult";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IArchiveUnpackResult } from "@/lib/archive";
@@ -58,7 +47,7 @@ export function ArchivesEditorUnpackerPage() {
         setArchivesPath(newXrfConfigsPath);
       }
     },
-    [isLoading]
+    [isLoading, log]
   );
 
   const onSelectArchivesPathClicked = useCallback(
@@ -88,7 +77,7 @@ export function ArchivesEditorUnpackerPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [archivesPath, log]);
+  }, [archivesPath, archivesUnpackPath, log]);
 
   useEffect(() => {
     if (xrfProjectPath) {
@@ -98,94 +87,62 @@ export function ArchivesEditorUnpackerPage() {
   }, [xrfProjectPath]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "safe center",
-        alignItems: "safe center",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        width: "100%",
-        height: "100%",
-        padding: 4,
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
-        <Typography>Provide archives to unpack</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "auto", marginBottom: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "auto",
-            marginRight: 1,
-            gap: 1,
-          }}
+    <PickerForm
+      title={"Provide archives to unpack"}
+      error={error ?? undefined}
+      isLoading={isLoading}
+      backPath={"/archives_editor"}
+      backDisabled={isLoading}
+      actions={
+        <Button
+          variant={"contained"}
+          fullWidth
+          disabled={isLoading || !archivesPath}
+          onClick={onUnpackArchivesPathClicked}
         >
-          <OutlinedInput
-            size={"small"}
-            disabled={isLoading}
-            value={archivesPath || ""}
-            placeholder={"Source"}
-            readOnly={true}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
-                <IconButton disabled={isLoading} edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            onClick={onSelectArchivesPathClicked}
-          />
+          Unpack
+        </Button>
+      }
+      status={result ? <Alert severity={"success"}>Archives unpacked.</Alert> : null}
+      result={
+        result ? (
+          <Paper elevation={4}>
+            <ArchivesUnpackResult result={result} />
+          </Paper>
+        ) : null
+      }
+    >
+      <OutlinedInput
+        size={"small"}
+        disabled={isLoading}
+        value={archivesPath || ""}
+        placeholder={"Source"}
+        readOnly={true}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
+            <IconButton disabled={isLoading} edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectArchivesPathClicked}
+      />
 
-          <OutlinedInput
-            size={"small"}
-            disabled={isLoading}
-            value={archivesUnpackPath || ""}
-            placeholder={"Output"}
-            readOnly={true}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
-                <IconButton disabled={isLoading} edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            onClick={onSelectArchivesPathClicked}
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
-          <Button variant={"contained"} disabled={isLoading || !archivesPath} onClick={onUnpackArchivesPathClicked}>
-            Unpack
-          </Button>
-        </Box>
-      </Grid>
-
-      {isLoading ? <CircularProgress size={24} /> : null}
-
-      {result ? (
-        <Box>
-          <Alert severity={"success"}>Archives unpacked.</Alert>
-        </Box>
-      ) : null}
-
-      {error ? (
-        <Box sx={{ maxWidth: 540 }}>
-          <Alert severity={"error"}>{error}</Alert>
-        </Box>
-      ) : null}
-
-      <ApplicationBackButton disabled={isLoading} path={"/archives_editor"} />
-
-      {result ? (
-        <Paper elevation={4}>
-          <ArchivesUnpackResult result={result} />
-        </Paper>
-      ) : null}
-    </Box>
+      <OutlinedInput
+        size={"small"}
+        disabled={isLoading}
+        value={archivesUnpackPath || ""}
+        placeholder={"Output"}
+        readOnly={true}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
+            <IconButton disabled={isLoading} edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectArchivesPathClicked}
+      />
+    </PickerForm>
   );
 }

@@ -1,22 +1,11 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  FormHelperText,
-  Grid,
-  IconButton,
-  InputAdornment,
-  OutlinedInput,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Button, IconButton, InputAdornment, OutlinedInput } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
@@ -77,56 +66,39 @@ export function SpawnEditorOpenForm(): ReactElement {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
-        <Typography>Select *.spawn file to open</Typography>
-      </Grid>
-
-      <Stack direction={"row"} spacing={1} sx={{ marginBottom: 2, minWidth: 350 }}>
-        <OutlinedInput
-          size={"small"}
-          disabled={isSelecting}
-          value={spawnPath ?? ""}
-          placeholder={"Spawn file"}
-          readOnly={true}
-          error={Boolean(spawnFile.error)}
-          endAdornment={
-            <InputAdornment position={"end"} onClick={onSelectSpawnFile}>
-              <IconButton edge={"end"}>
-                <FolderIcon />
-              </IconButton>
-            </InputAdornment>
-          }
-          onClick={onSelectSpawnFileClicked}
-        />
-
+    <PickerForm
+      title={"Select *.spawn file to open"}
+      error={spawnFile.error ? String(spawnFile.error) : undefined}
+      isLoading={spawnFile.isLoading}
+      backPath={"/spawn_editor"}
+      backDisabled={spawnFile.isLoading || isSelecting}
+      actions={
         <Button
           variant={"contained"}
+          fullWidth
           disabled={!spawnPath || isSelecting || spawnFile.isLoading}
           onClick={onOpenSpawnFile}
         >
           Open
         </Button>
-      </Stack>
-
-      {spawnFile.error ? (
-        <Box>
-          <FormHelperText error>{String(spawnFile.error)}</FormHelperText>
-        </Box>
-      ) : null}
-
-      {spawnFile.isLoading ? <CircularProgress size={24} /> : null}
-
-      <ApplicationBackButton disabled={spawnFile.isLoading || isSelecting} path={"/spawn_editor"} />
-    </Box>
+      }
+    >
+      <OutlinedInput
+        size={"small"}
+        disabled={isSelecting}
+        value={spawnPath ?? ""}
+        placeholder={"Spawn file"}
+        readOnly={true}
+        error={Boolean(spawnFile.error)}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectSpawnFile}>
+            <IconButton edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectSpawnFileClicked}
+      />
+    </PickerForm>
   );
 }

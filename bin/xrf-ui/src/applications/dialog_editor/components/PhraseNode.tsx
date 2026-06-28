@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Paper, Stack, TextField, Typography } from "@mui/material";
 import { ChangeEvent, ReactElement, useCallback } from "react";
 import { Handle, Position } from "reactflow";
 
@@ -15,44 +15,20 @@ export function PhraseNode({ data, isConnectable }: IPhraseNodeProps): ReactElem
   }, []);
 
   return (
-    <Box component={"div"} sx={{ bgcolor: "red", padding: 2 }}>
-      <Box>{data.label}</Box>
-
+    <Paper variant={"outlined"} sx={{ padding: 1.5, minWidth: 200 }}>
       <Handle type={"source"} position={Position.Top} isConnectable={isConnectable} />
 
-      <br />
+      <Typography variant={"subtitle2"} gutterBottom>
+        {data.label}
+      </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>Text:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>Action:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>Precondition:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>Give info:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>Disable info:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <label htmlFor={"text"}>Is final:</label>
-        <input className={"nodrag"} onChange={onChange} />
-      </Box>
+      <Stack spacing={1}>
+        {["Text", "Action", "Precondition", "Give info", "Disable info", "Is final"].map((field) => (
+          <TextField key={field} className={"nodrag"} label={field} size={"small"} fullWidth onChange={onChange} />
+        ))}
+      </Stack>
 
       <Handle type={"source"} position={Position.Bottom} isConnectable={isConnectable} />
-    </Box>
+    </Paper>
   );
 }

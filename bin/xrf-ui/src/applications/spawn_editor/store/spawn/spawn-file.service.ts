@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
+import { Injectable, OnProvision } from "@wirestate/core";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Optional } from "@/core/types/general";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
@@ -8,6 +8,7 @@ import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { ISpawnFile } from "@/lib/spawn_file";
 
+@Injectable()
 export class SpawnFileService {
   @Observable()
   public isReady: boolean = false;

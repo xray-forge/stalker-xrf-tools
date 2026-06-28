@@ -1,27 +1,17 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Grid,
-  IconButton,
-  InputAdornment,
-  OutlinedInput,
-  Typography,
-} from "@mui/material";
+import { Button, IconButton, InputAdornment, OutlinedInput } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
-import { MouseEvent, useCallback, useEffect, useState } from "react";
+import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ArchivesService } from "@/applications/archive_editor/store/archives";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectLinkedGamePath } from "@/lib/xrf_path";
 
-export function ArchivesEditorOpenForm() {
+export function ArchivesEditorOpenForm(): ReactElement {
   const { project, openArchivesProject } = useInjection(ArchivesService);
   const { xrfProjectPath } = useInjection(ProjectService);
 
@@ -71,66 +61,38 @@ export function ArchivesEditorOpenForm() {
   }, [xrfProjectPath]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "safe center",
-        alignItems: "safe center",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        width: "100%",
-        height: "100%",
-        padding: 4,
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
-        <Typography>Provide archives to open</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "auto", marginBottom: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "auto",
-            marginRight: 1,
-            gap: 1,
-          }}
+    <PickerForm
+      title={"Provide archives to open"}
+      error={project.error ? project.error.message : undefined}
+      isLoading={project.isLoading}
+      backDisabled={project.isLoading}
+      backPath={"/archives_editor"}
+      actions={
+        <Button
+          variant={"contained"}
+          fullWidth={true}
+          disabled={project.isLoading || !archivesPath}
+          onClick={onOpenPathClicked}
         >
-          <OutlinedInput
-            size={"small"}
-            disabled={project.isLoading}
-            value={archivesPath || ""}
-            placeholder={"Source"}
-            readOnly={true}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
-                <IconButton disabled={project.isLoading} edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            onClick={onSelectArchivesPathClicked}
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
-          <Button variant={"contained"} disabled={project.isLoading || !archivesPath} onClick={onOpenPathClicked}>
-            Open
-          </Button>
-        </Box>
-      </Grid>
-
-      {project.isLoading ? <CircularProgress size={24} /> : null}
-
-      {project.error ? (
-        <Box sx={{ maxWidth: 540 }}>
-          <Alert severity={"error"}>{project.error.message}</Alert>
-        </Box>
-      ) : null}
-
-      <ApplicationBackButton disabled={project.isLoading} path={"/archives_editor"} />
-    </Box>
+          Open
+        </Button>
+      }
+    >
+      <OutlinedInput
+        size={"small"}
+        disabled={project.isLoading}
+        value={archivesPath || ""}
+        placeholder={"Source"}
+        readOnly={true}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
+            <IconButton disabled={project.isLoading} edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectArchivesPathClicked}
+      />
+    </PickerForm>
   );
 }

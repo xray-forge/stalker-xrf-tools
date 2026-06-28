@@ -1,9 +1,9 @@
-import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect } from "react";
 
 import { TranslationsService } from "@/applications/translations_editor/store/translations";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { Logger, useLogger } from "@/lib/logging";
@@ -40,59 +40,28 @@ export function TranslationsEditorOpenForm(): ReactElement {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "safe center",
-        alignItems: "safe center",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        width: "100%",
-        height: "100%",
-        padding: 4,
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
-        <Typography>Provide translations details</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", width: "auto", marginBottom: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "auto",
-            marginRight: 1,
-            gap: 2,
-          }}
+    <PickerForm
+      title={"Provide translations details"}
+      error={project.error ? String(project.error) : undefined}
+      isLoading={project.isLoading}
+      backPath={"/translations_editor"}
+      actions={
+        <Button
+          fullWidth
+          disabled={project.isLoading || !translationsPath}
+          variant={"contained"}
+          onClick={onOpenTranslationsClicked}
         >
-          <FilePickerInput
-            label={"Translations path"}
-            value={translationsPath}
-            disabled={project.isLoading}
-            onClick={onSelectTranslationsPath}
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
-          <Button
-            disabled={project.isLoading || !translationsPath}
-            variant={"contained"}
-            onClick={onOpenTranslationsClicked}
-          >
-            Open
-          </Button>
-        </Box>
-      </Grid>
-
-      {project.error ? (
-        <Box>
-          <FormHelperText error>{String(project.error)}</FormHelperText>
-        </Box>
-      ) : null}
-
-      <ApplicationBackButton disabled={false} path={"/translations_editor"} />
-    </Box>
+          Open
+        </Button>
+      }
+    >
+      <FilePickerInput
+        label={"Translations path"}
+        value={translationsPath}
+        disabled={project.isLoading}
+        onClick={onSelectTranslationsPath}
+      />
+    </PickerForm>
   );
 }

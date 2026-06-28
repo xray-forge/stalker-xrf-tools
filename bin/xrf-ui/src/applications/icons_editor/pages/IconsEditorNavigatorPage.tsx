@@ -1,63 +1,30 @@
-import { Box, Button, ButtonGroup, Card } from "@mui/material";
-import { ReactElement } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
+import { default as DescriptionIcon } from "@mui/icons-material/Description";
+import { default as ImageIcon } from "@mui/icons-material/Image";
+import { default as InventoryIcon } from "@mui/icons-material/Inventory2";
+import { ReactElement, useMemo } from "react";
 
-import { ApplicationNavigatorHeader } from "@/core/components/ApplicationNavigatorHeader";
-import { NavigationFooter } from "@/core/components/footer/NavigationFooter";
+import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 
 export function IconsEditorNavigatorPage(): ReactElement {
-  const navigate: NavigateFunction = useNavigate();
+  const items = useMemo(
+    () => [
+      { label: "Equipment editor", icon: <ImageIcon />, to: "/icons_editor/icons_equipment" },
+      { label: "Equipment pack", icon: <InventoryIcon />, to: "/icons_editor/icons_equipment_pack" },
+      { label: "Equipment unpack", icon: <InventoryIcon />, to: "/icons_editor/icons_equipment_unpack" },
+      { label: "Description editor", icon: <DescriptionIcon />, to: "/icons_editor/icons_description" },
+      { label: "Description pack", icon: <DescriptionIcon />, to: "/icons_editor/icons_description_pack" },
+      { label: "Description unpack", icon: <DescriptionIcon />, to: "/icons_editor/icons_description_unpack" },
+      { label: "Back", icon: <ArrowBackIcon />, to: "/", isSecondary: true },
+    ],
+    []
+  );
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-        gap: 1,
-      }}
-    >
-      <ApplicationNavigatorHeader
-        title={"XRF icons editor"}
-        helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/icon_editor.html"}
-      />
-
-      <Card sx={{ minWidth: 200 }}>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/icons_editor/icons_equipment", { replace: true })}>
-              Equipment editor
-            </Button>
-
-            <Button onClick={() => navigate("/icons_editor/icons_equipment_pack", { replace: true })}>
-              Equipment pack
-            </Button>
-
-            <Button onClick={() => navigate("/icons_editor/icons_equipment_unpack", { replace: true })}>
-              Equipment unpack
-            </Button>
-
-            <Button onClick={() => navigate("/icons_editor/icons_description", { replace: true })}>
-              Description editor
-            </Button>
-
-            <Button onClick={() => navigate("/icons_editor/icons_description_pack", { replace: true })}>
-              Description pack
-            </Button>
-
-            <Button onClick={() => navigate("/icons_editor/icons_description_pack", { replace: true })}>
-              Description unpack
-            </Button>
-
-            <Button onClick={() => navigate("/", { replace: true })}>Back</Button>
-          </ButtonGroup>
-        </Box>
-      </Card>
-
-      <NavigationFooter />
-    </Box>
+    <ToolNavigator
+      title={"XRF icons editor"}
+      helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/icon_editor.html"}
+      items={items}
+    />
   );
 }

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
+import { Injectable, OnProvision } from "@wirestate/core";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Optional } from "@/core/types/general";
 import { IArchiveFileReadResult, IArchivesProject } from "@/lib/archive";
@@ -8,6 +8,7 @@ import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 
+@Injectable()
 export class ArchivesService {
   @Observable()
   public isReady: boolean = false;

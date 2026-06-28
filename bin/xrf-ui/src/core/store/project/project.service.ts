@@ -1,6 +1,6 @@
 import { exists } from "@tauri-apps/plugin-fs";
 import { Injectable, OnProvision, ProvisionId, WireStatus } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Optional } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local_storage";

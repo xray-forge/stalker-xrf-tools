@@ -1,5 +1,5 @@
 import { Container, ContainerConfig } from "@wirestate/core";
-import { ContainerProvider, ContainerProviderScope, useContainer } from "@wirestate/react";
+import { ContainerProvider, useContainer } from "@wirestate/react";
 import { ReactElement, useMemo } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -14,7 +14,7 @@ export function ArchivesEditorRouter(): ReactElement {
   const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ArchivesService] }), [parent]);
 
   return (
-    <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>
+    <ContainerProvider config={config}>
       <Routes>
         <Route path={"/"} element={<ArchivesEditorNavigatorPage />} />
         <Route path={"/editor"} element={<ArchivesEditorPage />} />

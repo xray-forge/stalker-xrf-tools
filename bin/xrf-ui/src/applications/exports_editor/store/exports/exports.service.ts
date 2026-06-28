@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Inject, Injectable, OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
+import { inject, Injectable, OnProvision } from "@wirestate/core";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
@@ -24,10 +24,7 @@ export class ExportsService {
 
   public readonly log: Logger = new Logger(this.constructor.name);
 
-  public constructor(
-    @Inject(ProjectService)
-    private readonly projectService: ProjectService
-  ) {
+  public constructor(private readonly projectService: ProjectService = inject(ProjectService)) {
     makeObservable(this);
   }
 

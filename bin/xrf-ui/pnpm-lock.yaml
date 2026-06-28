@@ -42,14 +42,17 @@ importers:
         specifier: ^2.3.5
         version: 2.3.5
       '@wirestate/core':
-        specifier: ^1.0.0-experimental.3
-        version: 1.0.0-experimental.3(reflect-metadata@0.2.2)(tslib@2.8.1)
+        specifier: ^1.0.0-experimental.14
+        version: 1.0.0-experimental.14
+      '@wirestate/mobx':
+        specifier: ^1.0.0-experimental.14
+        version: 1.0.0-experimental.14(mobx@6.16.0)
       '@wirestate/react':
-        specifier: ^1.0.0-experimental.3
-        version: 1.0.0-experimental.3(@wirestate/core@1.0.0-experimental.3(reflect-metadata@0.2.2)(tslib@2.8.1))(react@19.2.7)(reflect-metadata@0.2.2)(tslib@2.8.1)
+        specifier: ^1.0.0-experimental.14
+        version: 1.0.0-experimental.14(@wirestate/core@1.0.0-experimental.14)(react@19.2.7)
       '@wirestate/react-mobx':
-        specifier: ^1.0.0-experimental.3
-        version: 1.0.0-experimental.3(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)
+        specifier: ^1.0.0-experimental.14
+        version: 1.0.0-experimental.14(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)(react@19.2.7)
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -460,28 +463,6 @@ packages:
   '@humanwhocodes/object-schema@2.0.3':
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     deprecated: Use @eslint/object-schema instead
-
-  '@inversifyjs/common@2.0.1':
-    resolution: {integrity: sha512-pJAR4IAcT2jkYfZ9bD9XhtUDBLJRr8QOiSjb+2XyaHru6DLvu0VD2Id2iP7+tVRKkEe3XFUwDUEdKxcYlF699Q==}
-
-  '@inversifyjs/container@2.0.1':
-    resolution: {integrity: sha512-xoZU4Mha5Vo+U04xWUnD01QbpQMNoIh0nUEFlb965E3rIneUbsYYiXeLUoKl57BjXjErsOL0q8o3mXi1si8rBA==}
-    peerDependencies:
-      reflect-metadata: ~0.2.2
-
-  '@inversifyjs/core@10.0.1':
-    resolution: {integrity: sha512-z+DHdTbHFETivPLPRgowz9wWhHA4FNYqQnKhPyDCz7zX9H/PIDcK4gZIF1YNaf5Uc2bd1nehSlVgfaTzVbb0AA==}
-
-  '@inversifyjs/plugin@0.3.1':
-    resolution: {integrity: sha512-ByklTw731fydBCTMwMpkmwm+lv0U+JWm9NEqRsz3n5KzAC5Om2XtLjqzEC2w+8Ote3gVC3Qxsx6YmG9XLIZpvg==}
-
-  '@inversifyjs/prototype-utils@0.2.1':
-    resolution: {integrity: sha512-53cVE3cw+RxnSkGlg+jOFNSox2owJF9Fv3HgFKe4f+4aPullscltIiio88QRkx2Sc5yo3VlqPsXQFGw2CVJZnw==}
-
-  '@inversifyjs/reflect-metadata-utils@1.5.0':
-    resolution: {integrity: sha512-NpJVbRbuQ6Ao2vO+aw96un3oHDFCwXI0+pplsFt0Jh0gyR8DWk4m7ml/GBNMjdbeKVW/QgJ2S6NGXjk042uwqg==}
-    peerDependencies:
-      reflect-metadata: ~0.2.2
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -901,6 +882,9 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
+  '@swc/helpers@0.5.23':
+    resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
+
   '@tauri-apps/api@2.11.0':
     resolution: {integrity: sha512-7CinYODhky9lmO23xHnUFv0Xt43fbtWMyxZcLcRBlFkcgXKuEirBvHpmtJ89YMhyeGcq20Wuc47Fa4XjyniywA==}
 
@@ -1220,25 +1204,26 @@ packages:
       babel-plugin-react-compiler:
         optional: true
 
-  '@wirestate/core@1.0.0-experimental.3':
-    resolution: {integrity: sha512-CFTu4CNIYg0Y2mLswGFbQbMcy5kLfuARA2facMD4ybLaYzqrAVSy5wXH5ba80eVTO+JDFVrUvcS06Dxv082UOQ==}
-    peerDependencies:
-      reflect-metadata: '>=0.2.0'
-      tslib: '>=2.5.0'
+  '@wirestate/core@1.0.0-experimental.14':
+    resolution: {integrity: sha512-gm9dcP579vQlVH0zSzIYDjMw1sSkluuqhklxKqP2OyASaGrOk2O/4EtkEvsjPOMMxEqokLoI7o3Rc7A3CwHwkQ==}
 
-  '@wirestate/react-mobx@1.0.0-experimental.3':
-    resolution: {integrity: sha512-AGKzGHCbaLp0GYZyvfWtUxs1LGUWbsjF/UmYrMRy+1qGpg4PYyWkBsA1/f47OYuXe6kpGiKTARPsfcFiwKRq4w==}
+  '@wirestate/mobx@1.0.0-experimental.14':
+    resolution: {integrity: sha512-fUAVDT0wiE2eHAZENxDdq++MQkC0IrXI9N2ftJBjxrMEmR/htqbeX3+t4N8g8wfn/kXMqneh5cdMIo1VJaIiNw==}
+    peerDependencies:
+      mobx: '>=6.0.0'
+
+  '@wirestate/react-mobx@1.0.0-experimental.14':
+    resolution: {integrity: sha512-gM+TTEs0wbZctTqZX0IWj/MA/MdLvVLjzp5B11P5Rsr6s+SoNXuuLa4Y4Hs68bPbgCfZfbrku5/RHyIGkuKScA==}
     peerDependencies:
       mobx: '>=6.0.0'
       mobx-react-lite: '>=4.0.0'
-
-  '@wirestate/react@1.0.0-experimental.3':
-    resolution: {integrity: sha512-cKTmdLPVyPQwMtgmbgu68mAzHXrFHvnBN0ua4jV/qxEIDkfEXohUn6RtvdoHrNpa3d9qz6JeqW6I8DpZ479f4Q==}
-    peerDependencies:
-      '@wirestate/core': 1.0.0-experimental.3
       react: '>=16.8.0 <20.0.0'
-      reflect-metadata: '>=0.2.0'
-      tslib: '>=2.5.0'
+
+  '@wirestate/react@1.0.0-experimental.14':
+    resolution: {integrity: sha512-3BVxJ2FadNgx6tk7en4R3+RHtUhj+MeD75V7XxMiGUrpDEhhaT7pGiKfU5NfIBgVOOs8x9iJhG4ys0K56Kxorg==}
+    peerDependencies:
+      '@wirestate/core': 1.0.0-experimental.14
+      react: '>=16.8.0 <20.0.0'
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -2005,9 +1990,6 @@ packages:
     resolution: {integrity: sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw==}
     engines: {node: '>= 0.4'}
 
-  inversify@8.1.0:
-    resolution: {integrity: sha512-LeMjL2MKHM0E8UmKo2ilRvdxG3o0pLZPYFjkaHwcjcFIrhzBGetphNkaWJ6YaM78uC1gK9v45i1R7CkCJDvG4Q==}
-
   is-array-buffer@3.0.5:
     resolution: {integrity: sha512-DDfANUiiG2wC1qawP66qlTugJeL5HyzMpfr8lLK+jMQirGzNod0B12cFB/9q838Ru27sBwfw78/rdoU7RERz6A==}
     engines: {node: '>= 0.4'}
@@ -2511,9 +2493,6 @@ packages:
   readdirp@5.0.0:
     resolution: {integrity: sha512-9u/XQ1pvrQtYyMpZe7DXKv2p5CNvyVwzUB6uhLAnQwHMSgKMBR62lc7AHljaeteeHXn11XTAaLLUVZYVZyuRBQ==}
     engines: {node: '>= 20.19.0'}
-
-  reflect-metadata@0.2.2:
-    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
 
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
@@ -3261,34 +3240,6 @@ snapshots:
 
   '@humanwhocodes/object-schema@2.0.3': {}
 
-  '@inversifyjs/common@2.0.1': {}
-
-  '@inversifyjs/container@2.0.1(reflect-metadata@0.2.2)':
-    dependencies:
-      '@inversifyjs/common': 2.0.1
-      '@inversifyjs/core': 10.0.1(reflect-metadata@0.2.2)
-      '@inversifyjs/plugin': 0.3.1
-      '@inversifyjs/reflect-metadata-utils': 1.5.0(reflect-metadata@0.2.2)
-      reflect-metadata: 0.2.2
-
-  '@inversifyjs/core@10.0.1(reflect-metadata@0.2.2)':
-    dependencies:
-      '@inversifyjs/common': 2.0.1
-      '@inversifyjs/prototype-utils': 0.2.1
-      '@inversifyjs/reflect-metadata-utils': 1.5.0(reflect-metadata@0.2.2)
-    transitivePeerDependencies:
-      - reflect-metadata
-
-  '@inversifyjs/plugin@0.3.1': {}
-
-  '@inversifyjs/prototype-utils@0.2.1':
-    dependencies:
-      '@inversifyjs/common': 2.0.1
-
-  '@inversifyjs/reflect-metadata-utils@1.5.0(reflect-metadata@0.2.2)':
-    dependencies:
-      reflect-metadata: 0.2.2
-
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -3688,6 +3639,10 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
+  '@swc/helpers@0.5.23':
+    dependencies:
+      tslib: 2.8.1
+
   '@tauri-apps/api@2.11.0': {}
 
   '@tauri-apps/cli-darwin-arm64@2.11.2':
@@ -4033,23 +3988,24 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.0.16(@types/node@25.9.2)(esbuild@0.28.0)(sass@1.100.0)(terser@5.48.0)
 
-  '@wirestate/core@1.0.0-experimental.3(reflect-metadata@0.2.2)(tslib@2.8.1)':
+  '@wirestate/core@1.0.0-experimental.14':
     dependencies:
-      inversify: 8.1.0(reflect-metadata@0.2.2)
-      reflect-metadata: 0.2.2
-      tslib: 2.8.1
+      '@swc/helpers': 0.5.23
 
-  '@wirestate/react-mobx@1.0.0-experimental.3(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)':
+  '@wirestate/mobx@1.0.0-experimental.14(mobx@6.16.0)':
+    dependencies:
+      mobx: 6.16.0
+
+  '@wirestate/react-mobx@1.0.0-experimental.14(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)(react@19.2.7)':
     dependencies:
       mobx: 6.16.0
       mobx-react-lite: 4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-
-  '@wirestate/react@1.0.0-experimental.3(@wirestate/core@1.0.0-experimental.3(reflect-metadata@0.2.2)(tslib@2.8.1))(react@19.2.7)(reflect-metadata@0.2.2)(tslib@2.8.1)':
-    dependencies:
-      '@wirestate/core': 1.0.0-experimental.3(reflect-metadata@0.2.2)(tslib@2.8.1)
       react: 19.2.7
-      reflect-metadata: 0.2.2
-      tslib: 2.8.1
+
+  '@wirestate/react@1.0.0-experimental.14(@wirestate/core@1.0.0-experimental.14)(react@19.2.7)':
+    dependencies:
+      '@wirestate/core': 1.0.0-experimental.14
+      react: 19.2.7
 
   acorn-jsx@5.3.2(acorn@7.4.1):
     dependencies:
@@ -5026,14 +4982,6 @@ snapshots:
       hasown: 2.0.4
       side-channel: 1.1.0
 
-  inversify@8.1.0(reflect-metadata@0.2.2):
-    dependencies:
-      '@inversifyjs/common': 2.0.1
-      '@inversifyjs/container': 2.0.1(reflect-metadata@0.2.2)
-      '@inversifyjs/core': 10.0.1(reflect-metadata@0.2.2)
-    transitivePeerDependencies:
-      - reflect-metadata
-
   is-array-buffer@3.0.5:
     dependencies:
       call-bind: 1.0.9
@@ -5511,8 +5459,6 @@ snapshots:
       - immer
 
   readdirp@5.0.0: {}
-
-  reflect-metadata@0.2.2: {}
 
   reflect.getprototypeof@1.0.10:
     dependencies:

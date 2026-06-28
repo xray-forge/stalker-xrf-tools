@@ -1,22 +1,11 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  FormHelperText,
-  Grid,
-  IconButton,
-  InputAdornment,
-  OutlinedInput,
-  Typography,
-} from "@mui/material";
+import { Alert, Button, IconButton, InputAdornment, OutlinedInput } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
@@ -131,94 +120,63 @@ export function SpawnEditorUnpackForm(): ReactElement {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
-        <Typography>Select *.spawn file to unpack</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", width: "auto", marginBottom: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "auto",
-            marginRight: 1,
-            gap: 1,
-          }}
+    <PickerForm
+      title={"Select *.spawn file to unpack"}
+      error={spawnFile.error ? String(spawnFile.error) : undefined}
+      isLoading={spawnFile.isLoading}
+      backPath={"/spawn_editor"}
+      backDisabled={spawnFile.isLoading || isSelecting}
+      actions={
+        <Button
+          fullWidth
+          disabled={!spawnPath || !outputPath || isSelecting || spawnFile.isLoading}
+          variant={"contained"}
+          onClick={onUnpackClicked}
         >
-          <OutlinedInput
-            size={"small"}
-            disabled={isSelecting || spawnFile.isLoading}
-            value={spawnPath ?? ""}
-            placeholder={"Source"}
-            readOnly={true}
-            error={Boolean(spawnFile.error)}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectSpawnFile}>
-                <IconButton edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            onClick={onSelectSpawnFileClicked}
-          />
-
-          <OutlinedInput
-            size={"small"}
-            disabled={isSelecting || spawnFile.isLoading}
-            value={outputPath ?? ""}
-            placeholder={"Destination"}
-            readOnly={true}
-            error={Boolean(spawnFile.error)}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectOutput}>
-                <IconButton edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            onClick={onSelectOutputClicked}
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
-          <Button
-            disabled={!spawnPath || !outputPath || isSelecting || spawnFile.isLoading}
-            variant={"contained"}
-            onClick={onUnpackClicked}
-          >
-            Unpack
-          </Button>
-        </Box>
-      </Grid>
-
-      {spawnFile.error ? (
-        <Box>
-          <FormHelperText error>{String(spawnFile.error)}</FormHelperText>
-        </Box>
-      ) : null}
-
-      {isFinishedSuccessfully ? (
-        <Box sx={{ p: "0 8px", maxWidth: 500 }}>
+          Unpack
+        </Button>
+      }
+      status={
+        isFinishedSuccessfully ? (
           <Alert severity={"success"} variant={"outlined"}>
             Successfully unpacked spawn to {outputPath}
           </Alert>
-        </Box>
-      ) : null}
+        ) : null
+      }
+    >
+      <OutlinedInput
+        size={"small"}
+        disabled={isSelecting || spawnFile.isLoading}
+        value={spawnPath ?? ""}
+        placeholder={"Source"}
+        readOnly={true}
+        error={Boolean(spawnFile.error)}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectSpawnFile}>
+            <IconButton edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectSpawnFileClicked}
+      />
 
-      {spawnFile.isLoading ? <CircularProgress size={24} /> : null}
-
-      <ApplicationBackButton disabled={spawnFile.isLoading || isSelecting} path={"/spawn_editor"} />
-    </Box>
+      <OutlinedInput
+        size={"small"}
+        disabled={isSelecting || spawnFile.isLoading}
+        value={outputPath ?? ""}
+        placeholder={"Destination"}
+        readOnly={true}
+        error={Boolean(spawnFile.error)}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectOutput}>
+            <IconButton edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectOutputClicked}
+      />
+    </PickerForm>
   );
 }

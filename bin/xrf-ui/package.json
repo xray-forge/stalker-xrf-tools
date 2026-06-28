@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@11.5.2",
   "engines": {
     "node": ">=24"
   },
@@ -28,9 +27,10 @@
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-fs": "^2.5.1",
     "@tauri-apps/plugin-shell": "^2.3.5",
-    "@wirestate/core": "^1.0.0-experimental.3",
-    "@wirestate/react": "^1.0.0-experimental.3",
-    "@wirestate/react-mobx": "^1.0.0-experimental.3",
+    "@wirestate/core": "^1.0.0-experimental.14",
+    "@wirestate/mobx": "^1.0.0-experimental.14",
+    "@wirestate/react": "^1.0.0-experimental.14",
+    "@wirestate/react-mobx": "^1.0.0-experimental.14",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.17.0",

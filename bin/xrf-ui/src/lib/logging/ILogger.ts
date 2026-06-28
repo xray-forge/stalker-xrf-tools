@@ -1,7 +1,7 @@
 export interface ILogger {
-  log(...args: unknown[]): void;
-  info(...args: unknown[]): void;
-  debug(...args: unknown[]): void;
-  error(...args: unknown[]): void;
-  warn(...args: unknown[]): void;
+  log(...args: Array<unknown>): void;
+  info(...args: Array<unknown>): void;
+  debug(...args: Array<unknown>): void;
+  error(...args: Array<unknown>): void;
+  warn(...args: Array<unknown>): void;
 }

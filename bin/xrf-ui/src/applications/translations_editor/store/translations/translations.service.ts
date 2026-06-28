@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Injectable, OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/react-mobx";
+import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Optional } from "@/core/types/general";
 import { ETranslationsEditorCommand } from "@/lib/ipc";

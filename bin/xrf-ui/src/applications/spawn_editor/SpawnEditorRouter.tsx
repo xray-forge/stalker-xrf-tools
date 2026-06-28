@@ -1,5 +1,5 @@
 import { Container, ContainerConfig } from "@wirestate/core";
-import { ContainerProvider, ContainerProviderScope, useContainer } from "@wirestate/react";
+import { ContainerProvider, useContainer } from "@wirestate/react";
 import { ReactElement, useMemo } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -15,7 +15,7 @@ export function SpawnEditorRouter(): ReactElement {
   const config: ContainerConfig = useMemo(() => ({ parent, bindings: [SpawnFileService] }), [parent]);
 
   return (
-    <ContainerProvider config={config} scope={ContainerProviderScope.Parent}>
+    <ContainerProvider config={config}>
       <Routes>
         <Route path={"/"} element={<SpawnEditorNavigatorPage />} />
         <Route path={"editor/*"} element={<SpawnEditorPage />} />

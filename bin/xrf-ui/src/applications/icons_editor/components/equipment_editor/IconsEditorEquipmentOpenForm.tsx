@@ -1,9 +1,9 @@
-import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect } from "react";
 
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { FilePickerInput, usePathState } from "@/lib/file_picker";
 import { Logger, useLogger } from "@/lib/logging";
@@ -48,66 +48,35 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "safe center",
-        alignItems: "safe center",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        width: "100%",
-        height: "100%",
-        padding: 4,
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
-        <Typography>Provide equipment details</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", width: "auto", marginBottom: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "auto",
-            marginRight: 1,
-            gap: 2,
-          }}
+    <PickerForm
+      title={"Provide equipment details"}
+      error={spriteImage.error ? String(spriteImage.error) : undefined}
+      isLoading={spriteImage.isLoading}
+      backPath={"/icons_editor"}
+      actions={
+        <Button
+          fullWidth
+          disabled={spriteImage.isLoading || !spritePath || !systemLtxPath}
+          variant={"contained"}
+          onClick={onOpenEquipmentClicked}
         >
-          <FilePickerInput
-            label={"System ltx"}
-            value={systemLtxPath}
-            disabled={spriteImage.isLoading}
-            onClick={onSelectSystemLtxPath}
-          />
+          Open
+        </Button>
+      }
+    >
+      <FilePickerInput
+        label={"System ltx"}
+        value={systemLtxPath}
+        disabled={spriteImage.isLoading}
+        onClick={onSelectSystemLtxPath}
+      />
 
-          <FilePickerInput
-            label={"Equipment sprite"}
-            value={spritePath}
-            disabled={spriteImage.isLoading}
-            onClick={onSelectEquipmentPath}
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
-          <Button
-            disabled={spriteImage.isLoading || !spritePath || !systemLtxPath}
-            variant={"contained"}
-            onClick={onOpenEquipmentClicked}
-          >
-            Open
-          </Button>
-        </Box>
-      </Grid>
-
-      {spriteImage.error ? (
-        <Box>
-          <FormHelperText error>{String(spriteImage.error)}</FormHelperText>
-        </Box>
-      ) : null}
-
-      <ApplicationBackButton disabled={false} path={"/icons_editor"} />
-    </Box>
+      <FilePickerInput
+        label={"Equipment sprite"}
+        value={spritePath}
+        disabled={spriteImage.isLoading}
+        onClick={onSelectEquipmentPath}
+      />
+    </PickerForm>
   );
 }

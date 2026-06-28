@@ -1,23 +1,12 @@
 import { default as FolderIcon } from "@mui/icons-material/Folder";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Grid,
-  IconButton,
-  InputAdornment,
-  OutlinedInput,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Alert, Button, IconButton, InputAdornment, OutlinedInput, Paper } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs_editor/components/ConfigsVerifyResult";
-import { ApplicationBackButton } from "@/core/components/ApplicationBackButton";
+import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { EConfigsEditorCommand } from "@/lib/ipc";
@@ -92,73 +81,48 @@ export function ConfigsEditorVerifierPage() {
   }, [xrfConfigsPath]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "safe center",
-        alignItems: "safe center",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        width: "100%",
-        height: "100%",
-        padding: 4,
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", flexShrink: 0, marginBottom: 2 }}>
-        <Typography>Provide LTX files directory to verify</Typography>
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "auto", marginBottom: 2 }}>
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto", marginRight: 1 }}>
-          <OutlinedInput
-            size={"small"}
-            disabled={isLoading}
-            value={configsPath || ""}
-            placeholder={"Configs directory"}
-            readOnly={true}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
-                <IconButton disabled={isLoading} edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            onClick={onSelectConfigsPathClicked}
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", width: "auto" }}>
-          <Button variant={"contained"} disabled={isLoading || !configsPath} onClick={onVerifyPathClicked}>
-            Verify
-          </Button>
-        </Box>
-      </Grid>
-
-      {isLoading ? <CircularProgress size={24} /> : null}
-
-      {result ? (
-        <Box>
-          {result.errors.length ? (
+    <PickerForm
+      title={"Provide LTX files directory to verify"}
+      error={error ?? undefined}
+      isLoading={isLoading}
+      backPath={"/configs_editor"}
+      actions={
+        <Button variant={"contained"} fullWidth disabled={isLoading || !configsPath} onClick={onVerifyPathClicked}>
+          Verify
+        </Button>
+      }
+      status={
+        result ? (
+          result.errors.length ? (
             <Alert severity={"error"}>Configs did not pass validation.</Alert>
           ) : (
             <Alert severity={"success"}>Configs passed validation.</Alert>
-          )}
-        </Box>
-      ) : null}
-
-      {error ? (
-        <Box sx={{ maxWidth: 540 }}>
-          <Alert severity={"error"}>{error}</Alert>
-        </Box>
-      ) : null}
-
-      <ApplicationBackButton path={"/configs_editor"} />
-
-      {result ? (
-        <Paper elevation={4}>
-          <ConfigsVerifyResult result={result} />
-        </Paper>
-      ) : null}
-    </Box>
+          )
+        ) : null
+      }
+      result={
+        result ? (
+          <Paper elevation={4}>
+            <ConfigsVerifyResult result={result} />
+          </Paper>
+        ) : null
+      }
+    >
+      <OutlinedInput
+        size={"small"}
+        disabled={isLoading}
+        value={configsPath || ""}
+        placeholder={"Configs directory"}
+        readOnly={true}
+        endAdornment={
+          <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
+            <IconButton disabled={isLoading} edge={"end"}>
+              <FolderIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        onClick={onSelectConfigsPathClicked}
+      />
+    </PickerForm>
   );
 }
