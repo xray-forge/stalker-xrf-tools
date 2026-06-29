@@ -55,6 +55,36 @@ export function ArchivesEditorUnpackerPage() {
     [onSelectArchivesPath]
   );
 
+  const onSelectArchivesUnpackPath = useCallback(
+    async (event: MouseEvent<HTMLInputElement>) => {
+      if (isLoading) {
+        return;
+      }
+
+      event.stopPropagation();
+      event.preventDefault();
+
+      const newUnpackPath: Optional<string> = (await open({
+        title: "Provide output directory to unpack into",
+        directory: true,
+      })) as Optional<string>;
+
+      if (newUnpackPath) {
+        log.info("Selected new archives unpack path:", newUnpackPath);
+
+        setError(null);
+        setResult(null);
+        setArchivesUnpackPath(newUnpackPath);
+      }
+    },
+    [isLoading, log]
+  );
+
+  const onSelectArchivesUnpackPathClicked = useCallback(
+    (event: MouseEvent<HTMLInputElement>) => onSelectArchivesUnpackPath(event),
+    [onSelectArchivesUnpackPath]
+  );
+
   const onUnpackArchivesPathClicked = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -99,7 +129,7 @@ export function ArchivesEditorUnpackerPage() {
         <Button
           variant={"contained"}
           fullWidth
-          disabled={isLoading || !archivesPath}
+          disabled={isLoading || !archivesPath || !archivesUnpackPath}
           onClick={onUnpackArchivesPathClicked}
         >
           Unpack
@@ -137,13 +167,13 @@ export function ArchivesEditorUnpackerPage() {
         placeholder={"Output"}
         readOnly={true}
         endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
+          <InputAdornment position={"end"} onClick={onSelectArchivesUnpackPath}>
             <IconButton disabled={isLoading} edge={"end"}>
               <FolderIcon />
             </IconButton>
           </InputAdornment>
         }
-        onClick={onSelectArchivesPathClicked}
+        onClick={onSelectArchivesUnpackPathClicked}
       />
     </PickerForm>
   );
