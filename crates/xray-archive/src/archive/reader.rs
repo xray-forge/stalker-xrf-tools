@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{
   XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder,
+  get_windows1251_encoder,
 };
 
 pub struct ArchiveReader {
@@ -48,6 +49,15 @@ impl ArchiveReader {
   /// Create chunk based on whole file.
   pub fn from_path_utf8<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     Self::from_path(path, get_utf8_encoder())
+  }
+
+  /// Create chunk based on whole file, reading strings as windows-1251.
+  ///
+  /// X-Ray engine stores archive header and file names using the system ANSI
+  /// codepage (windows-1251 for the original localization), so non-ASCII names
+  /// are not valid UTF-8 and must be decoded accordingly.
+  pub fn from_path_windows1251<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+    Self::from_path(path, get_windows1251_encoder())
   }
 }
 
