@@ -42,17 +42,17 @@ importers:
         specifier: ^2.3.5
         version: 2.3.5
       '@wirestate/core':
-        specifier: ^1.0.0-experimental.14
-        version: 1.0.0-experimental.14
+        specifier: ^1.0.0-experimental.15
+        version: 1.0.0-experimental.15
       '@wirestate/mobx':
-        specifier: ^1.0.0-experimental.14
-        version: 1.0.0-experimental.14(mobx@6.16.0)
+        specifier: ^1.0.0-experimental.15
+        version: 1.0.0-experimental.15(mobx@6.16.0)
       '@wirestate/react':
-        specifier: ^1.0.0-experimental.14
-        version: 1.0.0-experimental.14(@wirestate/core@1.0.0-experimental.14)(react@19.2.7)
+        specifier: ^1.0.0-experimental.15
+        version: 1.0.0-experimental.15(@wirestate/core@1.0.0-experimental.15)(react@19.2.7)
       '@wirestate/react-mobx':
-        specifier: ^1.0.0-experimental.14
-        version: 1.0.0-experimental.14(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)(react@19.2.7)
+        specifier: ^1.0.0-experimental.15
+        version: 1.0.0-experimental.15(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)(react@19.2.7)
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -1204,25 +1204,25 @@ packages:
       babel-plugin-react-compiler:
         optional: true
 
-  '@wirestate/core@1.0.0-experimental.14':
-    resolution: {integrity: sha512-gm9dcP579vQlVH0zSzIYDjMw1sSkluuqhklxKqP2OyASaGrOk2O/4EtkEvsjPOMMxEqokLoI7o3Rc7A3CwHwkQ==}
+  '@wirestate/core@1.0.0-experimental.15':
+    resolution: {integrity: sha512-K8ejX5bNueGUtLMlz6wjFzoX0W5AhDyHX47g3nOobUQ75OqGzKtTRHJkmPjE/0OXIrAk1h4+RWGJXzZWv/DKuA==}
 
-  '@wirestate/mobx@1.0.0-experimental.14':
-    resolution: {integrity: sha512-fUAVDT0wiE2eHAZENxDdq++MQkC0IrXI9N2ftJBjxrMEmR/htqbeX3+t4N8g8wfn/kXMqneh5cdMIo1VJaIiNw==}
+  '@wirestate/mobx@1.0.0-experimental.15':
+    resolution: {integrity: sha512-ylYAoKbBVlTz/AbWzmXJFcHcfRCPEeokfD9km/TBOxfUlLCUXSTK7m2IIYBG4CPcTu/FuxMxL+fC3ouwvkr/Mg==}
     peerDependencies:
       mobx: '>=6.0.0'
 
-  '@wirestate/react-mobx@1.0.0-experimental.14':
-    resolution: {integrity: sha512-gM+TTEs0wbZctTqZX0IWj/MA/MdLvVLjzp5B11P5Rsr6s+SoNXuuLa4Y4Hs68bPbgCfZfbrku5/RHyIGkuKScA==}
+  '@wirestate/react-mobx@1.0.0-experimental.15':
+    resolution: {integrity: sha512-ZRCPMucs+kzmFJdv3RrsFLANDSJ4x/Zn13BLZNmmVAKHj4fl7/6xKtePsB32/IEv/NajKtksR0LzEFBkM8guzg==}
     peerDependencies:
       mobx: '>=6.0.0'
       mobx-react-lite: '>=4.0.0'
       react: '>=16.8.0 <20.0.0'
 
-  '@wirestate/react@1.0.0-experimental.14':
-    resolution: {integrity: sha512-3BVxJ2FadNgx6tk7en4R3+RHtUhj+MeD75V7XxMiGUrpDEhhaT7pGiKfU5NfIBgVOOs8x9iJhG4ys0K56Kxorg==}
+  '@wirestate/react@1.0.0-experimental.15':
+    resolution: {integrity: sha512-IF4tbcVFTozCuefs4dFo5NbSOLgD5U4S79lhD+vKouSceXtKqOxB/TiuHKqnV8RYxIDh07jmQi9Z+HskcyHuDg==}
     peerDependencies:
-      '@wirestate/core': 1.0.0-experimental.14
+      '@wirestate/core': 1.0.0-experimental.15
       react: '>=16.8.0 <20.0.0'
 
   acorn-jsx@5.3.2:
@@ -3988,23 +3988,23 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.0.16(@types/node@25.9.2)(esbuild@0.28.0)(sass@1.100.0)(terser@5.48.0)
 
-  '@wirestate/core@1.0.0-experimental.14':
+  '@wirestate/core@1.0.0-experimental.15':
     dependencies:
       '@swc/helpers': 0.5.23
 
-  '@wirestate/mobx@1.0.0-experimental.14(mobx@6.16.0)':
+  '@wirestate/mobx@1.0.0-experimental.15(mobx@6.16.0)':
     dependencies:
       mobx: 6.16.0
 
-  '@wirestate/react-mobx@1.0.0-experimental.14(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)(react@19.2.7)':
+  '@wirestate/react-mobx@1.0.0-experimental.15(mobx-react-lite@4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(mobx@6.16.0)(react@19.2.7)':
     dependencies:
       mobx: 6.16.0
       mobx-react-lite: 4.1.1(mobx@6.16.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react: 19.2.7
 
-  '@wirestate/react@1.0.0-experimental.14(@wirestate/core@1.0.0-experimental.14)(react@19.2.7)':
+  '@wirestate/react@1.0.0-experimental.15(@wirestate/core@1.0.0-experimental.15)(react@19.2.7)':
     dependencies:
-      '@wirestate/core': 1.0.0-experimental.14
+      '@wirestate/core': 1.0.0-experimental.15
       react: 19.2.7
 
   acorn-jsx@5.3.2(acorn@7.4.1):
