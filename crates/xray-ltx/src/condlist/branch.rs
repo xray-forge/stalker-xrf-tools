@@ -32,81 +32,16 @@ pub enum CondlistCondition {
 
 impl CondlistBranch {
   pub fn parse(branch: &str, branch_offset: usize) -> XRayResult<CondlistBranch> {
-    let mut cursor: usize = 0;
-    let mut conditions: Vec<CondlistCondition> = Vec::new();
+    let (conditions, conditions_span): (Vec<CondlistCondition>, Option<SourceSpan>) =
+      Self::parse_delimited_conditions(branch, branch_offset, b'{', b'}', "condition")?;
+    let (effects, effects_span): (Vec<CondlistCondition>, Option<SourceSpan>) =
+      Self::parse_delimited_conditions(branch, branch_offset, b'%', b'%', "effect")?;
+    let result: Option<String> = Self::parse_result(branch, conditions_span, effects_span)?;
 
-    if Self::byte_at(branch, cursor) == Some(b'{') {
-      let conditions_start: usize = cursor + 1;
-      let conditions_end: usize =
-        Self::find_delimiter(branch, conditions_start, b'}').ok_or_else(|| {
-          SourceSpan::parsing_error(
-            branch_offset + cursor,
-            "Expected closing '}' for the condition list",
-          )
-        })?;
-
-      conditions = Self::parse_conditions(
-        &branch[conditions_start..conditions_end],
-        branch_offset + conditions_start,
-      )?;
-      cursor = conditions_end + 1;
-    }
-
-    Self::skip_whitespace(branch, &mut cursor);
-
-    let result_start: usize = cursor;
-
-    while let Some(byte) = Self::byte_at(branch, cursor) {
-      if matches!(byte, b'{' | b'}') {
-        return Err(SourceSpan::parsing_error(
-          branch_offset + cursor,
-          "Unexpected brace in condlist result",
-        ));
-      }
-
-      if byte == b'%' {
-        break;
-      }
-
-      cursor += 1;
-    }
-
-    let result: Option<String> = (!branch[result_start..cursor].trim().is_empty())
-      .then(|| branch[result_start..cursor].trim().to_owned());
-
-    if Self::byte_at(branch, cursor) != Some(b'%') {
-      if result.is_some() || !conditions.is_empty() {
-        return Ok(CondlistBranch {
-          conditions,
-          effects: Vec::new(),
-          result,
-          span: SourceSpan::new(branch_offset, branch_offset + branch.len()),
-        });
-      }
-
+    if result.is_none() && conditions.is_empty() && effects.is_empty() {
       return Err(SourceSpan::parsing_error(
-        branch_offset + result_start,
-        "Expected a result or effect list after the condition list",
-      ));
-    }
-
-    let effects_start: usize = cursor + 1;
-    let effects_end: usize =
-      Self::find_delimiter(branch, effects_start, b'%').ok_or_else(|| {
-        SourceSpan::parsing_error(
-          branch_offset + cursor,
-          "Expected closing '%' for the effect list",
-        )
-      })?;
-    let effects: Vec<CondlistCondition> = Self::parse_conditions(
-      &branch[effects_start..effects_end],
-      branch_offset + effects_start,
-    )?;
-
-    if !branch[effects_end + 1..].trim().is_empty() {
-      return Err(SourceSpan::parsing_error(
-        branch_offset + effects_end + 1,
-        "Unexpected data after the effect list",
+        branch_offset,
+        "Expected a result, condition list, or effect list",
       ));
     }
 
@@ -116,6 +51,118 @@ impl CondlistBranch {
       result,
       span: SourceSpan::new(branch_offset, branch_offset + branch.len()),
     })
+  }
+
+  fn parse_delimited_conditions(
+    value: &str,
+    value_offset: usize,
+    opening: u8,
+    closing: u8,
+    name: &str,
+  ) -> XRayResult<(Vec<CondlistCondition>, Option<SourceSpan>)> {
+    let opening_index: Option<usize> = Self::find_delimiter(value, 0, opening);
+    let closing_index: Option<usize> = Self::find_delimiter(value, 0, closing);
+
+    let Some(opening_index) = opening_index else {
+      if closing != opening
+        && let Some(closing_index) = closing_index
+      {
+        return Err(SourceSpan::parsing_error(
+          value_offset + closing_index,
+          &format!(
+            "Unexpected closing '{}' for the {name} list",
+            closing as char
+          ),
+        ));
+      }
+
+      return Ok((Vec::new(), None));
+    };
+
+    if closing != opening && closing_index.is_some_and(|index| index < opening_index) {
+      return Err(SourceSpan::parsing_error(
+        value_offset + closing_index.expect("Closing delimiter should be present"),
+        &format!(
+          "Unexpected closing '{}' for the {name} list",
+          closing as char
+        ),
+      ));
+    }
+
+    let closing_index: usize =
+      Self::find_delimiter(value, opening_index + 1, closing).ok_or_else(|| {
+        SourceSpan::parsing_error(
+          value_offset + opening_index,
+          &format!("Expected closing '{}' for the {name} list", closing as char),
+        )
+      })?;
+
+    if opening != closing
+      && Self::find_delimiter(value, opening_index + 1, opening)
+        .is_some_and(|index| index < closing_index)
+    {
+      return Err(SourceSpan::parsing_error(
+        value_offset + opening_index + 1,
+        &format!(
+          "Unexpected opening '{}' for the {name} list",
+          opening as char
+        ),
+      ));
+    }
+
+    if let Some(index) = Self::find_delimiter(value, closing_index + 1, opening) {
+      return Err(SourceSpan::parsing_error(
+        value_offset + index,
+        &format!("Unexpected '{}' after the {name} list", opening as char),
+      ));
+    }
+
+    if closing != opening
+      && let Some(index) = Self::find_delimiter(value, closing_index + 1, closing)
+    {
+      return Err(SourceSpan::parsing_error(
+        value_offset + index,
+        &format!("Unexpected '{}' after the {name} list", closing as char),
+      ));
+    }
+
+    let span: SourceSpan = SourceSpan::new(opening_index, closing_index + 1);
+    let conditions: Vec<CondlistCondition> = Self::parse_conditions(
+      &value[opening_index + 1..closing_index],
+      value_offset + opening_index + 1,
+    )?;
+
+    Ok((conditions, Some(span)))
+  }
+
+  fn parse_result(
+    value: &str,
+    conditions_span: Option<SourceSpan>,
+    effects_span: Option<SourceSpan>,
+  ) -> XRayResult<Option<String>> {
+    let mut spans: Vec<SourceSpan> = [conditions_span, effects_span]
+      .into_iter()
+      .flatten()
+      .collect();
+    spans.sort_by_key(|span| span.start);
+
+    let mut result: String = String::new();
+    let mut cursor: usize = 0;
+
+    for span in spans {
+      result.push_str(&value[cursor..span.start]);
+      cursor = span.end;
+    }
+
+    result.push_str(&value[cursor..]);
+
+    let result: &str = result.trim();
+
+    if result.is_empty() {
+      return Ok(None);
+    }
+
+    Ok(Some(String::from(result)))
   }
 
   fn parse_conditions(value: &str, value_offset: usize) -> XRayResult<Vec<CondlistCondition>> {

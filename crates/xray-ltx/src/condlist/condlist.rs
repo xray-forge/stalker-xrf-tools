@@ -84,6 +84,32 @@ mod tests {
   }
 
   #[test]
+  fn accepts_effects_before_condlist_results() {
+    let condlist =
+      Condlist::parse("%+info% next_section, {+condition} %=play_sound(sound)% another_section")
+        .expect("Expected valid X-Ray effect-first condlist branches");
+
+    assert_eq!(condlist.branches[0].result.as_deref(), Some("next_section"));
+    assert_eq!(condlist.branches[0].effects.len(), 1);
+    assert_eq!(
+      condlist.branches[1].result.as_deref(),
+      Some("another_section")
+    );
+    assert_eq!(condlist.branches[1].conditions.len(), 1);
+    assert_eq!(condlist.branches[1].effects.len(), 1);
+  }
+
+  #[test]
+  fn accepts_context_specific_condlist_results() {
+    let condlist = Condlist::parse("15| guard, {=surge_started} | %+scene_end%")
+      .expect("Expected valid context-specific condlist results");
+
+    assert_eq!(condlist.branches[0].result.as_deref(), Some("15| guard"));
+    assert_eq!(condlist.branches[1].result.as_deref(), Some("|"));
+    assert_eq!(condlist.branches[1].effects.len(), 1);
+  }
+
+  #[test]
   fn rejects_malformed_condlist_syntax() {
     for value in [
       "",
@@ -98,7 +124,8 @@ mod tests {
       "{=check(foo} target",
       "{=check()tail} target",
       "{~not-a-number} target",
-      "target % =effect% trailing",
+      "{+first} one {+second} two",
+      "%+first% one %+second%",
     ] {
       assert!(
         Condlist::parse(value).is_err(),
