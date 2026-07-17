@@ -21,7 +21,6 @@ impl Condlist {
       if branch.is_empty() {
         return Err(SourceSpan::parsing_error(
           branch_offset,
-          branch_offset,
           "Expected a condlist branch",
         ));
       }
@@ -63,6 +62,28 @@ mod tests {
   }
 
   #[test]
+  fn accepts_xray_condition_only_and_spaced_function_calls() {
+    let condlist =
+      Condlist::parse("{+info}, fallback, {= spawn_corpse (snork : : target : )} section")
+        .expect("Expected valid X-Ray condlist");
+
+    assert_eq!(condlist.branches[0].result, None);
+    assert!(condlist.branches[0].effects.is_empty());
+
+    let CondlistCondition::Function {
+      name,
+      parameters: Some(parameters),
+      ..
+    } = &condlist.branches[2].conditions[0]
+    else {
+      panic!("Expected a spawn_corpse function condition");
+    };
+
+    assert_eq!(name, "spawn_corpse");
+    assert_eq!(parameters, &["snork", "", "target", ""]);
+  }
+
+  #[test]
   fn rejects_malformed_condlist_syntax() {
     for value in [
       "",
@@ -72,7 +93,7 @@ mod tests {
       "first,,second",
       "{+info target",
       "{+} target",
-      "{+info}",
+      "{}",
       "target %effect",
       "{=check(foo} target",
       "{=check()tail} target",

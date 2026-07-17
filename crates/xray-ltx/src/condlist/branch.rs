@@ -41,7 +41,6 @@ impl CondlistBranch {
         Self::find_delimiter(branch, conditions_start, b'}').ok_or_else(|| {
           SourceSpan::parsing_error(
             branch_offset + cursor,
-            branch_offset + cursor + 1,
             "Expected closing '}' for the condition list",
           )
         })?;
@@ -61,7 +60,6 @@ impl CondlistBranch {
       if matches!(byte, b'{' | b'}') {
         return Err(SourceSpan::parsing_error(
           branch_offset + cursor,
-          branch_offset + cursor + 1,
           "Unexpected brace in condlist result",
         ));
       }
@@ -77,7 +75,7 @@ impl CondlistBranch {
       .then(|| branch[result_start..cursor].trim().to_owned());
 
     if Self::byte_at(branch, cursor) != Some(b'%') {
-      if result.is_some() {
+      if result.is_some() || !conditions.is_empty() {
         return Ok(CondlistBranch {
           conditions,
           effects: Vec::new(),
@@ -88,7 +86,6 @@ impl CondlistBranch {
 
       return Err(SourceSpan::parsing_error(
         branch_offset + result_start,
-        branch_offset + result_start,
         "Expected a result or effect list after the condition list",
       ));
     }
@@ -98,7 +95,6 @@ impl CondlistBranch {
       Self::find_delimiter(branch, effects_start, b'%').ok_or_else(|| {
         SourceSpan::parsing_error(
           branch_offset + cursor,
-          branch_offset + cursor + 1,
           "Expected closing '%' for the effect list",
         )
       })?;
@@ -110,7 +106,6 @@ impl CondlistBranch {
     if !branch[effects_end + 1..].trim().is_empty() {
       return Err(SourceSpan::parsing_error(
         branch_offset + effects_end + 1,
-        branch_offset + branch.len(),
         "Unexpected data after the effect list",
       ));
     }
@@ -151,25 +146,59 @@ impl CondlistBranch {
     if !Self::is_condition_sign(sign) {
       return Err(SourceSpan::parsing_error(
         value_offset + *cursor,
-        value_offset + *cursor + 1,
         "Expected a condition or effect prefix ('+', '-', '~', '=', or '!')",
       ));
     }
 
     *cursor += 1;
+
+    if matches!(sign, b'=' | b'!') {
+      Self::skip_whitespace(value, cursor);
+    }
+
     let name_start: usize = *cursor;
+    let mut name_end: Option<usize> = None;
     let mut has_function_call: bool = false;
     let mut parameters: Option<Vec<String>> = None;
 
     while let Some(byte) = Self::byte_at(value, *cursor) {
-      if byte.is_ascii_whitespace() || Self::is_condition_sign(byte) {
+      if byte.is_ascii_whitespace() {
+        if matches!(sign, b'=' | b'!') {
+          let mut function_start: usize = *cursor;
+          Self::skip_whitespace(value, &mut function_start);
+
+          if Self::byte_at(value, function_start) == Some(b'(') {
+            name_end = Some(*cursor);
+            has_function_call = true;
+            let (next_cursor, parsed_parameters): (usize, Vec<String>) =
+              Self::parse_function_call(value, function_start, value_offset)?;
+            *cursor = next_cursor;
+            parameters = Some(parsed_parameters);
+
+            if let Some(next) = Self::byte_at(value, *cursor)
+              && !next.is_ascii_whitespace()
+              && !Self::is_condition_sign(next)
+            {
+              return Err(SourceSpan::parsing_error(
+                value_offset + *cursor,
+                "Unexpected data after function call",
+              ));
+            }
+
+            continue;
+          }
+        }
+
+        break;
+      }
+
+      if Self::is_condition_sign(byte) {
         break;
       }
 
       if matches!(byte, b',' | b'{' | b'}' | b'%') {
         return Err(SourceSpan::parsing_error(
           value_offset + *cursor,
-          value_offset + *cursor + 1,
           "Unexpected delimiter in a condition or effect",
         ));
       }
@@ -177,7 +206,6 @@ impl CondlistBranch {
       if byte == b')' {
         return Err(SourceSpan::parsing_error(
           value_offset + *cursor,
-          value_offset + *cursor + 1,
           "Unexpected ')' in a condition or effect",
         ));
       }
@@ -186,7 +214,6 @@ impl CondlistBranch {
         if *cursor == name_start || has_function_call {
           return Err(SourceSpan::parsing_error(
             value_offset + *cursor,
-            value_offset + *cursor + 1,
             "Expected one function call after a condition or effect name",
           ));
         }
@@ -194,14 +221,16 @@ impl CondlistBranch {
         if !matches!(sign, b'=' | b'!') {
           return Err(SourceSpan::parsing_error(
             value_offset + token_start,
-            value_offset + *cursor + 1,
             "Only '=' and '!' tokens can call functions",
           ));
         }
 
+        name_end = Some(*cursor);
         has_function_call = true;
+
         let (next_cursor, parsed_parameters): (usize, Vec<String>) =
           Self::parse_function_call(value, *cursor, value_offset)?;
+
         *cursor = next_cursor;
         parameters = Some(parsed_parameters);
 
@@ -211,7 +240,6 @@ impl CondlistBranch {
         {
           return Err(SourceSpan::parsing_error(
             value_offset + *cursor,
-            value_offset + *cursor + 1,
             "Unexpected data after function call",
           ));
         }
@@ -225,17 +253,11 @@ impl CondlistBranch {
     if name_start == *cursor {
       return Err(SourceSpan::parsing_error(
         value_offset + token_start,
-        value_offset + token_start + 1,
         "Expected a name after condition or effect prefix",
       ));
     }
 
-    let name: String = value[name_start..if has_function_call {
-      Self::find_function_start(value, name_start)
-    } else {
-      *cursor
-    }]
-      .to_owned();
+    let name: String = value[name_start..name_end.unwrap_or(*cursor)].to_owned();
     let span: SourceSpan = SourceSpan::new(value_offset + token_start, value_offset + *cursor);
 
     match sign {
@@ -253,7 +275,6 @@ impl CondlistBranch {
         Ok(value) => Ok(CondlistCondition::Probability { value, span }),
         Err(_) => Err(SourceSpan::parsing_error(
           value_offset + name_start,
-          value_offset + *cursor,
           "Expected a numeric probability after '~'",
         )),
       },
@@ -272,14 +293,6 @@ impl CondlistBranch {
       _ => unreachable!("Condition signs are checked above"),
     }
   }
-
-  fn find_function_start(value: &str, name_start: usize) -> usize {
-    value[name_start..]
-      .find('(')
-      .map(|index| name_start + index)
-      .expect("Function calls are checked while parsing")
-  }
-
   fn parse_function_call(
     value: &str,
     open_parenthesis: usize,
@@ -289,19 +302,22 @@ impl CondlistBranch {
 
     while let Some(byte) = Self::byte_at(value, cursor) {
       if byte == b')' {
-        let parameters: Vec<String> = value[open_parenthesis + 1..cursor]
-          .split(':')
-          .filter(|parameter| !parameter.is_empty())
-          .map(str::to_owned)
-          .collect();
+        let parameters_raw: &str = &value[open_parenthesis + 1..cursor];
+        let parameters: Vec<String> = if parameters_raw.trim().is_empty() {
+          Vec::new()
+        } else {
+          parameters_raw
+            .split(':')
+            .map(|parameter| parameter.trim().to_owned())
+            .collect()
+        };
 
         return Ok((cursor + 1, parameters));
       }
 
-      if byte.is_ascii_whitespace() || matches!(byte, b'(' | b',' | b'{' | b'}' | b'%') {
+      if matches!(byte, b'(' | b',' | b'{' | b'}' | b'%') {
         return Err(SourceSpan::parsing_error(
           value_offset + cursor,
-          value_offset + cursor + 1,
           "Unexpected character in function parameters",
         ));
       }
@@ -311,7 +327,6 @@ impl CondlistBranch {
 
     Err(SourceSpan::parsing_error(
       value_offset + open_parenthesis,
-      value_offset + open_parenthesis + 1,
       "Expected closing ')' for function call",
     ))
   }

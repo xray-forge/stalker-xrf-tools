@@ -12,7 +12,7 @@ impl SourceSpan {
     Self { start, end }
   }
 
-  pub(crate) fn parsing_error(start: usize, _end: usize, message: impl Into<String>) -> XRayError {
+  pub(crate) fn parsing_error(start: usize, message: impl Into<String>) -> XRayError {
     XRayError::new_parsing_error(format!(
       "Invalid condlist syntax at byte {}: {}",
       start + 1,

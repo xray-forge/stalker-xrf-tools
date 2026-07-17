@@ -181,3 +181,40 @@ impl LtxProject {
     Ok(())
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::{LtxProjectOptions, LtxVerifyOptions};
+  use std::path::PathBuf;
+
+  #[test]
+  fn validates_condlists_from_project_schemes() {
+    let root =
+      PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources/tests/ltx_project_verify/condlist");
+    let project = LtxProject::open_at_path_opt(
+      root,
+      LtxProjectOptions {
+        is_with_schemes_check: true,
+        ..Default::default()
+      },
+    )
+    .expect("Expected test project to open");
+
+    let result = project
+      .verify_entries_opt(LtxVerifyOptions {
+        is_silent: true,
+        ..Default::default()
+      })
+      .expect("Expected test project verification to complete");
+
+    assert_eq!(result.valid_sections, 2);
+    assert_eq!(result.invalid_sections, 1);
+    assert_eq!(result.errors.len(), 1);
+    assert!(
+      result.errors[0]
+        .to_string()
+        .contains("Invalid condlist syntax at byte")
+    );
+  }
+}
