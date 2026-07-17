@@ -132,14 +132,14 @@ impl GamedataProject {
                 }
 
                 for motion in motions {
-                  if let Some(_existing) = hud_motions.get(&motion) {
-                    if options.is_logging_enabled() {
-                      /*
-                      eprintln!(
-                        "Hud [{section_name}] overwriting '{motion}' ({existing} -> {linked_visual:?})",
-                      );
-                      */
-                    }
+                  if let Some(_existing) = hud_motions.get(&motion)
+                    && options.is_logging_enabled()
+                  {
+                    /*
+                    eprintln!(
+                      "Hud [{section_name}] overwriting '{motion}' ({existing} -> {linked_visual:?})",
+                    );
+                    */
                   }
 
                   hud_motions.insert(motion, linked_visual.to_str().unwrap().to_string());

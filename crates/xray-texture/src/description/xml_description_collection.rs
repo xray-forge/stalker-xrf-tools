@@ -29,26 +29,26 @@ impl XmlDescriptionCollection {
       for entry in entries.flatten() {
         let path: PathBuf = entry.path();
 
-        if let Some(extension) = path.extension() {
-          if extension == "xml" {
-            let descriptions: HashMap<String, TextureFileDescriptor> =
-              Self::get_description(options, &path)?;
+        if let Some(extension) = path.extension()
+          && extension == "xml"
+        {
+          let descriptions: HashMap<String, TextureFileDescriptor> =
+            Self::get_description(options, &path)?;
 
-            descriptions
-              .into_iter()
-              .for_each(|(name, description)| match files.get_mut(&name) {
-                None => {
-                  files.insert(name, description);
+          descriptions
+            .into_iter()
+            .for_each(|(name, description)| match files.get_mut(&name) {
+              None => {
+                files.insert(name, description);
+              }
+              Some(existing) => {
+                if options.is_verbose {
+                  println!("Merging textures for {name}");
                 }
-                Some(existing) => {
-                  if options.is_verbose {
-                    println!("Merging textures for {name}");
-                  }
 
-                  existing.sprites.extend(description.sprites);
-                }
-              })
-          }
+                existing.sprites.extend(description.sprites);
+              }
+            })
         }
       }
 

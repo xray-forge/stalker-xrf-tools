@@ -37,10 +37,10 @@ impl LtxFormatter {
 
     destination.push_str(&format!("[{section}]"));
 
-    if let Some(inherited) = inherited {
-      if !inherited.is_empty() {
-        destination.push_str(&format!(":{}", inherited.join(",")));
-      }
+    if let Some(inherited) = inherited
+      && !inherited.is_empty()
+    {
+      destination.push_str(&format!(":{}", inherited.join(",")));
     }
 
     if let Some(comment) = comment {

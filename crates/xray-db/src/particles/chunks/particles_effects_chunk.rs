@@ -77,10 +77,10 @@ impl FileImportExport for ParticlesEffectsChunk {
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
     for (section_name, section) in &ltx {
-      if let Some(meta_field) = section.get(META_TYPE_FIELD) {
-        if meta_field == ParticleEffect::META_TYPE {
-          effects.push(ParticleEffect::import(section_name, &ltx)?);
-        }
+      if let Some(meta_field) = section.get(META_TYPE_FIELD)
+        && meta_field == ParticleEffect::META_TYPE
+      {
+        effects.push(ParticleEffect::import(section_name, &ltx)?);
       }
     }
 

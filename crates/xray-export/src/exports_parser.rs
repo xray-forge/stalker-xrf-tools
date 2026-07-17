@@ -122,41 +122,39 @@ impl ExportsParser {
       for module_item in &module.body {
         if let ModuleItem::Stmt(Stmt::Expr(expression)) = module_item {
           // If it is call expression + extern:
-          if let Expr::Call(call_expression) = expression.expr.as_ref() {
-            if get_expression_callee_name(&call_expression.callee)
+          if let Expr::Call(call_expression) = expression.expr.as_ref()
+            && get_expression_callee_name(&call_expression.callee)
               .is_some_and(|x| x == XR_EXTERN_EXPRESSION)
-              && call_expression.args.len() == 2
+            && call_expression.args.len() == 2
+          {
+            let name: Option<String> =
+              get_expression_parameter_as_string_name(call_expression.args.first().unwrap());
+
+            if let Some(effect_full_name) = name
+              && let Some(effect_name) = filter(&effect_full_name)
             {
-              let name: Option<String> =
-                get_expression_parameter_as_string_name(call_expression.args.first().unwrap());
+              let comment: Option<String> = comments.get_leading(expression.span.lo).map(|it| {
+                it.iter()
+                  .map(|comment| comment.text.as_str())
+                  .collect::<Vec<_>>()
+                  .join("\n")
+              });
 
-              if let Some(effect_full_name) = name {
-                if let Some(effect_name) = filter(&effect_full_name) {
-                  let comment: Option<String> =
-                    comments.get_leading(expression.span.lo).map(|it| {
-                      it.iter()
-                        .map(|comment| comment.text.as_str())
-                        .collect::<Vec<_>>()
-                        .join("\n")
-                    });
+              let loc: Loc = source_map.lookup_char_pos(expression.span.lo);
 
-                  let loc: Loc = source_map.lookup_char_pos(expression.span.lo);
-
-                  expressions.push(ExportDescriptor {
-                    col: loc.col.0,
-                    comment,
-                    filename: loc.file.name.to_string(),
-                    line: loc.line,
-                    name: effect_name,
-                    parameters: get_parameters_from_arrow_expression(
-                      call_expression
-                        .args
-                        .get(1)
-                        .expect("Expect1 index argument declaration"),
-                    )?,
-                  });
-                }
-              }
+              expressions.push(ExportDescriptor {
+                col: loc.col.0,
+                comment,
+                filename: loc.file.name.to_string(),
+                line: loc.line,
+                name: effect_name,
+                parameters: get_parameters_from_arrow_expression(
+                  call_expression
+                    .args
+                    .get(1)
+                    .expect("Expect1 index argument declaration"),
+                )?,
+              });
             }
           }
         }
@@ -171,13 +169,7 @@ impl ExportsParser {
   pub fn read_exporting_sources_from_path<P: AsRef<Path>>(path: P) -> XRayResult<Vec<PathBuf>> {
     let mut files: Vec<PathBuf> = Vec::new();
 
-    for entry in WalkDir::new(path)
-      .into_iter()
-      .filter_map(|entry| match entry {
-        Ok(entry) => Some(entry),
-        Err(_) => None,
-      })
-    {
+    for entry in WalkDir::new(path).into_iter().filter_map(Result::ok) {
       let path: &Path = entry.path();
 
       if Self::is_valid_ts_export_source_path(path) {

@@ -68,10 +68,10 @@ impl FileImportExport for ParticlesGroupsChunk {
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     for (section_name, section) in &ltx {
-      if let Some(meta_field) = section.get(META_TYPE_FIELD) {
-        if meta_field == ParticleGroup::META_TYPE {
-          groups.push(ParticleGroup::import(section_name, &ltx)?);
-        }
+      if let Some(meta_field) = section.get(META_TYPE_FIELD)
+        && meta_field == ParticleGroup::META_TYPE
+      {
+        groups.push(ParticleGroup::import(section_name, &ltx)?);
       }
     }
 

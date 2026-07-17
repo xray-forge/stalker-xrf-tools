@@ -41,31 +41,31 @@ impl LtxProject {
       let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
       let entry_path: &Path = entry.path();
 
-      if let Some(extension) = entry_path.extension() {
-        if extension == LTX_EXTENSION {
-          let parent: &Path = match entry_path.parent() {
-            Some(parent) => parent,
-            None => {
-              return Err(XRayError::new_convert_error(
-                "Failed to parse parent directory of ltx file.",
-              ));
-            }
-          };
-
-          for include in &Ltx::read_included_from_file(entry_path)? {
-            let mut included_path: PathBuf = PathBuf::from(parent);
-
-            included_path.push(LtxIncludeConvertor::statement_to_path(include));
-
-            included.push(included_path);
+      if let Some(extension) = entry_path.extension()
+        && extension == LTX_EXTENSION
+      {
+        let parent: &Path = match entry_path.parent() {
+          Some(parent) => parent,
+          None => {
+            return Err(XRayError::new_convert_error(
+              "Failed to parse parent directory of ltx file.",
+            ));
           }
+        };
 
-          if options.is_with_schemes_check && Self::is_ltx_scheme_path(entry_path) {
-            ltx_scheme_files.push(entry.path().into())
-          }
+        for include in &Ltx::read_included_from_file(entry_path)? {
+          let mut included_path: PathBuf = PathBuf::from(parent);
 
-          ltx_files.push(entry.path().into());
+          included_path.push(LtxIncludeConvertor::statement_to_path(include));
+
+          included.push(included_path);
         }
+
+        if options.is_with_schemes_check && Self::is_ltx_scheme_path(entry_path) {
+          ltx_scheme_files.push(entry.path().into())
+        }
+
+        ltx_files.push(entry.path().into());
       }
     }
 
@@ -81,15 +81,15 @@ impl LtxProject {
       // To make checks more strict and consistent, verify typos with case-insensitive Windows OS.
       // Linux / sane logics fail when assuming that `ExAmPlE.TxT` is same as `example.txt`.
       // Part of strict checking because original gamedata has such failures.
-      if options.is_strict_check {
-        if let Some(matching_path) = included.iter().find(|it| {
+      if options.is_strict_check
+        && let Some(matching_path) = included.iter().find(|it| {
           it.to_str()
             .unwrap()
             .eq_ignore_ascii_case(ltx_file_path.to_str().unwrap())
-        }) {
-          ltx_file_entries_failures.push((ltx_file_path.clone(), matching_path.clone()));
-          continue;
-        }
+        })
+      {
+        ltx_file_entries_failures.push((ltx_file_path.clone(), matching_path.clone()));
+        continue;
       }
 
       ltx_file_entries.push(ltx_file_path.clone());

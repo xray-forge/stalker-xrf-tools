@@ -114,12 +114,12 @@ impl ChunkReadWrite for ParticleGroup {
       description_chunk_writer.flush_chunk_into::<T>(writer, Self::DESCRIPTION_CHUNK_ID)?;
     }
 
-    if let Some(effects_old) = &self.effects_old {
-      if !effects_old.is_empty() {
-        let mut effects_old_chunk_writer: ChunkWriter = ChunkWriter::new();
-        effects_old_chunk_writer.write_xr_list::<T, _>(effects_old)?;
-        effects_old_chunk_writer.flush_chunk_into::<T>(writer, Self::DESCRIPTION_CHUNK_ID)?;
-      }
+    if let Some(effects_old) = &self.effects_old
+      && !effects_old.is_empty()
+    {
+      let mut effects_old_chunk_writer: ChunkWriter = ChunkWriter::new();
+      effects_old_chunk_writer.write_xr_list::<T, _>(effects_old)?;
+      effects_old_chunk_writer.flush_chunk_into::<T>(writer, Self::DESCRIPTION_CHUNK_ID)?;
     }
 
     Ok(())

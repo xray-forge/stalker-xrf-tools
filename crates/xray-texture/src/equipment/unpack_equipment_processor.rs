@@ -12,10 +12,9 @@ impl UnpackEquipmentProcessor {
     for (section_name, section) in &options.ltx.sections {
       if let Some(sprite) =
         InventorySpriteDescriptor::new_optional_from_section(section_name, section)
+        && Self::unpack_sprite(&options, &sprite)?
       {
-        if Self::unpack_sprite(&options, &sprite)? {
-          count += 1;
-        }
+        count += 1;
       }
     }
 

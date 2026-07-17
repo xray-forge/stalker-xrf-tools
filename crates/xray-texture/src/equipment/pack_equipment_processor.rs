@@ -22,31 +22,30 @@ impl PackEquipmentProcessor {
     for (section_name, section) in &options.ltx.sections {
       if let Some(sprite_descriptor) =
         InventorySpriteDescriptor::new_optional_from_section(section_name, section)
+        && let Some((sprite_path, sprite)) = Self::read_sprite(&options, &sprite_descriptor)?
       {
-        if let Some((sprite_path, sprite)) = Self::read_sprite(&options, &sprite_descriptor)? {
-          let (x, y, w, h) = sprite_descriptor.get_boundaries();
+        let (x, y, w, h) = sprite_descriptor.get_boundaries();
 
-          if options.is_verbose {
-            println!(
-              "Packing icon: '{}':({}:{};{}x{}) as ({}:{};{}x{}), src: {}x{}, {}",
-              sprite_descriptor.section,
-              sprite_descriptor.x,
-              sprite_descriptor.y,
-              sprite_descriptor.w,
-              sprite_descriptor.h,
-              x,
-              y,
-              w,
-              h,
-              sprite.width(),
-              sprite.height(),
-              sprite_path.display(),
-            );
-          }
-
-          image.copy_from(&sprite, x, y)?;
-          count += 1;
+        if options.is_verbose {
+          println!(
+            "Packing icon: '{}':({}:{};{}x{}) as ({}:{};{}x{}), src: {}x{}, {}",
+            sprite_descriptor.section,
+            sprite_descriptor.x,
+            sprite_descriptor.y,
+            sprite_descriptor.w,
+            sprite_descriptor.h,
+            x,
+            y,
+            w,
+            h,
+            sprite.width(),
+            sprite.height(),
+            sprite_path.display(),
+          );
         }
+
+        image.copy_from(&sprite, x, y)?;
+        count += 1;
       }
     }
 
