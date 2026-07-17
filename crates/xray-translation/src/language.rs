@@ -1,7 +1,9 @@
 use derive_more::Display;
 use std::str::FromStr;
 use xray_error::{XRayError, XRayResult};
-use xray_utils::{XRayEncoding, get_windows1250_encoder, get_windows1251_encoder};
+use xray_utils::{
+  XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, get_windows1252_encoder,
+};
 
 pub const MULTILANGUAGE: &str = "multilang";
 
@@ -50,14 +52,16 @@ impl TranslationLanguage {
   pub fn get_language_encoding(&self) -> String {
     match self {
       Self::Russian | Self::Ukrainian => String::from("windows-1251"),
-      _ => String::from("windows-1250"),
+      Self::German | Self::Polish => String::from("windows-1250"),
+      _ => String::from("windows-1252"),
     }
   }
 
   pub fn get_language_encoder(&self) -> XRayEncoding {
     match self {
       Self::Russian | Self::Ukrainian => get_windows1251_encoder(),
-      _ => get_windows1250_encoder(),
+      Self::German | Self::Polish => get_windows1250_encoder(),
+      _ => get_windows1252_encoder(),
     }
   }
 
@@ -119,6 +123,42 @@ mod tests {
     assert_eq!(
       TranslationLanguage::from_str_single("spa").unwrap(),
       TranslationLanguage::Spanish
+    );
+  }
+
+  #[test]
+  fn selects_the_xray_encoding_for_each_language() {
+    assert_eq!(
+      TranslationLanguage::English.get_language_encoding(),
+      "windows-1252"
+    );
+    assert_eq!(
+      TranslationLanguage::French.get_language_encoding(),
+      "windows-1252"
+    );
+    assert_eq!(
+      TranslationLanguage::Italian.get_language_encoding(),
+      "windows-1252"
+    );
+    assert_eq!(
+      TranslationLanguage::Spanish.get_language_encoding(),
+      "windows-1252"
+    );
+    assert_eq!(
+      TranslationLanguage::German.get_language_encoding(),
+      "windows-1250"
+    );
+    assert_eq!(
+      TranslationLanguage::Polish.get_language_encoding(),
+      "windows-1250"
+    );
+    assert_eq!(
+      TranslationLanguage::Russian.get_language_encoding(),
+      "windows-1251"
+    );
+    assert_eq!(
+      TranslationLanguage::Ukrainian.get_language_encoding(),
+      "windows-1251"
     );
   }
 }

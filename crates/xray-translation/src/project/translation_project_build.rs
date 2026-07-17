@@ -11,7 +11,7 @@ use std::path::{Display, Path};
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
-use xray_utils::encode_string_to_bytes;
+use xray_utils::{XRayEncoding, encode_string_to_bytes};
 
 impl TranslationProject {
   pub fn build_dir(dir: &Path, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
@@ -147,28 +147,34 @@ impl TranslationProject {
 
     if options.language == TranslationLanguage::All {
       for language in TranslationLanguage::get_all() {
-        let data: Vec<u8> = encode_string_to_bytes(
-          &Self::compile_translation_json_by_language(&parsed, &language, options)?,
-          language.get_language_encoder(),
-        )?;
-
-        Self::prepare_target_xml_translation_file(path, &options.output, &language, options)?
-          .write_all(&data)?;
+        Self::build_translation_json_by_language(path.as_ref(), &parsed, &language, options)?;
       }
     } else {
-      let data: Vec<u8> = encode_string_to_bytes(
-        &Self::compile_translation_json_by_language(&parsed, &options.language, options)?,
-        options.language.get_language_encoder(),
-      )?;
-
-      Self::prepare_target_xml_translation_file(path, &options.output, &options.language, options)?
-        .write_all(&data)?;
+      Self::build_translation_json_by_language(path.as_ref(), &parsed, &options.language, options)?;
     }
 
     Ok(())
   }
 
+  fn build_translation_json_by_language(
+    path: &Path,
+    source: &TranslationJson,
+    language: &TranslationLanguage,
+    options: &ProjectBuildOptions,
+  ) -> XRayResult {
+    let data: Vec<u8> = encode_string_to_bytes(
+      &Self::compile_translation_json_by_language(path, source, language, options)?,
+      language.get_language_encoder(),
+    )?;
+
+    Self::prepare_target_xml_translation_file(&path, &options.output, language, options)?
+      .write_all(&data)?;
+
+    Ok(())
+  }
+
   fn compile_translation_json_by_language(
+    path: &Path,
     source: &TranslationJson,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
@@ -180,30 +186,28 @@ impl TranslationProject {
     let mut serializer: Serializer<String> = Serializer::new(&mut buffer);
     let mut compiled: TranslationCompiledXml = TranslationCompiledXml::default();
 
-    let language: String = language.to_string();
+    let language_key: String = language.to_string();
 
     if options.is_verbose_logging_enabled() {
       println!(
-        "Building json file with {} entries, language '{language}'",
+        "Building json file with {} entries, language '{language_key}'",
         source.len(),
       )
     }
 
     for (key, entry) in source {
-      match entry.get(&language) {
-        None => {
-          compiled.string.push(TranslationEntryCompiled {
-            id: key.clone(),
-            text: key.clone(),
-          });
-        }
-        Some(value) => compiled.string.push(TranslationEntryCompiled {
-          id: key.clone(),
-          text: value
-            .as_ref()
-            .map_or(key.clone(), Self::compile_translation_entry_by_ref),
-        }),
-      }
+      let text: String = entry.get(&language_key).map_or(key.clone(), |value| {
+        value
+          .as_ref()
+          .map_or(key.clone(), Self::compile_translation_entry_by_ref)
+      });
+
+      Self::validate_translation_entry_encoding(path, language, key, &text)?;
+
+      compiled.string.push(TranslationEntryCompiled {
+        id: key.clone(),
+        text,
+      });
     }
 
     if options.is_sorted {
@@ -222,10 +226,115 @@ impl TranslationProject {
     Ok(buffer)
   }
 
+  fn validate_translation_entry_encoding(
+    path: &Path,
+    language: &TranslationLanguage,
+    id: &str,
+    text: &str,
+  ) -> XRayResult {
+    for (field, value) in [("id", id), ("text", text)] {
+      if let Some(character) =
+        Self::find_unencodable_character(value, language.get_language_encoder())
+      {
+        return Err(XRayError::new_encoding_error(format!(
+          "Translation '{}' entry '{}' {} cannot be encoded as {}: '{}' (U+{:04X})",
+          path.display(),
+          id,
+          field,
+          language.get_language_encoding(),
+          character,
+          character as u32,
+        )));
+      }
+    }
+
+    Ok(())
+  }
+
+  fn find_unencodable_character(value: &str, encoding: XRayEncoding) -> Option<char> {
+    value
+      .chars()
+      .find(|character| encoding.encode(&String::from(*character)).2)
+  }
+
   fn compile_translation_entry_by_ref(variant: &TranslationVariant) -> String {
     match variant {
       TranslationVariant::String(value) => value.clone(),
       TranslationVariant::MultiString(values) => values.join("\\n"),
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use std::collections::HashMap;
+  use std::path::PathBuf;
+
+  fn build_options(language: TranslationLanguage) -> ProjectBuildOptions {
+    ProjectBuildOptions {
+      is_silent: true,
+      is_sorted: false,
+      is_verbose: false,
+      path: PathBuf::from("translations"),
+      output: PathBuf::from("output"),
+      language,
+    }
+  }
+
+  #[test]
+  fn compiles_windows_1252_translations() {
+    let source: TranslationJson = HashMap::from([(
+      String::from("st_test"),
+      HashMap::from([(
+        String::from("fra"),
+        Some(TranslationVariant::String(String::from(
+          "À bientôt, José !",
+        ))),
+      )]),
+    )]);
+    let options: ProjectBuildOptions = build_options(TranslationLanguage::French);
+
+    let compiled: String = TranslationProject::compile_translation_json_by_language(
+      Path::new("translations/example.json"),
+      &source,
+      &TranslationLanguage::French,
+      &options,
+    )
+    .unwrap();
+
+    assert!(compiled.contains("encoding=\"windows-1252\""));
+    assert!(
+      encode_string_to_bytes(
+        &compiled,
+        TranslationLanguage::French.get_language_encoder()
+      )
+      .is_ok()
+    );
+  }
+
+  #[test]
+  fn reports_unencodable_translation_entries_with_context() {
+    let source: TranslationJson = HashMap::from([(
+      String::from("st_test"),
+      HashMap::from([(
+        String::from("pol"),
+        Some(TranslationVariant::String(String::from("Й"))),
+      )]),
+    )]);
+    let options: ProjectBuildOptions = build_options(TranslationLanguage::Polish);
+
+    let error = TranslationProject::compile_translation_json_by_language(
+      Path::new("translations/example.json"),
+      &source,
+      &TranslationLanguage::Polish,
+      &options,
+    )
+    .unwrap_err();
+
+    assert_eq!(
+      error.to_string(),
+      "Encoding error: Translation 'translations/example.json' entry 'st_test' text cannot be encoded as windows-1250: 'Й' (U+0419)"
+    );
   }
 }
