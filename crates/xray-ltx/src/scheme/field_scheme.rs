@@ -269,13 +269,7 @@ impl LtxFieldScheme {
   fn validate_fixed_float_list_type(&self, value: &str, len: usize) -> Option<XRayError> {
     let parsed_values: Vec<f32> = value
       .split(',')
-      .filter_map(|x| {
-        if let Ok(parsed) = x.trim().parse::<f32>() {
-          Some(parsed)
-        } else {
-          None
-        }
-      })
+      .filter_map(|x| x.trim().parse::<f32>().ok())
       .collect();
 
     if parsed_values.len() != len {

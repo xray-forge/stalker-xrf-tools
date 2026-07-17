@@ -25,14 +25,16 @@ impl ChunkReadWrite for AlifeZoneVisual {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
       visual: reader.read_xr::<T, _>()?,
-      idle_animation: reader
-        .has_data()
-        .then(|| reader.read_w1251_string().unwrap())
-        .unwrap_or(String::new()),
-      attack_animation: reader
-        .has_data()
-        .then(|| reader.read_w1251_string().unwrap())
-        .unwrap_or(String::new()),
+      idle_animation: if reader.has_data() {
+        reader.read_w1251_string().unwrap()
+      } else {
+        String::new()
+      },
+      attack_animation: if reader.has_data() {
+        reader.read_w1251_string().unwrap()
+      } else {
+        String::new()
+      },
       last_spawn_time: reader.read_xr_optional::<T, Time>()?,
     })
   }

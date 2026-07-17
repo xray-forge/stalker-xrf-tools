@@ -34,7 +34,7 @@ impl ArchiveProject {
 
       unpacked_files_count += 1;
 
-      if unpacked_files_count % unpacked_files_chunk == 0 {
+      if unpacked_files_count.is_multiple_of(unpacked_files_chunk) {
         log::info!(
           "Unpacked {}/{} files",
           unpacked_files_count,
@@ -90,7 +90,7 @@ impl ArchiveProject {
     while tasks_set.join_next().await.is_some() {
       unpacked_files_count += 1;
 
-      if unpacked_files_count % unpacked_files_chunk == 0 {
+      if unpacked_files_count.is_multiple_of(unpacked_files_chunk) {
         log::info!(
           "Unpacked {unpacked_files_count} / {} files",
           self.files.len()

@@ -142,16 +142,16 @@ impl ArchiveReader {
         (None, "header") => {
           let variable_captures = self.variable_regex.captures(line);
 
-          if let Some(captures) = variable_captures {
-            if &captures["name"] == "entry_point" {
-              let entry_point = captures["value"].to_string();
-              return Ok(Some(
-                self
-                  .root_regex
-                  .replace(entry_point.as_str(), "")
-                  .to_string(),
-              ));
-            }
+          if let Some(captures) = variable_captures
+            && &captures["name"] == "entry_point"
+          {
+            let entry_point = captures["value"].to_string();
+            return Ok(Some(
+              self
+                .root_regex
+                .replace(entry_point.as_str(), "")
+                .to_string(),
+            ));
           }
         }
         (Some(capture), _) => {

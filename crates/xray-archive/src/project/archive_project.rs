@@ -28,13 +28,7 @@ impl ArchiveProject {
     } else {
       log::info!("Reading archive folder: {}", path.as_ref().display());
 
-      for entry in WalkDir::new(path)
-        .into_iter()
-        .filter_map(|entry| match entry {
-          Ok(entry) => Some(entry),
-          Err(_) => None,
-        })
-      {
+      for entry in WalkDir::new(path).into_iter().filter_map(Result::ok) {
         let path: &Path = entry.path();
 
         if ArchiveDescriptor::is_valid_db_path(&path) {

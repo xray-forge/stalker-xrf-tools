@@ -72,8 +72,7 @@ impl LtxSchemeParser {
     for (field_name, value) in section {
       match field_name {
         LTX_SCHEME_STRICT_FIELD => {
-          scheme.is_strict =
-            Self::parse_strict_mode(field_name, section_name, value).map_err(XRayError::from)?;
+          scheme.is_strict = Self::parse_strict_mode(field_name, section_name, value)?;
         }
         _ => {
           scheme.fields.insert(
