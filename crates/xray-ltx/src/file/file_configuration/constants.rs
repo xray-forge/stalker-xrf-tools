@@ -4,7 +4,7 @@ pub const LTX_EXTENSION: &str = "ltx";
 
 pub const LTX_SCHEME_FIELD: &str = "$scheme";
 
-pub const LTX_SCHEME_STRICT_FIELD: &str = "strict";
+pub const LTX_SCHEME_STRICT_FIELD: &str = "$strict";
 
 pub const LTX_SCHEME_LTX_FILENAME: &str = "scheme.ltx";
 

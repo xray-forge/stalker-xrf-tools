@@ -120,3 +120,21 @@ impl LtxSchemeParser {
     })
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::LtxSchemeParser;
+  use crate::Section;
+
+  #[test]
+  fn parses_dollar_strict_scheme_metadata() {
+    let mut section: Section = Section::new();
+
+    section.insert("$strict", "true");
+
+    let scheme = LtxSchemeParser::parse_section_scheme("$test", &section).unwrap();
+
+    assert!(scheme.is_strict);
+    assert!(!scheme.fields.contains_key("$strict"));
+  }
+}
