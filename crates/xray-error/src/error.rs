@@ -65,7 +65,10 @@ pub enum XRayError {
     col: usize,
     message: String,
   },
-  #[error("Ltx scheme error: '{at:?}' [{section}] {field} : {message}")]
+  #[error(
+  "Ltx scheme error{location} [{section}] {field} : {message}",
+  location = XRayError::format_ltx_scheme_location(at.as_deref())
+)]
   LtxScheme {
     section: String,
     field: String,
@@ -145,5 +148,29 @@ impl XRayError {
       message: message.into(),
       kind,
     }
+  }
+}
+
+impl XRayError {
+  fn format_ltx_scheme_location(at: Option<&str>) -> String {
+    at.map(|path| format!(" in '{path}'")).unwrap_or_default()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::XRayError;
+
+  #[test]
+  fn formats_ltx_scheme_error_locations_readably() {
+    assert_eq!(
+      XRayError::new_scheme_error_at("section", "field", "message", "configs/system.ltx")
+        .to_string(),
+      "Ltx scheme error in 'configs/system.ltx' [section] field : message"
+    );
+    assert_eq!(
+      XRayError::new_ltx_scheme_error("section", "field", "message").to_string(),
+      "Ltx scheme error [section] field : message"
+    );
   }
 }
