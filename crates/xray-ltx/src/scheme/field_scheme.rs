@@ -1,4 +1,5 @@
 use crate::Ltx;
+use crate::condlist::Condlist;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use std::cmp;
 use xray_error::XRayError;
@@ -399,9 +400,17 @@ impl LtxFieldScheme {
   }
 
   fn validate_condlist_type(&self, value: &str) -> Option<XRayError> {
-    // todo: Actual condlist structure parsing.
+    if value.is_empty() && !self.is_optional {
+      return Some(self.validation_error("Invalid value - condlist is expected, got empty field"));
+    }
 
-    self.validate_string_type(value)
+    if value.is_empty() {
+      return None;
+    }
+
+    Condlist::parse(value)
+      .err()
+      .map(|error| self.validation_error(&error.to_string()))
   }
 
   fn validate_string_type(&self, value: &str) -> Option<XRayError> {
@@ -604,6 +613,26 @@ mod tests {
     assert!(scheme.validate_bool_type("").is_some());
   }
 
+  #[test]
+  fn test_condlist_validation() {
+    let scheme: LtxFieldScheme =
+      LtxFieldScheme::new_with_type("test_section", "test_field", LtxFieldDataType::TypeCondlist);
+
+    assert!(
+      scheme
+        .validate_condlist_type("{+info -other} enabled, fallback %=set_active_task(test)%")
+        .is_none()
+    );
+    assert!(
+      scheme
+        .validate_condlist_type("{+info} %=mech_discount(0.95)%")
+        .is_none()
+    );
+
+    assert!(scheme.validate_condlist_type("").is_some());
+    assert!(scheme.validate_condlist_type("{+} enabled").is_some());
+    assert!(scheme.validate_condlist_type("enabled %effect").is_some());
+  }
   #[test]
   fn test_string_validation() {
     let scheme: LtxFieldScheme =

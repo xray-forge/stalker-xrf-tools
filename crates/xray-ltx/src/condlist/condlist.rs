@@ -1,0 +1,88 @@
+use super::branch::CondlistBranch;
+use super::span::SourceSpan;
+use xray_error::XRayResult;
+
+/// A parsed X-Ray condition list.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Condlist {
+  pub branches: Vec<CondlistBranch>,
+}
+
+impl Condlist {
+  pub fn parse(value: &str) -> XRayResult<Condlist> {
+    let mut branches: Vec<CondlistBranch> = Vec::new();
+    let mut branch_start: usize = 0;
+
+    for raw_branch in value.split(',') {
+      let leading_whitespace: usize = raw_branch.len() - raw_branch.trim_start().len();
+      let branch_offset: usize = branch_start + leading_whitespace;
+      let branch: &str = raw_branch.trim();
+
+      if branch.is_empty() {
+        return Err(SourceSpan::parsing_error(
+          branch_offset,
+          branch_offset,
+          "Expected a condlist branch",
+        ));
+      }
+
+      branches.push(CondlistBranch::parse(branch, branch_offset)?);
+
+      branch_start += raw_branch.len() + 1;
+    }
+
+    Ok(Condlist { branches })
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::super::branch::CondlistCondition;
+  use super::Condlist;
+
+  #[test]
+  fn parses_xray_condlist_syntax() {
+    let condlist =
+      Condlist::parse("{+info -other =actor_on_level(pripyat)} enabled, %=set_active_task(test)%")
+        .expect("Expected valid condlist");
+
+    assert_eq!(condlist.branches.len(), 2);
+    assert_eq!(condlist.branches[0].result.as_deref(), Some("enabled"));
+    assert_eq!(condlist.branches[1].result, None);
+    assert_eq!(condlist.branches[0].conditions.len(), 3);
+    assert_eq!(condlist.branches[1].effects.len(), 1);
+    assert!(matches!(
+      condlist.branches[0].conditions[2],
+      CondlistCondition::Function {
+        ref name,
+        expected: true,
+        parameters: Some(ref parameters),
+        ..
+      } if name == "actor_on_level" && parameters == &["pripyat"]
+    ));
+  }
+
+  #[test]
+  fn rejects_malformed_condlist_syntax() {
+    for value in [
+      "",
+      "   ",
+      ", target",
+      "target,",
+      "first,,second",
+      "{+info target",
+      "{+} target",
+      "{+info}",
+      "target %effect",
+      "{=check(foo} target",
+      "{=check()tail} target",
+      "{~not-a-number} target",
+      "target % =effect% trailing",
+    ] {
+      assert!(
+        Condlist::parse(value).is_err(),
+        "Expected invalid condlist: {value}"
+      );
+    }
+  }
+}
