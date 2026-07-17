@@ -71,13 +71,13 @@ impl LtxProject {
 
                 if let Some(error) = field_definition.validate_value(&ltx, value) {
                   match error {
-                    XRayError::LtxScheme { message, field, .. } => {
+                    XRayError::LtxScheme { message, .. } => {
                       section_has_error = true;
 
                       result.errors.push(XRayError::new_scheme_error_at(
                         section_name,
+                        field_name,
                         message,
-                        field,
                         entry.to_str().unwrap(),
                       ));
                     }
@@ -193,7 +193,7 @@ mod tests {
     let root =
       PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources/tests/ltx_project_verify/condlist");
     let project = LtxProject::open_at_path_opt(
-      root,
+      &root,
       LtxProjectOptions {
         is_with_schemes_check: true,
         ..Default::default()
@@ -211,10 +211,12 @@ mod tests {
     assert_eq!(result.valid_sections, 2);
     assert_eq!(result.invalid_sections, 1);
     assert_eq!(result.errors.len(), 1);
-    assert!(
-      result.errors[0]
-        .to_string()
-        .contains("Invalid condlist syntax at byte")
+    assert_eq!(
+      result.errors[0].to_string(),
+      format!(
+        "Ltx scheme error in '{}' [invalid] value : Parsing error: Invalid condlist syntax at byte 2: Expected a name after condition or effect prefix",
+        root.join("invalid.ltx").display(),
+      ),
     );
   }
 }
