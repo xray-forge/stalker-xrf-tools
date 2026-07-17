@@ -153,7 +153,7 @@ impl LtxFieldScheme {
       LtxFieldDataType::TypeRgba => self.validate_rgba_type(field_data),
       LtxFieldDataType::TypeSection => self.validate_section_type(field_data),
       LtxFieldDataType::TypeString => self.validate_string_type(field_data),
-      LtxFieldDataType::TypeTuple(_, _) => self.validate_tuple_type(field_data),
+      LtxFieldDataType::TypeTuple(_, _, _) => self.validate_tuple_type(field_data),
       LtxFieldDataType::TypeU16 => self.validate_u16_type(field_data),
       LtxFieldDataType::TypeU32 => self.validate_u32_type(field_data),
       LtxFieldDataType::TypeU8 => self.validate_u8_type(field_data),
@@ -311,11 +311,14 @@ impl LtxFieldScheme {
   /// Validate if provided value matches tuple description.
   fn validate_tuple_type(&self, value: &str) -> Option<XRayError> {
     match &self.data_type {
-      LtxFieldDataType::TypeTuple(types, types_raw) => {
+      LtxFieldDataType::TypeTuple(types, types_raw, separator) => {
         if types.is_empty() {
           Some(self.validation_error("Unexpected tuple check - list of possible values is empty"))
         } else {
-          let values: Vec<&str> = value.split(',').map(|it| it.trim()).collect();
+          let values: Vec<&str> = value
+            .split(separator.as_char())
+            .map(|it| it.trim())
+            .collect();
           let values_count: usize = values.len();
           let required_values_count: usize = types_raw
             .iter()
@@ -324,8 +327,9 @@ impl LtxFieldScheme {
 
           if values_count < required_values_count || values_count > types.len() {
             Some(self.validation_error(&format!(
-              "Invalid value, {} comma separated values required, provided {} ('{}' in '{}' field)",
+              "Invalid value, {} {} separated values required, provided {} ('{}' in '{}' field)",
               required_values_count,
+              separator.as_name(),
               values_count,
               value,
               types_raw.join(", ")
@@ -427,6 +431,7 @@ mod tests {
   use super::LtxFieldScheme;
   use crate::Ltx;
   use crate::scheme::field_data_type::LtxFieldDataType;
+  use crate::scheme::tuple_separator::TupleSeparator;
 
   #[test]
   fn test_u32_validation() {
@@ -756,6 +761,7 @@ mod tests {
         String::from("string"),
         String::from("bool"),
       ],
+      TupleSeparator::Comma,
     );
 
     assert!(scheme.validate_tuple_type("15.25, abc, true").is_none());
@@ -795,6 +801,7 @@ mod tests {
         String::from("?string"),
         String::from("?bool"),
       ],
+      TupleSeparator::Comma,
     );
 
     assert!(
@@ -836,5 +843,35 @@ mod tests {
     assert!(scheme.validate_tuple_type("a,b").is_some());
     assert!(scheme.validate_tuple_type("a,b,c").is_some());
     assert!(scheme.validate_tuple_type("a,b,c,d").is_some());
+  }
+
+  #[test]
+  fn test_pipe_tuple_condlist_validation() {
+    let data_type: LtxFieldDataType =
+      LtxFieldDataType::from_field_data("on_signal", "test_section", "tuple@pipe:string,condlist")
+        .expect("Expected pipe tuple type to parse");
+    let scheme: LtxFieldScheme =
+      LtxFieldScheme::new_with_optional_type("test_section", "on_signal", data_type);
+
+    assert!(
+      scheme
+        .validate_data_entry_by_type(&scheme.data_type, "signal | {+info} next_state")
+        .is_none()
+    );
+    assert!(
+      scheme
+        .validate_data_entry_by_type(&scheme.data_type, " | {+info} next_state")
+        .is_none()
+    );
+    assert!(
+      scheme
+        .validate_data_entry_by_type(&scheme.data_type, "signal | {+}")
+        .is_some()
+    );
+    assert!(
+      scheme
+        .validate_data_entry_by_type(&scheme.data_type, "signal |")
+        .is_none()
+    );
   }
 }

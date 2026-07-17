@@ -1,4 +1,5 @@
 use crate::file::file_configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
+use crate::scheme::tuple_separator::TupleSeparator;
 use std::fmt::Display;
 use xray_error::{XRayError, XRayResult};
 use xray_utils::assert_equal;
@@ -18,7 +19,7 @@ pub enum LtxFieldDataType {
   TypeRgba,
   TypeSection,
   TypeString,
-  TypeTuple(Vec<LtxFieldDataType>, Vec<String>),
+  TypeTuple(Vec<LtxFieldDataType>, Vec<String>, TupleSeparator),
   TypeU16,
   TypeU32,
   TypeU8,
@@ -150,38 +151,38 @@ impl LtxFieldDataType {
     let mut types: Vec<LtxFieldDataType> = Vec::new();
     let mut types_raw: Vec<String> = Vec::new();
 
-    match value.split_once(':') {
+    let (separator, allowed_values_string): (TupleSeparator, &str) = match value.split_once(':') {
       None => {
         return Err(XRayError::new_read_error(format!(
           "Failed to read scheme tuple type for field '{section_name}', expected ':' separated types"
         )));
       }
-      Some((_, allowed_values_string)) => {
-        for (tuple_entry, tuple_entry_raw) in
-          allowed_values_string.trim().split(',').filter_map(|it| {
-            let trimmed: &str = it.trim();
+      Some((tuple_type, allowed_values_string)) => {
+        let separator: TupleSeparator =
+          TupleSeparator::from_tuple_type(field_name, section_name, tuple_type)?;
 
-            if trimmed.is_empty() {
-              None
-            } else {
-              Some((
-                Self::from_field_data(field_name, section_name, trimmed),
-                trimmed,
-              ))
-            }
-          })
-        {
-          match tuple_entry? {
-            Self::TypeTuple(_, _) => {
-              return Err(XRayError::new_read_error(format!(
-                "Failed to read scheme for field '{section_name}', tuple cannot contain nested tuples"
-              )));
-            }
-            schema => {
-              types.push(schema);
-              types_raw.push(tuple_entry_raw.into());
-            }
-          }
+        (separator, allowed_values_string)
+      }
+    };
+
+    for tuple_entry_raw in
+      Self::split_tuple_entries(field_name, section_name, allowed_values_string)?
+    {
+      let (tuple_entry, tuple_entry_raw): (&str, String) =
+        Self::parse_tuple_entry(field_name, section_name, tuple_entry_raw)?;
+
+      let tuple_entry: XRayResult<LtxFieldDataType> =
+        Self::from_field_data(field_name, section_name, tuple_entry);
+
+      match tuple_entry? {
+        Self::TypeTuple(_, _, _) => {
+          return Err(XRayError::new_read_error(format!(
+            "Failed to read scheme for field '{section_name}', tuple cannot contain nested tuples"
+          )));
+        }
+        schema => {
+          types.push(schema);
+          types_raw.push(tuple_entry_raw);
         }
       }
     }
@@ -199,8 +200,84 @@ impl LtxFieldDataType {
         "Expected same count of raw and converted types for tuple type definition",
       )?;
 
-      Ok(Self::TypeTuple(types, types_raw))
+      Ok(Self::TypeTuple(types, types_raw, separator))
     }
+  }
+
+  fn split_tuple_entries<'a>(
+    field_name: &str,
+    section_name: &str,
+    value: &'a str,
+  ) -> XRayResult<Vec<&'a str>> {
+    let mut entries: Vec<&str> = Vec::new();
+    let mut start: usize = 0;
+    let mut depth: usize = 0;
+
+    for (index, character) in value.char_indices() {
+      match character {
+        '(' => depth += 1,
+        ')' => {
+          if depth == 0 {
+            return Err(XRayError::new_ltx_scheme_error(
+              section_name,
+              field_name,
+              "Failed to parse tuple type, unexpected closing parenthesis",
+            ));
+          }
+
+          depth -= 1;
+        }
+        ',' if depth == 0 => {
+          entries.push(&value[start..index]);
+          start = index + character.len_utf8();
+        }
+        _ => {}
+      }
+    }
+
+    if depth != 0 {
+      return Err(XRayError::new_ltx_scheme_error(
+        section_name,
+        field_name,
+        "Failed to parse tuple type, expected closing parenthesis",
+      ));
+    }
+
+    entries.push(&value[start..]);
+
+    Ok(entries)
+  }
+
+  fn parse_tuple_entry<'a>(
+    field_name: &str,
+    section_name: &str,
+    value: &'a str,
+  ) -> XRayResult<(&'a str, String)> {
+    let value: &str = value.trim();
+    let is_grouped: bool = value.starts_with('(') && value.ends_with(')');
+    let inner_value: &str = if is_grouped {
+      value[1..(value.len() - 1)].trim()
+    } else {
+      value
+    };
+
+    if inner_value.is_empty() {
+      return Err(XRayError::new_ltx_scheme_error(
+        section_name,
+        field_name,
+        "Failed to parse tuple type, expected a field type entry",
+      ));
+    }
+
+    if !is_grouped && inner_value.trim_start_matches('?').starts_with("enum") {
+      return Err(XRayError::new_ltx_scheme_error(
+        section_name,
+        field_name,
+        "Failed to parse tuple type, enum entries must be enclosed in parentheses",
+      ));
+    }
+
+    Ok((inner_value, String::from(value)))
   }
 
   /// Parse data type enum variant from provided string option.
@@ -231,7 +308,10 @@ impl Display for LtxFieldDataType {
       Self::TypeRgba => String::from("rgba"),
       Self::TypeSection => String::from("section"),
       Self::TypeString => String::from("string"),
-      Self::TypeTuple(_, raw_types) => format!("tuple:{}", raw_types.join(",")),
+      Self::TypeTuple(_, raw_types, separator) => match separator {
+        TupleSeparator::Comma => format!("tuple:{}", raw_types.join(",")),
+        TupleSeparator::Pipe => format!("tuple@pipe:{}", raw_types.join(",")),
+      },
       Self::TypeU16 => String::from("u16"),
       Self::TypeU32 => String::from("u32"),
       Self::TypeU8 => String::from("u8"),
@@ -240,5 +320,58 @@ impl Display for LtxFieldDataType {
     };
 
     write!(formatter, "{}", type_string)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::scheme::tuple_separator::TupleSeparator;
+
+  #[test]
+  fn parses_pipe_tuple_with_grouped_enum() {
+    let data_type: LtxFieldDataType = LtxFieldDataType::from_field_data(
+      "on_signal",
+      "$scheme_common",
+      "tuple@pipe:(enum:hit,miss),condlist",
+    )
+    .expect("Expected pipe tuple type to parse");
+
+    assert_eq!(
+      data_type,
+      LtxFieldDataType::TypeTuple(
+        vec![
+          LtxFieldDataType::TypeEnum(vec![String::from("hit"), String::from("miss")]),
+          LtxFieldDataType::TypeCondlist,
+        ],
+        vec![String::from("(enum:hit,miss)"), String::from("condlist")],
+        TupleSeparator::Pipe,
+      )
+    );
+  }
+
+  #[test]
+  fn rejects_ungrouped_enum_in_tuple() {
+    let error: XRayError = LtxFieldDataType::from_field_data(
+      "on_signal",
+      "$scheme_common",
+      "tuple@pipe:enum:hit,condlist",
+    )
+    .expect_err("Expected ungrouped enum tuple entry to fail");
+
+    assert!(
+      error
+        .to_string()
+        .contains("enum entries must be enclosed in parentheses")
+    );
+  }
+
+  #[test]
+  fn supports_explicit_comma_tuple_separator() {
+    let data_type: LtxFieldDataType =
+      LtxFieldDataType::from_field_data("value", "section", "tuple@comma:string,u32")
+        .expect("Expected comma tuple type to parse");
+
+    assert_eq!(data_type.to_string(), "tuple:string,u32");
   }
 }
