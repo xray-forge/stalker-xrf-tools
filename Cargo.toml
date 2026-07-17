@@ -31,3 +31,4 @@ dead_code = "allow"
 [workspace.lints.clippy]
 extra_unused_type_parameters = "allow"
 doc_lazy_continuation = "allow"
+module_inception = "allow"
