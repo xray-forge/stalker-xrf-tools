@@ -73,7 +73,7 @@ impl GenericCommand for VerifyGamedataCommand {
       )
       .arg(
         Arg::new("strict")
-          .help("Turn on strict mode")
+          .help("Fully validate expensive asset payloads")
           .short('s')
           .long("strict")
           .required(false)

@@ -33,7 +33,13 @@ impl GamedataProject {
           ));
         };
 
-        SoundFile::read_from_path(&path).err().map(|error| {
+        let sound: XRayResult<SoundFile> = if options.is_strict {
+          SoundFile::read_strictly_from_path(&path)
+        } else {
+          SoundFile::read_from_path(&path)
+        };
+
+        sound.err().map(|error| {
           if options.is_logging_enabled() {
             eprintln!("Sound is not valid: {} - {error}", path.display());
           }

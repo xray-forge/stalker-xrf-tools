@@ -45,30 +45,49 @@ pub struct SoundFile {
 }
 
 impl SoundFile {
-  /// Read and fully decode an X-Ray Ogg/Vorbis sound file.
+  /// Read the Ogg/Vorbis headers and X-Ray metadata of a sound file.
   ///
-  /// Successful reads guarantee an Ogg/Vorbis stream that X-Ray can load. Sounds without a
-  /// recognized X-Ray comment use the engine's default source parameters.
+  /// Successful reads guarantee a structurally valid X-Ray Ogg/Vorbis header. Sounds without a
+  /// recognized X-Ray comment use the engine's default source parameters. Use
+  /// [`Self::read_strictly_from_path`] to fully decode the audio payload.
   pub fn read_from_path<P>(path: P) -> XRayResult<Self>
+  where
+    P: AsRef<Path>,
+  {
+    Self::read_from_path_with_strictness(path, false)
+  }
+
+  /// Read and fully decode an X-Ray Ogg/Vorbis sound file.
+  pub fn read_strictly_from_path<P>(path: P) -> XRayResult<Self>
+  where
+    P: AsRef<Path>,
+  {
+    Self::read_from_path_with_strictness(path, true)
+  }
+
+  fn read_from_path_with_strictness<P>(path: P, is_strict: bool) -> XRayResult<Self>
   where
     P: AsRef<Path>,
   {
     let path: &Path = path.as_ref();
 
-    read_xray_sound(path).map_err(|error| {
+    read_xray_sound(path, is_strict).map_err(|error| {
       XRayError::new_verify_error(format!("Failed to read sound {}: {error}", path.display()))
     })
   }
 }
 
-fn read_xray_sound(path: &Path) -> Result<SoundFile, String> {
+fn read_xray_sound(path: &Path, is_strict: bool) -> Result<SoundFile, String> {
   let file: File = File::open(path).map_err(|error| format!("Could not open sound: {error}"))?;
   let mut reader: PacketReader<File> = PacketReader::new(file);
+
   let headers: VorbisHeaders = read_vorbis_headers(&mut reader)?;
   let (channels, sample_rate): (u16, u32) = parse_identification_packet(&headers.identification)?;
   let metadata: SoundMetadata = read_sound_metadata(&headers.comment)?;
 
-  decode_vorbis_stream(&mut reader, &headers)?;
+  if is_strict {
+    decode_vorbis_stream(&mut reader, &headers)?;
+  }
 
   Ok(SoundFile {
     channels,
