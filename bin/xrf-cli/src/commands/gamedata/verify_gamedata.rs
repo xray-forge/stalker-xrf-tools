@@ -132,6 +132,7 @@ impl GenericCommand for VerifyGamedataCommand {
 
     if verify_result.is_valid() {
       if verify_options.is_logging_enabled() {
+        println!();
         println!("{}", "Project gamedata is valid".green());
         println!(
           "Gamedata project verified in {} sec",
@@ -140,6 +141,7 @@ impl GenericCommand for VerifyGamedataCommand {
       }
     } else {
       if verify_options.is_logging_enabled() {
+        println!();
         println!("{}", "Project gamedata is invalid".red());
 
         for message in verify_result.get_failure_messages() {
