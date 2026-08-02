@@ -155,6 +155,60 @@ impl AlifeObjectInherited {
     })
   }
 
+  /// Get custom data of the object if it is supported by underlying alife class.
+  /// Custom data is stored on the shared abstract object and reached through inheritance chains.
+  pub fn get_custom_data(&self) -> Option<&String> {
+    match self {
+      AlifeObjectInherited::SeActor(object) => Some(&object.base.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeObjectBreakable(object) => Some(&object.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeObjectClimable(object) => Some(&object.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeGraphPoint(_) => None,
+      AlifeObjectInherited::CseAlifeSpaceRestrictor(object) => Some(&object.base.custom_data),
+      AlifeObjectInherited::SeSmartCover(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeAnomalousZone(object) => {
+        Some(&object.base.base.base.custom_data)
+      }
+      AlifeObjectInherited::SeZoneAnom(object) => Some(&object.base.base.base.base.custom_data),
+      AlifeObjectInherited::SeZoneTorrid(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::SeSmartTerrain(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::SeLevelChanger(object) => Some(&object.base.base.custom_data),
+      AlifeObjectInherited::SeZoneVisual(object) => Some(&object.base.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeObjectPhysic(object) => Some(&object.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeHelicopter(object) => Some(&object.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeInventoryBox(object) => Some(&object.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeObjectHangingLamp(object) => {
+        Some(&object.base.base.custom_data)
+      }
+      AlifeObjectInherited::CseAlifeItem(object) => Some(&object.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeItemExplosive(object) => {
+        Some(&object.base.base.base.custom_data)
+      }
+      AlifeObjectInherited::CseAlifeItemPda(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeItemAmmo(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeItemGrenade(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeItemArtefact(object) => {
+        Some(&object.base.base.base.custom_data)
+      }
+      AlifeObjectInherited::CseAlifeItemWeapon(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeItemDetector(object) => {
+        Some(&object.base.base.base.custom_data)
+      }
+      AlifeObjectInherited::CseAlifeItemHelmet(object) => Some(&object.base.base.base.custom_data),
+      AlifeObjectInherited::CseAlifeItemCustomOutfit(object) => {
+        Some(&object.base.base.base.custom_data)
+      }
+      AlifeObjectInherited::CseAlifeItemWeaponShotgun(object) => {
+        Some(&object.base.base.base.base.custom_data)
+      }
+      AlifeObjectInherited::CseAlifeItemWeaponMagazined(object) => {
+        Some(&object.base.base.base.base.custom_data)
+      }
+      AlifeObjectInherited::CseAlifeItemWeaponMagazinedWGl(object) => {
+        Some(&object.base.base.base.base.base.custom_data)
+      }
+    }
+  }
+
   pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
     match self {
       AlifeObjectInherited::SeActor(object) => writer.write_xr::<T, _>(object.deref())?,
