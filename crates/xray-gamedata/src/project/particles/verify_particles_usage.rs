@@ -37,10 +37,12 @@ impl GamedataProject {
 
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata particles usage in {} sec, {}/{} valid references, {} unparsed custom data sections",
+        "Verified gamedata particles usage in {} sec, {}/{} valid references, {}/{} spawn files inspected, {} unparsed custom data sections",
         (result.duration as f64) / 1000.0,
         result.checked_references_count - result.invalid_references_count,
         result.checked_references_count,
+        result.checked_spawn_files_count - result.unreadable_spawn_files_count,
+        result.checked_spawn_files_count,
         result.unparsed_custom_data_count
       );
     }
@@ -112,7 +114,14 @@ impl GamedataProject {
       .collect::<Vec<_>>();
 
     for relative_path in &spawn_files {
+      result.checked_spawn_files_count += 1;
+
       let Some(spawn_path) = self.get_absolute_asset_path(relative_path) else {
+        if options.is_logging_enabled() {
+          eprintln!("Spawn path not found for particle usage check: {relative_path}");
+        }
+
+        result.unreadable_spawn_files_count += 1;
         continue;
       };
 
@@ -120,15 +129,15 @@ impl GamedataProject {
         match SpawnFile::read_from_path::<XRayByteOrder, PathBuf>(&spawn_path) {
           Ok(spawn_file) => spawn_file,
           Err(error) => {
-            // Unreadable spawn files are reported by the spawns check, not this one.
-            if options.is_verbose_logging_enabled() {
+            if options.is_logging_enabled() {
               eprintln!(
-                "Skipping spawn file in particles usage check: {} - {}",
+                "Could not inspect spawn file for particle usage: {} - {}",
                 spawn_path.display(),
                 error
               );
             }
 
+            result.unreadable_spawn_files_count += 1;
             continue;
           }
         };
