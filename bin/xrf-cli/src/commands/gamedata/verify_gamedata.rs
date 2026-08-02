@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process;
 use xray_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
-  GamedataVerificationResult, GamedataVerificationType,
+  GamedataVerificationResult, GamedataVerificationStatus, GamedataVerificationType,
 };
 
 #[derive(Default)]
@@ -129,31 +129,51 @@ impl GenericCommand for VerifyGamedataCommand {
 
     let mut project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
     let verify_result: GamedataVerificationResult = project.verify(&verify_options)?;
+    let status: GamedataVerificationStatus = verify_result.status();
 
-    if verify_result.is_valid() {
-      if verify_options.is_logging_enabled() {
-        println!();
-        println!("{}", "Project gamedata is valid".green());
-        println!(
-          "Gamedata project verified in {} sec",
-          (verify_result.duration as f64) / 1000.0
-        );
-      }
-    } else {
-      if verify_options.is_logging_enabled() {
-        println!();
-        println!("{}", "Project gamedata is invalid".red());
-
-        for message in verify_result.get_failure_messages() {
-          println!("- {}", message);
+    if verify_options.is_logging_enabled() {
+      match status {
+        GamedataVerificationStatus::Passed => {
+          println!();
+          println!("{}", "Project gamedata is valid".green());
+          println!(
+            "Gamedata project verified in {} sec",
+            (verify_result.duration as f64) / 1000.0
+          );
         }
+        GamedataVerificationStatus::Failed
+        | GamedataVerificationStatus::Error
+        | GamedataVerificationStatus::Incomplete
+        | GamedataVerificationStatus::Skipped => {
+          eprintln!();
 
-        println!(
-          "Gamedata project checked in {} sec",
-          (verify_result.duration as f64) / 1000.0
-        );
+          let status_message = match status {
+            GamedataVerificationStatus::Failed => "Project gamedata is invalid".red(),
+            GamedataVerificationStatus::Error => "Project gamedata verification has errors".red(),
+            GamedataVerificationStatus::Incomplete => {
+              "Project gamedata verification is incomplete".yellow()
+            }
+            GamedataVerificationStatus::Skipped => {
+              "Project gamedata verification was skipped".yellow()
+            }
+            GamedataVerificationStatus::Passed => unreachable!(),
+          };
+
+          eprintln!("{status_message}");
+
+          for message in verify_result.get_failure_messages() {
+            eprintln!("- {message}");
+          }
+
+          eprintln!(
+            "Gamedata project checked in {} sec",
+            (verify_result.duration as f64) / 1000.0
+          );
+        }
       }
+    }
 
+    if status != GamedataVerificationStatus::Passed {
       process::exit(1);
     }
 

@@ -1,5 +1,6 @@
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
 use xray_error::XRayResult;
 
 use crate::project::levels::verify_levels_result::GamedataLevelVerificationResult;
@@ -15,6 +16,7 @@ use crate::project::textures::verify_textures_result::GamedataTexturesVerificati
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
 use crate::project::weathers::verify_weathers_result::GamedataWeathersVerificationResult;
 
+#[derive(Default)]
 pub struct GamedataVerificationResult {
   pub duration: u128,
   pub animations_result: Option<XRayResult<GamedataAnimationsVerificationResult>>,
@@ -33,20 +35,26 @@ pub struct GamedataVerificationResult {
 }
 
 impl GamedataVerificationResult {
+  pub fn status(&self) -> GamedataVerificationStatus {
+    Self::aggregate_status([
+      Self::get_optional_result_status(&self.animations_result),
+      Self::get_optional_result_status(&self.ltx_result),
+      Self::get_optional_result_status(&self.levels_result),
+      Self::get_optional_result_status(&self.meshes_result),
+      Self::get_optional_result_status(&self.particles_result),
+      Self::get_optional_result_status(&self.particles_usage_result),
+      Self::get_optional_result_status(&self.scripts_result),
+      Self::get_optional_result_status(&self.shaders_result),
+      Self::get_optional_result_status(&self.sounds_result),
+      Self::get_optional_result_status(&self.spawns_result),
+      Self::get_optional_result_status(&self.textures_result),
+      Self::get_optional_result_status(&self.weapons_result),
+      Self::get_optional_result_status(&self.weathers_result),
+    ])
+  }
+
   pub fn is_valid(&self) -> bool {
-    Self::is_optional_ok_and_valid(&self.animations_result)
-      && Self::is_optional_ok_and_valid(&self.ltx_result)
-      && Self::is_optional_ok_and_valid(&self.spawns_result)
-      && Self::is_optional_ok_and_valid(&self.meshes_result)
-      && Self::is_optional_ok_and_valid(&self.levels_result)
-      && Self::is_optional_ok_and_valid(&self.particles_result)
-      && Self::is_optional_ok_and_valid(&self.particles_usage_result)
-      && Self::is_optional_ok_and_valid(&self.scripts_result)
-      && Self::is_optional_ok_and_valid(&self.shaders_result)
-      && Self::is_optional_ok_and_valid(&self.sounds_result)
-      && Self::is_optional_ok_and_valid(&self.textures_result)
-      && Self::is_optional_ok_and_valid(&self.weapons_result)
-      && Self::is_optional_ok_and_valid(&self.weathers_result)
+    self.status() == GamedataVerificationStatus::Passed
   }
 
   pub fn get_failure_messages(&self) -> Vec<String> {
@@ -70,11 +78,15 @@ impl GamedataVerificationResult {
     .collect()
   }
 
-  fn is_optional_ok_and_valid<T>(result: &Option<XRayResult<T>>) -> bool
+  fn get_optional_result_status<T>(result: &Option<XRayResult<T>>) -> GamedataVerificationStatus
   where
-    T: GamedataGenericVerificationResult,
+    T: GamedataCheckResult,
   {
-    T::is_optional_ok_and_valid(result)
+    match result {
+      Some(Ok(result)) => result.status(),
+      Some(Err(_)) => GamedataVerificationStatus::Error,
+      None => GamedataVerificationStatus::Skipped,
+    }
   }
 
   fn get_optional_result_failure_message<T>(
@@ -82,8 +94,108 @@ impl GamedataVerificationResult {
     comment: &str,
   ) -> Option<String>
   where
-    T: GamedataGenericVerificationResult,
+    T: GamedataCheckResult,
   {
-    T::get_optional_result_failure_message(result, comment)
+    match result {
+      Some(Ok(result)) => match result.status() {
+        GamedataVerificationStatus::Passed | GamedataVerificationStatus::Skipped => None,
+        GamedataVerificationStatus::Failed
+        | GamedataVerificationStatus::Error
+        | GamedataVerificationStatus::Incomplete => Some(result.failure_message()),
+      },
+      Some(Err(error)) => Some(format!("Check failed ({comment}): {error}")),
+      None => None,
+    }
+  }
+
+  fn aggregate_status(
+    statuses: impl IntoIterator<Item = GamedataVerificationStatus>,
+  ) -> GamedataVerificationStatus {
+    let mut aggregate: GamedataVerificationStatus = GamedataVerificationStatus::Skipped;
+
+    for status in statuses {
+      aggregate = match (aggregate, status) {
+        (GamedataVerificationStatus::Error, _) | (_, GamedataVerificationStatus::Error) => {
+          GamedataVerificationStatus::Error
+        }
+        (GamedataVerificationStatus::Incomplete, _)
+        | (_, GamedataVerificationStatus::Incomplete) => GamedataVerificationStatus::Incomplete,
+        (GamedataVerificationStatus::Failed, _) | (_, GamedataVerificationStatus::Failed) => {
+          GamedataVerificationStatus::Failed
+        }
+        (GamedataVerificationStatus::Passed, _) | (_, GamedataVerificationStatus::Passed) => {
+          GamedataVerificationStatus::Passed
+        }
+        _ => GamedataVerificationStatus::Skipped,
+      };
+    }
+
+    aggregate
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::GamedataVerificationResult;
+  use crate::GamedataVerificationStatus;
+  use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
+  use xray_error::XRayError;
+
+  #[test]
+  fn aggregates_check_statuses_by_severity() {
+    use GamedataVerificationStatus::{Error, Failed, Incomplete, Passed, Skipped};
+
+    assert_eq!(GamedataVerificationResult::aggregate_status([]), Skipped);
+    assert_eq!(
+      GamedataVerificationResult::aggregate_status([Skipped, Passed]),
+      Passed
+    );
+    assert_eq!(
+      GamedataVerificationResult::aggregate_status([Passed, Incomplete]),
+      Incomplete
+    );
+    assert_eq!(
+      GamedataVerificationResult::aggregate_status([Failed, Incomplete]),
+      Incomplete
+    );
+    assert_eq!(
+      GamedataVerificationResult::aggregate_status([Incomplete, Error]),
+      Error
+    );
+  }
+
+  #[test]
+  fn empty_verification_result_is_skipped_and_not_valid() {
+    let result = GamedataVerificationResult::default();
+
+    assert_eq!(result.status(), GamedataVerificationStatus::Skipped);
+    assert!(!result.is_valid());
+  }
+
+  #[test]
+  fn maps_check_results_and_checker_errors_to_statuses() {
+    let mut result = GamedataVerificationResult {
+      animations_result: Some(Ok(GamedataAnimationsVerificationResult::default())),
+      ..Default::default()
+    };
+
+    assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+
+    result.animations_result = Some(Ok(GamedataAnimationsVerificationResult {
+      checked_huds_count: 1,
+      invalid_huds_count: 1,
+      ..Default::default()
+    }));
+
+    assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+    assert_eq!(
+      result.get_failure_messages(),
+      vec![String::from("1/1 HUD animations are invalid")]
+    );
+
+    result.animations_result = Some(Err(XRayError::new_unexpected_error("boom")));
+
+    assert_eq!(result.status(), GamedataVerificationStatus::Error);
+    assert!(result.get_failure_messages()[0].contains("Check failed (animations):"));
   }
 }

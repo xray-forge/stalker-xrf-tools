@@ -1,14 +1,15 @@
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 
 #[derive(Default)]
 pub struct GamedataSoundsVerificationResult {}
 
-impl GamedataGenericVerificationResult for GamedataSoundsVerificationResult {
-  fn is_valid(&self) -> bool {
-    true
+impl GamedataCheckResult for GamedataSoundsVerificationResult {
+  fn status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::Passed
   }
 
-  fn get_failure_message(&self) -> String {
+  fn failure_message(&self) -> String {
     String::from("todo;")
   }
 }

@@ -1,4 +1,5 @@
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 
 #[derive(Default)]
 pub struct GamedataParticlesVerificationResult {
@@ -7,12 +8,12 @@ pub struct GamedataParticlesVerificationResult {
   pub invalid_particle_files_count: u32,
 }
 
-impl GamedataGenericVerificationResult for GamedataParticlesVerificationResult {
-  fn is_valid(&self) -> bool {
-    self.invalid_particle_files_count == 0
+impl GamedataCheckResult for GamedataParticlesVerificationResult {
+  fn status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::from_is_valid(self.invalid_particle_files_count == 0)
   }
 
-  fn get_failure_message(&self) -> String {
+  fn failure_message(&self) -> String {
     format!(
       "{}/{} particle library files are invalid",
       self.invalid_particle_files_count, self.checked_particle_files_count
@@ -23,7 +24,7 @@ impl GamedataGenericVerificationResult for GamedataParticlesVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataParticlesVerificationResult;
-  use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+  use crate::GamedataCheckResult;
 
   #[test]
   fn describes_particle_library_failures() {
@@ -34,7 +35,7 @@ mod tests {
     };
 
     assert_eq!(
-      result.get_failure_message(),
+      result.failure_message(),
       "1/1 particle library files are invalid"
     );
   }

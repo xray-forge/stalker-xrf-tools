@@ -1,4 +1,5 @@
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 use xray_ltx::{LtxProjectFormatResult, LtxProjectVerifyResult};
 
 #[derive(Default)]
@@ -8,12 +9,14 @@ pub struct GamedataLtxVerificationResult {
   pub verification_result: LtxProjectVerifyResult,
 }
 
-impl GamedataGenericVerificationResult for GamedataLtxVerificationResult {
-  fn is_valid(&self) -> bool {
-    self.format_result.invalid_files == 0 && self.verification_result.invalid_sections == 0
+impl GamedataCheckResult for GamedataLtxVerificationResult {
+  fn status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::from_is_valid(
+      self.format_result.invalid_files == 0 && self.verification_result.invalid_sections == 0,
+    )
   }
 
-  fn get_failure_message(&self) -> String {
+  fn failure_message(&self) -> String {
     let mut message: String = String::new();
 
     if self.format_result.invalid_files > 0 {

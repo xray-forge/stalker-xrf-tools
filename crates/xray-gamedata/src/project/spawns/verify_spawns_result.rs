@@ -1,4 +1,5 @@
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 
 #[derive(Default)]
 pub struct GamedataSpawnsVerificationResult {
@@ -7,12 +8,12 @@ pub struct GamedataSpawnsVerificationResult {
   pub invalid_spawns: u32,
 }
 
-impl GamedataGenericVerificationResult for GamedataSpawnsVerificationResult {
-  fn is_valid(&self) -> bool {
-    self.invalid_spawns == 0
+impl GamedataCheckResult for GamedataSpawnsVerificationResult {
+  fn status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::from_is_valid(self.invalid_spawns == 0)
   }
 
-  fn get_failure_message(&self) -> String {
+  fn failure_message(&self) -> String {
     format!(
       "{}/{} spawns are invalid",
       self.invalid_spawns, self.total_spawns

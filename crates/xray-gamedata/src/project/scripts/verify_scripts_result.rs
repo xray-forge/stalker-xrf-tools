@@ -1,4 +1,5 @@
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 
 #[derive(Default)]
 pub struct GamedataScriptsVerificationResult {
@@ -7,12 +8,12 @@ pub struct GamedataScriptsVerificationResult {
   pub checked_scripts_count: u32,
 }
 
-impl GamedataGenericVerificationResult for GamedataScriptsVerificationResult {
-  fn is_valid(&self) -> bool {
-    self.invalid_scripts_count == 0
+impl GamedataCheckResult for GamedataScriptsVerificationResult {
+  fn status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::from_is_valid(self.invalid_scripts_count == 0)
   }
 
-  fn get_failure_message(&self) -> String {
+  fn failure_message(&self) -> String {
     format!(
       "{}/{} scripts are invalid",
       self.invalid_scripts_count, self.checked_scripts_count

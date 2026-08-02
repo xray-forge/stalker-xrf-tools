@@ -1,4 +1,5 @@
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 
 #[derive(Default)]
 pub struct GamedataAnimationsVerificationResult {
@@ -7,12 +8,12 @@ pub struct GamedataAnimationsVerificationResult {
   pub checked_huds_count: u32,
 }
 
-impl GamedataGenericVerificationResult for GamedataAnimationsVerificationResult {
-  fn is_valid(&self) -> bool {
-    self.invalid_huds_count == 0
+impl GamedataCheckResult for GamedataAnimationsVerificationResult {
+  fn status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::from_is_valid(self.invalid_huds_count == 0)
   }
 
-  fn get_failure_message(&self) -> String {
+  fn failure_message(&self) -> String {
     format!(
       "{}/{} HUD animations are invalid",
       self.invalid_huds_count, self.checked_huds_count

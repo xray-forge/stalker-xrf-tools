@@ -1,4 +1,5 @@
-use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+use crate::GamedataCheckResult;
+use crate::GamedataVerificationStatus;
 
 #[derive(Default)]
 pub struct GamedataTexturesVerificationResult {
@@ -7,12 +8,12 @@ pub struct GamedataTexturesVerificationResult {
   pub checked_textures_count: u32,
 }
 
-impl GamedataGenericVerificationResult for GamedataTexturesVerificationResult {
-  fn is_valid(&self) -> bool {
-    self.invalid_textures_count == 0
+impl GamedataCheckResult for GamedataTexturesVerificationResult {
+  fn status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::from_is_valid(self.invalid_textures_count == 0)
   }
 
-  fn get_failure_message(&self) -> String {
+  fn failure_message(&self) -> String {
     format!(
       "{}/{} textures are invalid",
       self.invalid_textures_count, self.checked_textures_count
