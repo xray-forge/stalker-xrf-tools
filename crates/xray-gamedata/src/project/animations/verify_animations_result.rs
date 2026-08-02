@@ -1,24 +1,19 @@
+use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
 
-#[derive(Default)]
 pub struct GamedataAnimationsVerificationResult {
   pub duration: u128,
-  pub findings: Vec<GamedataVerificationFinding>,
-  pub invalid_huds_count: u32,
-  pub checked_huds_count: u32,
+  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) player_hud_animations: GamedataPlayerHudAnimationsVerificationResult,
 }
 
 impl GamedataCheckResult for GamedataAnimationsVerificationResult {
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::from_is_valid(self.invalid_huds_count == 0)
+    self.player_hud_animations.status()
   }
 
   fn failure_message(&self) -> String {
-    format!(
-      "{}/{} HUD animations valid",
-      self.checked_huds_count - self.invalid_huds_count,
-      self.checked_huds_count
-    )
+    self.player_hud_animations.failure_message()
   }
 
   fn findings(&self) -> &[GamedataVerificationFinding] {
@@ -29,6 +24,7 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataAnimationsVerificationResult;
+  use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
   use crate::{
     GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationStatus,
     GamedataVerificationType,
@@ -36,7 +32,8 @@ mod tests {
 
   #[test]
   fn exposes_animation_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
+      "animations.player-hud",
       "configs/system.ltx",
       "Player HUD section [actor_hud] has invalid animations",
     );
@@ -45,10 +42,13 @@ mod tests {
     report.add_check(
       GamedataVerificationType::Animations,
       Ok(GamedataAnimationsVerificationResult {
-        checked_huds_count: 1,
+        duration: 0,
         findings: vec![finding.clone()],
-        invalid_huds_count: 1,
-        ..Default::default()
+        player_hud_animations: GamedataPlayerHudAnimationsVerificationResult {
+          checked_huds_count: 1,
+          findings: vec![finding.clone()],
+          invalid_huds_count: 1,
+        },
       }),
     );
 
