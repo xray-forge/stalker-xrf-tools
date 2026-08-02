@@ -5138,7 +5138,6 @@ dependencies = [
  "lazy_static",
  "symphonia-codec-vorbis",
  "symphonia-core",
- "symphonia-format-ogg",
  "symphonia-metadata",
 ]
 
@@ -5176,18 +5175,6 @@ dependencies = [
  "log",
  "num-complex",
  "smallvec",
-]
-
-[[package]]
-name = "symphonia-format-ogg"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b05a67e02b1e4fca1a261ba4fe06910a9357489ad8c36aafdd2960e9c6559433"
-dependencies = [
- "log",
- "symphonia-common",
- "symphonia-core",
- "symphonia-metadata",
 ]
 
 [[package]]

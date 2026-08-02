@@ -1,15 +1,13 @@
-use ogg::reading::PacketReader;
+use ogg::{Packet as OggPacket, reading::PacketReader};
 use std::fs::File;
 use std::io::{Read, Seek};
 use std::path::Path;
 use symphonia::core::{
-  codecs::audio::AudioDecoderOptions,
-  formats::probe::Hint,
-  formats::{FormatOptions, TrackType},
-  io::MediaSourceStream,
-  meta::MetadataOptions,
+  codecs::audio::{AudioCodecParameters, AudioDecoderOptions, well_known::CODEC_ID_VORBIS},
+  packet::Packet,
+  units::{Duration, Timestamp},
 };
-use symphonia::default::{get_codecs, get_probe};
+use symphonia::default::get_codecs;
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -64,10 +62,13 @@ impl SoundFile {
 }
 
 fn read_xray_sound(path: &Path) -> Result<SoundFile, String> {
-  let (channels, sample_rate, metadata): (u16, u32, SoundMetadata) =
-    read_xray_sound_metadata(path)?;
+  let file: File = File::open(path).map_err(|error| format!("Could not open sound: {error}"))?;
+  let mut reader: PacketReader<File> = PacketReader::new(file);
+  let headers: VorbisHeaders = read_vorbis_headers(&mut reader)?;
+  let (channels, sample_rate): (u16, u32) = parse_identification_packet(&headers.identification)?;
+  let metadata: SoundMetadata = read_sound_metadata(&headers.comment)?;
 
-  decode_vorbis_stream(path)?;
+  decode_vorbis_stream(&mut reader, &headers)?;
 
   Ok(SoundFile {
     channels,
@@ -76,20 +77,56 @@ fn read_xray_sound(path: &Path) -> Result<SoundFile, String> {
   })
 }
 
-/// Read the binary X-Ray sound parameters stored in the first Vorbis comment.
-fn read_xray_sound_metadata(path: &Path) -> Result<(u16, u32, SoundMetadata), String> {
-  let file: File = File::open(path).map_err(|error| format!("Could not open sound: {error}"))?;
-  let mut reader: PacketReader<File> = PacketReader::new(file);
-  let identification_packet: Vec<u8> = read_expected_packet(&mut reader, "identification")?;
-  let comment_packet: Vec<u8> = read_expected_packet(&mut reader, "comment")?;
-  let (channels, sample_rate): (u16, u32) = parse_identification_packet(&identification_packet)?;
+struct VorbisHeaders {
+  comment: Vec<u8>,
+  identification: Vec<u8>,
+  setup: Vec<u8>,
+  stream_serial: u32,
+}
 
-  if !comment_packet.starts_with(b"\x03vorbis") {
+fn read_vorbis_headers<R>(reader: &mut PacketReader<R>) -> Result<VorbisHeaders, String>
+where
+  R: Read + Seek,
+{
+  let identification: OggPacket = read_expected_packet(reader, "identification")?;
+  let stream_serial: u32 = identification.stream_serial();
+  let comment: OggPacket = read_expected_packet(reader, "comment")?;
+  let setup: OggPacket = read_expected_packet(reader, "setup")?;
+
+  if !identification.data.starts_with(b"\x01vorbis") {
+    return Err(String::from(
+      "Ogg stream does not contain a Vorbis identification packet",
+    ));
+  }
+
+  if comment.stream_serial() != stream_serial || setup.stream_serial() != stream_serial {
+    return Err(String::from(
+      "Vorbis header packets must belong to the same Ogg stream",
+    ));
+  }
+
+  if !comment.data.starts_with(b"\x03vorbis") {
     return Err(String::from(
       "Ogg stream does not contain a Vorbis comment packet",
     ));
   }
 
+  if !setup.data.starts_with(b"\x05vorbis") {
+    return Err(String::from(
+      "Ogg stream does not contain a Vorbis setup packet",
+    ));
+  }
+
+  Ok(VorbisHeaders {
+    comment: comment.data,
+    identification: identification.data,
+    setup: setup.data,
+    stream_serial,
+  })
+}
+
+/// Read the binary X-Ray sound parameters stored in the first Vorbis comment.
+fn read_sound_metadata(comment_packet: &[u8]) -> Result<SoundMetadata, String> {
   let metadata: SoundMetadata = first_vorbis_comment(&comment_packet[7..])?
     .map(|comment| parse_xray_comment(&comment))
     .transpose()?
@@ -100,7 +137,7 @@ fn read_xray_sound_metadata(path: &Path) -> Result<(u16, u32, SoundMetadata), St
     })
     .unwrap_or(SoundMetadata::EngineDefaults);
 
-  Ok((channels, sample_rate, metadata))
+  Ok(metadata)
 }
 
 fn parse_identification_packet(packet: &[u8]) -> Result<(u16, u32), String> {
@@ -131,13 +168,12 @@ fn parse_identification_packet(packet: &[u8]) -> Result<(u16, u32), String> {
 fn read_expected_packet<R>(
   reader: &mut PacketReader<R>,
   packet_name: &str,
-) -> Result<Vec<u8>, String>
+) -> Result<OggPacket, String>
 where
   R: Read + Seek,
 {
   reader
     .read_packet_expected()
-    .map(|packet| packet.data)
     .map_err(|error| format!("Could not read Vorbis {packet_name} packet: {error}"))
 }
 
@@ -247,40 +283,37 @@ fn read_bytes<'a>(
   Ok(value)
 }
 
-fn decode_vorbis_stream(path: &Path) -> Result<(), String> {
-  let file: File = File::open(path).map_err(|error| format!("Could not open sound: {error}"))?;
-  let stream = MediaSourceStream::new(Box::new(file), Default::default());
-  let mut format = get_probe()
-    .probe(
-      &Hint::new(),
-      stream,
-      FormatOptions::default(),
-      MetadataOptions::default(),
-    )
-    .map_err(|error| format!("Could not probe Ogg/Vorbis stream: {error}"))?;
-  let track = format
-    .default_track(TrackType::Audio)
-    .ok_or_else(|| String::from("Ogg stream does not contain a default audio track"))?;
-  let track_id: u32 = track.id;
-  let codec_params = track
-    .codec_params
-    .as_ref()
-    .and_then(|parameters| parameters.audio())
-    .ok_or_else(|| String::from("Ogg stream does not contain an audio codec configuration"))?;
+fn decode_vorbis_stream<R>(
+  reader: &mut PacketReader<R>,
+  headers: &VorbisHeaders,
+) -> Result<(), String>
+where
+  R: Read + Seek,
+{
+  let mut extra_data: Vec<u8> =
+    Vec::with_capacity(headers.identification.len() + headers.setup.len());
+  extra_data.extend_from_slice(&headers.identification);
+  extra_data.extend_from_slice(&headers.setup);
+  let mut codec_parameters: AudioCodecParameters = AudioCodecParameters::new();
+  codec_parameters
+    .for_codec(CODEC_ID_VORBIS)
+    .with_extra_data(extra_data.into_boxed_slice());
   let mut decoder = get_codecs()
-    .make_audio_decoder(codec_params, &AudioDecoderOptions::default())
+    .make_audio_decoder(&codec_parameters, &AudioDecoderOptions::default())
     .map_err(|error| format!("Could not initialize Vorbis decoder: {error}"))?;
 
   loop {
-    let packet = match format.next_packet() {
+    let packet: OggPacket = match reader.read_packet() {
       Ok(Some(packet)) => packet,
       Ok(None) => break,
       Err(error) => return Err(format!("Could not read Ogg/Vorbis packet: {error}")),
     };
 
-    if packet.track_id != track_id {
+    if packet.stream_serial() != headers.stream_serial {
       continue;
     }
+
+    let packet: Packet = Packet::new(0, Timestamp::ZERO, Duration::ZERO, packet.data);
 
     decoder
       .decode(&packet)
