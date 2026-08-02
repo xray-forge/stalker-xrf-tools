@@ -6,6 +6,7 @@ use crate::project::levels::verify_levels_result::GamedataLevelVerificationResul
 use crate::project::ltx::verify_ltx_result::GamedataLtxVerificationResult;
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
+use crate::project::particles::verify_particles_usage_result::GamedataParticlesUsageVerificationResult;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
 use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
@@ -21,6 +22,7 @@ pub struct GamedataVerificationResult {
   pub levels_result: Option<XRayResult<GamedataLevelVerificationResult>>,
   pub meshes_result: Option<XRayResult<GamedataMeshesVerificationResult>>,
   pub particles_result: Option<XRayResult<GamedataParticlesVerificationResult>>,
+  pub particles_usage_result: Option<XRayResult<GamedataParticlesUsageVerificationResult>>,
   pub scripts_result: Option<XRayResult<GamedataScriptsVerificationResult>>,
   pub shaders_result: Option<XRayResult<GamedataShadersVerificationResult>>,
   pub sounds_result: Option<XRayResult<GamedataSoundsVerificationResult>>,
@@ -38,6 +40,7 @@ impl GamedataVerificationResult {
       && Self::is_optional_ok_and_valid(&self.meshes_result)
       && Self::is_optional_ok_and_valid(&self.levels_result)
       && Self::is_optional_ok_and_valid(&self.particles_result)
+      && Self::is_optional_ok_and_valid(&self.particles_usage_result)
       && Self::is_optional_ok_and_valid(&self.scripts_result)
       && Self::is_optional_ok_and_valid(&self.shaders_result)
       && Self::is_optional_ok_and_valid(&self.sounds_result)
@@ -53,6 +56,7 @@ impl GamedataVerificationResult {
       Self::get_optional_result_failure_message(&self.levels_result, "levels"),
       Self::get_optional_result_failure_message(&self.meshes_result, "meshes"),
       Self::get_optional_result_failure_message(&self.particles_result, "particles"),
+      Self::get_optional_result_failure_message(&self.particles_usage_result, "particles-usage"),
       Self::get_optional_result_failure_message(&self.scripts_result, "scripts"),
       Self::get_optional_result_failure_message(&self.shaders_result, "shaders"),
       Self::get_optional_result_failure_message(&self.sounds_result, "sounds"),

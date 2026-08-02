@@ -49,6 +49,8 @@ impl GamedataProject {
         .contains_and_then(&options.checks, || self.verify_meshes(options)),
       particles_result: GamedataVerificationType::Particles
         .contains_and_then(&options.checks, || self.verify_particles(options)),
+      particles_usage_result: GamedataVerificationType::ParticlesUsage
+        .contains_and_then(&options.checks, || self.verify_particles_usage(options)),
       scripts_result: GamedataVerificationType::Scripts
         .contains_and_then(&options.checks, || self.verify_scripts(options)),
       shaders_result: GamedataVerificationType::Shaders

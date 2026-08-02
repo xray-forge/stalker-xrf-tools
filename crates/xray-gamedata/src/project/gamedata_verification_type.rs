@@ -14,6 +14,8 @@ pub enum GamedataVerificationType {
   Meshes,
   #[display("particles")]
   Particles,
+  #[display("particles-usage")]
+  ParticlesUsage,
   #[display("scripts")]
   Scripts,
   #[display("shaders")]
@@ -38,6 +40,7 @@ impl GamedataVerificationType {
       GamedataVerificationType::Ltx,
       GamedataVerificationType::Meshes,
       GamedataVerificationType::Particles,
+      GamedataVerificationType::ParticlesUsage,
       GamedataVerificationType::Scripts,
       GamedataVerificationType::Shaders,
       GamedataVerificationType::Sounds,
@@ -70,6 +73,7 @@ impl FromStr for GamedataVerificationType {
       "ltx" => Ok(Self::Ltx),
       "meshes" => Ok(Self::Meshes),
       "particles" => Ok(Self::Particles),
+      "particles-usage" => Ok(Self::ParticlesUsage),
       "scripts" => Ok(Self::Scripts),
       "shaders" => Ok(Self::Shaders),
       "sounds" => Ok(Self::Sounds),
