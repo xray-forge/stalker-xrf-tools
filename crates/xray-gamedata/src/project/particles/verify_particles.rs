@@ -130,15 +130,14 @@ impl GamedataProject {
             }
           }
         } else {
-          // Just log message.
           if options.is_logging_enabled() {
             eprintln!(
               "Not found texture for particle: {} - {}",
               particle.name, texture_relative_path
             );
-
-            is_valid = false;
           }
+
+          is_valid = false;
         }
       }
     }
