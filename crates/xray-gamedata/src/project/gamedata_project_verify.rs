@@ -28,6 +28,8 @@ impl GamedataProject {
           .collect::<Vec<_>>()
           .join("\n  -")
       );
+
+      println!();
     }
 
     let started_at: Instant = Instant::now();
