@@ -3,9 +3,8 @@ use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct GamedataProjectReadOptions {
-  pub roots: Vec<PathBuf>,
+  pub root: PathBuf,
   pub ignored: Vec<String>,
-  pub configs: PathBuf,
   pub is_verbose: bool,
   pub is_silent: bool,
   pub is_strict: bool,

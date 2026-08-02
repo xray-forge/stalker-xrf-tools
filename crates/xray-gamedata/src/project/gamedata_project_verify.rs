@@ -4,7 +4,6 @@ use crate::{
 };
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
-use xray_utils::path_vec_to_string;
 
 impl GamedataProject {
   pub fn verify(
@@ -18,11 +17,7 @@ impl GamedataProject {
     }
 
     if options.is_logging_enabled() {
-      println!(
-        "Verifying gamedata project: [{}] | {}",
-        path_vec_to_string(&self.roots),
-        self.configs.display()
-      );
+      println!("Verifying gamedata project: {}", self.root.display());
 
       println!(
         "Verifying modules: \n  -{}",

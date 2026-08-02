@@ -5,99 +5,46 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
-use xray_utils::path_vec_to_string;
 
 impl GamedataProject {
   pub fn read_project_assets(
     options: &GamedataProjectReadOptions,
-    roots: &mut Vec<PathBuf>,
-    ignored: &[&str],
   ) -> XRayResult<HashMap<String, AssetDescriptor>> {
+    let root: &Path = &options.root;
+
     if options.is_logging_enabled() {
-      println!(
-        "Reading project assets map in roots: {}",
-        path_vec_to_string(roots)
-      );
+      println!("Reading project assets map in root: {}", root.display());
     }
 
     let mut assets: HashMap<String, AssetDescriptor> = HashMap::new();
 
-    for (index, root) in roots.iter().enumerate() {
-      for entry in WalkDir::new(root) {
-        let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
-        let entry_path: &Path = entry.path();
+    for entry in WalkDir::new(root) {
+      let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
+      let entry_path: &Path = entry.path();
 
-        // Dirs are skipped.
-        if entry_path.is_dir() {
+      // Dirs are skipped.
+      if entry_path.is_dir() {
+        continue;
+      }
+
+      if let Some(relative) = entry_path
+        .strip_prefix(root)
+        .map_err(|_| {
+          XRayError::new_unexpected_error("Failed to strip prefix from gamedata root path")
+        })?
+        .to_str()
+      {
+        if options.ignored.iter().any(|it| relative.starts_with(it)) {
           continue;
         }
 
-        if let Some(relative) = entry_path
-          .strip_prefix(root)
-          .map_err(|_| {
-            XRayError::new_unexpected_error("Failed to strip prefix from gamedata root path")
-          })?
-          .to_str()
-        {
-          if ignored.iter().any(|it| relative.starts_with(it)) {
-            continue;
-          }
-
-          // todo: Descriptor with lowercase?
-          assets.insert(
-            relative.to_lowercase(),
-            AssetDescriptor::new_with_extension(index, relative),
-          );
-        } else {
-          log::warn!("Could not strip prefix: {}", entry_path.display());
-        }
-      }
-    }
-
-    if options
-      .roots
-      .iter()
-      .all(|it| !options.configs.starts_with(it))
-    {
-      if options.is_logging_enabled() {
-        println!(
-          "Reading project configs map in root: {}",
-          options.configs.display()
+        // todo: Descriptor with lowercase?
+        assets.insert(
+          relative.to_lowercase(),
+          AssetDescriptor::new_with_extension(relative),
         );
-      }
-
-      let config_root_index: usize = roots.len();
-      let configs_parent: &Path = match options.configs.parent() {
-        Some(it) => it,
-        None => return Err(XRayError::new_unexpected_error("No configs parent found")),
-      };
-
-      roots.push(configs_parent.into());
-
-      for entry in WalkDir::new(&options.configs) {
-        let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
-        let entry_path: &Path = entry.path();
-
-        // Dirs are skipped.
-        if entry_path.is_dir() || entry_path.extension().is_none_or(|it| it != "ltx") {
-          continue;
-        }
-
-        if let Some(relative) = entry_path
-          .strip_prefix(configs_parent)
-          .map_err(|_| {
-            XRayError::new_unexpected_error("Failed to strip prefix from gamedata configs path")
-          })?
-          .to_str()
-        {
-          // todo: Descriptor with lowercase?
-          assets.insert(
-            relative.to_lowercase(),
-            AssetDescriptor::new_with_extension(config_root_index, relative),
-          );
-        } else {
-          log::warn!("Could not strip prefix: {}", entry_path.display());
-        }
+      } else {
+        log::warn!("Could not strip prefix: {}", entry_path.display());
       }
     }
 
@@ -165,16 +112,7 @@ impl GamedataProject {
     self
       .assets
       .get(asset_path.to_str().unwrap())
-      .map(|descriptor| {
-        (
-          self
-            .roots
-            .get(descriptor.root_index)
-            .expect("Correct root setup")
-            .join(&asset_path),
-          descriptor,
-        )
-      })
+      .map(|descriptor| (self.root.join(&asset_path), descriptor))
       .or(None)
   }
 
@@ -195,14 +133,7 @@ impl GamedataProject {
       .iter()
       .filter_map(|(path, descriptor)| {
         if path.starts_with(split.first().unwrap()) && path.ends_with(split.last().unwrap()) {
-          Some((
-            self
-              .roots
-              .get(descriptor.root_index)
-              .expect("Correct root setup")
-              .join(path),
-            descriptor,
-          ))
+          Some((self.root.join(path), descriptor))
         } else {
           None
         }

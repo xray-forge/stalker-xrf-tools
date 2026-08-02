@@ -7,7 +7,6 @@ use xray_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
   GamedataVerificationResult, GamedataVerificationType,
 };
-use xray_utils::path_vec_to_string;
 
 #[derive(Default)]
 pub struct VerifyGamedataCommand;
@@ -23,31 +22,21 @@ impl GenericCommand for VerifyGamedataCommand {
       .about("Command to verify gamedata")
       .arg(
         Arg::new("root")
-          .help("Paths to gamedata root(s)")
-          .short('r')
-          .long("root")
+          .help("Path to assembled gamedata root")
           .required(true)
-          .value_delimiter(',')
-          .num_args(1..=10)
+          .value_name("ROOT")
+          .num_args(1)
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
         Arg::new("ignore")
-          .help("Ignored assets in gamedata roots")
+          .help("Ignored assets in the gamedata root")
           .short('i')
           .long("ignore")
           .required(false)
           .value_delimiter(',')
           .num_args(1..=10)
           .value_parser(value_parser!(String)),
-      )
-      .arg(
-        Arg::new("configs")
-          .help("Path gamedata folder")
-          .short('c')
-          .long("configs")
-          .required(false)
-          .value_parser(value_parser!(PathBuf)),
       )
       .arg(
         Arg::new("checks")
@@ -84,11 +73,10 @@ impl GenericCommand for VerifyGamedataCommand {
 
   /// Unpack xray engine database archive.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
-    let roots: Vec<PathBuf> = matches
-      .get_many::<PathBuf>("root")
-      .expect("Expected valid comma-separated roots to be provided")
-      .cloned()
-      .collect();
+    let root: PathBuf = matches
+      .get_one::<PathBuf>("root")
+      .expect("Expected a valid gamedata root to be provided")
+      .clone();
 
     let ignored: Vec<String> = matches
       .get_many::<String>("ignore")
@@ -106,16 +94,6 @@ impl GenericCommand for VerifyGamedataCommand {
         ]
       });
 
-    let configs: PathBuf = matches
-      .get_one::<PathBuf>("configs")
-      .cloned()
-      .unwrap_or_else(|| {
-        roots
-          .first()
-          .expect("Expected valid first root item to be provided")
-          .join("configs")
-      });
-
     let checks: Vec<GamedataVerificationType> = matches
       .get_many::<GamedataVerificationType>("checks")
       .map(|it| it.cloned().collect::<Vec<_>>())
@@ -126,9 +104,8 @@ impl GenericCommand for VerifyGamedataCommand {
     let is_strict: bool = matches.get_flag("strict");
 
     let open_options: GamedataProjectReadOptions = GamedataProjectReadOptions {
-      roots,
+      root,
       ignored,
-      configs,
       is_verbose,
       is_silent,
       is_strict,
@@ -144,11 +121,10 @@ impl GenericCommand for VerifyGamedataCommand {
     if open_options.is_logging_enabled() {
       println!("{}", "Opening gamedata project".green());
       println!(
-        "Roots: {}, ignored: [{}]",
-        path_vec_to_string(&open_options.roots),
+        "Root: {}, ignored: [{}]",
+        open_options.root.display(),
         open_options.ignored.join(", "),
       );
-      println!("Configs: {}", open_options.configs.display());
     }
 
     let mut project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
