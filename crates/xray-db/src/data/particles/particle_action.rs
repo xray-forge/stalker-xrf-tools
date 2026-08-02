@@ -165,7 +165,15 @@ impl ChunkReadWrite for ParticleAction {
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_u32::<T>(ParticleActionType::get_action_type(self) as u32)?;
+    // TargetRotate/TargetVelocity share variants with their D-derivatives, so the
+    // dispatch type must come from the stored action type to survive round-trip.
+    let action_type: ParticleActionType = match self {
+      ParticleAction::TargetRotate(action) => action.action_type,
+      ParticleAction::TargetVelocity(action) => action.action_type,
+      action => ParticleActionType::get_action_type(action),
+    };
+
+    writer.write_u32::<T>(action_type as u32)?;
 
     match self {
       ParticleAction::Avoid(action) => writer.write_xr::<T, _>(action.deref()),
@@ -362,5 +370,74 @@ impl LtxImportExport for ParticleAction {
       ParticleAction::Turbulence(action) => action.export(section_name, ltx),
       ParticleAction::Scatter(action) => action.export(section_name, ltx),
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::data::particles::actions::particle_action_target_rotate::ParticleActionTargetRotate;
+  use crate::data::particles::actions::particle_action_target_velocity::ParticleActionTargetVelocity;
+  use crate::data::particles::particle_action::ParticleAction;
+  use crate::data::particles::particle_action_type::ParticleActionType;
+  use byteorder::ReadBytesExt;
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
+  #[test]
+  fn test_read_write_derivative_action_types() -> XRayResult {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_relative_test_sample_file_path(file!(), "read_write_derivative.chunk");
+
+    // Derivative types (TargetRotateD / TargetVelocityD) share enum variants with their
+    // base types, so the dispatch u32 must round-trip from the stored action type.
+    let rotate: ParticleAction =
+      ParticleAction::TargetRotate(Box::new(ParticleActionTargetRotate {
+        action_flags: 1,
+        action_type: ParticleActionType::TargetRotateD,
+        rot: Vector3d::new_mock(),
+        scale: 1.5,
+      }));
+    let velocity: ParticleAction =
+      ParticleAction::TargetVelocity(Box::new(ParticleActionTargetVelocity {
+        action_flags: 1,
+        action_type: ParticleActionType::TargetVelocityD,
+        velocity: Vector3d::new_mock(),
+        scale: 0.5,
+      }));
+
+    rotate.write::<XRayByteOrder>(&mut writer)?;
+    velocity.write::<XRayByteOrder>(&mut writer)?;
+
+    writer.flush_chunk_into::<XRayByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    assert_eq!(
+      reader.read_u32::<XRayByteOrder>()?,
+      ParticleActionType::TargetRotateD as u32,
+      "Expected derivative dispatch type to be written for target rotate"
+    );
+
+    let mut reader: ChunkReader =
+      ChunkReader::from_slice(open_test_resource_as_slice(&filename)?)?.read_child_by_index(0)?;
+
+    assert_eq!(ParticleAction::read::<XRayByteOrder>(&mut reader)?, rotate);
+    assert_eq!(
+      ParticleAction::read::<XRayByteOrder>(&mut reader)?,
+      velocity
+    );
+
+    Ok(())
   }
 }

@@ -166,3 +166,23 @@ where
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use crate::data::particles::particle_action_type::ParticleActionType;
+  use std::str::FromStr;
+
+  #[test]
+  fn test_from_str() {
+    assert_eq!(
+      ParticleActionType::from_str("KillOld").unwrap(),
+      ParticleActionType::KillOld
+    );
+    assert_eq!(
+      ParticleActionType::from_str("TargetRotateD").unwrap(),
+      ParticleActionType::TargetRotateD
+    );
+    assert!(ParticleActionType::from_str("10").is_err());
+    assert!(ParticleActionType::from_str("NotAnAction").is_err());
+  }
+}
