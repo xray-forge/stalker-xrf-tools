@@ -28,18 +28,29 @@ pub struct XRaySoundParameters {
   pub max_ai_distance: f32,
 }
 
+/// Metadata that controls how X-Ray configures a sound source.
+#[derive(Clone, Debug, PartialEq)]
+pub enum SoundMetadata {
+  /// The engine uses its built-in sound-source defaults when no recognized X-Ray comment exists.
+  EngineDefaults,
+  XRay {
+    version: XRaySoundCommentVersion,
+    parameters: XRaySoundParameters,
+  },
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct SoundFile {
   pub channels: u16,
-  pub comment_version: XRaySoundCommentVersion,
-  pub parameters: XRaySoundParameters,
+  pub metadata: SoundMetadata,
   pub sample_rate: u32,
 }
 
 impl SoundFile {
   /// Read and fully decode an X-Ray Ogg/Vorbis sound file.
   ///
-  /// Successful reads guarantee an Ogg/Vorbis stream with a valid X-Ray sound comment.
+  /// Successful reads guarantee an Ogg/Vorbis stream that X-Ray can load. Sounds without a
+  /// recognized X-Ray comment use the engine's default source parameters.
   pub fn read_from_path<P>(path: P) -> XRayResult<Self>
   where
     P: AsRef<Path>,
@@ -53,27 +64,20 @@ impl SoundFile {
 }
 
 fn read_xray_sound(path: &Path) -> Result<SoundFile, String> {
-  let (channels, sample_rate, comment_version, parameters): (
-    u16,
-    u32,
-    XRaySoundCommentVersion,
-    XRaySoundParameters,
-  ) = read_xray_sound_metadata(path)?;
+  let (channels, sample_rate, metadata): (u16, u32, SoundMetadata) =
+    read_xray_sound_metadata(path)?;
 
   decode_vorbis_stream(path)?;
 
   Ok(SoundFile {
     channels,
-    comment_version,
-    parameters,
+    metadata,
     sample_rate,
   })
 }
 
 /// Read the binary X-Ray sound parameters stored in the first Vorbis comment.
-fn read_xray_sound_metadata(
-  path: &Path,
-) -> Result<(u16, u32, XRaySoundCommentVersion, XRaySoundParameters), String> {
+fn read_xray_sound_metadata(path: &Path) -> Result<(u16, u32, SoundMetadata), String> {
   let file: File = File::open(path).map_err(|error| format!("Could not open sound: {error}"))?;
   let mut reader: PacketReader<File> = PacketReader::new(file);
   let identification_packet: Vec<u8> = read_expected_packet(&mut reader, "identification")?;
@@ -86,11 +90,17 @@ fn read_xray_sound_metadata(
     ));
   }
 
-  let comment: Vec<u8> = first_vorbis_comment(&comment_packet[7..])?;
-  let (comment_version, parameters): (XRaySoundCommentVersion, XRaySoundParameters) =
-    parse_xray_comment(&comment)?;
+  let metadata: SoundMetadata = first_vorbis_comment(&comment_packet[7..])?
+    .map(|comment| parse_xray_comment(&comment))
+    .transpose()?
+    .flatten()
+    .map(|(version, parameters)| SoundMetadata::XRay {
+      version,
+      parameters,
+    })
+    .unwrap_or(SoundMetadata::EngineDefaults);
 
-  Ok((channels, sample_rate, comment_version, parameters))
+  Ok((channels, sample_rate, metadata))
 }
 
 fn parse_identification_packet(packet: &[u8]) -> Result<(u16, u32), String> {
@@ -131,65 +141,51 @@ where
     .map_err(|error| format!("Could not read Vorbis {packet_name} packet: {error}"))
 }
 
-fn first_vorbis_comment(packet: &[u8]) -> Result<Vec<u8>, String> {
+fn first_vorbis_comment(packet: &[u8]) -> Result<Option<Vec<u8>>, String> {
   let mut offset: usize = 0;
   let vendor_length: usize = read_u32(packet, &mut offset, "vendor length")? as usize;
   read_bytes(packet, &mut offset, vendor_length, "vendor string")?;
 
   let comments_count: u32 = read_u32(packet, &mut offset, "comments count")?;
   if comments_count == 0 {
-    return Err(String::from(
-      "Vorbis comment packet does not contain X-Ray sound parameters",
-    ));
+    return Ok(None);
   }
 
   let comment_length: usize = read_u32(packet, &mut offset, "first comment length")? as usize;
-  Ok(read_bytes(packet, &mut offset, comment_length, "first comment")?.to_vec())
+  Ok(Some(
+    read_bytes(packet, &mut offset, comment_length, "first comment")?.to_vec(),
+  ))
 }
 
 fn parse_xray_comment(
   comment: &[u8],
-) -> Result<(XRaySoundCommentVersion, XRaySoundParameters), String> {
+) -> Result<Option<(XRaySoundCommentVersion, XRaySoundParameters)>, String> {
   let mut offset: usize = 0;
   let version: u32 = read_u32(comment, &mut offset, "X-Ray comment version")?;
+  let comment_version: XRaySoundCommentVersion = match version {
+    0x0001 => XRaySoundCommentVersion::V1,
+    0x0002 => XRaySoundCommentVersion::V2,
+    0x0003 => XRaySoundCommentVersion::V3,
+    _ => return Ok(None),
+  };
   let min_distance: f32 = read_f32(comment, &mut offset, "minimum distance")?;
   let max_distance: f32 = read_f32(comment, &mut offset, "maximum distance")?;
 
-  let (comment_version, base_volume, game_type, max_ai_distance): (
-    XRaySoundCommentVersion,
-    f32,
-    u32,
-    f32,
-  ) = match version {
-    0x0001 => {
+  let (base_volume, game_type, max_ai_distance): (f32, u32, f32) = match comment_version {
+    XRaySoundCommentVersion::V1 => {
       let game_type: u32 = read_u32(comment, &mut offset, "game type")?;
-      (XRaySoundCommentVersion::V1, 1.0, game_type, max_distance)
+      (1.0, game_type, max_distance)
     }
-    0x0002 => {
+    XRaySoundCommentVersion::V2 => {
       let base_volume: f32 = read_f32(comment, &mut offset, "base volume")?;
       let game_type: u32 = read_u32(comment, &mut offset, "game type")?;
-      (
-        XRaySoundCommentVersion::V2,
-        base_volume,
-        game_type,
-        max_distance,
-      )
+      (base_volume, game_type, max_distance)
     }
-    0x0003 => {
+    XRaySoundCommentVersion::V3 => {
       let base_volume: f32 = read_f32(comment, &mut offset, "base volume")?;
       let game_type: u32 = read_u32(comment, &mut offset, "game type")?;
       let max_ai_distance: f32 = read_f32(comment, &mut offset, "maximum AI distance")?;
-      (
-        XRaySoundCommentVersion::V3,
-        base_volume,
-        game_type,
-        max_ai_distance,
-      )
-    }
-    _ => {
-      return Err(format!(
-        "Unsupported X-Ray Vorbis comment version: {version}"
-      ));
+      (base_volume, game_type, max_ai_distance)
     }
   };
 
@@ -217,7 +213,7 @@ fn parse_xray_comment(
     ));
   }
 
-  Ok((comment_version, parameters))
+  Ok(Some((comment_version, parameters)))
 }
 
 fn read_u8(bytes: &[u8], offset: &mut usize, field: &str) -> Result<u8, String> {
@@ -296,7 +292,9 @@ fn decode_vorbis_stream(path: &Path) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{XRaySoundCommentVersion, XRaySoundParameters, parse_xray_comment};
+  use super::{
+    XRaySoundCommentVersion, XRaySoundParameters, first_vorbis_comment, parse_xray_comment,
+  };
 
   fn xray_comment_v3(
     min_distance: f32,
@@ -319,7 +317,7 @@ mod tests {
   fn parses_valid_xray_v3_comment() {
     assert_eq!(
       parse_xray_comment(&xray_comment_v3(1.0, 50.0, 0.75, 7, 30.0)).unwrap(),
-      (
+      Some((
         XRaySoundCommentVersion::V3,
         XRaySoundParameters {
           min_distance: 1.0,
@@ -328,7 +326,7 @@ mod tests {
           game_type: 7,
           max_ai_distance: 30.0,
         }
-      )
+      ))
     );
   }
 
@@ -344,13 +342,27 @@ mod tests {
   }
 
   #[test]
-  fn rejects_xray_comment_with_unknown_version() {
+  fn accepts_unknown_xray_comment_version_as_engine_defaults() {
     let mut comment: Vec<u8> = xray_comment_v3(1.0, 50.0, 1.0, 0, 50.0);
     comment[0..4].copy_from_slice(&4u32.to_le_bytes());
 
+    assert_eq!(parse_xray_comment(&comment).unwrap(), None);
+  }
+
+  #[test]
+  fn rejects_truncated_recognized_xray_comment() {
+    let comment: Vec<u8> = 3u32.to_le_bytes().to_vec();
+
     assert_eq!(
       parse_xray_comment(&comment).unwrap_err(),
-      "Unsupported X-Ray Vorbis comment version: 4"
+      "Vorbis packet ends before minimum distance"
     );
+  }
+
+  #[test]
+  fn accepts_empty_vorbis_comments_as_engine_defaults() {
+    let comment_packet: Vec<u8> = [0u32.to_le_bytes(), 0u32.to_le_bytes()].concat();
+
+    assert_eq!(first_vorbis_comment(&comment_packet).unwrap(), None);
   }
 }
