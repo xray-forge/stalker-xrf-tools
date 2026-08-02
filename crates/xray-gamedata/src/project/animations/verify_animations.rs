@@ -3,7 +3,7 @@ use crate::project::animations::verify_animations_result::GamedataAnimationsVeri
 use crate::project::weapons::weapons_utils::{
   get_weapon_animation_name, is_player_hud_section, is_weapon_section,
 };
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -23,7 +23,11 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
 
-    let (checked_huds_count, invalid_huds_count) = self.verify_player_hud_animations(options)?;
+    let (checked_huds_count, invalid_huds_count, findings): (
+      u32,
+      u32,
+      Vec<GamedataVerificationFinding>,
+    ) = self.verify_player_hud_animations_with_findings(options)?;
 
     let duration: u128 = started_at.elapsed().as_millis();
 
@@ -36,6 +40,7 @@ impl GamedataProject {
 
     Ok(GamedataAnimationsVerificationResult {
       duration,
+      findings,
       checked_huds_count,
       invalid_huds_count,
     })
@@ -45,13 +50,25 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<(u32, u32)> {
+    let (checked_huds_count, invalid_huds_count, _): (u32, u32, Vec<GamedataVerificationFinding>) =
+      self.verify_player_hud_animations_with_findings(options)?;
+
+    Ok((checked_huds_count, invalid_huds_count))
+  }
+
+  fn verify_player_hud_animations_with_findings(
+    &self,
+    options: &GamedataProjectVerifyOptions,
+  ) -> XRayResult<(u32, u32, Vec<GamedataVerificationFinding>)> {
     if options.is_verbose_logging_enabled() {
       println!("Verify player hud animations");
     }
 
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
+    let system_ltx_path: PathBuf = self.ltx_project.get_system_ltx_path();
 
     let mut checked_huds_count: u32 = 0;
+    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
     let mut invalid_huds_count: u32 = 0;
 
     for (section_name, section) in &system_ltx.sections {
@@ -73,6 +90,10 @@ impl GamedataProject {
           println!("Player hud config [{section_name}] is invalid");
         }
 
+        findings.push(GamedataVerificationFinding::for_asset(
+          &system_ltx_path,
+          format!("Player HUD section [{section_name}] has invalid animations"),
+        ));
         invalid_huds_count += 1;
       }
     }
@@ -84,7 +105,14 @@ impl GamedataProject {
       );
     }
 
-    Ok((checked_huds_count, invalid_huds_count))
+    findings.sort_by(|left, right| {
+      left
+        .asset_path
+        .cmp(&right.asset_path)
+        .then_with(|| left.message.cmp(&right.message))
+    });
+
+    Ok((checked_huds_count, invalid_huds_count, findings))
   }
 
   pub fn verify_player_hud_animation(

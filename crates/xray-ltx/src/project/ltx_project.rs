@@ -157,7 +157,11 @@ impl LtxProject {
       .is_some_and(|name| name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION))
   }
 
+  pub fn get_system_ltx_path(&self) -> PathBuf {
+    self.root.join("system.ltx")
+  }
+
   pub fn get_system_ltx(&self) -> XRayResult<Ltx> {
-    Ltx::read_from_file_full(self.root.join("system.ltx"))
+    Ltx::read_from_file_full(self.get_system_ltx_path())
   }
 }
