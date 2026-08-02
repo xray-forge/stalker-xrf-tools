@@ -10,7 +10,6 @@ use xray_gamedata::{
 struct GamedataVerificationReportOutput {
   checks: Vec<GamedataVerificationCheckReportOutput>,
   duration_ms: u128,
-  schema_version: u32,
   status: String,
 }
 
@@ -59,7 +58,6 @@ impl<'a> GamedataVerificationReportWriter<'a> {
         .map(|check| self.check_report_output(check))
         .collect(),
       duration_ms: self.report.duration,
-      schema_version: 2,
       status: self.report.status().to_string(),
     }
   }
@@ -166,7 +164,7 @@ mod tests {
 
     fs::remove_dir_all(&root).unwrap();
 
-    assert_eq!(json["schemaVersion"], 2);
+    assert!(json.get("schemaVersion").is_none());
     assert_eq!(json["status"], "failed");
     assert_eq!(json["durationMs"], 42);
     assert_eq!(json["checks"][0]["verificationType"], "textures");
