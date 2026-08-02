@@ -14,8 +14,28 @@ impl GamedataGenericVerificationResult for GamedataParticlesVerificationResult {
 
   fn get_failure_message(&self) -> String {
     format!(
-      "{}/{} particle files are invalid",
+      "{}/{} particle library files are invalid",
       self.invalid_particle_files_count, self.checked_particle_files_count
     )
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::GamedataParticlesVerificationResult;
+  use crate::project::gamedata_generic_result::GamedataGenericVerificationResult;
+
+  #[test]
+  fn describes_particle_library_failures() {
+    let result = GamedataParticlesVerificationResult {
+      checked_particle_files_count: 1,
+      invalid_particle_files_count: 1,
+      ..Default::default()
+    };
+
+    assert_eq!(
+      result.get_failure_message(),
+      "1/1 particle library files are invalid"
+    );
   }
 }

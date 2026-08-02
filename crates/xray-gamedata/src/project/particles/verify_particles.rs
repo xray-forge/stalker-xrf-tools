@@ -36,7 +36,7 @@ impl GamedataProject {
             Ok(result) => {
               if !result {
                 if options.is_logging_enabled() {
-                  eprintln!("Particle file is not valid: {}", path.display());
+                  println!("Particle library is invalid: {}", path.display());
                 }
 
                 *invalid_particles_count.lock().unwrap() += 1;
@@ -45,7 +45,7 @@ impl GamedataProject {
             Err(error) => {
               if options.is_logging_enabled() {
                 println!(
-                  "Particles file verification failed: {} - {}",
+                  "Failed to verify particle library '{}': {}",
                   path.display(),
                   error
                 );
@@ -56,8 +56,8 @@ impl GamedataProject {
           },
           Err(error) => {
             if options.is_logging_enabled() {
-              eprintln!(
-                "Particles verification failed: {} - {}",
+              println!(
+                "Failed to read particle library '{}': {}",
                 path.display(),
                 error
               );
@@ -107,7 +107,7 @@ impl GamedataProject {
               if !result {
                 if options.is_logging_enabled() {
                   println!(
-                    "Particle texture is not valid: {} - {}",
+                    "Particle effect '{}' references invalid texture '{}'",
                     particle.name,
                     texture.display()
                   );
@@ -119,9 +119,9 @@ impl GamedataProject {
             Err(error) => {
               if options.is_logging_enabled() {
                 println!(
-                  "Particle texture verification failed: {} - {} - {}",
-                  particle.name,
+                  "Failed to verify texture '{}' for particle effect '{}': {}",
                   texture.display(),
+                  particle.name,
                   error
                 );
               }
@@ -131,8 +131,8 @@ impl GamedataProject {
           }
         } else {
           if options.is_logging_enabled() {
-            eprintln!(
-              "Not found texture for particle: {} - {}",
+            println!(
+              "Particle effect '{}' references missing texture '{}'",
               particle.name, texture_relative_path
             );
           }
