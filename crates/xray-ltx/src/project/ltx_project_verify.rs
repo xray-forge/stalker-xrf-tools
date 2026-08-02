@@ -180,9 +180,6 @@ mod tests {
   use crate::{LtxProjectOptions, LtxVerifyOptions};
   use std::fs;
   use std::path::PathBuf;
-  use std::sync::atomic::{AtomicU64, Ordering};
-
-  static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 
   #[test]
   fn validates_condlists_from_project_schemes() {
@@ -218,9 +215,8 @@ mod tests {
 
   #[test]
   fn skips_schema_less_sections() -> XRayResult {
-    let unique: u64 = NEXT_TEST_DIRECTORY_ID.fetch_add(1, Ordering::Relaxed);
     let root: PathBuf = std::env::temp_dir().join(format!(
-      "xray-ltx-project-verify-test-{}-{unique}",
+      "xray-ltx-project-verify-test-{}",
       std::process::id()
     ));
     fs::create_dir_all(&root)?;
