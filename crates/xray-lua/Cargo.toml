@@ -1,0 +1,11 @@
+[package]
+name = "xray-lua"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+full_moon = { version = "1.2.0", features = ["luajit"] }
+xray-error = { path = "../xray-error" }
+
+[lints]
+workspace = true

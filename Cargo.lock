@@ -7095,7 +7095,6 @@ dependencies = [
  "colored",
  "ddsfile",
  "derive_more 1.0.0",
- "full_moon",
  "log",
  "rayon",
  "regex",
@@ -7103,6 +7102,7 @@ dependencies = [
  "xray-db",
  "xray-error",
  "xray-ltx",
+ "xray-lua",
  "xray-sound",
  "xray-utils",
 ]
@@ -7118,6 +7118,14 @@ dependencies = [
  "xray-error",
  "xray-test-utils",
  "xray-utils",
+]
+
+[[package]]
+name = "xray-lua"
+version = "0.1.0"
+dependencies = [
+ "full_moon",
+ "xray-error",
 ]
 
 [[package]]
