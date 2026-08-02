@@ -12,6 +12,7 @@ members = [
     "crates/xray-export",
     "crates/xray-gamedata",
     "crates/xray-ltx",
+    "crates/xray-sound",
     "crates/xray-test-utils",
     "crates/xray-texture",
     "crates/xray-translation",

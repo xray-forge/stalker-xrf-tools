@@ -15,6 +15,7 @@ walkdir = "2.5.0"
 xray-db = { path = "../xray-db" }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
+xray-sound = { path = "../xray-sound" }
 xray-utils = { path = "../xray-utils" }
 
 [lints]

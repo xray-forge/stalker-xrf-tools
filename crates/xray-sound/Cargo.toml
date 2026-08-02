@@ -1,0 +1,12 @@
+[package]
+name = "xray-sound"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ogg = "0.9.2"
+symphonia = { version = "0.6.0", default-features = false, features = ["ogg", "vorbis"] }
+xray-error = { path = "../xray-error" }
+
+[lints]
+workspace = true
