@@ -101,7 +101,7 @@ impl GamedataProject {
       }
 
       for texture_relative_path in particle.sprite.texture_name.split(",") {
-        if let Some(texture) = self.get_dds_path(texture_relative_path) {
+        if let Some(texture) = self.resolve_dds_texture_path(texture_relative_path) {
           match self.verify_texture_by_path(options, &texture) {
             Ok(result) => {
               if !result {

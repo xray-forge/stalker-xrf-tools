@@ -173,17 +173,75 @@ impl GamedataProject {
     self.get_prefixed_absolute_asset_path("meshes", &visual_path)
   }
 
-  pub fn get_dds_path(&self, visual_path: &str) -> Option<PathBuf> {
-    self.get_texture_path(visual_path, ".dds")
-  }
-
-  pub fn get_texture_path(&self, texture_path: &str, extension: &str) -> Option<PathBuf> {
-    let mut texture_path: String = String::from(texture_path);
-
-    if !texture_path.ends_with(extension) {
-      texture_path.push_str(extension);
-    }
+  pub fn resolve_dds_texture_path(&self, texture_reference: &str) -> Option<PathBuf> {
+    let texture_path: String = Self::dds_texture_asset_path_from_reference(texture_reference);
 
     self.get_prefixed_absolute_asset_path("textures", &texture_path)
+  }
+
+  /// Resolve a renderer texture reference to its assembled DDS asset path.
+  ///
+  /// X-Ray strips known authoring extensions before loading the corresponding
+  /// DDS. Preserve every other byte so validation does not accept references
+  /// that the renderer would fail to resolve, including surrounding whitespace.
+  fn dds_texture_asset_path_from_reference(texture_reference: &str) -> String {
+    if let Some((stem, extension)) = texture_reference.rsplit_once('.') {
+      for renderer_extension in ["tga", "dds", "bmp", "ogm"] {
+        if extension.eq_ignore_ascii_case(renderer_extension) {
+          return format!("{stem}.dds");
+        }
+      }
+    }
+
+    format!("{texture_reference}.dds")
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::GamedataProject;
+
+  #[test]
+  fn resolves_renderer_authoring_extensions_to_dds() {
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference("pfx\\pfx_ani-fire01.bmp"),
+      "pfx\\pfx_ani-fire01.dds"
+    );
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference("pfx\\pfx_smoke_b.tga"),
+      "pfx\\pfx_smoke_b.dds"
+    );
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference("pfx\\pfx_smoke_b.DDS"),
+      "pfx\\pfx_smoke_b.dds"
+    );
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference("video\\intro.ogm"),
+      "video\\intro.dds"
+    );
+  }
+
+  #[test]
+  fn appends_dds_to_extensionless_and_unknown_extension_references() {
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference("pfx\\pfx_dist5"),
+      "pfx\\pfx_dist5.dds"
+    );
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference("pfx\\pfx_dist5.png"),
+      "pfx\\pfx_dist5.png.dds"
+    );
+  }
+
+  #[test]
+  fn preserves_whitespace_that_would_make_a_renderer_reference_invalid() {
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference(" pfx\\pfx_dist5.bmp"),
+      " pfx\\pfx_dist5.dds"
+    );
+    assert_eq!(
+      GamedataProject::dds_texture_asset_path_from_reference("pfx\\pfx_dist5.bmp "),
+      "pfx\\pfx_dist5.bmp .dds"
+    );
   }
 }

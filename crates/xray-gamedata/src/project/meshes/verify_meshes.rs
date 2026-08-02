@@ -170,7 +170,9 @@ impl GamedataProject {
     let mut is_valid: bool = true;
 
     if let Some(texture) = &ogf.texture
-      && self.get_dds_path(&texture.texture_name).is_none()
+      && self
+        .resolve_dds_texture_path(&texture.texture_name)
+        .is_none()
     {
       if options.is_logging_enabled() {
         eprintln!("Cannot read OGF texture: {}", texture.texture_name);
