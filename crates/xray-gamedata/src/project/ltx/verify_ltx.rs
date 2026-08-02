@@ -19,19 +19,8 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
 
-    let format_result: LtxProjectFormatResult =
-      self
-        .ltx_project
-        .check_format_all_files_opt(LtxFormatOptions {
-          is_silent: options.is_silent,
-          is_verbose: options.is_verbose,
-        })?;
-
-    let verification_result: LtxProjectVerifyResult =
-      self.ltx_project.verify_entries_opt(LtxVerifyOptions {
-        is_silent: options.is_silent,
-        is_verbose: options.is_verbose,
-      })?;
+    let format_result: LtxProjectFormatResult = self.verify_ltx_format(options)?;
+    let verification_result: LtxProjectVerifyResult = self.verify_ltx_schemes(options)?;
     let findings: Vec<GamedataVerificationFinding> =
       Self::collect_ltx_findings(&format_result, &verification_result);
 
@@ -89,7 +78,7 @@ impl GamedataProject {
     findings
   }
 
-  pub fn verify_ltx_format(
+  fn verify_ltx_format(
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<LtxProjectFormatResult> {
@@ -105,7 +94,7 @@ impl GamedataProject {
       })
   }
 
-  pub fn verify_ltx_schemes(
+  fn verify_ltx_schemes(
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<LtxProjectVerifyResult> {
