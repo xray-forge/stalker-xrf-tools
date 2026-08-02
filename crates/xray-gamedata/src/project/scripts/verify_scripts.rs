@@ -2,7 +2,7 @@ use crate::asset::asset_type::AssetType;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
-use full_moon::parse;
+use full_moon::{LuaVersion, parse_fallible};
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use std::fs::File;
@@ -46,9 +46,9 @@ impl GamedataProject {
                 *invalid_scripts_count.lock().unwrap() += 1;
               }
             }
-            Err(_) => {
+            Err(error) => {
               if options.is_logging_enabled() {
-                println!("Script verification failed: {}", path.display());
+                eprintln!("Script verification failed: {error}");
               }
 
               *invalid_scripts_count.lock().unwrap() += 1;
@@ -97,17 +97,61 @@ impl GamedataProject {
   ) -> XRayResult<bool> {
     let code: String = read_as_string_from_w1251_encoded(&mut File::open(path)?)?;
 
-    parse(&code).map_err(|it| {
+    verify_luajit_script(&code, path)?;
+
+    Ok(true)
+  }
+}
+
+fn verify_luajit_script(code: &str, path: &Path) -> XRayResult<()> {
+  parse_fallible(code, LuaVersion::luajit())
+    .into_result()
+    .map(|_| ())
+    .map_err(|errors| {
       XRayError::new_verify_error(format!(
-        "Failed to check lua script file: {}, errors: {}",
+        "Failed to check LuaJIT script file: {}, errors: {}",
         path.display(),
-        it.iter()
+        errors
+          .iter()
           .map(|it| it.to_string())
           .collect::<Vec<_>>()
           .join(", ")
       ))
-    })?;
+    })
+}
 
-    Ok(true)
+#[cfg(test)]
+mod tests {
+  use super::verify_luajit_script;
+  use std::path::Path;
+
+  #[test]
+  fn accepts_luajit_goto_and_label() {
+    let code: &str = r#"
+local ____exports = {}
+
+for index = 1, 3 do
+  if index == 2 then
+    goto __continue1
+  end
+
+  ::__continue1::
+end
+
+return ____exports
+"#;
+
+    assert!(verify_luajit_script(code, Path::new("generated.script")).is_ok());
+  }
+
+  #[test]
+  fn rejects_invalid_luajit_syntax_with_path() {
+    let path: &Path = Path::new("invalid.script");
+    let error: String = verify_luajit_script("local value =", path)
+      .expect_err("Expected malformed LuaJIT script to fail")
+      .to_string();
+
+    assert!(error.contains("invalid.script"));
+    assert!(error.contains("errors:"));
   }
 }
