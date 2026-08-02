@@ -1,6 +1,6 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use std::path::Path;
 use std::time::Instant;
@@ -37,27 +37,44 @@ impl GamedataProject {
 
       return Ok(GamedataSpawnsVerificationResult {
         duration: started_at.elapsed().as_millis(),
+        findings: Vec::new(),
         total_spawns: 0,
         invalid_spawns: 0,
       });
     }
 
     let mut total_spawns: u32 = 0;
+    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
     let mut invalid_spawns: u32 = 0;
 
     for relative_path in &spawn_files {
       total_spawns += 1;
 
       if let Some(spawn_path) = self.get_absolute_asset_path(relative_path) {
-        if !self.verify_spawn(options, &spawn_path)? {
+        let spawn_findings: Vec<GamedataVerificationFinding> =
+          self.verify_spawn_findings(options, &spawn_path);
+
+        if !spawn_findings.is_empty() {
+          findings.extend(spawn_findings);
           invalid_spawns += 1;
         }
       } else {
+        findings.push(GamedataVerificationFinding::for_asset(
+          Path::new(relative_path),
+          "Spawn path was not found in gamedata roots",
+        ));
         invalid_spawns += 1;
       }
     }
 
     let duration: u128 = started_at.elapsed().as_millis();
+
+    findings.sort_by(|left, right| {
+      left
+        .asset_path
+        .cmp(&right.asset_path)
+        .then_with(|| left.message.cmp(&right.message))
+    });
 
     if options.is_logging_enabled() {
       println!(
@@ -70,6 +87,7 @@ impl GamedataProject {
 
     Ok(GamedataSpawnsVerificationResult {
       duration,
+      findings,
       total_spawns,
       invalid_spawns,
     })
@@ -80,6 +98,14 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     path: &P,
   ) -> XRayResult<bool> {
+    Ok(self.verify_spawn_findings(options, path).is_empty())
+  }
+
+  fn verify_spawn_findings<P: AsRef<Path>>(
+    &self,
+    options: &GamedataProjectVerifyOptions,
+    path: &P,
+  ) -> Vec<GamedataVerificationFinding> {
     let file_path: String = path.as_ref().display().to_string();
 
     if options.is_verbose_logging_enabled() {
@@ -92,14 +118,17 @@ impl GamedataProject {
           println!("Verify spawn file: {}", file_path);
         }
 
-        Ok(true)
+        Vec::new()
       }
       Err(error) => {
         if options.is_logging_enabled() {
           eprintln!("Spawn file validation failed: {} -> {}", file_path, error);
         }
 
-        Ok(false)
+        vec![GamedataVerificationFinding::for_asset(
+          path,
+          format!("Failed to read spawn file: {error}"),
+        )]
       }
     }
   }

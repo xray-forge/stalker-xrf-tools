@@ -2,8 +2,8 @@
 
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
-use super::weather_validator::verify_weather_with_definitions;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use super::weather_validator::verify_weather_findings_with_definitions;
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -47,19 +47,37 @@ impl GamedataProject {
     })?;
     let definitions: WeatherDefinitions = WeatherDefinitions::read(&self.ltx_project.root);
     let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();
+    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
     let mut invalid_weather_files_count: u32 = 0;
 
     for weather_config in weather_configs {
-      if !verify_weather_with_definitions(
-        self,
-        options,
-        weather_config,
-        &definitions,
-        &mut definition_load_errors,
-      )? {
+      let weather_findings: Vec<GamedataVerificationFinding> =
+        verify_weather_findings_with_definitions(
+          self,
+          options,
+          weather_config,
+          &definitions,
+          &mut definition_load_errors,
+        )?;
+
+      if !weather_findings.is_empty() {
+        findings.extend(weather_findings);
         invalid_weather_files_count += 1;
       }
     }
+
+    if checked_weather_files_count == 0 {
+      findings.push(GamedataVerificationFinding::without_asset(
+        "No weather files found",
+      ));
+    }
+
+    findings.sort_by(|left, right| {
+      left
+        .asset_path
+        .cmp(&right.asset_path)
+        .then_with(|| left.message.cmp(&right.message))
+    });
 
     let duration: u128 = started_at.elapsed().as_millis();
 
@@ -86,6 +104,7 @@ impl GamedataProject {
     Ok(GamedataWeathersVerificationResult {
       duration,
       checked_weather_files_count,
+      findings,
       invalid_weather_files_count,
     })
   }
