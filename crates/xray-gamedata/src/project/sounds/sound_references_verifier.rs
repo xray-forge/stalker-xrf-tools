@@ -1,4 +1,4 @@
-use crate::project::sounds::verify_sound_references_result::GamedataSoundReferencesVerificationResult;
+use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use regex::Regex;
 use std::collections::HashSet;

@@ -1,5 +1,5 @@
+use crate::project::sounds::sounds_verification_result::GamedataSoundsVerificationResult;
 use crate::project::sounds::sounds_verifier::SoundsVerifier;
-use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use xray_error::XRayResult;
 

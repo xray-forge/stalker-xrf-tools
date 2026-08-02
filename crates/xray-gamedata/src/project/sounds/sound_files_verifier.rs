@@ -1,4 +1,4 @@
-use crate::project::sounds::verify_sound_files_result::GamedataSoundFilesVerificationResult;
+use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use rayon::prelude::*;
 use std::path::Path;

@@ -1,5 +1,5 @@
-use crate::project::sounds::verify_sound_files_result::GamedataSoundFilesVerificationResult;
-use crate::project::sounds::verify_sound_references_result::GamedataSoundReferencesVerificationResult;
+use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
+use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
 
 pub struct GamedataSoundsVerificationResult {
@@ -63,8 +63,8 @@ impl GamedataCheckResult for GamedataSoundsVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataSoundsVerificationResult;
-  use crate::project::sounds::verify_sound_files_result::GamedataSoundFilesVerificationResult;
-  use crate::project::sounds::verify_sound_references_result::GamedataSoundReferencesVerificationResult;
+  use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
+  use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
   use crate::{
     GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
     GamedataVerificationStatus, GamedataVerificationType,

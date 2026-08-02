@@ -1,7 +1,7 @@
 use crate::asset::asset_type::AssetType;
-use crate::project::sounds::verify_sound_files::SoundFilesVerifier;
-use crate::project::sounds::verify_sound_references::SoundReferencesVerifier;
-use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
+use crate::project::sounds::sound_files_verifier::SoundFilesVerifier;
+use crate::project::sounds::sound_references_verifier::SoundReferencesVerifier;
+use crate::project::sounds::sounds_verification_result::GamedataSoundsVerificationResult;
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use std::time::Instant;

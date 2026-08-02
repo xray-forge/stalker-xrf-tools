@@ -1,6 +1,7 @@
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
 
 #[derive(Default)]
+/// Aggregated outcome of validating sound references in configs and XML.
 pub(crate) struct GamedataSoundReferencesVerificationResult {
   pub(crate) checked_references_count: u32,
   pub(crate) findings: Vec<GamedataVerificationFinding>,
