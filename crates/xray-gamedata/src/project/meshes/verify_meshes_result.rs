@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataMeshesVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} meshes are invalid",
-      self.invalid_meshes_count, self.checked_meshes_count
+      "{}/{} meshes valid",
+      self.checked_meshes_count - self.invalid_meshes_count,
+      self.checked_meshes_count
     )
   }
 

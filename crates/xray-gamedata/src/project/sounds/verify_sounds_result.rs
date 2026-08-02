@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataSoundsVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} sounds are invalid",
-      self.invalid_sounds_count, self.checked_sounds_count
+      "{}/{} sounds valid",
+      self.checked_sounds_count - self.invalid_sounds_count,
+      self.checked_sounds_count
     )
   }
 

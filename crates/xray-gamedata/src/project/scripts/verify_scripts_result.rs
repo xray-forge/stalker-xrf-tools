@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataScriptsVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} scripts are invalid",
-      self.invalid_scripts_count, self.checked_scripts_count
+      "{}/{} scripts valid",
+      self.checked_scripts_count - self.invalid_scripts_count,
+      self.checked_scripts_count
     )
   }
 

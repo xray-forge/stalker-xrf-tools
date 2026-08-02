@@ -20,10 +20,10 @@ impl GamedataCheckResult for GamedataParticlesUsageVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} particle references are invalid; {}/{} spawn files could not be inspected",
-      self.invalid_references_count,
+      "{}/{} particle references valid; {}/{} spawn files readable",
+      self.checked_references_count - self.invalid_references_count,
       self.checked_references_count,
-      self.unreadable_spawn_files_count,
+      self.checked_spawn_files_count - self.unreadable_spawn_files_count,
       self.checked_spawn_files_count
     )
   }
@@ -53,7 +53,7 @@ mod tests {
     assert_eq!(result.status(), GamedataVerificationStatus::Failed);
     assert_eq!(
       result.failure_message(),
-      "0/0 particle references are invalid; 1/1 spawn files could not be inspected"
+      "0/0 particle references valid; 0/1 spawn files readable"
     );
   }
 

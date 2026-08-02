@@ -29,8 +29,9 @@ impl GamedataCheckResult for GamedataWeathersVerificationResult {
       String::from("No weather files found")
     } else {
       format!(
-        "{}/{} weather files are invalid",
-        self.invalid_weather_files_count, self.checked_weather_files_count
+        "{}/{} weather files valid",
+        self.checked_weather_files_count - self.invalid_weather_files_count,
+        self.checked_weather_files_count
       )
     }
   }

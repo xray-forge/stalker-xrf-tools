@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataTexturesVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} textures are invalid",
-      self.invalid_textures_count, self.checked_textures_count
+      "{}/{} textures valid",
+      self.checked_textures_count - self.invalid_textures_count,
+      self.checked_textures_count
     )
   }
 

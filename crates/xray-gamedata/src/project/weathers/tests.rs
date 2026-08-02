@@ -158,7 +158,7 @@ fn weather_parse_failure_makes_the_check_fail() {
   assert_eq!(result.checked_weather_files_count, 2);
   assert_eq!(result.invalid_weather_files_count, 1);
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
-  assert_eq!(result.failure_message(), "1/2 weather files are invalid");
+  assert_eq!(result.failure_message(), "1/2 weather files valid");
 }
 
 #[test]

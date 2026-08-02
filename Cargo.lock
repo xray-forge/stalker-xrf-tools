@@ -7221,6 +7221,8 @@ dependencies = [
  "ddsfile",
  "env_logger",
  "log",
+ "serde",
+ "serde_json",
  "tokio",
  "xray-archive",
  "xray-db",

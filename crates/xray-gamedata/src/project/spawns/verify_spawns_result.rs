@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataSpawnsVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} spawns are invalid",
-      self.invalid_spawns, self.total_spawns
+      "{}/{} spawns valid",
+      self.total_spawns - self.invalid_spawns,
+      self.total_spawns
     )
   }
 

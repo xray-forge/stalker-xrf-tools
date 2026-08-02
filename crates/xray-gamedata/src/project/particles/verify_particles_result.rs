@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataParticlesVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} particle library files are invalid",
-      self.invalid_particle_files_count, self.checked_particle_files_count
+      "{}/{} particle library files valid",
+      self.checked_particle_files_count - self.invalid_particle_files_count,
+      self.checked_particle_files_count
     )
   }
 
@@ -38,9 +39,6 @@ mod tests {
       ..Default::default()
     };
 
-    assert_eq!(
-      result.failure_message(),
-      "1/1 particle library files are invalid"
-    );
+    assert_eq!(result.failure_message(), "0/1 particle library files valid");
   }
 }

@@ -17,27 +17,13 @@ impl GamedataCheckResult for GamedataLtxVerificationResult {
   }
 
   fn failure_message(&self) -> String {
-    let mut message: String = String::new();
-
-    if self.format_result.invalid_files > 0 {
-      message.push_str(&format!(
-        "{}/{} files have invalid formatting",
-        self.format_result.invalid_files, self.format_result.total_files,
-      ))
-    }
-
-    if self.verification_result.invalid_sections > 0 {
-      if !message.is_empty() {
-        message.push_str(", ")
-      }
-
-      message.push_str(&format!(
-        "{}/{} sections are invalid",
-        self.verification_result.invalid_sections, self.verification_result.total_sections
-      ))
-    }
-
-    message
+    format!(
+      "{}/{} LTX files formatted; {}/{} sections valid",
+      self.format_result.valid_files,
+      self.format_result.total_files,
+      self.verification_result.valid_sections,
+      self.verification_result.total_sections
+    )
   }
 
   fn findings(&self) -> &[GamedataVerificationFinding] {

@@ -1,3 +1,4 @@
+use super::verification_report::GamedataVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use colored::Colorize;
@@ -25,6 +26,15 @@ impl GenericCommand for VerifyGamedataCommand {
           .help("Path to assembled gamedata root")
           .required(true)
           .value_name("ROOT")
+          .num_args(1)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("report")
+          .help("Write the structured verification report as JSON")
+          .long("report")
+          .required(false)
+          .value_name("PATH")
           .num_args(1)
           .value_parser(value_parser!(PathBuf)),
       )
@@ -77,6 +87,7 @@ impl GenericCommand for VerifyGamedataCommand {
       .get_one::<PathBuf>("root")
       .expect("Expected a valid gamedata root to be provided")
       .clone();
+    let report_path: Option<PathBuf> = matches.get_one::<PathBuf>("report").cloned();
 
     let ignored: Vec<String> = matches
       .get_many::<String>("ignore")
@@ -104,7 +115,7 @@ impl GenericCommand for VerifyGamedataCommand {
     let is_strict: bool = matches.get_flag("strict");
 
     let open_options: GamedataProjectReadOptions = GamedataProjectReadOptions {
-      root,
+      root: root.clone(),
       ignored,
       is_verbose,
       is_silent,
@@ -130,6 +141,10 @@ impl GenericCommand for VerifyGamedataCommand {
     let mut project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
     let verify_result: GamedataVerificationResult = project.verify(&verify_options)?;
     let status: GamedataVerificationStatus = verify_result.status();
+
+    if let Some(report_path) = report_path {
+      GamedataVerificationReportWriter::new(&root, &verify_result).write(&report_path)?;
+    }
 
     if verify_options.is_logging_enabled() {
       match status {

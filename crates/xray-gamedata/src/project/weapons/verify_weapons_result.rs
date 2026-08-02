@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataWeaponVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} weapons are invalid",
-      self.invalid_weapons_count, self.checked_weapons_count
+      "{}/{} weapons valid",
+      self.checked_weapons_count - self.invalid_weapons_count,
+      self.checked_weapons_count
     )
   }
 }

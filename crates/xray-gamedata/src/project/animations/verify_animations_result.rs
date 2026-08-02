@@ -15,8 +15,9 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} HUD animations are invalid",
-      self.invalid_huds_count, self.checked_huds_count
+      "{}/{} HUD animations valid",
+      self.checked_huds_count - self.invalid_huds_count,
+      self.checked_huds_count
     )
   }
 }

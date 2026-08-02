@@ -124,6 +124,10 @@ pub fn setup_logger() {
     };
   }
 
+  // X-Ray stores binary source parameters in Vorbis comments. Symphonia correctly keeps
+  // decoding those streams, but its text-comment reader emits a warning for each one.
+  logger.filter_module("symphonia_metadata::embedded::vorbis", LevelFilter::Error);
+
   logger.default_format();
   logger.init();
 }
