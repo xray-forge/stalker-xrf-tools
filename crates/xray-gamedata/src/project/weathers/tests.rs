@@ -1,9 +1,12 @@
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
+use super::weather_definitions::WeatherDefinitions;
+use super::weather_validator::verify_weather_with_definitions;
 use crate::GamedataProject;
 use crate::{
   GamedataCheckResult, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
   GamedataVerificationStatus,
 };
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -25,6 +28,14 @@ fn semantic_weather_project_files(
   weather_files: &[(&str, &str)],
   missing_texture: Option<&str>,
 ) -> (PathBuf, GamedataProject) {
+  semantic_weather_project_files_with_system(weather_files, missing_texture, "")
+}
+
+fn semantic_weather_project_files_with_system(
+  weather_files: &[(&str, &str)],
+  missing_texture: Option<&str>,
+  system_ltx: &str,
+) -> (PathBuf, GamedataProject) {
   let unique: u64 = NEXT_TEST_DIRECTORY_ID.fetch_add(1, Ordering::Relaxed);
   let root: PathBuf = std::env::temp_dir().join(format!(
     "xray-gamedata-semantic-weather-test-{}-{unique}",
@@ -35,7 +46,7 @@ fn semantic_weather_project_files(
   fs::create_dir_all(configs.join("$scheme")).unwrap();
   fs::create_dir_all(configs.join("environment").join("weathers")).unwrap();
   fs::create_dir_all(root.join("textures").join("sky")).unwrap();
-  fs::write(configs.join("system.ltx"), "").unwrap();
+  fs::write(configs.join("system.ltx"), system_ltx).unwrap();
   fs::write(
     configs.join("$scheme").join("environment.scheme.ltx"),
     "[$weather]\n$strict = true\nambient = string\nclouds_texture = string\nsky_texture = string\nsun = ?string\nthunderbolt_collection = ?string\n",
@@ -470,6 +481,120 @@ fn valid_weather_cycle_passes() {
   assert_eq!(result.checked_weather_files_count, 1);
   assert_eq!(result.invalid_weather_files_count, 0);
   assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+}
+
+#[test]
+fn primary_weather_definitions_survive_unreadable_legacy_system_fallback() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files_with_system(
+    &[("test.ltx", &weather)],
+    None,
+    "#include \"items\\*.ltx\"\n",
+  );
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.checked_weather_files_count, 1);
+  assert_eq!(result.invalid_weather_files_count, 0);
+  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+}
+
+#[test]
+fn missing_primary_names_resolve_from_legacy_system_fallback() {
+  let legacy_references: String = weather_section("00:00:00", "ambient_ok", "first")
+    .replace("sun = sun_ok", "sun = legacy_sun")
+    .replace(
+      "thunderbolt_collection = bolt_ok",
+      "thunderbolt_collection = legacy_bolt",
+    );
+  let repeated_legacy_references: String = weather_section("12:00:00", "ambient_ok", "second")
+    .replace("sun = sun_ok", "sun = legacy_sun")
+    .replace(
+      "thunderbolt_collection = bolt_ok",
+      "thunderbolt_collection = legacy_bolt",
+    );
+  let weather: String = format!("{}{}", legacy_references, repeated_legacy_references);
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files_with_system(
+    &[("test.ltx", &weather)],
+    None,
+    "[legacy_sun]\n\n[legacy_bolt]\nlegacy_thunderbolt =\n\n[legacy_thunderbolt]\n",
+  );
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.checked_weather_files_count, 1);
+  assert_eq!(result.invalid_weather_files_count, 0);
+  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+}
+
+#[test]
+fn unreadable_legacy_fallback_is_reported_once_when_missing_names_consult_it() {
+  let missing_references: String = weather_section("00:00:00", "ambient_ok", "first")
+    .replace("sun = sun_ok", "sun = legacy_sun")
+    .replace(
+      "thunderbolt_collection = bolt_ok",
+      "thunderbolt_collection = legacy_bolt",
+    );
+  let repeated_missing_references: String = weather_section("12:00:00", "ambient_ok", "second")
+    .replace("sun = sun_ok", "sun = legacy_sun")
+    .replace(
+      "thunderbolt_collection = bolt_ok",
+      "thunderbolt_collection = legacy_bolt",
+    );
+  let weather: String = format!("{}{}", missing_references, repeated_missing_references);
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files_with_system(
+    &[("test.ltx", &weather)],
+    None,
+    "#include \"items\\*.ltx\"\n",
+  );
+  let definitions: WeatherDefinitions = WeatherDefinitions::read(&project.ltx_project.root);
+  let config_path: PathBuf = project
+    .ltx_project
+    .root
+    .join("environment")
+    .join("weathers")
+    .join("test.ltx");
+  let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();
+
+  let is_valid: bool = verify_weather_with_definitions(
+    &project,
+    &GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    },
+    &config_path,
+    &definitions,
+    &mut definition_load_errors,
+  )
+  .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert!(!is_valid);
+  assert_eq!(definition_load_errors.len(), 1);
+  assert!(
+    definition_load_errors
+      .first()
+      .is_some_and(|error| error.contains("system.ltx"))
+  );
 }
 
 #[test]

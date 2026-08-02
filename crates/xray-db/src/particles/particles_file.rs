@@ -29,7 +29,9 @@ impl ParticlesFile {
 
   /// Read particles from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
-    Self::read_from_chunks::<T>(&ChunkReader::from_file(file)?.read_children())
+    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
+
+    Self::read_from_chunks::<T>(&chunks)
   }
 
   /// Read particles from chunks.

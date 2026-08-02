@@ -87,7 +87,7 @@ impl ChunkReadWrite for ParticleEffect {
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children();
+    let chunks: Vec<ChunkReader> = reader.read_children()?;
 
     let effect: Self = {
       Self {

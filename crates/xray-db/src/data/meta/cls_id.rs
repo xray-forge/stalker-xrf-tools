@@ -2,6 +2,7 @@
 use crate::data::meta::map::SECTION_TO_CLS_ID;
 use enum_map::Enum;
 use serde::{Deserialize, Serialize};
+use xray_error::{XRayError, XRayResult};
 
 /// todo: Add script to parse system ltx and read all the data from ltx/txt file instead.
 #[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize, Eq)]
@@ -106,11 +107,32 @@ pub enum ClsId {
 }
 
 impl ClsId {
-  pub fn from_section(section_name: &str) -> Self {
-    // todo: Implement with From<T> trait?
-    SECTION_TO_CLS_ID
-      .get(section_name)
-      .cloned()
-      .expect("Unexpected section provided for clsid matching")
+  pub fn from_section(section_name: &str) -> XRayResult<Self> {
+    SECTION_TO_CLS_ID.get(section_name).cloned().ok_or_else(|| {
+      XRayError::new_parsing_error(format!(
+        "Unknown ALife object section '{section_name}', no CLSID mapping exists"
+      ))
+    })
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::ClsId;
+  use xray_error::XRayError;
+
+  #[test]
+  fn maps_known_section_to_clsid() {
+    assert_eq!(ClsId::from_section("actor").unwrap(), ClsId::SActor);
+  }
+
+  #[test]
+  fn returns_error_for_unknown_section() {
+    let error: XRayError = ClsId::from_section("unknown_section").unwrap_err();
+
+    assert_eq!(
+      error.to_string(),
+      "Parsing error: Unknown ALife object section 'unknown_section', no CLSID mapping exists"
+    );
   }
 }

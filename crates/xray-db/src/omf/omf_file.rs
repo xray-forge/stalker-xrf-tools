@@ -28,7 +28,9 @@ impl OmfFile {
   }
 
   pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
-    Self::read_from_chunks::<T>(&ChunkReader::from_file(file)?.read_children())
+    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
+
+    Self::read_from_chunks::<T>(&chunks)
   }
 
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
@@ -72,7 +74,7 @@ impl OmfFile {
 
   pub fn read_motions_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
     let mut reader: ChunkReader = ChunkReader::from_file(file)?;
-    let chunks: Vec<ChunkReader> = reader.read_children();
+    let chunks: Vec<ChunkReader> = reader.read_children()?;
 
     log::info!(
       "Reading omf file motions, {} chunks, {} bytes",

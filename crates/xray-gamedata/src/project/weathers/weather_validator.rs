@@ -3,7 +3,7 @@ use super::weather_field_rules::{
   WEATHER_REQUIRED_FIELDS, is_valid_weather_field_value, parse_weather_time,
 };
 use crate::{GamedataProject, GamedataProjectVerifyOptions};
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 use std::path::Path;
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
@@ -18,6 +18,7 @@ pub fn verify_weather_with_definitions(
   options: &GamedataProjectVerifyOptions,
   config_path: &Path,
   definitions: &WeatherDefinitions,
+  definition_load_errors: &mut BTreeSet<String>,
 ) -> XRayResult<bool> {
   let ltx: Ltx = match Ltx::read_from_file_full(config_path) {
     Ok(ltx) => ltx,
@@ -141,19 +142,16 @@ pub fn verify_weather_with_definitions(
           is_valid = false;
         }
         Err(error) => {
-          if options.is_logging_enabled() {
-            eprintln!("{error}");
-          }
-
+          definition_load_errors.insert(error.clone());
           is_valid = false;
         }
       }
     }
 
     if let Some(sun) = section.get("sun").filter(|sun| !sun.is_empty()) {
-      match &definitions.sun_sections {
-        Ok(sun_sections) if sun_sections.contains(sun) => {}
-        Ok(_) => {
+      match definitions.has_sun(sun) {
+        Ok(true) => {}
+        Ok(false) => {
           if options.is_logging_enabled() {
             eprintln!(
               "Weather [{}] references missing sun [{}]: {}",
@@ -166,10 +164,7 @@ pub fn verify_weather_with_definitions(
           is_valid = false;
         }
         Err(error) => {
-          if options.is_logging_enabled() {
-            eprintln!("{error}");
-          }
-
+          definition_load_errors.insert(error);
           is_valid = false;
         }
       }
@@ -179,22 +174,22 @@ pub fn verify_weather_with_definitions(
       .get("thunderbolt_collection")
       .filter(|collection| !collection.is_empty())
     {
-      match &definitions.thunderbolt_collections {
-        Ok(collections) if collections.get(collection).is_some_and(Vec::is_empty) => {}
-        Ok(collections) if collections.contains_key(collection) => {
+      match definitions.missing_thunderbolt_definitions(collection) {
+        Ok(Some(missing_definitions)) if missing_definitions.is_empty() => {}
+        Ok(Some(missing_definitions)) => {
           if options.is_logging_enabled() {
             eprintln!(
               "Weather [{}] thunderbolt collection [{}] references missing definitions [{}]: {}",
               section_name,
               collection,
-              collections[collection].join(", "),
+              missing_definitions.join(", "),
               config_path.display()
             );
           }
 
           is_valid = false;
         }
-        Ok(_) => {
+        Ok(None) => {
           if options.is_logging_enabled() {
             eprintln!(
               "Weather [{}] references missing thunderbolt collection [{}]: {}",
@@ -207,10 +202,7 @@ pub fn verify_weather_with_definitions(
           is_valid = false;
         }
         Err(error) => {
-          if options.is_logging_enabled() {
-            eprintln!("{error}");
-          }
-
+          definition_load_errors.insert(error);
           is_valid = false;
         }
       }

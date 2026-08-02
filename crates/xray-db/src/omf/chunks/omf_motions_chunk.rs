@@ -20,7 +20,7 @@ impl ChunkReadWrite for OmfMotionsChunk {
       reader.read_bytes_remain()
     );
 
-    let mut chunks: Vec<ChunkReader> = reader.read_children();
+    let mut chunks: Vec<ChunkReader> = reader.read_children()?;
 
     let bones_motions_count: u32 = read_u32_chunk::<T>(
       chunks

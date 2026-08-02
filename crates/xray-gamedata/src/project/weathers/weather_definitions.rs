@@ -9,12 +9,14 @@ use xray_ltx::Ltx;
 pub struct WeatherDefinitions {
   /// Ambient section names read from `environment/ambients.ltx` and its includes.
   pub ambient_sections: Result<HashSet<String>, String>,
-  /// Sun section names read from `environment/suns.ltx` and the engine's `system.ltx` fallback.
+  /// Sun section names read from `environment/suns.ltx`.
   pub sun_sections: Result<HashSet<String>, String>,
   /// Thunderbolt collection names mapped to member definitions that could not be resolved.
   ///
   /// An empty member list means that every member of the collection has a definition.
   pub thunderbolt_collections: Result<HashMap<String, Vec<String>>, String>,
+  /// Parsed legacy definitions from `system.ltx`.
+  legacy_system: Result<Ltx, String>,
 }
 
 impl WeatherDefinitions {
@@ -23,25 +25,57 @@ impl WeatherDefinitions {
   /// The returned value retains definition-family errors so validation can continue and report
   /// every affected weather cycle in one run.
   pub fn read(configs_root: &Path) -> Self {
-    let system_sections: Result<HashSet<String>, String> =
-      Self::read_sections(&configs_root.join("system.ltx"));
-
     Self {
       ambient_sections: Self::read_sections(&configs_root.join("environment").join("ambients.ltx")),
-      // The engine falls back to system.ltx for legacy sun definitions.
-      sun_sections: Self::read_sections(&configs_root.join("environment").join("suns.ltx"))
-        .and_then(|mut sections| {
-          sections.extend(
-            system_sections
-              .as_ref()
-              .map_err(Clone::clone)?
-              .iter()
-              .cloned(),
-          );
-          Ok(sections)
-        }),
+      sun_sections: Self::read_sections(&configs_root.join("environment").join("suns.ltx")),
       thunderbolt_collections: Self::read_thunderbolt_collections(configs_root),
+      legacy_system: Self::read_ltx(&configs_root.join("system.ltx")),
     }
+  }
+
+  /// Resolves a sun name through the primary catalog, then the legacy `system.ltx` fallback.
+  pub fn has_sun(&self, sun: &str) -> Result<bool, String> {
+    let sun_sections: &HashSet<String> = self.sun_sections.as_ref().map_err(Clone::clone)?;
+
+    if sun_sections.contains(sun) {
+      return Ok(true);
+    }
+
+    self
+      .legacy_system
+      .as_ref()
+      .map(|system| system.has_section(sun))
+      .map_err(Clone::clone)
+  }
+
+  /// Resolves a thunderbolt collection and returns its unresolved member definitions.
+  ///
+  /// Primary collections use `environment/thunderbolts.ltx`. The legacy `system.ltx` fallback is
+  /// consulted only when the collection name is absent from the primary catalog.
+  pub fn missing_thunderbolt_definitions(
+    &self,
+    collection_name: &str,
+  ) -> Result<Option<Vec<String>>, String> {
+    let collections: &HashMap<String, Vec<String>> = self
+      .thunderbolt_collections
+      .as_ref()
+      .map_err(Clone::clone)?;
+
+    if let Some(missing_definitions) = collections.get(collection_name) {
+      return Ok(Some(missing_definitions.clone()));
+    }
+
+    let legacy_system: &Ltx = self.legacy_system.as_ref().map_err(Clone::clone)?;
+    let Some(collection) = legacy_system.section(collection_name) else {
+      return Ok(None);
+    };
+    let missing_definitions: Vec<String> = collection
+      .iter()
+      .map(|(thunderbolt_name, _)| thunderbolt_name.to_string())
+      .filter(|thunderbolt_name| !legacy_system.has_section(thunderbolt_name))
+      .collect();
+
+    Ok(Some(missing_definitions))
   }
 
   fn read_sections(path: &Path) -> Result<HashSet<String>, String> {
@@ -69,7 +103,6 @@ impl WeatherDefinitions {
     let environment_root: PathBuf = configs_root.join("environment");
     let collections: Ltx = Self::read_ltx(&environment_root.join("thunderbolt_collections.ltx"))?;
     let thunderbolts: Ltx = Self::read_ltx(&environment_root.join("thunderbolts.ltx"))?;
-    let system: Ltx = Self::read_ltx(&configs_root.join("system.ltx"))?;
 
     let mut result: HashMap<String, Vec<String>> = HashMap::new();
 
@@ -83,21 +116,6 @@ impl WeatherDefinitions {
             .filter(|thunderbolt_name| !thunderbolts.has_section(thunderbolt_name))
             .collect(),
         );
-      }
-    }
-
-    // The engine also permits legacy thunderbolt definitions in system.ltx.
-    for (collection_name, collection) in &system {
-      if !collection_name.is_empty() {
-        result
-          .entry(collection_name.to_string())
-          .or_insert_with(|| {
-            collection
-              .iter()
-              .map(|(thunderbolt_name, _)| thunderbolt_name.to_string())
-              .filter(|thunderbolt_name| !system.has_section(thunderbolt_name))
-              .collect()
-          });
       }
     }
 

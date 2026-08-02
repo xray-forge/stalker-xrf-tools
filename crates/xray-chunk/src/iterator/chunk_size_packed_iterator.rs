@@ -2,58 +2,111 @@ use crate::{ChunkDataSource, ChunkReader, XRayByteOrder};
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
 use std::io::SeekFrom;
+use xray_error::{XRayError, XRayResult};
 
 /// Iterate over data in chunk slice, which is stored like [(size)(content)(size)(content)].
 pub struct ChunkSizePackedIterator<'a, T: ChunkDataSource = FileSlice> {
   pub index: u32,
   pub reader: &'a mut ChunkReader<T>,
+  pub failed: bool,
 }
 
 impl<T: ChunkDataSource> ChunkSizePackedIterator<'_, T> {
-  pub fn from_start(reader: &mut ChunkReader<T>) -> ChunkSizePackedIterator<'_, T> {
-    reader
-      .reset_pos()
-      .expect("Iterator reader position reset expected");
+  pub fn from_start(reader: &mut ChunkReader<T>) -> XRayResult<ChunkSizePackedIterator<'_, T>> {
+    reader.reset_pos()?;
 
-    ChunkSizePackedIterator { index: 0, reader }
+    Ok(ChunkSizePackedIterator {
+      index: 0,
+      reader,
+      failed: false,
+    })
   }
 
   pub fn from_current(reader: &mut ChunkReader<T>) -> ChunkSizePackedIterator<'_, T> {
-    ChunkSizePackedIterator { index: 0, reader }
+    ChunkSizePackedIterator {
+      index: 0,
+      reader,
+      failed: false,
+    }
+  }
+
+  fn fail(&mut self, error: XRayError) -> Option<XRayResult<ChunkReader<T>>> {
+    self.failed = true;
+
+    Some(Err(error))
   }
 }
 
 impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
-  type Item = ChunkReader<T>;
+  type Item = XRayResult<ChunkReader<T>>;
 
-  fn next(&mut self) -> Option<ChunkReader<T>> {
-    if self.reader.is_ended() {
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.failed || self.reader.is_ended() {
       return None;
     }
 
-    let position: u64 = self.reader.data.get_seek().expect("Iterator seek position");
+    let position: u64 = match self.reader.data.get_seek() {
+      Ok(position) => position,
+      Err(error) => return self.fail(error.into()),
+    };
 
-    let size: u64 = self
-      .reader
-      // todo: Hardcoded byte order, should be part of generics.
-      .read_u32::<XRayByteOrder>()
-      .expect("Packed iterator size expected") as u64;
+    let size_field_size: u64 = 4;
+    let remaining: u64 = self.reader.read_bytes_remain();
+
+    if remaining < size_field_size {
+      return self.fail(XRayError::new_invalid_error(format!(
+        "Incomplete packed chunk size at position {position}, expected {size_field_size} bytes but only {remaining} remain"
+      )));
+    }
+
+    // todo: Hardcoded byte order, should be part of generics.
+    let size: u64 = match self.reader.read_u32::<XRayByteOrder>() {
+      Ok(size) => size as u64,
+      Err(error) => return self.fail(error.into()),
+    };
 
     let id: u32 = self.index;
 
+    if size < size_field_size {
+      return self.fail(XRayError::new_invalid_error(format!(
+        "Packed chunk {id} at position {position} declares invalid size {size}; size includes the {size_field_size}-byte header"
+      )));
+    }
+
+    let end_position: u64 = match position.checked_add(size) {
+      Some(end_position) => end_position,
+      None => {
+        return self.fail(XRayError::new_invalid_error(format!(
+          "Packed chunk {id} size {size} overflows its position {position}"
+        )));
+      }
+    };
+
+    if end_position > self.reader.end_pos() {
+      return self.fail(XRayError::new_invalid_error(format!(
+        "Packed chunk {id} at position {position} declares {size} bytes, beyond source end {}",
+        self.reader.end_pos()
+      )));
+    }
+
     self.index += 1;
-    self
+    if let Err(error) = self
       .reader
       .data
       .set_seek(SeekFrom::Current(size as i64 - 4))
-      .expect("Iterator seek position");
+    {
+      return self.fail(error.into());
+    }
 
-    Some(Self::Item {
+    Some(Ok(ChunkReader {
       id,
       size,
       position,
-      data: self.reader.data.slice(position + 4..position + size),
-    })
+      data: self
+        .reader
+        .data
+        .slice(position + size_field_size..end_position),
+    }))
   }
 }
 
@@ -68,7 +121,7 @@ mod tests {
     let mut chunk_reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[]))?;
 
-    if ChunkSizePackedIterator::from_start(&mut chunk_reader)
+    if ChunkSizePackedIterator::from_start(&mut chunk_reader)?
       .next()
       .is_some()
     {
@@ -92,8 +145,8 @@ mod tests {
 
     let mut vec: Vec<ChunkReader<InMemoryChunkDataSource>> = Vec::new();
 
-    for it in ChunkSizePackedIterator::from_start(&mut chunk_reader) {
-      vec.push(it);
+    for it in ChunkSizePackedIterator::from_start(&mut chunk_reader)? {
+      vec.push(it?);
     }
 
     assert_eq!(vec.len(), 1, "Expected count to be 1");
@@ -113,8 +166,8 @@ mod tests {
 
     let mut vec: Vec<ChunkReader<InMemoryChunkDataSource>> = Vec::new();
 
-    for it in ChunkSizePackedIterator::from_start(&mut chunk_reader) {
-      vec.push(it);
+    for it in ChunkSizePackedIterator::from_start(&mut chunk_reader)? {
+      vec.push(it?);
     }
 
     assert_eq!(vec.len(), 2, "Expected count to be 2");
@@ -140,13 +193,55 @@ mod tests {
     let mut vec: Vec<ChunkReader<InMemoryChunkDataSource>> = Vec::new();
 
     for it in ChunkSizePackedIterator::from_current(&mut chunk_reader) {
-      vec.push(it);
+      vec.push(it?);
     }
 
     assert_eq!(vec.len(), 1, "Expected count to be 2");
     assert_eq!(vec[0].id, 0, "Expected [1] id to be 0");
     assert_eq!(vec[0].size, 12, "Expected [1] size to be 5");
     assert_eq!(vec[0].position, 8, "Expected [1] position to be 0");
+
+    Ok(())
+  }
+
+  #[test]
+  fn rejects_size_smaller_than_header() -> XRayResult {
+    let mut reader: ChunkReader<InMemoryChunkDataSource> =
+      ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[3, 0, 0, 0]))?;
+    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> =
+      ChunkSizePackedIterator::from_start(&mut reader)?
+        .next()
+        .expect("Expected one invalid packed chunk");
+    let error: String = match result {
+      Ok(_) => panic!("Expected undersized packed chunk to fail"),
+      Err(error) => error.to_string(),
+    };
+
+    assert!(
+      error.contains("declares invalid size 3"),
+      "Unexpected error: {error}"
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn rejects_packed_chunk_data_beyond_source_end() -> XRayResult {
+    let mut reader: ChunkReader<InMemoryChunkDataSource> =
+      ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[8, 0, 0, 0, 0]))?;
+    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> =
+      ChunkSizePackedIterator::from_start(&mut reader)?
+        .next()
+        .expect("Expected one invalid packed chunk");
+    let error: String = match result {
+      Ok(_) => panic!("Expected oversized packed chunk to fail"),
+      Err(error) => error.to_string(),
+    };
+
+    assert!(
+      error.contains("beyond source end"),
+      "Unexpected error: {error}"
+    );
 
     Ok(())
   }

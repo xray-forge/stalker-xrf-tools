@@ -41,7 +41,9 @@ impl OgfFile {
   }
 
   pub fn read_from_chunk<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    Self::read_from_chunks::<T>(&reader.read_children())
+    let chunks: Vec<ChunkReader> = reader.read_children()?;
+
+    Self::read_from_chunks::<T>(&chunks)
   }
 
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
@@ -86,7 +88,7 @@ impl OgfFile {
   /// Read only list of motion refs specifically and skip other data parts.
   pub fn read_motion_refs_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
     let mut reader: ChunkReader = ChunkReader::from_file(file)?;
-    let chunks: Vec<ChunkReader> = reader.read_children();
+    let chunks: Vec<ChunkReader> = reader.read_children()?;
 
     log::info!(
       "Reading ogf file motion refs, {} chunks, {} bytes",

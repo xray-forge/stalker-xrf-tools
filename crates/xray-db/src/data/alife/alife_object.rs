@@ -70,7 +70,7 @@ impl ChunkReadWrite for AlifeObject {
     )?;
 
     let section: String = spawn_reader.read_w1251_string()?;
-    let clsid: ClsId = ClsId::from_section(&section);
+    let clsid: ClsId = ClsId::from_section(&section)?;
     let class: AlifeClass = AlifeClass::from_cls_id(&clsid);
     let name: String = spawn_reader.read_w1251_string()?;
     let script_game_id: u8 = spawn_reader.read_u8()?;
@@ -238,7 +238,7 @@ impl LtxImportExport for AlifeObject {
     })?;
 
     let object_section: String = read_ltx_field("section", section)?;
-    let clsid: ClsId = ClsId::from_section(&object_section);
+    let clsid: ClsId = ClsId::from_section(&object_section)?;
 
     Ok(Self {
       id: read_ltx_field("id", section)?,
@@ -307,11 +307,13 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::cls_id::ClsId;
   use crate::export::LtxImportExport;
+  use byteorder::WriteBytesExt;
   use serde_json::to_string_pretty;
-  use std::fs::File;
+  use std::fs::{self, File};
   use std::io::{Seek, SeekFrom, Write};
+  use std::path::PathBuf;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xray_error::XRayResult;
+  use xray_error::{XRayError, XRayResult};
   use xray_ltx::Ltx;
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
@@ -319,6 +321,52 @@ mod tests {
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
+
+  #[test]
+  fn binary_read_returns_error_for_unknown_section() -> XRayResult {
+    let mut object_data_writer: ChunkWriter = ChunkWriter::new();
+    object_data_writer.write_u16::<XRayByteOrder>(1)?;
+    object_data_writer.write_w1251_string("unknown_section")?;
+
+    let mut spawn_data_writer: ChunkWriter = ChunkWriter::new();
+    spawn_data_writer.write_u16::<XRayByteOrder>(object_data_writer.bytes_written() as u16)?;
+    spawn_data_writer.write_all(&object_data_writer.flush_raw_into_buffer()?)?;
+
+    let bytes: Vec<u8> = spawn_data_writer.flush_chunk_into_buffer::<XRayByteOrder>(0)?;
+    let path: PathBuf = std::env::temp_dir().join(format!(
+      "xray-db-unknown-clsid-{}.chunk",
+      std::process::id()
+    ));
+    fs::write(&path, bytes)?;
+
+    let mut reader: ChunkReader = ChunkReader::from_file(File::open(&path)?)?;
+    let result: XRayResult<AlifeObject> = AlifeObject::read::<XRayByteOrder>(&mut reader);
+
+    drop(reader);
+    fs::remove_file(path)?;
+
+    let error: XRayError = result.unwrap_err();
+
+    assert_eq!(
+      error.to_string(),
+      "Parsing error: Unknown ALife object section 'unknown_section', no CLSID mapping exists"
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn ltx_import_returns_error_for_unknown_section() {
+    let mut ltx: Ltx = Ltx::new();
+    ltx.with_section("object").set("section", "unknown_section");
+
+    let error: XRayError = AlifeObject::import("object", &ltx).unwrap_err();
+
+    assert_eq!(
+      error.to_string(),
+      "Parsing error: Unknown ALife object section 'unknown_section', no CLSID mapping exists"
+    );
+  }
 
   #[test]
   fn test_read_write() -> XRayResult {

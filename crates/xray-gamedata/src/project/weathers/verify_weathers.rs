@@ -5,6 +5,7 @@ use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_with_definitions;
 use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
@@ -45,10 +46,17 @@ impl GamedataProject {
       XRayError::new_verify_error("Weather config count exceeds the supported result range")
     })?;
     let definitions: WeatherDefinitions = WeatherDefinitions::read(&self.ltx_project.root);
+    let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();
     let mut invalid_weather_files_count: u32 = 0;
 
     for weather_config in weather_configs {
-      if !verify_weather_with_definitions(self, options, weather_config, &definitions)? {
+      if !verify_weather_with_definitions(
+        self,
+        options,
+        weather_config,
+        &definitions,
+        &mut definition_load_errors,
+      )? {
         invalid_weather_files_count += 1;
       }
     }
@@ -56,6 +64,10 @@ impl GamedataProject {
     let duration: u128 = started_at.elapsed().as_millis();
 
     if options.is_logging_enabled() {
+      for error in definition_load_errors {
+        eprintln!("{error}");
+      }
+
       if checked_weather_files_count == 0 {
         println!(
           "Checked gamedata weather files in {} sec, no weather files found",

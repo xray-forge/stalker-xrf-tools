@@ -24,7 +24,7 @@ impl ChunkReadWrite for ParticlesGroupsChunk {
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children();
+    let chunks: Vec<ChunkReader> = reader.read_children()?;
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
     log::info!(

@@ -69,7 +69,7 @@ impl<T: ChunkDataSource> ChunkReader<T> {
 
   /// Whether chunk is ended and contains no more data to read.
   pub fn is_ended(&self) -> bool {
-    self.data.cursor_pos() == self.data.end_pos()
+    self.data.cursor_pos() >= self.data.end_pos()
   }
 
   /// Whether chunk contains data to read.
@@ -79,12 +79,12 @@ impl<T: ChunkDataSource> ChunkReader<T> {
 
   /// Get summary of bytes read from chunk based on current seek position.
   pub fn read_bytes_len(&self) -> u64 {
-    self.data.cursor_pos() - self.data.start_pos()
+    self.data.cursor_pos().saturating_sub(self.data.start_pos())
   }
 
   /// Get summary of bytes remaining based on current seek position.
   pub fn read_bytes_remain(&self) -> u64 {
-    self.data.end_pos() - self.data.cursor_pos()
+    self.data.end_pos().saturating_sub(self.data.cursor_pos())
   }
 
   /// Reset seek position in chunk file.
@@ -94,7 +94,9 @@ impl<T: ChunkDataSource> ChunkReader<T> {
 
   /// Navigates to chunk with index and constructs chunk representation.
   pub fn read_child_by_index(&mut self, id: u32) -> XRayResult<Self> {
-    for (iteration, chunk) in ChunkIterator::from_start(self).enumerate() {
+    for (iteration, chunk) in ChunkIterator::from_start(self)?.enumerate() {
+      let chunk: ChunkReader<T> = chunk?;
+
       if id as usize == iteration {
         return Ok(chunk);
       }
@@ -107,13 +109,13 @@ impl<T: ChunkDataSource> ChunkReader<T> {
   }
 
   /// Get list of all child samples in current chunk, do not mutate current chunk.
-  pub fn get_children_cloned(&self) -> Vec<Self> {
-    ChunkIterator::from_start(&mut self.clone()).collect()
+  pub fn get_children_cloned(&self) -> XRayResult<Vec<Self>> {
+    ChunkIterator::from_start(&mut self.clone())?.collect()
   }
 
   /// Read list of all child samples in current chunk and advance further.
-  pub fn read_children(&mut self) -> Vec<Self> {
-    ChunkIterator::<T>::from_start(self).collect()
+  pub fn read_children(&mut self) -> XRayResult<Vec<Self>> {
+    ChunkIterator::<T>::from_start(self)?.collect()
   }
 
   /// Assert data in chink is read and nothing remains to read.
@@ -188,14 +190,14 @@ mod tests {
   fn test_read_empty_children() -> XRayResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 0);
 
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks[0].size, 0);
@@ -211,7 +213,7 @@ mod tests {
   fn test_read_empty_unordered_children() -> XRayResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks[0].size, 0);
@@ -232,14 +234,14 @@ mod tests {
   fn test_read_dummy_children() -> XRayResult {
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 8);
 
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
-    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned();
+    let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
     assert_eq!(chunks.len(), 5, "Expect five chunks");
     assert_eq!(chunks[0].size, 8);

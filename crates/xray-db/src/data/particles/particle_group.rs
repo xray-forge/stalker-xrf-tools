@@ -47,7 +47,7 @@ impl ParticleGroup {
 impl ChunkReadWrite for ParticleGroup {
   /// Read group from chunk reader binary data.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children();
+    let chunks: Vec<ChunkReader> = reader.read_children()?;
 
     let particle_group: Self = Self {
       version: read_u16_chunk::<T>(&mut find_required_chunk_by_id(
