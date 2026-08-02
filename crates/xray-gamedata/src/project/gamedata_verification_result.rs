@@ -204,12 +204,15 @@ mod tests {
   }
 
   #[test]
-  fn reports_unimplemented_and_partial_checks_as_incomplete() {
+  fn reports_unimplemented_checks_as_incomplete() {
     let result = GamedataVerificationResult {
       levels_result: Some(Ok(GamedataLevelVerificationResult::default())),
       shaders_result: Some(Ok(GamedataShadersVerificationResult::default())),
       sounds_result: Some(Ok(GamedataSoundsVerificationResult::default())),
-      weathers_result: Some(Ok(GamedataWeathersVerificationResult::default())),
+      weathers_result: Some(Ok(GamedataWeathersVerificationResult {
+        checked_weather_files_count: 1,
+        ..Default::default()
+      })),
       ..Default::default()
     };
 
@@ -220,7 +223,6 @@ mod tests {
         String::from("Level validation is not implemented"),
         String::from("Shader validation is not implemented"),
         String::from("Sound validation is not implemented"),
-        String::from("Weather validation parses files but does not validate their semantics"),
       ]
     );
   }

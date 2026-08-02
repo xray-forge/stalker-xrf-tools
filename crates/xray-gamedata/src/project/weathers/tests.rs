@@ -1,0 +1,525 @@
+use super::verify_weathers_result::GamedataWeathersVerificationResult;
+use crate::GamedataProject;
+use crate::{
+  GamedataCheckResult, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
+  GamedataVerificationStatus,
+};
+use std::fs;
+use std::path::PathBuf;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
+
+fn semantic_weather_project(weather: &str) -> (PathBuf, GamedataProject) {
+  semantic_weather_project_files(&[("test.ltx", weather)], None)
+}
+
+fn semantic_weather_project_with_missing_texture(
+  weather: &str,
+  missing_texture: Option<&str>,
+) -> (PathBuf, GamedataProject) {
+  semantic_weather_project_files(&[("test.ltx", weather)], missing_texture)
+}
+
+fn semantic_weather_project_files(
+  weather_files: &[(&str, &str)],
+  missing_texture: Option<&str>,
+) -> (PathBuf, GamedataProject) {
+  let unique: u64 = NEXT_TEST_DIRECTORY_ID.fetch_add(1, Ordering::Relaxed);
+  let root: PathBuf = std::env::temp_dir().join(format!(
+    "xray-gamedata-semantic-weather-test-{}-{unique}",
+    std::process::id()
+  ));
+  let configs: PathBuf = root.join("configs");
+
+  fs::create_dir_all(configs.join("$scheme")).unwrap();
+  fs::create_dir_all(configs.join("environment").join("weathers")).unwrap();
+  fs::create_dir_all(root.join("textures").join("sky")).unwrap();
+  fs::write(configs.join("system.ltx"), "").unwrap();
+  fs::write(
+    configs.join("$scheme").join("environment.scheme.ltx"),
+    "[$weather]\n$strict = true\nambient = string\nclouds_texture = string\nsky_texture = string\nsun = ?string\nthunderbolt_collection = ?string\n",
+  )
+  .unwrap();
+  fs::write(
+    configs.join("environment").join("ambients.ltx"),
+    "[ambient_ok]\n",
+  )
+  .unwrap();
+  fs::write(configs.join("environment").join("suns.ltx"), "[sun_ok]\n").unwrap();
+  fs::write(
+    configs
+      .join("environment")
+      .join("thunderbolt_collections.ltx"),
+    "[bolt_ok]\n\n[bolt_bad]\nmissing_bolt =\n",
+  )
+  .unwrap();
+  fs::write(configs.join("environment").join("thunderbolts.ltx"), "").unwrap();
+  for (name, weather) in weather_files {
+    fs::write(
+      configs.join("environment").join("weathers").join(name),
+      weather,
+    )
+    .unwrap();
+  }
+
+  for texture in [
+    "clouds.dds",
+    "first.dds",
+    "first#small.dds",
+    "second.dds",
+    "second#small.dds",
+  ] {
+    if missing_texture != Some(texture) {
+      fs::write(root.join("textures").join("sky").join(texture), "").unwrap();
+    }
+  }
+
+  let project: GamedataProject = GamedataProject::open(&GamedataProjectReadOptions {
+    root: root.clone(),
+    is_silent: true,
+    ..Default::default()
+  })
+  .unwrap();
+
+  (root, project)
+}
+
+fn weather_section(time: &str, ambient: &str, sky: &str) -> String {
+  format!(
+    r#"[{time}]
+$scheme = $weather
+ambient = {ambient}
+ambient_color = 0, 0, 0
+clouds_color = 0, 0, 0, 1
+clouds_texture = sky\clouds
+far_plane = 500
+fog_color = 0, 0, 0
+fog_density = 0.25
+fog_distance = 500
+hemisphere_color = 0, 0, 0, 1
+rain_color = 1, 1, 1
+rain_density = 0
+sky_color = 1, 1, 1
+sky_rotation = 0
+sky_texture = sky\{sky}
+sun = sun_ok
+sun_altitude = 0
+sun_color = 0, 0, 0
+sun_longitude = 0
+sun_shafts_intensity = 0
+thunderbolt_collection = bolt_ok
+thunderbolt_duration = 0
+thunderbolt_period = 0
+water_intensity = 1
+wind_direction = 0
+wind_velocity = 0
+"#
+  )
+}
+
+#[test]
+fn weather_parse_failure_makes_the_check_fail() {
+  let valid_weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files(
+    &[
+      ("valid.ltx", &valid_weather),
+      (
+        "invalid.ltx",
+        "[00:00:00]\nvalue = first\n[00:00:00]\nvalue = duplicate\n",
+      ),
+    ],
+    None,
+  );
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.checked_weather_files_count, 2);
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.failure_message(), "1/2 weather files are invalid");
+}
+
+#[test]
+fn out_of_range_weather_time_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("24:00:00", "ambient_ok", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.checked_weather_files_count, 1);
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn noncanonical_weather_time_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("0:0:0", "ambient_ok", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn weather_requires_at_least_two_time_sections() {
+  let weather: String = weather_section("00:00:00", "ambient_ok", "first");
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn missing_ambient_reference_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "missing_ambient", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn missing_sun_reference_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first").replace("sun = sun_ok", "sun = missing_sun"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn missing_thunderbolt_collection_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first").replace(
+      "thunderbolt_collection = bolt_ok",
+      "thunderbolt_collection = missing_collection",
+    ),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn missing_small_sky_texture_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) =
+    semantic_weather_project_with_missing_texture(&weather, Some("first#small.dds"));
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn missing_cloud_texture_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) =
+    semantic_weather_project_with_missing_texture(&weather, Some("clouds.dds"));
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn missing_required_weather_field_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first").replace("far_plane = 500\n", ""),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn malformed_weather_values_make_the_check_fail() {
+  for malformed_section in [
+    weather_section("00:00:00", "ambient_ok", "first")
+      .replace("fog_density = 0.25", "fog_density = invalid"),
+    weather_section("00:00:00", "ambient_ok", "first")
+      .replace("fog_color = 0, 0, 0", "fog_color = 0, 0"),
+  ] {
+    let weather: String = format!(
+      "{}{}",
+      malformed_section,
+      weather_section("12:00:00", "ambient_ok", "second")
+    );
+    let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+    let result: GamedataWeathersVerificationResult = project
+      .verify_weathers(&GamedataProjectVerifyOptions {
+        is_silent: true,
+        ..Default::default()
+      })
+      .unwrap();
+
+    fs::remove_dir_all(&root).unwrap();
+
+    assert_eq!(result.invalid_weather_files_count, 1);
+    assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  }
+}
+
+#[test]
+fn incorrect_weather_scheme_marker_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first")
+      .replace("$scheme = $weather", "$scheme = $other"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn negative_weather_distance_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first").replace("far_plane = 500", "far_plane = -1"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn thunderbolt_collection_with_missing_member_makes_the_check_fail() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first").replace(
+      "thunderbolt_collection = bolt_ok",
+      "thunderbolt_collection = bolt_bad"
+    ),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.invalid_weather_files_count, 1);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+}
+
+#[test]
+fn valid_weather_cycle_passes() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first"),
+    weather_section("12:00:00", "ambient_ok", "second")
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.checked_weather_files_count, 1);
+  assert_eq!(result.invalid_weather_files_count, 0);
+  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+}
+
+#[test]
+fn weather_cycle_allows_disabled_sun_and_thunderbolts() {
+  let weather: String = format!(
+    "{}{}",
+    weather_section("00:00:00", "ambient_ok", "first")
+      .replace("sun = sun_ok", "sun =")
+      .replace(
+        "thunderbolt_collection = bolt_ok",
+        "thunderbolt_collection ="
+      ),
+    weather_section("12:00:00", "ambient_ok", "second")
+      .replace("sun = sun_ok", "sun =")
+      .replace(
+        "thunderbolt_collection = bolt_ok",
+        "thunderbolt_collection ="
+      )
+  );
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.checked_weather_files_count, 1);
+  assert_eq!(result.invalid_weather_files_count, 0);
+  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+}
+
+#[test]
+fn missing_weather_cycles_make_the_check_fail() {
+  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files(&[], None);
+
+  let result: GamedataWeathersVerificationResult = project
+    .verify_weathers(&GamedataProjectVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })
+    .unwrap();
+
+  fs::remove_dir_all(&root).unwrap();
+
+  assert_eq!(result.checked_weather_files_count, 0);
+  assert_eq!(result.invalid_weather_files_count, 0);
+  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.failure_message(), "No weather files found");
+}
