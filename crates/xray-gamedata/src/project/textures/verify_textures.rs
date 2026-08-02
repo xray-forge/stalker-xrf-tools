@@ -1,6 +1,6 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
@@ -21,6 +21,7 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let checked_textures_count: Mutex<u32> = Mutex::new(0);
+    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
     let invalid_textures_count: Mutex<u32> = Mutex::new(0);
 
     self
@@ -41,6 +42,13 @@ impl GamedataProject {
                   println!("Texture is not valid: {}", path.display());
                 }
 
+                findings
+                  .lock()
+                  .unwrap()
+                  .push(GamedataVerificationFinding::for_asset(
+                    &path,
+                    "Texture uses an unsupported format",
+                  ));
                 *invalid_textures_count.lock().unwrap() += 1;
               }
             }
@@ -53,6 +61,13 @@ impl GamedataProject {
                 );
               }
 
+              findings
+                .lock()
+                .unwrap()
+                .push(GamedataVerificationFinding::for_asset(
+                  &path,
+                  error.to_string(),
+                ));
               *invalid_textures_count.lock().unwrap() += 1;
             }
           }
@@ -61,6 +76,13 @@ impl GamedataProject {
             println!("Texture path not found: {}", path);
           }
 
+          findings
+            .lock()
+            .unwrap()
+            .push(GamedataVerificationFinding::for_asset(
+              Path::new(path),
+              "Texture path was not found in gamedata roots",
+            ));
           *invalid_textures_count.lock().unwrap() += 1;
         }
       });
@@ -68,6 +90,10 @@ impl GamedataProject {
     let duration: u128 = started_at.elapsed().as_millis();
     let checked_textures_count: u32 = *checked_textures_count.lock().unwrap();
     let invalid_textures_count: u32 = *invalid_textures_count.lock().unwrap();
+    let mut findings: Vec<GamedataVerificationFinding> =
+      std::mem::take(&mut *findings.lock().unwrap());
+
+    findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
 
     if options.is_logging_enabled() {
       println!(
@@ -80,6 +106,7 @@ impl GamedataProject {
 
     Ok(GamedataTexturesVerificationResult {
       duration,
+      findings,
       invalid_textures_count,
       checked_textures_count,
     })
