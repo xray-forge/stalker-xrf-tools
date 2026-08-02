@@ -6,10 +6,10 @@ pub struct GamedataShadersVerificationResult {}
 
 impl GamedataCheckResult for GamedataShadersVerificationResult {
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::Passed
+    GamedataVerificationStatus::Incomplete
   }
 
   fn failure_message(&self) -> String {
-    String::from("todo;")
+    String::from("Shader validation is not implemented")
   }
 }

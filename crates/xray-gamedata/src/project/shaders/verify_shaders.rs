@@ -1,5 +1,5 @@
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use xray_error::XRayResult;
 
@@ -8,11 +8,13 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataShadersVerificationResult> {
+    let result = GamedataShadersVerificationResult::default();
+
     if options.is_logging_enabled() {
       println!("{}", "Verify shaders:".green());
-      println!("  - todo");
+      println!("  - {}: {}", result.status(), result.failure_message());
     }
 
-    Ok(GamedataShadersVerificationResult {})
+    Ok(result)
   }
 }

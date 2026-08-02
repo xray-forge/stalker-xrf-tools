@@ -1,5 +1,5 @@
 use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use xray_error::XRayResult;
 
@@ -8,11 +8,13 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataSoundsVerificationResult> {
+    let result = GamedataSoundsVerificationResult::default();
+
     if options.is_logging_enabled() {
       println!("{}", "Verify sounds:".green());
-      println!("  - todo")
+      println!("  - {}: {}", result.status(), result.failure_message());
     }
 
-    Ok(GamedataSoundsVerificationResult {})
+    Ok(result)
   }
 }

@@ -1,5 +1,5 @@
 use crate::project::weathers::verify_weathers_result::GamedataWeathersVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
 use colored::Colorize;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -44,7 +44,13 @@ impl GamedataProject {
       self.verify_weather(options, weather_config)?;
     }
 
-    Ok(GamedataWeathersVerificationResult { duration })
+    let result = GamedataWeathersVerificationResult { duration };
+
+    if options.is_logging_enabled() {
+      println!("  - {}: {}", result.status(), result.failure_message());
+    }
+
+    Ok(result)
   }
 
   pub fn verify_weather(

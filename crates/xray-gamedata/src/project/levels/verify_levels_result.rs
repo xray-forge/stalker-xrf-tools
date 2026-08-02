@@ -6,10 +6,10 @@ pub struct GamedataLevelVerificationResult {}
 
 impl GamedataCheckResult for GamedataLevelVerificationResult {
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::Passed
+    GamedataVerificationStatus::Incomplete
   }
 
   fn failure_message(&self) -> String {
-    String::from("todo;")
+    String::from("Level validation is not implemented")
   }
 }

@@ -8,10 +8,10 @@ pub struct GamedataWeathersVerificationResult {
 
 impl GamedataCheckResult for GamedataWeathersVerificationResult {
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::Passed
+    GamedataVerificationStatus::Incomplete
   }
 
   fn failure_message(&self) -> String {
-    String::from("todo;")
+    String::from("Weather validation parses files but does not validate their semantics")
   }
 }

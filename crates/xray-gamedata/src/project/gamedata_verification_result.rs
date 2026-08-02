@@ -139,6 +139,10 @@ mod tests {
   use super::GamedataVerificationResult;
   use crate::GamedataVerificationStatus;
   use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
+  use crate::project::levels::verify_levels_result::GamedataLevelVerificationResult;
+  use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
+  use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
+  use crate::project::weathers::verify_weathers_result::GamedataWeathersVerificationResult;
   use xray_error::XRayError;
 
   #[test]
@@ -197,5 +201,27 @@ mod tests {
 
     assert_eq!(result.status(), GamedataVerificationStatus::Error);
     assert!(result.get_failure_messages()[0].contains("Check failed (animations):"));
+  }
+
+  #[test]
+  fn reports_unimplemented_and_partial_checks_as_incomplete() {
+    let result = GamedataVerificationResult {
+      levels_result: Some(Ok(GamedataLevelVerificationResult::default())),
+      shaders_result: Some(Ok(GamedataShadersVerificationResult::default())),
+      sounds_result: Some(Ok(GamedataSoundsVerificationResult::default())),
+      weathers_result: Some(Ok(GamedataWeathersVerificationResult::default())),
+      ..Default::default()
+    };
+
+    assert_eq!(result.status(), GamedataVerificationStatus::Incomplete);
+    assert_eq!(
+      result.get_failure_messages(),
+      vec![
+        String::from("Level validation is not implemented"),
+        String::from("Shader validation is not implemented"),
+        String::from("Sound validation is not implemented"),
+        String::from("Weather validation parses files but does not validate their semantics"),
+      ]
+    );
   }
 }

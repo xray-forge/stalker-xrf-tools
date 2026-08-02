@@ -6,10 +6,10 @@ pub struct GamedataSoundsVerificationResult {}
 
 impl GamedataCheckResult for GamedataSoundsVerificationResult {
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::Passed
+    GamedataVerificationStatus::Incomplete
   }
 
   fn failure_message(&self) -> String {
-    String::from("todo;")
+    String::from("Sound validation is not implemented")
   }
 }
