@@ -27,25 +27,27 @@ impl GamedataProject {
         continue;
       }
 
-      if let Some(relative) = entry_path
-        .strip_prefix(root)
-        .map_err(|_| {
-          XRayError::new_unexpected_error("Failed to strip prefix from gamedata root path")
-        })?
-        .to_str()
-      {
-        if options.ignored.iter().any(|it| relative.starts_with(it)) {
-          continue;
-        }
-
-        // todo: Descriptor with lowercase?
-        assets.insert(
-          relative.to_lowercase(),
-          AssetDescriptor::new_with_extension(relative),
-        );
-      } else {
+      let relative_path: &Path = entry_path.strip_prefix(root).map_err(|_| {
+        XRayError::new_unexpected_error("Failed to strip prefix from gamedata root path")
+      })?;
+      let Some(relative): Option<&str> = relative_path.to_str() else {
         log::warn!("Could not strip prefix: {}", entry_path.display());
+        continue;
+      };
+      let logical_path: String = Self::logical_asset_path("", relative);
+
+      if options
+        .ignored
+        .iter()
+        .any(|ignored| logical_path.starts_with(&Self::logical_asset_path("", ignored)))
+      {
+        continue;
       }
+
+      assets.insert(
+        logical_path,
+        AssetDescriptor::from_relative_path(relative_path),
+      );
     }
 
     if options.is_logging_enabled() {
@@ -74,11 +76,13 @@ impl GamedataProject {
 
   /// Get list of all asset relative paths by provided ending part.
   pub fn get_all_asset_absolute_paths_by_ends_with(&self, filter: &str) -> Vec<PathBuf> {
+    let filter: String = Self::logical_asset_path("", filter);
+
     self
       .assets
       .iter()
       .filter_map(|(path, _)| {
-        if path.ends_with(filter) {
+        if path.ends_with(&filter) {
           self.get_absolute_asset_path(path)
         } else {
           None
@@ -106,14 +110,28 @@ impl GamedataProject {
     prefix: &str,
     relative_path: &str,
   ) -> Option<(PathBuf, &AssetDescriptor)> {
-    let asset_path: PathBuf =
-      PathBuf::from(prefix.to_lowercase()).join(relative_path.to_lowercase());
+    let asset_path: String = Self::logical_asset_path(prefix, relative_path);
 
     self
       .assets
-      .get(asset_path.to_str().unwrap())
-      .map(|descriptor| (self.root.join(&asset_path), descriptor))
+      .get(&asset_path)
+      .map(|descriptor| (self.root.join(&descriptor.relative_path), descriptor))
       .or(None)
+  }
+
+  fn logical_asset_path(prefix: &str, relative_path: &str) -> String {
+    let prefix: String = prefix.replace('/', "\\").to_lowercase();
+    let relative_path: String = relative_path.replace('/', "\\").to_lowercase();
+    let prefix: &str = prefix.trim_matches('\\');
+    let relative_path: &str = relative_path.trim_start_matches('\\');
+
+    if prefix.is_empty() {
+      relative_path.to_string()
+    } else if relative_path.is_empty() {
+      prefix.to_string()
+    } else {
+      format!("{prefix}\\{relative_path}")
+    }
   }
 
   pub fn get_prefixed_masked_assets(
@@ -121,8 +139,8 @@ impl GamedataProject {
     prefix: &str,
     mask: &str,
   ) -> Vec<(PathBuf, &AssetDescriptor)> {
-    let asset_mask: PathBuf = PathBuf::from(prefix.to_lowercase()).join(mask.to_lowercase());
-    let split: Vec<&str> = asset_mask.to_str().unwrap().split('*').collect::<Vec<_>>();
+    let asset_mask: String = Self::logical_asset_path(prefix, mask);
+    let split: Vec<&str> = asset_mask.split('*').collect::<Vec<_>>();
 
     if split.len() != 2 {
       return Vec::new();
@@ -133,7 +151,7 @@ impl GamedataProject {
       .iter()
       .filter_map(|(path, descriptor)| {
         if path.starts_with(split.first().unwrap()) && path.ends_with(split.last().unwrap()) {
-          Some((self.root.join(path), descriptor))
+          Some((self.root.join(&descriptor.relative_path), descriptor))
         } else {
           None
         }
@@ -199,7 +217,60 @@ impl GamedataProject {
 
 #[cfg(test)]
 mod tests {
-  use crate::GamedataProject;
+  use crate::asset::asset_descriptor::AssetDescriptor;
+  use crate::{GamedataProject, GamedataProjectReadOptions};
+  use std::collections::HashMap;
+  use std::fs;
+  use std::path::PathBuf;
+  use std::sync::atomic::{AtomicU64, Ordering};
+  use xray_error::XRayResult;
+
+  static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
+
+  #[test]
+  fn normalizes_host_separators_to_xray_logical_paths() {
+    assert_eq!(
+      GamedataProject::logical_asset_path("textures", "sky\\clouds.dds"),
+      "textures\\sky\\clouds.dds"
+    );
+    assert_eq!(
+      GamedataProject::logical_asset_path("textures", "sky/clouds.dds"),
+      "textures\\sky\\clouds.dds"
+    );
+    assert_eq!(
+      GamedataProject::logical_asset_path("meshes", "actors\\stalker_*.omf"),
+      "meshes\\actors\\stalker_*.omf"
+    );
+  }
+
+  #[test]
+  fn preserves_physical_path_casing_separately_from_logical_identity() -> XRayResult {
+    let unique: u64 = NEXT_TEST_DIRECTORY_ID.fetch_add(1, Ordering::Relaxed);
+    let root: PathBuf = std::env::temp_dir().join(format!(
+      "xray-gamedata-asset-path-test-{}-{unique}",
+      std::process::id()
+    ));
+    let relative_path: PathBuf = PathBuf::from("Textures").join("Sky").join("Clouds.DDS");
+    fs::create_dir_all(root.join("Textures").join("Sky"))?;
+    fs::write(root.join(&relative_path), [])?;
+
+    let assets: HashMap<String, AssetDescriptor> =
+      GamedataProject::read_project_assets(&GamedataProjectReadOptions {
+        root: root.clone(),
+        is_silent: true,
+        ..Default::default()
+      })?;
+    let descriptor: &AssetDescriptor = assets
+      .get("textures\\sky\\clouds.dds")
+      .expect("Expected canonical logical asset identity");
+
+    assert_eq!(descriptor.relative_path, relative_path);
+    assert!(root.join(&descriptor.relative_path).is_file());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
 
   #[test]
   fn resolves_renderer_authoring_extensions_to_dds() {

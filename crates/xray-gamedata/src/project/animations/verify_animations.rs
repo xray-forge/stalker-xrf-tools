@@ -281,27 +281,10 @@ impl GamedataProject {
 
     for motion_ref in &motion_refs {
       if motion_ref.ends_with("*.omf") {
-        let matching_base: String = PathBuf::from("meshes")
-          .join(&motion_ref[0..motion_ref.len() - 5])
-          .to_str()
-          .unwrap()
-          .to_string();
-
-        let matching_omf: Vec<String> = self
-          .assets
-          .iter()
-          .filter(|(path, descriptor)| {
-            descriptor.asset_type == AssetType::Omf && path.starts_with(&matching_base)
-          })
-          .map(|(path, _)| path.to_string())
-          .collect();
-
-        for omf in matching_omf {
-          assets.insert(
-            self
-              .get_absolute_asset_path(&omf)
-              .expect("Defined assets from pattern matching should be existing"),
-          );
+        for (omf_path, descriptor) in self.get_prefixed_masked_assets("meshes", motion_ref) {
+          if descriptor.asset_type == AssetType::Omf {
+            assets.insert(omf_path);
+          }
         }
       } else if let Some(visual_path) = self.get_omf_path(motion_ref) {
         assets.insert(visual_path);
