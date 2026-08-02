@@ -6,6 +6,7 @@ use xray_error::XRayResult;
 pub struct GamedataVerificationFinding {
   pub asset_path: Option<PathBuf>,
   pub message: String,
+  pub rule_id: Option<String>,
 }
 
 impl GamedataVerificationFinding {
@@ -17,6 +18,20 @@ impl GamedataVerificationFinding {
     Self {
       asset_path: Some(asset_path.as_ref().to_path_buf()),
       message: message.into(),
+      rule_id: None,
+    }
+  }
+
+  pub fn for_asset_in_rule<R, P, M>(rule_id: R, asset_path: P, message: M) -> Self
+  where
+    R: Into<String>,
+    P: AsRef<Path>,
+    M: Into<String>,
+  {
+    Self {
+      asset_path: Some(asset_path.as_ref().to_path_buf()),
+      message: message.into(),
+      rule_id: Some(rule_id.into()),
     }
   }
 
@@ -27,6 +42,19 @@ impl GamedataVerificationFinding {
     Self {
       asset_path: None,
       message: message.into(),
+      rule_id: None,
+    }
+  }
+
+  pub fn without_asset_in_rule<R, M>(rule_id: R, message: M) -> Self
+  where
+    R: Into<String>,
+    M: Into<String>,
+  {
+    Self {
+      asset_path: None,
+      message: message.into(),
+      rule_id: Some(rule_id.into()),
     }
   }
 }
@@ -71,7 +99,7 @@ impl GamedataVerificationReport {
   }
 
   pub fn status(&self) -> GamedataVerificationStatus {
-    Self::aggregate_status(self.checks.iter().map(|it| it.status))
+    GamedataVerificationStatus::aggregate(self.checks.iter().map(|it| it.status))
   }
 
   pub fn is_valid(&self) -> bool {
@@ -92,31 +120,6 @@ impl GamedataVerificationReport {
         GamedataVerificationStatus::Passed | GamedataVerificationStatus::Skipped
       )
     })
-  }
-
-  fn aggregate_status(
-    statuses: impl IntoIterator<Item = GamedataVerificationStatus>,
-  ) -> GamedataVerificationStatus {
-    let mut aggregate: GamedataVerificationStatus = GamedataVerificationStatus::Skipped;
-
-    for status in statuses {
-      aggregate = match (aggregate, status) {
-        (GamedataVerificationStatus::Error, _) | (_, GamedataVerificationStatus::Error) => {
-          GamedataVerificationStatus::Error
-        }
-        (GamedataVerificationStatus::Incomplete, _)
-        | (_, GamedataVerificationStatus::Incomplete) => GamedataVerificationStatus::Incomplete,
-        (GamedataVerificationStatus::Failed, _) | (_, GamedataVerificationStatus::Failed) => {
-          GamedataVerificationStatus::Failed
-        }
-        (GamedataVerificationStatus::Passed, _) | (_, GamedataVerificationStatus::Passed) => {
-          GamedataVerificationStatus::Passed
-        }
-        _ => GamedataVerificationStatus::Skipped,
-      };
-    }
-
-    aggregate
   }
 }
 
@@ -144,29 +147,6 @@ mod tests {
     fn findings(&self) -> &[GamedataVerificationFinding] {
       &self.findings
     }
-  }
-
-  #[test]
-  fn aggregates_check_statuses_by_severity() {
-    use GamedataVerificationStatus::{Error, Failed, Incomplete, Passed, Skipped};
-
-    assert_eq!(GamedataVerificationReport::aggregate_status([]), Skipped);
-    assert_eq!(
-      GamedataVerificationReport::aggregate_status([Skipped, Passed]),
-      Passed
-    );
-    assert_eq!(
-      GamedataVerificationReport::aggregate_status([Passed, Incomplete]),
-      Incomplete
-    );
-    assert_eq!(
-      GamedataVerificationReport::aggregate_status([Failed, Incomplete]),
-      Incomplete
-    );
-    assert_eq!(
-      GamedataVerificationReport::aggregate_status([Incomplete, Error]),
-      Error
-    );
   }
 
   #[test]

@@ -1,29 +1,57 @@
+use crate::project::sounds::verify_sound_files_result::GamedataSoundFilesVerificationResult;
+use crate::project::sounds::verify_sound_references_result::GamedataSoundReferencesVerificationResult;
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
 
-#[derive(Default)]
 pub struct GamedataSoundsVerificationResult {
-  pub checked_sound_references_count: u32,
   pub duration: u128,
-  pub findings: Vec<GamedataVerificationFinding>,
-  pub invalid_sound_references_count: u32,
-  pub invalid_sounds_count: u32,
-  pub checked_sounds_count: u32,
+  findings: Vec<GamedataVerificationFinding>,
+  sound_files: GamedataSoundFilesVerificationResult,
+  sound_references: GamedataSoundReferencesVerificationResult,
+}
+
+impl GamedataSoundsVerificationResult {
+  pub(crate) fn new(
+    duration: u128,
+    sound_files: GamedataSoundFilesVerificationResult,
+    sound_references: GamedataSoundReferencesVerificationResult,
+  ) -> Self {
+    let mut findings: Vec<GamedataVerificationFinding> = sound_files
+      .findings()
+      .iter()
+      .chain(sound_references.findings())
+      .cloned()
+      .collect();
+
+    findings.sort_by(|left, right| {
+      left
+        .asset_path
+        .cmp(&right.asset_path)
+        .then_with(|| left.rule_id.cmp(&right.rule_id))
+        .then_with(|| left.message.cmp(&right.message))
+    });
+
+    Self {
+      duration,
+      findings,
+      sound_files,
+      sound_references,
+    }
+  }
 }
 
 impl GamedataCheckResult for GamedataSoundsVerificationResult {
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::from_is_valid(
-      self.invalid_sounds_count == 0 && self.invalid_sound_references_count == 0,
-    )
+    GamedataVerificationStatus::aggregate([
+      self.sound_files.status(),
+      self.sound_references.status(),
+    ])
   }
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} sounds valid; {}/{} sound references valid",
-      self.checked_sounds_count - self.invalid_sounds_count,
-      self.checked_sounds_count,
-      self.checked_sound_references_count - self.invalid_sound_references_count,
-      self.checked_sound_references_count
+      "{}; {}",
+      self.sound_files.failure_message(),
+      self.sound_references.failure_message(),
     )
   }
 
@@ -35,6 +63,8 @@ impl GamedataCheckResult for GamedataSoundsVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataSoundsVerificationResult;
+  use crate::project::sounds::verify_sound_files_result::GamedataSoundFilesVerificationResult;
+  use crate::project::sounds::verify_sound_references_result::GamedataSoundReferencesVerificationResult;
   use crate::{
     GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
     GamedataVerificationStatus, GamedataVerificationType,
@@ -42,7 +72,8 @@ mod tests {
 
   #[test]
   fn exposes_sound_reference_findings_in_sound_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
+      "sounds.references",
       "configs/ui/game_tutorials.xml",
       "Unknown sound reference: <sound> = video\\missing",
     );
@@ -50,12 +81,15 @@ mod tests {
 
     report.add_check(
       GamedataVerificationType::Sounds,
-      Ok(GamedataSoundsVerificationResult {
-        checked_sound_references_count: 1,
-        findings: vec![finding.clone()],
-        invalid_sound_references_count: 1,
-        ..Default::default()
-      }),
+      Ok(GamedataSoundsVerificationResult::new(
+        0,
+        GamedataSoundFilesVerificationResult::default(),
+        GamedataSoundReferencesVerificationResult {
+          checked_references_count: 1,
+          findings: vec![finding.clone()],
+          invalid_references_count: 1,
+        },
+      )),
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
@@ -68,11 +102,15 @@ mod tests {
 
   #[test]
   fn fails_when_a_sound_reference_is_invalid() {
-    let result: GamedataSoundsVerificationResult = GamedataSoundsVerificationResult {
-      checked_sound_references_count: 1,
-      invalid_sound_references_count: 1,
-      ..Default::default()
-    };
+    let result: GamedataSoundsVerificationResult = GamedataSoundsVerificationResult::new(
+      0,
+      GamedataSoundFilesVerificationResult::default(),
+      GamedataSoundReferencesVerificationResult {
+        checked_references_count: 1,
+        invalid_references_count: 1,
+        ..Default::default()
+      },
+    );
 
     assert_eq!(result.status(), GamedataVerificationStatus::Failed);
   }

@@ -1,22 +1,39 @@
-use crate::project::sounds::verify_sounds_result::GamedataSoundsVerificationResult;
+use crate::project::sounds::verify_sound_references_result::GamedataSoundReferencesVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use regex::Regex;
 use std::collections::HashSet;
 use std::path::Path;
+use xray_error::XRayResult;
 use xray_ltx::{Ltx, LtxProject};
 
-impl GamedataProject {
-  pub(crate) fn verify_sound_references(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-    sound_paths: &[String],
-    result: &mut GamedataSoundsVerificationResult,
-  ) {
-    let sound_names: HashSet<String> = Self::read_sound_names(sound_paths);
-    let sound_roots: HashSet<String> = Self::read_sound_roots(&sound_names);
+pub(crate) struct SoundReferencesVerifier<'a> {
+  options: &'a GamedataProjectVerifyOptions,
+  project: &'a GamedataProject,
+  sound_paths: &'a [String],
+}
 
-    self.verify_sound_references_in_configs(options, &sound_names, &sound_roots, result);
-    self.verify_sound_references_in_xml(&sound_names, &sound_roots, result);
+impl<'a> SoundReferencesVerifier<'a> {
+  pub(crate) fn new(
+    project: &'a GamedataProject,
+    options: &'a GamedataProjectVerifyOptions,
+    sound_paths: &'a [String],
+  ) -> Self {
+    Self {
+      options,
+      project,
+      sound_paths,
+    }
+  }
+
+  pub(crate) fn verify(&self) -> XRayResult<GamedataSoundReferencesVerificationResult> {
+    let sound_names: HashSet<String> = Self::read_sound_names(self.sound_paths);
+    let sound_roots: HashSet<String> = Self::read_sound_roots(&sound_names);
+    let mut result: GamedataSoundReferencesVerificationResult = Default::default();
+
+    self.verify_references_in_configs(&sound_names, &sound_roots, &mut result);
+    self.verify_references_in_xml(&sound_names, &sound_roots, &mut result);
+
+    Ok(result)
   }
 
   fn read_sound_names(sound_paths: &[String]) -> HashSet<String> {
@@ -37,23 +54,20 @@ impl GamedataProject {
       .collect()
   }
 
-  fn verify_sound_references_in_configs(
+  fn verify_references_in_configs(
     &self,
-    options: &GamedataProjectVerifyOptions,
     sound_names: &HashSet<String>,
     sound_roots: &HashSet<String>,
-    result: &mut GamedataSoundsVerificationResult,
+    result: &mut GamedataSoundReferencesVerificationResult,
   ) {
-    for path in &self.ltx_project.ltx_file_entries {
+    for path in &self.project.ltx_project.ltx_file_entries {
       if LtxProject::is_ltx_scheme_path(path) {
         continue;
       }
 
       match Ltx::read_from_file_full(path) {
-        Ok(ltx) => {
-          self.verify_sound_references_in_ltx(options, sound_names, sound_roots, &ltx, path, result)
-        }
-        Err(error) if options.is_verbose_logging_enabled() => eprintln!(
+        Ok(ltx) => self.verify_references_in_ltx(sound_names, sound_roots, &ltx, path, result),
+        Err(error) if self.options.is_verbose_logging_enabled() => eprintln!(
           "Skipping ltx entry in sound reference check: {} - {}",
           path.display(),
           error
@@ -63,29 +77,32 @@ impl GamedataProject {
     }
   }
 
-  fn verify_sound_references_in_xml(
+  fn verify_references_in_xml(
     &self,
     sound_names: &HashSet<String>,
     sound_roots: &HashSet<String>,
-    result: &mut GamedataSoundsVerificationResult,
+    result: &mut GamedataSoundReferencesVerificationResult,
   ) {
     let sound_tag: Regex = Regex::new(r"(?is)<sound>\s*([^<]+?)\s*</sound>").unwrap();
 
-    for (relative_path, descriptor) in &self.assets {
+    for (relative_path, descriptor) in &self.project.assets {
       if !relative_path.starts_with("configs\\") || !relative_path.ends_with(".xml") {
         continue;
       }
 
-      let path = self.root.join(&descriptor.relative_path);
+      let path = self.project.root.join(&descriptor.relative_path);
       let contents: String = match std::fs::read(&path) {
         Ok(contents) => String::from_utf8_lossy(&contents).into_owned(),
         Err(error) => {
-          result.checked_sound_references_count += 1;
-          result.invalid_sound_references_count += 1;
-          result.findings.push(GamedataVerificationFinding::for_asset(
-            &path,
-            format!("Could not inspect XML sound references: {error}"),
-          ));
+          result.checked_references_count += 1;
+          result.invalid_references_count += 1;
+          result
+            .findings
+            .push(GamedataVerificationFinding::for_asset_in_rule(
+              "sounds.references",
+              &path,
+              format!("Could not inspect XML sound references: {error}"),
+            ));
           continue;
         }
       };
@@ -93,20 +110,19 @@ impl GamedataProject {
       for capture in sound_tag.captures_iter(&contents) {
         let reference: &str = &capture[1];
         if Self::is_direct_sound_reference(sound_roots, reference) {
-          self.verify_sound_reference(sound_names, reference, &path, "<sound>", result);
+          self.verify_reference(sound_names, reference, &path, "<sound>", result);
         }
       }
     }
   }
 
-  fn verify_sound_references_in_ltx(
+  fn verify_references_in_ltx(
     &self,
-    options: &GamedataProjectVerifyOptions,
     sound_names: &HashSet<String>,
     sound_roots: &HashSet<String>,
     ltx: &Ltx,
     path: &Path,
-    result: &mut GamedataSoundsVerificationResult,
+    result: &mut GamedataSoundReferencesVerificationResult,
   ) {
     for (section_name, section) in &ltx.sections {
       for (key, value) in section.iter() {
@@ -121,7 +137,7 @@ impl GamedataProject {
             continue;
           }
 
-          self.verify_sound_reference(
+          self.verify_reference(
             sound_names,
             reference,
             path,
@@ -132,31 +148,34 @@ impl GamedataProject {
       }
     }
 
-    if options.is_verbose_logging_enabled() {
+    if self.options.is_verbose_logging_enabled() {
       println!("Verified sound references in {}", path.display());
     }
   }
 
-  fn verify_sound_reference(
+  fn verify_reference(
     &self,
     sound_names: &HashSet<String>,
     reference: &str,
     path: &Path,
     location: &str,
-    result: &mut GamedataSoundsVerificationResult,
+    result: &mut GamedataSoundReferencesVerificationResult,
   ) {
     let sound_name: String = Self::normalize_sound_reference(reference);
-    result.checked_sound_references_count += 1;
+    result.checked_references_count += 1;
 
     if Self::sound_reference_exists(sound_names, &sound_name) {
       return;
     }
 
-    result.invalid_sound_references_count += 1;
-    result.findings.push(GamedataVerificationFinding::for_asset(
-      path,
-      format!("Unknown sound reference: {location} = {reference}"),
-    ));
+    result.invalid_references_count += 1;
+    result
+      .findings
+      .push(GamedataVerificationFinding::for_asset_in_rule(
+        "sounds.references",
+        path,
+        format!("Unknown sound reference: {location} = {reference}"),
+      ));
   }
 
   fn is_sound_reference_key(key: &str) -> bool {
@@ -187,7 +206,7 @@ impl GamedataProject {
 
 #[cfg(test)]
 mod tests {
-  use super::GamedataProject;
+  use super::SoundReferencesVerifier;
   use std::collections::HashSet;
 
   #[test]
@@ -199,17 +218,17 @@ mod tests {
     .into_iter()
     .collect();
 
-    assert!(GamedataProject::sound_reference_exists(
+    assert!(SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &GamedataProject::normalize_sound_reference("sounds/weapons/ak74_shot.ogg")
+      &SoundReferencesVerifier::normalize_sound_reference("sounds/weapons/ak74_shot.ogg")
     ));
-    assert!(GamedataProject::sound_reference_exists(
+    assert!(SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &GamedataProject::normalize_sound_reference("monsters\\boar\\boar_idle_")
+      &SoundReferencesVerifier::normalize_sound_reference("monsters\\boar\\boar_idle_")
     ));
-    assert!(!GamedataProject::sound_reference_exists(
+    assert!(!SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &GamedataProject::normalize_sound_reference("weapons\\missing")
+      &SoundReferencesVerifier::normalize_sound_reference("weapons\\missing")
     ));
   }
 
@@ -217,15 +236,15 @@ mod tests {
   fn only_treats_sound_fields_with_paths_as_direct_references() {
     let sound_roots: HashSet<String> = [String::from("weapons")].into_iter().collect();
 
-    assert!(GamedataProject::is_sound_reference_key("snd_shoot"));
-    assert!(!GamedataProject::is_sound_reference_key(
+    assert!(SoundReferencesVerifier::is_sound_reference_key("snd_shoot"));
+    assert!(!SoundReferencesVerifier::is_sound_reference_key(
       "Sound_Vampire_Hit"
     ));
-    assert!(GamedataProject::is_direct_sound_reference(
+    assert!(SoundReferencesVerifier::is_direct_sound_reference(
       &sound_roots,
       "weapons\\ak74_shot"
     ));
-    assert!(!GamedataProject::is_direct_sound_reference(
+    assert!(!SoundReferencesVerifier::is_direct_sound_reference(
       &sound_roots,
       "fight\\enemy\\enemy_"
     ));

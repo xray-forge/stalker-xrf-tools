@@ -15,6 +15,22 @@ pub enum GamedataVerificationStatus {
 }
 
 impl GamedataVerificationStatus {
+  pub fn aggregate(statuses: impl IntoIterator<Item = Self>) -> Self {
+    let mut aggregate: Self = Self::Skipped;
+
+    for status in statuses {
+      aggregate = match (aggregate, status) {
+        (Self::Error, _) | (_, Self::Error) => Self::Error,
+        (Self::Incomplete, _) | (_, Self::Incomplete) => Self::Incomplete,
+        (Self::Failed, _) | (_, Self::Failed) => Self::Failed,
+        (Self::Passed, _) | (_, Self::Passed) => Self::Passed,
+        _ => Self::Skipped,
+      };
+    }
+
+    aggregate
+  }
+
   pub const fn from_is_valid(is_valid: bool) -> Self {
     if is_valid { Self::Passed } else { Self::Failed }
   }
@@ -37,6 +53,29 @@ mod tests {
     assert_eq!(
       GamedataVerificationStatus::Incomplete.to_string(),
       "incomplete"
+    );
+  }
+
+  #[test]
+  fn aggregates_statuses_by_severity() {
+    use GamedataVerificationStatus::{Error, Failed, Incomplete, Passed, Skipped};
+
+    assert_eq!(GamedataVerificationStatus::aggregate([]), Skipped);
+    assert_eq!(
+      GamedataVerificationStatus::aggregate([Skipped, Passed]),
+      Passed
+    );
+    assert_eq!(
+      GamedataVerificationStatus::aggregate([Passed, Incomplete]),
+      Incomplete
+    );
+    assert_eq!(
+      GamedataVerificationStatus::aggregate([Failed, Incomplete]),
+      Incomplete
+    );
+    assert_eq!(
+      GamedataVerificationStatus::aggregate([Incomplete, Error]),
+      Error
     );
   }
 }
