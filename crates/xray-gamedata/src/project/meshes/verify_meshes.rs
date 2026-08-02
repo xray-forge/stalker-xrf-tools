@@ -37,32 +37,33 @@ impl GamedataProject {
 
         if let Some(path) = self.get_absolute_asset_path(path) {
           match OgfFile::read_from_path::<XRayByteOrder, _>(&path) {
-            Ok(ogf) => match self.verify_mesh_findings(options, &shader_library, &ogf, Some(&path))
-            {
-              Ok(mesh_findings) if !mesh_findings.is_empty() => {
-                if options.is_logging_enabled() {
-                  eprintln!("Mesh is not valid: {}", path.display());
-                }
+            Ok(ogf) => {
+              match self.verify_mesh_findings(options, &shader_library, &ogf, Some(&path), None) {
+                Ok(mesh_findings) if !mesh_findings.is_empty() => {
+                  if options.is_logging_enabled() {
+                    eprintln!("Mesh is not valid: {}", path.display());
+                  }
 
-                findings.lock().unwrap().extend(mesh_findings);
-                *invalid_meshes_count.lock().unwrap() += 1;
-              }
-              Ok(_) => {}
-              Err(error) => {
-                if options.is_logging_enabled() {
-                  eprintln!("Mesh verification failed: {} - {}", path.display(), error);
+                  findings.lock().unwrap().extend(mesh_findings);
+                  *invalid_meshes_count.lock().unwrap() += 1;
                 }
+                Ok(_) => {}
+                Err(error) => {
+                  if options.is_logging_enabled() {
+                    eprintln!("Mesh verification failed: {} - {}", path.display(), error);
+                  }
 
-                findings
-                  .lock()
-                  .unwrap()
-                  .push(GamedataVerificationFinding::for_asset(
-                    &path,
-                    format!("Failed to verify mesh: {error}"),
-                  ));
-                *invalid_meshes_count.lock().unwrap() += 1;
+                  findings
+                    .lock()
+                    .unwrap()
+                    .push(GamedataVerificationFinding::for_asset(
+                      &path,
+                      format!("Failed to verify mesh: {error}"),
+                    ));
+                  *invalid_meshes_count.lock().unwrap() += 1;
+                }
               }
-            },
+            }
             Err(error) => {
               if options.is_logging_enabled() {
                 eprintln!("Mesh verification failed: {} - {}", path.display(), error);
@@ -134,7 +135,7 @@ impl GamedataProject {
 
     Ok(
       self
-        .verify_mesh_findings(options, &shader_library, &ogf, Some(path.as_ref()))?
+        .verify_mesh_findings(options, &shader_library, &ogf, Some(path.as_ref()), None)?
         .is_empty(),
     )
   }
@@ -148,7 +149,7 @@ impl GamedataProject {
 
     Ok(
       self
-        .verify_mesh_findings(options, &shader_library, ogf, None)?
+        .verify_mesh_findings(options, &shader_library, ogf, None, None)?
         .is_empty(),
     )
   }
@@ -159,16 +160,30 @@ impl GamedataProject {
     shader_library: &ShaderLibraryFile,
     ogf: &OgfFile,
     mesh_path: Option<&Path>,
+    inherited_bones_count: Option<usize>,
   ) -> XRayResult<Vec<GamedataVerificationFinding>> {
+    let bones_count: Option<usize> = ogf
+      .bones
+      .as_ref()
+      .map(|bones| bones.bones.len())
+      .or(inherited_bones_count);
     let mut findings: Vec<GamedataVerificationFinding> =
       self.verify_mesh_texture_findings(options, ogf, mesh_path);
+
     findings.extend(self.verify_mesh_shader_findings(options, shader_library, ogf, mesh_path));
     findings.extend(self.verify_mesh_skeleton_findings(ogf, mesh_path));
+    findings.extend(self.verify_mesh_geometry_findings(ogf, mesh_path, bones_count));
 
     // Verify all nested children in mesh object.
     if let Some(children) = &ogf.children {
       for child in &children.nested {
-        findings.extend(self.verify_mesh_findings(options, shader_library, child, mesh_path)?);
+        findings.extend(self.verify_mesh_findings(
+          options,
+          shader_library,
+          child,
+          mesh_path,
+          bones_count,
+        )?);
       }
     }
 
@@ -320,6 +335,67 @@ impl GamedataProject {
     .into_iter()
     .map(|message| Self::mesh_finding(mesh_path, message))
     .collect()
+  }
+
+  fn verify_mesh_geometry_findings(
+    &self,
+    ogf: &OgfFile,
+    mesh_path: Option<&Path>,
+    bones_count: Option<usize>,
+  ) -> Vec<GamedataVerificationFinding> {
+    let Some(geometry) = &ogf.geometry else {
+      return Vec::new();
+    };
+
+    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+
+    if let Some(indices) = &geometry.indices {
+      if indices.len() % 3 != 0 {
+        findings.push(Self::mesh_finding(
+          mesh_path,
+          format!(
+            "Mesh geometry contains {} indices, which is not divisible by 3",
+            indices.len()
+          ),
+        ));
+      }
+
+      if let Some(vertex_count) = geometry.vertex_count
+        && let Some(index) = indices.iter().find(|index| **index as u32 >= vertex_count)
+      {
+        findings.push(Self::mesh_finding(
+          mesh_path,
+          format!(
+            "Mesh geometry index {index} references a vertex outside the {vertex_count} vertices"
+          ),
+        ));
+      }
+    }
+
+    if !geometry.skin_bone_indices.is_empty() {
+      match bones_count {
+        Some(bones_count) => {
+          if let Some(bone_index) = geometry
+            .skin_bone_indices
+            .iter()
+            .find(|index| **index as usize >= bones_count)
+          {
+            findings.push(Self::mesh_finding(
+              mesh_path,
+              format!(
+                "Mesh geometry skin vertex references bone {bone_index}, but the skeleton has {bones_count} bones"
+              ),
+            ));
+          }
+        }
+        None => findings.push(Self::mesh_finding(
+          mesh_path,
+          "Mesh geometry contains skinned vertices but no skeleton".to_string(),
+        )),
+      }
+    }
+
+    findings
   }
 
   fn skeleton_topology_findings<'a>(
