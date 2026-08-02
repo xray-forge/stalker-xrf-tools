@@ -1,6 +1,6 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::particles::verify_particles_usage_result::GamedataParticlesUsageVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
@@ -33,6 +33,12 @@ impl GamedataProject {
     self.verify_particles_usage_in_configs(options, &particle_names, &mut result);
     self.verify_particles_usage_in_spawns(options, &particle_names, &mut result);
 
+    result.findings.sort_by(|left, right| {
+      left
+        .asset_path
+        .cmp(&right.asset_path)
+        .then_with(|| left.message.cmp(&right.message))
+    });
     result.duration = started_at.elapsed().as_millis();
 
     if options.is_logging_enabled() {
@@ -121,6 +127,10 @@ impl GamedataProject {
           eprintln!("Spawn path not found for particle usage check: {relative_path}");
         }
 
+        result.findings.push(GamedataVerificationFinding::for_asset(
+          Path::new(relative_path),
+          "Spawn path was not found in gamedata roots",
+        ));
         result.unreadable_spawn_files_count += 1;
         continue;
       };
@@ -137,6 +147,10 @@ impl GamedataProject {
               );
             }
 
+            result.findings.push(GamedataVerificationFinding::for_asset(
+              &spawn_path,
+              format!("Could not inspect spawn file for particle usage: {error}"),
+            ));
             result.unreadable_spawn_files_count += 1;
             continue;
           }
@@ -194,6 +208,10 @@ impl GamedataProject {
               );
             }
 
+            result.findings.push(GamedataVerificationFinding::for_asset(
+              path,
+              format!("Unknown particle reference: [{section_name}] {key} = {reference}"),
+            ));
             result.invalid_references_count += 1;
           }
         }
