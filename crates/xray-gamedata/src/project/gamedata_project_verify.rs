@@ -1,5 +1,5 @@
 use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationResult,
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationReport,
   GamedataVerificationType,
 };
 use std::time::Instant;
@@ -9,7 +9,7 @@ impl GamedataProject {
   pub fn verify(
     &mut self,
     options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataVerificationResult> {
+  ) -> XRayResult<GamedataVerificationReport> {
     if options.checks.is_empty() {
       return Err(XRayError::new_unexpected_error(
         "No gamedata checks to perform provided",
@@ -34,35 +34,104 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
 
-    let mut result: GamedataVerificationResult = GamedataVerificationResult {
-      duration: 0,
-      animations_result: GamedataVerificationType::Animations
-        .contains_and_then(&options.checks, || self.verify_animations(options)),
-      ltx_result: GamedataVerificationType::Ltx
-        .contains_and_then(&options.checks, || self.verify_ltx(options)),
-      levels_result: GamedataVerificationType::Levels
-        .contains_and_then(&options.checks, || self.verify_levels(options)),
-      meshes_result: GamedataVerificationType::Meshes
-        .contains_and_then(&options.checks, || self.verify_meshes(options)),
-      particles_result: GamedataVerificationType::Particles
-        .contains_and_then(&options.checks, || self.verify_particles(options)),
-      particles_usage_result: GamedataVerificationType::ParticlesUsage
-        .contains_and_then(&options.checks, || self.verify_particles_usage(options)),
-      scripts_result: GamedataVerificationType::Scripts
-        .contains_and_then(&options.checks, || self.verify_scripts(options)),
-      shaders_result: GamedataVerificationType::Shaders
-        .contains_and_then(&options.checks, || self.verify_shaders(options)),
-      sounds_result: GamedataVerificationType::Sounds
-        .contains_and_then(&options.checks, || self.verify_sounds(options)),
-      spawns_result: GamedataVerificationType::Spawns
-        .contains_and_then(&options.checks, || self.verify_spawns(options)),
-      textures_result: GamedataVerificationType::Textures
-        .contains_and_then(&options.checks, || self.verify_textures(options)),
-      weapons_result: GamedataVerificationType::Weapons
-        .contains_and_then(&options.checks, || self.verify_weapons(options)),
-      weathers_result: GamedataVerificationType::Weathers
-        .contains_and_then(&options.checks, || self.verify_weathers(options)),
-    };
+    let mut result: GamedataVerificationReport = GamedataVerificationReport::default();
+
+    if options
+      .checks
+      .contains(&GamedataVerificationType::Animations)
+    {
+      result.add_check(
+        GamedataVerificationType::Animations,
+        self.verify_animations(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Ltx) {
+      result.add_check(GamedataVerificationType::Ltx, self.verify_ltx(options));
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Levels) {
+      result.add_check(
+        GamedataVerificationType::Levels,
+        self.verify_levels(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Meshes) {
+      result.add_check(
+        GamedataVerificationType::Meshes,
+        self.verify_meshes(options),
+      );
+    }
+
+    if options
+      .checks
+      .contains(&GamedataVerificationType::Particles)
+    {
+      result.add_check(
+        GamedataVerificationType::Particles,
+        self.verify_particles(options),
+      );
+    }
+
+    if options
+      .checks
+      .contains(&GamedataVerificationType::ParticlesUsage)
+    {
+      result.add_check(
+        GamedataVerificationType::ParticlesUsage,
+        self.verify_particles_usage(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Scripts) {
+      result.add_check(
+        GamedataVerificationType::Scripts,
+        self.verify_scripts(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Shaders) {
+      result.add_check(
+        GamedataVerificationType::Shaders,
+        self.verify_shaders(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Sounds) {
+      result.add_check(
+        GamedataVerificationType::Sounds,
+        self.verify_sounds(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Spawns) {
+      result.add_check(
+        GamedataVerificationType::Spawns,
+        self.verify_spawns(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Textures) {
+      result.add_check(
+        GamedataVerificationType::Textures,
+        self.verify_textures(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Weapons) {
+      result.add_check(
+        GamedataVerificationType::Weapons,
+        self.verify_weapons(options),
+      );
+    }
+
+    if options.checks.contains(&GamedataVerificationType::Weathers) {
+      result.add_check(
+        GamedataVerificationType::Weathers,
+        self.verify_weathers(options),
+      );
+    }
 
     result.duration = started_at.elapsed().as_millis();
 

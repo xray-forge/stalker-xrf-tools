@@ -1,6 +1,6 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use full_moon::{LuaVersion, parse_fallible};
 use rayon::iter::IntoParallelRefIterator;
@@ -23,6 +23,7 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let checked_scripts_count: Mutex<u32> = Mutex::new(0);
+    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
     let invalid_scripts_count: Mutex<u32> = Mutex::new(0);
 
     self
@@ -43,6 +44,13 @@ impl GamedataProject {
                   println!("Script is not valid: {}", path.display());
                 }
 
+                findings
+                  .lock()
+                  .unwrap()
+                  .push(GamedataVerificationFinding::for_asset(
+                    &path,
+                    "LuaJIT parser rejected the script",
+                  ));
                 *invalid_scripts_count.lock().unwrap() += 1;
               }
             }
@@ -51,6 +59,13 @@ impl GamedataProject {
                 eprintln!("Script verification failed: {error}");
               }
 
+              findings
+                .lock()
+                .unwrap()
+                .push(GamedataVerificationFinding::for_asset(
+                  &path,
+                  error.to_string(),
+                ));
               *invalid_scripts_count.lock().unwrap() += 1;
             }
           }
@@ -59,6 +74,13 @@ impl GamedataProject {
             println!("Script path not found: {}", path);
           }
 
+          findings
+            .lock()
+            .unwrap()
+            .push(GamedataVerificationFinding::for_asset(
+              Path::new(path),
+              "Script path was not found in gamedata roots",
+            ));
           *invalid_scripts_count.lock().unwrap() += 1;
         }
       });
@@ -66,6 +88,10 @@ impl GamedataProject {
     let duration: u128 = started_at.elapsed().as_millis();
     let checked_scripts_count: u32 = *checked_scripts_count.lock().unwrap();
     let invalid_scripts_count: u32 = *invalid_scripts_count.lock().unwrap();
+    let mut findings: Vec<GamedataVerificationFinding> =
+      std::mem::take(&mut *findings.lock().unwrap());
+
+    findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
 
     if options.is_logging_enabled() {
       if checked_scripts_count > 0 {
@@ -86,6 +112,7 @@ impl GamedataProject {
     Ok(GamedataScriptsVerificationResult {
       duration,
       checked_scripts_count,
+      findings,
       invalid_scripts_count,
     })
   }

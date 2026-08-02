@@ -2,7 +2,7 @@ use derive_more::Display;
 use std::str::FromStr;
 use xray_error::XRayError;
 
-#[derive(Clone, Debug, PartialEq, Display)]
+#[derive(Clone, Debug, Eq, PartialEq, Display)]
 pub enum GamedataVerificationType {
   #[display("animations")]
   Animations,

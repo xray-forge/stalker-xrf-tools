@@ -1,10 +1,10 @@
-use crate::GamedataCheckResult;
-use crate::GamedataVerificationStatus;
+use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
 
 #[derive(Default)]
 pub struct GamedataParticlesVerificationResult {
   pub duration: u128,
   pub checked_particle_files_count: u32,
+  pub findings: Vec<GamedataVerificationFinding>,
   pub invalid_particle_files_count: u32,
 }
 
@@ -18,6 +18,10 @@ impl GamedataCheckResult for GamedataParticlesVerificationResult {
       "{}/{} particle library files are invalid",
       self.invalid_particle_files_count, self.checked_particle_files_count
     )
+  }
+
+  fn findings(&self) -> &[GamedataVerificationFinding] {
+    &self.findings
   }
 }
 

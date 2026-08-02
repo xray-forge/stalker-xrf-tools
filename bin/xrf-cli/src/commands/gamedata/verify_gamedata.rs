@@ -165,6 +165,20 @@ impl GenericCommand for VerifyGamedataCommand {
             eprintln!("- {message}");
           }
 
+          for report in verify_result.get_failure_reports() {
+            for finding in &report.findings {
+              match &finding.asset_path {
+                Some(asset_path) => eprintln!(
+                  "  - [{}] {}: {}",
+                  report.verification_type,
+                  asset_path.display(),
+                  finding.message
+                ),
+                None => eprintln!("  - [{}] {}", report.verification_type, finding.message),
+              }
+            }
+          }
+
           eprintln!(
             "Gamedata project checked in {} sec",
             (verify_result.duration as f64) / 1000.0

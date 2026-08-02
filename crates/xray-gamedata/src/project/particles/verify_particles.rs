@@ -1,8 +1,8 @@
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use rayon::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::Instant;
 use xray_db::{ParticlesFile, XRayByteOrder};
@@ -19,6 +19,7 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let checked_particles_count: Mutex<u32> = Mutex::new(0);
+    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
     let invalid_particles_count: Mutex<u32> = Mutex::new(0);
 
     self
@@ -32,28 +33,19 @@ impl GamedataProject {
         *checked_particles_count.lock().unwrap() += 1;
 
         match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(&path) {
-          Ok(particles_file) => match self.verify_particle(options, &particles_file) {
-            Ok(result) => {
-              if !result {
-                if options.is_logging_enabled() {
-                  println!("Particle library is invalid: {}", path.display());
-                }
+          Ok(particles_file) => {
+            let particle_findings: Vec<GamedataVerificationFinding> =
+              self.verify_particle(options, &particles_file, path);
 
-                *invalid_particles_count.lock().unwrap() += 1;
-              }
-            }
-            Err(error) => {
+            if !particle_findings.is_empty() {
               if options.is_logging_enabled() {
-                println!(
-                  "Failed to verify particle library '{}': {}",
-                  path.display(),
-                  error
-                );
+                println!("Particle library is invalid: {}", path.display());
               }
 
+              findings.lock().unwrap().extend(particle_findings);
               *invalid_particles_count.lock().unwrap() += 1;
             }
-          },
+          }
           Err(error) => {
             if options.is_logging_enabled() {
               println!(
@@ -63,6 +55,13 @@ impl GamedataProject {
               );
             }
 
+            findings
+              .lock()
+              .unwrap()
+              .push(GamedataVerificationFinding::for_asset(
+                path,
+                format!("Failed to read particle library: {error}"),
+              ));
             *invalid_particles_count.lock().unwrap() += 1;
           }
         }
@@ -71,6 +70,10 @@ impl GamedataProject {
     let duration: u128 = started_at.elapsed().as_millis();
     let checked_particle_files_count: u32 = *checked_particles_count.lock().unwrap();
     let invalid_particle_files_count: u32 = *invalid_particles_count.lock().unwrap();
+    let mut findings: Vec<GamedataVerificationFinding> =
+      std::mem::take(&mut *findings.lock().unwrap());
+
+    findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
 
     if options.is_logging_enabled() {
       println!(
@@ -84,6 +87,7 @@ impl GamedataProject {
     Ok(GamedataParticlesVerificationResult {
       duration,
       checked_particle_files_count,
+      findings,
       invalid_particle_files_count,
     })
   }
@@ -92,8 +96,9 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     particles_file: &ParticlesFile,
-  ) -> XRayResult<bool> {
-    let mut is_valid: bool = true;
+    particle_library_path: &Path,
+  ) -> Vec<GamedataVerificationFinding> {
+    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
 
     for particle in &particles_file.effects.effects {
       if options.is_verbose_logging_enabled() {
@@ -105,43 +110,37 @@ impl GamedataProject {
           match self.verify_texture_by_path(options, &texture) {
             Ok(result) => {
               if !result {
-                if options.is_logging_enabled() {
-                  println!(
-                    "Particle effect '{}' references invalid texture '{}'",
-                    particle.name,
-                    texture.display()
-                  );
-                }
-
-                is_valid = false;
+                findings.push(GamedataVerificationFinding::for_asset(
+                  &texture,
+                  format!(
+                    "Particle effect '{}' references an invalid texture",
+                    particle.name
+                  ),
+                ));
               }
             }
             Err(error) => {
-              if options.is_logging_enabled() {
-                println!(
-                  "Failed to verify texture '{}' for particle effect '{}': {}",
-                  texture.display(),
-                  particle.name,
-                  error
-                );
-              }
-
-              is_valid = false;
+              findings.push(GamedataVerificationFinding::for_asset(
+                &texture,
+                format!(
+                  "Failed to verify texture for particle effect '{}': {error}",
+                  particle.name
+                ),
+              ));
             }
           }
         } else {
-          if options.is_logging_enabled() {
-            println!(
+          findings.push(GamedataVerificationFinding::for_asset(
+            particle_library_path,
+            format!(
               "Particle effect '{}' references missing texture '{}'",
               particle.name, texture_relative_path
-            );
-          }
-
-          is_valid = false;
+            ),
+          ));
         }
       }
     }
 
-    Ok(is_valid)
+    findings
   }
 }
