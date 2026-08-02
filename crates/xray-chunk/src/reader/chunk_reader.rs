@@ -69,7 +69,7 @@ impl<T: ChunkDataSource> ChunkReader<T> {
 
   /// Whether chunk is ended and contains no more data to read.
   pub fn is_ended(&self) -> bool {
-    self.data.cursor_pos() >= self.data.end_pos()
+    self.data.cursor_pos() == self.data.end_pos()
   }
 
   /// Whether chunk contains data to read.

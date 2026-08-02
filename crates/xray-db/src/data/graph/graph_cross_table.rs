@@ -26,11 +26,9 @@ impl GraphCrossTable {
   pub fn import_list<T: ByteOrder>(file: &mut File) -> XRayResult<Vec<Self>> {
     let mut cross_tables: Vec<Self> = Vec::new();
 
-    for cross_table_reader in ChunkSizePackedIterator::from_current(&mut ChunkReader::from_file(
-      file
-        .try_clone()
-        .expect("Cross tables list import should clone file"),
-    )?) {
+    for cross_table_reader in
+      ChunkSizePackedIterator::from_current(&mut ChunkReader::from_file(file.try_clone()?)?)
+    {
       let mut cross_table_reader: ChunkReader = cross_table_reader?;
 
       cross_tables.push(cross_table_reader.read_xr::<T, _>()?);

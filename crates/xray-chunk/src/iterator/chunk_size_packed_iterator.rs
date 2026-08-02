@@ -8,7 +8,7 @@ use xray_error::{XRayError, XRayResult};
 pub struct ChunkSizePackedIterator<'a, T: ChunkDataSource = FileSlice> {
   pub index: u32,
   pub reader: &'a mut ChunkReader<T>,
-  pub failed: bool,
+  failed: bool,
 }
 
 impl<T: ChunkDataSource> ChunkSizePackedIterator<'_, T> {

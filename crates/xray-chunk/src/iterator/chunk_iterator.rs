@@ -9,7 +9,7 @@ use xray_error::{XRayError, XRayResult};
 /// Mutates parent object to keep track of what was read during execution.
 pub struct ChunkIterator<'a, T: ChunkDataSource = FileSlice> {
   pub reader: &'a mut ChunkReader<T>,
-  pub failed: bool,
+  failed: bool,
 }
 
 impl<T: ChunkDataSource> ChunkIterator<'_, T> {
@@ -110,7 +110,8 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
 
 #[cfg(test)]
 mod tests {
-  use crate::{ChunkReader, InMemoryChunkDataSource};
+  use crate::{ChunkDataSource, ChunkReader, InMemoryChunkDataSource};
+  use std::io::SeekFrom;
   use xray_error::XRayResult;
 
   #[test]
@@ -140,6 +141,28 @@ mod tests {
 
     assert!(
       error.contains("beyond source end"),
+      "Unexpected error: {error}"
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn rejects_cursor_position_beyond_source_end() -> XRayResult {
+    let mut reader: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 0, 0])?;
+    reader.data.set_seek(SeekFrom::Start(4))?;
+
+    assert!(!reader.is_ended());
+    assert!(reader.assert_read("Reader overrun must fail").is_err());
+
+    let error: String = match super::ChunkIterator::from_current(&mut reader).next() {
+      Some(Err(error)) => error.to_string(),
+      Some(Ok(_)) => panic!("Expected overrun reader to fail"),
+      None => panic!("Expected overrun reader to produce an error"),
+    };
+
+    assert!(
+      error.contains("Incomplete chunk header"),
       "Unexpected error: {error}"
     );
 

@@ -31,7 +31,7 @@ impl ChunkDataSource for InMemoryChunkDataSource {
   }
 
   fn end_pos(&self) -> u64 {
-    self.cursor.remaining() as u64 + self.cursor.position()
+    self.cursor.get_ref().len() as u64
   }
 
   fn set_seek(&mut self, pos: SeekFrom) -> IoResult<u64> {
