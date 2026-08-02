@@ -1,6 +1,6 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
@@ -20,6 +20,7 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let checked_meshes_count: Mutex<u32> = Mutex::new(0);
+    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
     let invalid_meshes_count: Mutex<u32> = Mutex::new(0);
 
     self
@@ -33,21 +34,44 @@ impl GamedataProject {
         *checked_meshes_count.lock().unwrap() += 1;
 
         if let Some(path) = self.get_absolute_asset_path(path) {
-          match self.verify_mesh_by_path(options, &path) {
-            Ok(is_valid) => {
-              if !is_valid {
+          match OgfFile::read_from_path::<XRayByteOrder, _>(&path) {
+            Ok(ogf) => match self.verify_mesh_findings(options, &ogf, Some(&path)) {
+              Ok(mesh_findings) if !mesh_findings.is_empty() => {
                 if options.is_logging_enabled() {
                   eprintln!("Mesh is not valid: {}", path.display());
                 }
 
+                findings.lock().unwrap().extend(mesh_findings);
                 *invalid_meshes_count.lock().unwrap() += 1;
               }
-            }
+              Ok(_) => {}
+              Err(error) => {
+                if options.is_logging_enabled() {
+                  eprintln!("Mesh verification failed: {} - {}", path.display(), error);
+                }
+
+                findings
+                  .lock()
+                  .unwrap()
+                  .push(GamedataVerificationFinding::for_asset(
+                    &path,
+                    format!("Failed to verify mesh: {error}"),
+                  ));
+                *invalid_meshes_count.lock().unwrap() += 1;
+              }
+            },
             Err(error) => {
               if options.is_logging_enabled() {
                 eprintln!("Mesh verification failed: {} - {}", path.display(), error);
               }
 
+              findings
+                .lock()
+                .unwrap()
+                .push(GamedataVerificationFinding::for_asset(
+                  &path,
+                  format!("Failed to read mesh: {error}"),
+                ));
               *invalid_meshes_count.lock().unwrap() += 1;
             }
           }
@@ -56,6 +80,13 @@ impl GamedataProject {
             eprintln!("Mesh path not found: {}", path);
           }
 
+          findings
+            .lock()
+            .unwrap()
+            .push(GamedataVerificationFinding::for_asset(
+              Path::new(path),
+              "Mesh path was not found in gamedata roots",
+            ));
           *invalid_meshes_count.lock().unwrap() += 1;
         }
       });
@@ -63,6 +94,15 @@ impl GamedataProject {
     let duration: u128 = started_at.elapsed().as_millis();
     let checked_meshes_count: u32 = *checked_meshes_count.lock().unwrap();
     let invalid_meshes_count: u32 = *invalid_meshes_count.lock().unwrap();
+    let mut findings: Vec<GamedataVerificationFinding> =
+      std::mem::take(&mut *findings.lock().unwrap());
+
+    findings.sort_by(|left, right| {
+      left
+        .asset_path
+        .cmp(&right.asset_path)
+        .then_with(|| left.message.cmp(&right.message))
+    });
 
     if options.is_logging_enabled() {
       println!(
@@ -75,6 +115,7 @@ impl GamedataProject {
 
     Ok(GamedataMeshesVerificationResult {
       duration,
+      findings,
       invalid_meshes_count,
       checked_meshes_count,
     })
@@ -85,7 +126,13 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     path: &P,
   ) -> XRayResult<bool> {
-    self.verify_mesh(options, &OgfFile::read_from_path::<XRayByteOrder, _>(path)?)
+    let ogf: OgfFile = OgfFile::read_from_path::<XRayByteOrder, _>(path)?;
+
+    Ok(
+      self
+        .verify_mesh_findings(options, &ogf, Some(path.as_ref()))?
+        .is_empty(),
+    )
   }
 
   pub fn verify_mesh(
@@ -93,18 +140,22 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
   ) -> XRayResult<bool> {
-    let mut is_valid: bool = true;
+    Ok(self.verify_mesh_findings(options, ogf, None)?.is_empty())
+  }
 
-    if !self.verify_mesh_textures(options, ogf)? {
-      is_valid = false;
-    }
+  fn verify_mesh_findings(
+    &self,
+    options: &GamedataProjectVerifyOptions,
+    ogf: &OgfFile,
+    mesh_path: Option<&Path>,
+  ) -> XRayResult<Vec<GamedataVerificationFinding>> {
+    let mut findings: Vec<GamedataVerificationFinding> =
+      self.verify_mesh_texture_findings(options, ogf, mesh_path);
 
     // Verify all nested children in mesh object.
     if let Some(children) = &ogf.children {
       for child in &children.nested {
-        if !self.verify_mesh(options, child)? {
-          is_valid = false;
-        }
+        findings.extend(self.verify_mesh_findings(options, child, mesh_path)?);
       }
     }
 
@@ -118,28 +169,32 @@ impl GamedataProject {
             eprintln!("Mesh motion refs not found by path: {motion_ref}");
           }
 
-          is_valid = false;
+          findings.push(Self::mesh_finding(
+            mesh_path,
+            format!("Mesh references missing motion '{motion_ref}'"),
+          ));
         } else {
           for motion_path in motion_paths {
             match OmfFile::read_from_path::<XRayByteOrder, _>(&motion_path) {
-              Ok(omf) => match self.verify_mesh_motion(options, ogf, &omf) {
-                Ok(result) => {
-                  if !result {
-                    is_valid = false;
-                  }
-                }
-                Err(error) => {
-                  if options.is_logging_enabled() {
-                    eprintln!(
-                      "Mesh motion file failed to read: {}, error: {}",
-                      motion_path.display(),
-                      error
-                    );
-                  }
+              Ok(omf) => {
+                match self.verify_mesh_motion_findings(options, ogf, &omf, Some(&motion_path)) {
+                  Ok(motion_findings) => findings.extend(motion_findings),
+                  Err(error) => {
+                    if options.is_logging_enabled() {
+                      eprintln!(
+                        "Mesh motion verification failed: {}, error: {}",
+                        motion_path.display(),
+                        error
+                      );
+                    }
 
-                  is_valid = false;
+                    findings.push(GamedataVerificationFinding::for_asset(
+                      &motion_path,
+                      format!("Failed to verify referenced motion: {error}"),
+                    ));
+                  }
                 }
-              },
+              }
               Err(error) => {
                 if options.is_logging_enabled() {
                   eprintln!(
@@ -149,7 +204,10 @@ impl GamedataProject {
                   );
                 }
 
-                is_valid = false;
+                findings.push(GamedataVerificationFinding::for_asset(
+                  &motion_path,
+                  format!("Failed to read referenced motion: {error}"),
+                ));
               }
             }
           }
@@ -159,7 +217,7 @@ impl GamedataProject {
 
     // todo: Verify LOD?
 
-    Ok(is_valid)
+    Ok(findings)
   }
 
   pub fn verify_mesh_textures(
@@ -167,7 +225,20 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
   ) -> XRayResult<bool> {
-    let mut is_valid: bool = true;
+    Ok(
+      self
+        .verify_mesh_texture_findings(options, ogf, None)
+        .is_empty(),
+    )
+  }
+
+  fn verify_mesh_texture_findings(
+    &self,
+    options: &GamedataProjectVerifyOptions,
+    ogf: &OgfFile,
+    mesh_path: Option<&Path>,
+  ) -> Vec<GamedataVerificationFinding> {
+    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
 
     if let Some(texture) = &ogf.texture
       && self
@@ -178,12 +249,15 @@ impl GamedataProject {
         eprintln!("Cannot read OGF texture: {}", texture.texture_name);
       }
 
-      is_valid = false;
+      findings.push(Self::mesh_finding(
+        mesh_path,
+        format!("Mesh references missing texture '{}'", texture.texture_name),
+      ));
     }
 
     // todo: Shader check?
 
-    Ok(is_valid)
+    findings
   }
 
   pub fn verify_mesh_motion(
@@ -192,7 +266,21 @@ impl GamedataProject {
     ogf: &OgfFile,
     omf: &OmfFile,
   ) -> XRayResult<bool> {
-    let mut is_valid: bool = true;
+    Ok(
+      self
+        .verify_mesh_motion_findings(options, ogf, omf, None)?
+        .is_empty(),
+    )
+  }
+
+  fn verify_mesh_motion_findings(
+    &self,
+    options: &GamedataProjectVerifyOptions,
+    ogf: &OgfFile,
+    omf: &OmfFile,
+    motion_path: Option<&Path>,
+  ) -> XRayResult<Vec<GamedataVerificationFinding>> {
+    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
 
     if let Some(bones) = &ogf.bones {
       let omf_bones: Vec<&str> = omf.get_bones();
@@ -213,7 +301,14 @@ impl GamedataProject {
           );
         }
 
-        is_valid = false;
+        findings.push(Self::motion_finding(
+          motion_path,
+          format!(
+            "Motion bone count does not match mesh: {} mesh bones, {} motion bones",
+            bones.bones.len(),
+            omf_bones.len()
+          ),
+        ));
       } else if bones
         .bones
         .iter()
@@ -232,10 +327,35 @@ impl GamedataProject {
           );
         }
 
-        is_valid = false;
+        let missing_bones: Vec<&str> = bones
+          .bones
+          .iter()
+          .filter_map(|bone| {
+            (!omf_bones.contains(&bone.name.as_str())).then_some(bone.name.as_str())
+          })
+          .collect();
+
+        findings.push(Self::motion_finding(
+          motion_path,
+          format!("Motion is missing mesh bones: {}", missing_bones.join(",")),
+        ));
       }
     }
 
-    Ok(is_valid)
+    Ok(findings)
+  }
+
+  fn mesh_finding(mesh_path: Option<&Path>, message: String) -> GamedataVerificationFinding {
+    match mesh_path {
+      Some(path) => GamedataVerificationFinding::for_asset(path, message),
+      None => GamedataVerificationFinding::without_asset(message),
+    }
+  }
+
+  fn motion_finding(motion_path: Option<&Path>, message: String) -> GamedataVerificationFinding {
+    match motion_path {
+      Some(path) => GamedataVerificationFinding::for_asset(path, message),
+      None => GamedataVerificationFinding::without_asset(message),
+    }
   }
 }
