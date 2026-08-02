@@ -28,6 +28,7 @@ struct GamedataVerificationCheckReportOutput {
 struct GamedataVerificationFindingOutput {
   asset_path: Option<String>,
   message: String,
+  rule_id: Option<String>,
 }
 
 pub struct GamedataVerificationReportWriter<'a> {
@@ -58,7 +59,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
         .map(|check| self.check_report_output(check))
         .collect(),
       duration_ms: self.report.duration,
-      schema_version: 1,
+      schema_version: 2,
       status: self.report.status().to_string(),
     }
   }
@@ -101,6 +102,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
           .replace('\\', "/")
       }),
       message: finding.message.clone(),
+      rule_id: finding.rule_id.clone(),
     }
   }
 }
@@ -139,7 +141,8 @@ mod tests {
     let report: GamedataVerificationReport = GamedataVerificationReport {
       checks: vec![GamedataVerificationCheckReport {
         findings: vec![
-          GamedataVerificationFinding::for_asset(
+          GamedataVerificationFinding::for_asset_in_rule(
+            "textures.dds",
             root.join("textures").join("z.dds"),
             "Second finding",
           ),
@@ -163,7 +166,7 @@ mod tests {
 
     fs::remove_dir_all(&root).unwrap();
 
-    assert_eq!(json["schemaVersion"], 1);
+    assert_eq!(json["schemaVersion"], 2);
     assert_eq!(json["status"], "failed");
     assert_eq!(json["durationMs"], 42);
     assert_eq!(json["checks"][0]["verificationType"], "textures");
@@ -175,5 +178,6 @@ mod tests {
       json["checks"][0]["findings"][1]["assetPath"],
       "textures/z.dds"
     );
+    assert_eq!(json["checks"][0]["findings"][1]["ruleId"], "textures.dds");
   }
 }

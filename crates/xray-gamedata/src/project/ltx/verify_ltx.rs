@@ -31,7 +31,6 @@ impl GamedataProject {
       self.ltx_project.verify_entries_opt(LtxVerifyOptions {
         is_silent: options.is_silent,
         is_verbose: options.is_verbose,
-        is_strict: options.is_strict,
       })?;
     let findings: Vec<GamedataVerificationFinding> =
       Self::collect_ltx_findings(&format_result, &verification_result);
@@ -117,7 +116,6 @@ impl GamedataProject {
     self.ltx_project.verify_entries_opt(LtxVerifyOptions {
       is_silent: options.is_silent,
       is_verbose: options.is_verbose,
-      is_strict: options.is_strict,
     })
   }
 }

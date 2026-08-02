@@ -129,14 +129,6 @@ impl LtxProject {
           } else {
             result.valid_sections += 1;
           }
-        } else if options.is_strict {
-          result.invalid_sections += 1;
-          result.errors.push(XRayError::new_scheme_error_at(
-            section_name,
-            "*",
-            "Expected '$schema' field to be defined in strict mode check",
-            entry.to_str().unwrap(),
-          ));
         } else {
           result.skipped_sections += 1
         }
@@ -186,7 +178,11 @@ impl LtxProject {
 mod tests {
   use super::*;
   use crate::{LtxProjectOptions, LtxVerifyOptions};
+  use std::fs;
   use std::path::PathBuf;
+  use std::sync::atomic::{AtomicU64, Ordering};
+
+  static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 
   #[test]
   fn validates_condlists_from_project_schemes() {
@@ -218,5 +214,37 @@ mod tests {
         root.join("invalid.ltx").display(),
       ),
     );
+  }
+
+  #[test]
+  fn skips_schema_less_sections() -> XRayResult {
+    let unique: u64 = NEXT_TEST_DIRECTORY_ID.fetch_add(1, Ordering::Relaxed);
+    let root: PathBuf = std::env::temp_dir().join(format!(
+      "xray-ltx-project-verify-test-{}-{unique}",
+      std::process::id()
+    ));
+    fs::create_dir_all(&root)?;
+    fs::write(root.join("array_sections.ltx"), "[array@one]\nvalue = 1\n")?;
+
+    let project: LtxProject = LtxProject::open_at_path_opt(
+      &root,
+      LtxProjectOptions {
+        is_with_schemes_check: true,
+        ..Default::default()
+      },
+    )?;
+    let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions {
+      is_silent: true,
+      ..Default::default()
+    })?;
+
+    assert_eq!(result.checked_sections, 0);
+    assert_eq!(result.skipped_sections, 1);
+    assert_eq!(result.invalid_sections, 0);
+    assert!(result.errors.is_empty());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
   }
 }

@@ -39,14 +39,6 @@ impl GenericCommand for VerifyLtxCommand {
           .required(false)
           .action(ArgAction::SetTrue),
       )
-      .arg(
-        Arg::new("strict")
-          .help("Turn on strict checking mode")
-          .short('s')
-          .long("strict")
-          .required(false)
-          .action(ArgAction::SetTrue),
-      )
   }
 
   /// Verify ltx file or folder based on provided arguments.
@@ -57,7 +49,6 @@ impl GenericCommand for VerifyLtxCommand {
 
     let is_silent: bool = matches.get_flag("silent");
     let is_verbose: bool = matches.get_flag("verbose");
-    let is_strict: bool = matches.get_flag("strict");
 
     if !path.is_dir() {
       println!("Expected configs root directory path for validation as --path parameter");
@@ -78,7 +69,6 @@ impl GenericCommand for VerifyLtxCommand {
     let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions {
       is_silent,
       is_verbose,
-      is_strict,
     })?;
 
     if result.errors.is_empty() {
