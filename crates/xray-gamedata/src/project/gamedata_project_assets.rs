@@ -95,6 +95,10 @@ impl GamedataProject {
     self.get_prefixed_absolute_asset_path("", relative_path)
   }
 
+  pub fn get_shader_library_path(&self) -> PathBuf {
+    self.root.join("shaders.xr")
+  }
+
   pub fn get_prefixed_absolute_asset_path(
     &self,
     prefix: &str,

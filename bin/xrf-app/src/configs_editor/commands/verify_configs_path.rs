@@ -23,7 +23,6 @@ pub async fn verify_configs_path(path: &str) -> TauriResult<Value> {
     .verify_entries_opt(LtxVerifyOptions {
       is_silent: true,
       is_verbose: false,
-      is_strict: false,
     })
     .map_err(error_to_string)?;
 
