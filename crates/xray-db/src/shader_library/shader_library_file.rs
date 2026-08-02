@@ -68,6 +68,10 @@ impl ShaderLibraryFile {
   pub fn contains_blender(&self, name: &str) -> bool {
     self.blender_names.contains(name)
   }
+
+  pub fn blenders_count(&self) -> usize {
+    self.blender_names.len()
+  }
 }
 
 #[cfg(test)]
@@ -87,6 +91,7 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read.chunk");
     let contents: Vec<u8> = shader_library_contents(&["models\\model", "models\\model_pn_hm"])?;
     let mut file = overwrite_test_relative_resource_as_file(&filename)?;
+
     file.write_all(&contents)?;
     file.flush()?;
 
@@ -99,6 +104,7 @@ mod tests {
     assert!(library.contains_blender("models\\model"));
     assert!(library.contains_blender("models\\model_pn_hm"));
     assert!(!library.contains_blender("models\\missing"));
+    assert_eq!(library.blenders_count(), 2);
 
     Ok(())
   }
@@ -108,10 +114,12 @@ mod tests {
 
     for (index, name) in blender_names.iter().enumerate() {
       let mut blender: ChunkWriter = ChunkWriter::new();
+
       blender.write_all(&[0; ShaderLibraryFile::BLENDER_CLASS_ID_SIZE])?;
 
       let mut name_buffer: [u8; ShaderLibraryFile::BLENDER_NAME_SIZE] =
         [0; ShaderLibraryFile::BLENDER_NAME_SIZE];
+
       name_buffer[..name.len()].copy_from_slice(name.as_bytes());
       blender.write_all(&name_buffer)?;
       blender.write_all(&[0; 40])?;
@@ -120,6 +128,7 @@ mod tests {
     }
 
     let mut library: ChunkWriter = ChunkWriter::new();
+
     library.write_all(
       &blenders.flush_chunk_into_buffer::<XRayByteOrder>(ShaderLibraryFile::BLENDERS_CHUNK_ID)?,
     )?;

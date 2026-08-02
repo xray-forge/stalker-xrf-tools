@@ -1,6 +1,7 @@
 use crate::ogf::chunks::ogf_bones_chunk::OgfBonesChunk;
 use crate::ogf::chunks::ogf_children_chunk::OgfChildrenChunk;
 use crate::ogf::chunks::ogf_description_chunk::OgfDescriptionChunk;
+use crate::ogf::chunks::ogf_geometry::OgfGeometry;
 use crate::ogf::chunks::ogf_header_chunk::OgfHeaderChunk;
 use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
 use crate::ogf::chunks::ogf_texture_chunk::OgfTextureChunk;
@@ -19,6 +20,7 @@ use xray_error::{XRayError, XRayResult};
 pub struct OgfFile {
   pub header: OgfHeaderChunk,
   pub texture: Option<OgfTextureChunk>,
+  pub geometry: Option<OgfGeometry>,
   pub bones: Option<OgfBonesChunk>,
   pub children: Option<OgfChildrenChunk>,
   pub description: Option<OgfDescriptionChunk>,
@@ -53,6 +55,7 @@ impl OgfFile {
         Some(mut it) => Some(it.read_xr::<T, _>()?),
         None => None,
       },
+      geometry: OgfGeometry::read_from_chunks::<T, _>(chunks)?,
       bones: match find_optional_chunk_by_id(chunks, OgfBonesChunk::CHUNK_ID) {
         Some(mut it) => Some(it.read_xr::<T, _>()?),
         None => None,

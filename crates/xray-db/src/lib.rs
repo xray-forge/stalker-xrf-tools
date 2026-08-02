@@ -9,6 +9,7 @@ pub(crate) mod shader_library;
 pub(crate) mod spawn;
 pub(crate) mod types;
 
+pub use crate::ogf::chunks::ogf_geometry::*;
 pub use crate::ogf::ogf_file::*;
 pub use crate::omf::omf_file::*;
 pub use crate::particles::particles_file::*;
