@@ -16,6 +16,7 @@ members = [
     "crates/xray-sound",
     "crates/xray-test-utils",
     "crates/xray-texture",
+    "crates/xray-typescript",
     "crates/xray-translation",
     "crates/xray-utils",
 ]

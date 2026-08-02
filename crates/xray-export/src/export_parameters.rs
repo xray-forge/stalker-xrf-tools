@@ -1,30 +1,8 @@
-use crate::ast::ast_to_string::{ts_type_ref_to_string, ts_type_to_string};
 use crate::extern_descriptor::ExportParameterDescriptor;
-use swc_ecma_ast::{Callee, Expr, ExprOrSpread, Lit, Pat, TsType, TsTypeAnn};
 use xray_error::XRayResult;
+use xray_typescript::ast::{ts_type_ref_to_string, ts_type_to_string};
+use xray_typescript::swc_ecma_ast::{Expr, ExprOrSpread, Pat, TsType, TsTypeAnn};
 use xray_utils::assert_equal;
-
-pub fn get_expression_callee_name(callee: &Callee) -> Option<String> {
-  if let Callee::Expr(callee_expression) = callee
-    && let Expr::Ident(identifier) = callee_expression.as_ref()
-  {
-    return Some(identifier.sym.to_string());
-  }
-
-  None
-}
-
-pub fn get_expression_parameter_as_string_name(expression: &ExprOrSpread) -> Option<String> {
-  if let Expr::Lit(literal) = expression.expr.as_ref() {
-    return if let Lit::Str(string_literal) = literal {
-      Some(string_literal.value.to_string_lossy().to_string())
-    } else {
-      None
-    };
-  }
-
-  None
-}
 
 pub fn get_parameters_from_arrow_expression(
   expression: &ExprOrSpread,

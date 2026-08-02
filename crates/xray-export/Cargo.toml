@@ -6,11 +6,9 @@ edition = "2024"
 [dependencies]
 log = "0.4.28"
 serde = { version = "1.0.228", features = ["derive"] }
-swc_common = { version = "18.0.0", features = ["tty-emitter"] }
-swc_ecma_ast = "19.0.0"
-swc_ecma_parser = "28.0.0"
 walkdir = "2.5.0"
 xray-error = { path = "../xray-error" }
+xray-typescript = { path = "../xray-typescript" }
 xray-utils = { path = "../xray-utils" }
 
 [lints]

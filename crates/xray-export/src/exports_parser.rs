@@ -1,25 +1,16 @@
-use crate::ast::ast_utils::{
-  get_expression_callee_name, get_expression_parameter_as_string_name,
-  get_parameters_from_arrow_expression,
-};
 use crate::constants::{XR_CONDITIONS_PREFIX, XR_EFFECT_PREFIX, XR_EXTERN_EXPRESSION};
+use crate::export_parameters::get_parameters_from_arrow_expression;
 use crate::extern_descriptor::ExportDescriptor;
-use std::default::Default;
 use std::path::{Path, PathBuf};
-use std::rc::Rc;
-use swc_common::comments::{Comments, SingleThreadedComments};
-use swc_common::errors::DiagnosticBuilder;
-use swc_common::sync::Lrc;
-use swc_common::{
-  Loc, SourceFile, SourceMap,
-  errors::{ColorConfig, Handler},
-};
-use swc_ecma_ast::{Expr, ModuleItem, Program, Stmt};
-use swc_ecma_parser::{Parser, StringInput, Syntax, lexer::Lexer};
 use walkdir::WalkDir;
-use xray_error::{XRayError, XRayResult};
+use xray_error::XRayResult;
+use xray_typescript::ast::{expression_callee_name, expression_string_argument};
+use xray_typescript::parse_typescript_file;
+use xray_typescript::swc_common::{Loc, SourceMap, comments::Comments};
+use xray_typescript::swc_ecma_ast::{Expr, ModuleItem, Program, Stmt};
 
 #[derive(Default)]
+/// Parses X-Ray `extern` declarations from TypeScript source files.
 pub struct ExportsParser {}
 
 impl ExportsParser {
@@ -94,12 +85,12 @@ impl ExportsParser {
     for path in files {
       log::info!("Parsing exports from: {}", path.display());
 
-      let (program, source_map, comments) = self.open_ts_source_file(path)?;
+      let source = parse_typescript_file(path)?;
 
       expressions.append(&mut self.parse_program_extern_declarations(
-        &program,
-        &source_map,
-        &comments,
+        &source.program,
+        &source.source_map,
+        &source.comments,
         filter,
       )?);
     }
@@ -123,12 +114,12 @@ impl ExportsParser {
         if let ModuleItem::Stmt(Stmt::Expr(expression)) = module_item {
           // If it is call expression + extern:
           if let Expr::Call(call_expression) = expression.expr.as_ref()
-            && get_expression_callee_name(&call_expression.callee)
+            && expression_callee_name(&call_expression.callee)
               .is_some_and(|x| x == XR_EXTERN_EXPRESSION)
             && call_expression.args.len() == 2
           {
             let name: Option<String> =
-              get_expression_parameter_as_string_name(call_expression.args.first().unwrap());
+              expression_string_argument(call_expression.args.first().unwrap());
 
             if let Some(effect_full_name) = name
               && let Some(effect_name) = filter(&effect_full_name)
@@ -178,59 +169,5 @@ impl ExportsParser {
     }
 
     Ok(files)
-  }
-
-  fn open_ts_source_file(
-    &self,
-    path: &Path,
-  ) -> XRayResult<(Program, Lrc<SourceMap>, Box<dyn Comments>)> {
-    let source_map: Lrc<SourceMap> = Default::default();
-    let handler: Handler =
-      Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(source_map.clone()));
-    let fm: Rc<SourceFile> = source_map
-      .load_file(path)
-      .expect("Failed to load source file");
-    let comments: Box<SingleThreadedComments> = Box::default();
-
-    let lexer: Lexer = Lexer::new(
-      Syntax::Typescript(Default::default()),
-      Default::default(),
-      StringInput::from(fm.as_ref()),
-      Some(&comments),
-    );
-
-    let mut parser: Parser<Lexer> = Parser::new_from(lexer);
-    let mut diagnostics: Vec<DiagnosticBuilder> = parser
-      .take_errors()
-      .into_iter()
-      .map(|it| it.into_diagnostic(&handler))
-      .collect();
-
-    for diagostic in diagnostics.iter_mut() {
-      diagostic.emit();
-    }
-
-    if !diagnostics.is_empty() {
-      return Err(XRayError::new_parsing_error(format!(
-        "Failed to parse target files: {}",
-        diagnostics
-          .iter()
-          .map(|builder| builder
-            .message
-            .iter()
-            .map(|message| message.0.as_str())
-            .collect::<Vec<_>>()
-            .join(", "))
-          .collect::<Vec<_>>()
-          .join(", ")
-      )));
-    }
-
-    let program: Program = parser
-      .parse_program()
-      .map_err(|error| error.into_diagnostic(&handler).emit())
-      .expect("Failed to parse TS module");
-
-    Ok((program, source_map, comments))
   }
 }

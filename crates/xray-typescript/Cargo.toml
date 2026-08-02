@@ -1,0 +1,14 @@
+[package]
+name = "xray-typescript"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+log = "0.4.28"
+swc_common = { version = "18.0.0", features = ["tty-emitter"] }
+swc_ecma_ast = "19.0.0"
+swc_ecma_parser = "28.0.0"
+xray-error = { path = "../xray-error" }
+
+[lints]
+workspace = true

@@ -7080,11 +7080,9 @@ version = "0.1.0"
 dependencies = [
  "log",
  "serde",
- "swc_common",
- "swc_ecma_ast",
- "swc_ecma_parser",
  "walkdir",
  "xray-error",
+ "xray-typescript",
  "xray-utils",
 ]
 
@@ -7174,6 +7172,17 @@ dependencies = [
  "xray-error",
  "xray-test-utils",
  "xray-utils",
+]
+
+[[package]]
+name = "xray-typescript"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "swc_common",
+ "swc_ecma_ast",
+ "swc_ecma_parser",
+ "xray-error",
 ]
 
 [[package]]

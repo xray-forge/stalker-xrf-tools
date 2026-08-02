@@ -1,9 +1,32 @@
 use swc_ecma_ast::{
-  TsArrayType, TsEntityName, TsKeywordType, TsKeywordTypeKind, TsLitType, TsType, TsTypeOperator,
-  TsTypeOperatorOp, TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr, TsTypeRef,
-  TsUnionOrIntersectionType,
+  Callee, Expr, ExprOrSpread, Lit, TsArrayType, TsEntityName, TsKeywordType, TsKeywordTypeKind,
+  TsLitType, TsType, TsTypeOperator, TsTypeOperatorOp, TsTypeParamInstantiation, TsTypeQuery,
+  TsTypeQueryExpr, TsTypeRef, TsUnionOrIntersectionType,
 };
 
+/// Return the unqualified identifier called by a call expression, if present.
+pub fn expression_callee_name(callee: &Callee) -> Option<String> {
+  if let Callee::Expr(callee_expression) = callee
+    && let Expr::Ident(identifier) = callee_expression.as_ref()
+  {
+    return Some(identifier.sym.to_string());
+  }
+
+  None
+}
+
+/// Return an expression argument when it is a string literal.
+pub fn expression_string_argument(expression: &ExprOrSpread) -> Option<String> {
+  if let Expr::Lit(Lit::Str(string_literal)) = expression.expr.as_ref() {
+    return Some(string_literal.value.to_string_lossy().to_string());
+  }
+
+  None
+}
+
+/// Render supported TypeScript type nodes as TypeScript-like text.
+///
+/// Unsupported nodes are rendered as `unsupported` and logged as warnings.
 pub fn ts_type_to_string(ts_type: &TsType) -> String {
   match ts_type {
     TsType::TsKeywordType(keyword_type) => ts_keyword_type_to_string(keyword_type),
@@ -14,7 +37,7 @@ pub fn ts_type_to_string(ts_type: &TsType) -> String {
     TsType::TsTypeOperator(type_operator) => ts_type_operator_to_string(type_operator),
     TsType::TsTypeQuery(type_query) => ts_type_query_to_string(type_query),
     other => {
-      log::warn!("Parsed unsupported type: {:?}", other);
+      log::warn!("Parsed unsupported TypeScript type: {:?}", other);
       String::from("unsupported")
     }
   }
@@ -29,12 +52,8 @@ pub fn ts_literal_type_to_string(literal_type: &TsLitType) -> String {
 
 fn ts_type_operator_to_string(type_operator: &TsTypeOperator) -> String {
   match type_operator.op {
-    TsTypeOperatorOp::KeyOf => {
-      format!("keyof {}", ts_type_to_string(&type_operator.type_ann))
-    }
-    TsTypeOperatorOp::Unique => {
-      format!("unique {}", ts_type_to_string(&type_operator.type_ann))
-    }
+    TsTypeOperatorOp::KeyOf => format!("keyof {}", ts_type_to_string(&type_operator.type_ann)),
+    TsTypeOperatorOp::Unique => format!("unique {}", ts_type_to_string(&type_operator.type_ann)),
     TsTypeOperatorOp::ReadOnly => {
       format!("readonly {}", ts_type_to_string(&type_operator.type_ann))
     }
@@ -72,14 +91,12 @@ pub fn ts_type_ref_to_string(type_ref: &TsTypeRef) -> String {
   let name: String = type_ref.type_name.as_ident().unwrap().sym.to_string();
 
   if let Some(type_params) = &type_ref.type_params {
-    let params_str = ts_type_params_to_string(type_params);
-    format!("{}<{}>", name, params_str)
+    format!("{}<{}>", name, ts_type_params_to_string(type_params))
   } else {
     name
   }
 }
 
-// Helper function to transform type parameters to a string
 fn ts_type_params_to_string(type_params: &TsTypeParamInstantiation) -> String {
   type_params
     .params
@@ -93,31 +110,32 @@ pub fn ts_union_or_intersection_to_string(
   union_or_intersection: &TsUnionOrIntersectionType,
 ) -> String {
   match union_or_intersection {
-    TsUnionOrIntersectionType::TsUnionType(union) => {
-      let types = union
+    TsUnionOrIntersectionType::TsUnionType(union) => format!(
+      "({})",
+      union
         .types
         .iter()
         .map(|ts_type| ts_type_to_string(ts_type))
         .collect::<Vec<_>>()
-        .join(" | ");
-
-      format!("({})", types)
-    }
-    TsUnionOrIntersectionType::TsIntersectionType(intersection) => {
-      let types = intersection
+        .join(" | ")
+    ),
+    TsUnionOrIntersectionType::TsIntersectionType(intersection) => format!(
+      "({})",
+      intersection
         .types
         .iter()
         .map(|ts_type| ts_type_to_string(ts_type))
         .collect::<Vec<_>>()
-        .join(" & ");
-
-      format!("({})", types)
-    }
+        .join(" & ")
+    ),
   }
 }
 
 pub fn ts_array_type_to_string(array_type: &TsArrayType) -> String {
-  format!("Array<{}>", ts_type_to_string(&array_type.elem_type))
+  format!(
+    "Array<{}>",
+    ts_type_to_string(array_type.elem_type.as_ref())
+  )
 }
 
 pub fn ts_keyword_type_to_string(keyword_type: &TsKeywordType) -> String {
