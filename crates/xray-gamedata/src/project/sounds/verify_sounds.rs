@@ -56,19 +56,32 @@ impl GamedataProject {
         .then_with(|| left.message.cmp(&right.message))
     });
 
-    let result: GamedataSoundsVerificationResult = GamedataSoundsVerificationResult {
-      duration: started_at.elapsed().as_millis(),
+    let mut result: GamedataSoundsVerificationResult = GamedataSoundsVerificationResult {
       invalid_sounds_count: findings.len() as u32,
       checked_sounds_count: sound_paths.len() as u32,
       findings,
+      ..Default::default()
     };
+
+    self.verify_sound_references(options, &sound_paths, &mut result);
+
+    result.findings.sort_by(|left, right| {
+      left
+        .asset_path
+        .cmp(&right.asset_path)
+        .then_with(|| left.message.cmp(&right.message))
+    });
+
+    result.duration = started_at.elapsed().as_millis();
 
     if options.is_logging_enabled() {
       println!(
-        "Verified gamedata sounds in {} sec, {}/{} valid",
+        "Verified gamedata sounds in {} sec, {}/{} valid; {}/{} valid references",
         (result.duration as f64) / 1000.0,
         result.checked_sounds_count - result.invalid_sounds_count,
-        result.checked_sounds_count
+        result.checked_sounds_count,
+        result.checked_sound_references_count - result.invalid_sound_references_count,
+        result.checked_sound_references_count
       );
     }
 
