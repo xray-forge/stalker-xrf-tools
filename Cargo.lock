@@ -7132,6 +7132,7 @@ name = "xray-shaders"
 version = "0.1.0"
 dependencies = [
  "xray-error",
+ "xray-lua",
 ]
 
 [[package]]

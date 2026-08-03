@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 xray-error = { path = "../xray-error" }
+xray-lua = { path = "../xray-lua" }
 
 [lints]
 workspace = true

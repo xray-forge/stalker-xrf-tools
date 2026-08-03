@@ -8,9 +8,8 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayError;
-use xray_lua::verify_luajit_script;
 use xray_shaders::{
-  SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, is_shader_source_path,
+  SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, XRayShaderScript, is_shader_source_path,
 };
 
 pub(crate) struct ShadersVerifier<'a> {
@@ -143,7 +142,7 @@ impl<'a> ShadersVerifier<'a> {
 
       match fs::read_to_string(&path) {
         Ok(source) => {
-          if let Err(error) = verify_luajit_script(&source, &path) {
+          if let Err(error) = XRayShaderScript::parse(&path, &source) {
             result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
               "shaders.lua-syntax",
               &path,

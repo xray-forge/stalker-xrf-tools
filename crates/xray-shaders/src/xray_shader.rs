@@ -96,7 +96,7 @@ impl XRayShader {
     active_paths.push(path.to_path_buf());
 
     let imports: Vec<XRayShaderImportReference> =
-      XRayShaderImportReference::parse_all(path, &source)?;
+      XRayShaderImportReference::parse_all(path, renderer, &source)?;
     let mut resolved_imports: Vec<XRayShaderImport> = Vec::with_capacity(imports.len());
 
     for import in imports {
@@ -212,6 +212,38 @@ mod tests {
       XRayShader::load(&main_path, ShaderRenderer::DirectX11, root, &loader)?;
 
     assert_eq!(shader.imports()[0].shader().path(), common_path);
+
+    Ok(())
+  }
+
+  #[test]
+  fn follows_renderer_specific_include_rules() -> XRayResult {
+    let root: &Path = Path::new("shaders");
+    let directx_path: PathBuf = root.join("r3/directx.ps");
+    let directx_common_path: PathBuf = root.join("r3/common.h");
+    let opengl_path: PathBuf = root.join("gl/opengl.ps");
+    let loader: TestSourceLoader = TestSourceLoader::with_sources([
+      (
+        directx_path.clone(),
+        b"//#include \"commented.h\"\n# include <common.h>\n".to_vec(),
+      ),
+      (directx_common_path.clone(), b"float value;\n".to_vec()),
+      (
+        opengl_path.clone(),
+        b"//#include \"commented.h\"\n".to_vec(),
+      ),
+    ]);
+
+    let directx_shader: XRayShader =
+      XRayShader::load(&directx_path, ShaderRenderer::DirectX11, root, &loader)?;
+    let opengl_result = XRayShader::load(&opengl_path, ShaderRenderer::OpenGl, root, &loader);
+
+    assert_eq!(directx_shader.imports().len(), 1);
+    assert_eq!(
+      directx_shader.imports()[0].shader().path(),
+      directx_common_path
+    );
+    assert!(matches!(opengl_result, Err(XRayError::NotFound { .. })));
 
     Ok(())
   }
