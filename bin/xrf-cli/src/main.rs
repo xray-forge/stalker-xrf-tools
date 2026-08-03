@@ -2,6 +2,7 @@ pub(crate) mod commands;
 pub(crate) mod generic_command;
 
 use commands::archive::unpack_archive::UnpackArchiveCommand;
+use commands::externs::export_externs::ExportExternsCommand;
 use commands::ltx::verify_ltx::VerifyLtxCommand;
 use commands::spawn::info_spawn::InfoSpawnCommand;
 use commands::spawn::pack_spawn::PackSpawnFileCommand;
@@ -75,6 +76,8 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
   vec![
     // Archive:
     UnpackArchiveCommand::new_box(),
+    // Externs:
+    ExportExternsCommand::new_box(),
     // Gamedata:
     VerifyGamedataCommand::new_box(),
     // LTX:

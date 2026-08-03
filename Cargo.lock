@@ -7080,6 +7080,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "serde",
+ "serde_json",
  "walkdir",
  "xray-error",
  "xray-typescript",
@@ -7240,6 +7241,7 @@ dependencies = [
  "xray-archive",
  "xray-db",
  "xray-error",
+ "xray-export",
  "xray-gamedata",
  "xray-ltx",
  "xray-texture",

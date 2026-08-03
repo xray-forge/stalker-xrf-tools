@@ -3,7 +3,7 @@ use crate::types::TauriResult;
 use crate::utils::error_to_string;
 use serde_json::{Value, json};
 use tauri::State;
-use xray_export::ExportsParser;
+use xray_export::ExportsEditorParser;
 
 #[tauri::command]
 pub async fn open_xr_exports(
@@ -14,7 +14,7 @@ pub async fn open_xr_exports(
 ) -> TauriResult<Value> {
   log::info!("Parsing exports folders: {conditions_path} + {dialogs_path} + {effects_path}");
 
-  let parser: ExportsParser = ExportsParser::new();
+  let parser: ExportsEditorParser = ExportsEditorParser::new();
 
   let declaration: ExportsDeclarations = ExportsDeclarations {
     conditions: parser

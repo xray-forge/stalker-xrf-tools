@@ -3,7 +3,7 @@ use crate::types::TauriResult;
 use crate::utils::error_to_string;
 use serde_json::{Value, json};
 use tauri::State;
-use xray_export::{ExportDescriptor, ExportsParser};
+use xray_export::{ExportDescriptor, ExportsEditorParser};
 
 #[tauri::command]
 pub async fn open_xr_effects(
@@ -12,7 +12,7 @@ pub async fn open_xr_effects(
 ) -> TauriResult<Value> {
   log::info!("Parsing effects exports folder: {}", path);
 
-  let value: Vec<ExportDescriptor> = ExportsParser::new()
+  let value: Vec<ExportDescriptor> = ExportsEditorParser::new()
     .parse_effects_from_path(path)
     .map_err(error_to_string)?;
 

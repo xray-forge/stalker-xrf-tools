@@ -1,8 +1,10 @@
+use swc_common::{SourceMap, SourceMapper, Spanned};
 use swc_ecma_ast::{
-  Callee, Expr, ExprOrSpread, Lit, TsArrayType, TsEntityName, TsKeywordType, TsKeywordTypeKind,
-  TsLitType, TsType, TsTypeOperator, TsTypeOperatorOp, TsTypeParamInstantiation, TsTypeQuery,
-  TsTypeQueryExpr, TsTypeRef, TsUnionOrIntersectionType,
+  Callee, Expr, ExprOrSpread, Lit, TsArrayType, TsEntityName, TsImportType, TsKeywordType,
+  TsKeywordTypeKind, TsLit, TsLitType, TsType, TsTypeOperator, TsTypeOperatorOp,
+  TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr, TsTypeRef, TsUnionOrIntersectionType,
 };
+use xray_error::{XRayError, XRayResult};
 
 /// Return the unqualified identifier called by a call expression, if present.
 pub fn expression_callee_name(callee: &Callee) -> Option<String> {
@@ -36,6 +38,23 @@ pub fn ts_type_to_string(ts_type: &TsType) -> String {
     TsType::TsLitType(literal_type) => ts_literal_type_to_string(literal_type),
     TsType::TsTypeOperator(type_operator) => ts_type_operator_to_string(type_operator),
     TsType::TsTypeQuery(type_query) => ts_type_query_to_string(type_query),
+    TsType::TsTupleType(tuple_type) => format!(
+      "[{}]",
+      tuple_type
+        .elem_types
+        .iter()
+        .map(|element| ts_type_to_string(&element.ty))
+        .collect::<Vec<String>>()
+        .join(", ")
+    ),
+    TsType::TsOptionalType(optional_type) => {
+      format!("{}?", ts_type_to_string(&optional_type.type_ann))
+    }
+    TsType::TsRestType(rest_type) => format!("...{}", ts_type_to_string(&rest_type.type_ann)),
+    TsType::TsParenthesizedType(parenthesized_type) => {
+      format!("({})", ts_type_to_string(&parenthesized_type.type_ann))
+    }
+    TsType::TsImportType(import_type) => ts_import_type_to_string(import_type),
     other => {
       log::warn!("Parsed unsupported TypeScript type: {:?}", other);
       String::from("unsupported")
@@ -43,11 +62,39 @@ pub fn ts_type_to_string(ts_type: &TsType) -> String {
   }
 }
 
+/// Render a TypeScript type as stable TypeScript-like text.
+///
+/// The AST renderer handles the supported type nodes directly. For complex
+/// source-dependent nodes, such as type literals, this uses their source
+/// snippet and normalizes whitespace instead of losing information.
+pub fn canonical_ts_type_to_string(ts_type: &TsType, source_map: &SourceMap) -> XRayResult<String> {
+  if matches!(ts_type, TsType::TsTypeLit(_) | TsType::TsImportType(_)) {
+    return canonical_source_type(ts_type, source_map);
+  }
+  let value: String = ts_type_to_string(ts_type);
+
+  if value == "unsupported" {
+    return canonical_source_type(ts_type, source_map);
+  }
+
+  Ok(value)
+}
+
+fn canonical_source_type(ts_type: &TsType, source_map: &SourceMap) -> XRayResult<String> {
+  source_map
+    .span_to_snippet(ts_type.span())
+    .map(|value| value.split_whitespace().collect::<Vec<&str>>().join(" "))
+    .map_err(|_| XRayError::new_invalid_error("Failed to render TypeScript type annotation."))
+}
+
 pub fn ts_literal_type_to_string(literal_type: &TsLitType) -> String {
-  format!(
-    "\"{}\"",
-    literal_type.lit.as_str().unwrap().value.to_string_lossy()
-  )
+  match &literal_type.lit {
+    TsLit::Str(value) => format!("\"{}\"", value.value.to_string_lossy()),
+    TsLit::Bool(value) => value.value.to_string(),
+    TsLit::Number(value) => value.value.to_string(),
+    TsLit::BigInt(value) => format!("{}n", value.value),
+    _ => String::from("unsupported"),
+  }
 }
 
 fn ts_type_operator_to_string(type_operator: &TsTypeOperator) -> String {
@@ -70,8 +117,28 @@ pub fn ts_type_query_to_string(type_query: &TsTypeQuery) -> String {
 pub fn ts_entity_query_to_string(name: &TsTypeQueryExpr) -> String {
   match name {
     TsTypeQueryExpr::TsEntityName(entity_name) => ts_entity_name_to_string(entity_name),
-    TsTypeQueryExpr::Import(_) => String::from("unsupported"),
+    TsTypeQueryExpr::Import(import_type) => ts_import_type_to_string(import_type),
   }
+}
+
+pub fn ts_import_type_to_string(import_type: &TsImportType) -> String {
+  let qualifier: String = import_type
+    .qualifier
+    .as_ref()
+    .map(|value| format!(".{}", ts_entity_name_to_string(value)))
+    .unwrap_or_default();
+  let arguments: String = import_type
+    .type_args
+    .as_ref()
+    .map(|value| format!("<{}>", ts_type_params_to_string(value)))
+    .unwrap_or_default();
+
+  format!(
+    "import(\"{}\"){}{}",
+    import_type.arg.value.to_string_lossy(),
+    qualifier,
+    arguments,
+  )
 }
 
 pub fn ts_entity_name_to_string(name: &TsEntityName) -> String {
@@ -88,7 +155,7 @@ pub fn ts_entity_name_to_string(name: &TsEntityName) -> String {
 }
 
 pub fn ts_type_ref_to_string(type_ref: &TsTypeRef) -> String {
-  let name: String = type_ref.type_name.as_ident().unwrap().sym.to_string();
+  let name: String = ts_entity_name_to_string(&type_ref.type_name);
 
   if let Some(type_params) = &type_ref.type_params {
     format!("{}<{}>", name, ts_type_params_to_string(type_params))
@@ -140,9 +207,18 @@ pub fn ts_array_type_to_string(array_type: &TsArrayType) -> String {
 
 pub fn ts_keyword_type_to_string(keyword_type: &TsKeywordType) -> String {
   match keyword_type.kind {
+    TsKeywordTypeKind::TsAnyKeyword => String::from("any"),
+    TsKeywordTypeKind::TsUnknownKeyword => String::from("unknown"),
     TsKeywordTypeKind::TsStringKeyword => String::from("string"),
     TsKeywordTypeKind::TsNumberKeyword => String::from("number"),
     TsKeywordTypeKind::TsBooleanKeyword => String::from("boolean"),
-    _ => String::from("unknown"),
+    TsKeywordTypeKind::TsBigIntKeyword => String::from("bigint"),
+    TsKeywordTypeKind::TsObjectKeyword => String::from("object"),
+    TsKeywordTypeKind::TsSymbolKeyword => String::from("symbol"),
+    TsKeywordTypeKind::TsVoidKeyword => String::from("void"),
+    TsKeywordTypeKind::TsUndefinedKeyword => String::from("undefined"),
+    TsKeywordTypeKind::TsNullKeyword => String::from("null"),
+    TsKeywordTypeKind::TsNeverKeyword => String::from("never"),
+    TsKeywordTypeKind::TsIntrinsicKeyword => String::from("intrinsic"),
   }
 }

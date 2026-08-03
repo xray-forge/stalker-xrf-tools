@@ -1,0 +1,354 @@
+use crate::extern_manifest::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
+use std::collections::BTreeMap;
+use std::str::FromStr;
+use xray_error::{XRayError, XRayResult};
+
+/// Output contract selected by `xrf-cli export-externs`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ExternFormat {
+  Json,
+  Xml,
+  Html,
+}
+
+impl ExternFormat {
+  pub fn default_line_endings(self) -> LineEndings {
+    match self {
+      Self::Json => LineEndings::Crlf,
+      Self::Xml | Self::Html => LineEndings::Lf,
+    }
+  }
+
+  pub fn from_extension(path: &std::path::Path) -> XRayResult<Self> {
+    let extension: String = path
+      .extension()
+      .and_then(|extension| extension.to_str())
+      .unwrap_or_default()
+      .to_ascii_lowercase();
+
+    match extension.as_str() {
+      "json" => Ok(Self::Json),
+      "xml" => Ok(Self::Xml),
+      "html" | "htm" => Ok(Self::Html),
+      _ => Err(XRayError::new_invalid_error(format!(
+        "Cannot infer extern export format from '{}'; use --format.",
+        path.display()
+      ))),
+    }
+  }
+}
+
+impl FromStr for ExternFormat {
+  type Err = XRayError;
+
+  fn from_str(value: &str) -> XRayResult<Self> {
+    match value {
+      "json" => Ok(Self::Json),
+      "xml" => Ok(Self::Xml),
+      "html" => Ok(Self::Html),
+      _ => Err(XRayError::new_invalid_error(format!(
+        "Unsupported extern export format '{value}'. Expected json, xml, or html."
+      ))),
+    }
+  }
+}
+
+/// Physical line endings used for generated artifacts.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LineEndings {
+  Lf,
+  Crlf,
+}
+
+impl FromStr for LineEndings {
+  type Err = XRayError;
+
+  fn from_str(value: &str) -> XRayResult<Self> {
+    match value {
+      "lf" => Ok(Self::Lf),
+      "crlf" => Ok(Self::Crlf),
+      _ => Err(XRayError::new_invalid_error(format!(
+        "Unsupported line endings '{value}'. Expected lf or crlf."
+      ))),
+    }
+  }
+}
+
+/// Render an extern manifest using the selected stable public format.
+pub fn render_extern_manifest(
+  manifest: &ExternManifest,
+  format: ExternFormat,
+  line_endings: Option<LineEndings>,
+) -> XRayResult<String> {
+  let content: String = match format {
+    ExternFormat::Json => serde_json::to_string_pretty(manifest)?,
+    ExternFormat::Xml => render_xml(manifest),
+    ExternFormat::Html => render_html(manifest),
+  };
+  let ending: LineEndings = line_endings.unwrap_or_else(|| format.default_line_endings());
+
+  Ok(apply_line_endings(&format!("{content}\n"), ending))
+}
+
+/// Normalize line endings so XML/HTML check mode ignores host-specific EOLs.
+pub fn normalize_line_endings(content: &str) -> String {
+  content.replace("\r\n", "\n").replace('\r', "\n")
+}
+
+fn apply_line_endings(content: &str, line_endings: LineEndings) -> String {
+  match line_endings {
+    LineEndings::Lf => normalize_line_endings(content),
+    LineEndings::Crlf => normalize_line_endings(content).replace('\n', "\r\n"),
+  }
+}
+
+fn render_xml(manifest: &ExternManifest) -> String {
+  let mut result: String = String::from("<externs>\n  <exports>");
+
+  for (name, export) in &manifest.exports {
+    result.push_str(&format!("\n    <export name=\"{}\">", escape_xml(name)));
+    append_xml_export(&mut result, export, 6);
+    result.push_str("\n    </export>");
+  }
+
+  result.push_str("\n  </exports>\n</externs>");
+  result
+}
+
+fn append_xml_export(result: &mut String, export: &ExternExport, indentation: usize) {
+  match export {
+    ExternExport::Callable(value) => {
+      append_xml_documentation(result, value.doc.as_ref(), indentation);
+      result.push_str(&format!("\n{}<params>", " ".repeat(indentation)));
+      for parameter in &value.params {
+        result.push_str(&format!(
+          "\n{}<param name=\"{}\" type=\"{}\"{}>",
+          " ".repeat(indentation + 2),
+          escape_xml(&parameter.name),
+          escape_xml(&parameter.type_name),
+          parameter
+            .optional
+            .is_some_and(|value| value)
+            .then_some(" optional=\"true\"")
+            .unwrap_or_default(),
+        ));
+        if let Some(doc) = &parameter.doc {
+          result.push_str(&format!(
+            "\n{}<doc>{}</doc>",
+            " ".repeat(indentation + 4),
+            escape_xml(doc)
+          ));
+          result.push_str(&format!("\n{}</param>", " ".repeat(indentation + 2)));
+        } else {
+          result.push_str("</param>");
+        }
+      }
+      result.push_str(&format!("\n{}</params>", " ".repeat(indentation)));
+      result.push_str(&format!(
+        "\n{}<returns>{}</returns>",
+        " ".repeat(indentation),
+        escape_xml(&value.returns)
+      ));
+      result.push_str(&format!(
+        "\n{}<source>{}</source>",
+        " ".repeat(indentation),
+        escape_xml(&value.source)
+      ));
+    }
+    ExternExport::Value(value) => {
+      append_xml_documentation(result, value.doc.as_ref(), indentation);
+      result.push_str(&format!(
+        "\n{}<source>{}</source>",
+        " ".repeat(indentation),
+        escape_xml(&value.source)
+      ));
+      result.push_str(&format!(
+        "\n{}<type>{}</type>",
+        " ".repeat(indentation),
+        escape_xml(&value.type_name)
+      ));
+    }
+  }
+}
+
+fn append_xml_documentation(
+  result: &mut String,
+  documentation: Option<&crate::extern_manifest::ExternDocumentation>,
+  indentation: usize,
+) {
+  let Some(documentation) = documentation else {
+    return;
+  };
+  result.push_str(&format!("\n{}<doc>", " ".repeat(indentation)));
+  if let Some(description) = &documentation.description {
+    result.push_str(&format!(
+      "\n{}<description>{}</description>",
+      " ".repeat(indentation + 2),
+      escape_xml(description)
+    ));
+  }
+  if let Some(returns) = &documentation.returns {
+    result.push_str(&format!(
+      "\n{}<returns>{}</returns>",
+      " ".repeat(indentation + 2),
+      escape_xml(returns)
+    ));
+  }
+  result.push_str(&format!("\n{}</doc>", " ".repeat(indentation)));
+}
+
+fn render_html(manifest: &ExternManifest) -> String {
+  let groups: BTreeMap<String, Vec<(&String, &ExternExport)>> = manifest.exports.iter().fold(
+    BTreeMap::new(),
+    |mut groups: BTreeMap<String, Vec<(&String, &ExternExport)>>, entry| {
+      let namespace: String = extern_namespace(entry.0, entry.1);
+      groups.entry(namespace).or_default().push(entry);
+      groups
+    },
+  );
+  let mut result: String = String::from(
+    "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>XRF extern reference</title>\n  <style>body{font:14px system-ui,sans-serif;margin:2rem;color:#202124}details{margin:1rem 0}summary{cursor:pointer;font-weight:600}table{border-collapse:collapse;width:100%;margin-top:.5rem}th,td{border:1px solid #dadce0;padding:.5rem;text-align:left;vertical-align:top}th{background:#f8f9fa}code{white-space:nowrap}.docs{white-space:pre-wrap}</style>\n</head>\n<body>\n  <h1>XRF extern reference</h1>",
+  );
+
+  for (namespace, entries) in groups {
+    result.push_str(&format!("\n  <details>\n    <summary>{}</summary>\n    <table>\n      <thead><tr><th>Name</th><th>Contract</th><th>Documentation</th><th>Source</th></tr></thead>\n      <tbody>", escape_html(&namespace)));
+    for (name, export) in entries {
+      result.push_str(&format!("\n        <tr><td><code>{}</code></td><td><code>{}</code></td><td class=\"docs\">{}</td><td><code>{}</code></td></tr>", escape_html(name), escape_html(&extern_contract(export)), render_html_docs(export), escape_html(export.source())));
+    }
+    result.push_str("\n      </tbody>\n    </table>\n  </details>");
+  }
+
+  result.push_str("\n</body>\n</html>");
+  result
+}
+
+fn extern_namespace(name: &str, export: &ExternExport) -> String {
+  name
+    .split_once('.')
+    .map(|(namespace, _)| namespace.into())
+    .unwrap_or_else(|| {
+      export
+        .source()
+        .split('/')
+        .next_back()
+        .unwrap_or("globals")
+        .trim_end_matches(".ts")
+        .into()
+    })
+}
+
+fn extern_contract(export: &ExternExport) -> String {
+  match export {
+    ExternExport::Callable(value) => format!(
+      "({}) => {}",
+      value
+        .params
+        .iter()
+        .map(render_parameter_contract)
+        .collect::<Vec<String>>()
+        .join(", "),
+      value.returns,
+    ),
+    ExternExport::Value(value) => value.type_name.clone(),
+  }
+}
+
+fn render_parameter_contract(parameter: &ExternParameter) -> String {
+  format!(
+    "{}{}: {}",
+    parameter.name,
+    parameter
+      .optional
+      .is_some_and(|value| value)
+      .then_some("?")
+      .unwrap_or_default(),
+    parameter.type_name,
+  )
+}
+
+fn render_html_docs(export: &ExternExport) -> String {
+  let mut parts: Vec<String> = Vec::new();
+  if let Some(documentation) = export.documentation() {
+    if let Some(description) = &documentation.description {
+      parts.push(escape_html(description));
+    }
+    if let Some(returns) = &documentation.returns {
+      parts.push(format!("Returns: {}", escape_html(returns)));
+    }
+  }
+  if let ExternExport::Callable(ExternCallable { params, .. }) = export {
+    for parameter in params {
+      if let Some(doc) = &parameter.doc {
+        parts.push(format!(
+          "{}: {}",
+          escape_html(&parameter.name),
+          escape_html(doc)
+        ));
+      }
+    }
+  }
+  parts.join("\n")
+}
+
+fn escape_xml(value: &str) -> String {
+  value
+    .replace('&', "&amp;")
+    .replace('<', "&lt;")
+    .replace('>', "&gt;")
+    .replace('"', "&quot;")
+    .replace('\'', "&apos;")
+}
+
+fn escape_html(value: &str) -> String {
+  value
+    .replace('&', "&amp;")
+    .replace('<', "&lt;")
+    .replace('>', "&gt;")
+    .replace('"', "&quot;")
+    .replace('\'', "&#39;")
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{ExternFormat, LineEndings, render_extern_manifest};
+  use crate::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
+  use std::collections::BTreeMap;
+
+  #[test]
+  fn renders_stable_json_with_crlf_by_default() {
+    let manifest: ExternManifest = ExternManifest {
+      exports: BTreeMap::from([(
+        String::from("test.run"),
+        ExternExport::Callable(ExternCallable {
+          doc: None,
+          params: vec![ExternParameter {
+            doc: None,
+            name: String::from("id"),
+            optional: None,
+            type_name: String::from("TNumberId"),
+          }],
+          returns: String::from("void"),
+          source: String::from("src/test.ts"),
+        }),
+      )]),
+    };
+
+    let rendered: String = render_extern_manifest(&manifest, ExternFormat::Json, None).unwrap();
+
+    assert!(rendered.contains("\r\n"));
+    assert!(rendered.ends_with("\r\n"));
+    assert!(rendered.contains("\"exports\""));
+  }
+
+  #[test]
+  fn line_endings_can_be_overridden() {
+    let rendered: String = render_extern_manifest(
+      &ExternManifest::default(),
+      ExternFormat::Json,
+      Some(LineEndings::Lf),
+    )
+    .unwrap();
+
+    assert!(!rendered.contains("\r\n"));
+  }
+}
