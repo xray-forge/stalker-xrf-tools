@@ -1,23 +1,43 @@
+use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
+use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
 
-#[derive(Default)]
 pub struct GamedataMeshesVerificationResult {
   pub duration: u128,
-  pub findings: Vec<GamedataVerificationFinding>,
-  pub invalid_meshes_count: u32,
-  pub checked_meshes_count: u32,
+  findings: Vec<GamedataVerificationFinding>,
+  mesh_assets: GamedataMeshAssetsVerificationResult,
+  shader_library: GamedataShaderLibraryVerificationResult,
+}
+
+impl GamedataMeshesVerificationResult {
+  pub(crate) fn from_checks(
+    duration: u128,
+    shader_library: GamedataShaderLibraryVerificationResult,
+    mesh_assets: GamedataMeshAssetsVerificationResult,
+  ) -> Self {
+    let mut findings = shader_library.findings().to_vec();
+
+    findings.extend_from_slice(mesh_assets.findings());
+
+    Self {
+      duration,
+      findings,
+      mesh_assets,
+      shader_library,
+    }
+  }
 }
 
 impl GamedataCheckResult for GamedataMeshesVerificationResult {
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::from_is_valid(self.invalid_meshes_count == 0)
+    GamedataVerificationStatus::aggregate([self.shader_library.status(), self.mesh_assets.status()])
   }
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} meshes valid",
-      self.checked_meshes_count - self.invalid_meshes_count,
-      self.checked_meshes_count
+      "{}; {}",
+      self.shader_library.failure_message(),
+      self.mesh_assets.failure_message()
     )
   }
 
@@ -29,6 +49,8 @@ impl GamedataCheckResult for GamedataMeshesVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataMeshesVerificationResult;
+  use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
+  use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
   use crate::{
     GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationStatus,
     GamedataVerificationType,
@@ -44,12 +66,16 @@ mod tests {
 
     report.add_check(
       GamedataVerificationType::Meshes,
-      Ok(GamedataMeshesVerificationResult {
-        checked_meshes_count: 1,
-        findings: vec![finding.clone()],
-        invalid_meshes_count: 1,
-        ..Default::default()
-      }),
+      Ok(GamedataMeshesVerificationResult::from_checks(
+        0,
+        GamedataShaderLibraryVerificationResult::passed(Default::default()),
+        GamedataMeshAssetsVerificationResult {
+          checked_meshes_count: 1,
+          findings: vec![finding.clone()],
+          invalid_meshes_count: 1,
+          ..Default::default()
+        },
+      )),
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
