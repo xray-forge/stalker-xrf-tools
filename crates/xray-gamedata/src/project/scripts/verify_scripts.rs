@@ -1,4 +1,5 @@
 use crate::asset::asset_type::AssetType;
+use crate::project::scripts::runtime_script::is_runtime_script;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
 use colored::Colorize;
@@ -29,6 +30,7 @@ impl GamedataProject {
     self
       .get_all_asset_paths_by_type(AssetType::Script)
       .par_iter()
+      .filter(|path| is_runtime_script(path))
       .for_each(|path| {
         if options.is_verbose_logging_enabled() {
           println!("Verify script: {}", path);
