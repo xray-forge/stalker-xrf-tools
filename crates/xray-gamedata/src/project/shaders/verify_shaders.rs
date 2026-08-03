@@ -1,3 +1,4 @@
+use crate::project::shaders::shaders_verifier::ShadersVerifier;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use xray_error::XRayResult;
@@ -7,8 +8,6 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataShadersVerificationResult> {
-    let _ = options;
-
-    Ok(GamedataShadersVerificationResult)
+    Ok(ShadersVerifier::new(self.root.join("shaders"), options).verify())
   }
 }
