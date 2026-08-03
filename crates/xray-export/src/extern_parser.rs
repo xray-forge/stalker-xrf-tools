@@ -134,6 +134,7 @@ mod tests {
   #[test]
   fn parses_direct_object_and_asserted_externs_with_docs() {
     let root: PathBuf = create_test_root("manifest");
+
     write_source(
       &root,
       "externs.ts",
@@ -150,6 +151,7 @@ mod tests {
 
         /** Numeric data. */
         extern("data.value", rawValue as { readonly id: string });
+        extern("data.checkers", rawValue as Record<EAchievement, () => boolean>);
       "#,
     );
 
@@ -182,6 +184,13 @@ mod tests {
       panic!("Expected value extern");
     };
     assert_eq!(value.type_name, "{ readonly id: string }");
+
+    let ExternExport::Value(checkers) = parsed.manifest.exports.get("data.checkers").unwrap()
+    else {
+      panic!("Expected value extern");
+    };
+
+    assert_eq!(checkers.type_name, "Record<EAchievement, () => boolean>");
 
     fs::remove_dir_all(root).unwrap();
   }

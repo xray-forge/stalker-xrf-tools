@@ -1,8 +1,9 @@
 use swc_common::{SourceMap, SourceMapper, Spanned};
 use swc_ecma_ast::{
-  Callee, Expr, ExprOrSpread, Lit, TsArrayType, TsEntityName, TsImportType, TsKeywordType,
-  TsKeywordTypeKind, TsLit, TsLitType, TsType, TsTypeOperator, TsTypeOperatorOp,
-  TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr, TsTypeRef, TsUnionOrIntersectionType,
+  Callee, Expr, ExprOrSpread, Lit, TsArrayType, TsEntityName, TsFnOrConstructorType, TsFnParam,
+  TsFnType, TsImportType, TsKeywordType, TsKeywordTypeKind, TsLit, TsLitType, TsType,
+  TsTypeOperator, TsTypeOperatorOp, TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr,
+  TsTypeRef, TsUnionOrIntersectionType,
 };
 use xray_error::{XRayError, XRayResult};
 
@@ -38,6 +39,9 @@ pub fn ts_type_to_string(ts_type: &TsType) -> String {
     TsType::TsLitType(literal_type) => ts_literal_type_to_string(literal_type),
     TsType::TsTypeOperator(type_operator) => ts_type_operator_to_string(type_operator),
     TsType::TsTypeQuery(type_query) => ts_type_query_to_string(type_query),
+    TsType::TsFnOrConstructorType(TsFnOrConstructorType::TsFnType(function_type)) => {
+      ts_function_type_to_string(function_type)
+    }
     TsType::TsTupleType(tuple_type) => format!(
       "[{}]",
       tuple_type
@@ -73,11 +77,37 @@ pub fn canonical_ts_type_to_string(ts_type: &TsType, source_map: &SourceMap) -> 
   }
   let value: String = ts_type_to_string(ts_type);
 
-  if value == "unsupported" {
+  if value.contains("unsupported") {
     return canonical_source_type(ts_type, source_map);
   }
 
   Ok(value)
+}
+
+fn ts_function_type_to_string(function_type: &TsFnType) -> String {
+  let params: String = function_type
+    .params
+    .iter()
+    .map(|parameter| match parameter {
+      TsFnParam::Ident(binding) => {
+        let type_name: String = binding
+          .type_ann
+          .as_ref()
+          .map(|annotation| ts_type_to_string(&annotation.type_ann))
+          .unwrap_or_else(|| String::from("unsupported"));
+        let optional: &str = if binding.id.optional { "?" } else { "" };
+
+        format!("{}{}: {type_name}", binding.id.sym, optional)
+      }
+      _ => String::from("unsupported"),
+    })
+    .collect::<Vec<String>>()
+    .join(", ");
+
+  format!(
+    "({params}) => {}",
+    ts_type_to_string(&function_type.type_ann.type_ann)
+  )
 }
 
 fn canonical_source_type(ts_type: &TsType, source_map: &SourceMap) -> XRayResult<String> {
