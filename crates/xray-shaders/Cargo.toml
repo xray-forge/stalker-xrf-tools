@@ -1,0 +1,10 @@
+[package]
+name = "xray-shaders"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+xray-error = { path = "../xray-error" }
+
+[lints]
+workspace = true

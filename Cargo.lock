@@ -7101,6 +7101,7 @@ dependencies = [
  "xray-error",
  "xray-ltx",
  "xray-lua",
+ "xray-shaders",
  "xray-sound",
  "xray-utils",
 ]
@@ -7123,6 +7124,13 @@ name = "xray-lua"
 version = "0.1.0"
 dependencies = [
  "full_moon",
+ "xray-error",
+]
+
+[[package]]
+name = "xray-shaders"
+version = "0.1.0"
+dependencies = [
  "xray-error",
 ]
 
