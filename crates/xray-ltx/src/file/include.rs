@@ -1,4 +1,5 @@
 use crate::Ltx;
+use std::fs;
 use std::io;
 use std::path::{MAIN_SEPARATOR_STR, Path, PathBuf};
 use xray_error::{XRayError, XRayResult};
@@ -20,6 +21,89 @@ impl LtxIncludeConvertor {
   /// Transform ltx statement to cross-platform path.
   pub fn statement_to_path(statement: &str) -> PathBuf {
     PathBuf::from(statement.replace('\\', MAIN_SEPARATOR_STR))
+  }
+
+  /// Resolve an include statement to files in its containing directory.
+  ///
+  /// X-Ray extensions accepts `*` masks such as `w_*.ltx` and loads every matching file
+  /// directly from the include directory. Matches are sorted so that section
+  /// merging is deterministic across filesystems.
+  pub fn resolve_include_paths<P: AsRef<Path>>(
+    directory: P,
+    statement: &str,
+  ) -> XRayResult<Vec<PathBuf>> {
+    let included_path: PathBuf = directory.as_ref().join(Self::statement_to_path(statement));
+
+    if !statement.contains('*') {
+      return Ok(vec![included_path]);
+    }
+
+    let Some(parent) = included_path.parent() else {
+      return Err(XRayError::new_convert_error(format!(
+        "Failed to resolve parent directory for wildcard include {statement}"
+      )));
+    };
+
+    let Some(mask) = included_path.file_name().and_then(|name| name.to_str()) else {
+      return Err(XRayError::new_convert_error(format!(
+        "Failed to resolve wildcard file name for include {statement}"
+      )));
+    };
+
+    let entries: fs::ReadDir = match fs::read_dir(parent) {
+      Ok(entries) => entries,
+      Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(Vec::new()),
+      Err(error) => return Err(error.into()),
+    };
+    let mut resolved_paths: Vec<PathBuf> = Vec::new();
+
+    for entry in entries {
+      let entry: fs::DirEntry = entry?;
+      let path: PathBuf = entry.path();
+      let Some(file_name) = path.file_name().and_then(|name| name.to_str()) else {
+        continue;
+      };
+
+      if path.is_file() && Self::matches_wildcard_mask(file_name, mask) {
+        resolved_paths.push(path);
+      }
+    }
+
+    resolved_paths.sort();
+
+    Ok(resolved_paths)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::Ltx;
+  use std::fs;
+  use std::path::PathBuf;
+  use xray_error::XRayResult;
+
+  #[test]
+  fn loads_each_file_matched_by_wildcard_include() -> XRayResult {
+    let root: PathBuf =
+      std::env::temp_dir().join(format!("xray-ltx-wildcard-include-{}", std::process::id()));
+    let sections: PathBuf = root.join("sections");
+    let root_ltx: PathBuf = root.join("root.ltx");
+
+    fs::create_dir_all(&sections)?;
+    fs::write(&root_ltx, "#include \"sections\\section_*.ltx\"\n")?;
+    fs::write(sections.join("section_first.ltx"), "[first]\n")?;
+    fs::write(sections.join("section_second.ltx"), "[second]\n")?;
+    fs::write(sections.join("ignored.ltx"), "[ignored]\n")?;
+
+    let ltx: Ltx = Ltx::read_from_file_included(&root_ltx)?;
+
+    assert!(ltx.has_section("first"));
+    assert!(ltx.has_section("second"));
+    assert!(!ltx.has_section("ignored"));
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
   }
 }
 
@@ -45,11 +129,12 @@ impl LtxIncludeConvertor {
     };
 
     for included in &ltx.includes {
-      let mut included_path: PathBuf = result.directory.as_ref().unwrap().clone();
+      let included_paths: Vec<PathBuf> =
+        Self::resolve_include_paths(result.directory.as_ref().unwrap(), included)?;
 
-      included_path.push(Self::statement_to_path(included));
-
-      self.include_children(&mut result, &included_path)?;
+      for included_path in included_paths {
+        self.include_children(&mut result, &included_path)?;
+      }
     }
 
     for (key, value) in ltx.sections {
@@ -149,5 +234,25 @@ impl LtxIncludeConvertor {
     } else {
       false
     }
+  }
+
+  fn matches_wildcard_mask(file_name: &str, mask: &str) -> bool {
+    let mut remaining: &str = file_name;
+    let mut is_first_part: bool = true;
+
+    for part in mask.split('*').filter(|part| !part.is_empty()) {
+      let Some(position) = remaining.find(part) else {
+        return false;
+      };
+
+      if is_first_part && !mask.starts_with('*') && position != 0 {
+        return false;
+      }
+
+      remaining = &remaining[position + part.len()..];
+      is_first_part = false;
+    }
+
+    mask.ends_with('*') || remaining.is_empty()
   }
 }

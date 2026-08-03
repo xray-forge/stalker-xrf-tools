@@ -54,11 +54,7 @@ impl LtxProject {
         };
 
         for include in &Ltx::read_included_from_file(entry_path)? {
-          let mut included_path: PathBuf = PathBuf::from(parent);
-
-          included_path.push(LtxIncludeConvertor::statement_to_path(include));
-
-          included.push(included_path);
+          included.extend(LtxIncludeConvertor::resolve_include_paths(parent, include)?);
         }
 
         if options.is_with_schemes_check && Self::is_ltx_scheme_path(entry_path) {
@@ -163,5 +159,36 @@ impl LtxProject {
 
   pub fn get_system_ltx(&self) -> XRayResult<Ltx> {
     Ltx::read_from_file_full(self.get_system_ltx_path())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::LtxProject;
+  use std::fs;
+  use std::path::PathBuf;
+  use xray_error::XRayResult;
+
+  #[test]
+  fn does_not_treat_wildcard_included_files_as_entries() -> XRayResult {
+    let root: PathBuf =
+      std::env::temp_dir().join(format!("xray-ltx-wildcard-project-{}", std::process::id()));
+    let sections: PathBuf = root.join("sections");
+
+    fs::create_dir_all(&sections)?;
+    fs::write(
+      root.join("root.ltx"),
+      "#include \"sections\\section_*.ltx\"\n",
+    )?;
+    fs::write(sections.join("section_first.ltx"), "[first]\n")?;
+    fs::write(sections.join("section_second.ltx"), "[second]\n")?;
+
+    let project: LtxProject = LtxProject::open_at_path(&root)?;
+
+    assert_eq!(project.ltx_file_entries, vec![root.join("root.ltx")]);
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
   }
 }
