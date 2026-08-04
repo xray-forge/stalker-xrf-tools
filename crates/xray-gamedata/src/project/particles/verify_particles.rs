@@ -6,7 +6,7 @@ use crate::{
 use colored::Colorize;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use xray_db::{ParticlesFile, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 
@@ -64,7 +64,7 @@ impl GamedataProject {
       })
       .collect();
 
-    let duration: u128 = started_at.elapsed().as_millis();
+    let duration: Duration = started_at.elapsed();
     let invalid_particle_files_count: u32 = u32::try_from(
       particle_findings
         .iter()
@@ -80,12 +80,12 @@ impl GamedataProject {
     let mut findings: Vec<GamedataVerificationFinding> =
       particle_findings.into_iter().flatten().collect();
 
-    findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
+    findings.sort_by(|left, right| left.asset_path().cmp(&right.asset_path()));
 
     if options.is_logging_enabled() {
       println!(
         "Verified gamedata particle files in {} sec, {}/{} valid",
-        (duration as f64) / 1000.0,
+        duration.as_secs_f64(),
         checked_particle_files_count - invalid_particle_files_count,
         checked_particle_files_count
       );

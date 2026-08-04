@@ -27,12 +27,12 @@ impl GamedataProject {
     let findings: Vec<GamedataVerificationFinding> =
       Self::collect_ltx_findings(&format_result, &verification_result);
 
-    let duration: u128 = started_at.elapsed().as_millis();
+    let duration = started_at.elapsed();
 
     if options.is_logging_enabled() {
       println!(
         "Verified gamedata ltx files in {} sec",
-        (duration as f64) / 1000.0,
+        duration.as_secs_f64(),
       );
     }
 
@@ -81,9 +81,9 @@ impl GamedataProject {
 
     findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.message().cmp(right.message()))
     });
 
     findings

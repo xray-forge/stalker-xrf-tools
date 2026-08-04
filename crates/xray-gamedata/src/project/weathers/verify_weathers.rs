@@ -78,12 +78,12 @@ impl GamedataProject {
 
     findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.message().cmp(right.message()))
     });
 
-    let duration: u128 = started_at.elapsed().as_millis();
+    let duration = started_at.elapsed();
 
     if options.is_logging_enabled() {
       for error in definition_load_errors {
@@ -93,12 +93,12 @@ impl GamedataProject {
       if checked_weather_files_count == 0 {
         println!(
           "Checked gamedata weather files in {} sec, no weather files found",
-          (duration as f64) / 1000.0
+          duration.as_secs_f64()
         );
       } else {
         println!(
           "Verified gamedata weather files in {} sec, {}/{} valid",
-          (duration as f64) / 1000.0,
+          duration.as_secs_f64(),
           checked_weather_files_count - invalid_weather_files_count,
           checked_weather_files_count
         );

@@ -38,16 +38,16 @@ impl GamedataProject {
 
     result.findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.message().cmp(right.message()))
     });
-    result.duration = started_at.elapsed().as_millis();
+    result.duration = started_at.elapsed();
 
     if options.is_logging_enabled() {
       println!(
         "Verified gamedata particles usage in {} sec, {}/{} valid references, {}/{} spawn files inspected, {} unparsed custom data sections",
-        (result.duration as f64) / 1000.0,
+        result.duration.as_secs_f64(),
         result.checked_references_count - result.invalid_references_count,
         result.checked_references_count,
         result.checked_spawn_files_count - result.unreadable_spawn_files_count,

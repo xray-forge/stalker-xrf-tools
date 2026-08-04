@@ -1,15 +1,16 @@
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataScriptsVerificationResult {
-  pub duration: u128,
-  pub invalid_scripts_count: u32,
-  pub checked_scripts_count: u32,
-  pub findings: Vec<GamedataVerificationFinding>,
+  pub(crate) duration: Duration,
+  pub(crate) invalid_scripts_count: u32,
+  pub(crate) checked_scripts_count: u32,
+  pub(crate) findings: Vec<GamedataVerificationFinding>,
 }
 
 impl GamedataCheckResult for GamedataScriptsVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 

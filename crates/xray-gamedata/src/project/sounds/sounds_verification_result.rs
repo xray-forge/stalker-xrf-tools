@@ -1,9 +1,10 @@
 use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
 use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 pub struct GamedataSoundsVerificationResult {
-  pub duration: u128,
+  pub(crate) duration: Duration,
   findings: Vec<GamedataVerificationFinding>,
   sound_files: GamedataSoundFilesVerificationResult,
   sound_references: GamedataSoundReferencesVerificationResult,
@@ -11,7 +12,7 @@ pub struct GamedataSoundsVerificationResult {
 
 impl GamedataSoundsVerificationResult {
   pub(crate) fn new(
-    duration: u128,
+    duration: Duration,
     sound_files: GamedataSoundFilesVerificationResult,
     sound_references: GamedataSoundReferencesVerificationResult,
   ) -> Self {
@@ -24,10 +25,10 @@ impl GamedataSoundsVerificationResult {
 
     findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.rule.cmp(&right.rule))
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.rule().cmp(&right.rule()))
+        .then_with(|| left.message().cmp(right.message()))
     });
 
     Self {
@@ -40,7 +41,7 @@ impl GamedataSoundsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataSoundsVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
@@ -73,6 +74,7 @@ mod tests {
     GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
     GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
+  use std::time::Duration;
 
   #[test]
   fn exposes_sound_reference_findings_in_sound_reports() {
@@ -86,7 +88,7 @@ mod tests {
     report.add_check(
       GamedataVerificationType::Sounds,
       Ok(GamedataSoundsVerificationResult::new(
-        0,
+        Duration::ZERO,
         GamedataSoundFilesVerificationResult::default(),
         GamedataSoundReferencesVerificationResult {
           checked_references_count: 1,
@@ -97,9 +99,9 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks[0].findings, vec![finding]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
     assert_eq!(
-      report.checks[0].summary,
+      report.checks()[0].summary(),
       "0/0 sounds valid; 0/1 sound references valid"
     );
   }
@@ -107,7 +109,7 @@ mod tests {
   #[test]
   fn fails_when_a_sound_reference_is_invalid() {
     let result: GamedataSoundsVerificationResult = GamedataSoundsVerificationResult::new(
-      0,
+      Duration::ZERO,
       GamedataSoundFilesVerificationResult::default(),
       GamedataSoundReferencesVerificationResult {
         checked_references_count: 1,

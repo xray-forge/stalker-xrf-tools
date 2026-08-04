@@ -8,7 +8,7 @@ use crate::{
 use colored::Colorize;
 use regex::Regex;
 use std::path::Path;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
@@ -67,19 +67,19 @@ impl GamedataProject {
       }
     }
 
-    let duration: u128 = started_at.elapsed().as_millis();
+    let duration: Duration = started_at.elapsed();
 
     findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.message().cmp(right.message()))
     });
 
     if options.is_logging_enabled() {
       println!(
         "Verified gamedata weapons in {} sec, {}/{} valid",
-        (duration as f64) / 1000.0,
+        duration.as_secs_f64(),
         checked_weapons_count - invalid_weapons_count,
         checked_weapons_count
       );

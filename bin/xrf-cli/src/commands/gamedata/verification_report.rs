@@ -54,11 +54,11 @@ impl<'a> GamedataVerificationReportWriter<'a> {
     GamedataVerificationReportOutput {
       checks: self
         .report
-        .checks
+        .checks()
         .iter()
         .map(|check| self.check_report_output(check))
         .collect(),
-      duration_ms: self.report.duration,
+      duration_ms: self.report.duration().as_millis(),
       status: self.report.status().to_string(),
     }
   }
@@ -68,7 +68,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
     check: &GamedataVerificationCheckReport,
   ) -> GamedataVerificationCheckReportOutput {
     let mut findings: Vec<GamedataVerificationFindingOutput> = check
-      .findings
+      .findings()
       .iter()
       .map(|finding| self.finding_output(finding))
       .collect();
@@ -81,11 +81,11 @@ impl<'a> GamedataVerificationReportWriter<'a> {
     });
 
     GamedataVerificationCheckReportOutput {
-      duration_ms: check.duration,
+      duration_ms: check.duration().map(|duration| duration.as_millis()),
       findings,
-      status: check.status.to_string(),
-      summary: check.summary.clone(),
-      verification_type: check.verification_type.to_string(),
+      status: check.status().to_string(),
+      summary: check.summary().to_string(),
+      verification_type: check.verification_type().to_string(),
     }
   }
 
@@ -94,15 +94,15 @@ impl<'a> GamedataVerificationReportWriter<'a> {
     finding: &GamedataVerificationFinding,
   ) -> GamedataVerificationFindingOutput {
     GamedataVerificationFindingOutput {
-      asset_path: finding.asset_path.as_ref().map(|asset_path| {
+      asset_path: finding.asset_path().map(|asset_path| {
         asset_path
           .strip_prefix(self.root)
           .unwrap_or(asset_path)
           .to_string_lossy()
           .replace('\\', "/")
       }),
-      message: finding.message.clone(),
-      rule_id: finding.rule.to_string(),
+      message: finding.message().to_string(),
+      rule_id: finding.rule().to_string(),
     }
   }
 }
@@ -113,12 +113,36 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
   use std::sync::atomic::{AtomicU64, Ordering};
+  use std::time::Duration;
   use xray_gamedata::{
-    GamedataVerificationCheckReport, GamedataVerificationFinding, GamedataVerificationReport,
-    GamedataVerificationStatus, GamedataVerificationType,
+    GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
+    GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
 
   static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
+
+  struct TestCheckResult {
+    duration: Duration,
+    findings: Vec<GamedataVerificationFinding>,
+  }
+
+  impl GamedataCheckResult for TestCheckResult {
+    fn duration(&self) -> Option<Duration> {
+      Some(self.duration)
+    }
+
+    fn status(&self) -> GamedataVerificationStatus {
+      GamedataVerificationStatus::Failed
+    }
+
+    fn failure_message(&self) -> String {
+      String::from("2/2 textures are invalid")
+    }
+
+    fn findings(&self) -> &[GamedataVerificationFinding] {
+      &self.findings
+    }
+  }
 
   fn temporary_gamedata_root() -> PathBuf {
     let unique: u64 = NEXT_TEST_DIRECTORY_ID.fetch_add(1, Ordering::Relaxed);
@@ -138,27 +162,27 @@ mod tests {
   fn writes_root_relative_paths_and_sorted_findings() {
     let root: PathBuf = temporary_gamedata_root();
     let report_path: PathBuf = root.join("report.json");
-    let report: GamedataVerificationReport = GamedataVerificationReport {
-      checks: vec![GamedataVerificationCheckReport {
-        duration: Some(7),
+    let mut report: GamedataVerificationReport =
+      GamedataVerificationReport::with_duration(Duration::from_millis(42));
+
+    report.add_check(
+      GamedataVerificationType::Textures,
+      Ok(TestCheckResult {
+        duration: Duration::from_millis(7),
         findings: vec![
           GamedataVerificationFinding::for_asset(
-            xray_gamedata::GamedataVerificationRule::TexturesValidation,
+            GamedataVerificationRule::TexturesValidation,
             root.join("textures").join("z.dds"),
             "Second finding",
           ),
           GamedataVerificationFinding::for_asset(
-            xray_gamedata::GamedataVerificationRule::TexturesValidation,
+            GamedataVerificationRule::TexturesValidation,
             root.join("textures").join("a.dds"),
             "First finding",
           ),
         ],
-        status: GamedataVerificationStatus::Failed,
-        summary: String::from("2/2 textures are invalid"),
-        verification_type: GamedataVerificationType::Textures,
-      }],
-      duration: 42,
-    };
+      }),
+    );
 
     GamedataVerificationReportWriter::new(&root, &report)
       .write(&report_path)

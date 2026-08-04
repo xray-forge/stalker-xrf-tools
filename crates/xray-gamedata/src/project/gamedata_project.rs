@@ -8,12 +8,16 @@ use xray_error::{XRayError, XRayResult};
 use xray_ltx::{LtxProject, LtxProjectOptions};
 
 pub struct GamedataProject {
-  pub assets: HashMap<String, AssetDescriptor>,
-  pub ltx_project: LtxProject,
-  pub root: PathBuf,
+  pub(crate) assets: HashMap<String, AssetDescriptor>,
+  pub(crate) ltx_project: LtxProject,
+  pub(crate) root: PathBuf,
 }
 
 impl GamedataProject {
+  pub fn root(&self) -> &Path {
+    &self.root
+  }
+
   pub fn open(options: &GamedataProjectReadOptions) -> XRayResult<Self> {
     if !Self::is_valid_gamedata_dir(&options.root) {
       return Err(

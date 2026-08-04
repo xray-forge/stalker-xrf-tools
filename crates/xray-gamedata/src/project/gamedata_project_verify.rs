@@ -37,10 +37,10 @@ impl GamedataProject {
     let mut result: GamedataVerificationReport = GamedataVerificationReport::default();
 
     for check in checks {
-      result.checks.push(check.run(self, options));
+      result.add_report(check.run(self, options));
     }
 
-    result.duration = started_at.elapsed().as_millis();
+    result.set_duration(started_at.elapsed());
 
     Ok(result)
   }
@@ -85,9 +85,9 @@ mod tests {
       .verify(&options)
       .expect("Expected level verification to complete");
 
-    assert_eq!(report.checks.len(), 1);
+    assert_eq!(report.checks().len(), 1);
     assert_eq!(
-      report.checks[0].verification_type,
+      report.checks()[0].verification_type(),
       GamedataVerificationType::Levels
     );
     assert_eq!(report.status(), GamedataVerificationStatus::Incomplete);

@@ -9,7 +9,7 @@ use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
 use std::fs::File;
 use std::path::Path;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use xray_error::{XRayError, XRayResult};
 
 impl GamedataProject {
@@ -78,17 +78,17 @@ impl GamedataProject {
       })
       .collect();
 
-    let duration: u128 = started_at.elapsed().as_millis();
+    let duration: Duration = started_at.elapsed();
     let invalid_textures_count: u32 = u32::try_from(findings.len()).map_err(|_| {
       XRayError::new_verify_error("Invalid texture count exceeds the supported result range")
     })?;
 
-    findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
+    findings.sort_by(|left, right| left.asset_path().cmp(&right.asset_path()));
 
     if options.is_logging_enabled() {
       println!(
         "Verified gamedata textures in {} sec, {}/{} valid",
-        (duration as f64) / 1000.0,
+        duration.as_secs_f64(),
         checked_textures_count - invalid_textures_count,
         checked_textures_count
       );

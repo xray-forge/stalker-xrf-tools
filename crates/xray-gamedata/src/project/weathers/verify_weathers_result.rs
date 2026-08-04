@@ -1,22 +1,23 @@
 //! Aggregate result for assembled weather-cycle validation.
 
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 /// Counts and duration reported by the weather-cycle check.
 #[derive(Default)]
 pub struct GamedataWeathersVerificationResult {
-  /// Validation duration in milliseconds.
-  pub duration: u128,
+  /// Validation duration.
+  pub(crate) duration: Duration,
   /// Number of direct weather-cycle files that were checked.
-  pub checked_weather_files_count: u32,
+  pub(crate) checked_weather_files_count: u32,
   /// Per-file validation failures collected from weather-cycle checks.
-  pub findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<GamedataVerificationFinding>,
   /// Number of checked weather-cycle files with at least one problem.
-  pub invalid_weather_files_count: u32,
+  pub(crate) invalid_weather_files_count: u32,
 }
 
 impl GamedataCheckResult for GamedataWeathersVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
@@ -91,6 +92,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks[0].findings, vec![finding]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

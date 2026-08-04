@@ -1,9 +1,10 @@
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
 use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 pub struct GamedataMeshesVerificationResult {
-  pub duration: u128,
+  pub(crate) duration: Duration,
   findings: Vec<GamedataVerificationFinding>,
   mesh_assets: GamedataMeshAssetsVerificationResult,
   shader_library: GamedataShaderLibraryVerificationResult,
@@ -11,7 +12,7 @@ pub struct GamedataMeshesVerificationResult {
 
 impl GamedataMeshesVerificationResult {
   pub(crate) fn from_checks(
-    duration: u128,
+    duration: Duration,
     shader_library: GamedataShaderLibraryVerificationResult,
     mesh_assets: GamedataMeshAssetsVerificationResult,
   ) -> Self {
@@ -29,7 +30,7 @@ impl GamedataMeshesVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataMeshesVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
@@ -59,6 +60,7 @@ mod tests {
     GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
     GamedataVerificationStatus, GamedataVerificationType,
   };
+  use std::time::Duration;
 
   #[test]
   fn exposes_mesh_findings_in_reports() {
@@ -72,7 +74,7 @@ mod tests {
     report.add_check(
       GamedataVerificationType::Meshes,
       Ok(GamedataMeshesVerificationResult::from_checks(
-        0,
+        Duration::ZERO,
         GamedataShaderLibraryVerificationResult::passed(Default::default()),
         GamedataMeshAssetsVerificationResult {
           checked_meshes_count: 1,
@@ -84,6 +86,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks[0].findings, vec![finding]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

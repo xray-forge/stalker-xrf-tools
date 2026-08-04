@@ -1,8 +1,9 @@
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataShadersVerificationResult {
-  pub duration: u128,
+  pub(crate) duration: Duration,
   checked_scripts_count: u32,
   checked_sources_count: u32,
   findings: Vec<GamedataVerificationFinding>,
@@ -24,16 +25,16 @@ impl GamedataShadersVerificationResult {
   pub(crate) fn sort_findings(&mut self) {
     self.findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.rule.cmp(&right.rule))
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.rule().cmp(&right.rule()))
+        .then_with(|| left.message().cmp(right.message()))
     });
   }
 }
 
 impl GamedataCheckResult for GamedataShadersVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
@@ -82,7 +83,7 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks[0].findings, vec![finding]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 
   #[test]

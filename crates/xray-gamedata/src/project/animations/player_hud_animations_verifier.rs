@@ -73,9 +73,9 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
 
     result.findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.message().cmp(right.message()))
     });
 
     Ok(result)

@@ -32,16 +32,13 @@ impl<'a> SoundsVerifier<'a> {
     let sound_references =
       SoundReferencesVerifier::new(self.project, self.options, &sound_paths).verify()?;
 
-    let result: GamedataSoundsVerificationResult = GamedataSoundsVerificationResult::new(
-      started_at.elapsed().as_millis(),
-      sound_files,
-      sound_references,
-    );
+    let result: GamedataSoundsVerificationResult =
+      GamedataSoundsVerificationResult::new(started_at.elapsed(), sound_files, sound_references);
 
     if self.options.is_logging_enabled() {
       println!(
         "Verified gamedata sounds in {} sec, {}",
-        (result.duration as f64) / 1000.0,
+        result.duration.as_secs_f64(),
         result.failure_message()
       );
     }

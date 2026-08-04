@@ -3,13 +3,14 @@ use crate::{
   GamedataVerificationType,
 };
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 use xray_error::XRayResult;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationFinding {
-  pub asset_path: Option<PathBuf>,
-  pub message: String,
-  pub rule: GamedataVerificationRule,
+  asset_path: Option<PathBuf>,
+  message: String,
+  rule: GamedataVerificationRule,
 }
 
 impl GamedataVerificationFinding {
@@ -35,26 +36,65 @@ impl GamedataVerificationFinding {
       rule,
     }
   }
+
+  pub fn asset_path(&self) -> Option<&Path> {
+    self.asset_path.as_deref()
+  }
+
+  pub fn message(&self) -> &str {
+    &self.message
+  }
+
+  pub const fn rule(&self) -> GamedataVerificationRule {
+    self.rule
+  }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationCheckReport {
-  pub duration: Option<u128>,
-  pub findings: Vec<GamedataVerificationFinding>,
-  pub status: GamedataVerificationStatus,
-  pub summary: String,
-  pub verification_type: GamedataVerificationType,
+  duration: Option<Duration>,
+  findings: Vec<GamedataVerificationFinding>,
+  status: GamedataVerificationStatus,
+  summary: String,
+  verification_type: GamedataVerificationType,
 }
 
 #[derive(Default)]
 pub struct GamedataVerificationReport {
-  pub checks: Vec<GamedataVerificationCheckReport>,
-  pub duration: u128,
+  checks: Vec<GamedataVerificationCheckReport>,
+  duration: Duration,
 }
 
 pub type GamedataVerificationResult = GamedataVerificationReport;
 
 impl GamedataVerificationReport {
+  pub fn new() -> Self {
+    Self::default()
+  }
+
+  pub fn with_duration(duration: Duration) -> Self {
+    Self {
+      duration,
+      ..Self::default()
+    }
+  }
+
+  pub fn checks(&self) -> &[GamedataVerificationCheckReport] {
+    &self.checks
+  }
+
+  pub const fn duration(&self) -> Duration {
+    self.duration
+  }
+
+  pub(crate) fn set_duration(&mut self, duration: Duration) {
+    self.duration = duration;
+  }
+
+  pub(crate) fn add_report(&mut self, report: GamedataVerificationCheckReport) {
+    self.checks.push(report);
+  }
+
   pub fn add_check<T>(&mut self, verification_type: GamedataVerificationType, result: XRayResult<T>)
   where
     T: GamedataCheckResult,
@@ -93,7 +133,27 @@ impl GamedataVerificationReport {
 }
 
 impl GamedataVerificationCheckReport {
-  pub fn from_check_result<T>(
+  pub fn duration(&self) -> Option<Duration> {
+    self.duration
+  }
+
+  pub fn findings(&self) -> &[GamedataVerificationFinding] {
+    &self.findings
+  }
+
+  pub const fn status(&self) -> GamedataVerificationStatus {
+    self.status
+  }
+
+  pub fn summary(&self) -> &str {
+    &self.summary
+  }
+
+  pub const fn verification_type(&self) -> GamedataVerificationType {
+    self.verification_type
+  }
+
+  pub(crate) fn from_check_result<T>(
     verification_type: GamedataVerificationType,
     result: XRayResult<T>,
   ) -> Self
@@ -182,7 +242,7 @@ mod tests {
       vec![String::from("1/1 scripts are invalid")]
     );
     assert_eq!(
-      result.checks[0].findings,
+      result.checks()[0].findings(),
       vec![GamedataVerificationFinding::for_asset(
         GamedataVerificationRule::ScriptsSyntax,
         "scripts/invalid.script",
@@ -208,7 +268,7 @@ mod tests {
       )]
     );
     assert_eq!(
-      result.checks[0].findings,
+      result.checks()[0].findings(),
       vec![GamedataVerificationFinding::without_asset(
         GamedataVerificationRule::CheckExecution,
         "Unexpected error: boom",

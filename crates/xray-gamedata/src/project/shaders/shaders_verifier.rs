@@ -44,12 +44,12 @@ impl<'a> ShadersVerifier<'a> {
 
     result.sort_findings();
 
-    result.duration = started_at.elapsed().as_millis();
+    result.duration = started_at.elapsed();
 
     if self.options.is_logging_enabled() {
       println!(
         "Verified renderer shaders in {} sec, {}",
-        (result.duration as f64) / 1000.0,
+        result.duration.as_secs_f64(),
         result.failure_message()
       );
     }
@@ -279,7 +279,7 @@ mod tests {
     let rules: Vec<GamedataVerificationRule> = result
       .findings()
       .iter()
-      .map(|finding| finding.rule)
+      .map(|finding| finding.rule())
       .collect();
 
     assert!(rules.contains(&GamedataVerificationRule::ShadersLuaSyntax));

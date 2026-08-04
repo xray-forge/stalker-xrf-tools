@@ -19,7 +19,7 @@ impl GamedataProject {
     let player_hud_animations = PlayerHudAnimationsVerifier::new(self, options).verify()?;
 
     let result: GamedataAnimationsVerificationResult = GamedataAnimationsVerificationResult {
-      duration: started_at.elapsed().as_millis(),
+      duration: started_at.elapsed(),
       findings: player_hud_animations.findings().to_vec(),
       player_hud_animations,
     };
@@ -27,7 +27,7 @@ impl GamedataProject {
     if options.is_logging_enabled() {
       println!(
         "Verified gamedata animations in {} sec, {}",
-        (result.duration as f64) / 1000.0,
+        result.duration.as_secs_f64(),
         result.failure_message()
       );
     }

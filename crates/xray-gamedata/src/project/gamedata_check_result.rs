@@ -1,7 +1,8 @@
 use crate::{GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 pub trait GamedataCheckResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     None
   }
 

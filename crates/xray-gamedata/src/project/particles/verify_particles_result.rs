@@ -1,15 +1,16 @@
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataParticlesVerificationResult {
-  pub duration: u128,
-  pub checked_particle_files_count: u32,
-  pub findings: Vec<GamedataVerificationFinding>,
-  pub invalid_particle_files_count: u32,
+  pub(crate) duration: Duration,
+  pub(crate) checked_particle_files_count: u32,
+  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) invalid_particle_files_count: u32,
 }
 
 impl GamedataCheckResult for GamedataParticlesVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 

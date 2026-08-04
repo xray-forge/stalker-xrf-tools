@@ -39,7 +39,7 @@ impl<'a> MeshesVerifier<'a> {
     };
 
     let result = GamedataMeshesVerificationResult::from_checks(
-      started_at.elapsed().as_millis(),
+      started_at.elapsed(),
       shader_library,
       mesh_assets,
     );
@@ -47,7 +47,7 @@ impl<'a> MeshesVerifier<'a> {
     if self.options.is_logging_enabled() {
       println!(
         "Verified gamedata meshes in {} sec, {}",
-        (result.duration as f64) / 1000.0,
+        result.duration.as_secs_f64(),
         result.failure_message()
       );
     }

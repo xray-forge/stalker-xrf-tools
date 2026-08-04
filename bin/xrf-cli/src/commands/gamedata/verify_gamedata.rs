@@ -153,7 +153,7 @@ impl GenericCommand for VerifyGamedataCommand {
           println!("{}", "Project gamedata is valid".green());
           println!(
             "Gamedata project verified in {} sec",
-            (verify_result.duration as f64) / 1000.0
+            verify_result.duration().as_secs_f64()
           );
         }
         GamedataVerificationStatus::Failed
@@ -181,22 +181,22 @@ impl GenericCommand for VerifyGamedataCommand {
           }
 
           for report in verify_result.get_failure_reports() {
-            for finding in &report.findings {
-              match &finding.asset_path {
+            for finding in report.findings() {
+              match finding.asset_path() {
                 Some(asset_path) => eprintln!(
                   "  - [{}] {}: {}",
-                  report.verification_type,
+                  report.verification_type(),
                   asset_path.display(),
-                  finding.message
+                  finding.message()
                 ),
-                None => eprintln!("  - [{}] {}", report.verification_type, finding.message),
+                None => eprintln!("  - [{}] {}", report.verification_type(), finding.message()),
               }
             }
           }
 
           eprintln!(
             "Gamedata project checked in {} sec",
-            (verify_result.duration as f64) / 1000.0
+            verify_result.duration().as_secs_f64()
           );
         }
       }

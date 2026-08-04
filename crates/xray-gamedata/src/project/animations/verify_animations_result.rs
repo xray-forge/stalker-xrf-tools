@@ -1,14 +1,15 @@
 use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 pub struct GamedataAnimationsVerificationResult {
-  pub duration: u128,
+  pub(crate) duration: Duration,
   pub(crate) findings: Vec<GamedataVerificationFinding>,
   pub(crate) player_hud_animations: GamedataPlayerHudAnimationsVerificationResult,
 }
 
 impl GamedataCheckResult for GamedataAnimationsVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
@@ -33,6 +34,7 @@ mod tests {
     GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
     GamedataVerificationStatus, GamedataVerificationType,
   };
+  use std::time::Duration;
 
   #[test]
   fn exposes_animation_findings_in_reports() {
@@ -46,7 +48,7 @@ mod tests {
     report.add_check(
       GamedataVerificationType::Animations,
       Ok(GamedataAnimationsVerificationResult {
-        duration: 0,
+        duration: Duration::ZERO,
         findings: vec![finding.clone()],
         player_hud_animations: GamedataPlayerHudAnimationsVerificationResult {
           checked_huds_count: 1,
@@ -57,6 +59,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks[0].findings, vec![finding]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

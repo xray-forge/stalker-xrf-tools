@@ -1,15 +1,16 @@
 use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataTexturesVerificationResult {
-  pub duration: u128,
-  pub findings: Vec<GamedataVerificationFinding>,
-  pub invalid_textures_count: u32,
-  pub checked_textures_count: u32,
+  pub(crate) duration: Duration,
+  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) invalid_textures_count: u32,
+  pub(crate) checked_textures_count: u32,
 }
 
 impl GamedataCheckResult for GamedataTexturesVerificationResult {
-  fn duration(&self) -> Option<u128> {
+  fn duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
@@ -58,6 +59,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks[0].findings, vec![finding]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

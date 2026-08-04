@@ -6,7 +6,7 @@ use crate::{
 };
 use colored::Colorize;
 use std::path::Path;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use xray_db::{SpawnFile, XRayByteOrder};
 use xray_error::XRayResult;
 
@@ -39,7 +39,7 @@ impl GamedataProject {
       // todo: Verify result struct.
 
       return Ok(GamedataSpawnsVerificationResult {
-        duration: started_at.elapsed().as_millis(),
+        duration: started_at.elapsed(),
         findings: Vec::new(),
         total_spawns: 0,
         invalid_spawns: 0,
@@ -71,19 +71,19 @@ impl GamedataProject {
       }
     }
 
-    let duration: u128 = started_at.elapsed().as_millis();
+    let duration: Duration = started_at.elapsed();
 
     findings.sort_by(|left, right| {
       left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.message.cmp(&right.message))
+        .asset_path()
+        .cmp(&right.asset_path())
+        .then_with(|| left.message().cmp(right.message()))
     });
 
     if options.is_logging_enabled() {
       println!(
         "Verified gamedata spawn files in {} sec, {}/{} are valid",
-        (duration as f64) / 1000.0,
+        duration.as_secs_f64(),
         total_spawns - invalid_spawns,
         total_spawns
       );

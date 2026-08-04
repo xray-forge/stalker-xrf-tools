@@ -363,7 +363,7 @@ fn missing_required_weather_field_makes_the_check_fail() {
   assert_eq!(result.invalid_weather_files_count, 1);
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
   assert!(result.findings.iter().any(|finding| {
-    finding.message == "Weather [00:00:00] is missing required field [far_plane]"
+    finding.message() == "Weather [00:00:00] is missing required field [far_plane]"
   }));
 }
 
