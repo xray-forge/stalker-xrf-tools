@@ -1,9 +1,8 @@
 use crate::generic_command::CommandResult;
 use serde::Serialize;
 use std::path::Path;
-use xray_gamedata::{
-  GamedataVerificationCheckReport, GamedataVerificationFinding, GamedataVerificationResult,
-};
+use xray_gamedata::{GamedataVerificationCheckReport, GamedataVerificationResult};
+use xray_report::{CheckReport, Finding, Report};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -42,7 +41,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
   }
 
   pub fn write(&self, report_path: &Path) -> CommandResult {
-    let output: GamedataVerificationReportOutput = self.report_output();
+    let output: GamedataVerificationReportOutput = self.report_output()?;
     let json: String = serde_json::to_string_pretty(&output)?;
 
     std::fs::write(report_path, format!("{json}\n"))?;
@@ -50,59 +49,48 @@ impl<'a> GamedataVerificationReportWriter<'a> {
     Ok(())
   }
 
-  fn report_output(&self) -> GamedataVerificationReportOutput {
-    GamedataVerificationReportOutput {
-      checks: self
-        .report
-        .checks()
-        .iter()
-        .map(|check| self.check_report_output(check))
-        .collect(),
+  fn report_output(&self) -> CommandResult<GamedataVerificationReportOutput> {
+    let report: Report = self.report.to_report(self.root)?;
+    let checks: Vec<GamedataVerificationCheckReportOutput> = self
+      .report
+      .checks()
+      .iter()
+      .zip(report.checks())
+      .map(|(gamedata_check, check)| self.check_report_output(gamedata_check, check))
+      .collect();
+
+    Ok(GamedataVerificationReportOutput {
+      checks,
       duration_ms: self.report.duration().as_millis(),
-      status: self.report.status().to_string(),
-    }
+      status: report.status().to_string(),
+    })
   }
 
   fn check_report_output(
     &self,
-    check: &GamedataVerificationCheckReport,
+    gamedata_report: &GamedataVerificationCheckReport,
+    report: &CheckReport,
   ) -> GamedataVerificationCheckReportOutput {
-    let mut findings: Vec<GamedataVerificationFindingOutput> = check
+    let findings: Vec<GamedataVerificationFindingOutput> = report
       .findings()
       .iter()
       .map(|finding| self.finding_output(finding))
       .collect();
 
-    findings.sort_by(|left, right| {
-      left
-        .asset_path
-        .cmp(&right.asset_path)
-        .then_with(|| left.message.cmp(&right.message))
-    });
-
     GamedataVerificationCheckReportOutput {
-      duration_ms: check.duration().map(|duration| duration.as_millis()),
+      duration_ms: report.duration().map(|duration| duration.as_millis()),
       findings,
-      status: check.status().to_string(),
-      summary: check.summary().to_string(),
-      verification_type: check.verification_type().to_string(),
+      status: report.status().to_string(),
+      summary: gamedata_report.summary().to_string(),
+      verification_type: report.id().to_string(),
     }
   }
 
-  fn finding_output(
-    &self,
-    finding: &GamedataVerificationFinding,
-  ) -> GamedataVerificationFindingOutput {
+  fn finding_output(&self, finding: &Finding) -> GamedataVerificationFindingOutput {
     GamedataVerificationFindingOutput {
-      asset_path: finding.asset_path().map(|asset_path| {
-        asset_path
-          .strip_prefix(self.root)
-          .unwrap_or(asset_path)
-          .to_string_lossy()
-          .replace('\\', "/")
-      }),
+      asset_path: finding.subject().map(String::from),
       message: finding.message().to_string(),
-      rule_id: finding.rule().to_string(),
+      rule_id: finding.rule_id().to_string(),
     }
   }
 }

@@ -1,0 +1,57 @@
+use serde::Serialize;
+use std::fmt::{Display, Formatter};
+
+/// The outcome of a completed check.
+#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Status {
+  Error,
+  Failed,
+  Incomplete,
+  Passed,
+  #[default]
+  Skipped,
+}
+
+impl Status {
+  /// Aggregates check outcomes by severity.
+  pub fn aggregate(statuses: impl IntoIterator<Item = Self>) -> Self {
+    statuses.into_iter().min().unwrap_or(Self::Skipped)
+  }
+
+  pub const fn from_is_valid(is_valid: bool) -> Self {
+    if is_valid { Self::Passed } else { Self::Failed }
+  }
+}
+
+impl Display for Status {
+  fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    let value: &str = match self {
+      Self::Error => "error",
+      Self::Failed => "failed",
+      Self::Incomplete => "incomplete",
+      Self::Passed => "passed",
+      Self::Skipped => "skipped",
+    };
+
+    formatter.write_str(value)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::Status;
+
+  #[test]
+  fn aggregates_statuses_by_severity() {
+    assert_eq!(Status::aggregate([]), Status::Skipped);
+    assert_eq!(
+      Status::aggregate([Status::Passed, Status::Incomplete]),
+      Status::Incomplete
+    );
+    assert_eq!(
+      Status::aggregate([Status::Failed, Status::Error]),
+      Status::Error
+    );
+  }
+}

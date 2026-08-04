@@ -7102,6 +7102,7 @@ dependencies = [
  "xray-error",
  "xray-ltx",
  "xray-lua",
+ "xray-report",
  "xray-shaders",
  "xray-sound",
  "xray-utils",
@@ -7126,6 +7127,13 @@ version = "0.1.0"
 dependencies = [
  "full_moon",
  "xray-error",
+]
+
+[[package]]
+name = "xray-report"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -7246,6 +7254,7 @@ dependencies = [
  "xray-export",
  "xray-gamedata",
  "xray-ltx",
+ "xray-report",
  "xray-texture",
  "xray-translation",
  "xray-utils",

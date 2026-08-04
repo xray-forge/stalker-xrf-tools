@@ -1,0 +1,84 @@
+use crate::{CheckReport, Status};
+use serde::Serialize;
+
+/// Immutable, finalized account of a command's checks and findings.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Report {
+  checks: Vec<CheckReport>,
+  status: Status,
+}
+
+impl Report {
+  /// Creates a report and deterministically finalizes every check's findings.
+  pub fn new(mut checks: Vec<CheckReport>) -> Self {
+    for check in &mut checks {
+      check.finalize();
+    }
+
+    let status: Status = Status::aggregate(checks.iter().map(|check| check.status()));
+
+    Self { checks, status }
+  }
+
+  pub fn checks(&self) -> &[CheckReport] {
+    &self.checks
+  }
+
+  pub const fn status(&self) -> Status {
+    self.status
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{CheckReport, Report, Status};
+  use crate::{CheckId, Finding, RuleId};
+  use std::time::Duration;
+
+  #[test]
+  fn preserves_check_order_and_canonicalizes_findings() {
+    let first_check: CheckReport = CheckReport::new(
+      CheckId::new("textures").unwrap(),
+      Status::Failed,
+      Some(Duration::ZERO),
+      vec![
+        Finding::new(
+          RuleId::new("textures.read").unwrap(),
+          Some(String::from("z.dds")),
+          "same",
+        ),
+        Finding::new(
+          RuleId::new("textures.format").unwrap(),
+          Some(String::from("a.dds")),
+          "same",
+        ),
+        Finding::new(
+          RuleId::new("textures.read").unwrap(),
+          Some(String::from("a.dds")),
+          "same",
+        ),
+      ],
+    );
+    let second_check: CheckReport = CheckReport::new(
+      CheckId::new("scripts").unwrap(),
+      Status::Passed,
+      Some(Duration::ZERO),
+      Vec::new(),
+    );
+
+    let report: Report = Report::new(vec![first_check, second_check]);
+
+    assert_eq!(report.checks()[0].id().as_str(), "textures");
+    assert_eq!(report.checks()[1].id().as_str(), "scripts");
+    assert_eq!(
+      report.checks()[0].findings()[0].rule_id().as_str(),
+      "textures.format"
+    );
+    assert_eq!(
+      report.checks()[0].findings()[1].rule_id().as_str(),
+      "textures.read"
+    );
+    assert_eq!(report.checks()[0].findings()[2].subject(), Some("z.dds"));
+  }
+}

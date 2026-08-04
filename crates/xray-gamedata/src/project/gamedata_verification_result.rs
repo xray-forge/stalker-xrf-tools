@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use xray_error::XRayResult;
+use xray_report::{CheckId, CheckReport, Finding, IdentifierError, Report, RuleId};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationFinding {
@@ -148,6 +149,20 @@ impl GamedataVerificationReport {
       )
     })
   }
+
+  /// Converts this gamedata-specific report into the shared command report model.
+  ///
+  /// Gamedata retains its check counters and human summaries; the returned report
+  /// owns the normalized, deterministic data consumed by renderers.
+  pub fn to_report(&self, root: &Path) -> Result<Report, IdentifierError> {
+    let checks: Result<Vec<CheckReport>, IdentifierError> = self
+      .checks
+      .iter()
+      .map(|check| check.to_report(root))
+      .collect();
+
+    Ok(Report::new(checks?))
+  }
 }
 
 impl GamedataVerificationCheckReport {
@@ -198,6 +213,39 @@ impl GamedataVerificationCheckReport {
       },
     }
   }
+
+  fn to_report(&self, root: &Path) -> Result<CheckReport, IdentifierError> {
+    let findings: Result<Vec<Finding>, IdentifierError> = self
+      .findings
+      .iter()
+      .map(|finding| finding.to_report(root))
+      .collect();
+
+    Ok(CheckReport::new(
+      CheckId::new(self.verification_type.to_string())?,
+      self.status,
+      self.duration,
+      findings?,
+    ))
+  }
+}
+
+impl GamedataVerificationFinding {
+  fn to_report(&self, root: &Path) -> Result<Finding, IdentifierError> {
+    let subject: Option<String> = self.asset_path().map(|asset_path| {
+      asset_path
+        .strip_prefix(root)
+        .unwrap_or(asset_path)
+        .to_string_lossy()
+        .replace('\\', "/")
+    });
+
+    Ok(Finding::new(
+      RuleId::new(self.rule.to_string())?,
+      subject,
+      self.message.clone(),
+    ))
+  }
 }
 
 #[cfg(test)]
@@ -207,7 +255,9 @@ mod tests {
     GamedataCheckResult, GamedataVerificationRule, GamedataVerificationStatus,
     GamedataVerificationType,
   };
+  use std::path::Path;
   use xray_error::XRayError;
+  use xray_report::Status;
 
   struct TestCheckResult {
     findings: Vec<GamedataVerificationFinding>,
@@ -342,6 +392,61 @@ mod tests {
         GamedataVerificationRule::CheckExecution,
         "Unexpected error: boom",
       )]
+    );
+
+    let report = result
+      .to_report(Path::new("."))
+      .expect("Expected report conversion");
+
+    assert_eq!(report.checks()[0].duration(), None);
+  }
+
+  #[test]
+  fn converts_findings_to_the_shared_report_model() {
+    let mut result: GamedataVerificationReport = GamedataVerificationReport::default();
+
+    result.add_check(
+      GamedataVerificationType::Scripts,
+      Ok(TestCheckResult {
+        findings: vec![
+          GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::ScriptsSyntax,
+            "scripts/z.script",
+            "same",
+          ),
+          GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::ScriptsPath,
+            "scripts/a.script",
+            "same",
+          ),
+          GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::ScriptsSyntax,
+            "scripts/a.script",
+            "same",
+          ),
+        ],
+        status: GamedataVerificationStatus::Failed,
+        summary: String::from("3 scripts are invalid"),
+      }),
+    );
+
+    let report = result
+      .to_report(Path::new("."))
+      .expect("Expected report conversion");
+
+    assert_eq!(report.status(), Status::Failed);
+    assert_eq!(report.checks()[0].id().as_str(), "scripts");
+    assert_eq!(
+      report.checks()[0].findings()[0].rule_id().as_str(),
+      "scripts.path"
+    );
+    assert_eq!(
+      report.checks()[0].findings()[1].rule_id().as_str(),
+      "scripts.syntax"
+    );
+    assert_eq!(
+      report.checks()[0].findings()[2].subject(),
+      Some("scripts/z.script")
     );
   }
 }
