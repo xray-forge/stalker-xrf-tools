@@ -1,6 +1,10 @@
+mod callable_parser;
 mod declaration_parser;
+mod diagnostics;
 mod editor_projection;
 mod jsdoc_parser;
+mod type_renderer;
+mod value_parser;
 
 pub use editor_projection::{ExportDescriptor, ExportParameterDescriptor, ExportsEditorParser};
 
@@ -9,7 +13,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 use xray_error::{XRayError, XRayResult};
-use xray_typescript::parse_typescript_file;
+use xray_typescript::{TypeScriptSymbolResolver, parse_typescript_file};
 
 /// Parses TypeScript extern declarations into the canonical manifest model.
 ///
@@ -37,13 +41,18 @@ impl ExternManifestParser {
   ) -> XRayResult<ParsedExternManifest> {
     let mut parsed = Vec::new();
 
+    let symbol_resolver: TypeScriptSymbolResolver =
+      TypeScriptSymbolResolver::discover(declarations_root)?;
+
     for path in files {
       let source = parse_typescript_file(path)?;
       let source_path: String = self.normalize_declaration_path(path, declarations_root)?;
       let mut declarations = declaration_parser::ExternDeclarationParser::new(
         &source.source_map,
         &source.comments,
+        path,
         &source_path,
+        &symbol_resolver,
       )
       .parse(&source.program)?;
 
@@ -128,7 +137,10 @@ mod tests {
   }
 
   fn write_source(root: &Path, name: &str, source: &str) {
-    fs::write(root.join(name), source).unwrap();
+    let path: PathBuf = root.join(name);
+
+    fs::create_dir_all(path.parent().unwrap()).unwrap();
+    fs::write(path, source).unwrap();
   }
 
   #[test]
@@ -196,22 +208,23 @@ mod tests {
   }
 
   #[test]
-  fn rejects_missing_callable_contracts_and_duplicate_names() {
+  fn uses_unknown_for_missing_callable_types_and_rejects_duplicate_names() {
     let root: PathBuf = create_test_root("invalid");
     write_source(
       &root,
       "missing.ts",
-      "export {}; extern(\"test\", () => true);",
+      "export {}; extern(\"test\", (value) => true);",
     );
 
     let parser = ExternManifestParser::new();
-    assert!(
-      parser
-        .parse_directory(&root)
-        .unwrap_err()
-        .to_string()
-        .contains("explicit return type")
-    );
+    let parsed = parser.parse_directory(&root).unwrap();
+
+    let ExternExport::Callable(callable) = parsed.manifest.exports.get("test").unwrap() else {
+      panic!("Expected callable extern");
+    };
+
+    assert_eq!(callable.params[0].type_name, "unknown");
+    assert_eq!(callable.returns, "unknown");
 
     write_source(
       &root,
@@ -226,6 +239,141 @@ mod tests {
         .to_string()
         .contains("Duplicate extern")
     );
+
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn explains_an_unresolved_function_reference() {
+    let root: PathBuf = create_test_root("function-reference");
+    write_source(
+      &root,
+      "callbacks.ts",
+      "export {}; extern(\"callbacks.run\", run);",
+    );
+
+    let error = ExternManifestParser::new()
+      .parse_directory(&root)
+      .unwrap_err()
+      .to_string();
+
+    assert!(
+      error.contains("function reference `run` for extern 'callbacks.run' needs a type"),
+      "{error}"
+    );
+    assert!(
+      error.contains("`run as (arg: Type) => ReturnType`"),
+      "{error}"
+    );
+
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn resolves_imported_functions_in_extern_objects() {
+    let root: PathBuf = create_test_root("imported-function");
+    write_source(
+      &root,
+      "src/tsconfig.json",
+      r#"{
+        "compilerOptions": {
+          "baseUrl": "./engine",
+          "paths": { "@/*": ["../*"] }
+        }
+      }"#,
+    );
+    write_source(
+      &root,
+      "src/engine/callbacks/index.ts",
+      "export * from \"./handlers\";",
+    );
+    write_source(
+      &root,
+      "src/engine/callbacks/handlers.ts",
+      r#"
+        export function run(object: GameObject, count?: number): Nillable<string> { return null; }
+
+        export const conditions: Record<EAchievement, () => boolean> = {};
+
+        export const config = {
+          nested_conditions: {
+            enabled: (): boolean => true,
+          },
+        };
+      "#,
+    );
+    write_source(
+      &root,
+      "src/engine/declarations/callbacks.ts",
+      r#"
+        import { conditions, config, run } from "@/engine/callbacks";
+
+        extern("callbacks", { run: run });
+        extern("callbacks.conditions", conditions);
+        extern("callbacks.nested_conditions", config.nested_conditions);
+      "#,
+    );
+
+    let parsed = ExternManifestParser::new()
+      .parse_directory(&root.join("src/engine/declarations"))
+      .unwrap();
+    let ExternExport::Callable(callback) = parsed.manifest.exports.get("callbacks.run").unwrap()
+    else {
+      panic!("Expected callable extern");
+    };
+
+    assert_eq!(callback.source, "callbacks.ts");
+    assert_eq!(callback.params[0].name, "object");
+    assert_eq!(callback.params[0].type_name, "GameObject");
+    assert_eq!(callback.params[1].name, "count");
+    assert_eq!(callback.params[1].optional, Some(true));
+    assert_eq!(callback.params[1].type_name, "number");
+    assert_eq!(callback.returns, "Nillable<string>");
+
+    let ExternExport::Value(conditions) =
+      parsed.manifest.exports.get("callbacks.conditions").unwrap()
+    else {
+      panic!("Expected value extern");
+    };
+    assert_eq!(conditions.type_name, "Record<EAchievement, () => boolean>");
+
+    let ExternExport::Value(nested_conditions) = parsed
+      .manifest
+      .exports
+      .get("callbacks.nested_conditions")
+      .unwrap()
+    else {
+      panic!("Expected value extern");
+    };
+    assert_eq!(nested_conditions.type_name, "{ enabled: () => boolean; }");
+
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn resolves_local_function_references() {
+    let root: PathBuf = create_test_root("local-function");
+    write_source(
+      &root,
+      "callbacks.ts",
+      r#"
+        export {};
+
+        const run = (value: string): boolean => true;
+
+        extern("callbacks.run", run);
+      "#,
+    );
+
+    let parsed = ExternManifestParser::new().parse_directory(&root).unwrap();
+    let ExternExport::Callable(callback) = parsed.manifest.exports.get("callbacks.run").unwrap()
+    else {
+      panic!("Expected callable extern");
+    };
+
+    assert_eq!(callback.params[0].name, "value");
+    assert_eq!(callback.params[0].type_name, "string");
+    assert_eq!(callback.returns, "boolean");
 
     fs::remove_dir_all(root).unwrap();
   }
