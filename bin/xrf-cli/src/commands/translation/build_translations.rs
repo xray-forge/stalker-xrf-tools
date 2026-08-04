@@ -3,8 +3,7 @@ use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::str::FromStr;
-use std::sync::Arc;
-use xray_output::{OutputOptions, OutputVerbosity};
+use xray_output::OutputOptions;
 use xray_translation::{
   ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject,
 };
@@ -88,14 +87,7 @@ impl GenericCommand for BuildTranslationsCommand {
     let is_verbose: bool = matches.get_flag("verbose");
     let is_sorted: bool = matches.get_flag("sort");
 
-    let output: OutputOptions = OutputOptions::new(
-      Arc::new(TerminalOutput),
-      match (is_silent, is_verbose) {
-        (true, _) => OutputVerbosity::Silent,
-        (false, true) => OutputVerbosity::Verbose,
-        (false, false) => OutputVerbosity::Normal,
-      },
-    );
+    let output: OutputOptions = TerminalOutput::from_options(is_silent, is_verbose);
 
     xray_output::info!(
       output,

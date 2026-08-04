@@ -5,8 +5,7 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::process;
 use std::str::FromStr;
-use std::sync::Arc;
-use xray_output::{OutputOptions, OutputVerbosity};
+use xray_output::OutputOptions;
 use xray_translation::{
   ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject,
 };
@@ -88,14 +87,7 @@ impl GenericCommand for VerifyTranslationsCommand {
     let is_strict: bool = matches.get_flag("strict");
     let report_path: Option<PathBuf> = matches.get_one::<PathBuf>("report").cloned();
 
-    let output: OutputOptions = OutputOptions::new(
-      Arc::new(TerminalOutput),
-      match (is_silent, is_verbose) {
-        (true, _) => OutputVerbosity::Silent,
-        (false, true) => OutputVerbosity::Verbose,
-        (false, false) => OutputVerbosity::Normal,
-      },
-    );
+    let output: OutputOptions = TerminalOutput::from_options(is_silent, is_verbose);
 
     xray_output::info!(
       output,

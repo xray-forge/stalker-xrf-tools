@@ -2,10 +2,9 @@ use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
-use std::sync::Arc;
 use xray_error::XRayError;
 use xray_ltx::{Ltx, LtxFormatOptions, LtxProject, LtxProjectFormatResult};
-use xray_output::{OutputOptions, OutputVerbosity};
+use xray_output::OutputOptions;
 
 #[derive(Default)]
 pub struct FormatLtxCommand;
@@ -60,14 +59,9 @@ impl GenericCommand for FormatLtxCommand {
       .expect("Expected valid input path to be provided");
 
     let is_check: bool = matches.get_flag("check");
-    let output: OutputOptions = OutputOptions::new(
-      Arc::new(TerminalOutput),
-      match (matches.get_flag("silent"), matches.get_flag("verbose")) {
-        (true, _) => OutputVerbosity::Silent,
-        (false, true) => OutputVerbosity::Verbose,
-        (false, false) => OutputVerbosity::Normal,
-      },
-    );
+
+    let output: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if path.is_dir() {
       let project: Box<LtxProject> = Box::new(LtxProject::open_at_path(path).map_err(|error| {
