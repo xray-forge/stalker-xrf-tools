@@ -1,8 +1,11 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
+use std::sync::Arc;
 use xray_error::XRayError;
 use xray_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
+use xray_output::{OutputOptions, OutputVerbosity};
 
 #[derive(Default)]
 pub struct VerifyLtxCommand;
@@ -47,11 +50,20 @@ impl GenericCommand for VerifyLtxCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
 
-    let is_silent: bool = matches.get_flag("silent");
-    let is_verbose: bool = matches.get_flag("verbose");
+    let output: OutputOptions = OutputOptions::new(
+      Arc::new(TerminalOutput),
+      match (matches.get_flag("silent"), matches.get_flag("verbose")) {
+        (true, _) => OutputVerbosity::Silent,
+        (false, true) => OutputVerbosity::Verbose,
+        (false, false) => OutputVerbosity::Normal,
+      },
+    );
 
     if !path.is_dir() {
-      println!("Expected configs root directory path for validation as --path parameter");
+      xray_output::error!(
+        output,
+        "Expected configs root directory path for validation as --path parameter"
+      );
 
       return Err(XRayError::new_read_error("Failed to read provided path as directory").into());
     }
@@ -66,10 +78,7 @@ impl GenericCommand for VerifyLtxCommand {
       },
     )?);
 
-    let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions {
-      is_silent,
-      is_verbose,
-    })?;
+    let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions { output })?;
 
     if result.errors.is_empty() {
       Ok(())

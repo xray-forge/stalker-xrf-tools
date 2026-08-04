@@ -7,7 +7,6 @@ use xray_error::{XRayError, XRayResult};
 use xray_ltx::{
   LtxFormatOptions, LtxProjectFormatResult, LtxProjectVerifyResult, LtxVerifyOptions,
 };
-use xray_output::OutputVerbosity;
 
 impl GamedataProject {
   pub fn verify_ltx(
@@ -87,8 +86,7 @@ impl GamedataProject {
     self
       .ltx_project
       .check_format_all_files_opt(LtxFormatOptions {
-        is_silent: matches!(options.output.verbosity(), OutputVerbosity::Silent),
-        is_verbose: matches!(options.output.verbosity(), OutputVerbosity::Verbose),
+        output: options.output.clone(),
       })
   }
 
@@ -99,8 +97,7 @@ impl GamedataProject {
     xray_output::heading!(options.output, "Verify LTX schemas");
 
     self.ltx_project.verify_entries_opt(LtxVerifyOptions {
-      is_silent: matches!(options.output.verbosity(), OutputVerbosity::Silent),
-      is_verbose: matches!(options.output.verbosity(), OutputVerbosity::Verbose),
+      output: options.output.clone(),
     })
   }
 }

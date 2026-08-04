@@ -14,6 +14,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 walkdir = "2.5.0"
 xray-error = { path = "../xray-error" }
 xray-utils = { path = "../xray-utils" }
+xray-output = { path = "../xray-output" }
 
 [dev-dependencies]
 xray-test-utils = { path = "../xray-test-utils" }

@@ -1,8 +1,11 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
+use std::sync::Arc;
 use xray_error::XRayError;
 use xray_ltx::{Ltx, LtxFormatOptions, LtxProject, LtxProjectFormatResult};
+use xray_output::{OutputOptions, OutputVerbosity};
 
 #[derive(Default)]
 pub struct FormatLtxCommand;
@@ -56,13 +59,20 @@ impl GenericCommand for FormatLtxCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
 
-    let is_silent: bool = matches.get_flag("silent");
     let is_check: bool = matches.get_flag("check");
-    let is_verbose: bool = matches.get_flag("verbose");
+    let output: OutputOptions = OutputOptions::new(
+      Arc::new(TerminalOutput),
+      match (matches.get_flag("silent"), matches.get_flag("verbose")) {
+        (true, _) => OutputVerbosity::Silent,
+        (false, true) => OutputVerbosity::Verbose,
+        (false, false) => OutputVerbosity::Normal,
+      },
+    );
 
     if path.is_dir() {
       let project: Box<LtxProject> = Box::new(LtxProject::open_at_path(path).map_err(|error| {
-        println!(
+        xray_output::error!(
+          output,
           "Failed to format project at {}, reason: {}",
           path.display(),
           error
@@ -76,8 +86,7 @@ impl GenericCommand for FormatLtxCommand {
 
         let result: LtxProjectFormatResult =
           project.check_format_all_files_opt(LtxFormatOptions {
-            is_silent,
-            is_verbose,
+            output: output.clone(),
           })?;
 
         if result.invalid_files > 0 {
@@ -88,28 +97,31 @@ impl GenericCommand for FormatLtxCommand {
       } else {
         log::info!("Formatting ltx folder: {}", path.display());
 
-        project.format_all_files_opt(LtxFormatOptions {
-          is_silent,
-          is_verbose,
-        })?;
+        project.format_all_files_opt(LtxFormatOptions { output })?;
       }
 
       Ok(())
     } else {
       log::info!(
-        "Formatting ltx file: {}, --check={is_check}, --silent={is_silent}",
+        "Formatting ltx file: {}, --check={is_check}, --silent={}",
+        matches.get_flag("silent"),
         path.display()
       );
 
       // todo: Check single file?
       match Ltx::format_file(path, true) {
         Ok(_) => {
-          println!("Successfully formatted ltx in '{}'", path.display());
+          xray_output::success!(output, "Successfully formatted ltx in '{}'", path.display());
 
           Ok(())
         }
         Err(error) => {
-          println!("Failed to format {}, reason: {}", path.display(), error);
+          xray_output::failure!(
+            output,
+            "Failed to format {}, reason: {}",
+            path.display(),
+            error
+          );
 
           Err(Box::new(error))
         }

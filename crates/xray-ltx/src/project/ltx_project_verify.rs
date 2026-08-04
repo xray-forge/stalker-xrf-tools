@@ -19,9 +19,7 @@ impl LtxProject {
     let mut result: LtxProjectVerifyResult = LtxProjectVerifyResult::new();
     let started_at: Instant = Instant::now();
 
-    if !options.is_silent {
-      println!("Verify path: {}", self.root.display());
-    }
+    xray_output::heading!(options.output, "Verify path: {}", self.root.display());
 
     // For each file entry in the project:
     for entry in &self.ltx_file_entries {
@@ -58,14 +56,13 @@ impl LtxProject {
                 .get(field_name)
                 .or_else(|| scheme_definition.fields.get(LTX_SYMBOL_ANY))
               {
-                if options.is_verbose && !options.is_silent {
-                  println!(
-                    "Checking {} [{}] {}",
-                    entry.display(),
-                    section_name,
-                    field_name
-                  );
-                }
+                xray_output::verbose!(
+                  options.output,
+                  "Checking {} [{}] {}",
+                  entry.display(),
+                  section_name,
+                  field_name
+                );
 
                 result.checked_fields += 1;
 
@@ -137,26 +134,26 @@ impl LtxProject {
 
     result.duration = started_at.elapsed().as_millis();
 
-    if !options.is_silent {
-      for error in &result.errors {
-        println!("{}", error);
-      }
-
-      println!(
-        "Checked {} files, {} sections in {} sec",
-        self.ltx_files.len(),
-        result.total_sections,
-        (result.duration as f64) / 1000.0
-      );
-      println!(
-        "Verified {:.2}%, {} files, {} sections, {} fields",
-        (result.checked_sections as f32 * 100.0) / result.total_sections as f32,
-        result.total_files,
-        result.checked_sections,
-        result.checked_fields
-      );
-      println!("Found {} error(s)", result.errors.len());
+    for error in &result.errors {
+      xray_output::error!(options.output, "{error}");
     }
+
+    xray_output::info!(
+      options.output,
+      "Checked {} files, {} sections in {} sec",
+      self.ltx_files.len(),
+      result.total_sections,
+      (result.duration as f64) / 1000.0
+    );
+    xray_output::info!(
+      options.output,
+      "Verified {:.2}%, {} files, {} sections, {} fields",
+      (result.checked_sections as f32 * 100.0) / result.total_sections as f32,
+      result.total_files,
+      result.checked_sections,
+      result.checked_fields
+    );
+    xray_output::info!(options.output, "Found {} error(s)", result.errors.len());
 
     Ok(result)
   }
@@ -196,7 +193,6 @@ mod tests {
 
     let result = project
       .verify_entries_opt(LtxVerifyOptions {
-        is_silent: true,
         ..Default::default()
       })
       .expect("Expected test project verification to complete");
@@ -230,7 +226,6 @@ mod tests {
       },
     )?;
     let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions {
-      is_silent: true,
       ..Default::default()
     })?;
 
