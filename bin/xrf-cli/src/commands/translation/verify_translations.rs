@@ -1,3 +1,4 @@
+use super::translation_verification_report::TranslationVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
@@ -37,6 +38,15 @@ impl GenericCommand for VerifyTranslationsCommand {
           .value_parser(value_parser!(String)),
       )
       .arg(
+        Arg::new("report")
+          .help("Write the structured verification report as JSON")
+          .long("report")
+          .required(false)
+          .value_name("PATH")
+          .num_args(1)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
         Arg::new("strict")
           .help("Fail with non 0 error code if translation are missing")
           .long("strict")
@@ -73,6 +83,7 @@ impl GenericCommand for VerifyTranslationsCommand {
     let is_silent: bool = matches.get_flag("silent");
     let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
+    let report_path: Option<PathBuf> = matches.get_one::<PathBuf>("report").cloned();
 
     if !is_silent {
       println!(
@@ -95,6 +106,10 @@ impl GenericCommand for VerifyTranslationsCommand {
     } else {
       TranslationProject::verify_file(path, &options)?
     };
+
+    if let Some(report_path) = report_path {
+      TranslationVerificationReportWriter::new(&result).write(&report_path)?;
+    }
 
     if options.is_logging_enabled() {
       println!(

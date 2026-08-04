@@ -37,8 +37,7 @@ impl TranslationProject {
       if entry_path.is_file() {
         let file_result: ProjectVerifyResult = Self::verify_file(&entry_path, options)?;
 
-        result.missing_translations_count += file_result.missing_translations_count;
-        result.checked_translations_count += file_result.checked_translations_count;
+        result.merge(file_result);
       }
     }
 
@@ -94,22 +93,17 @@ impl TranslationProject {
 
     for language in languages {
       for (key, entry) in &parsed {
-        if let Some(possible_translation) = entry.get(&language) {
-          if possible_translation.is_none() {
-            println!(
-              "Translation key missing: {} {} in {}",
-              key, language, path_display
-            );
+        let is_missing: bool = entry
+          .get(&language)
+          .is_none_or(|translation| translation.is_none());
 
-            result.missing_translations_count += 1;
-          }
-        } else {
+        if is_missing {
           println!(
             "Translation key missing: {} {} in {}",
             key, language, path_display
           );
 
-          result.missing_translations_count += 1;
+          result.record_missing_translation(path.as_ref(), key, &language);
         }
       }
     }
