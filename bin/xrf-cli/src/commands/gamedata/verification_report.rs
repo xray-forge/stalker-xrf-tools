@@ -2,7 +2,7 @@ use crate::generic_command::CommandResult;
 use serde::Serialize;
 use std::path::Path;
 use xray_gamedata::{GamedataVerificationCheckReport, GamedataVerificationResult};
-use xray_report::{CheckReport, Finding, Report};
+use xray_report::{CheckReport, Finding};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -50,19 +50,17 @@ impl<'a> GamedataVerificationReportWriter<'a> {
   }
 
   fn report_output(&self) -> CommandResult<GamedataVerificationReportOutput> {
-    let report: Report = self.report.to_report();
     let checks: Vec<GamedataVerificationCheckReportOutput> = self
       .report
       .checks()
       .iter()
-      .zip(report.checks())
-      .map(|(gamedata_check, check)| self.check_report_output(gamedata_check, check))
+      .map(|gamedata_check| self.check_report_output(gamedata_check, gamedata_check.report()))
       .collect();
 
     Ok(GamedataVerificationReportOutput {
       checks,
       duration_ms: self.report.duration().as_millis(),
-      status: report.status().to_string(),
+      status: self.report.status().to_string(),
     })
   }
 

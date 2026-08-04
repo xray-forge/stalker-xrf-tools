@@ -2,7 +2,7 @@ use serde::Serialize;
 use std::fmt::{Display, Formatter};
 
 /// The outcome of a completed check.
-#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Status {
   Error,
@@ -16,11 +16,24 @@ pub enum Status {
 impl Status {
   /// Aggregates check outcomes by severity.
   pub fn aggregate(statuses: impl IntoIterator<Item = Self>) -> Self {
-    statuses.into_iter().min().unwrap_or(Self::Skipped)
+    statuses
+      .into_iter()
+      .min_by_key(|status| status.severity())
+      .unwrap_or(Self::Skipped)
   }
 
   pub const fn from_is_valid(is_valid: bool) -> Self {
     if is_valid { Self::Passed } else { Self::Failed }
+  }
+
+  const fn severity(self) -> u8 {
+    match self {
+      Self::Error => 0,
+      Self::Failed => 1,
+      Self::Incomplete => 2,
+      Self::Passed => 3,
+      Self::Skipped => 4,
+    }
   }
 }
 
@@ -51,6 +64,16 @@ mod tests {
     );
     assert_eq!(
       Status::aggregate([Status::Failed, Status::Error]),
+      Status::Error
+    );
+    assert_eq!(
+      Status::aggregate([
+        Status::Skipped,
+        Status::Passed,
+        Status::Incomplete,
+        Status::Failed,
+        Status::Error,
+      ]),
       Status::Error
     );
   }

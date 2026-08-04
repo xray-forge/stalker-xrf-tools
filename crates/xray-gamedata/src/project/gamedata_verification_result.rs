@@ -85,10 +85,9 @@ impl GamedataVerificationReport {
     })
   }
 
-  /// Converts this gamedata-specific report into the shared command report model.
+  /// Creates a shared report without gamedata-specific summaries.
   ///
-  /// Gamedata retains its check counters and human summaries; the returned report
-  /// finalizes the shared check data consumed by renderers.
+  /// Gamedata retains its check counters and human summaries separately.
   pub fn to_report(&self) -> Report {
     let checks: Vec<CheckReport> = self
       .checks
@@ -119,6 +118,10 @@ impl GamedataVerificationCheckReport {
 
   pub const fn verification_type(&self) -> GamedataVerificationType {
     self.verification_type
+  }
+
+  pub fn report(&self) -> &CheckReport {
+    &self.report
   }
 
   pub(crate) fn from_check_result<T>(
