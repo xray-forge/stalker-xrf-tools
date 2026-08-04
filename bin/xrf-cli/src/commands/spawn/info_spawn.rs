@@ -1,6 +1,6 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
-use clap::{Arg, ArgMatches, Command, value_parser};
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use xray_db::{SpawnFile, XRayByteOrder};
 use xray_output::OutputOptions;
@@ -25,6 +25,20 @@ impl GenericCommand for InfoSpawnCommand {
           .required(true)
           .value_parser(value_parser!(PathBuf)),
       )
+      .arg(
+        Arg::new("silent")
+          .help("Disable any logging")
+          .short('s')
+          .long("silent")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .action(ArgAction::SetTrue),
+      )
   }
 
   /// Print information about spawn file.
@@ -33,7 +47,8 @@ impl GenericCommand for InfoSpawnCommand {
       .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
-    let output: OutputOptions = TerminalOutput::from_options(false, false);
+    let output: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Read spawn file {}", path.display());
 

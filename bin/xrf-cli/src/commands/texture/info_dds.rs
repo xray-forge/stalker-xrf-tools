@@ -1,6 +1,6 @@
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
-use clap::{Arg, ArgMatches, Command, value_parser};
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use ddsfile::Dds;
 use std::fs::File;
 use std::path::PathBuf;
@@ -26,6 +26,20 @@ impl GenericCommand for InfoDdsCommand {
           .required(true)
           .value_parser(value_parser!(PathBuf)),
       )
+      .arg(
+        Arg::new("silent")
+          .help("Disable any logging")
+          .short('s')
+          .long("silent")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .action(ArgAction::SetTrue),
+      )
   }
 
   /// Print information about dds file.
@@ -34,7 +48,8 @@ impl GenericCommand for InfoDdsCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    let output: OutputOptions = TerminalOutput::from_options(false, false);
+    let output: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Read dds file {}", path.display());
 
