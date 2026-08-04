@@ -1,6 +1,9 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -47,6 +50,7 @@ impl<'a> MeshAssetsVerifier<'a> {
           }
 
           return vec![GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::MeshesPath,
             Path::new(relative_path),
             "Mesh path was not found in gamedata roots",
           )];
@@ -69,6 +73,7 @@ impl<'a> MeshAssetsVerifier<'a> {
                 }
 
                 vec![GamedataVerificationFinding::for_asset(
+                  GamedataVerificationRule::MeshesValidation,
                   &path,
                   format!("Failed to verify mesh: {error}"),
                 )]
@@ -81,6 +86,7 @@ impl<'a> MeshAssetsVerifier<'a> {
             }
 
             vec![GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::MeshesRead,
               &path,
               format!("Failed to read mesh: {error}"),
             )]
@@ -161,7 +167,8 @@ impl<'a> MeshAssetsVerifier<'a> {
             eprintln!("Mesh motion refs not found by path: {motion_ref}");
           }
 
-          findings.push(Self::mesh_finding(
+          findings.push(Self::new_mesh_finding(
+            GamedataVerificationRule::MeshesMotionValidation,
             mesh_path,
             format!("Mesh references missing motion '{motion_ref}'"),
           ));
@@ -181,6 +188,7 @@ impl<'a> MeshAssetsVerifier<'a> {
                     }
 
                     findings.push(GamedataVerificationFinding::for_asset(
+                      GamedataVerificationRule::MeshesMotionValidation,
                       &motion_path,
                       format!("Failed to verify referenced motion: {error}"),
                     ));
@@ -197,6 +205,7 @@ impl<'a> MeshAssetsVerifier<'a> {
                 }
 
                 findings.push(GamedataVerificationFinding::for_asset(
+                  GamedataVerificationRule::MeshesMotionRead,
                   &motion_path,
                   format!("Failed to read referenced motion: {error}"),
                 ));
@@ -230,7 +239,8 @@ impl<'a> MeshAssetsVerifier<'a> {
         eprintln!("Cannot read OGF texture: {}", texture.texture_name);
       }
 
-      findings.push(Self::mesh_finding(
+      findings.push(Self::new_mesh_finding(
+        GamedataVerificationRule::MeshesValidation,
         mesh_path,
         format!("Mesh references missing texture '{}'", texture.texture_name),
       ));
@@ -261,7 +271,8 @@ impl<'a> MeshAssetsVerifier<'a> {
       );
     }
 
-    vec![Self::mesh_finding(
+    vec![Self::new_mesh_finding(
+      GamedataVerificationRule::MeshesValidation,
       mesh_path,
       format!(
         "Mesh references shader '{}' that is not defined in shaders.xr",
@@ -286,7 +297,13 @@ impl<'a> MeshAssetsVerifier<'a> {
         .map(|bone| (bone.name.as_str(), bone.parent.as_str())),
     )
     .into_iter()
-    .map(|message| Self::mesh_finding(mesh_path, message))
+    .map(|message| {
+      Self::new_mesh_finding(
+        GamedataVerificationRule::MeshesValidation,
+        mesh_path,
+        message,
+      )
+    })
     .collect()
   }
 
@@ -304,7 +321,8 @@ impl<'a> MeshAssetsVerifier<'a> {
 
     if let Some(indices) = &geometry.indices {
       if indices.len() % 3 != 0 {
-        findings.push(Self::mesh_finding(
+        findings.push(Self::new_mesh_finding(
+          GamedataVerificationRule::MeshesValidation,
           mesh_path,
           format!(
             "Mesh geometry contains {} indices, which is not divisible by 3",
@@ -316,7 +334,8 @@ impl<'a> MeshAssetsVerifier<'a> {
       if let Some(vertex_count) = geometry.vertex_count
         && let Some(index) = indices.iter().find(|index| **index as u32 >= vertex_count)
       {
-        findings.push(Self::mesh_finding(
+        findings.push(Self::new_mesh_finding(
+          GamedataVerificationRule::MeshesValidation,
           mesh_path,
           format!(
             "Mesh geometry index {index} references a vertex outside the {vertex_count} vertices"
@@ -333,7 +352,8 @@ impl<'a> MeshAssetsVerifier<'a> {
             .iter()
             .find(|index| **index as usize >= bones_count)
           {
-            findings.push(Self::mesh_finding(
+            findings.push(Self::new_mesh_finding(
+              GamedataVerificationRule::MeshesValidation,
               mesh_path,
               format!(
                 "Mesh geometry skin vertex references bone {bone_index}, but the skeleton has {bones_count} bones"
@@ -341,7 +361,8 @@ impl<'a> MeshAssetsVerifier<'a> {
             ));
           }
         }
-        None => findings.push(Self::mesh_finding(
+        None => findings.push(Self::new_mesh_finding(
+          GamedataVerificationRule::MeshesValidation,
           mesh_path,
           "Mesh geometry contains skinned vertices but no skeleton".to_string(),
         )),
@@ -466,7 +487,8 @@ impl<'a> MeshAssetsVerifier<'a> {
           );
         }
 
-        findings.push(Self::motion_finding(
+        findings.push(Self::new_motion_finding(
+          GamedataVerificationRule::MeshesMotionValidation,
           motion_path,
           format!(
             "Motion bone count does not match mesh: {} mesh bones, {} motion bones",
@@ -500,7 +522,8 @@ impl<'a> MeshAssetsVerifier<'a> {
           })
           .collect();
 
-        findings.push(Self::motion_finding(
+        findings.push(Self::new_motion_finding(
+          GamedataVerificationRule::MeshesMotionValidation,
           motion_path,
           format!("Motion is missing mesh bones: {}", missing_bones.join(",")),
         ));
@@ -510,17 +533,25 @@ impl<'a> MeshAssetsVerifier<'a> {
     Ok(findings)
   }
 
-  fn mesh_finding(mesh_path: Option<&Path>, message: String) -> GamedataVerificationFinding {
+  fn new_mesh_finding(
+    rule: GamedataVerificationRule,
+    mesh_path: Option<&Path>,
+    message: String,
+  ) -> GamedataVerificationFinding {
     match mesh_path {
-      Some(path) => GamedataVerificationFinding::for_asset(path, message),
-      None => GamedataVerificationFinding::without_asset(message),
+      Some(path) => GamedataVerificationFinding::for_asset(rule, path, message),
+      None => GamedataVerificationFinding::without_asset(rule, message),
     }
   }
 
-  fn motion_finding(motion_path: Option<&Path>, message: String) -> GamedataVerificationFinding {
+  fn new_motion_finding(
+    rule: GamedataVerificationRule,
+    motion_path: Option<&Path>,
+    message: String,
+  ) -> GamedataVerificationFinding {
     match motion_path {
-      Some(path) => GamedataVerificationFinding::for_asset(path, message),
-      None => GamedataVerificationFinding::without_asset(message),
+      Some(path) => GamedataVerificationFinding::for_asset(rule, path, message),
+      None => GamedataVerificationFinding::without_asset(rule, message),
     }
   }
 }

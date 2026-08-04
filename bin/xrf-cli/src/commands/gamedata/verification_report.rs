@@ -28,7 +28,7 @@ struct GamedataVerificationCheckReportOutput {
 struct GamedataVerificationFindingOutput {
   asset_path: Option<String>,
   message: String,
-  rule_id: Option<String>,
+  rule_id: String,
 }
 
 pub struct GamedataVerificationReportWriter<'a> {
@@ -102,7 +102,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
           .replace('\\', "/")
       }),
       message: finding.message.clone(),
-      rule_id: finding.rule_id.clone(),
+      rule_id: finding.rule.to_string(),
     }
   }
 }
@@ -142,12 +142,13 @@ mod tests {
       checks: vec![GamedataVerificationCheckReport {
         duration: Some(7),
         findings: vec![
-          GamedataVerificationFinding::for_asset_in_rule(
-            "textures.dds",
+          GamedataVerificationFinding::for_asset(
+            xray_gamedata::GamedataVerificationRule::TexturesValidation,
             root.join("textures").join("z.dds"),
             "Second finding",
           ),
           GamedataVerificationFinding::for_asset(
+            xray_gamedata::GamedataVerificationRule::TexturesValidation,
             root.join("textures").join("a.dds"),
             "First finding",
           ),

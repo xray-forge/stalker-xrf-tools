@@ -34,14 +34,14 @@ impl GamedataCheckResult for GamedataSpawnsVerificationResult {
 mod tests {
   use super::GamedataSpawnsVerificationResult;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationStatus,
-    GamedataVerificationType,
+    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
   fn exposes_spawn_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
-      "spawns.unclassified",
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::SpawnsRead,
       "spawns/test.spawn",
       "Failed to read spawn file: invalid header",
     );

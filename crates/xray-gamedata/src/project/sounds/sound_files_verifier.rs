@@ -1,5 +1,8 @@
 use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use rayon::prelude::*;
 use std::path::Path;
 use xray_error::XRayResult;
@@ -34,8 +37,8 @@ impl<'a> SoundFilesVerifier<'a> {
         }
 
         let Some(path) = self.project.get_absolute_asset_path(relative_path) else {
-          return Some(GamedataVerificationFinding::for_asset_in_rule(
-            "sounds.files",
+          return Some(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::SoundsFiles,
             Path::new(relative_path),
             "Sound path was not found in gamedata roots",
           ));
@@ -52,7 +55,11 @@ impl<'a> SoundFilesVerifier<'a> {
             eprintln!("Sound is not valid: {} - {error}", path.display());
           }
 
-          GamedataVerificationFinding::for_asset_in_rule("sounds.files", path, error.to_string())
+          GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::SoundsFiles,
+            path,
+            error.to_string(),
+          )
         })
       })
       .collect();

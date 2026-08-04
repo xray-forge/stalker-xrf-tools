@@ -1,6 +1,9 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use std::path::Path;
 use std::time::Instant;
@@ -60,6 +63,7 @@ impl GamedataProject {
         }
       } else {
         findings.push(GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::SpawnsPath,
           Path::new(relative_path),
           "Spawn path was not found in gamedata roots",
         ));
@@ -126,6 +130,7 @@ impl GamedataProject {
         }
 
         vec![GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::SpawnsRead,
           path,
           format!("Failed to read spawn file: {error}"),
         )]

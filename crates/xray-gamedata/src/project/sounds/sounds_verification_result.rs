@@ -26,7 +26,7 @@ impl GamedataSoundsVerificationResult {
       left
         .asset_path
         .cmp(&right.asset_path)
-        .then_with(|| left.rule_id.cmp(&right.rule_id))
+        .then_with(|| left.rule.cmp(&right.rule))
         .then_with(|| left.message.cmp(&right.message))
     });
 
@@ -71,13 +71,13 @@ mod tests {
   use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
   use crate::{
     GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
-    GamedataVerificationStatus, GamedataVerificationType,
+    GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
   fn exposes_sound_reference_findings_in_sound_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
-      "sounds.references",
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::SoundsReferences,
       "configs/ui/game_tutorials.xml",
       "Unknown sound reference: <sound> = video\\missing",
     );

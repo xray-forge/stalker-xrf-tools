@@ -30,14 +30,14 @@ mod tests {
   use super::GamedataAnimationsVerificationResult;
   use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationStatus,
-    GamedataVerificationType,
+    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
   fn exposes_animation_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
-      "animations.player-hud",
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::AnimationsPlayerHud,
       "configs/system.ltx",
       "Player HUD section [actor_hud] has invalid animations",
     );

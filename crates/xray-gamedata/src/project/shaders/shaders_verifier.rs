@@ -1,6 +1,9 @@
 use crate::project::shaders::gamedata_shader_source_loader::GamedataShaderSourceLoader;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
-use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use std::collections::HashSet;
 use std::fs;
@@ -66,8 +69,8 @@ impl<'a> ShadersVerifier<'a> {
     let renderer_root: PathBuf = self.shaders_root.join(renderer.directory_name());
 
     if !renderer_root.is_dir() {
-      result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
-        "shaders.renderer-root",
+      result.add_finding(GamedataVerificationFinding::for_asset(
+        GamedataVerificationRule::ShadersRendererRoot,
         &renderer_root,
         format!(
           "{} renderer shader root is missing",
@@ -93,8 +96,8 @@ impl<'a> ShadersVerifier<'a> {
           &mut checked_sources,
         ),
         Ok(_) => {}
-        Err(error) => result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
-          "shaders.source-read",
+        Err(error) => result.add_finding(GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::ShadersSourceRead,
           error.path().unwrap_or(&renderer_root),
           format!("Failed to traverse renderer shader sources: {error}"),
         )),
@@ -110,8 +113,8 @@ impl<'a> ShadersVerifier<'a> {
     let entries = match fs::read_dir(renderer_root) {
       Ok(entries) => entries,
       Err(error) => {
-        result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
-          "shaders.source-read",
+        result.add_finding(GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::ShadersSourceRead,
           renderer_root,
           format!("Failed to read renderer shader root: {error}"),
         ));
@@ -124,8 +127,8 @@ impl<'a> ShadersVerifier<'a> {
       let entry = match entry {
         Ok(entry) => entry,
         Err(error) => {
-          result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
-            "shaders.source-read",
+          result.add_finding(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::ShadersSourceRead,
             renderer_root,
             format!("Failed to read renderer shader entry: {error}"),
           ));
@@ -143,15 +146,15 @@ impl<'a> ShadersVerifier<'a> {
       match fs::read_to_string(&path) {
         Ok(source) => {
           if let Err(error) = XRayShaderScript::parse(&path, &source) {
-            result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
-              "shaders.lua-syntax",
+            result.add_finding(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::ShadersLuaSyntax,
               &path,
               error.to_string(),
             ));
           }
         }
-        Err(error) => result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
-          "shaders.source-read",
+        Err(error) => result.add_finding(GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::ShadersSourceRead,
           &path,
           format!("Failed to read shader script: {error}"),
         )),
@@ -176,7 +179,7 @@ impl<'a> ShadersVerifier<'a> {
       Err(error) => {
         checked_sources.insert(path.to_path_buf());
         result.increment_checked_sources_count();
-        result.add_finding(GamedataVerificationFinding::for_asset_in_rule(
+        result.add_finding(GamedataVerificationFinding::for_asset(
           Self::shader_error_rule_id(&error),
           path,
           error.to_string(),
@@ -196,13 +199,13 @@ impl<'a> ShadersVerifier<'a> {
       .is_some_and(|value| value.eq_ignore_ascii_case(extension))
   }
 
-  fn shader_error_rule_id(error: &XRayError) -> &'static str {
+  fn shader_error_rule_id(error: &XRayError) -> GamedataVerificationRule {
     match error {
-      XRayError::Invalid { .. } => "shaders.include-syntax",
-      XRayError::NotFound { .. } => "shaders.include-missing",
-      XRayError::Read { .. } | XRayError::Io { .. } => "shaders.source-read",
-      XRayError::Verify { .. } => "shaders.include-cycle",
-      _ => "shaders.source-invalid",
+      XRayError::Invalid { .. } => GamedataVerificationRule::ShadersIncludeSyntax,
+      XRayError::NotFound { .. } => GamedataVerificationRule::ShadersIncludeMissing,
+      XRayError::Read { .. } | XRayError::Io { .. } => GamedataVerificationRule::ShadersSourceRead,
+      XRayError::Verify { .. } => GamedataVerificationRule::ShadersIncludeCycle,
+      _ => GamedataVerificationRule::ShadersSourceInvalid,
     }
   }
 
@@ -226,7 +229,7 @@ impl<'a> ShadersVerifier<'a> {
 #[cfg(test)]
 mod tests {
   use super::ShadersVerifier;
-  use crate::{GamedataCheckResult, GamedataProjectVerifyOptions};
+  use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
   use std::fs;
   use std::path::{Path, PathBuf};
   use xray_error::{XRayError, XRayResult};
@@ -273,15 +276,15 @@ mod tests {
     write_file(&root.join("gl/second.h"), "#include \"first.h\"\n")?;
 
     let result = ShadersVerifier::new(root.clone(), &options).verify();
-    let rule_ids: Vec<&str> = result
+    let rules: Vec<GamedataVerificationRule> = result
       .findings()
       .iter()
-      .filter_map(|finding| finding.rule_id.as_deref())
+      .map(|finding| finding.rule)
       .collect();
 
-    assert!(rule_ids.contains(&"shaders.lua-syntax"));
-    assert!(rule_ids.contains(&"shaders.include-missing"));
-    assert!(rule_ids.contains(&"shaders.include-cycle"));
+    assert!(rules.contains(&GamedataVerificationRule::ShadersLuaSyntax));
+    assert!(rules.contains(&GamedataVerificationRule::ShadersIncludeMissing));
+    assert!(rules.contains(&GamedataVerificationRule::ShadersIncludeCycle));
 
     fs::remove_dir_all(root)?;
 

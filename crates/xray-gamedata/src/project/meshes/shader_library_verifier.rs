@@ -1,5 +1,5 @@
 use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
-use crate::{GamedataProject, GamedataVerificationFinding};
+use crate::{GamedataProject, GamedataVerificationFinding, GamedataVerificationRule};
 use std::path::PathBuf;
 use xray_db::ShaderLibraryFile;
 
@@ -17,13 +17,13 @@ impl<'a> ShaderLibraryVerifier<'a> {
 
     match ShaderLibraryFile::read_from_path(&path) {
       Ok(library) => GamedataShaderLibraryVerificationResult::passed(library),
-      Err(error) => GamedataShaderLibraryVerificationResult::failed(
-        GamedataVerificationFinding::for_asset_in_rule(
-          "meshes.shader-library",
+      Err(error) => {
+        GamedataShaderLibraryVerificationResult::failed(GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::MeshesShaderLibrary,
           path,
           format!("Failed to read shader library: {error}"),
-        ),
-      ),
+        ))
+      }
     }
   }
 }

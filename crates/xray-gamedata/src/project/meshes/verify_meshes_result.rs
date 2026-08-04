@@ -56,14 +56,14 @@ mod tests {
   use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
   use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationStatus,
-    GamedataVerificationType,
+    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
   fn exposes_mesh_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
-      "meshes.unclassified",
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::MeshesValidation,
       "meshes/test.ogf",
       "Mesh references missing texture 'textures/test'",
     );

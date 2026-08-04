@@ -1,7 +1,10 @@
 use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
 use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use regex::Regex;
 use std::path::Path;
@@ -42,6 +45,7 @@ impl GamedataProject {
             }
 
             findings.push(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::WeaponsValidation,
               &system_ltx_path,
               format!("Weapon section [{section_name}] is invalid"),
             ));
@@ -54,6 +58,7 @@ impl GamedataProject {
           }
 
           findings.push(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::WeaponsValidation,
             &system_ltx_path,
             format!("Weapon section [{section_name}] failed verification: {error}"),
           ));

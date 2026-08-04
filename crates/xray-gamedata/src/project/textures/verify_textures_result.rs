@@ -34,14 +34,14 @@ impl GamedataCheckResult for GamedataTexturesVerificationResult {
 mod tests {
   use super::GamedataTexturesVerificationResult;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationStatus,
-    GamedataVerificationType,
+    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
   fn exposes_texture_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
-      "textures.unclassified",
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::TexturesValidation,
       "textures/test.dds",
       "Texture uses an unsupported format",
     );

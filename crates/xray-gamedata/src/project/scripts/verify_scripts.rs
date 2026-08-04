@@ -1,7 +1,10 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::scripts::runtime_script::is_runtime_script;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
@@ -45,6 +48,7 @@ impl GamedataProject {
           }
 
           return Some(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::ScriptsPath,
             Path::new(relative_path),
             "Script path was not found in gamedata roots",
           ));
@@ -58,6 +62,7 @@ impl GamedataProject {
             }
 
             Some(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::ScriptsSyntax,
               &path,
               "LuaJIT parser rejected the script",
             ))
@@ -68,6 +73,7 @@ impl GamedataProject {
             }
 
             Some(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::ScriptsRead,
               &path,
               error.to_string(),
             ))

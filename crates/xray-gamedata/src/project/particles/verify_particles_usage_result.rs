@@ -47,7 +47,7 @@ mod tests {
   use super::GamedataParticlesUsageVerificationResult;
   use crate::{
     GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
-    GamedataVerificationStatus, GamedataVerificationType,
+    GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
@@ -83,8 +83,8 @@ mod tests {
 
   #[test]
   fn exposes_particle_usage_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
-      "particles-usage.unclassified",
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::ParticlesUsageReference,
       "configs/scripts/test.ltx",
       "Unknown particle reference: [sr_particle] name = missing_particle",
     );

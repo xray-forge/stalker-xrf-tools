@@ -1,4 +1,7 @@
-use crate::{GamedataCheckResult, GamedataVerificationStatus, GamedataVerificationType};
+use crate::{
+  GamedataCheckResult, GamedataVerificationRule, GamedataVerificationStatus,
+  GamedataVerificationType,
+};
 use std::path::{Path, PathBuf};
 use xray_error::XRayResult;
 
@@ -6,11 +9,11 @@ use xray_error::XRayResult;
 pub struct GamedataVerificationFinding {
   pub asset_path: Option<PathBuf>,
   pub message: String,
-  pub rule_id: Option<String>,
+  pub rule: GamedataVerificationRule,
 }
 
 impl GamedataVerificationFinding {
-  pub fn for_asset<P, M>(asset_path: P, message: M) -> Self
+  pub fn for_asset<P, M>(rule: GamedataVerificationRule, asset_path: P, message: M) -> Self
   where
     P: AsRef<Path>,
     M: Into<String>,
@@ -18,43 +21,18 @@ impl GamedataVerificationFinding {
     Self {
       asset_path: Some(asset_path.as_ref().to_path_buf()),
       message: message.into(),
-      rule_id: None,
+      rule,
     }
   }
 
-  pub fn for_asset_in_rule<R, P, M>(rule_id: R, asset_path: P, message: M) -> Self
-  where
-    R: Into<String>,
-    P: AsRef<Path>,
-    M: Into<String>,
-  {
-    Self {
-      asset_path: Some(asset_path.as_ref().to_path_buf()),
-      message: message.into(),
-      rule_id: Some(rule_id.into()),
-    }
-  }
-
-  pub fn without_asset<M>(message: M) -> Self
+  pub fn without_asset<M>(rule: GamedataVerificationRule, message: M) -> Self
   where
     M: Into<String>,
   {
     Self {
       asset_path: None,
       message: message.into(),
-      rule_id: None,
-    }
-  }
-
-  pub fn without_asset_in_rule<R, M>(rule_id: R, message: M) -> Self
-  where
-    R: Into<String>,
-    M: Into<String>,
-  {
-    Self {
-      asset_path: None,
-      message: message.into(),
-      rule_id: Some(rule_id.into()),
+      rule,
     }
   }
 }
@@ -133,6 +111,7 @@ impl GamedataVerificationCheckReport {
       Err(error) => Self {
         duration: None,
         findings: vec![GamedataVerificationFinding::without_asset(
+          GamedataVerificationRule::CheckExecution,
           error.to_string(),
         )],
         status: GamedataVerificationStatus::Error,
@@ -146,7 +125,10 @@ impl GamedataVerificationCheckReport {
 #[cfg(test)]
 mod tests {
   use super::{GamedataVerificationFinding, GamedataVerificationReport};
-  use crate::{GamedataCheckResult, GamedataVerificationStatus, GamedataVerificationType};
+  use crate::{
+    GamedataCheckResult, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
+  };
   use xray_error::XRayError;
 
   struct TestCheckResult {
@@ -185,6 +167,7 @@ mod tests {
       GamedataVerificationType::Scripts,
       Ok(TestCheckResult {
         findings: vec![GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::ScriptsSyntax,
           "scripts/invalid.script",
           "Expected expression after '='",
         )],
@@ -201,6 +184,7 @@ mod tests {
     assert_eq!(
       result.checks[0].findings,
       vec![GamedataVerificationFinding::for_asset(
+        GamedataVerificationRule::ScriptsSyntax,
         "scripts/invalid.script",
         "Expected expression after '='",
       )]
@@ -226,6 +210,7 @@ mod tests {
     assert_eq!(
       result.checks[0].findings,
       vec![GamedataVerificationFinding::without_asset(
+        GamedataVerificationRule::CheckExecution,
         "Unexpected error: boom",
       )]
     );

@@ -1,5 +1,8 @@
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
@@ -52,6 +55,7 @@ impl GamedataProject {
             }
 
             vec![GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::ParticlesLibrary,
               path,
               format!("Failed to read particle library: {error}"),
             )]
@@ -114,6 +118,7 @@ impl GamedataProject {
             Ok(result) => {
               if !result {
                 findings.push(GamedataVerificationFinding::for_asset(
+                  GamedataVerificationRule::ParticlesTexture,
                   &texture,
                   format!(
                     "Particle effect '{}' references an invalid texture",
@@ -124,6 +129,7 @@ impl GamedataProject {
             }
             Err(error) => {
               findings.push(GamedataVerificationFinding::for_asset(
+                GamedataVerificationRule::ParticlesTexture,
                 &texture,
                 format!(
                   "Failed to verify texture for particle effect '{}': {error}",
@@ -134,6 +140,7 @@ impl GamedataProject {
           }
         } else {
           findings.push(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::ParticlesTexture,
             particle_library_path,
             format!(
               "Particle effect '{}' references missing texture '{}'",

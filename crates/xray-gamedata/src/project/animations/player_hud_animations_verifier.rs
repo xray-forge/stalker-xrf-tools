@@ -3,7 +3,10 @@ use crate::project::animations::player_hud_animations_verification_result::Gamed
 use crate::project::weapons::weapons_utils::{
   get_weapon_animation_name, is_player_hud_section, is_weapon_section,
 };
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
@@ -51,13 +54,11 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
           println!("Player hud config [{section_name}] is invalid");
         }
 
-        result
-          .findings
-          .push(GamedataVerificationFinding::for_asset_in_rule(
-            "animations.player-hud",
-            &system_ltx_path,
-            format!("Player HUD section [{section_name}] has invalid animations"),
-          ));
+        result.findings.push(GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::AnimationsPlayerHud,
+          &system_ltx_path,
+          format!("Player HUD section [{section_name}] has invalid animations"),
+        ));
         result.invalid_huds_count += 1;
       }
     }

@@ -3,7 +3,10 @@
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_findings_with_definitions;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -68,6 +71,7 @@ impl GamedataProject {
 
     if checked_weather_files_count == 0 {
       findings.push(GamedataVerificationFinding::without_asset(
+        GamedataVerificationRule::WeathersFiles,
         "No weather files found",
       ));
     }

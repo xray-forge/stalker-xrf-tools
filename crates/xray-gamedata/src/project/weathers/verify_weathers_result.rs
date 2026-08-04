@@ -50,7 +50,7 @@ mod tests {
   use super::GamedataWeathersVerificationResult;
   use crate::{
     GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
-    GamedataVerificationStatus, GamedataVerificationType,
+    GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
@@ -74,6 +74,7 @@ mod tests {
   #[test]
   fn exposes_weather_findings_in_reports() {
     let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::WeathersValidation,
       "configs/environment/weathers/test.ltx",
       "Weather [00:00:00] is missing required field [fog_color]",
     );

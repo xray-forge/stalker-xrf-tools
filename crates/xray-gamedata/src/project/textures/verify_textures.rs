@@ -1,6 +1,9 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
@@ -37,6 +40,7 @@ impl GamedataProject {
           }
 
           return Some(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::TexturesPath,
             Path::new(relative_path),
             "Texture path was not found in gamedata roots",
           ));
@@ -50,6 +54,7 @@ impl GamedataProject {
             }
 
             Some(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::TexturesValidation,
               &path,
               "Texture uses an unsupported format",
             ))
@@ -64,6 +69,7 @@ impl GamedataProject {
             }
 
             Some(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::TexturesRead,
               &path,
               error.to_string(),
             ))

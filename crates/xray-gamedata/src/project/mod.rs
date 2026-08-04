@@ -5,6 +5,7 @@ pub(crate) mod gamedata_project_assets;
 pub(crate) mod gamedata_project_options;
 pub(crate) mod gamedata_project_verify;
 pub(crate) mod gamedata_verification_result;
+pub(crate) mod gamedata_verification_rule;
 pub(crate) mod gamedata_verification_status;
 pub(crate) mod gamedata_verification_type;
 pub(crate) mod levels;

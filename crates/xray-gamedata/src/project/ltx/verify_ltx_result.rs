@@ -39,19 +39,18 @@ impl GamedataCheckResult for GamedataLtxVerificationResult {
 mod tests {
   use super::GamedataLtxVerificationResult;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationStatus,
-    GamedataVerificationType,
+    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
   use xray_ltx::LtxProjectVerifyResult;
 
   #[test]
   fn exposes_ltx_findings_in_reports() {
-    let finding: GamedataVerificationFinding =
-      GamedataVerificationFinding::for_asset_in_rule(
-        "ltx.unclassified",
-        "configs/system.ltx",
-        "LTX file needs formatting",
-      );
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::LtxFormatting,
+      "configs/system.ltx",
+      "LTX file needs formatting",
+    );
     let mut report: GamedataVerificationReport = GamedataVerificationReport::default();
 
     report.add_check(

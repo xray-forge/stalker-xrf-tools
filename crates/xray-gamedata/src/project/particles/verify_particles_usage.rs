@@ -1,6 +1,9 @@
 use crate::asset::asset_type::AssetType;
 use crate::project::particles::verify_particles_usage_result::GamedataParticlesUsageVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use colored::Colorize;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
@@ -128,6 +131,7 @@ impl GamedataProject {
         }
 
         result.findings.push(GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::ParticlesUsageSpawn,
           Path::new(relative_path),
           "Spawn path was not found in gamedata roots",
         ));
@@ -148,6 +152,7 @@ impl GamedataProject {
             }
 
             result.findings.push(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::ParticlesUsageSpawn,
               &spawn_path,
               format!("Could not inspect spawn file for particle usage: {error}"),
             ));
@@ -178,13 +183,11 @@ impl GamedataProject {
               );
             }
 
-            result
-              .findings
-              .push(GamedataVerificationFinding::for_asset_in_rule(
-                "particles-usage.spawn-custom-data",
-                &spawn_path,
-                format!("Could not parse spawn custom data for particle usage: {error}"),
-              ));
+            result.findings.push(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::ParticlesUsageSpawnCustomData,
+              &spawn_path,
+              format!("Could not parse spawn custom data for particle usage: {error}"),
+            ));
             result.unparsed_custom_data_count += 1;
           }
         }
@@ -224,6 +227,7 @@ impl GamedataProject {
             }
 
             result.findings.push(GamedataVerificationFinding::for_asset(
+              GamedataVerificationRule::ParticlesUsageReference,
               path,
               format!("Unknown particle reference: [{section_name}] {key} = {reference}"),
             ));

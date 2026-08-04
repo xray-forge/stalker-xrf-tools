@@ -2,7 +2,10 @@ use super::weather_definitions::WeatherDefinitions;
 use super::weather_field_rules::{
   WEATHER_REQUIRED_FIELDS, is_valid_weather_field_value, parse_weather_time,
 };
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
+use crate::{
+  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
+  GamedataVerificationRule,
+};
 use std::collections::{BTreeSet, HashSet};
 use std::path::Path;
 use xray_error::XRayResult;
@@ -48,6 +51,7 @@ pub fn verify_weather_findings_with_definitions(
       }
 
       return Ok(vec![GamedataVerificationFinding::for_asset(
+        GamedataVerificationRule::WeathersValidation,
         config_path,
         format!("Could not open weather LTX: {error}"),
       )]);
@@ -135,6 +139,7 @@ pub fn verify_weather_findings_with_definitions(
         Err(error) => {
           definition_load_errors.insert(error.clone());
           findings.push(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::WeathersDefinitions,
             config_path,
             format!("Could not load weather definitions: {error}"),
           ));
@@ -155,6 +160,7 @@ pub fn verify_weather_findings_with_definitions(
         Err(error) => {
           definition_load_errors.insert(error.clone());
           findings.push(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::WeathersDefinitions,
             config_path,
             format!("Could not load weather definitions: {error}"),
           ));
@@ -190,6 +196,7 @@ pub fn verify_weather_findings_with_definitions(
         Err(error) => {
           definition_load_errors.insert(error.clone());
           findings.push(GamedataVerificationFinding::for_asset(
+            GamedataVerificationRule::WeathersDefinitions,
             config_path,
             format!("Could not load weather definitions: {error}"),
           ));
@@ -239,5 +246,9 @@ fn report_weather_finding(
     eprintln!("{}: {}", message, config_path.display());
   }
 
-  GamedataVerificationFinding::for_asset(config_path, message)
+  GamedataVerificationFinding::for_asset(
+    GamedataVerificationRule::WeathersValidation,
+    config_path,
+    message,
+  )
 }
