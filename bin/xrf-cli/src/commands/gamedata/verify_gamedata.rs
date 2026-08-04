@@ -59,7 +59,7 @@ impl GenericCommand for VerifyGamedataCommand {
       )
       .arg(
         Arg::new("silent")
-          .help("Turn of logging")
+          .help("Turn off logging")
           .long("silent")
           .required(false)
           .action(ArgAction::SetTrue),

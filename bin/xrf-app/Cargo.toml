@@ -24,6 +24,7 @@ xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
 xray-export = { path = "../../crates/xray-export" }
 xray-ltx = { path = "../../crates/xray-ltx" }
+xray-output = { path = "../../crates/xray-output" }
 xray-texture = { path = "../../crates/xray-texture" }
 xray-translation = { path = "../../crates/xray-translation" }
 

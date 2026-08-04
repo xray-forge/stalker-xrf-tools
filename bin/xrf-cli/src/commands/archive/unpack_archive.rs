@@ -1,9 +1,11 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::env;
 use std::path::PathBuf;
 use tokio::runtime::Runtime;
 use xray_archive::{ArchiveProject, ArchiveUnpackResult};
+use xray_output::OutputOptions;
 
 #[derive(Default)]
 pub struct UnpackArchiveCommand;
@@ -49,9 +51,17 @@ impl GenericCommand for UnpackArchiveCommand {
       )
       .arg(
         Arg::new("silent")
-          .help("Disable any logging")
+          .help("Turn off logging")
           .short('s')
           .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
           .required(false)
           .action(ArgAction::SetTrue),
       )
@@ -77,44 +87,42 @@ impl GenericCommand for UnpackArchiveCommand {
       .get_one::<usize>("parallel")
       .expect("Expected valid parallel threads count to be provided");
 
-    let is_silent: bool = matches.get_flag("silent");
     let is_dry: bool = matches.get_flag("dry");
 
-    if !is_silent {
-      if is_dry {
-        println!("Unpack in dry mode");
-      }
+    let output: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-      println!("Unpack source: {}", path.display());
-      println!("Unpack destination: {}", destination.display());
+    if is_dry {
+      xray_output::info!(output, "Unpack in dry mode");
     }
+
+    xray_output::info!(output, "Unpack source: {}", path.display());
+    xray_output::info!(output, "Unpack destination: {}", destination.display());
 
     let archive_project: Box<ArchiveProject> = Box::new(ArchiveProject::new(path)?);
 
-    if !is_silent {
-      println!(
-        "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",
-        archive_project.archives.len(),
-        archive_project.files.len(),
-        (archive_project.get_compressed_size() as f64) / 1024.0 / 1024.0,
-        (archive_project.get_real_size() as f64) / 1024.0 / 1024.0,
-      );
+    xray_output::info!(
+      output,
+      "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",
+      archive_project.archives.len(),
+      archive_project.files.len(),
+      (archive_project.get_compressed_size() as f64) / 1024.0 / 1024.0,
+      (archive_project.get_real_size() as f64) / 1024.0 / 1024.0,
+    );
 
-      println!("Unpacking files, parallel {parallel}");
-    }
+    xray_output::info!(output, "Unpacking files, parallel {parallel}");
 
     if !is_dry {
       let result: ArchiveUnpackResult =
         Runtime::new()?.block_on(archive_project.unpack_parallel(&destination, parallel))?;
 
-      if !is_silent {
-        println!(
-          "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",
-          result.duration as f64 / 1000.0,
-          result.prepare_duration as f64 / 1000.0,
-          result.unpack_duration as f64 / 1000.0,
-        );
-      }
+      xray_output::info!(
+        output,
+        "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",
+        result.duration as f64 / 1000.0,
+        result.prepare_duration as f64 / 1000.0,
+        result.unpack_duration as f64 / 1000.0,
+      );
     }
 
     Ok(())

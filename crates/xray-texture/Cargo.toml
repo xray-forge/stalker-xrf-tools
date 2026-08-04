@@ -14,6 +14,7 @@ roxmltree = "0.21.1"
 serde = { version = "1.0.228", features = ["derive"] }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
+xray-output = { path = "../xray-output" }
 xray-utils = { path = "../xray-utils" }
 
 [lints]

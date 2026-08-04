@@ -7179,6 +7179,7 @@ dependencies = [
  "serde",
  "xray-error",
  "xray-ltx",
+ "xray-output",
  "xray-utils",
 ]
 
@@ -7239,6 +7240,7 @@ dependencies = [
  "xray-db",
  "xray-export",
  "xray-ltx",
+ "xray-output",
  "xray-texture",
  "xray-translation",
 ]

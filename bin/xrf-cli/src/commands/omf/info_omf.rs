@@ -1,7 +1,9 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use xray_db::{OmfFile, XRayByteOrder};
+use xray_output::OutputOptions;
 
 #[derive(Default)]
 pub struct InfoOmfCommand;
@@ -31,15 +33,18 @@ impl GenericCommand for InfoOmfCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read omf file {}", path.display());
+    let output: OutputOptions = TerminalOutput::from_options(false, false);
+
+    xray_output::info!(output, "Read omf file {}", path.display());
 
     let omf_file: Box<OmfFile> = Box::new(OmfFile::read_from_path::<XRayByteOrder, _>(path)?);
 
-    println!("Omf file information");
+    xray_output::info!(output, "Omf file information");
 
-    println!("Version: {}", omf_file.parameters.version);
+    xray_output::info!(output, "Version: {}", omf_file.parameters.version);
 
-    println!(
+    xray_output::info!(
+      output,
       "Motions: {} {}",
       omf_file.motions.motions.len(),
       omf_file
@@ -51,8 +56,13 @@ impl GenericCommand for InfoOmfCommand {
         .join(",")
     );
 
-    println!("Bones total: {}", omf_file.parameters.get_bones_count());
-    println!(
+    xray_output::info!(
+      output,
+      "Bones total: {}",
+      omf_file.parameters.get_bones_count()
+    );
+    xray_output::info!(
+      output,
       "Parts: {}",
       omf_file
         .parameters
@@ -64,7 +74,12 @@ impl GenericCommand for InfoOmfCommand {
     );
 
     for part in &omf_file.parameters.parts {
-      println!("Part '{}' bones: {}", part.name, part.get_bones().join(","))
+      xray_output::info!(
+        output,
+        "Part '{}' bones: {}",
+        part.name,
+        part.get_bones().join(",")
+      );
     }
 
     Ok(())

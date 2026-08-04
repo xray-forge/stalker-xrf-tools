@@ -28,7 +28,7 @@ impl GenericCommand for VerifyLtxCommand {
       )
       .arg(
         Arg::new("silent")
-          .help("Turn of formatter logging")
+          .help("Turn off logging")
           .long("silent")
           .required(false)
           .action(ArgAction::SetTrue),

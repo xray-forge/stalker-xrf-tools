@@ -1,9 +1,11 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
 use xray_db::{SpawnFile, XRayByteOrder};
+use xray_output::OutputOptions;
 
 #[derive(Default)]
 pub struct UnpackSpawnFileCommand;
@@ -43,9 +45,16 @@ impl GenericCommand for UnpackSpawnFileCommand {
       )
       .arg(
         Arg::new("silent")
-          .help("Disable any logging")
-          .short('s')
+          .help("Turn off logging")
           .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
           .required(false)
           .action(ArgAction::SetTrue),
       )
@@ -61,13 +70,13 @@ impl GenericCommand for UnpackSpawnFileCommand {
       .get_one::<_>("dest")
       .expect("Expected valid output path to be provided");
 
-    let is_silent: bool = matches.get_flag("silent");
     let force: bool = matches.get_flag("force");
 
-    if !is_silent {
-      println!("Starting parsing spawn file: {}", path.display());
-      println!("Unpack destination: {}", destination.display());
-    }
+    let output: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+
+    xray_output::info!(output, "Starting parsing spawn file: {}", path.display());
+    xray_output::info!(output, "Unpack destination: {}", destination.display());
 
     // Apply force flag and delete existing directories.
     if force && destination.exists() && destination.is_dir() {
@@ -93,10 +102,16 @@ impl GenericCommand for UnpackSpawnFileCommand {
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    if !is_silent {
-      println!("Read spawn file took: {}ms", read_duration.as_millis());
-      println!("Export spawn file took: {}ms", unpack_duration.as_millis());
-    }
+    xray_output::info!(
+      output,
+      "Read spawn file took: {}ms",
+      read_duration.as_millis()
+    );
+    xray_output::info!(
+      output,
+      "Export spawn file took: {}ms",
+      unpack_duration.as_millis()
+    );
 
     Ok(())
   }

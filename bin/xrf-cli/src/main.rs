@@ -23,6 +23,7 @@ use crate::commands::gamedata::verify_gamedata::VerifyGamedataCommand;
 use crate::commands::ltx::format_ltx::FormatLtxCommand;
 use crate::commands::texture::info_dds::InfoDdsCommand;
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::Command;
 use commands::ogf::info_ogf::InfoOgfCommand;
 use commands::omf::info_omf::InfoOmfCommand;
@@ -55,7 +56,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         let result: CommandResult = it.execute(matches);
 
         if let Err(error) = &result {
-          eprintln!(
+          xray_output::error!(
+            TerminalOutput::from_options(false, false),
             "Execution of command '{}' failed, error: {}",
             it.name(),
             error

@@ -41,6 +41,21 @@ impl GenericCommand for PackSpawnFileCommand {
           .required(false)
           .action(ArgAction::SetTrue),
       )
+      .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
   }
 
   /// Pack *.spawn file based on provided arguments.

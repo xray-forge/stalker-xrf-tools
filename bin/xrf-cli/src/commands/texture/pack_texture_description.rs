@@ -1,6 +1,8 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
+use xray_output::OutputOptions;
 use xray_texture::{ImageFormat, PackDescriptionOptions, PackDescriptionProcessor};
 
 #[derive(Default)]
@@ -35,6 +37,13 @@ impl GenericCommand for PackTextureDescriptionCommand {
           .long("output")
           .required(false)
           .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
       )
       .arg(
         Arg::new("verbose")
@@ -73,16 +82,18 @@ impl GenericCommand for PackTextureDescriptionCommand {
 
     let output: &PathBuf = matches.get_one::<PathBuf>("output").unwrap_or(base);
 
-    let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
     let is_parallel: bool = matches.get_flag("parallel");
+
+    let output_options: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let options: PackDescriptionOptions = PackDescriptionOptions {
       description: description.clone(),
       base: base.clone(),
-      output: output.clone(),
+      output: output_options,
+      output_path: output.clone(),
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
-      is_verbose,
       is_strict,
       is_parallel,
     };

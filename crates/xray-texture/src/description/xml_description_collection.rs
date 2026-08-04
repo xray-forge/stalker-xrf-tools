@@ -18,7 +18,8 @@ impl XmlDescriptionCollection {
   /// Handle both directory and single file as inputs.
   pub fn get_descriptions(options: &PackDescriptionOptions) -> XRayResult<Self> {
     if options.description.is_dir() {
-      println!(
+      xray_output::info!(
+        options.output,
         "Check texture descriptions from dir: {}",
         options.description.display()
       );
@@ -42,9 +43,7 @@ impl XmlDescriptionCollection {
                 files.insert(name, description);
               }
               Some(existing) => {
-                if options.is_verbose {
-                  println!("Merging textures for {name}");
-                }
+                xray_output::verbose!(options.output, "Merging textures for {name}");
 
                 existing.sprites.extend(description.sprites);
               }
@@ -65,9 +64,11 @@ impl XmlDescriptionCollection {
     options: &PackDescriptionOptions,
     path: &Path,
   ) -> XRayResult<HashMap<String, TextureFileDescriptor>> {
-    if options.is_verbose {
-      println!("Found texture description: {}", path.display());
-    }
+    xray_output::verbose!(
+      options.output,
+      "Found texture description: {}",
+      path.display()
+    );
 
     let mut descriptions: HashMap<String, TextureFileDescriptor> = HashMap::new();
 
@@ -89,7 +90,12 @@ impl XmlDescriptionCollection {
           panic!("Failed to parse xml: {} - {}", path.display(), error)
         }
 
-        println!("Error parsing XML file: {} - {}", path.display(), error);
+        xray_output::warning!(
+          options.output,
+          "Error parsing XML file: {} - {}",
+          path.display(),
+          error
+        );
         return Ok(HashMap::new());
       }
     };
@@ -107,9 +113,7 @@ impl XmlDescriptionCollection {
         let file_name: Option<&str> = file.attribute("name");
 
         if let Some(file_name) = file_name {
-          if options.is_verbose {
-            println!("Parsing file: {file_name}");
-          }
+          xray_output::verbose!(options.output, "Parsing file: {file_name}");
 
           let mut file_description: TextureFileDescriptor = TextureFileDescriptor::new(file_name);
 
@@ -120,7 +124,8 @@ impl XmlDescriptionCollection {
             if let Some(sprite) = TextureSpriteDescriptor::new_optional_from_node(node) {
               file_description.add_sprite(sprite);
             } else {
-              println!(
+              xray_output::warning!(
+                options.output,
                 "Skip texture node: {} ({})",
                 node.attribute("id").unwrap_or("unknown"),
                 node
@@ -133,7 +138,8 @@ impl XmlDescriptionCollection {
           }
 
           if file_description.sprites.is_empty() {
-            println!(
+            xray_output::warning!(
+              options.output,
               "Skip definitions node \"{file_name}\" without textures (in {})",
               path.display()
             );
@@ -143,9 +149,7 @@ impl XmlDescriptionCollection {
                 descriptions.insert(file_description.name.clone(), file_description);
               }
               Some(existing) => {
-                if options.is_verbose {
-                  println!("Merging textures for {file_name}");
-                }
+                xray_output::verbose!(options.output, "Merging textures for {file_name}");
 
                 file_description
                   .sprites
@@ -155,11 +159,15 @@ impl XmlDescriptionCollection {
             }
           }
         } else {
-          println!("Invalid file node supplied without name attribute");
+          xray_output::warning!(
+            options.output,
+            "Invalid file node supplied without name attribute"
+          );
         }
       }
     } else {
-      println!(
+      xray_output::warning!(
+        options.output,
         "Got no 'w' tag for file '{}'",
         options.description.display()
       );

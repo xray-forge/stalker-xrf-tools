@@ -1,7 +1,9 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use xray_db::{ParticlesFile, XRayByteOrder};
+use xray_output::OutputOptions;
 
 #[derive(Default)]
 pub struct InfoParticlesCommand;
@@ -31,16 +33,26 @@ impl GenericCommand for InfoParticlesCommand {
       .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read particle file {}", path.display());
+    let output: OutputOptions = TerminalOutput::from_options(false, false);
+
+    xray_output::info!(output, "Read particle file {}", path.display());
 
     let particles_file: Box<ParticlesFile> =
       Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
 
-    println!("Particles file information:");
+    xray_output::info!(output, "Particles file information:");
 
-    println!("Version: {}", particles_file.header.version);
-    println!("Effects count: {}", particles_file.effects.effects.len());
-    println!("Groups count: {}", particles_file.groups.groups.len());
+    xray_output::info!(output, "Version: {}", particles_file.header.version);
+    xray_output::info!(
+      output,
+      "Effects count: {}",
+      particles_file.effects.effects.len()
+    );
+    xray_output::info!(
+      output,
+      "Groups count: {}",
+      particles_file.groups.groups.len()
+    );
 
     Ok(())
   }

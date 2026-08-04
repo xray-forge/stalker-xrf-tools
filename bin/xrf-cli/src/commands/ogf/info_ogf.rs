@@ -1,7 +1,9 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use xray_db::{OgfFile, XRayByteOrder};
+use xray_output::OutputOptions;
 
 #[derive(Default)]
 pub struct InfoOgfCommand;
@@ -31,13 +33,16 @@ impl GenericCommand for InfoOgfCommand {
       .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read ogf file {}", path.display());
+    let output: OutputOptions = TerminalOutput::from_options(false, false);
+
+    xray_output::info!(output, "Read ogf file {}", path.display());
 
     let ogf_file: Box<OgfFile> = Box::new(OgfFile::read_from_path::<XRayByteOrder, _>(path)?);
 
-    println!("Ogf file information");
+    xray_output::info!(output, "Ogf file information");
 
-    println!(
+    xray_output::info!(
+      output,
       "Version: {}, model_type: {}, shader_id: {}, {:?} - {:?}",
       ogf_file.header.version,
       ogf_file.header.model_type,
@@ -46,38 +51,42 @@ impl GenericCommand for InfoOgfCommand {
       ogf_file.header.bounding_sphere
     );
 
-    println!("Boundaries box: {:?}", ogf_file.header.bounding_box);
-    println!("Boundaries sphere: {:?}", ogf_file.header.bounding_sphere);
+    xray_output::info!(output, "Boundaries box: {:?}", ogf_file.header.bounding_box);
+    xray_output::info!(
+      output,
+      "Boundaries sphere: {:?}",
+      ogf_file.header.bounding_sphere
+    );
 
     if let Some(texture) = &ogf_file.texture {
-      println!("Texture name: {}", texture.texture_name);
-      println!("Shader name: {}", texture.shader_name);
+      xray_output::info!(output, "Texture name: {}", texture.texture_name);
+      xray_output::info!(output, "Shader name: {}", texture.shader_name);
     }
 
     if let Some(description) = &ogf_file.description {
-      println!("Description: {:?}", description);
+      xray_output::info!(output, "Description: {:?}", description);
     }
 
     if let Some(bones) = &ogf_file.bones {
-      println!("Bones: {}", bones.bones.len());
+      xray_output::info!(output, "Bones: {}", bones.bones.len());
 
       for (index, bone) in bones.bones.iter().enumerate() {
-        println!("[{}] name: {}", index, bone.name);
-        println!("[{}] parent: {}", index, bone.parent);
+        xray_output::info!(output, "[{}] name: {}", index, bone.name);
+        xray_output::info!(output, "[{}] parent: {}", index, bone.parent);
       }
     }
 
     if let Some(kinematics) = &ogf_file.kinematics {
-      println!("Motion refs: {:?}", kinematics.motion_refs);
+      xray_output::info!(output, "Motion refs: {:?}", kinematics.motion_refs);
     }
 
     if let Some(children) = &ogf_file.children {
-      println!("OGF children ({}):", children.nested.len());
+      xray_output::info!(output, "OGF children ({}):", children.nested.len());
 
       for (index, child) in children.nested.iter().enumerate() {
         if let Some(texture) = &child.texture {
-          println!("[{}] texture name: {}", index, texture.texture_name);
-          println!("[{}] shader name: {}", index, texture.shader_name);
+          xray_output::info!(output, "[{}] texture name: {}", index, texture.texture_name);
+          xray_output::info!(output, "[{}] shader name: {}", index, texture.shader_name);
         }
       }
     }

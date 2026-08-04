@@ -2,6 +2,7 @@ use crate::types::TauriResult;
 use crate::utils::error_to_string;
 use serde_json::{Value, json};
 use xray_ltx::Ltx;
+use xray_output::OutputOptions;
 use xray_texture::{
   ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult,
 };
@@ -15,10 +16,10 @@ pub async fn pack_equipment(
   let options = PackEquipmentOptions {
     ltx: Ltx::read_from_file_full(system_ltx_path).map_err(|error| error.to_string())?,
     source: source_path.into(),
-    output: output_path.into(),
+    output: OutputOptions::default(),
+    output_path: output_path.into(),
     gamedata: None,
     dds_compression_format: ImageFormat::BC3RgbaUnorm,
-    is_verbose: false,
     is_strict: false,
   };
 

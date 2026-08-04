@@ -1,9 +1,11 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use std::time::Instant;
 use xray_ltx::Ltx;
+use xray_output::OutputOptions;
 use xray_texture::{
   ImageFormat, RgbaImage, UnpackEquipmentOptions, UnpackEquipmentProcessor, dds_to_image,
   read_dds_by_path,
@@ -43,6 +45,13 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
         Arg::new("verbose")
           .help("Turn on verbose logging")
           .short('v')
@@ -65,15 +74,17 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
       .get_one::<PathBuf>("output")
       .expect("Expected valid output folder path to be provided");
 
-    let is_verbose: bool = matches.get_flag("verbose");
+    let output_options: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let started_at: Instant = Instant::now();
 
-    println!("Opening DDS file: {}", source.display());
+    xray_output::info!(output_options, "Opening DDS file: {}", source.display());
 
     let source_dds: RgbaImage = read_dds_by_path(source)
       .and_then(|dds| {
-        println!(
+        xray_output::info!(
+          output_options,
           "Source DDS file details: {}x{}, mip-maps: {}, format: {:?}",
           dds.header.width,
           dds.header.height,
@@ -86,19 +97,26 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
       .expect("Expected path to valid DDS source file");
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
 
-    println!("Unpacking equipment DDS file into: {}", output.display());
+    xray_output::info!(
+      output_options,
+      "Unpacking equipment DDS file into: {}",
+      output.display()
+    );
 
     create_dir_all(output)?;
 
     UnpackEquipmentProcessor::unpack_sprites(UnpackEquipmentOptions {
       ltx: system_ltx,
       source: source_dds,
-      output: output.into(),
+      output: output_options.clone(),
+      output_path: output.into(),
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
-      is_verbose,
     })?;
 
-    println!("Successfully DDS equipment file based on LTX sections");
+    xray_output::info!(
+      output_options,
+      "Successfully DDS equipment file based on LTX sections"
+    );
 
     log::info!(
       "Unpack equipment took: {}ms",

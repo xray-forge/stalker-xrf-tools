@@ -28,7 +28,7 @@ impl GenericCommand for FormatLtxCommand {
       )
       .arg(
         Arg::new("check")
-          .help("Turn of formatter logging")
+          .help("Run formatter in check mode")
           .short('c')
           .long("check")
           .required(false)
@@ -36,7 +36,7 @@ impl GenericCommand for FormatLtxCommand {
       )
       .arg(
         Arg::new("silent")
-          .help("Turn off formatter logging")
+          .help("Turn off logging")
           .long("silent")
           .short('s')
           .required(false)
@@ -44,7 +44,7 @@ impl GenericCommand for FormatLtxCommand {
       )
       .arg(
         Arg::new("verbose")
-          .help("Turn on formatter verbose logging")
+          .help("Turn on verbose logging")
           .long("verbose")
           .short('v')
           .required(false)

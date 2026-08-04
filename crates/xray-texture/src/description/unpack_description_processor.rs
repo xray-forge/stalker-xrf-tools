@@ -16,11 +16,13 @@ impl UnpackDescriptionProcessor {
       XmlDescriptionCollection::get_descriptions(&options)?;
     let count: Mutex<u32> = Mutex::new(0);
 
-    println!("Unpacking for {} files", description.files.len());
+    xray_output::info!(
+      options.output,
+      "Unpacking for {} files",
+      description.files.len()
+    );
 
     if options.is_parallel {
-      println!("Unpacking for {} files", description.files.len());
-
       description.files.par_iter().for_each(|(_, file)| {
         if Self::unpack_xml_description(&options, file).is_ok_and(|it| it) {
           *count.lock().unwrap() += 1;
@@ -34,7 +36,7 @@ impl UnpackDescriptionProcessor {
       }
     }
 
-    println!("Unpacked {} files", *count.lock().unwrap());
+    xray_output::info!(options.output, "Unpacked {} files", *count.lock().unwrap());
 
     Ok(())
   }
@@ -44,11 +46,9 @@ impl UnpackDescriptionProcessor {
     file: &TextureFileDescriptor,
   ) -> XRayResult<bool> {
     let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
-    let destination: PathBuf = options.output.join(&file.name);
+    let destination: PathBuf = options.output_path.join(&file.name);
 
-    if options.is_verbose {
-      println!("Unpacking {}", full_name.display());
-    }
+    xray_output::verbose!(options.output, "Unpacking {}", full_name.display());
 
     let dds: XRayResult<RgbaImage> =
       read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
@@ -59,9 +59,12 @@ impl UnpackDescriptionProcessor {
       }
 
       for sprite in &file.sprites {
-        if options.is_verbose {
-          println!("Unpacking {} -> {}", full_name.display(), sprite.id);
-        }
+        xray_output::verbose!(
+          options.output,
+          "Unpacking {} -> {}",
+          full_name.display(),
+          sprite.id
+        );
 
         let (max_x, max_y) = sprite.get_dimension_boundaries();
 
@@ -77,7 +80,8 @@ impl UnpackDescriptionProcessor {
               full_name.display()
             );
           } else {
-            println!(
+            xray_output::warning!(
+              options.output,
               "[WARN] - exceeding sprite size '{}' (x:{}, y:{}) ({}x{} - {})",
               sprite.id,
               max_x,
@@ -103,7 +107,8 @@ impl UnpackDescriptionProcessor {
         full_name.display()
       )
     } else {
-      println!(
+      xray_output::warning!(
+        options.output,
         "Skip file {}, not able to read: {}",
         full_name.display(),
         dds.unwrap_err()

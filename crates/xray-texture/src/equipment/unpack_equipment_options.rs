@@ -6,7 +6,7 @@ use xray_ltx::Ltx;
 pub struct UnpackEquipmentOptions {
   pub ltx: Ltx,
   pub source: RgbaImage,
-  pub output: PathBuf,
+  pub output: xray_output::OutputOptions,
+  pub output_path: PathBuf,
   pub dds_compression_format: ImageFormat,
-  pub is_verbose: bool,
 }

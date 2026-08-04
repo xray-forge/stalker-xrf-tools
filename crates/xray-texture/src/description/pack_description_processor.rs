@@ -16,7 +16,11 @@ impl PackDescriptionProcessor {
       XmlDescriptionCollection::get_descriptions(options)?;
     let mut count: u32 = 0;
 
-    println!("Packing for {} files", description.files.len());
+    xray_output::info!(
+      options.output,
+      "Packing for {} files",
+      description.files.len()
+    );
 
     for file in description.files.values() {
       if Self::pack_xml_description(options, file)? {
@@ -24,7 +28,7 @@ impl PackDescriptionProcessor {
       }
     }
 
-    println!("Packed {count} files");
+    xray_output::info!(options.output, "Packed {count} files");
 
     Ok(())
   }
@@ -38,22 +42,23 @@ impl PackDescriptionProcessor {
     let (width, height) = file.get_dimension_boundaries()?;
     let mut result: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
 
-    if options.is_verbose {
-      println!("Packing file {} ({width}x{height})", full_name.display());
-    }
+    xray_output::verbose!(
+      options.output,
+      "Packing file {} ({width}x{height})",
+      full_name.display()
+    );
 
     for texture in &file.sprites {
-      if options.is_verbose {
-        println!(
-          "Packing texture {} -> {} at [x:{}, y:{}, w:{}, h:{}]",
-          full_name.display(),
-          texture.id,
-          texture.x,
-          texture.y,
-          texture.w,
-          texture.h
-        );
-      }
+      xray_output::verbose!(
+        options.output,
+        "Packing texture {} -> {} at [x:{}, y:{}, w:{}, h:{}]",
+        full_name.display(),
+        texture.id,
+        texture.x,
+        texture.y,
+        texture.w,
+        texture.h
+      );
 
       let texture_path: PathBuf = options
         .base
@@ -87,7 +92,8 @@ impl PackDescriptionProcessor {
               error
             )
           } else {
-            println!(
+            xray_output::warning!(
+              options.output,
               "Failed to read texture dds {} for {} ({}): {}",
               texture.id,
               file.name,
@@ -99,11 +105,9 @@ impl PackDescriptionProcessor {
       }
     }
 
-    let destination: PathBuf = options.output.join(format!("{}.dds", &file.name));
+    let destination: PathBuf = options.output_path.join(format!("{}.dds", &file.name));
 
-    if options.is_verbose {
-      println!("Saving file: {}", destination.display());
-    }
+    xray_output::verbose!(options.output, "Saving file: {}", destination.display());
 
     assert_equal(
       result.width() % 4,

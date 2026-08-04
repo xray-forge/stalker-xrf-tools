@@ -1,13 +1,15 @@
 use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{Arg, ArgMatches, Command, value_parser};
+use crate::output::TerminalOutput;
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use xray_error::XRayError;
 use xray_export::{
-  ExternFormat, ExternManifest, ExternManifestParser, LineEndings, normalize_line_endings,
-  render_extern_manifest,
+  ExternFormat, ExternManifest, ExternManifestParser, LineEndings, ParsedExternManifest,
+  normalize_line_endings, render_extern_manifest,
 };
+use xray_output::OutputOptions;
 
 /// Generate or verify a stable extern manifest from TypeScript declarations.
 #[derive(Default)]
@@ -53,42 +55,71 @@ impl GenericCommand for ExportExternsCommand {
           .long("line-endings")
           .value_parser(["lf", "crlf"]),
       )
+      .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .short('s')
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
   }
 
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let declarations_root: &PathBuf = matches
       .get_one("declarations-root")
       .expect("Expected declarations root");
-    let output: Option<&PathBuf> = matches.get_one("output");
+    let output_dir: Option<&PathBuf> = matches.get_one("output");
     let check: Option<&PathBuf> = matches.get_one("check");
 
-    if output.is_none() && check.is_none() {
+    if output_dir.is_none() && check.is_none() {
       return Err(
         XRayError::new_invalid_error("Specify exactly one of --output or --check.").into(),
       );
     }
 
-    let format: ExternFormat = Self::resolve_format(matches, output, check)?;
     let line_endings: Option<LineEndings> = matches
       .get_one::<String>("line-endings")
       .map(|value: &String| LineEndings::from_str(value))
       .transpose()?;
-    let parsed = ExternManifestParser::new().parse_directory(declarations_root)?;
 
-    if let Some(path) = output {
+    let output: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+
+    let format: ExternFormat = Self::resolve_format(matches, output_dir, check)?;
+
+    let parsed: ParsedExternManifest =
+      ExternManifestParser::new().parse_directory(declarations_root)?;
+
+    if let Some(path) = output_dir {
       let content: String = render_extern_manifest(&parsed.manifest, format, line_endings)?;
-      write_output(path, &content)?;
-      println!(
+
+      Self::write_output(path, &content)?;
+
+      xray_output::info!(
+        output,
         "Exported {} externs to '{}'.",
         parsed.manifest.exports.len(),
         path.display()
       );
+
       return Ok(());
     }
 
     let path: &PathBuf = check.expect("Checked path is required after validation");
-    verify_artifact(path, format, &parsed.manifest, line_endings)?;
-    println!(
+
+    Self::verify_artifact(path, format, &parsed.manifest, line_endings)?;
+
+    xray_output::info!(
+      output,
       "Extern artifact '{}' matches {} declarations.",
       path.display(),
       parsed.manifest.exports.len()
@@ -107,9 +138,11 @@ impl ExportExternsCommand {
     if let Some(value) = matches.get_one::<String>("format") {
       return ExternFormat::from_str(value);
     }
+
     if let Some(path) = check {
       return ExternFormat::from_extension(path);
     }
+
     let path: &PathBuf = output.expect("Output is required after validation");
 
     Err(XRayError::new_invalid_error(format!(
@@ -117,57 +150,61 @@ impl ExportExternsCommand {
       path.display()
     )))
   }
-}
 
-fn write_output(path: &Path, content: &str) -> Result<(), XRayError> {
-  if let Some(parent) = path.parent() {
-    fs::create_dir_all(parent)?;
-  }
-  fs::write(path, content)?;
-
-  Ok(())
-}
-
-fn verify_artifact(
-  path: &Path,
-  format: ExternFormat,
-  manifest: &ExternManifest,
-  line_endings: Option<LineEndings>,
-) -> Result<(), XRayError> {
-  let existing: String = fs::read_to_string(path)?;
-
-  match format {
-    ExternFormat::Json => {
-      let actual: ExternManifest = serde_json::from_str(&existing).map_err(|error| {
-        XRayError::new_invalid_error(format!(
-          "Cannot parse '{}' as an extern JSON manifest: {error}",
-          path.display()
-        ))
-      })?;
-      if actual != *manifest {
-        return Err(XRayError::new_verify_error(format!(
-          "Extern JSON artifact '{}' does not match the parsed declaration manifest.",
-          path.display()
-        )));
-      }
+  fn write_output(path: &Path, content: &str) -> Result<(), XRayError> {
+    if let Some(parent) = path.parent() {
+      fs::create_dir_all(parent)?;
     }
-    ExternFormat::Xml | ExternFormat::Html => {
-      let expected: String = render_extern_manifest(manifest, format, line_endings)?;
-      if normalize_line_endings(&existing) != normalize_line_endings(&expected) {
-        return Err(XRayError::new_verify_error(format!(
-          "Extern {} artifact '{}' does not match freshly rendered output.",
-          match format {
-            ExternFormat::Xml => "XML",
-            ExternFormat::Html => "HTML",
-            ExternFormat::Json => unreachable!(),
-          },
-          path.display()
-        )));
-      }
-    }
+
+    fs::write(path, content)?;
+
+    Ok(())
   }
 
-  Ok(())
+  fn verify_artifact(
+    path: &Path,
+    format: ExternFormat,
+    manifest: &ExternManifest,
+    line_endings: Option<LineEndings>,
+  ) -> Result<(), XRayError> {
+    let existing: String = fs::read_to_string(path)?;
+
+    match format {
+      ExternFormat::Json => {
+        let actual: ExternManifest = serde_json::from_str(&existing).map_err(|error| {
+          XRayError::new_invalid_error(format!(
+            "Cannot parse '{}' as an extern JSON manifest: {error}",
+            path.display()
+          ))
+        })?;
+
+        if actual != *manifest {
+          return Err(XRayError::new_verify_error(format!(
+            "Extern JSON artifact '{}' does not match the parsed declaration manifest.",
+            path.display()
+          )));
+        }
+      }
+
+      ExternFormat::Xml | ExternFormat::Html => {
+        let expected: String = render_extern_manifest(manifest, format, line_endings)?;
+
+        if normalize_line_endings(&existing) != normalize_line_endings(&expected) {
+          return Err(XRayError::new_verify_error(format!(
+            "Extern {} artifact '{}' does not match freshly rendered output.",
+            match format {
+              ExternFormat::Xml => "XML",
+              ExternFormat::Html => "HTML",
+              ExternFormat::Json => unreachable!(),
+            },
+            path.display()
+          )));
+        }
+      }
+    }
+
+    Ok(())
+  }
 }
 
 #[cfg(test)]

@@ -1,9 +1,11 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::process;
 use std::time::Instant;
 use xray_ltx::Ltx;
+use xray_output::OutputOptions;
 use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor};
 
 #[derive(Default)]
@@ -47,6 +49,13 @@ impl GenericCommand for PackEquipmentIconsCommand {
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
         Arg::new("verbose")
           .help("Turn on verbose logging")
           .short('v')
@@ -80,18 +89,23 @@ impl GenericCommand for PackEquipmentIconsCommand {
       .get_one::<PathBuf>("output")
       .expect("Expected valid output path to be provided");
 
-    let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
 
+    let output_options: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+
     if !source.is_dir() {
-      println!("Expected valid source folder containing DDS icons");
+      xray_output::error!(
+        output_options,
+        "Expected valid source folder containing DDS icons"
+      );
       process::exit(1);
     }
 
-    println!("Starting packing DDS icons file, parallel");
-    println!("System ltx: {}", system_ltx_path.display());
-    println!("Source icons dir: {}", source.display());
-    println!("Output dir: {}", output.display());
+    xray_output::info!(output_options, "Starting packing DDS icons file, parallel");
+    xray_output::info!(output_options, "System ltx: {}", system_ltx_path.display());
+    xray_output::info!(output_options, "Source icons dir: {}", source.display());
+    xray_output::info!(output_options, "Output dir: {}", output.display());
 
     let started_at: Instant = Instant::now();
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
@@ -99,10 +113,10 @@ impl GenericCommand for PackEquipmentIconsCommand {
     let options = PackEquipmentOptions {
       ltx: system_ltx,
       source: source.into(),
-      output: output.into(),
+      output: output_options.clone(),
+      output_path: output.into(),
       gamedata: gamedata.cloned(),
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
-      is_verbose,
       is_strict,
     };
 
@@ -110,7 +124,8 @@ impl GenericCommand for PackEquipmentIconsCommand {
 
     PackEquipmentProcessor::pack_sprites(options)?;
 
-    println!(
+    xray_output::info!(
+      output_options,
       "Saved resulting file with combined icons {}",
       output.display()
     );

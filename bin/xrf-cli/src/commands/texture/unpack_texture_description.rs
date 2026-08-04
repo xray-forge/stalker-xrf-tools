@@ -1,7 +1,9 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::time::Instant;
+use xray_output::OutputOptions;
 use xray_texture::{ImageFormat, PackDescriptionOptions, UnpackDescriptionProcessor};
 
 #[derive(Default)]
@@ -37,6 +39,13 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
         Arg::new("verbose")
           .help("Turn on verbose logging")
           .short('v')
@@ -70,11 +79,13 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
       .get_one::<PathBuf>("base")
       .expect("Expected valid base path to be provided");
 
-    let output: &PathBuf = matches.get_one::<PathBuf>("output").unwrap_or(base);
+    let output_path: &PathBuf = matches.get_one::<PathBuf>("output").unwrap_or(base);
 
-    let is_verbose: bool = matches.get_flag("verbose");
     let is_strict: bool = matches.get_flag("strict");
     let is_parallel: bool = matches.get_flag("parallel");
+
+    let output: OutputOptions =
+      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let started_at: Instant = Instant::now();
 
@@ -85,24 +96,25 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
     log::info!(
       "Paths: base {}, output {}",
       base.display(),
-      output.display()
+      output_path.display()
     );
     log::info!("Parallel mode: {}", is_parallel);
 
-    println!(
+    xray_output::info!(
+      output,
       "Unpacking texture descriptions: {}, from {} to {}, parallel - {}",
       description.display(),
       base.display(),
-      output.display(),
+      output_path.display(),
       is_parallel
     );
 
     UnpackDescriptionProcessor::unpack_xml_descriptions(PackDescriptionOptions {
       description: description.clone(),
       base: base.clone(),
-      output: output.clone(),
+      output,
+      output_path: output_path.clone(),
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
-      is_verbose,
       is_strict,
       is_parallel,
     })?;

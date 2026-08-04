@@ -1,8 +1,10 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use ddsfile::Dds;
 use std::fs::File;
 use std::path::PathBuf;
+use xray_output::OutputOptions;
 
 #[derive(Default)]
 pub struct InfoDdsCommand;
@@ -32,7 +34,9 @@ impl GenericCommand for InfoDdsCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    println!("Read dds file {}", path.display());
+    let output: OutputOptions = TerminalOutput::from_options(false, false);
+
+    xray_output::info!(output, "Read dds file {}", path.display());
 
     let mut dds_file: File = File::open(path)?;
     let dds: Box<Dds> = Box::new(Dds::read(&mut dds_file)?);
@@ -40,50 +44,49 @@ impl GenericCommand for InfoDdsCommand {
     let file_size: u64 = dds_file.metadata()?.len();
     let data_size: usize = dds.data.len();
 
-    println!("File size: {} ({}kb)", file_size, file_size / 1024);
-    println!("Metadata size: {} ", file_size - data_size as u64);
-    println!("Data size: {} ({}kb)", data_size, data_size / 1024);
-
-    println!("Size: {} x {}", dds.header.width, dds.header.height,);
-
-    println!(
+    xray_output::info!(output, "File size: {} ({}kb)", file_size, file_size / 1024);
+    xray_output::info!(output, "Metadata size: {} ", file_size - data_size as u64);
+    xray_output::info!(output, "Data size: {} ({}kb)", data_size, data_size / 1024);
+    xray_output::info!(output, "Size: {} x {}", dds.header.width, dds.header.height,);
+    xray_output::info!(
+      output,
       "Mipmap: {} - {}",
       dds.get_num_mipmap_levels(),
       dds.get_min_mipmap_size_in_bytes(),
     );
 
     if let Some(depth) = dds.header.depth {
-      println!("Depth: {}", depth);
+      xray_output::info!(output, "Depth: {}", depth);
     }
 
     if let Some(pitch) = dds.header.pitch {
-      println!("Pitch: {}", pitch);
+      xray_output::info!(output, "Pitch: {}", pitch);
     }
 
     if let Some(linear_size) = dds.header.linear_size {
-      println!("Linear size: {}", linear_size);
+      xray_output::info!(output, "Linear size: {}", linear_size);
     }
 
     if let Some(format) = dds.get_format() {
       if let Some(block_size) = format.get_block_size() {
-        println!("Block size: {}", block_size);
+        xray_output::info!(output, "Block size: {}", block_size);
       }
 
       if let Some(bits_per_pixel) = format.get_bits_per_pixel() {
-        println!("Bits per pixel: {}", bits_per_pixel);
+        xray_output::info!(output, "Bits per pixel: {}", bits_per_pixel);
       }
 
       if let Some(four_cc) = format.get_fourcc() {
-        println!("Four CC: {}", four_cc.0);
+        xray_output::info!(output, "Four CC: {}", four_cc.0);
       }
     } else {
-      println!("Format: unknown");
+      xray_output::info!(output, "Format: unknown");
     }
 
     if let Some(d3d_format) = dds.get_d3d_format() {
-      println!("D3D format: {:?}", d3d_format);
+      xray_output::info!(output, "D3D format: {:?}", d3d_format);
     } else if let Some(dxgi_format) = dds.get_dxgi_format() {
-      println!("DXGI format: {:?}", dxgi_format);
+      xray_output::info!(output, "DXGI format: {:?}", dxgi_format);
     }
 
     Ok(())

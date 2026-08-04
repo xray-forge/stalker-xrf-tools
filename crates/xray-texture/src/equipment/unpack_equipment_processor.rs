@@ -18,7 +18,7 @@ impl UnpackEquipmentProcessor {
       }
     }
 
-    println!("Unpacked {count} icons");
+    xray_output::info!(options.output, "Unpacked {count} icons");
 
     Ok(())
   }
@@ -29,17 +29,21 @@ impl UnpackEquipmentProcessor {
   ) -> XRayResult<bool> {
     let (x, y, w, h) = sprite.get_boundaries();
 
-    if options.is_verbose {
-      println!(
-        "Unpacking icon: '{}' x:{}({x}), y:{}({y}), w:{}({w}), h:{}({h})",
-        sprite.section, sprite.x, sprite.y, sprite.w, sprite.h,
-      );
-    }
+    xray_output::verbose!(
+      options.output,
+      "Unpacking icon: '{}' x:{}({x}), y:{}({y}), w:{}({w}), h:{}({h})",
+      sprite.section,
+      sprite.x,
+      sprite.y,
+      sprite.w,
+      sprite.h,
+    );
 
     // todo: Respect custom icon path from LTX file here (sprite.custom_icon).
 
     if x + w > options.source.width() || y + h > options.source.height() {
-      println!(
+      xray_output::warning!(
+        options.output,
         "Skip for possible section: '{}' - icon is out of source file bonds",
         sprite.section
       );
@@ -47,7 +51,7 @@ impl UnpackEquipmentProcessor {
       Ok(false)
     } else {
       save_image_as_ui_dds(
-        &options.output.join(format!("{}.dds", sprite.section)),
+        &options.output_path.join(format!("{}.dds", sprite.section)),
         &options.source.view(x, y, w, h).to_image(),
         options.dds_compression_format,
       )?;

@@ -1,5 +1,5 @@
 use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{Arg, ArgMatches, Command, value_parser};
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use xray_db::{SpawnFile, XRayByteOrder};
 use xray_error::XRayError;
@@ -23,6 +23,21 @@ impl GenericCommand for VerifySpawnFileCommand {
           .long("path")
           .required(true)
           .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
       )
   }
 

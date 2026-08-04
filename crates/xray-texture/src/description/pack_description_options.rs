@@ -4,9 +4,9 @@ use std::path::PathBuf;
 pub struct PackDescriptionOptions {
   pub description: PathBuf,
   pub base: PathBuf,
-  pub output: PathBuf,
+  pub output: xray_output::OutputOptions,
+  pub output_path: PathBuf,
   pub dds_compression_format: ImageFormat,
-  pub is_verbose: bool,
   pub is_strict: bool,
   pub is_parallel: bool,
 }
