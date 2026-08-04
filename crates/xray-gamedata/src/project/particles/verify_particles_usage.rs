@@ -36,12 +36,9 @@ impl GamedataProject {
     self.verify_particles_usage_in_configs(options, &particle_names, &mut result);
     self.verify_particles_usage_in_spawns(options, &particle_names, &mut result);
 
-    result.findings.sort_by(|left, right| {
-      left
-        .asset_path()
-        .cmp(&right.asset_path())
-        .then_with(|| left.message().cmp(right.message()))
-    });
+    result
+      .findings
+      .sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
     result.duration = started_at.elapsed();
 
     if options.is_logging_enabled() {

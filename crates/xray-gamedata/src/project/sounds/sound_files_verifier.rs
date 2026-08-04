@@ -67,12 +67,7 @@ impl<'a> SoundFilesVerifier<'a> {
       })
       .collect();
 
-    findings.sort_by(|left, right| {
-      left
-        .asset_path()
-        .cmp(&right.asset_path())
-        .then_with(|| left.message().cmp(right.message()))
-    });
+    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
 
     let invalid_sounds_count: u32 = u32::try_from(findings.len()).map_err(|_| {
       XRayError::new_verify_error("Invalid sound count exceeds the supported result range")

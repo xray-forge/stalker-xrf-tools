@@ -23,13 +23,7 @@ impl GamedataSoundsVerificationResult {
       .cloned()
       .collect();
 
-    findings.sort_by(|left, right| {
-      left
-        .asset_path()
-        .cmp(&right.asset_path())
-        .then_with(|| left.rule().cmp(&right.rule()))
-        .then_with(|| left.message().cmp(right.message()))
-    });
+    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_rule_and_message);
 
     Self {
       duration,

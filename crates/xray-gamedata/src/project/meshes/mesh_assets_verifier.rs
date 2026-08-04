@@ -108,12 +108,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     let mut findings: Vec<GamedataVerificationFinding> =
       mesh_findings.into_iter().flatten().collect();
 
-    findings.sort_by(|left, right| {
-      left
-        .asset_path()
-        .cmp(&right.asset_path())
-        .then_with(|| left.message().cmp(right.message()))
-    });
+    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
 
     Ok(GamedataMeshAssetsVerificationResult {
       findings,

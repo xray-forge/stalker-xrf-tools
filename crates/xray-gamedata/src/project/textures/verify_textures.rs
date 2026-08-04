@@ -83,7 +83,7 @@ impl GamedataProject {
       XRayError::new_verify_error("Invalid texture count exceeds the supported result range")
     })?;
 
-    findings.sort_by(|left, right| left.asset_path().cmp(&right.asset_path()));
+    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
 
     if options.is_logging_enabled() {
       println!(

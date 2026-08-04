@@ -2,6 +2,7 @@ use crate::{
   GamedataCheckResult, GamedataVerificationRule, GamedataVerificationStatus,
   GamedataVerificationType,
 };
+use std::cmp::Ordering;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use xray_error::XRayResult;
@@ -47,6 +48,23 @@ impl GamedataVerificationFinding {
 
   pub const fn rule(&self) -> GamedataVerificationRule {
     self.rule
+  }
+
+  /// Orders findings by asset path, then message.
+  pub fn cmp_by_asset_path_and_message(left: &Self, right: &Self) -> Ordering {
+    left
+      .asset_path
+      .cmp(&right.asset_path)
+      .then_with(|| left.message.cmp(&right.message))
+  }
+
+  /// Orders findings by asset path, rule, then message.
+  pub fn cmp_by_asset_path_rule_and_message(left: &Self, right: &Self) -> Ordering {
+    left
+      .asset_path
+      .cmp(&right.asset_path)
+      .then_with(|| left.rule.cmp(&right.rule))
+      .then_with(|| left.message.cmp(&right.message))
   }
 }
 
@@ -209,6 +227,57 @@ mod tests {
     fn findings(&self) -> &[GamedataVerificationFinding] {
       &self.findings
     }
+  }
+
+  #[test]
+  fn sorts_findings_by_asset_path_then_message() {
+    let mut findings: Vec<GamedataVerificationFinding> = vec![
+      GamedataVerificationFinding::for_asset(
+        GamedataVerificationRule::ScriptsSyntax,
+        "scripts/a.script",
+        "Second",
+      ),
+      GamedataVerificationFinding::for_asset(
+        GamedataVerificationRule::ScriptsSyntax,
+        "scripts/z.script",
+        "First",
+      ),
+      GamedataVerificationFinding::for_asset(
+        GamedataVerificationRule::ScriptsSyntax,
+        "scripts/a.script",
+        "First",
+      ),
+    ];
+
+    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+
+    assert_eq!(
+      findings
+        .iter()
+        .map(GamedataVerificationFinding::message)
+        .collect::<Vec<_>>(),
+      vec!["First", "Second", "First"]
+    );
+  }
+
+  #[test]
+  fn sorts_equal_paths_by_rule_before_message() {
+    let scripts_finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::ScriptsSyntax,
+      "scripts/a.script",
+      "First",
+    );
+    let textures_finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+      GamedataVerificationRule::TexturesRead,
+      "scripts/a.script",
+      "Second",
+    );
+    let mut findings: Vec<GamedataVerificationFinding> =
+      vec![textures_finding.clone(), scripts_finding.clone()];
+
+    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_rule_and_message);
+
+    assert_eq!(findings, vec![scripts_finding, textures_finding]);
   }
 
   #[test]

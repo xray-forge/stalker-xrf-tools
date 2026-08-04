@@ -69,12 +69,7 @@ impl GamedataProject {
 
     let duration: Duration = started_at.elapsed();
 
-    findings.sort_by(|left, right| {
-      left
-        .asset_path()
-        .cmp(&right.asset_path())
-        .then_with(|| left.message().cmp(right.message()))
-    });
+    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
 
     if options.is_logging_enabled() {
       println!(
