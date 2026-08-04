@@ -29,6 +29,10 @@ impl GamedataMeshesVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataMeshesVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::aggregate([self.shader_library.status(), self.mesh_assets.status()])
   }

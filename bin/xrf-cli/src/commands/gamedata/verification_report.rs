@@ -16,6 +16,7 @@ struct GamedataVerificationReportOutput {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct GamedataVerificationCheckReportOutput {
+  duration_ms: Option<u128>,
   findings: Vec<GamedataVerificationFindingOutput>,
   status: String,
   summary: String,
@@ -80,6 +81,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
     });
 
     GamedataVerificationCheckReportOutput {
+      duration_ms: check.duration,
       findings,
       status: check.status.to_string(),
       summary: check.summary.clone(),
@@ -138,6 +140,7 @@ mod tests {
     let report_path: PathBuf = root.join("report.json");
     let report: GamedataVerificationReport = GamedataVerificationReport {
       checks: vec![GamedataVerificationCheckReport {
+        duration: Some(7),
         findings: vec![
           GamedataVerificationFinding::for_asset_in_rule(
             "textures.dds",
@@ -167,6 +170,7 @@ mod tests {
     assert!(json.get("schemaVersion").is_none());
     assert_eq!(json["status"], "failed");
     assert_eq!(json["durationMs"], 42);
+    assert_eq!(json["checks"][0]["durationMs"], 7);
     assert_eq!(json["checks"][0]["verificationType"], "textures");
     assert_eq!(
       json["checks"][0]["findings"][0]["assetPath"],

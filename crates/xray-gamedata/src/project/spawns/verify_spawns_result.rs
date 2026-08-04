@@ -9,6 +9,10 @@ pub struct GamedataSpawnsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataSpawnsVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_spawns == 0)
   }

@@ -33,6 +33,10 @@ impl GamedataShadersVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataShadersVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.findings.is_empty())
   }

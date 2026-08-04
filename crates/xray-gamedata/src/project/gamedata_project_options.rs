@@ -1,4 +1,5 @@
 use crate::project::gamedata_verification_type::GamedataVerificationType;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 #[derive(Default)]
@@ -30,15 +31,14 @@ pub struct GamedataProjectVerifyOptions {
 
 impl GamedataProjectVerifyOptions {
   pub fn selected_checks(&self) -> Vec<GamedataVerificationType> {
-    let mut checks: Vec<GamedataVerificationType> = Vec::with_capacity(self.checks.len());
+    let mut seen: HashSet<GamedataVerificationType> = HashSet::with_capacity(self.checks.len());
 
-    for check in &self.checks {
-      if !checks.contains(check) {
-        checks.push(*check);
-      }
-    }
-
-    checks
+    self
+      .checks
+      .iter()
+      .copied()
+      .filter(|check| seen.insert(*check))
+      .collect()
   }
 
   pub fn is_logging_enabled(&self) -> bool {

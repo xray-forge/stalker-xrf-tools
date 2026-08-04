@@ -61,6 +61,7 @@ impl GamedataVerificationFinding {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationCheckReport {
+  pub duration: Option<u128>,
   pub findings: Vec<GamedataVerificationFinding>,
   pub status: GamedataVerificationStatus,
   pub summary: String,
@@ -123,12 +124,14 @@ impl GamedataVerificationCheckReport {
   {
     match result {
       Ok(result) => Self {
+        duration: result.duration(),
         findings: result.findings().to_vec(),
         status: result.status(),
         summary: result.failure_message(),
         verification_type,
       },
       Err(error) => Self {
+        duration: None,
         findings: vec![GamedataVerificationFinding::without_asset(
           error.to_string(),
         )],

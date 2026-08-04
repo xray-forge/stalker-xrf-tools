@@ -9,6 +9,10 @@ pub struct GamedataWeaponVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataWeaponVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_weapons_count == 0)
   }

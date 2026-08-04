@@ -9,6 +9,10 @@ pub struct GamedataScriptsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataScriptsVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_scripts_count == 0)
   }

@@ -12,6 +12,10 @@ pub struct GamedataParticlesUsageVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataParticlesUsageVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(
       self.invalid_references_count == 0 && self.unreadable_spawn_files_count == 0,

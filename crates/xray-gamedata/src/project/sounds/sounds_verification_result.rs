@@ -40,6 +40,10 @@ impl GamedataSoundsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataSoundsVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::aggregate([
       self.sound_files.status(),

@@ -10,6 +10,10 @@ pub struct GamedataLtxVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataLtxVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(
       self.format_result.invalid_files == 0 && self.verification_result.invalid_sections == 0,

@@ -16,6 +16,10 @@ pub struct GamedataWeathersVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataWeathersVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     if self.checked_weather_files_count == 0 {
       GamedataVerificationStatus::Failed

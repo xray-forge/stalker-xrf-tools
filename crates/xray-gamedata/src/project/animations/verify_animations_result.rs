@@ -8,6 +8,10 @@ pub struct GamedataAnimationsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataAnimationsVerificationResult {
+  fn duration(&self) -> Option<u128> {
+    Some(self.duration)
+  }
+
   fn status(&self) -> GamedataVerificationStatus {
     self.player_hud_animations.status()
   }
