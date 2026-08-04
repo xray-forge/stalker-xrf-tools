@@ -3,10 +3,9 @@ use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationF
 use colored::Colorize;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
 use std::time::Instant;
 use xray_db::{ParticlesFile, XRayByteOrder};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 
 impl GamedataProject {
   pub fn verify_particles(
@@ -18,19 +17,19 @@ impl GamedataProject {
     }
 
     let started_at: Instant = Instant::now();
-    let checked_particles_count: Mutex<u32> = Mutex::new(0);
-    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
-    let invalid_particles_count: Mutex<u32> = Mutex::new(0);
+    let particle_paths: Vec<PathBuf> =
+      self.get_all_asset_absolute_paths_by_ends_with("particles.xr");
 
-    self
-      .get_all_asset_absolute_paths_by_ends_with("particles.xr")
+    let checked_particle_files_count: u32 = u32::try_from(particle_paths.len()).map_err(|_| {
+      XRayError::new_verify_error("Particle library count exceeds the supported result range")
+    })?;
+
+    let particle_findings: Vec<Vec<GamedataVerificationFinding>> = particle_paths
       .par_iter()
-      .for_each(|path| {
+      .map(|path| {
         if options.is_verbose_logging_enabled() {
           println!("Verify particles file: {}", path.display());
         }
-
-        *checked_particles_count.lock().unwrap() += 1;
 
         match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(&path) {
           Ok(particles_file) => {
@@ -41,10 +40,9 @@ impl GamedataProject {
               if options.is_logging_enabled() {
                 println!("Particle library is invalid: {}", path.display());
               }
-
-              findings.lock().unwrap().extend(particle_findings);
-              *invalid_particles_count.lock().unwrap() += 1;
             }
+
+            particle_findings
           }
           Err(error) => {
             if options.is_logging_enabled() {
@@ -55,23 +53,30 @@ impl GamedataProject {
               );
             }
 
-            findings
-              .lock()
-              .unwrap()
-              .push(GamedataVerificationFinding::for_asset(
-                path,
-                format!("Failed to read particle library: {error}"),
-              ));
-            *invalid_particles_count.lock().unwrap() += 1;
+            vec![GamedataVerificationFinding::for_asset(
+              path,
+              format!("Failed to read particle library: {error}"),
+            )]
           }
         }
-      });
+      })
+      .collect();
 
     let duration: u128 = started_at.elapsed().as_millis();
-    let checked_particle_files_count: u32 = *checked_particles_count.lock().unwrap();
-    let invalid_particle_files_count: u32 = *invalid_particles_count.lock().unwrap();
+    let invalid_particle_files_count: u32 = u32::try_from(
+      particle_findings
+        .iter()
+        .filter(|findings| !findings.is_empty())
+        .count(),
+    )
+    .map_err(|_| {
+      XRayError::new_verify_error(
+        "Invalid particle library count exceeds the supported result range",
+      )
+    })?;
+
     let mut findings: Vec<GamedataVerificationFinding> =
-      std::mem::take(&mut *findings.lock().unwrap());
+      particle_findings.into_iter().flatten().collect();
 
     findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
 

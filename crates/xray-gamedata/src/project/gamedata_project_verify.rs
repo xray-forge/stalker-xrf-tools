@@ -7,10 +7,12 @@ use xray_error::{XRayError, XRayResult};
 
 impl GamedataProject {
   pub fn verify(
-    &mut self,
+    &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataVerificationReport> {
-    if options.checks.is_empty() {
+    let checks: Vec<GamedataVerificationType> = options.selected_checks();
+
+    if checks.is_empty() {
       return Err(XRayError::new_unexpected_error(
         "No gamedata checks to perform provided",
       ));
@@ -21,10 +23,9 @@ impl GamedataProject {
 
       println!(
         "Verifying modules: \n  -{}",
-        options
-          .checks
+        checks
           .iter()
-          .map(GamedataVerificationType::to_string)
+          .map(ToString::to_string)
           .collect::<Vec<_>>()
           .join("\n  -")
       );
@@ -33,108 +34,62 @@ impl GamedataProject {
     }
 
     let started_at: Instant = Instant::now();
-
     let mut result: GamedataVerificationReport = GamedataVerificationReport::default();
 
-    if options
-      .checks
-      .contains(&GamedataVerificationType::Animations)
-    {
-      result.add_check(
-        GamedataVerificationType::Animations,
-        self.verify_animations(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Ltx) {
-      result.add_check(GamedataVerificationType::Ltx, self.verify_ltx(options));
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Levels) {
-      result.add_check(
-        GamedataVerificationType::Levels,
-        self.verify_levels(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Meshes) {
-      result.add_check(
-        GamedataVerificationType::Meshes,
-        self.verify_meshes(options),
-      );
-    }
-
-    if options
-      .checks
-      .contains(&GamedataVerificationType::Particles)
-    {
-      result.add_check(
-        GamedataVerificationType::Particles,
-        self.verify_particles(options),
-      );
-    }
-
-    if options
-      .checks
-      .contains(&GamedataVerificationType::ParticlesUsage)
-    {
-      result.add_check(
-        GamedataVerificationType::ParticlesUsage,
-        self.verify_particles_usage(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Scripts) {
-      result.add_check(
-        GamedataVerificationType::Scripts,
-        self.verify_scripts(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Shaders) {
-      result.add_check(
-        GamedataVerificationType::Shaders,
-        self.verify_shaders(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Sounds) {
-      result.add_check(
-        GamedataVerificationType::Sounds,
-        self.verify_sounds(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Spawns) {
-      result.add_check(
-        GamedataVerificationType::Spawns,
-        self.verify_spawns(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Textures) {
-      result.add_check(
-        GamedataVerificationType::Textures,
-        self.verify_textures(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Weapons) {
-      result.add_check(
-        GamedataVerificationType::Weapons,
-        self.verify_weapons(options),
-      );
-    }
-
-    if options.checks.contains(&GamedataVerificationType::Weathers) {
-      result.add_check(
-        GamedataVerificationType::Weathers,
-        self.verify_weathers(options),
-      );
+    for check in checks {
+      result.checks.push(check.run(self, options));
     }
 
     result.duration = started_at.elapsed().as_millis();
 
     Ok(result)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::GamedataProject;
+  use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};
+  use std::collections::HashMap;
+  use std::path::PathBuf;
+  use xray_ltx::LtxProject;
+
+  fn empty_project() -> GamedataProject {
+    GamedataProject {
+      assets: HashMap::new(),
+      ltx_project: LtxProject {
+        root: PathBuf::new(),
+        ltx_file_entries: Vec::new(),
+        ltx_files: Vec::new(),
+        ltx_scheme_files: Vec::new(),
+        ltx_scheme_file_entries: Vec::new(),
+        ltx_scheme_declarations: Default::default(),
+      },
+      root: PathBuf::new(),
+    }
+  }
+
+  #[test]
+  fn runs_each_selected_check_once_in_request_order() {
+    let project: GamedataProject = empty_project();
+    let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
+      checks: vec![
+        GamedataVerificationType::Levels,
+        GamedataVerificationType::Levels,
+      ],
+      is_silent: true,
+      ..Default::default()
+    };
+
+    let report = project
+      .verify(&options)
+      .expect("Expected level verification to complete");
+
+    assert_eq!(report.checks.len(), 1);
+    assert_eq!(
+      report.checks[0].verification_type,
+      GamedataVerificationType::Levels
+    );
+    assert_eq!(report.status(), GamedataVerificationStatus::Incomplete);
   }
 }

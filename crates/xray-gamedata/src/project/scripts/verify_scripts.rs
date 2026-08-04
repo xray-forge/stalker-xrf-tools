@@ -7,9 +7,8 @@ use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use std::fs::File;
 use std::path::Path;
-use std::sync::Mutex;
 use std::time::Instant;
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 use xray_lua::verify_luajit_script;
 use xray_utils::read_as_string_from_w1251_encoded;
 
@@ -23,75 +22,64 @@ impl GamedataProject {
     }
 
     let started_at: Instant = Instant::now();
-    let checked_scripts_count: Mutex<u32> = Mutex::new(0);
-    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
-    let invalid_scripts_count: Mutex<u32> = Mutex::new(0);
-
-    self
+    let script_paths: Vec<String> = self
       .get_all_asset_paths_by_type(AssetType::Script)
-      .par_iter()
+      .into_iter()
       .filter(|path| is_runtime_script(path))
-      .for_each(|path| {
+      .collect();
+
+    let checked_scripts_count: u32 = u32::try_from(script_paths.len()).map_err(|_| {
+      XRayError::new_verify_error("Script count exceeds the supported result range")
+    })?;
+
+    let mut findings: Vec<GamedataVerificationFinding> = script_paths
+      .par_iter()
+      .filter_map(|relative_path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify script: {}", path);
+          println!("Verify script: {relative_path}");
         }
 
-        *checked_scripts_count.lock().unwrap() += 1;
-
-        if let Some(path) = self.get_absolute_asset_path(path) {
-          match self.verify_script(options, &path) {
-            Ok(is_valid) => {
-              if !is_valid {
-                if options.is_logging_enabled() {
-                  println!("Script is not valid: {}", path.display());
-                }
-
-                findings
-                  .lock()
-                  .unwrap()
-                  .push(GamedataVerificationFinding::for_asset(
-                    &path,
-                    "LuaJIT parser rejected the script",
-                  ));
-                *invalid_scripts_count.lock().unwrap() += 1;
-              }
-            }
-            Err(error) => {
-              if options.is_logging_enabled() {
-                eprintln!("Script verification failed: {error}");
-              }
-
-              findings
-                .lock()
-                .unwrap()
-                .push(GamedataVerificationFinding::for_asset(
-                  &path,
-                  error.to_string(),
-                ));
-              *invalid_scripts_count.lock().unwrap() += 1;
-            }
-          }
-        } else {
+        let Some(path) = self.get_absolute_asset_path(relative_path) else {
           if options.is_logging_enabled() {
-            println!("Script path not found: {}", path);
+            println!("Script path not found: {relative_path}");
           }
 
-          findings
-            .lock()
-            .unwrap()
-            .push(GamedataVerificationFinding::for_asset(
-              Path::new(path),
-              "Script path was not found in gamedata roots",
-            ));
-          *invalid_scripts_count.lock().unwrap() += 1;
+          return Some(GamedataVerificationFinding::for_asset(
+            Path::new(relative_path),
+            "Script path was not found in gamedata roots",
+          ));
+        };
+
+        match self.verify_script(options, &path) {
+          Ok(true) => None,
+          Ok(false) => {
+            if options.is_logging_enabled() {
+              println!("Script is not valid: {}", path.display());
+            }
+
+            Some(GamedataVerificationFinding::for_asset(
+              &path,
+              "LuaJIT parser rejected the script",
+            ))
+          }
+          Err(error) => {
+            if options.is_logging_enabled() {
+              eprintln!("Script verification failed: {error}");
+            }
+
+            Some(GamedataVerificationFinding::for_asset(
+              &path,
+              error.to_string(),
+            ))
+          }
         }
-      });
+      })
+      .collect();
 
     let duration: u128 = started_at.elapsed().as_millis();
-    let checked_scripts_count: u32 = *checked_scripts_count.lock().unwrap();
-    let invalid_scripts_count: u32 = *invalid_scripts_count.lock().unwrap();
-    let mut findings: Vec<GamedataVerificationFinding> =
-      std::mem::take(&mut *findings.lock().unwrap());
+    let invalid_scripts_count: u32 = u32::try_from(findings.len()).map_err(|_| {
+      XRayError::new_verify_error("Invalid script count exceeds the supported result range")
+    })?;
 
     findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
 

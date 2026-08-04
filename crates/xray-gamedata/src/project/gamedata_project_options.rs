@@ -29,11 +29,49 @@ pub struct GamedataProjectVerifyOptions {
 }
 
 impl GamedataProjectVerifyOptions {
+  pub fn selected_checks(&self) -> Vec<GamedataVerificationType> {
+    let mut checks: Vec<GamedataVerificationType> = Vec::with_capacity(self.checks.len());
+
+    for check in &self.checks {
+      if !checks.contains(check) {
+        checks.push(*check);
+      }
+    }
+
+    checks
+  }
+
   pub fn is_logging_enabled(&self) -> bool {
     !self.is_silent
   }
 
   pub fn is_verbose_logging_enabled(&self) -> bool {
     !self.is_silent && self.is_verbose
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::GamedataProjectVerifyOptions;
+  use crate::GamedataVerificationType;
+
+  #[test]
+  fn selected_checks_preserves_first_requested_order_and_removes_duplicates() {
+    let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
+      checks: vec![
+        GamedataVerificationType::Textures,
+        GamedataVerificationType::Scripts,
+        GamedataVerificationType::Textures,
+      ],
+      ..Default::default()
+    };
+
+    assert_eq!(
+      options.selected_checks(),
+      vec![
+        GamedataVerificationType::Textures,
+        GamedataVerificationType::Scripts,
+      ]
+    );
   }
 }

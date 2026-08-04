@@ -80,22 +80,12 @@ impl GamedataVerificationReport {
   where
     T: GamedataCheckResult,
   {
-    match result {
-      Ok(result) => self.checks.push(GamedataVerificationCheckReport {
-        findings: result.findings().to_vec(),
-        status: result.status(),
-        summary: result.failure_message(),
+    self
+      .checks
+      .push(GamedataVerificationCheckReport::from_check_result(
         verification_type,
-      }),
-      Err(error) => self.checks.push(GamedataVerificationCheckReport {
-        findings: vec![GamedataVerificationFinding::without_asset(
-          error.to_string(),
-        )],
-        status: GamedataVerificationStatus::Error,
-        summary: format!("Check failed ({verification_type}): {error}"),
-        verification_type,
-      }),
-    }
+        result,
+      ));
   }
 
   pub fn status(&self) -> GamedataVerificationStatus {
@@ -120,6 +110,33 @@ impl GamedataVerificationReport {
         GamedataVerificationStatus::Passed | GamedataVerificationStatus::Skipped
       )
     })
+  }
+}
+
+impl GamedataVerificationCheckReport {
+  pub fn from_check_result<T>(
+    verification_type: GamedataVerificationType,
+    result: XRayResult<T>,
+  ) -> Self
+  where
+    T: GamedataCheckResult,
+  {
+    match result {
+      Ok(result) => Self {
+        findings: result.findings().to_vec(),
+        status: result.status(),
+        summary: result.failure_message(),
+        verification_type,
+      },
+      Err(error) => Self {
+        findings: vec![GamedataVerificationFinding::without_asset(
+          error.to_string(),
+        )],
+        status: GamedataVerificationStatus::Error,
+        summary: format!("Check failed ({verification_type}): {error}"),
+        verification_type,
+      },
+    }
   }
 }
 

@@ -53,7 +53,7 @@ impl GenericCommand for VerifyGamedataCommand {
           .help("List of checks to perform")
           .long("checks")
           .value_delimiter(',')
-          .num_args(0..=15)
+          .num_args(1..)
           .value_parser(value_parser!(GamedataVerificationType)),
       )
       .arg(
@@ -138,7 +138,7 @@ impl GenericCommand for VerifyGamedataCommand {
       );
     }
 
-    let mut project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
+    let project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
     let verify_result: GamedataVerificationResult = project.verify(&verify_options)?;
     let status: GamedataVerificationStatus = verify_result.status();
 

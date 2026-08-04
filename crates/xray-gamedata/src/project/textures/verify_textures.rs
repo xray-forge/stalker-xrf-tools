@@ -6,7 +6,6 @@ use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
 use std::fs::File;
 use std::path::Path;
-use std::sync::Mutex;
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
 
@@ -20,78 +19,63 @@ impl GamedataProject {
     }
 
     let started_at: Instant = Instant::now();
-    let checked_textures_count: Mutex<u32> = Mutex::new(0);
-    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
-    let invalid_textures_count: Mutex<u32> = Mutex::new(0);
+    let texture_paths: Vec<String> = self.get_all_asset_paths_by_type(AssetType::Dds);
+    let checked_textures_count: u32 = u32::try_from(texture_paths.len()).map_err(|_| {
+      XRayError::new_verify_error("Texture count exceeds the supported result range")
+    })?;
 
-    self
-      .get_all_asset_paths_by_type(AssetType::Dds)
+    let mut findings: Vec<GamedataVerificationFinding> = texture_paths
       .par_iter()
-      .for_each(|path| {
+      .filter_map(|relative_path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify texture: {}", path);
+          println!("Verify texture: {relative_path}");
         }
 
-        *checked_textures_count.lock().unwrap() += 1;
-
-        if let Some(path) = self.get_absolute_asset_path(path) {
-          match self.verify_texture_by_path(options, &path) {
-            Ok(is_valid) => {
-              if !is_valid {
-                if options.is_logging_enabled() {
-                  println!("Texture is not valid: {}", path.display());
-                }
-
-                findings
-                  .lock()
-                  .unwrap()
-                  .push(GamedataVerificationFinding::for_asset(
-                    &path,
-                    "Texture uses an unsupported format",
-                  ));
-                *invalid_textures_count.lock().unwrap() += 1;
-              }
-            }
-            Err(error) => {
-              if options.is_logging_enabled() {
-                println!(
-                  "Texture verification failed: {} - {}",
-                  path.display(),
-                  error
-                );
-              }
-
-              findings
-                .lock()
-                .unwrap()
-                .push(GamedataVerificationFinding::for_asset(
-                  &path,
-                  error.to_string(),
-                ));
-              *invalid_textures_count.lock().unwrap() += 1;
-            }
-          }
-        } else {
+        let Some(path) = self.get_absolute_asset_path(relative_path) else {
           if options.is_logging_enabled() {
-            println!("Texture path not found: {}", path);
+            println!("Texture path not found: {relative_path}");
           }
 
-          findings
-            .lock()
-            .unwrap()
-            .push(GamedataVerificationFinding::for_asset(
-              Path::new(path),
-              "Texture path was not found in gamedata roots",
-            ));
-          *invalid_textures_count.lock().unwrap() += 1;
+          return Some(GamedataVerificationFinding::for_asset(
+            Path::new(relative_path),
+            "Texture path was not found in gamedata roots",
+          ));
+        };
+
+        match self.verify_texture_by_path(options, &path) {
+          Ok(true) => None,
+          Ok(false) => {
+            if options.is_logging_enabled() {
+              println!("Texture is not valid: {}", path.display());
+            }
+
+            Some(GamedataVerificationFinding::for_asset(
+              &path,
+              "Texture uses an unsupported format",
+            ))
+          }
+          Err(error) => {
+            if options.is_logging_enabled() {
+              println!(
+                "Texture verification failed: {} - {}",
+                path.display(),
+                error
+              );
+            }
+
+            Some(GamedataVerificationFinding::for_asset(
+              &path,
+              error.to_string(),
+            ))
+          }
         }
-      });
+      })
+      .collect();
 
     let duration: u128 = started_at.elapsed().as_millis();
-    let checked_textures_count: u32 = *checked_textures_count.lock().unwrap();
-    let invalid_textures_count: u32 = *invalid_textures_count.lock().unwrap();
-    let mut findings: Vec<GamedataVerificationFinding> =
-      std::mem::take(&mut *findings.lock().unwrap());
+    let invalid_textures_count: u32 = u32::try_from(findings.len()).map_err(|_| {
+      XRayError::new_verify_error("Invalid texture count exceeds the supported result range")
+    })?;
 
     findings.sort_by(|left, right| left.asset_path.cmp(&right.asset_path));
 

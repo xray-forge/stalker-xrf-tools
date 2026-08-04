@@ -4,9 +4,8 @@ use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationF
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
 use xray_db::{OgfFile, OmfFile, ShaderLibraryFile, XRayByteOrder};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 
 pub(crate) struct MeshAssetsVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
@@ -30,86 +29,78 @@ impl<'a> MeshAssetsVerifier<'a> {
   pub(crate) fn verify(&self) -> XRayResult<GamedataMeshAssetsVerificationResult> {
     let options = self.options;
     let shader_library = self.shader_library;
-    let checked_meshes_count: Mutex<u32> = Mutex::new(0);
-    let findings: Mutex<Vec<GamedataVerificationFinding>> = Mutex::new(Vec::new());
-    let invalid_meshes_count: Mutex<u32> = Mutex::new(0);
+    let mesh_paths: Vec<String> = self.project.get_all_asset_paths_by_type(AssetType::Ogf);
 
-    self
-      .project
-      .get_all_asset_paths_by_type(AssetType::Ogf)
+    let checked_meshes_count: u32 = u32::try_from(mesh_paths.len())
+      .map_err(|_| XRayError::new_verify_error("Mesh count exceeds the supported result range"))?;
+
+    let mesh_findings: Vec<Vec<GamedataVerificationFinding>> = mesh_paths
       .par_iter()
-      .for_each(|path| {
+      .map(|relative_path| {
         if options.is_verbose_logging_enabled() {
-          println!("Verify mesh: {}", path);
+          println!("Verify mesh: {relative_path}");
         }
 
-        *checked_meshes_count.lock().unwrap() += 1;
-
-        if let Some(path) = self.project.get_absolute_asset_path(path) {
-          match OgfFile::read_from_path::<XRayByteOrder, _>(&path) {
-            Ok(ogf) => {
-              match self.verify_mesh_findings(options, shader_library, &ogf, Some(&path), None) {
-                Ok(mesh_findings) if !mesh_findings.is_empty() => {
-                  if options.is_logging_enabled() {
-                    eprintln!("Mesh is not valid: {}", path.display());
-                  }
-
-                  findings.lock().unwrap().extend(mesh_findings);
-                  *invalid_meshes_count.lock().unwrap() += 1;
-                }
-                Ok(_) => {}
-                Err(error) => {
-                  if options.is_logging_enabled() {
-                    eprintln!("Mesh verification failed: {} - {}", path.display(), error);
-                  }
-
-                  findings
-                    .lock()
-                    .unwrap()
-                    .push(GamedataVerificationFinding::for_asset(
-                      &path,
-                      format!("Failed to verify mesh: {error}"),
-                    ));
-                  *invalid_meshes_count.lock().unwrap() += 1;
-                }
-              }
-            }
-            Err(error) => {
-              if options.is_logging_enabled() {
-                eprintln!("Mesh verification failed: {} - {}", path.display(), error);
-              }
-
-              findings
-                .lock()
-                .unwrap()
-                .push(GamedataVerificationFinding::for_asset(
-                  &path,
-                  format!("Failed to read mesh: {error}"),
-                ));
-              *invalid_meshes_count.lock().unwrap() += 1;
-            }
-          }
-        } else {
+        let Some(path) = self.project.get_absolute_asset_path(relative_path) else {
           if options.is_logging_enabled() {
-            eprintln!("Mesh path not found: {}", path);
+            eprintln!("Mesh path not found: {relative_path}");
           }
 
-          findings
-            .lock()
-            .unwrap()
-            .push(GamedataVerificationFinding::for_asset(
-              Path::new(path),
-              "Mesh path was not found in gamedata roots",
-            ));
-          *invalid_meshes_count.lock().unwrap() += 1;
-        }
-      });
+          return vec![GamedataVerificationFinding::for_asset(
+            Path::new(relative_path),
+            "Mesh path was not found in gamedata roots",
+          )];
+        };
 
-    let checked_meshes_count: u32 = *checked_meshes_count.lock().unwrap();
-    let invalid_meshes_count: u32 = *invalid_meshes_count.lock().unwrap();
+        match OgfFile::read_from_path::<XRayByteOrder, _>(&path) {
+          Ok(ogf) => {
+            match self.verify_mesh_findings(options, shader_library, &ogf, Some(&path), None) {
+              Ok(findings) if findings.is_empty() => Vec::new(),
+              Ok(findings) => {
+                if options.is_logging_enabled() {
+                  eprintln!("Mesh is not valid: {}", path.display());
+                }
+
+                findings
+              }
+              Err(error) => {
+                if options.is_logging_enabled() {
+                  eprintln!("Mesh verification failed: {} - {}", path.display(), error);
+                }
+
+                vec![GamedataVerificationFinding::for_asset(
+                  &path,
+                  format!("Failed to verify mesh: {error}"),
+                )]
+              }
+            }
+          }
+          Err(error) => {
+            if options.is_logging_enabled() {
+              eprintln!("Mesh verification failed: {} - {}", path.display(), error);
+            }
+
+            vec![GamedataVerificationFinding::for_asset(
+              &path,
+              format!("Failed to read mesh: {error}"),
+            )]
+          }
+        }
+      })
+      .collect();
+
+    let invalid_meshes_count: u32 = u32::try_from(
+      mesh_findings
+        .iter()
+        .filter(|findings| !findings.is_empty())
+        .count(),
+    )
+    .map_err(|_| {
+      XRayError::new_verify_error("Invalid mesh count exceeds the supported result range")
+    })?;
 
     let mut findings: Vec<GamedataVerificationFinding> =
-      std::mem::take(&mut *findings.lock().unwrap());
+      mesh_findings.into_iter().flatten().collect();
 
     findings.sort_by(|left, right| {
       left
