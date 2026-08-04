@@ -68,12 +68,12 @@ impl<'a> SoundReferencesVerifier<'a> {
 
       match Ltx::read_from_file_full(path) {
         Ok(ltx) => self.verify_references_in_ltx(sound_names, sound_roots, &ltx, path, result),
-        Err(error) if self.options.is_verbose_logging_enabled() => eprintln!(
+        Err(error) => xray_output::verbose!(
+          self.options.output,
           "Skipping ltx entry in sound reference check: {} - {}",
           path.display(),
           error
         ),
-        Err(_) => {}
       }
     }
   }
@@ -147,9 +147,11 @@ impl<'a> SoundReferencesVerifier<'a> {
       }
     }
 
-    if self.options.is_verbose_logging_enabled() {
-      println!("Verified sound references in {}", path.display());
-    }
+    xray_output::verbose!(
+      self.options.output,
+      "Verified sound references in {}",
+      path.display()
+    );
   }
 
   fn verify_reference(

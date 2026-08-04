@@ -2,7 +2,6 @@ use crate::GamedataFindingFactory;
 use crate::project::shaders::gamedata_shader_source_loader::GamedataShaderSourceLoader;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
 use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -27,9 +26,7 @@ impl<'a> ShadersVerifier<'a> {
   }
 
   pub(crate) fn verify(&self) -> GamedataShadersVerificationResult {
-    if self.options.is_logging_enabled() {
-      println!("{}", "Verify renderer shaders:".green());
-    }
+    xray_output::heading!(self.options.output, "Verify renderer shaders:");
 
     let started_at: Instant = Instant::now();
 
@@ -44,13 +41,12 @@ impl<'a> ShadersVerifier<'a> {
 
     result.duration = started_at.elapsed();
 
-    if self.options.is_logging_enabled() {
-      println!(
-        "Verified renderer shaders in {} sec, {}",
-        result.duration.as_secs_f64(),
-        result.failure_message()
-      );
-    }
+    xray_output::info!(
+      self.options.output,
+      "Verified renderer shaders in {} sec, {}",
+      result.duration.as_secs_f64(),
+      result.failure_message()
+    );
 
     result
   }
@@ -60,9 +56,11 @@ impl<'a> ShadersVerifier<'a> {
     renderer: ShaderRenderer,
     result: &mut GamedataShadersVerificationResult,
   ) {
-    if self.options.is_verbose_logging_enabled() {
-      println!("Verify {} renderer shaders", renderer.display_name());
-    }
+    xray_output::verbose!(
+      self.options.output,
+      "Verify {} renderer shaders",
+      renderer.display_name()
+    );
 
     let renderer_root: PathBuf = self.shaders_root.join(renderer.directory_name());
 
@@ -236,7 +234,7 @@ mod tests {
   fn validates_d3d11_scripts_and_renderer_then_root_includes() -> XRayResult {
     let root: PathBuf = create_shader_root("d3d11")?;
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     };
 
@@ -264,7 +262,7 @@ mod tests {
   fn reports_lua_include_and_cycle_problems_together() -> XRayResult {
     let root: PathBuf = create_shader_root("static-problems")?;
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     };
 

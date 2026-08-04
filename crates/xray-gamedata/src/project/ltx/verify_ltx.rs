@@ -1,22 +1,20 @@
 use crate::GamedataFindingFactory;
 use crate::project::ltx::verify_ltx_result::GamedataLtxVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use std::path::Path;
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{
   LtxFormatOptions, LtxProjectFormatResult, LtxProjectVerifyResult, LtxVerifyOptions,
 };
+use xray_output::OutputVerbosity;
 
 impl GamedataProject {
   pub fn verify_ltx(
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataLtxVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify LTX files".green());
-    }
+    xray_output::heading!(options.output, "Verify LTX files");
 
     let started_at: Instant = Instant::now();
 
@@ -26,12 +24,11 @@ impl GamedataProject {
 
     let duration = started_at.elapsed();
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata ltx files in {} sec",
-        duration.as_secs_f64(),
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified gamedata ltx files in {} sec",
+      duration.as_secs_f64(),
+    );
 
     Ok(GamedataLtxVerificationResult {
       duration,
@@ -85,15 +82,13 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<LtxProjectFormatResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify LTX files formatting".green());
-    }
+    xray_output::heading!(options.output, "Verify LTX files formatting");
 
     self
       .ltx_project
       .check_format_all_files_opt(LtxFormatOptions {
-        is_silent: options.is_silent,
-        is_verbose: options.is_verbose,
+        is_silent: matches!(options.output.verbosity(), OutputVerbosity::Silent),
+        is_verbose: matches!(options.output.verbosity(), OutputVerbosity::Verbose),
       })
   }
 
@@ -101,13 +96,11 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<LtxProjectVerifyResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify LTX schemas".green());
-    };
+    xray_output::heading!(options.output, "Verify LTX schemas");
 
     self.ltx_project.verify_entries_opt(LtxVerifyOptions {
-      is_silent: options.is_silent,
-      is_verbose: options.is_verbose,
+      is_silent: matches!(options.output.verbosity(), OutputVerbosity::Silent),
+      is_verbose: matches!(options.output.verbosity(), OutputVerbosity::Verbose),
     })
   }
 }

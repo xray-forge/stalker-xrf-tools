@@ -1,7 +1,6 @@
 use crate::GamedataFindingFactory;
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
@@ -13,9 +12,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataParticlesVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify particles:".green());
-    }
+    xray_output::heading!(options.output, "Verify particles:");
 
     let started_at: Instant = Instant::now();
     let particle_paths: Vec<PathBuf> =
@@ -28,29 +25,30 @@ impl GamedataProject {
     let particle_findings: Vec<Vec<Finding>> = particle_paths
       .par_iter()
       .map(|path| {
-        if options.is_verbose_logging_enabled() {
-          println!("Verify particles file: {}", path.display());
-        }
+        xray_output::verbose!(options.output, "Verify particles file: {}", path.display());
 
         match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(&path) {
           Ok(particles_file) => {
             let particle_findings: Vec<Finding> =
               self.verify_particle(options, &particles_file, path);
 
-            if !particle_findings.is_empty() && options.is_logging_enabled() {
-              println!("Particle library is invalid: {}", path.display());
+            if !particle_findings.is_empty() {
+              xray_output::info!(
+                options.output,
+                "Particle library is invalid: {}",
+                path.display()
+              );
             }
 
             particle_findings
           }
           Err(error) => {
-            if options.is_logging_enabled() {
-              println!(
-                "Failed to read particle library '{}': {}",
-                path.display(),
-                error
-              );
-            }
+            xray_output::info!(
+              options.output,
+              "Failed to read particle library '{}': {}",
+              path.display(),
+              error
+            );
 
             vec![GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesLibrary,
@@ -79,14 +77,13 @@ impl GamedataProject {
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata particle files in {} sec, {}/{} valid",
-        duration.as_secs_f64(),
-        checked_particle_files_count - invalid_particle_files_count,
-        checked_particle_files_count
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified gamedata particle files in {} sec, {}/{} valid",
+      duration.as_secs_f64(),
+      checked_particle_files_count - invalid_particle_files_count,
+      checked_particle_files_count
+    );
 
     Ok(GamedataParticlesVerificationResult {
       duration,
@@ -105,9 +102,7 @@ impl GamedataProject {
     let mut findings: Vec<Finding> = Vec::new();
 
     for particle in &particles_file.effects.effects {
-      if options.is_verbose_logging_enabled() {
-        println!("Verify particle: {}", particle.name);
-      }
+      xray_output::verbose!(options.output, "Verify particle: {}", particle.name);
 
       for texture_relative_path in particle.sprite.texture_name.split(",") {
         if let Some(texture) = self.resolve_dds_texture_path(texture_relative_path) {

@@ -3,7 +3,6 @@ use crate::project::meshes::mesh_assets_verifier::MeshAssetsVerifier;
 use crate::project::meshes::shader_library_verifier::ShaderLibraryVerifier;
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
-use colored::Colorize;
 use std::time::Instant;
 use xray_error::XRayResult;
 
@@ -21,9 +20,7 @@ impl<'a> MeshesVerifier<'a> {
   }
 
   pub(crate) fn verify(&self) -> XRayResult<GamedataMeshesVerificationResult> {
-    if self.options.is_logging_enabled() {
-      println!("{}", "Verify meshes:".green());
-    }
+    xray_output::heading!(self.options.output, "Verify meshes:");
 
     let started_at: Instant = Instant::now();
 
@@ -44,13 +41,12 @@ impl<'a> MeshesVerifier<'a> {
       mesh_assets,
     );
 
-    if self.options.is_logging_enabled() {
-      println!(
-        "Verified gamedata meshes in {} sec, {}",
-        result.duration.as_secs_f64(),
-        result.failure_message()
-      );
-    }
+    xray_output::info!(
+      self.options.output,
+      "Verified gamedata meshes in {} sec, {}",
+      result.duration.as_secs_f64(),
+      result.failure_message()
+    );
 
     Ok(result)
   }

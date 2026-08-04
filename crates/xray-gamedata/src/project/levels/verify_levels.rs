@@ -1,6 +1,5 @@
 use crate::project::levels::verify_levels_result::GamedataLevelVerificationResult;
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
-use colored::Colorize;
 use xray_error::XRayResult;
 
 impl GamedataProject {
@@ -10,10 +9,13 @@ impl GamedataProject {
   ) -> XRayResult<GamedataLevelVerificationResult> {
     let result = GamedataLevelVerificationResult::default();
 
-    if options.is_logging_enabled() {
-      println!("{}", "Verify levels:".green());
-      println!("  - {}: {}", result.status(), result.failure_message());
-    }
+    xray_output::heading!(options.output, "Verify levels:");
+    xray_output::info!(
+      options.output,
+      "  - {}: {}",
+      result.status(),
+      result.failure_message()
+    );
 
     // todo: For now just mark files as used.
 

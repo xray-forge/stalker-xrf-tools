@@ -1,5 +1,6 @@
 pub(crate) mod commands;
 pub(crate) mod generic_command;
+pub(crate) mod output;
 
 use commands::archive::unpack_archive::UnpackArchiveCommand;
 use commands::externs::export_externs::ExportExternsCommand;

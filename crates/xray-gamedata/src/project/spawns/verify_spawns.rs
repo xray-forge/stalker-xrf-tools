@@ -2,7 +2,6 @@ use crate::GamedataFindingFactory;
 use crate::asset::asset_type::AssetType;
 use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use std::path::Path;
 use std::time::{Duration, Instant};
 use xray_db::{SpawnFile, XRayByteOrder};
@@ -25,14 +24,10 @@ impl GamedataProject {
       .map(|(key, _)| key.clone())
       .collect::<Vec<_>>();
 
-    if options.is_logging_enabled() {
-      println!("{} {}", "Verify spawns:".green(), spawn_files.len());
-    }
+    xray_output::heading!(options.output, "{} {}", "Verify spawns:", spawn_files.len());
 
     if spawn_files.is_empty() {
-      if options.is_logging_enabled() {
-        println!("No spawn files found in gamedata root");
-      }
+      xray_output::info!(options.output, "No spawn files found in gamedata root");
 
       // todo: Verify result struct.
 
@@ -72,14 +67,13 @@ impl GamedataProject {
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata spawn files in {} sec, {}/{} are valid",
-        duration.as_secs_f64(),
-        total_spawns - invalid_spawns,
-        total_spawns
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified gamedata spawn files in {} sec, {}/{} are valid",
+      duration.as_secs_f64(),
+      total_spawns - invalid_spawns,
+      total_spawns
+    );
 
     Ok(GamedataSpawnsVerificationResult {
       duration,
@@ -104,22 +98,21 @@ impl GamedataProject {
   ) -> Vec<Finding> {
     let file_path: String = path.as_ref().display().to_string();
 
-    if options.is_verbose_logging_enabled() {
-      println!("Verify spawn file: {}", file_path);
-    }
+    xray_output::verbose!(options.output, "Verify spawn file: {}", file_path);
 
     match SpawnFile::read_from_path::<XRayByteOrder, P>(path) {
       Ok(_) => {
-        if options.is_verbose_logging_enabled() {
-          println!("Verify spawn file: {}", file_path);
-        }
+        xray_output::verbose!(options.output, "Verify spawn file: {}", file_path);
 
         Vec::new()
       }
       Err(error) => {
-        if options.is_logging_enabled() {
-          eprintln!("Spawn file validation failed: {} -> {}", file_path, error);
-        }
+        xray_output::error!(
+          options.output,
+          "Spawn file validation failed: {} -> {}",
+          file_path,
+          error
+        );
 
         vec![GamedataFindingFactory::for_asset(
           GamedataVerificationRule::SpawnsRead,

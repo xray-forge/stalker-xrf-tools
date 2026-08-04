@@ -91,7 +91,7 @@ fn semantic_weather_project_files_with_system(
 
   let project: GamedataProject = GamedataProject::open(&GamedataProjectReadOptions {
     root: root.clone(),
-    is_silent: true,
+    output: xray_output::OutputOptions::default(),
     ..Default::default()
   })
   .unwrap();
@@ -151,7 +151,7 @@ fn weather_parse_failure_makes_the_check_fail() {
   );
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -175,7 +175,7 @@ fn out_of_range_weather_time_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -198,7 +198,7 @@ fn noncanonical_weather_time_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -216,7 +216,7 @@ fn weather_requires_at_least_two_time_sections() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -238,7 +238,7 @@ fn missing_ambient_reference_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -260,7 +260,7 @@ fn missing_sun_reference_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -285,7 +285,7 @@ fn missing_thunderbolt_collection_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -308,7 +308,7 @@ fn missing_small_sky_texture_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -331,7 +331,7 @@ fn missing_cloud_texture_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -353,7 +353,7 @@ fn missing_required_weather_field_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -384,7 +384,7 @@ fn malformed_weather_values_make_the_check_fail() {
 
     let result: GamedataWeathersVerificationResult = project
       .verify_weathers(&GamedataProjectVerifyOptions {
-        is_silent: true,
+        output: xray_output::OutputOptions::default(),
         ..Default::default()
       })
       .unwrap();
@@ -408,7 +408,7 @@ fn incorrect_weather_scheme_marker_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -430,7 +430,7 @@ fn negative_weather_distance_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -455,7 +455,7 @@ fn thunderbolt_collection_with_missing_member_makes_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -477,7 +477,7 @@ fn valid_weather_cycle_passes() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -504,7 +504,7 @@ fn primary_weather_definitions_survive_unreadable_legacy_system_fallback() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -539,7 +539,7 @@ fn missing_primary_names_resolve_from_legacy_system_fallback() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -583,7 +583,7 @@ fn unreadable_legacy_fallback_is_reported_once_when_missing_names_consult_it() {
   let is_valid: bool = verify_weather_with_definitions(
     &project,
     &GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     },
     &config_path,
@@ -624,7 +624,7 @@ fn weather_cycle_allows_disabled_sun_and_thunderbolts() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();
@@ -642,7 +642,7 @@ fn missing_weather_cycles_make_the_check_fail() {
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     })
     .unwrap();

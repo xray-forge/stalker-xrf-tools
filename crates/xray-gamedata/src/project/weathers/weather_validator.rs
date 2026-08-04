@@ -44,9 +44,7 @@ pub fn verify_weather_findings_with_definitions(
   let ltx: Ltx = match Ltx::read_from_file_full(config_path) {
     Ok(ltx) => ltx,
     Err(error) => {
-      if options.is_logging_enabled() {
-        eprintln!("Could not open weather LTX: {}", error);
-      }
+      xray_output::error!(options.output, "Could not open weather LTX: {}", error);
 
       return Ok(vec![GamedataFindingFactory::for_asset(
         GamedataVerificationRule::WeathersValidation,
@@ -240,9 +238,7 @@ fn report_weather_finding(
 ) -> Finding {
   let message: String = message.into();
 
-  if options.is_logging_enabled() {
-    eprintln!("{}: {}", message, config_path.display());
-  }
+  xray_output::error!(options.output, "{}: {}", message, config_path.display());
 
   GamedataFindingFactory::for_asset(
     GamedataVerificationRule::WeathersValidation,

@@ -13,9 +13,11 @@ impl GamedataProject {
   ) -> XRayResult<HashMap<String, AssetDescriptor>> {
     let root: &Path = &options.root;
 
-    if options.is_logging_enabled() {
-      println!("Reading project assets map in root: {}", root.display());
-    }
+    xray_output::info!(
+      options.output,
+      "Reading project assets map in root: {}",
+      root.display()
+    );
 
     let mut assets: HashMap<String, AssetDescriptor> = HashMap::new();
 
@@ -56,9 +58,11 @@ impl GamedataProject {
       )?;
     }
 
-    if options.is_logging_enabled() {
-      println!("Read project assets map: {} files", assets.len());
-    }
+    xray_output::info!(
+      options.output,
+      "Read project assets map: {} files",
+      assets.len()
+    );
 
     Ok(assets)
   }
@@ -286,7 +290,7 @@ mod tests {
     let assets: HashMap<String, AssetDescriptor> =
       GamedataProject::read_project_assets(&GamedataProjectReadOptions {
         root: root.clone(),
-        is_silent: true,
+        output: xray_output::OutputOptions::default(),
         ..Default::default()
       })?;
     let descriptor: &AssetDescriptor = assets

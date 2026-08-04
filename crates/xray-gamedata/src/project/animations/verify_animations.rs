@@ -1,7 +1,6 @@
 use crate::project::animations::player_hud_animations_verifier::PlayerHudAnimationsVerifier;
 use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
-use colored::Colorize;
 use std::time::Instant;
 use xray_error::XRayResult;
 
@@ -10,9 +9,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataAnimationsVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify animations:".green());
-    }
+    xray_output::heading!(options.output, "Verify animations:");
 
     let started_at: Instant = Instant::now();
 
@@ -24,13 +21,12 @@ impl GamedataProject {
       player_hud_animations,
     };
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata animations in {} sec, {}",
-        result.duration.as_secs_f64(),
-        result.failure_message()
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified gamedata animations in {} sec, {}",
+      result.duration.as_secs_f64(),
+      result.failure_message()
+    );
 
     Ok(result)
   }

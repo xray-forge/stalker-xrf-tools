@@ -25,9 +25,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
   }
 
   pub(crate) fn verify(&self) -> XRayResult<GamedataPlayerHudAnimationsVerificationResult> {
-    if self.options.is_verbose_logging_enabled() {
-      println!("Verify player hud animations");
-    }
+    xray_output::verbose!(self.options.output, "Verify player hud animations");
 
     let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
     let system_ltx_path: PathBuf = self.project.ltx_project.get_system_ltx_path();
@@ -38,9 +36,10 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
         continue;
       }
 
-      if self.options.is_verbose_logging_enabled() {
-        println!("Verify player hud config [{section_name}]");
-      }
+      xray_output::verbose!(
+        self.options.output,
+        "Verify player hud config [{section_name}]"
+      );
 
       result.checked_huds_count += 1;
 
@@ -48,9 +47,10 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
         .verify_player_hud_animation(section_name, section)
         .is_ok_and(|it| it)
       {
-        if self.options.is_logging_enabled() {
-          println!("Player hud config [{section_name}] is invalid");
-        }
+        xray_output::info!(
+          self.options.output,
+          "Player hud config [{section_name}] is invalid"
+        );
 
         result.findings.push(GamedataFindingFactory::for_asset(
           GamedataVerificationRule::AnimationsPlayerHud,
@@ -61,13 +61,12 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
       }
     }
 
-    if self.options.is_logging_enabled() {
-      println!(
-        "Verified gamedata huds, {}/{} valid",
-        result.checked_huds_count - result.invalid_huds_count,
-        result.checked_huds_count,
-      );
-    }
+    xray_output::info!(
+      self.options.output,
+      "Verified gamedata huds, {}/{} valid",
+      result.checked_huds_count - result.invalid_huds_count,
+      result.checked_huds_count,
+    );
 
     result
       .findings
@@ -84,35 +83,32 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
       .get("visual")
       .and_then(|it| self.project.get_ogf_path(it))
     {
-      if self.options.is_verbose_logging_enabled() {
-        println!(
-          "Read player hud motion refs - [{}] {}",
-          section_name,
-          visual_path.display()
-        );
-      }
+      xray_output::verbose!(
+        self.options.output,
+        "Read player hud motion refs - [{}] {}",
+        section_name,
+        visual_path.display()
+      );
 
       match self.read_motion_refs(visual_path) {
         Ok(linked_visuals) => {
-          if self.options.is_verbose_logging_enabled() {
-            println!(
-              "Player hud ogf [{} contains {} linked omf files to check",
-              visual_path.display(),
-              linked_visuals.len()
-            );
-          }
+          xray_output::verbose!(
+            self.options.output,
+            "Player hud ogf [{} contains {} linked omf files to check",
+            visual_path.display(),
+            linked_visuals.len()
+          );
 
           for linked_visual in &linked_visuals {
             match OmfFile::read_motions_from_path::<XRayByteOrder, &PathBuf>(linked_visual) {
               Ok(motions) => {
                 if motions.is_empty() {
-                  if self.options.is_logging_enabled() {
-                    eprintln!(
-                      "No motions in visual: [{}] - {}",
-                      section_name,
-                      linked_visual.display()
-                    );
-                  }
+                  xray_output::error!(
+                    self.options.output,
+                    "No motions in visual: [{}] - {}",
+                    section_name,
+                    linked_visual.display()
+                  );
 
                   is_valid = false;
                 }
@@ -122,14 +118,13 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
                 }
               }
               Err(error) => {
-                if self.options.is_logging_enabled() {
-                  eprintln!(
-                    "Failed to read linked visual: [{}] - {} - {}",
-                    section_name,
-                    linked_visual.display(),
-                    error
-                  );
-                }
+                xray_output::error!(
+                  self.options.output,
+                  "Failed to read linked visual: [{}] - {} - {}",
+                  section_name,
+                  linked_visual.display(),
+                  error
+                );
 
                 is_valid = false;
               }
@@ -137,43 +132,43 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
           }
         }
         Err(error) => {
-          if self.options.is_logging_enabled() {
-            eprintln!(
-              "Failed to read linked visuals: [{}] - {} - {}",
-              section_name,
-              visual_path.display(),
-              error
-            );
-          }
+          xray_output::error!(
+            self.options.output,
+            "Failed to read linked visuals: [{}] - {} - {}",
+            section_name,
+            visual_path.display(),
+            error
+          );
 
           is_valid = false;
         }
       }
     } else {
-      if self.options.is_logging_enabled() {
-        eprintln!(
-          "Not found hud visual: [{}] - {:?}",
-          section_name,
-          section.get("visual")
-        );
-      }
+      xray_output::error!(
+        self.options.output,
+        "Not found hud visual: [{}] - {:?}",
+        section_name,
+        section.get("visual")
+      );
 
       is_valid = false;
     }
 
     if hud_motions.is_empty() {
-      if self.options.is_logging_enabled() {
-        eprintln!("Hud [{section_name}] contains no animations");
-      }
+      xray_output::error!(
+        self.options.output,
+        "Hud [{section_name}] contains no animations"
+      );
 
       is_valid = false;
     } else if !self
       .verify_weapon_animations(section_name, &hud_motions)
       .is_ok_and(|it| it)
     {
-      if self.options.is_logging_enabled() {
-        eprintln!("Hud [{section_name}] failed weapons check");
-      }
+      xray_output::error!(
+        self.options.output,
+        "Hud [{section_name}] failed weapons check"
+      );
 
       is_valid = false;
     }
@@ -186,9 +181,10 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     section_name: &str,
     motions: &HashSet<String>,
   ) -> XRayResult<bool> {
-    if self.options.is_verbose_logging_enabled() {
-      println!("Verify weapons animations for [{section_name}]");
-    }
+    xray_output::verbose!(
+      self.options.output,
+      "Verify weapons animations for [{section_name}]"
+    );
 
     let mut is_valid: bool = true;
     let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
@@ -208,22 +204,25 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
             let weapon_motion_name: String = get_weapon_animation_name(field_value);
 
             if !motions.contains(&weapon_motion_name) {
-              if self.options.is_logging_enabled() {
-                eprintln!(
-                  "Hud [{section_name}] weapon [{weapon_section_name}] {field_name}={weapon_motion_name} -> animation motion is not found"
-                )
-              }
+              xray_output::error!(
+                self.options.output,
+                "Hud [{section_name}] weapon [{weapon_section_name}] {field_name}={weapon_motion_name} -> animation motion is not found"
+              );
 
               is_valid = false;
             }
           }
-        } else if self.options.is_verbose_logging_enabled() {
-          eprintln!(
+        } else {
+          xray_output::verbose!(
+            self.options.output,
             "Not able to check weapon hud section [{section_name}] -> [{weapon_section_name}] [{hud_section_name}]"
           );
         }
-      } else if self.options.is_verbose_logging_enabled() {
-        eprintln!("Not able to check weapon hud [{section_name}] -> [{weapon_section_name}] hud");
+      } else {
+        xray_output::verbose!(
+          self.options.output,
+          "Not able to check weapon hud [{section_name}] -> [{weapon_section_name}] hud"
+        );
       }
     }
 

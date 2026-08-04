@@ -3,7 +3,6 @@ use crate::asset::asset_type::AssetType;
 use crate::project::scripts::runtime_script::is_runtime_script;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use std::fs::File;
@@ -18,9 +17,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataScriptsVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify scripts:".green());
-    }
+    xray_output::heading!(options.output, "Verify scripts:");
 
     let started_at: Instant = Instant::now();
     let script_paths: Vec<String> = self
@@ -36,14 +33,10 @@ impl GamedataProject {
     let mut findings: Vec<Finding> = script_paths
       .par_iter()
       .filter_map(|relative_path| {
-        if options.is_verbose_logging_enabled() {
-          println!("Verify script: {relative_path}");
-        }
+        xray_output::verbose!(options.output, "Verify script: {relative_path}");
 
         let Some(path) = self.get_absolute_asset_path(relative_path) else {
-          if options.is_logging_enabled() {
-            println!("Script path not found: {relative_path}");
-          }
+          xray_output::info!(options.output, "Script path not found: {relative_path}");
 
           return Some(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::ScriptsPath,
@@ -55,9 +48,7 @@ impl GamedataProject {
         match self.verify_script(options, &path) {
           Ok(true) => None,
           Ok(false) => {
-            if options.is_logging_enabled() {
-              println!("Script is not valid: {}", path.display());
-            }
+            xray_output::info!(options.output, "Script is not valid: {}", path.display());
 
             Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ScriptsSyntax,
@@ -66,9 +57,7 @@ impl GamedataProject {
             ))
           }
           Err(error) => {
-            if options.is_logging_enabled() {
-              eprintln!("Script verification failed: {error}");
-            }
+            xray_output::error!(options.output, "Script verification failed: {error}");
 
             Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ScriptsRead,
@@ -87,20 +76,20 @@ impl GamedataProject {
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
-    if options.is_logging_enabled() {
-      if checked_scripts_count > 0 {
-        println!(
-          "Verified gamedata scripts in {} sec, {}/{} valid",
-          duration.as_secs_f64(),
-          checked_scripts_count - invalid_scripts_count,
-          checked_scripts_count
-        );
-      } else {
-        println!(
-          "Check gamedata scripts in {} sec, no scripts found",
-          duration.as_secs_f64(),
-        );
-      }
+    if checked_scripts_count > 0 {
+      xray_output::info!(
+        options.output,
+        "Verified gamedata scripts in {} sec, {}/{} valid",
+        duration.as_secs_f64(),
+        checked_scripts_count - invalid_scripts_count,
+        checked_scripts_count
+      );
+    } else {
+      xray_output::info!(
+        options.output,
+        "Check gamedata scripts in {} sec, no scripts found",
+        duration.as_secs_f64(),
+      );
     }
 
     Ok(GamedataScriptsVerificationResult {

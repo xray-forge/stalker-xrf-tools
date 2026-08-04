@@ -3,7 +3,6 @@ use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
 use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use regex::Regex;
 use std::path::Path;
 use std::time::{Duration, Instant};
@@ -16,9 +15,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataWeaponVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify weapons:".green());
-    }
+    xray_output::heading!(options.output, "Verify weapons:");
 
     let started_at: Instant = Instant::now();
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
@@ -38,9 +35,7 @@ impl GamedataProject {
       match self.verify_ltx_weapon(options, &system_ltx, section_name, section) {
         Ok(is_valid) => {
           if !is_valid {
-            if options.is_logging_enabled() {
-              eprintln!("Invalid weapon section: [{section_name}]");
-            }
+            xray_output::error!(options.output, "Invalid weapon section: [{section_name}]");
 
             findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::WeaponsValidation,
@@ -51,9 +46,10 @@ impl GamedataProject {
           }
         }
         Err(error) => {
-          if options.is_logging_enabled() {
-            eprintln!("Invalid weapon section: [{section_name}], failure: {error:?}");
-          }
+          xray_output::error!(
+            options.output,
+            "Invalid weapon section: [{section_name}], failure: {error:?}"
+          );
 
           findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeaponsValidation,
@@ -69,14 +65,13 @@ impl GamedataProject {
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata weapons in {} sec, {}/{} valid",
-        duration.as_secs_f64(),
-        checked_weapons_count - invalid_weapons_count,
-        checked_weapons_count
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified gamedata weapons in {} sec, {}/{} valid",
+      duration.as_secs_f64(),
+      checked_weapons_count - invalid_weapons_count,
+      checked_weapons_count
+    );
 
     Ok(GamedataWeaponVerificationResult {
       duration,
@@ -93,9 +88,7 @@ impl GamedataProject {
     section_name: &str,
     section: &Section,
   ) -> XRayResult<bool> {
-    if options.is_verbose_logging_enabled() {
-      println!("Verify weapon ltx config [{section_name}]");
-    }
+    xray_output::verbose!(options.output, "Verify weapon ltx config [{section_name}]");
 
     let mut is_weapon_valid: bool = true;
 
@@ -130,25 +123,23 @@ impl GamedataProject {
 
     if let Some(visual) = &section.get("visual").and_then(|it| self.get_ogf_path(it)) {
       if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, _>(visual) {
-        if options.is_logging_enabled() {
-          eprintln!(
-            "Failed to read weapon visual: [{}] - {:?} - {}",
-            section_name,
-            section.get("visual"),
-            error
-          );
-        }
+        xray_output::error!(
+          options.output,
+          "Failed to read weapon visual: [{}] - {:?} - {}",
+          section_name,
+          section.get("visual"),
+          error
+        );
 
         is_valid = false;
       }
     } else {
-      if options.is_logging_enabled() {
-        eprintln!(
-          "Not found weapon visual: [{}] - {:?}",
-          section_name,
-          section.get("visual")
-        );
-      }
+      xray_output::error!(
+        options.output,
+        "Not found weapon visual: [{}] - {:?}",
+        section_name,
+        section.get("visual")
+      );
 
       is_valid = false;
     }
@@ -156,13 +147,12 @@ impl GamedataProject {
     let hud_section: &Section = match section.get("hud").and_then(|it| ltx.section(it)) {
       Some(it) => it,
       None => {
-        if options.is_logging_enabled() {
-          eprintln!(
-            "Not found hud section: [{}] - {:?}",
-            section_name,
-            section.get("hud")
-          );
-        }
+        xray_output::error!(
+          options.output,
+          "Not found hud section: [{}] - {:?}",
+          section_name,
+          section.get("hud")
+        );
 
         return Ok(false);
       }
@@ -182,26 +172,24 @@ impl GamedataProject {
                 match OmfFile::read_motions_from_path::<XRayByteOrder, &Path>(&motion_file_path) {
                   Ok(motions) => ref_animations.extend(motions),
                   Err(error) => {
-                    if options.is_logging_enabled() {
-                      eprintln!(
-                        "Error reading OMF motions for weapon hud: [{}] : {} - {}",
-                        section_name,
-                        visual_path.display(),
-                        error
-                      );
-                    }
+                    xray_output::error!(
+                      options.output,
+                      "Error reading OMF motions for weapon hud: [{}] : {} - {}",
+                      section_name,
+                      visual_path.display(),
+                      error
+                    );
 
                     is_valid = false;
                   }
                 }
               } else {
-                if options.is_logging_enabled() {
-                  eprintln!(
-                    "Error reading OMF motions for weapon hud: [{}] : {}, no asset found",
-                    section_name,
-                    visual_path.display()
-                  );
-                }
+                xray_output::error!(
+                  options.output,
+                  "Error reading OMF motions for weapon hud: [{}] : {}, no asset found",
+                  section_name,
+                  visual_path.display()
+                );
 
                 is_valid = false;
               }
@@ -219,34 +207,33 @@ impl GamedataProject {
               }
             }
           } else {
-            if options.is_logging_enabled() {
-              eprintln!(
-                "Missing motion refs for weapon hud: [{}] : {}",
-                section_name,
-                visual_path.display()
-              );
-            }
+            xray_output::error!(
+              options.output,
+              "Missing motion refs for weapon hud: [{}] : {}",
+              section_name,
+              visual_path.display()
+            );
 
             is_valid = false;
           }
         }
         Err(error) => {
-          if options.is_logging_enabled() {
-            eprintln!(
-              "Failed to read weapon hud visual: [{}] - {:?} - {}",
-              section_name,
-              section.get("visual"),
-              error
-            );
-          }
+          xray_output::error!(
+            options.output,
+            "Failed to read weapon hud visual: [{}] - {:?} - {}",
+            section_name,
+            section.get("visual"),
+            error
+          );
 
           is_valid = false;
         }
       }
     } else {
-      if options.is_logging_enabled() {
-        eprintln!("Not found hud visual definition: [{section_name}]");
-      }
+      xray_output::error!(
+        options.output,
+        "Not found hud visual definition: [{section_name}]"
+      );
 
       is_valid = false;
     }
@@ -271,9 +258,10 @@ impl GamedataProject {
       "snd_shoot",
     ] {
       if !section.contains_key(sound_section) {
-        if options.is_logging_enabled() {
-          eprintln!("Missing section required weapon sound: [{section_name}] : {sound_section}");
-        }
+        xray_output::error!(
+          options.output,
+          "Missing section required weapon sound: [{section_name}] : {sound_section}"
+        );
 
         are_sounds_valid = false;
       }
@@ -342,8 +330,11 @@ impl GamedataProject {
       }
     }
 
-    if is_valid && options.is_verbose_logging_enabled() {
-      eprintln!("Sound layers section verified: [{section_name}]");
+    if is_valid {
+      xray_output::verbose!(
+        options.output,
+        "Sound layers section verified: [{section_name}]"
+      );
     }
 
     Ok(is_valid)
@@ -364,11 +355,10 @@ impl GamedataProject {
     {
       is_valid = false;
 
-      if options.is_logging_enabled() {
-        eprintln!(
-          "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value}"
-        );
-      }
+      xray_output::error!(
+        options.output,
+        "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value}"
+      );
     }
 
     Ok(is_valid)
@@ -394,20 +384,18 @@ impl GamedataProject {
     // todo: Check OGG file, check existing.
     if let Some(sound_path) = self.get_prefixed_absolute_asset_path("sounds", &sound_object_value) {
       if sound_path.is_file() && sound_path.exists() {
-        if options.is_verbose_logging_enabled() {
-          eprintln!(
-            "Sound verified in section: [{section_name}] : {field_name} -> {sound_object_value}"
-          );
-        }
+        xray_output::verbose!(
+          options.output,
+          "Sound verified in section: [{section_name}] : {field_name} -> {sound_object_value}"
+        );
       } else {
         is_valid = false
       }
     } else {
-      if options.is_logging_enabled() {
-        eprintln!(
-          "Sound not found in section: [{section_name}] : {field_name} -> {sound_object_value}"
-        );
-      }
+      xray_output::error!(
+        options.output,
+        "Sound not found in section: [{section_name}] : {field_name} -> {sound_object_value}"
+      );
 
       is_valid = false;
     }

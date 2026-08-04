@@ -1,13 +1,15 @@
 use super::verification_report::GamedataVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use colored::Colorize;
 use std::path::PathBuf;
 use std::process;
+use std::sync::Arc;
 use xray_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
   GamedataVerificationResult, GamedataVerificationStatus, GamedataVerificationType,
 };
+use xray_output::{OutputOptions, OutputVerbosity};
 
 #[derive(Default)]
 pub struct VerifyGamedataCommand;
@@ -110,33 +112,36 @@ impl GenericCommand for VerifyGamedataCommand {
       .map(|it| it.cloned().collect::<Vec<_>>())
       .unwrap_or_else(GamedataVerificationType::get_all);
 
-    let is_silent: bool = matches.get_flag("silent");
-    let is_verbose: bool = matches.get_flag("verbose");
+    let output_verbosity: OutputVerbosity =
+      match (matches.get_flag("silent"), matches.get_flag("verbose")) {
+        (true, _) => OutputVerbosity::Silent,
+        (false, true) => OutputVerbosity::Verbose,
+        (false, false) => OutputVerbosity::Normal,
+      };
+
+    let output: OutputOptions = OutputOptions::new(Arc::new(TerminalOutput), output_verbosity);
     let is_strict: bool = matches.get_flag("strict");
 
     let open_options: GamedataProjectReadOptions = GamedataProjectReadOptions {
       root: root.clone(),
       ignored,
-      is_verbose,
-      is_silent,
+      output: output.clone(),
       is_strict,
     };
 
     let verify_options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
-      is_verbose,
-      is_silent,
+      output,
       is_strict,
       checks,
     };
 
-    if open_options.is_logging_enabled() {
-      println!("{}", "Opening gamedata project".green());
-      println!(
-        "Root: {}, ignored: [{}]",
-        open_options.root.display(),
-        open_options.ignored.join(", "),
-      );
-    }
+    xray_output::heading!(open_options.output, "Opening gamedata project");
+    xray_output::info!(
+      open_options.output,
+      "Root: {}, ignored: [{}]",
+      open_options.root.display(),
+      open_options.ignored.join(", "),
+    );
 
     let project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
     let verify_result: GamedataVerificationResult = project.verify(&verify_options)?;
@@ -146,59 +151,69 @@ impl GenericCommand for VerifyGamedataCommand {
       GamedataVerificationReportWriter::new(&root, &verify_result).write(&report_path)?;
     }
 
-    if verify_options.is_logging_enabled() {
-      match status {
-        GamedataVerificationStatus::Passed => {
-          println!();
-          println!("{}", "Project gamedata is valid".green());
-          println!(
-            "Gamedata project verified in {} sec",
-            verify_result.duration().as_secs_f64()
-          );
-        }
-        GamedataVerificationStatus::Failed
-        | GamedataVerificationStatus::Error
-        | GamedataVerificationStatus::Incomplete
-        | GamedataVerificationStatus::Skipped => {
-          eprintln!();
+    match status {
+      GamedataVerificationStatus::Passed => {
+        xray_output::info!(verify_options.output, "");
+        xray_output::success!(verify_options.output, "Project gamedata is valid");
+        xray_output::info!(
+          verify_options.output,
+          "Gamedata project verified in {} sec",
+          verify_result.duration().as_secs_f64()
+        );
+      }
+      GamedataVerificationStatus::Failed
+      | GamedataVerificationStatus::Error
+      | GamedataVerificationStatus::Incomplete
+      | GamedataVerificationStatus::Skipped => {
+        xray_output::error!(verify_options.output, "");
 
-          let status_message = match status {
-            GamedataVerificationStatus::Failed => "Project gamedata is invalid".red(),
-            GamedataVerificationStatus::Error => "Project gamedata verification has errors".red(),
-            GamedataVerificationStatus::Incomplete => {
-              "Project gamedata verification is incomplete".yellow()
-            }
-            GamedataVerificationStatus::Skipped => {
-              "Project gamedata verification was skipped".yellow()
-            }
-            GamedataVerificationStatus::Passed => unreachable!(),
-          };
+        let status_message = match status {
+          GamedataVerificationStatus::Failed => "Project gamedata is invalid",
+          GamedataVerificationStatus::Error => "Project gamedata verification has errors",
+          GamedataVerificationStatus::Incomplete => "Project gamedata verification is incomplete",
+          GamedataVerificationStatus::Skipped => "Project gamedata verification was skipped",
+          GamedataVerificationStatus::Passed => unreachable!(),
+        };
 
-          eprintln!("{status_message}");
-
-          for message in verify_result.get_failure_messages() {
-            eprintln!("- {message}");
+        match status {
+          GamedataVerificationStatus::Failed | GamedataVerificationStatus::Error => {
+            verify_options.output.failure(status_message);
           }
+          GamedataVerificationStatus::Incomplete | GamedataVerificationStatus::Skipped => {
+            verify_options.output.warning(status_message);
+          }
+          GamedataVerificationStatus::Passed => unreachable!(),
+        }
 
-          for report in verify_result.get_failure_reports() {
-            for finding in report.findings() {
-              match finding.subject() {
-                Some(subject) => eprintln!(
-                  "  - [{}] {}: {}",
-                  report.verification_type(),
-                  subject,
-                  finding.message()
-                ),
-                None => eprintln!("  - [{}] {}", report.verification_type(), finding.message()),
-              }
+        for message in verify_result.get_failure_messages() {
+          xray_output::error!(verify_options.output, "- {message}");
+        }
+
+        for report in verify_result.get_failure_reports() {
+          for finding in report.findings() {
+            match finding.subject() {
+              Some(subject) => xray_output::error!(
+                verify_options.output,
+                "  - [{}] {}: {}",
+                report.verification_type(),
+                subject,
+                finding.message()
+              ),
+              None => xray_output::error!(
+                verify_options.output,
+                "  - [{}] {}",
+                report.verification_type(),
+                finding.message()
+              ),
             }
           }
-
-          eprintln!(
-            "Gamedata project checked in {} sec",
-            verify_result.duration().as_secs_f64()
-          );
         }
+
+        xray_output::error!(
+          verify_options.output,
+          "Gamedata project checked in {} sec",
+          verify_result.duration().as_secs_f32()
+        );
       }
     }
 

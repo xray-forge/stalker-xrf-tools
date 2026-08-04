@@ -2,7 +2,6 @@ use crate::GamedataFindingFactory;
 use crate::asset::asset_type::AssetType;
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
 use std::fs::File;
@@ -15,9 +14,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataTexturesVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify textures:".green());
-    }
+    xray_output::heading!(options.output, "Verify textures:");
 
     let started_at: Instant = Instant::now();
     let texture_paths: Vec<String> = self.get_all_asset_paths_by_type(AssetType::Dds);
@@ -28,14 +25,10 @@ impl GamedataProject {
     let mut findings: Vec<Finding> = texture_paths
       .par_iter()
       .filter_map(|relative_path| {
-        if options.is_verbose_logging_enabled() {
-          println!("Verify texture: {relative_path}");
-        }
+        xray_output::verbose!(options.output, "Verify texture: {relative_path}");
 
         let Some(path) = self.get_absolute_asset_path(relative_path) else {
-          if options.is_logging_enabled() {
-            println!("Texture path not found: {relative_path}");
-          }
+          xray_output::info!(options.output, "Texture path not found: {relative_path}");
 
           return Some(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::TexturesPath,
@@ -47,9 +40,7 @@ impl GamedataProject {
         match self.verify_texture_by_path(options, &path) {
           Ok(true) => None,
           Ok(false) => {
-            if options.is_logging_enabled() {
-              println!("Texture is not valid: {}", path.display());
-            }
+            xray_output::info!(options.output, "Texture is not valid: {}", path.display());
 
             Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::TexturesValidation,
@@ -58,13 +49,12 @@ impl GamedataProject {
             ))
           }
           Err(error) => {
-            if options.is_logging_enabled() {
-              println!(
-                "Texture verification failed: {} - {}",
-                path.display(),
-                error
-              );
-            }
+            xray_output::info!(
+              options.output,
+              "Texture verification failed: {} - {}",
+              path.display(),
+              error
+            );
 
             Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::TexturesRead,
@@ -83,14 +73,13 @@ impl GamedataProject {
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata textures in {} sec, {}/{} valid",
-        duration.as_secs_f64(),
-        checked_textures_count - invalid_textures_count,
-        checked_textures_count
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified gamedata textures in {} sec, {}/{} valid",
+      duration.as_secs_f64(),
+      checked_textures_count - invalid_textures_count,
+      checked_textures_count
+    );
 
     Ok(GamedataTexturesVerificationResult {
       duration,

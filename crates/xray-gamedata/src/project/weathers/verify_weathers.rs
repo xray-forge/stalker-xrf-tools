@@ -5,7 +5,6 @@ use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_findings_with_definitions;
 use crate::GamedataFindingFactory;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -20,9 +19,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataWeathersVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify weathers:".green());
-    }
+    xray_output::heading!(options.output, "Verify weathers:");
 
     let started_at: Instant = Instant::now();
 
@@ -77,24 +74,24 @@ impl GamedataProject {
 
     let duration = started_at.elapsed();
 
-    if options.is_logging_enabled() {
-      for error in definition_load_errors {
-        eprintln!("{error}");
-      }
+    for error in definition_load_errors {
+      options.output.error(error);
+    }
 
-      if checked_weather_files_count == 0 {
-        println!(
-          "Checked gamedata weather files in {} sec, no weather files found",
-          duration.as_secs_f64()
-        );
-      } else {
-        println!(
-          "Verified gamedata weather files in {} sec, {}/{} valid",
-          duration.as_secs_f64(),
-          checked_weather_files_count - invalid_weather_files_count,
-          checked_weather_files_count
-        );
-      }
+    if checked_weather_files_count == 0 {
+      xray_output::info!(
+        options.output,
+        "Checked gamedata weather files in {} sec, no weather files found",
+        duration.as_secs_f64()
+      );
+    } else {
+      xray_output::info!(
+        options.output,
+        "Verified gamedata weather files in {} sec, {}/{} valid",
+        duration.as_secs_f64(),
+        checked_weather_files_count - invalid_weather_files_count,
+        checked_weather_files_count
+      );
     }
 
     Ok(GamedataWeathersVerificationResult {

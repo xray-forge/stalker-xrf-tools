@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-colored = "3.0.0"
 derive_more = { version = "1.0.0", features = ["display"] }
 ddsfile = "0.5.2"
 log = "0.4.28"
@@ -15,6 +14,7 @@ xray-db = { path = "../xray-db" }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
 xray-lua = { path = "../xray-lua" }
+xray-output = { path = "../xray-output" }
 xray-report = { path = "../xray-report" }
 xray-shaders = { path = "../xray-shaders" }
 xray-sound = { path = "../xray-sound" }

@@ -18,20 +18,23 @@ impl GamedataProject {
       ));
     }
 
-    if options.is_logging_enabled() {
-      println!("Verifying gamedata project: {}", self.root.display());
+    xray_output::info!(
+      options.output,
+      "Verifying gamedata project: {}",
+      self.root.display()
+    );
 
-      println!(
-        "Verifying modules: \n  -{}",
-        checks
-          .iter()
-          .map(ToString::to_string)
-          .collect::<Vec<_>>()
-          .join("\n  -")
-      );
+    xray_output::info!(
+      options.output,
+      "Verifying modules: \n  -{}",
+      checks
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join("\n  -")
+    );
 
-      println!();
-    }
+    xray_output::info!(options.output, "");
 
     let started_at: Instant = Instant::now();
     let mut result: GamedataVerificationReport = GamedataVerificationReport::default();
@@ -77,7 +80,7 @@ mod tests {
         GamedataVerificationType::Levels,
         GamedataVerificationType::Levels,
       ],
-      is_silent: true,
+      output: xray_output::OutputOptions::default(),
       ..Default::default()
     };
 

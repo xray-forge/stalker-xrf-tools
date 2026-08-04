@@ -3,7 +3,6 @@ use crate::project::sounds::sound_files_verifier::SoundFilesVerifier;
 use crate::project::sounds::sound_references_verifier::SoundReferencesVerifier;
 use crate::project::sounds::sounds_verification_result::GamedataSoundsVerificationResult;
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
-use colored::Colorize;
 use std::time::Instant;
 use xray_error::XRayResult;
 
@@ -21,9 +20,7 @@ impl<'a> SoundsVerifier<'a> {
   }
 
   pub(crate) fn verify(&self) -> XRayResult<GamedataSoundsVerificationResult> {
-    if self.options.is_logging_enabled() {
-      println!("{}", "Verify sounds:".green());
-    }
+    xray_output::heading!(self.options.output, "Verify sounds:");
 
     let started_at: Instant = Instant::now();
 
@@ -35,13 +32,12 @@ impl<'a> SoundsVerifier<'a> {
     let result: GamedataSoundsVerificationResult =
       GamedataSoundsVerificationResult::new(started_at.elapsed(), sound_files, sound_references);
 
-    if self.options.is_logging_enabled() {
-      println!(
-        "Verified gamedata sounds in {} sec, {}",
-        result.duration.as_secs_f64(),
-        result.failure_message()
-      );
-    }
+    xray_output::info!(
+      self.options.output,
+      "Verified gamedata sounds in {} sec, {}",
+      result.duration.as_secs_f64(),
+      result.failure_message()
+    );
 
     Ok(result)
   }

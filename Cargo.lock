@@ -7091,7 +7091,6 @@ dependencies = [
 name = "xray-gamedata"
 version = "0.1.0"
 dependencies = [
- "colored",
  "ddsfile",
  "derive_more 1.0.0",
  "log",
@@ -7102,6 +7101,7 @@ dependencies = [
  "xray-error",
  "xray-ltx",
  "xray-lua",
+ "xray-output",
  "xray-report",
  "xray-shaders",
  "xray-sound",
@@ -7128,6 +7128,10 @@ dependencies = [
  "full_moon",
  "xray-error",
 ]
+
+[[package]]
+name = "xray-output"
+version = "0.1.0"
 
 [[package]]
 name = "xray-report"
@@ -7255,6 +7259,7 @@ dependencies = [
  "xray-export",
  "xray-gamedata",
  "xray-ltx",
+ "xray-output",
  "xray-report",
  "xray-texture",
  "xray-translation",

@@ -13,6 +13,7 @@ members = [
     "crates/xray-gamedata",
     "crates/xray-ltx",
     "crates/xray-lua",
+    "crates/xray-output",
     "crates/xray-report",
     "crates/xray-shaders",
     "crates/xray-sound",

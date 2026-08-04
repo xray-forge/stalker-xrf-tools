@@ -2,7 +2,6 @@ use crate::GamedataFindingFactory;
 use crate::asset::asset_type::AssetType;
 use crate::project::particles::verify_particles_usage_result::GamedataParticlesUsageVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use colored::Colorize;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -21,9 +20,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataParticlesUsageVerificationResult> {
-    if options.is_logging_enabled() {
-      println!("{}", "Verify particles usage:".green());
-    }
+    xray_output::heading!(options.output, "Verify particles usage:");
 
     let started_at: Instant = Instant::now();
     let particle_names: HashSet<String> = self.read_particle_names()?;
@@ -39,17 +36,16 @@ impl GamedataProject {
       .sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
     result.duration = started_at.elapsed();
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified gamedata particles usage in {} sec, {}/{} valid references, {}/{} spawn files inspected, {} unparsed custom data sections",
-        result.duration.as_secs_f64(),
-        result.checked_references_count - result.invalid_references_count,
-        result.checked_references_count,
-        result.checked_spawn_files_count - result.unreadable_spawn_files_count,
-        result.checked_spawn_files_count,
-        result.unparsed_custom_data_count
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified gamedata particles usage in {} sec, {}/{} valid references, {}/{} spawn files inspected, {} unparsed custom data sections",
+      result.duration.as_secs_f64(),
+      result.checked_references_count - result.invalid_references_count,
+      result.checked_references_count,
+      result.checked_spawn_files_count - result.unreadable_spawn_files_count,
+      result.checked_spawn_files_count,
+      result.unparsed_custom_data_count
+    );
 
     Ok(result)
   }
@@ -90,13 +86,12 @@ impl GamedataProject {
         }
         Err(error) => {
           // Malformed ltx files are reported by the generic ltx check, not this one.
-          if options.is_verbose_logging_enabled() {
-            eprintln!(
-              "Skipping ltx entry in particles usage check: {} - {}",
-              path.display(),
-              error
-            );
-          }
+          xray_output::verbose!(
+            options.output,
+            "Skipping ltx entry in particles usage check: {} - {}",
+            path.display(),
+            error
+          );
         }
       }
     }
@@ -121,9 +116,10 @@ impl GamedataProject {
       result.checked_spawn_files_count += 1;
 
       let Some(spawn_path) = self.get_absolute_asset_path(relative_path) else {
-        if options.is_logging_enabled() {
-          eprintln!("Spawn path not found for particle usage check: {relative_path}");
-        }
+        xray_output::error!(
+          options.output,
+          "Spawn path not found for particle usage check: {relative_path}"
+        );
 
         result.findings.push(GamedataFindingFactory::for_asset(
           GamedataVerificationRule::ParticlesUsageSpawn,
@@ -138,13 +134,12 @@ impl GamedataProject {
         match SpawnFile::read_from_path::<XRayByteOrder, PathBuf>(&spawn_path) {
           Ok(spawn_file) => spawn_file,
           Err(error) => {
-            if options.is_logging_enabled() {
-              eprintln!(
-                "Could not inspect spawn file for particle usage: {} - {}",
-                spawn_path.display(),
-                error
-              );
-            }
+            xray_output::error!(
+              options.output,
+              "Could not inspect spawn file for particle usage: {} - {}",
+              spawn_path.display(),
+              error
+            );
 
             result.findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesUsageSpawn,
@@ -170,13 +165,12 @@ impl GamedataProject {
             self.verify_particles_usage_in_ltx(options, particle_names, &ltx, &spawn_path, result);
           }
           Err(error) => {
-            if options.is_logging_enabled() {
-              eprintln!(
-                "Could not parse spawn custom data for particle usage: {} - {}",
-                spawn_path.display(),
-                error
-              );
-            }
+            xray_output::error!(
+              options.output,
+              "Could not parse spawn custom data for particle usage: {} - {}",
+              spawn_path.display(),
+              error
+            );
 
             result.findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesUsageSpawnCustomData,
@@ -214,12 +208,11 @@ impl GamedataProject {
           result.checked_references_count += 1;
 
           if !particle_names.contains(&Self::normalize_particle_name(reference)) {
-            if options.is_logging_enabled() {
-              eprintln!(
-                "Unknown particle reference: [{section_name}] {key} = {reference} ({})",
-                path.display()
-              );
-            }
+            xray_output::error!(
+              options.output,
+              "Unknown particle reference: [{section_name}] {key} = {reference} ({})",
+              path.display()
+            );
 
             result.findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesUsageReference,

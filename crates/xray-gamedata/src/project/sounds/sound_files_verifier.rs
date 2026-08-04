@@ -33,9 +33,7 @@ impl<'a> SoundFilesVerifier<'a> {
       .sound_paths
       .par_iter()
       .filter_map(|relative_path| {
-        if self.options.is_verbose_logging_enabled() {
-          println!("Verify sound: {relative_path}");
-        }
+        xray_output::verbose!(self.options.output, "Verify sound: {relative_path}");
 
         let Some(path) = self.project.get_absolute_asset_path(relative_path) else {
           return Some(GamedataFindingFactory::for_asset(
@@ -52,9 +50,11 @@ impl<'a> SoundFilesVerifier<'a> {
         };
 
         sound.err().map(|error| {
-          if self.options.is_logging_enabled() {
-            eprintln!("Sound is not valid: {} - {error}", path.display());
-          }
+          xray_output::error!(
+            self.options.output,
+            "Sound is not valid: {} - {error}",
+            path.display()
+          );
 
           GamedataFindingFactory::for_asset(
             GamedataVerificationRule::SoundsFiles,
