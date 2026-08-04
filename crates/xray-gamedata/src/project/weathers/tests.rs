@@ -13,6 +13,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 
+/// Contents of a `system.ltx` that cannot be parsed, used to exercise legacy fallback failures.
+const UNREADABLE_SYSTEM_LTX: &str = "[legacy_duplicate]\n\n[legacy_duplicate]\n";
+
 fn semantic_weather_project(weather: &str) -> (PathBuf, GamedataProject) {
   semantic_weather_project_files(&[("test.ltx", weather)], None)
 }
@@ -496,7 +499,7 @@ fn primary_weather_definitions_survive_unreadable_legacy_system_fallback() {
   let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files_with_system(
     &[("test.ltx", &weather)],
     None,
-    "#include \"items\\*.ltx\"\n",
+    UNREADABLE_SYSTEM_LTX,
   );
 
   let result: GamedataWeathersVerificationResult = project
@@ -566,7 +569,7 @@ fn unreadable_legacy_fallback_is_reported_once_when_missing_names_consult_it() {
   let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files_with_system(
     &[("test.ltx", &weather)],
     None,
-    "#include \"items\\*.ltx\"\n",
+    UNREADABLE_SYSTEM_LTX,
   );
   let definitions: WeatherDefinitions = WeatherDefinitions::read(&project.ltx_project.root);
   let config_path: PathBuf = project
