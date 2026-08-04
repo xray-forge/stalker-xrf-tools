@@ -93,7 +93,7 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
     assert_eq!(
       report.checks()[0].summary(),
       "0/0 sounds valid; 0/1 sound references valid"

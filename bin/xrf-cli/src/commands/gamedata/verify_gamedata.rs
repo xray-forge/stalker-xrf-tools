@@ -182,11 +182,11 @@ impl GenericCommand for VerifyGamedataCommand {
 
           for report in verify_result.get_failure_reports() {
             for finding in report.findings() {
-              match finding.asset_path() {
-                Some(asset_path) => eprintln!(
+              match finding.subject() {
+                Some(subject) => eprintln!(
                   "  - [{}] {}: {}",
                   report.verification_type(),
-                  asset_path.display(),
+                  subject,
                   finding.message()
                 ),
                 None => eprintln!("  - [{}] {}", report.verification_type(), finding.message()),

@@ -6,7 +6,7 @@ use std::cmp::Ordering;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use xray_error::XRayResult;
-use xray_report::{CheckId, CheckReport, Finding, IdentifierError, Report, RuleId};
+use xray_report::{CheckId, CheckReport, Finding, Report, RuleId};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationFinding {
@@ -71,9 +71,7 @@ impl GamedataVerificationFinding {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationCheckReport {
-  duration: Option<Duration>,
-  findings: Vec<GamedataVerificationFinding>,
-  status: GamedataVerificationStatus,
+  report: CheckReport,
   summary: String,
   verification_type: GamedataVerificationType,
 }
@@ -127,7 +125,7 @@ impl GamedataVerificationReport {
   }
 
   pub fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::aggregate(self.checks.iter().map(|it| it.status))
+    GamedataVerificationStatus::aggregate(self.checks.iter().map(|it| it.status()))
   }
 
   pub fn is_valid(&self) -> bool {
@@ -144,7 +142,7 @@ impl GamedataVerificationReport {
   pub fn get_failure_reports(&self) -> impl Iterator<Item = &GamedataVerificationCheckReport> {
     self.checks.iter().filter(|it| {
       !matches!(
-        it.status,
+        it.status(),
         GamedataVerificationStatus::Passed | GamedataVerificationStatus::Skipped
       )
     })
@@ -153,29 +151,29 @@ impl GamedataVerificationReport {
   /// Converts this gamedata-specific report into the shared command report model.
   ///
   /// Gamedata retains its check counters and human summaries; the returned report
-  /// owns the normalized, deterministic data consumed by renderers.
-  pub fn to_report(&self, root: &Path) -> Result<Report, IdentifierError> {
-    let checks: Result<Vec<CheckReport>, IdentifierError> = self
+  /// finalizes the shared check data consumed by renderers.
+  pub fn to_report(&self) -> Report {
+    let checks: Vec<CheckReport> = self
       .checks
       .iter()
-      .map(|check| check.to_report(root))
+      .map(|check| check.report.clone())
       .collect();
 
-    Ok(Report::new(checks?))
+    Report::new(checks)
   }
 }
 
 impl GamedataVerificationCheckReport {
   pub fn duration(&self) -> Option<Duration> {
-    self.duration
+    self.report.duration()
   }
 
-  pub fn findings(&self) -> &[GamedataVerificationFinding] {
-    &self.findings
+  pub fn findings(&self) -> &[Finding] {
+    self.report.findings()
   }
 
   pub const fn status(&self) -> GamedataVerificationStatus {
-    self.status
+    self.report.status()
   }
 
   pub fn summary(&self) -> &str {
@@ -195,56 +193,55 @@ impl GamedataVerificationCheckReport {
   {
     match result {
       Ok(result) => Self {
-        duration: result.duration(),
-        findings: result.findings().to_vec(),
-        status: result.status(),
+        report: CheckReport::new(
+          Self::check_id(verification_type),
+          result.status(),
+          result.duration(),
+          result
+            .findings()
+            .iter()
+            .cloned()
+            .map(GamedataVerificationFinding::into_report)
+            .collect(),
+        ),
         summary: result.failure_message(),
         verification_type,
       },
       Err(error) => Self {
-        duration: None,
-        findings: vec![GamedataVerificationFinding::without_asset(
-          GamedataVerificationRule::CheckExecution,
-          error.to_string(),
-        )],
-        status: GamedataVerificationStatus::Error,
+        report: CheckReport::new(
+          Self::check_id(verification_type),
+          GamedataVerificationStatus::Error,
+          None,
+          vec![
+            GamedataVerificationFinding::without_asset(
+              GamedataVerificationRule::CheckExecution,
+              error.to_string(),
+            )
+            .into_report(),
+          ],
+        ),
         summary: format!("Check failed ({verification_type}): {error}"),
         verification_type,
       },
     }
   }
 
-  fn to_report(&self, root: &Path) -> Result<CheckReport, IdentifierError> {
-    let findings: Result<Vec<Finding>, IdentifierError> = self
-      .findings
-      .iter()
-      .map(|finding| finding.to_report(root))
-      .collect();
-
-    Ok(CheckReport::new(
-      CheckId::new(self.verification_type.to_string())?,
-      self.status,
-      self.duration,
-      findings?,
-    ))
+  fn check_id(verification_type: GamedataVerificationType) -> CheckId {
+    CheckId::new(verification_type.to_string())
+      .expect("Gamedata verification types have non-empty stable identifiers")
   }
 }
 
 impl GamedataVerificationFinding {
-  fn to_report(&self, root: &Path) -> Result<Finding, IdentifierError> {
-    let subject: Option<String> = self.asset_path().map(|asset_path| {
-      asset_path
-        .strip_prefix(root)
-        .unwrap_or(asset_path)
-        .to_string_lossy()
-        .replace('\\', "/")
-    });
-
-    Ok(Finding::new(
-      RuleId::new(self.rule.to_string())?,
-      subject,
-      self.message.clone(),
-    ))
+  pub(crate) fn into_report(self) -> Finding {
+    Finding::new(
+      RuleId::new(self.rule.to_string())
+        .expect("Gamedata verification rules have non-empty stable identifiers"),
+      self
+        .asset_path
+        .map(|asset_path| asset_path.to_string_lossy().replace('\\', "/")),
+      self.message,
+    )
   }
 }
 
@@ -255,7 +252,6 @@ mod tests {
     GamedataCheckResult, GamedataVerificationRule, GamedataVerificationStatus,
     GamedataVerificationType,
   };
-  use std::path::Path;
   use xray_error::XRayError;
   use xray_report::Status;
 
@@ -362,11 +358,14 @@ mod tests {
     );
     assert_eq!(
       result.checks()[0].findings(),
-      vec![GamedataVerificationFinding::for_asset(
-        GamedataVerificationRule::ScriptsSyntax,
-        "scripts/invalid.script",
-        "Expected expression after '='",
-      )]
+      vec![
+        GamedataVerificationFinding::for_asset(
+          GamedataVerificationRule::ScriptsSyntax,
+          "scripts/invalid.script",
+          "Expected expression after '='",
+        )
+        .into_report()
+      ]
     );
   }
 
@@ -388,15 +387,16 @@ mod tests {
     );
     assert_eq!(
       result.checks()[0].findings(),
-      vec![GamedataVerificationFinding::without_asset(
-        GamedataVerificationRule::CheckExecution,
-        "Unexpected error: boom",
-      )]
+      vec![
+        GamedataVerificationFinding::without_asset(
+          GamedataVerificationRule::CheckExecution,
+          "Unexpected error: boom",
+        )
+        .into_report()
+      ]
     );
 
-    let report = result
-      .to_report(Path::new("."))
-      .expect("Expected report conversion");
+    let report = result.to_report();
 
     assert_eq!(report.checks()[0].duration(), None);
   }
@@ -430,9 +430,7 @@ mod tests {
       }),
     );
 
-    let report = result
-      .to_report(Path::new("."))
-      .expect("Expected report conversion");
+    let report = result.to_report();
 
     assert_eq!(report.status(), Status::Failed);
     assert_eq!(report.checks()[0].id().as_str(), "scripts");

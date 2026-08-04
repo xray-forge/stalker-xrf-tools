@@ -79,7 +79,7 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
   }
 
   #[test]

@@ -50,7 +50,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
   }
 
   fn report_output(&self) -> CommandResult<GamedataVerificationReportOutput> {
-    let report: Report = self.report.to_report(self.root)?;
+    let report: Report = self.report.to_report();
     let checks: Vec<GamedataVerificationCheckReportOutput> = self
       .report
       .checks()
@@ -88,7 +88,15 @@ impl<'a> GamedataVerificationReportWriter<'a> {
 
   fn finding_output(&self, finding: &Finding) -> GamedataVerificationFindingOutput {
     GamedataVerificationFindingOutput {
-      asset_path: finding.subject().map(String::from),
+      asset_path: finding.subject().map(|subject| {
+        let asset_path: &Path = Path::new(subject);
+
+        asset_path
+          .strip_prefix(self.root)
+          .unwrap_or(asset_path)
+          .to_string_lossy()
+          .replace('\\', "/")
+      }),
       message: finding.message().to_string(),
       rule_id: finding.rule_id().to_string(),
     }
