@@ -1,7 +1,10 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::Arc;
+use xray_output::{OutputOptions, OutputVerbosity};
 use xray_translation::{
   ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject,
 };
@@ -73,7 +76,7 @@ impl GenericCommand for BuildTranslationsCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    let output: &PathBuf = matches
+    let output_dir: &PathBuf = matches
       .get_one::<PathBuf>("output")
       .expect("Expected valid output folder path to be provided");
 
@@ -85,21 +88,28 @@ impl GenericCommand for BuildTranslationsCommand {
     let is_verbose: bool = matches.get_flag("verbose");
     let is_sorted: bool = matches.get_flag("sort");
 
-    if !is_silent {
-      println!(
-        "Building translation {}, language - {}, sorted - {}",
-        path.display(),
-        language,
-        is_sorted
-      )
-    }
+    let output: OutputOptions = OutputOptions::new(
+      Arc::new(TerminalOutput),
+      match (is_silent, is_verbose) {
+        (true, _) => OutputVerbosity::Silent,
+        (false, true) => OutputVerbosity::Verbose,
+        (false, false) => OutputVerbosity::Normal,
+      },
+    );
+
+    xray_output::info!(
+      output,
+      "Building translation {}, language - {}, sorted - {}",
+      path.display(),
+      language,
+      is_sorted
+    );
 
     let options: ProjectBuildOptions = ProjectBuildOptions {
       is_sorted,
-      is_silent,
-      is_verbose,
+      output,
       path: path.clone(),
-      output: output.clone(),
+      output_dir: output_dir.clone(),
       language: TranslationLanguage::from_str(language)?,
     };
 
@@ -109,12 +119,11 @@ impl GenericCommand for BuildTranslationsCommand {
       TranslationProject::build_file(path, &options)?
     };
 
-    if options.is_logging_enabled() {
-      println!(
-        "Built translation files in {} sec",
-        (result.duration as f64) / 1000.0
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Built translation files in {} sec",
+      (result.duration as f64) / 1000.0
+    );
 
     Ok(())
   }

@@ -27,9 +27,12 @@ impl TranslationProject {
       )
       .with_extension("xml");
 
-    if options.is_verbose_logging_enabled() {
-      println!("Writing file ({}) {}", language, target.display());
-    }
+    xray_output::verbose!(
+      options.output,
+      "Writing file ({}) {}",
+      language,
+      target.display()
+    );
 
     match fs::create_dir_all(target.parent().expect("Target xml file parent dir")) {
       Ok(_) => {}

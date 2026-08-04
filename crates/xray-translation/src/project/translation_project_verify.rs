@@ -10,10 +10,7 @@ use xray_error::XRayResult;
 impl TranslationProject {
   pub fn verify_dir(dir: &Path, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {
     log::info!("Verifying dir {}", dir.display());
-
-    if options.is_logging_enabled() {
-      println!("Verifying dir {}", dir.display());
-    }
+    xray_output::info!(options.output, "Verifying dir {}", dir.display());
 
     let started_at: Instant = Instant::now();
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
@@ -63,10 +60,7 @@ impl TranslationProject {
         return Self::verify_json_file(path, options);
       } else {
         log::info!("Skip file {}", path.as_ref().display());
-
-        if options.is_logging_enabled() {
-          println!("Skip file {}", path.as_ref().display());
-        }
+        xray_output::info!(options.output, "Skip file {}", path.as_ref().display());
       }
     }
 
@@ -98,9 +92,12 @@ impl TranslationProject {
           .is_none_or(|translation| translation.is_none());
 
         if is_missing {
-          println!(
+          xray_output::error!(
+            options.output,
             "Translation key missing: {} {} in {}",
-            key, language, path_display
+            key,
+            language,
+            path_display
           );
 
           result.record_missing_translation(path.as_ref(), key, &language);

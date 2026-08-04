@@ -101,9 +101,8 @@ mod tests {
     let translation_path: PathBuf = root.join("dialogs.json");
     let report_path: PathBuf = root.join("report.json");
     let options: ProjectVerifyOptions = ProjectVerifyOptions {
-      is_silent: true,
       is_strict: false,
-      is_verbose: false,
+      output: xray_output::OutputOptions::default(),
       language: TranslationLanguage::Ukrainian,
       path: root.clone(),
     };

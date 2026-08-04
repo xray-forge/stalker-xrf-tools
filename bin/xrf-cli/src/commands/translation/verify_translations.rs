@@ -1,9 +1,12 @@
 use super::translation_verification_report::TranslationVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::process;
 use std::str::FromStr;
+use std::sync::Arc;
+use xray_output::{OutputOptions, OutputVerbosity};
 use xray_translation::{
   ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject,
 };
@@ -85,18 +88,25 @@ impl GenericCommand for VerifyTranslationsCommand {
     let is_strict: bool = matches.get_flag("strict");
     let report_path: Option<PathBuf> = matches.get_one::<PathBuf>("report").cloned();
 
-    if !is_silent {
-      println!(
-        "Verifying translation {}, language - {}",
-        path.display(),
-        language
-      )
-    }
+    let output: OutputOptions = OutputOptions::new(
+      Arc::new(TerminalOutput),
+      match (is_silent, is_verbose) {
+        (true, _) => OutputVerbosity::Silent,
+        (false, true) => OutputVerbosity::Verbose,
+        (false, false) => OutputVerbosity::Normal,
+      },
+    );
+
+    xray_output::info!(
+      output,
+      "Verifying translation {}, language - {}",
+      path.display(),
+      language
+    );
 
     let options: ProjectVerifyOptions = ProjectVerifyOptions {
       is_strict,
-      is_silent,
-      is_verbose,
+      output,
       path: path.clone(),
       language: TranslationLanguage::from_str(language)?,
     };
@@ -111,14 +121,13 @@ impl GenericCommand for VerifyTranslationsCommand {
       TranslationVerificationReportWriter::new(&result).write(&report_path)?;
     }
 
-    if options.is_logging_enabled() {
-      println!(
-        "Verified translation files in {} sec, {} checked, {} missing",
-        (result.duration as f64) / 1000.0,
-        result.checked_translations_count,
-        result.missing_translations_count
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Verified translation files in {} sec, {} checked, {} missing",
+      (result.duration as f64) / 1000.0,
+      result.checked_translations_count,
+      result.missing_translations_count
+    );
 
     if options.is_strict && result.missing_translations_count > 0 {
       log::error!("Failing with non-zero error code, missing translation found");

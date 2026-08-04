@@ -14,9 +14,11 @@ impl TranslationProject {
     dir: &P,
     options: &ProjectInitializeOptions,
   ) -> XRayResult<ProjectInitializeResult> {
-    if options.is_logging_enabled() {
-      println!("Initializing dir {}", dir.as_ref().display());
-    }
+    xray_output::info!(
+      options.output,
+      "Initializing dir {}",
+      dir.as_ref().display()
+    );
 
     let started_at: Instant = Instant::now();
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();
@@ -54,10 +56,7 @@ impl TranslationProject {
         return Self::initialize_json_file(path, options);
       } else {
         log::info!("Skip file {}", path.as_ref().display());
-
-        if options.is_logging_enabled() {
-          println!("Skip file {}", path.as_ref().display());
-        }
+        xray_output::info!(options.output, "Skip file {}", path.as_ref().display());
       }
     }
 
@@ -87,10 +86,10 @@ impl TranslationProject {
             initialized_count += 1;
 
             log::info!("Initializing missing key: {key} - {language}");
-
-            if options.is_logging_enabled() {
-              println!("Initializing missing key: {key} - {language}");
-            }
+            xray_output::info!(
+              options.output,
+              "Initializing missing key: {key} - {language}"
+            );
 
             value.insert(String::from(language), None);
           }

@@ -1,6 +1,9 @@
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
+use std::sync::Arc;
+use xray_output::{OutputOptions, OutputVerbosity};
 use xray_translation::{ProjectInitializeOptions, ProjectInitializeResult, TranslationProject};
 
 #[derive(Default)]
@@ -49,13 +52,19 @@ impl GenericCommand for InitializeTranslationsCommand {
     let is_silent: bool = matches.get_flag("silent");
     let is_verbose: bool = matches.get_flag("verbose");
 
-    if !is_silent {
-      println!("Verifying translation {}", path.display())
-    }
+    let output: OutputOptions = OutputOptions::new(
+      Arc::new(TerminalOutput),
+      match (is_silent, is_verbose) {
+        (true, _) => OutputVerbosity::Silent,
+        (false, true) => OutputVerbosity::Verbose,
+        (false, false) => OutputVerbosity::Normal,
+      },
+    );
+
+    xray_output::info!(output, "Verifying translation {}", path.display());
 
     let options: ProjectInitializeOptions = ProjectInitializeOptions {
-      is_silent,
-      is_verbose,
+      output,
       path: path.clone(),
     };
 
@@ -65,12 +74,11 @@ impl GenericCommand for InitializeTranslationsCommand {
       TranslationProject::initialize_file(path, &options)?
     };
 
-    if options.is_logging_enabled() {
-      println!(
-        "Initialized translation files in {} sec",
-        (result.duration as f64) / 1000.0,
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Initialized translation files in {} sec",
+      (result.duration as f64) / 1000.0,
+    );
 
     Ok(())
   }

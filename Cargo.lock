@@ -7193,6 +7193,7 @@ dependencies = [
  "serde_json",
  "walkdir",
  "xray-error",
+ "xray-output",
  "xray-report",
  "xray-test-utils",
  "xray-utils",

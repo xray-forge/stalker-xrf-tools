@@ -20,10 +20,7 @@ pub async fn verify_configs_path(path: &str) -> TauriResult<Value> {
   log::info!("Verifying ltx folder: {}", path);
 
   let result: LtxProjectVerifyResult = project
-    .verify_entries_opt(LtxVerifyOptions {
-      is_silent: true,
-      is_verbose: false,
-    })
+    .verify_entries_opt(LtxVerifyOptions::default())
     .map_err(error_to_string)?;
 
   Ok(json!(result))

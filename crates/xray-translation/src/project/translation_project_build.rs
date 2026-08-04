@@ -16,10 +16,7 @@ use xray_utils::{XRayEncoding, encode_string_to_bytes};
 impl TranslationProject {
   pub fn build_dir(dir: &Path, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
     log::info!("Building dir {}", dir.display());
-
-    if options.is_logging_enabled() {
-      println!("Building dir {}", dir.display());
-    }
+    xray_output::info!(options.output, "Building dir {}", dir.display());
 
     let started_at: Instant = Instant::now();
     let mut result: ProjectBuildResult = ProjectBuildResult::new();
@@ -61,10 +58,7 @@ impl TranslationProject {
         Self::build_json_file(path, options)?;
       } else {
         log::info!("Skip file {}", path.as_ref().display());
-
-        if options.is_logging_enabled() {
-          println!("Skip file {}", path.as_ref().display());
-        }
+        xray_output::info!(options.output, "Skip file {}", path.as_ref().display());
       }
     }
 
@@ -84,9 +78,10 @@ impl TranslationProject {
     let locale: Option<TranslationLanguage> = Self::get_locale_from_path(path);
 
     if let Some(locale) = locale {
-      if options.is_logging_enabled() {
-        println!("Building XML based translations {}", path_display);
-      }
+      xray_output::info!(
+        options.output,
+        "Building XML based translations {path_display}"
+      );
 
       // All locales needed or file locale matches current one.
       if options.language == TranslationLanguage::All || locale == options.language {
@@ -94,7 +89,12 @@ impl TranslationProject {
 
         copy(
           &mut File::open(path)?,
-          &mut Self::prepare_target_xml_translation_file(path, &options.output, &locale, options)?,
+          &mut Self::prepare_target_xml_translation_file(
+            path,
+            &options.output_dir,
+            &locale,
+            options,
+          )?,
         )?;
       } else {
         log::info!("Skip dynamic XML file {}", path_display);
@@ -103,9 +103,10 @@ impl TranslationProject {
       log::info!("Building static XML file {}", path.as_ref().display());
 
       // Just plain XML to copy from one place to another.
-      if options.is_logging_enabled() {
-        println!("Copy static XML translations {}", path_display);
-      }
+      xray_output::info!(
+        options.output,
+        "Copy static XML translations {path_display}"
+      );
 
       if options.language == TranslationLanguage::All {
         for language in TranslationLanguage::get_all() {
@@ -113,7 +114,7 @@ impl TranslationProject {
             &mut File::open(path)?,
             &mut Self::prepare_target_xml_translation_file(
               path,
-              &options.output,
+              &options.output_dir,
               &language,
               options,
             )?,
@@ -124,7 +125,7 @@ impl TranslationProject {
           &mut File::open(path)?,
           &mut Self::prepare_target_xml_translation_file(
             path,
-            &options.output,
+            &options.output_dir,
             &options.language,
             options,
           )?,
@@ -136,12 +137,11 @@ impl TranslationProject {
   }
 
   pub fn build_json_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XRayResult {
-    if options.is_logging_enabled() {
-      println!(
-        "Building JSON based translations {}",
-        path.as_ref().display()
-      );
-    }
+    xray_output::info!(
+      options.output,
+      "Building JSON based translations {}",
+      path.as_ref().display()
+    );
 
     let parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
 
@@ -167,7 +167,7 @@ impl TranslationProject {
       language.get_language_encoder(),
     )?;
 
-    Self::prepare_target_xml_translation_file(&path, &options.output, language, options)?
+    Self::prepare_target_xml_translation_file(&path, &options.output_dir, language, options)?
       .write_all(&data)?;
 
     Ok(())
@@ -188,12 +188,11 @@ impl TranslationProject {
 
     let language_key: String = language.to_string();
 
-    if options.is_verbose_logging_enabled() {
-      println!(
-        "Building json file with {} entries, language '{language_key}'",
-        source.len(),
-      )
-    }
+    xray_output::verbose!(
+      options.output,
+      "Building json file with {} entries, language '{language_key}'",
+      source.len(),
+    );
 
     for (key, entry) in source {
       let text: String = entry.get(&language_key).map_or(key.clone(), |value| {
@@ -273,11 +272,10 @@ mod tests {
 
   fn build_options(language: TranslationLanguage) -> ProjectBuildOptions {
     ProjectBuildOptions {
-      is_silent: true,
       is_sorted: false,
-      is_verbose: false,
       path: PathBuf::from("translations"),
-      output: PathBuf::from("output"),
+      output: xray_output::OutputOptions::default(),
+      output_dir: PathBuf::from("output"),
       language,
     }
   }
