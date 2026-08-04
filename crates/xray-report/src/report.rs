@@ -10,12 +10,8 @@ pub struct Report {
 }
 
 impl Report {
-  /// Creates a report and deterministically finalizes every check's findings.
-  pub fn new(mut checks: Vec<CheckReport>) -> Self {
-    for check in &mut checks {
-      check.finalize();
-    }
-
+  /// Creates a report while preserving the caller's check order.
+  pub fn new(checks: Vec<CheckReport>) -> Self {
     let status: Status = Status::aggregate(checks.iter().map(|check| check.status()));
 
     Self { checks, status }
@@ -37,7 +33,7 @@ mod tests {
   use std::time::Duration;
 
   #[test]
-  fn preserves_check_order_and_canonicalizes_findings() {
+  fn preserves_check_order_and_uses_pre_finalized_checks() {
     let first_check: CheckReport = CheckReport::new(
       CheckId::new("textures").unwrap(),
       Status::Failed,
@@ -67,18 +63,19 @@ mod tests {
       Vec::new(),
     );
 
+    assert_eq!(
+      first_check.findings()[0].rule_id().as_str(),
+      "textures.format"
+    );
+    assert_eq!(
+      first_check.findings()[1].rule_id().as_str(),
+      "textures.read"
+    );
+    assert_eq!(first_check.findings()[2].subject(), Some("z.dds"));
+
     let report: Report = Report::new(vec![first_check, second_check]);
 
     assert_eq!(report.checks()[0].id().as_str(), "textures");
     assert_eq!(report.checks()[1].id().as_str(), "scripts");
-    assert_eq!(
-      report.checks()[0].findings()[0].rule_id().as_str(),
-      "textures.format"
-    );
-    assert_eq!(
-      report.checks()[0].findings()[1].rule_id().as_str(),
-      "textures.read"
-    );
-    assert_eq!(report.checks()[0].findings()[2].subject(), Some("z.dds"));
   }
 }

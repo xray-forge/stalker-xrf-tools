@@ -19,6 +19,10 @@ impl CheckReport {
     duration: Option<Duration>,
     findings: Vec<Finding>,
   ) -> Self {
+    let mut findings: Vec<Finding> = findings;
+
+    findings.sort_by(Finding::cmp);
+
     Self {
       duration,
       findings,
@@ -41,9 +45,5 @@ impl CheckReport {
 
   pub const fn status(&self) -> Status {
     self.status
-  }
-
-  pub(crate) fn finalize(&mut self) {
-    self.findings.sort_by(Finding::cmp);
   }
 }
