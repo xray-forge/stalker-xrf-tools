@@ -4,7 +4,7 @@ use crate::description::xml_description_collection::XmlDescriptionCollection;
 use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
 use std::path::PathBuf;
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 use xray_utils::assert_equal;
 
 pub struct PackDescriptionProcessor {}
@@ -80,17 +80,17 @@ impl PackDescriptionProcessor {
 
           result
             .copy_from(&texture_dds, texture.x, texture.y)
-            .expect("Properly copied DDS texture into resulting file");
+            .map_err(|error| XRayError::new_texture_processing_error(error.to_string()))?;
         }
         Err(error) => {
           if options.is_strict {
-            panic!(
+            return Err(XRayError::new_texture_processing_error(format!(
               "Failed to read texture dds {} for {} ({}): {}",
               texture.id,
               file.name,
               full_name.display(),
               error
-            )
+            )));
           } else {
             xray_output::warning!(
               options.output,

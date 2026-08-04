@@ -7,7 +7,7 @@ use std::fs;
 use std::fs::{File, ReadDir};
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 
 pub struct XmlDescriptionCollection {
   pub files: HashMap<String, TextureFileDescriptor>,
@@ -87,7 +87,11 @@ impl XmlDescriptionCollection {
       Ok(doc) => doc,
       Err(error) => {
         if options.is_strict {
-          panic!("Failed to parse xml: {} - {}", path.display(), error)
+          return Err(XRayError::new_parsing_error(format!(
+            "Failed to parse xml: {} - {}",
+            path.display(),
+            error
+          )));
         }
 
         xray_output::warning!(
@@ -174,5 +178,40 @@ impl XmlDescriptionCollection {
     }
 
     Ok(descriptions)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::XmlDescriptionCollection;
+  use crate::PackDescriptionOptions;
+  use image_dds::ImageFormat;
+  use std::fs;
+  use std::path::PathBuf;
+
+  #[test]
+  fn returns_an_error_for_invalid_xml_in_strict_mode() {
+    let path: PathBuf = std::env::temp_dir().join(format!(
+      "xray-texture-invalid-description-{}.xml",
+      std::process::id()
+    ));
+
+    let options: PackDescriptionOptions = PackDescriptionOptions {
+      description: path.clone(),
+      base: PathBuf::new(),
+      output: Default::default(),
+      output_path: PathBuf::new(),
+      dds_compression_format: ImageFormat::BC3RgbaUnorm,
+      is_strict: true,
+      is_parallel: false,
+    };
+
+    fs::write(&path, "<w>").unwrap();
+
+    let result = XmlDescriptionCollection::get_description(&options, &path);
+
+    fs::remove_file(&path).unwrap();
+
+    assert!(result.is_err());
   }
 }

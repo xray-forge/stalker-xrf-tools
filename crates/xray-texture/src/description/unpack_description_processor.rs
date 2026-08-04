@@ -5,8 +5,8 @@ use image::{GenericImageView, RgbaImage};
 use rayon::prelude::*;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
-use std::sync::Mutex;
-use xray_error::XRayResult;
+use std::sync::atomic::{AtomicU32, Ordering};
+use xray_error::{XRayError, XRayResult};
 
 pub struct UnpackDescriptionProcessor {}
 
@@ -14,7 +14,7 @@ impl UnpackDescriptionProcessor {
   pub fn unpack_xml_descriptions(options: PackDescriptionOptions) -> XRayResult<()> {
     let description: XmlDescriptionCollection =
       XmlDescriptionCollection::get_descriptions(&options)?;
-    let count: Mutex<u32> = Mutex::new(0);
+    let count: AtomicU32 = AtomicU32::new(0);
 
     xray_output::info!(
       options.output,
@@ -23,20 +23,26 @@ impl UnpackDescriptionProcessor {
     );
 
     if options.is_parallel {
-      description.files.par_iter().for_each(|(_, file)| {
-        if Self::unpack_xml_description(&options, file).is_ok_and(|it| it) {
-          *count.lock().unwrap() += 1;
+      description.files.par_iter().try_for_each(|(_, file)| {
+        if Self::unpack_xml_description(&options, file)? {
+          count.fetch_add(1, Ordering::Relaxed);
         }
-      });
+
+        Ok::<(), XRayError>(())
+      })?;
     } else {
       for file in description.files.values() {
         if Self::unpack_xml_description(&options, file)? {
-          *count.lock().unwrap() += 1;
+          count.fetch_add(1, Ordering::Relaxed);
         }
       }
     }
 
-    xray_output::info!(options.output, "Unpacked {} files", *count.lock().unwrap());
+    xray_output::info!(
+      options.output,
+      "Unpacked {} files",
+      count.load(Ordering::Relaxed)
+    );
 
     Ok(())
   }
@@ -70,7 +76,7 @@ impl UnpackDescriptionProcessor {
 
         if max_x > dds.width() || max_y > dds.height() {
           if options.is_strict {
-            panic!(
+            return Err(XRayError::new_texture_processing_error(format!(
               "Unexpected texture '{}' (x:{}, y:{}) boundaries are bigger than source DDS file ({}x{} - {})",
               sprite.id,
               max_x,
@@ -78,7 +84,7 @@ impl UnpackDescriptionProcessor {
               dds.width(),
               dds.height(),
               full_name.display()
-            );
+            )));
           } else {
             xray_output::warning!(
               options.output,
@@ -102,10 +108,10 @@ impl UnpackDescriptionProcessor {
 
       Ok(true)
     } else if options.is_strict {
-      panic!(
+      Err(XRayError::new_texture_processing_error(format!(
         "Could not find file for texture unpacking: {}",
         full_name.display()
-      )
+      )))
     } else {
       xray_output::warning!(
         options.output,
