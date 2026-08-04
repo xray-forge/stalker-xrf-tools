@@ -40,7 +40,8 @@ mod tests {
 
   #[test]
   fn exposes_weapon_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
+      "weapons.unclassified",
       "configs/system.ltx",
       "Weapon section [wpn_test] is invalid",
     );

@@ -4,7 +4,7 @@ use crate::project::weapons::weapons_utils::{
   get_weapon_animation_name, is_player_hud_section, is_weapon_section,
 };
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_error::XRayResult;
@@ -82,7 +82,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
 
   fn verify_player_hud_animation(&self, section_name: &str, section: &Section) -> XRayResult<bool> {
     let mut is_valid: bool = true;
-    let mut hud_motions: HashMap<String, String> = HashMap::new();
+    let mut hud_motions: HashSet<String> = HashSet::new();
 
     if let Some(visual_path) = &section
       .get("visual")
@@ -122,11 +122,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
                 }
 
                 for motion in motions {
-                  if hud_motions.contains_key(&motion) && self.options.is_logging_enabled() {
-                    // Motion replacement is accepted; this branch preserves the diagnostic seam.
-                  }
-
-                  hud_motions.insert(motion, linked_visual.to_str().unwrap().to_string());
+                  hud_motions.insert(motion);
                 }
               }
               Err(error) => {
@@ -176,7 +172,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
 
       is_valid = false;
     } else if !self
-      .verify_weapon_animations(section_name, &hud_motions.keys().collect::<Vec<_>>())
+      .verify_weapon_animations(section_name, &hud_motions)
       .is_ok_and(|it| it)
     {
       if self.options.is_logging_enabled() {
@@ -189,7 +185,11 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     Ok(is_valid)
   }
 
-  fn verify_weapon_animations(&self, section_name: &str, motions: &[&String]) -> XRayResult<bool> {
+  fn verify_weapon_animations(
+    &self,
+    section_name: &str,
+    motions: &HashSet<String>,
+  ) -> XRayResult<bool> {
     if self.options.is_verbose_logging_enabled() {
       println!("Verify weapons animations for [{section_name}]");
     }
@@ -211,7 +211,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
 
             let weapon_motion_name: String = get_weapon_animation_name(field_value);
 
-            if !motions.contains(&&weapon_motion_name) {
+            if !motions.contains(&weapon_motion_name) {
               if self.options.is_logging_enabled() {
                 eprintln!(
                   "Hud [{section_name}] weapon [{weapon_section_name}] {field_name}={weapon_motion_name} -> animation motion is not found"

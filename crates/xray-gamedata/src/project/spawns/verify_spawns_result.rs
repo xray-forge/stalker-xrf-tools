@@ -40,7 +40,8 @@ mod tests {
 
   #[test]
   fn exposes_spawn_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
+      "spawns.unclassified",
       "spawns/test.spawn",
       "Failed to read spawn file: invalid header",
     );

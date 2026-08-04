@@ -47,7 +47,11 @@ mod tests {
   #[test]
   fn exposes_ltx_findings_in_reports() {
     let finding: GamedataVerificationFinding =
-      GamedataVerificationFinding::for_asset("configs/system.ltx", "LTX file needs formatting");
+      GamedataVerificationFinding::for_asset_in_rule(
+        "ltx.unclassified",
+        "configs/system.ltx",
+        "LTX file needs formatting",
+      );
     let mut report: GamedataVerificationReport = GamedataVerificationReport::default();
 
     report.add_check(

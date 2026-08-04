@@ -17,18 +17,23 @@ impl GamedataCheckResult for GamedataParticlesUsageVerificationResult {
   }
 
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::from_is_valid(
-      self.invalid_references_count == 0 && self.unreadable_spawn_files_count == 0,
-    )
+    if self.invalid_references_count != 0 || self.unreadable_spawn_files_count != 0 {
+      GamedataVerificationStatus::Failed
+    } else if self.unparsed_custom_data_count != 0 {
+      GamedataVerificationStatus::Incomplete
+    } else {
+      GamedataVerificationStatus::Passed
+    }
   }
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} particle references valid; {}/{} spawn files readable",
+      "{}/{} particle references valid; {}/{} spawn files readable; {} custom data sections unparsed",
       self.checked_references_count - self.invalid_references_count,
       self.checked_references_count,
       self.checked_spawn_files_count - self.unreadable_spawn_files_count,
-      self.checked_spawn_files_count
+      self.checked_spawn_files_count,
+      self.unparsed_custom_data_count,
     )
   }
 
@@ -57,13 +62,29 @@ mod tests {
     assert_eq!(result.status(), GamedataVerificationStatus::Failed);
     assert_eq!(
       result.failure_message(),
-      "0/0 particle references valid; 0/1 spawn files readable"
+      "0/0 particle references valid; 0/1 spawn files readable; 0 custom data sections unparsed"
+    );
+  }
+
+  #[test]
+  fn unparsed_spawn_custom_data_makes_particle_usage_verification_incomplete() {
+    let result: GamedataParticlesUsageVerificationResult =
+      GamedataParticlesUsageVerificationResult {
+        unparsed_custom_data_count: 1,
+        ..Default::default()
+      };
+
+    assert_eq!(result.status(), GamedataVerificationStatus::Incomplete);
+    assert_eq!(
+      result.failure_message(),
+      "0/0 particle references valid; 0/0 spawn files readable; 1 custom data sections unparsed"
     );
   }
 
   #[test]
   fn exposes_particle_usage_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset_in_rule(
+      "particles-usage.unclassified",
       "configs/scripts/test.ltx",
       "Unknown particle reference: [sr_particle] name = missing_particle",
     );

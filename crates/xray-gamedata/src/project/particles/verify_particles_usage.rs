@@ -169,7 +169,22 @@ impl GamedataProject {
           Ok(ltx) => {
             self.verify_particles_usage_in_ltx(options, particle_names, &ltx, &spawn_path, result);
           }
-          Err(_) => {
+          Err(error) => {
+            if options.is_logging_enabled() {
+              eprintln!(
+                "Could not parse spawn custom data for particle usage: {} - {}",
+                spawn_path.display(),
+                error
+              );
+            }
+
+            result
+              .findings
+              .push(GamedataVerificationFinding::for_asset_in_rule(
+                "particles-usage.spawn-custom-data",
+                &spawn_path,
+                format!("Could not parse spawn custom data for particle usage: {error}"),
+              ));
             result.unparsed_custom_data_count += 1;
           }
         }

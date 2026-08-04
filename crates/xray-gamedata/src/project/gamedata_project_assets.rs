@@ -2,6 +2,7 @@ use crate::asset::asset_descriptor::AssetDescriptor;
 use crate::asset::asset_type::AssetType;
 use crate::{GamedataProject, GamedataProjectReadOptions};
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
@@ -19,7 +20,9 @@ impl GamedataProject {
     let mut assets: HashMap<String, AssetDescriptor> = HashMap::new();
 
     for entry in WalkDir::new(root) {
-      let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
+      let entry: DirEntry = entry.map_err(|error| {
+        XRayError::new_asset_error(format!("Failed to read gamedata asset entry: {error}"))
+      })?;
       let entry_path: &Path = entry.path();
 
       // Dirs are skipped.
@@ -30,10 +33,12 @@ impl GamedataProject {
       let relative_path: &Path = entry_path.strip_prefix(root).map_err(|_| {
         XRayError::new_unexpected_error("Failed to strip prefix from gamedata root path")
       })?;
-      let Some(relative): Option<&str> = relative_path.to_str() else {
-        log::warn!("Could not strip prefix: {}", entry_path.display());
-        continue;
-      };
+      let relative: &str = relative_path.to_str().ok_or_else(|| {
+        XRayError::new_asset_error(format!(
+          "Gamedata asset path is not valid UTF-8: {}",
+          entry_path.display()
+        ))
+      })?;
       let logical_path: String = Self::logical_asset_path("", relative);
 
       if options
@@ -44,10 +49,11 @@ impl GamedataProject {
         continue;
       }
 
-      assets.insert(
+      Self::insert_asset(
+        &mut assets,
         logical_path,
         AssetDescriptor::from_relative_path(relative_path),
-      );
+      )?;
     }
 
     if options.is_logging_enabled() {
@@ -55,6 +61,25 @@ impl GamedataProject {
     }
 
     Ok(assets)
+  }
+
+  fn insert_asset(
+    assets: &mut HashMap<String, AssetDescriptor>,
+    logical_path: String,
+    descriptor: AssetDescriptor,
+  ) -> XRayResult {
+    match assets.entry(logical_path) {
+      Entry::Vacant(entry) => {
+        entry.insert(descriptor);
+        Ok(())
+      }
+      Entry::Occupied(entry) => Err(XRayError::new_asset_error(format!(
+        "Gamedata assets '{}' and '{}' have the same logical path '{}'",
+        entry.get().relative_path.display(),
+        descriptor.relative_path.display(),
+        entry.key(),
+      ))),
+    }
   }
 }
 
@@ -274,6 +299,32 @@ mod tests {
     fs::remove_dir_all(root)?;
 
     Ok(())
+  }
+
+  #[test]
+  fn rejects_assets_with_duplicate_logical_paths() {
+    let mut assets: HashMap<String, AssetDescriptor> = HashMap::new();
+
+    GamedataProject::insert_asset(
+      &mut assets,
+      String::from("textures\\sky\\clouds.dds"),
+      AssetDescriptor::from_relative_path(PathBuf::from("Textures/Sky/Clouds.DDS")),
+    )
+    .expect("Expected first asset to be inserted");
+
+    let error = GamedataProject::insert_asset(
+      &mut assets,
+      String::from("textures\\sky\\clouds.dds"),
+      AssetDescriptor::from_relative_path(PathBuf::from("textures/sky/clouds.dds")),
+    )
+    .expect_err("Expected duplicate logical asset path to fail");
+
+    assert_eq!(assets.len(), 1);
+    assert!(
+      error
+        .to_string()
+        .contains("have the same logical path 'textures\\sky\\clouds.dds'")
+    );
   }
 
   #[test]
