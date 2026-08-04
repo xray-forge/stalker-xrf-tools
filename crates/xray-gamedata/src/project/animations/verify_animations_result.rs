@@ -1,10 +1,10 @@
 use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 pub struct GamedataAnimationsVerificationResult {
   pub(crate) duration: Duration,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) player_hud_animations: GamedataPlayerHudAnimationsVerificationResult,
 }
 
@@ -21,7 +21,7 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
     self.player_hud_animations.failure_message()
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -29,16 +29,17 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataAnimationsVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
   use std::time::Duration;
 
   #[test]
   fn exposes_animation_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::AnimationsPlayerHud,
       "configs/system.ltx",
       "Player HUD section [actor_hud] has invalid animations",
@@ -59,6 +60,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

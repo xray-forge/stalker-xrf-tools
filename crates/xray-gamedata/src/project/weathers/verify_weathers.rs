@@ -3,10 +3,8 @@
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_findings_with_definitions;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::GamedataFindingFactory;
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use colored::Colorize;
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -50,18 +48,17 @@ impl GamedataProject {
     })?;
     let definitions: WeatherDefinitions = WeatherDefinitions::read(&self.ltx_project.root);
     let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();
-    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+    let mut findings: Vec<Finding> = Vec::new();
     let mut invalid_weather_files_count: u32 = 0;
 
     for weather_config in weather_configs {
-      let weather_findings: Vec<GamedataVerificationFinding> =
-        verify_weather_findings_with_definitions(
-          self,
-          options,
-          weather_config,
-          &definitions,
-          &mut definition_load_errors,
-        )?;
+      let weather_findings: Vec<Finding> = verify_weather_findings_with_definitions(
+        self,
+        options,
+        weather_config,
+        &definitions,
+        &mut definition_load_errors,
+      )?;
 
       if !weather_findings.is_empty() {
         findings.extend(weather_findings);
@@ -70,13 +67,13 @@ impl GamedataProject {
     }
 
     if checked_weather_files_count == 0 {
-      findings.push(GamedataVerificationFinding::without_asset(
+      findings.push(GamedataFindingFactory::without_asset(
         GamedataVerificationRule::WeathersFiles,
         "No weather files found",
       ));
     }
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     let duration = started_at.elapsed();
 

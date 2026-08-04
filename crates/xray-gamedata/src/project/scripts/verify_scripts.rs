@@ -1,10 +1,8 @@
+use crate::GamedataFindingFactory;
 use crate::asset::asset_type::AssetType;
 use crate::project::scripts::runtime_script::is_runtime_script;
 use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use colored::Colorize;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
@@ -35,7 +33,7 @@ impl GamedataProject {
       XRayError::new_verify_error("Script count exceeds the supported result range")
     })?;
 
-    let mut findings: Vec<GamedataVerificationFinding> = script_paths
+    let mut findings: Vec<Finding> = script_paths
       .par_iter()
       .filter_map(|relative_path| {
         if options.is_verbose_logging_enabled() {
@@ -47,7 +45,7 @@ impl GamedataProject {
             println!("Script path not found: {relative_path}");
           }
 
-          return Some(GamedataVerificationFinding::for_asset(
+          return Some(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::ScriptsPath,
             Path::new(relative_path),
             "Script path was not found in gamedata roots",
@@ -61,7 +59,7 @@ impl GamedataProject {
               println!("Script is not valid: {}", path.display());
             }
 
-            Some(GamedataVerificationFinding::for_asset(
+            Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ScriptsSyntax,
               &path,
               "LuaJIT parser rejected the script",
@@ -72,7 +70,7 @@ impl GamedataProject {
               eprintln!("Script verification failed: {error}");
             }
 
-            Some(GamedataVerificationFinding::for_asset(
+            Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ScriptsRead,
               &path,
               error.to_string(),
@@ -87,7 +85,7 @@ impl GamedataProject {
       XRayError::new_verify_error("Invalid script count exceeds the supported result range")
     })?;
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     if options.is_logging_enabled() {
       if checked_scripts_count > 0 {

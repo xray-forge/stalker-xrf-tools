@@ -1,4 +1,5 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::GamedataFindingFactory;
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 #[derive(Default)]
@@ -6,11 +7,11 @@ pub struct GamedataShadersVerificationResult {
   pub(crate) duration: Duration,
   checked_scripts_count: u32,
   checked_sources_count: u32,
-  findings: Vec<GamedataVerificationFinding>,
+  findings: Vec<Finding>,
 }
 
 impl GamedataShadersVerificationResult {
-  pub(crate) fn add_finding(&mut self, finding: GamedataVerificationFinding) {
+  pub(crate) fn add_finding(&mut self, finding: Finding) {
     self.findings.push(finding);
   }
 
@@ -25,7 +26,7 @@ impl GamedataShadersVerificationResult {
   pub(crate) fn sort_findings(&mut self) {
     self
       .findings
-      .sort_by(GamedataVerificationFinding::cmp_by_asset_path_rule_and_message);
+      .sort_by(GamedataFindingFactory::cmp_by_asset_path_rule_and_message);
   }
 }
 
@@ -47,7 +48,7 @@ impl GamedataCheckResult for GamedataShadersVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -55,14 +56,15 @@ impl GamedataCheckResult for GamedataShadersVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataShadersVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::{
-    GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
-    GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]
   fn exposes_renderer_shader_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::ShadersIncludeMissing,
       "shaders/r3/main.ps",
       "Shader source includes missing file 'common.h'",
@@ -79,7 +81,7 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 
   #[test]

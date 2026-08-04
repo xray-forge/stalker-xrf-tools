@@ -1,8 +1,6 @@
+use crate::GamedataFindingFactory;
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use colored::Colorize;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
@@ -27,7 +25,7 @@ impl GamedataProject {
       XRayError::new_verify_error("Particle library count exceeds the supported result range")
     })?;
 
-    let particle_findings: Vec<Vec<GamedataVerificationFinding>> = particle_paths
+    let particle_findings: Vec<Vec<Finding>> = particle_paths
       .par_iter()
       .map(|path| {
         if options.is_verbose_logging_enabled() {
@@ -36,7 +34,7 @@ impl GamedataProject {
 
         match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(&path) {
           Ok(particles_file) => {
-            let particle_findings: Vec<GamedataVerificationFinding> =
+            let particle_findings: Vec<Finding> =
               self.verify_particle(options, &particles_file, path);
 
             if !particle_findings.is_empty() && options.is_logging_enabled() {
@@ -54,7 +52,7 @@ impl GamedataProject {
               );
             }
 
-            vec![GamedataVerificationFinding::for_asset(
+            vec![GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesLibrary,
               path,
               format!("Failed to read particle library: {error}"),
@@ -77,10 +75,9 @@ impl GamedataProject {
       )
     })?;
 
-    let mut findings: Vec<GamedataVerificationFinding> =
-      particle_findings.into_iter().flatten().collect();
+    let mut findings: Vec<Finding> = particle_findings.into_iter().flatten().collect();
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     if options.is_logging_enabled() {
       println!(
@@ -104,8 +101,8 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     particles_file: &ParticlesFile,
     particle_library_path: &Path,
-  ) -> Vec<GamedataVerificationFinding> {
-    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+  ) -> Vec<Finding> {
+    let mut findings: Vec<Finding> = Vec::new();
 
     for particle in &particles_file.effects.effects {
       if options.is_verbose_logging_enabled() {
@@ -117,7 +114,7 @@ impl GamedataProject {
           match self.verify_texture_by_path(options, &texture) {
             Ok(result) => {
               if !result {
-                findings.push(GamedataVerificationFinding::for_asset(
+                findings.push(GamedataFindingFactory::for_asset(
                   GamedataVerificationRule::ParticlesTexture,
                   &texture,
                   format!(
@@ -128,7 +125,7 @@ impl GamedataProject {
               }
             }
             Err(error) => {
-              findings.push(GamedataVerificationFinding::for_asset(
+              findings.push(GamedataFindingFactory::for_asset(
                 GamedataVerificationRule::ParticlesTexture,
                 &texture,
                 format!(
@@ -139,7 +136,7 @@ impl GamedataProject {
             }
           }
         } else {
-          findings.push(GamedataVerificationFinding::for_asset(
+          findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::ParticlesTexture,
             particle_library_path,
             format!(

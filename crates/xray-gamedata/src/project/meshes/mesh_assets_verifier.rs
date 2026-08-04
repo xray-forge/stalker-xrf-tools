@@ -1,9 +1,7 @@
+use crate::GamedataFindingFactory;
 use crate::asset::asset_type::AssetType;
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -37,7 +35,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     let checked_meshes_count: u32 = u32::try_from(mesh_paths.len())
       .map_err(|_| XRayError::new_verify_error("Mesh count exceeds the supported result range"))?;
 
-    let mesh_findings: Vec<Vec<GamedataVerificationFinding>> = mesh_paths
+    let mesh_findings: Vec<Vec<Finding>> = mesh_paths
       .par_iter()
       .map(|relative_path| {
         if options.is_verbose_logging_enabled() {
@@ -49,7 +47,7 @@ impl<'a> MeshAssetsVerifier<'a> {
             eprintln!("Mesh path not found: {relative_path}");
           }
 
-          return vec![GamedataVerificationFinding::for_asset(
+          return vec![GamedataFindingFactory::for_asset(
             GamedataVerificationRule::MeshesPath,
             Path::new(relative_path),
             "Mesh path was not found in gamedata roots",
@@ -72,7 +70,7 @@ impl<'a> MeshAssetsVerifier<'a> {
                   eprintln!("Mesh verification failed: {} - {}", path.display(), error);
                 }
 
-                vec![GamedataVerificationFinding::for_asset(
+                vec![GamedataFindingFactory::for_asset(
                   GamedataVerificationRule::MeshesValidation,
                   &path,
                   format!("Failed to verify mesh: {error}"),
@@ -85,7 +83,7 @@ impl<'a> MeshAssetsVerifier<'a> {
               eprintln!("Mesh verification failed: {} - {}", path.display(), error);
             }
 
-            vec![GamedataVerificationFinding::for_asset(
+            vec![GamedataFindingFactory::for_asset(
               GamedataVerificationRule::MeshesRead,
               &path,
               format!("Failed to read mesh: {error}"),
@@ -105,10 +103,9 @@ impl<'a> MeshAssetsVerifier<'a> {
       XRayError::new_verify_error("Invalid mesh count exceeds the supported result range")
     })?;
 
-    let mut findings: Vec<GamedataVerificationFinding> =
-      mesh_findings.into_iter().flatten().collect();
+    let mut findings: Vec<Finding> = mesh_findings.into_iter().flatten().collect();
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     Ok(GamedataMeshAssetsVerificationResult {
       findings,
@@ -125,15 +122,14 @@ impl<'a> MeshAssetsVerifier<'a> {
     ogf: &OgfFile,
     mesh_path: Option<&Path>,
     inherited_bones_count: Option<usize>,
-  ) -> XRayResult<Vec<GamedataVerificationFinding>> {
+  ) -> XRayResult<Vec<Finding>> {
     let bones_count: Option<usize> = ogf
       .bones
       .as_ref()
       .map(|bones| bones.bones.len())
       .or(inherited_bones_count);
 
-    let mut findings: Vec<GamedataVerificationFinding> =
-      self.verify_mesh_texture_findings(options, ogf, mesh_path);
+    let mut findings: Vec<Finding> = self.verify_mesh_texture_findings(options, ogf, mesh_path);
 
     findings.extend(self.verify_mesh_shader_findings(options, shader_library, ogf, mesh_path));
     findings.extend(self.verify_mesh_skeleton_findings(ogf, mesh_path));
@@ -182,7 +178,7 @@ impl<'a> MeshAssetsVerifier<'a> {
                       );
                     }
 
-                    findings.push(GamedataVerificationFinding::for_asset(
+                    findings.push(GamedataFindingFactory::for_asset(
                       GamedataVerificationRule::MeshesMotionValidation,
                       &motion_path,
                       format!("Failed to verify referenced motion: {error}"),
@@ -199,7 +195,7 @@ impl<'a> MeshAssetsVerifier<'a> {
                   );
                 }
 
-                findings.push(GamedataVerificationFinding::for_asset(
+                findings.push(GamedataFindingFactory::for_asset(
                   GamedataVerificationRule::MeshesMotionRead,
                   &motion_path,
                   format!("Failed to read referenced motion: {error}"),
@@ -221,8 +217,8 @@ impl<'a> MeshAssetsVerifier<'a> {
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
     mesh_path: Option<&Path>,
-  ) -> Vec<GamedataVerificationFinding> {
-    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+  ) -> Vec<Finding> {
+    let mut findings: Vec<Finding> = Vec::new();
 
     if let Some(texture) = &ogf.texture
       && self
@@ -250,7 +246,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     shader_library: &ShaderLibraryFile,
     ogf: &OgfFile,
     mesh_path: Option<&Path>,
-  ) -> Vec<GamedataVerificationFinding> {
+  ) -> Vec<Finding> {
     let Some(texture) = &ogf.texture else {
       return Vec::new();
     };
@@ -276,11 +272,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     )]
   }
 
-  fn verify_mesh_skeleton_findings(
-    &self,
-    ogf: &OgfFile,
-    mesh_path: Option<&Path>,
-  ) -> Vec<GamedataVerificationFinding> {
+  fn verify_mesh_skeleton_findings(&self, ogf: &OgfFile, mesh_path: Option<&Path>) -> Vec<Finding> {
     let Some(bones) = &ogf.bones else {
       return Vec::new();
     };
@@ -307,12 +299,12 @@ impl<'a> MeshAssetsVerifier<'a> {
     ogf: &OgfFile,
     mesh_path: Option<&Path>,
     bones_count: Option<usize>,
-  ) -> Vec<GamedataVerificationFinding> {
+  ) -> Vec<Finding> {
     let Some(geometry) = &ogf.geometry else {
       return Vec::new();
     };
 
-    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+    let mut findings: Vec<Finding> = Vec::new();
 
     if let Some(indices) = &geometry.indices {
       if indices.len() % 3 != 0 {
@@ -460,8 +452,8 @@ impl<'a> MeshAssetsVerifier<'a> {
     ogf: &OgfFile,
     omf: &OmfFile,
     motion_path: Option<&Path>,
-  ) -> XRayResult<Vec<GamedataVerificationFinding>> {
-    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+  ) -> XRayResult<Vec<Finding>> {
+    let mut findings: Vec<Finding> = Vec::new();
 
     if let Some(bones) = &ogf.bones {
       let omf_bones: Vec<&str> = omf.get_bones();
@@ -532,10 +524,10 @@ impl<'a> MeshAssetsVerifier<'a> {
     rule: GamedataVerificationRule,
     mesh_path: Option<&Path>,
     message: String,
-  ) -> GamedataVerificationFinding {
+  ) -> Finding {
     match mesh_path {
-      Some(path) => GamedataVerificationFinding::for_asset(rule, path, message),
-      None => GamedataVerificationFinding::without_asset(rule, message),
+      Some(path) => GamedataFindingFactory::for_asset(rule, path, message),
+      None => GamedataFindingFactory::without_asset(rule, message),
     }
   }
 
@@ -543,10 +535,10 @@ impl<'a> MeshAssetsVerifier<'a> {
     rule: GamedataVerificationRule,
     motion_path: Option<&Path>,
     message: String,
-  ) -> GamedataVerificationFinding {
+  ) -> Finding {
     match motion_path {
-      Some(path) => GamedataVerificationFinding::for_asset(rule, path, message),
-      None => GamedataVerificationFinding::without_asset(rule, message),
+      Some(path) => GamedataFindingFactory::for_asset(rule, path, message),
+      None => GamedataFindingFactory::without_asset(rule, message),
     }
   }
 }

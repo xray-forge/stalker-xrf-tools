@@ -2,10 +2,8 @@ use super::weather_definitions::WeatherDefinitions;
 use super::weather_field_rules::{
   WEATHER_REQUIRED_FIELDS, is_valid_weather_field_value, parse_weather_time,
 };
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::GamedataFindingFactory;
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use std::collections::{BTreeSet, HashSet};
 use std::path::Path;
 use xray_error::XRayResult;
@@ -42,7 +40,7 @@ pub fn verify_weather_findings_with_definitions(
   config_path: &Path,
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
-) -> XRayResult<Vec<GamedataVerificationFinding>> {
+) -> XRayResult<Vec<Finding>> {
   let ltx: Ltx = match Ltx::read_from_file_full(config_path) {
     Ok(ltx) => ltx,
     Err(error) => {
@@ -50,7 +48,7 @@ pub fn verify_weather_findings_with_definitions(
         eprintln!("Could not open weather LTX: {}", error);
       }
 
-      return Ok(vec![GamedataVerificationFinding::for_asset(
+      return Ok(vec![GamedataFindingFactory::for_asset(
         GamedataVerificationRule::WeathersValidation,
         config_path,
         format!("Could not open weather LTX: {error}"),
@@ -63,7 +61,7 @@ pub fn verify_weather_findings_with_definitions(
     .filter(|section_name| !section_name.is_empty())
     .collect();
 
-  let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+  let mut findings: Vec<Finding> = Vec::new();
 
   if weather_sections.len() < 2 {
     findings.push(report_weather_finding(
@@ -138,7 +136,7 @@ pub fn verify_weather_findings_with_definitions(
         }
         Err(error) => {
           definition_load_errors.insert(error.clone());
-          findings.push(GamedataVerificationFinding::for_asset(
+          findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeathersDefinitions,
             config_path,
             format!("Could not load weather definitions: {error}"),
@@ -159,7 +157,7 @@ pub fn verify_weather_findings_with_definitions(
         }
         Err(error) => {
           definition_load_errors.insert(error.clone());
-          findings.push(GamedataVerificationFinding::for_asset(
+          findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeathersDefinitions,
             config_path,
             format!("Could not load weather definitions: {error}"),
@@ -195,7 +193,7 @@ pub fn verify_weather_findings_with_definitions(
         }
         Err(error) => {
           definition_load_errors.insert(error.clone());
-          findings.push(GamedataVerificationFinding::for_asset(
+          findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeathersDefinitions,
             config_path,
             format!("Could not load weather definitions: {error}"),
@@ -239,14 +237,14 @@ fn report_weather_finding(
   options: &GamedataProjectVerifyOptions,
   config_path: &Path,
   message: impl Into<String>,
-) -> GamedataVerificationFinding {
+) -> Finding {
   let message: String = message.into();
 
   if options.is_logging_enabled() {
     eprintln!("{}: {}", message, config_path.display());
   }
 
-  GamedataVerificationFinding::for_asset(
+  GamedataFindingFactory::for_asset(
     GamedataVerificationRule::WeathersValidation,
     config_path,
     message,

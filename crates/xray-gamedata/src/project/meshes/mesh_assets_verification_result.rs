@@ -1,9 +1,9 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 
 #[derive(Default)]
 pub(crate) struct GamedataMeshAssetsVerificationResult {
   pub(crate) checked_meshes_count: u32,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) invalid_meshes_count: u32,
   pub(crate) is_skipped: bool,
 }
@@ -29,7 +29,7 @@ impl GamedataCheckResult for GamedataMeshAssetsVerificationResult {
     }
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }

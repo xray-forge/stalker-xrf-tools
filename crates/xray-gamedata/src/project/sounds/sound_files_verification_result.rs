@@ -1,10 +1,10 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 
 #[derive(Default)]
 /// Aggregated outcome of validating individual sound files.
 pub(crate) struct GamedataSoundFilesVerificationResult {
   pub(crate) checked_sounds_count: u32,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) invalid_sounds_count: u32,
 }
 
@@ -21,7 +21,7 @@ impl GamedataCheckResult for GamedataSoundFilesVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }

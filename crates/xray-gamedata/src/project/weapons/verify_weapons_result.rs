@@ -1,11 +1,11 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataWeaponVerificationResult {
   pub(crate) duration: Duration,
   pub(crate) checked_weapons_count: u32,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) invalid_weapons_count: u32,
 }
 
@@ -26,7 +26,7 @@ impl GamedataCheckResult for GamedataWeaponVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -34,14 +34,15 @@ impl GamedataCheckResult for GamedataWeaponVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataWeaponVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]
   fn exposes_weapon_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::WeaponsValidation,
       "configs/system.ltx",
       "Weapon section [wpn_test] is invalid",
@@ -59,6 +60,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

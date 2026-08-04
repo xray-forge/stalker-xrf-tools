@@ -111,15 +111,16 @@ mod tests {
   use std::sync::atomic::{AtomicU64, Ordering};
   use std::time::Duration;
   use xray_gamedata::{
-    GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
-    GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
+  use xray_report::RuleId;
 
   static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 
   struct TestCheckResult {
     duration: Duration,
-    findings: Vec<GamedataVerificationFinding>,
+    findings: Vec<Finding>,
   }
 
   impl GamedataCheckResult for TestCheckResult {
@@ -135,7 +136,7 @@ mod tests {
       String::from("2/2 textures are invalid")
     }
 
-    fn findings(&self) -> &[GamedataVerificationFinding] {
+    fn findings(&self) -> &[Finding] {
       &self.findings
     }
   }
@@ -166,14 +167,14 @@ mod tests {
       Ok(TestCheckResult {
         duration: Duration::from_millis(7),
         findings: vec![
-          GamedataVerificationFinding::for_asset(
-            GamedataVerificationRule::TexturesValidation,
-            root.join("textures").join("z.dds"),
+          Finding::new(
+            RuleId::new("textures.dds").expect("Expected a non-empty test rule ID"),
+            Some(root.join("textures").join("z.dds").display().to_string()),
             "Second finding",
           ),
-          GamedataVerificationFinding::for_asset(
-            GamedataVerificationRule::TexturesValidation,
-            root.join("textures").join("a.dds"),
+          Finding::new(
+            RuleId::new("textures.dds").expect("Expected a non-empty test rule ID"),
+            Some(root.join("textures").join("a.dds").display().to_string()),
             "First finding",
           ),
         ],

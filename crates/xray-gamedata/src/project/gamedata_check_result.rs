@@ -1,4 +1,4 @@
-use crate::{GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataVerificationStatus};
 use std::time::Duration;
 
 pub trait GamedataCheckResult {
@@ -10,7 +10,7 @@ pub trait GamedataCheckResult {
 
   fn failure_message(&self) -> String;
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &[]
   }
 }

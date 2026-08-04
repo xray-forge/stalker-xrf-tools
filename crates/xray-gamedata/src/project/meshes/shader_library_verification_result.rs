@@ -1,10 +1,10 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use xray_db::ShaderLibraryFile;
 
 pub(crate) struct GamedataShaderLibraryVerificationResult {
   pub(crate) blender_count: usize,
   pub(crate) checked_count: u32,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) invalid_count: u32,
   library: Option<ShaderLibraryFile>,
 }
@@ -20,7 +20,7 @@ impl GamedataShaderLibraryVerificationResult {
     }
   }
 
-  pub(crate) fn failed(finding: GamedataVerificationFinding) -> Self {
+  pub(crate) fn failed(finding: Finding) -> Self {
     Self {
       blender_count: 0,
       checked_count: 1,
@@ -47,7 +47,7 @@ impl GamedataCheckResult for GamedataShaderLibraryVerificationResult {
       self.blender_count
     )
   }
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }

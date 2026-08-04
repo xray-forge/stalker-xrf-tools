@@ -1,8 +1,6 @@
+use crate::GamedataFindingFactory;
 use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use regex::Regex;
 use std::collections::HashSet;
 use std::path::Path;
@@ -99,7 +97,7 @@ impl<'a> SoundReferencesVerifier<'a> {
         Err(error) => {
           result.checked_references_count += 1;
           result.invalid_references_count += 1;
-          result.findings.push(GamedataVerificationFinding::for_asset(
+          result.findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::SoundsReferences,
             &path,
             format!("Could not inspect XML sound references: {error}"),
@@ -170,7 +168,7 @@ impl<'a> SoundReferencesVerifier<'a> {
     }
 
     result.invalid_references_count += 1;
-    result.findings.push(GamedataVerificationFinding::for_asset(
+    result.findings.push(GamedataFindingFactory::for_asset(
       GamedataVerificationRule::SoundsReferences,
       path,
       format!("Unknown sound reference: {location} = {reference}"),

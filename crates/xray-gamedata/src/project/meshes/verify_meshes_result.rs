@@ -1,11 +1,11 @@
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
 use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 pub struct GamedataMeshesVerificationResult {
   pub(crate) duration: Duration,
-  findings: Vec<GamedataVerificationFinding>,
+  findings: Vec<Finding>,
   mesh_assets: GamedataMeshAssetsVerificationResult,
   shader_library: GamedataShaderLibraryVerificationResult,
 }
@@ -46,7 +46,7 @@ impl GamedataCheckResult for GamedataMeshesVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -54,17 +54,18 @@ impl GamedataCheckResult for GamedataMeshesVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataMeshesVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
   use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
   use std::time::Duration;
 
   #[test]
   fn exposes_mesh_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::MeshesValidation,
       "meshes/test.ogf",
       "Mesh references missing texture 'textures/test'",
@@ -86,6 +87,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

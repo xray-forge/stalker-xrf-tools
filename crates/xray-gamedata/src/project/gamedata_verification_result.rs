@@ -1,73 +1,10 @@
 use crate::{
-  GamedataCheckResult, GamedataVerificationRule, GamedataVerificationStatus,
-  GamedataVerificationType,
+  GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule,
+  GamedataVerificationStatus, GamedataVerificationType,
 };
-use std::cmp::Ordering;
-use std::path::{Path, PathBuf};
 use std::time::Duration;
 use xray_error::XRayResult;
-use xray_report::{CheckId, CheckReport, Finding, Report, RuleId};
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct GamedataVerificationFinding {
-  asset_path: Option<PathBuf>,
-  message: String,
-  rule: GamedataVerificationRule,
-}
-
-impl GamedataVerificationFinding {
-  pub fn for_asset<P, M>(rule: GamedataVerificationRule, asset_path: P, message: M) -> Self
-  where
-    P: AsRef<Path>,
-    M: Into<String>,
-  {
-    Self {
-      asset_path: Some(asset_path.as_ref().to_path_buf()),
-      message: message.into(),
-      rule,
-    }
-  }
-
-  pub fn without_asset<M>(rule: GamedataVerificationRule, message: M) -> Self
-  where
-    M: Into<String>,
-  {
-    Self {
-      asset_path: None,
-      message: message.into(),
-      rule,
-    }
-  }
-
-  pub fn asset_path(&self) -> Option<&Path> {
-    self.asset_path.as_deref()
-  }
-
-  pub fn message(&self) -> &str {
-    &self.message
-  }
-
-  pub const fn rule(&self) -> GamedataVerificationRule {
-    self.rule
-  }
-
-  /// Orders findings by asset path, then message.
-  pub fn cmp_by_asset_path_and_message(left: &Self, right: &Self) -> Ordering {
-    left
-      .asset_path
-      .cmp(&right.asset_path)
-      .then_with(|| left.message.cmp(&right.message))
-  }
-
-  /// Orders findings by asset path, rule, then message.
-  pub fn cmp_by_asset_path_rule_and_message(left: &Self, right: &Self) -> Ordering {
-    left
-      .asset_path
-      .cmp(&right.asset_path)
-      .then_with(|| left.rule.cmp(&right.rule))
-      .then_with(|| left.message.cmp(&right.message))
-  }
-}
+use xray_report::{CheckId, CheckReport, Finding, Report};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationCheckReport {
@@ -197,12 +134,7 @@ impl GamedataVerificationCheckReport {
           Self::check_id(verification_type),
           result.status(),
           result.duration(),
-          result
-            .findings()
-            .iter()
-            .cloned()
-            .map(GamedataVerificationFinding::into_report)
-            .collect(),
+          result.findings().to_vec(),
         ),
         summary: result.failure_message(),
         verification_type,
@@ -212,13 +144,10 @@ impl GamedataVerificationCheckReport {
           Self::check_id(verification_type),
           GamedataVerificationStatus::Error,
           None,
-          vec![
-            GamedataVerificationFinding::without_asset(
-              GamedataVerificationRule::CheckExecution,
-              error.to_string(),
-            )
-            .into_report(),
-          ],
+          vec![GamedataFindingFactory::without_asset(
+            GamedataVerificationRule::CheckExecution,
+            error.to_string(),
+          )],
         ),
         summary: format!("Check failed ({verification_type}): {error}"),
         verification_type,
@@ -232,31 +161,18 @@ impl GamedataVerificationCheckReport {
   }
 }
 
-impl GamedataVerificationFinding {
-  pub(crate) fn into_report(self) -> Finding {
-    Finding::new(
-      RuleId::new(self.rule.to_string())
-        .expect("Gamedata verification rules have non-empty stable identifiers"),
-      self
-        .asset_path
-        .map(|asset_path| asset_path.to_string_lossy().replace('\\', "/")),
-      self.message,
-    )
-  }
-}
-
 #[cfg(test)]
 mod tests {
-  use super::{GamedataVerificationFinding, GamedataVerificationReport};
+  use super::GamedataVerificationReport;
   use crate::{
-    GamedataCheckResult, GamedataVerificationRule, GamedataVerificationStatus,
-    GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
   use xray_error::XRayError;
   use xray_report::Status;
 
   struct TestCheckResult {
-    findings: Vec<GamedataVerificationFinding>,
+    findings: Vec<Finding>,
     status: GamedataVerificationStatus,
     summary: String,
   }
@@ -270,60 +186,9 @@ mod tests {
       self.summary.clone()
     }
 
-    fn findings(&self) -> &[GamedataVerificationFinding] {
+    fn findings(&self) -> &[Finding] {
       &self.findings
     }
-  }
-
-  #[test]
-  fn sorts_findings_by_asset_path_then_message() {
-    let mut findings: Vec<GamedataVerificationFinding> = vec![
-      GamedataVerificationFinding::for_asset(
-        GamedataVerificationRule::ScriptsSyntax,
-        "scripts/a.script",
-        "Second",
-      ),
-      GamedataVerificationFinding::for_asset(
-        GamedataVerificationRule::ScriptsSyntax,
-        "scripts/z.script",
-        "First",
-      ),
-      GamedataVerificationFinding::for_asset(
-        GamedataVerificationRule::ScriptsSyntax,
-        "scripts/a.script",
-        "First",
-      ),
-    ];
-
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
-
-    assert_eq!(
-      findings
-        .iter()
-        .map(GamedataVerificationFinding::message)
-        .collect::<Vec<_>>(),
-      vec!["First", "Second", "First"]
-    );
-  }
-
-  #[test]
-  fn sorts_equal_paths_by_rule_before_message() {
-    let scripts_finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
-      GamedataVerificationRule::ScriptsSyntax,
-      "scripts/a.script",
-      "First",
-    );
-    let textures_finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
-      GamedataVerificationRule::TexturesRead,
-      "scripts/a.script",
-      "Second",
-    );
-    let mut findings: Vec<GamedataVerificationFinding> =
-      vec![textures_finding.clone(), scripts_finding.clone()];
-
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_rule_and_message);
-
-    assert_eq!(findings, vec![scripts_finding, textures_finding]);
   }
 
   #[test]
@@ -341,7 +206,7 @@ mod tests {
     result.add_check(
       GamedataVerificationType::Scripts,
       Ok(TestCheckResult {
-        findings: vec![GamedataVerificationFinding::for_asset(
+        findings: vec![GamedataFindingFactory::for_asset(
           GamedataVerificationRule::ScriptsSyntax,
           "scripts/invalid.script",
           "Expected expression after '='",
@@ -358,14 +223,11 @@ mod tests {
     );
     assert_eq!(
       result.checks()[0].findings(),
-      vec![
-        GamedataVerificationFinding::for_asset(
-          GamedataVerificationRule::ScriptsSyntax,
-          "scripts/invalid.script",
-          "Expected expression after '='",
-        )
-        .into_report()
-      ]
+      vec![GamedataFindingFactory::for_asset(
+        GamedataVerificationRule::ScriptsSyntax,
+        "scripts/invalid.script",
+        "Expected expression after '='",
+      )]
     );
   }
 
@@ -387,13 +249,10 @@ mod tests {
     );
     assert_eq!(
       result.checks()[0].findings(),
-      vec![
-        GamedataVerificationFinding::without_asset(
-          GamedataVerificationRule::CheckExecution,
-          "Unexpected error: boom",
-        )
-        .into_report()
-      ]
+      vec![GamedataFindingFactory::without_asset(
+        GamedataVerificationRule::CheckExecution,
+        "Unexpected error: boom",
+      )]
     );
 
     let report = result.to_report();
@@ -402,24 +261,24 @@ mod tests {
   }
 
   #[test]
-  fn converts_findings_to_the_shared_report_model() {
+  fn finalizes_shared_findings_in_the_report_model() {
     let mut result: GamedataVerificationReport = GamedataVerificationReport::default();
 
     result.add_check(
       GamedataVerificationType::Scripts,
       Ok(TestCheckResult {
         findings: vec![
-          GamedataVerificationFinding::for_asset(
+          GamedataFindingFactory::for_asset(
             GamedataVerificationRule::ScriptsSyntax,
             "scripts/z.script",
             "same",
           ),
-          GamedataVerificationFinding::for_asset(
+          GamedataFindingFactory::for_asset(
             GamedataVerificationRule::ScriptsPath,
             "scripts/a.script",
             "same",
           ),
-          GamedataVerificationFinding::for_asset(
+          GamedataFindingFactory::for_asset(
             GamedataVerificationRule::ScriptsSyntax,
             "scripts/a.script",
             "same",

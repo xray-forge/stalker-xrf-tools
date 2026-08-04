@@ -1,8 +1,6 @@
+use crate::GamedataFindingFactory;
 use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use rayon::prelude::*;
 use std::path::Path;
 use xray_error::{XRayError, XRayResult};
@@ -31,7 +29,7 @@ impl<'a> SoundFilesVerifier<'a> {
     let checked_sounds_count: u32 = u32::try_from(self.sound_paths.len())
       .map_err(|_| XRayError::new_verify_error("Sound count exceeds the supported result range"))?;
 
-    let mut findings: Vec<GamedataVerificationFinding> = self
+    let mut findings: Vec<Finding> = self
       .sound_paths
       .par_iter()
       .filter_map(|relative_path| {
@@ -40,7 +38,7 @@ impl<'a> SoundFilesVerifier<'a> {
         }
 
         let Some(path) = self.project.get_absolute_asset_path(relative_path) else {
-          return Some(GamedataVerificationFinding::for_asset(
+          return Some(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::SoundsFiles,
             Path::new(relative_path),
             "Sound path was not found in gamedata roots",
@@ -58,7 +56,7 @@ impl<'a> SoundFilesVerifier<'a> {
             eprintln!("Sound is not valid: {} - {error}", path.display());
           }
 
-          GamedataVerificationFinding::for_asset(
+          GamedataFindingFactory::for_asset(
             GamedataVerificationRule::SoundsFiles,
             path,
             error.to_string(),
@@ -67,7 +65,7 @@ impl<'a> SoundFilesVerifier<'a> {
       })
       .collect();
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     let invalid_sounds_count: u32 = u32::try_from(findings.len()).map_err(|_| {
       XRayError::new_verify_error("Invalid sound count exceeds the supported result range")

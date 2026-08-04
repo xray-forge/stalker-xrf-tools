@@ -1,4 +1,4 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 #[derive(Default)]
@@ -6,7 +6,7 @@ pub struct GamedataScriptsVerificationResult {
   pub(crate) duration: Duration,
   pub(crate) invalid_scripts_count: u32,
   pub(crate) checked_scripts_count: u32,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
 }
 
 impl GamedataCheckResult for GamedataScriptsVerificationResult {
@@ -26,7 +26,7 @@ impl GamedataCheckResult for GamedataScriptsVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }

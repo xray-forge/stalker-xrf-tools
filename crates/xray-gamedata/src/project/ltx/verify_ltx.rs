@@ -1,8 +1,6 @@
+use crate::GamedataFindingFactory;
 use crate::project::ltx::verify_ltx_result::GamedataLtxVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use colored::Colorize;
 use std::path::Path;
 use std::time::Instant;
@@ -24,8 +22,7 @@ impl GamedataProject {
 
     let format_result: LtxProjectFormatResult = self.verify_ltx_format(options)?;
     let verification_result: LtxProjectVerifyResult = self.verify_ltx_schemes(options)?;
-    let findings: Vec<GamedataVerificationFinding> =
-      Self::collect_ltx_findings(&format_result, &verification_result);
+    let findings: Vec<Finding> = Self::collect_ltx_findings(&format_result, &verification_result);
 
     let duration = started_at.elapsed();
 
@@ -47,12 +44,12 @@ impl GamedataProject {
   fn collect_ltx_findings(
     format_result: &LtxProjectFormatResult,
     verification_result: &LtxProjectVerifyResult,
-  ) -> Vec<GamedataVerificationFinding> {
-    let mut findings: Vec<GamedataVerificationFinding> = format_result
+  ) -> Vec<Finding> {
+    let mut findings: Vec<Finding> = format_result
       .to_format
       .iter()
       .map(|path| {
-        GamedataVerificationFinding::for_asset(
+        GamedataFindingFactory::for_asset(
           GamedataVerificationRule::LtxFormatting,
           path,
           "LTX file needs formatting",
@@ -67,19 +64,19 @@ impl GamedataProject {
           field,
           message,
           section,
-        } => findings.push(GamedataVerificationFinding::for_asset(
+        } => findings.push(GamedataFindingFactory::for_asset(
           GamedataVerificationRule::LtxSchema,
           Path::new(path),
           format!("[{section}] {field}: {message}"),
         )),
-        error => findings.push(GamedataVerificationFinding::without_asset(
+        error => findings.push(GamedataFindingFactory::without_asset(
           GamedataVerificationRule::LtxVerification,
           error.to_string(),
         )),
       }
     }
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     findings
   }
@@ -118,7 +115,8 @@ impl GamedataProject {
 #[cfg(test)]
 mod tests {
   use super::GamedataProject;
-  use crate::{GamedataVerificationFinding, GamedataVerificationRule};
+  use crate::GamedataFindingFactory;
+  use crate::{Finding, GamedataVerificationRule};
   use std::path::PathBuf;
   use xray_error::XRayError;
   use xray_ltx::{LtxProjectFormatResult, LtxProjectVerifyResult};
@@ -139,18 +137,18 @@ mod tests {
       ..Default::default()
     };
 
-    let findings: Vec<GamedataVerificationFinding> =
+    let findings: Vec<Finding> =
       GamedataProject::collect_ltx_findings(&format_result, &verification_result);
 
     assert_eq!(
       findings,
       vec![
-        GamedataVerificationFinding::for_asset(
+        GamedataFindingFactory::for_asset(
           GamedataVerificationRule::LtxSchema,
           "configs/environment/weathers/test.ltx",
           "[weather] fog_density: Expected a number",
         ),
-        GamedataVerificationFinding::for_asset(
+        GamedataFindingFactory::for_asset(
           GamedataVerificationRule::LtxFormatting,
           "configs/system.ltx",
           "LTX file needs formatting",

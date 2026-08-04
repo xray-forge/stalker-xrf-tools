@@ -1,11 +1,12 @@
+use crate::GamedataFindingFactory;
 use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
 use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 pub struct GamedataSoundsVerificationResult {
   pub(crate) duration: Duration,
-  findings: Vec<GamedataVerificationFinding>,
+  findings: Vec<Finding>,
   sound_files: GamedataSoundFilesVerificationResult,
   sound_references: GamedataSoundReferencesVerificationResult,
 }
@@ -16,14 +17,14 @@ impl GamedataSoundsVerificationResult {
     sound_files: GamedataSoundFilesVerificationResult,
     sound_references: GamedataSoundReferencesVerificationResult,
   ) -> Self {
-    let mut findings: Vec<GamedataVerificationFinding> = sound_files
+    let mut findings: Vec<Finding> = sound_files
       .findings()
       .iter()
       .chain(sound_references.findings())
       .cloned()
       .collect();
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_rule_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_rule_and_message);
 
     Self {
       duration,
@@ -54,7 +55,7 @@ impl GamedataCheckResult for GamedataSoundsVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -62,17 +63,18 @@ impl GamedataCheckResult for GamedataSoundsVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataSoundsVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
   use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
   use crate::{
-    GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationReport,
-    GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
+    GamedataVerificationStatus, GamedataVerificationType,
   };
   use std::time::Duration;
 
   #[test]
   fn exposes_sound_reference_findings_in_sound_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::SoundsReferences,
       "configs/ui/game_tutorials.xml",
       "Unknown sound reference: <sound> = video\\missing",
@@ -93,7 +95,7 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
     assert_eq!(
       report.checks()[0].summary(),
       "0/0 sounds valid; 0/1 sound references valid"

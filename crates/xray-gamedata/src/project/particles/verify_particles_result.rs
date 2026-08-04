@@ -1,11 +1,11 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataParticlesVerificationResult {
   pub(crate) duration: Duration,
   pub(crate) checked_particle_files_count: u32,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) invalid_particle_files_count: u32,
 }
 
@@ -26,7 +26,7 @@ impl GamedataCheckResult for GamedataParticlesVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }

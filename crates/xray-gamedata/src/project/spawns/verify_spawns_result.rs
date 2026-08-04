@@ -1,10 +1,10 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataSpawnsVerificationResult {
   pub(crate) duration: Duration,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) total_spawns: u32,
   pub(crate) invalid_spawns: u32,
 }
@@ -26,7 +26,7 @@ impl GamedataCheckResult for GamedataSpawnsVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -34,14 +34,15 @@ impl GamedataCheckResult for GamedataSpawnsVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataSpawnsVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]
   fn exposes_spawn_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::SpawnsRead,
       "spawns/test.spawn",
       "Failed to read spawn file: invalid header",
@@ -59,6 +60,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

@@ -1,11 +1,11 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 use xray_ltx::{LtxProjectFormatResult, LtxProjectVerifyResult};
 
 #[derive(Default)]
 pub struct GamedataLtxVerificationResult {
   pub(crate) duration: Duration,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) format_result: LtxProjectFormatResult,
   pub(crate) verification_result: LtxProjectVerifyResult,
 }
@@ -31,7 +31,7 @@ impl GamedataCheckResult for GamedataLtxVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -39,15 +39,16 @@ impl GamedataCheckResult for GamedataLtxVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataLtxVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
   use xray_ltx::LtxProjectVerifyResult;
 
   #[test]
   fn exposes_ltx_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::LtxFormatting,
       "configs/system.ltx",
       "LTX file needs formatting",
@@ -67,6 +68,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

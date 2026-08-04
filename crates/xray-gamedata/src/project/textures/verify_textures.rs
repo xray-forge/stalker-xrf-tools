@@ -1,9 +1,7 @@
+use crate::GamedataFindingFactory;
 use crate::asset::asset_type::AssetType;
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use colored::Colorize;
 use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
@@ -27,7 +25,7 @@ impl GamedataProject {
       XRayError::new_verify_error("Texture count exceeds the supported result range")
     })?;
 
-    let mut findings: Vec<GamedataVerificationFinding> = texture_paths
+    let mut findings: Vec<Finding> = texture_paths
       .par_iter()
       .filter_map(|relative_path| {
         if options.is_verbose_logging_enabled() {
@@ -39,7 +37,7 @@ impl GamedataProject {
             println!("Texture path not found: {relative_path}");
           }
 
-          return Some(GamedataVerificationFinding::for_asset(
+          return Some(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::TexturesPath,
             Path::new(relative_path),
             "Texture path was not found in gamedata roots",
@@ -53,7 +51,7 @@ impl GamedataProject {
               println!("Texture is not valid: {}", path.display());
             }
 
-            Some(GamedataVerificationFinding::for_asset(
+            Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::TexturesValidation,
               &path,
               "Texture uses an unsupported format",
@@ -68,7 +66,7 @@ impl GamedataProject {
               );
             }
 
-            Some(GamedataVerificationFinding::for_asset(
+            Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::TexturesRead,
               &path,
               error.to_string(),
@@ -83,7 +81,7 @@ impl GamedataProject {
       XRayError::new_verify_error("Invalid texture count exceeds the supported result range")
     })?;
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     if options.is_logging_enabled() {
       println!(

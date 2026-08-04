@@ -1,9 +1,7 @@
+use crate::GamedataFindingFactory;
 use crate::asset::asset_type::AssetType;
 use crate::project::particles::verify_particles_usage_result::GamedataParticlesUsageVerificationResult;
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use colored::Colorize;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
@@ -38,7 +36,7 @@ impl GamedataProject {
 
     result
       .findings
-      .sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+      .sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
     result.duration = started_at.elapsed();
 
     if options.is_logging_enabled() {
@@ -127,7 +125,7 @@ impl GamedataProject {
           eprintln!("Spawn path not found for particle usage check: {relative_path}");
         }
 
-        result.findings.push(GamedataVerificationFinding::for_asset(
+        result.findings.push(GamedataFindingFactory::for_asset(
           GamedataVerificationRule::ParticlesUsageSpawn,
           Path::new(relative_path),
           "Spawn path was not found in gamedata roots",
@@ -148,7 +146,7 @@ impl GamedataProject {
               );
             }
 
-            result.findings.push(GamedataVerificationFinding::for_asset(
+            result.findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesUsageSpawn,
               &spawn_path,
               format!("Could not inspect spawn file for particle usage: {error}"),
@@ -180,7 +178,7 @@ impl GamedataProject {
               );
             }
 
-            result.findings.push(GamedataVerificationFinding::for_asset(
+            result.findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesUsageSpawnCustomData,
               &spawn_path,
               format!("Could not parse spawn custom data for particle usage: {error}"),
@@ -223,7 +221,7 @@ impl GamedataProject {
               );
             }
 
-            result.findings.push(GamedataVerificationFinding::for_asset(
+            result.findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesUsageReference,
               path,
               format!("Unknown particle reference: [{section_name}] {key} = {reference}"),

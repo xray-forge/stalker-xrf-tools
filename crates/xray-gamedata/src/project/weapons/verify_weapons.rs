@@ -1,10 +1,8 @@
+use crate::GamedataFindingFactory;
 use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
 use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationFinding,
-  GamedataVerificationRule,
-};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use colored::Colorize;
 use regex::Regex;
 use std::path::Path;
@@ -27,7 +25,7 @@ impl GamedataProject {
     let system_ltx_path = self.ltx_project.get_system_ltx_path();
 
     let mut checked_weapons_count: u32 = 0;
-    let mut findings: Vec<GamedataVerificationFinding> = Vec::new();
+    let mut findings: Vec<Finding> = Vec::new();
     let mut invalid_weapons_count: u32 = 0;
 
     for (section_name, section) in &system_ltx.sections {
@@ -44,7 +42,7 @@ impl GamedataProject {
               eprintln!("Invalid weapon section: [{section_name}]");
             }
 
-            findings.push(GamedataVerificationFinding::for_asset(
+            findings.push(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::WeaponsValidation,
               &system_ltx_path,
               format!("Weapon section [{section_name}] is invalid"),
@@ -57,7 +55,7 @@ impl GamedataProject {
             eprintln!("Invalid weapon section: [{section_name}], failure: {error:?}");
           }
 
-          findings.push(GamedataVerificationFinding::for_asset(
+          findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeaponsValidation,
             &system_ltx_path,
             format!("Weapon section [{section_name}] failed verification: {error}"),
@@ -69,7 +67,7 @@ impl GamedataProject {
 
     let duration: Duration = started_at.elapsed();
 
-    findings.sort_by(GamedataVerificationFinding::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     if options.is_logging_enabled() {
       println!(

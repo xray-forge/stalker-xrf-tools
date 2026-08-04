@@ -1,10 +1,10 @@
-use crate::{GamedataCheckResult, GamedataVerificationFinding, GamedataVerificationStatus};
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataTexturesVerificationResult {
   pub(crate) duration: Duration,
-  pub(crate) findings: Vec<GamedataVerificationFinding>,
+  pub(crate) findings: Vec<Finding>,
   pub(crate) invalid_textures_count: u32,
   pub(crate) checked_textures_count: u32,
 }
@@ -26,7 +26,7 @@ impl GamedataCheckResult for GamedataTexturesVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[GamedataVerificationFinding] {
+  fn findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -34,14 +34,15 @@ impl GamedataCheckResult for GamedataTexturesVerificationResult {
 #[cfg(test)]
 mod tests {
   use super::GamedataTexturesVerificationResult;
+  use crate::GamedataFindingFactory;
   use crate::{
-    GamedataVerificationFinding, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]
   fn exposes_texture_findings_in_reports() {
-    let finding: GamedataVerificationFinding = GamedataVerificationFinding::for_asset(
+    let finding: Finding = GamedataFindingFactory::for_asset(
       GamedataVerificationRule::TexturesValidation,
       "textures/test.dds",
       "Texture uses an unsupported format",
@@ -59,6 +60,6 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding.into_report()]);
+    assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }
