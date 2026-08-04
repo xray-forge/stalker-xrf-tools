@@ -36,10 +36,8 @@ impl GamedataProject {
             let particle_findings: Vec<GamedataVerificationFinding> =
               self.verify_particle(options, &particles_file, path);
 
-            if !particle_findings.is_empty() {
-              if options.is_logging_enabled() {
-                println!("Particle library is invalid: {}", path.display());
-              }
+            if !particle_findings.is_empty() && options.is_logging_enabled() {
+              println!("Particle library is invalid: {}", path.display());
             }
 
             particle_findings
