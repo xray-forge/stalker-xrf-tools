@@ -8,6 +8,6 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
   ) -> XRayResult<GamedataShadersVerificationResult> {
-    Ok(ShadersVerifier::new(self.root.join("shaders"), options).verify())
+    Ok(ShadersVerifier::new(self.root().join("shaders"), options).verify())
   }
 }

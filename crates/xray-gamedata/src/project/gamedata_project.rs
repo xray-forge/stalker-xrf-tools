@@ -1,21 +1,20 @@
-use crate::asset::asset_descriptor::AssetDescriptor;
-use crate::project::gamedata_project_options::GamedataProjectReadOptions;
-use std::collections::HashMap;
 use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
+use xray_assets::{DirectoryAssetIndex, XrayAssetIndex};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{LtxProject, LtxProjectOptions};
 
+use crate::project::gamedata_project_options::GamedataProjectReadOptions;
+
 pub struct GamedataProject {
-  pub(crate) assets: HashMap<String, AssetDescriptor>,
+  pub(crate) assets: XrayAssetIndex,
   pub(crate) ltx_project: LtxProject,
-  pub(crate) root: PathBuf,
 }
 
 impl GamedataProject {
   pub fn root(&self) -> &Path {
-    &self.root
+    self.assets.root()
   }
 
   pub fn open(options: &GamedataProjectReadOptions) -> XRayResult<Self> {
@@ -47,7 +46,7 @@ impl GamedataProject {
     }
 
     Ok(Self {
-      assets: Self::read_project_assets(options)?,
+      assets: XrayAssetIndex::new(DirectoryAssetIndex::read(&options.root)?, &options.ignored)?,
       ltx_project: LtxProject::open_at_path_opt(
         &configs,
         LtxProjectOptions {
@@ -61,7 +60,6 @@ impl GamedataProject {
           error
         ))
       })?,
-      root: options.root.clone(),
     })
   }
 }

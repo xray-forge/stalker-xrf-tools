@@ -21,7 +21,7 @@ impl GamedataProject {
     xray_output::info!(
       options.output,
       "Verifying gamedata project: {}",
-      self.root.display()
+      self.root().display()
     );
 
     xray_output::info!(
@@ -53,13 +53,17 @@ impl GamedataProject {
 mod tests {
   use super::GamedataProject;
   use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};
-  use std::collections::HashMap;
   use std::path::PathBuf;
+  use xray_assets::{DirectoryAssetIndex, XrayAssetIndex};
   use xray_ltx::LtxProject;
 
   fn empty_project() -> GamedataProject {
     GamedataProject {
-      assets: HashMap::new(),
+      assets: XrayAssetIndex::new(
+        DirectoryAssetIndex::read(env!("CARGO_MANIFEST_DIR")).expect("read test assets"),
+        &[],
+      )
+      .expect("create test assets"),
       ltx_project: LtxProject {
         root: PathBuf::new(),
         ltx_file_entries: Vec::new(),
@@ -68,7 +72,6 @@ mod tests {
         ltx_scheme_file_entries: Vec::new(),
         ltx_scheme_declarations: Default::default(),
       },
-      root: PathBuf::new(),
     }
   }
 

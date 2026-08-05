@@ -16,6 +16,7 @@ xray-ltx = { path = "../xray-ltx" }
 xray-lua = { path = "../xray-lua" }
 xray-output = { path = "../xray-output" }
 xray-report = { path = "../xray-report" }
+xray-assets = { path = "../xray-assets" }
 xray-shaders = { path = "../xray-shaders" }
 xray-sound = { path = "../xray-sound" }
 xray-utils = { path = "../xray-utils" }

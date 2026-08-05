@@ -1,10 +1,11 @@
-use crate::asset::asset_type::AssetType;
+use std::time::Instant;
+use xray_assets::XrayAssetType as AssetType;
+use xray_error::XRayResult;
+
 use crate::project::sounds::sound_files_verifier::SoundFilesVerifier;
 use crate::project::sounds::sound_references_verifier::SoundReferencesVerifier;
 use crate::project::sounds::sounds_verification_result::GamedataSoundsVerificationResult;
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
-use std::time::Instant;
-use xray_error::XRayResult;
 
 pub(crate) struct SoundsVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,

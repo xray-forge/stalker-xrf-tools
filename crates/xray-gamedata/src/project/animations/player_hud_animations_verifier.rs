@@ -1,15 +1,16 @@
+use std::collections::HashSet;
+use std::path::{Path, PathBuf};
+use xray_assets::XrayAssetType as AssetType;
+use xray_db::{OgfFile, OmfFile, XRayByteOrder};
+use xray_error::XRayResult;
+use xray_ltx::{Ltx, Section};
+
 use crate::GamedataFindingFactory;
-use crate::asset::asset_type::AssetType;
 use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
 use crate::project::weapons::weapons_utils::{
   get_weapon_animation_name, is_player_hud_section, is_weapon_section,
 };
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use std::collections::HashSet;
-use std::path::{Path, PathBuf};
-use xray_db::{OgfFile, OmfFile, XRayByteOrder};
-use xray_error::XRayResult;
-use xray_ltx::{Ltx, Section};
 
 pub(crate) struct PlayerHudAnimationsVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
@@ -239,7 +240,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
           .project
           .get_prefixed_masked_assets("meshes", motion_ref)
         {
-          if descriptor.asset_type == AssetType::Omf {
+          if descriptor.is_type(AssetType::Omf) {
             assets.insert(omf_path);
           }
         }

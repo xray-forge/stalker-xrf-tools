@@ -1,11 +1,12 @@
-use crate::GamedataFindingFactory;
-use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use regex::Regex;
 use std::collections::HashSet;
 use std::path::Path;
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, LtxProject};
+
+use crate::GamedataFindingFactory;
+use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 pub(crate) struct SoundReferencesVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
@@ -86,12 +87,14 @@ impl<'a> SoundReferencesVerifier<'a> {
   ) {
     let sound_tag: Regex = Regex::new(r"(?is)<sound>\s*([^<]+?)\s*</sound>").unwrap();
 
-    for (relative_path, descriptor) in &self.project.assets {
+    for asset in self.project.assets.assets() {
+      let relative_path = asset.logical_path();
+
       if !relative_path.starts_with("configs\\") || !relative_path.ends_with(".xml") {
         continue;
       }
 
-      let path = self.project.root.join(&descriptor.relative_path);
+      let path = self.project.root().join(asset.relative_path());
       let contents: String = match std::fs::read(&path) {
         Ok(contents) => String::from_utf8_lossy(&contents).into_owned(),
         Err(error) => {

@@ -1,11 +1,12 @@
-use crate::GamedataFindingFactory;
-use crate::asset::asset_type::AssetType;
-use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
-use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use std::path::Path;
 use std::time::{Duration, Instant};
+use xray_assets::XrayAssetType as AssetType;
 use xray_db::{SpawnFile, XRayByteOrder};
 use xray_error::XRayResult;
+
+use crate::GamedataFindingFactory;
+use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
   /// Verify spawn files in spawns directories, not levels spawn files.
@@ -17,12 +18,10 @@ impl GamedataProject {
 
     let spawn_files: Vec<String> = self
       .assets
-      .iter()
-      .filter(|(relative_path, descriptor)| {
-        descriptor.asset_type == AssetType::Spawn && relative_path.starts_with("spawns")
-      })
-      .map(|(key, _)| key.clone())
-      .collect::<Vec<_>>();
+      .with_type(AssetType::Spawn)
+      .filter(|asset| asset.logical_path().starts_with("spawns\\"))
+      .map(|asset| asset.logical_path().to_string())
+      .collect();
 
     xray_output::heading!(options.output, "{} {}", "Verify spawns:", spawn_files.len());
 

@@ -1,16 +1,17 @@
-use crate::GamedataFindingFactory;
-use crate::asset::asset_type::AssetType;
-use crate::project::scripts::runtime_script::is_runtime_script;
-use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
-use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use std::fs::File;
 use std::path::Path;
 use std::time::{Duration, Instant};
+use xray_assets::XrayAssetType as AssetType;
 use xray_error::{XRayError, XRayResult};
 use xray_lua::verify_luajit_script;
 use xray_utils::read_as_string_from_w1251_encoded;
+
+use crate::GamedataFindingFactory;
+use crate::project::scripts::runtime_script::is_runtime_script;
+use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationResult;
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
   pub fn verify_scripts(

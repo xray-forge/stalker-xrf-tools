@@ -17,6 +17,10 @@ impl XrayAsset<'_> {
     self.asset_type
   }
 
+  pub fn is_type(&self, asset_type: XrayAssetType) -> bool {
+    self.asset_type == Some(asset_type)
+  }
+
   pub fn relative_path(&self) -> &Path {
     self.directory_asset.relative_path()
   }

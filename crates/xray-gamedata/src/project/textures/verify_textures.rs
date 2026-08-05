@@ -1,13 +1,14 @@
-use crate::GamedataFindingFactory;
-use crate::asset::asset_type::AssetType;
-use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
-use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
 use std::fs::File;
 use std::path::Path;
 use std::time::{Duration, Instant};
+use xray_assets::XrayAssetType as AssetType;
 use xray_error::{XRayError, XRayResult};
+
+use crate::GamedataFindingFactory;
+use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
   pub fn verify_textures(
@@ -151,13 +152,17 @@ mod tests {
   use super::GamedataProject;
   use crate::GamedataProjectVerifyOptions;
   use ddsfile::{AlphaMode, D3D10ResourceDimension, Dds, DxgiFormat, NewDxgiParams};
-  use std::collections::HashMap;
   use std::path::PathBuf;
+  use xray_assets::{DirectoryAssetIndex, XrayAssetIndex};
   use xray_ltx::LtxProject;
 
   fn empty_project() -> GamedataProject {
     GamedataProject {
-      assets: HashMap::new(),
+      assets: XrayAssetIndex::new(
+        DirectoryAssetIndex::read(env!("CARGO_MANIFEST_DIR")).expect("read test assets"),
+        &[],
+      )
+      .expect("create test assets"),
       ltx_project: LtxProject {
         root: PathBuf::new(),
         ltx_file_entries: Vec::new(),
@@ -166,7 +171,6 @@ mod tests {
         ltx_scheme_file_entries: Vec::new(),
         ltx_scheme_declarations: Default::default(),
       },
-      root: PathBuf::new(),
     }
   }
 

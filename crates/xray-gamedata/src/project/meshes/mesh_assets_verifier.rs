@@ -1,12 +1,13 @@
-use crate::GamedataFindingFactory;
-use crate::asset::asset_type::AssetType;
-use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
-use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
+use xray_assets::XrayAssetType as AssetType;
 use xray_db::{OgfFile, OmfFile, ShaderLibraryFile, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
+
+use crate::GamedataFindingFactory;
+use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 pub(crate) struct MeshAssetsVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
