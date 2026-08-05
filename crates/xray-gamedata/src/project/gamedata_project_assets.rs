@@ -1,17 +1,9 @@
 use std::path::PathBuf;
-use xray_assets::{XrayAsset, XrayAssetType as AssetType};
+use xray_assets::XrayAsset;
 
 use crate::GamedataProject;
 
 impl GamedataProject {
-  pub fn get_all_asset_paths_by_type(&self, asset_type: AssetType) -> Vec<String> {
-    self
-      .assets
-      .with_type(asset_type)
-      .map(|asset| asset.logical_path().to_string())
-      .collect()
-  }
-
   pub fn get_all_asset_absolute_paths_by_ends_with(&self, filter: &str) -> Vec<PathBuf> {
     self
       .assets

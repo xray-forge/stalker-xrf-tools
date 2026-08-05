@@ -18,7 +18,13 @@ impl GamedataProject {
     xray_output::heading!(options.output, "Verify textures:");
 
     let started_at: Instant = Instant::now();
-    let texture_paths: Vec<String> = self.get_all_asset_paths_by_type(AssetType::Dds);
+
+    let texture_paths: Vec<String> = self
+      .assets
+      .with_type(AssetType::Dds)
+      .map(|asset| asset.logical_path().to_string())
+      .collect();
+
     let checked_textures_count: u32 = u32::try_from(texture_paths.len()).map_err(|_| {
       XRayError::new_verify_error("Texture count exceeds the supported result range")
     })?;

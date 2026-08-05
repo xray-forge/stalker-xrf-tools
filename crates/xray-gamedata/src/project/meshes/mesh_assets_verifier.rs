@@ -31,7 +31,12 @@ impl<'a> MeshAssetsVerifier<'a> {
   pub(crate) fn verify(&self) -> XRayResult<GamedataMeshAssetsVerificationResult> {
     let options = self.options;
     let shader_library = self.shader_library;
-    let mesh_paths: Vec<String> = self.project.get_all_asset_paths_by_type(AssetType::Ogf);
+    let mesh_paths: Vec<String> = self
+      .project
+      .assets
+      .with_type(AssetType::Ogf)
+      .map(|asset| asset.logical_path().to_string())
+      .collect();
 
     let checked_meshes_count: u32 = u32::try_from(mesh_paths.len())
       .map_err(|_| XRayError::new_verify_error("Mesh count exceeds the supported result range"))?;

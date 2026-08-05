@@ -25,7 +25,13 @@ impl<'a> SoundsVerifier<'a> {
 
     let started_at: Instant = Instant::now();
 
-    let sound_paths: Vec<String> = self.project.get_all_asset_paths_by_type(AssetType::Ogg);
+    let sound_paths: Vec<String> = self
+      .project
+      .assets
+      .with_type(AssetType::Ogg)
+      .map(|asset| asset.logical_path().to_string())
+      .collect();
+
     let sound_files = SoundFilesVerifier::new(self.project, self.options, &sound_paths).verify()?;
     let sound_references =
       SoundReferencesVerifier::new(self.project, self.options, &sound_paths).verify()?;

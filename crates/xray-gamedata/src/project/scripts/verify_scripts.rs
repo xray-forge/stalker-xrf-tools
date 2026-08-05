@@ -22,7 +22,10 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let script_paths: Vec<String> = self
-      .get_all_asset_paths_by_type(AssetType::Script)
+      .assets
+      .with_type(AssetType::Script)
+      .map(|asset| asset.logical_path().to_string())
+      .collect::<Vec<_>>()
       .into_iter()
       .filter(|path| is_runtime_script(path))
       .collect();

@@ -1,6 +1,7 @@
 use std::path::Path;
 use xray_error::{XRayError, XRayResult};
 
+/// Converts a root-relative physical path into the canonical X-Ray logical path used for indexing.
 pub(crate) fn logical_path(path: &Path) -> XRayResult<String> {
   normalize(path.to_str().ok_or_else(|| {
     XRayError::new_asset_error(format!(
