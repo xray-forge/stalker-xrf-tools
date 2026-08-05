@@ -1,4 +1,4 @@
-use crate::xray_asset_utils::{is_component_prefix, logical_path, normalize};
+use crate::xray_asset_utils::{is_component_prefix, join, logical_path, normalize};
 use crate::{DirectoryAssetIndex, XrayAsset, XrayAssetType};
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -66,6 +66,10 @@ impl XrayAssetIndex {
     )
   }
 
+  pub fn find_in(&self, prefix: &str, path: &str) -> XRayResult<Option<XrayAsset<'_>>> {
+    self.find(&join(prefix, path)?)
+  }
+
   pub fn with_prefix(&self, prefix: &str) -> XRayResult<impl Iterator<Item = XrayAsset<'_>>> {
     let prefix = normalize(prefix)?;
 
@@ -100,6 +104,37 @@ impl XrayAssetIndex {
 
   pub fn with_mask(&self, mask: &str) -> XRayResult<impl Iterator<Item = XrayAsset<'_>>> {
     let mask = normalize(mask)?;
+
+    let Some((start, end)) = mask.split_once('*') else {
+      return Err(XRayError::new_asset_error(
+        "X-Ray asset mask must contain exactly one '*'",
+      ));
+    };
+
+    if end.contains('*') {
+      return Err(XRayError::new_asset_error(
+        "X-Ray asset mask must contain exactly one '*'",
+      ));
+    }
+
+    let start: String = start.to_string();
+    let end: String = end.to_string();
+
+    Ok(
+      self
+        .assets
+        .iter()
+        .filter(move |(path, _)| path.starts_with(&start) && path.ends_with(&end))
+        .map(|(path, index)| self.asset(path, *index)),
+    )
+  }
+
+  pub fn with_mask_in(
+    &self,
+    prefix: &str,
+    mask: &str,
+  ) -> XRayResult<impl Iterator<Item = XrayAsset<'_>>> {
+    let mask: String = join(prefix, mask)?;
 
     let Some((start, end)) = mask.split_once('*') else {
       return Err(XRayError::new_asset_error(

@@ -33,3 +33,12 @@ pub(crate) fn is_component_prefix(path: &str, prefix: &str) -> bool {
       .strip_prefix(prefix)
       .is_some_and(|rest| rest.starts_with('\\'))
 }
+
+pub(crate) fn join(prefix: &str, path: &str) -> XRayResult<String> {
+  match (prefix.is_empty(), path.is_empty()) {
+    (true, true) => normalize(""),
+    (true, false) => normalize(path),
+    (false, true) => normalize(prefix),
+    (false, false) => normalize(&format!("{prefix}\\{path}")),
+  }
+}

@@ -45,10 +45,9 @@ impl GamedataProject {
     prefix: &str,
     relative_path: &str,
   ) -> Option<(PathBuf, XrayAsset<'_>)> {
-    let path = join_logical_path(prefix, relative_path)?;
     self
       .assets
-      .find(&path)
+      .find_in(prefix, relative_path)
       .ok()
       .flatten()
       .map(|asset| (self.root().join(asset.relative_path()), asset))
@@ -59,10 +58,7 @@ impl GamedataProject {
     prefix: &str,
     mask: &str,
   ) -> Vec<(PathBuf, XrayAsset<'_>)> {
-    let Some(mask) = join_logical_path(prefix, mask) else {
-      return Vec::new();
-    };
-    let Ok(assets) = self.assets.with_mask(&mask) else {
+    let Ok(assets) = self.assets.with_mask_in(prefix, mask) else {
       return Vec::new();
     };
     assets
@@ -96,6 +92,7 @@ impl GamedataProject {
     } else {
       format!("{visual_path}{extension}")
     };
+
     self.get_prefixed_absolute_asset_path("meshes", &visual_path)
   }
 
