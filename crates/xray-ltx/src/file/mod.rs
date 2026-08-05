@@ -1,3 +1,4 @@
+pub(crate) mod check;
 pub(crate) mod file_configuration;
 pub(crate) mod file_section;
 pub(crate) mod formatter;

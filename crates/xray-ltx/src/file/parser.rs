@@ -6,7 +6,7 @@ use crate::file::file_configuration::line_separator::LineSeparator;
 use crate::file::file_section::section::Section;
 use crate::file::file_section::section_entry::SectionEntry;
 use crate::file::formatter::LtxFormatter;
-use crate::{Ltx, ROOT_SECTION};
+use crate::{Ltx, LtxCheck, ROOT_SECTION};
 use std::str::Chars;
 use xray_error::{XRayError, XRayResult};
 
@@ -48,6 +48,7 @@ impl<'a> LtxParser<'a> {
   pub fn parse(&mut self) -> XRayResult<Ltx> {
     let mut current_section: String = ROOT_SECTION.to_string();
     let mut includes_processed: bool = false;
+    let mut is_metadata_header: bool = true;
     let mut ltx: Ltx = Ltx::new();
 
     self.skip_whitespaces();
@@ -61,10 +62,18 @@ impl<'a> LtxParser<'a> {
 
       match current_char {
         current if current == LTX_SYMBOL_COMMENT => {
-          self.skip_comment()?;
+          let comment_line: usize = self.line + 1;
+          let comment_column: usize = self.column + 1;
+          let comment: String = self.skip_comment()?;
+
+          if is_metadata_header {
+            self.parse_metadata_directive(&comment, &mut ltx, comment_line, comment_column)?;
+          }
         }
 
         current if current == LTX_SYMBOL_INCLUDE => {
+          is_metadata_header = false;
+
           let line: String = self.parse_until_eol(true)?;
           let (included_path, _) = self.parse_include_from_line(&line)?;
 
@@ -79,6 +88,8 @@ impl<'a> LtxParser<'a> {
         }
 
         current if current == LTX_SYMBOL_SECTION_OPEN => {
+          is_metadata_header = false;
+
           let line: String = self.parse_until_eol(true)?;
           let (section, inherited, _) = self.parse_section_from_line(&line)?;
 
@@ -105,6 +116,8 @@ impl<'a> LtxParser<'a> {
         }
 
         _ => {
+          is_metadata_header = false;
+
           let line: String = self.parse_until_eol(true)?;
           let (key, value, _) = self.parse_key_value_from_line(&line)?;
 
@@ -129,6 +142,48 @@ impl<'a> LtxParser<'a> {
     }
 
     Ok(ltx)
+  }
+
+  fn parse_metadata_directive(
+    &self,
+    comment: &str,
+    ltx: &mut Ltx,
+    line: usize,
+    column: usize,
+  ) -> XRayResult {
+    let mut parts: std::str::SplitWhitespace<'_> = comment.split_whitespace();
+
+    if parts.next() != Some("@xrf-ltx") {
+      return Ok(());
+    }
+
+    let Some(directive) = parts.next() else {
+      return Err(XRayError::new_ltx_parse_error(
+        line,
+        column,
+        "Expected an @xrf-ltx directive name",
+      ));
+    };
+
+    if parts.next().is_some() {
+      return Err(XRayError::new_ltx_parse_error(
+        line,
+        column,
+        "Expected exactly one @xrf-ltx directive",
+      ));
+    }
+
+    let Some(check) = LtxCheck::from_skip_directive(directive) else {
+      return Err(XRayError::new_ltx_parse_error(
+        line,
+        column,
+        format!("Unknown @xrf-ltx directive '{directive}'"),
+      ));
+    };
+
+    ltx.skip_check(check);
+
+    Ok(())
   }
 
   /// Parse the whole LTX input and reformat as string.
@@ -473,6 +528,32 @@ impl LtxParser<'_> {
 #[cfg(test)]
 mod test {
   use crate::file::parser::LtxParser;
+  use crate::{Ltx, LtxCheck};
+
+  #[test]
+  fn parses_header_metadata_directive() {
+    let ltx: Ltx = Ltx::read_from_str("; @xrf-ltx skip-inheritance\n[child]:missing\n").unwrap();
+
+    assert!(ltx.is_check_skipped(LtxCheck::Inheritance));
+    assert!(ltx.into_inherited().is_ok());
+  }
+
+  #[test]
+  fn rejects_unknown_header_metadata_directive() {
+    let error = Ltx::read_from_str("; @xrf-ltx skip-unknown\n[section]\n").unwrap_err();
+
+    assert_eq!(
+      error.to_string(),
+      "Ltx parse error: 1:2 Unknown @xrf-ltx directive 'skip-unknown'"
+    );
+  }
+
+  #[test]
+  fn ignores_metadata_directive_after_ltx_content() {
+    let ltx: Ltx = Ltx::read_from_str("[section]\n; @xrf-ltx skip-inheritance\n").unwrap();
+
+    assert!(!ltx.is_check_skipped(LtxCheck::Inheritance));
+  }
 
   #[test]
   fn test_read_section() {

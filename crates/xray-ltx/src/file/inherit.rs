@@ -1,6 +1,6 @@
-use crate::Ltx;
 use crate::file::file_section::section::Section;
 use crate::file::types::LtxSections;
+use crate::{Ltx, LtxCheck};
 use xray_error::{XRayError, XRayResult};
 
 /// Converter object to process and inject all inherit section statements.
@@ -25,6 +25,10 @@ impl LtxInheritConvertor {
       return Err(XRayError::new_convert_error(
         "Failed to equipment ltx file, not processed include statements detected on inheritance conversion",
       ));
+    }
+
+    if ltx.is_check_skipped(LtxCheck::Inheritance) {
+      return Ok(ltx);
     }
 
     // Nothing to parse - no child sections.

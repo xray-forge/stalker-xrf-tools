@@ -125,6 +125,7 @@ impl LtxIncludeConvertor {
       path: ltx.path,
       directory: ltx.directory,
       includes: Default::default(),
+      skipped_checks: ltx.skipped_checks,
       sections: Default::default(),
     };
 

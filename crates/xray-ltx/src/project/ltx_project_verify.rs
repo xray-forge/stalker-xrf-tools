@@ -238,4 +238,28 @@ mod tests {
 
     Ok(())
   }
+
+  #[test]
+  fn skips_inheritance_for_entry_with_header_metadata() -> XRayResult {
+    let root: PathBuf = std::env::temp_dir().join(format!(
+      "xray-ltx-project-skip-inheritance-test-{}",
+      std::process::id()
+    ));
+    fs::create_dir_all(&root)?;
+    fs::write(
+      root.join("disabled.ltx"),
+      "; @xrf-ltx skip-inheritance\n[child]:missing\n",
+    )?;
+
+    let project: LtxProject = LtxProject::open_at_path(&root)?;
+    let result: LtxProjectVerifyResult = project.verify_entries()?;
+
+    assert_eq!(result.total_files, 1);
+    assert_eq!(result.total_sections, 1);
+    assert!(result.errors.is_empty());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
 }

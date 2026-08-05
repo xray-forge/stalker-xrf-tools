@@ -3,7 +3,7 @@ use crate::file::file_section::section_setter::SectionSetter;
 use crate::file::include::LtxIncludeConvertor;
 use crate::file::inherit::LtxInheritConvertor;
 use crate::file::types::{LtxIncluded, LtxSections};
-use crate::{ROOT_SECTION, Section};
+use crate::{LtxCheck, ROOT_SECTION, Section};
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
 use xray_error::XRayResult;
@@ -11,6 +11,7 @@ use xray_error::XRayResult;
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ltx {
   pub(crate) includes: LtxIncluded,
+  pub(crate) skipped_checks: Vec<LtxCheck>,
   pub directory: Option<PathBuf>,
   pub path: Option<PathBuf>,
   pub sections: LtxSections,
@@ -98,6 +99,17 @@ impl Ltx {
 
   pub fn includes(&self, file: &String) -> bool {
     self.includes.contains(file)
+  }
+
+  /// Check whether this LTX file opted out of a conversion or verification check.
+  pub fn is_check_skipped(&self, check: LtxCheck) -> bool {
+    self.skipped_checks.contains(&check)
+  }
+
+  pub(crate) fn skip_check(&mut self, check: LtxCheck) {
+    if !self.is_check_skipped(check) {
+      self.skipped_checks.push(check);
+    }
   }
 
   pub fn get_included(&self) -> &Vec<String> {
