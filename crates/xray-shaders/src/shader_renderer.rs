@@ -28,7 +28,7 @@ impl ShaderRenderer {
 
   /// Ordered paths the engine tries for an import.
   ///
-  /// This retu rns candidates only. The caller owns filesystem access and
+  /// This returns candidates only. The caller owns filesystem access and
   /// decides how a missing import should be reported.
   pub fn include_candidate_paths(self, shaders_root: &Path, import_path: &str) -> Vec<PathBuf> {
     let import_path: PathBuf = Self::path_from_xray_path(import_path);
