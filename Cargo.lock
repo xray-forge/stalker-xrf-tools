@@ -7020,6 +7020,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "xray-assets"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "walkdir",
+ "xray-error",
+]
+
+[[package]]
 name = "xray-chunk"
 version = "0.1.0"
 dependencies = [
@@ -7097,6 +7106,7 @@ dependencies = [
  "rayon",
  "regex",
  "walkdir",
+ "xray-assets",
  "xray-db",
  "xray-error",
  "xray-ltx",

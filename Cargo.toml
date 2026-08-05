@@ -4,6 +4,7 @@ members = [
     "bin/xrf-app",
     "bin/xrf-cli",
     "crates/xray-archive",
+    "crates/xray-assets",
     "crates/xray-chunk",
     "crates/xray-db",
     "crates/xray-delharc",

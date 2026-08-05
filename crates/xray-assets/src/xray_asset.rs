@@ -1,0 +1,23 @@
+use crate::{DirectoryAsset, XrayAssetType};
+use std::path::Path;
+
+#[derive(Debug, Clone, Copy)]
+pub struct XrayAsset<'a> {
+  pub(crate) logical_path: &'a str,
+  pub(crate) asset_type: Option<XrayAssetType>,
+  pub(crate) directory_asset: &'a DirectoryAsset,
+}
+
+impl XrayAsset<'_> {
+  pub fn logical_path(&self) -> &str {
+    self.logical_path
+  }
+
+  pub fn asset_type(&self) -> Option<XrayAssetType> {
+    self.asset_type
+  }
+
+  pub fn relative_path(&self) -> &Path {
+    self.directory_asset.relative_path()
+  }
+}
