@@ -4,16 +4,6 @@ use xray_assets::XrayAsset;
 use crate::GamedataProject;
 
 impl GamedataProject {
-  pub fn get_all_asset_absolute_paths_by_ends_with(&self, filter: &str) -> Vec<PathBuf> {
-    self
-      .assets
-      .with_suffix(filter)
-      .into_iter()
-      .flatten()
-      .map(|asset| asset.absolute_path())
-      .collect()
-  }
-
   pub fn get_absolute_asset_path(&self, relative_path: &str) -> Option<PathBuf> {
     self.get_prefixed_absolute_asset_path("", relative_path)
   }

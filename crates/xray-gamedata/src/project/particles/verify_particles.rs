@@ -15,8 +15,11 @@ impl GamedataProject {
     xray_output::heading!(options.output, "Verify particles:");
 
     let started_at: Instant = Instant::now();
-    let particle_paths: Vec<PathBuf> =
-      self.get_all_asset_absolute_paths_by_ends_with("particles.xr");
+    let particle_paths: Vec<PathBuf> = self
+      .assets
+      .with_suffix("particles.xr")?
+      .map(|asset| asset.absolute_path())
+      .collect();
 
     let checked_particle_files_count: u32 = u32::try_from(particle_paths.len()).map_err(|_| {
       XRayError::new_verify_error("Particle library count exceeds the supported result range")

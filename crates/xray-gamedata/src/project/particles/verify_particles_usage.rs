@@ -55,7 +55,7 @@ impl GamedataProject {
   fn read_particle_names(&self) -> XRayResult<HashSet<String>> {
     let mut names: HashSet<String> = HashSet::new();
 
-    for path in self.get_all_asset_absolute_paths_by_ends_with("particles.xr") {
+    for path in self.assets.with_suffix("particles.xr")?.map(|asset| asset.absolute_path()) {
       let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder, _>(&path)?;
 
       for effect in &particles_file.effects.effects {
