@@ -18,7 +18,7 @@ impl GamedataProject {
       .with_suffix(filter)
       .into_iter()
       .flatten()
-      .map(|asset| self.root().join(asset.relative_path()))
+      .map(|asset| asset.absolute_path())
       .collect()
   }
 
@@ -50,7 +50,7 @@ impl GamedataProject {
       .find_in(prefix, relative_path)
       .ok()
       .flatten()
-      .map(|asset| (self.root().join(asset.relative_path()), asset))
+      .map(|asset| (asset.absolute_path(), asset))
   }
 
   pub fn get_prefixed_masked_assets(
@@ -61,9 +61,7 @@ impl GamedataProject {
     let Ok(assets) = self.assets.with_mask_in(prefix, mask) else {
       return Vec::new();
     };
-    assets
-      .map(|asset| (self.root().join(asset.relative_path()), asset))
-      .collect()
+    assets.map(|asset| (asset.absolute_path(), asset)).collect()
   }
 
   pub fn get_ogf_path(&self, visual_path: &str) -> Option<PathBuf> {

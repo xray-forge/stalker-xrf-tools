@@ -35,7 +35,7 @@ impl<'a> MeshesVerifier<'a> {
       },
     };
 
-    let result = GamedataMeshesVerificationResult::from_checks(
+    let result: GamedataMeshesVerificationResult = GamedataMeshesVerificationResult::from_checks(
       started_at.elapsed(),
       shader_library,
       mesh_assets,

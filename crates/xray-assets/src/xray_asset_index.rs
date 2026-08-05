@@ -165,6 +165,7 @@ impl XrayAssetIndex {
       logical_path,
       asset_type: XrayAssetType::from_logical_path(logical_path),
       directory_asset: self.directory.asset(index),
+      root: self.directory.root(),
     }
   }
 }

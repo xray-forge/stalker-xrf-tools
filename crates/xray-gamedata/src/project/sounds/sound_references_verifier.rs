@@ -94,7 +94,7 @@ impl<'a> SoundReferencesVerifier<'a> {
         continue;
       }
 
-      let path = self.project.root().join(asset.relative_path());
+      let path = asset.absolute_path();
       let contents: String = match std::fs::read(&path) {
         Ok(contents) => String::from_utf8_lossy(&contents).into_owned(),
         Err(error) => {
