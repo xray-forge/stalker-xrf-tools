@@ -2,6 +2,7 @@ use crate::xray_asset_utils::{is_component_prefix, join, logical_path, normalize
 use crate::{DirectoryAssetIndex, XrayAsset, XrayAssetType};
 use std::collections::BTreeMap;
 use std::path::Path;
+use std::path::PathBuf;
 use xray_error::{XRayError, XRayResult};
 
 #[derive(Debug)]
@@ -68,6 +69,18 @@ impl XrayAssetIndex {
 
   pub fn find_in(&self, prefix: &str, path: &str) -> XRayResult<Option<XrayAsset<'_>>> {
     self.find(&join(prefix, path)?)
+  }
+
+  pub fn absolute_path(&self, path: &str) -> XRayResult<Option<PathBuf>> {
+    Ok(self.find(path)?.map(|asset| asset.absolute_path()))
+  }
+
+  pub fn absolute_path_in(&self, prefix: &str, path: &str) -> XRayResult<Option<PathBuf>> {
+    Ok(
+      self
+        .find_in(prefix, path)?
+        .map(|asset| asset.absolute_path()),
+    )
   }
 
   pub fn with_prefix(&self, prefix: &str) -> XRayResult<impl Iterator<Item = XrayAsset<'_>>> {
