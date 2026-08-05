@@ -2,6 +2,9 @@
 
 mod directory_asset;
 mod directory_asset_index;
+pub mod shader;
+pub mod texture;
+pub mod xray_path;
 mod xray_asset;
 mod xray_asset_index;
 mod xray_asset_type;

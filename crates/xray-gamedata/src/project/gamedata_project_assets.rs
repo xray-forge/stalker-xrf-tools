@@ -19,7 +19,10 @@ impl GamedataProject {
   }
 
   pub fn get_shader_library_path(&self) -> PathBuf {
-    self.root().join("shaders.xr")
+    self
+      .assets
+      .expected_absolute_path(xray_assets::shader::SHADER_LIBRARY_LOGICAL_PATH)
+      .expect("fixed shader library path is valid")
   }
 
   pub fn get_prefixed_absolute_asset_path(
@@ -57,38 +60,52 @@ impl GamedataProject {
   }
 
   pub fn get_ogf_path(&self, visual_path: &str) -> Option<PathBuf> {
-    self.get_mesh_path(visual_path, ".ogf")
+    self
+      .assets
+      .ogf(visual_path)
+      .ok()
+      .flatten()
+      .map(|asset| asset.absolute_path())
   }
 
   pub fn get_omf_path(&self, visual_path: &str) -> Option<PathBuf> {
-    self.get_mesh_path(visual_path, ".omf")
+    self
+      .assets
+      .omf(visual_path)
+      .ok()
+      .flatten()
+      .map(|asset| asset.absolute_path())
   }
 
   pub fn get_omf_paths(&self, visual_path: &str) -> Vec<PathBuf> {
-    if visual_path.ends_with("*.omf") {
-      self
-        .get_prefixed_masked_assets("meshes", visual_path)
-        .into_iter()
-        .map(|(path, _)| path)
-        .collect()
-    } else {
-      self.get_omf_path(visual_path).into_iter().collect()
-    }
+    self
+      .assets
+      .omfs(visual_path)
+      .into_iter()
+      .flatten()
+      .map(|asset| asset.absolute_path())
+      .collect()
   }
 
   pub fn get_mesh_path(&self, visual_path: &str, extension: &str) -> Option<PathBuf> {
-    let visual_path = if visual_path.ends_with(extension) {
-      visual_path.to_string()
-    } else {
-      format!("{visual_path}{extension}")
-    };
-
-    self.get_prefixed_absolute_asset_path("meshes", &visual_path)
+    self
+      .assets
+      .find_in(
+        "meshes",
+        &xray_assets::xray_path::with_extension(visual_path, extension),
+      )
+      .ok()
+      .flatten()
+      .map(|asset| asset.absolute_path())
   }
 
   pub fn resolve_dds_texture_path(&self, texture_reference: &str) -> Option<PathBuf> {
-    let texture_path = dds_texture_asset_path_from_reference(texture_reference);
-    self.get_prefixed_absolute_asset_path("textures", &texture_path)
+    self
+      .assets
+      .dds_texture(texture_reference)
+      .ok()
+      .flatten()
+      .map(|asset| asset.absolute_path())
   }
 }
 

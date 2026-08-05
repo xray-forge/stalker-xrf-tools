@@ -83,6 +83,37 @@ impl XrayAssetIndex {
     )
   }
 
+  /// Returns the expected physical location for a valid X-Ray logical path, even when absent.
+  pub fn expected_absolute_path(&self, path: &str) -> XRayResult<PathBuf> {
+    Ok(self.root().join(normalize(path)?))
+  }
+
+  pub fn ogf(&self, reference: &str) -> XRayResult<Option<XrayAsset<'_>>> {
+    self.find_in(
+      "meshes",
+      &crate::xray_path::with_extension(reference, ".ogf"),
+    )
+  }
+
+  pub fn omf(&self, reference: &str) -> XRayResult<Option<XrayAsset<'_>>> {
+    self.find_in(
+      "meshes",
+      &crate::xray_path::with_extension(reference, ".omf"),
+    )
+  }
+
+  pub fn omfs(&self, reference: &str) -> XRayResult<Vec<XrayAsset<'_>>> {
+    if reference.ends_with("*.omf") {
+      Ok(self.with_mask_in("meshes", reference)?.collect())
+    } else {
+      Ok(self.omf(reference)?.into_iter().collect())
+    }
+  }
+
+  pub fn dds_texture(&self, reference: &str) -> XRayResult<Option<XrayAsset<'_>>> {
+    self.find_in("textures", &crate::texture::dds_logical_path(reference))
+  }
+
   pub fn with_prefix(&self, prefix: &str) -> XRayResult<impl Iterator<Item = XrayAsset<'_>>> {
     let prefix = normalize(prefix)?;
 
