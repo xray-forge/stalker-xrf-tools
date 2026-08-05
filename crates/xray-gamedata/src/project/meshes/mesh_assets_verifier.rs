@@ -46,7 +46,13 @@ impl<'a> MeshAssetsVerifier<'a> {
       .map(|relative_path| {
         xray_output::verbose!(options.output, "Verify mesh: {relative_path}");
 
-        let Some(path) = self.project.get_absolute_asset_path(relative_path) else {
+        let Some(path) = self
+          .project
+          .assets
+          .absolute_path(relative_path)
+          .ok()
+          .flatten()
+        else {
           xray_output::error!(options.output, "Mesh path not found: {relative_path}");
 
           return vec![GamedataFindingFactory::for_asset(
@@ -157,7 +163,13 @@ impl<'a> MeshAssetsVerifier<'a> {
     // Verify all motion refs injected in OGF file.
     if let Some(kinematics) = &ogf.kinematics {
       for motion_ref in &kinematics.motion_refs {
-        let motion_paths: Vec<PathBuf> = self.project.get_omf_paths(motion_ref);
+        let motion_paths: Vec<PathBuf> = self
+          .project
+          .assets
+          .omfs(motion_ref)?
+          .into_iter()
+          .map(|asset| asset.absolute_path())
+          .collect();
 
         if motion_paths.is_empty() {
           xray_output::error!(
@@ -228,7 +240,10 @@ impl<'a> MeshAssetsVerifier<'a> {
     if let Some(texture) = &ogf.texture
       && self
         .project
-        .resolve_dds_texture_path(&texture.texture_name)
+        .assets
+        .dds_texture(&texture.texture_name)
+        .ok()
+        .flatten()
         .is_none()
     {
       xray_output::error!(

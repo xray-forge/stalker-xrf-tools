@@ -108,7 +108,13 @@ impl GamedataProject {
       xray_output::verbose!(options.output, "Verify particle: {}", particle.name);
 
       for texture_relative_path in particle.sprite.texture_name.split(",") {
-        if let Some(texture) = self.resolve_dds_texture_path(texture_relative_path) {
+        if let Some(texture) = self
+          .assets
+          .dds_texture(texture_relative_path)
+          .ok()
+          .flatten()
+          .map(|asset| asset.absolute_path())
+        {
           match self.verify_texture_by_path(options, &texture) {
             Ok(result) => {
               if !result {

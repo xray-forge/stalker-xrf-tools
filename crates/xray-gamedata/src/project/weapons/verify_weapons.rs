@@ -121,7 +121,14 @@ impl GamedataProject {
   ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
-    if let Some(visual) = &section.get("visual").and_then(|it| self.get_ogf_path(it)) {
+    if let Some(visual) = &section.get("visual").and_then(|it| {
+      self
+        .assets
+        .ogf(it)
+        .ok()
+        .flatten()
+        .map(|asset| asset.absolute_path())
+    }) {
       if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, _>(visual) {
         xray_output::error!(
           options.output,
@@ -158,17 +165,27 @@ impl GamedataProject {
       }
     };
 
-    if let Some(visual_path) = &hud_section
-      .get("item_visual")
-      .and_then(|it| self.get_ogf_path(it))
-    {
+    if let Some(visual_path) = &hud_section.get("item_visual").and_then(|it| {
+      self
+        .assets
+        .ogf(it)
+        .ok()
+        .flatten()
+        .map(|asset| asset.absolute_path())
+    }) {
       match OgfFile::read_from_path::<XRayByteOrder, _>(visual_path) {
         Ok(hud_visual) => {
           if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
             let mut ref_animations: Vec<String> = Vec::new();
 
             for motion_ref in &motion_refs {
-              if let Some(motion_file_path) = self.get_omf_path(motion_ref) {
+              if let Some(motion_file_path) = self
+                .assets
+                .omf(motion_ref)
+                .ok()
+                .flatten()
+                .map(|asset| asset.absolute_path())
+              {
                 match OmfFile::read_motions_from_path::<XRayByteOrder, &Path>(&motion_file_path) {
                   Ok(motions) => ref_animations.extend(motions),
                   Err(error) => {
@@ -382,7 +399,12 @@ impl GamedataProject {
     }
 
     // todo: Check OGG file, check existing.
-    if let Some(sound_path) = self.get_prefixed_absolute_asset_path("sounds", &sound_object_value) {
+    if let Some(sound_path) = self
+      .assets
+      .absolute_path_in("sounds", &sound_object_value)
+      .ok()
+      .flatten()
+    {
       if sound_path.is_file() && sound_path.exists() {
         xray_output::verbose!(
           options.output,

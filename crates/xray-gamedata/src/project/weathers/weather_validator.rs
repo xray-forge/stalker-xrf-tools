@@ -203,7 +203,10 @@ pub fn verify_weather_findings_with_definitions(
     if let Some(sky_texture) = section.get("sky_texture") {
       for texture_reference in [sky_texture.to_string(), format!("{sky_texture}#small")] {
         if project
-          .resolve_dds_texture_path(&texture_reference)
+          .assets
+          .dds_texture(&texture_reference)
+          .ok()
+          .flatten()
           .is_none()
         {
           findings.push(report_weather_finding(
@@ -218,7 +221,12 @@ pub fn verify_weather_findings_with_definitions(
     }
 
     if let Some(clouds_texture) = section.get("clouds_texture")
-      && project.resolve_dds_texture_path(clouds_texture).is_none()
+      && project
+        .assets
+        .dds_texture(clouds_texture)
+        .ok()
+        .flatten()
+        .is_none()
     {
       findings.push(report_weather_finding(
         options,

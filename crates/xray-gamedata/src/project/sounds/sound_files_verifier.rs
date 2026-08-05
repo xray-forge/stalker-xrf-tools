@@ -35,7 +35,13 @@ impl<'a> SoundFilesVerifier<'a> {
       .filter_map(|relative_path| {
         xray_output::verbose!(self.options.output, "Verify sound: {relative_path}");
 
-        let Some(path) = self.project.get_absolute_asset_path(relative_path) else {
+        let Some(path) = self
+          .project
+          .assets
+          .absolute_path(relative_path)
+          .ok()
+          .flatten()
+        else {
           return Some(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::SoundsFiles,
             Path::new(relative_path),

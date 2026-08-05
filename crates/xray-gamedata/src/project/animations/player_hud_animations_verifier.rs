@@ -98,10 +98,15 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     let mut is_valid: bool = true;
     let mut hud_motions: HashSet<String> = HashSet::new();
 
-    if let Some(visual_path) = &section
-      .get("visual")
-      .and_then(|it| self.project.get_ogf_path(it))
-    {
+    if let Some(visual_path) = &section.get("visual").and_then(|it| {
+      self
+        .project
+        .assets
+        .ogf(it)
+        .ok()
+        .flatten()
+        .map(|asset| asset.absolute_path())
+    }) {
       xray_output::verbose!(
         self.options.output,
         "Read player hud motion refs - [{}] {}",
@@ -253,17 +258,10 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     let mut assets: HashSet<PathBuf> = HashSet::new();
 
     for motion_ref in &motion_refs {
-      if motion_ref.ends_with("*.omf") {
-        for (omf_path, descriptor) in self
-          .project
-          .get_prefixed_masked_assets("meshes", motion_ref)
-        {
-          if descriptor.is_type(AssetType::Omf) {
-            assets.insert(omf_path);
-          }
+      for asset in self.project.assets.omfs(motion_ref)? {
+        if asset.is_type(AssetType::Omf) {
+          assets.insert(asset.absolute_path());
         }
-      } else if let Some(visual_path) = self.project.get_omf_path(motion_ref) {
-        assets.insert(visual_path);
       }
     }
 

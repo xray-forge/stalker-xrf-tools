@@ -10,3 +10,20 @@ pub fn dds_logical_path(reference: &str) -> String {
     format!("{reference}.dds")
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::dds_logical_path;
+
+  #[test]
+  fn replaces_renderer_authoring_extensions_with_dds() {
+    assert_eq!(dds_logical_path("pfx\\smoke.TGA"), "pfx\\smoke.dds");
+    assert_eq!(dds_logical_path("pfx\\smoke.bmp"), "pfx\\smoke.dds");
+  }
+
+  #[test]
+  fn appends_dds_for_unknown_or_missing_extensions() {
+    assert_eq!(dds_logical_path("pfx\\smoke"), "pfx\\smoke.dds");
+    assert_eq!(dds_logical_path("pfx\\smoke.png"), "pfx\\smoke.png.dds");
+  }
+}

@@ -55,7 +55,11 @@ impl GamedataProject {
   fn read_particle_names(&self) -> XRayResult<HashSet<String>> {
     let mut names: HashSet<String> = HashSet::new();
 
-    for path in self.assets.with_suffix("particles.xr")?.map(|asset| asset.absolute_path()) {
+    for path in self
+      .assets
+      .with_suffix("particles.xr")?
+      .map(|asset| asset.absolute_path())
+    {
       let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder, _>(&path)?;
 
       for effect in &particles_file.effects.effects {
@@ -114,7 +118,7 @@ impl GamedataProject {
     for relative_path in &spawn_files {
       result.checked_spawn_files_count += 1;
 
-      let Some(spawn_path) = self.get_absolute_asset_path(relative_path) else {
+      let Some(spawn_path) = self.assets.absolute_path(relative_path).ok().flatten() else {
         xray_output::error!(
           options.output,
           "Spawn path not found for particle usage check: {relative_path}"

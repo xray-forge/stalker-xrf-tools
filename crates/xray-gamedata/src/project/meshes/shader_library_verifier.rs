@@ -14,7 +14,11 @@ impl<'a> ShaderLibraryVerifier<'a> {
   }
 
   pub(crate) fn verify(&self) -> GamedataShaderLibraryVerificationResult {
-    let path: PathBuf = self.project.get_shader_library_path();
+    let path: PathBuf = self
+      .project
+      .assets
+      .expected_absolute_path(xray_assets::shader::SHADER_LIBRARY_LOGICAL_PATH)
+      .expect("fixed shader library path is valid");
 
     match ShaderLibraryFile::read_from_path(&path) {
       Ok(library) => GamedataShaderLibraryVerificationResult::passed(library),

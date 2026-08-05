@@ -43,3 +43,28 @@ pub(crate) fn join(prefix: &str, path: &str) -> XRayResult<String> {
     (false, false) => normalize(&format!("{prefix}\\{path}")),
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::{is_component_prefix, normalize};
+
+  #[test]
+  fn normalizes_case_and_separators() {
+    assert_eq!(
+      normalize("Textures/Sky\\Clouds.DDS").unwrap(),
+      "textures\\sky\\clouds.dds"
+    );
+  }
+
+  #[test]
+  fn rejects_ambiguous_path_components() {
+    assert!(normalize("textures//clouds.dds").is_err());
+    assert!(normalize("textures/../clouds.dds").is_err());
+  }
+
+  #[test]
+  fn prefixes_end_on_component_boundaries() {
+    assert!(is_component_prefix("scripts\\ui.script", "scripts"));
+    assert!(!is_component_prefix("scripts_extra\\ui.script", "scripts"));
+  }
+}

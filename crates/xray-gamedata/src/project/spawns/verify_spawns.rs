@@ -45,7 +45,7 @@ impl GamedataProject {
     for relative_path in &spawn_files {
       total_spawns += 1;
 
-      if let Some(spawn_path) = self.get_absolute_asset_path(relative_path) {
+      if let Some(spawn_path) = self.assets.absolute_path(relative_path).ok().flatten() {
         let spawn_findings: Vec<Finding> = self.verify_spawn_findings(options, &spawn_path);
 
         if !spawn_findings.is_empty() {

@@ -34,7 +34,7 @@ impl GamedataProject {
       .filter_map(|relative_path| {
         xray_output::verbose!(options.output, "Verify texture: {relative_path}");
 
-        let Some(path) = self.get_absolute_asset_path(relative_path) else {
+        let Some(path) = self.assets.absolute_path(relative_path).ok().flatten() else {
           xray_output::info!(options.output, "Texture path not found: {relative_path}");
 
           return Some(GamedataFindingFactory::for_asset(

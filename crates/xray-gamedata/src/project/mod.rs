@@ -2,7 +2,6 @@ pub(crate) mod animations;
 pub(crate) mod gamedata_check_result;
 pub(crate) mod gamedata_finding_factory;
 pub(crate) mod gamedata_project;
-pub(crate) mod gamedata_project_assets;
 pub(crate) mod gamedata_project_options;
 pub(crate) mod gamedata_project_verify;
 pub(crate) mod gamedata_verification_result;
