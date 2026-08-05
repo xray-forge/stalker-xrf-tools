@@ -102,6 +102,7 @@ fn join_logical_path(prefix: &str, path: &str) -> Option<String> {
     (false, false) => Some(format!("{prefix}\\{path}")),
   }
 }
+
 fn dds_texture_asset_path_from_reference(reference: &str) -> String {
   if let Some((stem, extension)) = reference.rsplit_once('.')
     && ["tga", "dds", "bmp", "ogm"]

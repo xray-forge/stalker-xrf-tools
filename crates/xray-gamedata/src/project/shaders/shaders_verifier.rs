@@ -65,6 +65,16 @@ impl<'a> ShadersVerifier<'a> {
     let renderer_root: PathBuf = self.shaders_root.join(renderer.directory_name());
 
     if !renderer_root.is_dir() {
+      // Specific to OpenXray
+      if renderer == ShaderRenderer::OpenGl {
+        xray_output::verbose!(
+          self.options.output,
+          "Skip OpenGL renderer shaders, the renderer root is not present"
+        );
+
+        return;
+      }
+
       result.add_finding(GamedataFindingFactory::for_asset(
         GamedataVerificationRule::ShadersRendererRoot,
         &renderer_root,
@@ -251,6 +261,29 @@ mod tests {
       result.failure_message(),
       "1 shader scripts and 2 shader sources checked, 0 problems"
     );
+    assert!(result.findings().is_empty());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
+
+  #[test]
+  fn skips_a_missing_open_gl_renderer_root() -> XRayResult {
+    let root: PathBuf = create_shader_root("missing-open-gl")?;
+    let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
+      output: xray_output::OutputOptions::default(),
+      ..Default::default()
+    };
+
+    fs::remove_dir(root.join("gl"))?;
+    write_file(
+      &root.join("r3/basic.s"),
+      "function normal(shader, t_base, t_second, t_detail) end\n",
+    )?;
+
+    let result = ShadersVerifier::new(root.clone(), &options).verify();
+
     assert!(result.findings().is_empty());
 
     fs::remove_dir_all(root)?;
