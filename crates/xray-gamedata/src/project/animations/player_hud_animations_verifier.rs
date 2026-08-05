@@ -1,8 +1,9 @@
+use rayon::prelude::*;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use xray_assets::XrayAssetType as AssetType;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 use crate::GamedataFindingFactory;
@@ -10,7 +11,7 @@ use crate::project::animations::player_hud_animations_verification_result::Gamed
 use crate::project::weapons::weapons_utils::{
   get_weapon_animation_name, is_player_hud_section, is_weapon_section,
 };
-use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 pub(crate) struct PlayerHudAnimationsVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
@@ -30,53 +31,70 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
 
     let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
     let system_ltx_path: PathBuf = self.project.ltx_project.get_system_ltx_path();
-    let mut result: GamedataPlayerHudAnimationsVerificationResult = Default::default();
+    let player_hud_sections: Vec<(&String, &Section)> = system_ltx
+      .sections
+      .iter()
+      .filter(|(_, section)| is_player_hud_section(section))
+      .collect();
 
-    for (section_name, section) in &system_ltx.sections {
-      if !is_player_hud_section(section) {
-        continue;
-      }
+    let checked_huds_count: u32 = u32::try_from(player_hud_sections.len()).map_err(|_| {
+      XRayError::new_verify_error("Player HUD count exceeds the supported result range")
+    })?;
 
-      xray_output::verbose!(
-        self.options.output,
-        "Verify player hud config [{section_name}]"
-      );
+    let mut findings: Vec<Finding> = player_hud_sections
+      .par_iter()
+      .filter_map(|(section_name, section)| {
+        xray_output::verbose!(
+          self.options.output,
+          "Verify player hud config [{section_name}]"
+        );
 
-      result.checked_huds_count += 1;
+        if self
+          .verify_player_hud_animation(&system_ltx, section_name, section)
+          .is_ok_and(|it| it)
+        {
+          return None;
+        }
 
-      if !self
-        .verify_player_hud_animation(section_name, section)
-        .is_ok_and(|it| it)
-      {
         xray_output::info!(
           self.options.output,
           "Player hud config [{section_name}] is invalid"
         );
 
-        result.findings.push(GamedataFindingFactory::for_asset(
+        Some(GamedataFindingFactory::for_asset(
           GamedataVerificationRule::AnimationsPlayerHud,
           &system_ltx_path,
           format!("Player HUD section [{section_name}] has invalid animations"),
-        ));
-        result.invalid_huds_count += 1;
-      }
-    }
+        ))
+      })
+      .collect();
+
+    let invalid_huds_count: u32 = u32::try_from(findings.len()).map_err(|_| {
+      XRayError::new_verify_error("Invalid player HUD count exceeds the supported result range")
+    })?;
 
     xray_output::info!(
       self.options.output,
       "Verified gamedata huds, {}/{} valid",
-      result.checked_huds_count - result.invalid_huds_count,
-      result.checked_huds_count,
+      checked_huds_count - invalid_huds_count,
+      checked_huds_count,
     );
 
-    result
-      .findings
-      .sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
+    findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
-    Ok(result)
+    Ok(GamedataPlayerHudAnimationsVerificationResult {
+      checked_huds_count,
+      findings,
+      invalid_huds_count,
+    })
   }
 
-  fn verify_player_hud_animation(&self, section_name: &str, section: &Section) -> XRayResult<bool> {
+  fn verify_player_hud_animation(
+    &self,
+    system_ltx: &Ltx,
+    section_name: &str,
+    section: &Section,
+  ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
     let mut hud_motions: HashSet<String> = HashSet::new();
 
@@ -163,7 +181,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
 
       is_valid = false;
     } else if !self
-      .verify_weapon_animations(section_name, &hud_motions)
+      .verify_weapon_animations(system_ltx, section_name, &hud_motions)
       .is_ok_and(|it| it)
     {
       xray_output::error!(
@@ -179,6 +197,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
 
   fn verify_weapon_animations(
     &self,
+    system_ltx: &Ltx,
     section_name: &str,
     motions: &HashSet<String>,
   ) -> XRayResult<bool> {
@@ -188,7 +207,6 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     );
 
     let mut is_valid: bool = true;
-    let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
 
     for (weapon_section_name, weapon_section) in &system_ltx.sections {
       if !is_weapon_section(weapon_section) {
