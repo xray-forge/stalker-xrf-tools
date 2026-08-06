@@ -7267,6 +7267,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "walkdir",
  "xray-archive",
  "xray-db",
  "xray-error",

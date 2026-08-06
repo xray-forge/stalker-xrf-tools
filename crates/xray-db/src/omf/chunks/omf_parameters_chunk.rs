@@ -1,7 +1,7 @@
 use crate::OmfFile;
 use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
 use crate::data::ogf::ogf_part::OgfPart;
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
@@ -51,7 +51,25 @@ impl ChunkReadWrite for OmfParametersChunk {
     })
   }
 
-  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
-    todo!("Implement")
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    if !OmfFile::SUPPORTED_VERSIONS.contains(&self.version) {
+      return Err(XRayError::new_not_implemented_error(format!(
+        "Unexpected parameters version {} on write, only versions {:?} are implemented",
+        self.version,
+        OmfFile::SUPPORTED_VERSIONS
+      )));
+    }
+
+    writer.write_u16::<T>(self.version)?;
+
+    writer.write_xr_list::<T, _>(&self.parts).map_err(|error| {
+      XRayError::new_serialization_error(format!("Failed to write ogf parts: {error}"))
+    })?;
+
+    OgfMotionDefinition::write_list::<T>(writer, &self.motions, self.version).map_err(|error| {
+      XRayError::new_serialization_error(format!("Failed to write ogf motion definitions: {error}"))
+    })?;
+
+    Ok(())
   }
 }

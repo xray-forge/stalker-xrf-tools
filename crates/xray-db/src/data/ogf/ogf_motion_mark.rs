@@ -1,4 +1,4 @@
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
@@ -31,28 +31,81 @@ impl ChunkReadWrite for OgfMotionMark {
     Ok(Self { name, intervals })
   }
 
-  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
-    todo!("Implement")
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_w1251_rn_string(&self.name)?;
+    writer.write_u32::<T>(self.intervals.len() as u32)?;
+
+    for (from, to) in &self.intervals {
+      writer.write_f32::<T>(*from)?;
+      writer.write_f32::<T>(*to)?;
+    }
+
+    Ok(())
   }
 }
 
-/*
-sub read_motion_mark {
-  my $self = $_[0];
-  $self->{name} = '';
-  my $c;
-  while (1) {
-    ($c) = $_[1]->unpack('a');
-    last if ($c eq "\n" || $c eq "\r");
-    $self->{name} .= $c;
+#[cfg(test)]
+mod tests {
+  use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
+  #[test]
+  fn test_read_write() -> XRayResult {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+
+    let original: OgfMotionMark = OgfMotionMark {
+      name: String::from("Left"),
+      intervals: vec![(0.25, 0.75), (1.5, 2.0)],
+    };
+
+    original.write::<XRayByteOrder>(&mut writer)?;
+
+    // 4 name bytes + 2 terminator bytes + 4 count bytes + 4 interval floats.
+    assert_eq!(writer.bytes_written(), 4 + 2 + 4 + 16);
+
+    writer.flush_chunk_into::<XRayByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    assert_eq!(OgfMotionMark::read::<XRayByteOrder>(&mut reader)?, original);
+
+    Ok(())
   }
-  ($c) = $_[1]->unpack('a');
-  die unless $c eq "\n";
-  my ($count) = $_[1]->unpack('V', 4);
-  for (my $i = 0; $i < $count; $i++) {
-    my $int = {};
-    ($int->{min}, $int->{max}) = $_[1]->unpack('ff', 8);
-    push @{$self->{intervals}}, $int;
+
+  #[test]
+  fn test_read_write_without_intervals() -> XRayResult {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String =
+      get_relative_test_sample_file_path(file!(), "read_write_without_intervals.chunk");
+
+    let original: OgfMotionMark = OgfMotionMark {
+      name: String::from("Right"),
+      intervals: Vec::new(),
+    };
+
+    original.write::<XRayByteOrder>(&mut writer)?;
+
+    writer.flush_chunk_into::<XRayByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    assert_eq!(OgfMotionMark::read::<XRayByteOrder>(&mut reader)?, original);
+
+    Ok(())
   }
 }
- */

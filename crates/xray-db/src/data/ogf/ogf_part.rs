@@ -1,4 +1,4 @@
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
@@ -43,8 +43,16 @@ impl ChunkReadWriteList for OgfPart {
     Ok(parts)
   }
 
-  fn write_list<T: ByteOrder>(_: &mut ChunkWriter, _: &[Self]) -> XRayResult {
-    todo!()
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, parts: &[Self]) -> XRayResult {
+    writer.write_u16::<T>(parts.len() as u16)?;
+
+    for part in parts {
+      part.write::<T>(writer).map_err(|error| {
+        XRayError::new_serialization_error(format!("Failed to write ogf part: {error}"))
+      })?;
+    }
+
+    Ok(())
   }
 }
 
@@ -62,7 +70,58 @@ impl ChunkReadWrite for OgfPart {
     Ok(Self { name, bones })
   }
 
-  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
-    todo!("Implement")
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_w1251_string(&self.name)?;
+    writer.write_u16::<T>(self.bones.len() as u16)?;
+
+    for (name, index) in &self.bones {
+      writer.write_w1251_string(name)?;
+      writer.write_u32::<T>(*index)?;
+    }
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::data::ogf::ogf_part::OgfPart;
+  use xray_chunk::{ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
+  #[test]
+  fn test_read_write_list() -> XRayResult {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
+
+    let original: Vec<OgfPart> = vec![
+      OgfPart {
+        name: String::from("default"),
+        bones: vec![(String::from("bip01"), 0)],
+      },
+      OgfPart {
+        name: String::from("right_hand"),
+        bones: vec![(String::from("r_hand"), 1), (String::from("lead_gun"), 2)],
+      },
+    ];
+
+    OgfPart::write_list::<XRayByteOrder>(&mut writer, &original)?;
+
+    writer.flush_chunk_into::<XRayByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    assert_eq!(OgfPart::read_list::<XRayByteOrder>(&mut reader)?, original);
+
+    Ok(())
   }
 }

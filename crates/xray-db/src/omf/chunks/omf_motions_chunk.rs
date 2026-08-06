@@ -1,6 +1,7 @@
 use crate::data::ogf::ogf_motion::OgfMotion;
-use byteorder::ByteOrder;
+use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, read_u32_chunk};
 use xray_error::XRayResult;
 
@@ -49,7 +50,32 @@ impl ChunkReadWrite for OmfMotionsChunk {
     Ok(Self { motions })
   }
 
-  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
-    todo!("Implement writer")
+  /// Write motions as nested chunks, where leading chunk 0 stores motions count and
+  /// following chunks 1..=N store motions themselves.
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    let mut count_writer: ChunkWriter = ChunkWriter::new();
+
+    count_writer.write_u32::<T>(self.motions.len() as u32)?;
+    writer.write_all(count_writer.flush_chunk_into_buffer::<T>(0)?.as_slice())?;
+
+    for (index, motion) in self.motions.iter().enumerate() {
+      let mut motion_writer: ChunkWriter = ChunkWriter::new();
+
+      motion.write::<T>(&mut motion_writer)?;
+
+      writer.write_all(
+        motion_writer
+          .flush_chunk_into_buffer::<T>(index as u32 + 1)?
+          .as_slice(),
+      )?;
+    }
+
+    log::info!(
+      "Written motions chunk, {} bytes, {} motions",
+      writer.bytes_written(),
+      self.motions.len()
+    );
+
+    Ok(())
   }
 }

@@ -1,5 +1,6 @@
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
+use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
@@ -29,7 +30,54 @@ impl ChunkReadWrite for OgfMotion {
     })
   }
 
-  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
-    todo!("Implement")
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_w1251_string(&self.name)?;
+    writer.write_u32::<T>(self.count)?;
+    writer.write_u8(self.flags)?;
+    writer.write_all(&self.remaining)?;
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::data::ogf::ogf_motion::OgfMotion;
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
+  #[test]
+  fn test_read_write() -> XRayResult {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+
+    let original: OgfMotion = OgfMotion {
+      name: String::from("ak74_draw"),
+      count: 32,
+      flags: 1,
+      remaining: vec![1, 2, 3, 4, 5, 6, 7, 8],
+    };
+
+    original.write::<XRayByteOrder>(&mut writer)?;
+
+    // 9 name bytes + 1 terminator + 4 count bytes + 1 flags byte + 8 payload bytes.
+    assert_eq!(writer.bytes_written(), 9 + 1 + 4 + 1 + 8);
+
+    writer.flush_chunk_into::<XRayByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(&filename)?,
+      0,
+    )?;
+
+    let file: FileSlice = open_test_resource_as_slice(&filename)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    assert_eq!(OgfMotion::read::<XRayByteOrder>(&mut reader)?, original);
+
+    Ok(())
   }
 }

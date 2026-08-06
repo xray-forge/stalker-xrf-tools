@@ -1,5 +1,5 @@
 use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
-use byteorder::{ByteOrder, ReadBytesExt};
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
@@ -88,7 +88,141 @@ impl OgfMotionDefinition {
     Ok(motion)
   }
 
-  pub fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
-    todo!("Implement")
+  pub fn write_list<T: ByteOrder>(
+    writer: &mut ChunkWriter,
+    definitions: &[Self],
+    version: u16,
+  ) -> XRayResult {
+    writer.write_u16::<T>(definitions.len() as u16)?;
+
+    for definition in definitions {
+      definition.write::<T>(writer, version).map_err(|error| {
+        XRayError::new_serialization_error(format!("Failed to write ogf motion: {error}"))
+      })?;
+    }
+
+    Ok(())
+  }
+
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter, version: u16) -> XRayResult {
+    writer.write_w1251_string(&self.name)?;
+    writer.write_u32::<T>(self.flags)?;
+    writer.write_u16::<T>(self.bone_or_part)?;
+    writer.write_u16::<T>(self.motion)?;
+    writer.write_f32::<T>(self.speed)?;
+    writer.write_f32::<T>(self.power)?;
+    writer.write_f32::<T>(self.accrue)?;
+    writer.write_f32::<T>(self.falloff)?;
+
+    if version == 4 {
+      writer.write_u32::<T>(self.marks.len() as u32)?;
+
+      for mark in &self.marks {
+        mark.write::<T>(writer).map_err(|error| {
+          XRayError::new_serialization_error(format!("Failed to write ogf motion mark: {error}"))
+        })?;
+      }
+    } else if !self.marks.is_empty() {
+      return Err(XRayError::new_invalid_error(format!(
+        "Cannot write {} ogf motion marks for '{}', marks are only supported in version 4, got {version}",
+        self.marks.len(),
+        self.name
+      )));
+    }
+
+    Ok(())
+  }
+}
+
+impl OgfMotionDefinition {
+  #[cfg(test)]
+  pub fn new_mock(marks: Vec<OgfMotionMark>) -> Self {
+    Self {
+      name: String::from("ak74_draw"),
+      flags: 3,
+      bone_or_part: 1,
+      motion: 7,
+      speed: 1.0,
+      power: 0.5,
+      accrue: 2.0,
+      falloff: 4.0,
+      marks,
+    }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
+  use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
+  fn write_read_list(
+    filename: &str,
+    definitions: &[OgfMotionDefinition],
+    version: u16,
+  ) -> XRayResult<Vec<OgfMotionDefinition>> {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    OgfMotionDefinition::write_list::<XRayByteOrder>(&mut writer, definitions, version)?;
+
+    writer.flush_chunk_into::<XRayByteOrder>(
+      &mut overwrite_test_relative_resource_as_file(filename)?,
+      0,
+    )?;
+
+    let file: FileSlice = open_test_resource_as_slice(filename)?;
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    OgfMotionDefinition::read_list::<XRayByteOrder>(&mut reader, version)
+  }
+
+  #[test]
+  fn test_read_write_list_v4_with_marks() -> XRayResult {
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_v4.chunk");
+
+    let original: Vec<OgfMotionDefinition> = vec![
+      OgfMotionDefinition::new_mock(vec![OgfMotionMark {
+        name: String::from("Left"),
+        intervals: vec![(0.1, 0.2)],
+      }]),
+      OgfMotionDefinition::new_mock(Vec::new()),
+    ];
+
+    assert_eq!(write_read_list(&filename, &original, 4)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_read_write_list_v3_without_marks() -> XRayResult {
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_v3.chunk");
+
+    let original: Vec<OgfMotionDefinition> = vec![OgfMotionDefinition::new_mock(Vec::new())];
+
+    assert_eq!(write_read_list(&filename, &original, 3)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_write_v3_with_marks_is_rejected() {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    let definition: OgfMotionDefinition = OgfMotionDefinition::new_mock(vec![OgfMotionMark {
+      name: String::from("Left"),
+      intervals: vec![(0.1, 0.2)],
+    }]);
+
+    assert!(
+      definition.write::<XRayByteOrder>(&mut writer, 3).is_err(),
+      "Expect marks to be rejected when writing version 3 motion definition"
+    );
   }
 }
