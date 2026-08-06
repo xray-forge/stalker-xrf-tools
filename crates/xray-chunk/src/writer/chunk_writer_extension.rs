@@ -28,6 +28,11 @@ impl ChunkWriter {
     Ok(self.write(&encode_string_to_w1251_bytes(data)?)? + self.write(&[0u8])?)
   }
 
+  /// Write \r\n terminated windows1251 encoded string.
+  pub fn write_w1251_rn_string(&mut self, data: &str) -> XRayResult<usize> {
+    Ok(self.write(&encode_string_to_w1251_bytes(data)?)? + self.write(b"\r\n")?)
+  }
+
   /// Write serialized vector into vector, where u32 count N is followed by N u16 entries.
   pub fn write_u16_vector<T: ByteOrder>(&mut self, data: &[u16]) -> XRayResult<usize> {
     self.write_u32::<T>(data.len() as u32)?;
@@ -71,6 +76,24 @@ mod tests {
       "Expect null terminated string written"
     );
     assert_eq!(writer.bytes_written(), 4, "Expect 4 bytes written");
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_write_w1251_rn_string_sample() -> XRayResult {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    assert_eq!(
+      writer.write_w1251_rn_string("abc")?,
+      5,
+      "Expect 5 bytes written"
+    );
+    assert_eq!(
+      writer.buffer,
+      [b'a', b'b', b'c', b'\r', b'\n'],
+      "Expect rn terminated string written"
+    );
 
     Ok(())
   }
