@@ -1,9 +1,13 @@
 use crate::GamedataFindingFactory;
 use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
+use crate::project::weapons::weapon_sound_layer_issues::{
+  WeaponSoundLayerIssue, weapon_sound_layer_issues,
+};
+use crate::project::weapons::weapon_sound_source::WeaponSoundSource;
+use crate::project::weapons::weapon_sound_value::WeaponSoundValue;
 use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use regex::Regex;
 use std::path::Path;
 use std::time::{Duration, Instant};
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
@@ -289,27 +293,40 @@ impl GamedataProject {
         continue;
       }
 
-      if field_value == NO_SOUND {
-        continue;
-      }
+      let value: WeaponSoundValue<'_> = WeaponSoundValue::parse(field_value);
+      let source: WeaponSoundSource<'_, '_> = WeaponSoundSource::classify(ltx, value);
 
-      // Layered sounds from OXR/COC.
-      if let Some(section) = ltx.section(field_value) {
-        if !self
-          .verify_weapon_sound_layer(options, ltx, field_value, section)
-          .is_ok_and(|it| it)
-        {
-          are_sounds_valid = false;
+      match source {
+        WeaponSoundSource::Asset { name } if name == NO_SOUND => continue,
+        WeaponSoundSource::Asset { name } => {
+          if !self
+            .verify_weapon_sound_asset(options, section_name, field_name, name)
+            .is_ok_and(|it| it)
+          {
+            are_sounds_valid = false;
+          }
         }
+        WeaponSoundSource::LayeredSection {
+          name,
+          has_parameters,
+          section,
+        } => {
+          if has_parameters {
+            xray_output::error!(
+              options.output,
+              "Layered sound reference cannot include volume or delay: [{section_name}] {field_name} : {field_value}"
+            );
 
-        continue;
-      }
+            are_sounds_valid = false;
+          }
 
-      if !self
-        .verify_weapon_sound_asset(options, section_name, field_name, field_value)
-        .is_ok_and(|it| it)
-      {
-        are_sounds_valid = false
+          if !self
+            .verify_weapon_sound_layer(options, name, section)
+            .is_ok_and(|it| it)
+          {
+            are_sounds_valid = false;
+          }
+        }
       }
     }
 
@@ -319,26 +336,60 @@ impl GamedataProject {
   pub fn verify_weapon_sound_layer(
     &self,
     options: &GamedataProjectVerifyOptions,
-    _: &Ltx,
     section_name: &str,
     section: &Section,
   ) -> XRayResult<bool> {
-    // Check sound layer structure here and linked sounds:
-    //
-    // [wpn_abakan_snd_shoot]
-    // snd_1_layer = weapons\abakan\abakan_shoot
-    // snd_1_layer1 = weapons\abakan\abakan_shoot1
+    let issues: Vec<WeaponSoundLayerIssue> = weapon_sound_layer_issues(section);
+    let mut is_valid: bool = issues.is_empty();
 
-    let mut is_valid: bool = true;
+    for issue in issues {
+      match issue {
+        WeaponSoundLayerIssue::InvalidFieldName { field_name } => {
+          let field_value: Option<&str> = section.get(&field_name);
+
+          xray_output::error!(
+            options.output,
+            "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value:?}"
+          );
+        }
+        WeaponSoundLayerIssue::MissingLayer {
+          expected,
+          found: Some(found),
+        } => {
+          xray_output::error!(
+            options.output,
+            "Sound layer section has a gap: [{section_name}] expected snd_{expected}_layer before snd_{found}_layer"
+          );
+        }
+        WeaponSoundLayerIssue::MissingLayer {
+          expected,
+          found: None,
+        } => {
+          xray_output::error!(
+            options.output,
+            "Sound layer section is missing required first layer: [{section_name}] snd_{expected}_layer"
+          );
+        }
+        WeaponSoundLayerIssue::MissingBaseLayer { layer } => {
+          xray_output::error!(
+            options.output,
+            "Sound layer variants require a base layer: [{section_name}] snd_{layer}_layer"
+          );
+        }
+        WeaponSoundLayerIssue::MissingVariant {
+          layer,
+          expected,
+          found,
+        } => {
+          xray_output::error!(
+            options.output,
+            "Sound layer variants have a gap: [{section_name}] expected snd_{layer}_layer{expected} before snd_{layer}_layer{found}"
+          );
+        }
+      }
+    }
 
     for (field_name, field_value) in section {
-      if !self
-        .verify_weapon_sound_layer_field_name(options, section_name, field_name, field_value)
-        .is_ok_and(|it| it)
-      {
-        is_valid = false
-      }
-
       if !self
         .verify_weapon_sound_asset(options, section_name, field_name, field_value)
         .is_ok_and(|it| it)
@@ -351,30 +402,6 @@ impl GamedataProject {
       xray_output::verbose!(
         options.output,
         "Sound layers section verified: [{section_name}]"
-      );
-    }
-
-    Ok(is_valid)
-  }
-
-  fn verify_weapon_sound_layer_field_name(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-    section_name: &str,
-    field_name: &str,
-    field_value: &str,
-  ) -> XRayResult<bool> {
-    let mut is_valid: bool = true;
-
-    if !Regex::new(r"^snd_([1-9]([0-9]+)?)_layer([1-9]([0-9]+)?)?$")
-      .unwrap()
-      .is_match(field_name)
-    {
-      is_valid = false;
-
-      xray_output::error!(
-        options.output,
-        "Sound layer field name is invalid, should match pattern: [{section_name}] {field_name} : {field_value}"
       );
     }
 
