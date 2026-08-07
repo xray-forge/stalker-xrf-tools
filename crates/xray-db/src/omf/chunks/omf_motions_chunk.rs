@@ -3,7 +3,8 @@ use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, read_u32_chunk};
-use xray_error::XRayResult;
+use xray_error::{XRayError, XRayResult};
+use xray_utils::assert_equal;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OmfMotionsChunk {
@@ -23,21 +24,21 @@ impl ChunkReadWrite for OmfMotionsChunk {
 
     let mut chunks: Vec<ChunkReader> = reader.read_children()?;
 
-    let bones_motions_count: u32 = read_u32_chunk::<T>(
-      chunks
-        .first_mut()
-        .expect("Correct omf motions chunk with count definitions"),
-    )?;
+    let (count_chunk, motion_chunks): (&mut ChunkReader, &mut [ChunkReader]) = chunks
+      .split_first_mut()
+      .ok_or_else(|| XRayError::new_read_error("OMF motions chunk has no count definition"))?;
 
-    assert_eq!(
+    let bones_motions_count: u32 = read_u32_chunk::<T>(count_chunk)?;
+
+    assert_equal(
       bones_motions_count as usize,
-      chunks.len() - 1,
-      "Expect matching OMF motions chunks count and count definition"
-    );
+      motion_chunks.len(),
+      "Expect matching OMF motions chunks count and count definition",
+    )?;
 
     let mut motions: Vec<OgfMotion> = Vec::new();
 
-    for chunk in &mut chunks[1..] {
+    for chunk in motion_chunks {
       motions.push(chunk.read_xr::<T, _>()?);
     }
 
