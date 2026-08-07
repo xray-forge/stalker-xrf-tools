@@ -16,37 +16,46 @@ impl PackEquipmentProcessor {
     let started_at: Instant = Instant::now();
 
     let mut count: u32 = 0;
+    let mut skipped_sections: Vec<&str> = Vec::new();
     let mut image: ImageBuffer<Rgba<u8>, Vec<u8>> =
       InventorySpriteDescriptor::create_equipment_sprite_base_for_ltx(&options.ltx)?;
 
     for (section_name, section) in &options.ltx.sections {
-      if let Some(sprite_descriptor) =
+      let Some(sprite_descriptor) =
         InventorySpriteDescriptor::new_optional_from_section(section_name, section)
-        && let Some((sprite_path, sprite)) = Self::read_sprite(&options, &sprite_descriptor)?
-      {
-        let (x, y, w, h) = sprite_descriptor.get_boundaries();
+      else {
+        continue;
+      };
 
-        xray_output::verbose!(
-          options.output,
-          "Packing icon: '{}':({}:{};{}x{}) as ({}:{};{}x{}), src: {}x{}, {}",
-          sprite_descriptor.section,
-          sprite_descriptor.x,
-          sprite_descriptor.y,
-          sprite_descriptor.w,
-          sprite_descriptor.h,
-          x,
-          y,
-          w,
-          h,
-          sprite.width(),
-          sprite.height(),
-          sprite_path.display(),
-        );
+      let Some((sprite_path, sprite)) = Self::read_sprite(&options, &sprite_descriptor) else {
+        skipped_sections.push(section_name);
+        continue;
+      };
 
-        image.copy_from(&sprite, x, y)?;
-        count += 1;
-      }
+      let (x, y, w, h) = sprite_descriptor.get_boundaries();
+
+      xray_output::verbose!(
+        options.output,
+        "Packing icon: '{}':({}:{};{}x{}) as ({}:{};{}x{}), src: {}x{}, {}",
+        sprite_descriptor.section,
+        sprite_descriptor.x,
+        sprite_descriptor.y,
+        sprite_descriptor.w,
+        sprite_descriptor.h,
+        x,
+        y,
+        w,
+        h,
+        sprite.width(),
+        sprite.height(),
+        sprite_path.display(),
+      );
+
+      image.copy_from(&sprite, x, y)?;
+      count += 1;
     }
+
+    Self::assert_every_section_has_an_icon(&options, &skipped_sections)?;
 
     assert_equal(
       image.width() % 4,
@@ -77,34 +86,41 @@ impl PackEquipmentProcessor {
     })
   }
 
+  /// Fail once with every section that declares inventory grid coordinates but has no icon to pack.
+  fn assert_every_section_has_an_icon(
+    options: &PackEquipmentOptions,
+    skipped_sections: &[&str],
+  ) -> XRayResult {
+    if !options.is_strict || skipped_sections.is_empty() {
+      return Ok(());
+    }
+
+    Err(XRayError::new_texture_processing_error(format!(
+      "Expected an icon to exist for each of the {} sections declaring inv_grid_* fields, found none for: {}",
+      skipped_sections.len(),
+      skipped_sections.join(", ")
+    )))
+  }
+
   pub fn read_sprite(
     options: &PackEquipmentOptions,
     sprite: &InventorySpriteDescriptor,
-  ) -> XRayResult<Option<(PathBuf, DynamicImage)>> {
+  ) -> Option<(PathBuf, DynamicImage)> {
     let (_, _, w, h) = sprite.get_boundaries();
     let sprite_path: PathBuf = Self::read_sprite_path(options, sprite);
 
     match Self::read_sprite_from_path(&sprite_path, w, h) {
-      Ok(icon) => Ok(Some((sprite_path, icon))),
+      Ok(icon) => Some((sprite_path, icon)),
       Err(error) => {
-        if options.is_strict {
-          Err(XRayError::new_texture_processing_error(format!(
-            "Expected icon to exist for assembling at path {} / {}, error: {}",
-            sprite_path.display(),
-            sprite.section,
-            error
-          )))
-        } else {
-          xray_output::warning!(
-            options.output,
-            "Skip icon {} / '{}', reason: {}",
-            sprite_path.display(),
-            sprite.section,
-            error
-          );
+        xray_output::warning!(
+          options.output,
+          "Skip icon {} / '{}', reason: {}",
+          sprite_path.display(),
+          sprite.section,
+          error
+        );
 
-          Ok(None)
-        }
+        None
       }
     }
   }

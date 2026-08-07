@@ -30,10 +30,23 @@ impl InventorySpriteDescriptor {
     inventory_sections
   }
 
+  /// Describe the inventory icon of a section, if it declares one.
+  ///
+  /// A section opts in with `$inventory_icon = true`. The grid fields alone are not enough: they are
+  /// also declared by abstract base sections purely so children can inherit them, and section lookups
+  /// see inherited fields, so keying off them would pack sections that have no icon of their own.
   pub fn new_optional_from_section<T>(section_name: T, section: &Section) -> Option<Self>
   where
     T: Into<String>,
   {
+    if !section
+      .get("$inventory_icon")
+      .and_then(|value| value.trim().parse::<bool>().ok())
+      .unwrap_or(false)
+    {
+      return None;
+    }
+
     let x: u32 = section
       .get("inv_grid_x")?
       .parse::<u32>()
@@ -117,5 +130,84 @@ impl InventorySpriteDescriptor {
     max_height = max_height + (4 - max_height % 4);
 
     (max_width, max_height)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::InventorySpriteDescriptor;
+  use xray_ltx::Ltx;
+
+  fn descriptor_for(ltx: &str, section: &str) -> Option<InventorySpriteDescriptor> {
+    let ltx: Ltx = Ltx::read_from_str(ltx).expect("test LTX is valid");
+
+    InventorySpriteDescriptor::new_optional_from_section(section, &ltx[section])
+  }
+
+  #[test]
+  fn describes_sections_that_opt_in() {
+    let descriptor: InventorySpriteDescriptor = descriptor_for(
+      "[wpn_ak74]\n\
+       $inventory_icon = true\n\
+       inv_grid_x = 25\n\
+       inv_grid_y = 4\n\
+       inv_grid_width = 5\n\
+       inv_grid_height = 2\n",
+      "wpn_ak74",
+    )
+    .expect("expect an opted in section to describe an icon");
+
+    assert_eq!(descriptor.x, 25);
+    assert_eq!(descriptor.y, 4);
+    assert_eq!(descriptor.w, 5);
+    assert_eq!(descriptor.h, 2);
+  }
+
+  #[test]
+  fn ignores_grid_fields_without_opt_in() {
+    assert!(
+      descriptor_for(
+        "[some_section]\n\
+         inv_grid_x = 25\n\
+         inv_grid_y = 4\n\
+         inv_grid_width = 5\n\
+         inv_grid_height = 2\n",
+        "some_section",
+      )
+      .is_none(),
+      "Expect grid fields alone not to declare an icon, so adding them cannot pack an asset"
+    );
+  }
+
+  #[test]
+  fn ignores_sections_that_opt_out() {
+    assert!(
+      descriptor_for(
+        "[af_base]\n\
+         $inventory_icon = false\n\
+         inv_grid_x = 0\n\
+         inv_grid_y = 0\n\
+         inv_grid_width = 1\n\
+         inv_grid_height = 1\n",
+        "af_base",
+      )
+      .is_none(),
+      "Expect an explicit opt out to be honoured even when the section is grid complete"
+    );
+  }
+
+  #[test]
+  fn requires_grid_fields_even_when_opted_in() {
+    assert!(
+      descriptor_for(
+        "[af_base]\n\
+         $inventory_icon = true\n\
+         inv_grid_width = 1\n\
+         inv_grid_height = 1\n",
+        "af_base",
+      )
+      .is_none(),
+      "Expect a section without grid position not to describe an icon"
+    );
   }
 }
