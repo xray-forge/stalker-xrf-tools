@@ -78,10 +78,11 @@ impl ChunkReadWrite for ParticleGroup {
     };
 
     assert!(reader.is_ended(), "Expect groups chunk to be ended");
-    assert_eq!(
-      particle_group.version, 3,
-      "Only version 3 of group chunks is supported"
-    );
+    assert_equal(
+      particle_group.version,
+      3,
+      "Only version 3 of group chunks is supported",
+    )?;
 
     Ok(particle_group)
   }

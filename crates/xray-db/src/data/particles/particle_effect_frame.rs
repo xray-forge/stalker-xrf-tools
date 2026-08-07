@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -64,12 +65,11 @@ impl LtxImportExport for ParticleEffectFrame {
 
     let meta_type: String = read_ltx_field(META_TYPE_FIELD, section)?;
 
-    assert_eq!(
-      meta_type,
+    assert_equal(
+      meta_type.as_str(),
       Self::META_TYPE,
-      "Expected corrected meta type field for '{}' importing",
-      Self::META_TYPE
-    );
+      "Expected corrected meta type field for particle effect frame importing",
+    )?;
 
     let texture_size: Vec<String> = read_ltx_field::<String>("texture_size", section)?
       .split(',')
@@ -138,6 +138,7 @@ impl LtxImportExport for ParticleEffectFrame {
 
 #[cfg(test)]
 mod tests {
+  use crate::constants::META_TYPE_FIELD;
   use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
   use crate::export::LtxImportExport;
   use serde_json::to_string_pretty;
@@ -220,6 +221,19 @@ mod tests {
     assert_eq!(read, original);
 
     Ok(())
+  }
+
+  #[test]
+  fn test_import_rejects_incorrect_meta_type() {
+    let mut ltx: Ltx = Ltx::new();
+    ltx
+      .with_section("data")
+      .set(META_TYPE_FIELD, "incorrect_meta_type");
+
+    assert!(
+      ParticleEffectFrame::import("data", &ltx).is_err(),
+      "Expect import to reject an incorrect particle effect frame meta type"
+    );
   }
 
   #[test]

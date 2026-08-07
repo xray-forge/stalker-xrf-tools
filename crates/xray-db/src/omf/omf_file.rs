@@ -8,7 +8,7 @@ use std::io::Write;
 use std::path::Path;
 use xray_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
 use xray_error::{XRayError, XRayResult};
-use xray_utils::open_export_file;
+use xray_utils::{assert_equal, open_export_file};
 
 // c++ CKinematicsAnimated
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,11 +37,11 @@ impl OmfFile {
   }
 
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
-    assert_eq!(
+    assert_equal(
       chunks.len(),
       2,
-      "Unexpected chunks count in omf file, expected 2"
-    );
+      "Unexpected chunks count in omf file, expected 2",
+    )?;
 
     let parameters: OmfParametersChunk =
       find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?
@@ -227,6 +227,16 @@ mod tests {
     assert!(
       file.write_to::<XRayByteOrder>(&mut Vec::new()).is_err(),
       "Expect write to reject mismatched motions and definitions counts"
+    );
+  }
+
+  #[test]
+  fn test_read_rejects_unexpected_chunks_count() {
+    let chunks: Vec<ChunkReader> = Vec::new();
+
+    assert!(
+      OmfFile::read_from_chunks::<XRayByteOrder>(&chunks).is_err(),
+      "Expect read to reject an unexpected OMF chunks count"
     );
   }
 

@@ -7,7 +7,7 @@ use std::path::Path;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::open_export_file;
+use xray_utils::{assert_equal, open_export_file};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -67,12 +67,12 @@ impl FileImportExport for ParticlesHeaderChunk {
       version: read_ltx_field("version", section)?,
     };
 
-    assert_eq!(
-      meta_type,
+    assert_equal(
+      meta_type.as_str(),
       Self::META_TYPE,
-      "Expect type metadata to be set as {meta_type}"
-    );
-    assert_eq!(header_chunk.version, 1, "Expect version chunk to be 1");
+      "Expect type metadata to be set correctly",
+    )?;
+    assert_equal(header_chunk.version, 1, "Expect version chunk to be 1")?;
 
     Ok(header_chunk)
   }
