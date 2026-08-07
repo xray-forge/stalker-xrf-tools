@@ -1,6 +1,6 @@
 use crate::project::weapons::weapon_sound_layer_field::WeaponSoundLayerField;
 use std::collections::{BTreeMap, BTreeSet};
-use xray_ltx::Section;
+use xray_ltx::{LTX_SYMBOL_SCHEME, Section};
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum WeaponSoundLayerIssue {
@@ -26,6 +26,11 @@ pub(crate) fn weapon_sound_layer_issues(section: &Section) -> Vec<WeaponSoundLay
   let mut layers: BTreeMap<u32, BTreeSet<Option<u32>>> = BTreeMap::new();
 
   for (field_name, _) in section {
+    // Metadata fields such as `$scheme` describe the section itself and are not sound layers.
+    if field_name.starts_with(LTX_SYMBOL_SCHEME) {
+      continue;
+    }
+
     let Some(field) = WeaponSoundLayerField::parse(field_name) else {
       issues.push(WeaponSoundLayerIssue::InvalidFieldName {
         field_name: String::from(field_name),
@@ -94,6 +99,22 @@ mod tests {
     .expect("test LTX is valid");
 
     assert!(weapon_sound_layer_issues(&ltx["layered_shot"]).is_empty());
+  }
+
+  #[test]
+  fn ignores_section_metadata_fields() {
+    let ltx: Ltx = Ltx::read_from_str(
+      "[layered_shot]\n\
+       $scheme = $item_weapon_sound_layers\n\
+       snd_1_layer = weapons\\ak74\\shot\n\
+       snd_2_layer = weapons\\ak74\\distant\n",
+    )
+    .expect("test LTX is valid");
+
+    assert!(
+      weapon_sound_layer_issues(&ltx["layered_shot"]).is_empty(),
+      "Expect $scheme to describe the section rather than be read as a sound layer"
+    );
   }
 
   #[test]

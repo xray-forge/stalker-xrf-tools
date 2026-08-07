@@ -4,6 +4,7 @@ pub(crate) mod project;
 pub(crate) mod scheme;
 
 pub use crate::file::check::*;
+pub use crate::file::file_configuration::constants::LTX_SYMBOL_SCHEME;
 pub use crate::file::file_configuration::constants::ROOT_SECTION;
 pub use crate::file::file_configuration::line_separator::LineSeparator;
 pub use crate::file::file_section::section::*;

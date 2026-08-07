@@ -12,7 +12,7 @@ use std::path::Path;
 use std::time::{Duration, Instant};
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_error::XRayResult;
-use xray_ltx::{Ltx, Section};
+use xray_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
 
 impl GamedataProject {
   pub fn verify_weapons(
@@ -444,6 +444,11 @@ impl GamedataProject {
     }
 
     for (field_name, field_value) in section {
+      // Metadata fields such as `$scheme` describe the section, they are not sound references.
+      if field_name.starts_with(LTX_SYMBOL_SCHEME) {
+        continue;
+      }
+
       if !self
         .verify_weapon_sound_asset(options, section_name, field_name, field_value)
         .is_ok_and(|it| it)
