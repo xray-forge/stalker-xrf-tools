@@ -1,3 +1,4 @@
+use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
 use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
 use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
@@ -5,6 +6,7 @@ use std::time::Duration;
 pub struct GamedataAnimationsVerificationResult {
   pub(crate) duration: Duration,
   pub(crate) findings: Vec<Finding>,
+  pub(crate) hud_item_animations: GamedataHudItemAnimationsVerificationResult,
   pub(crate) player_hud_animations: GamedataPlayerHudAnimationsVerificationResult,
 }
 
@@ -14,11 +16,18 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
   }
 
   fn status(&self) -> GamedataVerificationStatus {
-    self.player_hud_animations.status()
+    GamedataVerificationStatus::aggregate([
+      self.player_hud_animations.status(),
+      self.hud_item_animations.status(),
+    ])
   }
 
   fn failure_message(&self) -> String {
-    self.player_hud_animations.failure_message()
+    format!(
+      "{}, {}",
+      self.player_hud_animations.failure_message(),
+      self.hud_item_animations.failure_message()
+    )
   }
 
   fn findings(&self) -> &[Finding] {
@@ -30,6 +39,7 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
 mod tests {
   use super::GamedataAnimationsVerificationResult;
   use crate::GamedataFindingFactory;
+  use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
   use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
   use crate::{
     Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
@@ -51,6 +61,7 @@ mod tests {
       Ok(GamedataAnimationsVerificationResult {
         duration: Duration::ZERO,
         findings: vec![finding.clone()],
+        hud_item_animations: GamedataHudItemAnimationsVerificationResult::default(),
         player_hud_animations: GamedataPlayerHudAnimationsVerificationResult {
           checked_huds_count: 1,
           findings: vec![finding.clone()],
@@ -60,6 +71,41 @@ mod tests {
     );
 
     assert_eq!(report.status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.checks()[0].findings(), [finding]);
+  }
+
+  #[test]
+  fn fails_when_only_hud_item_animations_are_invalid() {
+    let finding: Finding = GamedataFindingFactory::for_asset(
+      GamedataVerificationRule::AnimationsHudItem,
+      "configs/system.ltx",
+      "Hud item section [wpn_ak74_hud] anm_shots=missing -> explicitly requested item motion is not found",
+    );
+    let mut report: GamedataVerificationReport = GamedataVerificationReport::default();
+
+    report.add_check(
+      GamedataVerificationType::Animations,
+      Ok(GamedataAnimationsVerificationResult {
+        duration: Duration::ZERO,
+        findings: vec![finding.clone()],
+        hud_item_animations: GamedataHudItemAnimationsVerificationResult {
+          checked_items_count: 2,
+          findings: vec![finding.clone()],
+          invalid_items_count: 1,
+        },
+        player_hud_animations: GamedataPlayerHudAnimationsVerificationResult {
+          checked_huds_count: 1,
+          findings: Vec::new(),
+          invalid_huds_count: 0,
+        },
+      }),
+    );
+
+    assert_eq!(
+      report.status(),
+      GamedataVerificationStatus::Failed,
+      "Expect invalid hud item animations alone to fail the animations check"
+    );
     assert_eq!(report.checks()[0].findings(), [finding]);
   }
 }

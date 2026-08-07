@@ -22,6 +22,13 @@ pub fn is_weapon_section(section: &Section) -> bool {
       || section.contains_key("flame"))
 }
 
+/// Whether the section describes a hud item, a model attached to the player hands.
+///
+/// The engine requires `item_visual` for every such section, see `attachable_hud_item::load`.
+pub fn is_hud_item_section(section: &Section) -> bool {
+  section.contains_key("item_visual")
+}
+
 pub fn is_player_hud_section(section: &Section) -> bool {
   section.contains_key("visual")
     && section.contains_key("position")

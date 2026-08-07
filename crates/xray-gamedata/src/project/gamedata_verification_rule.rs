@@ -4,6 +4,8 @@ use derive_more::Display;
 #[derive(Clone, Copy, Debug, Display, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[non_exhaustive]
 pub enum GamedataVerificationRule {
+  #[display("animations.hud-item")]
+  AnimationsHudItem,
   #[display("animations.player-hud")]
   AnimationsPlayerHud,
   #[display("checks.execution")]
