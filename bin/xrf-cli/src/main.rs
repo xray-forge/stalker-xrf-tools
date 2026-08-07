@@ -26,6 +26,7 @@ use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
 use clap::Command;
 use commands::ogf::info_ogf::InfoOgfCommand;
+use commands::ogf::patch_ogf_motion_refs::PatchOgfMotionRefsCommand;
 use commands::omf::info_omf::InfoOmfCommand;
 use commands::omf::repack_omf::RepackOmfCommand;
 use commands::particle::info_particles::InfoParticlesCommand;
@@ -89,6 +90,7 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     VerifyLtxCommand::new_box(),
     // OGF:
     InfoOgfCommand::new_box(),
+    PatchOgfMotionRefsCommand::new_box(),
     // OMF:
     InfoOmfCommand::new_box(),
     RepackOmfCommand::new_box(),
