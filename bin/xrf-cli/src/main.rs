@@ -27,6 +27,7 @@ use crate::output::TerminalOutput;
 use clap::Command;
 use commands::ogf::info_ogf::InfoOgfCommand;
 use commands::omf::info_omf::InfoOmfCommand;
+use commands::omf::repack_omf::RepackOmfCommand;
 use commands::particle::info_particles::InfoParticlesCommand;
 use commands::particle::pack_particles::PackParticlesFileCommand;
 use commands::particle::repack_particles::RepackParticlesCommand;
@@ -90,6 +91,7 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     InfoOgfCommand::new_box(),
     // OMF:
     InfoOmfCommand::new_box(),
+    RepackOmfCommand::new_box(),
     // Particles:
     InfoParticlesCommand::new_box(),
     PackParticlesFileCommand::new_box(),
