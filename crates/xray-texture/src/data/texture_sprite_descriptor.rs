@@ -1,3 +1,6 @@
+use crate::constants::{
+  XML_ATTRIBUTE_HEIGHT, XML_ATTRIBUTE_ID, XML_ATTRIBUTE_WIDTH, XML_ATTRIBUTE_X, XML_ATTRIBUTE_Y,
+};
 use roxmltree::Node;
 
 /// Description of single texture sprite.
@@ -27,11 +30,11 @@ impl TextureSpriteDescriptor {
   }
 
   pub fn new_optional_from_node(node: Node) -> Option<Self> {
-    let id: Option<&str> = node.attribute("id");
-    let x: Option<&str> = node.attribute("x");
-    let y: Option<&str> = node.attribute("y");
-    let w: Option<&str> = node.attribute("width");
-    let h: Option<&str> = node.attribute("height");
+    let id: Option<&str> = node.attribute(XML_ATTRIBUTE_ID);
+    let x: Option<&str> = node.attribute(XML_ATTRIBUTE_X);
+    let y: Option<&str> = node.attribute(XML_ATTRIBUTE_Y);
+    let w: Option<&str> = node.attribute(XML_ATTRIBUTE_WIDTH);
+    let h: Option<&str> = node.attribute(XML_ATTRIBUTE_HEIGHT);
 
     if id.is_none() || x.is_none() || y.is_none() || w.is_none() || h.is_none() {
       None

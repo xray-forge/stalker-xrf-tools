@@ -1,4 +1,8 @@
-use crate::INVENTORY_ICON_GRID_SQUARE_BASE;
+use crate::constants::{
+  INVENTORY_ICON_GRID_SQUARE_BASE, LTX_FIELD_INV_GRID_HEIGHT, LTX_FIELD_INV_GRID_WIDTH,
+  LTX_FIELD_INV_GRID_X, LTX_FIELD_INV_GRID_Y, LTX_FIELD_INVENTORY_ICON,
+  LTX_FIELD_INVENTORY_ICON_PATH,
+};
 use image::{ImageBuffer, Rgba, RgbaImage};
 use serde::Serialize;
 use std::cmp::max;
@@ -40,7 +44,7 @@ impl InventorySpriteDescriptor {
     T: Into<String>,
   {
     if !section
-      .get("$inventory_icon")
+      .get(LTX_FIELD_INVENTORY_ICON)
       .and_then(|value| value.trim().parse::<bool>().ok())
       .unwrap_or(false)
     {
@@ -48,19 +52,19 @@ impl InventorySpriteDescriptor {
     }
 
     let x: u32 = section
-      .get("inv_grid_x")?
+      .get(LTX_FIELD_INV_GRID_X)?
       .parse::<u32>()
       .unwrap_or(u32::MAX);
     let y: u32 = section
-      .get("inv_grid_y")?
+      .get(LTX_FIELD_INV_GRID_Y)?
       .parse::<u32>()
       .unwrap_or(u32::MAX);
     let w: u32 = section
-      .get("inv_grid_width")?
+      .get(LTX_FIELD_INV_GRID_WIDTH)?
       .parse::<u32>()
       .unwrap_or(u32::MAX);
     let h: u32 = section
-      .get("inv_grid_height")?
+      .get(LTX_FIELD_INV_GRID_HEIGHT)?
       .parse::<u32>()
       .unwrap_or(u32::MAX);
 
@@ -70,7 +74,7 @@ impl InventorySpriteDescriptor {
       Some(Self {
         section: section_name.into(),
         custom_icon: section
-          .get("$inventory_icon_path")
+          .get(LTX_FIELD_INVENTORY_ICON_PATH)
           .map(|value| value.into()),
         x,
         y,

@@ -1,3 +1,4 @@
+use crate::constants::DDS_EXTENSION;
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::{UnpackEquipmentOptions, save_image_as_ui_dds};
 use image::GenericImageView;
@@ -51,7 +52,9 @@ impl UnpackEquipmentProcessor {
       Ok(false)
     } else {
       save_image_as_ui_dds(
-        &options.output_path.join(format!("{}.dds", sprite.section)),
+        &options
+          .output_path
+          .join(format!("{}.{}", sprite.section, DDS_EXTENSION)),
         &options.source.view(x, y, w, h).to_image(),
         options.dds_compression_format,
       )?;

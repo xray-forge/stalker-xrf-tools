@@ -1,7 +1,10 @@
+pub(crate) mod constants;
 pub(crate) mod data;
 pub(crate) mod description;
 pub(crate) mod equipment;
 pub(crate) mod utils;
+
+pub use crate::constants::INVENTORY_ICON_GRID_SQUARE_BASE;
 
 pub use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 pub use crate::data::texture_file_descriptor::TextureFileDescriptor;
@@ -11,7 +14,6 @@ pub use crate::description::pack_description_options::PackDescriptionOptions;
 pub use crate::description::pack_description_processor::PackDescriptionProcessor;
 pub use crate::description::unpack_description_processor::UnpackDescriptionProcessor;
 
-pub use crate::equipment::equipment_constants::INVENTORY_ICON_GRID_SQUARE_BASE;
 pub use crate::equipment::pack_equipment_options::PackEquipmentOptions;
 pub use crate::equipment::pack_equipment_processor::PackEquipmentProcessor;
 pub use crate::equipment::pack_equipment_result::PackEquipmentResult;

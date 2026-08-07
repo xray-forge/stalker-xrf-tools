@@ -1,3 +1,4 @@
+use crate::constants::DDS_EXTENSION;
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
 use crate::{PackDescriptionOptions, dds_to_image, read_dds_by_path, save_image_as_ui_dds};
@@ -51,7 +52,9 @@ impl UnpackDescriptionProcessor {
     options: &PackDescriptionOptions,
     file: &TextureFileDescriptor,
   ) -> XRayResult<bool> {
-    let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
+    let full_name: PathBuf = options
+      .base
+      .join(format!("{}.{}", file.name, DDS_EXTENSION));
     let destination: PathBuf = options.output_path.join(&file.name);
 
     xray_output::verbose!(options.output, "Unpacking {}", full_name.display());
@@ -99,7 +102,7 @@ impl UnpackDescriptionProcessor {
           }
         } else {
           save_image_as_ui_dds(
-            &destination.join(format!("{}.dds", sprite.id)),
+            &destination.join(format!("{}.{}", sprite.id, DDS_EXTENSION)),
             &dds.view(sprite.x, sprite.y, sprite.w, sprite.h).to_image(),
             options.dds_compression_format,
           )?;

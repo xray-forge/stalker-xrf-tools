@@ -1,3 +1,4 @@
+use crate::constants::DDS_EXTENSION;
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
@@ -37,7 +38,9 @@ impl PackDescriptionProcessor {
     options: &PackDescriptionOptions,
     file: &TextureFileDescriptor,
   ) -> XRayResult<bool> {
-    let full_name: PathBuf = options.base.join(format!("{}.dds", file.name));
+    let full_name: PathBuf = options
+      .base
+      .join(format!("{}.{}", file.name, DDS_EXTENSION));
 
     let (width, height) = file.get_dimension_boundaries()?;
     let mut result: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
@@ -63,7 +66,7 @@ impl PackDescriptionProcessor {
       let texture_path: PathBuf = options
         .base
         .join(&file.name)
-        .join(format!("{}.dds", texture.id));
+        .join(format!("{}.{}", texture.id, DDS_EXTENSION));
 
       match read_dds_by_path(&texture_path).and_then(|dds| dds_to_image(&dds)) {
         Ok(texture_dds) => {
@@ -105,7 +108,9 @@ impl PackDescriptionProcessor {
       }
     }
 
-    let destination: PathBuf = options.output_path.join(format!("{}.dds", &file.name));
+    let destination: PathBuf = options
+      .output_path
+      .join(format!("{}.{}", &file.name, DDS_EXTENSION));
 
     xray_output::verbose!(options.output, "Saving file: {}", destination.display());
 

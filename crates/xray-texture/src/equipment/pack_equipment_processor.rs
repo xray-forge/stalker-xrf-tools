@@ -1,3 +1,8 @@
+use crate::constants::{
+  DDS_EXTENSION, EXTENSIONS_DIRECTORY, LTX_PATH_EXTENSION_MARKER, LTX_PATH_EXTENSION_MARKER_PREFIX,
+  LTX_PATH_GAMEDATA_MARKER, LTX_PATH_GAMEDATA_MARKER_PREFIX, PNG_EXTENSION, RESOURCES_DIRECTORY,
+  TEXTURES_DIRECTORY,
+};
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::utils::images::dds_to_image;
 use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_image_as_ui_dds};
@@ -129,7 +134,7 @@ impl PackEquipmentProcessor {
   pub fn read_sprite_from_path(path: &Path, width: u32, height: u32) -> XRayResult<DynamicImage> {
     let image: DynamicImage = if path
       .extension()
-      .is_some_and(|extension| extension.eq("png"))
+      .is_some_and(|extension| extension.eq(PNG_EXTENSION))
     {
       ImageReader::open(path)?.decode()?
     } else {
@@ -196,21 +201,29 @@ impl PackEquipmentProcessor {
   ) -> PathBuf {
     match descriptor.custom_icon.as_deref() {
       None => {
-        let png_path: PathBuf = options.source.join(format!("{}.png", descriptor.section));
+        let png_path: PathBuf = options
+          .source
+          .join(format!("{}.{}", descriptor.section, PNG_EXTENSION));
 
         if png_path.exists() {
           png_path
         } else {
-          options.source.join(format!("{}.dds", descriptor.section))
+          options
+            .source
+            .join(format!("{}.{}", descriptor.section, DDS_EXTENSION))
         }
       }
       Some(custom_path) => {
         // Handle custom gamedata source.
         if let Some(gamedata) = &options.gamedata {
-          if custom_path.starts_with('~') {
+          if custom_path.starts_with(LTX_PATH_GAMEDATA_MARKER) {
             PathBuf::from(
               gamedata
-                .join(custom_path.strip_prefix("~\\").unwrap())
+                .join(
+                  custom_path
+                    .strip_prefix(LTX_PATH_GAMEDATA_MARKER_PREFIX)
+                    .unwrap(),
+                )
                 .absolutize()
                 .unwrap()
                 .to_str()
@@ -219,7 +232,7 @@ impl PackEquipmentProcessor {
           } else {
             PathBuf::from(
               gamedata
-                .join("textures")
+                .join(TEXTURES_DIRECTORY)
                 .join(custom_path)
                 .absolutize()
                 .unwrap()
@@ -228,7 +241,7 @@ impl PackEquipmentProcessor {
             )
           }
           // Handle ~ path for xrf / system.ltx
-        } else if custom_path.starts_with('~') {
+        } else if custom_path.starts_with(LTX_PATH_GAMEDATA_MARKER) {
           PathBuf::from(
             options
               .ltx
@@ -237,15 +250,19 @@ impl PackEquipmentProcessor {
               .unwrap()
               .join("..")
               .join("..")
-              .join("resources")
-              .join(custom_path.strip_prefix("~\\").unwrap())
+              .join(RESOURCES_DIRECTORY)
+              .join(
+                custom_path
+                  .strip_prefix(LTX_PATH_GAMEDATA_MARKER_PREFIX)
+                  .unwrap(),
+              )
               .absolutize()
               .unwrap()
               .to_str()
               .unwrap(),
           )
           // Handle relative path for xrf / system.ltx extensions
-        } else if custom_path.starts_with('#') {
+        } else if custom_path.starts_with(LTX_PATH_EXTENSION_MARKER) {
           PathBuf::from(
             options
               .ltx
@@ -253,8 +270,12 @@ impl PackEquipmentProcessor {
               .as_ref()
               .unwrap()
               .join("..")
-              .join("extensions")
-              .join(custom_path.strip_prefix("#\\").unwrap())
+              .join(EXTENSIONS_DIRECTORY)
+              .join(
+                custom_path
+                  .strip_prefix(LTX_PATH_EXTENSION_MARKER_PREFIX)
+                  .unwrap(),
+              )
               .absolutize()
               .unwrap()
               .to_str()
@@ -270,8 +291,8 @@ impl PackEquipmentProcessor {
               .unwrap()
               .join("..")
               .join("..")
-              .join("resources")
-              .join("textures")
+              .join(RESOURCES_DIRECTORY)
+              .join(TEXTURES_DIRECTORY)
               .join(custom_path)
               .absolutize()
               .unwrap()

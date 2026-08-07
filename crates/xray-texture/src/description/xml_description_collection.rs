@@ -1,3 +1,6 @@
+use crate::constants::{
+  XML_ATTRIBUTE_ID, XML_ATTRIBUTE_NAME, XML_TAG_FILE, XML_TAG_TEXTURE, XML_TAG_WINDOW,
+};
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
@@ -107,14 +110,14 @@ impl XmlDescriptionCollection {
     let window: Option<Node> = document
       .root()
       .children()
-      .find(|it| it.is_element() && it.tag_name().name().eq("w"));
+      .find(|it| it.is_element() && it.tag_name().name().eq(XML_TAG_WINDOW));
 
     if let Some(window) = window {
       for file in window
         .children()
-        .filter(|it| it.is_element() && it.tag_name().name().eq("file"))
+        .filter(|it| it.is_element() && it.tag_name().name().eq(XML_TAG_FILE))
       {
-        let file_name: Option<&str> = file.attribute("name");
+        let file_name: Option<&str> = file.attribute(XML_ATTRIBUTE_NAME);
 
         if let Some(file_name) = file_name {
           xray_output::verbose!(options.output, "Parsing file: {file_name}");
@@ -123,7 +126,7 @@ impl XmlDescriptionCollection {
 
           for node in file
             .descendants()
-            .filter(|it| it.is_element() && it.tag_name().name().eq("texture"))
+            .filter(|it| it.is_element() && it.tag_name().name().eq(XML_TAG_TEXTURE))
           {
             if let Some(sprite) = TextureSpriteDescriptor::new_optional_from_node(node) {
               file_description.add_sprite(sprite);
@@ -131,7 +134,7 @@ impl XmlDescriptionCollection {
               xray_output::warning!(
                 options.output,
                 "Skip texture node: {} ({})",
-                node.attribute("id").unwrap_or("unknown"),
+                node.attribute(XML_ATTRIBUTE_ID).unwrap_or("unknown"),
                 node
                   .attributes()
                   .map(|it| format!("{}={}", it.name(), it.value()))
