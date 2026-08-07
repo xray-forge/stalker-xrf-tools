@@ -51,6 +51,12 @@ impl GenericCommand for RenameOmfMotionsCommand {
           .action(ArgAction::SetTrue),
       )
       .arg(
+        Arg::new("dry-run")
+          .help("Validate the change and report the result without writing any file")
+          .long("dry-run")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
         Arg::new("silent")
           .help("Disable any logging")
           .short('s')
@@ -89,6 +95,7 @@ impl GenericCommand for RenameOmfMotionsCommand {
       destination,
       map_path,
       matches.get_flag("strict"),
+      matches.get_flag("dry-run"),
     )?;
 
     Ok(())
@@ -103,6 +110,7 @@ impl RenameOmfMotionsCommand {
     destination: &Path,
     map_path: &Path,
     is_strict: bool,
+    is_dry_run: bool,
   ) -> XRayResult {
     let renames: HashMap<String, String> = Self::read_map(map_path)?;
     let mut omf_file: Box<OmfFile> = Box::new(OmfFile::read_from_path::<XRayByteOrder, _>(&path)?);
@@ -132,6 +140,16 @@ impl RenameOmfMotionsCommand {
       "Resulting motions: {}",
       omf_file.get_motion_names().join(",")
     );
+
+    if is_dry_run {
+      xray_output::info!(
+        output,
+        "Dry run, nothing written, {} would receive {renamed_count} renamed motions",
+        destination.display()
+      );
+
+      return Ok(());
+    }
 
     omf_file.write_to_path::<XRayByteOrder, _>(&destination)?;
 

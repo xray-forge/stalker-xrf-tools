@@ -46,6 +46,12 @@ impl GenericCommand for PatchOgfMotionRefsCommand {
           .value_parser(value_parser!(String)),
       )
       .arg(
+        Arg::new("dry-run")
+          .help("Validate the rewrite and report the result without writing any file")
+          .long("dry-run")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
         Arg::new("silent")
           .help("Disable any logging")
           .short('s')
@@ -80,7 +86,13 @@ impl GenericCommand for PatchOgfMotionRefsCommand {
     let output: OutputOptions =
       TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    Self::patch_file(&output, path, destination, &motion_refs)?;
+    Self::patch_file(
+      &output,
+      path,
+      destination,
+      &motion_refs,
+      matches.get_flag("dry-run"),
+    )?;
 
     Ok(())
   }
@@ -93,6 +105,7 @@ impl PatchOgfMotionRefsCommand {
     path: &Path,
     destination: &Path,
     motion_refs: &[String],
+    is_dry_run: bool,
   ) -> XRayResult {
     let original: Vec<u8> = fs::read(path)?;
     let existing: Vec<String> = OgfFile::read_motion_refs_from_path::<XRayByteOrder, _>(&path)?;
@@ -109,6 +122,18 @@ impl PatchOgfMotionRefsCommand {
 
     let patched: Vec<u8> =
       OgfFile::write_motion_refs_to_buffer::<XRayByteOrder>(File::open(path)?, motion_refs)?;
+
+    if is_dry_run {
+      xray_output::info!(
+        output,
+        "Dry run, nothing written, {} would receive {} bytes instead of {}",
+        destination.display(),
+        patched.len(),
+        original.len()
+      );
+
+      return Ok(());
+    }
 
     fs::write(destination, &patched)?;
 

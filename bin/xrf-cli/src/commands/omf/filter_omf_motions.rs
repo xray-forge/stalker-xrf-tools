@@ -52,6 +52,12 @@ impl GenericCommand for FilterOmfMotionsCommand {
           .value_parser(value_parser!(String)),
       )
       .arg(
+        Arg::new("dry-run")
+          .help("Validate the change and report the result without writing any file")
+          .long("dry-run")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
         Arg::new("silent")
           .help("Disable any logging")
           .short('s')
@@ -83,7 +89,14 @@ impl GenericCommand for FilterOmfMotionsCommand {
     let output: OutputOptions =
       TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    Self::filter_file(&output, path, destination, &names, &prefixes)?;
+    Self::filter_file(
+      &output,
+      path,
+      destination,
+      &names,
+      &prefixes,
+      matches.get_flag("dry-run"),
+    )?;
 
     Ok(())
   }
@@ -104,6 +117,7 @@ impl FilterOmfMotionsCommand {
     destination: &Path,
     names: &[String],
     prefixes: &[String],
+    is_dry_run: bool,
   ) -> XRayResult {
     if names.is_empty() && prefixes.is_empty() {
       return Err(XRayError::new_invalid_error(
@@ -138,6 +152,16 @@ impl FilterOmfMotionsCommand {
       "Kept motions: {}",
       omf_file.get_motion_names().join(",")
     );
+
+    if is_dry_run {
+      xray_output::info!(
+        output,
+        "Dry run, nothing written, {} would receive {retained_count} motions",
+        destination.display()
+      );
+
+      return Ok(());
+    }
 
     omf_file.write_to_path::<XRayByteOrder, _>(&destination)?;
 
