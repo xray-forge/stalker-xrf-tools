@@ -27,7 +27,9 @@ use crate::output::TerminalOutput;
 use clap::Command;
 use commands::ogf::info_ogf::InfoOgfCommand;
 use commands::ogf::patch_ogf_motion_refs::PatchOgfMotionRefsCommand;
+use commands::omf::filter_omf_motions::FilterOmfMotionsCommand;
 use commands::omf::info_omf::InfoOmfCommand;
+use commands::omf::rename_omf_motions::RenameOmfMotionsCommand;
 use commands::omf::repack_omf::RepackOmfCommand;
 use commands::particle::info_particles::InfoParticlesCommand;
 use commands::particle::pack_particles::PackParticlesFileCommand;
@@ -92,7 +94,9 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     InfoOgfCommand::new_box(),
     PatchOgfMotionRefsCommand::new_box(),
     // OMF:
+    FilterOmfMotionsCommand::new_box(),
     InfoOmfCommand::new_box(),
+    RenameOmfMotionsCommand::new_box(),
     RepackOmfCommand::new_box(),
     // Particles:
     InfoParticlesCommand::new_box(),
