@@ -113,7 +113,61 @@ impl GamedataProject {
       is_weapon_valid = false;
     }
 
+    if !self
+      .verify_weapon_bore_animations(options, ltx, section_name, section)
+      .is_ok_and(|it| it)
+    {
+      is_weapon_valid = false;
+    }
+
     Ok(is_weapon_valid)
+  }
+
+  /// Verify that a launcher capable weapon keeps its grenade launcher bore animations defined.
+  ///
+  /// `CWeaponMagazinedWGrenade::PlayAnimBore` switches to `anm_bore_g` or `anm_bore_w_gl` as soon as
+  /// a launcher is attached. The Anomaly engine detects a missing bore and returns to idle, but
+  /// OpenXRay only falls back to `anim_` prefixed aliases that this project never defines. With
+  /// nothing to play the animation end callback never fires and the weapon stays in the bore state,
+  /// so these keys cannot be dropped the way Anomaly content drops them.
+  pub fn verify_weapon_bore_animations(
+    &self,
+    options: &GamedataProjectVerifyOptions,
+    ltx: &Ltx,
+    section_name: &str,
+    section: &Section,
+  ) -> XRayResult<bool> {
+    // Only weapons that can carry a launcher ever reach the grenade launcher bore branch.
+    if section
+      .get("grenade_launcher_status")
+      .is_none_or(|it| it.trim() == "0")
+    {
+      return Ok(true);
+    }
+
+    let Some(hud_section) = section.get("hud").and_then(|it| ltx.section(it)) else {
+      return Ok(true);
+    };
+
+    // A weapon without any bore never enters the state, so there is nothing to keep consistent.
+    if hud_section.get("anm_bore").is_none() {
+      return Ok(true);
+    }
+
+    let mut is_valid: bool = true;
+
+    for required in ["anm_bore_g", "anm_bore_w_gl"] {
+      if hud_section.get(required).is_none() {
+        xray_output::error!(
+          options.output,
+          "Weapon [{section_name}] supports a grenade launcher and defines anm_bore, but its hud section has no {required}, and the engine has no fallback for it"
+        );
+
+        is_valid = false;
+      }
+    }
+
+    Ok(is_valid)
   }
 
   pub fn verify_weapon_hud(

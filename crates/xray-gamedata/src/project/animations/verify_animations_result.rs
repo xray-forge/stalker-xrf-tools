@@ -1,4 +1,5 @@
 use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
+use crate::project::animations::hud_motion_collisions_verification_result::GamedataHudMotionCollisionsVerificationResult;
 use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
 use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
@@ -7,6 +8,7 @@ pub struct GamedataAnimationsVerificationResult {
   pub(crate) duration: Duration,
   pub(crate) findings: Vec<Finding>,
   pub(crate) hud_item_animations: GamedataHudItemAnimationsVerificationResult,
+  pub(crate) hud_motion_collisions: GamedataHudMotionCollisionsVerificationResult,
   pub(crate) player_hud_animations: GamedataPlayerHudAnimationsVerificationResult,
 }
 
@@ -19,14 +21,16 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
     GamedataVerificationStatus::aggregate([
       self.player_hud_animations.status(),
       self.hud_item_animations.status(),
+      self.hud_motion_collisions.status(),
     ])
   }
 
   fn failure_message(&self) -> String {
     format!(
-      "{}, {}",
+      "{}, {}, {}",
       self.player_hud_animations.failure_message(),
-      self.hud_item_animations.failure_message()
+      self.hud_item_animations.failure_message(),
+      self.hud_motion_collisions.failure_message()
     )
   }
 
@@ -40,6 +44,7 @@ mod tests {
   use super::GamedataAnimationsVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
+  use crate::project::animations::hud_motion_collisions_verification_result::GamedataHudMotionCollisionsVerificationResult;
   use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
   use crate::{
     Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
@@ -62,6 +67,7 @@ mod tests {
         duration: Duration::ZERO,
         findings: vec![finding.clone()],
         hud_item_animations: GamedataHudItemAnimationsVerificationResult::default(),
+        hud_motion_collisions: GamedataHudMotionCollisionsVerificationResult::default(),
         player_hud_animations: GamedataPlayerHudAnimationsVerificationResult {
           checked_huds_count: 1,
           findings: vec![finding.clone()],
@@ -93,6 +99,7 @@ mod tests {
           findings: vec![finding.clone()],
           invalid_items_count: 1,
         },
+        hud_motion_collisions: GamedataHudMotionCollisionsVerificationResult::default(),
         player_hud_animations: GamedataPlayerHudAnimationsVerificationResult {
           checked_huds_count: 1,
           findings: Vec::new(),

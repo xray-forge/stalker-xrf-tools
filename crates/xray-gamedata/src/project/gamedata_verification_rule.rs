@@ -6,6 +6,8 @@ use derive_more::Display;
 pub enum GamedataVerificationRule {
   #[display("animations.hud-item")]
   AnimationsHudItem,
+  #[display("animations.motion-collision")]
+  AnimationsMotionCollision,
   #[display("animations.player-hud")]
   AnimationsPlayerHud,
   #[display("checks.execution")]
