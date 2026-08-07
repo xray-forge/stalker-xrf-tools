@@ -12,6 +12,7 @@ pub(crate) mod types;
 pub use crate::ogf::chunks::ogf_geometry::*;
 pub use crate::ogf::ogf_file::*;
 pub use crate::omf::omf_file::*;
+pub use crate::omf::omf_motions_processor::*;
 pub use crate::particles::particles_file::*;
 pub use crate::shader_library::shader_library_file::*;
 pub use crate::spawn::spawn_file::*;

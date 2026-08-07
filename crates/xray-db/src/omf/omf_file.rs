@@ -132,6 +132,16 @@ impl OmfFile {
 }
 
 impl OmfFile {
+  /// List names of motions stored in the file, as used for engine lookups.
+  pub fn get_motion_names(&self) -> Vec<&str> {
+    self
+      .parameters
+      .motions
+      .iter()
+      .map(|it| it.name.as_str())
+      .collect()
+  }
+
   pub fn get_bones(&self) -> Vec<&str> {
     self
       .parameters
