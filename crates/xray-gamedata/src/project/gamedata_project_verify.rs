@@ -96,6 +96,7 @@ mod tests {
       report.checks()[0].verification_type(),
       GamedataVerificationType::Levels
     );
-    assert_eq!(report.status(), GamedataVerificationStatus::Incomplete);
+    // The test project ships no spawn file, so the level roster is unknown and nothing is checked.
+    assert_eq!(report.status(), GamedataVerificationStatus::Skipped);
   }
 }

@@ -12,6 +12,48 @@ pub enum GamedataVerificationRule {
   AnimationsPlayerHud,
   #[display("checks.execution")]
   CheckExecution,
+  #[display("levels.ai-guid")]
+  LevelsAiGuid,
+  #[display("levels.ai-node-count")]
+  LevelsAiNodeCount,
+  #[display("levels.ai-version")]
+  LevelsAiVersion,
+  #[display("levels.cform-version")]
+  LevelsCformVersion,
+  #[display("levels.details-pair")]
+  LevelsDetailsPair,
+  #[display("levels.file-empty")]
+  LevelsFileEmpty,
+  #[display("levels.file-truncated")]
+  LevelsFileTruncated,
+  #[display("levels.graph-duplicate")]
+  LevelsGraphDuplicate,
+  #[display("levels.graph-guid")]
+  LevelsGraphGuid,
+  #[display("levels.header-version")]
+  LevelsHeaderVersion,
+  #[display("levels.level-guid")]
+  LevelsLevelGuid,
+  #[display("levels.ltx-read")]
+  LevelsLtxRead,
+  #[display("levels.map-texture")]
+  LevelsMapTexture,
+  #[display("levels.missing-bundle")]
+  LevelsMissingBundle,
+  #[display("levels.missing-file")]
+  LevelsMissingFile,
+  #[display("levels.orphan-bundle")]
+  LevelsOrphanBundle,
+  #[display("levels.roster-conflict")]
+  LevelsRosterConflict,
+  #[display("levels.shader-reference")]
+  LevelsShaderReference,
+  #[display("levels.shaders-chunk")]
+  LevelsShadersChunk,
+  #[display("levels.texture-reference")]
+  LevelsTextureReference,
+  #[display("levels.undeclared-map")]
+  LevelsUndeclaredMap,
   #[display("ltx.formatting")]
   LtxFormatting,
   #[display("ltx.schema")]

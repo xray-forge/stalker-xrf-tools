@@ -9,6 +9,7 @@ ddsfile = "0.5.2"
 log = "0.4.28"
 rayon = "1.11.0"
 regex = "1.12.2"
+uuid = { version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
 xray-db = { path = "../xray-db" }
 xray-error = { path = "../xray-error" }
@@ -20,6 +21,9 @@ xray-assets = { path = "../xray-assets" }
 xray-shaders = { path = "../xray-shaders" }
 xray-sound = { path = "../xray-sound" }
 xray-utils = { path = "../xray-utils" }
+
+[dev-dependencies]
+xray-chunk = { path = "../xray-chunk" }
 
 [lints]
 workspace = true

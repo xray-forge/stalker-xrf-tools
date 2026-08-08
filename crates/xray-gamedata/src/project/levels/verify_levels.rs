@@ -1,24 +1,17 @@
-use crate::project::levels::verify_levels_result::GamedataLevelVerificationResult;
-use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
+use crate::project::levels::levels_verifier::LevelsVerifier;
+use crate::project::levels::verify_levels_result::GamedataLevelsVerificationResult;
+use crate::{GamedataProject, GamedataProjectVerifyOptions};
 use xray_error::XRayResult;
 
 impl GamedataProject {
+  // todo: Level bundles are the largest asset family in gamedata, so they are the natural first
+  //   producer of asset usage data. Marking consumed assets is deliberately not done here - it is a
+  //   whole suite concern that needs a usage marking API on the asset index and a policy for mods
+  //   that ship spare assets, and deciding it from inside one check would fix the shape for all.
   pub fn verify_levels(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataLevelVerificationResult> {
-    let result = GamedataLevelVerificationResult::default();
-
-    xray_output::heading!(options.output, "Verify levels:");
-    xray_output::info!(
-      options.output,
-      "  - {}: {}",
-      result.status(),
-      result.failure_message()
-    );
-
-    // todo: For now just mark files as used.
-
-    Ok(result)
+  ) -> XRayResult<GamedataLevelsVerificationResult> {
+    LevelsVerifier::new(self, options).verify()
   }
 }
