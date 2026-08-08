@@ -4,15 +4,14 @@ use crate::constants::{
   TEXTURES_DIRECTORY,
 };
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
-use crate::utils::images::dds_to_image;
+use crate::utils::images::{dds_to_image, fit_image_into_bounds};
 use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_image_as_ui_dds};
-use image::imageops::FilterType;
-use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba};
 use path_absolutize::*;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
-use xray_utils::{assert, assert_equal};
+use xray_utils::assert_equal;
 
 pub struct PackEquipmentProcessor {}
 
@@ -141,57 +140,7 @@ impl PackEquipmentProcessor {
       dds_to_image(&read_dds_by_path(path)?)?.into()
     };
 
-    let image_width: u32 = image.width();
-    let image_height: u32 = image.height();
-
-    if image_width != width || image_height != height {
-      log::info!(
-        "Rescaling image to bounds: {}x{} from {}x{} {}",
-        width,
-        height,
-        image_width,
-        image_height,
-        path.display()
-      );
-
-      let rescaled_image: DynamicImage = image.resize(width, height, FilterType::Lanczos3);
-      let rescaled_width: u32 = rescaled_image.width();
-      let rescaled_height: u32 = rescaled_image.height();
-
-      if rescaled_width != width || rescaled_height != height {
-        log::info!(
-          "Re-center rescaled image to bounds: {}x{} from {}x{} {}",
-          width,
-          height,
-          rescaled_width,
-          rescaled_height,
-          path.display()
-        );
-
-        let mut centered: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
-
-        assert(
-          rescaled_width <= width,
-          "Unexpected width {rescaled_width} > {width} when rescaling",
-        )?;
-        assert(
-          rescaled_height <= height,
-          "Unexpected height {rescaled_height} > {height} when rescaling",
-        )?;
-
-        centered.copy_from(
-          &rescaled_image,
-          (width - rescaled_width) / 2,
-          (height - rescaled_height) / 2,
-        )?;
-
-        Ok(centered.into())
-      } else {
-        Ok(rescaled_image)
-      }
-    } else {
-      Ok(image)
-    }
+    fit_image_into_bounds(image, width, height, path)
   }
 
   /// Read equipment icon from custom path defined in ltx config folder.

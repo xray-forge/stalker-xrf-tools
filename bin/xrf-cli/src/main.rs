@@ -21,6 +21,7 @@ use commands::translation::verify_translations::VerifyTranslationsCommand;
 
 use crate::commands::gamedata::verify_gamedata::VerifyGamedataCommand;
 use crate::commands::ltx::format_ltx::FormatLtxCommand;
+use crate::commands::texture::crop_dds::CropDdsCommand;
 use crate::commands::texture::info_dds::InfoDdsCommand;
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -112,6 +113,7 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     UnpackSpawnFileCommand::new_box(),
     VerifySpawnFileCommand::new_box(),
     // Textures:
+    CropDdsCommand::new_box(),
     InfoDdsCommand::new_box(),
     PackEquipmentIconsCommand::new_box(),
     PackTextureDescriptionCommand::new_box(),

@@ -4,7 +4,9 @@ pub(crate) mod description;
 pub(crate) mod equipment;
 pub(crate) mod utils;
 
+pub use crate::constants::DDS_EXTENSION;
 pub use crate::constants::INVENTORY_ICON_GRID_SQUARE_BASE;
+pub use crate::constants::PNG_EXTENSION;
 
 pub use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 pub use crate::data::texture_file_descriptor::TextureFileDescriptor;
@@ -21,11 +23,13 @@ pub use crate::equipment::unpack_equipment_processor::UnpackEquipmentProcessor;
 
 pub use crate::equipment::unpack_equipment_options::UnpackEquipmentOptions;
 pub use utils::images::dds_to_image;
+pub use utils::images::fit_image_into_bounds;
 pub use utils::images::open_dds_as_png;
 pub use utils::images::read_dds_by_path;
 pub use utils::images::save_image_as_ui_dds;
 pub use utils::images::save_image_as_ui_png;
 
+pub use image::DynamicImage;
 pub use image::RgbaImage;
 pub use image_dds::ImageFormat;
 pub use image_dds::image::GenericImage;
