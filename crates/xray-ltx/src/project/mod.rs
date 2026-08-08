@@ -1,3 +1,4 @@
+pub mod ltx_files_formatter;
 pub mod ltx_format_options;
 pub mod ltx_project;
 pub mod ltx_project_format;

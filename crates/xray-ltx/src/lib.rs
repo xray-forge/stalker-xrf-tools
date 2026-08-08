@@ -4,12 +4,14 @@ pub(crate) mod project;
 pub(crate) mod scheme;
 
 pub use crate::file::check::*;
+pub use crate::file::file_configuration::constants::LTX_EXTENSION;
 pub use crate::file::file_configuration::constants::LTX_SYMBOL_SCHEME;
 pub use crate::file::file_configuration::constants::ROOT_SECTION;
 pub use crate::file::file_configuration::line_separator::LineSeparator;
 pub use crate::file::file_section::section::*;
 pub use crate::file::ltx::*;
 
+pub use crate::project::ltx_files_formatter::*;
 pub use crate::project::ltx_format_options::*;
 pub use crate::project::ltx_project::*;
 pub use crate::project::ltx_project_format_result::*;
