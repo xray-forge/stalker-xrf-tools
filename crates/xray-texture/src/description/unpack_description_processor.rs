@@ -16,15 +16,12 @@ impl UnpackDescriptionProcessor {
     let description: XmlDescriptionCollection =
       XmlDescriptionCollection::get_descriptions(&options)?;
     let count: AtomicU32 = AtomicU32::new(0);
+    let selected: Vec<&TextureFileDescriptor> = description.select_files(&options)?;
 
-    xray_output::info!(
-      options.output,
-      "Unpacking for {} files",
-      description.files.len()
-    );
+    xray_output::info!(options.output, "Unpacking for {} files", selected.len());
 
     if options.is_parallel {
-      description.files.par_iter().try_for_each(|(_, file)| {
+      selected.par_iter().try_for_each(|file| {
         if Self::unpack_xml_description(&options, file)? {
           count.fetch_add(1, Ordering::Relaxed);
         }
@@ -32,7 +29,7 @@ impl UnpackDescriptionProcessor {
         Ok::<(), XRayError>(())
       })?;
     } else {
-      for file in description.files.values() {
+      for file in selected {
         if Self::unpack_xml_description(&options, file)? {
           count.fetch_add(1, Ordering::Relaxed);
         }

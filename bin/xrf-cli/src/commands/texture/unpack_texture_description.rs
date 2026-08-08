@@ -39,6 +39,15 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
+        Arg::new("file")
+          .help(
+            "Name of a described file to unpack, repeatable; unpacks every described file if omitted",
+          )
+          .long("file")
+          .required(false)
+          .action(ArgAction::Append),
+      )
+      .arg(
         Arg::new("silent")
           .help("Turn off logging")
           .long("silent")
@@ -81,6 +90,11 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
 
     let output_path: &PathBuf = matches.get_one::<PathBuf>("output").unwrap_or(base);
 
+    let files: Vec<String> = matches
+      .get_many::<String>("file")
+      .map(|values| values.cloned().collect())
+      .unwrap_or_default();
+
     let is_strict: bool = matches.get_flag("strict");
     let is_parallel: bool = matches.get_flag("parallel");
 
@@ -115,6 +129,7 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
       output,
       output_path: output_path.clone(),
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
+      files,
       is_strict,
       is_parallel,
     })?;

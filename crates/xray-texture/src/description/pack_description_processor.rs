@@ -17,13 +17,11 @@ impl PackDescriptionProcessor {
       XmlDescriptionCollection::get_descriptions(options)?;
     let mut count: u32 = 0;
 
-    xray_output::info!(
-      options.output,
-      "Packing for {} files",
-      description.files.len()
-    );
+    let selected: Vec<&TextureFileDescriptor> = description.select_files(options)?;
 
-    for file in description.files.values() {
+    xray_output::info!(options.output, "Packing for {} files", selected.len());
+
+    for file in selected {
       if Self::pack_xml_description(options, file)? {
         count += 1;
       }
