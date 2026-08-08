@@ -80,6 +80,31 @@ impl SpawnFile {
     Ok(spawn_file)
   }
 
+  /// Read only the game graphs chunk of the spawn file by provided path.
+  ///
+  /// Unlike [`Self::read_from_path`], ALife, artefact spawn and patrol chunks are not parsed at all.
+  /// Consumers that only need the level roster stay readable on spawn files containing ALife object
+  /// classes without a CLSID mapping, and skip the bulk of the file.
+  pub fn read_graphs_from_path<T: ByteOrder, P: AsRef<Path>>(
+    path: &P,
+  ) -> XRayResult<SpawnGraphsChunk> {
+    Self::read_graphs_from_file::<T>(File::open(path)?)
+  }
+
+  /// Read only the game graphs chunk of the spawn file from file.
+  pub fn read_graphs_from_file<T: ByteOrder>(file: File) -> XRayResult<SpawnGraphsChunk> {
+    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
+
+    Self::read_graphs_from_chunks::<T>(&chunks)
+  }
+
+  /// Read only the game graphs chunk of the spawn file from chunks.
+  pub fn read_graphs_from_chunks<T: ByteOrder>(
+    chunks: &[ChunkReader],
+  ) -> XRayResult<SpawnGraphsChunk> {
+    find_required_chunk_by_id(chunks, SpawnGraphsChunk::CHUNK_ID)?.read_xr::<T, _>()
+  }
+
   /// Write spawn file data to the file by provided path.
   pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
     let path_ref: &Path = path.as_ref();
