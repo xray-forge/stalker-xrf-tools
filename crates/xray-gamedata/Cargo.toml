@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-derive_more = { version = "1.0.0", features = ["display"] }
+derive_more = { version = "2.1.1", features = ["display"] }
 ddsfile = "0.5.2"
-log = "0.4.28"
-rayon = "1.11.0"
-regex = "1.12.2"
-uuid = { version = "1.18.1", features = ["v4"] }
+log = "0.4.33"
+rayon = "1.12.0"
+regex = "1.13.1"
+uuid = { version = "1.24.0", features = ["v4"] }
 walkdir = "2.5.0"
 xray-db = { path = "../xray-db" }
 xray-error = { path = "../xray-error" }

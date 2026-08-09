@@ -7,11 +7,11 @@ edition = "2024"
 ddsfile = "0.5.2"
 image = "0.25.10"
 image_dds = "0.7.2"
-log = "0.4.28"
-path-absolutize = "3.1.1"
-rayon = "1.11.0"
+log = "0.4.33"
+path-absolutize = "4.0.1"
+rayon = "1.12.0"
 roxmltree = "0.21.1"
-serde = { version = "1.0.228", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
 xray-output = { path = "../xray-output" }

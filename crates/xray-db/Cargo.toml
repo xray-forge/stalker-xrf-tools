@@ -9,15 +9,15 @@ path = "src/lib.rs"
 
 [dependencies]
 byteorder = "1.5.0"
-derive_more = { version = "1.0.0", features = ["display", "from_str"] }
-enum-map = "2.7.3"
+derive_more = { version = "2.1.1", features = ["display", "from_str"] }
+enum-map = "3.1.0"
 lazy_static = "1.5.0"
-log = "0.4.28"
-phf = { version = "0.13.1", features = ["macros"] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.145"
-typetag = "0.2.21"
-uuid = { version = "1.18.1", features = ["v4", "serde"] }
+log = "0.4.33"
+phf = { version = "0.14.0", features = ["macros"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+typetag = "0.2.23"
+uuid = { version = "1.24.0", features = ["v4", "serde"] }
 xray-chunk = { path = "../xray-chunk" }
 xray-error = { path = "../xray-error" }
 xray-ltx = { path = "../xray-ltx" }
