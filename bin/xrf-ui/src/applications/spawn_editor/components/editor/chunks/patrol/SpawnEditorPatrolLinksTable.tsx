@@ -18,7 +18,7 @@ export function SpawnEditorPatrolLinksTable({ patrols }: ISpawnEditorPatrolsTabl
         field: "links",
         headerName: "links",
         width: 160,
-        valueGetter: (it: AnyObject) => (it.row.links ? JSON.stringify(it.row.links) : null),
+        valueGetter: (it: AnyObject) => (it?.row?.links ? JSON.stringify(it.row.links) : null),
       },
     ],
     [patrols]

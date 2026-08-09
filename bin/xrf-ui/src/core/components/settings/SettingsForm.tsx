@@ -9,9 +9,14 @@ import { SettingsPathField } from "@/core/components/settings/SettingsPathField"
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
+import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/lib/theme";
 import { getProjectConfigsPath } from "@/lib/xrf_path";
 
-type ColorSchemeMode = "light" | "dark" | "system";
+const COLOR_SCHEME_MODE_LABELS: Record<ColorSchemeMode, string> = {
+  light: "Light",
+  dark: "Dark",
+  system: "System",
+};
 
 export function SettingsForm(): ReactElement {
   const log: Logger = useLogger("settings-modal");
@@ -76,10 +81,17 @@ export function SettingsForm(): ReactElement {
           Follow the system theme, or pin the application to one.
         </Typography>
 
-        <ToggleButtonGroup exclusive size={"small"} value={mode ?? "system"} onChange={onChangeMode}>
-          <ToggleButton value={"light"}>Light</ToggleButton>
-          <ToggleButton value={"dark"}>Dark</ToggleButton>
-          <ToggleButton value={"system"}>System</ToggleButton>
+        <ToggleButtonGroup
+          exclusive
+          size={"small"}
+          value={mode ?? DEFAULT_COLOR_SCHEME_MODE}
+          onChange={onChangeMode}
+        >
+          {COLOR_SCHEME_MODES.map((it: ColorSchemeMode) => (
+            <ToggleButton key={it} value={it}>
+              {COLOR_SCHEME_MODE_LABELS[it]}
+            </ToggleButton>
+          ))}
         </ToggleButtonGroup>
       </Box>
 

@@ -15,7 +15,11 @@ export function ArchivesEditor(): ReactElement {
   return (
     <EditorLayout
       toolbar={
-        <EditorToolbar title={"Archives editor"} subtitle={`${fileCount} files`} backPath={"/archives_editor"} />
+        <EditorToolbar
+          title={"Archives editor"}
+          subtitle={`${fileCount} files`}
+          onBack={archivesService.closeArchivesProject}
+        />
       }
       menu={<ArchivesMenu />}
     >

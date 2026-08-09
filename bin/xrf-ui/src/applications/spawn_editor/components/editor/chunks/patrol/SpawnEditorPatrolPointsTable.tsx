@@ -21,7 +21,7 @@ export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolsTab
         field: "position",
         headerName: "position",
         width: 160,
-        valueGetter: (it: AnyObject) => (it.row.position ? JSON.stringify(it.row.position) : null),
+        valueGetter: (it: AnyObject) => (it?.row?.position ? JSON.stringify(it.row.position) : null),
       },
     ],
     [patrols]

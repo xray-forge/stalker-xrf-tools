@@ -1,3 +1,15 @@
+/**
+ * Color scheme modes the application offers.
+ *
+ * `system` is not a scheme of its own: `theme-init.ts` resolves it against the OS preference before
+ * first paint, so it must stay in sync with what that script accepts.
+ */
+export const COLOR_SCHEME_MODES = ["light", "dark", "system"] as const;
+
+export type ColorSchemeMode = (typeof COLOR_SCHEME_MODES)[number];
+
+export const DEFAULT_COLOR_SCHEME_MODE: ColorSchemeMode = "dark";
+
 // Desktop radii. Windows 11 keeps most controls at 4-8px; anything rounder reads as a touch target.
 export const RADIUS = {
   sm: 4,

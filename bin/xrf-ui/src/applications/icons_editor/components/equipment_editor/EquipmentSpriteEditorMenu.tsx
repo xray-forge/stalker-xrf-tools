@@ -1,9 +1,7 @@
-import { default as CloseIcon } from "@mui/icons-material/Close";
 import { default as Inventory2Icon } from "@mui/icons-material/Inventory2";
 import { default as RefreshIcon } from "@mui/icons-material/Refresh";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
@@ -11,7 +9,6 @@ import { Logger, useLogger } from "@/lib/logging";
 
 export function EquipmentSpriteEditorMenu(): ReactElement {
   const log: Logger = useLogger("equipment-editor-menu");
-  const navigate: NavigateFunction = useNavigate();
 
   const equipmentService: EquipmentService = useInjection(EquipmentService);
 
@@ -31,21 +28,14 @@ export function EquipmentSpriteEditorMenu(): ReactElement {
     }
   }, [log, equipmentService]);
 
-  const onCloseClick = useCallback(async () => {
-    await equipmentService.closeEquipmentProject();
-
-    navigate("/icons_editor", { replace: true });
-  }, [navigate, equipmentService]);
-
   const actions: Array<IEditorSideMenuItem> = useMemo(() => {
     const isLoading: boolean = equipmentService.spriteImage.isLoading;
 
     return [
       { label: "Reload", icon: <RefreshIcon />, isDisabled: isLoading, onClick: onReopenClick },
       { label: "Repack and reload", icon: <Inventory2Icon />, isDisabled: isLoading, onClick: onRepackAndReopenClick },
-      { label: "Close", icon: <CloseIcon />, isDisabled: isLoading, onClick: onCloseClick },
     ];
-  }, [equipmentService.spriteImage.isLoading, onReopenClick, onRepackAndReopenClick, onCloseClick]);
+  }, [equipmentService.spriteImage.isLoading, onReopenClick, onRepackAndReopenClick]);
 
   return <EditorSideMenu actions={actions} />;
 }

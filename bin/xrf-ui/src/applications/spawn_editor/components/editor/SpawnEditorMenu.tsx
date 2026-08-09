@@ -1,5 +1,4 @@
 import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
-import { default as CloseIcon } from "@mui/icons-material/Close";
 import { default as GroupsIcon } from "@mui/icons-material/Groups";
 import { default as ImportExportIcon } from "@mui/icons-material/ImportExport";
 import { default as InfoIcon } from "@mui/icons-material/Info";
@@ -43,12 +42,6 @@ export function SpawnEditorMenu(): ReactElement {
     }
   }, [spawnFileService]);
 
-  const onCloseClicked = useCallback(() => {
-    navigate("/spawn_editor", { replace: true });
-
-    return spawnFileService.closeSpawnFile();
-  }, [navigate, spawnFileService]);
-
   const sections: Array<IEditorSideMenuItem> = useMemo(
     () =>
       [
@@ -72,9 +65,8 @@ export function SpawnEditorMenu(): ReactElement {
     return [
       { label: "Save", icon: <SaveIcon />, isDisabled: isLoading, onClick: onSaveClicked },
       { label: "Export", icon: <ImportExportIcon />, isDisabled: isLoading, onClick: onExportClicked },
-      { label: "Close", icon: <CloseIcon />, isDisabled: isLoading, onClick: onCloseClicked },
     ];
-  }, [spawnFileService.spawnFile.isLoading, onSaveClicked, onExportClicked, onCloseClicked]);
+  }, [spawnFileService.spawnFile.isLoading, onSaveClicked, onExportClicked]);
 
   return <EditorSideMenu sections={sections} actions={actions} />;
 }
