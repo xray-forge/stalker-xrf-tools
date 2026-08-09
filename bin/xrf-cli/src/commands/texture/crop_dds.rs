@@ -4,7 +4,7 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use xray_output::OutputOptions;
 use xray_texture::{
-  DynamicImage, GenericImageView, ImageFormat, PNG_EXTENSION, RgbaImage, dds_to_image,
+  DynamicImage, GenericImageView, ImageFormat, Mipmaps, PNG_EXTENSION, RgbaImage, dds_to_image,
   fit_image_into_bounds, read_dds_by_path, save_image_as_ui_dds, save_image_as_ui_png,
 };
 
@@ -155,7 +155,14 @@ impl GenericCommand for CropDdsCommand {
     {
       save_image_as_ui_png(output_path, &result)?;
     } else {
-      save_image_as_ui_dds(output_path, &result, ImageFormat::BC3RgbaUnorm)?;
+      save_image_as_ui_dds(
+        output_path,
+        &result,
+        ImageFormat::BC3RgbaUnorm,
+        // A cropped region is packing input read at its base level, so a mip chain would only cost
+        // space.
+        Mipmaps::Disabled,
+      )?;
     }
 
     xray_output::info!(

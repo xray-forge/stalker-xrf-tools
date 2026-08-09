@@ -5,11 +5,12 @@ use image::{
   DynamicImage, ExtendedColorType, GenericImage, ImageBuffer, ImageEncoder, ImageFormat, Rgba,
   RgbaImage,
 };
-use image_dds::{ImageFormat as DDSImageFormat, dds_from_image};
+use image_dds::{ImageFormat as DDSImageFormat, Mipmaps, dds_from_image};
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 use xray_error::{XRayError, XRayResult};
+use xray_output::OutputOptions;
 use xray_utils::assert;
 
 /// Scale an image to the given bounds and centre it on a transparent canvas of exactly that size.
@@ -94,18 +95,73 @@ pub fn dds_to_image(dds: &Dds) -> XRayResult<RgbaImage> {
   })
 }
 
-pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: DDSImageFormat) -> XRayResult {
-  dds_from_image(
-    image,
-    format,
-    image_dds::Quality::Slow,
-    image_dds::Mipmaps::Disabled,
-  )
-  .map_err(|it| XRayError::new_texture_processing_error(it.to_string()))?
-  .write(&mut BufWriter::new(File::create(path)?))
-  .map_err(|it| XRayError::new_texture_processing_error(it.to_string()))?;
+/// Write an image as a dds file with the given format and mip chain.
+///
+/// Dimensions do not have to be multiples of 4. The block compressor pads every mip level out to whole
+/// 4x4 blocks itself and records the unpadded size in the header, so the file keeps the exact
+/// dimensions the image was built with.
+pub fn save_image_as_ui_dds(
+  path: &Path,
+  image: &RgbaImage,
+  format: DDSImageFormat,
+  mipmaps: Mipmaps,
+) -> XRayResult {
+  dds_from_image(image, format, image_dds::Quality::Slow, mipmaps)
+    .map_err(|it| XRayError::new_texture_processing_error(it.to_string()))?
+    .write(&mut BufWriter::new(File::create(path)?))
+    .map_err(|it| XRayError::new_texture_processing_error(it.to_string()))?;
 
   Ok(())
+}
+
+/// Warn when the sheet about to be written at `path` is shaped differently from the one it replaces.
+///
+/// Packing is meant to replace a sheet's pixels, not its geometry. Canvas size and mip chain length are
+/// resource state that the packed sprite rectangles do not fully describe, so a sheet that quietly
+/// changes shape diverges from its pristine form and from the other resource repositories with nothing
+/// in the log to say so. One sheet can also be described by several description files, and packing only
+/// some of them would otherwise shrink it without a word.
+pub fn warn_on_reshaped_ui_dds(
+  output: &OutputOptions,
+  path: &Path,
+  width: u32,
+  height: u32,
+  mipmap_levels: u32,
+) {
+  if !path.is_file() {
+    return;
+  }
+
+  let existing: Dds = match read_dds_by_path(path) {
+    Ok(existing) => existing,
+    Err(error) => {
+      xray_output::warning!(
+        output,
+        "Cannot compare shape against replaced file {}: {}",
+        path.display(),
+        error
+      );
+
+      return;
+    }
+  };
+
+  if existing.header.width != width
+    || existing.header.height != height
+    || existing.get_num_mipmap_levels() != mipmap_levels
+  {
+    xray_output::warning!(
+      output,
+      "Replacing {} of {}x{} with {} mipmap levels by {}x{} with {} mipmap levels",
+      path.display(),
+      existing.header.width,
+      existing.header.height,
+      existing.get_num_mipmap_levels(),
+      width,
+      height,
+      mipmap_levels
+    );
+  }
 }
 
 pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> XRayResult {
@@ -127,4 +183,62 @@ pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XRayResult<(RgbaImage, Vec<u8
     .expect("Error encoding pixels as PNG");
 
   Ok((image, buffer))
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{read_dds_by_path, save_image_as_ui_dds};
+  use ddsfile::Dds;
+  use image::RgbaImage;
+  use image_dds::{ImageFormat as DDSImageFormat, Mipmaps};
+  use std::fs;
+  use std::path::PathBuf;
+
+  fn temp_dds_path(name: &str) -> PathBuf {
+    std::env::temp_dir().join(format!("xray-texture-{name}-{}.dds", std::process::id()))
+  }
+
+  fn write_and_read(name: &str, width: u32, height: u32, mipmaps: Mipmaps) -> Dds {
+    let path: PathBuf = temp_dds_path(name);
+
+    save_image_as_ui_dds(
+      &path,
+      &RgbaImage::new(width, height),
+      DDSImageFormat::BC3RgbaUnorm,
+      mipmaps,
+    )
+    .expect("expect the sheet to be written");
+
+    let dds: Dds = read_dds_by_path(&path).expect("expect the written sheet to be readable");
+
+    fs::remove_file(&path).expect("expect the written sheet to be removable");
+
+    dds
+  }
+
+  #[test]
+  fn keeps_dimensions_that_are_not_multiples_of_four() {
+    let dds: Dds = write_and_read("unaligned", 1023, 1020, Mipmaps::Disabled);
+
+    assert_eq!(
+      (dds.header.width, dds.header.height),
+      (1023, 1020),
+      "Expect block compression to pad internally rather than grow the stored size"
+    );
+  }
+
+  #[test]
+  fn writes_the_requested_mip_chain() {
+    let generated: Dds = write_and_read("mipped", 1023, 1020, Mipmaps::GeneratedAutomatic);
+
+    assert_eq!(generated.get_num_mipmap_levels(), 10);
+    assert_eq!(
+      (generated.header.width, generated.header.height),
+      (1023, 1020)
+    );
+
+    let flat: Dds = write_and_read("flat", 1023, 1020, Mipmaps::Disabled);
+
+    assert_eq!(flat.get_num_mipmap_levels(), 1);
+  }
 }

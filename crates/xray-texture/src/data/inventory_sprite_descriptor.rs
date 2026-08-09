@@ -1,6 +1,6 @@
 use crate::constants::{
-  INVENTORY_ICON_GRID_SQUARE_BASE, LTX_FIELD_INV_GRID_HEIGHT, LTX_FIELD_INV_GRID_WIDTH,
-  LTX_FIELD_INV_GRID_X, LTX_FIELD_INV_GRID_Y, LTX_FIELD_INVENTORY_ICON,
+  DDS_BLOCK_ALIGNMENT, INVENTORY_ICON_GRID_SQUARE_BASE, LTX_FIELD_INV_GRID_HEIGHT,
+  LTX_FIELD_INV_GRID_WIDTH, LTX_FIELD_INV_GRID_X, LTX_FIELD_INV_GRID_Y, LTX_FIELD_INVENTORY_ICON,
   LTX_FIELD_INVENTORY_ICON_PATH,
 };
 use image::{ImageBuffer, Rgba, RgbaImage};
@@ -112,6 +112,11 @@ impl InventorySpriteDescriptor {
     }
   }
 
+  /// Smallest [`DDS_BLOCK_ALIGNMENT`] aligned canvas that holds every icon claiming a grid slot.
+  ///
+  /// A grid square is 50 pixels, so a slot boundary lands on a whole block only every other column and
+  /// row, and the rounding adds at most two pixels per axis. An already aligned canvas is returned
+  /// untouched.
   pub fn get_equipment_sprite_boundaries_from_ltx(ltx: &Ltx) -> (u32, u32) {
     let mut max_width: u32 = 0;
     let mut max_height: u32 = 0;
@@ -129,11 +134,10 @@ impl InventorySpriteDescriptor {
       }
     }
 
-    // Make sure resulting sprites are multiples of 4 for width and height
-    max_width = max_width + (4 - max_width % 4);
-    max_height = max_height + (4 - max_height % 4);
-
-    (max_width, max_height)
+    (
+      max_width.next_multiple_of(DDS_BLOCK_ALIGNMENT),
+      max_height.next_multiple_of(DDS_BLOCK_ALIGNMENT),
+    )
   }
 }
 
@@ -198,6 +202,38 @@ mod tests {
       .is_none(),
       "Expect an explicit opt out to be honoured even when the section is grid complete"
     );
+  }
+
+  fn boundaries_of(slots: &[(u32, u32, u32, u32)]) -> (u32, u32) {
+    let mut source: String = String::new();
+
+    for (index, (x, y, w, h)) in slots.iter().enumerate() {
+      source.push_str(&format!(
+        "[section_{index}]\n\
+         $inventory_icon = true\n\
+         inv_grid_x = {x}\n\
+         inv_grid_y = {y}\n\
+         inv_grid_width = {w}\n\
+         inv_grid_height = {h}\n\n"
+      ));
+    }
+
+    InventorySpriteDescriptor::get_equipment_sprite_boundaries_from_ltx(
+      &Ltx::read_from_str(&source).expect("test LTX is valid"),
+    )
+  }
+
+  #[test]
+  fn bounds_the_sheet_by_its_furthest_grid_slots() {
+    // Slots reach 30 columns by 20 rows of 50 pixels, which is aligned already.
+    assert_eq!(boundaries_of(&[(25, 4, 5, 2), (0, 17, 1, 3)]), (1500, 1000));
+  }
+
+  #[test]
+  fn rounds_an_odd_column_up_to_a_whole_block() {
+    // An odd column or row ends on a 50 pixel boundary, which is two pixels into a block.
+    assert_eq!(boundaries_of(&[(0, 0, 1, 1)]), (52, 52));
+    assert_eq!(boundaries_of(&[(0, 0, 2, 2)]), (100, 100));
   }
 
   #[test]

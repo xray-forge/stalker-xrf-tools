@@ -2,6 +2,7 @@ use crate::constants::DDS_EXTENSION;
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::{UnpackEquipmentOptions, save_image_as_ui_dds};
 use image::GenericImageView;
+use image_dds::Mipmaps;
 use xray_error::XRayResult;
 
 pub struct UnpackEquipmentProcessor {}
@@ -51,12 +52,15 @@ impl UnpackEquipmentProcessor {
 
       Ok(false)
     } else {
+      // Unpacked icons are packing input read at their base level, so a mip chain would only cost
+      // space.
       save_image_as_ui_dds(
         &options
           .output_path
           .join(format!("{}.{}", sprite.section, DDS_EXTENSION)),
         &options.source.view(x, y, w, h).to_image(),
         options.dds_compression_format,
+        Mipmaps::Disabled,
       )?;
 
       Ok(true)

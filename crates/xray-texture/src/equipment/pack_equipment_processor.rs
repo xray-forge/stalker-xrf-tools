@@ -1,17 +1,17 @@
 use crate::constants::{
   DDS_EXTENSION, EXTENSIONS_DIRECTORY, LTX_PATH_EXTENSION_MARKER, LTX_PATH_EXTENSION_MARKER_PREFIX,
   LTX_PATH_GAMEDATA_MARKER, LTX_PATH_GAMEDATA_MARKER_PREFIX, PNG_EXTENSION, RESOURCES_DIRECTORY,
-  TEXTURES_DIRECTORY,
+  TEXTURES_DIRECTORY, UI_MIPMAP_LEVELS, UI_MIPMAPS,
 };
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
-use crate::utils::images::{dds_to_image, fit_image_into_bounds};
+use crate::utils::images::{dds_to_image, fit_image_into_bounds, warn_on_reshaped_ui_dds};
 use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_image_as_ui_dds};
 use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba};
 use path_absolutize::*;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use xray_error::{XRayError, XRayResult};
-use xray_utils::assert_equal;
 
 pub struct PackEquipmentProcessor {}
 
@@ -23,6 +23,10 @@ impl PackEquipmentProcessor {
     let mut skipped_sections: Vec<&str> = Vec::new();
     let mut image: ImageBuffer<Rgba<u8>, Vec<u8>> =
       InventorySpriteDescriptor::create_equipment_sprite_base_for_ltx(&options.ltx)?;
+
+    // Variants such as `_nimble`, `_snag` and the `pri_a15_` quest copies inherit their base weapon's
+    // grid position, so several sections legitimately share one slot with inheritance.
+    let mut occupied_slots: HashMap<(u32, u32), (String, Vec<u8>)> = HashMap::new();
 
     for (section_name, section) in &options.ltx.sections {
       let Some(sprite_descriptor) =
@@ -55,24 +59,34 @@ impl PackEquipmentProcessor {
         sprite_path.display(),
       );
 
+      Self::warn_on_conflicting_slot(
+        &options,
+        &mut occupied_slots,
+        (x, y),
+        &sprite_descriptor.section,
+        &sprite,
+      );
+
       image.copy_from(&sprite, x, y)?;
       count += 1;
     }
 
     Self::assert_every_section_has_an_icon(&options, &skipped_sections)?;
 
-    assert_equal(
-      image.width() % 4,
-      0,
-      "DirectX compression requires texture width to be multiple of 4",
-    )?;
-    assert_equal(
-      image.height() % 4,
-      0,
-      "DirectX compression requires texture height to be multiple of 4",
-    )?;
+    warn_on_reshaped_ui_dds(
+      &options.output,
+      &options.output_path,
+      image.width(),
+      image.height(),
+      UI_MIPMAP_LEVELS,
+    );
 
-    save_image_as_ui_dds(&options.output_path, &image, options.dds_compression_format)?;
+    save_image_as_ui_dds(
+      &options.output_path,
+      &image,
+      options.dds_compression_format,
+      UI_MIPMAPS,
+    )?;
 
     xray_output::info!(
       options.output,
@@ -88,6 +102,37 @@ impl PackEquipmentProcessor {
       saved_height: image.height(),
       packed_count: count,
     })
+  }
+
+  /// Warn when a slot already holds different art, which means one section's icon is being discarded.
+  ///
+  /// Sharing a slot is normal and harmless while the art matches, so only a genuine difference is
+  /// reported. Without this, updating a weapon's icon and forgetting its variants looks like it worked:
+  /// the pack succeeds, the count is unchanged, and the variant packed later quietly wins.
+  fn warn_on_conflicting_slot(
+    options: &PackEquipmentOptions,
+    occupied_slots: &mut HashMap<(u32, u32), (String, Vec<u8>)>,
+    slot: (u32, u32),
+    section: &str,
+    sprite: &DynamicImage,
+  ) {
+    let bytes: Vec<u8> = sprite.to_rgba8().into_raw();
+
+    match occupied_slots.get(&slot) {
+      Some((previous_section, previous_bytes)) if previous_bytes != &bytes => {
+        xray_output::warning!(
+          options.output,
+          "Slot {}:{} is claimed by '{}' and '{}' with different icons, only the last one packed survives",
+          slot.0,
+          slot.1,
+          previous_section,
+          section
+        );
+      }
+      _ => {}
+    }
+
+    occupied_slots.insert(slot, (String::from(section), bytes));
   }
 
   /// Fail once with every section that declares inventory grid coordinates but has no icon to pack.

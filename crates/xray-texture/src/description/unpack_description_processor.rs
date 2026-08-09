@@ -3,6 +3,7 @@ use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
 use crate::{PackDescriptionOptions, dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImageView, RgbaImage};
+use image_dds::Mipmaps;
 use rayon::prelude::*;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
@@ -98,10 +99,13 @@ impl UnpackDescriptionProcessor {
             );
           }
         } else {
+          // Unpacked sprites are packing input read at their base level, so a mip chain would only
+          // cost space.
           save_image_as_ui_dds(
             &destination.join(format!("{}.{}", sprite.id, DDS_EXTENSION)),
             &dds.view(sprite.x, sprite.y, sprite.w, sprite.h).to_image(),
             options.dds_compression_format,
+            Mipmaps::Disabled,
           )?;
         }
       }

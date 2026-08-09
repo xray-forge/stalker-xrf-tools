@@ -1,7 +1,8 @@
-use crate::constants::DDS_EXTENSION;
+use crate::constants::{DDS_EXTENSION, UI_MIPMAP_LEVELS, UI_MIPMAPS};
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
+use crate::utils::images::warn_on_reshaped_ui_dds;
 use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
 use std::path::PathBuf;
@@ -40,7 +41,7 @@ impl PackDescriptionProcessor {
       .base
       .join(format!("{}.{}", file.name, DDS_EXTENSION));
 
-    let (width, height) = file.get_dimension_boundaries()?;
+    let (width, height) = file.get_dimension_boundaries();
     let mut result: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
 
     xray_output::verbose!(
@@ -112,18 +113,20 @@ impl PackDescriptionProcessor {
 
     xray_output::verbose!(options.output, "Saving file: {}", destination.display());
 
-    assert_equal(
-      result.width() % 4,
-      0,
-      "DirectX compression requires texture width to be multiple of 4",
-    )?;
-    assert_equal(
-      result.height() % 4,
-      0,
-      "DirectX compression requires texture height to be multiple of 4",
-    )?;
+    warn_on_reshaped_ui_dds(
+      &options.output,
+      &destination,
+      width,
+      height,
+      UI_MIPMAP_LEVELS,
+    );
 
-    save_image_as_ui_dds(&destination, &result, options.dds_compression_format)?;
+    save_image_as_ui_dds(
+      &destination,
+      &result,
+      options.dds_compression_format,
+      UI_MIPMAPS,
+    )?;
 
     Ok(true)
   }

@@ -1,3 +1,20 @@
+/// Mip chain written into a packed UI sprite sheet.
+///
+/// None, following vanilla.
+/// The engine cannot use a chain here anyway, since the UI is authored on a 1024x768 canvas
+/// that is scaled up to the real resolution, so a sheet is magnified rather than minified
+/// and only level 0 is ever sampled.
+pub const UI_MIPMAPS: image_dds::Mipmaps = image_dds::Mipmaps::Disabled;
+
+/// Number of mip levels [`UI_MIPMAPS`] produces, for comparing against an existing sheet.
+pub const UI_MIPMAP_LEVELS: u32 = 1;
+
+/// Block edge a BC compressed sheet is sized to.
+///
+/// Encoders and the engine both cope with an unaligned sheet by padding it to whole blocks, so this is
+/// convention rather than necessity.
+pub const DDS_BLOCK_ALIGNMENT: u32 = 4;
+
 /// Inventory icon coordinates are expressed in grid cells rather than pixels, so every `inv_grid_*`
 /// value is multiplied by this to reach the sprite sheet. Note it is not a multiple of 4, so icon
 /// boundaries do not align with the 4x4 blocks of BC compressed sheets.
