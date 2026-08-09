@@ -2,7 +2,7 @@ use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
-use xray_db::{OgfFile, XRayByteOrder};
+use xray_db::{OgfChunksProcessor, OgfFile, XRayByteOrder};
 use xray_output::OutputOptions;
 
 #[derive(Default)]
@@ -93,6 +93,14 @@ impl GenericCommand for InfoOgfCommand {
 
     if let Some(kinematics) = &ogf_file.kinematics {
       xray_output::info!(output, "Motion refs: {:?}", kinematics.motion_refs);
+    }
+
+    match OgfChunksProcessor::find_unknown_chunk_ids::<XRayByteOrder, _>(path) {
+      Ok(unknown) if !unknown.is_empty() => {
+        xray_output::info!(output, "Unparsed chunk ids: {:?}", unknown);
+      }
+      Ok(_) => xray_output::verbose!(output, "Unparsed chunk ids: none"),
+      Err(error) => xray_output::warning!(output, "Could not survey chunks: {}", error),
     }
 
     if let Some(children) = &ogf_file.children {

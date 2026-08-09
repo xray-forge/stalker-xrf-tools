@@ -2,22 +2,22 @@ use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::{Path, PathBuf};
-use xray_db::{OgfFile, OgfMotionRefsProcessor, OgfRefsPatchReport, XRayByteOrder};
+use xray_db::{OgfFile, OgfRefsPatchReport, OgfTextureRefsProcessor, XRayByteOrder};
 use xray_error::XRayResult;
 use xray_output::OutputOptions;
 
 #[derive(Default)]
-pub struct PatchOgfMotionRefsCommand;
+pub struct PatchOgfTextureRefsCommand;
 
-impl GenericCommand for PatchOgfMotionRefsCommand {
+impl GenericCommand for PatchOgfTextureRefsCommand {
   fn name(&self) -> &'static str {
-    "patch-ogf-motion-refs"
+    "patch-ogf-texture-refs"
   }
 
-  /// Create command for rewriting ogf motion refs.
+  /// Create command for renaming ogf texture refs.
   fn init(&self) -> Command {
     Command::new(self.name())
-      .about("Command to rewrite motion refs of provided ogf file")
+      .about("Command to rename a texture reference of provided ogf file")
       .arg(
         Arg::new("path")
           .help("Path to ogf file")
@@ -35,17 +35,20 @@ impl GenericCommand for PatchOgfMotionRefsCommand {
           .value_parser(value_parser!(PathBuf)),
       )
       .arg(
-        Arg::new("refs")
-          .help("Motion refs to store in the ogf file")
-          .short('r')
-          .long("refs")
-          .required(true)
-          .num_args(1..)
-          .value_parser(value_parser!(String)),
+        Arg::new("from")
+          .help("Texture reference to rename, matched exactly")
+          .long("from")
+          .required(true),
+      )
+      .arg(
+        Arg::new("to")
+          .help("Texture reference to write in its place")
+          .long("to")
+          .required(true),
       )
       .arg(
         Arg::new("dry-run")
-          .help("Validate the rewrite and report the result without writing any file")
+          .help("Validate the change and report the result without writing any file")
           .long("dry-run")
           .action(ArgAction::SetTrue),
       )
@@ -65,17 +68,18 @@ impl GenericCommand for PatchOgfMotionRefsCommand {
       )
   }
 
-  /// Rewrite motion refs of provided ogf file.
+  /// Rename a texture reference of provided ogf file.
   fn execute(&self, matches: &ArgMatches) -> CommandResult {
     let path: &PathBuf = matches
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
 
-    let motion_refs: Vec<String> = matches
-      .get_many::<String>("refs")
-      .expect("Expected valid motion refs to be provided")
-      .cloned()
-      .collect();
+    let from: &String = matches
+      .get_one::<String>("from")
+      .expect("Expected valid source texture reference to be provided");
+    let to: &String = matches
+      .get_one::<String>("to")
+      .expect("Expected valid target texture reference to be provided");
 
     let destination: &Path = matches
       .get_one::<PathBuf>("dest")
@@ -84,11 +88,12 @@ impl GenericCommand for PatchOgfMotionRefsCommand {
     let output: OutputOptions =
       TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    Self::report_patch_file(
+    Self::patch_file(
       &output,
       path,
       destination,
-      &motion_refs,
+      from,
+      to,
       matches.get_flag("dry-run"),
     )?;
 
@@ -96,33 +101,39 @@ impl GenericCommand for PatchOgfMotionRefsCommand {
   }
 }
 
-impl PatchOgfMotionRefsCommand {
-  /// Rewrite motion refs of single ogf file, preserving all other chunks byte for byte.
-  fn report_patch_file(
+impl PatchOgfTextureRefsCommand {
+  /// Rename a texture reference of single ogf file, preserving all other chunks byte for byte.
+  ///
+  /// The rename itself and every guard around it live in [`OgfTextureRefsProcessor`], so this only
+  /// reports what it did.
+  fn patch_file(
     output: &OutputOptions,
     path: &Path,
     destination: &Path,
-    motion_refs: &[String],
+    from: &str,
+    to: &str,
     is_dry_run: bool,
   ) -> XRayResult {
-    let existing: Vec<String> = OgfFile::read_motion_refs_from_path::<XRayByteOrder, _>(&path)?;
+    let existing: Vec<String> = OgfFile::read_texture_refs_from_path::<XRayByteOrder, _>(&path)?;
 
     xray_output::info!(
       output,
-      "Patch ogf motion refs {}, {:?} -> {:?}",
+      "Patch ogf texture refs {}, '{}' -> '{}', existing {:?}",
       path.display(),
-      existing,
-      motion_refs
+      from,
+      to,
+      existing
     );
 
-    let report: OgfRefsPatchReport = OgfMotionRefsProcessor::patch_motion_refs_to_path::<
+    let report: OgfRefsPatchReport = OgfTextureRefsProcessor::patch_texture_refs_to_path::<
       XRayByteOrder,
-    >(path, destination, motion_refs, is_dry_run)?;
+    >(path, destination, from, to, is_dry_run)?;
 
     if report.is_dry_run {
       xray_output::info!(
         output,
-        "Dry run, nothing written, {} would receive {} bytes instead of {}",
+        "Dry run, nothing written, {} references would be renamed and {} would receive {} bytes instead of {}",
+        report.patched_count,
         destination.display(),
         report.patched_size,
         report.original_size
@@ -133,7 +144,8 @@ impl PatchOgfMotionRefsCommand {
 
     xray_output::info!(
       output,
-      "Ogf motion refs written into {}",
+      "Renamed {} ogf texture references, written into {}",
+      report.patched_count,
       destination.display()
     );
 
