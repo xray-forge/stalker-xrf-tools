@@ -1,13 +1,15 @@
-use crate::constants::META_TYPE_FIELD;
-use crate::export::LtxImportExport;
-use crate::file_import::read_ltx_field;
+use std::io::Write;
+
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::{assert_equal, decode_bytes_from_base64, encode_bytes_to_base64};
+
+use crate::constants::META_TYPE_FIELD;
+use crate::export::LtxImportExport;
+use crate::file_import::read_ltx_field;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]

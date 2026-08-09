@@ -1,6 +1,7 @@
-use crc_any::{CRCu16, CRCu32};
 #[cfg(feature = "std")]
 use std::io;
+
+use crc_any::{CRCu16, CRCu32};
 
 pub struct SinkSum {
   pub length: u64,

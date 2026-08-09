@@ -1,9 +1,11 @@
+use std::path::PathBuf;
+use std::time::Instant;
+
+use xray_error::XRayResult;
+
 use crate::Ltx;
 use crate::project::ltx_format_options::LtxFormatOptions;
 use crate::project::ltx_project_format_result::LtxProjectFormatResult;
-use std::path::PathBuf;
-use std::time::Instant;
-use xray_error::XRayResult;
 
 /// Formatter of arbitrary sets of LTX files.
 pub struct LtxFilesFormatter {}
@@ -114,11 +116,13 @@ impl LtxFilesFormatter {
 
 #[cfg(test)]
 mod tests {
-  use crate::project::ltx_files_formatter::LtxFilesFormatter;
-  use crate::project::ltx_project_format_result::LtxProjectFormatResult;
   use std::fs;
   use std::path::PathBuf;
+
   use xray_error::XRayResult;
+
+  use crate::project::ltx_files_formatter::LtxFilesFormatter;
+  use crate::project::ltx_project_format_result::LtxProjectFormatResult;
 
   fn create_root(name: &str) -> XRayResult<PathBuf> {
     let root: PathBuf =

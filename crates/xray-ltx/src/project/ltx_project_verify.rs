@@ -1,11 +1,13 @@
+use std::path::Path;
+use std::time::Instant;
+
+use fxhash::FxBuildHasher;
+use indexmap::IndexSet;
+use xray_error::{XRayError, XRayResult};
+
 use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::ltx_verify_options::LtxVerifyOptions;
 use crate::{Ltx, LtxProject, LtxProjectVerifyResult};
-use fxhash::FxBuildHasher;
-use indexmap::IndexSet;
-use std::path::Path;
-use std::time::Instant;
-use xray_error::{XRayError, XRayResult};
 
 impl LtxProject {
   /// Verify all the entries in current ltx project.
@@ -173,10 +175,11 @@ impl LtxProject {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use crate::{LtxProjectOptions, LtxVerifyOptions};
   use std::fs;
   use std::path::PathBuf;
+
+  use super::*;
+  use crate::{LtxProjectOptions, LtxVerifyOptions};
 
   #[test]
   fn validates_condlists_from_project_schemes() {

@@ -1,7 +1,9 @@
-use crate::project::gamedata_verification_type::GamedataVerificationType;
 use std::collections::HashSet;
 use std::path::PathBuf;
+
 use xray_output::OutputOptions;
+
+use crate::project::gamedata_verification_type::GamedataVerificationType;
 
 #[derive(Default)]
 pub struct GamedataProjectReadOptions {

@@ -1,8 +1,9 @@
-use crate::data::generic::vector_3d::Vector3d;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::data::generic::vector_3d::Vector3d;
 
 /// Oriented bounding box, `Fobb` in the engine.
 ///

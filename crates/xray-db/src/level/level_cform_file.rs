@@ -1,10 +1,12 @@
-use crate::data::generic::vector_3d::Vector3d;
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
+
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+
+use crate::data::generic::vector_3d::Vector3d;
 
 /// `hdrCFORM` in c++ codebase, stored raw at the very start of the `level.cform` file.
 ///
@@ -82,15 +84,17 @@ impl LevelCformFile {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::level::level_cform_file::{LevelCformFile, LevelCformHeader};
   use std::io::Write;
+
   use xray_chunk::{ChunkReadWrite, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_relative_test_sample_file_path, open_test_resource_as_file,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::level::level_cform_file::{LevelCformFile, LevelCformHeader};
 
   fn sample() -> LevelCformHeader {
     LevelCformHeader {

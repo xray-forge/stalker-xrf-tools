@@ -1,11 +1,12 @@
-use crate::types::TauriResult;
-use crate::utils::error_to_string;
 use serde_json::{Value, json};
 use xray_ltx::Ltx;
 use xray_output::OutputOptions;
 use xray_texture::{
   ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult,
 };
+
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 
 #[tauri::command]
 pub async fn pack_equipment(

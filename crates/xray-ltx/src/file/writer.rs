@@ -1,11 +1,13 @@
-use crate::Ltx;
-use crate::file::file_configuration::constants::ROOT_SECTION;
-use crate::file::file_configuration::line_separator::{DEFAULT_KV_SEPARATOR, LineSeparator};
 use std::fs;
 use std::io::Write;
 use std::path::Path;
+
 use xray_error::XRayResult;
 use xray_utils::read_as_string_from_w1251_encoded;
+
+use crate::Ltx;
+use crate::file::file_configuration::constants::ROOT_SECTION;
+use crate::file::file_configuration::line_separator::{DEFAULT_KV_SEPARATOR, LineSeparator};
 
 impl Ltx {
   /// Format single LTX file by provided path

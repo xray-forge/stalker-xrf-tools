@@ -1,6 +1,8 @@
-use crate::project::weapons::weapon_sound_layer_field::WeaponSoundLayerField;
 use std::collections::{BTreeMap, BTreeSet};
+
 use xray_ltx::{LTX_SYMBOL_SCHEME, Section};
+
+use crate::project::weapons::weapon_sound_layer_field::WeaponSoundLayerField;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum WeaponSoundLayerIssue {
@@ -85,8 +87,9 @@ pub(crate) fn weapon_sound_layer_issues(section: &Section) -> Vec<WeaponSoundLay
 
 #[cfg(test)]
 mod tests {
-  use super::{WeaponSoundLayerIssue, weapon_sound_layer_issues};
   use xray_ltx::Ltx;
+
+  use super::{WeaponSoundLayerIssue, weapon_sound_layer_issues};
 
   #[test]
   fn accepts_contiguous_layer_and_variant_names() {

@@ -1,6 +1,7 @@
-use colored::Colorize;
 use std::fmt::Display;
 use std::sync::Arc;
+
+use colored::Colorize;
 use xray_output::{Output, OutputOptions, OutputVerbosity};
 
 /// Terminal renderer for live workflow output.
@@ -52,8 +53,9 @@ impl Output for TerminalOutput {
 
 #[cfg(test)]
 mod tests {
-  use super::TerminalOutput;
   use xray_output::OutputVerbosity;
+
+  use super::TerminalOutput;
 
   #[test]
   fn maps_cli_verbosity_flags() {

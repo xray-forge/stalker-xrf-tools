@@ -1,16 +1,18 @@
-use crate::GamedataFindingFactory;
-use crate::project::shaders::gamedata_shader_source_loader::GamedataShaderSourceLoader;
-use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
-use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+
 use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayError;
 use xray_shaders::{
   SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, XRayShaderScript, is_shader_source_path,
 };
+
+use crate::GamedataFindingFactory;
+use crate::project::shaders::gamedata_shader_source_loader::GamedataShaderSourceLoader;
+use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
+use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 pub(crate) struct ShadersVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
@@ -234,11 +236,13 @@ impl<'a> ShadersVerifier<'a> {
 
 #[cfg(test)]
 mod tests {
-  use super::ShadersVerifier;
-  use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
   use std::fs;
   use std::path::{Path, PathBuf};
+
   use xray_error::{XRayError, XRayResult};
+
+  use super::ShadersVerifier;
+  use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
   #[test]
   fn validates_d3d11_scripts_and_renderer_then_root_includes() -> XRayResult {

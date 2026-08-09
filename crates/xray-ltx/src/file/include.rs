@@ -1,8 +1,10 @@
-use crate::Ltx;
 use std::fs;
 use std::io;
 use std::path::{MAIN_SEPARATOR_STR, Path, PathBuf};
+
 use xray_error::{XRayError, XRayResult};
+
+use crate::Ltx;
 
 /// Converter object to process and inject all child #include statements.
 #[derive(Default)]
@@ -77,10 +79,12 @@ impl LtxIncludeConvertor {
 
 #[cfg(test)]
 mod tests {
-  use crate::Ltx;
   use std::fs;
   use std::path::PathBuf;
+
   use xray_error::XRayResult;
+
+  use crate::Ltx;
 
   #[test]
   fn loads_each_file_matched_by_wildcard_include() -> XRayResult {

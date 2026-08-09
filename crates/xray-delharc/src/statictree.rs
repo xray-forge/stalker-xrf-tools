@@ -45,12 +45,13 @@ When reading, the following bit paths will result in finding the particular leav
 11111 -> i
 ```
 */
-use crate::bitstream::BitRead;
-use crate::error::LhaError;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::cmp::Ordering;
 use core::fmt;
+
+use crate::bitstream::BitRead;
+use crate::error::LhaError;
 
 pub mod entry;
 use entry::*;
@@ -215,9 +216,10 @@ impl fmt::Display for HuffTree {
 #[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
+  use std::collections::{HashMap, HashSet};
+
   use super::*;
   use crate::bitstream::BitStream;
-  use std::collections::{HashMap, HashSet};
 
   fn validate_tree(tree: &HuffTree, num_leaves: usize) {
     let mut leaves: HashMap<u16, usize> = HashMap::with_capacity(num_leaves);

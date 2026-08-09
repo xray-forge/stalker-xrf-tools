@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::fs::File;
 use std::path::Path;
+
 use xray_chunk::{ChunkDataSource, ChunkReader, find_required_chunk_by_id};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::encode_w1251_bytes_to_string;
@@ -76,8 +77,8 @@ impl ShaderLibraryFile {
 
 #[cfg(test)]
 mod tests {
-  use super::ShaderLibraryFile;
   use std::io::Write;
+
   use xray_chunk::{ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -85,6 +86,8 @@ mod tests {
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
+
+  use super::ShaderLibraryFile;
 
   #[test]
   fn test_read() -> XRayResult {

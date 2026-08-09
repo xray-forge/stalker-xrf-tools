@@ -1,14 +1,16 @@
-use super::verification_report::GamedataVerificationReportWriter;
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::process;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
   GamedataVerificationResult, GamedataVerificationStatus, GamedataVerificationType,
 };
 use xray_output::OutputOptions;
+
+use super::verification_report::GamedataVerificationReportWriter;
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct VerifyGamedataCommand;

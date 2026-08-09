@@ -10,7 +10,6 @@ pub use crate::file::file_configuration::constants::ROOT_SECTION;
 pub use crate::file::file_configuration::line_separator::LineSeparator;
 pub use crate::file::file_section::section::*;
 pub use crate::file::ltx::*;
-
 pub use crate::project::ltx_files_formatter::*;
 pub use crate::project::ltx_format_options::*;
 pub use crate::project::ltx_project::*;

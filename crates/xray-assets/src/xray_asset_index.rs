@@ -1,9 +1,11 @@
-use crate::xray_asset_utils::{is_component_prefix, join, logical_path, normalize};
-use crate::{DirectoryAssetIndex, XrayAsset, XrayAssetType};
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::path::PathBuf;
+
 use xray_error::{XRayError, XRayResult};
+
+use crate::xray_asset_utils::{is_component_prefix, join, logical_path, normalize};
+use crate::{DirectoryAssetIndex, XrayAsset, XrayAssetType};
 
 #[derive(Debug)]
 pub struct XrayAssetIndex {

@@ -1,15 +1,17 @@
-use super::callable_parser::ExternCallableParser;
-use super::diagnostics::{invalid_at, unsupported_export_value_reason};
-use super::type_renderer::canonical_type;
-use crate::extern_manifest::{ExternDocumentation, ExternExport, ExternValue};
 use std::collections::BTreeMap;
 use std::path::Path;
+
 use xray_error::XRayResult;
 use xray_typescript::swc_common::{SourceMap, Spanned};
 use xray_typescript::swc_ecma_ast::{
   Expr, MemberExpr, MemberProp, Program, TsFnOrConstructorType, TsType,
 };
 use xray_typescript::{TypeScriptSymbol, TypeScriptSymbolResolver};
+
+use super::callable_parser::ExternCallableParser;
+use super::diagnostics::{invalid_at, unsupported_export_value_reason};
+use super::type_renderer::canonical_type;
+use crate::extern_manifest::{ExternDocumentation, ExternExport, ExternValue};
 
 /// Parses one value passed to an extern declaration.
 pub struct ExternValueParser<'a> {

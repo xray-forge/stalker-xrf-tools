@@ -1,6 +1,7 @@
-use ogg::reading::PacketReader;
 use std::fs::File;
 use std::path::Path;
+
+use ogg::reading::PacketReader;
 use xray_error::{XRayError, XRayResult};
 
 use crate::SoundMetadata;

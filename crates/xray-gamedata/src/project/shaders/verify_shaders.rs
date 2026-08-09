@@ -1,7 +1,8 @@
+use xray_error::XRayResult;
+
 use crate::project::shaders::shaders_verifier::ShadersVerifier;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions};
-use xray_error::XRayResult;
 
 impl GamedataProject {
   pub fn verify_shaders(

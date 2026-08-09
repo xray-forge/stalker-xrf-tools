@@ -1,5 +1,6 @@
-use serde::Serialize;
 use std::path::PathBuf;
+
+use serde::Serialize;
 
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]

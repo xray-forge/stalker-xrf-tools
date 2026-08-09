@@ -1,3 +1,7 @@
+use std::time::Instant;
+
+use xray_error::XRayResult;
+
 use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
 use crate::project::animations::hud_item_animations_verifier::HudItemAnimationsVerifier;
 use crate::project::animations::hud_motion_collisions_verification_result::GamedataHudMotionCollisionsVerificationResult;
@@ -6,8 +10,6 @@ use crate::project::animations::player_hud_animations_verification_result::Gamed
 use crate::project::animations::player_hud_animations_verifier::PlayerHudAnimationsVerifier;
 use crate::project::animations::verify_animations_result::GamedataAnimationsVerificationResult;
 use crate::{Finding, GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
-use std::time::Instant;
-use xray_error::XRayResult;
 
 impl GamedataProject {
   pub fn verify_animations(

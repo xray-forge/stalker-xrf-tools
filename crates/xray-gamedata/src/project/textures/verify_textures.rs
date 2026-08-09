@@ -1,8 +1,9 @@
-use ddsfile::{Dds, DxgiFormat};
-use rayon::prelude::*;
 use std::fs::File;
 use std::path::Path;
 use std::time::{Duration, Instant};
+
+use ddsfile::{Dds, DxgiFormat};
+use rayon::prelude::*;
 use xray_assets::XrayAssetType as AssetType;
 use xray_error::{XRayError, XRayResult};
 
@@ -155,12 +156,14 @@ impl GamedataProject {
 
 #[cfg(test)]
 mod tests {
-  use super::GamedataProject;
-  use crate::GamedataProjectVerifyOptions;
-  use ddsfile::{AlphaMode, D3D10ResourceDimension, Dds, DxgiFormat, NewDxgiParams};
   use std::path::PathBuf;
+
+  use ddsfile::{AlphaMode, D3D10ResourceDimension, Dds, DxgiFormat, NewDxgiParams};
   use xray_assets::{DirectoryAssetIndex, XrayAssetIndex};
   use xray_ltx::LtxProject;
+
+  use super::GamedataProject;
+  use crate::GamedataProjectVerifyOptions;
 
   fn empty_project() -> GamedataProject {
     GamedataProject {

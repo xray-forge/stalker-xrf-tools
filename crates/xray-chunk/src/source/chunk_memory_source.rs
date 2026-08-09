@@ -1,8 +1,10 @@
-use crate::source::chunk_data_source::ChunkDataSource;
-use bytes::Buf;
-use parquet::file::reader::Length;
 use std::io::{Cursor, Read, Result as IoResult, Seek, SeekFrom};
 use std::ops::RangeBounds;
+
+use bytes::Buf;
+use parquet::file::reader::Length;
+
+use crate::source::chunk_data_source::ChunkDataSource;
 
 #[derive(Clone)]
 pub struct InMemoryChunkDataSource {

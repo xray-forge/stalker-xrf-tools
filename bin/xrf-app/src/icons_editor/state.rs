@@ -1,5 +1,6 @@
-use serde::Serialize;
 use std::sync::{Arc, Mutex};
+
+use serde::Serialize;
 use xray_texture::{InventorySpriteDescriptor, RgbaImage};
 
 pub struct IconsEditorState {

@@ -1,6 +1,7 @@
+use std::path::PathBuf;
+
 use image::RgbaImage;
 use image_dds::ImageFormat;
-use std::path::PathBuf;
 use xray_ltx::Ltx;
 
 pub struct UnpackEquipmentOptions {

@@ -1,13 +1,15 @@
-use crate::types::TranslationJson;
-use crate::{
-  ProjectInitializeOptions, ProjectInitializeResult, TranslationLanguage, TranslationProject,
-};
 use std::ffi::OsStr;
 use std::io::Write;
 use std::path::{Display, Path};
 use std::time::Instant;
+
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
+
+use crate::types::TranslationJson;
+use crate::{
+  ProjectInitializeOptions, ProjectInitializeResult, TranslationLanguage, TranslationProject,
+};
 
 impl TranslationProject {
   pub fn initialize_dir<P: AsRef<Path>>(

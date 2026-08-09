@@ -1,14 +1,16 @@
+use std::fs::create_dir_all;
+use std::path::PathBuf;
+use std::sync::atomic::{AtomicU32, Ordering};
+
+use image::{GenericImageView, RgbaImage};
+use image_dds::Mipmaps;
+use rayon::prelude::*;
+use xray_error::{XRayError, XRayResult};
+
 use crate::constants::DDS_EXTENSION;
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::description::xml_description_collection::XmlDescriptionCollection;
 use crate::{PackDescriptionOptions, dds_to_image, read_dds_by_path, save_image_as_ui_dds};
-use image::{GenericImageView, RgbaImage};
-use image_dds::Mipmaps;
-use rayon::prelude::*;
-use std::fs::create_dir_all;
-use std::path::PathBuf;
-use std::sync::atomic::{AtomicU32, Ordering};
-use xray_error::{XRayError, XRayResult};
 
 pub struct UnpackDescriptionProcessor {}
 

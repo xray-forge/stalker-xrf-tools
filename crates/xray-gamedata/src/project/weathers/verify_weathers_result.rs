@@ -1,7 +1,8 @@
 //! Aggregate result for assembled weather-cycle validation.
 
-use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
+
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 
 /// Counts and duration reported by the weather-cycle check.
 #[derive(Default)]

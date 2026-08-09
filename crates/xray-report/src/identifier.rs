@@ -1,6 +1,7 @@
-use serde::Serialize;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+
+use serde::Serialize;
 
 /// Error returned when a stable report identifier is empty.
 #[derive(Debug, Eq, PartialEq)]

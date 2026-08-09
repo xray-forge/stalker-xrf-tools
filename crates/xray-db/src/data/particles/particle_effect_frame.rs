@@ -1,12 +1,13 @@
-use crate::constants::META_TYPE_FIELD;
-use crate::export::LtxImportExport;
-use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
+
+use crate::constants::META_TYPE_FIELD;
+use crate::export::LtxImportExport;
+use crate::file_import::read_ltx_field;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -138,13 +139,11 @@ impl LtxImportExport for ParticleEffectFrame {
 
 #[cfg(test)]
 mod tests {
-  use crate::constants::META_TYPE_FIELD;
-  use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
-  use crate::export::LtxImportExport;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+
+  use serde_json::to_string_pretty;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
@@ -154,6 +153,10 @@ mod tests {
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
+
+  use crate::constants::META_TYPE_FIELD;
+  use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
+  use crate::export::LtxImportExport;
 
   #[test]
   fn test_read_write() -> XRayResult {

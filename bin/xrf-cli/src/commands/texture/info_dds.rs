@@ -1,10 +1,12 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use ddsfile::Dds;
 use std::fs::File;
 use std::path::PathBuf;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use ddsfile::Dds;
 use xray_output::OutputOptions;
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct InfoDdsCommand;

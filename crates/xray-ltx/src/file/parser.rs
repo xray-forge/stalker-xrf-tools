@@ -1,3 +1,7 @@
+use std::str::Chars;
+
+use xray_error::{XRayError, XRayResult};
+
 use crate::file::file_configuration::constants::{
   LTX_SYMBOL_COMMENT, LTX_SYMBOL_INCLUDE, LTX_SYMBOL_INHERIT, LTX_SYMBOL_SECTION_CLOSE,
   LTX_SYMBOL_SECTION_OPEN,
@@ -7,8 +11,6 @@ use crate::file::file_section::section::Section;
 use crate::file::file_section::section_entry::SectionEntry;
 use crate::file::formatter::LtxFormatter;
 use crate::{Ltx, LtxCheck, ROOT_SECTION};
-use std::str::Chars;
-use xray_error::{XRayError, XRayResult};
 
 /// Ltx parser.
 pub struct LtxParser<'a> {

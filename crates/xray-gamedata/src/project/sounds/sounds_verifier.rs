@@ -1,4 +1,5 @@
 use std::time::Instant;
+
 use xray_assets::XrayAssetType as AssetType;
 use xray_error::XRayResult;
 

@@ -1,6 +1,7 @@
-use crate::ChunkReader;
 use byteorder::{ByteOrder, ReadBytesExt};
 use xray_error::XRayResult;
+
+use crate::ChunkReader;
 
 /// Read chunk as u16 value, verify remaining data is 0.
 #[inline]

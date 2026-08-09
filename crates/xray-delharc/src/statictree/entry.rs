@@ -58,8 +58,9 @@ impl TreeEntry {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
   use core::mem;
+
+  use super::*;
   #[test]
   fn tree_entry_works() {
     assert_eq!(mem::size_of::<TreeEntry>(), 2);

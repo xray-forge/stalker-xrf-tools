@@ -1,6 +1,7 @@
+use std::io::Write;
+
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_utils::{decode_bytes_to_string, encode_string_to_bytes, get_windows1251_encoder};

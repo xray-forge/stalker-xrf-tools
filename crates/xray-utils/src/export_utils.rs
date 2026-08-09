@@ -1,5 +1,6 @@
 use std::fs::{File, OpenOptions};
 use std::path::Path;
+
 use xray_error::{XRayError, XRayResult};
 
 /// Create file for exporting by provided path.

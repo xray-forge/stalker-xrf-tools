@@ -1,9 +1,11 @@
-use crate::archives_editor::state::ArchivesEditorState;
-use crate::types::TauriResult;
-use serde_json::{Value, json};
 use std::sync::MutexGuard;
+
+use serde_json::{Value, json};
 use tauri::State;
 use xray_archive::ArchiveProject;
+
+use crate::archives_editor::state::ArchivesEditorState;
+use crate::types::TauriResult;
 
 #[tauri::command]
 pub async fn read_archive_file(

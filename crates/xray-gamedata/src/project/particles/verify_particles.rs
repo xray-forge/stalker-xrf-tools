@@ -1,11 +1,13 @@
+use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant};
+
+use rayon::prelude::*;
+use xray_db::{ParticlesFile, XRayByteOrder};
+use xray_error::{XRayError, XRayResult};
+
 use crate::GamedataFindingFactory;
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use rayon::prelude::*;
-use std::path::{Path, PathBuf};
-use std::time::{Duration, Instant};
-use xray_db::{ParticlesFile, XRayByteOrder};
-use xray_error::{XRayError, XRayResult};
 
 impl GamedataProject {
   pub fn verify_particles(

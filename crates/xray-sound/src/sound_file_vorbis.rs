@@ -1,5 +1,6 @@
-use ogg::{Packet as OggPacket, reading::PacketReader};
 use std::io::{Read, Seek};
+
+use ogg::{Packet as OggPacket, reading::PacketReader};
 use symphonia::core::{
   codecs::audio::{AudioCodecParameters, AudioDecoderOptions, well_known::CODEC_ID_VORBIS},
   packet::Packet,

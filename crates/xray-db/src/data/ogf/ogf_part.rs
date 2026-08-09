@@ -85,7 +85,6 @@ impl ChunkReadWrite for OgfPart {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::ogf::ogf_part::OgfPart;
   use xray_chunk::{ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -93,6 +92,8 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::ogf::ogf_part::OgfPart;
 
   #[test]
   fn test_read_write_list() -> XRayResult {

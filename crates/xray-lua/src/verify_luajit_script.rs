@@ -1,6 +1,8 @@
-use crate::XRayLuaScript;
 use std::path::Path;
+
 use xray_error::XRayResult;
+
+use crate::XRayLuaScript;
 
 /// Verify LuaJIT source syntax.
 pub fn verify_luajit_script(code: &str, path: &Path) -> XRayResult<()> {
@@ -9,8 +11,9 @@ pub fn verify_luajit_script(code: &str, path: &Path) -> XRayResult<()> {
 
 #[cfg(test)]
 mod tests {
-  use super::verify_luajit_script;
   use std::path::Path;
+
+  use super::verify_luajit_script;
 
   #[test]
   fn accepts_luajit_goto_and_label() {

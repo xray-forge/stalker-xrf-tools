@@ -1,9 +1,10 @@
-use crate::translations_editor::state::TranslationsEditorState;
-use crate::types::TauriResult;
-use crate::utils::error_to_string;
 use serde_json::{Value, json};
 use tauri::State;
 use xray_translation::{TranslationProject, TranslationProjectJson};
+
+use crate::translations_editor::state::TranslationsEditorState;
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 
 #[tauri::command]
 pub async fn read_translations_project(

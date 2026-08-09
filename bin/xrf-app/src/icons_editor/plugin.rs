@@ -1,9 +1,10 @@
-use crate::icons_editor::state::IconsEditorState;
-use crate::icons_editor::stream::get_equipment_sprite_stream_response;
 use tauri::http::header::CONTENT_TYPE;
 use tauri::http::{Response, StatusCode};
 use tauri::plugin::TauriPlugin;
 use tauri::{Manager, Runtime};
+
+use crate::icons_editor::state::IconsEditorState;
+use crate::icons_editor::stream::get_equipment_sprite_stream_response;
 
 pub struct IconsEditorPlugin {}
 

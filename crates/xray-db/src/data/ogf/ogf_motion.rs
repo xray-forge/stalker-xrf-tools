@@ -1,6 +1,7 @@
+use std::io::Write;
+
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 
@@ -42,7 +43,6 @@ impl ChunkReadWrite for OgfMotion {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::ogf::ogf_motion::OgfMotion;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -50,6 +50,8 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::ogf::ogf_motion::OgfMotion;
 
   #[test]
   fn test_read_write() -> XRayResult {

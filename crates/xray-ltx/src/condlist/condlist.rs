@@ -1,6 +1,7 @@
+use xray_error::XRayResult;
+
 use super::branch::CondlistBranch;
 use super::span::SourceSpan;
-use xray_error::XRayResult;
 
 /// A parsed X-Ray condition list.
 #[derive(Clone, Debug, PartialEq)]

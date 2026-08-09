@@ -1,10 +1,12 @@
+use std::time::Instant;
+
+use xray_error::XRayResult;
+
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
 use crate::project::meshes::mesh_assets_verifier::MeshAssetsVerifier;
 use crate::project::meshes::shader_library_verifier::ShaderLibraryVerifier;
 use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResult;
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions};
-use std::time::Instant;
-use xray_error::XRayResult;
 
 pub(crate) struct MeshesVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,

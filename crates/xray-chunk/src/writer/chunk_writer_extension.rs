@@ -1,8 +1,10 @@
-use crate::{ChunkReadWrite, ChunkReadWriteList, ChunkReadWriteOptional, ChunkWriter};
-use byteorder::{ByteOrder, WriteBytesExt};
 use std::io::Write;
+
+use byteorder::{ByteOrder, WriteBytesExt};
 use xray_error::XRayResult;
 use xray_utils::encode_string_to_w1251_bytes;
+
+use crate::{ChunkReadWrite, ChunkReadWriteList, ChunkReadWriteOptional, ChunkWriter};
 
 impl ChunkWriter {
   #[inline]
@@ -47,8 +49,9 @@ impl ChunkWriter {
 
 #[cfg(test)]
 mod tests {
-  use crate::{ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
+
+  use crate::{ChunkWriter, XRayByteOrder};
 
   #[test]
   fn test_write_w1251_string_empty() -> XRayResult {

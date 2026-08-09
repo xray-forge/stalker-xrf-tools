@@ -1,15 +1,17 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use std::time::Instant;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_ltx::Ltx;
 use xray_output::OutputOptions;
 use xray_texture::{
   ImageFormat, RgbaImage, UnpackEquipmentOptions, UnpackEquipmentProcessor, dds_to_image,
   read_dds_by_path,
 };
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct UnpackEquipmentIconsCommand;

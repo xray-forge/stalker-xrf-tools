@@ -1,11 +1,13 @@
-use crate::data::generic::vector_3d::Vector3d;
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
+
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+
+use crate::data::generic::vector_3d::Vector3d;
 
 /// `hdrNODES` in c++ codebase, stored raw at the very start of the `level.ai` file.
 ///
@@ -89,9 +91,8 @@ impl LevelAiFile {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::level::level_ai_file::{LevelAiFile, LevelAiHeader};
   use std::io::Write;
+
   use uuid::uuid;
   use xray_chunk::{ChunkReadWrite, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
@@ -99,6 +100,9 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_file,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::level::level_ai_file::{LevelAiFile, LevelAiHeader};
 
   fn sample() -> LevelAiHeader {
     LevelAiHeader {

@@ -1,14 +1,16 @@
-use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
-use crate::omf::chunks::omf_parameters_chunk::OmfParametersChunk;
-use byteorder::ByteOrder;
-use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+
+use byteorder::ByteOrder;
+use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{assert_equal, open_export_file};
+
+use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
+use crate::omf::chunks::omf_parameters_chunk::OmfParametersChunk;
 
 // c++ CKinematicsAnimated
 #[derive(Debug, Serialize, Deserialize)]
@@ -163,12 +165,6 @@ impl OmfFile {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::ogf::ogf_motion::OgfMotion;
-  use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
-  use crate::data::ogf::ogf_part::OgfPart;
-  use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
-  use crate::omf::chunks::omf_parameters_chunk::OmfParametersChunk;
-  use crate::omf::omf_file::OmfFile;
   use xray_chunk::{ChunkReader, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -176,6 +172,13 @@ mod tests {
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice,
   };
+
+  use crate::data::ogf::ogf_motion::OgfMotion;
+  use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
+  use crate::data::ogf::ogf_part::OgfPart;
+  use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
+  use crate::omf::chunks::omf_parameters_chunk::OmfParametersChunk;
+  use crate::omf::omf_file::OmfFile;
 
   fn new_mock(version: u16) -> OmfFile {
     OmfFile {

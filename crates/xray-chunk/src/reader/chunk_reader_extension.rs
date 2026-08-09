@@ -1,9 +1,11 @@
+use std::io::Read;
+
+use byteorder::{ByteOrder, ReadBytesExt};
+use xray_error::XRayResult;
+
 use crate::chunk_trait::ChunkReadWrite;
 use crate::source::chunk_data_source::ChunkDataSource;
 use crate::{ChunkReadWriteList, ChunkReadWriteOptional, ChunkReader};
-use byteorder::{ByteOrder, ReadBytesExt};
-use std::io::Read;
-use xray_error::XRayResult;
 
 impl ChunkReader {
   #[inline]
@@ -54,10 +56,11 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
 #[cfg(test)]
 mod tests {
+  use xray_error::XRayResult;
+
   use crate::XRayByteOrder;
   use crate::reader::chunk_reader::ChunkReader;
   use crate::source::chunk_memory_source::InMemoryChunkDataSource;
-  use xray_error::XRayResult;
 
   #[test]
   fn test_read_u16_vector() -> XRayResult {

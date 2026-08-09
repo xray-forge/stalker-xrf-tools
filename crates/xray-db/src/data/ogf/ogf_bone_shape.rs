@@ -1,10 +1,11 @@
-use crate::data::ogf::ogf_cylinder::OgfCylinder;
-use crate::data::ogf::ogf_obb::OgfObb;
-use crate::data::ogf::ogf_sphere::OgfSphere;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::data::ogf::ogf_cylinder::OgfCylinder;
+use crate::data::ogf::ogf_obb::OgfObb;
+use crate::data::ogf::ogf_sphere::OgfSphere;
 
 /// Collision shape of one bone, `SBoneShape` in the engine.
 ///

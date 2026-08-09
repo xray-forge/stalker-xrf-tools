@@ -1,6 +1,8 @@
-use crate::RuleId;
-use serde::Serialize;
 use std::cmp::Ordering;
+
+use serde::Serialize;
+
+use crate::RuleId;
 
 /// A single rule violation or checker error.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]

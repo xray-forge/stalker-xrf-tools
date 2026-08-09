@@ -1,3 +1,7 @@
+use std::fs::File;
+use std::io::{BufWriter, Write};
+use std::path::Path;
+
 use ddsfile::Dds;
 use image::codecs::png::PngEncoder;
 use image::imageops::FilterType;
@@ -6,9 +10,6 @@ use image::{
   RgbaImage,
 };
 use image_dds::{ImageFormat as DDSImageFormat, Mipmaps, dds_from_image};
-use std::fs::File;
-use std::io::{BufWriter, Write};
-use std::path::Path;
 use xray_error::{XRayError, XRayResult};
 use xray_output::OutputOptions;
 use xray_utils::assert;
@@ -187,12 +188,14 @@ pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XRayResult<(RgbaImage, Vec<u8
 
 #[cfg(test)]
 mod tests {
-  use super::{read_dds_by_path, save_image_as_ui_dds};
+  use std::fs;
+  use std::path::PathBuf;
+
   use ddsfile::Dds;
   use image::RgbaImage;
   use image_dds::{ImageFormat as DDSImageFormat, Mipmaps};
-  use std::fs;
-  use std::path::PathBuf;
+
+  use super::{read_dds_by_path, save_image_as_ui_dds};
 
   fn temp_dds_path(name: &str) -> PathBuf {
     std::env::temp_dir().join(format!("xray-texture-{name}-{}.dds", std::process::id()))

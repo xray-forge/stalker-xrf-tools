@@ -1,7 +1,9 @@
+use std::path::{Path, PathBuf};
+
+use xray_error::{XRayError, XRayResult};
+
 use crate::xray_shader_import_reference::XRayShaderImportReference;
 use crate::{ShaderRenderer, XRayShaderCompiler, XRayShaderImport, XRayShaderSourceLoader};
-use std::path::{Path, PathBuf};
-use xray_error::{XRayError, XRayResult};
 
 /// A fully resolved X-Ray shader source file and its nested imports.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -150,11 +152,13 @@ impl XRayShader {
 
 #[cfg(test)]
 mod tests {
-  use super::XRayShader;
-  use crate::{ShaderRenderer, XRayShaderPlaceholderCompiler, XRayShaderSourceLoader};
   use std::collections::HashMap;
   use std::path::{Path, PathBuf};
+
   use xray_error::{XRayError, XRayResult};
+
+  use super::XRayShader;
+  use crate::{ShaderRenderer, XRayShaderPlaceholderCompiler, XRayShaderSourceLoader};
 
   struct TestSourceLoader {
     sources: HashMap<PathBuf, Vec<u8>>,

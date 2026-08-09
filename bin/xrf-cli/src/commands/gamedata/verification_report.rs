@@ -1,8 +1,10 @@
-use crate::generic_command::CommandResult;
-use serde::Serialize;
 use std::path::Path;
+
+use serde::Serialize;
 use xray_gamedata::{GamedataVerificationCheckReport, GamedataVerificationResult};
 use xray_report::{CheckReport, Finding};
+
+use crate::generic_command::CommandResult;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -103,16 +105,18 @@ impl<'a> GamedataVerificationReportWriter<'a> {
 
 #[cfg(test)]
 mod tests {
-  use super::GamedataVerificationReportWriter;
   use std::fs;
   use std::path::PathBuf;
   use std::sync::atomic::{AtomicU64, Ordering};
   use std::time::Duration;
+
   use xray_gamedata::{
     Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationStatus,
     GamedataVerificationType,
   };
   use xray_report::RuleId;
+
+  use super::GamedataVerificationReportWriter;
 
   static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 

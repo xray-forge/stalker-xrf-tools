@@ -1,9 +1,10 @@
-use crate::constants::DDS_EXTENSION;
-use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
-use crate::{UnpackEquipmentOptions, save_image_as_ui_dds};
 use image::GenericImageView;
 use image_dds::Mipmaps;
 use xray_error::XRayResult;
+
+use crate::constants::DDS_EXTENSION;
+use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
+use crate::{UnpackEquipmentOptions, save_image_as_ui_dds};
 
 pub struct UnpackEquipmentProcessor {}
 

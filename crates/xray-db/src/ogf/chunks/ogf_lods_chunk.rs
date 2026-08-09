@@ -1,6 +1,7 @@
+use std::io::Write;
+
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_utils::{decode_bytes_to_string, encode_string_to_bytes, get_windows1251_encoder};
@@ -40,8 +41,8 @@ impl ChunkReadWrite for OgfLodsChunk {
 
 #[cfg(test)]
 mod tests {
-  use super::OgfLodsChunk;
   use std::io::Write;
+
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -49,6 +50,8 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use super::OgfLodsChunk;
 
   /// Round trip the given text through a real chunk, the way the reader sees it on disk.
   fn write_then_read(name: &str, lods: &str) -> XRayResult<OgfLodsChunk> {

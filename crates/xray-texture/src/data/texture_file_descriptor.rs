@@ -1,6 +1,7 @@
+use std::cmp::max;
+
 use crate::constants::DDS_BLOCK_ALIGNMENT;
 use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
-use std::cmp::max;
 
 pub struct TextureFileDescriptor {
   pub name: String,

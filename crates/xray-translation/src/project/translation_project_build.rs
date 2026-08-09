@@ -1,17 +1,19 @@
-use crate::types::{
-  TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant,
-};
-use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
-use quick_xml::se::Serializer;
-use serde::Serialize;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{Write, copy};
 use std::path::{Display, Path};
 use std::time::Instant;
+
+use quick_xml::se::Serializer;
+use serde::Serialize;
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{XRayEncoding, encode_string_to_bytes};
+
+use crate::types::{
+  TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant,
+};
+use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
 
 impl TranslationProject {
   pub fn build_dir(dir: &Path, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
@@ -266,9 +268,10 @@ impl TranslationProject {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
   use std::collections::HashMap;
   use std::path::PathBuf;
+
+  use super::*;
 
   fn build_options(language: TranslationLanguage) -> ProjectBuildOptions {
     ProjectBuildOptions {

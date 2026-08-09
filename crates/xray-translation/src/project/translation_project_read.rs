@@ -1,3 +1,12 @@
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+
+use walkdir::{DirEntry, WalkDir};
+use xray_error::XRayResult;
+use xray_utils::{XRayEncoding, decode_bytes_to_string};
+
 use crate::language::MULTILANGUAGE;
 use crate::project::translation_project::TranslationProject;
 use crate::project::translation_project_constants::ALLOWED_PROJECT_READ_EXTENSIONS;
@@ -5,13 +14,6 @@ use crate::types::{
   TranslationCompiledXml, TranslationJson, TranslationProjectJson, TranslationVariant,
 };
 use crate::{TranslationEntry, TranslationLanguage};
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
-use walkdir::{DirEntry, WalkDir};
-use xray_error::XRayResult;
-use xray_utils::{XRayEncoding, decode_bytes_to_string};
 
 impl TranslationProject {
   pub fn read_project<P: AsRef<Path>>(dir: P) -> XRayResult<TranslationProjectJson> {
@@ -199,13 +201,15 @@ impl TranslationProject {
 
 #[cfg(test)]
 mod tests {
-  use crate::project::translation_project::TranslationProject;
-  use crate::types::{TranslationProjectJson, TranslationVariant};
-  use crate::{TranslationEntry, TranslationJson};
   use std::path::PathBuf;
+
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_absolute_test_sample_file_path,
   };
+
+  use crate::project::translation_project::TranslationProject;
+  use crate::types::{TranslationProjectJson, TranslationVariant};
+  use crate::{TranslationEntry, TranslationJson};
 
   #[test]
   fn test_read_xml_project() {

@@ -1,8 +1,9 @@
-use rayon::iter::IntoParallelRefIterator;
-use rayon::prelude::*;
 use std::fs::File;
 use std::path::Path;
 use std::time::{Duration, Instant};
+
+use rayon::iter::IntoParallelRefIterator;
+use rayon::prelude::*;
 use xray_assets::XrayAssetType as AssetType;
 use xray_error::{XRayError, XRayResult};
 use xray_lua::verify_luajit_script;

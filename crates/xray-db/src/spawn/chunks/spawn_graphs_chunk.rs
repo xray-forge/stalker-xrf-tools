@@ -1,3 +1,14 @@
+use std::fmt;
+use std::fs::File;
+use std::path::Path;
+
+use byteorder::ByteOrder;
+use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+use xray_error::XRayResult;
+use xray_ltx::Ltx;
+use xray_utils::{assert_length, open_export_file};
+
 use crate::data::graph::graph_cross_table::GraphCrossTable;
 use crate::data::graph::graph_edge::GraphEdge;
 use crate::data::graph::graph_header::GraphHeader;
@@ -5,15 +16,6 @@ use crate::data::graph::graph_level::GraphLevel;
 use crate::data::graph::graph_level_point::GraphLevelPoint;
 use crate::data::graph::graph_vertex::GraphVertex;
 use crate::export::{FileImportExport, LtxImportExport};
-use byteorder::ByteOrder;
-use serde::{Deserialize, Serialize};
-use std::fmt;
-use std::fs::File;
-use std::path::Path;
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-use xray_error::XRayResult;
-use xray_ltx::Ltx;
-use xray_utils::{assert_length, open_export_file};
 
 /// `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize`
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -268,14 +270,6 @@ impl fmt::Debug for SpawnGraphsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::graph::graph_cross_table::GraphCrossTable;
-  use crate::data::graph::graph_edge::GraphEdge;
-  use crate::data::graph::graph_header::GraphHeader;
-  use crate::data::graph::graph_level::GraphLevel;
-  use crate::data::graph::graph_level_point::GraphLevelPoint;
-  use crate::data::graph::graph_vertex::GraphVertex;
-  use crate::spawn::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
   use uuid::uuid;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
@@ -284,6 +278,15 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::data::graph::graph_cross_table::GraphCrossTable;
+  use crate::data::graph::graph_edge::GraphEdge;
+  use crate::data::graph::graph_header::GraphHeader;
+  use crate::data::graph::graph_level::GraphLevel;
+  use crate::data::graph::graph_level_point::GraphLevelPoint;
+  use crate::data::graph::graph_vertex::GraphVertex;
+  use crate::spawn::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
 
   #[test]
   fn test_read_write_empty() -> XRayResult {

@@ -1,6 +1,8 @@
-use crate::{CheckId, Finding, Status};
-use serde::Serialize;
 use std::time::Duration;
+
+use serde::Serialize;
+
+use crate::{CheckId, Finding, Status};
 
 /// Immutable report data for one command check.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]

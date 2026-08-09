@@ -1,8 +1,10 @@
-use crate::file::file_configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
-use crate::scheme::tuple_separator::TupleSeparator;
 use std::fmt::Display;
+
 use xray_error::{XRayError, XRayResult};
 use xray_utils::assert_equal;
+
+use crate::file::file_configuration::constants::{LTX_SYMBOL_ARRAY, LTX_SYMBOL_OPTIONAL};
+use crate::scheme::tuple_separator::TupleSeparator;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum LtxFieldDataType {

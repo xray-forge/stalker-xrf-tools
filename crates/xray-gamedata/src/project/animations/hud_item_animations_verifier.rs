@@ -1,6 +1,7 @@
-use rayon::prelude::*;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
+
+use rayon::prelude::*;
 use xray_assets::XrayAssetType as AssetType;
 use xray_db::{OgfFile, OmfFile, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};

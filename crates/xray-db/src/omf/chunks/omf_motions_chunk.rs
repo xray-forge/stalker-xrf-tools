@@ -1,10 +1,12 @@
-use crate::data::ogf::ogf_motion::OgfMotion;
+use std::io::Write;
+
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io::Write;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, read_u32_chunk};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::assert_equal;
+
+use crate::data::ogf::ogf_motion::OgfMotion;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OmfMotionsChunk {

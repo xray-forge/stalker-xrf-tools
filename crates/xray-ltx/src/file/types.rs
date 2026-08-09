@@ -1,8 +1,9 @@
+use fxhash::FxBuildHasher;
+use indexmap::IndexMap;
+
 use crate::file::file_section::section::Section;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;
-use fxhash::FxBuildHasher;
-use indexmap::IndexMap;
 
 pub type SectionData = IndexMap<String, String, FxBuildHasher>;
 

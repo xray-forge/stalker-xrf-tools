@@ -1,13 +1,13 @@
-use crate::bitstream::*;
-use crate::error::{LhaError, LhaResult};
-use crate::ringbuf::*;
-use crate::statictree::*;
-use crate::stub_io::Read;
 #[cfg(not(feature = "std"))]
 use alloc::boxed::Box;
 use core::num::NonZeroU32;
 
 use super::Decoder;
+use crate::bitstream::*;
+use crate::error::{LhaError, LhaResult};
+use crate::ringbuf::*;
+use crate::statictree::*;
+use crate::stub_io::Read;
 
 const NUM_COMMANDS: usize = 510;
 const NUM_TEMP_CODELEN: usize = 20;
@@ -313,10 +313,11 @@ where
 #[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
-  use super::super::DecoderAny;
-  use super::*;
   use std::fs;
   use std::io;
+
+  use super::super::DecoderAny;
+  use super::*;
 
   #[test]
   fn lhav2_works() {

@@ -1,6 +1,7 @@
-use crate::{NoopOutput, Output};
 use std::fmt::Display;
 use std::sync::Arc;
+
+use crate::{NoopOutput, Output};
 
 /// Controls which live workflow messages are rendered.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -78,10 +79,11 @@ impl Default for OutputOptions {
 
 #[cfg(test)]
 mod tests {
-  use super::{OutputOptions, OutputVerbosity};
-  use crate::Output;
   use std::fmt::Display;
   use std::sync::{Arc, Mutex};
+
+  use super::{OutputOptions, OutputVerbosity};
+  use crate::Output;
 
   #[derive(Default)]
   struct RecordingOutput {

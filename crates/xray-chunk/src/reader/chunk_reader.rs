@@ -1,12 +1,14 @@
-use crate::iterator::chunk_iterator::ChunkIterator;
-use crate::source::chunk_data_source::ChunkDataSource;
-use crate::source::chunk_memory_source::InMemoryChunkDataSource;
-use fileslice::FileSlice;
-use parquet::file::reader::Length;
 use std::fmt;
 use std::fs::File;
 use std::io::SeekFrom;
+
+use fileslice::FileSlice;
+use parquet::file::reader::Length;
 use xray_error::{XRayError, XRayResult};
+
+use crate::iterator::chunk_iterator::ChunkIterator;
+use crate::source::chunk_data_source::ChunkDataSource;
+use crate::source::chunk_memory_source::InMemoryChunkDataSource;
 
 #[derive(Clone)]
 pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
@@ -144,10 +146,11 @@ impl fmt::Debug for ChunkReader {
 
 #[cfg(test)]
 mod tests {
-  use crate::reader::chunk_reader::ChunkReader;
   use fileslice::FileSlice;
   use xray_error::XRayResult;
   use xray_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
+
+  use crate::reader::chunk_reader::ChunkReader;
 
   #[test]
   fn test_read_empty_file() -> XRayResult {

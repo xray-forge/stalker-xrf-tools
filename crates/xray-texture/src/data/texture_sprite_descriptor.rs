@@ -1,7 +1,8 @@
+use roxmltree::Node;
+
 use crate::constants::{
   XML_ATTRIBUTE_HEIGHT, XML_ATTRIBUTE_ID, XML_ATTRIBUTE_WIDTH, XML_ATTRIBUTE_X, XML_ATTRIBUTE_Y,
 };
-use roxmltree::Node;
 
 /// Description of single texture sprite.
 pub struct TextureSpriteDescriptor {

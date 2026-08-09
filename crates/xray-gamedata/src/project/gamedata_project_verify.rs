@@ -1,9 +1,11 @@
+use std::time::Instant;
+
+use xray_error::{XRayError, XRayResult};
+
 use crate::{
   GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationReport,
   GamedataVerificationType,
 };
-use std::time::Instant;
-use xray_error::{XRayError, XRayResult};
 
 impl GamedataProject {
   pub fn verify(
@@ -51,11 +53,13 @@ impl GamedataProject {
 
 #[cfg(test)]
 mod tests {
-  use super::GamedataProject;
-  use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};
   use std::path::PathBuf;
+
   use xray_assets::{DirectoryAssetIndex, XrayAssetIndex};
   use xray_ltx::LtxProject;
+
+  use super::GamedataProject;
+  use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};
 
   fn empty_project() -> GamedataProject {
     GamedataProject {

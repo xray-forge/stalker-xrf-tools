@@ -1,12 +1,14 @@
-use crate::GamedataFindingFactory;
-use crate::project::ltx::verify_ltx_result::GamedataLtxVerificationResult;
-use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 use std::path::Path;
 use std::time::Instant;
+
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{
   LtxFormatOptions, LtxProjectFormatResult, LtxProjectVerifyResult, LtxVerifyOptions,
 };
+
+use crate::GamedataFindingFactory;
+use crate::project::ltx::verify_ltx_result::GamedataLtxVerificationResult;
+use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
   pub fn verify_ltx(
@@ -104,12 +106,14 @@ impl GamedataProject {
 
 #[cfg(test)]
 mod tests {
+  use std::path::PathBuf;
+
+  use xray_error::XRayError;
+  use xray_ltx::{LtxProjectFormatResult, LtxProjectVerifyResult};
+
   use super::GamedataProject;
   use crate::GamedataFindingFactory;
   use crate::{Finding, GamedataVerificationRule};
-  use std::path::PathBuf;
-  use xray_error::XRayError;
-  use xray_ltx::{LtxProjectFormatResult, LtxProjectVerifyResult};
 
   #[test]
   fn collects_format_and_scheme_findings_with_source_paths() {

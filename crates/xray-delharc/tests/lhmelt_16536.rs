@@ -1,9 +1,10 @@
-use delharc::header::*;
 use std::path::PathBuf;
 use std::{
   fs,
   io::{self, Seek, SeekFrom},
 };
+
+use delharc::header::*;
 
 mod sink;
 use sink::SinkSum;

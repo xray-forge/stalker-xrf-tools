@@ -1,3 +1,13 @@
+use byteorder::{ByteOrder, WriteBytesExt};
+use serde::{Deserialize, Serialize};
+use xray_chunk::{
+  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id,
+  read_f32_chunk, read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
+};
+use xray_error::{XRayError, XRayResult};
+use xray_ltx::{Ltx, Section};
+use xray_utils::assert_equal;
+
 use crate::constants::META_TYPE_FIELD;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::particles::particle_action::ParticleAction;
@@ -8,15 +18,6 @@ use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
 use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
 use crate::export::LtxImportExport;
 use crate::file_import::{read_ltx_field, read_ltx_optional_field};
-use byteorder::{ByteOrder, WriteBytesExt};
-use serde::{Deserialize, Serialize};
-use xray_chunk::{
-  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id,
-  read_f32_chunk, read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
-};
-use xray_error::{XRayError, XRayResult};
-use xray_ltx::{Ltx, Section};
-use xray_utils::assert_equal;
 
 /// C++ src/Layers/xrRender/ParticleEffectDef.cpp
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -368,6 +369,20 @@ impl LtxImportExport for ParticleEffect {
 
 #[cfg(test)]
 mod tests {
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
+
+  use serde_json::to_string_pretty;
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_ltx::Ltx;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::file::read_file_as_string;
+  use xray_test_utils::utils::{
+    get_absolute_test_resource_path, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+  };
+
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::particles::actions::particle_action_copy_vertex::ParticleActionCopyVertex;
   use crate::data::particles::actions::particle_action_damping::ParticleActionDamping;
@@ -380,18 +395,6 @@ mod tests {
   use crate::data::particles::particle_effect_frame::ParticleEffectFrame;
   use crate::data::particles::particle_effect_sprite::ParticleEffectSprite;
   use crate::export::LtxImportExport;
-  use serde_json::to_string_pretty;
-  use std::fs::File;
-  use std::io::{Seek, SeekFrom, Write};
-  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xray_error::XRayResult;
-  use xray_ltx::Ltx;
-  use xray_test_utils::FileSlice;
-  use xray_test_utils::file::read_file_as_string;
-  use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
-  };
 
   #[test]
   fn test_read_write() -> XRayResult {

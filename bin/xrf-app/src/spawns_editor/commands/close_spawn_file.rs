@@ -1,8 +1,10 @@
-use crate::spawns_editor::state::SpawnsEditorState;
-use crate::types::TauriResult;
 use std::sync::MutexGuard;
+
 use tauri::State;
 use xray_db::SpawnFile;
+
+use crate::spawns_editor::state::SpawnsEditorState;
+use crate::types::TauriResult;
 
 #[tauri::command]
 pub fn close_spawn_file(state: State<'_, SpawnsEditorState>) -> TauriResult {

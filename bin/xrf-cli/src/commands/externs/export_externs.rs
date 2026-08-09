@@ -1,15 +1,17 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_error::XRayError;
 use xray_export::{
   ExternFormat, ExternManifest, ExternManifestParser, LineEndings, ParsedExternManifest,
   normalize_line_endings, render_extern_manifest,
 };
 use xray_output::OutputOptions;
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 /// Generate or verify a stable extern manifest from TypeScript declarations.
 #[derive(Default)]
@@ -209,11 +211,13 @@ impl ExportExternsCommand {
 
 #[cfg(test)]
 mod tests {
+  use std::path::PathBuf;
+
+  use clap::ArgMatches;
+  use xray_export::ExternFormat;
+
   use super::ExportExternsCommand;
   use crate::generic_command::GenericCommand;
-  use clap::ArgMatches;
-  use std::path::PathBuf;
-  use xray_export::ExternFormat;
 
   #[test]
   fn infers_check_format_from_extension() {

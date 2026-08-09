@@ -1,6 +1,7 @@
+use tauri::State;
+
 use crate::icons_editor::state::IconsEditorState;
 use crate::types::TauriResult;
-use tauri::State;
 
 #[tauri::command]
 pub async fn close_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult {

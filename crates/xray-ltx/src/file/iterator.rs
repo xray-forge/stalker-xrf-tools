@@ -1,6 +1,7 @@
+use indexmap::map::{IntoIter, Iter, IterMut};
+
 use crate::file::file_section::section::Section;
 use crate::file::ltx::Ltx;
-use indexmap::map::{IntoIter, Iter, IterMut};
 
 pub struct PropertyIter<'a> {
   pub(crate) inner: Iter<'a, String, String>,

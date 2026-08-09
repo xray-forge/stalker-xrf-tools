@@ -1,3 +1,14 @@
+use std::io::Write;
+
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
+use xray_ltx::{Ltx, Section};
+use xray_utils::{
+  assert, assert_equal, assert_not_equal, decode_bytes_from_base64, encode_bytes_to_base64,
+};
+
 use crate::constants::{
   FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
 };
@@ -7,15 +18,6 @@ use crate::data::meta::alife_class::AlifeClass;
 use crate::data::meta::cls_id::ClsId;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use serde::{Deserialize, Serialize};
-use std::io::Write;
-use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xray_error::{XRayError, XRayResult};
-use xray_ltx::{Ltx, Section};
-use xray_utils::{
-  assert, assert_equal, assert_not_equal, decode_bytes_from_base64, encode_bytes_to_base64,
-};
 
 /// Generic abstract ALife object base.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -298,20 +300,12 @@ impl LtxImportExport for AlifeObject {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::alife::alife_object::AlifeObject;
-  use crate::data::alife::alife_object_inherited::AlifeObjectInherited;
-  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
-  use crate::data::alife::inherited::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::meta::cls_id::ClsId;
-  use crate::export::LtxImportExport;
-  use byteorder::WriteBytesExt;
-  use serde_json::to_string_pretty;
   use std::fs::{self, File};
   use std::io::{Seek, SeekFrom, Write};
   use std::path::PathBuf;
+
+  use byteorder::WriteBytesExt;
+  use serde_json::to_string_pretty;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::{XRayError, XRayResult};
   use xray_ltx::Ltx;
@@ -321,6 +315,16 @@ mod tests {
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::alife::alife_object::AlifeObject;
+  use crate::data::alife::alife_object_inherited::AlifeObjectInherited;
+  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
+  use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
+  use crate::data::alife::inherited::alife_object_item_custom_outfit::AlifeObjectItemCustomOutfit;
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::data::meta::cls_id::ClsId;
+  use crate::export::LtxImportExport;
 
   #[test]
   fn binary_read_returns_error_for_unknown_section() -> XRayResult {

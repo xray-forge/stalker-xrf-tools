@@ -1,6 +1,7 @@
-use byteorder::{ByteOrder, WriteBytesExt};
 use std::io;
 use std::io::Write;
+
+use byteorder::{ByteOrder, WriteBytesExt};
 use xray_error::XRayResult;
 
 #[derive(Default)]

@@ -1,5 +1,6 @@
-use crate::{CheckReport, Status};
 use serde::Serialize;
+
+use crate::{CheckReport, Status};
 
 /// Immutable, finalized account of a command's checks and findings.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -28,9 +29,10 @@ impl Report {
 
 #[cfg(test)]
 mod tests {
+  use std::time::Duration;
+
   use super::{CheckReport, Report, Status};
   use crate::{CheckId, Finding, RuleId};
-  use std::time::Duration;
 
   #[test]
   fn preserves_check_order_and_uses_pre_finalized_checks() {

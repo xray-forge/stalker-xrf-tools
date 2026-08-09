@@ -1,8 +1,10 @@
-use crate::DirectoryAsset;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+
 use walkdir::WalkDir;
 use xray_error::{XRayError, XRayResult};
+
+use crate::DirectoryAsset;
 
 #[derive(Debug)]
 pub struct DirectoryAssetIndex {

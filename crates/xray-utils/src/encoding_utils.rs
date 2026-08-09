@@ -1,10 +1,11 @@
+use std::borrow::Cow;
+use std::io;
+use std::io::{ErrorKind, Read};
+
 use base64::engine::{GeneralPurpose, general_purpose};
 use base64::{Engine, alphabet};
 use encoding_rs::{Encoding, UTF_8};
 use encoding_rs::{WINDOWS_1250, WINDOWS_1251, WINDOWS_1252};
-use std::borrow::Cow;
-use std::io;
-use std::io::{ErrorKind, Read};
 use xray_error::{XRayError, XRayResult};
 
 pub type XRayEncoding = &'static Encoding;

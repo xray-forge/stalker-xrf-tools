@@ -1,9 +1,3 @@
-use crate::constants::META_TYPE_FIELD;
-use crate::data::particles::particle_effect_description::ParticleDescription;
-use crate::data::particles::particle_group_effect::ParticleGroupEffect;
-use crate::data::particles::particle_group_effect_old::ParticleGroupEffectOld;
-use crate::export::LtxImportExport;
-use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
@@ -13,6 +7,13 @@ use xray_chunk::{
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
+
+use crate::constants::META_TYPE_FIELD;
+use crate::data::particles::particle_effect_description::ParticleDescription;
+use crate::data::particles::particle_group_effect::ParticleGroupEffect;
+use crate::data::particles::particle_group_effect_old::ParticleGroupEffectOld;
+use crate::export::LtxImportExport;
+use crate::file_import::read_ltx_field;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

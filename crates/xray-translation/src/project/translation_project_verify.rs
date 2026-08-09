@@ -1,11 +1,13 @@
-use crate::project::translation_project_verify_result::ProjectVerifyResult;
-use crate::types::TranslationJson;
-use crate::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
 use std::ffi::OsStr;
 use std::path::{Display, Path};
 use std::time::Instant;
+
 use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayResult;
+
+use crate::project::translation_project_verify_result::ProjectVerifyResult;
+use crate::types::TranslationJson;
+use crate::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
 
 impl TranslationProject {
   pub fn verify_dir(dir: &Path, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {

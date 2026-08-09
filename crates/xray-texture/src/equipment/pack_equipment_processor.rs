@@ -1,3 +1,11 @@
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::time::Instant;
+
+use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba};
+use path_absolutize::*;
+use xray_error::{XRayError, XRayResult};
+
 use crate::constants::{
   DDS_EXTENSION, EXTENSIONS_DIRECTORY, LTX_PATH_EXTENSION_MARKER, LTX_PATH_EXTENSION_MARKER_PREFIX,
   LTX_PATH_GAMEDATA_MARKER, LTX_PATH_GAMEDATA_MARKER_PREFIX, PNG_EXTENSION, RESOURCES_DIRECTORY,
@@ -6,12 +14,6 @@ use crate::constants::{
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::utils::images::{dds_to_image, fit_image_into_bounds, warn_on_reshaped_ui_dds};
 use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_image_as_ui_dds};
-use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba};
-use path_absolutize::*;
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-use std::time::Instant;
-use xray_error::{XRayError, XRayResult};
 
 pub struct PackEquipmentProcessor {}
 

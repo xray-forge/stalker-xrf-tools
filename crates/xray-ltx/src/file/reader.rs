@@ -1,11 +1,13 @@
-use crate::Ltx;
-use crate::file::parser::LtxParser;
-use crate::file::types::LtxIncluded;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+
 use xray_error::XRayResult;
 use xray_utils::read_as_string_from_w1251_encoded;
+
+use crate::Ltx;
+use crate::file::parser::LtxParser;
+use crate::file::types::LtxIncluded;
 
 impl Ltx {
   /// Read LTX from a string.
@@ -77,14 +79,16 @@ impl Ltx {
 
 #[cfg(test)]
 mod test {
-  use crate::Ltx;
-  use crate::file::types::LtxIncluded;
   use std::env::temp_dir;
   use std::fs::File;
   use std::io::Write;
   use std::path::PathBuf;
+
   use xray_test_utils::file::read_file_as_normalized_win_endl_string;
   use xray_test_utils::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
+
+  use crate::Ltx;
+  use crate::file::types::LtxIncluded;
 
   #[test]
   fn load_from_file() {

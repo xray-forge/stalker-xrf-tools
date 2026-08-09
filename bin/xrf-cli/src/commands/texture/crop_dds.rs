@@ -1,12 +1,14 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_output::OutputOptions;
 use xray_texture::{
   DynamicImage, GenericImageView, ImageFormat, Mipmaps, PNG_EXTENSION, RgbaImage, dds_to_image,
   fit_image_into_bounds, read_dds_by_path, save_image_as_ui_dds, save_image_as_ui_png,
 };
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct CropDdsCommand;

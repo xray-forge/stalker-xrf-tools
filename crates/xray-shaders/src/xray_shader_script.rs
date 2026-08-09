@@ -1,7 +1,9 @@
-use crate::XRayShaderPass;
 use std::path::{Path, PathBuf};
+
 use xray_error::XRayResult;
 use xray_lua::XRayLuaScript;
+
+use crate::XRayShaderPass;
 
 /// An X-Ray renderer shader script and the literal passes it declares.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -51,9 +53,11 @@ impl XRayShaderScript {
 
 #[cfg(test)]
 mod tests {
-  use super::XRayShaderScript;
   use std::path::Path;
+
   use xray_error::{XRayError, XRayResult};
+
+  use super::XRayShaderScript;
 
   #[test]
   fn collects_literal_shader_passes() -> XRayResult {

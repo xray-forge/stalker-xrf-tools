@@ -1,12 +1,14 @@
-use crate::archive::archive_descriptor::ArchiveDescriptor;
-use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
-use crate::archive::reader::ArchiveReader;
-use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
+
+use serde::Serialize;
 use walkdir::WalkDir;
 use xray_error::{XRayError, XRayResult};
+
+use crate::archive::archive_descriptor::ArchiveDescriptor;
+use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
+use crate::archive::reader::ArchiveReader;
 
 // todo: Add reading from fsgame.ltx file.
 #[derive(Serialize)]

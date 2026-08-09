@@ -1,12 +1,14 @@
+use std::collections::BTreeSet;
+use std::path::{Path, PathBuf};
+
+use xray_error::XRayResult;
+
 use super::TypeScriptSymbol;
 use super::declaration_parser::{exported_symbol, local_symbol};
 use super::typescript_project::TypeScriptProject;
 use crate::parse_typescript_file;
 use crate::swc_common::SourceMap;
 use crate::swc_ecma_ast::{ImportSpecifier, ModuleDecl, ModuleExportName, ModuleItem, Program};
-use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
-use xray_error::XRayResult;
 
 /// Resolves TypeScript function references within one project.
 ///

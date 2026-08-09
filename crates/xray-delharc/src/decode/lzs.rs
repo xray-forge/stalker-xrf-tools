@@ -1,11 +1,12 @@
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+use core::num::NonZeroU16;
+
 use crate::bitstream::*;
 use crate::decode::Decoder;
 use crate::error::LhaResult;
 use crate::ringbuf::*;
 use crate::stub_io::Read;
-#[cfg(not(feature = "std"))]
-use alloc::boxed::Box;
-use core::num::NonZeroU16;
 
 const RING_BUFFER_SIZE: usize = 2048;
 const START_OFFSET: isize = -17;

@@ -1,7 +1,8 @@
+use std::str::FromStr;
+
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 
@@ -94,11 +95,11 @@ impl Vector3d {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
+
+  use serde_json::to_string_pretty;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -107,6 +108,8 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::vector_3d::Vector3d;
 
   #[test]
   fn test_read_write() -> XRayResult {

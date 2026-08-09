@@ -1,6 +1,7 @@
 use std::default::Default;
 use std::path::Path;
 use std::rc::Rc;
+
 use swc_common::comments::SingleThreadedComments;
 use swc_common::errors::DiagnosticBuilder;
 use swc_common::sync::Lrc;

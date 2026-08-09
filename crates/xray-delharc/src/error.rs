@@ -1,7 +1,8 @@
-use crate::stub_io::Read;
 use core::fmt;
 #[cfg(feature = "std")]
 use std::io;
+
+use crate::stub_io::Read;
 
 pub type LhaResult<T, R> = Result<T, LhaError<<R as Read>::Error>>;
 

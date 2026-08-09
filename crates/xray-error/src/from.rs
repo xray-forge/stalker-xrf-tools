@@ -1,7 +1,9 @@
-use crate::XRayError;
-use image::ImageError;
 use std::error::Error;
 use std::io::Error as IoError;
+
+use image::ImageError;
+
+use crate::XRayError;
 
 impl From<IoError> for XRayError {
   fn from(value: IoError) -> Self {

@@ -1,14 +1,16 @@
-use crate::data::alife::alife_object::AlifeObject;
-use crate::export::{FileImportExport, LtxImportExport};
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::io::Write;
 use std::path::Path;
+
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
 use xray_utils::{assert_equal, assert_length, open_export_file};
+
+use crate::data::alife::alife_object::AlifeObject;
+use crate::export::{FileImportExport, LtxImportExport};
 
 /// ALife spawns chunk has the following structure:
 /// 0 - count
@@ -182,6 +184,14 @@ impl fmt::Debug for SpawnALifeSpawnsChunk {
 
 #[cfg(test)]
 mod tests {
+  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
   use crate::data::alife::alife_object::AlifeObject;
   use crate::data::alife::alife_object_inherited::AlifeObjectInherited;
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -192,13 +202,6 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::meta::cls_id::ClsId;
   use crate::spawn::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
-  use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xray_error::XRayResult;
-  use xray_test_utils::FileSlice;
-  use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
-  };
 
   #[test]
   fn test_read_write_empty() -> XRayResult {

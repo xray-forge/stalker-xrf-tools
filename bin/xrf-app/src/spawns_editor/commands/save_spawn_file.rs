@@ -1,10 +1,12 @@
+use std::path::Path;
+use std::sync::MutexGuard;
+
+use tauri::State;
+use xray_db::{SpawnFile, XRayByteOrder};
+
 use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
-use std::path::Path;
-use std::sync::MutexGuard;
-use tauri::State;
-use xray_db::{SpawnFile, XRayByteOrder};
 
 #[tauri::command]
 pub fn save_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> TauriResult {

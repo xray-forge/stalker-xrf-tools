@@ -1,7 +1,3 @@
-use crate::ArchiveProject;
-use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
-use crate::project::archive_project_unpack_result::ArchiveUnpackResult;
-use minilzo_rs::LZO;
 use std::cmp::{max, min};
 use std::collections::HashSet;
 use std::fs;
@@ -10,8 +6,14 @@ use std::io::ErrorKind::AlreadyExists;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
+
+use minilzo_rs::LZO;
 use xray_error::XRayResult;
 use xray_utils::{assert, assert_equal, assert_not_equal};
+
+use crate::ArchiveProject;
+use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
+use crate::project::archive_project_unpack_result::ArchiveUnpackResult;
 
 impl ArchiveProject {
   pub fn unpack<P: AsRef<Path>>(&self, destination: P) -> XRayResult<ArchiveUnpackResult> {

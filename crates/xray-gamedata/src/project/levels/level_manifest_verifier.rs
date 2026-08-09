@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+
 use xray_ltx::Ltx;
 
 use crate::GamedataFindingFactory;

@@ -6,14 +6,15 @@ mod jsdoc_parser;
 mod type_renderer;
 mod value_parser;
 
-pub use editor_projection::{ExportDescriptor, ExportParameterDescriptor, ExportsEditorParser};
-
-use crate::extern_manifest::{ExternExport, ExternManifest, ParsedExternManifest};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+
+pub use editor_projection::{ExportDescriptor, ExportParameterDescriptor, ExportsEditorParser};
 use walkdir::WalkDir;
 use xray_error::{XRayError, XRayResult};
 use xray_typescript::{TypeScriptSymbolResolver, parse_typescript_file};
+
+use crate::extern_manifest::{ExternExport, ExternManifest, ParsedExternManifest};
 
 /// Parses TypeScript extern declarations into the canonical manifest model.
 ///
@@ -123,10 +124,11 @@ impl ExternManifestParser {
 
 #[cfg(test)]
 mod tests {
-  use super::ExternManifestParser;
-  use crate::ExternExport;
   use std::fs;
   use std::path::{Path, PathBuf};
+
+  use super::ExternManifestParser;
+  use crate::ExternExport;
 
   fn create_test_root(name: &str) -> PathBuf {
     let root: PathBuf =

@@ -1,7 +1,8 @@
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
+
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use xray_chunk::{
   ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator, ChunkWriter,
@@ -113,11 +114,11 @@ impl ChunkReadWrite for GraphCrossTable {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::graph::graph_cross_table::GraphCrossTable;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+
+  use serde_json::to_string_pretty;
   use uuid::uuid;
   use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
@@ -128,6 +129,8 @@ mod tests {
     open_test_resource_as_file, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::graph::graph_cross_table::GraphCrossTable;
 
   #[test]
   fn test_read_write_list() -> XRayResult {

@@ -2,30 +2,13 @@ pub(crate) mod commands;
 pub(crate) mod generic_command;
 pub(crate) mod output;
 
+use std::error::Error;
+use std::{env, process};
+
+use clap::Command;
 use commands::archive::unpack_archive::UnpackArchiveCommand;
 use commands::externs::export_externs::ExportExternsCommand;
 use commands::ltx::verify_ltx::VerifyLtxCommand;
-use commands::spawn::info_spawn::InfoSpawnCommand;
-use commands::spawn::pack_spawn::PackSpawnFileCommand;
-use commands::spawn::repack_spawn::RepackSpawnCommand;
-use commands::spawn::unpack_spawn::UnpackSpawnFileCommand;
-use commands::spawn::verify_spawn::VerifySpawnFileCommand;
-use commands::texture::pack_equipment_icons::PackEquipmentIconsCommand;
-use commands::texture::pack_texture_description::PackTextureDescriptionCommand;
-use commands::texture::unpack_equipment_icons::UnpackEquipmentIconsCommand;
-use commands::texture::unpack_texture_description::UnpackTextureDescriptionCommand;
-use commands::translation::build_translations::BuildTranslationsCommand;
-use commands::translation::initialize_translations::InitializeTranslationsCommand;
-use commands::translation::parse_translations::ParseTranslationsCommand;
-use commands::translation::verify_translations::VerifyTranslationsCommand;
-
-use crate::commands::gamedata::verify_gamedata::VerifyGamedataCommand;
-use crate::commands::ltx::format_ltx::FormatLtxCommand;
-use crate::commands::texture::crop_dds::CropDdsCommand;
-use crate::commands::texture::info_dds::InfoDdsCommand;
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::Command;
 use commands::ogf::info_ogf::InfoOgfCommand;
 use commands::ogf::patch_ogf_motion_refs::PatchOgfMotionRefsCommand;
 use commands::ogf::patch_ogf_texture_refs::PatchOgfTextureRefsCommand;
@@ -39,10 +22,28 @@ use commands::particle::repack_particles::RepackParticlesCommand;
 use commands::particle::reunpack_particles::ReUnpackParticlesCommand;
 use commands::particle::unpack_particles::UnpackParticlesCommand;
 use commands::particle::verify_particles::VerifyParticlesFileCommand;
+use commands::spawn::info_spawn::InfoSpawnCommand;
+use commands::spawn::pack_spawn::PackSpawnFileCommand;
+use commands::spawn::repack_spawn::RepackSpawnCommand;
+use commands::spawn::unpack_spawn::UnpackSpawnFileCommand;
+use commands::spawn::verify_spawn::VerifySpawnFileCommand;
+use commands::texture::pack_equipment_icons::PackEquipmentIconsCommand;
+use commands::texture::pack_texture_description::PackTextureDescriptionCommand;
+use commands::texture::unpack_equipment_icons::UnpackEquipmentIconsCommand;
+use commands::texture::unpack_texture_description::UnpackTextureDescriptionCommand;
+use commands::translation::build_translations::BuildTranslationsCommand;
+use commands::translation::initialize_translations::InitializeTranslationsCommand;
+use commands::translation::parse_translations::ParseTranslationsCommand;
+use commands::translation::verify_translations::VerifyTranslationsCommand;
 use env_logger::Builder;
 use log::LevelFilter;
-use std::error::Error;
-use std::{env, process};
+
+use crate::commands::gamedata::verify_gamedata::VerifyGamedataCommand;
+use crate::commands::ltx::format_ltx::FormatLtxCommand;
+use crate::commands::texture::crop_dds::CropDdsCommand;
+use crate::commands::texture::info_dds::InfoDdsCommand;
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 fn main() -> Result<(), Box<dyn Error>> {
   setup_logger();

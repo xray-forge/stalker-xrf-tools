@@ -1,3 +1,14 @@
+use std::fs::File;
+use std::path::Path;
+
+use byteorder::ByteOrder;
+use serde::{Deserialize, Serialize};
+use xray_chunk::{
+  ChunkReader, find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id,
+  find_optional_chunk_by_id, find_required_chunk_by_id,
+};
+use xray_error::{XRayError, XRayResult};
+
 use crate::data::ogf::ogf_geometry::OgfGeometry;
 use crate::ogf::chunks::ogf_bones_chunk::OgfBonesChunk;
 use crate::ogf::chunks::ogf_children_chunk::OgfChildrenChunk;
@@ -10,15 +21,6 @@ use crate::ogf::chunks::ogf_texture_chunk::OgfTextureChunk;
 use crate::ogf::chunks::ogf_user_data_chunk::OgfUserDataChunk;
 use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
 use crate::omf::chunks::omf_parameters_chunk::OmfParametersChunk;
-use byteorder::ByteOrder;
-use serde::{Deserialize, Serialize};
-use std::fs::File;
-use std::path::Path;
-use xray_chunk::{
-  ChunkReader, find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id,
-  find_optional_chunk_by_id, find_required_chunk_by_id,
-};
-use xray_error::{XRayError, XRayResult};
 
 /// FMesh in c++ codebase.
 ///

@@ -1,5 +1,6 @@
-use crate::data::ogf::ogf_vertex::OgfVertex;
 use serde::{Deserialize, Serialize};
+
+use crate::data::ogf::ogf_vertex::OgfVertex;
 
 /// Contents of an OGF vertex chunk: the stored format tag, the vertex count it declares, and the
 /// decoded vertices when the layout of that format is known.

@@ -1,7 +1,8 @@
-use fileslice::FileSlice;
 use std::fs::{File, OpenOptions};
 use std::io::{Error as IoError, Result as IoResult};
 use std::path::{Path, PathBuf};
+
+use fileslice::FileSlice;
 
 /// Get absolute path to provided test resource.
 pub fn get_absolute_test_resource_path(resource_path: &str) -> PathBuf {

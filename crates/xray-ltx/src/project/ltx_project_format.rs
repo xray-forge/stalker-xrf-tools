@@ -1,7 +1,8 @@
+use xray_error::XRayResult;
+
 use crate::project::ltx_files_formatter::LtxFilesFormatter;
 use crate::project::ltx_project_format_result::LtxProjectFormatResult;
 use crate::{LtxFormatOptions, LtxProject};
-use xray_error::XRayResult;
 
 impl LtxProject {
   /// Format all LTX entries in current project.

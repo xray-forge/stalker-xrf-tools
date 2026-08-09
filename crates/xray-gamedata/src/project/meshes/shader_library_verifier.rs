@@ -1,8 +1,10 @@
+use std::path::PathBuf;
+
+use xray_db::ShaderLibraryFile;
+
 use crate::GamedataFindingFactory;
 use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
 use crate::{GamedataProject, GamedataVerificationRule};
-use std::path::PathBuf;
-use xray_db::ShaderLibraryFile;
 
 pub(crate) struct ShaderLibraryVerifier<'a> {
   project: &'a GamedataProject,

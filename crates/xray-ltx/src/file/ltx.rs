@@ -1,12 +1,14 @@
+use std::ops::{Index, IndexMut};
+use std::path::PathBuf;
+
+use xray_error::XRayResult;
+
 use crate::file::file_section::section_entry::SectionEntry;
 use crate::file::file_section::section_setter::SectionSetter;
 use crate::file::include::LtxIncludeConvertor;
 use crate::file::inherit::LtxInheritConvertor;
 use crate::file::types::{LtxIncluded, LtxSections};
 use crate::{LtxCheck, ROOT_SECTION, Section};
-use std::ops::{Index, IndexMut};
-use std::path::PathBuf;
-use xray_error::XRayResult;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Ltx {
@@ -218,9 +220,10 @@ impl<'q> IndexMut<&'q str> for Ltx {
 
 #[cfg(test)]
 mod test {
+  use xray_error::{XRayError, XRayResult};
+
   use crate::file::ltx::Ltx;
   use crate::{ROOT_SECTION, Section};
-  use xray_error::{XRayError, XRayResult};
 
   #[test]
   fn load_from_str_with_empty_general_section() {

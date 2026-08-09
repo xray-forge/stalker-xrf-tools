@@ -1,8 +1,9 @@
 #![allow(dead_code)]
-use crate::data::meta::map::SECTION_TO_CLS_ID;
 use enum_map::Enum;
 use serde::{Deserialize, Serialize};
 use xray_error::{XRayError, XRayResult};
+
+use crate::data::meta::map::SECTION_TO_CLS_ID;
 
 /// todo: Add script to parse system ltx and read all the data from ltx/txt file instead.
 #[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize, Eq)]
@@ -118,8 +119,9 @@ impl ClsId {
 
 #[cfg(test)]
 mod tests {
-  use super::ClsId;
   use xray_error::XRayError;
+
+  use super::ClsId;
 
   #[test]
   fn maps_known_section_to_clsid() {

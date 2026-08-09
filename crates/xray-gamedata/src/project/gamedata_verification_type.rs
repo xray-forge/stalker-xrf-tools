@@ -1,10 +1,12 @@
+use std::str::FromStr;
+
+use derive_more::Display;
+use xray_error::XRayError;
+
 use crate::{
   GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions,
   GamedataVerificationCheckReport,
 };
-use derive_more::Display;
-use std::str::FromStr;
-use xray_error::XRayError;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Display)]
 pub enum GamedataVerificationType {

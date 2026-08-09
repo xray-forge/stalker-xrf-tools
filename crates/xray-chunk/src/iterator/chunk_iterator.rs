@@ -1,9 +1,11 @@
-use crate::reader::chunk_reader::ChunkReader;
-use crate::{ChunkDataSource, XRayByteOrder};
+use std::io::SeekFrom;
+
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
-use std::io::SeekFrom;
 use xray_error::{XRayError, XRayResult};
+
+use crate::reader::chunk_reader::ChunkReader;
+use crate::{ChunkDataSource, XRayByteOrder};
 
 /// Iterate over samples in provided file slice.
 /// Mutates parent object to keep track of what was read during execution.
@@ -110,9 +112,11 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
 
 #[cfg(test)]
 mod tests {
-  use crate::{ChunkDataSource, ChunkReader, InMemoryChunkDataSource};
   use std::io::SeekFrom;
+
   use xray_error::XRayResult;
+
+  use crate::{ChunkDataSource, ChunkReader, InMemoryChunkDataSource};
 
   #[test]
   fn rejects_incomplete_chunk_header() -> XRayResult {

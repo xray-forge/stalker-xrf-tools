@@ -1,8 +1,10 @@
-use crate::archives_editor::state::ArchivesEditorState;
-use crate::types::TauriResult;
 use std::sync::MutexGuard;
+
 use tauri::State;
 use xray_archive::ArchiveProject;
+
+use crate::archives_editor::state::ArchivesEditorState;
+use crate::types::TauriResult;
 
 #[tauri::command]
 pub fn close_archives_project(state: State<'_, ArchivesEditorState>) -> TauriResult {

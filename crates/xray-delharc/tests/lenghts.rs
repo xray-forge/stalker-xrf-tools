@@ -1,5 +1,6 @@
-use delharc::{decode::DecoderAny, *};
 use std::{fs, io};
+
+use delharc::{decode::DecoderAny, *};
 
 mod sink;
 use sink::SinkSum;

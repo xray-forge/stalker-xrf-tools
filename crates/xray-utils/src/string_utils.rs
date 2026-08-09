@@ -1,4 +1,5 @@
 use std::str::FromStr;
+
 use xray_error::{XRayError, XRayResult};
 
 /// Stringify provided vector as comma-separated values.
@@ -73,11 +74,12 @@ pub fn vector_from_string_sep_sized<T: FromStr>(
 
 #[cfg(test)]
 mod tests {
+  use xray_error::XRayResult;
+
   use crate::{
     vector_from_string, vector_from_string_sep, vector_from_string_sep_sized,
     vector_from_string_sized, vector_to_string, vector_to_string_sep,
   };
-  use xray_error::XRayResult;
 
   #[test]
   fn test_vector_to_string() -> XRayResult {

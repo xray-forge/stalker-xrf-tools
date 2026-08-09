@@ -1,10 +1,11 @@
-use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
-use crate::export::LtxImportExport;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
+
+use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
+use crate::export::LtxImportExport;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -46,14 +47,10 @@ impl LtxImportExport for AlifeObjectItemHelmet {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
-  use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
-  use crate::data::alife::inherited::alife_object_item_helmet::AlifeObjectItemHelmet;
-  use crate::export::LtxImportExport;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+
+  use serde_json::to_string_pretty;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
@@ -63,6 +60,12 @@ mod tests {
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::inherited::alife_object_dynamic_visual::AlifeObjectDynamicVisual;
+  use crate::data::alife::inherited::alife_object_item::AlifeObjectItem;
+  use crate::data::alife::inherited::alife_object_item_helmet::AlifeObjectItemHelmet;
+  use crate::export::LtxImportExport;
 
   #[test]
   fn test_read_write() -> XRayResult {

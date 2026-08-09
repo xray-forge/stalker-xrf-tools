@@ -1,11 +1,13 @@
-use crate::level::level_header_chunk::LevelHeaderChunk;
-use crate::level::level_shaders_chunk::LevelShadersChunk;
-use byteorder::ByteOrder;
-use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
+
+use byteorder::ByteOrder;
+use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReader, find_optional_chunk_by_id, find_required_chunk_by_id};
 use xray_error::{XRayError, XRayResult};
+
+use crate::level::level_header_chunk::LevelHeaderChunk;
+use crate::level::level_shaders_chunk::LevelShadersChunk;
 
 /// Descriptor of the compiled `level` file used by xray game engine.
 ///

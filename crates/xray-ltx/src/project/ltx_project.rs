@@ -1,3 +1,8 @@
+use std::path::{Path, PathBuf};
+
+use walkdir::{DirEntry, WalkDir};
+use xray_error::{XRayError, XRayResult};
+
 use crate::Ltx;
 use crate::file::file_configuration::constants::{
   LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME,
@@ -6,9 +11,6 @@ use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::project::ltx_project_options::LtxProjectOptions;
 use crate::scheme::parser::LtxSchemeParser;
-use std::path::{Path, PathBuf};
-use walkdir::{DirEntry, WalkDir};
-use xray_error::{XRayError, XRayResult};
 
 /// Handler of LTX configs root.
 /// Iteration and filtering of de-duplicated ltx files.
@@ -164,10 +166,12 @@ impl LtxProject {
 
 #[cfg(test)]
 mod tests {
-  use super::LtxProject;
   use std::fs;
   use std::path::PathBuf;
+
   use xray_error::XRayResult;
+
+  use super::LtxProject;
 
   #[test]
   fn does_not_treat_wildcard_included_files_as_entries() -> XRayResult {

@@ -1,7 +1,8 @@
-use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+
+use serde::Deserialize;
 use xray_error::{XRayError, XRayResult};
 
 /// Resolves TypeScript modules using one project's compiler configuration.

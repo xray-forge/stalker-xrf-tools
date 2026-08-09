@@ -1,8 +1,9 @@
-use crate::level::level_shader_entry::{LevelShaderEntry, LevelShaderReference};
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::level::level_shader_entry::{LevelShaderEntry, LevelShaderReference};
 
 /// `fsL_SHADERS` chunk of the `level` file, listing every shader and texture set the level geometry
 /// references.
@@ -61,8 +62,6 @@ impl ChunkReadWrite for LevelShadersChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::level::level_shader_entry::{LevelShaderEntry, LevelShaderReference};
-  use crate::level::level_shaders_chunk::LevelShadersChunk;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -70,6 +69,9 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::level::level_shader_entry::{LevelShaderEntry, LevelShaderReference};
+  use crate::level::level_shaders_chunk::LevelShadersChunk;
 
   #[test]
   fn splits_entries_by_resolvability() {

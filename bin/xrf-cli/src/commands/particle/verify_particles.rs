@@ -1,8 +1,10 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_db::{ParticlesFile, XRayByteOrder};
 use xray_error::XRayError;
+
+use crate::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
 pub struct VerifyParticlesFileCommand;

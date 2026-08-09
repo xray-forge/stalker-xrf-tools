@@ -1,10 +1,11 @@
-use crate::data::particles::particle_action::ParticleAction;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::{Display, FromStr};
 use enum_map::Enum;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::data::particles::particle_action::ParticleAction;
 
 #[derive(Copy, Clone, Debug, Enum, PartialEq, FromStr, Display, Serialize, Deserialize)]
 pub enum ParticleActionType {
@@ -169,8 +170,9 @@ where
 
 #[cfg(test)]
 mod tests {
-  use crate::data::particles::particle_action_type::ParticleActionType;
   use std::str::FromStr;
+
+  use crate::data::particles::particle_action_type::ParticleActionType;
 
   #[test]
   fn test_from_str() {

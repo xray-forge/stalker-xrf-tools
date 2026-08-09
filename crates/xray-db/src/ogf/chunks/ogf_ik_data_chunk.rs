@@ -1,8 +1,9 @@
-use crate::data::ogf::ogf_bone_ik_data::OgfBoneIkData;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::data::ogf::ogf_bone_ik_data::OgfBoneIkData;
 
 /// Per bone physics and bind pose data, `OGF_S_IKDATA`.
 ///
@@ -40,6 +41,16 @@ impl OgfIkDataChunk {
 
 #[cfg(test)]
 mod tests {
+  use std::io::Write;
+
+  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
+  use xray_error::XRayResult;
+  use xray_test_utils::FileSlice;
+  use xray_test_utils::utils::{
+    get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
+  };
+
   use super::OgfIkDataChunk;
   use crate::data::generic::vector_3d::Vector3d;
   use crate::data::ogf::ogf_bone_ik_data::OgfBoneIkData;
@@ -49,14 +60,6 @@ mod tests {
   use crate::data::ogf::ogf_joint_limit::OgfJointLimit;
   use crate::data::ogf::ogf_obb::OgfObb;
   use crate::data::ogf::ogf_sphere::OgfSphere;
-  use std::io::Write;
-  use xray_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
-  use xray_error::XRayResult;
-  use xray_test_utils::FileSlice;
-  use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
-  };
 
   fn vector(base: f32) -> Vector3d {
     Vector3d::new(base, base + 1.0, base + 2.0)

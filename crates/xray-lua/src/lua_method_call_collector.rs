@@ -1,7 +1,8 @@
-use crate::XRayLuaMethodCall;
 use full_moon::ast::{Ast, Call, Expression, FunctionArgs, FunctionCall, Prefix, Suffix};
 use full_moon::tokenizer::TokenType;
 use full_moon::visitors::Visitor;
+
+use crate::XRayLuaMethodCall;
 
 pub struct LuaMethodCallCollector {
   method_calls: Vec<XRayLuaMethodCall>,

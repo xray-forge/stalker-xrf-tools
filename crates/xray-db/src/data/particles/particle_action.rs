@@ -1,3 +1,13 @@
+use std::ops::Deref;
+use std::str::FromStr;
+
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
+use xray_ltx::{Ltx, Section};
+use xray_utils::{assert_equal, assert_length};
+
 use crate::constants::META_TYPE_FIELD;
 use crate::data::particles::actions::particle_action_avoid::ParticleActionAvoid;
 use crate::data::particles::actions::particle_action_bounce::ParticleActionBounce;
@@ -31,14 +41,6 @@ use crate::data::particles::actions::particle_action_vortex::ParticleActionVorte
 use crate::data::particles::particle_action_type::ParticleActionType;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use serde::{Deserialize, Serialize};
-use std::ops::Deref;
-use std::str::FromStr;
-use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xray_error::{XRayError, XRayResult};
-use xray_ltx::{Ltx, Section};
-use xray_utils::{assert_equal, assert_length};
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -375,11 +377,6 @@ impl LtxImportExport for ParticleAction {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::particles::actions::particle_action_target_rotate::ParticleActionTargetRotate;
-  use crate::data::particles::actions::particle_action_target_velocity::ParticleActionTargetVelocity;
-  use crate::data::particles::particle_action::ParticleAction;
-  use crate::data::particles::particle_action_type::ParticleActionType;
   use byteorder::ReadBytesExt;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
@@ -388,6 +385,12 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::data::particles::actions::particle_action_target_rotate::ParticleActionTargetRotate;
+  use crate::data::particles::actions::particle_action_target_velocity::ParticleActionTargetVelocity;
+  use crate::data::particles::particle_action::ParticleAction;
+  use crate::data::particles::particle_action_type::ParticleActionType;
 
   #[test]
   fn test_read_write_derivative_action_types() -> XRayResult {

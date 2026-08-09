@@ -1,12 +1,14 @@
+use std::fs::File;
+use std::io::{Read, Seek, SeekFrom};
+use std::path::PathBuf;
+
+use xray_error::{XRayError, XRayResult};
+
 use crate::ArchiveProject;
 use crate::project::archive_project_constants::{
   ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
 };
 use crate::project::archive_project_read_result::ProjectReadResult;
-use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
-use std::path::PathBuf;
-use xray_error::{XRayError, XRayResult};
 
 impl ArchiveProject {
   /// Read single file from project as string.

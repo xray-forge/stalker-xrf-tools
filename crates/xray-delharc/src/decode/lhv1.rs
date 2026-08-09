@@ -1,11 +1,12 @@
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+use core::num::NonZeroU16;
+
 use crate::bitstream::*;
 use crate::decode::Decoder;
 use crate::error::LhaResult;
 use crate::ringbuf::*;
 use crate::stub_io::Read;
-#[cfg(not(feature = "std"))]
-use alloc::boxed::Box;
-use core::num::NonZeroU16;
 
 mod dyntree;
 use dyntree::*;
@@ -127,9 +128,10 @@ fn decode_offset(bits9: u16) -> (u16, u32) {
 #[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
-  use super::*;
   use std::fs;
   use std::io;
+
+  use super::*;
 
   #[test]
   fn lhav1_works() {

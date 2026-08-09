@@ -1,13 +1,14 @@
-use crate::project::translation_project::TranslationProject;
 use std::fs;
 use std::fs::File;
 use std::io::ErrorKind::AlreadyExists;
+use std::path::{Path, PathBuf};
 
+use serde_json::{Map, Value};
+use xray_error::XRayResult;
+
+use crate::project::translation_project::TranslationProject;
 use crate::types::{TranslationJson, TranslationVariant};
 use crate::{ProjectBuildOptions, TranslationLanguage};
-use serde_json::{Map, Value};
-use std::path::{Path, PathBuf};
-use xray_error::XRayResult;
 
 impl TranslationProject {
   pub fn prepare_target_xml_translation_file<P1: AsRef<Path>, P2: AsRef<Path>>(

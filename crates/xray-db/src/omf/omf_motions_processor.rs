@@ -1,7 +1,9 @@
-use crate::omf::omf_file::OmfFile;
 use std::collections::{HashMap, HashSet};
+
 use xray_error::{XRayError, XRayResult};
 use xray_utils::assert_equal;
+
+use crate::omf::omf_file::OmfFile;
 
 /// Editing operations over the motion set of an omf file.
 pub struct OmfMotionsProcessor {}
@@ -110,6 +112,10 @@ impl OmfMotionsProcessor {
 
 #[cfg(test)]
 mod tests {
+  use std::collections::HashMap;
+
+  use xray_error::XRayResult;
+
   use crate::data::ogf::ogf_motion::OgfMotion;
   use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
   use crate::data::ogf::ogf_part::OgfPart;
@@ -117,8 +123,6 @@ mod tests {
   use crate::omf::chunks::omf_parameters_chunk::OmfParametersChunk;
   use crate::omf::omf_file::OmfFile;
   use crate::omf::omf_motions_processor::OmfMotionsProcessor;
-  use std::collections::HashMap;
-  use xray_error::XRayResult;
 
   /// Build a file whose motions are named after the provided list.
   fn new_named_mock(names: &[&str]) -> OmfFile {

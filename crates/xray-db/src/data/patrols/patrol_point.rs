@@ -1,13 +1,15 @@
-use crate::data::generic::vector_3d::Vector3d;
-use crate::export::LtxImportExport;
-use crate::file_import::read_ltx_field;
+use std::io::Write;
+
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::io::Write;
 use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::assert_equal;
+
+use crate::data::generic::vector_3d::Vector3d;
+use crate::export::LtxImportExport;
+use crate::file_import::read_ltx_field;
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -140,13 +142,11 @@ impl LtxImportExport for PatrolPoint {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::patrols::patrol_point::PatrolPoint;
-  use crate::export::LtxImportExport;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+
+  use serde_json::to_string_pretty;
   use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
@@ -156,6 +156,10 @@ mod tests {
     get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::data::patrols::patrol_point::PatrolPoint;
+  use crate::export::LtxImportExport;
 
   #[test]
   fn test_read_write_list() -> XRayResult {

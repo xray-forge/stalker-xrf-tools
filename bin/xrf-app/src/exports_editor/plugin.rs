@@ -1,6 +1,7 @@
-use crate::exports_editor::state::ExportsEditorState;
 use tauri::plugin::TauriPlugin;
 use tauri::{Manager, Runtime};
+
+use crate::exports_editor::state::ExportsEditorState;
 
 pub struct ExportsEditorPlugin {}
 

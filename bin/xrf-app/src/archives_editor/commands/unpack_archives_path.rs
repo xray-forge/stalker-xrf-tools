@@ -1,8 +1,10 @@
+use std::path::Path;
+
+use serde_json::{Value, json};
+use xray_archive::ArchiveProject;
+
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
-use serde_json::{Value, json};
-use std::path::Path;
-use xray_archive::ArchiveProject;
 
 #[tauri::command]
 pub async fn unpack_archives_path(from: &str, destination: &str) -> TauriResult<Value> {

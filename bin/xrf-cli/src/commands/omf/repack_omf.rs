@@ -1,13 +1,15 @@
-use crate::commands::omf::repack_omf_statistics::{RepackOmfOutcome, RepackOmfStatistics};
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::{Path, PathBuf};
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use walkdir::WalkDir;
 use xray_db::{OmfFile, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_output::OutputOptions;
+
+use crate::commands::omf::repack_omf_statistics::{RepackOmfOutcome, RepackOmfStatistics};
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct RepackOmfCommand;

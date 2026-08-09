@@ -1,10 +1,12 @@
-use crate::constants::NIL;
+use std::str::FromStr;
+
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 use xray_chunk::{ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+
+use crate::constants::NIL;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "camelCase")]
@@ -152,11 +154,11 @@ impl Time {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::time::Time;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::str::FromStr;
+
+  use serde_json::to_string_pretty;
   use xray_chunk::{
     ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter, XRayByteOrder,
   };
@@ -167,6 +169,8 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::time::Time;
 
   #[test]
   fn test_read_write() -> XRayResult {

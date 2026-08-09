@@ -1,4 +1,5 @@
 use std::path::Path;
+
 use xray_error::{XRayError, XRayResult};
 
 /// Converts a root-relative physical path into the canonical X-Ray logical path used for indexing.

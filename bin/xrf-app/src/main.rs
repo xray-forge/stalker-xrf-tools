@@ -10,15 +10,17 @@ mod translations_editor;
 mod types;
 mod utils;
 
+use std::env;
+
+use env_logger::Builder;
+use log::LevelFilter;
+
 use crate::archives_editor::plugin::ArchivesEditorPlugin;
 use crate::configs_editor::plugin::ConfigsEditorPlugin;
 use crate::exports_editor::plugin::ExportsEditorPlugin;
 use crate::icons_editor::plugin::IconsEditorPlugin;
 use crate::spawns_editor::plugin::SpawnsEditorPlugin;
 use crate::translations_editor::plugin::TranslationsEditorPlugin;
-use env_logger::Builder;
-use log::LevelFilter;
-use std::env;
 
 fn main() {
   setup_logger();

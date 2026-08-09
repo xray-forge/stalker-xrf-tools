@@ -1,12 +1,14 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
 use xray_error::{XRayError, XRayResult};
 use xray_output::OutputOptions;
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct RenameOmfMotionsCommand;

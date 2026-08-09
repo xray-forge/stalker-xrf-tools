@@ -1,6 +1,7 @@
-use crate::archives_editor::state::ArchivesEditorState;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{Manager, Runtime};
+
+use crate::archives_editor::state::ArchivesEditorState;
 
 pub struct ArchivesEditorPlugin {}
 

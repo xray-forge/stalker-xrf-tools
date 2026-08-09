@@ -1,5 +1,6 @@
-use serde::Serialize;
 use std::fmt::{Display, Formatter};
+
+use serde::Serialize;
 
 /// The outcome of a completed check.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize)]

@@ -1,7 +1,8 @@
+use std::time::Duration;
+
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
 use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
 use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
-use std::time::Duration;
 
 pub struct GamedataMeshesVerificationResult {
   pub(crate) duration: Duration,
@@ -53,6 +54,8 @@ impl GamedataCheckResult for GamedataMeshesVerificationResult {
 
 #[cfg(test)]
 mod tests {
+  use std::time::Duration;
+
   use super::GamedataMeshesVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
@@ -61,7 +64,6 @@ mod tests {
     Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
     GamedataVerificationType,
   };
-  use std::time::Duration;
 
   #[test]
   fn exposes_mesh_findings_in_reports() {

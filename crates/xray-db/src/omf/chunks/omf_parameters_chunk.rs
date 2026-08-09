@@ -1,10 +1,11 @@
-use crate::OmfFile;
-use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
-use crate::data::ogf::ogf_part::OgfPart;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+
+use crate::OmfFile;
+use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
+use crate::data::ogf::ogf_part::OgfPart;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OmfParametersChunk {

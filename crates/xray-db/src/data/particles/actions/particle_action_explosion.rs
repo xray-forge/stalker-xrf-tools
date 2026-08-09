@@ -1,12 +1,13 @@
-use crate::data::generic::vector_3d::Vector3d;
-use crate::data::particles::particle_action_type::ParticleActionType;
-use crate::export::LtxImportExport;
-use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+
+use crate::data::generic::vector_3d::Vector3d;
+use crate::data::particles::particle_action_type::ParticleActionType;
+use crate::export::LtxImportExport;
+use crate::file_import::read_ltx_field;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -89,13 +90,10 @@ impl LtxImportExport for ParticleActionExplosion {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::data::particles::actions::particle_action_explosion::ParticleActionExplosion;
-  use crate::data::particles::particle_action_type::ParticleActionType;
-  use crate::export::LtxImportExport;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
+
+  use serde_json::to_string_pretty;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_ltx::Ltx;
@@ -105,6 +103,11 @@ mod tests {
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::data::particles::actions::particle_action_explosion::ParticleActionExplosion;
+  use crate::data::particles::particle_action_type::ParticleActionType;
+  use crate::export::LtxImportExport;
 
   #[test]
   fn test_read_write() -> XRayResult {

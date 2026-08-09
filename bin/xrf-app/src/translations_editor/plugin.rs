@@ -1,6 +1,7 @@
-use crate::translations_editor::state::TranslationsEditorState;
 use tauri::plugin::TauriPlugin;
 use tauri::{Manager, Runtime};
+
+use crate::translations_editor::state::TranslationsEditorState;
 
 pub struct TranslationsEditorPlugin {}
 

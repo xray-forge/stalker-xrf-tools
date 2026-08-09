@@ -1,7 +1,9 @@
-use crate::extern_manifest::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
 use std::collections::BTreeMap;
 use std::str::FromStr;
+
 use xray_error::{XRayError, XRayResult};
+
+use crate::extern_manifest::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
 
 /// Output contract selected by `xrf-cli export-externs`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -310,9 +312,10 @@ fn escape_html(value: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+  use std::collections::BTreeMap;
+
   use super::{ExternFormat, LineEndings, render_extern_manifest};
   use crate::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
-  use std::collections::BTreeMap;
 
   #[test]
   fn renders_stable_json_with_crlf_by_default() {

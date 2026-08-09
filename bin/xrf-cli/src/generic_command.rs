@@ -1,5 +1,6 @@
-use clap::{ArgMatches, Command};
 use std::error::Error;
+
+use clap::{ArgMatches, Command};
 
 pub type CommandResult<T = ()> = Result<T, Box<dyn Error>>;
 

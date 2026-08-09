@@ -1,11 +1,12 @@
 //! # **LHA** header and related types.
 #[cfg(not(feature = "std"))]
 use alloc::{borrow::Cow, boxed::Box, string::String};
-use chrono::{LocalResult, prelude::*};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 #[cfg(feature = "std")]
 use std::path::PathBuf;
+
+use chrono::{LocalResult, prelude::*};
 
 mod compression;
 mod msdos;
@@ -13,11 +14,10 @@ mod ostype;
 mod parser;
 mod timestamp;
 
-use parser::ext::*;
-
 pub use compression::*;
 pub use msdos::*;
 pub use ostype::*;
+use parser::ext::*;
 pub use parser::*;
 pub use timestamp::*;
 

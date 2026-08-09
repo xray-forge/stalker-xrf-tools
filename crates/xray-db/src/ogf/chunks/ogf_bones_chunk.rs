@@ -1,9 +1,10 @@
-use crate::data::ogf::ogf_bone::OgfBone;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_utils::assert_length;
+
+use crate::data::ogf::ogf_bone::OgfBone;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfBonesChunk {

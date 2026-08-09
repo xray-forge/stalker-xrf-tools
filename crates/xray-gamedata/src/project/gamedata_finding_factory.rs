@@ -1,7 +1,9 @@
-use crate::{Finding, GamedataVerificationRule};
 use std::cmp::Ordering;
 use std::path::Path;
+
 use xray_report::RuleId;
+
+use crate::{Finding, GamedataVerificationRule};
 
 /// Constructs shared report findings from gamedata verification inputs.
 pub(crate) struct GamedataFindingFactory;

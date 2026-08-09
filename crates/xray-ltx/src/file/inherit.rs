@@ -1,7 +1,8 @@
+use xray_error::{XRayError, XRayResult};
+
 use crate::file::file_section::section::Section;
 use crate::file::types::LtxSections;
 use crate::{Ltx, LtxCheck};
-use xray_error::{XRayError, XRayResult};
 
 /// Converter object to process and inject all inherit section statements.
 #[derive(Default)]
@@ -108,9 +109,10 @@ impl LtxInheritConvertor {
 
 #[cfg(test)]
 mod test {
+  use xray_error::XRayResult;
+
   use crate::Section;
   use crate::file::ltx::Ltx;
-  use xray_error::XRayResult;
 
   #[test]
   fn test_inheritance_chain() {

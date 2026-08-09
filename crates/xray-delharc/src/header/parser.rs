@@ -1,12 +1,13 @@
-use super::*;
-use crate::crc::Crc16;
-use crate::error::{LhaError, LhaResult};
-use crate::stub_io::Read;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::fmt::Write;
 use core::num::Wrapping;
 use core::slice;
+
+use super::*;
+use crate::crc::Crc16;
+use crate::error::{LhaError, LhaResult};
+use crate::stub_io::Read;
 
 /// Raw identifiers of extra headers.
 pub mod ext {
@@ -512,8 +513,9 @@ unsafe fn struct_slice_mut<T: Copy>(obj: &mut T) -> &mut [u8] {
 #[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
-  use super::*;
   use std::path::MAIN_SEPARATOR;
+
+  use super::*;
 
   fn parse_filename(data: &[u8]) -> Cow<'_, str> {
     parse_str_nilterm(data, false, false)

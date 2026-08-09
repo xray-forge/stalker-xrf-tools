@@ -35,7 +35,6 @@ impl ChunkReadWrite for LevelHeaderChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::level::level_header_chunk::LevelHeaderChunk;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -43,6 +42,8 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::level::level_header_chunk::LevelHeaderChunk;
 
   #[test]
   fn test_read_write() -> XRayResult {

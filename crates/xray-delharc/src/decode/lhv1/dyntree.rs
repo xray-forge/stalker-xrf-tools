@@ -1,10 +1,11 @@
 //! # Dynamic Huffman Coding.
-use crate::bitstream::BitRead;
-use crate::error::LhaError;
-use crate::statictree::entry::*;
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
 use core::fmt;
+
+use crate::bitstream::BitRead;
+use crate::error::LhaError;
+use crate::statictree::entry::*;
 
 #[derive(Clone)]
 pub struct DynHuffTree {
@@ -516,11 +517,13 @@ impl fmt::Display for DynHuffTree {
 #[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use crate::bitstream::BitStream;
+  use std::collections::{HashMap, HashSet};
+
   use rand::distributions::{Uniform, WeightedIndex};
   use rand::{Rng, RngCore, thread_rng};
-  use std::collections::{HashMap, HashSet};
+
+  use super::*;
+  use crate::bitstream::BitStream;
 
   fn validate_tree(tree: &DynHuffTree) {
     let mut leaves: HashMap<u16, usize> = HashMap::with_capacity(NUM_LEAVES);

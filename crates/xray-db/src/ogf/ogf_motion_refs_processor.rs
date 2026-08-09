@@ -1,14 +1,16 @@
-use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
-use crate::ogf::ogf_file::OgfFile;
-use crate::ogf::ogf_refs_patch_report::OgfRefsPatchReport;
-use byteorder::ByteOrder;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+
+use byteorder::ByteOrder;
 use xray_chunk::{ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::open_export_file;
+
+use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
+use crate::ogf::ogf_file::OgfFile;
+use crate::ogf::ogf_refs_patch_report::OgfRefsPatchReport;
 
 /// Editing operations over the motion refs of an ogf file.
 pub struct OgfMotionRefsProcessor {}
@@ -171,19 +173,21 @@ impl OgfMotionRefsProcessor {
 
 #[cfg(test)]
 mod tests {
-  use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
-  use crate::ogf::ogf_file::OgfFile;
-  use crate::ogf::ogf_motion_refs_processor::OgfMotionRefsProcessor;
   use std::fs;
   use std::fs::File;
   use std::io::Write;
   use std::path::PathBuf;
+
   use xray_chunk::{ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
     get_absolute_test_resource_path, get_relative_test_sample_file_path,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
+  use crate::ogf::ogf_file::OgfFile;
+  use crate::ogf::ogf_motion_refs_processor::OgfMotionRefsProcessor;
 
   /// Payload standing in for a chunk the writer must copy verbatim, such as geometry.
   const OPAQUE_PAYLOAD: [u8; 12] = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 255, 128];

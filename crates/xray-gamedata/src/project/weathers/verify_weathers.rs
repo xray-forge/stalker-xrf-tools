@@ -1,14 +1,16 @@
 //! Discovery and aggregate reporting for assembled weather cycles.
 
+use std::collections::BTreeSet;
+use std::path::{Path, PathBuf};
+use std::time::Instant;
+
+use xray_error::{XRayError, XRayResult};
+
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_findings_with_definitions;
 use crate::GamedataFindingFactory;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
-use std::time::Instant;
-use xray_error::{XRayError, XRayResult};
 
 impl GamedataProject {
   /// Verifies every assembled weather cycle under `configs/environment/weathers`.

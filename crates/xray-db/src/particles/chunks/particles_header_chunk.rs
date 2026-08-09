@@ -1,13 +1,15 @@
-use crate::constants::META_TYPE_FIELD;
-use crate::export::FileImportExport;
-use crate::file_import::read_ltx_field;
+use std::path::Path;
+
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 use xray_utils::{assert_equal, open_export_file};
+
+use crate::constants::META_TYPE_FIELD;
+use crate::export::FileImportExport;
+use crate::file_import::read_ltx_field;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -97,12 +99,11 @@ impl FileImportExport for ParticlesHeaderChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::export::FileImportExport;
-  use crate::particles::chunks::particles_header_chunk::ParticlesHeaderChunk;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+
+  use serde_json::to_string_pretty;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -112,6 +113,9 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::export::FileImportExport;
+  use crate::particles::chunks::particles_header_chunk::ParticlesHeaderChunk;
 
   #[test]
   fn test_read_write_incorrect() -> XRayResult {

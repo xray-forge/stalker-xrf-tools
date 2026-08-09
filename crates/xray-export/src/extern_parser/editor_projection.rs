@@ -1,7 +1,9 @@
+use std::path::Path;
+
+use xray_error::XRayResult;
+
 use super::ExternManifestParser;
 use crate::extern_manifest::{ExternCallable, ExternExport, ExternParameter, ParsedExtern};
-use std::path::Path;
-use xray_error::XRayResult;
 
 /// Compatibility projection used by the desktop exports editor.
 #[derive(Clone, Debug, serde::Serialize)]

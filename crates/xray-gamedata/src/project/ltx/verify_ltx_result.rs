@@ -1,6 +1,8 @@
-use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use std::time::Duration;
+
 use xray_ltx::{LtxProjectFormatResult, LtxProjectVerifyResult};
+
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 
 #[derive(Default)]
 pub struct GamedataLtxVerificationResult {
@@ -38,13 +40,14 @@ impl GamedataCheckResult for GamedataLtxVerificationResult {
 
 #[cfg(test)]
 mod tests {
+  use xray_ltx::LtxProjectVerifyResult;
+
   use super::GamedataLtxVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::{
     Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
     GamedataVerificationType,
   };
-  use xray_ltx::LtxProjectVerifyResult;
 
   #[test]
   fn exposes_ltx_findings_in_reports() {

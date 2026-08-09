@@ -1,5 +1,6 @@
-use chrono::{LocalResult, prelude::*};
 use core::fmt;
+
+use chrono::{LocalResult, prelude::*};
 
 /// The type returned when parsing last modified timestamp.
 #[derive(Debug, Clone, PartialEq, Eq)]

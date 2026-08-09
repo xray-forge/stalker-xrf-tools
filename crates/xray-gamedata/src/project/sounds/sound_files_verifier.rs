@@ -1,10 +1,12 @@
+use std::path::Path;
+
+use rayon::prelude::*;
+use xray_error::{XRayError, XRayResult};
+use xray_sound::SoundFile;
+
 use crate::GamedataFindingFactory;
 use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use rayon::prelude::*;
-use std::path::Path;
-use xray_error::{XRayError, XRayResult};
-use xray_sound::SoundFile;
 
 pub(crate) struct SoundFilesVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,

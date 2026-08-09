@@ -1,15 +1,17 @@
-use crate::ogf::chunks::ogf_children_chunk::OgfChildrenChunk;
-use crate::ogf::chunks::ogf_texture_chunk::OgfTextureChunk;
-use crate::ogf::ogf_file::OgfFile;
-use crate::ogf::ogf_refs_patch_report::OgfRefsPatchReport;
-use byteorder::ByteOrder;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+
+use byteorder::ByteOrder;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::open_export_file;
+
+use crate::ogf::chunks::ogf_children_chunk::OgfChildrenChunk;
+use crate::ogf::chunks::ogf_texture_chunk::OgfTextureChunk;
+use crate::ogf::ogf_file::OgfFile;
+use crate::ogf::ogf_refs_patch_report::OgfRefsPatchReport;
 
 /// Editing operations over the texture refs of an ogf file.
 pub struct OgfTextureRefsProcessor {}

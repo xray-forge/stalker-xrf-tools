@@ -1,5 +1,6 @@
-use crate::project::weapons::weapon_sound_value::WeaponSoundValue;
 use xray_ltx::{Ltx, Section};
+
+use crate::project::weapons::weapon_sound_value::WeaponSoundValue;
 
 #[derive(Debug)]
 pub(crate) enum WeaponSoundSource<'value, 'section> {
@@ -28,9 +29,10 @@ impl<'value, 'section> WeaponSoundSource<'value, 'section> {
 
 #[cfg(test)]
 mod tests {
+  use xray_ltx::Ltx;
+
   use super::WeaponSoundSource;
   use crate::project::weapons::weapon_sound_value::WeaponSoundValue;
-  use xray_ltx::Ltx;
 
   #[test]
   fn classifies_an_ltx_section_as_a_layered_weapon_sound() {

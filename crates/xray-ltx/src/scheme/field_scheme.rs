@@ -1,8 +1,10 @@
+use std::cmp;
+
+use xray_error::XRayError;
+
 use crate::Ltx;
 use crate::condlist::Condlist;
 use crate::scheme::field_data_type::LtxFieldDataType;
-use std::cmp;
-use xray_error::XRayError;
 
 /// Scheme definition for single field in LTX file section.
 #[derive(Clone, Debug)]

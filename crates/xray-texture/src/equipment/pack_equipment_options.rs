@@ -1,5 +1,6 @@
-use image_dds::ImageFormat;
 use std::path::PathBuf;
+
+use image_dds::ImageFormat;
 use xray_ltx::Ltx;
 
 pub struct PackEquipmentOptions {

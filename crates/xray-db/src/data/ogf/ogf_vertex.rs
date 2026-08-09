@@ -1,6 +1,7 @@
-use crate::data::generic::vector_3d::Vector3d;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
+
+use crate::data::generic::vector_3d::Vector3d;
 
 /// One bone a vertex is skinned to, and how strongly.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -101,8 +102,9 @@ impl OgfVertex {
 
 #[cfg(test)]
 mod tests {
-  use super::OgfVertex;
   use xray_chunk::XRayByteOrder;
+
+  use super::OgfVertex;
 
   /// Geometry block shared by every format: position, normal, tangent, binormal, then a uv pair.
   fn geometry_bytes() -> Vec<u8> {

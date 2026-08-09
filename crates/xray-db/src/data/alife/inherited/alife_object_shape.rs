@@ -1,11 +1,12 @@
-use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
-use crate::data::generic::shape::Shape;
-use crate::export::LtxImportExport;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+
+use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
+use crate::data::generic::shape::Shape;
+use crate::export::LtxImportExport;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -61,10 +62,6 @@ impl LtxImportExport for AlifeObjectShape {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::inherited::alife_object_shape::AlifeObjectShape;
-  use crate::data::generic::shape::Shape;
-  use crate::data::generic::vector_3d::Vector3d;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -72,6 +69,11 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::inherited::alife_object_shape::AlifeObjectShape;
+  use crate::data::generic::shape::Shape;
+  use crate::data::generic::vector_3d::Vector3d;
 
   #[test]
   fn test_read_write() -> XRayResult {

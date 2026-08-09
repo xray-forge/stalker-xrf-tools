@@ -133,16 +133,16 @@ pub(crate) mod ringbuf;
 pub(crate) mod statictree;
 pub mod stub_io;
 
+#[cfg(feature = "std")]
+use std::fs::File;
+#[cfg(feature = "std")]
+use std::path::Path;
+
 pub use decode::LhaDecodeReader;
 pub use error::{LhaError, LhaResult};
 pub use header::{CompressionMethod, LhaHeader, MsDosAttrs, OsType, TimestampResult};
 #[cfg(not(feature = "std"))]
 pub use stub_io::{Read, Take, UnexpectedEofError};
-
-#[cfg(feature = "std")]
-use std::fs::File;
-#[cfg(feature = "std")]
-use std::path::Path;
 
 #[cfg(feature = "std")]
 /// Attempt to open a file from a filesystem in read-only mode and on success return an instance of

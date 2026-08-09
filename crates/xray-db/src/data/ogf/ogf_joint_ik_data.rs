@@ -1,8 +1,9 @@
-use crate::data::ogf::ogf_joint_limit::OgfJointLimit;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::data::ogf::ogf_joint_limit::OgfJointLimit;
 
 /// Inverse kinematics settings of one bone, `SJointIKData` in the engine.
 ///

@@ -1,5 +1,6 @@
-use crate::{DirectoryAsset, XrayAssetType};
 use std::path::{Path, PathBuf};
+
+use crate::{DirectoryAsset, XrayAssetType};
 
 #[derive(Debug, Clone, Copy)]
 pub struct XrayAsset<'a> {

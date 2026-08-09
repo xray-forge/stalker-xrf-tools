@@ -1,10 +1,10 @@
 //! # Decoding algorithms.
-use crate::error::{LhaError, LhaResult};
-use crate::stub_io::{Read, Take, discard_to_end};
 use core::fmt;
 
 use crate::crc::Crc16;
+use crate::error::{LhaError, LhaResult};
 use crate::header::{CompressionMethod, LhaHeader};
+use crate::stub_io::{Read, Take, discard_to_end};
 
 #[cfg(feature = "lh1")]
 mod lhv1;
@@ -535,8 +535,9 @@ fn wrap_err<R: Read>(read: R, source: LhaError<R::Error>) -> LhaDecodeError<R> {
 #[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
-  use super::*;
   use std::io;
+
+  use super::*;
 
   #[test]
   fn decode_error_works() {

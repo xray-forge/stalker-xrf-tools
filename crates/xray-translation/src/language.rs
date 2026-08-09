@@ -1,5 +1,6 @@
-use derive_more::Display;
 use std::str::FromStr;
+
+use derive_more::Display;
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{
   XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, get_windows1252_encoder,
@@ -94,8 +95,9 @@ impl TranslationLanguage {
 
 #[cfg(test)]
 mod tests {
-  use crate::TranslationLanguage;
   use std::str::FromStr;
+
+  use crate::TranslationLanguage;
 
   #[test]
   fn test_from_str() {

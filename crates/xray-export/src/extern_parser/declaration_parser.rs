@@ -1,14 +1,16 @@
-use super::diagnostics::{invalid_at, source_location};
-use super::jsdoc_parser::JsDocParser;
-use super::value_parser::ExternValueParser;
-use crate::extern_manifest::{ExternDocumentation, ExternSourceLocation, ParsedExtern};
 use std::collections::BTreeMap;
 use std::path::Path;
+
 use xray_error::XRayResult;
 use xray_typescript::TypeScriptSymbolResolver;
 use xray_typescript::ast::{expression_callee_name, expression_string_argument};
 use xray_typescript::swc_common::{SourceMap, Spanned, comments::Comments};
 use xray_typescript::swc_ecma_ast::{Expr, ModuleItem, Program, Prop, PropName, Stmt};
+
+use super::diagnostics::{invalid_at, source_location};
+use super::jsdoc_parser::JsDocParser;
+use super::value_parser::ExternValueParser;
+use crate::extern_manifest::{ExternDocumentation, ExternSourceLocation, ParsedExtern};
 
 const EXTERN_EXPRESSION: &str = "extern";
 

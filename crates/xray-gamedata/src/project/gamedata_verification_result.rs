@@ -1,10 +1,12 @@
+use std::time::Duration;
+
+use xray_error::XRayResult;
+use xray_report::{CheckId, CheckReport, Finding, Report};
+
 use crate::{
   GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule,
   GamedataVerificationStatus, GamedataVerificationType,
 };
-use std::time::Duration;
-use xray_error::XRayResult;
-use xray_report::{CheckId, CheckReport, Finding, Report};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GamedataVerificationCheckReport {
@@ -166,13 +168,14 @@ impl GamedataVerificationCheckReport {
 
 #[cfg(test)]
 mod tests {
+  use xray_error::XRayError;
+  use xray_report::Status;
+
   use super::GamedataVerificationReport;
   use crate::{
     Finding, GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule,
     GamedataVerificationStatus, GamedataVerificationType,
   };
-  use xray_error::XRayError;
-  use xray_report::Status;
 
   struct TestCheckResult {
     findings: Vec<Finding>,

@@ -1,12 +1,14 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::process;
 use std::time::Instant;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_ltx::Ltx;
 use xray_output::OutputOptions;
 use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor};
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct PackEquipmentIconsCommand;

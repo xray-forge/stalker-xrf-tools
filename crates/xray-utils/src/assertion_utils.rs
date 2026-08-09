@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+
 use xray_error::{XRayError, XRayResult};
 
 /// Assert condition.

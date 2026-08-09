@@ -1,5 +1,6 @@
-use delharc::header::*;
 use std::{fs, io};
+
+use delharc::header::*;
 
 mod sink;
 use sink::SinkSum;

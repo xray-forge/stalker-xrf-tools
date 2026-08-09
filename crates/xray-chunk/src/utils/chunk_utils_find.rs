@@ -1,5 +1,6 @@
-use crate::reader::chunk_reader::ChunkReader;
 use xray_error::{XRayError, XRayResult};
+
+use crate::reader::chunk_reader::ChunkReader;
 
 /// Find chink in list by id.
 #[inline]

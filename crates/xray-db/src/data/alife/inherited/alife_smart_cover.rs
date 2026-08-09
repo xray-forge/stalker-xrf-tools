@@ -1,12 +1,13 @@
-use crate::data::alife::inherited::alife_object_smart_cover::AlifeObjectSmartCover;
-use crate::data::alife::inherited::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
-use crate::export::LtxImportExport;
-use crate::file_import::read_ltx_field;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
+
+use crate::data::alife::inherited::alife_object_smart_cover::AlifeObjectSmartCover;
+use crate::data::alife::inherited::alife_smart_cover_loophole::AlifeSmartCoverLoophole;
+use crate::export::LtxImportExport;
+use crate::file_import::read_ltx_field;
 
 /// Represents script extension of base server smart cover class.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -95,11 +96,6 @@ impl LtxImportExport for AlifeSmartCover {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
-  use crate::data::alife::inherited::alife_object_dynamic::AlifeObjectDynamic;
-  use crate::data::alife::inherited::alife_object_smart_cover::AlifeObjectSmartCover;
-  use crate::data::generic::shape::Shape;
-  use crate::data::generic::vector_3d::Vector3d;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -107,6 +103,12 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
+  use crate::data::alife::inherited::alife_object_dynamic::AlifeObjectDynamic;
+  use crate::data::alife::inherited::alife_object_smart_cover::AlifeObjectSmartCover;
+  use crate::data::generic::shape::Shape;
+  use crate::data::generic::vector_3d::Vector3d;
 
   #[test]
   fn test_read_write() -> XRayResult {

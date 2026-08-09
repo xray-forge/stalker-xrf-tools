@@ -1,8 +1,10 @@
+use std::path::{Path, PathBuf};
+
+use full_moon::{LuaVersion, ast::Ast, parse_fallible};
+use xray_error::{XRayError, XRayResult};
+
 use crate::XRayLuaMethodCall;
 use crate::lua_method_call_collector::LuaMethodCallCollector;
-use full_moon::{LuaVersion, ast::Ast, parse_fallible};
-use std::path::{Path, PathBuf};
-use xray_error::{XRayError, XRayResult};
 
 /// A parsed LuaJIT script with normalized method calls.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -57,9 +59,11 @@ impl XRayLuaScript {
 
 #[cfg(test)]
 mod tests {
-  use super::XRayLuaScript;
   use std::path::Path;
+
   use xray_error::XRayResult;
+
+  use super::XRayLuaScript;
 
   #[test]
   fn collects_literal_and_dynamic_method_calls() -> XRayResult {

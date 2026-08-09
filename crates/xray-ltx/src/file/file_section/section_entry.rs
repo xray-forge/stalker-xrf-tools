@@ -1,5 +1,6 @@
-use crate::file::file_section::section::Section;
 use indexmap::map::{Entry, OccupiedEntry, VacantEntry};
+
+use crate::file::file_section::section::Section;
 
 /// A view into an `Ltx`, which may either be vacant or occupied.
 pub enum SectionEntry<'a> {

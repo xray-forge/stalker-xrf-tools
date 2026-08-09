@@ -1,5 +1,6 @@
-use super::span::SourceSpan;
 use xray_error::XRayResult;
+
+use super::span::SourceSpan;
 
 /// One comma-separated condition-list branch.
 #[derive(Clone, Debug, PartialEq)]

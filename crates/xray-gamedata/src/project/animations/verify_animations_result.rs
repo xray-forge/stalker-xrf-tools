@@ -1,8 +1,9 @@
+use std::time::Duration;
+
 use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
 use crate::project::animations::hud_motion_collisions_verification_result::GamedataHudMotionCollisionsVerificationResult;
 use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
 use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
-use std::time::Duration;
 
 pub struct GamedataAnimationsVerificationResult {
   pub(crate) duration: Duration,
@@ -41,6 +42,8 @@ impl GamedataCheckResult for GamedataAnimationsVerificationResult {
 
 #[cfg(test)]
 mod tests {
+  use std::time::Duration;
+
   use super::GamedataAnimationsVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
@@ -50,7 +53,6 @@ mod tests {
     Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
     GamedataVerificationType,
   };
-  use std::time::Duration;
 
   #[test]
   fn exposes_animation_findings_in_reports() {

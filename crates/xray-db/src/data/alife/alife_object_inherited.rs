@@ -1,3 +1,11 @@
+use std::ops::Deref;
+
+use byteorder::ByteOrder;
+use serde::{Deserialize, Serialize};
+use xray_chunk::{ChunkReader, ChunkWriter};
+use xray_error::{XRayError, XRayResult};
+use xray_ltx::Ltx;
+
 use crate::data::alife::inherited::alife_actor::AlifeActor;
 use crate::data::alife::inherited::alife_anomalous_zone::AlifeAnomalousZone;
 use crate::data::alife::inherited::alife_graph_point::AlifeGraphPoint;
@@ -29,12 +37,6 @@ use crate::data::alife::inherited::alife_smart_terrain::AlifeSmartTerrain;
 use crate::data::alife::inherited::alife_zone_visual::AlifeZoneVisual;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::export::LtxImportExport;
-use byteorder::ByteOrder;
-use serde::{Deserialize, Serialize};
-use std::ops::Deref;
-use xray_chunk::{ChunkReader, ChunkWriter};
-use xray_error::{XRayError, XRayResult};
-use xray_ltx::Ltx;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]

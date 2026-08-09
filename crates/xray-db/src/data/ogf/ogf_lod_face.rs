@@ -1,8 +1,9 @@
-use crate::data::ogf::ogf_lod_vertex::OgfLodVertex;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::data::ogf::ogf_lod_vertex::OgfLodVertex;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

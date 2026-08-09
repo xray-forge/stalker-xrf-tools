@@ -1,6 +1,8 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{Arg, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
+
+use clap::{Arg, ArgMatches, Command, value_parser};
+
+use crate::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
 pub struct ParseTranslationsCommand;

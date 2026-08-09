@@ -1,11 +1,13 @@
-use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
-use crate::types::TauriResult;
-use crate::utils::error_to_string;
-use serde_json::{Value, json};
 use std::sync::MutexGuard;
+
+use serde_json::{Value, json};
 use tauri::State;
 use xray_ltx::Ltx;
 use xray_texture::{InventorySpriteDescriptor, open_dds_as_png};
+
+use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
+use crate::types::TauriResult;
+use crate::utils::error_to_string;
 
 #[tauri::command]
 pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult<Value> {

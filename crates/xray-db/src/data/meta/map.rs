@@ -1,8 +1,9 @@
-use crate::data::meta::alife_class::AlifeClass;
-use crate::data::meta::cls_id::ClsId;
 use enum_map::{EnumMap, enum_map};
 use lazy_static::lazy_static;
 use phf::phf_map;
+
+use crate::data::meta::alife_class::AlifeClass;
+use crate::data::meta::cls_id::ClsId;
 
 lazy_static! {
   pub static ref SECTION_TO_CLS_ID: phf::Map<&'static str, ClsId> = phf_map! {

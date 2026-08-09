@@ -1,5 +1,6 @@
-use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 use xray_db::ShaderLibraryFile;
+
+use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
 
 pub(crate) struct GamedataShaderLibraryVerificationResult {
   pub(crate) blender_count: usize,

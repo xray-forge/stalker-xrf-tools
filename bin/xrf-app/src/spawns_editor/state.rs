@@ -1,4 +1,5 @@
 use std::sync::{Arc, Mutex};
+
 use xray_db::SpawnFile;
 
 pub struct SpawnsEditorState {

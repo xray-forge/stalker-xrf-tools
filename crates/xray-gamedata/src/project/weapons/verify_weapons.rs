@@ -1,3 +1,10 @@
+use std::path::Path;
+use std::time::{Duration, Instant};
+
+use xray_db::{OgfFile, OmfFile, XRayByteOrder};
+use xray_error::XRayResult;
+use xray_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
+
 use crate::GamedataFindingFactory;
 use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
@@ -8,11 +15,6 @@ use crate::project::weapons::weapon_sound_source::WeaponSoundSource;
 use crate::project::weapons::weapon_sound_value::WeaponSoundValue;
 use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
-use std::path::Path;
-use std::time::{Duration, Instant};
-use xray_db::{OgfFile, OmfFile, XRayByteOrder};
-use xray_error::XRayResult;
-use xray_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
 
 impl GamedataProject {
   pub fn verify_weapons(

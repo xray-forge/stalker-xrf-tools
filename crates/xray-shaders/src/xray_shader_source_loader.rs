@@ -1,4 +1,5 @@
 use std::path::Path;
+
 use xray_error::XRayResult;
 
 /// Loads shader source bytes for `XRayShader` import resolution.

@@ -1,9 +1,11 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use std::{fs, io};
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_db::{SpawnFile, XRayByteOrder};
+
+use crate::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
 pub struct PackSpawnFileCommand;

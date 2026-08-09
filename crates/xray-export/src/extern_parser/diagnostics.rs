@@ -1,7 +1,8 @@
-use crate::extern_manifest::ExternSourceLocation;
 use xray_error::XRayError;
 use xray_typescript::swc_common::{BytePos, SourceMap, SourceMapper, Spanned};
 use xray_typescript::swc_ecma_ast::Expr;
+
+use crate::extern_manifest::ExternSourceLocation;
 
 /// Return an extern declaration source location.
 pub fn source_location(

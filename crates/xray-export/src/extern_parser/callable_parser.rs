@@ -1,11 +1,13 @@
-use super::diagnostics::invalid_at;
-use super::type_renderer::canonical_type;
-use crate::extern_manifest::{ExternCallable, ExternDocumentation, ExternParameter};
 use std::collections::BTreeMap;
+
 use xray_error::XRayResult;
 use xray_typescript::TypeScriptFunctionSignature;
 use xray_typescript::swc_common::{SourceMap, SourceMapper, Spanned};
 use xray_typescript::swc_ecma_ast::{ArrowExpr, Pat, TsFnParam, TsFnType, TsTypeAnn};
+
+use super::diagnostics::invalid_at;
+use super::type_renderer::canonical_type;
+use crate::extern_manifest::{ExternCallable, ExternDocumentation, ExternParameter};
 
 /// Builds canonical extern callables from TypeScript function contracts.
 pub struct ExternCallableParser<'a> {

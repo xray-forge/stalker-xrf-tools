@@ -1,7 +1,9 @@
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-use serde::Serialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+
+use serde::Serialize;
+
+use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]

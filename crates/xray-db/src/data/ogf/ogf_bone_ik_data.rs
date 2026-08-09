@@ -1,10 +1,11 @@
-use crate::data::generic::vector_3d::Vector3d;
-use crate::data::ogf::ogf_bone_shape::OgfBoneShape;
-use crate::data::ogf::ogf_joint_ik_data::OgfJointIkData;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
+
+use crate::data::generic::vector_3d::Vector3d;
+use crate::data::ogf::ogf_bone_shape::OgfBoneShape;
+use crate::data::ogf::ogf_joint_ik_data::OgfJointIkData;
 
 /// Physics and bind pose data of one bone, one record of `OGF_S_IKDATA`.
 ///

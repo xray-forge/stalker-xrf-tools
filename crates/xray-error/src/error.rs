@@ -1,5 +1,6 @@
-use serde::Serialize;
 use std::io::ErrorKind;
+
+use serde::Serialize;
 use thiserror::Error as ThisError;
 use xray_error_derive::ErrorConstructors;
 

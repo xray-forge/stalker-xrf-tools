@@ -1,6 +1,8 @@
-use crate::extern_manifest::ExternDocumentation;
 use std::collections::BTreeMap;
+
 use xray_typescript::swc_common::{BytePos, comments::Comments};
+
+use crate::extern_manifest::ExternDocumentation;
 
 /// Parses JSDoc comments associated with one TypeScript source file.
 pub struct JsDocParser<'a> {

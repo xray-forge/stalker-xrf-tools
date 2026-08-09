@@ -1,7 +1,8 @@
 //! # Bit-stream tools.
+use core::mem;
+
 use crate::error::{LhaError, LhaResult};
 use crate::stub_io::Read;
-use core::mem;
 
 type BitBuf = usize;
 const BITBUF_BYTESIZE: usize = mem::size_of::<BitBuf>();
@@ -159,8 +160,9 @@ const fn bitsize<T>() -> u32 {
 #[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
-  use super::*;
   use std::io;
+
+  use super::*;
   #[test]
   fn bit_stream_works() {
     assert_eq!(BITBUF_BYTESIZE, mem::size_of::<usize>());

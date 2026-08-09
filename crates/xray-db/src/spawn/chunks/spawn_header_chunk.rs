@@ -1,13 +1,15 @@
-use crate::export::FileImportExport;
-use crate::file_import::read_ltx_field;
+use std::path::Path;
+
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use uuid::Uuid;
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 use xray_utils::open_export_file;
+
+use crate::export::FileImportExport;
+use crate::file_import::read_ltx_field;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -98,12 +100,11 @@ impl FileImportExport for SpawnHeaderChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::export::FileImportExport;
-  use crate::spawn::chunks::spawn_header_chunk::SpawnHeaderChunk;
-  use serde_json::to_string_pretty;
   use std::fs::File;
   use std::io::{Seek, SeekFrom, Write};
   use std::path::Path;
+
+  use serde_json::to_string_pretty;
   use uuid::{Uuid, uuid};
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
@@ -114,6 +115,9 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::export::FileImportExport;
+  use crate::spawn::chunks::spawn_header_chunk::SpawnHeaderChunk;
 
   #[test]
   fn test_read_empty() -> XRayResult {

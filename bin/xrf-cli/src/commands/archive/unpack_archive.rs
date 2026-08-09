@@ -1,11 +1,13 @@
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
-use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::env;
 use std::path::PathBuf;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use tokio::runtime::Runtime;
 use xray_archive::{ArchiveProject, ArchiveUnpackResult};
 use xray_output::OutputOptions;
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct UnpackArchiveCommand;

@@ -1,9 +1,10 @@
-use crate::data::ogf::ogf_box::OgfBox;
-use crate::data::ogf::ogf_sphere::OgfSphere;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+
+use crate::data::ogf::ogf_box::OgfBox;
+use crate::data::ogf::ogf_sphere::OgfSphere;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfHeaderChunk {

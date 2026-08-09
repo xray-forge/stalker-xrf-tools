@@ -1,13 +1,15 @@
-use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
-use crate::export::{FileImportExport, LtxImportExport};
-use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
-use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::Path;
+
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
 use xray_utils::{assert_length, open_export_file};
+
+use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
+use crate::export::{FileImportExport, LtxImportExport};
 
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
@@ -112,9 +114,6 @@ impl fmt::Debug for SpawnArtefactSpawnsChunk {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
-  use crate::data::generic::vector_3d::Vector3d;
-  use crate::spawn::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
   use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
@@ -122,6 +121,10 @@ mod tests {
     get_relative_test_sample_file_path, open_test_resource_as_slice,
     overwrite_test_relative_resource_as_file,
   };
+
+  use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::spawn::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
 
   #[test]
   fn test_read_write() -> XRayResult {

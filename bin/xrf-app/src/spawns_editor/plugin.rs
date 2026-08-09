@@ -1,6 +1,7 @@
-use crate::spawns_editor::state::SpawnsEditorState;
 use tauri::plugin::TauriPlugin;
 use tauri::{Manager, Runtime};
+
+use crate::spawns_editor::state::SpawnsEditorState;
 
 pub struct SpawnsEditorPlugin {}
 

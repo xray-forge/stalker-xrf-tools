@@ -1,8 +1,9 @@
+use std::time::Duration;
+
 use crate::GamedataFindingFactory;
 use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
 use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
 use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
-use std::time::Duration;
 
 pub struct GamedataSoundsVerificationResult {
   pub(crate) duration: Duration,
@@ -62,6 +63,8 @@ impl GamedataCheckResult for GamedataSoundsVerificationResult {
 
 #[cfg(test)]
 mod tests {
+  use std::time::Duration;
+
   use super::GamedataSoundsVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
@@ -70,7 +73,6 @@ mod tests {
     Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
     GamedataVerificationStatus, GamedataVerificationType,
   };
-  use std::time::Duration;
 
   #[test]
   fn exposes_sound_reference_findings_in_sound_reports() {

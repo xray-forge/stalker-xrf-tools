@@ -1,7 +1,9 @@
-use crate::source::chunk_data_source::ChunkDataSource;
-use fileslice::FileSlice;
 use std::io::{Seek, SeekFrom};
 use std::ops::RangeBounds;
+
+use fileslice::FileSlice;
+
+use crate::source::chunk_data_source::ChunkDataSource;
 
 impl ChunkDataSource for FileSlice {
   fn start_pos(&self) -> u64 {

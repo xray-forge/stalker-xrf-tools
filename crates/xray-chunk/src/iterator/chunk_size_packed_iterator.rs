@@ -1,8 +1,10 @@
-use crate::{ChunkDataSource, ChunkReader, XRayByteOrder};
+use std::io::SeekFrom;
+
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
-use std::io::SeekFrom;
 use xray_error::{XRayError, XRayResult};
+
+use crate::{ChunkDataSource, ChunkReader, XRayByteOrder};
 
 /// Iterate over data in chunk slice, which is stored like [(size)(content)(size)(content)].
 pub struct ChunkSizePackedIterator<'a, T: ChunkDataSource = FileSlice> {
@@ -112,9 +114,11 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
 
 #[cfg(test)]
 mod tests {
-  use crate::{ChunkDataSource, ChunkReader, ChunkSizePackedIterator, InMemoryChunkDataSource};
   use std::io::SeekFrom;
+
   use xray_error::XRayResult;
+
+  use crate::{ChunkDataSource, ChunkReader, ChunkSizePackedIterator, InMemoryChunkDataSource};
 
   #[test]
   fn test_iterate_empty() -> XRayResult {

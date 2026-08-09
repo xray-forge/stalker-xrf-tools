@@ -1,6 +1,8 @@
-use crate::ShaderRenderer;
 use std::path::Path;
+
 use xray_error::{XRayError, XRayResult};
+
+use crate::ShaderRenderer;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct XRayShaderImportReference {

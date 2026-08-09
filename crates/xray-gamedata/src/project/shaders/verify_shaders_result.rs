@@ -1,6 +1,7 @@
+use std::time::Duration;
+
 use crate::GamedataFindingFactory;
 use crate::{Finding, GamedataCheckResult, GamedataVerificationStatus};
-use std::time::Duration;
 
 #[derive(Default)]
 pub struct GamedataShadersVerificationResult {

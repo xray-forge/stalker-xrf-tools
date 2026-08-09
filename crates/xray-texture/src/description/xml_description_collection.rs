@@ -1,16 +1,18 @@
+use std::collections::HashMap;
+use std::fs;
+use std::fs::{File, ReadDir};
+use std::io::Read;
+use std::path::{Path, PathBuf};
+
+use roxmltree::{Document, Node, ParsingOptions};
+use xray_error::{XRayError, XRayResult};
+
 use crate::constants::{
   XML_ATTRIBUTE_ID, XML_ATTRIBUTE_NAME, XML_TAG_FILE, XML_TAG_TEXTURE, XML_TAG_WINDOW,
 };
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
-use roxmltree::{Document, Node, ParsingOptions};
-use std::collections::HashMap;
-use std::fs;
-use std::fs::{File, ReadDir};
-use std::io::Read;
-use std::path::{Path, PathBuf};
-use xray_error::{XRayError, XRayResult};
 
 pub struct XmlDescriptionCollection {
   pub files: HashMap<String, TextureFileDescriptor>,
@@ -258,11 +260,13 @@ impl XmlDescriptionCollection {
 
 #[cfg(test)]
 mod tests {
-  use super::XmlDescriptionCollection;
-  use crate::PackDescriptionOptions;
-  use image_dds::ImageFormat;
   use std::fs;
   use std::path::PathBuf;
+
+  use image_dds::ImageFormat;
+
+  use super::XmlDescriptionCollection;
+  use crate::PackDescriptionOptions;
 
   #[test]
   fn returns_an_error_for_invalid_xml_in_strict_mode() {
@@ -294,12 +298,14 @@ mod tests {
 
 #[cfg(test)]
 mod select_files_tests {
+  use std::collections::HashMap;
+  use std::path::PathBuf;
+
+  use image_dds::ImageFormat;
+
   use super::XmlDescriptionCollection;
   use crate::data::texture_file_descriptor::TextureFileDescriptor;
   use crate::description::pack_description_options::PackDescriptionOptions;
-  use image_dds::ImageFormat;
-  use std::collections::HashMap;
-  use std::path::PathBuf;
 
   fn collection_of(names: &[&str]) -> XmlDescriptionCollection {
     let mut files: HashMap<String, TextureFileDescriptor> = HashMap::new();

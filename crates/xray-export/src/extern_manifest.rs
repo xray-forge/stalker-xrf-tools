@@ -1,5 +1,6 @@
-use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+
+use serde::{Deserialize, Serialize};
 
 /// The public, stable manifest of names exported to X-Ray configuration data.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

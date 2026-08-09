@@ -1,13 +1,15 @@
+use std::cmp::max;
+
+use image::{ImageBuffer, Rgba, RgbaImage};
+use serde::Serialize;
+use xray_error::{XRayError, XRayResult};
+use xray_ltx::{Ltx, Section};
+
 use crate::constants::{
   DDS_BLOCK_ALIGNMENT, INVENTORY_ICON_GRID_SQUARE_BASE, LTX_FIELD_INV_GRID_HEIGHT,
   LTX_FIELD_INV_GRID_WIDTH, LTX_FIELD_INV_GRID_X, LTX_FIELD_INV_GRID_Y, LTX_FIELD_INVENTORY_ICON,
   LTX_FIELD_INVENTORY_ICON_PATH,
 };
-use image::{ImageBuffer, Rgba, RgbaImage};
-use serde::Serialize;
-use std::cmp::max;
-use xray_error::{XRayError, XRayResult};
-use xray_ltx::{Ltx, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -143,8 +145,9 @@ impl InventorySpriteDescriptor {
 
 #[cfg(test)]
 mod tests {
-  use super::InventorySpriteDescriptor;
   use xray_ltx::Ltx;
+
+  use super::InventorySpriteDescriptor;
 
   fn descriptor_for(ltx: &str, section: &str) -> Option<InventorySpriteDescriptor> {
     let ltx: Ltx = Ltx::read_from_str(ltx).expect("test LTX is valid");

@@ -1,6 +1,7 @@
+use std::ops::Index;
+
 use crate::file::iterator::{PropertyIter, PropertyIterMut};
 use crate::file::types::SectionData;
-use std::ops::Index;
 
 /// Properties type (key-value pairs).
 #[derive(Clone, Default, Debug, PartialEq)]

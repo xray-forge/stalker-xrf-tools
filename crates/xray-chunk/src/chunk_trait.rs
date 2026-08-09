@@ -1,7 +1,8 @@
-use crate::{ChunkReader, ChunkWriter};
 use byteorder::ByteOrder;
 use fileslice::FileSlice;
 use xray_error::XRayResult;
+
+use crate::{ChunkReader, ChunkWriter};
 
 pub trait ChunkReadWriteList: Sized {
   fn read_list<T: ByteOrder>(reader: &mut ChunkReader<FileSlice>) -> XRayResult<Vec<Self>>;

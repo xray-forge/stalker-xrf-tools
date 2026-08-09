@@ -1,8 +1,10 @@
-use crate::generic_command::CommandResult;
-use serde::Serialize;
 use std::path::Path;
+
+use serde::Serialize;
 use xray_report::{CheckReport, Finding, Report};
 use xray_translation::ProjectVerifyResult;
+
+use crate::generic_command::CommandResult;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -83,11 +85,13 @@ impl<'a> TranslationVerificationReportWriter<'a> {
 
 #[cfg(test)]
 mod tests {
-  use super::TranslationVerificationReportWriter;
   use std::fs;
   use std::path::PathBuf;
   use std::sync::atomic::{AtomicU64, Ordering};
+
   use xray_translation::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
+
+  use super::TranslationVerificationReportWriter;
 
   static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 

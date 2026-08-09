@@ -1,6 +1,7 @@
-use regex::Regex;
 use std::collections::HashSet;
 use std::path::Path;
+
+use regex::Regex;
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, LtxProject};
 
@@ -208,8 +209,9 @@ impl<'a> SoundReferencesVerifier<'a> {
 
 #[cfg(test)]
 mod tests {
-  use super::SoundReferencesVerifier;
   use std::collections::HashSet;
+
+  use super::SoundReferencesVerifier;
 
   #[test]
   fn resolves_exact_and_randomized_sound_references() {

@@ -1,3 +1,8 @@
+use std::collections::BTreeSet;
+use std::fs;
+use std::path::PathBuf;
+use std::sync::atomic::{AtomicU64, Ordering};
+
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_with_definitions;
@@ -6,10 +11,6 @@ use crate::{
   GamedataCheckResult, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
   GamedataVerificationStatus,
 };
-use std::collections::BTreeSet;
-use std::fs;
-use std::path::PathBuf;
-use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 

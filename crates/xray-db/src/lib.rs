@@ -10,6 +10,8 @@ pub(crate) mod shader_library;
 pub(crate) mod spawn;
 pub(crate) mod types;
 
+pub use xray_chunk::XRayByteOrder;
+
 pub use crate::data::generic::vector_3d::*;
 pub use crate::data::graph::graph_cross_table::*;
 pub use crate::data::graph::graph_header::*;
@@ -35,4 +37,3 @@ pub use crate::shader_library::shader_library_file::*;
 pub use crate::spawn::chunks::spawn_graphs_chunk::*;
 pub use crate::spawn::spawn_file::*;
 pub use crate::types::*;
-pub use xray_chunk::XRayByteOrder;

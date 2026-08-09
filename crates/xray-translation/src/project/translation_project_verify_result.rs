@@ -1,6 +1,7 @@
-use serde::Serialize;
 use std::path::Path;
 use std::time::Duration;
+
+use serde::Serialize;
 use xray_report::{CheckId, CheckReport, Finding, Report, RuleId, Status};
 
 #[derive(Debug, Default, Serialize)]
@@ -63,9 +64,11 @@ impl ProjectVerifyResult {
 
 #[cfg(test)]
 mod tests {
-  use super::ProjectVerifyResult;
   use std::path::Path;
+
   use xray_report::Status;
+
+  use super::ProjectVerifyResult;
 
   #[test]
   fn reports_missing_translations_as_findings() {

@@ -1,14 +1,16 @@
-use crate::constants::META_TYPE_FIELD;
-use crate::data::particles::particle_effect::ParticleEffect;
-use crate::export::{FileImportExport, LtxImportExport};
-use byteorder::ByteOrder;
-use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::Path;
+
+use byteorder::ByteOrder;
+use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::XRayResult;
 use xray_ltx::Ltx;
 use xray_utils::{assert, open_export_file};
+
+use crate::constants::META_TYPE_FIELD;
+use crate::data::particles::particle_effect::ParticleEffect;
+use crate::export::{FileImportExport, LtxImportExport};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

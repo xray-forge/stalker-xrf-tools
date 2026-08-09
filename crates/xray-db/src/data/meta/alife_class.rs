@@ -1,8 +1,10 @@
-use crate::data::meta::cls_id::ClsId;
-use crate::data::meta::map::CLS_ID_TO_CLASS;
+use std::ops::Index;
+
 use derive_more::{Display, FromStr};
 use enum_map::Enum;
-use std::ops::Index;
+
+use crate::data::meta::cls_id::ClsId;
+use crate::data::meta::map::CLS_ID_TO_CLASS;
 
 #[derive(Clone, Debug, Enum, PartialEq, FromStr, Display)]
 pub enum AlifeClass {

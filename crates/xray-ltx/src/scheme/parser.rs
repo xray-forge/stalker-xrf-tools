@@ -1,3 +1,8 @@
+use std::path::PathBuf;
+
+use indexmap::map::Entry;
+use xray_error::{XRayError, XRayResult};
+
 use crate::file::file_configuration::constants::{
   LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME,
 };
@@ -7,9 +12,6 @@ use crate::file::types::LtxSectionSchemes;
 use crate::scheme::field_data_type::LtxFieldDataType;
 use crate::scheme::field_scheme::LtxFieldScheme;
 use crate::scheme::section_scheme::LtxSectionScheme;
-use indexmap::map::Entry;
-use std::path::PathBuf;
-use xray_error::{XRayError, XRayResult};
 
 /// Parser of LTX scheme definitions.
 #[derive(Clone, Debug)]

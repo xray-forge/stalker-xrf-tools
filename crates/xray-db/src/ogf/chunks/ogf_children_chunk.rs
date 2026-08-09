@@ -1,8 +1,9 @@
-use crate::OgfFile;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
+
+use crate::OgfFile;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfChildrenChunk {

@@ -1,5 +1,6 @@
-use crate::language::TranslationLanguage;
 use std::path::PathBuf;
+
+use crate::language::TranslationLanguage;
 
 pub struct ProjectVerifyOptions {
   pub is_strict: bool,

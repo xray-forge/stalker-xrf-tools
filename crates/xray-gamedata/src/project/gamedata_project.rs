@@ -1,6 +1,7 @@
 use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
+
 use xray_assets::{DirectoryAssetIndex, XrayAssetIndex};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{LtxProject, LtxProjectOptions};

@@ -1,6 +1,7 @@
-use byteorder::ByteOrder;
 use std::fs::File;
 use std::path::Path;
+
+use byteorder::ByteOrder;
 use xray_chunk::ChunkReader;
 use xray_error::{XRayError, XRayResult};
 
