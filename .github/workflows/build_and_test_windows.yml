@@ -22,7 +22,7 @@ jobs:
         node-version: [ 24.x ]
 
     steps:
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.97.1
 
       - name: Configure Git line endings
         run: |
