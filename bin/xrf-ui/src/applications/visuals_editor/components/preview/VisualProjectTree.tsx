@@ -1,7 +1,9 @@
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
-import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box } from "@mui/material";
 import { RichTreeView, TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
 import { ReactElement, useMemo } from "react";
+
+import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
 
 /**
  * Left side panel listing visuals available in a gamedata or resources tree.
@@ -42,29 +44,16 @@ export function VisualProjectTree(): ReactElement {
     []
   );
 
+  const actions: Array<IEditorSideMenuItem> = useMemo(
+    () => [{ label: "Open project", description: "Needs backend", icon: <FolderOpenIcon />, isDisabled: true }],
+    []
+  );
+
   return (
-    <Drawer
-      variant={"permanent"}
-      open={true}
-      sx={{ height: "100%", width: 280, flexShrink: 0 }}
-      slotProps={{ paper: { sx: { position: "relative", width: 280 } } }}
-    >
-      <List disablePadding>
-        <ListItem disablePadding>
-          <ListItemButton disabled>
-            <ListItemIcon>
-              <FolderOpenIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Open project"} secondary={"Needs backend"} />
-          </ListItemButton>
-        </ListItem>
-      </List>
-
-      <Divider />
-
-      <Box sx={{ padding: 1, flexGrow: 1, minHeight: 0, overflow: "auto" }}>
+    <EditorSideMenu actions={actions}>
+      <Box sx={{ padding: 1 }}>
         <RichTreeView items={items} />
       </Box>
-    </Drawer>
+    </EditorSideMenu>
   );
 }

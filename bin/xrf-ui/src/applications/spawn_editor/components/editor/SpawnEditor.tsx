@@ -1,4 +1,3 @@
-import { Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -8,16 +7,15 @@ import { SpawnEditorGraphs } from "@/applications/spawn_editor/components/editor
 import { SpawnEditorHeader } from "@/applications/spawn_editor/components/editor/chunks/header/SpawnEditorHeader";
 import { SpawnEditorPatrols } from "@/applications/spawn_editor/components/editor/chunks/patrol/SpawnEditorPatrols";
 import { SpawnEditorMenu } from "@/applications/spawn_editor/components/editor/SpawnEditorMenu";
+import { EditorLayout } from "@/core/components/editor/EditorLayout";
+import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 
 export function SpawnEditor(): ReactElement {
   return (
-    <Grid
-      container
-      wrap={"nowrap"}
-      sx={{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}
+    <EditorLayout
+      toolbar={<EditorToolbar title={"Spawn editor"} backPath={"/spawn_editor"} />}
+      menu={<SpawnEditorMenu />}
     >
-      <SpawnEditorMenu />
-
       <Routes>
         <Route path={"/header"} element={<SpawnEditorHeader />} />
         <Route path={"/alife"} element={<SpawnEditorAlife />} />
@@ -26,6 +24,6 @@ export function SpawnEditor(): ReactElement {
         <Route path={"/graph"} element={<SpawnEditorGraphs />} />
         <Route path={"/*"} element={<SpawnEditorHeader />} />
       </Routes>
-    </Grid>
+    </EditorLayout>
   );
 }

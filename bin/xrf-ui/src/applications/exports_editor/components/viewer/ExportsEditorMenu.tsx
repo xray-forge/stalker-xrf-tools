@@ -1,34 +1,19 @@
+import { default as BoltIcon } from "@mui/icons-material/Bolt";
 import { default as CloseIcon } from "@mui/icons-material/Close";
-import { default as LooksIcon3 } from "@mui/icons-material/Looks3";
-import { default as LooksIcon1 } from "@mui/icons-material/LooksOne";
-import { default as LooksIcon2 } from "@mui/icons-material/LooksTwo";
-import { Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { default as ForumIcon } from "@mui/icons-material/Forum";
+import { default as RuleIcon } from "@mui/icons-material/Rule";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { ExportsService } from "@/applications/exports_editor/store/exports";
+import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
 
 export function ExportsEditorMenu(): ReactElement {
   const exportsService: ExportsService = useInjection(ExportsService);
 
   const navigate: NavigateFunction = useNavigate();
-
-  const sections: Array<[string, ReactElement]> = useMemo(
-    () => [
-      ["Conditions", <LooksIcon1 />],
-      ["Dialogs", <LooksIcon2 />],
-      ["Effects", <LooksIcon3 />],
-    ],
-    []
-  );
-
-  const onNavigateClicked = useCallback(
-    (to: string) => {
-      navigate(`/exports_editor/exports/${to}`, { replace: true });
-    },
-    [navigate]
-  );
+  const { pathname } = useLocation();
 
   const onCloseClicked = useCallback(() => {
     navigate("/exports_editor", { replace: true });
@@ -36,36 +21,32 @@ export function ExportsEditorMenu(): ReactElement {
     return exportsService.closeExports();
   }, [exportsService, navigate]);
 
-  return (
-    <Drawer
-      variant={"permanent"}
-      open={true}
-      sx={{ height: "100%" }}
-      slotProps={{ paper: { sx: { position: "relative" } } }}
-    >
-      <List disablePadding>
-        {sections.map(([text, icon]) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton onClick={() => onNavigateClicked(text.toLowerCase())}>
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-
-      <Divider />
-
-      <List disablePadding>
-        <ListItem disablePadding>
-          <ListItemButton disabled={exportsService.declarations.isLoading} onClick={onCloseClicked}>
-            <ListItemIcon>
-              <CloseIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Close"} />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Drawer>
+  const sections: Array<IEditorSideMenuItem> = useMemo(
+    () =>
+      [
+        { label: "Conditions", icon: <RuleIcon />, path: "conditions" },
+        { label: "Dialogs", icon: <ForumIcon />, path: "dialogs" },
+        { label: "Effects", icon: <BoltIcon />, path: "effects" },
+      ].map((it) => ({
+        label: it.label,
+        icon: it.icon,
+        isSelected: pathname.endsWith(`/${it.path}`),
+        onClick: () => navigate(`/exports_editor/exports/${it.path}`, { replace: true }),
+      })),
+    [navigate, pathname]
   );
+
+  const actions: Array<IEditorSideMenuItem> = useMemo(
+    () => [
+      {
+        label: "Close",
+        icon: <CloseIcon />,
+        isDisabled: exportsService.declarations.isLoading,
+        onClick: onCloseClicked,
+      },
+    ],
+    [exportsService.declarations.isLoading, onCloseClicked]
+  );
+
+  return <EditorSideMenu sections={sections} actions={actions} />;
 }

@@ -1,35 +1,25 @@
+import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
 import { default as CloseIcon } from "@mui/icons-material/Close";
+import { default as GroupsIcon } from "@mui/icons-material/Groups";
 import { default as ImportExportIcon } from "@mui/icons-material/ImportExport";
-import { default as LooksIcon3 } from "@mui/icons-material/Looks3";
-import { default as LooksIcon4 } from "@mui/icons-material/Looks4";
-import { default as LooksIcon5 } from "@mui/icons-material/Looks5";
-import { default as LooksIcon1 } from "@mui/icons-material/LooksOne";
-import { default as LooksIcon2 } from "@mui/icons-material/LooksTwo";
+import { default as InfoIcon } from "@mui/icons-material/Info";
+import { default as RouteIcon } from "@mui/icons-material/Route";
 import { default as SaveIcon } from "@mui/icons-material/Save";
-import { Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { default as ScienceIcon } from "@mui/icons-material/Science";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
+import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
 import { Optional } from "@/core/types/general";
 
 export function SpawnEditorMenu(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
   const navigate: NavigateFunction = useNavigate();
-
-  const sections: Array<[string, ReactElement]> = useMemo(
-    () => [
-      ["Header", <LooksIcon1 />],
-      ["Alife", <LooksIcon2 />],
-      ["Artefacts", <LooksIcon3 />],
-      ["Patrols", <LooksIcon4 />],
-      ["Graph", <LooksIcon5 />],
-    ],
-    []
-  );
+  const { pathname } = useLocation();
 
   const onSaveClicked = useCallback(async () => {
     const path: Optional<string> = await dialog.save({
@@ -53,67 +43,38 @@ export function SpawnEditorMenu(): ReactElement {
     }
   }, [spawnFileService]);
 
-  const onNavigateClicked = useCallback(
-    (to: string) => {
-      navigate(`/spawn_editor/editor/${to}`, { replace: true });
-    },
-    [navigate]
-  );
-
   const onCloseClicked = useCallback(() => {
     navigate("/spawn_editor", { replace: true });
 
     return spawnFileService.closeSpawnFile();
   }, [navigate, spawnFileService]);
 
-  return (
-    <Drawer
-      variant={"permanent"}
-      open={true}
-      sx={{ height: "100%" }}
-      slotProps={{ paper: { sx: { position: "relative" } } }}
-    >
-      <List disablePadding>
-        {sections.map(([text, icon]) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton onClick={() => onNavigateClicked(text.toLowerCase())}>
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-
-      <Divider />
-
-      <List disablePadding>
-        <ListItem disablePadding>
-          <ListItemButton disabled={spawnFileService.spawnFile.isLoading} onClick={onSaveClicked}>
-            <ListItemIcon>
-              <SaveIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Save"} />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton disabled={spawnFileService.spawnFile.isLoading} onClick={onExportClicked}>
-            <ListItemIcon>
-              <ImportExportIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Export"} />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton disabled={spawnFileService.spawnFile.isLoading} onClick={onCloseClicked}>
-            <ListItemIcon>
-              <CloseIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Close"} />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Drawer>
+  const sections: Array<IEditorSideMenuItem> = useMemo(
+    () =>
+      [
+        { label: "Header", icon: <InfoIcon />, path: "header" },
+        { label: "Alife", icon: <GroupsIcon />, path: "alife" },
+        { label: "Artefacts", icon: <ScienceIcon />, path: "artefacts" },
+        { label: "Patrols", icon: <RouteIcon />, path: "patrols" },
+        { label: "Graph", icon: <AccountTreeIcon />, path: "graph" },
+      ].map((it) => ({
+        label: it.label,
+        icon: it.icon,
+        isSelected: pathname.endsWith(`/${it.path}`),
+        onClick: () => navigate(`/spawn_editor/editor/${it.path}`, { replace: true }),
+      })),
+    [navigate, pathname]
   );
+
+  const actions: Array<IEditorSideMenuItem> = useMemo(() => {
+    const isLoading: boolean = spawnFileService.spawnFile.isLoading;
+
+    return [
+      { label: "Save", icon: <SaveIcon />, isDisabled: isLoading, onClick: onSaveClicked },
+      { label: "Export", icon: <ImportExportIcon />, isDisabled: isLoading, onClick: onExportClicked },
+      { label: "Close", icon: <CloseIcon />, isDisabled: isLoading, onClick: onCloseClicked },
+    ];
+  }, [spawnFileService.spawnFile.isLoading, onSaveClicked, onExportClicked, onCloseClicked]);
+
+  return <EditorSideMenu sections={sections} actions={actions} />;
 }

@@ -1,29 +1,29 @@
-import { Box, Grid } from "@mui/material";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { TranslationsEditorMenu } from "@/applications/translations_editor/components/TranslationsEditorMenu";
-import { TranslationsEditorToolbar } from "@/applications/translations_editor/components/TranslationsEditorToolbar";
 import { TranslationsEditorWorkspace } from "@/applications/translations_editor/components/TranslationsEditorWorkspace";
+import { TranslationsService } from "@/applications/translations_editor/store/translations";
+import { EditorLayout } from "@/core/components/editor/EditorLayout";
+import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 
 export function TranslationsEditor(): ReactElement {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        flexWrap: "nowrap",
-      }}
-    >
-      <TranslationsEditorToolbar />
+  const translationsService: TranslationsService = useInjection(TranslationsService);
 
-      <Grid container wrap={"nowrap"} sx={{ flexGrow: 1 }}>
-        <TranslationsEditorMenu />
-        <TranslationsEditorWorkspace />
-      </Grid>
-    </Box>
+  const fileCount: number = Object.keys(translationsService.project.value ?? {}).length;
+
+  return (
+    <EditorLayout
+      toolbar={
+        <EditorToolbar
+          title={"Translations editor"}
+          subtitle={`${fileCount} files`}
+          backPath={"/translations_editor"}
+        />
+      }
+      menu={<TranslationsEditorMenu />}
+    >
+      <TranslationsEditorWorkspace />
+    </EditorLayout>
   );
 }

@@ -1,18 +1,25 @@
-import { Grid } from "@mui/material";
+import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { ArchivesFileContent } from "@/applications/archive_editor/components/editor/ArchivesFileContent";
 import { ArchivesMenu } from "@/applications/archive_editor/components/editor/ArchivesMenu";
+import { ArchivesService } from "@/applications/archive_editor/store/archives";
+import { EditorLayout } from "@/core/components/editor/EditorLayout";
+import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 
 export function ArchivesEditor(): ReactElement {
+  const archivesService: ArchivesService = useInjection(ArchivesService);
+
+  const fileCount: number = Object.keys(archivesService.project.value?.files ?? {}).length;
+
   return (
-    <Grid
-      container
-      wrap={"nowrap"}
-      sx={{ alignItems: "center", height: "100%", justifyContent: "center", width: "100%" }}
+    <EditorLayout
+      toolbar={
+        <EditorToolbar title={"Archives editor"} subtitle={`${fileCount} files`} backPath={"/archives_editor"} />
+      }
+      menu={<ArchivesMenu />}
     >
-      <ArchivesMenu />
       <ArchivesFileContent />
-    </Grid>
+    </EditorLayout>
   );
 }

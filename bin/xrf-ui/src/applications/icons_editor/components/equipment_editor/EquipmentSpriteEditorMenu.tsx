@@ -1,9 +1,12 @@
-import { Box, Button, Grid } from "@mui/material";
+import { default as CloseIcon } from "@mui/icons-material/Close";
+import { default as Inventory2Icon } from "@mui/icons-material/Inventory2";
+import { default as RefreshIcon } from "@mui/icons-material/Refresh";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback } from "react";
+import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
+import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function EquipmentSpriteEditorMenu(): ReactElement {
@@ -34,42 +37,15 @@ export function EquipmentSpriteEditorMenu(): ReactElement {
     navigate("/icons_editor", { replace: true });
   }, [navigate, equipmentService]);
 
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: 240, minWidth: 240, justifySelf: "stretch" }}>
-      <Box sx={{ padding: 3 }}>Descriptors: {equipmentService.spriteImage.value?.descriptors.length ?? 0}</Box>
+  const actions: Array<IEditorSideMenuItem> = useMemo(() => {
+    const isLoading: boolean = equipmentService.spriteImage.isLoading;
 
-      <Grid container sx={{ flexGrow: 1 }} />
+    return [
+      { label: "Reload", icon: <RefreshIcon />, isDisabled: isLoading, onClick: onReopenClick },
+      { label: "Repack and reload", icon: <Inventory2Icon />, isDisabled: isLoading, onClick: onRepackAndReopenClick },
+      { label: "Close", icon: <CloseIcon />, isDisabled: isLoading, onClick: onCloseClick },
+    ];
+  }, [equipmentService.spriteImage.isLoading, onReopenClick, onRepackAndReopenClick, onCloseClick]);
 
-      <Box sx={{ display: "flex", margin: 0, padding: "0 24px", width: "100%", gap: 1, flexDirection: "column" }}>
-        <Button
-          fullWidth={true}
-          variant={"outlined"}
-          disabled={equipmentService.spriteImage.isLoading}
-          onClick={onReopenClick}
-        >
-          Reload
-        </Button>
-
-        <Button
-          fullWidth={true}
-          variant={"outlined"}
-          disabled={equipmentService.spriteImage.isLoading}
-          onClick={onRepackAndReopenClick}
-        >
-          Repack and reload
-        </Button>
-      </Box>
-
-      <Box sx={{ padding: 3 }}>
-        <Button
-          fullWidth={true}
-          variant={"outlined"}
-          disabled={equipmentService.spriteImage.isLoading}
-          onClick={onCloseClick}
-        >
-          Close
-        </Button>
-      </Box>
-    </Box>
-  );
+  return <EditorSideMenu actions={actions} />;
 }

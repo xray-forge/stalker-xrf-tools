@@ -1,4 +1,3 @@
-import { Grid } from "@mui/material";
 import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -6,22 +5,21 @@ import { ExportsViewerConditions } from "@/applications/exports_editor/component
 import { ExportsViewerDialogs } from "@/applications/exports_editor/components/viewer/exports/ExportsViewerDialogs";
 import { ExportsViewerEffects } from "@/applications/exports_editor/components/viewer/exports/ExportsViewerEffects";
 import { ExportsEditorMenu } from "@/applications/exports_editor/components/viewer/ExportsEditorMenu";
+import { EditorLayout } from "@/core/components/editor/EditorLayout";
+import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 
 export function ExportsEditor(): ReactElement {
   return (
-    <Grid
-      container
-      wrap={"nowrap"}
-      sx={{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}
+    <EditorLayout
+      toolbar={<EditorToolbar title={"Exports editor"} backPath={"/exports_editor"} />}
+      menu={<ExportsEditorMenu />}
     >
-      <ExportsEditorMenu />
-
       <Routes>
         <Route path={"/conditions"} element={<ExportsViewerConditions />} />
         <Route path={"/effects"} element={<ExportsViewerEffects />} />
         <Route path={"/dialogs"} element={<ExportsViewerDialogs />} />
         <Route path={"/*"} element={<ExportsViewerConditions />} />
       </Routes>
-    </Grid>
+    </EditorLayout>
   );
 }

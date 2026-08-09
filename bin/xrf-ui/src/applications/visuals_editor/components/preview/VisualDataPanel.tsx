@@ -1,6 +1,7 @@
-import { Box, Divider, Drawer, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Divider, Tab, Tabs, Typography } from "@mui/material";
 import { ReactElement, useMemo } from "react";
 
+import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { useTabState } from "@/lib/tab";
 
 const HEADER_FIELDS: Array<string> = ["Format version", "Model type", "Shader", "Texture", "Bounding box", "Source"];
@@ -54,23 +55,23 @@ export function VisualDataPanel(): ReactElement {
   }, [activeTab]);
 
   return (
-    <Drawer
+    <EditorSideMenu
       anchor={"right"}
-      variant={"permanent"}
-      open={true}
-      sx={{ height: "100%", width: 300, flexShrink: 0 }}
-      slotProps={{ paper: { sx: { position: "relative", width: 300 } } }}
+      width={300}
+      header={
+        <>
+          <Tabs value={activeTab} variant={"scrollable"} scrollButtons={"auto"} onChange={onActiveTabChange}>
+            <Tab value={"header"} label={"Header"} />
+            <Tab value={"bones"} label={"Bones"} />
+            <Tab value={"motions"} label={"Motions"} />
+            <Tab value={"materials"} label={"Materials"} />
+          </Tabs>
+
+          <Divider />
+        </>
+      }
     >
-      <Tabs value={activeTab} variant={"scrollable"} scrollButtons={"auto"} onChange={onActiveTabChange}>
-        <Tab value={"header"} label={"Header"} />
-        <Tab value={"bones"} label={"Bones"} />
-        <Tab value={"motions"} label={"Motions"} />
-        <Tab value={"materials"} label={"Materials"} />
-      </Tabs>
-
-      <Divider />
-
-      <Box sx={{ padding: 2, flexGrow: 1, minHeight: 0, overflowY: "auto" }}>{activeContent}</Box>
-    </Drawer>
+      <Box sx={{ padding: 2 }}>{activeContent}</Box>
+    </EditorSideMenu>
   );
 }

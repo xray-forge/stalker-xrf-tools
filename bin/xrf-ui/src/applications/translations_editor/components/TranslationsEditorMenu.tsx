@@ -1,9 +1,10 @@
-import { Box, Button, Grid } from "@mui/material";
+import { default as CloseIcon } from "@mui/icons-material/Close";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback } from "react";
+import { ReactElement, useCallback, useMemo } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { TranslationsService } from "@/applications/translations_editor/store/translations";
+import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function TranslationsEditorMenu(): ReactElement {
@@ -20,30 +21,21 @@ export function TranslationsEditorMenu(): ReactElement {
     navigate("/translations_editor", { replace: true });
   }, [log, navigate, translationsService]);
 
+  const actions: Array<IEditorSideMenuItem> = useMemo(
+    () => [
+      {
+        label: "Close",
+        icon: <CloseIcon />,
+        isDisabled: translationsService.project.isLoading,
+        onClick: onCloseClick,
+      },
+    ],
+    [translationsService.project.isLoading, onCloseClick]
+  );
+
   if (!translationsService.project.value) {
     throw new Error("Unexpected rendering of translations menu.");
   }
 
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: 240, minWidth: 240, justifySelf: "stretch" }}>
-      <Box sx={{ padding: 3 }}>{Object.keys(translationsService.project.value).length} files</Box>
-
-      <Grid container sx={{ flexGrow: 1 }} />
-
-      <Box sx={{ display: "flex", margin: 0, padding: "0 24px", width: "100%", gap: 1, flexDirection: "column" }}>
-        todo
-      </Box>
-
-      <Box sx={{ padding: 3 }}>
-        <Button
-          fullWidth={true}
-          variant={"outlined"}
-          disabled={translationsService.project.isLoading}
-          onClick={onCloseClick}
-        >
-          Close
-        </Button>
-      </Box>
-    </Box>
-  );
+  return <EditorSideMenu actions={actions} />;
 }
