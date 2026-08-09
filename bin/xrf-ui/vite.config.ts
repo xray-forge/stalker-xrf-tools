@@ -34,16 +34,8 @@ function getInitialVendorChunk(id: string): string | null {
       return "vendor-core";
     }
 
-    if (normalized.includes("/node_modules/@mui/x-data-grid/")) {
-      return "vendor-mui-data-grid";
-    }
-
     if (normalized.includes("/node_modules/@mui/") || normalized.includes("/node_modules/@emotion/")) {
       return "vendor-mui";
-    }
-
-    if (normalized.includes("/node_modules/three/")) {
-      return "vendor-three";
     }
 
     return "vendor";
