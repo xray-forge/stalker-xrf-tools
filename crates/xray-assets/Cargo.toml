@@ -2,11 +2,12 @@
 name = "xray-assets"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
-log = "0.4.33"
-walkdir = "2.5.0"
-xray-error = { path = "../xray-error" }
+log = { workspace = true }
+walkdir = { workspace = true }
+xray-error = { workspace = true }
 
 [lints]
 workspace = true

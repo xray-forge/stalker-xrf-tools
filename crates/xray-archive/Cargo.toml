@@ -2,23 +2,23 @@
 name = "xray-archive"
 version = "0.1.0"
 edition = "2024"
-resolver = "2"
+rust-version.workspace = true
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
 bounded_join_set = "0.3.0"
-byteorder = "1.5.0"
+byteorder = { workspace = true }
 crc32fast = "1.5.0"
-delharc = { path = "../xray-delharc", features = ["std", "lh1"] }
-log = "0.4.33"
+delharc = { workspace = true, features = ["std", "lh1"] }
+log = { workspace = true }
 minilzo-rs = "0.6.1"
-regex = "1.13.1"
-serde = { version = "1.0.229", features = ["derive"] }
-walkdir = "2.5.0"
-xray-error = { path = "../xray-error" }
-xray-utils = { path = "../xray-utils" }
+regex = { workspace = true }
+serde = { workspace = true }
+walkdir = { workspace = true }
+xray-error = { workspace = true }
+xray-utils = { workspace = true }
 
 [lints]
 workspace = true

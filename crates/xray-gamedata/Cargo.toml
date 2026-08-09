@@ -2,28 +2,28 @@
 name = "xray-gamedata"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
-derive_more = { version = "2.1.1", features = ["display"] }
-ddsfile = "0.5.2"
-log = "0.4.33"
-rayon = "1.12.0"
-regex = "1.13.1"
-uuid = { version = "1.24.0", features = ["v4"] }
-walkdir = "2.5.0"
-xray-db = { path = "../xray-db" }
-xray-error = { path = "../xray-error" }
-xray-ltx = { path = "../xray-ltx" }
-xray-lua = { path = "../xray-lua" }
-xray-output = { path = "../xray-output" }
-xray-report = { path = "../xray-report" }
-xray-assets = { path = "../xray-assets" }
-xray-shaders = { path = "../xray-shaders" }
-xray-sound = { path = "../xray-sound" }
-xray-utils = { path = "../xray-utils" }
+derive_more = { workspace = true, features = ["display"] }
+ddsfile = { workspace = true }
+rayon = { workspace = true }
+regex = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+walkdir = { workspace = true }
+xray-db = { workspace = true }
+xray-error = { workspace = true }
+xray-ltx = { workspace = true }
+xray-lua = { workspace = true }
+xray-output = { workspace = true }
+xray-report = { workspace = true }
+xray-assets = { workspace = true }
+xray-shaders = { workspace = true }
+xray-sound = { workspace = true }
+xray-utils = { workspace = true }
 
 [dev-dependencies]
-xray-chunk = { path = "../xray-chunk" }
+xray-chunk = { workspace = true }
 
 [lints]
 workspace = true

@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::SeekFrom;
 
 use fileslice::FileSlice;
-use parquet::file::reader::Length;
 use xray_error::{XRayError, XRayResult};
 
 use crate::iterator::chunk_iterator::ChunkIterator;

@@ -2,12 +2,13 @@
 name = "xray-test-utils"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-fileslice = "0.7.0"
+fileslice = { workspace = true }
 
 [lints]
 workspace = true

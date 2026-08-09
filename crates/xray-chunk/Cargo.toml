@@ -2,17 +2,16 @@
 name = "xray-chunk"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
-bytes = "1.12.1"
-parquet = "59.2.0"
-byteorder = "1.5.0"
-fileslice = "0.7.0"
-xray-error = { path = "../xray-error" }
-xray-utils = { path = "../xray-utils" }
+byteorder = { workspace = true }
+fileslice = { workspace = true }
+xray-error = { workspace = true }
+xray-utils = { workspace = true }
 
 [dev-dependencies]
-xray-test-utils = { path = "../xray-test-utils" }
+xray-test-utils = { workspace = true }
 
 [lints]
 workspace = true

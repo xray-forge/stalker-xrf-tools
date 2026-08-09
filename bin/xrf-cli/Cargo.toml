@@ -2,27 +2,28 @@
 name = "xrf-cli"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
 clap = { version = "4.6.6", features = ["derive", "default"] }
 colored = "3.1.1"
-ddsfile = "0.5.2"
-env_logger = "0.11.11"
-log = "0.4.33"
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
-tokio = { version = "1.53.1", features = ["full"] }
-walkdir = "2.5.0"
-xray-archive = { path = "../../crates/xray-archive" }
-xray-db = { path = "../../crates/xray-db" }
-xray-gamedata = { path = "../../crates/xray-gamedata" }
-xray-ltx = { path = "../../crates/xray-ltx" }
-xray-output = { path = "../../crates/xray-output" }
-xray-report = { path = "../../crates/xray-report" }
-xray-error = { path = "../../crates/xray-error" }
-xray-export = { path = "../../crates/xray-export" }
-xray-texture = { path = "../../crates/xray-texture" }
-xray-translation = { path = "../../crates/xray-translation" }
+ddsfile = { workspace = true }
+env_logger = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { version = "1.53.1", features = ["rt-multi-thread"] }
+walkdir = { workspace = true }
+xray-archive = { workspace = true }
+xray-db = { workspace = true }
+xray-gamedata = { workspace = true }
+xray-ltx = { workspace = true }
+xray-output = { workspace = true }
+xray-report = { workspace = true }
+xray-error = { workspace = true }
+xray-export = { workspace = true }
+xray-texture = { workspace = true }
+xray-translation = { workspace = true }
 
 [lints]
 workspace = true

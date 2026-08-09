@@ -1,5 +1,5 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "bin/xrf-app",
     "bin/xrf-cli",
@@ -24,6 +24,44 @@ members = [
     "crates/xray-translation",
     "crates/xray-utils",
 ]
+
+[workspace.package]
+rust-version = "1.97.1"
+
+[workspace.dependencies]
+byteorder = "1.5.0"
+ddsfile = "0.5.2"
+delharc = { path = "crates/xray-delharc" }
+derive_more = "2.1.1"
+env_logger = "0.11.11"
+fileslice = { version = "0.7.0", default-features = false }
+image = { version = "0.25.10", default-features = false }
+log = "0.4.33"
+rayon = "1.12.0"
+regex = "1.13.1"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+uuid = "1.24.0"
+walkdir = "2.5.0"
+xray-archive = { path = "crates/xray-archive" }
+xray-assets = { path = "crates/xray-assets" }
+xray-chunk = { path = "crates/xray-chunk" }
+xray-db = { path = "crates/xray-db" }
+xray-error = { path = "crates/xray-error" }
+xray-error-derive = { path = "crates/xray-error-derive" }
+xray-export = { path = "crates/xray-export" }
+xray-gamedata = { path = "crates/xray-gamedata" }
+xray-ltx = { path = "crates/xray-ltx" }
+xray-lua = { path = "crates/xray-lua" }
+xray-output = { path = "crates/xray-output" }
+xray-report = { path = "crates/xray-report" }
+xray-shaders = { path = "crates/xray-shaders" }
+xray-sound = { path = "crates/xray-sound" }
+xray-test-utils = { path = "crates/xray-test-utils" }
+xray-texture = { path = "crates/xray-texture" }
+xray-translation = { path = "crates/xray-translation" }
+xray-typescript = { path = "crates/xray-typescript" }
+xray-utils = { path = "crates/xray-utils" }
 
 [profile.release]
 panic = "abort"

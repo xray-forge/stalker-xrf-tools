@@ -2,21 +2,22 @@
 name = "xray-translation"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
-derive_more = { version = "2.1.1", features = ["display", "from_str"] }
-log = "0.4.33"
+derive_more = { workspace = true, features = ["display", "from_str"] }
+log = { workspace = true }
 quick-xml = { version = "0.41.0", features = ["serialize", "serde"] }
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
-walkdir = "2.5.0"
-xray-error = { path = "../xray-error" }
-xray-output = { path = "../xray-output" }
-xray-report = { path = "../xray-report" }
-xray-utils = { path = "../xray-utils" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+walkdir = { workspace = true }
+xray-error = { workspace = true }
+xray-output = { workspace = true }
+xray-report = { workspace = true }
+xray-utils = { workspace = true }
 
 [dev-dependencies]
-xray-test-utils = { path = "../xray-test-utils" }
+xray-test-utils = { workspace = true }
 
 [lints]
 workspace = true

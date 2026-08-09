@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "XRF development tools"
 authors = ["Neloreck"]
 edition = "2024"
+rust-version.workspace = true
 
 [build-dependencies]
 tauri-build = { version = "2.6.3", features = [
@@ -11,22 +12,22 @@ tauri-build = { version = "2.6.3", features = [
 ] }
 
 [dependencies]
-env_logger = "0.11.11"
-log = "0.4.33"
+env_logger = { workspace = true }
+log = { workspace = true }
 percent-encoding = "2.3.2"
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
+serde = { workspace = true }
+serde_json = { workspace = true }
 tauri = { version = "2.11.5", features = [] }
 tauri-plugin-dialog = "2.7.2"
 tauri-plugin-fs = "2.5.1"
 tauri-plugin-shell = "2.3.5"
-xray-archive = { path = "../../crates/xray-archive" }
-xray-db = { path = "../../crates/xray-db" }
-xray-export = { path = "../../crates/xray-export" }
-xray-ltx = { path = "../../crates/xray-ltx" }
-xray-output = { path = "../../crates/xray-output" }
-xray-texture = { path = "../../crates/xray-texture" }
-xray-translation = { path = "../../crates/xray-translation" }
+xray-archive = { workspace = true }
+xray-db = { workspace = true }
+xray-export = { workspace = true }
+xray-ltx = { workspace = true }
+xray-output = { workspace = true }
+xray-texture = { workspace = true }
+xray-translation = { workspace = true }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

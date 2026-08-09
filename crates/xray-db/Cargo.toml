@@ -2,29 +2,28 @@
 name = "xray-db"
 version = "0.1.0"
 edition = "2024"
-resolver = "2"
+rust-version.workspace = true
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-byteorder = "1.5.0"
-derive_more = { version = "2.1.1", features = ["display", "from_str"] }
+byteorder = { workspace = true }
+derive_more = { workspace = true, features = ["display", "from_str"] }
 enum-map = "3.1.0"
 lazy_static = "1.5.0"
-log = "0.4.33"
+log = { workspace = true }
 phf = { version = "0.14.0", features = ["macros"] }
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
-typetag = "0.2.23"
-uuid = { version = "1.24.0", features = ["v4", "serde"] }
-xray-chunk = { path = "../xray-chunk" }
-xray-error = { path = "../xray-error" }
-xray-ltx = { path = "../xray-ltx" }
-xray-utils = { path = "../xray-utils" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+xray-chunk = { workspace = true }
+xray-error = { workspace = true }
+xray-ltx = { workspace = true }
+xray-utils = { workspace = true }
 
 [dev-dependencies]
-xray-test-utils = { path = "../xray-test-utils" }
+xray-test-utils = { workspace = true }
 
 [lints]
 workspace = true

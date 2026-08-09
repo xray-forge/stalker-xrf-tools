@@ -2,10 +2,11 @@
 name = "xray-shaders"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
-xray-error = { path = "../xray-error" }
-xray-lua = { path = "../xray-lua" }
+xray-error = { workspace = true }
+xray-lua = { workspace = true }
 
 [lints]
 workspace = true

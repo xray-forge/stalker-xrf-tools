@@ -1,9 +1,6 @@
 use std::io::{Cursor, Read, Result as IoResult, Seek, SeekFrom};
 use std::ops::RangeBounds;
 
-use bytes::Buf;
-use parquet::file::reader::Length;
-
 use crate::source::chunk_data_source::ChunkDataSource;
 
 #[derive(Clone)]
@@ -18,8 +15,13 @@ impl InMemoryChunkDataSource {
     }
   }
 
+  /// Count of bytes left to read from the current cursor position.
+  pub fn len(&self) -> u64 {
+    (self.cursor.get_ref().len() as u64).saturating_sub(self.cursor.position())
+  }
+
   pub fn is_empty(&self) -> bool {
-    !self.cursor.has_remaining()
+    self.len() == 0
   }
 }
 
@@ -60,12 +62,6 @@ impl ChunkDataSource for InMemoryChunkDataSource {
     Self {
       cursor: Cursor::new(self.cursor.get_ref()[start..end].to_vec()),
     }
-  }
-}
-
-impl Length for InMemoryChunkDataSource {
-  fn len(&self) -> u64 {
-    self.cursor.remaining() as u64
   }
 }
 

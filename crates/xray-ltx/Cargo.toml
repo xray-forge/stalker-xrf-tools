@@ -2,6 +2,7 @@
 name = "xray-ltx"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 license = "MIT"
 
 [lib]
@@ -10,14 +11,14 @@ path = "src/lib.rs"
 [dependencies]
 fxhash = "0.2.1"
 indexmap = "2.14.0"
-serde = { version = "1.0.229", features = ["derive"] }
-walkdir = "2.5.0"
-xray-error = { path = "../xray-error" }
-xray-utils = { path = "../xray-utils" }
-xray-output = { path = "../xray-output" }
+serde = { workspace = true }
+walkdir = { workspace = true }
+xray-error = { workspace = true }
+xray-utils = { workspace = true }
+xray-output = { workspace = true }
 
 [dev-dependencies]
-xray-test-utils = { path = "../xray-test-utils" }
+xray-test-utils = { workspace = true }
 
 [lints]
 workspace = true

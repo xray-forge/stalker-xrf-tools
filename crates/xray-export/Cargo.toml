@@ -2,15 +2,14 @@
 name = "xray-export"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
-log = "0.4.33"
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
-walkdir = "2.5.0"
-xray-error = { path = "../xray-error" }
-xray-typescript = { path = "../xray-typescript" }
-xray-utils = { path = "../xray-utils" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+walkdir = { workspace = true }
+xray-error = { workspace = true }
+xray-typescript = { workspace = true }
 
 [lints]
 workspace = true

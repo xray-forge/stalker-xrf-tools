@@ -2,20 +2,23 @@
 name = "xray-texture"
 version = "0.1.0"
 edition = "2024"
+rust-version.workspace = true
 
 [dependencies]
-ddsfile = "0.5.2"
-image = "0.25.10"
+ddsfile = { workspace = true }
+image = { workspace = true, features = [
+  "rayon", "bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp",
+] }
 image_dds = "0.7.2"
-log = "0.4.33"
+log = { workspace = true }
 path-absolutize = "4.0.1"
-rayon = "1.12.0"
+rayon = { workspace = true }
 roxmltree = "0.21.1"
-serde = { version = "1.0.229", features = ["derive"] }
-xray-error = { path = "../xray-error" }
-xray-ltx = { path = "../xray-ltx" }
-xray-output = { path = "../xray-output" }
-xray-utils = { path = "../xray-utils" }
+serde = { workspace = true }
+xray-error = { workspace = true }
+xray-ltx = { workspace = true }
+xray-output = { workspace = true }
+xray-utils = { workspace = true }
 
 [lints]
 workspace = true

@@ -55,8 +55,7 @@ impl GenericCommand for VerifyEquipmentIconsCommand {
       .get_one::<PathBuf>("system-ltx")
       .expect("Expected valid path to system ltx to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let ltx: Ltx = Ltx::read_from_file_full(path)?;
     let overlaps: Vec<EquipmentGridOverlap> = VerifyEquipmentGridProcessor::find_overlaps(&ltx);
