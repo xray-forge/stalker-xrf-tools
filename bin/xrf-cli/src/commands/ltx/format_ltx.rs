@@ -141,6 +141,7 @@ mod tests {
   use xray_error::XRayResult;
 
   use super::FormatLtxCommand;
+  use crate::generic_command::{CommandResult, GenericCommand};
 
   fn create_root(name: &str) -> XRayResult<PathBuf> {
     let root: PathBuf = std::env::temp_dir().join(format!("xrf-cli-format-ltx-{name}-{}", std::process::id()));
@@ -218,6 +219,56 @@ mod tests {
     let missing: PathBuf = root.join("absent.ltx");
 
     assert!(FormatLtxCommand::collect_ltx_files(&[&missing]).is_err());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
+
+  #[test]
+  fn preserves_standalone_semicolon_comments() -> CommandResult {
+    let root: PathBuf = create_root("standalone-comment")?;
+    let file: PathBuf = root.join("comment.ltx");
+
+    fs::write(&file, ";\n")?;
+
+    let command: FormatLtxCommand = FormatLtxCommand;
+    let matches =
+      command
+        .init()
+        .try_get_matches_from(["format-ltx", "--path", &file.display().to_string(), "--silent"])?;
+
+    command.execute(&matches)?;
+
+    assert_eq!(fs::read_to_string(&file)?, ";\r\n");
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
+
+  #[test]
+  fn formatting_standalone_comment_is_idempotent() -> CommandResult {
+    let root: PathBuf = create_root("idempotent-comment")?;
+    let file: PathBuf = root.join("comment.ltx");
+    let expected: Vec<u8> = b";\r\n".to_vec();
+
+    fs::write(&file, &expected)?;
+
+    let command: FormatLtxCommand = FormatLtxCommand;
+    let matches =
+      command
+        .init()
+        .try_get_matches_from(["format-ltx", "--path", &file.display().to_string(), "--silent"])?;
+
+    command.execute(&matches)?;
+    let formatted_once: Vec<u8> = fs::read(&file)?;
+
+    command.execute(&matches)?;
+    let formatted_twice: Vec<u8> = fs::read(&file)?;
+
+    assert_eq!(formatted_once, expected);
+    assert_eq!(formatted_twice, formatted_once);
 
     fs::remove_dir_all(root)?;
 

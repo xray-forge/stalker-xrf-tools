@@ -4,13 +4,18 @@ use crate::LineSeparator;
 pub struct LtxFormatter {}
 
 impl LtxFormatter {
-  /// Write comment statement, filter empty comments.
+  /// Write comment statement.
   pub fn write_comment(destination: &mut String, comment: &str) {
     let comment: &str = comment.trim();
 
+    destination.push(';');
+
     if !comment.is_empty() {
-      destination.push_str(&format!("; {comment}{}", LineSeparator::CRLF.as_str()));
+      destination.push(' ');
+      destination.push_str(comment);
     }
+
+    destination.push_str(LineSeparator::CRLF.as_str());
   }
 
   /// Write include statement.
@@ -79,12 +84,12 @@ mod test {
   }
 
   #[test]
-  fn test_write_comment_empty() {
+  fn writes_standalone_semicolon_comment() {
     let mut destination: String = String::new();
 
     LtxFormatter::write_comment(&mut destination, "   ");
 
-    assert_eq!(destination, "");
+    assert_eq!(destination, ";\r\n");
   }
 
   #[test]
