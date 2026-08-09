@@ -13,7 +13,6 @@ export function DialogEditorPage(): ReactElement {
 
   return (
     <ToolNavigator
-      title={"XRF dialog editor"}
       helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/dialog_editor.html"}
       items={items}
     />

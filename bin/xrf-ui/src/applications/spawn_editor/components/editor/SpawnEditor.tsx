@@ -11,11 +11,18 @@ import { SpawnEditorMenu } from "@/applications/spawn_editor/components/editor/S
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 
 export function SpawnEditor(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
   const navigate: NavigateFunction = useNavigate();
+
+  const header = spawnFileService.spawnFile.value?.header;
+
+  useEditorStatus(
+    header ? [`version ${header.version}`, `${header.objectsCount} objects`, `${header.levelsCount} levels`] : []
+  );
 
   const onClose = useCallback(() => {
     navigate("/spawn_editor", { replace: true });
@@ -24,7 +31,7 @@ export function SpawnEditor(): ReactElement {
   }, [navigate, spawnFileService]);
 
   return (
-    <EditorLayout toolbar={<EditorToolbar title={"Spawn editor"} onBack={onClose} />} menu={<SpawnEditorMenu />}>
+    <EditorLayout toolbar={<EditorToolbar onBack={onClose} />} menu={<SpawnEditorMenu />}>
       <Routes>
         <Route path={"/header"} element={<SpawnEditorHeader />} />
         <Route path={"/alife"} element={<SpawnEditorAlife />} />

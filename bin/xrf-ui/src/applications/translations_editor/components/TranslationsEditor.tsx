@@ -6,6 +6,7 @@ import { TranslationsEditorWorkspace } from "@/applications/translations_editor/
 import { TranslationsService } from "@/applications/translations_editor/store/translations";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function TranslationsEditor(): ReactElement {
@@ -17,6 +18,8 @@ export function TranslationsEditor(): ReactElement {
 
   const fileCount: number = Object.keys(translationsService.project.value ?? {}).length;
 
+  useEditorStatus([`${fileCount} files`]);
+
   const onClose = useCallback(async () => {
     log.info("Closing translations");
 
@@ -27,9 +30,7 @@ export function TranslationsEditor(): ReactElement {
 
   return (
     <EditorLayout
-      toolbar={
-        <EditorToolbar title={"Translations editor"} subtitle={`${fileCount} files`} onBack={onClose} />
-      }
+      toolbar={<EditorToolbar onBack={onClose} />}
     >
       <TranslationsEditorWorkspace />
     </EditorLayout>

@@ -3,6 +3,7 @@ import { ReactElement, ReactNode } from "react";
 
 import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
+import { EditorStatusProvider } from "@/core/components/shell/EditorStatusContext";
 
 export interface IApplicationShellProps {
   children: ReactNode;
@@ -16,14 +17,16 @@ export interface IApplicationShellProps {
  */
 export function ApplicationShell({ children }: IApplicationShellProps): ReactElement {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
-      <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
-        <ApplicationRail />
+    <EditorStatusProvider>
+      <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
+        <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
+          <ApplicationRail />
 
-        <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>{children}</Box>
+          <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>{children}</Box>
+        </Box>
+
+        <ApplicationStatusBar />
       </Box>
-
-      <ApplicationStatusBar />
-    </Box>
+    </EditorStatusProvider>
   );
 }

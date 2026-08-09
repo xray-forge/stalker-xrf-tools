@@ -1,32 +1,26 @@
-import { Box, Button, ButtonGroup, Card, Grid, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { ReactElement } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
+
+import { EditorLayout } from "@/core/components/editor/EditorLayout";
+import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 
 export function NavigationError(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      <Grid container sx={{ justifyContent: "center", marginBottom: 2 }}>
-        <Typography>XRF navigation error</Typography>
-      </Grid>
+    <EditorLayout toolbar={<EditorToolbar title={"Not found"} />}>
+      <Box sx={{ width: "100%", height: "100%", overflowY: "auto", padding: 3 }}>
+        <Typography variant={"subtitle1"}>This route does not exist</Typography>
 
-      <Card>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <ButtonGroup orientation={"vertical"}>
-            <Button onClick={() => navigate("/", { replace: true })}>Go home</Button>
-          </ButtonGroup>
-        </Box>
-      </Card>
-    </Box>
+        <Typography variant={"body2"} sx={{ color: "text.secondary", marginTop: 0.5, marginBottom: 2 }}>
+          The link may be out of date, or the tool it pointed at has been renamed.
+        </Typography>
+
+        <Button variant={"contained"} onClick={() => navigate("/", { replace: true })}>
+          Go home
+        </Button>
+      </Box>
+    </EditorLayout>
   );
 }

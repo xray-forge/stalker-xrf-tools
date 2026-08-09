@@ -15,7 +15,6 @@ export function VisualsEditorNavigatorPage(): ReactElement {
 
   return (
     <ToolNavigator
-      title={"XRF visuals editor"}
       helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/app.html"}
       items={items}
     />

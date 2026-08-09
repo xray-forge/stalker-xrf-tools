@@ -15,7 +15,6 @@ export function ArchivesEditorNavigatorPage(): ReactElement {
 
   return (
     <ToolNavigator
-      title={"XRF archive editor"}
       helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/archive_editor.html"}
       items={items}
     />

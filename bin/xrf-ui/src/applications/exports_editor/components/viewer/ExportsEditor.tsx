@@ -9,11 +9,24 @@ import { ExportsEditorMenu } from "@/applications/exports_editor/components/view
 import { ExportsService } from "@/applications/exports_editor/store/exports";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 
 export function ExportsEditor(): ReactElement {
   const exportsService: ExportsService = useInjection(ExportsService);
 
   const navigate: NavigateFunction = useNavigate();
+
+  const declarations = exportsService.declarations.value;
+
+  useEditorStatus(
+    declarations
+      ? [
+        `${declarations.conditions.length} conditions`,
+        `${declarations.dialogs.length} dialogs`,
+        `${declarations.effects.length} effects`,
+      ]
+      : []
+  );
 
   const onClose = useCallback(() => {
     navigate("/exports_editor", { replace: true });
@@ -23,7 +36,7 @@ export function ExportsEditor(): ReactElement {
 
   return (
     <EditorLayout
-      toolbar={<EditorToolbar title={"Exports editor"} onBack={onClose} />}
+      toolbar={<EditorToolbar onBack={onClose} />}
       menu={<ExportsEditorMenu />}
     >
       <Routes>

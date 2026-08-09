@@ -17,7 +17,6 @@ export function ConfigsEditorNavigatorPage(): ReactElement {
 
   return (
     <ToolNavigator
-      title={"XRF configs editor"}
       helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/config_editor.html"}
       items={items}
     />

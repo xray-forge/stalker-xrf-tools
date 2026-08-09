@@ -2,9 +2,10 @@ import { Box } from "@mui/material";
 import { ReactElement, useEffect, useRef } from "react";
 
 import { Optional } from "@/core/types/general";
-import { createStubVisualMeshData, IVisualPreviewViewOptions, VisualPreviewScene } from "@/lib/visuals";
+import { IVisualMeshData, IVisualPreviewViewOptions, VisualPreviewScene } from "@/lib/visuals";
 
 interface IVisualPreviewViewportProps {
+  mesh: IVisualMeshData;
   options: IVisualPreviewViewOptions;
   cameraResetToken: number;
 }
@@ -16,17 +17,20 @@ interface IVisualPreviewViewportProps {
  * clean webgl context instead of leaking the previous one. View options are read through a ref on mount
  * so a remount restores whatever the toolbar currently shows.
  */
-export function VisualPreviewViewport({ options, cameraResetToken }: IVisualPreviewViewportProps): ReactElement {
+export function VisualPreviewViewport({ mesh, options, cameraResetToken }: IVisualPreviewViewportProps): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<Optional<VisualPreviewScene>>(null);
   const optionsRef = useRef<IVisualPreviewViewOptions>(options);
+  const meshRef = useRef<IVisualMeshData>(mesh);
+
+  meshRef.current = mesh;
 
   useEffect(() => {
     if (!containerRef.current) {
       return;
     }
 
-    const scene: VisualPreviewScene = new VisualPreviewScene(createStubVisualMeshData());
+    const scene: VisualPreviewScene = new VisualPreviewScene(meshRef.current);
 
     sceneRef.current = scene;
 

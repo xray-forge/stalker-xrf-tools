@@ -1,11 +1,12 @@
-import { ReactElement, ReactNode, useCallback, useState } from "react";
+import { ReactElement, ReactNode, useCallback, useMemo, useState } from "react";
 
 import { VisualDataPanel } from "@/applications/visuals_editor/components/preview/VisualDataPanel";
 import { VisualPreviewAnimationBar } from "@/applications/visuals_editor/components/preview/VisualPreviewAnimationBar";
 import { VisualPreviewToolbar } from "@/applications/visuals_editor/components/preview/VisualPreviewToolbar";
 import { VisualPreviewViewport } from "@/applications/visuals_editor/components/preview/VisualPreviewViewport";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { IVisualPreviewViewOptions } from "@/lib/visuals";
+import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { createStubVisualMeshData, IVisualMeshData, IVisualPreviewViewOptions } from "@/lib/visuals";
 
 const DEFAULT_VIEW_OPTIONS: IVisualPreviewViewOptions = {
   isWireframe: false,
@@ -25,6 +26,10 @@ export function VisualPreviewLayout({ tree }: IVisualPreviewLayoutProps): ReactE
   const [options, setOptions] = useState<IVisualPreviewViewOptions>(DEFAULT_VIEW_OPTIONS);
   const [cameraResetToken, setCameraResetToken] = useState(0);
 
+  const mesh: IVisualMeshData = useMemo(() => createStubVisualMeshData(), []);
+
+  useEditorStatus([`${mesh.positions.length / 3} vertices`, `${mesh.indices.length / 3} triangles`]);
+
   const onResetCamera = useCallback(() => setCameraResetToken((it) => it + 1), []);
 
   return (
@@ -34,7 +39,7 @@ export function VisualPreviewLayout({ tree }: IVisualPreviewLayoutProps): ReactE
       aside={<VisualDataPanel />}
       footer={<VisualPreviewAnimationBar />}
     >
-      <VisualPreviewViewport options={options} cameraResetToken={cameraResetToken} />
+      <VisualPreviewViewport mesh={mesh} options={options} cameraResetToken={cameraResetToken} />
     </EditorLayout>
   );
 }

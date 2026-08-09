@@ -39,7 +39,6 @@ export function VisualPreviewToolbar({
 
   return (
     <EditorToolbar
-      title={"Visuals editor"}
       subtitle={"Stub visual"}
       backPath={"/visuals_editor"}
       actions={

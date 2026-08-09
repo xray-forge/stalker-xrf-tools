@@ -7,6 +7,7 @@ import { EquipmentSpriteEditorWorkspace } from "@/applications/icons_editor/comp
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 
 export function EquipmentSpriteEditor(): ReactElement {
   const equipmentService: EquipmentService = useInjection(EquipmentService);
@@ -14,10 +15,14 @@ export function EquipmentSpriteEditor(): ReactElement {
 
   const navigate: NavigateFunction = useNavigate();
 
-  const subtitle: string = spriteImage
-    ? `${spriteImage.path} (${spriteImage.image.width}px * ${spriteImage.image.height}px), ` +
-      `${spriteImage.descriptors.length} descriptors`
-    : "";
+  useEditorStatus(
+    spriteImage
+      ? [
+        `${spriteImage.image.width} x ${spriteImage.image.height}`,
+        `${spriteImage.descriptors.length} descriptors`,
+      ]
+      : []
+  );
 
   const onClose = useCallback(async () => {
     await equipmentService.closeEquipmentProject();
@@ -27,7 +32,7 @@ export function EquipmentSpriteEditor(): ReactElement {
 
   return (
     <EditorLayout
-      toolbar={<EditorToolbar title={"Icons editor"} subtitle={subtitle} onBack={onClose} />}
+      toolbar={<EditorToolbar subtitle={spriteImage?.path} onBack={onClose} />}
       menu={<EquipmentSpriteEditorMenu />}
     >
       <EquipmentSpriteEditorWorkspace />

@@ -10,36 +10,84 @@ import { ReactElement } from "react";
 
 export interface IApplicationTool {
   label: string;
+  title: string;
   description: string;
   icon: ReactElement;
   path: string;
 }
 
 /**
- * The tool roster, shared by the rail and the welcome page so they can never disagree.
+ * Resolve the tool owning a route.
+ *
+ * Every surface that needs to name the current tool goes through here, so the rail, the toolbar and
+ * the navigator cannot drift into three different names for one thing.
+ */
+export function findApplicationTool(pathname: string): IApplicationTool | null {
+  return APPLICATION_TOOLS.find((tool) => pathname.startsWith(tool.path)) ?? null;
+}
+
+/**
+ * The tool roster: the single source for how a tool is named anywhere in the application.
+ *
+ * `label` is the short form the rail and status bar use, `title` the long form for headers. The `XRF`
+ * prefix is deliberately absent - it is already the window title, and repeating it inside the app was
+ * noise.
  */
 export const APPLICATION_TOOLS: Array<IApplicationTool> = [
   {
     label: "Archives",
+    title: "Archives editor",
     description: "Browse and unpack game archives",
     icon: <ArchiveIcon />,
     path: "/archives_editor",
   },
-  { label: "Dialogs", description: "Edit NPC dialog graphs", icon: <ForumIcon />, path: "/dialog_editor" },
+  {
+    label: "Dialogs",
+    title: "Dialog editor",
+    description: "Edit NPC dialog graphs",
+    icon: <ForumIcon />,
+    path: "/dialog_editor",
+  },
   {
     label: "Configs",
+    title: "Configs editor",
     description: "Explore, verify and format LTX",
     icon: <SettingsApplicationsIcon />,
     path: "/configs_editor",
   },
-  { label: "Exports", description: "Inspect script exports", icon: <SwapHorizIcon />, path: "/exports_editor" },
-  { label: "Icons", description: "Edit equipment and icon sprites", icon: <ImageIcon />, path: "/icons_editor" },
-  { label: "Spawns", description: "Inspect spawn files", icon: <MapIcon />, path: "/spawn_editor" },
+  {
+    label: "Exports",
+    title: "Exports editor",
+    description: "Inspect script exports",
+    icon: <SwapHorizIcon />,
+    path: "/exports_editor",
+  },
+  {
+    label: "Icons",
+    title: "Icons editor",
+    description: "Edit equipment and icon sprites",
+    icon: <ImageIcon />,
+    path: "/icons_editor",
+  },
+  {
+    label: "Spawns",
+    title: "Spawn editor",
+    description: "Inspect spawn files",
+    icon: <MapIcon />,
+    path: "/spawn_editor",
+  },
   {
     label: "Translations",
+    title: "Translations editor",
     description: "Manage localization tables",
     icon: <TranslateIcon />,
     path: "/translations_editor",
   },
-  { label: "Visuals", description: "Preview models and animations", icon: <ViewInArIcon />, path: "/visuals_editor" },
+  {
+    label: "Visuals",
+    title: "Visuals editor",
+    description: "Preview models and animations",
+    icon: <ViewInArIcon />,
+    path: "/visuals_editor",
+  },
 ];

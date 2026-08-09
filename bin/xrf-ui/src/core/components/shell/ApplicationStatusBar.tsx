@@ -1,29 +1,24 @@
 import { Box, Typography } from "@mui/material";
 import { ReactElement } from "react";
-import { useLocation } from "react-router-dom";
 
-import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/applicationTools";
-import { Optional } from "@/core/types/general";
+import { useEditorStatusSegments } from "@/core/components/shell/EditorStatusContext";
 import { LAYOUT } from "@/lib/theme/tokens";
 
 /**
  * Bottom status strip.
  *
- * Currently reports only which tool is active. It exists now so editors have somewhere to put counts,
- * paths and progress instead of growing their own footers.
+ * Reports what the active editor publishes through `useEditorStatus`. It deliberately does not repeat
+ * the tool name: the rail already shows that, and the header says it again.
  */
 export function ApplicationStatusBar(): ReactElement {
-  const { pathname } = useLocation();
-
-  const active: Optional<IApplicationTool> =
-    APPLICATION_TOOLS.find((tool) => pathname.startsWith(tool.path)) ?? null;
+  const segments: Array<string> = useEditorStatusSegments();
 
   return (
     <Box
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 1,
+        gap: 1.5,
         height: LAYOUT.statusBarHeight,
         minHeight: LAYOUT.statusBarHeight,
         paddingX: 1.5,
@@ -32,15 +27,17 @@ export function ApplicationStatusBar(): ReactElement {
         backgroundColor: "background.paper",
       }}
     >
-      <Typography variant={"caption"} sx={{ color: "text.secondary" }}>
-        {active ? active.description : "XRF development tools"}
-      </Typography>
-
-      <Box sx={{ flexGrow: 1 }} />
-
-      <Typography variant={"caption"} sx={{ color: "text.secondary" }}>
-        {active ? active.label : "Home"}
-      </Typography>
+      {segments.length ? (
+        segments.map((segment: string, index: number) => (
+          <Typography key={segment + index} variant={"caption"} noWrap sx={{ color: "text.secondary" }}>
+            {segment}
+          </Typography>
+        ))
+      ) : (
+        <Typography variant={"caption"} sx={{ color: "text.secondary", opacity: 0.7 }}>
+          Ready
+        </Typography>
+      )}
     </Box>
   );
 }
