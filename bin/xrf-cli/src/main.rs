@@ -30,6 +30,7 @@ use commands::spawn::verify_spawn::VerifySpawnFileCommand;
 use commands::texture::pack_equipment_icons::PackEquipmentIconsCommand;
 use commands::texture::pack_texture_description::PackTextureDescriptionCommand;
 use commands::texture::unpack_equipment_icons::UnpackEquipmentIconsCommand;
+use commands::texture::verify_equipment_icons::VerifyEquipmentIconsCommand;
 use commands::texture::unpack_texture_description::UnpackTextureDescriptionCommand;
 use commands::translation::build_translations::BuildTranslationsCommand;
 use commands::translation::initialize_translations::InitializeTranslationsCommand;
@@ -121,6 +122,7 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     PackEquipmentIconsCommand::new_box(),
     PackTextureDescriptionCommand::new_box(),
     UnpackEquipmentIconsCommand::new_box(),
+    VerifyEquipmentIconsCommand::new_box(),
     UnpackTextureDescriptionCommand::new_box(),
     // Translations:
     BuildTranslationsCommand::new_box(),

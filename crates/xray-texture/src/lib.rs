@@ -32,3 +32,5 @@ pub use crate::equipment::pack_equipment_processor::PackEquipmentProcessor;
 pub use crate::equipment::pack_equipment_result::PackEquipmentResult;
 pub use crate::equipment::unpack_equipment_options::UnpackEquipmentOptions;
 pub use crate::equipment::unpack_equipment_processor::UnpackEquipmentProcessor;
+pub use crate::equipment::verify_equipment_grid_processor::EquipmentGridOverlap;
+pub use crate::equipment::verify_equipment_grid_processor::VerifyEquipmentGridProcessor;
