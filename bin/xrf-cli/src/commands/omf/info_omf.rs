@@ -82,9 +82,10 @@ impl GenericCommand for InfoOmfCommand {
 
       xray_output::verbose!(
         output,
-        "Motion '{}': keyframes {}, speed {}, power {}, accrue {}, falloff {}",
+        "Motion '{}': keyframes {}, flags {:#04b}, speed {}, power {}, accrue {}, falloff {}",
         definition.name,
         keyframes.map_or_else(|| String::from("?"), |it| it.to_string()),
+        definition.flags,
         definition.speed,
         definition.power,
         definition.accrue,
