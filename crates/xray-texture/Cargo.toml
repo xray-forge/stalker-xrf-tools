@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 ddsfile = "0.5.2"
-image = "0.25.9"
+image = "0.25.10"
 image_dds = "0.7.2"
 log = "0.4.28"
 path-absolutize = "3.1.1"
