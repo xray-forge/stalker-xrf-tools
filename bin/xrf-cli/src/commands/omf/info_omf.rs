@@ -71,6 +71,26 @@ impl GenericCommand for InfoOmfCommand {
         .join(",")
     );
 
+    // Keyframe count and playback speed together give effective duration.
+    for definition in &omf_file.parameters.motions {
+      let keyframes: Option<u32> = omf_file
+        .motions
+        .motions
+        .get(definition.motion as usize)
+        .map(|it| it.count);
+
+      xray_output::verbose!(
+        output,
+        "Motion '{}': keyframes {}, speed {}, power {}, accrue {}, falloff {}",
+        definition.name,
+        keyframes.map_or_else(|| String::from("?"), |it| it.to_string()),
+        definition.speed,
+        definition.power,
+        definition.accrue,
+        definition.falloff
+      );
+    }
+
     xray_output::info!(
       output,
       "Bones total: {}",
