@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkDataSource, ChunkReader};
 use xray_error::{XRayError, XRayResult};
 
+use crate::data::ogf::ogf_vertex::OgfVertex;
+use crate::data::ogf::ogf_vertices::OgfVertices;
+
 /// Geometry embedded directly in an OGF visual.
 ///
 /// Geometry can instead be stored in shared vertex or index containers. In
@@ -13,6 +16,10 @@ pub struct OgfGeometry {
   pub vertex_count: Option<u32>,
   pub indices: Option<Vec<u16>>,
   pub skin_bone_indices: Vec<u16>,
+  /// Stored vertex format tag, kept so the data can be written back in the form it arrived in.
+  pub vertex_format: Option<u32>,
+  /// Fully decoded vertices, absent for a format whose layout is not known.
+  pub vertices: Option<Vec<OgfVertex>>,
 }
 
 impl OgfGeometry {
@@ -32,7 +39,7 @@ impl OgfGeometry {
   pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(
     chunks: &[ChunkReader<D>],
   ) -> XRayResult<Option<Self>> {
-    let vertices: Option<(u32, Vec<u16>)> = match chunks
+    let vertices: Option<OgfVertices> = match chunks
       .iter()
       .find(|chunk| chunk.id == Self::VERTICES_CHUNK_ID)
     {
@@ -51,25 +58,32 @@ impl OgfGeometry {
     match (vertices, indices) {
       (None, None) => Ok(None),
       (vertices, indices) => Ok(Some(Self {
-        vertex_count: vertices.as_ref().map(|(count, _)| *count),
+        vertex_count: vertices.as_ref().map(|it| it.count),
         indices,
         skin_bone_indices: vertices
-          .map(|(_, bone_indices)| bone_indices)
+          .as_ref()
+          .map(OgfVertices::collect_bone_indices)
           .unwrap_or_default(),
+        vertex_format: vertices.as_ref().map(|it| it.format),
+        vertices: vertices.and_then(|it| it.vertices),
       })),
     }
   }
 
   fn read_vertices<T: ByteOrder, D: ChunkDataSource>(
     reader: &mut ChunkReader<D>,
-  ) -> XRayResult<(u32, Vec<u16>)> {
+  ) -> XRayResult<OgfVertices> {
     let vertex_format: u32 = reader.read_u32::<T>()?;
     let vertex_count: u32 = reader.read_u32::<T>()?;
     let vertices: Vec<u8> = reader.read_remaining()?;
 
     let Some((vertex_size, bone_indices_per_vertex)) = Self::skin_vertex_layout(vertex_format)
     else {
-      return Ok((vertex_count, Vec::new()));
+      return Ok(OgfVertices {
+        format: vertex_format,
+        count: vertex_count,
+        vertices: None,
+      });
     };
 
     let expected_size: usize = (vertex_count as usize)
@@ -83,22 +97,20 @@ impl OgfGeometry {
       )));
     }
 
-    let mut skin_bone_indices: Vec<u16> =
-      Vec::with_capacity((vertex_count as usize) * bone_indices_per_vertex);
+    let mut parsed: Vec<OgfVertex> = Vec::with_capacity(vertex_count as usize);
 
     for vertex in vertices.chunks_exact(vertex_size) {
-      match bone_indices_per_vertex {
-        1 => skin_bone_indices.push(T::read_u32(&vertex[56..60]) as u16),
-        count => {
-          for index in 0..count {
-            let offset: usize = index * 2;
-            skin_bone_indices.push(T::read_u16(&vertex[offset..offset + 2]));
-          }
-        }
-      }
+      parsed.push(OgfVertex::read_from_slice::<T>(
+        vertex,
+        bone_indices_per_vertex,
+      ));
     }
 
-    Ok((vertex_count, skin_bone_indices))
+    Ok(OgfVertices {
+      format: vertex_format,
+      count: vertex_count,
+      vertices: Some(parsed),
+    })
   }
 
   fn read_indices<T: ByteOrder, D: ChunkDataSource>(
