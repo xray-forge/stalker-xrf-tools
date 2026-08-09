@@ -2,13 +2,14 @@ import { default as DarkModeIcon } from "@mui/icons-material/DarkMode";
 import { default as GitHubIcon } from "@mui/icons-material/GitHub";
 import { default as HomeIcon } from "@mui/icons-material/Home";
 import { default as LightModeIcon } from "@mui/icons-material/LightMode";
+import { default as SettingsIcon } from "@mui/icons-material/Settings";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
 import { open } from "@tauri-apps/plugin-shell";
-import { ReactElement, ReactNode, useCallback } from "react";
+import { ReactElement, ReactNode, useCallback, useState } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
-import { SettingsModalButton } from "@/core/components/settings/SettingsModalButton";
+import { SettingsDialog } from "@/core/components/settings/SettingsDialog";
 import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/applicationTools";
 import { Maybe } from "@/core/types/general";
 import { LAYOUT } from "@/lib/theme/tokens";
@@ -49,6 +50,8 @@ export function ApplicationRail(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
   const { pathname } = useLocation();
   const { mode, setMode, systemMode } = useColorScheme();
+
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   const resolvedMode: Maybe<string> = mode === "system" ? systemMode : mode;
   const isLightMode: boolean = resolvedMode === "light";
@@ -105,7 +108,9 @@ export function ApplicationRail(): ReactElement {
 
       <RailButton label={"Source on github"} icon={<GitHubIcon />} onClick={onOpenGithubLink} />
 
-      <SettingsModalButton />
+      <RailButton label={"Settings"} icon={<SettingsIcon />} onClick={() => setSettingsOpen(true)} />
+
+      <SettingsDialog isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} />
     </Box>
   );
 }

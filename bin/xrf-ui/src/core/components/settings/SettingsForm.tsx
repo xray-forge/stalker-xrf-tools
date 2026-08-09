@@ -1,135 +1,105 @@
-import { default as FolderIcon } from "@mui/icons-material/Folder";
-import { Box, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Typography } from "@mui/material";
+import { Box, Divider, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exists } from "@tauri-apps/plugin-fs";
 import { useInjection } from "@wirestate/react";
-import { MouseEvent, ReactElement, ReactNode, useCallback } from "react";
+import { ReactElement, useCallback } from "react";
 
+import { SettingsPathField } from "@/core/components/settings/SettingsPathField";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { getProjectConfigsPath } from "@/lib/xrf_path";
 
-export interface ISettingsFormProps {
-  title?: ReactNode;
-  isWithProjectForm?: boolean;
-  isWithConfigsForm?: boolean;
-  padding?: number | string;
-}
+type ColorSchemeMode = "light" | "dark" | "system";
 
-export function SettingsForm({
-  title,
-  isWithProjectForm = true,
-  isWithConfigsForm = true,
-  padding = 2,
-}: ISettingsFormProps): ReactElement {
+export function SettingsForm(): ReactElement {
   const log: Logger = useLogger("settings-modal");
 
   const projectService: ProjectService = useInjection(ProjectService);
+  const { mode, setMode } = useColorScheme();
 
-  const onSelectProjectPath = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      event.preventDefault();
+  const onSelectProjectPath = useCallback(async () => {
+    const newXrfProjectPath: Optional<string> = (await open({
+      title: "Provide path to xrf project",
+      directory: true,
+    })) as Optional<string>;
 
-      const newXrfProjectPath: Optional<string> = (await open({
-        title: "Provide path to xrf project",
-        directory: true,
-      })) as Optional<string>;
+    if (newXrfProjectPath) {
+      log.info("Selected new project path:", newXrfProjectPath);
 
-      if (newXrfProjectPath) {
-        log.info("Selected new project path:", newXrfProjectPath);
+      projectService.setXrfProjectPath(newXrfProjectPath);
 
-        projectService.setXrfProjectPath(newXrfProjectPath);
+      // Try to auto-guess configs folder from xrf directory.
+      if (!projectService.xrfConfigsPath) {
+        const newXrfConfigsPath: string = await getProjectConfigsPath(newXrfProjectPath);
 
-        // Try to auto-guess configs folder from xrf directory.
-        if (!projectService.xrfConfigsPath) {
-          const newXrfConfigsPath: string = await getProjectConfigsPath(newXrfProjectPath);
-
-          if (await exists(newXrfConfigsPath)) {
-            log.info("Automatically selected new configs path:", newXrfConfigsPath);
-            projectService.setXrfConfigsPath(newXrfConfigsPath);
-          }
+        if (await exists(newXrfConfigsPath)) {
+          log.info("Automatically selected new configs path:", newXrfConfigsPath);
+          projectService.setXrfConfigsPath(newXrfConfigsPath);
         }
       }
-    },
-    [log, projectService]
-  );
+    }
+  }, [log, projectService]);
 
-  const onSelectProjectPathClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectProjectPath(event),
-    [onSelectProjectPath]
-  );
+  const onSelectConfigsPath = useCallback(async () => {
+    const newXrfConfigsPath: Optional<string> = (await open({
+      title: "Provide path to xrf configs",
+      directory: true,
+    })) as Optional<string>;
 
-  const onSelectConfigsPath = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      event.preventDefault();
+    if (newXrfConfigsPath) {
+      log.info("Selected new configs path:", newXrfConfigsPath);
 
-      const newXrfConfigsPath: Optional<string> = (await open({
-        title: "Provide path to xrf configs",
-        directory: true,
-      })) as Optional<string>;
+      projectService.setXrfConfigsPath(newXrfConfigsPath);
+    }
+  }, [log, projectService]);
 
-      if (newXrfConfigsPath) {
-        log.info("Selected new configs path:", newXrfConfigsPath);
+  const onClearProjectPath = useCallback(() => projectService.setXrfProjectPath(null), [projectService]);
+  const onClearConfigsPath = useCallback(() => projectService.setXrfConfigsPath(null), [projectService]);
 
-        projectService.setXrfConfigsPath(newXrfConfigsPath);
+  const onChangeMode = useCallback(
+    (_: unknown, value: Optional<ColorSchemeMode>) => {
+      if (value) {
+        setMode(value);
       }
     },
-    [log, projectService]
-  );
-
-  const onSelectConfigsPathClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectConfigsPath(event),
-    [onSelectConfigsPath]
+    [setMode]
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", padding: padding, gap: 2 }}>
-      {title ? <Typography variant={"h5"}>{title}</Typography> : null}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box>
+        <Typography variant={"subtitle2"}>Appearance</Typography>
 
-      {isWithProjectForm ? (
-        <FormControl size={"small"} variant={"outlined"}>
-          <InputLabel size={"small"}>Project</InputLabel>
-          <OutlinedInput
-            size={"small"}
-            type={"text"}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectProjectPath}>
-                <IconButton edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            label={"Project"}
-            value={projectService.xrfProjectPath || ""}
-            readOnly
-            onClick={onSelectProjectPathClicked}
-          />
-        </FormControl>
-      ) : null}
+        <Typography variant={"caption"} sx={{ display: "block", color: "text.secondary", marginBottom: 1 }}>
+          Follow the system theme, or pin the application to one.
+        </Typography>
 
-      {isWithConfigsForm ? (
-        <FormControl size={"small"} variant={"outlined"}>
-          <InputLabel size={"small"}>Configs</InputLabel>
-          <OutlinedInput
-            size={"small"}
-            type={"text"}
-            endAdornment={
-              <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
-                <IconButton edge={"end"}>
-                  <FolderIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            label={"Configs"}
-            value={projectService.xrfConfigsPath || ""}
-            readOnly
-            onClick={onSelectConfigsPathClicked}
-          />
-        </FormControl>
-      ) : null}
+        <ToggleButtonGroup exclusive size={"small"} value={mode ?? "system"} onChange={onChangeMode}>
+          <ToggleButton value={"light"}>Light</ToggleButton>
+          <ToggleButton value={"dark"}>Dark</ToggleButton>
+          <ToggleButton value={"system"}>System</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
+      <Divider />
+
+      <SettingsPathField
+        label={"Project"}
+        description={"Root of the xrf project. Most tools resolve their defaults from here."}
+        value={projectService.xrfProjectPath}
+        onSelect={onSelectProjectPath}
+        onClear={onClearProjectPath}
+      />
+
+      <SettingsPathField
+        label={"Configs"}
+        description={"Directory holding LTX configs. Guessed from the project path when it is left empty."}
+        value={projectService.xrfConfigsPath}
+        onSelect={onSelectConfigsPath}
+        onClear={onClearConfigsPath}
+      />
     </Box>
   );
 }
