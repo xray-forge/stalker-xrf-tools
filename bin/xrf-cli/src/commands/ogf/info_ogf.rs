@@ -92,6 +92,21 @@ impl GenericCommand for InfoOgfCommand {
       xray_output::info!(output, "Motion refs: {:?}", kinematics.motion_refs);
     }
 
+    if let Some(swi_data) = &ogf_file.swi_data {
+      xray_output::info!(output, "Progressive lods: {}", swi_data.windows.len());
+
+      for (index, window) in swi_data.windows.iter().enumerate() {
+        xray_output::verbose!(
+          output,
+          "[{}] lod offset: {}, tris: {}, verts: {}",
+          index,
+          window.offset,
+          window.num_tris,
+          window.num_verts
+        );
+      }
+    }
+
     match OgfChunksProcessor::find_unknown_chunk_ids::<XRayByteOrder, _>(path) {
       Ok(unknown) if !unknown.is_empty() => {
         xray_output::info!(output, "Unparsed chunk ids: {:?}", unknown);
@@ -107,6 +122,11 @@ impl GenericCommand for InfoOgfCommand {
         if let Some(texture) = &child.texture {
           xray_output::info!(output, "[{}] texture name: {}", index, texture.texture_name);
           xray_output::info!(output, "[{}] shader name: {}", index, texture.shader_name);
+        }
+
+        // A child is a full visual, so progressive lods live here rather than on the root.
+        if let Some(swi_data) = &child.swi_data {
+          xray_output::info!(output, "[{}] progressive lods: {}", index, swi_data.windows.len());
         }
       }
     }

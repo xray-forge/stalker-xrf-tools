@@ -5,5 +5,6 @@ pub(crate) mod ogf_header_chunk;
 pub(crate) mod ogf_ik_data_chunk;
 pub(crate) mod ogf_kinematics_chunk;
 pub(crate) mod ogf_lods_chunk;
+pub(crate) mod ogf_swi_data_chunk;
 pub(crate) mod ogf_texture_chunk;
 pub(crate) mod ogf_user_data_chunk;

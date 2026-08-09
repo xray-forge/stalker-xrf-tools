@@ -17,6 +17,7 @@ use crate::ogf::chunks::ogf_header_chunk::OgfHeaderChunk;
 use crate::ogf::chunks::ogf_ik_data_chunk::OgfIkDataChunk;
 use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
 use crate::ogf::chunks::ogf_lods_chunk::OgfLodsChunk;
+use crate::ogf::chunks::ogf_swi_data_chunk::OgfSwiDataChunk;
 use crate::ogf::chunks::ogf_texture_chunk::OgfTextureChunk;
 use crate::ogf::chunks::ogf_user_data_chunk::OgfUserDataChunk;
 use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
@@ -35,6 +36,8 @@ pub struct OgfFile {
   pub texture: Option<OgfTextureChunk>,
   pub geometry: Option<OgfGeometry>,
   pub bones: Option<OgfBonesChunk>,
+  /// Progressive mesh level of detail table, present only on progressive visuals.
+  pub swi_data: Option<OgfSwiDataChunk>,
   pub children: Option<OgfChildrenChunk>,
   pub description: Option<OgfDescriptionChunk>,
   pub kinematics: Option<OgfKinematicsChunk>,
@@ -92,6 +95,10 @@ impl OgfFile {
         None => None,
       },
       geometry: OgfGeometry::read_from_chunks::<T, _>(chunks)?,
+      swi_data: match find_optional_chunk_by_id(chunks, OgfSwiDataChunk::CHUNK_ID) {
+        Some(mut it) => Some(it.read_xr::<T, _>()?),
+        None => None,
+      },
       children: match find_optional_chunk_by_id(chunks, OgfChildrenChunk::CHUNK_ID) {
         Some(mut it) => Some(it.read_xr::<T, _>()?),
         None => None,

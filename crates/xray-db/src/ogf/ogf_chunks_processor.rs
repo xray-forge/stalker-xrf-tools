@@ -13,6 +13,7 @@ use crate::ogf::chunks::ogf_header_chunk::OgfHeaderChunk;
 use crate::ogf::chunks::ogf_ik_data_chunk::OgfIkDataChunk;
 use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
 use crate::ogf::chunks::ogf_lods_chunk::OgfLodsChunk;
+use crate::ogf::chunks::ogf_swi_data_chunk::OgfSwiDataChunk;
 use crate::ogf::chunks::ogf_texture_chunk::OgfTextureChunk;
 use crate::ogf::chunks::ogf_user_data_chunk::OgfUserDataChunk;
 use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
@@ -49,6 +50,7 @@ impl OgfChunksProcessor {
     OgfUserDataChunk::CHUNK_ID,
     OgfLodsChunk::CHUNK_ID,
     OgfIkDataChunk::CHUNK_ID,
+    OgfSwiDataChunk::CHUNK_ID,
     OmfMotionsChunk::CHUNK_ID,
     OmfParametersChunk::CHUNK_ID,
   ];

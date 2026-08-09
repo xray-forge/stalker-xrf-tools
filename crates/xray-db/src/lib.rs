@@ -17,6 +17,7 @@ pub use crate::data::graph::graph_cross_table::*;
 pub use crate::data::graph::graph_header::*;
 pub use crate::data::graph::graph_level::*;
 pub use crate::data::ogf::ogf_geometry::*;
+pub use crate::data::ogf::ogf_slide_window::*;
 pub use crate::data::ogf::ogf_vertex::*;
 pub use crate::data::ogf::ogf_vertices::*;
 pub use crate::level::level_ai_file::*;
