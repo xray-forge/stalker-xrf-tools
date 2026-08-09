@@ -8,6 +8,9 @@ pub struct GamedataTexturesVerificationResult {
   pub(crate) findings: Vec<Finding>,
   pub(crate) invalid_textures_count: u32,
   pub(crate) checked_textures_count: u32,
+  /// Texture descriptors that declare a bump the engine can resolve to a file.
+  pub(crate) checked_bumps_count: u32,
+  pub(crate) unresolved_bumps_count: u32,
 }
 
 impl GamedataCheckResult for GamedataTexturesVerificationResult {
@@ -16,14 +19,16 @@ impl GamedataCheckResult for GamedataTexturesVerificationResult {
   }
 
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::from_is_valid(self.invalid_textures_count == 0)
+    GamedataVerificationStatus::from_is_valid(self.invalid_textures_count == 0 && self.unresolved_bumps_count == 0)
   }
 
   fn failure_message(&self) -> String {
     format!(
-      "{}/{} textures valid",
+      "{}/{} textures valid, {}/{} declared bumps resolved",
       self.checked_textures_count - self.invalid_textures_count,
-      self.checked_textures_count
+      self.checked_textures_count,
+      self.checked_bumps_count - self.unresolved_bumps_count,
+      self.checked_bumps_count
     )
   }
 
