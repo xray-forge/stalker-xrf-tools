@@ -12,6 +12,7 @@ use commands::ltx::verify_ltx::VerifyLtxCommand;
 use commands::ogf::info_ogf::InfoOgfCommand;
 use commands::ogf::patch_ogf_motion_refs::PatchOgfMotionRefsCommand;
 use commands::ogf::patch_ogf_texture_refs::PatchOgfTextureRefsCommand;
+use commands::omf::duplicate_omf_motion::DuplicateOmfMotionCommand;
 use commands::omf::filter_omf_motions::FilterOmfMotionsCommand;
 use commands::omf::info_omf::InfoOmfCommand;
 use commands::omf::rename_omf_motions::RenameOmfMotionsCommand;
@@ -99,6 +100,7 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     PatchOgfMotionRefsCommand::new_box(),
     PatchOgfTextureRefsCommand::new_box(),
     // OMF:
+    DuplicateOmfMotionCommand::new_box(),
     FilterOmfMotionsCommand::new_box(),
     InfoOmfCommand::new_box(),
     RenameOmfMotionsCommand::new_box(),

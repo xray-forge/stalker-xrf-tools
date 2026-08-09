@@ -9,6 +9,9 @@ use crate::omf::omf_file::OmfFile;
 pub struct OmfMotionsProcessor {}
 
 impl OmfMotionsProcessor {
+  /// Bit that makes a motion play once and stop rather than loop.
+  pub const FLAG_PLAY_ONCE: u32 = 0b10;
+
   /// Keep only motions whose definition name is accepted by the predicate.
   ///
   /// Surviving definitions get their `motion` field renumbered to the new ordinal to keep the
@@ -67,6 +70,43 @@ impl OmfMotionsProcessor {
     Self::assert_motion_names_are_unique(file)?;
 
     Ok(renamed_count)
+  }
+
+  /// Copy an existing motion under a new name, optionally forcing it to play once.
+  ///
+  /// Both the definition and the keyframe payload are duplicated rather than aliased, because the
+  /// rest of this processor treats the two lists as ordinal pairs and a definition without a
+  /// payload would break every later filter or rename.
+  pub fn duplicate_motion(file: &mut OmfFile, from: &str, to: &str, play_once: bool) -> XRayResult {
+    Self::assert_motions_are_paired(file, "duplicating")?;
+
+    let index: usize = file
+      .parameters
+      .motions
+      .iter()
+      .position(|it| it.name == from)
+      .ok_or_else(|| XRayError::new_not_found_error(format!("Motion '{from}' was not found in the omf file")))?;
+
+    let mut definition = file.parameters.motions[index].clone();
+    let mut motion = file.motions.motions[index].clone();
+
+    definition.name = String::from(to);
+    motion.name = String::from(to);
+
+    if play_once {
+      definition.flags |= Self::FLAG_PLAY_ONCE;
+    }
+
+    // The definition addresses its payload by ordinal, so the copy must point at its own new slot.
+    definition.motion = u16::try_from(file.parameters.motions.len())
+      .map_err(|_| XRayError::new_invalid_error("Motions count exceeds the supported range after duplication"))?;
+
+    file.parameters.motions.push(definition);
+    file.motions.motions.push(motion);
+
+    Self::assert_motion_names_are_unique(file)?;
+
+    Ok(())
   }
 
   /// Guard that definitions and payloads can be treated as ordinal pairs.
@@ -238,5 +278,58 @@ mod tests {
       OmfMotionsProcessor::rename_motions(&mut file, &renames).is_err(),
       "Expect rename producing duplicate names to be rejected"
     );
+  }
+
+  #[test]
+  fn test_duplicate_motion_copies_both_lists_and_points_at_its_own_payload() -> XRayResult {
+    let mut file: OmfFile = new_named_mock(&["pm_idle", "pm_shoot"]);
+
+    OmfMotionsProcessor::duplicate_motion(&mut file, "pm_idle", "pm_idle_bore", false)?;
+
+    assert_eq!(file.parameters.motions.len(), 3);
+    assert_eq!(file.motions.motions.len(), 3);
+    assert_eq!(file.parameters.motions[2].name, "pm_idle_bore");
+    assert_eq!(file.motions.motions[2].name, "pm_idle_bore");
+    // The copy must address its own new slot, not the ordinal it was cloned from.
+    assert_eq!(file.parameters.motions[2].motion, 2);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_duplicate_motion_can_clear_looping() -> XRayResult {
+    let mut file: OmfFile = new_named_mock(&["pm_idle"]);
+
+    // Start from a looping motion, which is what a real idle is.
+    file.parameters.motions[0].flags = 0;
+
+    OmfMotionsProcessor::duplicate_motion(&mut file, "pm_idle", "pm_idle_bore", true)?;
+
+    // Without this the engine never leaves the bore state, since it exits only on animation end.
+    assert_ne!(
+      file.parameters.motions[1].flags & OmfMotionsProcessor::FLAG_PLAY_ONCE,
+      0
+    );
+    // The source keeps looping.
+    assert_eq!(
+      file.parameters.motions[0].flags & OmfMotionsProcessor::FLAG_PLAY_ONCE,
+      0
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_duplicate_motion_rejects_an_unknown_source() {
+    let mut file: OmfFile = new_named_mock(&["pm_idle"]);
+
+    assert!(OmfMotionsProcessor::duplicate_motion(&mut file, "pm_missing", "pm_idle_bore", true).is_err());
+  }
+
+  #[test]
+  fn test_duplicate_motion_rejects_a_name_already_present() {
+    let mut file: OmfFile = new_named_mock(&["pm_idle", "pm_shoot"]);
+
+    assert!(OmfMotionsProcessor::duplicate_motion(&mut file, "pm_idle", "pm_shoot", true).is_err());
   }
 }
