@@ -5,6 +5,7 @@ import { default as MapIcon } from "@mui/icons-material/Map";
 import { default as SettingsApplicationsIcon } from "@mui/icons-material/SettingsApplications";
 import { default as SwapHorizIcon } from "@mui/icons-material/SwapHoriz";
 import { default as TranslateIcon } from "@mui/icons-material/Translate";
+import { default as ViewInArIcon } from "@mui/icons-material/ViewInAr";
 import { ReactElement, useMemo } from "react";
 
 import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
@@ -43,6 +44,12 @@ export function Root(): ReactElement {
         description: "Manage localization tables",
         icon: <TranslateIcon />,
         to: "/translations_editor",
+      },
+      {
+        label: "Visuals editor",
+        description: "Preview models and animations",
+        icon: <ViewInArIcon />,
+        to: "/visuals_editor",
       },
     ],
     []

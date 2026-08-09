@@ -35,13 +35,15 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.17.0",
-    "reactflow": "^11.11.4"
+    "reactflow": "^11.11.4",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.2",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^8.57.1",
     "eslint-config-standard-with-typescript": "^43.0.1",

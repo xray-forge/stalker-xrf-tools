@@ -1,4 +1,4 @@
-import { Card, Divider, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Card, Divider, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -41,20 +41,38 @@ export function ToolNavigator({ title, helpLink, items, isWithSettings }: IToolN
 
   return (
     <CenteredColumn>
-      <ApplicationNavigatorHeader title={title} helpLink={helpLink} />
+      <Box sx={{ width: "100%", flexShrink: 0 }}>
+        <ApplicationNavigatorHeader title={title} helpLink={helpLink} />
+      </Box>
 
-      <Card sx={{ minWidth: 260, maxWidth: 360, width: "100%", overflow: "hidden" }}>
-        <List disablePadding>{primaryItems.map(renderItem)}</List>
+      <Card
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 260,
+          maxWidth: 360,
+          width: "100%",
+          minHeight: 0,
+          overflow: "hidden",
+        }}
+      >
+        <List disablePadding sx={{ minHeight: 0, overflowY: "auto" }}>
+          {primaryItems.map(renderItem)}
+        </List>
 
         {secondaryItems.length ? (
           <>
             <Divider />
-            <List disablePadding>{secondaryItems.map(renderItem)}</List>
+            <List disablePadding sx={{ flexShrink: 0 }}>
+              {secondaryItems.map(renderItem)}
+            </List>
           </>
         ) : null}
       </Card>
 
-      <NavigationFooter isWithSettings={isWithSettings} />
+      <Box sx={{ width: "100%", flexShrink: 0 }}>
+        <NavigationFooter isWithSettings={isWithSettings} />
+      </Box>
     </CenteredColumn>
   );
 }

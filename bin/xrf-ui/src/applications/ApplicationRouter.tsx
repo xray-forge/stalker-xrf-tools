@@ -9,6 +9,7 @@ import { IconsEditorRouter } from "@/applications/icons_editor/IconsEditorRouter
 import { Root } from "@/applications/Root";
 import { SpawnEditorRouter } from "@/applications/spawn_editor/SpawnEditorRouter";
 import { TranslationsEditorRouter } from "@/applications/translations_editor/TranslationsEditorRouter";
+import { VisualsEditorRouter } from "@/applications/visuals_editor/VisualsEditorRouter";
 import { NavigationError } from "@/core/components/NavigationError";
 
 export function ApplicationRouter(): ReactElement {
@@ -23,6 +24,7 @@ export function ApplicationRouter(): ReactElement {
         <Route path={"configs_editor/*"} element={<ConfigsEditorRouter />} />
         <Route path={"exports_editor/*"} element={<ExportsEditorRouter />} />
         <Route path={"translations_editor/*"} element={<TranslationsEditorRouter />} />
+        <Route path={"visuals_editor/*"} element={<VisualsEditorRouter />} />
         <Route path={"*"} element={<NavigationError />} />
       </Routes>
     </Router>

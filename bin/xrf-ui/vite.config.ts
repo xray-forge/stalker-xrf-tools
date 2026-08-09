@@ -42,6 +42,10 @@ function getInitialVendorChunk(id: string): string | null {
       return "vendor-mui";
     }
 
+    if (normalized.includes("/node_modules/three/")) {
+      return "vendor-three";
+    }
+
     return "vendor";
   }
 
