@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-clap = { version = "4.5.53", features = ["derive", "default"] }
-colored = "3.0.0"
+clap = { version = "4.6.6", features = ["derive", "default"] }
+colored = "3.1.1"
 ddsfile = "0.5.2"
-env_logger = "0.11.8"
-log = "0.4.28"
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.145"
-tokio = { version = "1.48.0", features = ["full"] }
+env_logger = "0.11.11"
+log = "0.4.33"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+tokio = { version = "1.53.1", features = ["full"] }
 walkdir = "2.5.0"
 xray-archive = { path = "../../crates/xray-archive" }
 xray-db = { path = "../../crates/xray-db" }
@@ -23,7 +23,6 @@ xray-error = { path = "../../crates/xray-error" }
 xray-export = { path = "../../crates/xray-export" }
 xray-texture = { path = "../../crates/xray-texture" }
 xray-translation = { path = "../../crates/xray-translation" }
-xray-utils = { path = "../../crates/xray-utils" }
 
 [lints]
 workspace = true
