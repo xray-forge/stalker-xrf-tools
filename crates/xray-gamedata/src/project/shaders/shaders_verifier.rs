@@ -5,9 +5,7 @@ use std::time::Instant;
 
 use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayError;
-use xray_shaders::{
-  SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, XRayShaderScript, is_shader_source_path,
-};
+use xray_shaders::{SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, XRayShaderScript, is_shader_source_path};
 
 use crate::GamedataFindingFactory;
 use crate::project::shaders::gamedata_shader_source_loader::GamedataShaderSourceLoader;
@@ -21,10 +19,7 @@ pub(crate) struct ShadersVerifier<'a> {
 
 impl<'a> ShadersVerifier<'a> {
   pub(crate) fn new(shaders_root: PathBuf, options: &'a GamedataProjectVerifyOptions) -> Self {
-    Self {
-      options,
-      shaders_root,
-    }
+    Self { options, shaders_root }
   }
 
   pub(crate) fn verify(&self) -> GamedataShadersVerificationResult {
@@ -32,8 +27,7 @@ impl<'a> ShadersVerifier<'a> {
 
     let started_at: Instant = Instant::now();
 
-    let mut result: GamedataShadersVerificationResult =
-      GamedataShadersVerificationResult::default();
+    let mut result: GamedataShadersVerificationResult = GamedataShadersVerificationResult::default();
 
     for renderer in [ShaderRenderer::DirectX11, ShaderRenderer::OpenGl] {
       self.verify_renderer(renderer, &mut result);
@@ -53,11 +47,7 @@ impl<'a> ShadersVerifier<'a> {
     result
   }
 
-  fn verify_renderer(
-    &self,
-    renderer: ShaderRenderer,
-    result: &mut GamedataShadersVerificationResult,
-  ) {
+  fn verify_renderer(&self, renderer: ShaderRenderer, result: &mut GamedataShadersVerificationResult) {
     xray_output::verbose!(
       self.options.output,
       "Verify {} renderer shaders",
@@ -80,10 +70,7 @@ impl<'a> ShadersVerifier<'a> {
       result.add_finding(GamedataFindingFactory::for_asset(
         GamedataVerificationRule::ShadersRendererRoot,
         &renderer_root,
-        format!(
-          "{} renderer shader root is missing",
-          renderer.display_name()
-        ),
+        format!("{} renderer shader root is missing", renderer.display_name()),
       ));
 
       return;
@@ -96,13 +83,9 @@ impl<'a> ShadersVerifier<'a> {
 
     for entry in WalkDir::new(&renderer_root) {
       match entry {
-        Ok(entry) if Self::is_shader_source_file(&entry) => self.verify_shader_source(
-          entry.path(),
-          renderer,
-          result,
-          &source_loader,
-          &mut checked_sources,
-        ),
+        Ok(entry) if Self::is_shader_source_file(&entry) => {
+          self.verify_shader_source(entry.path(), renderer, result, &source_loader, &mut checked_sources)
+        }
         Ok(_) => {}
         Err(error) => result.add_finding(GamedataFindingFactory::for_asset(
           GamedataVerificationRule::ShadersSourceRead,
@@ -113,11 +96,7 @@ impl<'a> ShadersVerifier<'a> {
     }
   }
 
-  fn verify_root_shader_scripts(
-    &self,
-    renderer_root: &Path,
-    result: &mut GamedataShadersVerificationResult,
-  ) {
+  fn verify_root_shader_scripts(&self, renderer_root: &Path, result: &mut GamedataShadersVerificationResult) {
     let entries = match fs::read_dir(renderer_root) {
       Ok(entries) => entries,
       Err(error) => {
@@ -325,9 +304,7 @@ mod tests {
   }
 
   fn create_shader_root(test_name: &str) -> XRayResult<PathBuf> {
-    let root: PathBuf = std::env::temp_dir()
-      .join("xray-gamedata-shader-tests")
-      .join(test_name);
+    let root: PathBuf = std::env::temp_dir().join("xray-gamedata-shader-tests").join(test_name);
 
     if root.exists() {
       fs::remove_dir_all(&root)?;
@@ -340,12 +317,9 @@ mod tests {
   }
 
   fn write_file(path: &Path, contents: &str) -> XRayResult {
-    let parent: &Path = path.parent().ok_or_else(|| {
-      XRayError::new_unexpected_error(format!(
-        "Shader test path has no parent: {}",
-        path.display()
-      ))
-    })?;
+    let parent: &Path = path
+      .parent()
+      .ok_or_else(|| XRayError::new_unexpected_error(format!("Shader test path has no parent: {}", path.display())))?;
 
     fs::create_dir_all(parent)?;
     fs::write(path, contents)?;

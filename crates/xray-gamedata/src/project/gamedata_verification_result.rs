@@ -4,8 +4,8 @@ use xray_error::XRayResult;
 use xray_report::{CheckId, CheckReport, Finding, Report};
 
 use crate::{
-  GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule,
-  GamedataVerificationStatus, GamedataVerificationType,
+  GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule, GamedataVerificationStatus,
+  GamedataVerificationType,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -55,12 +55,10 @@ impl GamedataVerificationReport {
   where
     T: GamedataCheckResult,
   {
-    self
-      .checks
-      .push(GamedataVerificationCheckReport::from_check_result(
-        verification_type,
-        result,
-      ));
+    self.checks.push(GamedataVerificationCheckReport::from_check_result(
+      verification_type,
+      result,
+    ));
   }
 
   pub fn status(&self) -> GamedataVerificationStatus {
@@ -72,10 +70,7 @@ impl GamedataVerificationReport {
   }
 
   pub fn get_failure_messages(&self) -> Vec<String> {
-    self
-      .get_failure_reports()
-      .map(|it| it.summary.clone())
-      .collect()
+    self.get_failure_reports().map(|it| it.summary.clone()).collect()
   }
 
   pub fn get_failure_reports(&self) -> impl Iterator<Item = &GamedataVerificationCheckReport> {
@@ -91,11 +86,7 @@ impl GamedataVerificationReport {
   ///
   /// Gamedata retains its check counters and human summaries separately.
   pub fn to_report(&self) -> Report {
-    let checks: Vec<CheckReport> = self
-      .checks
-      .iter()
-      .map(|check| check.report.clone())
-      .collect();
+    let checks: Vec<CheckReport> = self.checks.iter().map(|check| check.report.clone()).collect();
 
     Report::new(checks)
   }
@@ -126,10 +117,7 @@ impl GamedataVerificationCheckReport {
     &self.report
   }
 
-  pub(crate) fn from_check_result<T>(
-    verification_type: GamedataVerificationType,
-    result: XRayResult<T>,
-  ) -> Self
+  pub(crate) fn from_check_result<T>(verification_type: GamedataVerificationType, result: XRayResult<T>) -> Self
   where
     T: GamedataCheckResult,
   {
@@ -161,8 +149,7 @@ impl GamedataVerificationCheckReport {
   }
 
   fn check_id(verification_type: GamedataVerificationType) -> CheckId {
-    CheckId::new(verification_type.to_string())
-      .expect("Gamedata verification types have non-empty stable identifiers")
+    CheckId::new(verification_type.to_string()).expect("Gamedata verification types have non-empty stable identifiers")
   }
 }
 
@@ -173,8 +160,8 @@ mod tests {
 
   use super::GamedataVerificationReport;
   use crate::{
-    Finding, GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataFindingFactory, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   struct TestCheckResult {
@@ -249,9 +236,7 @@ mod tests {
     assert_eq!(result.status(), GamedataVerificationStatus::Error);
     assert_eq!(
       result.get_failure_messages(),
-      vec![String::from(
-        "Check failed (animations): Unexpected error: boom"
-      )]
+      vec![String::from("Check failed (animations): Unexpected error: boom")]
     );
     assert_eq!(
       result.checks()[0].findings(),
@@ -274,21 +259,9 @@ mod tests {
       GamedataVerificationType::Scripts,
       Ok(TestCheckResult {
         findings: vec![
-          GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::ScriptsSyntax,
-            "scripts/z.script",
-            "same",
-          ),
-          GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::ScriptsPath,
-            "scripts/a.script",
-            "same",
-          ),
-          GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::ScriptsSyntax,
-            "scripts/a.script",
-            "same",
-          ),
+          GamedataFindingFactory::for_asset(GamedataVerificationRule::ScriptsSyntax, "scripts/z.script", "same"),
+          GamedataFindingFactory::for_asset(GamedataVerificationRule::ScriptsPath, "scripts/a.script", "same"),
+          GamedataFindingFactory::for_asset(GamedataVerificationRule::ScriptsSyntax, "scripts/a.script", "same"),
         ],
         status: GamedataVerificationStatus::Failed,
         summary: String::from("3 scripts are invalid"),
@@ -299,17 +272,8 @@ mod tests {
 
     assert_eq!(report.status(), Status::Failed);
     assert_eq!(report.checks()[0].id().as_str(), "scripts");
-    assert_eq!(
-      report.checks()[0].findings()[0].rule_id().as_str(),
-      "scripts.path"
-    );
-    assert_eq!(
-      report.checks()[0].findings()[1].rule_id().as_str(),
-      "scripts.syntax"
-    );
-    assert_eq!(
-      report.checks()[0].findings()[2].subject(),
-      Some("scripts/z.script")
-    );
+    assert_eq!(report.checks()[0].findings()[0].rule_id().as_str(), "scripts.path");
+    assert_eq!(report.checks()[0].findings()[1].rule_id().as_str(), "scripts.syntax");
+    assert_eq!(report.checks()[0].findings()[2].subject(), Some("scripts/z.script"));
   }
 }

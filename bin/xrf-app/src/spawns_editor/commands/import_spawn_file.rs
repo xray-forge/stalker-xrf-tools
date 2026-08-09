@@ -7,10 +7,7 @@ use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
 
 #[tauri::command]
-pub async fn import_spawn_file(
-  path: &str,
-  state: State<'_, SpawnsEditorState>,
-) -> TauriResult<String> {
+pub async fn import_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> TauriResult<String> {
   log::info!("Importing spawn file");
 
   match SpawnFile::import_from_path::<XRayByteOrder, _>(&Path::new(path)) {
@@ -21,9 +18,6 @@ pub async fn import_spawn_file(
 
       Ok(String::from("Imported spawn file"))
     }
-    Err(error) => Err(format!(
-      "Failed to import provided spawn file path: {}",
-      error
-    )),
+    Err(error) => Err(format!("Failed to import provided spawn file path: {}", error)),
   }
 }

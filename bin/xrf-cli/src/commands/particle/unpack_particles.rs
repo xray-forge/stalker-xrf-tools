@@ -77,8 +77,7 @@ impl GenericCommand for UnpackParticlesCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let particles_file: Box<ParticlesFile> =
-      Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
+    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.export_to_path(destination)?;
@@ -86,10 +85,7 @@ impl GenericCommand for UnpackParticlesCommand {
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
     log::info!("Read particle file took: {}ms", read_duration.as_millis());
-    log::info!(
-      "Export particle file took: {}ms",
-      unpack_duration.as_millis()
-    );
+    log::info!("Export particle file took: {}ms", unpack_duration.as_millis());
 
     Ok(())
   }

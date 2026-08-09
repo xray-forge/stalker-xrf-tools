@@ -6,18 +6,12 @@ use crate::{LtxFormatOptions, LtxProject};
 
 impl LtxProject {
   /// Format all LTX entries in current project.
-  pub fn format_all_files_opt(
-    &self,
-    options: LtxFormatOptions,
-  ) -> XRayResult<LtxProjectFormatResult> {
+  pub fn format_all_files_opt(&self, options: LtxFormatOptions) -> XRayResult<LtxProjectFormatResult> {
     LtxFilesFormatter::format_opt(&self.ltx_files, options)
   }
 
   /// Check format of all LTX entries in current project.
-  pub fn check_format_all_files_opt(
-    &self,
-    options: LtxFormatOptions,
-  ) -> XRayResult<LtxProjectFormatResult> {
+  pub fn check_format_all_files_opt(&self, options: LtxFormatOptions) -> XRayResult<LtxProjectFormatResult> {
     LtxFilesFormatter::check_format_opt(&self.ltx_files, options)
   }
 

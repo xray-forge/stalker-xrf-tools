@@ -13,17 +13,11 @@ mod tests {
 
   #[test]
   fn preserves_an_existing_extension() {
-    assert_eq!(
-      with_extension("actors\\stalker.ogf", ".ogf"),
-      "actors\\stalker.ogf"
-    );
+    assert_eq!(with_extension("actors\\stalker.ogf", ".ogf"), "actors\\stalker.ogf");
   }
 
   #[test]
   fn appends_a_missing_extension() {
-    assert_eq!(
-      with_extension("actors\\stalker", ".ogf"),
-      "actors\\stalker.ogf"
-    );
+    assert_eq!(with_extension("actors\\stalker", ".ogf"), "actors\\stalker.ogf");
   }
 }

@@ -111,9 +111,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_directory,
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_directory, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::export::FileImportExport;
@@ -126,8 +125,7 @@ mod tests {
     )?)?
     .read_child_by_index(0)?;
 
-    let original: XRayResult<SpawnHeaderChunk> =
-      SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader);
+    let original: XRayResult<SpawnHeaderChunk> = SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader);
 
     assert!(original.is_err(), "Expected failure with empty chunk");
 
@@ -152,10 +150,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 44);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 44);
 
@@ -167,10 +163,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -185,8 +178,7 @@ mod tests {
       levels_count: 12,
     };
 
-    let export_folder: &Path =
-      &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
+    let export_folder: &Path = &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
 
     original.export(&export_folder)?;
 
@@ -205,9 +197,10 @@ mod tests {
       levels_count: 31,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -215,10 +208,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<SpawnHeaderChunk>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<SpawnHeaderChunk>(&serialized)?);
 
     Ok(())
   }

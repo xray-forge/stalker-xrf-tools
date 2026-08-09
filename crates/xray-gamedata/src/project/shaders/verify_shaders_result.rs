@@ -59,8 +59,8 @@ mod tests {
   use super::GamedataShadersVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::{
-    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]

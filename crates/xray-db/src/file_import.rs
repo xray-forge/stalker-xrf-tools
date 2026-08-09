@@ -5,9 +5,9 @@ use xray_ltx::Section;
 
 /// Read value from ltx section and parse it as provided T type.
 pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> XRayResult<T> {
-  let value: &str = section.get(field_name).ok_or_else(|| {
-    XRayError::new_parsing_error(format!("Field '{field_name}' was not found in ltx file"))
-  })?;
+  let value: &str = section
+    .get(field_name)
+    .ok_or_else(|| XRayError::new_parsing_error(format!("Field '{field_name}' was not found in ltx file")))?;
 
   Ok(match T::from_str(value) {
     Ok(value) => value,
@@ -23,10 +23,7 @@ pub fn read_ltx_field<T: FromStr>(field_name: &str, section: &Section) -> XRayRe
 }
 
 /// Read optional value from ltx section and parse it as provided T type.
-pub fn read_ltx_optional_field<T: FromStr>(
-  field_name: &str,
-  section: &Section,
-) -> XRayResult<Option<T>> {
+pub fn read_ltx_optional_field<T: FromStr>(field_name: &str, section: &Section) -> XRayResult<Option<T>> {
   let field_data: Option<&str> = section.get(field_name);
 
   Ok(match field_data {

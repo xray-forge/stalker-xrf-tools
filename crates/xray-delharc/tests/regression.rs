@@ -304,8 +304,7 @@ fn test_regression() -> io::Result<()> {
     let mut lha_reader = delharc::LhaDecodeReader::new(&file)?;
     for filen in 0.. {
       assert!(filen < headers.len());
-      let (path, comment, size_c, size_o, crc16, crc32, modif, level, ostype, compr) =
-        &headers[filen];
+      let (path, comment, size_c, size_o, crc16, crc32, modif, level, ostype, compr) = &headers[filen];
       let mut sink = SinkSum::new();
       let header = lha_reader.header();
       assert_eq!(header.level, *level);

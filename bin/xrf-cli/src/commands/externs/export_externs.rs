@@ -5,8 +5,8 @@ use std::str::FromStr;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_error::XRayError;
 use xray_export::{
-  ExternFormat, ExternManifest, ExternManifestParser, LineEndings, ParsedExternManifest,
-  normalize_line_endings, render_extern_manifest,
+  ExternFormat, ExternManifest, ExternManifestParser, LineEndings, ParsedExternManifest, normalize_line_endings,
+  render_extern_manifest,
 };
 use xray_output::OutputOptions;
 
@@ -83,9 +83,7 @@ impl GenericCommand for ExportExternsCommand {
     let check: Option<&PathBuf> = matches.get_one("check");
 
     if output_dir.is_none() && check.is_none() {
-      return Err(
-        XRayError::new_invalid_error("Specify exactly one of --output or --check.").into(),
-      );
+      return Err(XRayError::new_invalid_error("Specify exactly one of --output or --check.").into());
     }
 
     let line_endings: Option<LineEndings> = matches
@@ -93,13 +91,11 @@ impl GenericCommand for ExportExternsCommand {
       .map(|value: &String| LineEndings::from_str(value))
       .transpose()?;
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let format: ExternFormat = Self::resolve_format(matches, output_dir, check)?;
 
-    let parsed: ParsedExternManifest =
-      ExternManifestParser::new().parse_directory(declarations_root)?;
+    let parsed: ParsedExternManifest = ExternManifestParser::new().parse_directory(declarations_root)?;
 
     if let Some(path) = output_dir {
       let content: String = render_extern_manifest(&parsed.manifest, format, line_endings)?;

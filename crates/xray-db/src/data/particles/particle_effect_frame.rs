@@ -100,15 +100,11 @@ impl LtxImportExport for ParticleEffectFrame {
         reserved[0]
           .trim()
           .parse::<f32>()
-          .or(Err(XRayError::new_parsing_error(
-            "Failed to parse reserved X value",
-          )))?,
+          .or(Err(XRayError::new_parsing_error("Failed to parse reserved X value")))?,
         reserved[1]
           .trim()
           .parse::<f32>()
-          .or(Err(XRayError::new_parsing_error(
-            "Failed to parse reserved Y value",
-          )))?,
+          .or(Err(XRayError::new_parsing_error("Failed to parse reserved Y value")))?,
       ),
       frame_dimension_x: read_ltx_field("frame_dimension_x", section)?,
       frame_count: read_ltx_field("frame_count", section)?,
@@ -125,10 +121,7 @@ impl LtxImportExport for ParticleEffectFrame {
         "texture_size",
         format!("{},{}", self.texture_size.0, self.texture_size.1),
       )
-      .set(
-        "reserved",
-        format!("{},{}", self.reserved.0, self.reserved.1),
-      )
+      .set("reserved", format!("{},{}", self.reserved.0, self.reserved.1))
       .set("frame_dimension_x", self.frame_dimension_x.to_string())
       .set("frame_count", self.frame_count.to_string())
       .set("frame_speed", self.frame_speed.to_string());
@@ -150,8 +143,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::constants::META_TYPE_FIELD;
@@ -176,17 +169,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 28);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 28);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
@@ -218,8 +207,7 @@ mod tests {
     original.export("data", &mut ltx)?;
     ltx.write_to(&mut file)?;
 
-    let read: ParticleEffectFrame =
-      ParticleEffectFrame::import("data", &Ltx::read_from_path(config_path)?)?;
+    let read: ParticleEffectFrame = ParticleEffectFrame::import("data", &Ltx::read_from_path(config_path)?)?;
 
     assert_eq!(read, original);
 
@@ -229,9 +217,7 @@ mod tests {
   #[test]
   fn test_import_rejects_incorrect_meta_type() {
     let mut ltx: Ltx = Ltx::new();
-    ltx
-      .with_section("data")
-      .set(META_TYPE_FIELD, "incorrect_meta_type");
+    ltx.with_section("data").set(META_TYPE_FIELD, "incorrect_meta_type");
 
     assert!(
       ParticleEffectFrame::import("data", &ltx).is_err(),
@@ -249,9 +235,10 @@ mod tests {
       frame_speed: 1.5,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -259,10 +246,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<ParticleEffectFrame>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<ParticleEffectFrame>(&serialized)?);
 
     Ok(())
   }

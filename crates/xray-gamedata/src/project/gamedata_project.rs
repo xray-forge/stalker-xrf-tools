@@ -42,7 +42,8 @@ impl GamedataProject {
             "Invalid gamedata configs folder provided: {}, existing folder with system.ltx is required",
             configs.display()
           ),
-        ).into(),
+        )
+        .into(),
       );
     }
 
@@ -55,12 +56,7 @@ impl GamedataProject {
           is_strict_check: false,
         },
       )
-      .map_err(|error| {
-        XRayError::new_asset_error(format!(
-          "Failed to open gamedata project ltx configs: {}",
-          error
-        ))
-      })?,
+      .map_err(|error| XRayError::new_asset_error(format!("Failed to open gamedata project ltx configs: {}", error)))?,
     })
   }
 }

@@ -47,13 +47,7 @@ impl<'a> MeshAssetsVerifier<'a> {
       .map(|relative_path| {
         xray_output::verbose!(options.output, "Verify mesh: {relative_path}");
 
-        let Some(path) = self
-          .project
-          .assets
-          .absolute_path(relative_path)
-          .ok()
-          .flatten()
-        else {
+        let Some(path) = self.project.assets.absolute_path(relative_path).ok().flatten() else {
           xray_output::error!(options.output, "Mesh path not found: {relative_path}");
 
           return vec![GamedataFindingFactory::for_asset(
@@ -64,30 +58,28 @@ impl<'a> MeshAssetsVerifier<'a> {
         };
 
         match OgfFile::read_from_path::<XRayByteOrder, _>(&path) {
-          Ok(ogf) => {
-            match self.verify_mesh_findings(options, shader_library, &ogf, Some(&path), None) {
-              Ok(findings) if findings.is_empty() => Vec::new(),
-              Ok(findings) => {
-                xray_output::error!(options.output, "Mesh is not valid: {}", path.display());
+          Ok(ogf) => match self.verify_mesh_findings(options, shader_library, &ogf, Some(&path), None) {
+            Ok(findings) if findings.is_empty() => Vec::new(),
+            Ok(findings) => {
+              xray_output::error!(options.output, "Mesh is not valid: {}", path.display());
 
-                findings
-              }
-              Err(error) => {
-                xray_output::error!(
-                  options.output,
-                  "Mesh verification failed: {} - {}",
-                  path.display(),
-                  error
-                );
-
-                vec![GamedataFindingFactory::for_asset(
-                  GamedataVerificationRule::MeshesValidation,
-                  &path,
-                  format!("Failed to verify mesh: {error}"),
-                )]
-              }
+              findings
             }
-          }
+            Err(error) => {
+              xray_output::error!(
+                options.output,
+                "Mesh verification failed: {} - {}",
+                path.display(),
+                error
+              );
+
+              vec![GamedataFindingFactory::for_asset(
+                GamedataVerificationRule::MeshesValidation,
+                &path,
+                format!("Failed to verify mesh: {error}"),
+              )]
+            }
+          },
           Err(error) => {
             xray_output::error!(
               options.output,
@@ -106,15 +98,8 @@ impl<'a> MeshAssetsVerifier<'a> {
       })
       .collect();
 
-    let invalid_meshes_count: u32 = u32::try_from(
-      mesh_findings
-        .iter()
-        .filter(|findings| !findings.is_empty())
-        .count(),
-    )
-    .map_err(|_| {
-      XRayError::new_verify_error("Invalid mesh count exceeds the supported result range")
-    })?;
+    let invalid_meshes_count: u32 = u32::try_from(mesh_findings.iter().filter(|findings| !findings.is_empty()).count())
+      .map_err(|_| XRayError::new_verify_error("Invalid mesh count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = mesh_findings.into_iter().flatten().collect();
 
@@ -151,13 +136,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     // Verify all nested children in mesh object.
     if let Some(children) = &ogf.children {
       for child in &children.nested {
-        findings.extend(self.verify_mesh_findings(
-          options,
-          shader_library,
-          child,
-          mesh_path,
-          bones_count,
-        )?);
+        findings.extend(self.verify_mesh_findings(options, shader_library, child, mesh_path, bones_count)?);
       }
     }
 
@@ -173,10 +152,7 @@ impl<'a> MeshAssetsVerifier<'a> {
           .collect();
 
         if motion_paths.is_empty() {
-          xray_output::error!(
-            options.output,
-            "Mesh motion refs not found by path: {motion_ref}"
-          );
+          xray_output::error!(options.output, "Mesh motion refs not found by path: {motion_ref}");
 
           findings.push(Self::new_mesh_finding(
             GamedataVerificationRule::MeshesMotionValidation,
@@ -186,25 +162,23 @@ impl<'a> MeshAssetsVerifier<'a> {
         } else {
           for motion_path in motion_paths {
             match OmfFile::read_from_path::<XRayByteOrder, _>(&motion_path) {
-              Ok(omf) => {
-                match self.verify_mesh_motion_findings(options, ogf, &omf, Some(&motion_path)) {
-                  Ok(motion_findings) => findings.extend(motion_findings),
-                  Err(error) => {
-                    xray_output::error!(
-                      options.output,
-                      "Mesh motion verification failed: {}, error: {}",
-                      motion_path.display(),
-                      error
-                    );
+              Ok(omf) => match self.verify_mesh_motion_findings(options, ogf, &omf, Some(&motion_path)) {
+                Ok(motion_findings) => findings.extend(motion_findings),
+                Err(error) => {
+                  xray_output::error!(
+                    options.output,
+                    "Mesh motion verification failed: {}, error: {}",
+                    motion_path.display(),
+                    error
+                  );
 
-                    findings.push(GamedataFindingFactory::for_asset(
-                      GamedataVerificationRule::MeshesMotionValidation,
-                      &motion_path,
-                      format!("Failed to verify referenced motion: {error}"),
-                    ));
-                  }
+                  findings.push(GamedataFindingFactory::for_asset(
+                    GamedataVerificationRule::MeshesMotionValidation,
+                    &motion_path,
+                    format!("Failed to verify referenced motion: {error}"),
+                  ));
                 }
-              }
+              },
               Err(error) => {
                 xray_output::error!(
                   options.output,
@@ -247,11 +221,7 @@ impl<'a> MeshAssetsVerifier<'a> {
         .flatten()
         .is_none()
     {
-      xray_output::error!(
-        options.output,
-        "Cannot read OGF texture: {}",
-        texture.texture_name
-      );
+      xray_output::error!(options.output, "Cannot read OGF texture: {}", texture.texture_name);
 
       findings.push(Self::new_mesh_finding(
         GamedataVerificationRule::MeshesValidation,
@@ -306,13 +276,7 @@ impl<'a> MeshAssetsVerifier<'a> {
         .map(|bone| (bone.name.as_str(), bone.parent.as_str())),
     )
     .into_iter()
-    .map(|message| {
-      Self::new_mesh_finding(
-        GamedataVerificationRule::MeshesValidation,
-        mesh_path,
-        message,
-      )
-    })
+    .map(|message| Self::new_mesh_finding(GamedataVerificationRule::MeshesValidation, mesh_path, message))
     .collect()
   }
 
@@ -346,9 +310,7 @@ impl<'a> MeshAssetsVerifier<'a> {
         findings.push(Self::new_mesh_finding(
           GamedataVerificationRule::MeshesValidation,
           mesh_path,
-          format!(
-            "Mesh geometry index {index} references a vertex outside the {vertex_count} vertices"
-          ),
+          format!("Mesh geometry index {index} references a vertex outside the {vertex_count} vertices"),
         ));
       }
     }
@@ -381,9 +343,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     findings
   }
 
-  fn skeleton_topology_findings<'bone>(
-    bones: impl IntoIterator<Item = (&'bone str, &'bone str)>,
-  ) -> Vec<String> {
+  fn skeleton_topology_findings<'bone>(bones: impl IntoIterator<Item = (&'bone str, &'bone str)>) -> Vec<String> {
     let bones: Vec<(&str, &str)> = bones.into_iter().collect();
     let mut findings: Vec<String> = Vec::new();
     let mut parents_by_name: HashMap<String, &str> = HashMap::with_capacity(bones.len());
@@ -397,9 +357,7 @@ impl<'a> MeshAssetsVerifier<'a> {
       let normalized_name: String = name.to_ascii_lowercase();
 
       if parents_by_name.insert(normalized_name, *parent).is_some() {
-        findings.push(format!(
-          "Mesh skeleton contains duplicate bone name '{name}'"
-        ));
+        findings.push(format!("Mesh skeleton contains duplicate bone name '{name}'"));
       }
     }
 
@@ -412,10 +370,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     }
 
     for (name, parent) in &bones {
-      if !name.is_empty()
-        && !parent.is_empty()
-        && !parents_by_name.contains_key(&parent.to_ascii_lowercase())
-      {
+      if !name.is_empty() && !parent.is_empty() && !parents_by_name.contains_key(&parent.to_ascii_lowercase()) {
         findings.push(format!(
           "Mesh skeleton bone '{name}' references missing parent '{parent}'"
         ));
@@ -504,11 +459,7 @@ impl<'a> MeshAssetsVerifier<'a> {
             omf_bones.len()
           ),
         ));
-      } else if bones
-        .bones
-        .iter()
-        .any(|it| !omf_bones.contains(&it.name.as_str()))
-      {
+      } else if bones.bones.iter().any(|it| !omf_bones.contains(&it.name.as_str())) {
         xray_output::error!(
           options.output,
           "Missing bones in OMF file for OGF mesh: {} <-> {}",
@@ -524,9 +475,7 @@ impl<'a> MeshAssetsVerifier<'a> {
         let missing_bones: Vec<&str> = bones
           .bones
           .iter()
-          .filter_map(|bone| {
-            (!omf_bones.contains(&bone.name.as_str())).then_some(bone.name.as_str())
-          })
+          .filter_map(|bone| (!omf_bones.contains(&bone.name.as_str())).then_some(bone.name.as_str()))
           .collect();
 
         findings.push(Self::new_motion_finding(
@@ -540,22 +489,14 @@ impl<'a> MeshAssetsVerifier<'a> {
     Ok(findings)
   }
 
-  fn new_mesh_finding(
-    rule: GamedataVerificationRule,
-    mesh_path: Option<&Path>,
-    message: String,
-  ) -> Finding {
+  fn new_mesh_finding(rule: GamedataVerificationRule, mesh_path: Option<&Path>, message: String) -> Finding {
     match mesh_path {
       Some(path) => GamedataFindingFactory::for_asset(rule, path, message),
       None => GamedataFindingFactory::without_asset(rule, message),
     }
   }
 
-  fn new_motion_finding(
-    rule: GamedataVerificationRule,
-    motion_path: Option<&Path>,
-    message: String,
-  ) -> Finding {
+  fn new_motion_finding(rule: GamedataVerificationRule, motion_path: Option<&Path>, message: String) -> Finding {
     match motion_path {
       Some(path) => GamedataFindingFactory::for_asset(rule, path, message),
       None => GamedataFindingFactory::without_asset(rule, message),
@@ -569,11 +510,8 @@ mod tests {
 
   #[test]
   fn accepts_a_connected_skeleton_with_one_root() {
-    let findings: Vec<String> = MeshAssetsVerifier::skeleton_topology_findings([
-      ("root", ""),
-      ("spine", "root"),
-      ("head", "spine"),
-    ]);
+    let findings: Vec<String> =
+      MeshAssetsVerifier::skeleton_topology_findings([("root", ""), ("spine", "root"), ("head", "spine")]);
 
     assert!(findings.is_empty());
   }

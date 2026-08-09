@@ -92,59 +92,31 @@ mod tests {
 
   impl Output for RecordingOutput {
     fn heading(&self, message: &dyn Display) {
-      self
-        .messages
-        .lock()
-        .unwrap()
-        .push(format!("heading:{message}"));
+      self.messages.lock().unwrap().push(format!("heading:{message}"));
     }
 
     fn success(&self, message: &dyn Display) {
-      self
-        .messages
-        .lock()
-        .unwrap()
-        .push(format!("success:{message}"));
+      self.messages.lock().unwrap().push(format!("success:{message}"));
     }
 
     fn warning(&self, message: &dyn Display) {
-      self
-        .messages
-        .lock()
-        .unwrap()
-        .push(format!("warning:{message}"));
+      self.messages.lock().unwrap().push(format!("warning:{message}"));
     }
 
     fn failure(&self, message: &dyn Display) {
-      self
-        .messages
-        .lock()
-        .unwrap()
-        .push(format!("failure:{message}"));
+      self.messages.lock().unwrap().push(format!("failure:{message}"));
     }
 
     fn info(&self, message: &dyn Display) {
-      self
-        .messages
-        .lock()
-        .unwrap()
-        .push(format!("info:{message}"));
+      self.messages.lock().unwrap().push(format!("info:{message}"));
     }
 
     fn error(&self, message: &dyn Display) {
-      self
-        .messages
-        .lock()
-        .unwrap()
-        .push(format!("error:{message}"));
+      self.messages.lock().unwrap().push(format!("error:{message}"));
     }
 
     fn verbose(&self, message: &dyn Display) {
-      self
-        .messages
-        .lock()
-        .unwrap()
-        .push(format!("verbose:{message}"));
+      self.messages.lock().unwrap().push(format!("verbose:{message}"));
     }
   }
 

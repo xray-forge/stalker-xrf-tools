@@ -50,8 +50,7 @@ impl GenericCommand for InfoDdsCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Read dds file {}", path.display());
 

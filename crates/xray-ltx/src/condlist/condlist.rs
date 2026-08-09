@@ -20,10 +20,7 @@ impl Condlist {
       let branch: &str = raw_branch.trim();
 
       if branch.is_empty() {
-        return Err(SourceSpan::parsing_error(
-          branch_offset,
-          "Expected a condlist branch",
-        ));
+        return Err(SourceSpan::parsing_error(branch_offset, "Expected a condlist branch"));
       }
 
       branches.push(CondlistBranch::parse(branch, branch_offset)?);
@@ -42,9 +39,8 @@ mod tests {
 
   #[test]
   fn parses_xray_condlist_syntax() {
-    let condlist =
-      Condlist::parse("{+info -other =actor_on_level(pripyat)} enabled, %=set_active_task(test)%")
-        .expect("Expected valid condlist");
+    let condlist = Condlist::parse("{+info -other =actor_on_level(pripyat)} enabled, %=set_active_task(test)%")
+      .expect("Expected valid condlist");
 
     assert_eq!(condlist.branches.len(), 2);
     assert_eq!(condlist.branches[0].result.as_deref(), Some("enabled"));
@@ -64,9 +60,8 @@ mod tests {
 
   #[test]
   fn accepts_xray_condition_only_and_spaced_function_calls() {
-    let condlist =
-      Condlist::parse("{+info}, fallback, {= spawn_corpse (snork : : target : )} section")
-        .expect("Expected valid X-Ray condlist");
+    let condlist = Condlist::parse("{+info}, fallback, {= spawn_corpse (snork : : target : )} section")
+      .expect("Expected valid X-Ray condlist");
 
     assert_eq!(condlist.branches[0].result, None);
     assert!(condlist.branches[0].effects.is_empty());
@@ -86,16 +81,12 @@ mod tests {
 
   #[test]
   fn accepts_effects_before_condlist_results() {
-    let condlist =
-      Condlist::parse("%+info% next_section, {+condition} %=play_sound(sound)% another_section")
-        .expect("Expected valid X-Ray effect-first condlist branches");
+    let condlist = Condlist::parse("%+info% next_section, {+condition} %=play_sound(sound)% another_section")
+      .expect("Expected valid X-Ray effect-first condlist branches");
 
     assert_eq!(condlist.branches[0].result.as_deref(), Some("next_section"));
     assert_eq!(condlist.branches[0].effects.len(), 1);
-    assert_eq!(
-      condlist.branches[1].result.as_deref(),
-      Some("another_section")
-    );
+    assert_eq!(condlist.branches[1].result.as_deref(), Some("another_section"));
     assert_eq!(condlist.branches[1].conditions.len(), 1);
     assert_eq!(condlist.branches[1].effects.len(), 1);
   }
@@ -128,10 +119,7 @@ mod tests {
       "{+first} one {+second} two",
       "%+first% one %+second%",
     ] {
-      assert!(
-        Condlist::parse(value).is_err(),
-        "Expected invalid condlist: {value}"
-      );
+      assert!(Condlist::parse(value).is_err(), "Expected invalid condlist: {value}");
     }
   }
 }

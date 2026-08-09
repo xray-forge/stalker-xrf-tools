@@ -3,9 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 
-use crate::project::levels::level_engine_constants::{
-  AI_CURRENT_VERSION, LEVEL_PRODUCTION_VERSION,
-};
+use crate::project::levels::level_engine_constants::{AI_CURRENT_VERSION, LEVEL_PRODUCTION_VERSION};
 use crate::project::levels::tests::fixtures::*;
 use crate::project::levels::verify_levels_result::GamedataLevelsVerificationResult;
 use crate::{
@@ -45,8 +43,7 @@ fn skips_verification_without_any_graph_spawn_file() {
 
 #[test]
 fn reports_graph_level_without_a_bundle() {
-  let result: GamedataLevelsVerificationResult =
-    GamedataFixture::new().with_bundles(Vec::new()).verify();
+  let result: GamedataLevelsVerificationResult = GamedataFixture::new().with_bundles(Vec::new()).verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.missing-bundle");
@@ -67,9 +64,7 @@ fn reports_bundle_unreachable_from_the_graph() {
 
 #[test]
 fn reports_graph_level_without_a_declared_map() {
-  let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_declared_maps(Vec::new())
-    .verify();
+  let result: GamedataLevelsVerificationResult = GamedataFixture::new().with_declared_maps(Vec::new()).verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.undeclared-map");
@@ -103,9 +98,7 @@ fn reports_duplicate_level_in_a_single_graph() {
 #[test]
 fn reports_missing_required_bundle_file() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_bundles(vec![
-      LevelBundleFixture::valid("zaton").without("level.geom"),
-    ])
+    .with_bundles(vec![LevelBundleFixture::valid("zaton").without("level.geom")])
     .verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
@@ -134,9 +127,7 @@ fn requires_ai_map_only_for_levels_the_graph_declares() {
 #[test]
 fn reports_empty_required_bundle_file() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_bundles(vec![
-      LevelBundleFixture::valid("zaton").with("level.geom", Vec::new()),
-    ])
+    .with_bundles(vec![LevelBundleFixture::valid("zaton").with("level.geom", Vec::new())])
     .verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
@@ -146,9 +137,7 @@ fn reports_empty_required_bundle_file() {
 #[test]
 fn reports_detail_description_without_its_texture() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_bundles(vec![
-      LevelBundleFixture::valid("zaton").with("level.details", vec![1]),
-    ])
+    .with_bundles(vec![LevelBundleFixture::valid("zaton").with("level.details", vec![1])])
     .verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
@@ -172,8 +161,7 @@ fn accepts_detail_description_together_with_its_texture() {
 fn reports_unreadable_level_configuration() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
     .with_bundles(vec![
-      LevelBundleFixture::valid("zaton")
-        .with("level.ltx", b"[duplicate]\n\n[duplicate]\n".to_vec()),
+      LevelBundleFixture::valid("zaton").with("level.ltx", b"[duplicate]\n\n[duplicate]\n".to_vec()),
     ])
     .verify();
 
@@ -183,9 +171,7 @@ fn reports_unreadable_level_configuration() {
 
 #[test]
 fn reports_missing_level_map_texture() {
-  let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .without_texture("map\\map_zaton")
-    .verify();
+  let result: GamedataLevelsVerificationResult = GamedataFixture::new().without_texture("map\\map_zaton").verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.map-texture");
@@ -194,10 +180,9 @@ fn reports_missing_level_map_texture() {
 #[test]
 fn reports_incompatible_level_version() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_bundles(vec![LevelBundleFixture::valid("zaton").with(
-      "level",
-      level_file_bytes(13, true, &["shader\\one/level\\ground"]),
-    )])
+    .with_bundles(vec![
+      LevelBundleFixture::valid("zaton").with("level", level_file_bytes(13, true, &["shader\\one/level\\ground"])),
+    ])
     .verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
@@ -207,10 +192,9 @@ fn reports_incompatible_level_version() {
 #[test]
 fn reports_level_without_a_shaders_chunk() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_bundles(vec![LevelBundleFixture::valid("zaton").with(
-      "level",
-      level_file_bytes(LEVEL_PRODUCTION_VERSION, false, &[]),
-    )])
+    .with_bundles(vec![
+      LevelBundleFixture::valid("zaton").with("level", level_file_bytes(LEVEL_PRODUCTION_VERSION, false, &[])),
+    ])
     .verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
@@ -220,9 +204,7 @@ fn reports_level_without_a_shaders_chunk() {
 #[test]
 fn reports_truncated_level_file() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_bundles(vec![
-      LevelBundleFixture::valid("zaton").with("level", vec![1, 2, 3]),
-    ])
+    .with_bundles(vec![LevelBundleFixture::valid("zaton").with("level", vec![1, 2, 3])])
     .verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
@@ -257,8 +239,7 @@ fn reports_truncated_collision_form_header() {
 fn reports_unsupported_ai_map_version() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
     .with_bundles(vec![
-      LevelBundleFixture::valid("zaton")
-        .with("level.ai", ai_map_bytes(7, AI_NODE_COUNT, ZATON_GUID)),
+      LevelBundleFixture::valid("zaton").with("level.ai", ai_map_bytes(7, AI_NODE_COUNT, ZATON_GUID)),
     ])
     .verify();
 
@@ -269,19 +250,15 @@ fn reports_unsupported_ai_map_version() {
 #[test]
 fn reports_ai_map_that_does_not_match_the_graph_level() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
-    .with_bundles(vec![LevelBundleFixture::valid("zaton").with(
-      "level.ai",
-      ai_map_bytes(AI_CURRENT_VERSION, AI_NODE_COUNT, OTHER_GUID),
-    )])
+    .with_bundles(vec![
+      LevelBundleFixture::valid("zaton").with("level.ai", ai_map_bytes(AI_CURRENT_VERSION, AI_NODE_COUNT, OTHER_GUID)),
+    ])
     .verify();
 
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
   assert_eq!(
     rule_ids(&result),
-    BTreeSet::from([
-      String::from("levels.ai-guid"),
-      String::from("levels.level-guid"),
-    ])
+    BTreeSet::from([String::from("levels.ai-guid"), String::from("levels.level-guid"),])
   );
 }
 
@@ -317,10 +294,8 @@ fn addresses_cross_tables_by_ascending_level_id_rank() {
   // lowest id is the first one regardless of the order levels appear in the file.
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
     .with_bundles(vec![
-      LevelBundleFixture::valid("jupiter").with(
-        "level.ai",
-        ai_map_bytes(AI_CURRENT_VERSION, AI_NODE_COUNT, OTHER_GUID),
-      ),
+      LevelBundleFixture::valid("jupiter")
+        .with("level.ai", ai_map_bytes(AI_CURRENT_VERSION, AI_NODE_COUNT, OTHER_GUID)),
       LevelBundleFixture::valid("zaton"),
     ])
     .with_declared_maps(vec![String::from("zaton"), String::from("jupiter")])
@@ -350,11 +325,7 @@ fn reports_level_texture_reference_that_does_not_resolve() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
     .with_bundles(vec![LevelBundleFixture::valid("zaton").with(
       "level",
-      level_file_bytes(
-        LEVEL_PRODUCTION_VERSION,
-        true,
-        &["shader\\one/level\\missing"],
-      ),
+      level_file_bytes(LEVEL_PRODUCTION_VERSION, true, &["shader\\one/level\\missing"]),
     )])
     .verify();
 
@@ -380,11 +351,7 @@ fn skips_empty_shader_table_entries_like_the_renderer() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new()
     .with_bundles(vec![LevelBundleFixture::valid("zaton").with(
       "level",
-      level_file_bytes(
-        LEVEL_PRODUCTION_VERSION,
-        true,
-        &["", "shader\\one/level\\ground"],
-      ),
+      level_file_bytes(LEVEL_PRODUCTION_VERSION, true, &["", "shader\\one/level\\ground"]),
     )])
     .verify();
 
@@ -402,11 +369,7 @@ fn fails_the_check_when_the_game_graph_cannot_be_read() {
   fs::create_dir_all(root.join("configs").join("$scheme")).unwrap();
   fs::write(root.join("configs").join("system.ltx"), "").unwrap();
   fs::create_dir_all(root.join("spawns")).unwrap();
-  fs::write(
-    root.join("spawns").join("all.spawn"),
-    [1, 2, 3, 4, 5, 6, 7, 8],
-  )
-  .unwrap();
+  fs::write(root.join("spawns").join("all.spawn"), [1, 2, 3, 4, 5, 6, 7, 8]).unwrap();
 
   let project: GamedataProject = GamedataProject::open(&GamedataProjectReadOptions {
     root: root.clone(),
@@ -416,9 +379,7 @@ fn fails_the_check_when_the_game_graph_cannot_be_read() {
   .unwrap();
 
   assert!(
-    project
-      .verify_levels(&GamedataProjectVerifyOptions::default())
-      .is_err(),
+    project.verify_levels(&GamedataProjectVerifyOptions::default()).is_err(),
     "Expected an unreadable game graph to fail the check instead of passing it"
   );
 }

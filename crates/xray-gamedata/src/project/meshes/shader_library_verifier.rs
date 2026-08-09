@@ -24,13 +24,11 @@ impl<'a> ShaderLibraryVerifier<'a> {
 
     match ShaderLibraryFile::read_from_path(&path) {
       Ok(library) => GamedataShaderLibraryVerificationResult::passed(library),
-      Err(error) => {
-        GamedataShaderLibraryVerificationResult::failed(GamedataFindingFactory::for_asset(
-          GamedataVerificationRule::MeshesShaderLibrary,
-          path,
-          format!("Failed to read shader library: {error}"),
-        ))
-      }
+      Err(error) => GamedataShaderLibraryVerificationResult::failed(GamedataFindingFactory::for_asset(
+        GamedataVerificationRule::MeshesShaderLibrary,
+        path,
+        format!("Failed to read shader library: {error}"),
+      )),
     }
   }
 }

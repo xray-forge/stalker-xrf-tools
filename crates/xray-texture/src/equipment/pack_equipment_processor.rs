@@ -8,8 +8,8 @@ use xray_error::{XRayError, XRayResult};
 
 use crate::constants::{
   DDS_EXTENSION, EXTENSIONS_DIRECTORY, LTX_PATH_EXTENSION_MARKER, LTX_PATH_EXTENSION_MARKER_PREFIX,
-  LTX_PATH_GAMEDATA_MARKER, LTX_PATH_GAMEDATA_MARKER_PREFIX, PNG_EXTENSION, RESOURCES_DIRECTORY,
-  TEXTURES_DIRECTORY, UI_MIPMAP_LEVELS, UI_MIPMAPS,
+  LTX_PATH_GAMEDATA_MARKER, LTX_PATH_GAMEDATA_MARKER_PREFIX, PNG_EXTENSION, RESOURCES_DIRECTORY, TEXTURES_DIRECTORY,
+  UI_MIPMAP_LEVELS, UI_MIPMAPS,
 };
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
 use crate::utils::images::{dds_to_image, fit_image_into_bounds, warn_on_reshaped_ui_dds};
@@ -31,9 +31,7 @@ impl PackEquipmentProcessor {
     let mut occupied_slots: HashMap<(u32, u32), (String, Vec<u8>)> = HashMap::new();
 
     for (section_name, section) in &options.ltx.sections {
-      let Some(sprite_descriptor) =
-        InventorySpriteDescriptor::new_optional_from_section(section_name, section)
-      else {
+      let Some(sprite_descriptor) = InventorySpriteDescriptor::new_optional_from_section(section_name, section) else {
         continue;
       };
 
@@ -83,12 +81,7 @@ impl PackEquipmentProcessor {
       UI_MIPMAP_LEVELS,
     );
 
-    save_image_as_ui_dds(
-      &options.output_path,
-      &image,
-      options.dds_compression_format,
-      UI_MIPMAPS,
-    )?;
+    save_image_as_ui_dds(&options.output_path, &image, options.dds_compression_format, UI_MIPMAPS)?;
 
     xray_output::info!(
       options.output,
@@ -138,10 +131,7 @@ impl PackEquipmentProcessor {
   }
 
   /// Fail once with every section that declares inventory grid coordinates but has no icon to pack.
-  fn assert_every_section_has_an_icon(
-    options: &PackEquipmentOptions,
-    skipped_sections: &[&str],
-  ) -> XRayResult {
+  fn assert_every_section_has_an_icon(options: &PackEquipmentOptions, skipped_sections: &[&str]) -> XRayResult {
     if !options.is_strict || skipped_sections.is_empty() {
       return Ok(());
     }
@@ -178,10 +168,7 @@ impl PackEquipmentProcessor {
 
   /// Read rescaled png or dds icon to inject into one large equipment file.
   pub fn read_sprite_from_path(path: &Path, width: u32, height: u32) -> XRayResult<DynamicImage> {
-    let image: DynamicImage = if path
-      .extension()
-      .is_some_and(|extension| extension.eq(PNG_EXTENSION))
-    {
+    let image: DynamicImage = if path.extension().is_some_and(|extension| extension.eq(PNG_EXTENSION)) {
       ImageReader::open(path)?.decode()?
     } else {
       dds_to_image(&read_dds_by_path(path)?)?.into()
@@ -191,22 +178,15 @@ impl PackEquipmentProcessor {
   }
 
   /// Read equipment icon from custom path defined in ltx config folder.
-  pub fn read_sprite_path(
-    options: &PackEquipmentOptions,
-    descriptor: &InventorySpriteDescriptor,
-  ) -> PathBuf {
+  pub fn read_sprite_path(options: &PackEquipmentOptions, descriptor: &InventorySpriteDescriptor) -> PathBuf {
     match descriptor.custom_icon.as_deref() {
       None => {
-        let png_path: PathBuf = options
-          .source
-          .join(format!("{}.{}", descriptor.section, PNG_EXTENSION));
+        let png_path: PathBuf = options.source.join(format!("{}.{}", descriptor.section, PNG_EXTENSION));
 
         if png_path.exists() {
           png_path
         } else {
-          options
-            .source
-            .join(format!("{}.{}", descriptor.section, DDS_EXTENSION))
+          options.source.join(format!("{}.{}", descriptor.section, DDS_EXTENSION))
         }
       }
       Some(custom_path) => {
@@ -215,11 +195,7 @@ impl PackEquipmentProcessor {
           if custom_path.starts_with(LTX_PATH_GAMEDATA_MARKER) {
             PathBuf::from(
               gamedata
-                .join(
-                  custom_path
-                    .strip_prefix(LTX_PATH_GAMEDATA_MARKER_PREFIX)
-                    .unwrap(),
-                )
+                .join(custom_path.strip_prefix(LTX_PATH_GAMEDATA_MARKER_PREFIX).unwrap())
                 .absolutize()
                 .unwrap()
                 .to_str()
@@ -247,11 +223,7 @@ impl PackEquipmentProcessor {
               .join("..")
               .join("..")
               .join(RESOURCES_DIRECTORY)
-              .join(
-                custom_path
-                  .strip_prefix(LTX_PATH_GAMEDATA_MARKER_PREFIX)
-                  .unwrap(),
-              )
+              .join(custom_path.strip_prefix(LTX_PATH_GAMEDATA_MARKER_PREFIX).unwrap())
               .absolutize()
               .unwrap()
               .to_str()
@@ -267,11 +239,7 @@ impl PackEquipmentProcessor {
               .unwrap()
               .join("..")
               .join(EXTENSIONS_DIRECTORY)
-              .join(
-                custom_path
-                  .strip_prefix(LTX_PATH_EXTENSION_MARKER_PREFIX)
-                  .unwrap(),
-              )
+              .join(custom_path.strip_prefix(LTX_PATH_EXTENSION_MARKER_PREFIX).unwrap())
               .absolutize()
               .unwrap()
               .to_str()

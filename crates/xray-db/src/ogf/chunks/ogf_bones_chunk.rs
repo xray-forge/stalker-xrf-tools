@@ -15,11 +15,7 @@ impl OgfBonesChunk {
   pub const CHUNK_ID: u32 = 13;
 
   pub fn get_bone_names(&self) -> Vec<&str> {
-    self
-      .bones
-      .iter()
-      .map(|it| it.name.as_str())
-      .collect::<Vec<_>>()
+    self.bones.iter().map(|it| it.name.as_str()).collect::<Vec<_>>()
   }
 }
 
@@ -35,11 +31,7 @@ impl ChunkReadWrite for OgfBonesChunk {
     }
 
     reader.assert_read("Expect all data to be read from ogf bones chunk")?;
-    assert_length(
-      &bones,
-      count as usize,
-      "Expected correct count of bones to be read",
-    )?;
+    assert_length(&bones, count as usize, "Expected correct count of bones to be read")?;
 
     Ok(Self { bones })
   }

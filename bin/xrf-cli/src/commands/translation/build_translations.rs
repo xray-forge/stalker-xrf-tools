@@ -3,9 +3,7 @@ use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_output::OutputOptions;
-use xray_translation::{
-  ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject,
-};
+use xray_translation::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;

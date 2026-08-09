@@ -50,8 +50,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
@@ -71,10 +70,7 @@ mod tests {
     // 4 name bytes + 2 terminator bytes + 4 count bytes + 4 interval floats.
     assert_eq!(writer.bytes_written(), 4 + 2 + 4 + 16);
 
-    writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
@@ -87,8 +83,7 @@ mod tests {
   #[test]
   fn test_read_write_without_intervals() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "read_write_without_intervals.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_without_intervals.chunk");
 
     let original: OgfMotionMark = OgfMotionMark {
       name: String::from("Right"),
@@ -97,10 +92,7 @@ mod tests {
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
-    writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;

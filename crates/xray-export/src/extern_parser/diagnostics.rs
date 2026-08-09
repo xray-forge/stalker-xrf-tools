@@ -5,11 +5,7 @@ use xray_typescript::swc_ecma_ast::Expr;
 use crate::extern_manifest::ExternSourceLocation;
 
 /// Return an extern declaration source location.
-pub fn source_location(
-  source_map: &SourceMap,
-  position: BytePos,
-  source_path: &str,
-) -> ExternSourceLocation {
+pub fn source_location(source_map: &SourceMap, position: BytePos, source_path: &str) -> ExternSourceLocation {
   let location = source_map.lookup_char_pos(position);
 
   ExternSourceLocation {
@@ -20,12 +16,7 @@ pub fn source_location(
 }
 
 /// Create a location-aware invalid extern declaration error.
-pub fn invalid_at(
-  source_map: &SourceMap,
-  position: BytePos,
-  source_path: &str,
-  reason: &str,
-) -> XRayError {
+pub fn invalid_at(source_map: &SourceMap, position: BytePos, source_path: &str, reason: &str) -> XRayError {
   let location: ExternSourceLocation = source_location(source_map, position, source_path);
 
   XRayError::new_invalid_error(format!(
@@ -35,11 +26,7 @@ pub fn invalid_at(
 }
 
 /// Explain why an expression cannot provide a stable extern contract.
-pub fn unsupported_export_value_reason(
-  value: &Expr,
-  export_name: &str,
-  source_map: &SourceMap,
-) -> String {
+pub fn unsupported_export_value_reason(value: &Expr, export_name: &str, source_map: &SourceMap) -> String {
   let expression: String = source_map
     .span_to_snippet(value.span())
     .unwrap_or_else(|_| String::from("<unavailable>"));

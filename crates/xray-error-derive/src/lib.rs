@@ -24,10 +24,7 @@ pub fn error_constructors_derive(input: TokenStream) -> TokenStream {
       if attr.path().is_ident("constructor") {
         match attr.meta {
           Meta::Path(_) => {
-            custom_fn_name = Some(format!(
-              "new_{}_error",
-              variant_name.to_string().to_case(Case::Snake)
-            ))
+            custom_fn_name = Some(format!("new_{}_error", variant_name.to_string().to_case(Case::Snake)))
           }
           Meta::List(_) => match attr.parse_args::<LitStr>() {
             Ok(literal) => custom_fn_name = Some(literal.value()),

@@ -89,8 +89,7 @@ mod tests {
   use xray_chunk::{ChunkReadWrite, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_file,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -120,9 +119,9 @@ mod tests {
       &get_relative_test_sample_file_path(file!(), &filename),
     )?)?;
 
-    let read: LevelCformFile = LevelCformFile::read_from_file::<XRayByteOrder>(
-      open_test_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
-    )?;
+    let read: LevelCformFile = LevelCformFile::read_from_file::<XRayByteOrder>(open_test_resource_as_file(
+      &get_relative_test_sample_file_path(file!(), &filename),
+    )?)?;
 
     assert_eq!(read.header, original);
 
@@ -140,11 +139,8 @@ mod tests {
 
     bytes.truncate(LevelCformHeader::SIZE as usize - 1);
 
-    overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-      file!(),
-      &filename,
-    ))?
-    .write_all(&bytes)?;
+    overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?
+      .write_all(&bytes)?;
 
     assert!(
       LevelCformFile::read_from_file::<XRayByteOrder>(open_test_resource_as_file(

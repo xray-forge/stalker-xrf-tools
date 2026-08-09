@@ -13,11 +13,7 @@ pub struct OgfPart {
 
 impl OgfPart {
   pub fn get_bones(&self) -> Vec<&str> {
-    self
-      .bones
-      .iter()
-      .map(|it| it.0.as_str())
-      .collect::<Vec<_>>()
+    self.bones.iter().map(|it| it.0.as_str()).collect::<Vec<_>>()
   }
 }
 
@@ -28,17 +24,12 @@ impl ChunkReadWriteList for OgfPart {
 
     for _ in 0..count {
       parts.push(
-        Self::read::<T>(reader).map_err(|error| {
-          XRayError::new_read_error(format!("Failed to read ogf part: {error}"))
-        })?,
+        Self::read::<T>(reader)
+          .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf part: {error}")))?,
       );
     }
 
-    assert_length(
-      &parts,
-      count as usize,
-      "Expected correct count of OGF parts to be read",
-    )?;
+    assert_length(&parts, count as usize, "Expected correct count of OGF parts to be read")?;
 
     Ok(parts)
   }
@@ -47,9 +38,9 @@ impl ChunkReadWriteList for OgfPart {
     writer.write_u16::<T>(parts.len() as u16)?;
 
     for part in parts {
-      part.write::<T>(writer).map_err(|error| {
-        XRayError::new_serialization_error(format!("Failed to write ogf part: {error}"))
-      })?;
+      part
+        .write::<T>(writer)
+        .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf part: {error}")))?;
     }
 
     Ok(())
@@ -89,8 +80,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::ogf::ogf_part::OgfPart;
@@ -113,10 +103,7 @@ mod tests {
 
     OgfPart::write_list::<XRayByteOrder>(&mut writer, &original)?;
 
-    writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;

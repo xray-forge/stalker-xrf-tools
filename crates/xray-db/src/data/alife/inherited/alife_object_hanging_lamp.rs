@@ -146,10 +146,7 @@ impl LtxImportExport for AlifeObjectHangingLamp {
     ltx
       .with_section(section_name)
       .set("hanging_lamp.main_color", self.main_color.to_string())
-      .set(
-        "hanging_lamp.main_brightness",
-        self.main_brightness.to_string(),
-      )
+      .set("hanging_lamp.main_brightness", self.main_brightness.to_string())
       .set("hanging_lamp.color_animator", &self.color_animator)
       .set("hanging_lamp.main_range", self.main_range.to_string())
       .set("hanging_lamp.light_flags", self.light_flags.to_string())
@@ -157,33 +154,21 @@ impl LtxImportExport for AlifeObjectHangingLamp {
       .set("hanging_lamp.fixed_bones", &self.fixed_bones)
       .set("hanging_lamp.health", self.health.to_string())
       .set("hanging_lamp.virtual_size", self.virtual_size.to_string())
-      .set(
-        "hanging_lamp.ambient_radius",
-        self.ambient_radius.to_string(),
-      )
+      .set("hanging_lamp.ambient_radius", self.ambient_radius.to_string())
       .set("hanging_lamp.ambient_power", self.ambient_power.to_string())
       .set("hanging_lamp.ambient_texture", &self.ambient_texture)
       .set("hanging_lamp.light_texture", &self.light_texture)
       .set("hanging_lamp.light_bone", &self.light_bone)
-      .set(
-        "hanging_lamp.spot_cone_angle",
-        self.spot_cone_angle.to_string(),
-      )
+      .set("hanging_lamp.spot_cone_angle", self.spot_cone_angle.to_string())
       .set("hanging_lamp.glow_texture", &self.glow_texture)
       .set("hanging_lamp.glow_radius", self.glow_radius.to_string())
       .set("hanging_lamp.light_ambient_bone", &self.light_ambient_bone)
-      .set(
-        "hanging_lamp.volumetric_quality",
-        self.volumetric_quality.to_string(),
-      )
+      .set("hanging_lamp.volumetric_quality", self.volumetric_quality.to_string())
       .set(
         "hanging_lamp.volumetric_intensity",
         self.volumetric_intensity.to_string(),
       )
-      .set(
-        "hanging_lamp.volumetric_distance",
-        self.volumetric_distance.to_string(),
-      );
+      .set("hanging_lamp.volumetric_distance", self.volumetric_distance.to_string());
 
     Ok(())
   }
@@ -201,8 +186,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -263,10 +248,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 234);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 234);
 
@@ -276,10 +259,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeObjectHangingLamp::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeObjectHangingLamp::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -334,9 +314,7 @@ mod tests {
 
     original.export("data", &mut ltx)?;
 
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
-      &ltx_filename,
-    )?)?;
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&ltx_filename)?)?;
 
     let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
@@ -390,9 +368,10 @@ mod tests {
       volumetric_distance: 30.1,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -401,10 +380,7 @@ mod tests {
 
     assert_eq!(serialized.to_string(), serialized);
 
-    assert_eq!(
-      serde_json::from_str::<AlifeObjectHangingLamp>(&serialized)?,
-      original
-    );
+    assert_eq!(serde_json::from_str::<AlifeObjectHangingLamp>(&serialized)?, original);
 
     Ok(())
   }

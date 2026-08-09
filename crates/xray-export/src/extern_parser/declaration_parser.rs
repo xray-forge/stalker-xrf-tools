@@ -74,10 +74,8 @@ impl<'a> ExternDeclarationParser<'a> {
         )
       })?;
       let documentation: Option<ExternDocumentation> = self.jsdoc_parser.parse(statement.span.lo);
-      let parameter_docs: BTreeMap<String, String> =
-        self.jsdoc_parser.parameter_docs(statement.span.lo);
-      let location: ExternSourceLocation =
-        source_location(self.source_map, statement.span.lo, self.source_path);
+      let parameter_docs: BTreeMap<String, String> = self.jsdoc_parser.parameter_docs(statement.span.lo);
+      let location: ExternSourceLocation = source_location(self.source_map, statement.span.lo, self.source_path);
 
       match call.args[1].expr.as_ref() {
         Expr::Object(object) => self.parse_object(
@@ -145,8 +143,7 @@ impl<'a> ExternDeclarationParser<'a> {
         .jsdoc_parser
         .parse(property.span().lo)
         .or_else(|| documentation.clone());
-      let own_parameter_docs: BTreeMap<String, String> =
-        self.jsdoc_parser.parameter_docs(property.span().lo);
+      let own_parameter_docs: BTreeMap<String, String> = self.jsdoc_parser.parameter_docs(property.span().lo);
       let property_parameter_docs: &BTreeMap<String, String> = if own_parameter_docs.is_empty() {
         parameter_docs
       } else {

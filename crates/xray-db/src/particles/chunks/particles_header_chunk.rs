@@ -109,9 +109,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_directory,
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_directory, get_relative_test_sample_file_path,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::export::FileImportExport;
@@ -119,8 +118,7 @@ mod tests {
 
   #[test]
   fn test_read_write_incorrect() -> XRayResult {
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
 
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 2 };
 
@@ -130,10 +128,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 2);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 2);
 
@@ -167,10 +163,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 2);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 2);
 
@@ -182,10 +176,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -194,8 +185,7 @@ mod tests {
   fn test_import_export() -> XRayResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
-    let export_folder: &Path =
-      &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
+    let export_folder: &Path = &get_absolute_test_resource_path(&get_relative_test_sample_file_directory(file!()));
 
     original.export(&export_folder)?;
 
@@ -210,9 +200,10 @@ mod tests {
   fn test_serialize_deserialize() -> XRayResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -220,10 +211,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<ParticlesHeaderChunk>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<ParticlesHeaderChunk>(&serialized)?);
 
     Ok(())
   }

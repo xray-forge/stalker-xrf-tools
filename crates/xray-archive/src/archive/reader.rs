@@ -9,8 +9,7 @@ use delharc::decode::{Decoder, Lh1Decoder};
 use regex::Regex;
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{
-  XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder,
-  get_windows1251_encoder,
+  XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder, get_windows1251_encoder,
 };
 
 use crate::archive::archive_constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK};
@@ -87,12 +86,8 @@ impl ArchiveReader {
         Err(error) => return Err(XRayError::new_read_error(error.to_string())),
       };
       let chunk_size: u32 = self.file.read_u32::<XRayByteOrder>()?;
-      let chunk_usize: usize = usize::try_from(chunk_size).map_err(|error| {
-        XRayError::new_read_error(format!(
-          "Failed to read archive header chunk size: {}",
-          error
-        ))
-      })?;
+      let chunk_usize: usize = usize::try_from(chunk_size)
+        .map_err(|error| XRayError::new_read_error(format!("Failed to read archive header chunk size: {}", error)))?;
 
       let chunk_id: u32 = raw_chunk_id & CHUNK_ID_MASK;
       let compressed: bool = (raw_chunk_id & CHUNK_ID_COMPRESSED_MASK) != 0;
@@ -104,8 +99,7 @@ impl ArchiveReader {
           let mut reader: Cursor<&[u8]> = Cursor::new(chunk_data.as_slice());
 
           file_descriptors = Some(
-            Self::read_file_descriptors(&mut reader, self.encoding)
-              .expect("Expecting a valid file descriptors chunk"),
+            Self::read_file_descriptors(&mut reader, self.encoding).expect("Expecting a valid file descriptors chunk"),
           );
         }
         // Metadata header
@@ -148,12 +142,7 @@ impl ArchiveReader {
             && &captures["name"] == "entry_point"
           {
             let entry_point = captures["value"].to_string();
-            return Ok(Some(
-              self
-                .root_regex
-                .replace(entry_point.as_str(), "")
-                .to_string(),
-            ));
+            return Ok(Some(self.root_regex.replace(entry_point.as_str(), "").to_string()));
           }
         }
         (Some(capture), _) => {
@@ -166,11 +155,7 @@ impl ArchiveReader {
     Ok(None)
   }
 
-  fn read_chunk<T: Read>(
-    file: &mut T,
-    chunk_usize: usize,
-    compressed: bool,
-  ) -> XRayResult<Vec<u8>> {
+  fn read_chunk<T: Read>(file: &mut T, chunk_usize: usize, compressed: bool) -> XRayResult<Vec<u8>> {
     match compressed {
       true => {
         let decoded_len: u32 = file.read_u32::<XRayByteOrder>()?;

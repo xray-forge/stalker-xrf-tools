@@ -31,21 +31,15 @@ where
   }
 
   if comment.stream_serial() != stream_serial || setup.stream_serial() != stream_serial {
-    return Err(String::from(
-      "Vorbis header packets must belong to the same Ogg stream",
-    ));
+    return Err(String::from("Vorbis header packets must belong to the same Ogg stream"));
   }
 
   if !comment.data.starts_with(b"\x03vorbis") {
-    return Err(String::from(
-      "Ogg stream does not contain a Vorbis comment packet",
-    ));
+    return Err(String::from("Ogg stream does not contain a Vorbis comment packet"));
   }
 
   if !setup.data.starts_with(b"\x05vorbis") {
-    return Err(String::from(
-      "Ogg stream does not contain a Vorbis setup packet",
-    ));
+    return Err(String::from("Ogg stream does not contain a Vorbis setup packet"));
   }
 
   Ok(VorbisHeaders {
@@ -82,15 +76,11 @@ pub fn parse_identification_packet(packet: &[u8]) -> Result<(u16, u32), String> 
   Ok((channels, sample_rate))
 }
 
-pub fn decode_vorbis_stream<R>(
-  reader: &mut PacketReader<R>,
-  headers: &VorbisHeaders,
-) -> Result<(), String>
+pub fn decode_vorbis_stream<R>(reader: &mut PacketReader<R>, headers: &VorbisHeaders) -> Result<(), String>
 where
   R: Read + Seek,
 {
-  let mut extra_data: Vec<u8> =
-    Vec::with_capacity(headers.identification.len() + headers.setup.len());
+  let mut extra_data: Vec<u8> = Vec::with_capacity(headers.identification.len() + headers.setup.len());
   extra_data.extend_from_slice(&headers.identification);
   extra_data.extend_from_slice(&headers.setup);
   let mut codec_parameters: AudioCodecParameters = AudioCodecParameters::new();
@@ -122,10 +112,7 @@ where
   Ok(())
 }
 
-fn read_expected_packet<R>(
-  reader: &mut PacketReader<R>,
-  packet_name: &str,
-) -> Result<OggPacket, String>
+fn read_expected_packet<R>(reader: &mut PacketReader<R>, packet_name: &str) -> Result<OggPacket, String>
 where
   R: Read + Seek,
 {
@@ -144,12 +131,7 @@ fn read_u32(bytes: &[u8], offset: &mut usize, field: &str) -> Result<u32, String
   Ok(u32::from_le_bytes(value.try_into().unwrap()))
 }
 
-fn read_bytes<'a>(
-  bytes: &'a [u8],
-  offset: &mut usize,
-  length: usize,
-  field: &str,
-) -> Result<&'a [u8], String> {
+fn read_bytes<'a>(bytes: &'a [u8], offset: &mut usize, length: usize, field: &str) -> Result<&'a [u8], String> {
   let end: usize = offset
     .checked_add(length)
     .ok_or_else(|| format!("Vorbis {field} length overflows the packet"))?;

@@ -6,9 +6,8 @@ use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
 
 use crate::constants::{
-  DDS_BLOCK_ALIGNMENT, INVENTORY_ICON_GRID_SQUARE_BASE, LTX_FIELD_INV_GRID_HEIGHT,
-  LTX_FIELD_INV_GRID_WIDTH, LTX_FIELD_INV_GRID_X, LTX_FIELD_INV_GRID_Y, LTX_FIELD_INVENTORY_ICON,
-  LTX_FIELD_INVENTORY_ICON_PATH,
+  DDS_BLOCK_ALIGNMENT, INVENTORY_ICON_GRID_SQUARE_BASE, LTX_FIELD_INV_GRID_HEIGHT, LTX_FIELD_INV_GRID_WIDTH,
+  LTX_FIELD_INV_GRID_X, LTX_FIELD_INV_GRID_Y, LTX_FIELD_INVENTORY_ICON, LTX_FIELD_INVENTORY_ICON_PATH,
 };
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -53,14 +52,8 @@ impl InventorySpriteDescriptor {
       return None;
     }
 
-    let x: u32 = section
-      .get(LTX_FIELD_INV_GRID_X)?
-      .parse::<u32>()
-      .unwrap_or(u32::MAX);
-    let y: u32 = section
-      .get(LTX_FIELD_INV_GRID_Y)?
-      .parse::<u32>()
-      .unwrap_or(u32::MAX);
+    let x: u32 = section.get(LTX_FIELD_INV_GRID_X)?.parse::<u32>().unwrap_or(u32::MAX);
+    let y: u32 = section.get(LTX_FIELD_INV_GRID_Y)?.parse::<u32>().unwrap_or(u32::MAX);
     let w: u32 = section
       .get(LTX_FIELD_INV_GRID_WIDTH)?
       .parse::<u32>()
@@ -75,9 +68,7 @@ impl InventorySpriteDescriptor {
     } else {
       Some(Self {
         section: section_name.into(),
-        custom_icon: section
-          .get(LTX_FIELD_INVENTORY_ICON_PATH)
-          .map(|value| value.into()),
+        custom_icon: section.get(LTX_FIELD_INVENTORY_ICON_PATH).map(|value| value.into()),
         x,
         y,
         w,
@@ -100,9 +91,7 @@ impl InventorySpriteDescriptor {
 
 impl InventorySpriteDescriptor {
   /// Prepare combined equipment image base with suitable base size.
-  pub fn create_equipment_sprite_base_for_ltx(
-    ltx: &Ltx,
-  ) -> XRayResult<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+  pub fn create_equipment_sprite_base_for_ltx(ltx: &Ltx) -> XRayResult<ImageBuffer<Rgba<u8>, Vec<u8>>> {
     let (max_width, max_height) = Self::get_equipment_sprite_boundaries_from_ltx(ltx);
 
     if max_width > 32 * 1024 || max_height > 32 * 1024 {
@@ -125,14 +114,8 @@ impl InventorySpriteDescriptor {
 
     for (section_name, section) in &ltx.sections {
       if let Some(sprite) = Self::new_optional_from_section(section_name, section) {
-        max_width = max(
-          (sprite.x + sprite.w) * INVENTORY_ICON_GRID_SQUARE_BASE,
-          max_width,
-        );
-        max_height = max(
-          (sprite.y + sprite.h) * INVENTORY_ICON_GRID_SQUARE_BASE,
-          max_height,
-        );
+        max_width = max((sprite.x + sprite.w) * INVENTORY_ICON_GRID_SQUARE_BASE, max_width);
+        max_height = max((sprite.y + sprite.h) * INVENTORY_ICON_GRID_SQUARE_BASE, max_height);
       }
     }
 

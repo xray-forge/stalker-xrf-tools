@@ -49,21 +49,14 @@ impl SpawnFile {
 
   /// Read spawn file from chunks.
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
-    assert_length(
-      chunks,
-      5,
-      "Unexpected chunks count in spawn file root, expected 5",
-    )?;
+    assert_length(chunks, 5, "Unexpected chunks count in spawn file root, expected 5")?;
 
     let spawn_file: Self = {
       Self {
         header: find_required_chunk_by_id(chunks, SpawnHeaderChunk::CHUNK_ID)?.read_xr::<T, _>()?,
-        alife_spawn: find_required_chunk_by_id(chunks, SpawnALifeSpawnsChunk::CHUNK_ID)?
-          .read_xr::<T, _>()?,
-        artefact_spawn: find_required_chunk_by_id(chunks, SpawnArtefactSpawnsChunk::CHUNK_ID)?
-          .read_xr::<T, _>()?,
-        patrols: find_required_chunk_by_id(chunks, SpawnPatrolsChunk::CHUNK_ID)?
-          .read_xr::<T, _>()?,
+        alife_spawn: find_required_chunk_by_id(chunks, SpawnALifeSpawnsChunk::CHUNK_ID)?.read_xr::<T, _>()?,
+        artefact_spawn: find_required_chunk_by_id(chunks, SpawnArtefactSpawnsChunk::CHUNK_ID)?.read_xr::<T, _>()?,
+        patrols: find_required_chunk_by_id(chunks, SpawnPatrolsChunk::CHUNK_ID)?.read_xr::<T, _>()?,
         graphs: find_required_chunk_by_id(chunks, SpawnGraphsChunk::CHUNK_ID)?.read_xr::<T, _>()?,
       }
     };
@@ -87,9 +80,7 @@ impl SpawnFile {
   /// Unlike [`Self::read_from_path`], ALife, artefact spawn and patrol chunks are not parsed at all.
   /// Consumers that only need the level roster stay readable on spawn files containing ALife object
   /// classes without a CLSID mapping, and skip the bulk of the file.
-  pub fn read_graphs_from_path<T: ByteOrder, P: AsRef<Path>>(
-    path: &P,
-  ) -> XRayResult<SpawnGraphsChunk> {
+  pub fn read_graphs_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<SpawnGraphsChunk> {
     Self::read_graphs_from_file::<T>(File::open(path)?)
   }
 
@@ -101,9 +92,7 @@ impl SpawnFile {
   }
 
   /// Read only the game graphs chunk of the spawn file from chunks.
-  pub fn read_graphs_from_chunks<T: ByteOrder>(
-    chunks: &[ChunkReader],
-  ) -> XRayResult<SpawnGraphsChunk> {
+  pub fn read_graphs_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<SpawnGraphsChunk> {
     find_required_chunk_by_id(chunks, SpawnGraphsChunk::CHUNK_ID)?.read_xr::<T, _>()
   }
 
@@ -134,8 +123,7 @@ impl SpawnFile {
 
     let mut artefact_spawn_chunk_writer: ChunkWriter = ChunkWriter::new();
     artefact_spawn_chunk_writer.write_xr::<T, _>(&self.artefact_spawn)?;
-    artefact_spawn_chunk_writer
-      .flush_chunk_into::<T>(writer, SpawnArtefactSpawnsChunk::CHUNK_ID)?;
+    artefact_spawn_chunk_writer.flush_chunk_into::<T>(writer, SpawnArtefactSpawnsChunk::CHUNK_ID)?;
 
     let mut patrols_chunk_writer: ChunkWriter = ChunkWriter::new();
     patrols_chunk_writer.write_xr::<T, _>(&self.patrols)?;

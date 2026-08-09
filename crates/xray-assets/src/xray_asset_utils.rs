@@ -5,10 +5,7 @@ use xray_error::{XRayError, XRayResult};
 /// Converts a root-relative physical path into the canonical X-Ray logical path used for indexing.
 pub(crate) fn logical_path(path: &Path) -> XRayResult<String> {
   normalize(path.to_str().ok_or_else(|| {
-    XRayError::new_asset_error(format!(
-      "directory asset path is not valid UTF-8: {}",
-      path.display()
-    ))
+    XRayError::new_asset_error(format!("directory asset path is not valid UTF-8: {}", path.display()))
   })?)
 }
 
@@ -30,10 +27,7 @@ pub(crate) fn normalize(path: &str) -> XRayResult<String> {
 }
 
 pub(crate) fn is_component_prefix(path: &str, prefix: &str) -> bool {
-  path == prefix
-    || path
-      .strip_prefix(prefix)
-      .is_some_and(|rest| rest.starts_with('\\'))
+  path == prefix || path.strip_prefix(prefix).is_some_and(|rest| rest.starts_with('\\'))
 }
 
 pub(crate) fn join(prefix: &str, path: &str) -> XRayResult<String> {

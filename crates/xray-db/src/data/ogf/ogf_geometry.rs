@@ -36,21 +36,13 @@ impl OgfGeometry {
   const VERTEX_SIZE_3_LINK: usize = 70;
   const VERTEX_SIZE_4_LINK: usize = 76;
 
-  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(
-    chunks: &[ChunkReader<D>],
-  ) -> XRayResult<Option<Self>> {
-    let vertices: Option<OgfVertices> = match chunks
-      .iter()
-      .find(|chunk| chunk.id == Self::VERTICES_CHUNK_ID)
-    {
+  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(chunks: &[ChunkReader<D>]) -> XRayResult<Option<Self>> {
+    let vertices: Option<OgfVertices> = match chunks.iter().find(|chunk| chunk.id == Self::VERTICES_CHUNK_ID) {
       Some(chunk) => Some(Self::read_vertices::<T, D>(&mut chunk.clone())?),
       None => None,
     };
 
-    let indices: Option<Vec<u16>> = match chunks
-      .iter()
-      .find(|chunk| chunk.id == Self::INDICES_CHUNK_ID)
-    {
+    let indices: Option<Vec<u16>> = match chunks.iter().find(|chunk| chunk.id == Self::INDICES_CHUNK_ID) {
       Some(chunk) => Some(Self::read_indices::<T, D>(&mut chunk.clone())?),
       None => None,
     };
@@ -70,15 +62,12 @@ impl OgfGeometry {
     }
   }
 
-  fn read_vertices<T: ByteOrder, D: ChunkDataSource>(
-    reader: &mut ChunkReader<D>,
-  ) -> XRayResult<OgfVertices> {
+  fn read_vertices<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XRayResult<OgfVertices> {
     let vertex_format: u32 = reader.read_u32::<T>()?;
     let vertex_count: u32 = reader.read_u32::<T>()?;
     let vertices: Vec<u8> = reader.read_remaining()?;
 
-    let Some((vertex_size, bone_indices_per_vertex)) = Self::skin_vertex_layout(vertex_format)
-    else {
+    let Some((vertex_size, bone_indices_per_vertex)) = Self::skin_vertex_layout(vertex_format) else {
       return Ok(OgfVertices {
         format: vertex_format,
         count: vertex_count,
@@ -100,10 +89,7 @@ impl OgfGeometry {
     let mut parsed: Vec<OgfVertex> = Vec::with_capacity(vertex_count as usize);
 
     for vertex in vertices.chunks_exact(vertex_size) {
-      parsed.push(OgfVertex::read_from_slice::<T>(
-        vertex,
-        bone_indices_per_vertex,
-      ));
+      parsed.push(OgfVertex::read_from_slice::<T>(vertex, bone_indices_per_vertex));
     }
 
     Ok(OgfVertices {
@@ -113,9 +99,7 @@ impl OgfGeometry {
     })
   }
 
-  fn read_indices<T: ByteOrder, D: ChunkDataSource>(
-    reader: &mut ChunkReader<D>,
-  ) -> XRayResult<Vec<u16>> {
+  fn read_indices<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XRayResult<Vec<u16>> {
     let indices: Vec<u16> = reader.read_u16_vector::<T>()?;
     reader.assert_read("Expect all data to be read from ogf indices")?;
 
@@ -142,8 +126,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use super::OgfGeometry;
@@ -161,8 +144,8 @@ mod tests {
     assert_eq!(file.bytes_remaining(), contents.len());
 
     let chunks = ChunkReader::from_slice(file)?.read_children()?;
-    let geometry: OgfGeometry = OgfGeometry::read_from_chunks::<XRayByteOrder, _>(&chunks)?
-      .expect("geometry chunks are present");
+    let geometry: OgfGeometry =
+      OgfGeometry::read_from_chunks::<XRayByteOrder, _>(&chunks)?.expect("geometry chunks are present");
 
     assert_eq!(geometry.vertex_count, Some(2));
     assert_eq!(geometry.indices, Some(vec![0, 1, 0]));
@@ -192,12 +175,8 @@ mod tests {
 
     let mut source: ChunkWriter = ChunkWriter::new();
 
-    source.write_all(
-      &vertices.flush_chunk_into_buffer::<XRayByteOrder>(OgfGeometry::VERTICES_CHUNK_ID)?,
-    )?;
-    source.write_all(
-      &indices.flush_chunk_into_buffer::<XRayByteOrder>(OgfGeometry::INDICES_CHUNK_ID)?,
-    )?;
+    source.write_all(&vertices.flush_chunk_into_buffer::<XRayByteOrder>(OgfGeometry::VERTICES_CHUNK_ID)?)?;
+    source.write_all(&indices.flush_chunk_into_buffer::<XRayByteOrder>(OgfGeometry::INDICES_CHUNK_ID)?)?;
 
     source.flush_raw_into_buffer()
   }

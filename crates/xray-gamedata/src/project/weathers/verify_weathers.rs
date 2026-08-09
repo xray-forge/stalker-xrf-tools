@@ -34,17 +34,11 @@ impl GamedataProject {
       .ltx_project
       .ltx_files
       .iter()
-      .filter(|path| {
-        path
-          .parent()
-          .expect("Config parent expected")
-          .ends_with(&weathers_path)
-      })
+      .filter(|path| path.parent().expect("Config parent expected").ends_with(&weathers_path))
       .collect();
 
-    let checked_weather_files_count: u32 = u32::try_from(weather_configs.len()).map_err(|_| {
-      XRayError::new_verify_error("Weather config count exceeds the supported result range")
-    })?;
+    let checked_weather_files_count: u32 = u32::try_from(weather_configs.len())
+      .map_err(|_| XRayError::new_verify_error("Weather config count exceeds the supported result range"))?;
     let definitions: WeatherDefinitions = WeatherDefinitions::read(&self.ltx_project.root);
     let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();
     let mut findings: Vec<Finding> = Vec::new();

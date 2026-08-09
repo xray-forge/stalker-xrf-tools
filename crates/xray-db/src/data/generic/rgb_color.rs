@@ -48,19 +48,13 @@ impl FromStr for RgbColor {
     Ok(Self {
       r: parts[0]
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse color R value",
-        )))?,
+        .or(Err(XRayError::new_parsing_error("Failed to parse color R value")))?,
       g: parts[1]
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse color G value",
-        )))?,
+        .or(Err(XRayError::new_parsing_error("Failed to parse color G value")))?,
       b: parts[2]
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse color B value",
-        )))?,
+        .or(Err(XRayError::new_parsing_error("Failed to parse color B value")))?,
     })
   }
 }

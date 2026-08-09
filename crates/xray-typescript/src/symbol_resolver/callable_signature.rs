@@ -4,10 +4,7 @@ use crate::swc_common::SourceMap;
 use crate::swc_ecma_ast::{ArrowExpr, Function, Pat};
 
 /// Convert a function declaration into its manifest-ready signature.
-pub fn function_signature(
-  function: &Function,
-  source_map: &SourceMap,
-) -> TypeScriptFunctionSignature {
+pub fn function_signature(function: &Function, source_map: &SourceMap) -> TypeScriptFunctionSignature {
   TypeScriptFunctionSignature {
     params: function
       .params
@@ -67,15 +64,13 @@ fn parameter_signature(pattern: &Pat, source_map: &SourceMap) -> TypeScriptFunct
         .unwrap_or_else(|| String::from("unknown")),
     },
     Pat::Assign(assign) => {
-      let mut parameter: TypeScriptFunctionParameter =
-        parameter_signature(assign.left.as_ref(), source_map);
+      let mut parameter: TypeScriptFunctionParameter = parameter_signature(assign.left.as_ref(), source_map);
       parameter.optional = true;
 
       parameter
     }
     Pat::Rest(rest) => {
-      let mut parameter: TypeScriptFunctionParameter =
-        parameter_signature(rest.arg.as_ref(), source_map);
+      let mut parameter: TypeScriptFunctionParameter = parameter_signature(rest.arg.as_ref(), source_map);
       parameter.type_name = format!("...{}", parameter.type_name);
 
       parameter
@@ -90,6 +85,5 @@ fn parameter_signature(pattern: &Pat, source_map: &SourceMap) -> TypeScriptFunct
 
 /// Render a type annotation without failing resolution for unsupported syntax.
 fn canonical_type(type_annotation: &crate::swc_ecma_ast::TsType, source_map: &SourceMap) -> String {
-  canonical_ts_type_to_string(type_annotation, source_map)
-    .unwrap_or_else(|_| String::from("unknown"))
+  canonical_ts_type_to_string(type_annotation, source_map).unwrap_or_else(|_| String::from("unknown"))
 }

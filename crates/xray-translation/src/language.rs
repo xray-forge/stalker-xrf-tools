@@ -2,9 +2,7 @@ use std::str::FromStr;
 
 use derive_more::Display;
 use xray_error::{XRayError, XRayResult};
-use xray_utils::{
-  XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, get_windows1252_encoder,
-};
+use xray_utils::{XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, get_windows1252_encoder};
 
 pub const MULTILANGUAGE: &str = "multilang";
 
@@ -109,10 +107,7 @@ mod tests {
       TranslationLanguage::from_str("ukr").unwrap(),
       TranslationLanguage::Ukrainian
     );
-    assert_eq!(
-      TranslationLanguage::from_str("all").unwrap(),
-      TranslationLanguage::All
-    );
+    assert_eq!(TranslationLanguage::from_str("all").unwrap(), TranslationLanguage::All);
   }
 
   #[test]
@@ -130,37 +125,13 @@ mod tests {
 
   #[test]
   fn selects_the_xray_encoding_for_each_language() {
-    assert_eq!(
-      TranslationLanguage::English.get_language_encoding(),
-      "windows-1252"
-    );
-    assert_eq!(
-      TranslationLanguage::French.get_language_encoding(),
-      "windows-1252"
-    );
-    assert_eq!(
-      TranslationLanguage::Italian.get_language_encoding(),
-      "windows-1252"
-    );
-    assert_eq!(
-      TranslationLanguage::Spanish.get_language_encoding(),
-      "windows-1252"
-    );
-    assert_eq!(
-      TranslationLanguage::German.get_language_encoding(),
-      "windows-1250"
-    );
-    assert_eq!(
-      TranslationLanguage::Polish.get_language_encoding(),
-      "windows-1250"
-    );
-    assert_eq!(
-      TranslationLanguage::Russian.get_language_encoding(),
-      "windows-1251"
-    );
-    assert_eq!(
-      TranslationLanguage::Ukrainian.get_language_encoding(),
-      "windows-1251"
-    );
+    assert_eq!(TranslationLanguage::English.get_language_encoding(), "windows-1252");
+    assert_eq!(TranslationLanguage::French.get_language_encoding(), "windows-1252");
+    assert_eq!(TranslationLanguage::Italian.get_language_encoding(), "windows-1252");
+    assert_eq!(TranslationLanguage::Spanish.get_language_encoding(), "windows-1252");
+    assert_eq!(TranslationLanguage::German.get_language_encoding(), "windows-1250");
+    assert_eq!(TranslationLanguage::Polish.get_language_encoding(), "windows-1250");
+    assert_eq!(TranslationLanguage::Russian.get_language_encoding(), "windows-1251");
+    assert_eq!(TranslationLanguage::Ukrainian.get_language_encoding(), "windows-1251");
   }
 }

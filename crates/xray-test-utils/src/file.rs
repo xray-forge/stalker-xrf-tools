@@ -16,10 +16,5 @@ pub fn read_file_as_normalized_win_endl_string(file: &mut File) -> IoResult<Stri
 
   file.read_to_string(&mut value)?;
 
-  Ok(
-    value
-      .replace("\r\n", "\n")
-      .replace('\r', "\n")
-      .replace('\n', "\r\n"),
-  )
+  Ok(value.replace("\r\n", "\n").replace('\r', "\n").replace('\n', "\r\n"))
 }

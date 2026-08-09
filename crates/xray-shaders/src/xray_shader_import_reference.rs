@@ -47,12 +47,7 @@ impl XRayShaderImportReference {
         )));
       };
 
-      imports.push(Self::from_include_path(
-        path,
-        line_number,
-        include,
-        closing_delimiter,
-      )?);
+      imports.push(Self::from_include_path(path, line_number, include, closing_delimiter)?);
     }
 
     Ok(imports)

@@ -115,11 +115,7 @@ impl<'a> ExternCallableParser<'a> {
   }
 
   /// Parse one parameter in an inline arrow function.
-  fn parse_parameter(
-    &self,
-    parameter: &Pat,
-    parameter_docs: &BTreeMap<String, String>,
-  ) -> XRayResult<ExternParameter> {
+  fn parse_parameter(&self, parameter: &Pat, parameter_docs: &BTreeMap<String, String>) -> XRayResult<ExternParameter> {
     let (name, annotation, optional): (String, Option<&TsTypeAnn>, bool) = match parameter {
       Pat::Ident(binding) => (
         binding.id.sym.to_string(),
@@ -147,11 +143,7 @@ impl<'a> ExternCallableParser<'a> {
         )
       }
       Pat::Assign(pattern) => match pattern.left.as_ref() {
-        Pat::Ident(binding) => (
-          binding.id.sym.to_string(),
-          binding.type_ann.as_deref(),
-          true,
-        ),
+        Pat::Ident(binding) => (binding.id.sym.to_string(), binding.type_ann.as_deref(), true),
         Pat::Array(binding) => (
           pattern_name(self.source_map, binding.span, "[parameter]"),
           binding.type_ann.as_deref(),
@@ -189,14 +181,8 @@ impl<'a> ExternCallableParser<'a> {
 }
 
 /// Return a readable name for a destructured parameter pattern.
-fn pattern_name(
-  source_map: &SourceMap,
-  span: xray_typescript::swc_common::Span,
-  fallback: &str,
-) -> String {
-  let snippet: String = source_map
-    .span_to_snippet(span)
-    .unwrap_or_else(|_| fallback.into());
+fn pattern_name(source_map: &SourceMap, span: xray_typescript::swc_common::Span, fallback: &str) -> String {
+  let snippet: String = source_map.span_to_snippet(span).unwrap_or_else(|_| fallback.into());
   let mut nesting: usize = 0;
 
   for (index, character) in snippet.char_indices() {

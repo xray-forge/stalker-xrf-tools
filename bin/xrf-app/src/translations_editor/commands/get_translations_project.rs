@@ -8,9 +8,7 @@ use crate::translations_editor::state::TranslationsEditorState;
 use crate::types::TauriResult;
 
 #[tauri::command]
-pub async fn get_translations_project(
-  state: State<'_, TranslationsEditorState>,
-) -> TauriResult<Option<Value>> {
+pub async fn get_translations_project(state: State<'_, TranslationsEditorState>) -> TauriResult<Option<Value>> {
   log::info!("Getting translations project");
 
   let lock: MutexGuard<Option<TranslationProjectJson>> = state.project.lock().unwrap();

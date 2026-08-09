@@ -28,10 +28,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
   /// Motion every item model must provide, used by the engine as a fallback.
   const FALLBACK_MOTION: &'static str = "idle";
 
-  pub(crate) fn new(
-    project: &'a GamedataProject,
-    options: &'a GamedataProjectVerifyOptions,
-  ) -> Self {
+  pub(crate) fn new(project: &'a GamedataProject, options: &'a GamedataProjectVerifyOptions) -> Self {
     Self { options, project }
   }
 
@@ -47,9 +44,8 @@ impl<'a> HudItemAnimationsVerifier<'a> {
       .filter(|(_, section)| is_hud_item_section(section))
       .collect();
 
-    let checked_items_count: u32 = u32::try_from(item_sections.len()).map_err(|_| {
-      XRayError::new_verify_error("Hud item count exceeds the supported result range")
-    })?;
+    let checked_items_count: u32 = u32::try_from(item_sections.len())
+      .map_err(|_| XRayError::new_verify_error("Hud item count exceeds the supported result range"))?;
 
     // Each section is verified once, reading its model and omf files a single time.
     let messages_per_item: Vec<Vec<String>> = item_sections
@@ -57,22 +53,14 @@ impl<'a> HudItemAnimationsVerifier<'a> {
       .map(|(section_name, section)| self.verify_item_animations(section_name, section))
       .collect();
 
-    let invalid_items_count: u32 = u32::try_from(
-      messages_per_item.iter().filter(|it| !it.is_empty()).count(),
-    )
-    .map_err(|_| {
-      XRayError::new_verify_error("Invalid hud item count exceeds the supported result range")
-    })?;
+    let invalid_items_count: u32 = u32::try_from(messages_per_item.iter().filter(|it| !it.is_empty()).count())
+      .map_err(|_| XRayError::new_verify_error("Invalid hud item count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = messages_per_item
       .into_iter()
       .flatten()
       .map(|message| {
-        GamedataFindingFactory::for_asset(
-          GamedataVerificationRule::AnimationsHudItem,
-          &system_ltx_path,
-          message,
-        )
+        GamedataFindingFactory::for_asset(GamedataVerificationRule::AnimationsHudItem, &system_ltx_path, message)
       })
       .collect();
 
@@ -162,12 +150,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
 
   /// Read motions provided by the model, or `None` when the model carries no animations at all.
   fn read_model_motions(&self, visual: &str) -> XRayResult<Option<HashSet<String>>> {
-    let Some(visual_path) = self
-      .project
-      .assets
-      .ogf(visual)?
-      .map(|asset| asset.absolute_path())
-    else {
+    let Some(visual_path) = self.project.assets.ogf(visual)?.map(|asset| asset.absolute_path()) else {
       return Err(XRayError::new_not_found_error(format!(
         "Visual '{visual}' was not found"
       )));
@@ -180,9 +163,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
     let mut motions: HashSet<String> = HashSet::new();
 
     for linked in linked_assets {
-      motions.extend(OmfFile::read_motions_from_path::<XRayByteOrder, &PathBuf>(
-        &linked,
-      )?);
+      motions.extend(OmfFile::read_motions_from_path::<XRayByteOrder, &PathBuf>(&linked)?);
     }
 
     Ok(Some(motions))
@@ -190,13 +171,12 @@ impl<'a> HudItemAnimationsVerifier<'a> {
 
   /// Resolve omf assets linked by the model motion refs, or `None` when the model has no refs.
   fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XRayResult<Option<HashSet<PathBuf>>> {
-    let motion_refs: Vec<String> =
-      match OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path) {
-        Ok(refs) => refs,
-        // Model has no motion refs chunk, so it is a static visual without animations.
-        Err(XRayError::NotFound { .. }) => return Ok(None),
-        Err(error) => return Err(error),
-      };
+    let motion_refs: Vec<String> = match OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path) {
+      Ok(refs) => refs,
+      // Model has no motion refs chunk, so it is a static visual without animations.
+      Err(XRayError::NotFound { .. }) => return Ok(None),
+      Err(error) => return Err(error),
+    };
 
     let mut assets: HashSet<PathBuf> = HashSet::new();
 

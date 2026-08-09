@@ -27,10 +27,7 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    log::info!(
-      "Reading artefacts spawns chunk: {} bytes",
-      reader.read_bytes_remain()
-    );
+    log::info!("Reading artefacts spawns chunk: {} bytes", reader.read_bytes_remain());
 
     let count: u32 = reader.read_u32::<T>()?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::with_capacity(count as usize);
@@ -40,11 +37,7 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
       nodes.push(ArtefactSpawnPoint::read::<T>(reader)?);
     }
 
-    assert_length(
-      &nodes,
-      count as usize,
-      "Expected defined count of nodes to be read",
-    )?;
+    assert_length(&nodes, count as usize, "Expected defined count of nodes to be read")?;
     reader.assert_read("Expect artefact spawns chunk to be ended")?;
 
     Ok(Self { nodes })
@@ -59,10 +52,7 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
       node.write::<T>(writer)?;
     }
 
-    log::info!(
-      "Written artefact spawns chunk, {} bytes",
-      writer.bytes_written()
-    );
+    log::info!("Written artefact spawns chunk, {} bytes", writer.bytes_written());
 
     Ok(())
   }
@@ -92,9 +82,7 @@ impl FileImportExport for SpawnArtefactSpawnsChunk {
       spawn_point.export(&index.to_string(), &mut ltx)?;
     }
 
-    ltx.write_to(&mut open_export_file(
-      path.as_ref().join("artefact_spawns.ltx"),
-    )?)?;
+    ltx.write_to(&mut open_export_file(path.as_ref().join("artefact_spawns.ltx"))?)?;
 
     log::info!("Exported artefact spawns chunk");
 
@@ -118,8 +106,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
@@ -151,10 +138,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 44);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename).unwrap(),
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename).unwrap(), 0)?;
 
     assert_eq!(bytes_written, 44);
 
@@ -166,10 +151,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      SpawnArtefactSpawnsChunk::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(SpawnArtefactSpawnsChunk::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

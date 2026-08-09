@@ -74,8 +74,7 @@ impl GenericCommand for UnpackSpawnFileCommand {
 
     let force: bool = matches.get_flag("force");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Starting parsing spawn file: {}", path.display());
     xray_output::info!(output, "Unpack destination: {}", destination.display());
@@ -104,16 +103,8 @@ impl GenericCommand for UnpackSpawnFileCommand {
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    xray_output::info!(
-      output,
-      "Read spawn file took: {}ms",
-      read_duration.as_millis()
-    );
-    xray_output::info!(
-      output,
-      "Export spawn file took: {}ms",
-      unpack_duration.as_millis()
-    );
+    xray_output::info!(output, "Read spawn file took: {}ms", read_duration.as_millis());
+    xray_output::info!(output, "Export spawn file took: {}ms", unpack_duration.as_millis());
 
     Ok(())
   }

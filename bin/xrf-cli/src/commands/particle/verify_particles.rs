@@ -45,11 +45,7 @@ impl GenericCommand for VerifyParticlesFileCommand {
 
     let unpacked: bool = matches.get_flag("unpacked");
 
-    log::info!(
-      "Verify particle file {}, unpacked: {}",
-      path.display(),
-      unpacked
-    );
+    log::info!("Verify particle file {}, unpacked: {}", path.display(), unpacked);
 
     let particles_file_result: CommandResult<ParticlesFile> = if unpacked {
       ParticlesFile::import_from_path(path).map_err(Into::into)
@@ -70,10 +66,7 @@ impl GenericCommand for VerifyParticlesFileCommand {
       Err(error) => {
         log::error!("Provided particle file is invalid: {}", error);
 
-        Err(
-          XRayError::new_parsing_error(format!("Verification of particle file failed: {}", error))
-            .into(),
-        )
+        Err(XRayError::new_parsing_error(format!("Verification of particle file failed: {}", error)).into())
       }
     }
   }

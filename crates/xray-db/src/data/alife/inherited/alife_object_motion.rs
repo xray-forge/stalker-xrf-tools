@@ -47,9 +47,7 @@ impl LtxImportExport for AlifeObjectMotion {
 
   /// Export object data into ltx file.
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
-    ltx
-      .with_section(section_name)
-      .set("motion_name", &self.motion_name);
+    ltx.with_section(section_name).set("motion_name", &self.motion_name);
 
     Ok(())
   }
@@ -61,8 +59,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_motion::AlifeObjectMotion;
@@ -80,10 +77,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 12);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 12);
 
@@ -93,10 +88,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeObjectMotion::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeObjectMotion::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

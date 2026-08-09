@@ -47,8 +47,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use super::OgfIkDataChunk;
@@ -120,8 +119,7 @@ mod tests {
 
     chunk.write::<XRayByteOrder>(&mut writer)?;
 
-    let contents: Vec<u8> =
-      writer.flush_chunk_into_buffer::<XRayByteOrder>(OgfIkDataChunk::CHUNK_ID)?;
+    let contents: Vec<u8> = writer.flush_chunk_into_buffer::<XRayByteOrder>(OgfIkDataChunk::CHUNK_ID)?;
     let mut file = overwrite_test_relative_resource_as_file(&filename)?;
 
     file.write_all(&contents)?;
@@ -155,9 +153,7 @@ mod tests {
   #[test]
   fn round_trips_version_zero_bones_without_friction() -> XRayResult {
     // Version 0 records stop before friction, so reading must not consume four bytes that are not there.
-    let chunk: OgfIkDataChunk = OgfIkDataChunk {
-      bones: vec![bone(0)],
-    };
+    let chunk: OgfIkDataChunk = OgfIkDataChunk { bones: vec![bone(0)] };
 
     let read: OgfIkDataChunk = write_then_read("unversioned.chunk", &chunk)?;
 

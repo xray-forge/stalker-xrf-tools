@@ -21,12 +21,8 @@ pub async fn open_xr_exports(
     conditions: parser
       .parse_conditions_from_path(conditions_path)
       .map_err(error_to_string)?,
-    dialogs: parser
-      .parse_dialogs_from_path(dialogs_path)
-      .map_err(error_to_string)?,
-    effects: parser
-      .parse_effects_from_path(effects_path)
-      .map_err(error_to_string)?,
+    dialogs: parser.parse_dialogs_from_path(dialogs_path).map_err(error_to_string)?,
+    effects: parser.parse_effects_from_path(effects_path).map_err(error_to_string)?,
   };
 
   let json: Value = json!(declaration);

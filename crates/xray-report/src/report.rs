@@ -65,14 +65,8 @@ mod tests {
       Vec::new(),
     );
 
-    assert_eq!(
-      first_check.findings()[0].rule_id().as_str(),
-      "textures.format"
-    );
-    assert_eq!(
-      first_check.findings()[1].rule_id().as_str(),
-      "textures.read"
-    );
+    assert_eq!(first_check.findings()[0].rule_id().as_str(), "textures.format");
+    assert_eq!(first_check.findings()[1].rule_id().as_str(), "textures.read");
     assert_eq!(first_check.findings()[2].subject(), Some("z.dds"));
 
     let report: Report = Report::new(vec![first_check, second_check]);

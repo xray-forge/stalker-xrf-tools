@@ -60,10 +60,7 @@ impl ChunkReadWrite for PatrolLink {
       "Expected correct count of patrol links to be read",
     )?;
 
-    Ok(Self {
-      index,
-      links: vertices,
-    })
+    Ok(Self { index, links: vertices })
   }
 
   /// Write patrol link data into chunk writer.
@@ -103,11 +100,7 @@ impl LtxImportExport for PatrolLink {
       ))
     }
 
-    assert_length(
-      &links,
-      count,
-      "Expected to import exact count of patrol links",
-    )?;
+    assert_length(&links, count, "Expected to import exact count of patrol links")?;
 
     Ok(Self { index, links })
   }
@@ -143,8 +136,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::patrols::patrol_link::PatrolLink;
@@ -164,10 +157,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 32);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 32);
 
@@ -204,10 +195,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 48);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 48);
 
@@ -219,10 +208,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      PatrolLink::read_list::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(PatrolLink::read_list::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

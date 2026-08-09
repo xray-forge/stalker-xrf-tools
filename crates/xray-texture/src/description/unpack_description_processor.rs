@@ -16,8 +16,7 @@ pub struct UnpackDescriptionProcessor {}
 
 impl UnpackDescriptionProcessor {
   pub fn unpack_xml_descriptions(options: PackDescriptionOptions) -> XRayResult<()> {
-    let description: XmlDescriptionCollection =
-      XmlDescriptionCollection::get_descriptions(&options)?;
+    let description: XmlDescriptionCollection = XmlDescriptionCollection::get_descriptions(&options)?;
     let count: AtomicU32 = AtomicU32::new(0);
     let selected: Vec<&TextureFileDescriptor> = description.select_files(&options)?;
 
@@ -39,28 +38,18 @@ impl UnpackDescriptionProcessor {
       }
     }
 
-    xray_output::info!(
-      options.output,
-      "Unpacked {} files",
-      count.load(Ordering::Relaxed)
-    );
+    xray_output::info!(options.output, "Unpacked {} files", count.load(Ordering::Relaxed));
 
     Ok(())
   }
 
-  pub fn unpack_xml_description(
-    options: &PackDescriptionOptions,
-    file: &TextureFileDescriptor,
-  ) -> XRayResult<bool> {
-    let full_name: PathBuf = options
-      .base
-      .join(format!("{}.{}", file.name, DDS_EXTENSION));
+  pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &TextureFileDescriptor) -> XRayResult<bool> {
+    let full_name: PathBuf = options.base.join(format!("{}.{}", file.name, DDS_EXTENSION));
     let destination: PathBuf = options.output_path.join(&file.name);
 
     xray_output::verbose!(options.output, "Unpacking {}", full_name.display());
 
-    let dds: XRayResult<RgbaImage> =
-      read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
+    let dds: XRayResult<RgbaImage> = read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
 
     if let Ok(dds) = dds {
       if !destination.exists() {
@@ -68,12 +57,7 @@ impl UnpackDescriptionProcessor {
       }
 
       for sprite in &file.sprites {
-        xray_output::verbose!(
-          options.output,
-          "Unpacking {} -> {}",
-          full_name.display(),
-          sprite.id
-        );
+        xray_output::verbose!(options.output, "Unpacking {} -> {}", full_name.display(), sprite.id);
 
         let (max_x, max_y) = sprite.get_dimension_boundaries();
 

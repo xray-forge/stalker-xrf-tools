@@ -37,9 +37,8 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
       .filter(|(_, section)| is_player_hud_section(section))
       .collect();
 
-    let checked_huds_count: u32 = u32::try_from(hud_sections.len()).map_err(|_| {
-      XRayError::new_verify_error("Player HUD count exceeds the supported result range")
-    })?;
+    let checked_huds_count: u32 = u32::try_from(hud_sections.len())
+      .map_err(|_| XRayError::new_verify_error("Player HUD count exceeds the supported result range"))?;
 
     let mut messages: Vec<String> = hud_sections
       .par_iter()
@@ -51,9 +50,8 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
     messages.sort();
     messages.dedup();
 
-    let collisions_count: u32 = u32::try_from(messages.len()).map_err(|_| {
-      XRayError::new_verify_error("Motion collision count exceeds the supported result range")
-    })?;
+    let collisions_count: u32 = u32::try_from(messages.len())
+      .map_err(|_| XRayError::new_verify_error("Motion collision count exceeds the supported result range"))?;
 
     xray_output::info!(
       self.options.output,

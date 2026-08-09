@@ -52,8 +52,8 @@ mod tests {
   use super::GamedataWeathersVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::{
-    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]

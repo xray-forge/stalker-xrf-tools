@@ -115,24 +115,23 @@ impl HuffTree {
         max_allocated += 2;
       }
       // fill tree with leaves found in the lengths table at the current length
-      let more_leaves =
-        value_lengths
-          .iter()
-          .copied()
-          .zip(0..)
-          .fold(false, |mut more, (len, value)| {
-            match len.cmp(&current_len) {
-              Ordering::Equal => {
-                tree.push(TreeEntry::leaf(value));
-              }
-              Ordering::Greater => {
-                // there are more leaves to process
-                more = true;
-              }
-              Ordering::Less => {}
+      let more_leaves = value_lengths
+        .iter()
+        .copied()
+        .zip(0..)
+        .fold(false, |mut more, (len, value)| {
+          match len.cmp(&current_len) {
+            Ordering::Equal => {
+              tree.push(TreeEntry::leaf(value));
             }
-            more
-          });
+            Ordering::Greater => {
+              // there are more leaves to process
+              more = true;
+            }
+            Ordering::Less => {}
+          }
+          more
+        });
       if tree.len() > max_allocated {
         return Err("too many leaves");
       }
@@ -185,12 +184,7 @@ impl HuffTree {
 
 impl fmt::Display for HuffTree {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    fn fmt_step(
-      tree: &Vec<TreeEntry>,
-      index: usize,
-      f: &mut fmt::Formatter<'_>,
-      prefix: &mut String,
-    ) -> fmt::Result {
+    fn fmt_step(tree: &Vec<TreeEntry>, index: usize, f: &mut fmt::Formatter<'_>, prefix: &mut String) -> fmt::Result {
       match tree[index].as_type() {
         NodeType::Leaf(code) => writeln!(f, "{} -> {}", prefix, code)?,
         NodeType::Branch(index) => {

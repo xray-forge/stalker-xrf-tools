@@ -37,11 +37,7 @@ impl ArchiveProject {
       unpacked_files_count += 1;
 
       if unpacked_files_count.is_multiple_of(unpacked_files_chunk) {
-        log::info!(
-          "Unpacked {}/{} files",
-          unpacked_files_count,
-          self.files.len()
-        )
+        log::info!("Unpacked {}/{} files", unpacked_files_count, self.files.len())
       }
     }
 
@@ -84,8 +80,7 @@ impl ArchiveProject {
         let descriptor: ArchiveFileReplicationDescriptor = file_descriptor.clone();
         let destination: PathBuf = destination.as_ref().into();
 
-        tasks_set
-          .spawn(async move { Self::unpack_file(&LZO::init().unwrap(), destination, &descriptor) });
+        tasks_set.spawn(async move { Self::unpack_file(&LZO::init().unwrap(), destination, &descriptor) });
       }
     }
 
@@ -93,10 +88,7 @@ impl ArchiveProject {
       unpacked_files_count += 1;
 
       if unpacked_files_count.is_multiple_of(unpacked_files_chunk) {
-        log::info!(
-          "Unpacked {unpacked_files_count} / {} files",
-          self.files.len()
-        )
+        log::info!("Unpacked {unpacked_files_count} / {} files", self.files.len())
       }
     }
 
@@ -163,10 +155,7 @@ impl ArchiveProject {
         let to_read: usize = min(buf.len(), remaining_bytes);
         let read: usize = source_file.read(&mut buf[..to_read])?;
 
-        assert(
-          read <= remaining_bytes,
-          "Must not read more bytes than remaining",
-        )?;
+        assert(read <= remaining_bytes, "Must not read more bytes than remaining")?;
         assert_not_equal(read, 0, "Unexpected End Of File")?;
 
         let written: usize = dest_file

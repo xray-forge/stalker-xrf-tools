@@ -7,9 +7,7 @@ use std::path::{Path, PathBuf};
 use roxmltree::{Document, Node, ParsingOptions};
 use xray_error::{XRayError, XRayResult};
 
-use crate::constants::{
-  XML_ATTRIBUTE_ID, XML_ATTRIBUTE_NAME, XML_TAG_FILE, XML_TAG_TEXTURE, XML_TAG_WINDOW,
-};
+use crate::constants::{XML_ATTRIBUTE_ID, XML_ATTRIBUTE_NAME, XML_TAG_FILE, XML_TAG_TEXTURE, XML_TAG_WINDOW};
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
 use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
 use crate::description::pack_description_options::PackDescriptionOptions;
@@ -24,10 +22,7 @@ impl XmlDescriptionCollection {
   /// A description usually names several sheets, and packing rewrites every one of them. Selecting by
   /// name keeps a change to a single sheet from touching its neighbours. An unknown name is an error
   /// rather than a silently empty run, because that is almost always a typo.
-  pub fn select_files(
-    &self,
-    options: &PackDescriptionOptions,
-  ) -> XRayResult<Vec<&TextureFileDescriptor>> {
+  pub fn select_files(&self, options: &PackDescriptionOptions) -> XRayResult<Vec<&TextureFileDescriptor>> {
     if options.files.is_empty() {
       return Ok(self.files.values().collect());
     }
@@ -84,11 +79,7 @@ impl XmlDescriptionCollection {
     let described: String = normalize(described);
     let requested: String = normalize(requested);
 
-    described == requested
-      || described
-        .rsplit('/')
-        .next()
-        .is_some_and(|base| base == requested)
+    described == requested || described.rsplit('/').next().is_some_and(|base| base == requested)
   }
 
   /// Get descriptions from provided options.
@@ -110,8 +101,7 @@ impl XmlDescriptionCollection {
         if let Some(extension) = path.extension()
           && extension == "xml"
         {
-          let descriptions: HashMap<String, TextureFileDescriptor> =
-            Self::get_description(options, &path)?;
+          let descriptions: HashMap<String, TextureFileDescriptor> = Self::get_description(options, &path)?;
 
           descriptions
             .into_iter()
@@ -141,11 +131,7 @@ impl XmlDescriptionCollection {
     options: &PackDescriptionOptions,
     path: &Path,
   ) -> XRayResult<HashMap<String, TextureFileDescriptor>> {
-    xray_output::verbose!(
-      options.output,
-      "Found texture description: {}",
-      path.display()
-    );
+    xray_output::verbose!(options.output, "Found texture description: {}", path.display());
 
     let mut descriptions: HashMap<String, TextureFileDescriptor> = HashMap::new();
 
@@ -171,12 +157,7 @@ impl XmlDescriptionCollection {
           )));
         }
 
-        xray_output::warning!(
-          options.output,
-          "Error parsing XML file: {} - {}",
-          path.display(),
-          error
-        );
+        xray_output::warning!(options.output, "Error parsing XML file: {} - {}", path.display(), error);
         return Ok(HashMap::new());
       }
     };
@@ -240,10 +221,7 @@ impl XmlDescriptionCollection {
             }
           }
         } else {
-          xray_output::warning!(
-            options.output,
-            "Invalid file node supplied without name attribute"
-          );
+          xray_output::warning!(options.output, "Invalid file node supplied without name attribute");
         }
       }
     } else {
@@ -270,10 +248,8 @@ mod tests {
 
   #[test]
   fn returns_an_error_for_invalid_xml_in_strict_mode() {
-    let path: PathBuf = std::env::temp_dir().join(format!(
-      "xray-texture-invalid-description-{}.xml",
-      std::process::id()
-    ));
+    let path: PathBuf =
+      std::env::temp_dir().join(format!("xray-texture-invalid-description-{}.xml", std::process::id()));
 
     let options: PackDescriptionOptions = PackDescriptionOptions {
       description: path.clone(),
@@ -332,8 +308,7 @@ mod select_files_tests {
 
   #[test]
   fn selects_every_file_when_none_requested() {
-    let collection: XmlDescriptionCollection =
-      collection_of(&[r"ui\ui_actor_weapons", r"ui\ui_actor_armor"]);
+    let collection: XmlDescriptionCollection = collection_of(&[r"ui\ui_actor_weapons", r"ui\ui_actor_armor"]);
 
     assert_eq!(
       collection
@@ -346,8 +321,7 @@ mod select_files_tests {
 
   #[test]
   fn selects_by_bare_file_name() {
-    let collection: XmlDescriptionCollection =
-      collection_of(&[r"ui\ui_actor_weapons", r"ui\ui_actor_armor"]);
+    let collection: XmlDescriptionCollection = collection_of(&[r"ui\ui_actor_weapons", r"ui\ui_actor_armor"]);
 
     let selected = collection
       .select_files(&options_for(&["ui_actor_weapons"]))
@@ -385,13 +359,10 @@ mod select_files_tests {
 
   #[test]
   fn rejects_an_ambiguous_bare_name() {
-    let collection: XmlDescriptionCollection =
-      collection_of(&[r"ui\ui_actor_weapons", r"hud\ui_actor_weapons"]);
+    let collection: XmlDescriptionCollection = collection_of(&[r"ui\ui_actor_weapons", r"hud\ui_actor_weapons"]);
 
     assert!(
-      collection
-        .select_files(&options_for(&["ui_actor_weapons"]))
-        .is_err(),
+      collection.select_files(&options_for(&["ui_actor_weapons"])).is_err(),
       "Expect a bare name matching two described files to fail"
     );
   }

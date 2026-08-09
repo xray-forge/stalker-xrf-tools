@@ -82,18 +82,9 @@ impl LtxImportExport for AlifeObjectSmartCover {
       .with_section(section_name)
       .set("description", &self.description)
       .set("hold_position_time", self.hold_position_time.to_string())
-      .set(
-        "enter_min_enemy_distance",
-        self.enter_min_enemy_distance.to_string(),
-      )
-      .set(
-        "exit_min_enemy_distance",
-        self.exit_min_enemy_distance.to_string(),
-      )
-      .set(
-        "exit_min_enemy_distance",
-        self.exit_min_enemy_distance.to_string(),
-      )
+      .set("enter_min_enemy_distance", self.enter_min_enemy_distance.to_string())
+      .set("exit_min_enemy_distance", self.exit_min_enemy_distance.to_string())
+      .set("exit_min_enemy_distance", self.exit_min_enemy_distance.to_string())
       .set("is_combat_cover", self.is_combat_cover.to_string())
       .set("can_fire", self.can_fire.to_string());
 
@@ -109,8 +100,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -158,10 +148,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 136);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 136);
 
@@ -171,10 +159,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeObjectSmartCover::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeObjectSmartCover::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

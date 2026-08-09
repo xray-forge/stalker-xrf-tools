@@ -8,10 +8,7 @@ use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
 #[tauri::command]
-pub async fn read_archive_file(
-  path: &str,
-  state: State<'_, ArchivesEditorState>,
-) -> TauriResult<Value> {
+pub async fn read_archive_file(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<Value> {
   let lock: MutexGuard<Option<ArchiveProject>> = state.project.lock().unwrap();
 
   if (*lock).is_none() {

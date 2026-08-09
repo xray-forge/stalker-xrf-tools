@@ -14,9 +14,7 @@ impl ChunkReader {
   }
 
   #[inline]
-  pub fn read_xr_optional<T: ByteOrder, C: ChunkReadWriteOptional>(
-    &mut self,
-  ) -> XRayResult<Option<C>> {
+  pub fn read_xr_optional<T: ByteOrder, C: ChunkReadWriteOptional>(&mut self) -> XRayResult<Option<C>> {
     C::read_optional::<T>(self)
   }
 
@@ -82,8 +80,7 @@ mod tests {
 
   #[test]
   fn test_read_bytes() -> XRayResult {
-    let mut chunk: ChunkReader<InMemoryChunkDataSource> =
-      ChunkReader::from_bytes(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])?;
+    let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])?;
 
     assert_eq!(chunk.read_bytes_remain(), 10, "Expect 10 bytes remaining");
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -100,15 +97,9 @@ mod tests {
 
   #[test]
   fn test_read_remaining() -> XRayResult {
-    assert_eq!(
-      ChunkReader::from_bytes(&[0, 1, 2])?.read_remaining()?,
-      vec![0, 1, 2]
-    );
+    assert_eq!(ChunkReader::from_bytes(&[0, 1, 2])?.read_remaining()?, vec![0, 1, 2]);
     assert_eq!(ChunkReader::from_bytes(&[0])?.read_remaining()?, vec![0]);
-    assert_eq!(
-      ChunkReader::from_bytes(&[])?.read_remaining()?,
-      Vec::<u8>::new()
-    );
+    assert_eq!(ChunkReader::from_bytes(&[])?.read_remaining()?, Vec::<u8>::new());
 
     Ok(())
   }

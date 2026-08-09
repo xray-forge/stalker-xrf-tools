@@ -226,16 +226,11 @@ impl DynHuffTree {
   pub fn new() -> Self {
     let mut groups = Groups::new();
     let mut nodes = [TreeNode::default(); NUM_NODES];
-    let leaves: [u16; NUM_LEAVES] =
-      core::array::from_fn(|value| (NUM_NODES - 1) as u16 - value as u16);
+    let leaves: [u16; NUM_LEAVES] = core::array::from_fn(|value| (NUM_NODES - 1) as u16 - value as u16);
 
     let mut last_group = groups.allocate();
 
-    for (node, value) in nodes[NUM_NODES - NUM_LEAVES..NUM_NODES]
-      .iter_mut()
-      .rev()
-      .zip(0..)
-    {
+    for (node, value) in nodes[NUM_NODES - NUM_LEAVES..NUM_NODES].iter_mut().rev().zip(0..) {
       *node = TreeNode::new_leaf(value, last_group);
     }
 
@@ -299,9 +294,7 @@ impl DynHuffTree {
         for node in nodes[..target_len].iter_mut().rev().take(2 - num_children) {
           let (entry, freq) = next_leaf.unwrap();
           target_len -= 1;
-          self
-            .leaves
-            .set_leaf_node_index(entry.as_value(), target_len);
+          self.leaves.set_leaf_node_index(entry.as_value(), target_len);
           node.entry = entry;
           node.freq = freq;
           next_leaf = leaves_riter.next();
@@ -319,9 +312,7 @@ impl DynHuffTree {
           break;
         }
         let node = target_mut.next().unwrap();
-        self
-          .leaves
-          .set_leaf_node_index(entry.as_value(), target_mut.len());
+        self.leaves.set_leaf_node_index(entry.as_value(), target_mut.len());
         node.entry = entry;
         node.freq = freq;
         next_leaf = leaves_riter.next();
@@ -366,11 +357,7 @@ impl DynHuffTree {
     #[cfg(debug_assertions)]
     let child_nodes = &mut self.nodes[child_index - 1..child_index + 1];
     #[cfg(not(debug_assertions))]
-    let child_nodes = unsafe {
-      self
-        .nodes
-        .get_unchecked_mut(child_index - 1..child_index + 1)
-    };
+    let child_nodes = unsafe { self.nodes.get_unchecked_mut(child_index - 1..child_index + 1) };
     for child in child_nodes.iter_mut() {
       child.parent = parent_index as u16;
     }
@@ -484,19 +471,10 @@ impl DynHuffTree {
 
 impl fmt::Display for DynHuffTree {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    fn fmt_step(
-      nodes: &[TreeNode],
-      index: usize,
-      f: &mut fmt::Formatter<'_>,
-      prefix: &mut String,
-    ) -> fmt::Result {
+    fn fmt_step(nodes: &[TreeNode], index: usize, f: &mut fmt::Formatter<'_>, prefix: &mut String) -> fmt::Result {
       let node = nodes[index];
       match node.entry.as_type() {
-        NodeType::Leaf(code) => writeln!(
-          f,
-          "{} -> {} f: {} g: {}",
-          prefix, code, node.freq, node.group
-        )?,
+        NodeType::Leaf(code) => writeln!(f, "{} -> {} f: {} g: {}", prefix, code, node.freq, node.group)?,
         NodeType::Branch(index) => {
           prefix.push('0');
           fmt_step(nodes, index as usize, f, prefix)?;

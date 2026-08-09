@@ -3,9 +3,7 @@ use std::path::Path;
 
 use xray_error::XRayResult;
 use xray_typescript::swc_common::{SourceMap, Spanned};
-use xray_typescript::swc_ecma_ast::{
-  Expr, MemberExpr, MemberProp, Program, TsFnOrConstructorType, TsType,
-};
+use xray_typescript::swc_ecma_ast::{Expr, MemberExpr, MemberProp, Program, TsFnOrConstructorType, TsType};
 use xray_typescript::{TypeScriptSymbol, TypeScriptSymbolResolver};
 
 use super::callable_parser::ExternCallableParser;
@@ -69,20 +67,16 @@ impl<'a> ExternValueParser<'a> {
         documentation,
         parameter_docs,
       ),
-      Expr::Member(member) => {
-        self.parse_member_reference(program, member, value, export_name, documentation)
-      }
+      Expr::Member(member) => self.parse_member_reference(program, member, value, export_name, documentation),
       Expr::TsAs(assertion) => {
         if let TsType::TsFnOrConstructorType(TsFnOrConstructorType::TsFnType(function_type)) =
           assertion.type_ann.as_ref()
         {
-          return Ok(ExternExport::Callable(
-            self.callable_parser.parse_function_type(
-              function_type,
-              documentation,
-              parameter_docs,
-            )?,
-          ));
+          return Ok(ExternExport::Callable(self.callable_parser.parse_function_type(
+            function_type,
+            documentation,
+            parameter_docs,
+          )?));
         }
 
         Ok(ExternExport::Value(ExternValue {
@@ -116,17 +110,15 @@ impl<'a> ExternValueParser<'a> {
       .ok_or_else(|| self.invalid_value(value, export_name))?;
 
     match symbol {
-      TypeScriptSymbol::Callable(signature) => Ok(ExternExport::Callable(
-        self
-          .callable_parser
-          .from_signature(signature, documentation, parameter_docs),
-      )),
+      TypeScriptSymbol::Callable(signature) => Ok(ExternExport::Callable(self.callable_parser.from_signature(
+        signature,
+        documentation,
+        parameter_docs,
+      ))),
       value => Ok(ExternExport::Value(ExternValue {
         doc: documentation,
         source: self.source_path.into(),
-        type_name: value
-          .value_type()
-          .expect("Non-callable symbols have value types"),
+        type_name: value.value_type().expect("Non-callable symbols have value types"),
       })),
     }
   }

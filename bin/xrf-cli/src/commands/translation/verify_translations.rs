@@ -4,9 +4,7 @@ use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_output::OutputOptions;
-use xray_translation::{
-  ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject,
-};
+use xray_translation::{ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject};
 
 use super::translation_verification_report::TranslationVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};

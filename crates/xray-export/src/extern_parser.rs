@@ -35,15 +35,10 @@ impl ExternManifestParser {
     self.parse_files(&files, declarations_root)
   }
 
-  fn parse_files(
-    &self,
-    files: &[PathBuf],
-    declarations_root: &Path,
-  ) -> XRayResult<ParsedExternManifest> {
+  fn parse_files(&self, files: &[PathBuf], declarations_root: &Path) -> XRayResult<ParsedExternManifest> {
     let mut parsed = Vec::new();
 
-    let symbol_resolver: TypeScriptSymbolResolver =
-      TypeScriptSymbolResolver::discover(declarations_root)?;
+    let symbol_resolver: TypeScriptSymbolResolver = TypeScriptSymbolResolver::discover(declarations_root)?;
 
     for path in files {
       let source = parse_typescript_file(path)?;
@@ -87,9 +82,7 @@ impl ExternManifestParser {
       && !path.file_name().is_some_and(|name| {
         name.to_string_lossy().ends_with(".test.ts") || name.to_string_lossy().ends_with(".spec.ts")
       })
-      && !path
-        .components()
-        .any(|component| component.as_os_str() == "__test__")
+      && !path.components().any(|component| component.as_os_str() == "__test__")
   }
 
   fn read_source_files(&self, declarations_root: &Path) -> Vec<PathBuf> {
@@ -105,11 +98,7 @@ impl ExternManifestParser {
     files
   }
 
-  fn normalize_declaration_path(
-    &self,
-    path: &Path,
-    declarations_root: &Path,
-  ) -> XRayResult<String> {
+  fn normalize_declaration_path(&self, path: &Path, declarations_root: &Path) -> XRayResult<String> {
     let relative: &Path = path.strip_prefix(declarations_root).map_err(|_| {
       XRayError::new_invalid_error(format!(
         "Declaration '{}' is outside declarations root '{}'.",
@@ -131,8 +120,7 @@ mod tests {
   use crate::ExternExport;
 
   fn create_test_root(name: &str) -> PathBuf {
-    let root: PathBuf =
-      std::env::temp_dir().join(format!("xray-export-{name}-{}", std::process::id()));
+    let root: PathBuf = std::env::temp_dir().join(format!("xray-export-{name}-{}", std::process::id()));
     let _ = fs::remove_dir_all(&root);
     fs::create_dir_all(&root).unwrap();
     root
@@ -178,10 +166,7 @@ mod tests {
     assert_eq!(callback.params[0].name, "id");
     assert_eq!(callback.params[0].type_name, "TId");
     assert_eq!(callback.source, "externs.ts");
-    assert_eq!(
-      callback.params[0].doc.as_deref(),
-      Some("Callback identifier.")
-    );
+    assert_eq!(callback.params[0].doc.as_deref(), Some("Callback identifier."));
     assert_eq!(callback.returns, "boolean");
     assert_eq!(
       callback
@@ -199,8 +184,7 @@ mod tests {
     };
     assert_eq!(value.type_name, "{ readonly id: string }");
 
-    let ExternExport::Value(checkers) = parsed.manifest.exports.get("data.checkers").unwrap()
-    else {
+    let ExternExport::Value(checkers) = parsed.manifest.exports.get("data.checkers").unwrap() else {
       panic!("Expected value extern");
     };
 
@@ -212,11 +196,7 @@ mod tests {
   #[test]
   fn uses_unknown_for_missing_callable_types_and_rejects_duplicate_names() {
     let root: PathBuf = create_test_root("invalid");
-    write_source(
-      &root,
-      "missing.ts",
-      "export {}; extern(\"test\", (value) => true);",
-    );
+    write_source(&root, "missing.ts", "export {}; extern(\"test\", (value) => true);");
 
     let parser = ExternManifestParser::new();
     let parsed = parser.parse_directory(&root).unwrap();
@@ -248,11 +228,7 @@ mod tests {
   #[test]
   fn explains_an_unresolved_function_reference() {
     let root: PathBuf = create_test_root("function-reference");
-    write_source(
-      &root,
-      "callbacks.ts",
-      "export {}; extern(\"callbacks.run\", run);",
-    );
+    write_source(&root, "callbacks.ts", "export {}; extern(\"callbacks.run\", run);");
 
     let error = ExternManifestParser::new()
       .parse_directory(&root)
@@ -263,10 +239,7 @@ mod tests {
       error.contains("function reference `run` for extern 'callbacks.run' needs a type"),
       "{error}"
     );
-    assert!(
-      error.contains("`run as (arg: Type) => ReturnType`"),
-      "{error}"
-    );
+    assert!(error.contains("`run as (arg: Type) => ReturnType`"), "{error}");
 
     fs::remove_dir_all(root).unwrap();
   }
@@ -284,11 +257,7 @@ mod tests {
         }
       }"#,
     );
-    write_source(
-      &root,
-      "src/engine/callbacks/index.ts",
-      "export * from \"./handlers\";",
-    );
+    write_source(&root, "src/engine/callbacks/index.ts", "export * from \"./handlers\";");
     write_source(
       &root,
       "src/engine/callbacks/handlers.ts",
@@ -319,8 +288,7 @@ mod tests {
     let parsed = ExternManifestParser::new()
       .parse_directory(&root.join("src/engine/declarations"))
       .unwrap();
-    let ExternExport::Callable(callback) = parsed.manifest.exports.get("callbacks.run").unwrap()
-    else {
+    let ExternExport::Callable(callback) = parsed.manifest.exports.get("callbacks.run").unwrap() else {
       panic!("Expected callable extern");
     };
 
@@ -332,18 +300,12 @@ mod tests {
     assert_eq!(callback.params[1].type_name, "number");
     assert_eq!(callback.returns, "Nillable<string>");
 
-    let ExternExport::Value(conditions) =
-      parsed.manifest.exports.get("callbacks.conditions").unwrap()
-    else {
+    let ExternExport::Value(conditions) = parsed.manifest.exports.get("callbacks.conditions").unwrap() else {
       panic!("Expected value extern");
     };
     assert_eq!(conditions.type_name, "Record<EAchievement, () => boolean>");
 
-    let ExternExport::Value(nested_conditions) = parsed
-      .manifest
-      .exports
-      .get("callbacks.nested_conditions")
-      .unwrap()
+    let ExternExport::Value(nested_conditions) = parsed.manifest.exports.get("callbacks.nested_conditions").unwrap()
     else {
       panic!("Expected value extern");
     };
@@ -368,8 +330,7 @@ mod tests {
     );
 
     let parsed = ExternManifestParser::new().parse_directory(&root).unwrap();
-    let ExternExport::Callable(callback) = parsed.manifest.exports.get("callbacks.run").unwrap()
-    else {
+    let ExternExport::Callable(callback) = parsed.manifest.exports.get("callbacks.run").unwrap() else {
       panic!("Expected callable extern");
     };
 

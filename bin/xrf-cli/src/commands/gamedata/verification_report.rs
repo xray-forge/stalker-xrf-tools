@@ -111,8 +111,7 @@ mod tests {
   use std::time::Duration;
 
   use xray_gamedata::{
-    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationStatus,
-    GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationStatus, GamedataVerificationType,
   };
   use xray_report::RuleId;
 
@@ -161,8 +160,7 @@ mod tests {
   fn writes_root_relative_paths_and_sorted_findings() {
     let root: PathBuf = temporary_gamedata_root();
     let report_path: PathBuf = root.join("report.json");
-    let mut report: GamedataVerificationReport =
-      GamedataVerificationReport::with_duration(Duration::from_millis(42));
+    let mut report: GamedataVerificationReport = GamedataVerificationReport::with_duration(Duration::from_millis(42));
 
     report.add_check(
       GamedataVerificationType::Textures,
@@ -186,8 +184,7 @@ mod tests {
     GamedataVerificationReportWriter::new(&root, &report)
       .write(&report_path)
       .unwrap();
-    let json: serde_json::Value =
-      serde_json::from_str(&fs::read_to_string(&report_path).unwrap()).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&fs::read_to_string(&report_path).unwrap()).unwrap();
 
     fs::remove_dir_all(&root).unwrap();
 
@@ -196,14 +193,8 @@ mod tests {
     assert_eq!(json["durationMs"], 42);
     assert_eq!(json["checks"][0]["durationMs"], 7);
     assert_eq!(json["checks"][0]["verificationType"], "textures");
-    assert_eq!(
-      json["checks"][0]["findings"][0]["assetPath"],
-      "textures/a.dds"
-    );
-    assert_eq!(
-      json["checks"][0]["findings"][1]["assetPath"],
-      "textures/z.dds"
-    );
+    assert_eq!(json["checks"][0]["findings"][0]["assetPath"], "textures/a.dds");
+    assert_eq!(json["checks"][0]["findings"][1]["assetPath"], "textures/z.dds");
     assert_eq!(json["checks"][0]["findings"][1]["ruleId"], "textures.dds");
   }
 }

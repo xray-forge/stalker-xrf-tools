@@ -60,10 +60,7 @@ impl GenericCommand for VerifySpawnFileCommand {
       Err(error) => {
         log::error!("Provided spawn file is invalid: {}", error);
 
-        Err(
-          XRayError::new_parsing_error(format!("Verification of spawn file failed: {}", error))
-            .into(),
-        )
+        Err(XRayError::new_parsing_error(format!("Verification of spawn file failed: {}", error)).into())
       }
     }
   }

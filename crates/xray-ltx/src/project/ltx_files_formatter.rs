@@ -12,18 +12,12 @@ pub struct LtxFilesFormatter {}
 
 impl LtxFilesFormatter {
   /// Format provided LTX files, rewriting the ones that are not formatted yet.
-  pub fn format_opt(
-    files: &[PathBuf],
-    options: LtxFormatOptions,
-  ) -> XRayResult<LtxProjectFormatResult> {
+  pub fn format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XRayResult<LtxProjectFormatResult> {
     Self::process(files, options, true)
   }
 
   /// Check format of provided LTX files without rewriting any of them.
-  pub fn check_format_opt(
-    files: &[PathBuf],
-    options: LtxFormatOptions,
-  ) -> XRayResult<LtxProjectFormatResult> {
+  pub fn check_format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XRayResult<LtxProjectFormatResult> {
     Self::process(files, options, false)
   }
 
@@ -40,11 +34,7 @@ impl LtxFilesFormatter {
 
 impl LtxFilesFormatter {
   /// Format or check provided LTX files, writing the formatted output only when requested.
-  fn process(
-    files: &[PathBuf],
-    options: LtxFormatOptions,
-    is_write: bool,
-  ) -> XRayResult<LtxProjectFormatResult> {
+  fn process(files: &[PathBuf], options: LtxFormatOptions, is_write: bool) -> XRayResult<LtxProjectFormatResult> {
     let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
     let started_at: Instant = Instant::now();
 
@@ -62,11 +52,7 @@ impl LtxFilesFormatter {
         xray_output::info!(
           options.output,
           "{}: {}",
-          if is_write {
-            "Formatted"
-          } else {
-            "Not formatted"
-          },
+          if is_write { "Formatted" } else { "Not formatted" },
           file.display()
         );
       } else {
@@ -125,8 +111,7 @@ mod tests {
   use crate::project::ltx_project_format_result::LtxProjectFormatResult;
 
   fn create_root(name: &str) -> XRayResult<PathBuf> {
-    let root: PathBuf =
-      std::env::temp_dir().join(format!("xray-ltx-format-{name}-{}", std::process::id()));
+    let root: PathBuf = std::env::temp_dir().join(format!("xray-ltx-format-{name}-{}", std::process::id()));
 
     if root.exists() {
       fs::remove_dir_all(&root)?;

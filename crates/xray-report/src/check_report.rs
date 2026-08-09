@@ -15,12 +15,7 @@ pub struct CheckReport {
 }
 
 impl CheckReport {
-  pub fn new(
-    id: CheckId,
-    status: Status,
-    duration: Option<Duration>,
-    findings: Vec<Finding>,
-  ) -> Self {
+  pub fn new(id: CheckId, status: Status, duration: Option<Duration>, findings: Vec<Finding>) -> Self {
     let mut findings: Vec<Finding> = findings;
 
     findings.sort_by(Finding::cmp);

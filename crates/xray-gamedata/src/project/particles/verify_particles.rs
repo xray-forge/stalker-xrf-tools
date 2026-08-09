@@ -23,9 +23,8 @@ impl GamedataProject {
       .map(|asset| asset.absolute_path())
       .collect();
 
-    let checked_particle_files_count: u32 = u32::try_from(particle_paths.len()).map_err(|_| {
-      XRayError::new_verify_error("Particle library count exceeds the supported result range")
-    })?;
+    let checked_particle_files_count: u32 = u32::try_from(particle_paths.len())
+      .map_err(|_| XRayError::new_verify_error("Particle library count exceeds the supported result range"))?;
 
     let particle_findings: Vec<Vec<Finding>> = particle_paths
       .par_iter()
@@ -34,15 +33,10 @@ impl GamedataProject {
 
         match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(&path) {
           Ok(particles_file) => {
-            let particle_findings: Vec<Finding> =
-              self.verify_particle(options, &particles_file, path);
+            let particle_findings: Vec<Finding> = self.verify_particle(options, &particles_file, path);
 
             if !particle_findings.is_empty() {
-              xray_output::info!(
-                options.output,
-                "Particle library is invalid: {}",
-                path.display()
-              );
+              xray_output::info!(options.output, "Particle library is invalid: {}", path.display());
             }
 
             particle_findings
@@ -66,17 +60,10 @@ impl GamedataProject {
       .collect();
 
     let duration: Duration = started_at.elapsed();
-    let invalid_particle_files_count: u32 = u32::try_from(
-      particle_findings
-        .iter()
-        .filter(|findings| !findings.is_empty())
-        .count(),
-    )
-    .map_err(|_| {
-      XRayError::new_verify_error(
-        "Invalid particle library count exceeds the supported result range",
-      )
-    })?;
+    let invalid_particle_files_count: u32 =
+      u32::try_from(particle_findings.iter().filter(|findings| !findings.is_empty()).count()).map_err(|_| {
+        XRayError::new_verify_error("Invalid particle library count exceeds the supported result range")
+      })?;
 
     let mut findings: Vec<Finding> = particle_findings.into_iter().flatten().collect();
 
@@ -123,10 +110,7 @@ impl GamedataProject {
                 findings.push(GamedataFindingFactory::for_asset(
                   GamedataVerificationRule::ParticlesTexture,
                   &texture,
-                  format!(
-                    "Particle effect '{}' references an invalid texture",
-                    particle.name
-                  ),
+                  format!("Particle effect '{}' references an invalid texture", particle.name),
                 ));
               }
             }

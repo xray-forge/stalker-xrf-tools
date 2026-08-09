@@ -32,8 +32,7 @@ impl OgfMotionRefsProcessor {
 
     Self::assert_chunk_copy_is_lossless::<T>(source, &original, &existing)?;
 
-    let patched: Vec<u8> =
-      Self::write_motion_refs_to_buffer::<T>(Self::open_source(source)?, motion_refs)?;
+    let patched: Vec<u8> = Self::write_motion_refs_to_buffer::<T>(Self::open_source(source)?, motion_refs)?;
 
     let report: OgfRefsPatchReport = OgfRefsPatchReport {
       original_size: original.len(),
@@ -63,17 +62,13 @@ impl OgfMotionRefsProcessor {
   }
 
   /// Rewrite motion refs of an ogf file, copying every other chunk verbatim.
-  pub fn write_motion_refs_to_buffer<T: ByteOrder>(
-    file: File,
-    motion_refs: &[String],
-  ) -> XRayResult<Vec<u8>> {
+  pub fn write_motion_refs_to_buffer<T: ByteOrder>(file: File, motion_refs: &[String]) -> XRayResult<Vec<u8>> {
     let mut chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
     let mut buffer: Vec<u8> = Vec::new();
     let mut patched_count: u32 = 0;
 
     for chunk in &mut chunks {
-      let payload: Vec<u8> = if chunk.id == OgfKinematicsChunk::CHUNK_ID
-        || chunk.id == OgfKinematicsChunk::CHUNK_ID_OLD
+      let payload: Vec<u8> = if chunk.id == OgfKinematicsChunk::CHUNK_ID || chunk.id == OgfKinematicsChunk::CHUNK_ID_OLD
       {
         patched_count += 1;
 
@@ -108,11 +103,7 @@ impl OgfMotionRefsProcessor {
 
   fn open_source(source: &Path) -> XRayResult<File> {
     File::open(source).map_err(|error| {
-      XRayError::new_not_found_error(format!(
-        "OGF file was not read: {}, error: {}",
-        source.display(),
-        error
-      ))
+      XRayError::new_not_found_error(format!("OGF file was not read: {}, error: {}", source.display(), error))
     })
   }
 
@@ -120,13 +111,8 @@ impl OgfMotionRefsProcessor {
   ///
   /// Geometry is not re-serializable, so this is what proves the chunk copy preserves everything
   /// outside the motion refs chunk. A mismatch means patching would silently corrupt the model.
-  fn assert_chunk_copy_is_lossless<T: ByteOrder>(
-    source: &Path,
-    original: &[u8],
-    existing: &[String],
-  ) -> XRayResult {
-    let reverted: Vec<u8> =
-      Self::write_motion_refs_to_buffer::<T>(Self::open_source(source)?, existing)?;
+  fn assert_chunk_copy_is_lossless<T: ByteOrder>(source: &Path, original: &[u8], existing: &[String]) -> XRayResult {
+    let reverted: Vec<u8> = Self::write_motion_refs_to_buffer::<T>(Self::open_source(source)?, existing)?;
 
     if reverted != original {
       return Err(XRayError::new_verify_error(format!(
@@ -141,10 +127,7 @@ impl OgfMotionRefsProcessor {
   }
 
   /// Guard that the written file reads back exactly the requested motion refs.
-  fn assert_written_refs_match<T: ByteOrder>(
-    destination: &Path,
-    motion_refs: &[String],
-  ) -> XRayResult {
+  fn assert_written_refs_match<T: ByteOrder>(destination: &Path, motion_refs: &[String]) -> XRayResult {
     let read_back: Vec<String> = OgfFile::read_motion_refs_from_path::<T, _>(&destination)?;
 
     if read_back != motion_refs {
@@ -181,8 +164,7 @@ mod tests {
   use xray_chunk::{ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, overwrite_test_relative_resource_as_file,
   };
 
   use crate::ogf::chunks::ogf_kinematics_chunk::OgfKinematicsChunk;
@@ -192,11 +174,7 @@ mod tests {
   /// Payload standing in for a chunk the writer must copy verbatim, such as geometry.
   const OPAQUE_PAYLOAD: [u8; 12] = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 255, 128];
 
-  fn write_sample(
-    filename: &str,
-    refs_chunk_id: u32,
-    motion_refs: &[String],
-  ) -> XRayResult<PathBuf> {
+  fn write_sample(filename: &str, refs_chunk_id: u32, motion_refs: &[String]) -> XRayResult<PathBuf> {
     let mut opaque_writer: ChunkWriter = ChunkWriter::new();
     opaque_writer.write_all(&OPAQUE_PAYLOAD)?;
 
@@ -221,10 +199,8 @@ mod tests {
     let refs: Vec<String> = vec![String::from("dynamics\\weapons\\wpn_ak74\\anim")];
     let path: PathBuf = write_sample(&filename, OgfKinematicsChunk::CHUNK_ID, &refs)?;
 
-    let rewritten: Vec<u8> = OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(
-      File::open(&path)?,
-      &refs,
-    )?;
+    let rewritten: Vec<u8> =
+      OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(File::open(&path)?, &refs)?;
 
     assert_eq!(
       rewritten,
@@ -238,18 +214,11 @@ mod tests {
   #[test]
   fn test_write_motion_refs_preserves_other_chunks() -> XRayResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "preserves_chunks.ogf");
-    let path: PathBuf = write_sample(
-      &filename,
-      OgfKinematicsChunk::CHUNK_ID,
-      &[String::from("old\\ref")],
-    )?;
+    let path: PathBuf = write_sample(&filename, OgfKinematicsChunk::CHUNK_ID, &[String::from("old\\ref")])?;
 
     let patched: Vec<u8> = OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(
       File::open(&path)?,
-      &[
-        String::from("new\\much\\longer\\ref"),
-        String::from("second"),
-      ],
+      &[String::from("new\\much\\longer\\ref"), String::from("second")],
     )?;
 
     // Opaque chunk header and payload must survive untouched at the head of the file.
@@ -266,10 +235,7 @@ mod tests {
 
     assert_eq!(
       OgfFile::read_motion_refs_from_path::<XRayByteOrder, _>(&path)?,
-      vec![
-        String::from("new\\much\\longer\\ref"),
-        String::from("second")
-      ],
+      vec![String::from("new\\much\\longer\\ref"), String::from("second")],
       "Expect patched file to read back new refs"
     );
 
@@ -279,11 +245,7 @@ mod tests {
   #[test]
   fn test_write_motion_refs_preserves_old_chunk_id() -> XRayResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "old_chunk_id.ogf");
-    let path: PathBuf = write_sample(
-      &filename,
-      OgfKinematicsChunk::CHUNK_ID_OLD,
-      &[String::from("old\\ref")],
-    )?;
+    let path: PathBuf = write_sample(&filename, OgfKinematicsChunk::CHUNK_ID_OLD, &[String::from("old\\ref")])?;
 
     let patched: Vec<u8> = OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(
       File::open(&path)?,
@@ -318,19 +280,13 @@ mod tests {
     let mut opaque_writer: ChunkWriter = ChunkWriter::new();
 
     opaque_writer.write_all(&OPAQUE_PAYLOAD)?;
-    opaque_writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      9,
-    )?;
+    opaque_writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 9)?;
 
     let path: PathBuf = get_absolute_test_resource_path(&filename);
 
     assert!(
-      OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(
-        File::open(&path)?,
-        &[String::from("any")]
-      )
-      .is_err(),
+      OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(File::open(&path)?, &[String::from("any")])
+        .is_err(),
       "Expect rewrite to be refused when file has no motion refs chunk"
     );
 

@@ -8,14 +8,11 @@ use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState}
 use crate::types::TauriResult;
 
 #[tauri::command]
-pub async fn get_equipment_sprite(
-  state: State<'_, IconsEditorState>,
-) -> TauriResult<Option<Value>> {
+pub async fn get_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult<Option<Value>> {
   let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
   let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
   let name_lock: MutexGuard<Option<String>> = state.equipment_sprite_name.lock().unwrap();
-  let equipment_lock: MutexGuard<Option<Vec<InventorySpriteDescriptor>>> =
-    state.equipment_descriptors.lock().unwrap();
+  let equipment_lock: MutexGuard<Option<Vec<InventorySpriteDescriptor>>> = state.equipment_descriptors.lock().unwrap();
 
   if ltx_path_lock.is_none() || equipment_lock.is_none() || name_lock.is_none() {
     return Ok(None);

@@ -1,15 +1,14 @@
 use std::path::PathBuf;
 
 use xray_db::{
-  LevelAiFile, LevelAiHeader, LevelCformFile, LevelCformHeader, LevelFile, LevelShadersChunk,
-  XRayByteOrder,
+  LevelAiFile, LevelAiHeader, LevelCformFile, LevelCformHeader, LevelFile, LevelShadersChunk, XRayByteOrder,
 };
 
 use crate::GamedataFindingFactory;
 use crate::project::levels::level_bundle::LevelBundle;
 use crate::project::levels::level_engine_constants::{
-  AI_CURRENT_VERSION, AI_VERSION_ALLOWED, CFORM_CURRENT_VERSION, LEVEL_AI_FILE, LEVEL_CFORM_FILE,
-  LEVEL_FILE, LEVEL_PRODUCTION_VERSION,
+  AI_CURRENT_VERSION, AI_VERSION_ALLOWED, CFORM_CURRENT_VERSION, LEVEL_AI_FILE, LEVEL_CFORM_FILE, LEVEL_FILE,
+  LEVEL_PRODUCTION_VERSION,
 };
 use crate::project::levels::level_roster::RosterLevel;
 use crate::{Finding, GamedataVerificationRule};
@@ -83,9 +82,7 @@ impl<'a> LevelBinariesVerifier<'a> {
       findings.push(GamedataFindingFactory::for_asset(
         GamedataVerificationRule::LevelsShadersChunk,
         &asset_path,
-        String::from(
-          "Level file has no shaders chunk, the renderer asserts with 'Level doesn't builded correctly.'",
-        ),
+        String::from("Level file has no shaders chunk, the renderer asserts with 'Level doesn't builded correctly.'"),
       ));
     }
 
@@ -147,10 +144,7 @@ impl<'a> LevelBinariesVerifier<'a> {
       return vec![GamedataFindingFactory::for_asset(
         GamedataVerificationRule::LevelsFileTruncated,
         self.bundle.file_path(LEVEL_AI_FILE),
-        format!(
-          "Level AI-map is smaller than its {} byte header",
-          LevelAiHeader::SIZE
-        ),
+        format!("Level AI-map is smaller than its {} byte header", LevelAiHeader::SIZE),
       )];
     }
 

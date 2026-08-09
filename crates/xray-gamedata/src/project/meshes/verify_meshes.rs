@@ -5,10 +5,7 @@ use crate::project::meshes::verify_meshes_result::GamedataMeshesVerificationResu
 use crate::{GamedataProject, GamedataProjectVerifyOptions};
 
 impl GamedataProject {
-  pub fn verify_meshes(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataMeshesVerificationResult> {
+  pub fn verify_meshes(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataMeshesVerificationResult> {
     MeshesVerifier::new(self, options).verify()
   }
 }

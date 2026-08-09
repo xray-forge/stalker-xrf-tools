@@ -59,10 +59,7 @@ impl LtxInheritConvertor {
       None => {
         return Err(XRayError::new_convert_error(format!(
           "Failed to inherit unknown section [{section_name}] when reading ltx file ({})",
-          ltx
-            .path
-            .as_ref()
-            .map_or("virtual", |path| path.to_str().unwrap())
+          ltx.path.as_ref().map_or("virtual", |path| path.to_str().unwrap())
         )));
       }
       Some(it) => it,

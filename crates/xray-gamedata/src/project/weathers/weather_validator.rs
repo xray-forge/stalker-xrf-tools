@@ -5,9 +5,7 @@ use xray_error::XRayResult;
 use xray_ltx::{Ltx, Section};
 
 use super::weather_definitions::WeatherDefinitions;
-use super::weather_field_rules::{
-  WEATHER_REQUIRED_FIELDS, is_valid_weather_field_value, parse_weather_time,
-};
+use super::weather_field_rules::{WEATHER_REQUIRED_FIELDS, is_valid_weather_field_value, parse_weather_time};
 use crate::GamedataFindingFactory;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
@@ -24,14 +22,8 @@ pub fn verify_weather_with_definitions(
   definition_load_errors: &mut BTreeSet<String>,
 ) -> XRayResult<bool> {
   Ok(
-    verify_weather_findings_with_definitions(
-      project,
-      options,
-      config_path,
-      definitions,
-      definition_load_errors,
-    )?
-    .is_empty(),
+    verify_weather_findings_with_definitions(project, options, config_path, definitions, definition_load_errors)?
+      .is_empty(),
   )
 }
 
@@ -186,9 +178,7 @@ pub fn verify_weather_findings_with_definitions(
           findings.push(report_weather_finding(
             options,
             config_path,
-            format!(
-              "Weather [{section_name}] references missing thunderbolt collection [{collection}]"
-            ),
+            format!("Weather [{section_name}] references missing thunderbolt collection [{collection}]"),
           ));
         }
         Err(error) => {
@@ -204,31 +194,18 @@ pub fn verify_weather_findings_with_definitions(
 
     if let Some(sky_texture) = section.get("sky_texture") {
       for texture_reference in [sky_texture.to_string(), format!("{sky_texture}#small")] {
-        if project
-          .assets
-          .dds_texture(&texture_reference)
-          .ok()
-          .flatten()
-          .is_none()
-        {
+        if project.assets.dds_texture(&texture_reference).ok().flatten().is_none() {
           findings.push(report_weather_finding(
             options,
             config_path,
-            format!(
-              "Weather [{section_name}] references missing sky texture [{texture_reference}]"
-            ),
+            format!("Weather [{section_name}] references missing sky texture [{texture_reference}]"),
           ));
         }
       }
     }
 
     if let Some(clouds_texture) = section.get("clouds_texture")
-      && project
-        .assets
-        .dds_texture(clouds_texture)
-        .ok()
-        .flatten()
-        .is_none()
+      && project.assets.dds_texture(clouds_texture).ok().flatten().is_none()
     {
       findings.push(report_weather_finding(
         options,
@@ -250,9 +227,5 @@ fn report_weather_finding(
 
   xray_output::error!(options.output, "{}: {}", message, config_path.display());
 
-  GamedataFindingFactory::for_asset(
-    GamedataVerificationRule::WeathersValidation,
-    config_path,
-    message,
-  )
+  GamedataFindingFactory::for_asset(GamedataVerificationRule::WeathersValidation, config_path, message)
 }

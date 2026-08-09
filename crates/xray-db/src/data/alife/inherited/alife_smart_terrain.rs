@@ -45,19 +45,11 @@ impl ChunkReadWrite for AlifeSmartTerrain {
 
     let dead_objects_infos_count: u8 = reader.read_u8()?;
 
-    assert_equal(
-      dead_objects_infos_count,
-      0,
-      "Unexpected dead objects in smart terrain",
-    )?;
+    assert_equal(dead_objects_infos_count, 0, "Unexpected dead objects in smart terrain")?;
 
     let smart_terrain_actor_control: u8 = reader.read_u8()?;
 
-    assert_equal(
-      smart_terrain_actor_control,
-      0,
-      "Unexpected smart terrain actor control",
-    )?;
+    assert_equal(smart_terrain_actor_control, 0, "Unexpected smart terrain actor control")?;
 
     let respawn_point: u8 = reader.read_u8()?;
 
@@ -69,19 +61,11 @@ impl ChunkReadWrite for AlifeSmartTerrain {
 
     let staying_objects_count: u8 = reader.read_u8()?;
 
-    assert_equal(
-      staying_objects_count,
-      0,
-      "Unexpected smart terrain staying objects",
-    )?;
+    assert_equal(staying_objects_count, 0, "Unexpected smart terrain staying objects")?;
 
     let save_marker: u16 = reader.read_u16::<T>()?;
 
-    assert_equal(
-      save_marker,
-      6,
-      "Unexpected data provided with smart terrain save",
-    )?;
+    assert_equal(save_marker, 6, "Unexpected data provided with smart terrain save")?;
 
     Ok(Self {
       base,
@@ -139,27 +123,18 @@ impl LtxImportExport for AlifeSmartTerrain {
 
     ltx
       .with_section(section_name)
-      .set(
-        "arriving_objects_count",
-        self.arriving_objects_count.to_string(),
-      )
+      .set("arriving_objects_count", self.arriving_objects_count.to_string())
       .set(
         "object_job_descriptors_count",
         self.object_job_descriptors_count.to_string(),
       )
-      .set(
-        "dead_objects_infos_count",
-        self.dead_objects_infos_count.to_string(),
-      )
+      .set("dead_objects_infos_count", self.dead_objects_infos_count.to_string())
       .set(
         "smart_terrain_actor_control",
         self.smart_terrain_actor_control.to_string(),
       )
       .set("respawn_point", self.respawn_point.to_string())
-      .set(
-        "staying_objects_count",
-        self.staying_objects_count.to_string(),
-      )
+      .set("staying_objects_count", self.staying_objects_count.to_string())
       .set("save_marker", self.save_marker.to_string());
 
     Ok(())
@@ -172,8 +147,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -226,10 +200,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 114);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 114);
 
@@ -239,10 +211,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeSmartTerrain::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeSmartTerrain::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

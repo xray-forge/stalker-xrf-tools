@@ -3,9 +3,7 @@ use std::path::PathBuf;
 use indexmap::map::Entry;
 use xray_error::{XRayError, XRayResult};
 
-use crate::file::file_configuration::constants::{
-  LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME,
-};
+use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME};
 use crate::file::file_section::section::Section;
 use crate::file::ltx::Ltx;
 use crate::file::types::LtxSectionSchemes;
@@ -23,9 +21,7 @@ impl LtxSchemeParser {
     let mut schemes: LtxSectionSchemes = Default::default();
 
     for file in files {
-      let ltx: Ltx = Ltx::read_from_path(file)?
-        .into_included()?
-        .into_inherited()?;
+      let ltx: Ltx = Ltx::read_from_path(file)?.into_included()?.into_inherited()?;
 
       for (name, section) in &ltx {
         if !name.starts_with(LTX_SYMBOL_SCHEME) {
@@ -39,10 +35,7 @@ impl LtxSchemeParser {
           Entry::Occupied(_) => {
             return Err(XRayError::new_convert_error(format!(
               "Failed to parse ltx schemes - duplicate declaration of [{name}] section when reading '{}'",
-              &ltx
-                .path
-                .as_ref()
-                .map_or("virtial", |path| path.to_str().unwrap())
+              &ltx.path.as_ref().map_or("virtial", |path| path.to_str().unwrap())
             )));
           }
           Entry::Vacant(entry) => {
@@ -89,13 +82,8 @@ impl LtxSchemeParser {
   }
 
   /// Parse LTX field definition from section by field name.
-  fn parse_field_scheme(
-    field_name: &str,
-    section_name: &str,
-    field_data: &str,
-  ) -> XRayResult<LtxFieldScheme> {
-    let data_type: LtxFieldDataType =
-      LtxFieldDataType::from_field_data(field_name, section_name, field_data)?;
+  fn parse_field_scheme(field_name: &str, section_name: &str, field_data: &str) -> XRayResult<LtxFieldScheme> {
+    let data_type: LtxFieldDataType = LtxFieldDataType::from_field_data(field_name, section_name, field_data)?;
 
     // Do not allow unknown typing.
     if data_type == LtxFieldDataType::TypeUnknown {

@@ -23,10 +23,7 @@ impl<'a> JsDocParser<'a> {
     let description: Option<String> = documentation_description(&raw);
     let returns: Option<String> = documentation_tag(&raw, "returns");
 
-    (description.is_some() || returns.is_some()).then_some(ExternDocumentation {
-      description,
-      returns,
-    })
+    (description.is_some() || returns.is_some()).then_some(ExternDocumentation { description, returns })
   }
 
   /// Read documented parameter descriptions from a leading JSDoc block.
@@ -51,11 +48,7 @@ impl<'a> JsDocParser<'a> {
         continue;
       };
 
-      let Some(description) = parts
-        .next()
-        .map(normalize_doc_text)
-        .filter(|value| !value.is_empty())
-      else {
+      let Some(description) = parts.next().map(normalize_doc_text).filter(|value| !value.is_empty()) else {
         continue;
       };
       result.insert(name.into(), description);
@@ -83,10 +76,7 @@ fn documentation_description(raw: &str) -> Option<String> {
     .into_iter()
     .take_while(|line| !line.starts_with('@'))
     .collect();
-  let value: String = lines
-    .join(documentation_line_ending(raw))
-    .trim()
-    .to_string();
+  let value: String = lines.join(documentation_line_ending(raw)).trim().to_string();
 
   (!value.is_empty()).then_some(value)
 }
@@ -105,10 +95,7 @@ fn documentation_tag(raw: &str, tag: &str) -> Option<String> {
     value.push(line.clone());
   }
 
-  let result: String = value
-    .join(documentation_line_ending(raw))
-    .trim()
-    .to_string();
+  let result: String = value.join(documentation_line_ending(raw)).trim().to_string();
 
   (!result.is_empty()).then_some(result)
 }

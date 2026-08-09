@@ -70,10 +70,7 @@ impl CondlistBranch {
       {
         return Err(SourceSpan::parsing_error(
           value_offset + closing_index,
-          &format!(
-            "Unexpected closing '{}' for the {name} list",
-            closing as char
-          ),
+          &format!("Unexpected closing '{}' for the {name} list", closing as char),
         ));
       }
 
@@ -83,31 +80,23 @@ impl CondlistBranch {
     if closing != opening && closing_index.is_some_and(|index| index < opening_index) {
       return Err(SourceSpan::parsing_error(
         value_offset + closing_index.expect("Closing delimiter should be present"),
-        &format!(
-          "Unexpected closing '{}' for the {name} list",
-          closing as char
-        ),
+        &format!("Unexpected closing '{}' for the {name} list", closing as char),
       ));
     }
 
-    let closing_index: usize =
-      Self::find_delimiter(value, opening_index + 1, closing).ok_or_else(|| {
-        SourceSpan::parsing_error(
-          value_offset + opening_index,
-          &format!("Expected closing '{}' for the {name} list", closing as char),
-        )
-      })?;
+    let closing_index: usize = Self::find_delimiter(value, opening_index + 1, closing).ok_or_else(|| {
+      SourceSpan::parsing_error(
+        value_offset + opening_index,
+        &format!("Expected closing '{}' for the {name} list", closing as char),
+      )
+    })?;
 
     if opening != closing
-      && Self::find_delimiter(value, opening_index + 1, opening)
-        .is_some_and(|index| index < closing_index)
+      && Self::find_delimiter(value, opening_index + 1, opening).is_some_and(|index| index < closing_index)
     {
       return Err(SourceSpan::parsing_error(
         value_offset + opening_index + 1,
-        &format!(
-          "Unexpected opening '{}' for the {name} list",
-          opening as char
-        ),
+        &format!("Unexpected opening '{}' for the {name} list", opening as char),
       ));
     }
 
@@ -141,10 +130,7 @@ impl CondlistBranch {
     conditions_span: Option<SourceSpan>,
     effects_span: Option<SourceSpan>,
   ) -> XRayResult<Option<String>> {
-    let mut spans: Vec<SourceSpan> = [conditions_span, effects_span]
-      .into_iter()
-      .flatten()
-      .collect();
+    let mut spans: Vec<SourceSpan> = [conditions_span, effects_span].into_iter().flatten().collect();
     spans.sort_by_key(|span| span.start);
 
     let mut result: String = String::new();
@@ -183,11 +169,7 @@ impl CondlistBranch {
     Ok(conditions)
   }
 
-  fn parse_condition(
-    value: &str,
-    value_offset: usize,
-    cursor: &mut usize,
-  ) -> XRayResult<CondlistCondition> {
+  fn parse_condition(value: &str, value_offset: usize, cursor: &mut usize) -> XRayResult<CondlistCondition> {
     let token_start: usize = *cursor;
     let sign: u8 = Self::byte_at(value, *cursor).expect("Cursor should point to a condition token");
 

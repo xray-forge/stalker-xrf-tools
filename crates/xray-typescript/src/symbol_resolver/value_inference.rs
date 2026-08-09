@@ -60,6 +60,5 @@ fn property_name(name: &PropName) -> Option<String> {
 
 /// Render a type annotation without failing resolution for unsupported syntax.
 fn canonical_type(type_annotation: &crate::swc_ecma_ast::TsType, source_map: &SourceMap) -> String {
-  canonical_ts_type_to_string(type_annotation, source_map)
-    .unwrap_or_else(|_| String::from("unknown"))
+  canonical_ts_type_to_string(type_annotation, source_map).unwrap_or_else(|_| String::from("unknown"))
 }

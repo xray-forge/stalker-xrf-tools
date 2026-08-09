@@ -66,11 +66,7 @@ impl ChunkReadWrite for SpawnGraphsChunk {
 
     let cross_tables: Vec<GraphCrossTable> = reader.read_xr_list::<T, _>()?;
 
-    log::info!(
-      "Read graphs ver {}, {} bytes",
-      header.version,
-      reader.read_bytes_len(),
-    );
+    log::info!("Read graphs ver {}, {} bytes", header.version, reader.read_bytes_len(),);
 
     assert_length(
       &levels,
@@ -135,10 +131,8 @@ impl ChunkReadWrite for SpawnGraphsChunk {
 impl FileImportExport for SpawnGraphsChunk {
   /// Import graphs data from provided path.
   fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
-    let header: GraphHeader = GraphHeader::import(
-      "header",
-      &Ltx::read_from_path(path.as_ref().join("graphs_header.ltx"))?,
-    )?;
+    let header: GraphHeader =
+      GraphHeader::import("header", &Ltx::read_from_path(path.as_ref().join("graphs_header.ltx"))?)?;
 
     let levels_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("graphs_levels.ltx"))?;
     let mut levels: Vec<GraphLevel> = Vec::new();
@@ -168,9 +162,8 @@ impl FileImportExport for SpawnGraphsChunk {
       edges.push(GraphEdge::import(&index.to_string(), &edges_ltx)?);
     }
 
-    let cross_tables: Vec<GraphCrossTable> = GraphCrossTable::import_list::<XRayByteOrder>(
-      &mut File::open(path.as_ref().join("graphs_cross_tables.gct"))?,
-    )?;
+    let cross_tables: Vec<GraphCrossTable> =
+      GraphCrossTable::import_list::<XRayByteOrder>(&mut File::open(path.as_ref().join("graphs_cross_tables.gct"))?)?;
 
     log::info!("Imported graphs chunk");
 
@@ -191,9 +184,7 @@ impl FileImportExport for SpawnGraphsChunk {
 
     self.header.export("header", &mut graphs_header_ltx)?;
 
-    graphs_header_ltx.write_to(&mut open_export_file(
-      path.as_ref().join("graphs_header.ltx"),
-    )?)?;
+    graphs_header_ltx.write_to(&mut open_export_file(path.as_ref().join("graphs_header.ltx"))?)?;
 
     let mut graphs_level_ltx: Ltx = Ltx::new();
 
@@ -201,9 +192,7 @@ impl FileImportExport for SpawnGraphsChunk {
       level.export(&index.to_string(), &mut graphs_level_ltx)?;
     }
 
-    graphs_level_ltx.write_to(&mut open_export_file(
-      path.as_ref().join("graphs_levels.ltx"),
-    )?)?;
+    graphs_level_ltx.write_to(&mut open_export_file(path.as_ref().join("graphs_levels.ltx"))?)?;
 
     log::info!("Exported graph levels");
 
@@ -213,9 +202,7 @@ impl FileImportExport for SpawnGraphsChunk {
       vertex.export(&index.to_string(), &mut graphs_vertices_ltx)?;
     }
 
-    graphs_vertices_ltx.write_to(&mut open_export_file(
-      path.as_ref().join("graphs_vertices.ltx"),
-    )?)?;
+    graphs_vertices_ltx.write_to(&mut open_export_file(path.as_ref().join("graphs_vertices.ltx"))?)?;
 
     log::info!("Exported graph vertices");
 
@@ -225,9 +212,7 @@ impl FileImportExport for SpawnGraphsChunk {
       point.export(&index.to_string(), &mut graphs_points_ltx)?;
     }
 
-    graphs_points_ltx.write_to(&mut open_export_file(
-      path.as_ref().join("graphs_points.ltx"),
-    )?)?;
+    graphs_points_ltx.write_to(&mut open_export_file(path.as_ref().join("graphs_points.ltx"))?)?;
 
     log::info!("Exported graph points");
 
@@ -237,9 +222,7 @@ impl FileImportExport for SpawnGraphsChunk {
       edge.export(&index.to_string(), &mut graphs_edges_ltx)?;
     }
 
-    graphs_edges_ltx.write_to(&mut open_export_file(
-      path.as_ref().join("graphs_edges.ltx"),
-    )?)?;
+    graphs_edges_ltx.write_to(&mut open_export_file(path.as_ref().join("graphs_edges.ltx"))?)?;
 
     log::info!("Exported graph edges");
 
@@ -275,8 +258,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -315,17 +297,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 28);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 28);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
@@ -333,10 +311,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -456,17 +431,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 430);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 430);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
 
@@ -474,10 +445,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

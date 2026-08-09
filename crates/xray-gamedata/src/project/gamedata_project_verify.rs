@@ -2,16 +2,10 @@ use std::time::Instant;
 
 use xray_error::{XRayError, XRayResult};
 
-use crate::{
-  GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationReport,
-  GamedataVerificationType,
-};
+use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationReport, GamedataVerificationType};
 
 impl GamedataProject {
-  pub fn verify(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataVerificationReport> {
+  pub fn verify(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataVerificationReport> {
     let checks: Vec<GamedataVerificationType> = options.selected_checks();
 
     if checks.is_empty() {
@@ -20,20 +14,12 @@ impl GamedataProject {
       ));
     }
 
-    xray_output::info!(
-      options.output,
-      "Verifying gamedata project: {}",
-      self.root().display()
-    );
+    xray_output::info!(options.output, "Verifying gamedata project: {}", self.root().display());
 
     xray_output::info!(
       options.output,
       "Verifying modules: \n  -{}",
-      checks
-        .iter()
-        .map(ToString::to_string)
-        .collect::<Vec<_>>()
-        .join("\n  -")
+      checks.iter().map(ToString::to_string).collect::<Vec<_>>().join("\n  -")
     );
 
     xray_output::info!(options.output, "");
@@ -83,10 +69,7 @@ mod tests {
   fn runs_each_selected_check_once_in_request_order() {
     let project: GamedataProject = empty_project();
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
-      checks: vec![
-        GamedataVerificationType::Levels,
-        GamedataVerificationType::Levels,
-      ],
+      checks: vec![GamedataVerificationType::Levels, GamedataVerificationType::Levels],
       output: xray_output::OutputOptions::default(),
       ..Default::default()
     };
@@ -96,10 +79,7 @@ mod tests {
       .expect("Expected level verification to complete");
 
     assert_eq!(report.checks().len(), 1);
-    assert_eq!(
-      report.checks()[0].verification_type(),
-      GamedataVerificationType::Levels
-    );
+    assert_eq!(report.checks()[0].verification_type(), GamedataVerificationType::Levels);
     // The test project ships no spawn file, so the level roster is unknown and nothing is checked.
     assert_eq!(report.status(), GamedataVerificationStatus::Skipped);
   }

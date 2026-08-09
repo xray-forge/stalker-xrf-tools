@@ -7,10 +7,7 @@ use crate::types::TauriResult;
 use crate::utils::error_to_string;
 
 #[tauri::command]
-pub async fn open_xr_effects(
-  path: &str,
-  state: State<'_, ExportsEditorState>,
-) -> TauriResult<Value> {
+pub async fn open_xr_effects(path: &str, state: State<'_, ExportsEditorState>) -> TauriResult<Value> {
   log::info!("Parsing effects exports folder: {}", path);
 
   let value: Vec<ExportDescriptor> = ExportsEditorParser::new()

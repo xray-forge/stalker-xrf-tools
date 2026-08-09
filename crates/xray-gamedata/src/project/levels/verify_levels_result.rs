@@ -65,20 +65,16 @@ mod tests {
   use super::GamedataLevelsVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::{
-    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]
   fn skips_verification_without_a_game_graph() {
-    let result: GamedataLevelsVerificationResult =
-      GamedataLevelsVerificationResult::skipped(Duration::ZERO);
+    let result: GamedataLevelsVerificationResult = GamedataLevelsVerificationResult::skipped(Duration::ZERO);
 
     assert_eq!(result.status(), GamedataVerificationStatus::Skipped);
-    assert_eq!(
-      result.failure_message(),
-      "No game graph found, level roster is unknown"
-    );
+    assert_eq!(result.failure_message(), "No game graph found, level roster is unknown");
   }
 
   #[test]

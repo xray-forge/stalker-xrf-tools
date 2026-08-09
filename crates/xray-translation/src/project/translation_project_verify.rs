@@ -22,12 +22,7 @@ impl TranslationProject {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
         Err(error) => {
-          return Err(
-            error
-              .into_io_error()
-              .expect("WalkDir error transformation")
-              .into(),
-          );
+          return Err(error.into_io_error().expect("WalkDir error transformation").into());
         }
       };
 
@@ -51,10 +46,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn verify_file<P: AsRef<Path>>(
-    path: &P,
-    options: &ProjectVerifyOptions,
-  ) -> XRayResult<ProjectVerifyResult> {
+  pub fn verify_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {
     let extension: Option<&OsStr> = path.as_ref().extension();
 
     if let Some(extension) = extension {
@@ -69,10 +61,7 @@ impl TranslationProject {
     Ok(ProjectVerifyResult::new())
   }
 
-  pub fn verify_json_file<P: AsRef<Path>>(
-    path: &P,
-    options: &ProjectVerifyOptions,
-  ) -> XRayResult<ProjectVerifyResult> {
+  pub fn verify_json_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {
     let path_display: Display = path.as_ref().display();
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
 
@@ -89,9 +78,7 @@ impl TranslationProject {
 
     for language in languages {
       for (key, entry) in &parsed {
-        let is_missing: bool = entry
-          .get(&language)
-          .is_none_or(|translation| translation.is_none());
+        let is_missing: bool = entry.get(&language).is_none_or(|translation| translation.is_none());
 
         if is_missing {
           xray_output::error!(

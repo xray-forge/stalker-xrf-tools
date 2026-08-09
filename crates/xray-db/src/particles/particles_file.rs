@@ -39,20 +39,15 @@ impl ParticlesFile {
   /// Read particles from chunks.
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
     assert(
-      !chunks
-        .iter()
-        .any(|it| it.id == ParticlesFirstgenChunk::CHUNK_ID),
+      !chunks.iter().any(|it| it.id == ParticlesFirstgenChunk::CHUNK_ID),
       "Unexpected first-gen chunk in particles file, unpacking not implemented",
     )?;
     assert_length(chunks, 3, "Unexpected chunks in particles file root")?;
 
     Ok(Self {
-      header: find_required_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)?
-        .read_xr::<T, _>()?,
-      effects: find_required_chunk_by_id(chunks, ParticlesEffectsChunk::CHUNK_ID)?
-        .read_xr::<T, _>()?,
-      groups: find_required_chunk_by_id(chunks, ParticlesGroupsChunk::CHUNK_ID)?
-        .read_xr::<T, _>()?,
+      header: find_required_chunk_by_id(chunks, ParticlesHeaderChunk::CHUNK_ID)?.read_xr::<T, _>()?,
+      effects: find_required_chunk_by_id(chunks, ParticlesEffectsChunk::CHUNK_ID)?.read_xr::<T, _>()?,
+      groups: find_required_chunk_by_id(chunks, ParticlesGroupsChunk::CHUNK_ID)?.read_xr::<T, _>()?,
     })
   }
 

@@ -10,9 +10,7 @@ use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{XRayEncoding, encode_string_to_bytes};
 
-use crate::types::{
-  TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant,
-};
+use crate::types::{TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant};
 use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
 
 impl TranslationProject {
@@ -25,8 +23,7 @@ impl TranslationProject {
 
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(dir) {
-      let entry: DirEntry =
-        entry.map_err(|error| XRayError::new_serialization_error(error.to_string()))?;
+      let entry: DirEntry = entry.map_err(|error| XRayError::new_serialization_error(error.to_string()))?;
 
       if entry.path().is_file() {
         Self::build_file(&entry.path(), options)?;
@@ -44,10 +41,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn build_file<P: AsRef<Path>>(
-    path: &P,
-    options: &ProjectBuildOptions,
-  ) -> XRayResult<ProjectBuildResult> {
+  pub fn build_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
     let extension: Option<&OsStr> = path.as_ref().extension();
     let started_at: Instant = Instant::now();
 
@@ -80,10 +74,7 @@ impl TranslationProject {
     let locale: Option<TranslationLanguage> = Self::get_locale_from_path(path);
 
     if let Some(locale) = locale {
-      xray_output::info!(
-        options.output,
-        "Building XML based translations {path_display}"
-      );
+      xray_output::info!(options.output, "Building XML based translations {path_display}");
 
       // All locales needed or file locale matches current one.
       if options.language == TranslationLanguage::All || locale == options.language {
@@ -91,12 +82,7 @@ impl TranslationProject {
 
         copy(
           &mut File::open(path)?,
-          &mut Self::prepare_target_xml_translation_file(
-            path,
-            &options.output_dir,
-            &locale,
-            options,
-          )?,
+          &mut Self::prepare_target_xml_translation_file(path, &options.output_dir, &locale, options)?,
         )?;
       } else {
         log::info!("Skip dynamic XML file {}", path_display);
@@ -105,32 +91,19 @@ impl TranslationProject {
       log::info!("Building static XML file {}", path.as_ref().display());
 
       // Just plain XML to copy from one place to another.
-      xray_output::info!(
-        options.output,
-        "Copy static XML translations {path_display}"
-      );
+      xray_output::info!(options.output, "Copy static XML translations {path_display}");
 
       if options.language == TranslationLanguage::All {
         for language in TranslationLanguage::get_all() {
           copy(
             &mut File::open(path)?,
-            &mut Self::prepare_target_xml_translation_file(
-              path,
-              &options.output_dir,
-              &language,
-              options,
-            )?,
+            &mut Self::prepare_target_xml_translation_file(path, &options.output_dir, &language, options)?,
           )?;
         }
       } else {
         copy(
           &mut File::open(path)?,
-          &mut Self::prepare_target_xml_translation_file(
-            path,
-            &options.output_dir,
-            &options.language,
-            options,
-          )?,
+          &mut Self::prepare_target_xml_translation_file(path, &options.output_dir, &options.language, options)?,
         )?;
       }
     }
@@ -169,8 +142,7 @@ impl TranslationProject {
       language.get_language_encoder(),
     )?;
 
-    Self::prepare_target_xml_translation_file(&path, &options.output_dir, language, options)?
-      .write_all(&data)?;
+    Self::prepare_target_xml_translation_file(&path, &options.output_dir, language, options)?.write_all(&data)?;
 
     Ok(())
   }
@@ -205,16 +177,11 @@ impl TranslationProject {
 
       Self::validate_translation_entry_encoding(path, language, key, &text)?;
 
-      compiled.string.push(TranslationEntryCompiled {
-        id: key.clone(),
-        text,
-      });
+      compiled.string.push(TranslationEntryCompiled { id: key.clone(), text });
     }
 
     if options.is_sorted {
-      compiled
-        .string
-        .sort_by(|first, second| first.id.cmp(&second.id))
+      compiled.string.sort_by(|first, second| first.id.cmp(&second.id))
     }
 
     serializer.expand_empty_elements(true);
@@ -234,9 +201,7 @@ impl TranslationProject {
     text: &str,
   ) -> XRayResult {
     for (field, value) in [("id", id), ("text", text)] {
-      if let Some(character) =
-        Self::find_unencodable_character(value, language.get_language_encoder())
-      {
+      if let Some(character) = Self::find_unencodable_character(value, language.get_language_encoder()) {
         return Err(XRayError::new_encoding_error(format!(
           "Translation '{}' entry '{}' {} cannot be encoded as {}: '{}' (U+{:04X})",
           path.display(),
@@ -289,9 +254,7 @@ mod tests {
       String::from("st_test"),
       HashMap::from([(
         String::from("fra"),
-        Some(TranslationVariant::String(String::from(
-          "À bientôt, José !",
-        ))),
+        Some(TranslationVariant::String(String::from("À bientôt, José !"))),
       )]),
     )]);
     let options: ProjectBuildOptions = build_options(TranslationLanguage::French);
@@ -305,23 +268,14 @@ mod tests {
     .unwrap();
 
     assert!(compiled.contains("encoding=\"windows-1252\""));
-    assert!(
-      encode_string_to_bytes(
-        &compiled,
-        TranslationLanguage::French.get_language_encoder()
-      )
-      .is_ok()
-    );
+    assert!(encode_string_to_bytes(&compiled, TranslationLanguage::French.get_language_encoder()).is_ok());
   }
 
   #[test]
   fn reports_unencodable_translation_entries_with_context() {
     let source: TranslationJson = HashMap::from([(
       String::from("st_test"),
-      HashMap::from([(
-        String::from("pol"),
-        Some(TranslationVariant::String(String::from("Й"))),
-      )]),
+      HashMap::from([(String::from("pol"), Some(TranslationVariant::String(String::from("Й"))))]),
     )]);
     let options: ProjectBuildOptions = build_options(TranslationLanguage::Polish);
 

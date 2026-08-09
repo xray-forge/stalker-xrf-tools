@@ -18,17 +18,11 @@ impl<T: ChunkDataSource> ChunkIterator<'_, T> {
   pub fn from_start(reader: &mut ChunkReader<T>) -> XRayResult<ChunkIterator<'_, T>> {
     reader.reset_pos()?;
 
-    Ok(ChunkIterator {
-      reader,
-      failed: false,
-    })
+    Ok(ChunkIterator { reader, failed: false })
   }
 
   pub fn from_current(reader: &mut ChunkReader<T>) -> ChunkIterator<'_, T> {
-    ChunkIterator {
-      reader,
-      failed: false,
-    }
+    ChunkIterator { reader, failed: false }
   }
 
   fn fail(&mut self, error: XRayError) -> Option<XRayResult<ChunkReader<T>>> {
@@ -126,27 +120,20 @@ mod tests {
       Err(error) => error.to_string(),
     };
 
-    assert!(
-      error.contains("Incomplete chunk header"),
-      "Unexpected error: {error}"
-    );
+    assert!(error.contains("Incomplete chunk header"), "Unexpected error: {error}");
 
     Ok(())
   }
 
   #[test]
   fn rejects_chunk_data_beyond_source_end() -> XRayResult {
-    let mut reader: ChunkReader<InMemoryChunkDataSource> =
-      ChunkReader::from_bytes(&[1, 0, 0, 0, 10, 0, 0, 0, 0, 0])?;
+    let mut reader: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[1, 0, 0, 0, 10, 0, 0, 0, 0, 0])?;
     let error: String = match reader.read_children() {
       Ok(_) => panic!("Expected oversized chunk to fail"),
       Err(error) => error.to_string(),
     };
 
-    assert!(
-      error.contains("beyond source end"),
-      "Unexpected error: {error}"
-    );
+    assert!(error.contains("beyond source end"), "Unexpected error: {error}");
 
     Ok(())
   }
@@ -165,10 +152,7 @@ mod tests {
       None => panic!("Expected overrun reader to produce an error"),
     };
 
-    assert!(
-      error.contains("Incomplete chunk header"),
-      "Unexpected error: {error}"
-    );
+    assert!(error.contains("Incomplete chunk header"), "Unexpected error: {error}");
 
     Ok(())
   }

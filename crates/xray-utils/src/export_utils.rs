@@ -11,10 +11,5 @@ pub fn open_export_file<T: AsRef<Path>>(path: T) -> XRayResult<File> {
     .write(true)
     .truncate(true)
     .open(path)
-    .map_err(|error| {
-      XRayError::new_io_error(
-        format!("Failed to create file for exporting: {}", error),
-        error.kind(),
-      )
-    })
+    .map_err(|error| XRayError::new_io_error(format!("Failed to create file for exporting: {}", error), error.kind()))
 }

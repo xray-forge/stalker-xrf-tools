@@ -8,11 +8,7 @@ fn extract_to_stdout<R: io::Read, P: AsRef<Path>>(
     let header = lha_reader.header();
     let filename = header.parse_pathname();
 
-    eprintln!(
-      "  Path: {:?} modified: {} ",
-      filename,
-      header.parse_last_modified()
-    );
+    eprintln!("  Path: {:?} modified: {} ", filename, header.parse_last_modified());
     eprintln!("----------------------------------------------------------------");
 
     if filename.ends_with(matching_path.as_ref()) {

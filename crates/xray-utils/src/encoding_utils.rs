@@ -10,8 +10,7 @@ use xray_error::{XRayError, XRayResult};
 
 pub type XRayEncoding = &'static Encoding;
 
-pub const CUSTOM_B64_ENGINE: GeneralPurpose =
-  GeneralPurpose::new(&alphabet::URL_SAFE, general_purpose::NO_PAD);
+pub const CUSTOM_B64_ENGINE: GeneralPurpose = GeneralPurpose::new(&alphabet::URL_SAFE, general_purpose::NO_PAD);
 
 /// Return encoding factory for windows1250.
 #[inline]
@@ -58,10 +57,7 @@ pub fn decode_bytes_to_string(bytes: &[u8], encoding: XRayEncoding) -> io::Resul
 
 /// Try encoding provided u8 raw bytes as string value.
 #[inline]
-pub fn decode_bytes_to_string_without_bom_handling(
-  bytes: &[u8],
-  encoding: XRayEncoding,
-) -> io::Result<String> {
+pub fn decode_bytes_to_string_without_bom_handling(bytes: &[u8], encoding: XRayEncoding) -> io::Result<String> {
   let (cow, had_errors) = encoding.decode_without_bom_handling(bytes);
 
   if had_errors {
@@ -102,10 +98,7 @@ pub fn encode_string_to_bytes(string: &str, encoding: XRayEncoding) -> io::Resul
 
 /// Read whole encoded reader content to a string.
 #[inline]
-pub fn read_as_string_from_encoded<R: Read>(
-  reader: &mut R,
-  encoding: XRayEncoding,
-) -> io::Result<String> {
+pub fn read_as_string_from_encoded<R: Read>(reader: &mut R, encoding: XRayEncoding) -> io::Result<String> {
   let mut raw_data: Vec<u8> = Vec::new();
 
   reader.read_to_end(&mut raw_data)?;
@@ -146,12 +139,9 @@ pub fn encode_bytes_to_base64(bytes: &[u8]) -> String {
 /// Decode b64 as bytes.
 #[inline]
 pub fn decode_bytes_from_base64(string: &str) -> XRayResult<Vec<u8>> {
-  CUSTOM_B64_ENGINE.decode(string).map_err(|error| {
-    XRayError::new_parsing_error(format!(
-      "Failed to decode bytes value from base 64: {}",
-      error
-    ))
-  })
+  CUSTOM_B64_ENGINE
+    .decode(string)
+    .map_err(|error| XRayError::new_parsing_error(format!("Failed to decode bytes value from base 64: {}", error)))
 }
 
 /// Decode b64 as string.

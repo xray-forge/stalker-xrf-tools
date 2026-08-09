@@ -4,9 +4,7 @@ use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
 
 use crate::Ltx;
-use crate::file::file_configuration::constants::{
-  LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME,
-};
+use crate::file::file_configuration::constants::{LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME};
 use crate::file::include::LtxIncludeConvertor;
 use crate::file::types::LtxSectionSchemes;
 use crate::project::ltx_project_options::LtxProjectOptions;
@@ -99,11 +97,7 @@ impl LtxProject {
         "Cannot read LTX project safely, detected case-insensitive #include statements:\n{}",
         ltx_file_entries_failures
           .iter()
-          .map(|(first, second)| format!(
-            "  - {} incorrectly imported as {}",
-            first.display(),
-            second.display()
-          ))
+          .map(|(first, second)| format!("  - {} incorrectly imported as {}", first.display(), second.display()))
           .collect::<Vec<_>>()
           .join("\n")
       )));
@@ -113,13 +107,7 @@ impl LtxProject {
     let ltx_scheme_file_entries: Vec<PathBuf> = if options.is_with_schemes_check {
       ltx_scheme_files
         .iter()
-        .filter_map(|it| {
-          if included.contains(it) {
-            None
-          } else {
-            Some(it.clone())
-          }
-        })
+        .filter_map(|it| if included.contains(it) { None } else { Some(it.clone()) })
         .collect()
     } else {
       Default::default()
@@ -175,15 +163,11 @@ mod tests {
 
   #[test]
   fn does_not_treat_wildcard_included_files_as_entries() -> XRayResult {
-    let root: PathBuf =
-      std::env::temp_dir().join(format!("xray-ltx-wildcard-project-{}", std::process::id()));
+    let root: PathBuf = std::env::temp_dir().join(format!("xray-ltx-wildcard-project-{}", std::process::id()));
     let sections: PathBuf = root.join("sections");
 
     fs::create_dir_all(&sections)?;
-    fs::write(
-      root.join("root.ltx"),
-      "#include \"sections\\section_*.ltx\"\n",
-    )?;
+    fs::write(root.join("root.ltx"), "#include \"sections\\section_*.ltx\"\n")?;
     fs::write(sections.join("section_first.ltx"), "[first]\n")?;
     fs::write(sections.join("section_second.ltx"), "[second]\n")?;
 

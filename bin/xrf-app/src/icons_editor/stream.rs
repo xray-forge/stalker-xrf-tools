@@ -15,10 +15,8 @@ pub fn get_equipment_sprite_stream_response<R: Runtime>(
   let handle: &AppHandle<R> = context.app_handle();
   let icons_editor_state: State<IconsEditorState> = handle.state::<IconsEditorState>();
 
-  let sprite_lock: MutexGuard<Option<String>> =
-    icons_editor_state.equipment_sprite_name.lock().unwrap();
-  let preview_lock: MutexGuard<Option<Vec<u8>>> =
-    icons_editor_state.equipment_sprite_preview.lock().unwrap();
+  let sprite_lock: MutexGuard<Option<String>> = icons_editor_state.equipment_sprite_name.lock().unwrap();
+  let preview_lock: MutexGuard<Option<Vec<u8>>> = icons_editor_state.equipment_sprite_preview.lock().unwrap();
 
   let preview: Option<&Vec<u8>> = preview_lock.as_ref();
   let sprite_name: Option<&String> = sprite_lock.as_ref();
@@ -36,11 +34,7 @@ pub fn get_equipment_sprite_stream_response<R: Runtime>(
 
     let mut response: Builder = Response::builder();
 
-    if let Some(referer) = request
-      .headers()
-      .get(REFERER)
-      .map(|header| header.to_str().unwrap())
-    {
+    if let Some(referer) = request.headers().get(REFERER).map(|header| header.to_str().unwrap()) {
       response = response.header(ACCESS_CONTROL_ALLOW_ORIGIN, referer.trim_matches('/'))
     }
 

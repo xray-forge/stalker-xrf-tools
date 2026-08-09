@@ -42,9 +42,7 @@ impl GenericCommand for PackTextureDescriptionCommand {
       )
       .arg(
         Arg::new("file")
-          .help(
-            "Name of a described file to pack, repeatable; packs every described file if omitted",
-          )
+          .help("Name of a described file to pack, repeatable; packs every described file if omitted")
           .long("file")
           .required(false)
           .action(ArgAction::Append),
@@ -115,15 +113,8 @@ impl GenericCommand for PackTextureDescriptionCommand {
       is_parallel,
     };
 
-    log::info!(
-      "Packing texture descriptions from: {}",
-      description.display()
-    );
-    log::info!(
-      "Paths: base {}, output {}",
-      base.display(),
-      output.display()
-    );
+    log::info!("Packing texture descriptions from: {}", description.display());
+    log::info!("Paths: base {}, output {}", base.display(), output.display());
     log::info!("DDS format: {:?}", options.dds_compression_format);
 
     PackDescriptionProcessor::pack_xml_descriptions(&options)?;

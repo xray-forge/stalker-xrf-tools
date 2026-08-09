@@ -30,10 +30,7 @@ impl LtxIncludeConvertor {
   /// X-Ray extensions accepts `*` masks such as `w_*.ltx` and loads every matching file
   /// directly from the include directory. Matches are sorted so that section
   /// merging is deterministic across filesystems.
-  pub fn resolve_include_paths<P: AsRef<Path>>(
-    directory: P,
-    statement: &str,
-  ) -> XRayResult<Vec<PathBuf>> {
+  pub fn resolve_include_paths<P: AsRef<Path>>(directory: P, statement: &str) -> XRayResult<Vec<PathBuf>> {
     let included_path: PathBuf = directory.as_ref().join(Self::statement_to_path(statement));
 
     if !statement.contains('*') {
@@ -88,8 +85,7 @@ mod tests {
 
   #[test]
   fn loads_each_file_matched_by_wildcard_include() -> XRayResult {
-    let root: PathBuf =
-      std::env::temp_dir().join(format!("xray-ltx-wildcard-include-{}", std::process::id()));
+    let root: PathBuf = std::env::temp_dir().join(format!("xray-ltx-wildcard-include-{}", std::process::id()));
     let sections: PathBuf = root.join("sections");
     let root_ltx: PathBuf = root.join("root.ltx");
 
@@ -134,8 +130,7 @@ impl LtxIncludeConvertor {
     };
 
     for included in &ltx.includes {
-      let included_paths: Vec<PathBuf> =
-        Self::resolve_include_paths(result.directory.as_ref().unwrap(), included)?;
+      let included_paths: Vec<PathBuf> = Self::resolve_include_paths(result.directory.as_ref().unwrap(), included)?;
 
       for included_path in included_paths {
         self.include_children(&mut result, &included_path)?;
@@ -209,10 +204,7 @@ impl LtxIncludeConvertor {
     match Ltx::read_from_path(path.as_ref()) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {
-        XRayError::Io {
-          ref kind,
-          message: _,
-        } => {
+        XRayError::Io { ref kind, message: _ } => {
           if *kind == io::ErrorKind::NotFound {
             if self.is_raw_ts_variant_existing(path) {
               Ok(None)
@@ -230,11 +222,7 @@ impl LtxIncludeConvertor {
 
   /// Check if similar TS counterpart exists for provided ltx path.
   fn is_raw_ts_variant_existing<P: AsRef<Path>>(&self, path: &P) -> bool {
-    if path
-      .as_ref()
-      .extension()
-      .is_some_and(|extension| extension == "ltx")
-    {
+    if path.as_ref().extension().is_some_and(|extension| extension == "ltx") {
       path.as_ref().with_extension("ts").exists()
     } else {
       false

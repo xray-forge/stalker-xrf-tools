@@ -29,9 +29,10 @@ impl OgfMotionDefinition {
     let mut definitions: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
-      definitions.push(Self::read::<T>(reader, version).map_err(|error| {
-        XRayError::new_read_error(format!("Failed to read ogf motion: {error}"))
-      })?);
+      definitions.push(
+        Self::read::<T>(reader, version)
+          .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf motion: {error}")))?,
+      );
     }
 
     assert_length(
@@ -58,9 +59,10 @@ impl OgfMotionDefinition {
       let mut marks: Vec<OgfMotionMark> = Vec::with_capacity(count as usize);
 
       for _ in 0..count {
-        marks.push(OgfMotionMark::read::<T>(reader).map_err(|error| {
-          XRayError::new_read_error(format!("Failed to read ogf motion mark: {error}"))
-        })?);
+        marks.push(
+          OgfMotionMark::read::<T>(reader)
+            .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf motion mark: {error}")))?,
+        );
       }
 
       assert_length(
@@ -89,17 +91,13 @@ impl OgfMotionDefinition {
     Ok(motion)
   }
 
-  pub fn write_list<T: ByteOrder>(
-    writer: &mut ChunkWriter,
-    definitions: &[Self],
-    version: u16,
-  ) -> XRayResult {
+  pub fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, definitions: &[Self], version: u16) -> XRayResult {
     writer.write_u16::<T>(definitions.len() as u16)?;
 
     for definition in definitions {
-      definition.write::<T>(writer, version).map_err(|error| {
-        XRayError::new_serialization_error(format!("Failed to write ogf motion: {error}"))
-      })?;
+      definition
+        .write::<T>(writer, version)
+        .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf motion: {error}")))?;
     }
 
     Ok(())
@@ -119,9 +117,9 @@ impl OgfMotionDefinition {
       writer.write_u32::<T>(self.marks.len() as u32)?;
 
       for mark in &self.marks {
-        mark.write::<T>(writer).map_err(|error| {
-          XRayError::new_serialization_error(format!("Failed to write ogf motion mark: {error}"))
-        })?;
+        mark
+          .write::<T>(writer)
+          .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf motion mark: {error}")))?;
       }
     } else if !self.marks.is_empty() {
       return Err(XRayError::new_invalid_error(format!(
@@ -158,8 +156,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
@@ -174,10 +171,7 @@ mod tests {
 
     OgfMotionDefinition::write_list::<XRayByteOrder>(&mut writer, definitions, version)?;
 
-    writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(filename)?,
-      0,
-    )?;
+    writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(filename)?, 0)?;
 
     let file: FileSlice = open_test_resource_as_slice(filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;

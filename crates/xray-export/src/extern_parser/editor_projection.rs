@@ -37,36 +37,21 @@ impl ExportsEditorParser {
   }
 
   /// Parse conditions externs and remove the `xr_conditions.` namespace.
-  pub fn parse_conditions_from_path<P: AsRef<Path>>(
-    &self,
-    path: P,
-  ) -> XRayResult<Vec<ExportDescriptor>> {
-    self.parse_projected(path.as_ref(), |name: &str| {
-      name.strip_prefix("xr_conditions.")
-    })
+  pub fn parse_conditions_from_path<P: AsRef<Path>>(&self, path: P) -> XRayResult<Vec<ExportDescriptor>> {
+    self.parse_projected(path.as_ref(), |name: &str| name.strip_prefix("xr_conditions."))
   }
 
   /// Parse all callable externs as dialog declarations without renaming them.
-  pub fn parse_dialogs_from_path<P: AsRef<Path>>(
-    &self,
-    path: P,
-  ) -> XRayResult<Vec<ExportDescriptor>> {
+  pub fn parse_dialogs_from_path<P: AsRef<Path>>(&self, path: P) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_projected(path.as_ref(), |name: &str| Some(name))
   }
 
   /// Parse effects externs and remove the `xr_effects.` namespace.
-  pub fn parse_effects_from_path<P: AsRef<Path>>(
-    &self,
-    path: P,
-  ) -> XRayResult<Vec<ExportDescriptor>> {
+  pub fn parse_effects_from_path<P: AsRef<Path>>(&self, path: P) -> XRayResult<Vec<ExportDescriptor>> {
     self.parse_projected(path.as_ref(), |name: &str| name.strip_prefix("xr_effects."))
   }
 
-  fn parse_projected(
-    &self,
-    path: &Path,
-    filter: impl Fn(&str) -> Option<&str>,
-  ) -> XRayResult<Vec<ExportDescriptor>> {
+  fn parse_projected(&self, path: &Path, filter: impl Fn(&str) -> Option<&str>) -> XRayResult<Vec<ExportDescriptor>> {
     let parsed = ExternManifestParser::new().parse_directory(path)?;
 
     let mut result: Vec<ExportDescriptor> = parsed

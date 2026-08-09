@@ -66,8 +66,7 @@ impl GenericCommand for FormatLtxCommand {
 
     let is_check: bool = matches.get_flag("check");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let files: Vec<PathBuf> = Self::collect_ltx_files(&paths)?;
 
@@ -78,17 +77,13 @@ impl GenericCommand for FormatLtxCommand {
       paths.len()
     );
 
-    let options: LtxFormatOptions = LtxFormatOptions {
-      output: output.clone(),
-    };
+    let options: LtxFormatOptions = LtxFormatOptions { output: output.clone() };
 
     if is_check {
       let result: LtxProjectFormatResult = LtxFilesFormatter::check_format_opt(&files, options)?;
 
       if result.invalid_files > 0 {
-        return Err(
-          XRayError::new_verify_error("Project includes LTX files with invalid format").into(),
-        );
+        return Err(XRayError::new_verify_error("Project includes LTX files with invalid format").into());
       }
     } else {
       LtxFilesFormatter::format_opt(&files, options)?;
@@ -148,8 +143,7 @@ mod tests {
   use super::FormatLtxCommand;
 
   fn create_root(name: &str) -> XRayResult<PathBuf> {
-    let root: PathBuf =
-      std::env::temp_dir().join(format!("xrf-cli-format-ltx-{name}-{}", std::process::id()));
+    let root: PathBuf = std::env::temp_dir().join(format!("xrf-cli-format-ltx-{name}-{}", std::process::id()));
 
     if root.exists() {
       fs::remove_dir_all(&root)?;
@@ -174,10 +168,7 @@ mod tests {
 
     files.sort();
 
-    assert_eq!(
-      files,
-      vec![root.join("first.ltx"), nested.join("second.ltx")]
-    );
+    assert_eq!(files, vec![root.join("first.ltx"), nested.join("second.ltx")]);
 
     fs::remove_dir_all(root)?;
 

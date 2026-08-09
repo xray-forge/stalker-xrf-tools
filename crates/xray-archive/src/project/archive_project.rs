@@ -54,11 +54,7 @@ impl ArchiveProject {
       for (name, descriptor) in &archive.files {
         files.insert(
           name.clone(),
-          ArchiveFileReplicationDescriptor::from_descriptor(
-            descriptor,
-            &archive.path,
-            &archive.output_root_path,
-          ),
+          ArchiveFileReplicationDescriptor::from_descriptor(descriptor, &archive.path, &archive.output_root_path),
         );
       }
     }

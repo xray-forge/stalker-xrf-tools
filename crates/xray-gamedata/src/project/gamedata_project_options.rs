@@ -51,10 +51,7 @@ mod tests {
 
     assert_eq!(
       options.selected_checks(),
-      vec![
-        GamedataVerificationType::Textures,
-        GamedataVerificationType::Scripts,
-      ]
+      vec![GamedataVerificationType::Textures, GamedataVerificationType::Scripts,]
     );
   }
 }

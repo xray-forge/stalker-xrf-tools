@@ -8,8 +8,7 @@ use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_with_definitions;
 use crate::GamedataProject;
 use crate::{
-  GamedataCheckResult, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
-  GamedataVerificationStatus,
+  GamedataCheckResult, GamedataProjectReadOptions, GamedataProjectVerifyOptions, GamedataVerificationStatus,
 };
 
 static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
@@ -56,26 +55,16 @@ fn semantic_weather_project_files_with_system(
     "[$weather]\n$strict = true\nambient = string\nclouds_texture = string\nsky_texture = string\nsun = ?string\nthunderbolt_collection = ?string\n",
   )
   .unwrap();
-  fs::write(
-    configs.join("environment").join("ambients.ltx"),
-    "[ambient_ok]\n",
-  )
-  .unwrap();
+  fs::write(configs.join("environment").join("ambients.ltx"), "[ambient_ok]\n").unwrap();
   fs::write(configs.join("environment").join("suns.ltx"), "[sun_ok]\n").unwrap();
   fs::write(
-    configs
-      .join("environment")
-      .join("thunderbolt_collections.ltx"),
+    configs.join("environment").join("thunderbolt_collections.ltx"),
     "[bolt_ok]\n\n[bolt_bad]\nmissing_bolt =\n",
   )
   .unwrap();
   fs::write(configs.join("environment").join("thunderbolts.ltx"), "").unwrap();
   for (name, weather) in weather_files {
-    fs::write(
-      configs.join("environment").join("weathers").join(name),
-      weather,
-    )
-    .unwrap();
+    fs::write(configs.join("environment").join("weathers").join(name), weather).unwrap();
   }
 
   for texture in [
@@ -363,18 +352,19 @@ fn missing_required_weather_field_makes_the_check_fail() {
 
   assert_eq!(result.invalid_weather_files_count, 1);
   assert_eq!(result.status(), GamedataVerificationStatus::Failed);
-  assert!(result.findings.iter().any(|finding| {
-    finding.message() == "Weather [00:00:00] is missing required field [far_plane]"
-  }));
+  assert!(
+    result
+      .findings
+      .iter()
+      .any(|finding| { finding.message() == "Weather [00:00:00] is missing required field [far_plane]" })
+  );
 }
 
 #[test]
 fn malformed_weather_values_make_the_check_fail() {
   for malformed_section in [
-    weather_section("00:00:00", "ambient_ok", "first")
-      .replace("fog_density = 0.25", "fog_density = invalid"),
-    weather_section("00:00:00", "ambient_ok", "first")
-      .replace("fog_color = 0, 0, 0", "fog_color = 0, 0"),
+    weather_section("00:00:00", "ambient_ok", "first").replace("fog_density = 0.25", "fog_density = invalid"),
+    weather_section("00:00:00", "ambient_ok", "first").replace("fog_color = 0, 0, 0", "fog_color = 0, 0"),
   ] {
     let weather: String = format!(
       "{}{}",
@@ -401,8 +391,7 @@ fn malformed_weather_values_make_the_check_fail() {
 fn incorrect_weather_scheme_marker_makes_the_check_fail() {
   let weather: String = format!(
     "{}{}",
-    weather_section("00:00:00", "ambient_ok", "first")
-      .replace("$scheme = $weather", "$scheme = $other"),
+    weather_section("00:00:00", "ambient_ok", "first").replace("$scheme = $weather", "$scheme = $other"),
     weather_section("12:00:00", "ambient_ok", "second")
   );
   let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
@@ -446,10 +435,8 @@ fn negative_weather_distance_makes_the_check_fail() {
 fn thunderbolt_collection_with_missing_member_makes_the_check_fail() {
   let weather: String = format!(
     "{}{}",
-    weather_section("00:00:00", "ambient_ok", "first").replace(
-      "thunderbolt_collection = bolt_ok",
-      "thunderbolt_collection = bolt_bad"
-    ),
+    weather_section("00:00:00", "ambient_ok", "first")
+      .replace("thunderbolt_collection = bolt_ok", "thunderbolt_collection = bolt_bad"),
     weather_section("12:00:00", "ambient_ok", "second")
   );
   let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
@@ -497,11 +484,8 @@ fn primary_weather_definitions_survive_unreadable_legacy_system_fallback() {
     weather_section("00:00:00", "ambient_ok", "first"),
     weather_section("12:00:00", "ambient_ok", "second")
   );
-  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files_with_system(
-    &[("test.ltx", &weather)],
-    None,
-    UNREADABLE_SYSTEM_LTX,
-  );
+  let (root, project): (PathBuf, GamedataProject) =
+    semantic_weather_project_files_with_system(&[("test.ltx", &weather)], None, UNREADABLE_SYSTEM_LTX);
 
   let result: GamedataWeathersVerificationResult = project
     .verify_weathers(&GamedataProjectVerifyOptions {
@@ -567,11 +551,8 @@ fn unreadable_legacy_fallback_is_reported_once_when_missing_names_consult_it() {
       "thunderbolt_collection = legacy_bolt",
     );
   let weather: String = format!("{}{}", missing_references, repeated_missing_references);
-  let (root, project): (PathBuf, GamedataProject) = semantic_weather_project_files_with_system(
-    &[("test.ltx", &weather)],
-    None,
-    UNREADABLE_SYSTEM_LTX,
-  );
+  let (root, project): (PathBuf, GamedataProject) =
+    semantic_weather_project_files_with_system(&[("test.ltx", &weather)], None, UNREADABLE_SYSTEM_LTX);
   let definitions: WeatherDefinitions = WeatherDefinitions::read(&project.ltx_project.root);
   let config_path: PathBuf = project
     .ltx_project
@@ -610,16 +591,10 @@ fn weather_cycle_allows_disabled_sun_and_thunderbolts() {
     "{}{}",
     weather_section("00:00:00", "ambient_ok", "first")
       .replace("sun = sun_ok", "sun =")
-      .replace(
-        "thunderbolt_collection = bolt_ok",
-        "thunderbolt_collection ="
-      ),
+      .replace("thunderbolt_collection = bolt_ok", "thunderbolt_collection ="),
     weather_section("12:00:00", "ambient_ok", "second")
       .replace("sun = sun_ok", "sun =")
-      .replace(
-        "thunderbolt_collection = bolt_ok",
-        "thunderbolt_collection ="
-      )
+      .replace("thunderbolt_collection = bolt_ok", "thunderbolt_collection =")
   );
   let (root, project): (PathBuf, GamedataProject) = semantic_weather_project(&weather);
 

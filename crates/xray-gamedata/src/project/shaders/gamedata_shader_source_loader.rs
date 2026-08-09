@@ -12,11 +12,8 @@ impl XRayShaderSourceLoader for GamedataShaderSourceLoader {
       return Ok(None);
     }
 
-    fs::read(path).map(Some).map_err(|error| {
-      XRayError::new_read_error(format!(
-        "Failed to read shader source {}: {error}",
-        path.display()
-      ))
-    })
+    fs::read(path)
+      .map(Some)
+      .map_err(|error| XRayError::new_read_error(format!("Failed to read shader source {}: {error}", path.display())))
   }
 }

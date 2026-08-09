@@ -49,8 +49,7 @@ impl GenericCommand for InfoOmfCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid path to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Read omf file {}", path.display());
 
@@ -93,11 +92,7 @@ impl GenericCommand for InfoOmfCommand {
       );
     }
 
-    xray_output::info!(
-      output,
-      "Bones total: {}",
-      omf_file.parameters.get_bones_count()
-    );
+    xray_output::info!(output, "Bones total: {}", omf_file.parameters.get_bones_count());
     xray_output::info!(
       output,
       "Parts: {}",
@@ -111,12 +106,7 @@ impl GenericCommand for InfoOmfCommand {
     );
 
     for part in &omf_file.parameters.parts {
-      xray_output::info!(
-        output,
-        "Part '{}' bones: {}",
-        part.name,
-        part.get_bones().join(",")
-      );
+      xray_output::info!(output, "Part '{}' bones: {}", part.name, part.get_bones().join(","));
     }
 
     Ok(())

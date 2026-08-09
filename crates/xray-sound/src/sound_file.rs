@@ -6,9 +6,7 @@ use xray_error::{XRayError, XRayResult};
 
 use crate::SoundMetadata;
 use crate::sound_file_metadata::read_sound_metadata;
-use crate::sound_file_vorbis::{
-  VorbisHeaders, decode_vorbis_stream, parse_identification_packet, read_vorbis_headers,
-};
+use crate::sound_file_vorbis::{VorbisHeaders, decode_vorbis_stream, parse_identification_packet, read_vorbis_headers};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SoundFile {
@@ -44,9 +42,8 @@ impl SoundFile {
   {
     let path: &Path = path.as_ref();
 
-    read_xray_sound(path, is_strict).map_err(|error| {
-      XRayError::new_verify_error(format!("Failed to read sound {}: {error}", path.display()))
-    })
+    read_xray_sound(path, is_strict)
+      .map_err(|error| XRayError::new_verify_error(format!("Failed to read sound {}: {error}", path.display())))
   }
 }
 

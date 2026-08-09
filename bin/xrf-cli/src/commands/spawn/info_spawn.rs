@@ -49,8 +49,7 @@ impl GenericCommand for InfoSpawnCommand {
       .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Read spawn file {}", path.display());
 
@@ -71,26 +70,14 @@ impl GenericCommand for InfoSpawnCommand {
 
     xray_output::info!(output, "Patrols: {}", spawn_file.patrols.patrols.len());
 
-    xray_output::info!(
-      output,
-      "Level version: {}",
-      spawn_file.graphs.header.version
-    );
+    xray_output::info!(output, "Level version: {}", spawn_file.graphs.header.version);
     xray_output::info!(
       output,
       "Level graph vertices: {}",
       spawn_file.graphs.header.vertices_count
     );
-    xray_output::info!(
-      output,
-      "Level graph points: {}",
-      spawn_file.graphs.header.points_count
-    );
-    xray_output::info!(
-      output,
-      "Level graph edges: {}",
-      spawn_file.graphs.header.edges_count
-    );
+    xray_output::info!(output, "Level graph points: {}", spawn_file.graphs.header.points_count);
+    xray_output::info!(output, "Level graph edges: {}", spawn_file.graphs.header.edges_count);
 
     Ok(())
   }

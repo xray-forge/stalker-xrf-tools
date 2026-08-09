@@ -55,9 +55,7 @@ impl Ltx {
 
   /// Get the immutable general section
   pub fn root_section(&mut self) -> &Section {
-    self
-      .entry(ROOT_SECTION.into())
-      .or_insert_with(Default::default)
+    self.entry(ROOT_SECTION.into()).or_insert_with(Default::default)
   }
 
   /// Get the mutable general section
@@ -125,10 +123,7 @@ impl Ltx {
 
   /// Iterate with sections
   pub fn sections(&self) -> impl DoubleEndedIterator<Item = &str> {
-    self
-      .sections
-      .keys()
-      .map(|section_name| section_name.as_str())
+    self.sections.keys().map(|section_name| section_name.as_str())
   }
 
   /// Set key-value to a section
@@ -144,10 +139,7 @@ impl Ltx {
   where
     S: Into<String>,
   {
-    self
-      .sections
-      .get(&section.into())
-      .and_then(|section| section.get(key))
+    self.sections.get(&section.into()).and_then(|section| section.get(key))
   }
 
   /// Get the first value from the sections with key, return the default value if it does not exist
@@ -182,9 +174,7 @@ impl Ltx {
   where
     S: Into<String>,
   {
-    self
-      .section_mut(section)
-      .and_then(|section| section.remove(key))
+    self.section_mut(section).and_then(|section| section.remove(key))
   }
 
   /// Total sections count
@@ -535,10 +525,7 @@ Comment[tr]=İnternet'e erişin
 Comment[uk]=Доступ до Інтернету
 ";
     let ltx: Ltx = Ltx::read_from_str(input).unwrap();
-    assert_eq!(
-      ltx.get_from("test", "Comment[tr]").unwrap(),
-      "İnternet'e erişin"
-    );
+    assert_eq!(ltx.get_from("test", "Comment[tr]").unwrap(), "İnternet'e erişin");
   }
 
   #[test]

@@ -47,8 +47,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::ogf::ogf_motion::OgfMotion;
@@ -70,10 +69,7 @@ mod tests {
     // 9 name bytes + 1 terminator + 4 count bytes + 1 flags byte + 8 payload bytes.
     assert_eq!(writer.bytes_written(), 9 + 1 + 4 + 1 + 8);
 
-    writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;

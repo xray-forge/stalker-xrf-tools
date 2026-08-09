@@ -91,8 +91,7 @@ impl GenericCommand for UnpackArchiveCommand {
 
     let is_dry: bool = matches.get_flag("dry");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if is_dry {
       xray_output::info!(output, "Unpack in dry mode");

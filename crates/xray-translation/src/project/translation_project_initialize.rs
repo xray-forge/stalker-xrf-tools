@@ -7,29 +7,22 @@ use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
 
 use crate::types::TranslationJson;
-use crate::{
-  ProjectInitializeOptions, ProjectInitializeResult, TranslationLanguage, TranslationProject,
-};
+use crate::{ProjectInitializeOptions, ProjectInitializeResult, TranslationLanguage, TranslationProject};
 
 impl TranslationProject {
   pub fn initialize_dir<P: AsRef<Path>>(
     dir: &P,
     options: &ProjectInitializeOptions,
   ) -> XRayResult<ProjectInitializeResult> {
-    xray_output::info!(
-      options.output,
-      "Initializing dir {}",
-      dir.as_ref().display()
-    );
+    xray_output::info!(options.output, "Initializing dir {}", dir.as_ref().display());
 
     let started_at: Instant = Instant::now();
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();
 
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(dir) {
-      let entry: DirEntry = entry.map_err(|error| {
-        XRayError::from(error.into_io_error().expect("WalkDir error transformed"))
-      })?;
+      let entry: DirEntry =
+        entry.map_err(|error| XRayError::from(error.into_io_error().expect("WalkDir error transformed")))?;
 
       if entry.path().is_file() {
         Self::initialize_file(&entry.path(), options)?;
@@ -88,10 +81,7 @@ impl TranslationProject {
             initialized_count += 1;
 
             log::info!("Initializing missing key: {key} - {language}");
-            xray_output::info!(
-              options.output,
-              "Initializing missing key: {key} - {language}"
-            );
+            xray_output::info!(options.output, "Initializing missing key: {key} - {language}");
 
             value.insert(String::from(language), None);
           }

@@ -14,10 +14,7 @@ pub(crate) struct MeshesVerifier<'a> {
 }
 
 impl<'a> MeshesVerifier<'a> {
-  pub(crate) fn new(
-    project: &'a GamedataProject,
-    options: &'a GamedataProjectVerifyOptions,
-  ) -> Self {
+  pub(crate) fn new(project: &'a GamedataProject, options: &'a GamedataProjectVerifyOptions) -> Self {
     Self { options, project }
   }
 
@@ -28,20 +25,15 @@ impl<'a> MeshesVerifier<'a> {
 
     let shader_library = ShaderLibraryVerifier::new(self.project).verify();
     let mesh_assets: GamedataMeshAssetsVerificationResult = match shader_library.library() {
-      Some(shader_library) => {
-        MeshAssetsVerifier::new(self.project, self.options, shader_library).verify()?
-      }
+      Some(shader_library) => MeshAssetsVerifier::new(self.project, self.options, shader_library).verify()?,
       None => GamedataMeshAssetsVerificationResult {
         is_skipped: true,
         ..Default::default()
       },
     };
 
-    let result: GamedataMeshesVerificationResult = GamedataMeshesVerificationResult::from_checks(
-      started_at.elapsed(),
-      shader_library,
-      mesh_assets,
-    );
+    let result: GamedataMeshesVerificationResult =
+      GamedataMeshesVerificationResult::from_checks(started_at.elapsed(), shader_library, mesh_assets);
 
     xray_output::info!(
       self.options.output,

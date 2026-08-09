@@ -7,10 +7,7 @@ use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
 
 #[tauri::command]
-pub async fn open_spawn_file(
-  path: &str,
-  state: tauri::State<'_, SpawnsEditorState>,
-) -> TauriResult<Value> {
+pub async fn open_spawn_file(path: &str, state: tauri::State<'_, SpawnsEditorState>) -> TauriResult<Value> {
   log::info!("Opening spawn file");
 
   match SpawnFile::read_from_path::<XRayByteOrder, _>(&Path::new(path)) {

@@ -26,8 +26,7 @@ pub struct TypeScriptSource {
 /// SWC reports parsing diagnostics before a program can be produced.
 pub fn parse_typescript_file(path: &Path) -> XRayResult<TypeScriptSource> {
   let source_map: Lrc<SourceMap> = Default::default();
-  let handler: Handler =
-    Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(source_map.clone()));
+  let handler: Handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(source_map.clone()));
   let source_file: Rc<SourceFile> = source_map
     .load_file(path)
     .expect("Failed to load TypeScript source file");

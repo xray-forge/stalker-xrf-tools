@@ -27,9 +27,7 @@ impl ChunkReader<FileSlice> {
   /// Create chunk based on file slice boundaries.
   pub fn from_slice(slice: FileSlice) -> XRayResult<Self> {
     if slice.is_empty() {
-      return Err(XRayError::new_invalid_error(
-        "Failed to create chunk from empty source",
-      ));
+      return Err(XRayError::new_invalid_error("Failed to create chunk from empty source"));
     }
 
     Ok(Self {
@@ -126,10 +124,7 @@ impl<T: ChunkDataSource> ChunkReader<T> {
     if self.is_ended() {
       Ok(())
     } else {
-      Err(XRayError::new_chunk_not_ended_error(
-        message,
-        self.read_bytes_remain(),
-      ))
+      Err(XRayError::new_chunk_not_ended_error(message, self.read_bytes_remain()))
     }
   }
 }
@@ -161,10 +156,7 @@ mod tests {
 
     let result: XRayResult<ChunkReader> = ChunkReader::from_slice(file);
 
-    assert!(
-      result.is_err(),
-      "File should be empty and fail to read data"
-    );
+    assert!(result.is_err(), "File should be empty and fail to read data");
     assert_eq!(
       result.unwrap_err().to_string(),
       "Invalid error: Failed to create chunk from empty source",

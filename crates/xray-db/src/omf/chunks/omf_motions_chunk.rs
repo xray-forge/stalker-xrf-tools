@@ -19,10 +19,7 @@ impl OmfMotionsChunk {
 
 impl ChunkReadWrite for OmfMotionsChunk {
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    log::info!(
-      "Reading motions chunk: {} bytes",
-      reader.read_bytes_remain()
-    );
+    log::info!("Reading motions chunk: {} bytes", reader.read_bytes_remain());
 
     let mut chunks: Vec<ChunkReader> = reader.read_children()?;
 
@@ -66,11 +63,7 @@ impl ChunkReadWrite for OmfMotionsChunk {
 
       motion.write::<T>(&mut motion_writer)?;
 
-      writer.write_all(
-        motion_writer
-          .flush_chunk_into_buffer::<T>(index as u32 + 1)?
-          .as_slice(),
-      )?;
+      writer.write_all(motion_writer.flush_chunk_into_buffer::<T>(index as u32 + 1)?.as_slice())?;
     }
 
     log::info!(

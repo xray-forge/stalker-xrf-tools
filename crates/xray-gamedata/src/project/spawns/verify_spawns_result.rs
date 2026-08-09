@@ -37,8 +37,7 @@ mod tests {
   use super::GamedataSpawnsVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::{
-    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
-    GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]

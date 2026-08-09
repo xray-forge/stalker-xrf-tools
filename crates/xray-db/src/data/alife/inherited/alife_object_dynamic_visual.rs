@@ -79,8 +79,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -111,10 +111,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 51);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 51);
 
@@ -123,8 +121,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 51 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectDynamicVisual =
-      AlifeObjectDynamicVisual::read::<XRayByteOrder>(&mut reader)?;
+    let read_object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read::<XRayByteOrder>(&mut reader)?;
 
     assert_eq!(read_object, original);
 
@@ -169,9 +166,7 @@ mod tests {
     first.export("first", &mut ltx)?;
     second.export("second", &mut ltx)?;
 
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
-      &ltx_filename,
-    )?)?;
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&ltx_filename)?)?;
 
     let source: Ltx = Ltx::read_from_path(&get_absolute_test_resource_path(&ltx_filename))?;
 
@@ -198,9 +193,10 @@ mod tests {
       visual_flags: 33,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -208,10 +204,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<AlifeObjectDynamicVisual>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<AlifeObjectDynamicVisual>(&serialized)?);
 
     Ok(())
   }

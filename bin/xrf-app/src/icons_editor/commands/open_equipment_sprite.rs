@@ -17,14 +17,13 @@ pub async fn open_equipment_sprite(
 
   let name: &str = "equipment.png";
 
-  let (image, preview_buffer) = open_dds_as_png(equipment_dds_path)
-    .map_err(|error| format!("Failed to open provided image file: {}", error))?;
+  let (image, preview_buffer) =
+    open_dds_as_png(equipment_dds_path).map_err(|error| format!("Failed to open provided image file: {}", error))?;
 
   log::info!("Opened equipment dds file");
 
-  let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
-    &Ltx::read_from_file_full(system_ltx_path).map_err(error_to_string)?,
-  );
+  let descriptors: Vec<InventorySpriteDescriptor> =
+    InventorySpriteDescriptor::new_list_from_ltx(&Ltx::read_from_file_full(system_ltx_path).map_err(error_to_string)?);
 
   let response = IconsEditorEquipmentResponse {
     system_ltx_path: system_ltx_path.into(),

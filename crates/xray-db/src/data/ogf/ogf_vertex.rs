@@ -75,10 +75,7 @@ impl OgfVertex {
 
     let geometry_offset: usize = bones_size + weights_size;
 
-    Self::read_geometry::<T>(
-      &vertex[geometry_offset..geometry_offset + Self::GEOMETRY_SIZE],
-      links,
-    )
+    Self::read_geometry::<T>(&vertex[geometry_offset..geometry_offset + Self::GEOMETRY_SIZE], links)
   }
 
   fn read_geometry<T: ByteOrder>(geometry: &[u8], links: Vec<OgfVertexLink>) -> Self {
@@ -124,14 +121,8 @@ mod tests {
       (vertex.position.x, vertex.position.y, vertex.position.z),
       (1.0, 2.0, 3.0)
     );
-    assert_eq!(
-      (vertex.normal.x, vertex.normal.y, vertex.normal.z),
-      (0.0, 1.0, 0.0)
-    );
-    assert_eq!(
-      (vertex.tangent.x, vertex.tangent.y, vertex.tangent.z),
-      (1.0, 0.0, 0.0)
-    );
+    assert_eq!((vertex.normal.x, vertex.normal.y, vertex.normal.z), (0.0, 1.0, 0.0));
+    assert_eq!((vertex.tangent.x, vertex.tangent.y, vertex.tangent.z), (1.0, 0.0, 0.0));
     assert_eq!(
       (vertex.binormal.x, vertex.binormal.y, vertex.binormal.z),
       (0.0, 0.0, 1.0)
@@ -198,11 +189,7 @@ mod tests {
     assert!(
       (vertex.links.iter().map(|it| it.weight).sum::<f32>() - 1.0).abs() < 1e-6,
       "Expect weights to sum to one, got {:?}",
-      vertex
-        .links
-        .iter()
-        .map(|it| it.weight)
-        .collect::<Vec<f32>>()
+      vertex.links.iter().map(|it| it.weight).collect::<Vec<f32>>()
     );
     assert!((vertex.links[3].weight - 0.4).abs() < 1e-6);
   }

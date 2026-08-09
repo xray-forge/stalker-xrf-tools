@@ -22,9 +22,7 @@ impl Ltx {
 
   /// Read LTX from a file, inject all includes and unwrap inherited sections.
   pub fn read_from_file_full<P: AsRef<Path>>(filename: P) -> XRayResult<Self> {
-    Self::read_from_path(filename)?
-      .into_included()?
-      .into_inherited()
+    Self::read_from_path(filename)?.into_included()?.into_inherited()
   }
 
   /// Read from a file as generic ltx with LTX descriptor filled.
@@ -106,8 +104,7 @@ mod test {
 
   #[test]
   fn format_from_file_one() {
-    let formatted: String =
-      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_1.ltx")).unwrap();
+    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_1.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_1.ltx").unwrap(),
@@ -119,8 +116,7 @@ mod test {
 
   #[test]
   fn format_from_file_two() {
-    let formatted: String =
-      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_2.ltx")).unwrap();
+    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_2.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_2.ltx").unwrap(),
@@ -132,8 +128,7 @@ mod test {
 
   #[test]
   fn format_from_file_three() {
-    let formatted: String =
-      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_3.ltx")).unwrap();
+    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_3.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_3.ltx").unwrap(),
@@ -145,8 +140,7 @@ mod test {
 
   #[test]
   fn format_from_file_four() {
-    let formatted: String =
-      Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_4.ltx")).unwrap();
+    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_4.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
       &mut get_absolute_test_resource_as_file(file!(), "formatted_4.ltx").unwrap(),
@@ -189,9 +183,9 @@ mod test {
     use std::io::Cursor;
 
     let d = vec![
-      10, 8, 68, 8, 61, 10, 126, 126, 61, 49, 10, 62, 8, 8, 61, 10, 91, 93, 93, 36, 91, 61, 10, 75,
-      91, 10, 10, 10, 61, 92, 120, 68, 70, 70, 70, 70, 70, 126, 61, 10, 0, 0, 61, 10, 38, 46, 49,
-      61, 0, 39, 0, 0, 46, 92, 120, 46, 36, 91, 91, 1, 0, 0, 16, 0, 0, 0, 0, 0, 0,
+      10, 8, 68, 8, 61, 10, 126, 126, 61, 49, 10, 62, 8, 8, 61, 10, 91, 93, 93, 36, 91, 61, 10, 75, 91, 10, 10, 10, 61,
+      92, 120, 68, 70, 70, 70, 70, 70, 126, 61, 10, 0, 0, 61, 10, 38, 46, 49, 61, 0, 39, 0, 0, 46, 92, 120, 46, 36, 91,
+      91, 1, 0, 0, 16, 0, 0, 0, 0, 0, 0,
     ];
     let mut file = Cursor::new(d);
     assert!(Ltx::read_from(&mut file).is_err());

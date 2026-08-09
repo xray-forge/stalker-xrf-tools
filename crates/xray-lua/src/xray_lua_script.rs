@@ -47,11 +47,7 @@ impl XRayLuaScript {
         XRayError::new_verify_error(format!(
           "Failed to check LuaJIT script file: {}, errors: {}",
           path.display(),
-          errors
-            .iter()
-            .map(|it| it.to_string())
-            .collect::<Vec<_>>()
-            .join(", ")
+          errors.iter().map(|it| it.to_string()).collect::<Vec<_>>().join(", ")
         ))
       })
   }

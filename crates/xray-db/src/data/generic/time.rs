@@ -84,9 +84,7 @@ impl ChunkReadWrite for Time {
 impl Time {
   /// Cast optional time object to serialized string.
   pub fn export_to_string(time: Option<&Self>) -> String {
-    time
-      .as_ref()
-      .map_or(String::from(NIL), |value| value.to_string())
+    time.as_ref().map_or(String::from(NIL), |value| value.to_string())
   }
 
   /// Import optional time from string value.
@@ -106,33 +104,31 @@ impl FromStr for Time {
     let parts: Vec<&str> = string.split(',').map(str::trim).collect();
 
     if parts.len() != 7 {
-      return Err(XRayError::new_parsing_error(
-        "Failed to parse time object from string",
-      ));
+      return Err(XRayError::new_parsing_error("Failed to parse time object from string"));
     }
 
     Ok(Self {
-      year: parts[0].parse().or(Err(XRayError::new_parsing_error(
-        "Failed to parse years value",
-      )))?,
-      month: parts[1].parse().or(Err(XRayError::new_parsing_error(
-        "Failed to parse months value",
-      )))?,
-      day: parts[2].parse().or(Err(XRayError::new_parsing_error(
-        "Failed to parse days value",
-      )))?,
-      hour: parts[3].parse().or(Err(XRayError::new_parsing_error(
-        "Failed to parse hours value",
-      )))?,
-      minute: parts[4].parse().or(Err(XRayError::new_parsing_error(
-        "Failed to parse minutes value",
-      )))?,
-      second: parts[5].parse().or(Err(XRayError::new_parsing_error(
-        "Failed to parse seconds value",
-      )))?,
-      millis: parts[6].parse().or(Err(XRayError::new_parsing_error(
-        "Failed to parse millis value",
-      )))?,
+      year: parts[0]
+        .parse()
+        .or(Err(XRayError::new_parsing_error("Failed to parse years value")))?,
+      month: parts[1]
+        .parse()
+        .or(Err(XRayError::new_parsing_error("Failed to parse months value")))?,
+      day: parts[2]
+        .parse()
+        .or(Err(XRayError::new_parsing_error("Failed to parse days value")))?,
+      hour: parts[3]
+        .parse()
+        .or(Err(XRayError::new_parsing_error("Failed to parse hours value")))?,
+      minute: parts[4]
+        .parse()
+        .or(Err(XRayError::new_parsing_error("Failed to parse minutes value")))?,
+      second: parts[5]
+        .parse()
+        .or(Err(XRayError::new_parsing_error("Failed to parse seconds value")))?,
+      millis: parts[6]
+        .parse()
+        .or(Err(XRayError::new_parsing_error("Failed to parse millis value")))?,
     })
   }
 }
@@ -159,15 +155,12 @@ mod tests {
   use std::str::FromStr;
 
   use serde_json::to_string_pretty;
-  use xray_chunk::{
-    ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter, XRayByteOrder,
-  };
+  use xray_chunk::{ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter, XRayByteOrder};
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::time::Time;
@@ -191,10 +184,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 8);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 8);
 
@@ -212,8 +203,7 @@ mod tests {
   #[test]
   fn test_read_write_optional_some() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
 
     let original: Time = Time {
       year: 22,
@@ -229,10 +219,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 9);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 9);
 
@@ -242,10 +230,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      Time::read_optional::<XRayByteOrder>(&mut reader)?,
-      Some(original)
-    );
+    assert_eq!(Time::read_optional::<XRayByteOrder>(&mut reader)?, Some(original));
 
     Ok(())
   }
@@ -253,17 +238,14 @@ mod tests {
   #[test]
   fn test_read_write_optional_none() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
 
     Time::write_optional::<XRayByteOrder>(&mut writer, None)?;
 
     assert_eq!(writer.bytes_written(), 1);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 1);
 
@@ -290,14 +272,8 @@ mod tests {
       millis: 100,
     };
 
-    assert_eq!(
-      Time::export_to_string(Some(&original)),
-      "20,6,1,15,15,23,100"
-    );
-    assert_eq!(
-      Time::from_str_optional("20,6,1,15,15,23,100")?,
-      Some(original)
-    );
+    assert_eq!(Time::export_to_string(Some(&original)), "20,6,1,15,15,23,100");
+    assert_eq!(Time::from_str_optional("20,6,1,15,15,23,100")?, Some(original));
     assert_eq!(Time::export_to_string(None), "nil");
     assert_eq!(Time::from_str_optional("nil")?, None);
 
@@ -334,9 +310,10 @@ mod tests {
       millis: 100,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

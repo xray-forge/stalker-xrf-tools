@@ -13,8 +13,7 @@ impl UnpackEquipmentProcessor {
     let mut count: u32 = 0;
 
     for (section_name, section) in &options.ltx.sections {
-      if let Some(sprite) =
-        InventorySpriteDescriptor::new_optional_from_section(section_name, section)
+      if let Some(sprite) = InventorySpriteDescriptor::new_optional_from_section(section_name, section)
         && Self::unpack_sprite(&options, &sprite)?
       {
         count += 1;
@@ -26,10 +25,7 @@ impl UnpackEquipmentProcessor {
     Ok(())
   }
 
-  pub fn unpack_sprite(
-    options: &UnpackEquipmentOptions,
-    sprite: &InventorySpriteDescriptor,
-  ) -> XRayResult<bool> {
+  pub fn unpack_sprite(options: &UnpackEquipmentOptions, sprite: &InventorySpriteDescriptor) -> XRayResult<bool> {
     let (x, y, w, h) = sprite.get_boundaries();
 
     xray_output::verbose!(

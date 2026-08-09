@@ -1,8 +1,8 @@
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id,
-  read_f32_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
+  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
+  read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
@@ -51,39 +51,19 @@ impl ChunkReadWrite for ParticleGroup {
     let chunks: Vec<ChunkReader> = reader.read_children()?;
 
     let particle_group: Self = Self {
-      version: read_u16_chunk::<T>(&mut find_required_chunk_by_id(
-        &chunks,
-        Self::VERSION_CHUNK_ID,
-      )?)?,
-      name: read_w1251_string_chunk(&mut find_required_chunk_by_id(
-        &chunks,
-        Self::NAME_CHUNK_ID,
-      )?)?,
-      flags: read_u32_chunk::<T>(&mut find_required_chunk_by_id(
-        &chunks,
-        Self::FLAGS_CHUNK_ID,
-      )?)?,
-      effects: find_required_chunk_by_id(&chunks, Self::EFFECTS_CHUNK_ID)?
-        .read_xr_list::<T, _>()?,
-      time_limit: read_f32_chunk::<T>(&mut find_required_chunk_by_id(
-        &chunks,
-        Self::TIME_LIMIT_CHUNK_ID,
-      )?)?,
-      description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
-        ParticleDescription::read::<T>(&mut it).expect("Invalid description chunk data")
-      }),
-      effects_old: find_optional_chunk_by_id(&chunks, Self::EFFECTS2_CHUNK_ID).map(|mut it| {
-        it.read_xr_list::<T, _>()
-          .expect("Invalid old group effects chunk data")
-      }),
+      version: read_u16_chunk::<T>(&mut find_required_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)?)?,
+      name: read_w1251_string_chunk(&mut find_required_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)?)?,
+      flags: read_u32_chunk::<T>(&mut find_required_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)?)?,
+      effects: find_required_chunk_by_id(&chunks, Self::EFFECTS_CHUNK_ID)?.read_xr_list::<T, _>()?,
+      time_limit: read_f32_chunk::<T>(&mut find_required_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)?)?,
+      description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID)
+        .map(|mut it| ParticleDescription::read::<T>(&mut it).expect("Invalid description chunk data")),
+      effects_old: find_optional_chunk_by_id(&chunks, Self::EFFECTS2_CHUNK_ID)
+        .map(|mut it| it.read_xr_list::<T, _>().expect("Invalid old group effects chunk data")),
     };
 
     assert!(reader.is_ended(), "Expect groups chunk to be ended");
-    assert_equal(
-      particle_group.version,
-      3,
-      "Only version 3 of group chunks is supported",
-    )?;
+    assert_equal(particle_group.version, 3, "Only version 3 of group chunks is supported")?;
 
     Ok(particle_group)
   }
@@ -147,8 +127,7 @@ impl LtxImportExport for ParticleGroup {
       "Expected corrected meta type field for particle group importing",
     )?;
 
-    let effects_old: Vec<ParticleGroupEffectOld> =
-      ParticleGroupEffectOld::import_list(section_name, ltx)?;
+    let effects_old: Vec<ParticleGroupEffectOld> = ParticleGroupEffectOld::import_list(section_name, ltx)?;
 
     Ok(Self {
       version: read_ltx_field("version", section)?,
@@ -156,10 +135,7 @@ impl LtxImportExport for ParticleGroup {
       flags: read_ltx_field("flags", section)?,
       time_limit: read_ltx_field("time_limit", section)?,
       effects: ParticleGroupEffect::import_list(section_name, ltx)?,
-      description: ParticleDescription::import_optional(
-        &Self::get_description_section(section_name),
-        ltx,
-      )?,
+      description: ParticleDescription::import_optional(&Self::get_description_section(section_name), ltx)?,
       effects_old: if effects_old.is_empty() {
         None
       } else {

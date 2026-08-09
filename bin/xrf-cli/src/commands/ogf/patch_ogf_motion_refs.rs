@@ -83,16 +83,9 @@ impl GenericCommand for PatchOgfMotionRefsCommand {
       .get_one::<PathBuf>("dest")
       .map_or(path.as_path(), |it| it.as_path());
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    Self::report_patch_file(
-      &output,
-      path,
-      destination,
-      &motion_refs,
-      matches.get_flag("dry-run"),
-    )?;
+    Self::report_patch_file(&output, path, destination, &motion_refs, matches.get_flag("dry-run"))?;
 
     Ok(())
   }
@@ -117,9 +110,8 @@ impl PatchOgfMotionRefsCommand {
       motion_refs
     );
 
-    let report: OgfRefsPatchReport = OgfMotionRefsProcessor::patch_motion_refs_to_path::<
-      XRayByteOrder,
-    >(path, destination, motion_refs, is_dry_run)?;
+    let report: OgfRefsPatchReport =
+      OgfMotionRefsProcessor::patch_motion_refs_to_path::<XRayByteOrder>(path, destination, motion_refs, is_dry_run)?;
 
     if report.is_dry_run {
       xray_output::info!(
@@ -133,11 +125,7 @@ impl PatchOgfMotionRefsCommand {
       return Ok(());
     }
 
-    xray_output::info!(
-      output,
-      "Ogf motion refs written into {}",
-      destination.display()
-    );
+    xray_output::info!(output, "Ogf motion refs written into {}", destination.display());
 
     Ok(())
   }

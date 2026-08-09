@@ -66,10 +66,8 @@ impl ChunkReadWriteList for PatrolPoint {
       point_index_writer.write_u32::<T>(index as u32)?;
       point.write::<T>(&mut point_writer)?;
 
-      point_chunk_writer
-        .write_all(&point_index_writer.flush_chunk_into_buffer::<T>(Self::INDEX_CHUNK_ID)?)?;
-      point_chunk_writer
-        .write_all(&point_writer.flush_chunk_into_buffer::<T>(Self::DATA_CHUNK_ID)?)?;
+      point_chunk_writer.write_all(&point_index_writer.flush_chunk_into_buffer::<T>(Self::INDEX_CHUNK_ID)?)?;
+      point_chunk_writer.write_all(&point_writer.flush_chunk_into_buffer::<T>(Self::DATA_CHUNK_ID)?)?;
 
       writer.write_all(&point_chunk_writer.flush_chunk_into_buffer::<T>(index as u32)?)?;
     }
@@ -153,8 +151,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -201,10 +199,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 274);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 274);
 
@@ -212,9 +208,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 274 + 8);
     assert_eq!(
-      PatrolPoint::read_list::<XRayByteOrder>(
-        &mut ChunkReader::from_slice(file)?.read_child_by_index(0)?
-      )?,
+      PatrolPoint::read_list::<XRayByteOrder>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
       original
     );
 
@@ -238,10 +232,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 39);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 39);
 
@@ -249,9 +241,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 39 + 8);
     assert_eq!(
-      PatrolPoint::read::<XRayByteOrder>(
-        &mut ChunkReader::from_slice(file)?.read_child_by_index(0)?
-      )?,
+      PatrolPoint::read::<XRayByteOrder>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
       original
     );
 

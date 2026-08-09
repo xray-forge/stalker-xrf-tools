@@ -4,8 +4,8 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  ChunkReader, find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id,
-  find_optional_chunk_by_id, find_required_chunk_by_id,
+  ChunkReader, find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id, find_optional_chunk_by_id,
+  find_required_chunk_by_id,
 };
 use xray_error::{XRayError, XRayResult};
 
@@ -73,16 +73,12 @@ impl OgfFile {
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
     // Bones are read up front because the ik data chunk stores no count of its own and has one record
     // per bone, so it can only be read once the bone list is known.
-    let bones: Option<OgfBonesChunk> =
-      match find_optional_chunk_by_id(chunks, OgfBonesChunk::CHUNK_ID) {
-        Some(mut it) => Some(it.read_xr::<T, _>()?),
-        None => None,
-      };
+    let bones: Option<OgfBonesChunk> = match find_optional_chunk_by_id(chunks, OgfBonesChunk::CHUNK_ID) {
+      Some(mut it) => Some(it.read_xr::<T, _>()?),
+      None => None,
+    };
 
-    let ik_data: Option<OgfIkDataChunk> = match (
-      &bones,
-      find_optional_chunk_by_id(chunks, OgfIkDataChunk::CHUNK_ID),
-    ) {
+    let ik_data: Option<OgfIkDataChunk> = match (&bones, find_optional_chunk_by_id(chunks, OgfIkDataChunk::CHUNK_ID)) {
       (Some(bones), Some(mut it)) => Some(OgfIkDataChunk::read::<T>(&mut it, bones.bones.len())?),
       _ => None,
     };
@@ -106,10 +102,7 @@ impl OgfFile {
       },
       kinematics: match find_one_of_optional_chunk_by_id(
         chunks,
-        &[
-          OgfKinematicsChunk::CHUNK_ID,
-          OgfKinematicsChunk::CHUNK_ID_OLD,
-        ],
+        &[OgfKinematicsChunk::CHUNK_ID, OgfKinematicsChunk::CHUNK_ID_OLD],
       ) {
         Some((id, mut it)) => Some(OgfKinematicsChunk::read::<T>(&mut it, id)?),
         None => None,
@@ -134,9 +127,7 @@ impl OgfFile {
   }
 
   /// Read only list of motion refs specifically and skip other data parts.
-  pub fn read_motion_refs_from_path<T: ByteOrder, P: AsRef<Path>>(
-    path: &P,
-  ) -> XRayResult<Vec<String>> {
+  pub fn read_motion_refs_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Vec<String>> {
     Self::read_motion_refs_from_file::<T>(File::open(path)?)
   }
 
@@ -153,10 +144,7 @@ impl OgfFile {
 
     let (chunk_id, mut chunk) = find_one_of_required_chunks_by_id(
       &chunks,
-      &[
-        OgfKinematicsChunk::CHUNK_ID,
-        OgfKinematicsChunk::CHUNK_ID_OLD,
-      ],
+      &[OgfKinematicsChunk::CHUNK_ID, OgfKinematicsChunk::CHUNK_ID_OLD],
     )?;
 
     Ok(OgfKinematicsChunk::read::<T>(&mut chunk, chunk_id)?.motion_refs)
@@ -166,9 +154,7 @@ impl OgfFile {
   ///
   /// Texture chunks of a skeleton live inside the children container rather than at the top level,
   /// so the top level `texture` field is empty for the models that have any.
-  pub fn read_texture_refs_from_path<T: ByteOrder, P: AsRef<Path>>(
-    path: &P,
-  ) -> XRayResult<Vec<String>> {
+  pub fn read_texture_refs_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Vec<String>> {
     Ok(
       Self::read_from_path::<T, _>(path)?
         .children

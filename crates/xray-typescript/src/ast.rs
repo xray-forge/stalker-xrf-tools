@@ -1,9 +1,8 @@
 use swc_common::{SourceMap, SourceMapper, Spanned};
 use swc_ecma_ast::{
-  Callee, Expr, ExprOrSpread, Lit, TsArrayType, TsEntityName, TsFnOrConstructorType, TsFnParam,
-  TsFnType, TsImportType, TsKeywordType, TsKeywordTypeKind, TsLit, TsLitType, TsType,
-  TsTypeOperator, TsTypeOperatorOp, TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr,
-  TsTypeRef, TsUnionOrIntersectionType,
+  Callee, Expr, ExprOrSpread, Lit, TsArrayType, TsEntityName, TsFnOrConstructorType, TsFnParam, TsFnType, TsImportType,
+  TsKeywordType, TsKeywordTypeKind, TsLit, TsLitType, TsType, TsTypeOperator, TsTypeOperatorOp,
+  TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr, TsTypeRef, TsUnionOrIntersectionType,
 };
 use xray_error::{XRayError, XRayResult};
 
@@ -104,10 +103,7 @@ fn ts_function_type_to_string(function_type: &TsFnType) -> String {
     .collect::<Vec<String>>()
     .join(", ");
 
-  format!(
-    "({params}) => {}",
-    ts_type_to_string(&function_type.type_ann.type_ann)
-  )
+  format!("({params}) => {}", ts_type_to_string(&function_type.type_ann.type_ann))
 }
 
 fn canonical_source_type(ts_type: &TsType, source_map: &SourceMap) -> XRayResult<String> {
@@ -138,10 +134,7 @@ fn ts_type_operator_to_string(type_operator: &TsTypeOperator) -> String {
 }
 
 pub fn ts_type_query_to_string(type_query: &TsTypeQuery) -> String {
-  format!(
-    "typeof {}",
-    ts_entity_query_to_string(&type_query.expr_name)
-  )
+  format!("typeof {}", ts_entity_query_to_string(&type_query.expr_name))
 }
 
 pub fn ts_entity_query_to_string(name: &TsTypeQueryExpr) -> String {
@@ -175,11 +168,7 @@ pub fn ts_entity_name_to_string(name: &TsEntityName) -> String {
   match name {
     TsEntityName::Ident(ident) => ident.sym.to_string(),
     TsEntityName::TsQualifiedName(qname) => {
-      format!(
-        "{}.{}",
-        ts_entity_name_to_string(&qname.left),
-        qname.right.sym
-      )
+      format!("{}.{}", ts_entity_name_to_string(&qname.left), qname.right.sym)
     }
   }
 }
@@ -203,9 +192,7 @@ fn ts_type_params_to_string(type_params: &TsTypeParamInstantiation) -> String {
     .join(", ")
 }
 
-pub fn ts_union_or_intersection_to_string(
-  union_or_intersection: &TsUnionOrIntersectionType,
-) -> String {
+pub fn ts_union_or_intersection_to_string(union_or_intersection: &TsUnionOrIntersectionType) -> String {
   match union_or_intersection {
     TsUnionOrIntersectionType::TsUnionType(union) => format!(
       "({})",
@@ -229,10 +216,7 @@ pub fn ts_union_or_intersection_to_string(
 }
 
 pub fn ts_array_type_to_string(array_type: &TsArrayType) -> String {
-  format!(
-    "Array<{}>",
-    ts_type_to_string(array_type.elem_type.as_ref())
-  )
+  format!("Array<{}>", ts_type_to_string(array_type.elem_type.as_ref()))
 }
 
 pub fn ts_keyword_type_to_string(keyword_type: &TsKeywordType) -> String {

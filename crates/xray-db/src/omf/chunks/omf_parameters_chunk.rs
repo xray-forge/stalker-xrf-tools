@@ -39,9 +39,7 @@ impl ChunkReadWrite for OmfParametersChunk {
       .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf parts: {}", error)))?;
 
     let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader, version)
-      .map_err(|error| {
-        XRayError::new_read_error(format!("Failed to read ogf motion definitions: {}", error))
-      })?;
+      .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf motion definitions: {}", error)))?;
 
     reader.assert_read("Expect all data to be read from omf parameters chunk")?;
 
@@ -63,9 +61,9 @@ impl ChunkReadWrite for OmfParametersChunk {
 
     writer.write_u16::<T>(self.version)?;
 
-    writer.write_xr_list::<T, _>(&self.parts).map_err(|error| {
-      XRayError::new_serialization_error(format!("Failed to write ogf parts: {error}"))
-    })?;
+    writer
+      .write_xr_list::<T, _>(&self.parts)
+      .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf parts: {error}")))?;
 
     OgfMotionDefinition::write_list::<T>(writer, &self.motions, self.version).map_err(|error| {
       XRayError::new_serialization_error(format!("Failed to write ogf motion definitions: {error}"))

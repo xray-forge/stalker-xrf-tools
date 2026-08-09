@@ -84,12 +84,7 @@ impl<R: Read> Parser<'_, R> {
   // NOTE: does not update wrapping sum
   fn read_u8_or_none(&mut self) -> LhaResult<Option<u8>, R> {
     let mut byte = 0u8;
-    if 0
-      == self
-        .rd
-        .read_all(slice::from_mut(&mut byte))
-        .map_err(LhaError::Io)?
-    {
+    if 0 == self.rd.read_all(slice::from_mut(&mut byte)).map_err(LhaError::Io)? {
       return Ok(None);
     }
     // self.rd.by_ref().bytes().next().transpose().map(|mb|
@@ -147,8 +142,7 @@ impl<R: Read> Parser<'_, R> {
       .try_reserve_exact(limit)
       .map_err(|_| LhaError::HeaderParse("memory allocation failed"))?;
     // TODO: use BorrowedBuf once stabilized
-    let spare =
-      unsafe { core::mem::transmute::<_, &mut [u8]>(&mut buf.spare_capacity_mut()[..limit]) };
+    let spare = unsafe { core::mem::transmute::<_, &mut [u8]>(&mut buf.spare_capacity_mut()[..limit]) };
     self.rd.read_exact(spare).map_err(LhaError::Io)?;
     unsafe {
       buf.set_len(buf.len() + limit);
@@ -310,9 +304,7 @@ impl LhaHeader {
             }
           }
         }
-        [EXT_HEADER_MSDOS_ATTRS, data @ ..] | [EXT_HEADER_EXT_ATTRS, data @ ..]
-          if data.len() >= 2 =>
-        {
+        [EXT_HEADER_MSDOS_ATTRS, data @ ..] | [EXT_HEADER_EXT_ATTRS, data @ ..] if data.len() >= 2 => {
           if let Some(attrs) = read_u16(&data[0..2]) {
             msdos_attrs = MsDosAttrs::from_bits_retain(attrs);
           }
@@ -528,10 +520,7 @@ mod tests {
       (&b"Foo"[..], Some(&b"Bar"[..])),
       split_data_at_nil_or_end(b"Foo\x00Bar")
     );
-    assert_eq!(
-      (&[][..], Some(&b"Bar"[..])),
-      split_data_at_nil_or_end(b"\x00Bar")
-    );
+    assert_eq!((&[][..], Some(&b"Bar"[..])), split_data_at_nil_or_end(b"\x00Bar"));
   }
 
   #[test]
@@ -546,19 +535,10 @@ mod tests {
     }
     assert_eq!("Hello%00World%7f", parse_filename(b"Hello\x00World\x7f"));
     assert_eq!("Hello%01World%ff", parse_filename(b"Hello\x01World\xff"));
-    assert_eq!(
-      "Hello",
-      parse_str_nilterm(b"Hello\x00World\xff", true, false)
-    );
+    assert_eq!("Hello", parse_str_nilterm(b"Hello\x00World\xff", true, false));
     if std::path::is_separator('/') {
-      assert_eq!(
-        "He_llo",
-        parse_str_nilterm(b"He/llo\x00World\xff", true, false)
-      );
-      assert_eq!(
-        "He/llo",
-        parse_str_nilterm(b"He/llo\x00World\xff", true, true)
-      );
+      assert_eq!("He_llo", parse_str_nilterm(b"He/llo\x00World\xff", true, false));
+      assert_eq!("He/llo", parse_str_nilterm(b"He/llo\x00World\xff", true, true));
       assert_eq!(
         "He/llo%00World%ff",
         parse_str_nilterm(b"He/llo\x00World\xff", false, true)

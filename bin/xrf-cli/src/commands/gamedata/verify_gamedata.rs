@@ -3,8 +3,8 @@ use std::process;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_gamedata::{
-  GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
-  GamedataVerificationResult, GamedataVerificationStatus, GamedataVerificationType,
+  GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions, GamedataVerificationResult,
+  GamedataVerificationStatus, GamedataVerificationType,
 };
 use xray_output::OutputOptions;
 
@@ -113,8 +113,7 @@ impl GenericCommand for VerifyGamedataCommand {
       .map(|it| it.cloned().collect::<Vec<_>>())
       .unwrap_or_else(GamedataVerificationType::get_all);
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
     let is_strict: bool = matches.get_flag("strict");
 
     let open_options: GamedataProjectReadOptions = GamedataProjectReadOptions {

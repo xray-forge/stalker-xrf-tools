@@ -3,10 +3,7 @@ use std::str::FromStr;
 use derive_more::Display;
 use xray_error::XRayError;
 
-use crate::{
-  GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions,
-  GamedataVerificationCheckReport,
-};
+use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationCheckReport};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Display)]
 pub enum GamedataVerificationType {
@@ -81,10 +78,7 @@ impl GamedataVerificationType {
     }
   }
 
-  fn check_report<T>(
-    verification_type: Self,
-    result: xray_error::XRayResult<T>,
-  ) -> GamedataVerificationCheckReport
+  fn check_report<T>(verification_type: Self, result: xray_error::XRayResult<T>) -> GamedataVerificationCheckReport
   where
     T: GamedataCheckResult,
   {

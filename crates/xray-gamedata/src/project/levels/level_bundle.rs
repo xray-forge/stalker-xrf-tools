@@ -42,12 +42,7 @@ impl<'a> LevelBundle<'a> {
   }
 
   pub(crate) fn file_on_disk(&self, file: &str) -> Option<PathBuf> {
-    self
-      .project
-      .assets
-      .absolute_path(&self.file_path(file))
-      .ok()
-      .flatten()
+    self.project.assets.absolute_path(&self.file_path(file)).ok().flatten()
   }
 
   pub(crate) fn file_size(&self, file: &str) -> Option<u64> {
@@ -77,13 +72,6 @@ impl<'a> LevelBundle<'a> {
       .flatten()
       .is_some();
 
-    in_bundle
-      || self
-        .project
-        .assets
-        .dds_texture(reference)
-        .ok()
-        .flatten()
-        .is_some()
+    in_bundle || self.project.assets.dds_texture(reference).ok().flatten().is_some()
   }
 }

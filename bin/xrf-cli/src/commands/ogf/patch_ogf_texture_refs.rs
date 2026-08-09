@@ -87,17 +87,9 @@ impl GenericCommand for PatchOgfTextureRefsCommand {
       .get_one::<PathBuf>("dest")
       .map_or(path.as_path(), |it| it.as_path());
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    Self::patch_file(
-      &output,
-      path,
-      destination,
-      from,
-      to,
-      matches.get_flag("dry-run"),
-    )?;
+    Self::patch_file(&output, path, destination, from, to, matches.get_flag("dry-run"))?;
 
     Ok(())
   }
@@ -127,9 +119,8 @@ impl PatchOgfTextureRefsCommand {
       existing
     );
 
-    let report: OgfRefsPatchReport = OgfTextureRefsProcessor::patch_texture_refs_to_path::<
-      XRayByteOrder,
-    >(path, destination, from, to, is_dry_run)?;
+    let report: OgfRefsPatchReport =
+      OgfTextureRefsProcessor::patch_texture_refs_to_path::<XRayByteOrder>(path, destination, from, to, is_dry_run)?;
 
     if report.is_dry_run {
       xray_output::info!(

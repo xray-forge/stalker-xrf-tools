@@ -10,10 +10,7 @@ pub fn find_optional_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<Chun
 
 /// Find chink in list by id.
 #[inline]
-pub fn find_one_of_optional_chunk_by_id(
-  chunks: &[ChunkReader],
-  ids: &[u32],
-) -> Option<(u32, ChunkReader)> {
+pub fn find_one_of_optional_chunk_by_id(chunks: &[ChunkReader], ids: &[u32]) -> Option<(u32, ChunkReader)> {
   for id in ids {
     if let Some(chunk) = chunks.iter().find(|it| it.id == *id).cloned() {
       return Some((*id, chunk));
@@ -37,10 +34,7 @@ pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XRayResult<
 
 /// Find required chunk in list by one of ids.
 #[inline]
-pub fn find_one_of_required_chunks_by_id(
-  chunks: &[ChunkReader],
-  ids: &[u32],
-) -> XRayResult<(u32, ChunkReader)> {
+pub fn find_one_of_required_chunks_by_id(chunks: &[ChunkReader], ids: &[u32]) -> XRayResult<(u32, ChunkReader)> {
   for id in ids {
     if let Some(chunk) = chunks.iter().find(|it| it.id == *id).cloned() {
       return Ok((*id, chunk));

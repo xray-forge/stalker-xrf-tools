@@ -42,8 +42,7 @@ impl<R: Read> LzsDecoder<R> {
     for (t, s) in target.zip(history_iter).take(real_count) {
       *t = s;
     }
-    self.copy_progress =
-      NonZeroU16::new((count - real_count) as u16).map(|count| ((pos + real_count) as u16, count));
+    self.copy_progress = NonZeroU16::new((count - real_count) as u16).map(|count| ((pos + real_count) as u16, count));
     Ok(())
   }
 }

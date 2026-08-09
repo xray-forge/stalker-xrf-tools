@@ -15,20 +15,14 @@ pub struct XrayAssetIndex {
 
 impl XrayAssetIndex {
   pub fn new(directory: DirectoryAssetIndex, ignored: &[String]) -> XRayResult<Self> {
-    let ignored: Vec<String> = ignored
-      .iter()
-      .map(|path| normalize(path))
-      .collect::<XRayResult<_>>()?;
+    let ignored: Vec<String> = ignored.iter().map(|path| normalize(path)).collect::<XRayResult<_>>()?;
 
     let mut assets: BTreeMap<String, usize> = BTreeMap::new();
 
     for (index, asset) in directory.assets().enumerate() {
       let logical_path = logical_path(asset.relative_path())?;
 
-      if ignored
-        .iter()
-        .any(|prefix| is_component_prefix(&logical_path, prefix))
-      {
+      if ignored.iter().any(|prefix| is_component_prefix(&logical_path, prefix)) {
         continue;
       }
 
@@ -52,10 +46,7 @@ impl XrayAssetIndex {
   }
 
   pub fn assets(&self) -> impl Iterator<Item = XrayAsset<'_>> {
-    self
-      .assets
-      .iter()
-      .map(|(path, index)| self.asset(path, *index))
+    self.assets.iter().map(|(path, index)| self.asset(path, *index))
   }
 
   pub fn find(&self, path: &str) -> XRayResult<Option<XrayAsset<'_>>> {
@@ -78,11 +69,7 @@ impl XrayAssetIndex {
   }
 
   pub fn absolute_path_in(&self, prefix: &str, path: &str) -> XRayResult<Option<PathBuf>> {
-    Ok(
-      self
-        .find_in(prefix, path)?
-        .map(|asset| asset.absolute_path()),
-    )
+    Ok(self.find_in(prefix, path)?.map(|asset| asset.absolute_path()))
   }
 
   /// Returns the expected physical location for a valid X-Ray logical path, even when absent.
@@ -91,17 +78,11 @@ impl XrayAssetIndex {
   }
 
   pub fn ogf(&self, reference: &str) -> XRayResult<Option<XrayAsset<'_>>> {
-    self.find_in(
-      "meshes",
-      &crate::xray_path::with_extension(reference, ".ogf"),
-    )
+    self.find_in("meshes", &crate::xray_path::with_extension(reference, ".ogf"))
   }
 
   pub fn omf(&self, reference: &str) -> XRayResult<Option<XrayAsset<'_>>> {
-    self.find_in(
-      "meshes",
-      &crate::xray_path::with_extension(reference, ".omf"),
-    )
+    self.find_in("meshes", &crate::xray_path::with_extension(reference, ".omf"))
   }
 
   pub fn omfs(&self, reference: &str) -> XRayResult<Vec<XrayAsset<'_>>> {
@@ -175,11 +156,7 @@ impl XrayAssetIndex {
     )
   }
 
-  pub fn with_mask_in(
-    &self,
-    prefix: &str,
-    mask: &str,
-  ) -> XRayResult<impl Iterator<Item = XrayAsset<'_>>> {
+  pub fn with_mask_in(&self, prefix: &str, mask: &str) -> XRayResult<impl Iterator<Item = XrayAsset<'_>>> {
     let mask: String = join(prefix, mask)?;
 
     let Some((start, end)) = mask.split_once('*') else {

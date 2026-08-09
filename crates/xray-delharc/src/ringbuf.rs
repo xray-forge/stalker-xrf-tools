@@ -110,18 +110,12 @@ impl<const N: usize> RingBuffer for RingArrayBuf<N> {
   fn iter_from_offset(&mut self, offset: usize) -> HistoryIter<'_, Self> {
     let offset = (offset & index_mask!(N)) + 1;
     let index = self.cursor + N - offset;
-    HistoryIter {
-      index,
-      ringbuf: self,
-    }
+    HistoryIter { index, ringbuf: self }
   }
 
   fn iter_from_pos(&mut self, pos: usize) -> HistoryIter<'_, Self> {
     let index = pos & index_mask!(N);
-    HistoryIter {
-      index,
-      ringbuf: self,
-    }
+    HistoryIter { index, ringbuf: self }
   }
 }
 

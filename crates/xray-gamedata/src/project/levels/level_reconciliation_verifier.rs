@@ -20,10 +20,7 @@ pub(crate) struct LevelReconciliationVerifier<'a> {
 }
 
 impl<'a> LevelReconciliationVerifier<'a> {
-  pub(crate) fn new(
-    project: &'a GamedataProject,
-    options: &'a GamedataProjectVerifyOptions,
-  ) -> Self {
+  pub(crate) fn new(project: &'a GamedataProject, options: &'a GamedataProjectVerifyOptions) -> Self {
     Self { options, project }
   }
 
@@ -49,11 +46,7 @@ impl<'a> LevelReconciliationVerifier<'a> {
     )
   }
 
-  pub(crate) fn verify(
-    &self,
-    roster: &LevelRoster,
-    bundles: &BTreeSet<String>,
-  ) -> XRayResult<Vec<Finding>> {
+  pub(crate) fn verify(&self, roster: &LevelRoster, bundles: &BTreeSet<String>) -> XRayResult<Vec<Finding>> {
     let mut findings: Vec<Finding> = Vec::new();
     let declared_maps: BTreeSet<String> = self.declared_map_levels()?;
 

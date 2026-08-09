@@ -35,10 +35,7 @@ impl SpawnALifeSpawnsChunk {
 impl ChunkReadWrite for SpawnALifeSpawnsChunk {
   /// Read spawns chunk by position descriptor from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    log::info!(
-      "Reading ALife spawns chunk, {} bytes",
-      reader.read_bytes_remain()
-    );
+    log::info!("Reading ALife spawns chunk, {} bytes", reader.read_bytes_remain());
 
     let mut count_reader: ChunkReader = reader.read_child_by_index(Self::COUNT_CHUNK_ID)?;
     let mut objects_reader: ChunkReader = reader.read_child_by_index(Self::OBJECTS_CHUNK_ID)?;
@@ -50,8 +47,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
     for object_reader in ChunkIterator::from_start(&mut objects_reader)? {
       let mut object_reader: ChunkReader = object_reader?;
 
-      let mut index_reader: ChunkReader =
-        object_reader.read_child_by_index(Self::OBJECT_INDEX_CHUNK_ID)?;
+      let mut index_reader: ChunkReader = object_reader.read_child_by_index(Self::OBJECT_INDEX_CHUNK_ID)?;
       let index: u16 = index_reader.read_u16::<T>()?;
 
       assert_equal(
@@ -61,8 +57,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
       )?;
       index_reader.assert_read("Expect ALife object index to be read")?;
 
-      let mut data_reader: ChunkReader =
-        object_reader.read_child_by_index(Self::OBJECT_DATA_CHUNK_ID)?;
+      let mut data_reader: ChunkReader = object_reader.read_child_by_index(Self::OBJECT_DATA_CHUNK_ID)?;
       let data: AlifeObject = data_reader.read_xr::<T, _>()?;
 
       objects.push(data);
@@ -107,11 +102,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
           .as_slice(),
       )?;
 
-      objects_writer.write_all(
-        object_writer
-          .flush_chunk_into_buffer::<T>(index as u32)?
-          .as_slice(),
-      )?;
+      objects_writer.write_all(object_writer.flush_chunk_into_buffer::<T>(index as u32)?.as_slice())?;
     }
 
     writer.write_all(
@@ -130,10 +121,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
         .as_slice(),
     )?;
 
-    log::info!(
-      "Written ALife spawns chunk, {} bytes",
-      writer.bytes_written()
-    );
+    log::info!("Written ALife spawns chunk, {} bytes", writer.bytes_written());
 
     Ok(())
   }
@@ -162,9 +150,7 @@ impl FileImportExport for SpawnALifeSpawnsChunk {
       object.export(&index.to_string(), &mut ltx)?;
     }
 
-    ltx.write_to(&mut open_export_file(
-      path.as_ref().join("alife_spawns.ltx"),
-    )?)?;
+    ltx.write_to(&mut open_export_file(path.as_ref().join("alife_spawns.ltx"))?)?;
 
     log::info!("Exported ALife spawns chunk");
 
@@ -188,8 +174,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::alife_object::AlifeObject;
@@ -215,10 +200,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 28);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 28);
 
@@ -262,28 +245,26 @@ mod tests {
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
-          inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(
-            AlifeObjectItemCustomOutfit {
-              base: AlifeObjectItem {
-                base: AlifeObjectDynamicVisual {
-                  base: AlifeObjectAbstract {
-                    game_vertex_id: 43543,
-                    distance: 523.33,
-                    direct_control: 423,
-                    level_vertex_id: 142,
-                    flags: 34,
-                    custom_data: String::from("custom-data"),
-                    story_id: 256973,
-                    spawn_story_id: 356490,
-                  },
-                  visual_name: String::from("visual-name"),
-                  visual_flags: 0,
+          inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(AlifeObjectItemCustomOutfit {
+            base: AlifeObjectItem {
+              base: AlifeObjectDynamicVisual {
+                base: AlifeObjectAbstract {
+                  game_vertex_id: 43543,
+                  distance: 523.33,
+                  direct_control: 423,
+                  level_vertex_id: 142,
+                  flags: 34,
+                  custom_data: String::from("custom-data"),
+                  story_id: 256973,
+                  spawn_story_id: 356490,
                 },
-                condition: 1.0,
-                upgrades_count: 0,
+                visual_name: String::from("visual-name"),
+                visual_flags: 0,
               },
+              condition: 1.0,
+              upgrades_count: 0,
             },
-          )),
+          })),
           update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         },
         AlifeObject {
@@ -305,22 +286,20 @@ mod tests {
           script_version: 10,
           client_data_size: 0,
           spawn_id: 2354,
-          inherited: AlifeObjectInherited::CseAlifeSpaceRestrictor(Box::new(
-            AlifeObjectSpaceRestrictor {
-              base: AlifeObjectAbstract {
-                game_vertex_id: 5473,
-                distance: 45.5,
-                direct_control: 373574,
-                level_vertex_id: 253,
-                flags: 0,
-                custom_data: String::from("custom-data"),
-                story_id: 3564,
-                spawn_story_id: 38754,
-              },
-              shape: vec![],
-              restrictor_type: 0,
+          inherited: AlifeObjectInherited::CseAlifeSpaceRestrictor(Box::new(AlifeObjectSpaceRestrictor {
+            base: AlifeObjectAbstract {
+              game_vertex_id: 5473,
+              distance: 45.5,
+              direct_control: 373574,
+              level_vertex_id: 253,
+              flags: 0,
+              custom_data: String::from("custom-data"),
+              story_id: 3564,
+              spawn_story_id: 38754,
             },
-          )),
+            shape: vec![],
+            restrictor_type: 0,
+          })),
           update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8],
         },
       ],
@@ -332,10 +311,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 419);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 419);
 

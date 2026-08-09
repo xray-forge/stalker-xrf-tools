@@ -61,11 +61,7 @@ pub enum XRayError {
   #[error("Chunk is not ended, {remaining} bytes remain: {message}")]
   ChunkNotEnded { message: String, remaining: u64 },
   #[error("Ltx parse error: {line}:{col} {message}")]
-  LtxParse {
-    line: usize,
-    col: usize,
-    message: String,
-  },
+  LtxParse { line: usize, col: usize, message: String },
   #[error(
   "Ltx scheme error{location} [{section}] {field} : {message}",
   location = XRayError::format_ltx_scheme_location(at.as_deref())
@@ -165,8 +161,7 @@ mod tests {
   #[test]
   fn formats_ltx_scheme_error_locations_readably() {
     assert_eq!(
-      XRayError::new_scheme_error_at("section", "field", "message", "configs/system.ltx")
-        .to_string(),
+      XRayError::new_scheme_error_at("section", "field", "message", "configs/system.ltx").to_string(),
       "Ltx scheme error in 'configs/system.ltx' [section] field : message"
     );
     assert_eq!(

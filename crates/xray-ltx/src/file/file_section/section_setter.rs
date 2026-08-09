@@ -55,9 +55,6 @@ impl<'a> SectionSetter<'a> {
 
   /// Get the entry in this section with `key`.
   pub fn get<K: Into<String>>(&'a mut self, key: K) -> Option<&'a str> {
-    self
-      .ltx
-      .section(&self.section_name)
-      .and_then(|props| props.get(key))
+    self.ltx.section(&self.section_name).and_then(|props| props.get(key))
   }
 }

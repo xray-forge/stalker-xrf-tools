@@ -45,13 +45,7 @@ pub const WEATHER_FLOAT_FIELDS: [&str; 13] = [
 ];
 
 /// Fields that must contain exactly three finite floating-point values.
-pub const WEATHER_VECTOR3_FIELDS: [&str; 5] = [
-  "ambient_color",
-  "fog_color",
-  "rain_color",
-  "sky_color",
-  "sun_color",
-];
+pub const WEATHER_VECTOR3_FIELDS: [&str; 5] = ["ambient_color", "fog_color", "rain_color", "sky_color", "sun_color"];
 
 /// Fields that must contain exactly four finite floating-point values.
 pub const WEATHER_VECTOR4_FIELDS: [&str; 2] = ["clouds_color", "hemisphere_color"];
@@ -120,10 +114,7 @@ pub fn is_valid_weather_field_value(field_name: &str, value: &str) -> bool {
 fn is_finite_float_list(value: &str, expected_length: usize) -> bool {
   let values: Vec<&str> = value.split(',').map(str::trim).collect();
 
-  values.len() == expected_length
-    && values
-      .iter()
-      .all(|value| parse_finite_float(value).is_some())
+  values.len() == expected_length && values.iter().all(|value| parse_finite_float(value).is_some())
 }
 
 fn parse_finite_float(value: &str) -> Option<f32> {

@@ -63,21 +63,15 @@ impl FromStr for Vector3d<f32> {
       x: parts[0]
         .trim()
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector X value",
-        )))?,
+        .or(Err(XRayError::new_parsing_error("Failed to parse vector X value")))?,
       y: parts[1]
         .trim()
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector Y value",
-        )))?,
+        .or(Err(XRayError::new_parsing_error("Failed to parse vector Y value")))?,
       z: parts[2]
         .trim()
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector Z value",
-        )))?,
+        .or(Err(XRayError::new_parsing_error("Failed to parse vector Z value")))?,
     })
   }
 }
@@ -105,8 +99,7 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -116,28 +109,20 @@ mod tests {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    let original: Vector3d = Vector3d {
-      x: 1.5,
-      y: 2.7,
-      z: 3.2,
-    };
+    let original: Vector3d = Vector3d { x: 1.5, y: 2.7, z: 3.2 };
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 12);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 12);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 12 + 8);
 
@@ -172,9 +157,10 @@ mod tests {
       z: 30.2,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

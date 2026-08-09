@@ -26,11 +26,7 @@ impl ChunkReadWrite for AlifeActor {
       save_marker: reader.read_u16::<T>()?,
     };
 
-    assert_equal(
-      object.save_marker,
-      1,
-      "Unexpected save data for actor object provided",
-    )?;
+    assert_equal(object.save_marker, 1, "Unexpected save data for actor object provided")?;
 
     Ok(object)
   }
@@ -69,10 +65,7 @@ impl LtxImportExport for AlifeActor {
 
     ltx
       .with_section(section_name)
-      .set(
-        "actor.start_position_filled",
-        self.start_position_filled.to_string(),
-      )
+      .set("actor.start_position_filled", self.start_position_filled.to_string())
       .set("actor.save_marker", self.save_marker.to_string());
 
     Ok(())
@@ -91,8 +84,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_actor::AlifeActor;
@@ -162,10 +155,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 196);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 196);
 
@@ -236,9 +227,7 @@ mod tests {
 
     original.export("data", &mut ltx)?;
 
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
-      &ltx_filename,
-    )?)?;
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&ltx_filename)?)?;
 
     let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
@@ -298,9 +287,10 @@ mod tests {
       save_marker: 1,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

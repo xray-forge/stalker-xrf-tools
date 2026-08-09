@@ -4,9 +4,7 @@ use std::io::Write;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xray_chunk::{
-  ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator, ChunkWriter,
-};
+use xray_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator, ChunkWriter};
 use xray_error::XRayResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -27,9 +25,7 @@ impl GraphCrossTable {
   pub fn import_list<T: ByteOrder>(file: &mut File) -> XRayResult<Vec<Self>> {
     let mut cross_tables: Vec<Self> = Vec::new();
 
-    for cross_table_reader in
-      ChunkSizePackedIterator::from_current(&mut ChunkReader::from_file(file.try_clone()?)?)
-    {
+    for cross_table_reader in ChunkSizePackedIterator::from_current(&mut ChunkReader::from_file(file.try_clone()?)?) {
       let mut cross_table_reader: ChunkReader = cross_table_reader?;
 
       cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
@@ -125,9 +121,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_file, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_file,
+    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::graph::graph_cross_table::GraphCrossTable;
@@ -169,17 +164,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 166);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 166);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 166 + 8);
 
@@ -187,10 +178,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      GraphCrossTable::read_list::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(GraphCrossTable::read_list::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -214,17 +202,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 55);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 55);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 55 + 8);
 
@@ -232,10 +216,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      GraphCrossTable::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(GraphCrossTable::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -243,8 +224,7 @@ mod tests {
   #[test]
   fn test_import_export() -> XRayResult {
     let config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.gct");
-    let mut file: File =
-      overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
+    let mut file: File = overwrite_test_relative_resource_as_file(config_path.to_str().expect("Valid path"))?;
 
     let original: Vec<GraphCrossTable> = vec![
       GraphCrossTable {
@@ -276,9 +256,7 @@ mod tests {
     GraphCrossTable::export_list::<XRayByteOrder>(&original, &mut file)?;
 
     assert_eq!(
-      GraphCrossTable::import_list::<XRayByteOrder>(&mut open_test_resource_as_file(
-        config_path.to_str().unwrap()
-      )?,)?,
+      GraphCrossTable::import_list::<XRayByteOrder>(&mut open_test_resource_as_file(config_path.to_str().unwrap())?,)?,
       original
     );
 
@@ -296,9 +274,10 @@ mod tests {
       data: vec![],
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -306,10 +285,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<GraphCrossTable>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<GraphCrossTable>(&serialized)?);
 
     Ok(())
   }

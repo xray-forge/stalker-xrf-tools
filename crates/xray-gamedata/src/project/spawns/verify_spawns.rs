@@ -11,10 +11,7 @@ use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVeri
 
 impl GamedataProject {
   /// Verify spawn files in spawns directories, not levels spawn files.
-  pub fn verify_spawns(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataSpawnsVerificationResult> {
+  pub fn verify_spawns(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataSpawnsVerificationResult> {
     let started_at: Instant = Instant::now();
 
     let spawn_files: Vec<String> = self
@@ -83,19 +80,11 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_spawn<P: AsRef<Path>>(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-    path: &P,
-  ) -> XRayResult<bool> {
+  pub fn verify_spawn<P: AsRef<Path>>(&self, options: &GamedataProjectVerifyOptions, path: &P) -> XRayResult<bool> {
     Ok(self.verify_spawn_findings(options, path).is_empty())
   }
 
-  fn verify_spawn_findings<P: AsRef<Path>>(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-    path: &P,
-  ) -> Vec<Finding> {
+  fn verify_spawn_findings<P: AsRef<Path>>(&self, options: &GamedataProjectVerifyOptions, path: &P) -> Vec<Finding> {
     let file_path: String = path.as_ref().display().to_string();
 
     xray_output::verbose!(options.output, "Verify spawn file: {}", file_path);

@@ -63,10 +63,7 @@ mod tests {
       Status::aggregate([Status::Passed, Status::Incomplete]),
       Status::Incomplete
     );
-    assert_eq!(
-      Status::aggregate([Status::Failed, Status::Error]),
-      Status::Error
-    );
+    assert_eq!(Status::aggregate([Status::Failed, Status::Error]), Status::Error);
     assert_eq!(
       Status::aggregate([
         Status::Skipped,

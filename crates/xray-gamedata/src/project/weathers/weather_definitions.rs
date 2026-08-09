@@ -53,14 +53,8 @@ impl WeatherDefinitions {
   ///
   /// Primary collections use `environment/thunderbolts.ltx`. The legacy `system.ltx` fallback is
   /// consulted only when the collection name is absent from the primary catalog.
-  pub fn missing_thunderbolt_definitions(
-    &self,
-    collection_name: &str,
-  ) -> Result<Option<Vec<String>>, String> {
-    let collections: &HashMap<String, Vec<String>> = self
-      .thunderbolt_collections
-      .as_ref()
-      .map_err(Clone::clone)?;
+  pub fn missing_thunderbolt_definitions(&self, collection_name: &str) -> Result<Option<Vec<String>>, String> {
+    let collections: &HashMap<String, Vec<String>> = self.thunderbolt_collections.as_ref().map_err(Clone::clone)?;
 
     if let Some(missing_definitions) = collections.get(collection_name) {
       return Ok(Some(missing_definitions.clone()));
@@ -90,17 +84,11 @@ impl WeatherDefinitions {
   }
 
   fn read_ltx(path: &Path) -> Result<Ltx, String> {
-    Ltx::read_from_file_full(path).map_err(|error| {
-      format!(
-        "Could not read weather definitions from {}: {error}",
-        path.display()
-      )
-    })
+    Ltx::read_from_file_full(path)
+      .map_err(|error| format!("Could not read weather definitions from {}: {error}", path.display()))
   }
 
-  fn read_thunderbolt_collections(
-    configs_root: &Path,
-  ) -> Result<HashMap<String, Vec<String>>, String> {
+  fn read_thunderbolt_collections(configs_root: &Path) -> Result<HashMap<String, Vec<String>>, String> {
     let environment_root: PathBuf = configs_root.join("environment");
     let collections: Ltx = Self::read_ltx(&environment_root.join("thunderbolt_collections.ltx"))?;
     let thunderbolts: Ltx = Self::read_ltx(&environment_root.join("thunderbolts.ltx"))?;

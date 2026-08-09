@@ -21,9 +21,8 @@ impl DirectoryAssetIndex {
     let mut assets: Vec<DirectoryAsset> = Vec::new();
 
     for entry in WalkDir::new(root).follow_links(false) {
-      let entry = entry.map_err(|error| {
-        XRayError::new_asset_error(format!("failed to read directory asset entry: {error}"))
-      })?;
+      let entry =
+        entry.map_err(|error| XRayError::new_asset_error(format!("failed to read directory asset entry: {error}")))?;
 
       if !entry.file_type().is_file() {
         continue;
@@ -39,11 +38,7 @@ impl DirectoryAssetIndex {
 
     assets.sort_by(|left, right| left.relative_path().cmp(right.relative_path()));
 
-    log::debug!(
-      "read {} directory assets from {}",
-      assets.len(),
-      root.display()
-    );
+    log::debug!("read {} directory assets from {}", assets.len(), root.display());
 
     Ok(Self {
       root: root.to_path_buf(),
@@ -60,10 +55,7 @@ impl DirectoryAssetIndex {
   }
 
   pub fn find(&self, relative_path: &Path) -> Option<&DirectoryAsset> {
-    self
-      .assets
-      .iter()
-      .find(|asset| asset.relative_path() == relative_path)
+    self.assets.iter().find(|asset| asset.relative_path() == relative_path)
   }
 
   pub fn with_prefix(&self, prefix: &Path) -> impl Iterator<Item = &DirectoryAsset> {

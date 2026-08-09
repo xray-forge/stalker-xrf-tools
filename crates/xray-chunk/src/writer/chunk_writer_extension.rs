@@ -13,10 +13,7 @@ impl ChunkWriter {
   }
 
   #[inline]
-  pub fn write_xr_optional<T: ByteOrder, W: ChunkReadWriteOptional>(
-    &mut self,
-    writable: Option<&W>,
-  ) -> XRayResult {
+  pub fn write_xr_optional<T: ByteOrder, W: ChunkReadWriteOptional>(&mut self, writable: Option<&W>) -> XRayResult {
     W::write_optional::<T>(self, writable)
   }
 
@@ -68,11 +65,7 @@ mod tests {
   fn test_write_w1251_string_sample() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    assert_eq!(
-      writer.write_w1251_string("abc")?,
-      4,
-      "Expect 4 bytes written"
-    );
+    assert_eq!(writer.write_w1251_string("abc")?, 4, "Expect 4 bytes written");
     assert_eq!(
       writer.buffer,
       [b'a', b'b', b'c', 0],
@@ -87,11 +80,7 @@ mod tests {
   fn test_write_w1251_rn_string_sample() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
-    assert_eq!(
-      writer.write_w1251_rn_string("abc")?,
-      5,
-      "Expect 5 bytes written"
-    );
+    assert_eq!(writer.write_w1251_rn_string("abc")?, 5, "Expect 5 bytes written");
     assert_eq!(
       writer.buffer,
       [b'a', b'b', b'c', b'\r', b'\n'],
@@ -111,11 +100,7 @@ mod tests {
       "Expect 4 bytes written"
     );
     assert_eq!(writer.buffer, [0, 0, 0, 0], "Expect correct written data");
-    assert_eq!(
-      writer.bytes_written(),
-      4,
-      "Expect 4 bytes written with empty vector"
-    );
+    assert_eq!(writer.bytes_written(), 4, "Expect 4 bytes written with empty vector");
 
     Ok(())
   }
@@ -134,11 +119,7 @@ mod tests {
       [4, 0, 0, 0, 1, 0, 2, 0, 3, 0, 4, 0],
       "Expect correct written data"
     );
-    assert_eq!(
-      writer.bytes_written(),
-      12,
-      "Expect 12 bytes written with empty vector"
-    );
+    assert_eq!(writer.bytes_written(), 12, "Expect 12 bytes written with empty vector");
 
     Ok(())
   }

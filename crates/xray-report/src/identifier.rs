@@ -67,13 +67,7 @@ mod tests {
 
   #[test]
   fn rejects_empty_identifiers() {
-    assert_eq!(
-      CheckId::new("").unwrap_err().to_string(),
-      "check ID cannot be empty"
-    );
-    assert_eq!(
-      RuleId::new("").unwrap_err().to_string(),
-      "rule ID cannot be empty"
-    );
+    assert_eq!(CheckId::new("").unwrap_err().to_string(), "check ID cannot be empty");
+    assert_eq!(RuleId::new("").unwrap_err().to_string(), "rule ID cannot be empty");
   }
 }

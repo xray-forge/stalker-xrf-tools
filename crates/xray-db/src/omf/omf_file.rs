@@ -39,18 +39,11 @@ impl OmfFile {
   }
 
   pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
-    assert_equal(
-      chunks.len(),
-      2,
-      "Unexpected chunks count in omf file, expected 2",
-    )?;
+    assert_equal(chunks.len(), 2, "Unexpected chunks count in omf file, expected 2")?;
 
-    let parameters: OmfParametersChunk =
-      find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?
-        .read_xr::<T, _>()
-        .map_err(|error| {
-          XRayError::new_read_error(format!("Failed to read OMF parameters: {error}"))
-        })?;
+    let parameters: OmfParametersChunk = find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?
+      .read_xr::<T, _>()
+      .map_err(|error| XRayError::new_read_error(format!("Failed to read OMF parameters: {error}")))?;
 
     let motions: OmfMotionsChunk = find_required_chunk_by_id(chunks, OmfMotionsChunk::CHUNK_ID)?
       .read_xr::<T, _>()
@@ -64,10 +57,7 @@ impl OmfFile {
       )));
     }
 
-    Ok(Self {
-      parameters,
-      motions,
-    })
+    Ok(Self { parameters, motions })
   }
 }
 
@@ -136,12 +126,7 @@ impl OmfFile {
 impl OmfFile {
   /// List names of motions stored in the file, as used for engine lookups.
   pub fn get_motion_names(&self) -> Vec<&str> {
-    self
-      .parameters
-      .motions
-      .iter()
-      .map(|it| it.name.as_str())
-      .collect()
+    self.parameters.motions.iter().map(|it| it.name.as_str()).collect()
   }
 
   pub fn get_bones(&self) -> Vec<&str> {
@@ -169,8 +154,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
   };
 
   use crate::data::ogf::ogf_motion::OgfMotion;

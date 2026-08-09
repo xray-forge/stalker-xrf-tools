@@ -5,9 +5,7 @@ use std::path::PathBuf;
 use xray_error::{XRayError, XRayResult};
 
 use crate::ArchiveProject;
-use crate::project::archive_project_constants::{
-  ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
-};
+use crate::project::archive_project_constants::{ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE};
 use crate::project::archive_project_read_result::ProjectReadResult;
 
 impl ArchiveProject {

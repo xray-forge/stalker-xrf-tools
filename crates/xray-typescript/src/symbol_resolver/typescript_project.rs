@@ -119,7 +119,5 @@ fn find_typescript_module(path: &Path) -> Option<PathBuf> {
   let file: PathBuf = path.with_extension("ts");
   let index: PathBuf = path.join("index.ts");
 
-  [direct, file, index]
-    .into_iter()
-    .find(|candidate| candidate.is_file())
+  [direct, file, index].into_iter().find(|candidate| candidate.is_file())
 }

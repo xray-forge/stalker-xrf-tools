@@ -88,9 +88,11 @@ impl ChunkReadWriteList for ParticleAction {
     let mut actions: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
-      actions.push(reader.read_xr::<T, _>().map_err(|error| {
-        XRayError::new_parsing_error(format!("Failed to read particle effect action: {}", error))
-      })?);
+      actions.push(
+        reader
+          .read_xr::<T, _>()
+          .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle effect action: {}", error)))?,
+      );
     }
 
     assert_length(
@@ -135,12 +137,8 @@ impl ChunkReadWrite for ParticleAction {
       ParticleActionType::OrbitLine => Self::OrbitLine(Box::new(reader.read_xr::<T, _>()?)),
       ParticleActionType::OrbitPoint => Self::OrbitPoint(Box::new(reader.read_xr::<T, _>()?)),
       ParticleActionType::RandomAccel => Self::RandomAccel(Box::new(reader.read_xr::<T, _>()?)),
-      ParticleActionType::RandomDisplace => {
-        Self::RandomDisplace(Box::new(reader.read_xr::<T, _>()?))
-      }
-      ParticleActionType::RandomVelocity => {
-        Self::RandomVelocity(Box::new(reader.read_xr::<T, _>()?))
-      }
+      ParticleActionType::RandomDisplace => Self::RandomDisplace(Box::new(reader.read_xr::<T, _>()?)),
+      ParticleActionType::RandomVelocity => Self::RandomVelocity(Box::new(reader.read_xr::<T, _>()?)),
       ParticleActionType::Restore => Self::Restore(Box::new(reader.read_xr::<T, _>()?)),
       ParticleActionType::Sink => Self::Sink(Box::new(reader.read_xr::<T, _>()?)),
       ParticleActionType::SinkVelocity => Self::SinkVelocity(Box::new(reader.read_xr::<T, _>()?)),
@@ -231,102 +229,64 @@ impl LtxImportExport for ParticleAction {
 
     let action_type: ParticleActionType =
       ParticleActionType::from_str(read_ltx_field::<String>("action_type", section)?.as_str())
-        .map_err(|_| {
-          XRayError::new_parsing_error("Failed to parse particle action type from LTX field")
-        })?;
+        .map_err(|_| XRayError::new_parsing_error("Failed to parse particle action type from LTX field"))?;
 
     Ok(match action_type {
-      ParticleActionType::Avoid => {
-        Self::Avoid(Box::new(ParticleActionAvoid::import(section_name, ltx)?))
+      ParticleActionType::Avoid => Self::Avoid(Box::new(ParticleActionAvoid::import(section_name, ltx)?)),
+      ParticleActionType::Bounce => Self::Bounce(Box::new(ParticleActionBounce::import(section_name, ltx)?)),
+      ParticleActionType::CopyVertex => {
+        Self::CopyVertex(Box::new(ParticleActionCopyVertex::import(section_name, ltx)?))
       }
-      ParticleActionType::Bounce => {
-        Self::Bounce(Box::new(ParticleActionBounce::import(section_name, ltx)?))
-      }
-      ParticleActionType::CopyVertex => Self::CopyVertex(Box::new(
-        ParticleActionCopyVertex::import(section_name, ltx)?,
-      )),
-      ParticleActionType::Damping => {
-        Self::Damping(Box::new(ParticleActionDamping::import(section_name, ltx)?))
-      }
-      ParticleActionType::Explosion => Self::Explosion(Box::new(ParticleActionExplosion::import(
-        section_name,
-        ltx,
-      )?)),
-      ParticleActionType::Follow => {
-        Self::Follow(Box::new(ParticleActionFollow::import(section_name, ltx)?))
-      }
-      ParticleActionType::Gravitate => Self::Gravitate(Box::new(ParticleActionGravitate::import(
-        section_name,
-        ltx,
-      )?)),
-      ParticleActionType::Gravity => {
-        Self::Gravity(Box::new(ParticleActionGravity::import(section_name, ltx)?))
-      }
+      ParticleActionType::Damping => Self::Damping(Box::new(ParticleActionDamping::import(section_name, ltx)?)),
+      ParticleActionType::Explosion => Self::Explosion(Box::new(ParticleActionExplosion::import(section_name, ltx)?)),
+      ParticleActionType::Follow => Self::Follow(Box::new(ParticleActionFollow::import(section_name, ltx)?)),
+      ParticleActionType::Gravitate => Self::Gravitate(Box::new(ParticleActionGravitate::import(section_name, ltx)?)),
+      ParticleActionType::Gravity => Self::Gravity(Box::new(ParticleActionGravity::import(section_name, ltx)?)),
       ParticleActionType::Jet => Self::Jet(Box::new(ParticleActionJet::import(section_name, ltx)?)),
-      ParticleActionType::KillOld => {
-        Self::KillOld(Box::new(ParticleActionKillOld::import(section_name, ltx)?))
+      ParticleActionType::KillOld => Self::KillOld(Box::new(ParticleActionKillOld::import(section_name, ltx)?)),
+      ParticleActionType::MatchVelocity => {
+        Self::MatchVelocity(Box::new(ParticleActionMatchVelocity::import(section_name, ltx)?))
       }
-      ParticleActionType::MatchVelocity => Self::MatchVelocity(Box::new(
-        ParticleActionMatchVelocity::import(section_name, ltx)?,
-      )),
-      ParticleActionType::Move => {
-        Self::Move(Box::new(ParticleActionMove::import(section_name, ltx)?))
+      ParticleActionType::Move => Self::Move(Box::new(ParticleActionMove::import(section_name, ltx)?)),
+      ParticleActionType::OrbitLine => Self::OrbitLine(Box::new(ParticleActionOrbitLine::import(section_name, ltx)?)),
+      ParticleActionType::OrbitPoint => {
+        Self::OrbitPoint(Box::new(ParticleActionOrbitPoint::import(section_name, ltx)?))
       }
-      ParticleActionType::OrbitLine => Self::OrbitLine(Box::new(ParticleActionOrbitLine::import(
-        section_name,
-        ltx,
-      )?)),
-      ParticleActionType::OrbitPoint => Self::OrbitPoint(Box::new(
-        ParticleActionOrbitPoint::import(section_name, ltx)?,
-      )),
-      ParticleActionType::RandomAccel => Self::RandomAccel(Box::new(
-        ParticleActionRandomAcceleration::import(section_name, ltx)?,
-      )),
-      ParticleActionType::RandomDisplace => Self::RandomDisplace(Box::new(
-        ParticleActionRandomDisplace::import(section_name, ltx)?,
-      )),
-      ParticleActionType::RandomVelocity => Self::RandomVelocity(Box::new(
-        ParticleActionRandomVelocity::import(section_name, ltx)?,
-      )),
-      ParticleActionType::Restore => {
-        Self::Restore(Box::new(ParticleActionRestore::import(section_name, ltx)?))
+      ParticleActionType::RandomAccel => {
+        Self::RandomAccel(Box::new(ParticleActionRandomAcceleration::import(section_name, ltx)?))
       }
-      ParticleActionType::Sink => {
-        Self::Sink(Box::new(ParticleActionSink::import(section_name, ltx)?))
+      ParticleActionType::RandomDisplace => {
+        Self::RandomDisplace(Box::new(ParticleActionRandomDisplace::import(section_name, ltx)?))
       }
-      ParticleActionType::SinkVelocity => Self::SinkVelocity(Box::new(
-        ParticleActionSinkVelocity::import(section_name, ltx)?,
-      )),
-      ParticleActionType::Source => {
-        Self::Source(Box::new(ParticleActionSource::import(section_name, ltx)?))
+      ParticleActionType::RandomVelocity => {
+        Self::RandomVelocity(Box::new(ParticleActionRandomVelocity::import(section_name, ltx)?))
       }
-      ParticleActionType::SpeedLimit => Self::SpeedLimit(Box::new(
-        ParticleActionSpeedLimit::import(section_name, ltx)?,
-      )),
-      ParticleActionType::TargetColor => Self::TargetColor(Box::new(
-        ParticleActionTargetColor::import(section_name, ltx)?,
-      )),
-      ParticleActionType::TargetSize => Self::TargetSize(Box::new(
-        ParticleActionTargetSize::import(section_name, ltx)?,
-      )),
-      ParticleActionType::TargetRotate | ParticleActionType::TargetRotateD => Self::TargetRotate(
-        Box::new(ParticleActionTargetRotate::import(section_name, ltx)?),
-      ),
+      ParticleActionType::Restore => Self::Restore(Box::new(ParticleActionRestore::import(section_name, ltx)?)),
+      ParticleActionType::Sink => Self::Sink(Box::new(ParticleActionSink::import(section_name, ltx)?)),
+      ParticleActionType::SinkVelocity => {
+        Self::SinkVelocity(Box::new(ParticleActionSinkVelocity::import(section_name, ltx)?))
+      }
+      ParticleActionType::Source => Self::Source(Box::new(ParticleActionSource::import(section_name, ltx)?)),
+      ParticleActionType::SpeedLimit => {
+        Self::SpeedLimit(Box::new(ParticleActionSpeedLimit::import(section_name, ltx)?))
+      }
+      ParticleActionType::TargetColor => {
+        Self::TargetColor(Box::new(ParticleActionTargetColor::import(section_name, ltx)?))
+      }
+      ParticleActionType::TargetSize => {
+        Self::TargetSize(Box::new(ParticleActionTargetSize::import(section_name, ltx)?))
+      }
+      ParticleActionType::TargetRotate | ParticleActionType::TargetRotateD => {
+        Self::TargetRotate(Box::new(ParticleActionTargetRotate::import(section_name, ltx)?))
+      }
       ParticleActionType::TargetVelocity | ParticleActionType::TargetVelocityD => {
-        Self::TargetVelocity(Box::new(ParticleActionTargetVelocity::import(
-          section_name,
-          ltx,
-        )?))
+        Self::TargetVelocity(Box::new(ParticleActionTargetVelocity::import(section_name, ltx)?))
       }
-      ParticleActionType::Vortex => {
-        Self::Vortex(Box::new(ParticleActionVortex::import(section_name, ltx)?))
+      ParticleActionType::Vortex => Self::Vortex(Box::new(ParticleActionVortex::import(section_name, ltx)?)),
+      ParticleActionType::Turbulence => {
+        Self::Turbulence(Box::new(ParticleActionTurbulence::import(section_name, ltx)?))
       }
-      ParticleActionType::Turbulence => Self::Turbulence(Box::new(
-        ParticleActionTurbulence::import(section_name, ltx)?,
-      )),
-      ParticleActionType::Scatter => {
-        Self::Scatter(Box::new(ParticleActionScatter::import(section_name, ltx)?))
-      }
+      ParticleActionType::Scatter => Self::Scatter(Box::new(ParticleActionScatter::import(section_name, ltx)?)),
       ParticleActionType::Unknown | ParticleActionType::CallActionList => {
         return Err(XRayError::new_unexpected_error(format!(
           "Unexpected action type provided for reading: {}",
@@ -337,9 +297,7 @@ impl LtxImportExport for ParticleAction {
   }
 
   fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
-    ltx
-      .with_section(section_name)
-      .set(META_TYPE_FIELD, Self::META_TYPE);
+    ltx.with_section(section_name).set(META_TYPE_FIELD, Self::META_TYPE);
 
     match self {
       ParticleAction::Avoid(action) => action.export(section_name, ltx),
@@ -382,8 +340,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -395,33 +352,27 @@ mod tests {
   #[test]
   fn test_read_write_derivative_action_types() -> XRayResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String =
-      get_relative_test_sample_file_path(file!(), "read_write_derivative.chunk");
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_derivative.chunk");
 
     // Derivative types (TargetRotateD / TargetVelocityD) share enum variants with their
     // base types, so the dispatch u32 must round-trip from the stored action type.
-    let rotate: ParticleAction =
-      ParticleAction::TargetRotate(Box::new(ParticleActionTargetRotate {
-        action_flags: 1,
-        action_type: ParticleActionType::TargetRotateD,
-        rot: Vector3d::new_mock(),
-        scale: 1.5,
-      }));
-    let velocity: ParticleAction =
-      ParticleAction::TargetVelocity(Box::new(ParticleActionTargetVelocity {
-        action_flags: 1,
-        action_type: ParticleActionType::TargetVelocityD,
-        velocity: Vector3d::new_mock(),
-        scale: 0.5,
-      }));
+    let rotate: ParticleAction = ParticleAction::TargetRotate(Box::new(ParticleActionTargetRotate {
+      action_flags: 1,
+      action_type: ParticleActionType::TargetRotateD,
+      rot: Vector3d::new_mock(),
+      scale: 1.5,
+    }));
+    let velocity: ParticleAction = ParticleAction::TargetVelocity(Box::new(ParticleActionTargetVelocity {
+      action_flags: 1,
+      action_type: ParticleActionType::TargetVelocityD,
+      velocity: Vector3d::new_mock(),
+      scale: 0.5,
+    }));
 
     rotate.write::<XRayByteOrder>(&mut writer)?;
     velocity.write::<XRayByteOrder>(&mut writer)?;
 
-    writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
@@ -436,10 +387,7 @@ mod tests {
       ChunkReader::from_slice(open_test_resource_as_slice(&filename)?)?.read_child_by_index(0)?;
 
     assert_eq!(ParticleAction::read::<XRayByteOrder>(&mut reader)?, rotate);
-    assert_eq!(
-      ParticleAction::read::<XRayByteOrder>(&mut reader)?,
-      velocity
-    );
+    assert_eq!(ParticleAction::read::<XRayByteOrder>(&mut reader)?, velocity);
 
     Ok(())
   }

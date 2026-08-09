@@ -13,8 +13,7 @@ use crate::utils::error_to_string;
 pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult<Value> {
   let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
   let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
-  let dds_name_lock: MutexGuard<Option<String>> =
-    state.equipment_sprite_name.as_ref().lock().unwrap();
+  let dds_name_lock: MutexGuard<Option<String>> = state.equipment_sprite_name.as_ref().lock().unwrap();
 
   if ltx_path_lock.is_none() || dds_path_lock.is_none() || dds_name_lock.is_none() {
     return Err(String::from(
@@ -26,12 +25,11 @@ pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> Taur
   let ltx_path: &String = ltx_path_lock.as_ref().unwrap();
   let dds_path: &String = dds_path_lock.as_ref().unwrap();
 
-  let (image, preview_buffer) = open_dds_as_png(dds_path)
-    .map_err(|error| format!("Failed to open provided image file: {}", error))?;
+  let (image, preview_buffer) =
+    open_dds_as_png(dds_path).map_err(|error| format!("Failed to open provided image file: {}", error))?;
 
-  let descriptors: Vec<InventorySpriteDescriptor> = InventorySpriteDescriptor::new_list_from_ltx(
-    &Ltx::read_from_file_full(ltx_path).map_err(error_to_string)?,
-  );
+  let descriptors: Vec<InventorySpriteDescriptor> =
+    InventorySpriteDescriptor::new_list_from_ltx(&Ltx::read_from_file_full(ltx_path).map_err(error_to_string)?);
 
   let response = IconsEditorEquipmentResponse {
     system_ltx_path: ltx_path.into(),

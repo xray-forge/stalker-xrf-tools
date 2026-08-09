@@ -9,11 +9,7 @@ use crate::{Finding, GamedataVerificationRule};
 pub(crate) struct GamedataFindingFactory;
 
 impl GamedataFindingFactory {
-  pub(crate) fn for_asset<P, M>(
-    rule: GamedataVerificationRule,
-    asset_path: P,
-    message: M,
-  ) -> Finding
+  pub(crate) fn for_asset<P, M>(rule: GamedataVerificationRule, asset_path: P, message: M) -> Finding
   where
     P: AsRef<Path>,
     M: Into<String>,
@@ -54,8 +50,7 @@ impl GamedataFindingFactory {
     M: Into<String>,
   {
     Finding::new(
-      RuleId::new(rule.to_string())
-        .expect("Gamedata verification rules have non-empty stable identifiers"),
+      RuleId::new(rule.to_string()).expect("Gamedata verification rules have non-empty stable identifiers"),
       subject,
       message,
     )
@@ -70,21 +65,9 @@ mod tests {
   #[test]
   fn sorts_findings_by_asset_path_then_message() {
     let mut findings: Vec<Finding> = vec![
-      GamedataFindingFactory::for_asset(
-        GamedataVerificationRule::ScriptsSyntax,
-        "scripts/a.script",
-        "Second",
-      ),
-      GamedataFindingFactory::for_asset(
-        GamedataVerificationRule::ScriptsSyntax,
-        "scripts/z.script",
-        "First",
-      ),
-      GamedataFindingFactory::for_asset(
-        GamedataVerificationRule::ScriptsSyntax,
-        "scripts/a.script",
-        "First",
-      ),
+      GamedataFindingFactory::for_asset(GamedataVerificationRule::ScriptsSyntax, "scripts/a.script", "Second"),
+      GamedataFindingFactory::for_asset(GamedataVerificationRule::ScriptsSyntax, "scripts/z.script", "First"),
+      GamedataFindingFactory::for_asset(GamedataVerificationRule::ScriptsSyntax, "scripts/a.script", "First"),
     ];
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
@@ -97,16 +80,10 @@ mod tests {
 
   #[test]
   fn sorts_equal_paths_by_rule_before_message() {
-    let scripts_finding: Finding = GamedataFindingFactory::for_asset(
-      GamedataVerificationRule::ScriptsSyntax,
-      "scripts/a.script",
-      "First",
-    );
-    let textures_finding: Finding = GamedataFindingFactory::for_asset(
-      GamedataVerificationRule::TexturesRead,
-      "scripts/a.script",
-      "Second",
-    );
+    let scripts_finding: Finding =
+      GamedataFindingFactory::for_asset(GamedataVerificationRule::ScriptsSyntax, "scripts/a.script", "First");
+    let textures_finding: Finding =
+      GamedataFindingFactory::for_asset(GamedataVerificationRule::TexturesRead, "scripts/a.script", "Second");
     let mut findings: Vec<Finding> = vec![textures_finding.clone(), scripts_finding.clone()];
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_rule_and_message);

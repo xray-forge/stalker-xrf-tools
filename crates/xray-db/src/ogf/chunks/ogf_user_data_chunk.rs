@@ -30,10 +30,7 @@ impl ChunkReadWrite for OgfUserDataChunk {
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
-    writer.write_all(&encode_string_to_bytes(
-      &self.user_data,
-      get_windows1251_encoder(),
-    )?)?;
+    writer.write_all(&encode_string_to_bytes(&self.user_data, get_windows1251_encoder())?)?;
 
     Ok(())
   }

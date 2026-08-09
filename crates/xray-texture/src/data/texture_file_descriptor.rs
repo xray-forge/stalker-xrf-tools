@@ -54,13 +54,7 @@ mod tests {
     let mut descriptor: TextureFileDescriptor = TextureFileDescriptor::new(r"ui\ui_actor_weapons");
 
     for (index, (x, y, w, h)) in sprites.iter().enumerate() {
-      descriptor.add_sprite(TextureSpriteDescriptor::new(
-        format!("sprite_{index}"),
-        *x,
-        *y,
-        *w,
-        *h,
-      ));
+      descriptor.add_sprite(TextureSpriteDescriptor::new(format!("sprite_{index}"), *x, *y, *w, *h));
     }
 
     descriptor
@@ -70,8 +64,7 @@ mod tests {
   fn bounds_the_furthest_sprite_edges() {
     // The furthest edges are 1023x1020, of which only the width needs rounding.
     assert_eq!(
-      descriptor_of(&[(0, 0, 90, 44), (933, 910, 90, 110), (180, 88, 90, 44)])
-        .get_dimension_boundaries(),
+      descriptor_of(&[(0, 0, 90, 44), (933, 910, 90, 110), (180, 88, 90, 44)]).get_dimension_boundaries(),
       (1024, 1020)
     );
   }

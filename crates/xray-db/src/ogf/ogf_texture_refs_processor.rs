@@ -35,8 +35,7 @@ impl OgfTextureRefsProcessor {
 
     Self::assert_chunk_copy_is_lossless::<T>(source, &original, from)?;
 
-    let (patched, patched_count) =
-      Self::write_texture_refs_to_buffer::<T>(Self::open_source(source)?, from, to)?;
+    let (patched, patched_count) = Self::write_texture_refs_to_buffer::<T>(Self::open_source(source)?, from, to)?;
 
     if patched_count == 0 {
       return Err(XRayError::new_verify_error(format!(
@@ -74,11 +73,7 @@ impl OgfTextureRefsProcessor {
   }
 
   /// Rename texture references of an ogf file, copying every other chunk verbatim.
-  pub fn write_texture_refs_to_buffer<T: ByteOrder>(
-    file: File,
-    from: &str,
-    to: &str,
-  ) -> XRayResult<(Vec<u8>, u32)> {
+  pub fn write_texture_refs_to_buffer<T: ByteOrder>(file: File, from: &str, to: &str) -> XRayResult<(Vec<u8>, u32)> {
     let mut chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
     let mut buffer: Vec<u8> = Vec::new();
     let mut patched_count: u32 = 0;
@@ -155,22 +150,13 @@ impl OgfTextureRefsProcessor {
 
   fn open_source(source: &Path) -> XRayResult<File> {
     File::open(source).map_err(|error| {
-      XRayError::new_not_found_error(format!(
-        "OGF file was not read: {}, error: {}",
-        source.display(),
-        error
-      ))
+      XRayError::new_not_found_error(format!("OGF file was not read: {}, error: {}", source.display(), error))
     })
   }
 
   /// Guard that a rename which changes nothing reproduces the source file byte for byte.
-  fn assert_chunk_copy_is_lossless<T: ByteOrder>(
-    source: &Path,
-    original: &[u8],
-    from: &str,
-  ) -> XRayResult {
-    let (reverted, _) =
-      Self::write_texture_refs_to_buffer::<T>(Self::open_source(source)?, from, from)?;
+  fn assert_chunk_copy_is_lossless<T: ByteOrder>(source: &Path, original: &[u8], from: &str) -> XRayResult {
+    let (reverted, _) = Self::write_texture_refs_to_buffer::<T>(Self::open_source(source)?, from, from)?;
 
     if reverted != original {
       return Err(XRayError::new_verify_error(format!(
@@ -185,11 +171,7 @@ impl OgfTextureRefsProcessor {
   }
 
   /// Verify the written file names the new reference and no longer names the old one.
-  fn assert_written_refs_match<T: ByteOrder>(
-    destination: &Path,
-    from: &str,
-    to: &str,
-  ) -> XRayResult {
+  fn assert_written_refs_match<T: ByteOrder>(destination: &Path, from: &str, to: &str) -> XRayResult {
     let written: Vec<String> = OgfFile::read_texture_refs_from_path::<T, _>(&destination)?;
 
     if written.iter().any(|it| it == from) {

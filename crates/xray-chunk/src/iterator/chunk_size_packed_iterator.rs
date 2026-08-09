@@ -92,11 +92,7 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
     }
 
     self.index += 1;
-    if let Err(error) = self
-      .reader
-      .data
-      .set_seek(SeekFrom::Current(size as i64 - 4))
-    {
+    if let Err(error) = self.reader.data.set_seek(SeekFrom::Current(size as i64 - 4)) {
       return self.fail(error.into());
     }
 
@@ -104,10 +100,7 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
       id,
       size,
       position,
-      data: self
-        .reader
-        .data
-        .slice(position + size_field_size..end_position),
+      data: self.reader.data.slice(position + size_field_size..end_position),
     }))
   }
 }
@@ -125,10 +118,7 @@ mod tests {
     let mut chunk_reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[]))?;
 
-    if ChunkSizePackedIterator::from_start(&mut chunk_reader)?
-      .next()
-      .is_some()
-    {
+    if ChunkSizePackedIterator::from_start(&mut chunk_reader)?.next().is_some() {
       panic!("No iterations expected in empty data");
     }
 
@@ -212,19 +202,15 @@ mod tests {
   fn rejects_size_smaller_than_header() -> XRayResult {
     let mut reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[3, 0, 0, 0]))?;
-    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> =
-      ChunkSizePackedIterator::from_start(&mut reader)?
-        .next()
-        .expect("Expected one invalid packed chunk");
+    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> = ChunkSizePackedIterator::from_start(&mut reader)?
+      .next()
+      .expect("Expected one invalid packed chunk");
     let error: String = match result {
       Ok(_) => panic!("Expected undersized packed chunk to fail"),
       Err(error) => error.to_string(),
     };
 
-    assert!(
-      error.contains("declares invalid size 3"),
-      "Unexpected error: {error}"
-    );
+    assert!(error.contains("declares invalid size 3"), "Unexpected error: {error}");
 
     Ok(())
   }
@@ -233,19 +219,15 @@ mod tests {
   fn rejects_packed_chunk_data_beyond_source_end() -> XRayResult {
     let mut reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[8, 0, 0, 0, 0]))?;
-    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> =
-      ChunkSizePackedIterator::from_start(&mut reader)?
-        .next()
-        .expect("Expected one invalid packed chunk");
+    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> = ChunkSizePackedIterator::from_start(&mut reader)?
+      .next()
+      .expect("Expected one invalid packed chunk");
     let error: String = match result {
       Ok(_) => panic!("Expected oversized packed chunk to fail"),
       Err(error) => error.to_string(),
     };
 
-    assert!(
-      error.contains("beyond source end"),
-      "Unexpected error: {error}"
-    );
+    assert!(error.contains("beyond source end"), "Unexpected error: {error}");
 
     Ok(())
   }

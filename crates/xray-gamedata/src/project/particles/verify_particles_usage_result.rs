@@ -49,18 +49,17 @@ mod tests {
   use super::GamedataParticlesUsageVerificationResult;
   use crate::GamedataFindingFactory;
   use crate::{
-    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]
   fn unreadable_spawn_files_fail_particle_usage_verification() {
-    let result: GamedataParticlesUsageVerificationResult =
-      GamedataParticlesUsageVerificationResult {
-        checked_spawn_files_count: 1,
-        unreadable_spawn_files_count: 1,
-        ..Default::default()
-      };
+    let result: GamedataParticlesUsageVerificationResult = GamedataParticlesUsageVerificationResult {
+      checked_spawn_files_count: 1,
+      unreadable_spawn_files_count: 1,
+      ..Default::default()
+    };
 
     assert_eq!(result.status(), GamedataVerificationStatus::Failed);
     assert_eq!(
@@ -71,11 +70,10 @@ mod tests {
 
   #[test]
   fn unparsed_spawn_custom_data_makes_particle_usage_verification_incomplete() {
-    let result: GamedataParticlesUsageVerificationResult =
-      GamedataParticlesUsageVerificationResult {
-        unparsed_custom_data_count: 1,
-        ..Default::default()
-      };
+    let result: GamedataParticlesUsageVerificationResult = GamedataParticlesUsageVerificationResult {
+      unparsed_custom_data_count: 1,
+      ..Default::default()
+    };
 
     assert_eq!(result.status(), GamedataVerificationStatus::Incomplete);
     assert_eq!(

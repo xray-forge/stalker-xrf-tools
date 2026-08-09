@@ -14,10 +14,7 @@ pub(crate) struct SoundsVerifier<'a> {
 }
 
 impl<'a> SoundsVerifier<'a> {
-  pub(crate) fn new(
-    project: &'a GamedataProject,
-    options: &'a GamedataProjectVerifyOptions,
-  ) -> Self {
+  pub(crate) fn new(project: &'a GamedataProject, options: &'a GamedataProjectVerifyOptions) -> Self {
     Self { options, project }
   }
 
@@ -34,8 +31,7 @@ impl<'a> SoundsVerifier<'a> {
       .collect();
 
     let sound_files = SoundFilesVerifier::new(self.project, self.options, &sound_paths).verify()?;
-    let sound_references =
-      SoundReferencesVerifier::new(self.project, self.options, &sound_paths).verify()?;
+    let sound_references = SoundReferencesVerifier::new(self.project, self.options, &sound_paths).verify()?;
 
     let result: GamedataSoundsVerificationResult =
       GamedataSoundsVerificationResult::new(started_at.elapsed(), sound_files, sound_references);

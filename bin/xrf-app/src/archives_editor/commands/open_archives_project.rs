@@ -8,10 +8,7 @@ use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
 #[tauri::command]
-pub async fn open_archives_project(
-  path: &str,
-  state: State<'_, ArchivesEditorState>,
-) -> TauriResult<Value> {
+pub async fn open_archives_project(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<Value> {
   log::info!("Opening archives project");
 
   let project: ArchiveProject = ArchiveProject::new(&Path::new(path))

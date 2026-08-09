@@ -18,21 +18,15 @@ impl OmfMotionsProcessor {
   pub fn retain_motions(file: &mut OmfFile, predicate: impl Fn(&str) -> bool) -> XRayResult<usize> {
     Self::assert_motions_are_paired(file, "filtering")?;
 
-    let retained: Vec<bool> = file
-      .parameters
-      .motions
-      .iter()
-      .map(|it| predicate(&it.name))
-      .collect();
+    let retained: Vec<bool> = file.parameters.motions.iter().map(|it| predicate(&it.name)).collect();
 
     let removed_count: usize = retained.iter().filter(|it| !**it).count();
     let mut retained_iter = retained.iter();
 
-    file.parameters.motions.retain(|_| {
-      *retained_iter
-        .next()
-        .expect("Retained flag for each motion definition")
-    });
+    file
+      .parameters
+      .motions
+      .retain(|_| *retained_iter.next().expect("Retained flag for each motion definition"));
 
     let mut retained_iter = retained.iter();
 
@@ -42,9 +36,8 @@ impl OmfMotionsProcessor {
       .retain(|_| *retained_iter.next().expect("Retained flag for each motion"));
 
     for (ordinal, definition) in file.parameters.motions.iter_mut().enumerate() {
-      definition.motion = u16::try_from(ordinal).map_err(|_| {
-        XRayError::new_invalid_error("Motions count exceeds the supported range after filtering")
-      })?;
+      definition.motion = u16::try_from(ordinal)
+        .map_err(|_| XRayError::new_invalid_error("Motions count exceeds the supported range after filtering"))?;
     }
 
     Ok(removed_count)
@@ -56,20 +49,12 @@ impl OmfMotionsProcessor {
   /// are updated, because the engine asserts the two match at the same ordinal.
   ///
   /// Returns the count of renamed motions.
-  pub fn rename_motions(
-    file: &mut OmfFile,
-    renames: &HashMap<String, String>,
-  ) -> XRayResult<usize> {
+  pub fn rename_motions(file: &mut OmfFile, renames: &HashMap<String, String>) -> XRayResult<usize> {
     Self::assert_motions_are_paired(file, "renaming")?;
 
     let mut renamed_count: usize = 0;
 
-    for (definition, motion) in file
-      .parameters
-      .motions
-      .iter_mut()
-      .zip(file.motions.motions.iter_mut())
-    {
+    for (definition, motion) in file.parameters.motions.iter_mut().zip(file.motions.motions.iter_mut()) {
       if let Some(renamed) = renames.get(&definition.name) {
         definition.name.clone_from(renamed);
         renamed_count += 1;
@@ -180,12 +165,7 @@ mod tests {
       "Expect motion payloads to be filtered alongside definitions"
     );
     assert_eq!(
-      file
-        .parameters
-        .motions
-        .iter()
-        .map(|it| it.motion)
-        .collect::<Vec<_>>(),
+      file.parameters.motions.iter().map(|it| it.motion).collect::<Vec<_>>(),
       vec![0, 1],
       "Expect surviving definitions to be renumbered to their new ordinal"
     );
@@ -202,12 +182,7 @@ mod tests {
     OmfMotionsProcessor::retain_motions(&mut file, |name| name == "second")?;
 
     assert_eq!(
-      file
-        .motions
-        .motions
-        .first()
-        .expect("Retained motion")
-        .remaining,
+      file.motions.motions.first().expect("Retained motion").remaining,
       vec![42],
       "Expect the payload of the retained motion to survive, not the payload at index zero"
     );
@@ -221,18 +196,12 @@ mod tests {
 
     let renames: HashMap<String, String> = HashMap::from([
       (String::from("ak_74_draw"), String::from("ak74_draw")),
-      (
-        String::from("ak_74_idle_move"),
-        String::from("ak74_idle_moving"),
-      ),
+      (String::from("ak_74_idle_move"), String::from("ak74_idle_moving")),
     ]);
 
     assert_eq!(OmfMotionsProcessor::rename_motions(&mut file, &renames)?, 2);
 
-    assert_eq!(
-      file.get_motion_names(),
-      vec!["ak74_draw", "ak74_idle_moving"]
-    );
+    assert_eq!(file.get_motion_names(), vec!["ak74_draw", "ak74_idle_moving"]);
     assert_eq!(
       file
         .motions
@@ -251,8 +220,7 @@ mod tests {
   fn test_rename_motions_leaves_unmapped_names() -> XRayResult {
     let mut file: OmfFile = new_named_mock(&["ak_74_draw", "ak_74_idle"]);
 
-    let renames: HashMap<String, String> =
-      HashMap::from([(String::from("ak_74_draw"), String::from("ak74_draw"))]);
+    let renames: HashMap<String, String> = HashMap::from([(String::from("ak_74_draw"), String::from("ak74_draw"))]);
 
     assert_eq!(OmfMotionsProcessor::rename_motions(&mut file, &renames)?, 1);
     assert_eq!(file.get_motion_names(), vec!["ak74_draw", "ak_74_idle"]);
@@ -264,8 +232,7 @@ mod tests {
   fn test_rename_motions_rejects_duplicates() {
     let mut file: OmfFile = new_named_mock(&["first", "second"]);
 
-    let renames: HashMap<String, String> =
-      HashMap::from([(String::from("first"), String::from("second"))]);
+    let renames: HashMap<String, String> = HashMap::from([(String::from("first"), String::from("second"))]);
 
     assert!(
       OmfMotionsProcessor::rename_motions(&mut file, &renames).is_err(),

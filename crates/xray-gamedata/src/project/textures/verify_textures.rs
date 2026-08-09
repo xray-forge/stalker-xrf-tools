@@ -26,9 +26,8 @@ impl GamedataProject {
       .map(|asset| asset.logical_path().to_string())
       .collect();
 
-    let checked_textures_count: u32 = u32::try_from(texture_paths.len()).map_err(|_| {
-      XRayError::new_verify_error("Texture count exceeds the supported result range")
-    })?;
+    let checked_textures_count: u32 = u32::try_from(texture_paths.len())
+      .map_err(|_| XRayError::new_verify_error("Texture count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = texture_paths
       .par_iter()
@@ -75,9 +74,8 @@ impl GamedataProject {
       .collect();
 
     let duration: Duration = started_at.elapsed();
-    let invalid_textures_count: u32 = u32::try_from(findings.len()).map_err(|_| {
-      XRayError::new_verify_error("Invalid texture count exceeds the supported result range")
-    })?;
+    let invalid_textures_count: u32 = u32::try_from(findings.len())
+      .map_err(|_| XRayError::new_verify_error("Invalid texture count exceeds the supported result range"))?;
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
@@ -97,11 +95,7 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_texture_by_path(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-    path: &Path,
-  ) -> XRayResult<bool> {
+  pub fn verify_texture_by_path(&self, options: &GamedataProjectVerifyOptions, path: &Path) -> XRayResult<bool> {
     self.verify_texture(
       options,
       &Dds::read(&mut File::open(path)?).map_err(|error| {
@@ -114,11 +108,7 @@ impl GamedataProject {
     )
   }
 
-  pub fn verify_texture(
-    &self,
-    _options: &GamedataProjectVerifyOptions,
-    dds: &Dds,
-  ) -> XRayResult<bool> {
+  pub fn verify_texture(&self, _options: &GamedataProjectVerifyOptions, dds: &Dds) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
     if let Some(header10) = &dds.header10 {

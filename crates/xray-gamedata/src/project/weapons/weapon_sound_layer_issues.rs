@@ -6,21 +6,10 @@ use crate::project::weapons::weapon_sound_layer_field::WeaponSoundLayerField;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum WeaponSoundLayerIssue {
-  InvalidFieldName {
-    field_name: String,
-  },
-  MissingLayer {
-    expected: u32,
-    found: Option<u32>,
-  },
-  MissingBaseLayer {
-    layer: u32,
-  },
-  MissingVariant {
-    layer: u32,
-    expected: u32,
-    found: u32,
-  },
+  InvalidFieldName { field_name: String },
+  MissingLayer { expected: u32, found: Option<u32> },
+  MissingBaseLayer { layer: u32 },
+  MissingVariant { layer: u32, expected: u32, found: u32 },
 }
 
 pub(crate) fn weapon_sound_layer_issues(section: &Section) -> Vec<WeaponSoundLayerIssue> {
@@ -40,10 +29,7 @@ pub(crate) fn weapon_sound_layer_issues(section: &Section) -> Vec<WeaponSoundLay
       continue;
     };
 
-    layers
-      .entry(field.layer())
-      .or_default()
-      .insert(field.variant());
+    layers.entry(field.layer()).or_default().insert(field.variant());
   }
 
   let mut expected_layer: u32 = 1;

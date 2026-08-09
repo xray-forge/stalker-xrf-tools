@@ -86,10 +86,7 @@ const TESTS_CASES: &[(&str, &str, u64, u64, u16, u32, &str, u8, CompressionMetho
   ),
 ];
 
-const SUBDIR_CASES: &[(
-  &str,
-  &[(&str, u64, u64, u16, u32, &str, u8, CompressionMethod)],
-)] = &[
+const SUBDIR_CASES: &[(&str, &[(&str, u64, u64, u16, u32, &str, u8, CompressionMethod)])] = &[
   (
     "subdir.lzh",
     &[

@@ -29,9 +29,7 @@ impl ChunkReadWrite for Shape {
         reader.read_xr::<T, _>()?,
       )),
       _ => {
-        return Err(XRayError::new_parsing_error(
-          "Unexpected shape type provided",
-        ));
+        return Err(XRayError::new_parsing_error("Unexpected shape type provided"));
       }
     })
   }
@@ -171,8 +169,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::shape::Shape;
@@ -220,10 +218,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 67);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 67);
 
@@ -256,10 +252,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 17);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 17);
 
@@ -280,36 +274,18 @@ mod tests {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_box.chunk");
 
     let original: Shape = Shape::Box((
-      Vector3d {
-        x: 1.5,
-        y: 1.7,
-        z: 1.0,
-      },
-      Vector3d {
-        x: 2.5,
-        y: 2.7,
-        z: 2.0,
-      },
-      Vector3d {
-        x: 3.5,
-        y: 3.7,
-        z: 3.0,
-      },
-      Vector3d {
-        x: 4.5,
-        y: 4.7,
-        z: 4.0,
-      },
+      Vector3d { x: 1.5, y: 1.7, z: 1.0 },
+      Vector3d { x: 2.5, y: 2.7, z: 2.0 },
+      Vector3d { x: 3.5, y: 3.7, z: 3.0 },
+      Vector3d { x: 4.5, y: 4.7, z: 4.0 },
     ));
 
     original.write::<XRayByteOrder>(&mut writer)?;
 
     assert_eq!(writer.bytes_written(), 49);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 49);
 
@@ -384,9 +360,10 @@ mod tests {
       52.0,
     ));
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize_sphere.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize_sphere.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -424,9 +401,10 @@ mod tests {
       },
     ));
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize_box.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize_box.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

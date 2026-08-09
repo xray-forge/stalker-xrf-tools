@@ -5,13 +5,9 @@ use serde::{Deserialize, Serialize};
 use xray_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
-use xray_utils::{
-  assert, assert_equal, assert_not_equal, decode_bytes_from_base64, encode_bytes_to_base64,
-};
+use xray_utils::{assert, assert_equal, assert_not_equal, decode_bytes_from_base64, encode_bytes_to_base64};
 
-use crate::constants::{
-  FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN,
-};
+use crate::constants::{FLAG_SPAWN_DESTROY_ON_SPAWN, MINIMAL_SUPPORTED_SPAWN_VERSION, NET_ACTION_SPAWN};
 use crate::data::alife::alife_object_inherited::AlifeObjectInherited;
 use crate::data::generic::vector_3d::Vector3d;
 use crate::data::meta::alife_class::AlifeClass;
@@ -99,11 +95,7 @@ impl ChunkReadWrite for AlifeObject {
     let script_version: u16 = spawn_reader.read_u16::<T>()?;
     let client_data_size: u16 = spawn_reader.read_u16::<T>()?;
 
-    assert_equal(
-      client_data_size,
-      0,
-      "Client data is not expected in ALife object",
-    )?; // Or read client data?
+    assert_equal(client_data_size, 0, "Client data is not expected in ALife object")?; // Or read client data?
 
     let spawn_id: u16 = spawn_reader.read_u16::<T>()?;
     let inherited_size: u16 = spawn_reader.read_u16::<T>()?;
@@ -114,14 +106,9 @@ impl ChunkReadWrite for AlifeObject {
       "Expect correct size of inherited data for ALife object",
     )?;
 
-    assert_not_equal(
-      &class,
-      &AlifeClass::Unknown,
-      "Expect known ALife object clsid",
-    )?;
+    assert_not_equal(&class, &AlifeClass::Unknown, "Expect known ALife object clsid")?;
 
-    let inherited: AlifeObjectInherited =
-      AlifeObjectInherited::read::<T>(&mut spawn_reader, &class)?;
+    let inherited: AlifeObjectInherited = AlifeObjectInherited::read::<T>(&mut spawn_reader, &class)?;
 
     let mut update_reader: ChunkReader = reader.read_child_by_index(Self::DATA_UPDATE_CHUNK_ID)?;
     let update_data_length: u16 = update_reader.read_u16::<T>()?;
@@ -132,14 +119,9 @@ impl ChunkReadWrite for AlifeObject {
       update_reader.size,
       "Expect correct size of ALife object update data",
     )?;
-    assert_equal(
-      update_size,
-      0,
-      "Expect no ALife update data in object chunk",
-    )?;
+    assert_equal(update_size, 0, "Expect no ALife update data in object chunk")?;
 
-    let update_data: Vec<u8> =
-      update_reader.read_bytes(update_reader.read_bytes_remain() as usize)?;
+    let update_data: Vec<u8> = update_reader.read_bytes(update_reader.read_bytes_remain() as usize)?;
 
     spawn_reader.assert_read("Expect ALife object spawn data to be read")?;
     update_reader.assert_read("Expect ALife object update data to be read")?;
@@ -312,8 +294,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::alife_object::AlifeObject;
@@ -337,10 +319,7 @@ mod tests {
     spawn_data_writer.write_all(&object_data_writer.flush_raw_into_buffer()?)?;
 
     let bytes: Vec<u8> = spawn_data_writer.flush_chunk_into_buffer::<XRayByteOrder>(0)?;
-    let path: PathBuf = std::env::temp_dir().join(format!(
-      "xray-db-unknown-clsid-{}.chunk",
-      std::process::id()
-    ));
+    let path: PathBuf = std::env::temp_dir().join(format!("xray-db-unknown-clsid-{}.chunk", std::process::id()));
     fs::write(&path, bytes)?;
 
     let mut reader: ChunkReader = ChunkReader::from_file(File::open(&path)?)?;
@@ -396,28 +375,26 @@ mod tests {
       script_version: 10,
       client_data_size: 0,
       spawn_id: 2354,
-      inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(
-        AlifeObjectItemCustomOutfit {
-          base: AlifeObjectItem {
-            base: AlifeObjectDynamicVisual {
-              base: AlifeObjectAbstract {
-                game_vertex_id: 12434,
-                distance: 124.33,
-                direct_control: 624345,
-                level_vertex_id: 48528,
-                flags: 34,
-                custom_data: String::from("custom-data"),
-                story_id: 523,
-                spawn_story_id: 2865268,
-              },
-              visual_name: String::from("visual-name"),
-              visual_flags: 0,
+      inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(AlifeObjectItemCustomOutfit {
+        base: AlifeObjectItem {
+          base: AlifeObjectDynamicVisual {
+            base: AlifeObjectAbstract {
+              game_vertex_id: 12434,
+              distance: 124.33,
+              direct_control: 624345,
+              level_vertex_id: 48528,
+              flags: 34,
+              custom_data: String::from("custom-data"),
+              story_id: 523,
+              spawn_story_id: 2865268,
             },
-            condition: 1.0,
-            upgrades_count: 0,
+            visual_name: String::from("visual-name"),
+            visual_flags: 0,
           },
+          condition: 1.0,
+          upgrades_count: 0,
         },
-      )),
+      })),
       update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     };
 
@@ -425,10 +402,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 185);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 185);
 
@@ -467,36 +442,32 @@ mod tests {
       script_version: 10,
       client_data_size: 0,
       spawn_id: 2354,
-      inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(
-        AlifeObjectItemCustomOutfit {
-          base: AlifeObjectItem {
-            base: AlifeObjectDynamicVisual {
-              base: AlifeObjectAbstract {
-                game_vertex_id: 12,
-                distance: 100.0,
-                direct_control: 52,
-                level_vertex_id: 364,
-                flags: 33,
-                custom_data: String::from("custom-data"),
-                story_id: 523,
-                spawn_story_id: 2865268,
-              },
-              visual_name: String::from("visual-name"),
-              visual_flags: 0,
+      inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(AlifeObjectItemCustomOutfit {
+        base: AlifeObjectItem {
+          base: AlifeObjectDynamicVisual {
+            base: AlifeObjectAbstract {
+              game_vertex_id: 12,
+              distance: 100.0,
+              direct_control: 52,
+              level_vertex_id: 364,
+              flags: 33,
+              custom_data: String::from("custom-data"),
+              story_id: 523,
+              spawn_story_id: 2865268,
             },
-            condition: 0.2,
-            upgrades_count: 0,
+            visual_name: String::from("visual-name"),
+            visual_flags: 0,
           },
+          condition: 0.2,
+          upgrades_count: 0,
         },
-      )),
+      })),
       update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     };
 
     original.export("data", &mut ltx)?;
 
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
-      &ltx_filename,
-    )?)?;
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&ltx_filename)?)?;
 
     let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
@@ -526,34 +497,33 @@ mod tests {
       script_version: 10,
       client_data_size: 0,
       spawn_id: 2354,
-      inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(
-        AlifeObjectItemCustomOutfit {
-          base: AlifeObjectItem {
-            base: AlifeObjectDynamicVisual {
-              base: AlifeObjectAbstract {
-                game_vertex_id: 145,
-                distance: 52.33,
-                direct_control: 256,
-                level_vertex_id: 3634,
-                flags: 24,
-                custom_data: String::from("custom-data"),
-                story_id: 414,
-                spawn_story_id: 124,
-              },
-              visual_name: String::from("visual-name"),
-              visual_flags: 2,
+      inherited: AlifeObjectInherited::CseAlifeItemCustomOutfit(Box::new(AlifeObjectItemCustomOutfit {
+        base: AlifeObjectItem {
+          base: AlifeObjectDynamicVisual {
+            base: AlifeObjectAbstract {
+              game_vertex_id: 145,
+              distance: 52.33,
+              direct_control: 256,
+              level_vertex_id: 3634,
+              flags: 24,
+              custom_data: String::from("custom-data"),
+              story_id: 414,
+              spawn_story_id: 124,
             },
-            condition: 1.0,
-            upgrades_count: 0,
+            visual_name: String::from("visual-name"),
+            visual_flags: 2,
           },
+          condition: 1.0,
+          upgrades_count: 0,
         },
-      )),
+      })),
       update_data: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

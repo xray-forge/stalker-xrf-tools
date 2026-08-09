@@ -61,8 +61,7 @@ mod tests {
   use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
   use crate::project::meshes::shader_library_verification_result::GamedataShaderLibraryVerificationResult;
   use crate::{
-    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
-    GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]

@@ -20,20 +20,10 @@ impl TranslationProject {
     let target: PathBuf = destination
       .as_ref()
       .join(language.to_string())
-      .join(
-        path
-          .as_ref()
-          .file_name()
-          .expect("Target xml file path name"),
-      )
+      .join(path.as_ref().file_name().expect("Target xml file path name"))
       .with_extension("xml");
 
-    xray_output::verbose!(
-      options.output,
-      "Writing file ({}) {}",
-      language,
-      target.display()
-    );
+    xray_output::verbose!(options.output, "Writing file ({}) {}", language, target.display());
 
     match fs::create_dir_all(target.parent().expect("Target xml file parent dir")) {
       Ok(_) => {}
@@ -77,12 +67,9 @@ impl TranslationProject {
             None => Value::Null,
             Some(value) => match value {
               TranslationVariant::String(str) => Value::String(str.clone()),
-              TranslationVariant::MultiString(vector) => Value::Array(
-                vector
-                  .iter()
-                  .map(|string| Value::String(string.clone()))
-                  .collect(),
-              ),
+              TranslationVariant::MultiString(vector) => {
+                Value::Array(vector.iter().map(|string| Value::String(string.clone())).collect())
+              }
             },
           },
         );

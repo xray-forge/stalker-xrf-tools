@@ -69,8 +69,7 @@ impl GenericCommand for RepackOmfCommand {
 
     let destination: Option<&PathBuf> = matches.get_one::<PathBuf>("dest");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if path.is_dir() {
       Self::verify_directory(&output, path, destination)?;
@@ -86,11 +85,7 @@ impl GenericCommand for RepackOmfCommand {
 
 impl RepackOmfCommand {
   /// Verify that every omf file in provided directory is serialized back into identical bytes.
-  fn verify_directory(
-    output: &OutputOptions,
-    path: &Path,
-    destination: Option<&PathBuf>,
-  ) -> XRayResult {
+  fn verify_directory(output: &OutputOptions, path: &Path, destination: Option<&PathBuf>) -> XRayResult {
     if destination.is_some() {
       return Err(XRayError::new_invalid_error(
         "Destination path is not applicable when repacking a directory",
@@ -137,14 +132,12 @@ impl RepackOmfCommand {
 
   /// Read provided omf file and write it into destination path.
   fn repack_file(output: &OutputOptions, path: &Path, destination: Option<&PathBuf>) -> XRayResult {
-    let destination: &PathBuf = destination.ok_or_else(|| {
-      XRayError::new_invalid_error("Destination path is required when not verifying")
-    })?;
+    let destination: &PathBuf =
+      destination.ok_or_else(|| XRayError::new_invalid_error("Destination path is required when not verifying"))?;
 
     xray_output::info!(output, "Repack omf file {}", path.display());
 
-    OmfFile::read_from_path::<XRayByteOrder, _>(&path)?
-      .write_to_path::<XRayByteOrder, _>(destination)?;
+    OmfFile::read_from_path::<XRayByteOrder, _>(&path)?.write_to_path::<XRayByteOrder, _>(destination)?;
 
     xray_output::info!(output, "Omf file repacked into {}", destination.display());
 

@@ -97,10 +97,7 @@ impl GenericCommand for PackEquipmentIconsCommand {
       TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if !source.is_dir() {
-      xray_output::error!(
-        output_options,
-        "Expected valid source folder containing DDS icons"
-      );
+      xray_output::error!(output_options, "Expected valid source folder containing DDS icons");
       process::exit(1);
     }
 
@@ -132,10 +129,7 @@ impl GenericCommand for PackEquipmentIconsCommand {
       output.display()
     );
 
-    log::info!(
-      "Pack equipment took: {}ms",
-      started_at.elapsed().as_millis()
-    );
+    log::info!("Pack equipment took: {}ms", started_at.elapsed().as_millis());
 
     Ok(())
   }

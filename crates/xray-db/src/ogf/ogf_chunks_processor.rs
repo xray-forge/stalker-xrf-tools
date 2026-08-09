@@ -53,9 +53,7 @@ impl OgfChunksProcessor {
     OmfParametersChunk::CHUNK_ID,
   ];
 
-  pub fn collect_chunks_from_path<T: ByteOrder, P: AsRef<Path>>(
-    path: P,
-  ) -> XRayResult<Vec<OgfChunkEntry>> {
+  pub fn collect_chunks_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Vec<OgfChunkEntry>> {
     Self::collect_chunks::<T>(File::open(path.as_ref()).map_err(|error| {
       XRayError::new_not_found_error(format!(
         "OGF file was not read: {}, error: {}",
@@ -92,11 +90,7 @@ impl OgfChunksProcessor {
   ///
   /// The immediate children of a children container are array slots numbered from zero, not chunk
   /// types, so they are stepped through rather than recorded.
-  fn walk(
-    chunks: &mut [ChunkReader],
-    depth: usize,
-    entries: &mut Vec<OgfChunkEntry>,
-  ) -> XRayResult {
+  fn walk(chunks: &mut [ChunkReader], depth: usize, entries: &mut Vec<OgfChunkEntry>) -> XRayResult {
     for chunk in chunks {
       entries.push(OgfChunkEntry {
         id: chunk.id,

@@ -40,14 +40,10 @@ impl TypeScriptSymbolResolver {
     if let Some(symbol) = local_symbol(program, local_name, source_map) {
       return Ok(Some(symbol));
     }
-    let Some((module_specifier, export_name)) = imported_function_reference(program, local_name)
-    else {
+    let Some((module_specifier, export_name)) = imported_function_reference(program, local_name) else {
       return Ok(None);
     };
-    let Some(module_path) = self
-      .project
-      .resolve_module_path(source_file, &module_specifier)
-    else {
+    let Some(module_path) = self.project.resolve_module_path(source_file, &module_specifier) else {
       return Ok(None);
     };
     let mut visited: BTreeSet<PathBuf> = BTreeSet::new();
@@ -93,9 +89,7 @@ impl TypeScriptSymbolResolver {
       let ModuleItem::ModuleDecl(ModuleDecl::ExportDecl(declaration)) = item else {
         continue;
       };
-      if let Some(symbol) =
-        exported_symbol(&declaration.decl, export_name, source.source_map.as_ref())
-      {
+      if let Some(symbol) = exported_symbol(&declaration.decl, export_name, source.source_map.as_ref()) {
         return Ok(Some(symbol));
       }
     }

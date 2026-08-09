@@ -25,12 +25,7 @@ impl LtxFormatter {
   }
 
   /// Write section statement.
-  pub fn write_section(
-    destination: &mut String,
-    section: &str,
-    inherited: Option<Vec<String>>,
-    comment: Option<&str>,
-  ) {
+  pub fn write_section(destination: &mut String, section: &str, inherited: Option<Vec<String>>, comment: Option<&str>) {
     if !destination.is_empty() {
       destination.push_str(LineSeparator::CRLF.as_str())
     }
@@ -51,12 +46,7 @@ impl LtxFormatter {
   }
 
   /// Write section statement.
-  pub fn write_key_value(
-    destination: &mut String,
-    key: &str,
-    value: Option<&str>,
-    comment: Option<&str>,
-  ) {
+  pub fn write_key_value(destination: &mut String, key: &str, value: Option<&str>, comment: Option<&str>) {
     destination.push_str(key);
 
     if let Some(value) = value {
@@ -110,16 +100,9 @@ mod test {
   fn test_write_include_with_comment() {
     let mut destination: String = String::new();
 
-    LtxFormatter::write_include(
-      &mut destination,
-      "base\\some_file.ltx",
-      Some("nested ; comment"),
-    );
+    LtxFormatter::write_include(&mut destination, "base\\some_file.ltx", Some("nested ; comment"));
 
-    assert_eq!(
-      destination,
-      "#include \"base\\some_file.ltx\" ; nested ; comment\r\n"
-    );
+    assert_eq!(destination, "#include \"base\\some_file.ltx\" ; nested ; comment\r\n");
   }
 
   #[test]
@@ -166,11 +149,7 @@ mod test {
     LtxFormatter::write_section(
       &mut destination,
       "some_section",
-      Some(vec![
-        String::from("a"),
-        String::from("b"),
-        String::from("c"),
-      ]),
+      Some(vec![String::from("a"), String::from("b"), String::from("c")]),
       Some("nested ; comment"),
     );
 
@@ -208,12 +187,7 @@ mod test {
   fn test_write_key_with_value_and_comment() {
     let mut destination: String = String::new();
 
-    LtxFormatter::write_key_value(
-      &mut destination,
-      "key",
-      Some("value"),
-      Some("test ; comment"),
-    );
+    LtxFormatter::write_key_value(&mut destination, "key", Some("value"), Some("test ; comment"));
 
     assert_eq!(destination, "key = value ; test ; comment\r\n");
   }

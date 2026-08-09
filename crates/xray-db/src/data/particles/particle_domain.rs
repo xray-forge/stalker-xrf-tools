@@ -88,103 +88,69 @@ impl FromStr for ParticleDomain {
     }
 
     Ok(Self {
-      domain_type: parts[0]
-        .parse::<u32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector domain_type value",
-        )))?,
+      domain_type: parts[0].parse::<u32>().or(Err(XRayError::new_parsing_error(
+        "Failed to parse vector domain_type value",
+      )))?,
       coordinates: (
         Vector3d {
-          x: parts[1]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse coordinates 0 vector x value",
-            )))?,
-          y: parts[2]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse coordinates 0 vector y value",
-            )))?,
-          z: parts[3]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse coordinates 0 vector z value",
-            )))?,
+          x: parts[1].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse coordinates 0 vector x value",
+          )))?,
+          y: parts[2].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse coordinates 0 vector y value",
+          )))?,
+          z: parts[3].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse coordinates 0 vector z value",
+          )))?,
         },
         Vector3d {
-          x: parts[4]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse coordinates 1 vector x value",
-            )))?,
-          y: parts[5]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse coordinates 1 vector y value",
-            )))?,
-          z: parts[6]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse coordinates 1 vector z value",
-            )))?,
+          x: parts[4].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse coordinates 1 vector x value",
+          )))?,
+          y: parts[5].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse coordinates 1 vector y value",
+          )))?,
+          z: parts[6].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse coordinates 1 vector z value",
+          )))?,
         },
       ),
       basis: (
         Vector3d {
-          x: parts[7]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse basis 0 vector x value",
-            )))?,
-          y: parts[8]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse basis 0 vector y value",
-            )))?,
-          z: parts[9]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse basis 0 vector z value",
-            )))?,
+          x: parts[7].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse basis 0 vector x value",
+          )))?,
+          y: parts[8].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse basis 0 vector y value",
+          )))?,
+          z: parts[9].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse basis 0 vector z value",
+          )))?,
         },
         Vector3d {
-          x: parts[10]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse basis 1 vector x value",
-            )))?,
-          y: parts[11]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse basis 1 vector y value",
-            )))?,
-          z: parts[12]
-            .parse::<f32>()
-            .or(Err(XRayError::new_parsing_error(
-              "Failed to parse basis 1 vector z value",
-            )))?,
+          x: parts[10].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse basis 1 vector x value",
+          )))?,
+          y: parts[11].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse basis 1 vector y value",
+          )))?,
+          z: parts[12].parse::<f32>().or(Err(XRayError::new_parsing_error(
+            "Failed to parse basis 1 vector z value",
+          )))?,
         },
       ),
-      radius1: parts[13]
-        .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector radius1 value",
-        )))?,
-      radius2: parts[14]
-        .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector radius2 value",
-        )))?,
-      radius1_sqr: parts[15]
-        .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector radius1_sqr value",
-        )))?,
-      radius2_sqr: parts[16]
-        .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error(
-          "Failed to parse vector radius2_sqr value",
-        )))?,
+      radius1: parts[13].parse::<f32>().or(Err(XRayError::new_parsing_error(
+        "Failed to parse vector radius1 value",
+      )))?,
+      radius2: parts[14].parse::<f32>().or(Err(XRayError::new_parsing_error(
+        "Failed to parse vector radius2 value",
+      )))?,
+      radius1_sqr: parts[15].parse::<f32>().or(Err(XRayError::new_parsing_error(
+        "Failed to parse vector radius1_sqr value",
+      )))?,
+      radius2_sqr: parts[16].parse::<f32>().or(Err(XRayError::new_parsing_error(
+        "Failed to parse vector radius2_sqr value",
+      )))?,
     })
   }
 }
@@ -200,11 +166,7 @@ impl ParticleDomain {
           y: 1.25,
           z: 1.75,
         },
-        Vector3d {
-          x: 2.5,
-          y: 2.1,
-          z: 2.8,
-        },
+        Vector3d { x: 2.5, y: 2.1, z: 2.8 },
       ),
       basis: (
         Vector3d {
@@ -212,11 +174,7 @@ impl ParticleDomain {
           y: -1.3,
           z: 0.4,
         },
-        Vector3d {
-          x: 2.3,
-          y: 0.3,
-          z: 3.3,
-        },
+        Vector3d { x: 2.3, y: 0.3, z: 3.3 },
       ),
       radius1: 100.0,
       radius2: 400.0,
@@ -238,8 +196,7 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::particles::particle_domain::ParticleDomain;
@@ -256,17 +213,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 68);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 68);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 68 + 8);
 
@@ -274,10 +227,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      ParticleDomain::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(ParticleDomain::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -291,9 +241,7 @@ mod tests {
       "1,1.5,1.25,1.75,2.5,2.1,2.8,0.5,-1.3,0.4,2.3,0.3,3.3,100,400,10,20"
     );
     assert_eq!(
-      ParticleDomain::from_str(
-        "1,1.5,1.25,1.75,2.5,2.1,2.8,0.5,-1.3,0.4,2.3,0.3,3.3,100,400,10,20"
-      )?,
+      ParticleDomain::from_str("1,1.5,1.25,1.75,2.5,2.1,2.8,0.5,-1.3,0.4,2.3,0.3,3.3,100,400,10,20")?,
       original
     );
 
@@ -304,9 +252,10 @@ mod tests {
   fn test_serialize_deserialize() -> XRayResult {
     let original: ParticleDomain = ParticleDomain::new_mock();
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -314,10 +263,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<ParticleDomain>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<ParticleDomain>(&serialized)?);
 
     Ok(())
   }

@@ -42,11 +42,7 @@ impl<'a> SoundReferencesVerifier<'a> {
   fn read_sound_names(sound_paths: &[String]) -> HashSet<String> {
     sound_paths
       .iter()
-      .filter_map(|path| {
-        path
-          .strip_prefix("sounds\\")
-          .map(Self::normalize_sound_reference)
-      })
+      .filter_map(|path| path.strip_prefix("sounds\\").map(Self::normalize_sound_reference))
       .collect()
   }
 
@@ -140,22 +136,12 @@ impl<'a> SoundReferencesVerifier<'a> {
             continue;
           }
 
-          self.verify_reference(
-            sound_names,
-            reference,
-            path,
-            &format!("[{section_name}] {key}"),
-            result,
-          );
+          self.verify_reference(sound_names, reference, path, &format!("[{section_name}] {key}"), result);
         }
       }
     }
 
-    xray_output::verbose!(
-      self.options.output,
-      "Verified sound references in {}",
-      path.display()
-    );
+    xray_output::verbose!(self.options.output, "Verified sound references in {}", path.display());
   }
 
   fn verify_reference(
@@ -241,9 +227,7 @@ mod tests {
     let sound_roots: HashSet<String> = [String::from("weapons")].into_iter().collect();
 
     assert!(SoundReferencesVerifier::is_sound_reference_key("snd_shoot"));
-    assert!(!SoundReferencesVerifier::is_sound_reference_key(
-      "Sound_Vampire_Hit"
-    ));
+    assert!(!SoundReferencesVerifier::is_sound_reference_key("Sound_Vampire_Hit"));
     assert!(SoundReferencesVerifier::is_direct_sound_reference(
       &sound_roots,
       "weapons\\ak74_shot"

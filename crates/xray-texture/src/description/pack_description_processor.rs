@@ -16,8 +16,7 @@ pub struct PackDescriptionProcessor {}
 impl PackDescriptionProcessor {
   /// Pack list of xml files by options.
   pub fn pack_xml_descriptions(options: &PackDescriptionOptions) -> XRayResult {
-    let description: XmlDescriptionCollection =
-      XmlDescriptionCollection::get_descriptions(options)?;
+    let description: XmlDescriptionCollection = XmlDescriptionCollection::get_descriptions(options)?;
     let mut count: u32 = 0;
 
     let selected: Vec<&TextureFileDescriptor> = description.select_files(options)?;
@@ -35,13 +34,8 @@ impl PackDescriptionProcessor {
     Ok(())
   }
 
-  pub fn pack_xml_description(
-    options: &PackDescriptionOptions,
-    file: &TextureFileDescriptor,
-  ) -> XRayResult<bool> {
-    let full_name: PathBuf = options
-      .base
-      .join(format!("{}.{}", file.name, DDS_EXTENSION));
+  pub fn pack_xml_description(options: &PackDescriptionOptions, file: &TextureFileDescriptor) -> XRayResult<bool> {
+    let full_name: PathBuf = options.base.join(format!("{}.{}", file.name, DDS_EXTENSION));
 
     let (width, height) = file.get_dimension_boundaries();
     let mut result: ImageBuffer<Rgba<u8>, Vec<u8>> = RgbaImage::new(width, height);
@@ -109,26 +103,13 @@ impl PackDescriptionProcessor {
       }
     }
 
-    let destination: PathBuf = options
-      .output_path
-      .join(format!("{}.{}", &file.name, DDS_EXTENSION));
+    let destination: PathBuf = options.output_path.join(format!("{}.{}", &file.name, DDS_EXTENSION));
 
     xray_output::verbose!(options.output, "Saving file: {}", destination.display());
 
-    warn_on_reshaped_ui_dds(
-      &options.output,
-      &destination,
-      width,
-      height,
-      UI_MIPMAP_LEVELS,
-    );
+    warn_on_reshaped_ui_dds(&options.output, &destination, width, height, UI_MIPMAP_LEVELS);
 
-    save_image_as_ui_dds(
-      &destination,
-      &result,
-      options.dds_compression_format,
-      UI_MIPMAPS,
-    )?;
+    save_image_as_ui_dds(&destination, &result, options.dds_compression_format, UI_MIPMAPS)?;
 
     Ok(true)
   }

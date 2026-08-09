@@ -31,9 +31,7 @@ impl AlifeSmartCoverLoophole {
           enabled: match partial.last().unwrap().parse::<u8>() {
             Ok(parsed) => parsed,
             Err(_) => {
-              return Err(XRayError::new_parsing_error(
-                "Failed to parse loophole enabled status",
-              ));
+              return Err(XRayError::new_parsing_error("Failed to parse loophole enabled status"));
             }
           },
         })

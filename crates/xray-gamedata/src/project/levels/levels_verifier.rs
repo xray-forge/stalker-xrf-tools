@@ -5,15 +5,11 @@ use xray_db::ShaderLibraryFile;
 use xray_error::XRayResult;
 
 use crate::GamedataFindingFactory;
-use crate::project::levels::level_binaries_verifier::{
-  LevelBinariesOutcome, LevelBinariesVerifier,
-};
+use crate::project::levels::level_binaries_verifier::{LevelBinariesOutcome, LevelBinariesVerifier};
 use crate::project::levels::level_bundle::LevelBundle;
 use crate::project::levels::level_manifest_verifier::LevelManifestVerifier;
 use crate::project::levels::level_reconciliation_verifier::LevelReconciliationVerifier;
-use crate::project::levels::level_references_verifier::{
-  LevelReferencesOutcome, LevelReferencesVerifier,
-};
+use crate::project::levels::level_references_verifier::{LevelReferencesOutcome, LevelReferencesVerifier};
 use crate::project::levels::level_roster::LevelRoster;
 use crate::project::levels::verify_levels_result::GamedataLevelsVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions};
@@ -24,10 +20,7 @@ pub(crate) struct LevelsVerifier<'a> {
 }
 
 impl<'a> LevelsVerifier<'a> {
-  pub(crate) fn new(
-    project: &'a GamedataProject,
-    options: &'a GamedataProjectVerifyOptions,
-  ) -> Self {
+  pub(crate) fn new(project: &'a GamedataProject, options: &'a GamedataProjectVerifyOptions) -> Self {
     Self { options, project }
   }
 
@@ -43,21 +36,17 @@ impl<'a> LevelsVerifier<'a> {
         "No spawn files carrying a game graph found in gamedata root, level roster is unknown"
       );
 
-      return Ok(GamedataLevelsVerificationResult::skipped(
-        started_at.elapsed(),
-      ));
+      return Ok(GamedataLevelsVerificationResult::skipped(started_at.elapsed()));
     }
 
-    let reconciliation: LevelReconciliationVerifier =
-      LevelReconciliationVerifier::new(self.project, self.options);
+    let reconciliation: LevelReconciliationVerifier = LevelReconciliationVerifier::new(self.project, self.options);
     let bundles: BTreeSet<String> = reconciliation.bundle_names()?;
 
     let mut findings: Vec<Finding> = std::mem::take(&mut roster.findings);
 
     findings.extend(reconciliation.verify(&roster, &bundles)?);
 
-    let shader_library: Option<ShaderLibraryFile> =
-      LevelReferencesVerifier::read_library(self.project);
+    let shader_library: Option<ShaderLibraryFile> = LevelReferencesVerifier::read_library(self.project);
 
     let mut checked_references_count: u32 = 0;
     let mut invalid_references_count: u32 = 0;

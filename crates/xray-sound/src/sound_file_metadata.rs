@@ -31,10 +31,7 @@ pub fn read_sound_metadata(comment_packet: &[u8]) -> Result<SoundMetadata, Strin
     .map(|comment| parse_xray_comment(&comment))
     .transpose()?
     .flatten()
-    .map(|(version, parameters)| SoundMetadata::XRay {
-      version,
-      parameters,
-    })
+    .map(|(version, parameters)| SoundMetadata::XRay { version, parameters })
     .unwrap_or(SoundMetadata::EngineDefaults);
 
   Ok(metadata)
@@ -60,9 +57,7 @@ fn first_vorbis_comment(packet: &[u8]) -> Result<Option<Vec<u8>>, String> {
   ))
 }
 
-fn parse_xray_comment(
-  comment: &[u8],
-) -> Result<Option<(XRaySoundCommentVersion, XRaySoundParameters)>, String> {
+fn parse_xray_comment(comment: &[u8]) -> Result<Option<(XRaySoundCommentVersion, XRaySoundParameters)>, String> {
   let mut offset: usize = 0;
 
   let version: u32 = read_u32(comment, &mut offset, "X-Ray comment version")?;
@@ -107,9 +102,7 @@ fn parse_xray_comment(
     || !parameters.base_volume.is_finite()
     || !parameters.max_ai_distance.is_finite()
   {
-    return Err(String::from(
-      "X-Ray sound parameters must be finite numbers",
-    ));
+    return Err(String::from("X-Ray sound parameters must be finite numbers"));
   }
 
   if parameters.max_distance < 0.1 || parameters.max_ai_distance < 0.1 {
@@ -133,12 +126,7 @@ fn read_f32(bytes: &[u8], offset: &mut usize, field: &str) -> Result<f32, String
   Ok(f32::from_le_bytes(value.try_into().unwrap()))
 }
 
-fn read_bytes<'a>(
-  bytes: &'a [u8],
-  offset: &mut usize,
-  length: usize,
-  field: &str,
-) -> Result<&'a [u8], String> {
+fn read_bytes<'a>(bytes: &'a [u8], offset: &mut usize, length: usize, field: &str) -> Result<&'a [u8], String> {
   let end: usize = offset
     .checked_add(length)
     .ok_or_else(|| format!("Vorbis {field} length overflows the packet"))?;
@@ -153,9 +141,7 @@ fn read_bytes<'a>(
 
 #[cfg(test)]
 mod tests {
-  use super::{
-    XRaySoundCommentVersion, XRaySoundParameters, first_vorbis_comment, parse_xray_comment,
-  };
+  use super::{XRaySoundCommentVersion, XRaySoundParameters, first_vorbis_comment, parse_xray_comment};
 
   fn xray_comment_v3(
     min_distance: f32,

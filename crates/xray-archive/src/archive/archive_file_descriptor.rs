@@ -25,11 +25,7 @@ pub struct ArchiveFileReplicationDescriptor {
 }
 
 impl ArchiveFileReplicationDescriptor {
-  pub fn from_descriptor(
-    descriptor: &ArchiveFileDescriptor,
-    source: &Path,
-    destination: &Path,
-  ) -> Self {
+  pub fn from_descriptor(descriptor: &ArchiveFileDescriptor, source: &Path, destination: &Path) -> Self {
     Self {
       crc: descriptor.crc,
       source: source.into(),

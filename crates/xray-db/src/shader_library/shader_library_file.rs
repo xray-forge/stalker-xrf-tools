@@ -83,8 +83,8 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use super::ShaderLibraryFile;
@@ -120,8 +120,7 @@ mod tests {
 
       blender.write_all(&[0; ShaderLibraryFile::BLENDER_CLASS_ID_SIZE])?;
 
-      let mut name_buffer: [u8; ShaderLibraryFile::BLENDER_NAME_SIZE] =
-        [0; ShaderLibraryFile::BLENDER_NAME_SIZE];
+      let mut name_buffer: [u8; ShaderLibraryFile::BLENDER_NAME_SIZE] = [0; ShaderLibraryFile::BLENDER_NAME_SIZE];
 
       name_buffer[..name.len()].copy_from_slice(name.as_bytes());
       blender.write_all(&name_buffer)?;
@@ -132,9 +131,7 @@ mod tests {
 
     let mut library: ChunkWriter = ChunkWriter::new();
 
-    library.write_all(
-      &blenders.flush_chunk_into_buffer::<XRayByteOrder>(ShaderLibraryFile::BLENDERS_CHUNK_ID)?,
-    )?;
+    library.write_all(&blenders.flush_chunk_into_buffer::<XRayByteOrder>(ShaderLibraryFile::BLENDERS_CHUNK_ID)?)?;
 
     library.flush_raw_into_buffer()
   }

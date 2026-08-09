@@ -281,11 +281,7 @@ fn render_html_docs(export: &ExternExport) -> String {
   if let ExternExport::Callable(ExternCallable { params, .. }) = export {
     for parameter in params {
       if let Some(doc) = &parameter.doc {
-        parts.push(format!(
-          "{}: {}",
-          escape_html(&parameter.name),
-          escape_html(doc)
-        ));
+        parts.push(format!("{}: {}", escape_html(&parameter.name), escape_html(doc)));
       }
     }
   }
@@ -345,12 +341,8 @@ mod tests {
 
   #[test]
   fn line_endings_can_be_overridden() {
-    let rendered: String = render_extern_manifest(
-      &ExternManifest::default(),
-      ExternFormat::Json,
-      Some(LineEndings::Lf),
-    )
-    .unwrap();
+    let rendered: String =
+      render_extern_manifest(&ExternManifest::default(), ExternFormat::Json, Some(LineEndings::Lf)).unwrap();
 
     assert!(!rendered.contains("\r\n"));
   }

@@ -76,12 +76,9 @@ impl ChunkReadWrite for Patrol {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(Self::META_CHUNK_ID)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
 
-    let mut point_count_reader: ChunkReader =
-      data_reader.read_child_by_index(Self::DATA_POINT_COUNT_CHUNK_ID)?;
-    let mut points_reader: ChunkReader =
-      data_reader.read_child_by_index(Self::DATA_POINT_DATA_CHUNK_ID)?;
-    let mut links_reader: ChunkReader =
-      data_reader.read_child_by_index(Self::DATA_LIST_CHUNK_ID)?;
+    let mut point_count_reader: ChunkReader = data_reader.read_child_by_index(Self::DATA_POINT_COUNT_CHUNK_ID)?;
+    let mut points_reader: ChunkReader = data_reader.read_child_by_index(Self::DATA_POINT_DATA_CHUNK_ID)?;
+    let mut links_reader: ChunkReader = data_reader.read_child_by_index(Self::DATA_LIST_CHUNK_ID)?;
 
     let name: String = meta_reader.read_w1251_string()?;
 
@@ -102,11 +99,7 @@ impl ChunkReadWrite for Patrol {
     )?;
     reader.assert_read("Expect patrol chunk to be ended")?;
 
-    Ok(Self {
-      name,
-      points,
-      links,
-    })
+    Ok(Self { name, points, links })
   }
 
   /// Write single patrol entity into chunk writer.
@@ -122,13 +115,10 @@ impl ChunkReadWrite for Patrol {
     writer.write_all(&meta_writer.flush_chunk_into_buffer::<T>(Self::META_CHUNK_ID)?)?;
 
     point_count_writer.write_u32::<T>(self.points.len() as u32)?;
-    data_writer.write_all(
-      &point_count_writer.flush_chunk_into_buffer::<T>(Self::DATA_POINT_COUNT_CHUNK_ID)?,
-    )?;
+    data_writer.write_all(&point_count_writer.flush_chunk_into_buffer::<T>(Self::DATA_POINT_COUNT_CHUNK_ID)?)?;
 
     points_writer.write_xr_list::<T, _>(&self.points)?;
-    data_writer
-      .write_all(&points_writer.flush_chunk_into_buffer::<T>(Self::DATA_POINT_DATA_CHUNK_ID)?)?;
+    data_writer.write_all(&points_writer.flush_chunk_into_buffer::<T>(Self::DATA_POINT_DATA_CHUNK_ID)?)?;
 
     links_writer.write_xr_list::<T, _>(&self.links)?;
     data_writer.write_all(&links_writer.flush_chunk_into_buffer::<T>(Self::DATA_LIST_CHUNK_ID)?)?;
@@ -171,23 +161,12 @@ impl Patrol {
     }
 
     for index in 0..links_count {
-      links.push(PatrolLink::import(
-        &format!("{}.{}", name, index),
-        patrol_links_ltx,
-      )?);
+      links.push(PatrolLink::import(&format!("{}.{}", name, index), patrol_links_ltx)?);
     }
 
-    assert_length(
-      &links,
-      links_count,
-      "Expect defined count of patrols to be imported",
-    )?;
+    assert_length(&links, links_count, "Expect defined count of patrols to be imported")?;
 
-    Ok(Self {
-      name,
-      points,
-      links,
-    })
+    Ok(Self { name, points, links })
   }
 
   /// Export patrol data into ltx config files.
@@ -214,10 +193,7 @@ impl Patrol {
       .set("links_count", self.links.len().to_string());
 
     for (index, point) in self.points.iter().enumerate() {
-      point.export(
-        &format!("{}.{}.{}", self.name, index, point.name),
-        patrol_points_ltx,
-      )?;
+      point.export(&format!("{}.{}.{}", self.name, index, point.name), patrol_points_ltx)?;
     }
 
     for (index, link) in self.links.iter().enumerate() {
@@ -241,8 +217,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -283,10 +259,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 210);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 210);
 
@@ -359,10 +333,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 430);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 430);
 
@@ -370,9 +342,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
     assert_eq!(
-      Patrol::read_list::<XRayByteOrder>(
-        &mut ChunkReader::from_slice(file)?.read_child_by_index(0)?
-      )?,
+      Patrol::read_list::<XRayByteOrder>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
       original
     );
 
@@ -412,12 +382,9 @@ mod tests {
       }],
     };
 
-    let patrol_config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
-    let points_config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "import_export_points.ltx");
-    let links_config_path: &Path =
-      &get_absolute_test_sample_file_path(file!(), "import_export_links.ltx");
+    let patrol_config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export.ltx");
+    let points_config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export_points.ltx");
+    let links_config_path: &Path = &get_absolute_test_sample_file_path(file!(), "import_export_links.ltx");
 
     let mut patrol_file: File = overwrite_file(patrol_config_path)?;
     let mut points_file: File = overwrite_file(points_config_path)?;
@@ -427,12 +394,7 @@ mod tests {
     let mut links_ltx: Ltx = Ltx::new();
     let mut points_ltx: Ltx = Ltx::new();
 
-    original.export(
-      &original.name,
-      &mut patrol_ltx,
-      &mut points_ltx,
-      &mut links_ltx,
-    )?;
+    original.export(&original.name, &mut patrol_ltx, &mut points_ltx, &mut links_ltx)?;
 
     patrol_ltx.write_to(&mut patrol_file)?;
     points_ltx.write_to(&mut points_file)?;

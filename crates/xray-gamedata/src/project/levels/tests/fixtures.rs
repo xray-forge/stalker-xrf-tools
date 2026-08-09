@@ -7,17 +7,15 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use uuid::{Uuid, uuid};
 use xray_chunk::{ChunkReadWrite, ChunkWriter, XRayByteOrder};
 use xray_db::{
-  GraphCrossTable, GraphHeader, GraphLevel, LevelAiHeader, LevelCformHeader, LevelHeaderChunk,
-  LevelShaderEntry, LevelShadersChunk, SpawnGraphsChunk, Vector3d,
+  GraphCrossTable, GraphHeader, GraphLevel, LevelAiHeader, LevelCformHeader, LevelHeaderChunk, LevelShaderEntry,
+  LevelShadersChunk, SpawnGraphsChunk, Vector3d,
 };
 
 use crate::project::levels::level_engine_constants::{
   AI_CURRENT_VERSION, CFORM_CURRENT_VERSION, LEVEL_PRODUCTION_VERSION,
 };
 use crate::project::levels::verify_levels_result::GamedataLevelsVerificationResult;
-use crate::{
-  GamedataCheckResult, GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions,
-};
+use crate::{GamedataCheckResult, GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions};
 
 pub(crate) static NEXT_TEST_DIRECTORY_ID: AtomicU64 = AtomicU64::new(0);
 
@@ -40,20 +38,13 @@ impl LevelBundleFixture {
       files: vec![
         (
           String::from("level"),
-          level_file_bytes(
-            LEVEL_PRODUCTION_VERSION,
-            true,
-            &["shader\\one/level\\ground"],
-          ),
+          level_file_bytes(LEVEL_PRODUCTION_VERSION, true, &["shader\\one/level\\ground"]),
         ),
         (
           String::from("level.ai"),
           ai_map_bytes(AI_CURRENT_VERSION, AI_NODE_COUNT, ZATON_GUID),
         ),
-        (
-          String::from("level.cform"),
-          cform_bytes(CFORM_CURRENT_VERSION),
-        ),
+        (String::from("level.cform"), cform_bytes(CFORM_CURRENT_VERSION)),
         (String::from("level.game"), vec![1]),
         (String::from("level.geom"), vec![1]),
         (String::from("level.geomx"), vec![1]),
@@ -167,10 +158,7 @@ pub(crate) fn level_ltx_bytes(texture: &str) -> Vec<u8> {
 }
 
 /// Build a spawn file containing only the game graph chunk, which is all the roster reads.
-pub(crate) fn spawn_graph_bytes(
-  levels: &[(&str, u8, Uuid)],
-  cross_tables: Vec<GraphCrossTable>,
-) -> Vec<u8> {
+pub(crate) fn spawn_graph_bytes(levels: &[(&str, u8, Uuid)], cross_tables: Vec<GraphCrossTable>) -> Vec<u8> {
   let mut graphs_writer: ChunkWriter = ChunkWriter::new();
 
   let graphs: SpawnGraphsChunk = SpawnGraphsChunk {
@@ -231,20 +219,14 @@ impl GamedataFixture {
     let unique: u64 = NEXT_TEST_DIRECTORY_ID.fetch_add(1, Ordering::Relaxed);
 
     Self {
-      root: std::env::temp_dir().join(format!(
-        "xray-gamedata-levels-test-{}-{unique}",
-        std::process::id()
-      )),
+      root: std::env::temp_dir().join(format!("xray-gamedata-levels-test-{}-{unique}", std::process::id())),
       bundles: vec![LevelBundleFixture::valid("zaton")],
       spawn: Some(spawn_graph_bytes(
         &[("zaton", 108, ZATON_GUID)],
         vec![cross_table(ZATON_GUID, GRAPH_GUID, AI_NODE_COUNT)],
       )),
       declared_maps: vec![String::from("zaton")],
-      textures: vec![
-        String::from("map\\map_zaton"),
-        String::from("level\\ground"),
-      ],
+      textures: vec![String::from("map\\map_zaton"), String::from("level\\ground")],
     }
   }
 

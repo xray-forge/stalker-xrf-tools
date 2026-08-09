@@ -50,8 +50,7 @@ mod tests {
   use crate::project::animations::hud_motion_collisions_verification_result::GamedataHudMotionCollisionsVerificationResult;
   use crate::project::animations::player_hud_animations_verification_result::GamedataPlayerHudAnimationsVerificationResult;
   use crate::{
-    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
-    GamedataVerificationType,
+    Finding, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus, GamedataVerificationType,
   };
 
   #[test]

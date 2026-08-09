@@ -27,10 +27,7 @@ impl SpawnPatrolsChunk {
 impl ChunkReadWrite for SpawnPatrolsChunk {
   /// Read patrols list from the chunk.
   fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
-    log::info!(
-      "Reading patrols chunk, bytes {}",
-      reader.read_bytes_remain()
-    );
+    log::info!("Reading patrols chunk, bytes {}", reader.read_bytes_remain());
 
     let mut meta_reader: ChunkReader = reader.read_child_by_index(Self::META_NESTED_CHUNK_ID)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_NESTED_CHUNK_ID)?;
@@ -38,11 +35,7 @@ impl ChunkReadWrite for SpawnPatrolsChunk {
     let count: u32 = meta_reader.read_u32::<T>()?;
     let patrols: Vec<Patrol> = data_reader.read_xr_list::<T, _>()?;
 
-    assert_length(
-      &patrols,
-      count as usize,
-      "Expect defined count of patrols to be read",
-    )?;
+    assert_length(&patrols, count as usize, "Expect defined count of patrols to be read")?;
 
     meta_reader.assert_read("Expect patrol meta chunk to be ended")?;
     data_reader.assert_read("Expect patrol data chunk to be ended")?;
@@ -115,12 +108,8 @@ impl FileImportExport for SpawnPatrolsChunk {
     }
 
     patrols_ltx.write_to(&mut open_export_file(path.as_ref().join("patrols.ltx"))?)?;
-    patrol_points_ltx.write_to(&mut open_export_file(
-      path.as_ref().join("patrol_points.ltx"),
-    )?)?;
-    patrol_links_ltx.write_to(&mut open_export_file(
-      path.as_ref().join("patrol_links.ltx"),
-    )?)?;
+    patrol_points_ltx.write_to(&mut open_export_file(path.as_ref().join("patrol_points.ltx"))?)?;
+    patrol_links_ltx.write_to(&mut open_export_file(path.as_ref().join("patrol_links.ltx"))?)?;
 
     log::info!("Exported patrols chunk");
 
@@ -130,11 +119,7 @@ impl FileImportExport for SpawnPatrolsChunk {
 
 impl fmt::Debug for SpawnPatrolsChunk {
   fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(
-      formatter,
-      "PatrolsChunk {{ patrols: Vector[{}] }}",
-      self.patrols.len(),
-    )
+    write!(formatter, "PatrolsChunk {{ patrols: Vector[{}] }}", self.patrols.len(),)
   }
 }
 
@@ -144,8 +129,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -215,10 +199,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 450);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 450);
 

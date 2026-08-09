@@ -27,8 +27,7 @@ impl GamedataProject {
     let started_at: Instant = Instant::now();
     let particle_names: HashSet<String> = self.read_particle_names()?;
 
-    let mut result: GamedataParticlesUsageVerificationResult =
-      GamedataParticlesUsageVerificationResult::default();
+    let mut result: GamedataParticlesUsageVerificationResult = GamedataParticlesUsageVerificationResult::default();
 
     self.verify_particles_usage_in_configs(options, &particle_names, &mut result);
     self.verify_particles_usage_in_spawns(options, &particle_names, &mut result);
@@ -134,26 +133,25 @@ impl GamedataProject {
         continue;
       };
 
-      let spawn_file: SpawnFile =
-        match SpawnFile::read_from_path::<XRayByteOrder, PathBuf>(&spawn_path) {
-          Ok(spawn_file) => spawn_file,
-          Err(error) => {
-            xray_output::error!(
-              options.output,
-              "Could not inspect spawn file for particle usage: {} - {}",
-              spawn_path.display(),
-              error
-            );
+      let spawn_file: SpawnFile = match SpawnFile::read_from_path::<XRayByteOrder, PathBuf>(&spawn_path) {
+        Ok(spawn_file) => spawn_file,
+        Err(error) => {
+          xray_output::error!(
+            options.output,
+            "Could not inspect spawn file for particle usage: {} - {}",
+            spawn_path.display(),
+            error
+          );
 
-            result.findings.push(GamedataFindingFactory::for_asset(
-              GamedataVerificationRule::ParticlesUsageSpawn,
-              &spawn_path,
-              format!("Could not inspect spawn file for particle usage: {error}"),
-            ));
-            result.unreadable_spawn_files_count += 1;
-            continue;
-          }
-        };
+          result.findings.push(GamedataFindingFactory::for_asset(
+            GamedataVerificationRule::ParticlesUsageSpawn,
+            &spawn_path,
+            format!("Could not inspect spawn file for particle usage: {error}"),
+          ));
+          result.unreadable_spawn_files_count += 1;
+          continue;
+        }
+      };
 
       for object in &spawn_file.alife_spawn.objects {
         let Some(custom_data) = object.inherited.get_custom_data() else {

@@ -20,14 +20,8 @@ pub(crate) struct LevelReferencesVerifier<'a> {
 }
 
 impl<'a> LevelReferencesVerifier<'a> {
-  pub(crate) fn new(
-    bundle: &'a LevelBundle<'a>,
-    shader_library: Option<&'a ShaderLibraryFile>,
-  ) -> Self {
-    Self {
-      bundle,
-      shader_library,
-    }
+  pub(crate) fn new(bundle: &'a LevelBundle<'a>, shader_library: Option<&'a ShaderLibraryFile>) -> Self {
+    Self { bundle, shader_library }
   }
 
   /// Load the shader library once per check.
@@ -63,12 +57,7 @@ impl<'a> LevelReferencesVerifier<'a> {
     outcome
   }
 
-  fn verify_reference(
-    &self,
-    asset_path: &str,
-    reference: &LevelShaderReference,
-    outcome: &mut LevelReferencesOutcome,
-  ) {
+  fn verify_reference(&self, asset_path: &str, reference: &LevelShaderReference, outcome: &mut LevelReferencesOutcome) {
     outcome.checked_count += 1;
 
     if let Some(library) = self.shader_library

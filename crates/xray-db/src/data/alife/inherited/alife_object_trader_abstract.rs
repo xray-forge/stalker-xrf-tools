@@ -93,10 +93,7 @@ impl LtxImportExport for AlifeObjectTraderAbstract {
       .set("trader.rank", self.rank.to_string())
       .set("trader.reputation", self.reputation.to_string())
       .set("trader.character_name", &self.character_name)
-      .set(
-        "trader.dead_body_can_take",
-        self.dead_body_can_take.to_string(),
-      )
+      .set("trader.dead_body_can_take", self.dead_body_can_take.to_string())
       .set("trader.dead_body_closed", self.dead_body_closed.to_string());
 
     Ok(())
@@ -109,8 +106,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_trader_abstract::AlifeObjectTraderAbstract;
@@ -137,10 +133,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 74);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 74);
 
@@ -150,10 +144,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeObjectTraderAbstract::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeObjectTraderAbstract::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

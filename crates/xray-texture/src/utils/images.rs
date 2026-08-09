@@ -5,10 +5,7 @@ use std::path::Path;
 use ddsfile::Dds;
 use image::codecs::png::PngEncoder;
 use image::imageops::FilterType;
-use image::{
-  DynamicImage, ExtendedColorType, GenericImage, ImageBuffer, ImageEncoder, ImageFormat, Rgba,
-  RgbaImage,
-};
+use image::{DynamicImage, ExtendedColorType, GenericImage, ImageBuffer, ImageEncoder, ImageFormat, Rgba, RgbaImage};
 use image_dds::{ImageFormat as DDSImageFormat, Mipmaps, dds_from_image};
 use xray_error::{XRayError, XRayResult};
 use xray_output::OutputOptions;
@@ -18,12 +15,7 @@ use xray_utils::assert;
 ///
 /// Scaling preserves the aspect ratio, so an image whose proportions differ from the bounds ends up
 /// letterboxed rather than distorted. An image that already matches the bounds is returned untouched.
-pub fn fit_image_into_bounds(
-  image: DynamicImage,
-  width: u32,
-  height: u32,
-  source: &Path,
-) -> XRayResult<DynamicImage> {
+pub fn fit_image_into_bounds(image: DynamicImage, width: u32, height: u32, source: &Path) -> XRayResult<DynamicImage> {
   let image_width: u32 = image.width();
   let image_height: u32 = image.height();
 
@@ -89,10 +81,7 @@ pub fn read_dds_by_path<P: AsRef<Path>>(path: P) -> XRayResult<Dds> {
 
 pub fn dds_to_image(dds: &Dds) -> XRayResult<RgbaImage> {
   image_dds::image_from_dds(dds, 0).map_err(|error| {
-    XRayError::new_texture_processing_error(format!(
-      "Failed to convert DDS to RGBA image: {}'",
-      error,
-    ))
+    XRayError::new_texture_processing_error(format!("Failed to convert DDS to RGBA image: {}'", error,))
   })
 }
 
@@ -101,12 +90,7 @@ pub fn dds_to_image(dds: &Dds) -> XRayResult<RgbaImage> {
 /// Dimensions do not have to be multiples of 4. The block compressor pads every mip level out to whole
 /// 4x4 blocks itself and records the unpadded size in the header, so the file keeps the exact
 /// dimensions the image was built with.
-pub fn save_image_as_ui_dds(
-  path: &Path,
-  image: &RgbaImage,
-  format: DDSImageFormat,
-  mipmaps: Mipmaps,
-) -> XRayResult {
+pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: DDSImageFormat, mipmaps: Mipmaps) -> XRayResult {
   dds_from_image(image, format, image_dds::Quality::Slow, mipmaps)
     .map_err(|it| XRayError::new_texture_processing_error(it.to_string()))?
     .write(&mut BufWriter::new(File::create(path)?))
@@ -122,13 +106,7 @@ pub fn save_image_as_ui_dds(
 /// changes shape diverges from its pristine form and from the other resource repositories with nothing
 /// in the log to say so. One sheet can also be described by several description files, and packing only
 /// some of them would otherwise shrink it without a word.
-pub fn warn_on_reshaped_ui_dds(
-  output: &OutputOptions,
-  path: &Path,
-  width: u32,
-  height: u32,
-  mipmap_levels: u32,
-) {
+pub fn warn_on_reshaped_ui_dds(output: &OutputOptions, path: &Path, width: u32, height: u32, mipmap_levels: u32) {
   if !path.is_file() {
     return;
   }
@@ -175,12 +153,7 @@ pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XRayResult<(RgbaImage, Vec<u8
   let mut buffer: Vec<u8> = Vec::new();
 
   PngEncoder::new(buffer.by_ref())
-    .write_image(
-      image.as_raw(),
-      image.width(),
-      image.height(),
-      ExtendedColorType::Rgba8,
-    )
+    .write_image(image.as_raw(), image.width(), image.height(), ExtendedColorType::Rgba8)
     .expect("Error encoding pixels as PNG");
 
   Ok((image, buffer))
@@ -235,10 +208,7 @@ mod tests {
     let generated: Dds = write_and_read("mipped", 1023, 1020, Mipmaps::GeneratedAutomatic);
 
     assert_eq!(generated.get_num_mipmap_levels(), 10);
-    assert_eq!(
-      (generated.header.width, generated.header.height),
-      (1023, 1020)
-    );
+    assert_eq!((generated.header.width, generated.header.height), (1023, 1020));
 
     let flat: Dds = write_and_read("flat", 1023, 1020, Mipmaps::Disabled);
 

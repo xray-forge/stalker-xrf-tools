@@ -118,23 +118,11 @@ impl LtxImportExport for AlifeLevelChanger {
         "level_changer.dest_level_vertex_id",
         self.dest_level_vertex_id.to_string(),
       )
-      .set(
-        "level_changer.dest_position",
-        self.dest_position.to_string(),
-      )
-      .set(
-        "level_changer.dest_direction",
-        self.dest_direction.to_string(),
-      )
+      .set("level_changer.dest_position", self.dest_position.to_string())
+      .set("level_changer.dest_direction", self.dest_direction.to_string())
       .set("level_changer.angle_y", self.angle_y.to_string())
-      .set(
-        "level_changer.dest_level_name",
-        self.dest_level_name.to_string(),
-      )
-      .set(
-        "level_changer.dest_graph_point",
-        self.dest_graph_point.to_string(),
-      )
+      .set("level_changer.dest_level_name", self.dest_level_name.to_string())
+      .set("level_changer.dest_graph_point", self.dest_graph_point.to_string())
       .set("level_changer.silent_mode", self.silent_mode.to_string())
       .set("level_changer.enabled", self.enabled.to_string())
       .set("level_changer.hint", self.hint.to_string())
@@ -156,8 +144,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_level_changer::AlifeLevelChanger;
@@ -212,10 +200,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 177);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 177);
 
@@ -274,9 +260,7 @@ mod tests {
 
     original.export("data", &mut ltx)?;
 
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
-      &ltx_filename,
-    )?)?;
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&ltx_filename)?)?;
 
     let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
@@ -323,9 +307,10 @@ mod tests {
       save_marker: 26,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -334,10 +319,7 @@ mod tests {
 
     assert_eq!(serialized.to_string(), serialized);
 
-    assert_eq!(
-      serde_json::from_str::<AlifeLevelChanger>(&serialized)?,
-      original
-    );
+    assert_eq!(serde_json::from_str::<AlifeLevelChanger>(&serialized)?, original);
 
     Ok(())
   }

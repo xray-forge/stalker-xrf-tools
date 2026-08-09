@@ -7,8 +7,7 @@ use crate::types::TauriResult;
 
 #[tauri::command]
 pub async fn get_xr_exports(state: State<'_, ExportsEditorState>) -> TauriResult<Option<Value>> {
-  let conditions: Option<Vec<ExportDescriptor>> =
-    state.conditions.lock().unwrap().as_ref().cloned();
+  let conditions: Option<Vec<ExportDescriptor>> = state.conditions.lock().unwrap().as_ref().cloned();
   let dialogs: Option<Vec<ExportDescriptor>> = state.dialogs.lock().unwrap().as_ref().cloned();
   let effects: Option<Vec<ExportDescriptor>> = state.effects.lock().unwrap().as_ref().cloned();
 

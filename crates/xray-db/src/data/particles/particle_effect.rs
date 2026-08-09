@@ -1,8 +1,8 @@
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xray_chunk::{
-  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id,
-  read_f32_chunk, read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
+  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
+  read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
 };
 use xray_error::{XRayError, XRayResult};
 use xray_ltx::{Ltx, Section};
@@ -93,85 +93,58 @@ impl ChunkReadWrite for ParticleEffect {
     let effect: Self = {
       Self {
         version: read_u16_chunk::<T>(
-          &mut find_optional_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)
-            .expect("Particle name chunk not found"),
+          &mut find_optional_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID).expect("Particle name chunk not found"),
         )
-        .map_err(|error| {
-          XRayError::new_parsing_error(format!("Failed to read particle version chunk: {}", error))
-        })?,
+        .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle version chunk: {}", error)))?,
         name: read_w1251_string_chunk(
-          &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)
-            .expect("Particle name chunk not found"),
+          &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID).expect("Particle name chunk not found"),
         )
-        .map_err(|error| {
-          XRayError::new_parsing_error(format!("Failed to read particle name chunk: {}", error))
-        })?,
+        .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle name chunk: {}", error)))?,
         max_particles: read_u32_chunk::<T>(
           &mut find_optional_chunk_by_id(&chunks, Self::MAX_PARTICLES_CHUNK_ID)
             .expect("Particle max particles chunk not found"),
         )
         .map_err(|error| {
-          XRayError::new_parsing_error(format!(
-            "Failed to read particle max_particles chunk: {}",
-            error
-          ))
+          XRayError::new_parsing_error(format!("Failed to read particle max_particles chunk: {}", error))
         })?,
         actions: find_required_chunk_by_id(&chunks, Self::ACTION_LIST_CHUNK_ID)?
           .read_xr_list::<T, _>()
-          .map_err(|error| {
-            XRayError::new_parsing_error(format!(
-              "Failed to read particle actions chunk: {}",
-              error
-            ))
-          })?,
+          .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle actions chunk: {}", error)))?,
         flags: read_u32_chunk::<T>(
-          &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)
-            .expect("Particle flags chunk not found"),
+          &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID).expect("Particle flags chunk not found"),
         )
-        .map_err(|error| {
-          XRayError::new_parsing_error(format!("Failed to read particle flags chunk: {}", error))
-        })?,
+        .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle flags chunk: {}", error)))?,
         frame: find_optional_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID).map(|mut it| {
           it.read_xr::<T, _>()
             .expect("Invalid frame chunk data in particle effect")
         }),
         sprite: find_required_chunk_by_id(&chunks, Self::SPRITE_CHUNK_ID)?
           .read_xr::<T, _>()
-          .map_err(|error| {
-            XRayError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error))
-          })?,
-        time_limit: find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID).map(|mut it| {
-          read_f32_chunk::<T>(&mut it)
-            .expect("Invalid frame time limit chunk data in particle effect")
-        }),
+          .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error)))?,
+        time_limit: find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)
+          .map(|mut it| read_f32_chunk::<T>(&mut it).expect("Invalid frame time limit chunk data in particle effect")),
         collision: find_optional_chunk_by_id(&chunks, Self::COLLISION_CHUNK_ID).map(|mut it| {
           it.read_xr::<T, _>()
             .expect("Invalid collision chunk data in particle effect")
         }),
-        velocity_scale: find_optional_chunk_by_id(&chunks, Self::VELOCITY_SCALE_CHUNK_ID).map(
-          |mut it| {
-            read_f32_vector_chunk::<T>(&mut it)
-              .expect("Invalid velocity scale chunk data in particle effect")
-              .into()
-          },
-        ),
-        description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(
-          |mut it| {
-            it.read_xr::<T, _>()
-              .expect("Invalid description chunk data in particle effect")
-          },
-        ),
+        velocity_scale: find_optional_chunk_by_id(&chunks, Self::VELOCITY_SCALE_CHUNK_ID).map(|mut it| {
+          read_f32_vector_chunk::<T>(&mut it)
+            .expect("Invalid velocity scale chunk data in particle effect")
+            .into()
+        }),
+        description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID).map(|mut it| {
+          it.read_xr::<T, _>()
+            .expect("Invalid description chunk data in particle effect")
+        }),
         rotation: find_optional_chunk_by_id(&chunks, Self::ROTATION_CHUNK_ID).map(|mut it| {
           read_f32_vector_chunk::<T>(&mut it)
             .expect("Invalid rotation chunk data in particle effect")
             .into()
         }),
-        editor_data: find_optional_chunk_by_id(&chunks, Self::EDITOR_DATA_CHUNK_ID).map(
-          |mut it| {
-            it.read_xr::<T, _>()
-              .expect("Invalid editor data chunk in particle effect")
-          },
-        ),
+        editor_data: find_optional_chunk_by_id(&chunks, Self::EDITOR_DATA_CHUNK_ID).map(|mut it| {
+          it.read_xr::<T, _>()
+            .expect("Invalid editor data chunk in particle effect")
+        }),
       }
     };
 
@@ -300,20 +273,11 @@ impl LtxImportExport for ParticleEffect {
       frame: ParticleEffectFrame::import_optional(&Self::get_frame_section(section_name), ltx)?,
       sprite: ParticleEffectSprite::import(&Self::get_sprite_section(section_name), ltx)?,
       time_limit: read_ltx_optional_field("time_limit", section)?,
-      collision: ParticleEffectCollision::import_optional(
-        &Self::get_collision_section(section_name),
-        ltx,
-      )?,
+      collision: ParticleEffectCollision::import_optional(&Self::get_collision_section(section_name), ltx)?,
       velocity_scale: read_ltx_optional_field("velocity_scale", section)?,
-      description: ParticleDescription::import_optional(
-        &Self::get_description_section(section_name),
-        ltx,
-      )?,
+      description: ParticleDescription::import_optional(&Self::get_description_section(section_name), ltx)?,
       rotation: read_ltx_optional_field("rotation", section)?,
-      editor_data: ParticleEffectEditorData::import_optional(
-        &Self::get_editor_data_section(section_name),
-        ltx,
-      )?,
+      editor_data: ParticleEffectEditorData::import_optional(&Self::get_editor_data_section(section_name), ltx)?,
     })
   }
 
@@ -329,29 +293,16 @@ impl LtxImportExport for ParticleEffect {
       .set("flags", self.flags.to_string())
       .set_optional("time_limit", self.time_limit.map(|it| it.to_string()))
       .set_optional("rotation", self.rotation.as_ref().map(|it| it.to_string()))
-      .set_optional(
-        "velocity_scale",
-        self.velocity_scale.as_ref().map(|it| it.to_string()),
-      );
+      .set_optional("velocity_scale", self.velocity_scale.as_ref().map(|it| it.to_string()));
 
-    self
-      .sprite
-      .export(&Self::get_sprite_section(section_name), ltx)?;
+    self.sprite.export(&Self::get_sprite_section(section_name), ltx)?;
 
     for (index, action) in self.actions.iter().enumerate() {
       action.export(&Self::get_action_section(section_name, index), ltx)?
     }
 
-    ParticleEffectFrame::export_optional(
-      &Self::get_frame_section(section_name),
-      ltx,
-      self.frame.as_ref(),
-    )?;
-    ParticleEffectCollision::export_optional(
-      &Self::get_collision_section(section_name),
-      ltx,
-      self.collision.as_ref(),
-    )?;
+    ParticleEffectFrame::export_optional(&Self::get_frame_section(section_name), ltx, self.frame.as_ref())?;
+    ParticleEffectCollision::export_optional(&Self::get_collision_section(section_name), ltx, self.collision.as_ref())?;
     ParticleDescription::export_optional(
       &Self::get_description_section(section_name),
       ltx,
@@ -379,8 +330,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -455,17 +406,13 @@ mod tests {
     assert_eq!(writer.bytes_written(), 343);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 343);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 343 + 8);
 
@@ -535,9 +482,7 @@ mod tests {
 
     original.export("data", &mut ltx)?;
 
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
-      &ltx_filename,
-    )?)?;
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&ltx_filename)?)?;
 
     let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
@@ -597,9 +542,10 @@ mod tests {
       }),
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -607,10 +553,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      serde_json::from_str::<ParticleEffect>(&serialized)?,
-      original
-    );
+    assert_eq!(serde_json::from_str::<ParticleEffect>(&serialized)?, original);
 
     Ok(())
   }

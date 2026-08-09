@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_output::OutputOptions;
 use xray_texture::{
-  DynamicImage, GenericImageView, ImageFormat, Mipmaps, PNG_EXTENSION, RgbaImage, dds_to_image,
-  fit_image_into_bounds, read_dds_by_path, save_image_as_ui_dds, save_image_as_ui_png,
+  DynamicImage, GenericImageView, ImageFormat, Mipmaps, PNG_EXTENSION, RgbaImage, dds_to_image, fit_image_into_bounds,
+  read_dds_by_path, save_image_as_ui_dds, save_image_as_ui_png,
 };
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -105,15 +105,10 @@ impl GenericCommand for CropDdsCommand {
 
     let x: u32 = *matches.get_one::<u32>("x").expect("Expected valid x");
     let y: u32 = *matches.get_one::<u32>("y").expect("Expected valid y");
-    let width: u32 = *matches
-      .get_one::<u32>("width")
-      .expect("Expected valid width");
-    let height: u32 = *matches
-      .get_one::<u32>("height")
-      .expect("Expected valid height");
+    let width: u32 = *matches.get_one::<u32>("width").expect("Expected valid width");
+    let height: u32 = *matches.get_one::<u32>("height").expect("Expected valid height");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let image: RgbaImage = dds_to_image(&read_dds_by_path(source)?)?;
 

@@ -68,10 +68,7 @@ impl LtxImportExport for AlifeZoneVisual {
       visual: AlifeObjectVisual::import(section_name, ltx)?,
       idle_animation: read_ltx_field("zone_visual.idle_animation", section)?,
       attack_animation: read_ltx_field("zone_visual.attack_animation", section)?,
-      last_spawn_time: Time::from_str_optional(&read_ltx_field::<String>(
-        "zone_visual.last_spawn_time",
-        section,
-      )?)?,
+      last_spawn_time: Time::from_str_optional(&read_ltx_field::<String>("zone_visual.last_spawn_time", section)?)?,
     })
   }
 
@@ -99,8 +96,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -166,10 +162,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 145);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 145);
 
@@ -179,10 +173,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeZoneVisual::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeZoneVisual::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -240,10 +231,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 190);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 190);
 
@@ -253,10 +242,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeZoneVisual::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeZoneVisual::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

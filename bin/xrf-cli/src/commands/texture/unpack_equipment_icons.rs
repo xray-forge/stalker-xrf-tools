@@ -6,8 +6,7 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xray_ltx::Ltx;
 use xray_output::OutputOptions;
 use xray_texture::{
-  ImageFormat, RgbaImage, UnpackEquipmentOptions, UnpackEquipmentProcessor, dds_to_image,
-  read_dds_by_path,
+  ImageFormat, RgbaImage, UnpackEquipmentOptions, UnpackEquipmentProcessor, dds_to_image, read_dds_by_path,
 };
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -115,15 +114,9 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
     })?;
 
-    xray_output::info!(
-      output_options,
-      "Successfully DDS equipment file based on LTX sections"
-    );
+    xray_output::info!(output_options, "Successfully DDS equipment file based on LTX sections");
 
-    log::info!(
-      "Unpack equipment took: {}ms",
-      started_at.elapsed().as_millis()
-    );
+    log::info!("Unpack equipment took: {}ms", started_at.elapsed().as_millis());
 
     Ok(())
   }

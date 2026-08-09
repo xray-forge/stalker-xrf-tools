@@ -53,8 +53,7 @@ impl<'a> TranslationVerificationReportWriter<'a> {
 
   fn report_output(&self) -> TranslationVerificationReportOutput {
     let report: Report = self.result.to_report();
-    let checks: Vec<TranslationVerificationCheckOutput> =
-      report.checks().iter().map(Self::check_output).collect();
+    let checks: Vec<TranslationVerificationCheckOutput> = report.checks().iter().map(Self::check_output).collect();
 
     TranslationVerificationReportOutput {
       checked_translations_count: self.result.checked_translations_count,
@@ -119,8 +118,7 @@ mod tests {
     TranslationVerificationReportWriter::new(&result)
       .write(&report_path)
       .unwrap();
-    let json: serde_json::Value =
-      serde_json::from_str(&fs::read_to_string(&report_path).unwrap()).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&fs::read_to_string(&report_path).unwrap()).unwrap();
 
     fs::remove_dir_all(&root).unwrap();
 
@@ -129,10 +127,7 @@ mod tests {
     assert_eq!(json["missingTranslationsCount"], 1);
     assert_eq!(json["checks"][0]["id"], "translations");
     assert_eq!(json["checks"][0]["status"], "failed");
-    assert_eq!(
-      json["checks"][0]["findings"][0]["ruleId"],
-      "translations.missing"
-    );
+    assert_eq!(json["checks"][0]["findings"][0]["ruleId"], "translations.missing");
     assert_eq!(
       json["checks"][0]["findings"][0]["subject"],
       translation_path.to_string_lossy().replace('\\', "/")

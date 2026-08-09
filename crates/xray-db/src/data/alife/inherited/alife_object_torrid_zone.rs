@@ -52,10 +52,7 @@ impl LtxImportExport for AlifeObjectTorridZone {
     Ok(Self {
       base: AlifeObjectCustomZone::import(section_name, ltx)?,
       motion: AlifeObjectMotion::import(section_name, ltx)?,
-      last_spawn_time: Time::from_str_optional(&read_ltx_field::<String>(
-        "last_spawn_time",
-        section,
-      )?)?,
+      last_spawn_time: Time::from_str_optional(&read_ltx_field::<String>("last_spawn_time", section)?)?,
     })
   }
 
@@ -64,10 +61,9 @@ impl LtxImportExport for AlifeObjectTorridZone {
     self.base.export(section_name, ltx)?;
     self.motion.export(section_name, ltx)?;
 
-    ltx.with_section(section_name).set(
-      "last_spawn_time",
-      Time::export_to_string(self.last_spawn_time.as_ref()),
-    );
+    ltx
+      .with_section(section_name)
+      .set("last_spawn_time", Time::export_to_string(self.last_spawn_time.as_ref()));
 
     Ok(())
   }
@@ -79,8 +75,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -135,10 +130,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 81);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 81);
 
@@ -148,10 +141,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeObjectTorridZone::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeObjectTorridZone::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

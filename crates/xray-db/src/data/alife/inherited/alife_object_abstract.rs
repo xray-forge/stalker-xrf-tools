@@ -69,10 +69,7 @@ impl LtxImportExport for AlifeObjectAbstract {
       direct_control: read_ltx_field("abstract.direct_control", section)?,
       level_vertex_id: read_ltx_field("abstract.level_vertex_id", section)?,
       flags: read_ltx_field("abstract.flags", section)?,
-      custom_data: decode_string_from_base64(&read_ltx_field::<String>(
-        "abstract.custom_data",
-        section,
-      )?)?,
+      custom_data: decode_string_from_base64(&read_ltx_field::<String>("abstract.custom_data", section)?)?,
       story_id: read_ltx_field("abstract.story_id", section)?,
       spawn_story_id: read_ltx_field("abstract.spawn_story_id", section)?,
     })
@@ -87,10 +84,7 @@ impl LtxImportExport for AlifeObjectAbstract {
       .set("abstract.direct_control", self.direct_control.to_string())
       .set("abstract.level_vertex_id", self.level_vertex_id.to_string())
       .set("abstract.flags", self.flags.to_string())
-      .set(
-        "abstract.custom_data",
-        encode_string_to_base64(&self.custom_data),
-      )
+      .set("abstract.custom_data", encode_string_to_base64(&self.custom_data))
       .set("abstract.story_id", self.story_id.to_string())
       .set("abstract.spawn_story_id", self.spawn_story_id.to_string());
 
@@ -110,8 +104,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
+    get_absolute_test_resource_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -137,10 +131,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 38);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 38);
 
@@ -150,10 +142,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(
-      AlifeObjectAbstract::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(AlifeObjectAbstract::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -188,9 +177,7 @@ mod tests {
     first.export("first", &mut ltx)?;
     second.export("second", &mut ltx)?;
 
-    ltx.write_to(&mut overwrite_test_relative_resource_as_file(
-      &ltx_filename,
-    )?)?;
+    ltx.write_to(&mut overwrite_test_relative_resource_as_file(&ltx_filename)?)?;
 
     let source: Ltx = Ltx::read_from_path(get_absolute_test_resource_path(&ltx_filename))?;
 
@@ -213,9 +200,10 @@ mod tests {
       spawn_story_id: 36,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;
@@ -223,10 +211,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<AlifeObjectAbstract>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<AlifeObjectAbstract>(&serialized)?);
 
     Ok(())
   }

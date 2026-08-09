@@ -6,11 +6,7 @@ use crate::swc_common::SourceMap;
 use crate::swc_ecma_ast::{Decl, Expr, ModuleItem, Pat, Program, Stmt, VarDecl};
 
 /// Return a symbol declared directly in one source module.
-pub fn local_symbol(
-  program: &Program,
-  local_name: &str,
-  source_map: &SourceMap,
-) -> Option<TypeScriptSymbol> {
+pub fn local_symbol(program: &Program, local_name: &str, source_map: &SourceMap) -> Option<TypeScriptSymbol> {
   let Program::Module(module) = program else {
     return None;
   };
@@ -35,35 +31,24 @@ pub fn local_symbol(
 }
 
 /// Resolve the symbol emitted directly by an export declaration.
-pub fn exported_symbol(
-  declaration: &Decl,
-  export_name: &str,
-  source_map: &SourceMap,
-) -> Option<TypeScriptSymbol> {
+pub fn exported_symbol(declaration: &Decl, export_name: &str, source_map: &SourceMap) -> Option<TypeScriptSymbol> {
   declared_symbol(declaration, export_name, source_map)
 }
 
 /// Resolve a source declaration by its local binding name.
-fn declared_symbol(
-  declaration: &Decl,
-  local_name: &str,
-  source_map: &SourceMap,
-) -> Option<TypeScriptSymbol> {
+fn declared_symbol(declaration: &Decl, local_name: &str, source_map: &SourceMap) -> Option<TypeScriptSymbol> {
   match declaration {
-    Decl::Fn(function) if function.ident.sym == *local_name => Some(TypeScriptSymbol::Callable(
-      function_signature(&function.function, source_map),
-    )),
+    Decl::Fn(function) if function.ident.sym == *local_name => Some(TypeScriptSymbol::Callable(function_signature(
+      &function.function,
+      source_map,
+    ))),
     Decl::Var(variable) => variable_symbol(variable, local_name, source_map),
     _ => None,
   }
 }
 
 /// Extract a contract from an exported variable declaration.
-fn variable_symbol(
-  variable: &VarDecl,
-  export_name: &str,
-  source_map: &SourceMap,
-) -> Option<TypeScriptSymbol> {
+fn variable_symbol(variable: &VarDecl, export_name: &str, source_map: &SourceMap) -> Option<TypeScriptSymbol> {
   variable.decls.iter().find_map(|declaration| {
     let Pat::Ident(identifier) = &declaration.name else {
       return None;
@@ -73,9 +58,9 @@ fn variable_symbol(
     }
 
     match declaration.init.as_deref() {
-      Some(Expr::Arrow(arrow)) => Some(TypeScriptSymbol::Callable(
-        super::callable_signature::arrow_signature(arrow, source_map),
-      )),
+      Some(Expr::Arrow(arrow)) => Some(TypeScriptSymbol::Callable(super::callable_signature::arrow_signature(
+        arrow, source_map,
+      ))),
       Some(Expr::Fn(function)) => Some(TypeScriptSymbol::Callable(function_signature(
         &function.function,
         source_map,

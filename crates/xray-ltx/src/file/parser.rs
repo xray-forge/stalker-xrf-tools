@@ -3,8 +3,7 @@ use std::str::Chars;
 use xray_error::{XRayError, XRayResult};
 
 use crate::file::file_configuration::constants::{
-  LTX_SYMBOL_COMMENT, LTX_SYMBOL_INCLUDE, LTX_SYMBOL_INHERIT, LTX_SYMBOL_SECTION_CLOSE,
-  LTX_SYMBOL_SECTION_OPEN,
+  LTX_SYMBOL_COMMENT, LTX_SYMBOL_INCLUDE, LTX_SYMBOL_INHERIT, LTX_SYMBOL_SECTION_CLOSE, LTX_SYMBOL_SECTION_OPEN,
 };
 use crate::file::file_configuration::line_separator::LineSeparator;
 use crate::file::file_section::section::Section;
@@ -132,9 +131,7 @@ impl<'a> LtxParser<'a> {
               vacant_entry.insert(properties);
             }
             SectionEntry::Occupied(properties) => {
-              properties
-                .into_mut()
-                .append(key, value.unwrap_or(String::new()));
+              properties.into_mut().append(key, value.unwrap_or(String::new()));
             }
           }
         }
@@ -146,13 +143,7 @@ impl<'a> LtxParser<'a> {
     Ok(ltx)
   }
 
-  fn parse_metadata_directive(
-    &self,
-    comment: &str,
-    ltx: &mut Ltx,
-    line: usize,
-    column: usize,
-  ) -> XRayResult {
+  fn parse_metadata_directive(&self, comment: &str, ltx: &mut Ltx, line: usize, column: usize) -> XRayResult {
     let mut parts: std::str::SplitWhitespace<'_> = comment.split_whitespace();
 
     if parts.next() != Some("@xrf-ltx") {
@@ -287,11 +278,7 @@ impl LtxParser<'_> {
 
   /// Create parsing error.
   fn error<U, M: Into<String>>(&self, message: M) -> XRayResult<U> {
-    Err(XRayError::new_ltx_parse_error(
-      self.line + 1,
-      self.column + 1,
-      message,
-    ))
+    Err(XRayError::new_ltx_parse_error(self.line + 1, self.column + 1, message))
   }
 
   /// Consume all the white space until the end of the line or a tab.
@@ -328,11 +315,7 @@ impl LtxParser<'_> {
     }
   }
 
-  fn parse_until(
-    &mut self,
-    endpoint: &[Option<char>],
-    check_inline_comment: bool,
-  ) -> XRayResult<String> {
+  fn parse_until(&mut self, endpoint: &[Option<char>], check_inline_comment: bool) -> XRayResult<String> {
     let mut result: String = String::new();
 
     while !endpoint.contains(&self.char) {
@@ -382,10 +365,7 @@ impl LtxParser<'_> {
 
 impl LtxParser<'_> {
   /// Parse section name, inherited sections and comment from the line.
-  fn parse_section_from_line(
-    &self,
-    line: &str,
-  ) -> XRayResult<(String, Option<Vec<String>>, Option<String>)> {
+  fn parse_section_from_line(&self, line: &str) -> XRayResult<(String, Option<Vec<String>>, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty section statement");
     }
@@ -413,36 +393,20 @@ impl LtxParser<'_> {
         .filter_map(|it| {
           let it: &str = it.trim();
 
-          if it.is_empty() {
-            None
-          } else {
-            Some(String::from(it))
-          }
+          if it.is_empty() { None } else { Some(String::from(it)) }
         })
         .collect::<Vec<String>>();
 
       Ok((
         section,
-        if inherited.is_empty() {
-          None
-        } else {
-          Some(inherited)
-        },
+        if inherited.is_empty() { None } else { Some(inherited) },
         comment.map(|comment| String::from(comment.trim())),
       ))
     } else {
       // Fully trimmed value after splitting.
       let comment: String = String::from(remainder[1..].trim_start());
 
-      Ok((
-        section,
-        None,
-        if comment.is_empty() {
-          None
-        } else {
-          Some(comment)
-        },
-      ))
+      Ok((section, None, if comment.is_empty() { None } else { Some(comment) }))
     }
   }
 
@@ -494,17 +458,11 @@ impl LtxParser<'_> {
       ));
     }
 
-    Ok((
-      included_path,
-      comment.filter(|it| !it.is_empty()).map(String::from),
-    ))
+    Ok((included_path, comment.filter(|it| !it.is_empty()).map(String::from)))
   }
 
   /// Parse line key, value and comment from provided line.
-  fn parse_key_value_from_line(
-    &self,
-    line: &str,
-  ) -> XRayResult<(String, Option<String>, Option<String>)> {
+  fn parse_key_value_from_line(&self, line: &str) -> XRayResult<(String, Option<String>, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty value statement");
     }
@@ -572,16 +530,10 @@ mod test {
     let parser: LtxParser = Default::default();
 
     assert_eq!(
-      parser
-        .parse_section_from_line("[section] : a,   b, c")
-        .unwrap(),
+      parser.parse_section_from_line("[section] : a,   b, c").unwrap(),
       (
         String::from("section"),
-        Some(vec!(
-          String::from("a"),
-          String::from("b"),
-          String::from("c"),
-        )),
+        Some(vec!(String::from("a"), String::from("b"), String::from("c"),)),
         None
       )
     );
@@ -602,14 +554,8 @@ mod test {
     let parser: LtxParser = Default::default();
 
     assert_eq!(
-      parser
-        .parse_section_from_line("[section] :  ;;;; test")
-        .unwrap(),
-      (
-        String::from("section"),
-        None,
-        Some(String::from(";;; test"))
-      )
+      parser.parse_section_from_line("[section] :  ;;;; test").unwrap(),
+      (String::from("section"), None, Some(String::from(";;; test")))
     );
   }
 
@@ -634,14 +580,8 @@ mod test {
     let parser: LtxParser = Default::default();
 
     assert_eq!(
-      parser
-        .parse_section_from_line("[section];commented phrase ")
-        .unwrap(),
-      (
-        String::from("section"),
-        None,
-        Some(String::from("commented phrase"))
-      )
+      parser.parse_section_from_line("[section];commented phrase ").unwrap(),
+      (String::from("section"), None, Some(String::from("commented phrase")))
     );
   }
 
@@ -650,9 +590,7 @@ mod test {
     let parser: LtxParser = Default::default();
 
     assert_eq!(
-      parser
-        .parse_key_value_from_line("  key   =   value")
-        .unwrap(),
+      parser.parse_key_value_from_line("  key   =   value").unwrap(),
       (String::from("key"), Some(String::from("value")), None)
     );
   }

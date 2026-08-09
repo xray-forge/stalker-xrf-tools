@@ -79,8 +79,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::artefact_spawn::artefact_spawn_point::ArtefactSpawnPoint;
@@ -102,10 +102,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 20);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 20);
 
@@ -117,10 +115,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      ArtefactSpawnPoint::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(ArtefactSpawnPoint::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -167,10 +162,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<ArtefactSpawnPoint>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<ArtefactSpawnPoint>(&serialized)?);
 
     Ok(())
   }

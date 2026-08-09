@@ -37,13 +37,7 @@ impl<'a> SoundFilesVerifier<'a> {
       .filter_map(|relative_path| {
         xray_output::verbose!(self.options.output, "Verify sound: {relative_path}");
 
-        let Some(path) = self
-          .project
-          .assets
-          .absolute_path(relative_path)
-          .ok()
-          .flatten()
-        else {
+        let Some(path) = self.project.assets.absolute_path(relative_path).ok().flatten() else {
           return Some(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::SoundsFiles,
             Path::new(relative_path),
@@ -58,26 +52,17 @@ impl<'a> SoundFilesVerifier<'a> {
         };
 
         sound.err().map(|error| {
-          xray_output::error!(
-            self.options.output,
-            "Sound is not valid: {} - {error}",
-            path.display()
-          );
+          xray_output::error!(self.options.output, "Sound is not valid: {} - {error}", path.display());
 
-          GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::SoundsFiles,
-            path,
-            error.to_string(),
-          )
+          GamedataFindingFactory::for_asset(GamedataVerificationRule::SoundsFiles, path, error.to_string())
         })
       })
       .collect();
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
-    let invalid_sounds_count: u32 = u32::try_from(findings.len()).map_err(|_| {
-      XRayError::new_verify_error("Invalid sound count exceeds the supported result range")
-    })?;
+    let invalid_sounds_count: u32 = u32::try_from(findings.len())
+      .map_err(|_| XRayError::new_verify_error("Invalid sound count exceeds the supported result range"))?;
 
     Ok(GamedataSoundFilesVerificationResult {
       checked_sounds_count,

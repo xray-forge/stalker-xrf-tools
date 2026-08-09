@@ -88,8 +88,7 @@ impl GenericCommand for RenameOmfMotionsCommand {
       .get_one::<PathBuf>("dest")
       .expect("Expected valid output path to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     Self::rename_file(
       &output,
@@ -137,11 +136,7 @@ impl RenameOmfMotionsCommand {
       omf_file.motions.motions.len()
     );
 
-    xray_output::verbose!(
-      output,
-      "Resulting motions: {}",
-      omf_file.get_motion_names().join(",")
-    );
+    xray_output::verbose!(output, "Resulting motions: {}", omf_file.get_motion_names().join(","));
 
     if is_dry_run {
       xray_output::info!(
@@ -155,11 +150,7 @@ impl RenameOmfMotionsCommand {
 
     omf_file.write_to_path::<XRayByteOrder, _>(&destination)?;
 
-    xray_output::info!(
-      output,
-      "Renamed omf file written into {}",
-      destination.display()
-    );
+    xray_output::info!(output, "Renamed omf file written into {}", destination.display());
 
     Ok(())
   }
@@ -182,11 +173,7 @@ impl RenameOmfMotionsCommand {
   }
 
   /// Guard that every motion in the file has an entry in the map.
-  fn assert_map_covers_all_motions(
-    path: &Path,
-    omf_file: &OmfFile,
-    renames: &HashMap<String, String>,
-  ) -> XRayResult {
+  fn assert_map_covers_all_motions(path: &Path, omf_file: &OmfFile, renames: &HashMap<String, String>) -> XRayResult {
     let uncovered: Vec<&str> = omf_file
       .get_motion_names()
       .into_iter()

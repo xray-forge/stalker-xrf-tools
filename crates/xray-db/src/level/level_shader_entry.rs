@@ -81,10 +81,7 @@ mod tests {
       LevelShaderEntry::parse("def_shaders\\def_vertex/prop\\prop_fence,detail\\dirt"),
       LevelShaderEntry::Reference(LevelShaderReference {
         shader: String::from("def_shaders\\def_vertex"),
-        textures: vec![
-          String::from("prop\\prop_fence"),
-          String::from("detail\\dirt"),
-        ],
+        textures: vec![String::from("prop\\prop_fence"), String::from("detail\\dirt"),],
       })
     );
   }
@@ -102,11 +99,7 @@ mod tests {
 
   #[test]
   fn renders_entries_back_into_raw_chunk_representation() {
-    for raw in [
-      "",
-      "no_delimiter",
-      "def_shaders\\def_vertex/prop\\fence,dirt",
-    ] {
+    for raw in ["", "no_delimiter", "def_shaders\\def_vertex/prop\\fence,dirt"] {
       assert_eq!(LevelShaderEntry::parse(raw).to_raw(), raw);
     }
   }

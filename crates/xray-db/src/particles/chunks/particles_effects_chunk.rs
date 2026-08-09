@@ -53,11 +53,7 @@ impl ChunkReadWrite for ParticlesEffectsChunk {
 
       effect.write::<T>(&mut effect_writer)?;
 
-      writer.write_all(
-        effect_writer
-          .flush_chunk_into_buffer::<T>(index as u32)?
-          .as_slice(),
-      )?;
+      writer.write_all(effect_writer.flush_chunk_into_buffer::<T>(index as u32)?.as_slice())?;
     }
 
     log::info!(

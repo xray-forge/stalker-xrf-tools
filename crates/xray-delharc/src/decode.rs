@@ -149,12 +149,11 @@ where
   /// # Errors
   /// Return an error if the header could not be read or parsed.
   pub fn new(mut rd: R) -> Result<LhaDecodeReader<R>, LhaDecodeError<R>> {
-    let header = match LhaHeader::read(rd.by_ref())
-      .and_then(|h| h.ok_or_else(|| LhaError::HeaderParse("a header is missing")))
-    {
-      Ok(h) => h,
-      Err(e) => return Err(wrap_err(rd, e)),
-    };
+    let header =
+      match LhaHeader::read(rd.by_ref()).and_then(|h| h.ok_or_else(|| LhaError::HeaderParse("a header is missing"))) {
+        Ok(h) => h,
+        Err(e) => return Err(wrap_err(rd, e)),
+      };
     let decoder = DecoderAny::new_from_header(&header, rd);
     let crc = Crc16::default();
     Ok(LhaDecodeReader {
@@ -263,11 +262,7 @@ where
   /// # Panics
   /// Panics if the reader has been already taken.
   pub fn into_inner(self) -> R {
-    self
-      .decoder
-      .expect("decoder not empty")
-      .into_inner()
-      .into_inner()
+    self.decoder.expect("decoder not empty").into_inner().into_inner()
   }
   /// Take the inner stream reader value out of the decoder, leaving a none in its place.
   ///
@@ -276,10 +271,7 @@ where
     self.header.original_size = 0;
     self.output_length = 0;
     self.crc.reset();
-    self
-      .decoder
-      .take()
-      .map(|decoder| decoder.into_inner().into_inner())
+    self.decoder.take().map(|decoder| decoder.into_inner().into_inner())
   }
   /// Return the number of remaining bytes of the currently decompressed file to be read.
   pub fn len(&self) -> u64 {
@@ -326,20 +318,14 @@ where
   /// In this instance check the result from header's [`LhaHeader::is_directory`] to determine
   /// what steps should be taken next.
   pub fn is_decoder_supported(&self) -> bool {
-    self
-      .decoder
-      .as_ref()
-      .map(|d| d.is_supported())
-      .unwrap_or(false)
+    self.decoder.as_ref().map(|d| d.is_supported()).unwrap_or(false)
   }
 }
 
 #[cfg(feature = "std")]
 impl<R: Read<Error = std::io::Error>> std::io::Read for LhaDecodeReader<R> {
   fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-    let len = buf
-      .len()
-      .min((self.header.original_size - self.output_length) as usize);
+    let len = buf.len().min((self.header.original_size - self.output_length) as usize);
     let target = &mut buf[..len];
     self.decoder.as_mut().unwrap().fill_buffer(target)?;
     self.output_length += len as u64;
@@ -360,9 +346,7 @@ where
   }
 
   fn read_all(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-    let len = buf
-      .len()
-      .min((self.header.original_size - self.output_length) as usize);
+    let len = buf.len().min((self.header.original_size - self.output_length) as usize);
     let target = &mut buf[..len];
     self.decoder.as_mut().unwrap().fill_buffer(target)?;
     self.output_length += len as u64;
@@ -497,9 +481,7 @@ where
   LhaError<R::Error>: fmt::Debug,
 {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("LhaDecodeError")
-      .field("source", &self.source)
-      .finish()
+    f.debug_struct("LhaDecodeError").field("source", &self.source).finish()
   }
 }
 

@@ -49,11 +49,7 @@ impl LevelRoster {
     let sources: Vec<String> = project
       .assets
       .with_type(AssetType::Spawn)
-      .filter(|asset| {
-        asset
-          .logical_path()
-          .starts_with(&format!("{SPAWNS_DIRECTORY}\\"))
-      })
+      .filter(|asset| asset.logical_path().starts_with(&format!("{SPAWNS_DIRECTORY}\\")))
       .map(|asset| asset.logical_path().to_string())
       .collect();
 
@@ -64,12 +60,9 @@ impl LevelRoster {
         )));
       };
 
-      let graphs: SpawnGraphsChunk = SpawnFile::read_graphs_from_path::<XRayByteOrder, _>(&path)
-        .map_err(|error| {
-          XRayError::new_verify_error(format!(
-            "Failed to read level roster from spawn file {source}: {error}"
-          ))
-        })?;
+      let graphs: SpawnGraphsChunk = SpawnFile::read_graphs_from_path::<XRayByteOrder, _>(&path).map_err(|error| {
+        XRayError::new_verify_error(format!("Failed to read level roster from spawn file {source}: {error}"))
+      })?;
 
       roster.sources_count += 1;
       roster.add_graph(source, &graphs);
@@ -92,11 +85,7 @@ impl LevelRoster {
   }
 
   pub(crate) fn names(&self) -> BTreeSet<&str> {
-    self
-      .levels
-      .iter()
-      .map(|level| level.name.as_str())
-      .collect()
+    self.levels.iter().map(|level| level.name.as_str()).collect()
   }
 
   fn add_graph(&mut self, source: &str, graphs: &SpawnGraphsChunk) {

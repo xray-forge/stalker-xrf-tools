@@ -92,8 +92,7 @@ impl GenericCommand for PackSpawnFileCommand {
     }
 
     let started_at: Instant = Instant::now();
-    let spawn_file: Box<SpawnFile> =
-      Box::new(SpawnFile::import_from_path::<XRayByteOrder, _>(path)?);
+    let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::import_from_path::<XRayByteOrder, _>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     spawn_file.write_to_path::<XRayByteOrder, _>(destination)?;
@@ -101,10 +100,7 @@ impl GenericCommand for PackSpawnFileCommand {
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
     log::info!("Read spawn file took: {}ms", read_duration.as_millis());
-    log::info!(
-      "Writing packed spawn file took: {}ms",
-      write_duration.as_millis()
-    );
+    log::info!("Writing packed spawn file took: {}ms", write_duration.as_millis());
 
     Ok(())
   }

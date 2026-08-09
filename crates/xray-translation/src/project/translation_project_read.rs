@@ -10,9 +10,7 @@ use xray_utils::{XRayEncoding, decode_bytes_to_string};
 use crate::language::MULTILANGUAGE;
 use crate::project::translation_project::TranslationProject;
 use crate::project::translation_project_constants::ALLOWED_PROJECT_READ_EXTENSIONS;
-use crate::types::{
-  TranslationCompiledXml, TranslationJson, TranslationProjectJson, TranslationVariant,
-};
+use crate::types::{TranslationCompiledXml, TranslationJson, TranslationProjectJson, TranslationVariant};
 use crate::{TranslationEntry, TranslationLanguage};
 
 impl TranslationProject {
@@ -24,12 +22,7 @@ impl TranslationProject {
       let entry: DirEntry = match entry {
         Ok(entry) => entry,
         Err(error) => {
-          return Err(
-            error
-              .into_io_error()
-              .expect("WalkError transformation")
-              .into(),
-          );
+          return Err(error.into_io_error().expect("WalkError transformation").into());
         }
       };
 
@@ -40,25 +33,18 @@ impl TranslationProject {
       {
         if extension == "json" {
           project_json.insert(
-            entry_path
-              .to_str()
-              .expect("Entry path when read translation")
-              .into(),
+            entry_path.to_str().expect("Entry path when read translation").into(),
             Self::read_translation_json_by_path(&entry_path)?,
           );
         } else if extension == "xml" {
           let translations: TranslationJson = Self::read_translation_xml_by_path(&entry_path)?;
 
-          let xml_entry_path: String =
-            Self::get_xml_name_from_path(&entry_path).expect("Xml file entry path");
+          let xml_entry_path: String = Self::get_xml_name_from_path(&entry_path).expect("Xml file entry path");
 
           // Merge or insert based on existing translation keys.
           Self::merge_translation_xml(&xml_entry_path, &mut project_json, translations);
         } else {
-          log::warn!(
-            "Skip unknown extension translation file {}",
-            entry_path.display()
-          );
+          log::warn!("Skip unknown extension translation file {}", entry_path.display());
         }
       }
     }
@@ -81,22 +67,18 @@ impl TranslationProject {
 
     File::open(path)?.read_to_end(&mut data)?;
 
-    let xml_language: TranslationLanguage =
-      Self::get_locale_from_path(&path).unwrap_or(TranslationLanguage::English);
+    let xml_language: TranslationLanguage = Self::get_locale_from_path(&path).unwrap_or(TranslationLanguage::English);
     let xml_encoding: XRayEncoding = xml_language.get_language_encoder();
     let xml_content: String = decode_bytes_to_string(&data, xml_encoding)?;
-    let xml_data: TranslationCompiledXml = quick_xml::de::from_str(&xml_content)
-      .expect("Expected valid XML source file with standard format");
+    let xml_data: TranslationCompiledXml =
+      quick_xml::de::from_str(&xml_content).expect("Expected valid XML source file with standard format");
 
     let mut json: TranslationJson = HashMap::new();
 
     for entry in xml_data.string {
       let mut translation_entry: TranslationEntry = HashMap::new();
 
-      translation_entry.insert(
-        xml_language.to_string(),
-        Some(TranslationVariant::String(entry.text)),
-      );
+      translation_entry.insert(xml_language.to_string(), Some(TranslationVariant::String(entry.text)));
 
       json.insert(entry.id, translation_entry);
     }
@@ -141,9 +123,7 @@ impl TranslationProject {
           let parts_count: usize = parts.len();
 
           if parts_count > 2 {
-            let lang_part = parts
-              .get(parts_count - 2)
-              .expect("Language path in translation file");
+            let lang_part = parts.get(parts_count - 2).expect("Language path in translation file");
 
             return TranslationLanguage::from_str_single(lang_part).ok();
           }
@@ -166,11 +146,7 @@ impl TranslationProject {
 
       // Confirm language is part of the file extension.
       if parts.len() > 2 && TranslationLanguage::from_str_single(parts[parts.len() - 2]).is_ok() {
-        let base_name: String = format!(
-          "{}.{}.xml",
-          parts[..parts.len() - 2].join("."),
-          MULTILANGUAGE
-        );
+        let base_name: String = format!("{}.{}.xml", parts[..parts.len() - 2].join("."), MULTILANGUAGE);
 
         return path
           .parent()
@@ -203,9 +179,7 @@ impl TranslationProject {
 mod tests {
   use std::path::PathBuf;
 
-  use xray_test_utils::utils::{
-    get_absolute_test_resource_path, get_absolute_test_sample_file_path,
-  };
+  use xray_test_utils::utils::{get_absolute_test_resource_path, get_absolute_test_sample_file_path};
 
   use crate::project::translation_project::TranslationProject;
   use crate::types::{TranslationProjectJson, TranslationVariant};
@@ -213,8 +187,7 @@ mod tests {
 
   #[test]
   fn test_read_xml_project() {
-    let base_xml_path: PathBuf =
-      get_absolute_test_sample_file_path(file!(), "multilang.multilang.xml");
+    let base_xml_path: PathBuf = get_absolute_test_sample_file_path(file!(), "multilang.multilang.xml");
 
     let project_json: TranslationProjectJson =
       TranslationProject::read_project(base_xml_path.parent().expect("Parent dir expected"))
@@ -254,17 +227,11 @@ mod tests {
     );
     assert_eq!(
       TranslationProject::get_xml_name_from_path(&eng_xml_path).expect("Expected path"),
-      dir
-        .join("example.multilang.xml")
-        .to_str()
-        .expect("Expected path"),
+      dir.join("example.multilang.xml").to_str().expect("Expected path"),
     );
     assert_eq!(
       TranslationProject::get_xml_name_from_path(&ukr_xml_path).expect("Expected path"),
-      dir
-        .join("example.multilang.xml")
-        .to_str()
-        .expect("Expected path"),
+      dir.join("example.multilang.xml").to_str().expect("Expected path"),
     );
   }
 }

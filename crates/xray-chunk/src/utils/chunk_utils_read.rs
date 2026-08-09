@@ -35,9 +35,7 @@ pub fn read_f32_chunk<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<f32>
 
 /// Read chunk as f32 vector value, verify remaining data is 0.
 #[inline]
-pub fn read_f32_vector_chunk<T: ByteOrder>(
-  reader: &mut ChunkReader,
-) -> XRayResult<(f32, f32, f32)> {
+pub fn read_f32_vector_chunk<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<(f32, f32, f32)> {
   let data: (f32, f32, f32) = (
     reader.read_f32::<T>()?,
     reader.read_f32::<T>()?,

@@ -21,10 +21,7 @@ impl<'a> Iterator for PropertyIter<'a> {
 
 impl DoubleEndedIterator for PropertyIter<'_> {
   fn next_back(&mut self) -> Option<Self::Item> {
-    self
-      .inner
-      .next_back()
-      .map(|(k, v)| (k.as_ref(), v.as_ref()))
+    self.inner.next_back().map(|(k, v)| (k.as_ref(), v.as_ref()))
   }
 }
 

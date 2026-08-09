@@ -8,18 +8,7 @@ use delharc::header::*;
 mod sink;
 use sink::SinkSum;
 
-const TESTS_CASES: &[(
-  u64,
-  &str,
-  &str,
-  u64,
-  u64,
-  u16,
-  u32,
-  &str,
-  u8,
-  CompressionMethod,
-)] = &[
+const TESTS_CASES: &[(u64, &str, &str, u64, u64, u16, u32, &str, u8, CompressionMethod)] = &[
   (
     0,
     "h0_lh0.lzh",
@@ -118,10 +107,7 @@ const TESTS_CASES: &[(
   ),
 ];
 
-const SUBDIR_CASES: &[(
-  &str,
-  &[(&str, u64, u64, u16, u32, &str, u8, CompressionMethod)],
-)] = &[
+const SUBDIR_CASES: &[(&str, &[(&str, u64, u64, u16, u32, &str, u8, CompressionMethod)])] = &[
   (
     "h1_subdir.lzh",
     &[

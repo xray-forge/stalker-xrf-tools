@@ -4,10 +4,7 @@ use std::path::Path;
 
 /// Assert file content is equal.
 pub fn files_are_equal_by_path<P: AsRef<Path>>(first_path: P, second_path: P) -> IoResult<bool> {
-  files_are_equal(
-    File::open(first_path.as_ref())?,
-    File::open(second_path.as_ref())?,
-  )
+  files_are_equal(File::open(first_path.as_ref())?, File::open(second_path.as_ref())?)
 }
 
 /// Assert file content is equal.
@@ -29,8 +26,7 @@ pub fn files_are_equal(first: File, second: File) -> IoResult<bool> {
     ) {
       (0, 0) => return Ok(true),
       (first_read, second_read)
-        if first_read == second_read
-          && first_buffer[..first_read] == second_buffer[..second_read] =>
+        if first_read == second_read && first_buffer[..first_read] == second_buffer[..second_read] =>
       {
         continue;
       }

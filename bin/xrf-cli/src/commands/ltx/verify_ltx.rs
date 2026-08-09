@@ -51,8 +51,7 @@ impl GenericCommand for VerifyLtxCommand {
       .get_one::<PathBuf>("path")
       .expect("Expected valid input path to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if !path.is_dir() {
       xray_output::error!(

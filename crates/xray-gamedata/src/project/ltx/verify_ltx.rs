@@ -2,19 +2,14 @@ use std::path::Path;
 use std::time::Instant;
 
 use xray_error::{XRayError, XRayResult};
-use xray_ltx::{
-  LtxFormatOptions, LtxProjectFormatResult, LtxProjectVerifyResult, LtxVerifyOptions,
-};
+use xray_ltx::{LtxFormatOptions, LtxProjectFormatResult, LtxProjectVerifyResult, LtxVerifyOptions};
 
 use crate::GamedataFindingFactory;
 use crate::project::ltx::verify_ltx_result::GamedataLtxVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
-  pub fn verify_ltx(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataLtxVerificationResult> {
+  pub fn verify_ltx(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataLtxVerificationResult> {
     xray_output::heading!(options.output, "Verify LTX files");
 
     let started_at: Instant = Instant::now();
@@ -79,23 +74,15 @@ impl GamedataProject {
     findings
   }
 
-  fn verify_ltx_format(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<LtxProjectFormatResult> {
+  fn verify_ltx_format(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<LtxProjectFormatResult> {
     xray_output::heading!(options.output, "Verify LTX files formatting");
 
-    self
-      .ltx_project
-      .check_format_all_files_opt(LtxFormatOptions {
-        output: options.output.clone(),
-      })
+    self.ltx_project.check_format_all_files_opt(LtxFormatOptions {
+      output: options.output.clone(),
+    })
   }
 
-  fn verify_ltx_schemes(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<LtxProjectVerifyResult> {
+  fn verify_ltx_schemes(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<LtxProjectVerifyResult> {
     xray_output::heading!(options.output, "Verify LTX schemas");
 
     self.ltx_project.verify_entries_opt(LtxVerifyOptions {
@@ -131,8 +118,7 @@ mod tests {
       ..Default::default()
     };
 
-    let findings: Vec<Finding> =
-      GamedataProject::collect_ltx_findings(&format_result, &verification_result);
+    let findings: Vec<Finding> = GamedataProject::collect_ltx_findings(&format_result, &verification_result);
 
     assert_eq!(
       findings,

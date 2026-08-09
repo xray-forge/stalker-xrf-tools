@@ -60,10 +60,7 @@ mod tests {
   fn classifies_a_non_section_as_a_direct_weapon_sound_asset() {
     let ltx: Ltx = Ltx::new();
 
-    match WeaponSoundSource::classify(
-      &ltx,
-      WeaponSoundValue::parse("weapons\\ak74\\shot, 1.0, 0.1"),
-    ) {
+    match WeaponSoundSource::classify(&ltx, WeaponSoundValue::parse("weapons\\ak74\\shot, 1.0, 0.1")) {
       WeaponSoundSource::Asset { name } => assert_eq!(name, "weapons\\ak74\\shot"),
       WeaponSoundSource::LayeredSection { .. } => {
         panic!("sound asset should not be classified as a layered section")

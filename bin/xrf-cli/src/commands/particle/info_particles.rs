@@ -49,27 +49,17 @@ impl GenericCommand for InfoParticlesCommand {
       .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Read particle file {}", path.display());
 
-    let particles_file: Box<ParticlesFile> =
-      Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
+    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
 
     xray_output::info!(output, "Particles file information:");
 
     xray_output::info!(output, "Version: {}", particles_file.header.version);
-    xray_output::info!(
-      output,
-      "Effects count: {}",
-      particles_file.effects.effects.len()
-    );
-    xray_output::info!(
-      output,
-      "Groups count: {}",
-      particles_file.groups.groups.len()
-    );
+    xray_output::info!(output, "Effects count: {}", particles_file.effects.effects.len());
+    xray_output::info!(output, "Groups count: {}", particles_file.groups.groups.len());
 
     Ok(())
   }

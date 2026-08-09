@@ -88,8 +88,7 @@ impl GenericCommand for FilterOmfMotionsCommand {
     let names: Vec<String> = Self::collect_values(matches, "keep");
     let prefixes: Vec<String> = Self::collect_values(matches, "keep-prefix");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     Self::filter_file(
       &output,
@@ -149,11 +148,7 @@ impl FilterOmfMotionsCommand {
       path.display()
     );
 
-    xray_output::verbose!(
-      output,
-      "Kept motions: {}",
-      omf_file.get_motion_names().join(",")
-    );
+    xray_output::verbose!(output, "Kept motions: {}", omf_file.get_motion_names().join(","));
 
     if is_dry_run {
       xray_output::info!(
@@ -167,11 +162,7 @@ impl FilterOmfMotionsCommand {
 
     omf_file.write_to_path::<XRayByteOrder, _>(&destination)?;
 
-    xray_output::info!(
-      output,
-      "Filtered omf file written into {}",
-      destination.display()
-    );
+    xray_output::info!(output, "Filtered omf file written into {}", destination.display());
 
     Ok(())
   }

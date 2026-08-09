@@ -1,19 +1,13 @@
 use serde_json::{Value, json};
 use xray_ltx::Ltx;
 use xray_output::OutputOptions;
-use xray_texture::{
-  ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult,
-};
+use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult};
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
 
 #[tauri::command]
-pub async fn pack_equipment(
-  source_path: &str,
-  output_path: &str,
-  system_ltx_path: &str,
-) -> TauriResult<Value> {
+pub async fn pack_equipment(source_path: &str, output_path: &str, system_ltx_path: &str) -> TauriResult<Value> {
   let options = PackEquipmentOptions {
     ltx: Ltx::read_from_file_full(system_ltx_path).map_err(|error| error.to_string())?,
     source: source_path.into(),
@@ -26,8 +20,7 @@ pub async fn pack_equipment(
 
   log::info!("Packing equipment dds: {source_path} -> {output_path}, {system_ltx_path}");
 
-  let result: PackEquipmentResult =
-    PackEquipmentProcessor::pack_sprites(options).map_err(error_to_string)?;
+  let result: PackEquipmentResult = PackEquipmentProcessor::pack_sprites(options).map_err(error_to_string)?;
 
   Ok(json!(result))
 }

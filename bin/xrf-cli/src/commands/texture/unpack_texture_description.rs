@@ -42,9 +42,7 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
       )
       .arg(
         Arg::new("file")
-          .help(
-            "Name of a described file to unpack, repeatable; unpacks every described file if omitted",
-          )
+          .help("Name of a described file to unpack, repeatable; unpacks every described file if omitted")
           .long("file")
           .required(false)
           .action(ArgAction::Append),
@@ -100,20 +98,12 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
     let is_strict: bool = matches.get_flag("strict");
     let is_parallel: bool = matches.get_flag("parallel");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     let started_at: Instant = Instant::now();
 
-    log::info!(
-      "Unpacking texture descriptions from: {}",
-      description.display()
-    );
-    log::info!(
-      "Paths: base {}, output {}",
-      base.display(),
-      output_path.display()
-    );
+    log::info!("Unpacking texture descriptions from: {}", description.display());
+    log::info!("Paths: base {}, output {}", base.display(), output_path.display());
     log::info!("Parallel mode: {}", is_parallel);
 
     xray_output::info!(

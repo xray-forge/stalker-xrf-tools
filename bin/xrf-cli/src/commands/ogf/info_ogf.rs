@@ -49,8 +49,7 @@ impl GenericCommand for InfoOgfCommand {
       .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
-    let output: OutputOptions =
-      TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     xray_output::info!(output, "Read ogf file {}", path.display());
 
@@ -69,11 +68,7 @@ impl GenericCommand for InfoOgfCommand {
     );
 
     xray_output::info!(output, "Boundaries box: {:?}", ogf_file.header.bounding_box);
-    xray_output::info!(
-      output,
-      "Boundaries sphere: {:?}",
-      ogf_file.header.bounding_sphere
-    );
+    xray_output::info!(output, "Boundaries sphere: {:?}", ogf_file.header.bounding_sphere);
 
     if let Some(texture) = &ogf_file.texture {
       xray_output::info!(output, "Texture name: {}", texture.texture_name);

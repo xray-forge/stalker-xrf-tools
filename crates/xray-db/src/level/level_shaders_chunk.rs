@@ -66,8 +66,7 @@ mod tests {
   use xray_error::XRayResult;
   use xray_test_utils::FileSlice;
   use xray_test_utils::utils::{
-    get_relative_test_sample_file_path, open_test_resource_as_slice,
-    overwrite_test_relative_resource_as_file,
+    get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_test_relative_resource_as_file,
   };
 
   use crate::level::level_shader_entry::{LevelShaderEntry, LevelShaderReference};
@@ -106,24 +105,17 @@ mod tests {
     original.write::<XRayByteOrder>(&mut writer)?;
 
     writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
-        file!(),
-        &filename,
-      ))?,
+      &mut overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
       LevelShadersChunk::CHUNK_ID,
     )?;
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      LevelShadersChunk::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(LevelShadersChunk::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }

@@ -50,8 +50,7 @@ impl GenericCommand for RepackParticlesCommand {
     log::info!("Repack into {}", destination.display());
 
     let started_at: Instant = Instant::now();
-    let particles_file: Box<ParticlesFile> =
-      Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
+    let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
     particles_file.write_to_path::<XRayByteOrder, _>(destination)?;

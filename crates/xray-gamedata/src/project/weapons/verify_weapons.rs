@@ -8,19 +8,14 @@ use xray_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
 use crate::GamedataFindingFactory;
 use crate::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
-use crate::project::weapons::weapon_sound_layer_issues::{
-  WeaponSoundLayerIssue, weapon_sound_layer_issues,
-};
+use crate::project::weapons::weapon_sound_layer_issues::{WeaponSoundLayerIssue, weapon_sound_layer_issues};
 use crate::project::weapons::weapon_sound_source::WeaponSoundSource;
 use crate::project::weapons::weapon_sound_value::WeaponSoundValue;
 use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapon_section};
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
-  pub fn verify_weapons(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataWeaponVerificationResult> {
+  pub fn verify_weapons(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataWeaponVerificationResult> {
     xray_output::heading!(options.output, "Verify weapons:");
 
     let started_at: Instant = Instant::now();
@@ -140,10 +135,7 @@ impl GamedataProject {
     section: &Section,
   ) -> XRayResult<bool> {
     // Only weapons that can carry a launcher ever reach the grenade launcher bore branch.
-    if section
-      .get("grenade_launcher_status")
-      .is_none_or(|it| it.trim() == "0")
-    {
+    if section.get("grenade_launcher_status").is_none_or(|it| it.trim() == "0") {
       return Ok(true);
     }
 
@@ -181,14 +173,10 @@ impl GamedataProject {
   ) -> XRayResult<bool> {
     let mut is_valid: bool = true;
 
-    if let Some(visual) = &section.get("visual").and_then(|it| {
-      self
-        .assets
-        .ogf(it)
-        .ok()
-        .flatten()
-        .map(|asset| asset.absolute_path())
-    }) {
+    if let Some(visual) = &section
+      .get("visual")
+      .and_then(|it| self.assets.ogf(it).ok().flatten().map(|asset| asset.absolute_path()))
+    {
       if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, _>(visual) {
         xray_output::error!(
           options.output,
@@ -225,14 +213,10 @@ impl GamedataProject {
       }
     };
 
-    if let Some(visual_path) = &hud_section.get("item_visual").and_then(|it| {
-      self
-        .assets
-        .ogf(it)
-        .ok()
-        .flatten()
-        .map(|asset| asset.absolute_path())
-    }) {
+    if let Some(visual_path) = &hud_section
+      .get("item_visual")
+      .and_then(|it| self.assets.ogf(it).ok().flatten().map(|asset| asset.absolute_path()))
+    {
       match OgfFile::read_from_path::<XRayByteOrder, _>(visual_path) {
         Ok(hud_visual) => {
           if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
@@ -307,10 +291,7 @@ impl GamedataProject {
         }
       }
     } else {
-      xray_output::error!(
-        options.output,
-        "Not found hud visual definition: [{section_name}]"
-      );
+      xray_output::error!(options.output, "Not found hud visual definition: [{section_name}]");
 
       is_valid = false;
     }
@@ -327,13 +308,7 @@ impl GamedataProject {
   ) -> XRayResult<bool> {
     let mut are_sounds_valid: bool = true;
 
-    for sound_section in [
-      "snd_draw",
-      "snd_empty",
-      "snd_holster",
-      "snd_reload",
-      "snd_shoot",
-    ] {
+    for sound_section in ["snd_draw", "snd_empty", "snd_holster", "snd_reload", "snd_shoot"] {
       if !section.contains_key(sound_section) {
         xray_output::error!(
           options.output,
@@ -417,10 +392,7 @@ impl GamedataProject {
             "Sound layer section has a gap: [{section_name}] expected snd_{expected}_layer before snd_{found}_layer"
           );
         }
-        WeaponSoundLayerIssue::MissingLayer {
-          expected,
-          found: None,
-        } => {
+        WeaponSoundLayerIssue::MissingLayer { expected, found: None } => {
           xray_output::error!(
             options.output,
             "Sound layer section is missing required first layer: [{section_name}] snd_{expected}_layer"
@@ -432,11 +404,7 @@ impl GamedataProject {
             "Sound layer variants require a base layer: [{section_name}] snd_{layer}_layer"
           );
         }
-        WeaponSoundLayerIssue::MissingVariant {
-          layer,
-          expected,
-          found,
-        } => {
+        WeaponSoundLayerIssue::MissingVariant { layer, expected, found } => {
           xray_output::error!(
             options.output,
             "Sound layer variants have a gap: [{section_name}] expected snd_{layer}_layer{expected} before snd_{layer}_layer{found}"
@@ -460,10 +428,7 @@ impl GamedataProject {
     }
 
     if is_valid {
-      xray_output::verbose!(
-        options.output,
-        "Sound layers section verified: [{section_name}]"
-      );
+      xray_output::verbose!(options.output, "Sound layers section verified: [{section_name}]");
     }
 
     Ok(is_valid)

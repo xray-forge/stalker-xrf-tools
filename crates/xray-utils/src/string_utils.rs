@@ -54,11 +54,7 @@ pub fn vector_from_string_sized<T: FromStr>(string: &str, size: usize) -> XRayRe
 
 /// Read vector of values from serialized by separator string.
 #[inline]
-pub fn vector_from_string_sep_sized<T: FromStr>(
-  string: &str,
-  sep: &str,
-  size: usize,
-) -> XRayResult<Vec<T>> {
+pub fn vector_from_string_sep_sized<T: FromStr>(string: &str, sep: &str, size: usize) -> XRayResult<Vec<T>> {
   let vector: Vec<T> = vector_from_string_sep(string, sep)?;
 
   if vector.len() == size {
@@ -77,8 +73,8 @@ mod tests {
   use xray_error::XRayResult;
 
   use crate::{
-    vector_from_string, vector_from_string_sep, vector_from_string_sep_sized,
-    vector_from_string_sized, vector_to_string, vector_to_string_sep,
+    vector_from_string, vector_from_string_sep, vector_from_string_sep_sized, vector_from_string_sized,
+    vector_to_string, vector_to_string_sep,
   };
 
   #[test]
@@ -92,10 +88,7 @@ mod tests {
   #[test]
   fn test_vector_to_string_sep() -> XRayResult {
     assert_eq!(vector_to_string_sep(&[1, 2, 3, 4], "#"), "1#2#3#4");
-    assert_eq!(
-      vector_to_string_sep(&["ab", "cd", "ef", "gh"], "$"),
-      "ab$cd$ef$gh"
-    );
+    assert_eq!(vector_to_string_sep(&["ab", "cd", "ef", "gh"], "$"), "ab$cd$ef$gh");
 
     Ok(())
   }
@@ -119,10 +112,7 @@ mod tests {
       vector_from_string_sep::<f32>("1$2.5$-33$4.0", "$")?,
       [1f32, 2.5f32, -33f32, 4f32]
     );
-    assert_eq!(
-      vector_from_string_sep::<String>("a#$b#$c", "#$")?,
-      ["a", "b", "c",]
-    );
+    assert_eq!(vector_from_string_sep::<String>("a#$b#$c", "#$")?, ["a", "b", "c",]);
 
     Ok(())
   }
@@ -134,25 +124,15 @@ mod tests {
       vector_from_string_sized::<f32>("1,2.5,-33,4.0,76", 5)?,
       [1f32, 2.5f32, -33f32, 4f32, 76f32]
     );
-    assert_eq!(
-      vector_from_string_sized::<String>("a,b,c", 3)?,
-      ["a", "b", "c",]
-    );
-    assert_eq!(
-      vector_from_string_sized::<String>("", 0)?,
-      Vec::<String>::new()
-    );
+    assert_eq!(vector_from_string_sized::<String>("a,b,c", 3)?, ["a", "b", "c",]);
+    assert_eq!(vector_from_string_sized::<String>("", 0)?, Vec::<String>::new());
 
     assert_eq!(
-      vector_from_string_sized::<String>("", 3)
-        .unwrap_err()
-        .to_string(),
+      vector_from_string_sized::<String>("", 3).unwrap_err().to_string(),
       "Parsing error: Failed to parse sized vector from string, not matching size (0 instead of 3)"
     );
     assert_eq!(
-      vector_from_string_sized::<String>("a,b", 3)
-        .unwrap_err()
-        .to_string(),
+      vector_from_string_sized::<String>("a,b", 3).unwrap_err().to_string(),
       "Parsing error: Failed to parse sized vector from string, not matching size (2 instead of 3)"
     );
 
@@ -161,10 +141,7 @@ mod tests {
 
   #[test]
   fn test_vector_from_string_sep_sized() -> XRayResult {
-    assert_eq!(
-      vector_from_string_sep_sized::<i32>("1#2#3#4", "#", 4)?,
-      [1, 2, 3, 4]
-    );
+    assert_eq!(vector_from_string_sep_sized::<i32>("1#2#3#4", "#", 4)?, [1, 2, 3, 4]);
     assert_eq!(
       vector_from_string_sep_sized::<f32>("1$2.5$-33$4.0$45", "$", 5)?,
       [1f32, 2.5f32, -33f32, 4f32, 45f32]

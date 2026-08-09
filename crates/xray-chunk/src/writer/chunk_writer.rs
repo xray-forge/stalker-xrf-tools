@@ -15,11 +15,7 @@ impl ChunkWriter {
   }
 
   /// Flush all the written data as chunk into the writable object.
-  pub fn flush_chunk_into<T: ByteOrder>(
-    &mut self,
-    destination: &mut dyn Write,
-    id: u32,
-  ) -> XRayResult<usize> {
+  pub fn flush_chunk_into<T: ByteOrder>(&mut self, destination: &mut dyn Write, id: u32) -> XRayResult<usize> {
     destination.write_u32::<T>(id)?;
     destination.write_u32::<T>(self.buffer.len() as u32)?;
 

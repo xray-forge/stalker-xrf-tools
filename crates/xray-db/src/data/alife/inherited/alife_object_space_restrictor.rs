@@ -60,10 +60,9 @@ impl LtxImportExport for AlifeObjectSpaceRestrictor {
 
     Shape::export_list(&self.shape, section_name, ltx);
 
-    ltx.with_section(section_name).set(
-      "space_restrictor.restrictor_type",
-      self.restrictor_type.to_string(),
-    );
+    ltx
+      .with_section(section_name)
+      .set("space_restrictor.restrictor_type", self.restrictor_type.to_string());
 
     Ok(())
   }
@@ -82,8 +81,8 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file, overwrite_test_relative_resource_as_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice,
+    overwrite_file, overwrite_test_relative_resource_as_file,
   };
 
   use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -124,10 +123,8 @@ mod tests {
 
     assert_eq!(writer.bytes_written(), 106);
 
-    let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_test_relative_resource_as_file(&filename)?,
-      0,
-    )?;
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_test_relative_resource_as_file(&filename)?, 0)?;
 
     assert_eq!(bytes_written, 106);
 
@@ -197,10 +194,7 @@ mod tests {
     let source: Ltx = Ltx::read_from_path(config_path)?;
 
     assert_eq!(AlifeObjectSpaceRestrictor::import("first", &source)?, first);
-    assert_eq!(
-      AlifeObjectSpaceRestrictor::import("second", &source)?,
-      second
-    );
+    assert_eq!(AlifeObjectSpaceRestrictor::import("second", &source)?, second);
 
     Ok(())
   }
@@ -230,9 +224,10 @@ mod tests {
       restrictor_type: 6,
     };
 
-    let mut file: File = overwrite_test_relative_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), "serialize_deserialize.json"),
-    )?;
+    let mut file: File = overwrite_test_relative_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
 
     file.write_all(to_string_pretty(&original)?.as_bytes())?;
     file.seek(SeekFrom::Start(0))?;

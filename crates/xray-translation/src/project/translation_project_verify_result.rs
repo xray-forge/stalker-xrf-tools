@@ -74,11 +74,7 @@ mod tests {
   fn reports_missing_translations_as_findings() {
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
 
-    result.record_missing_translation(
-      Path::new("translations/dialogs.json"),
-      "st_dialog_hello",
-      "ukr",
-    );
+    result.record_missing_translation(Path::new("translations/dialogs.json"), "st_dialog_hello", "ukr");
 
     let report = result.to_report();
 

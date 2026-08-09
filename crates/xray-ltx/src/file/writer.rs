@@ -13,9 +13,8 @@ impl Ltx {
   /// Format single LTX file by provided path
   pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> XRayResult<bool> {
     let formatted: String = Ltx::format_from_file(&filename)?;
-    let existing: String = read_as_string_from_w1251_encoded(
-      &mut fs::OpenOptions::new().read(true).open(filename.as_ref())?,
-    )?;
+    let existing: String =
+      read_as_string_from_w1251_encoded(&mut fs::OpenOptions::new().read(true).open(filename.as_ref())?)?;
 
     if existing == formatted {
       Ok(false)
@@ -136,14 +135,8 @@ a3 = n3
 
     let mut ltx: Ltx = Ltx::new();
 
-    ltx
-      .with_section("Section1")
-      .set("Key1", "Value")
-      .set("Key2", "Value");
-    ltx
-      .with_section("Section2")
-      .set("Key1", "Value")
-      .set("Key2", "Value");
+    ltx.with_section("Section1").set("Key1", "Value").set("Key2", "Value");
+    ltx.with_section("Section2").set("Key1", "Value").set("Key2", "Value");
 
     {
       let mut buf: Vec<u8> = Vec::new();
@@ -162,18 +155,9 @@ a3 = n3
 
     let mut ltx: Ltx = Ltx::new();
 
-    ltx
-      .with_section(ROOT_SECTION)
-      .set("Key1", "Value")
-      .set("Key2", "Value");
-    ltx
-      .with_section("Section1")
-      .set("Key1", "Value")
-      .set("Key2", "Value");
-    ltx
-      .with_section("Section2")
-      .set("Key1", "Value")
-      .set("Key2", "Value");
+    ltx.with_section(ROOT_SECTION).set("Key1", "Value").set("Key2", "Value");
+    ltx.with_section("Section1").set("Key1", "Value").set("Key2", "Value");
+    ltx.with_section("Section2").set("Key1", "Value").set("Key2", "Value");
 
     let mut buf: Vec<u8> = Vec::new();
     ltx.write_to(&mut buf).unwrap();

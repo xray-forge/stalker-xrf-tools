@@ -121,11 +121,7 @@ mod tests {
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
     assert_eq!(chunk.read_bytes_remain(), 1, "Expect 1 byte remaining");
 
-    assert_eq!(
-      chunk.read_w1251_string()?,
-      "",
-      "Expect empty string with terminator"
-    );
+    assert_eq!(chunk.read_w1251_string()?, "", "Expect empty string with terminator");
     assert_eq!(chunk.cursor_pos(), 1, "Expect 1 byte read");
     assert_eq!(chunk.read_bytes_remain(), 0, "Expect 0 bytes remaining");
 
@@ -170,17 +166,10 @@ mod tests {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'a'; 1024])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
-    assert_eq!(
-      chunk.read_bytes_remain(),
-      1024,
-      "Expect 1024 bytes remaining"
-    );
+    assert_eq!(chunk.read_bytes_remain(), 1024, "Expect 1024 bytes remaining");
 
     assert_eq!(
-      chunk
-        .read_w1251_string_limited(500)
-        .unwrap_err()
-        .to_string(),
+      chunk.read_w1251_string_limited(500).unwrap_err().to_string(),
       "Parsing error: Cannot parse string, reading data over buffer size limit",
       "Expect buffer limit error"
     );
@@ -212,11 +201,7 @@ mod tests {
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
     assert_eq!(chunk.read_bytes_remain(), 1, "Expect 1 byte remaining");
 
-    assert_eq!(
-      chunk.read_w1251_string()?,
-      "",
-      "Expect empty string with terminator"
-    );
+    assert_eq!(chunk.read_w1251_string()?, "", "Expect empty string with terminator");
     assert_eq!(chunk.cursor_pos(), 1, "Expect 1 byte read");
     assert_eq!(chunk.read_bytes_remain(), 0, "Expect 0 bytes remaining");
 
@@ -225,8 +210,7 @@ mod tests {
 
   #[test]
   fn test_read_w1251_rn_string_empty_remaining_data() -> XRayResult {
-    let mut chunk: ChunkReader<InMemoryChunkDataSource> =
-      ChunkReader::from_bytes(&[b'\r', b'\n', 0, 0, 0])?;
+    let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'\r', b'\n', 0, 0, 0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
     assert_eq!(chunk.read_bytes_remain(), 5, "Expect 5 bytes remaining");
@@ -240,9 +224,8 @@ mod tests {
 
   #[test]
   fn test_read_w1251_rn_string_few() -> XRayResult {
-    let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[
-      b'a', b'b', b'c', b'\r', b'\n', b'c', b'b', b'a', b'\r', b'\n',
-    ])?;
+    let mut chunk: ChunkReader<InMemoryChunkDataSource> =
+      ChunkReader::from_bytes(&[b'a', b'b', b'c', b'\r', b'\n', b'c', b'b', b'a', b'\r', b'\n'])?;
 
     assert_eq!(chunk.read_bytes_remain(), 10, "Expect 10 bytes remaining");
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -263,17 +246,10 @@ mod tests {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'a'; 1024])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
-    assert_eq!(
-      chunk.read_bytes_remain(),
-      1024,
-      "Expect 1024 bytes remaining"
-    );
+    assert_eq!(chunk.read_bytes_remain(), 1024, "Expect 1024 bytes remaining");
 
     assert_eq!(
-      chunk
-        .read_w1251_rn_string_limited(500)
-        .unwrap_err()
-        .to_string(),
+      chunk.read_w1251_rn_string_limited(500).unwrap_err().to_string(),
       "Parsing error: Cannot parse string, reading data over buffer size limit",
       "Expect buffer limit error"
     );

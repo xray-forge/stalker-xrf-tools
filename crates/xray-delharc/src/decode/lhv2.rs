@@ -91,10 +91,7 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
       1 => (4, 3),  // 3..=18
       _ => (9, 20), // 20..=531
     };
-    self
-      .bit_reader
-      .read_bits(bits)
-      .map(|skip: usize| skip + increment)
+    self.bit_reader.read_bits(bits).map(|skip: usize| skip + increment)
   }
 
   fn read_temp_tree(&mut self) -> LhaResult<(), R> {
@@ -112,9 +109,7 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
     }
 
     if num_codes > NUM_TEMP_CODELEN {
-      return Err(LhaError::Decompress(
-        "temporary codelen table has invalid size",
-      ));
+      return Err(LhaError::Decompress("temporary codelen table has invalid size"));
     }
 
     // read actual lengths
@@ -127,9 +122,7 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
     // println!("skip: {:?}", skip);
 
     if 3 + skip > num_codes {
-      return Err(LhaError::Decompress(
-        "temporary codelen table has invalid size",
-      ));
+      return Err(LhaError::Decompress("temporary codelen table has invalid size"));
     }
 
     for p in code_lengths[3 + skip..num_codes].iter_mut() {
@@ -159,9 +152,7 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
     }
 
     if num_codes > NUM_COMMANDS {
-      return Err(LhaError::Decompress(
-        "commands codelen table has invalid size",
-      ));
+      return Err(LhaError::Decompress("commands codelen table has invalid size"));
     }
 
     let mut index = 0;
@@ -206,9 +197,7 @@ impl<C: LhaDecoderConfig, R: Read> LhaV2Decoder<C, R> {
     }
 
     if num_codes > C::HISTORY_BITS as usize {
-      return Err(LhaError::Decompress(
-        "offset codelen table has invalid size",
-      ));
+      return Err(LhaError::Decompress("offset codelen table has invalid size"));
     }
 
     // read actual lengths
@@ -321,26 +310,11 @@ mod tests {
 
   #[test]
   fn lhav2_works() {
-    println!(
-      "DecoderAny<Empty> {}",
-      core::mem::size_of::<DecoderAny<io::Empty>>()
-    );
-    println!(
-      "DecoderAny<fs::File> {}",
-      core::mem::size_of::<DecoderAny<fs::File>>()
-    );
-    println!(
-      "Lh7Decoder<Empty> {}",
-      core::mem::size_of::<Lh7Decoder<io::Empty>>()
-    );
-    println!(
-      "Lh7Decoder<File> {}",
-      core::mem::size_of::<Lh7Decoder<fs::File>>()
-    );
-    println!(
-      "BitStream<File> {}",
-      core::mem::size_of::<BitStream<fs::File>>()
-    );
+    println!("DecoderAny<Empty> {}", core::mem::size_of::<DecoderAny<io::Empty>>());
+    println!("DecoderAny<fs::File> {}", core::mem::size_of::<DecoderAny<fs::File>>());
+    println!("Lh7Decoder<Empty> {}", core::mem::size_of::<Lh7Decoder<io::Empty>>());
+    println!("Lh7Decoder<File> {}", core::mem::size_of::<Lh7Decoder<fs::File>>());
+    println!("BitStream<File> {}", core::mem::size_of::<BitStream<fs::File>>());
     println!("HuffTree {}", core::mem::size_of::<HuffTree>());
     println!(
       "Option<(u32, NonZeroU32)> {}",

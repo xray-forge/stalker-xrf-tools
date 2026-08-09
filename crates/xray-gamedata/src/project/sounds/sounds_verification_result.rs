@@ -42,10 +42,7 @@ impl GamedataCheckResult for GamedataSoundsVerificationResult {
   }
 
   fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::aggregate([
-      self.sound_files.status(),
-      self.sound_references.status(),
-    ])
+    GamedataVerificationStatus::aggregate([self.sound_files.status(), self.sound_references.status()])
   }
 
   fn failure_message(&self) -> String {
@@ -70,8 +67,8 @@ mod tests {
   use crate::project::sounds::sound_files_verification_result::GamedataSoundFilesVerificationResult;
   use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
   use crate::{
-    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule,
-    GamedataVerificationStatus, GamedataVerificationType,
+    Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationRule, GamedataVerificationStatus,
+    GamedataVerificationType,
   };
 
   #[test]

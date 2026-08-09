@@ -7,11 +7,7 @@ pub struct XRayShaderPass {
 }
 
 impl XRayShaderPass {
-  pub fn from_literal_shader_begin(
-    line_number: usize,
-    vertex_shader: String,
-    pixel_shader: String,
-  ) -> Self {
+  pub fn from_literal_shader_begin(line_number: usize, vertex_shader: String, pixel_shader: String) -> Self {
     Self {
       line_number,
       pixel_shader,

@@ -79,8 +79,7 @@ mod tests {
   use xray_test_utils::FileSlice;
   use xray_test_utils::file::read_file_as_string;
   use xray_test_utils::utils::{
-    get_absolute_test_sample_file_path, get_relative_test_sample_file_path,
-    open_test_resource_as_slice, overwrite_file,
+    get_absolute_test_sample_file_path, get_relative_test_sample_file_path, open_test_resource_as_slice, overwrite_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -109,8 +108,7 @@ mod tests {
 
     assert_eq!(bytes_written, 20);
 
-    let file: FileSlice =
-      open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+    let file: FileSlice = open_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 20 + 8);
 
@@ -118,10 +116,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(
-      GraphLevelPoint::read::<XRayByteOrder>(&mut reader)?,
-      original
-    );
+    assert_eq!(GraphLevelPoint::read::<XRayByteOrder>(&mut reader)?, original);
 
     Ok(())
   }
@@ -168,10 +163,7 @@ mod tests {
     let serialized: String = read_file_as_string(&mut file)?;
 
     assert_eq!(serialized.to_string(), serialized);
-    assert_eq!(
-      original,
-      serde_json::from_str::<GraphLevelPoint>(&serialized)?
-    );
+    assert_eq!(original, serde_json::from_str::<GraphLevelPoint>(&serialized)?);
 
     Ok(())
   }

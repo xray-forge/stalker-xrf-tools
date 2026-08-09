@@ -14,10 +14,7 @@ impl LtxProject {
   /// Make sure that:
   /// - All included files exist or `.ts` counterpart is declared
   /// - All the inherited sections are valid and declared before inherit attempt
-  pub fn verify_entries_opt(
-    &self,
-    options: LtxVerifyOptions,
-  ) -> XRayResult<LtxProjectVerifyResult> {
+  pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> XRayResult<LtxProjectVerifyResult> {
     let mut result: LtxProjectVerifyResult = LtxProjectVerifyResult::new();
     let started_at: Instant = Instant::now();
 
@@ -97,10 +94,7 @@ impl LtxProject {
 
             if scheme_definition.is_strict {
               for (field_name, definition) in &scheme_definition.fields {
-                if !definition.is_optional
-                  && field_name != LTX_SYMBOL_ANY
-                  && !validated.contains(field_name)
-                {
+                if !definition.is_optional && field_name != LTX_SYMBOL_ANY && !validated.contains(field_name) {
                   section_has_error = true;
 
                   result.errors.push(XRayError::new_scheme_error_at(
@@ -183,8 +177,7 @@ mod tests {
 
   #[test]
   fn validates_condlists_from_project_schemes() {
-    let root =
-      PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources/tests/ltx_project_verify/condlist");
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources/tests/ltx_project_verify/condlist");
     let project = LtxProject::open_at_path_opt(
       &root,
       LtxProjectOptions {
@@ -195,9 +188,7 @@ mod tests {
     .expect("Expected test project to open");
 
     let result = project
-      .verify_entries_opt(LtxVerifyOptions {
-        ..Default::default()
-      })
+      .verify_entries_opt(LtxVerifyOptions { ..Default::default() })
       .expect("Expected test project verification to complete");
 
     assert_eq!(result.valid_sections, 2);
@@ -214,10 +205,7 @@ mod tests {
 
   #[test]
   fn skips_schema_less_sections() -> XRayResult {
-    let root: PathBuf = std::env::temp_dir().join(format!(
-      "xray-ltx-project-verify-test-{}",
-      std::process::id()
-    ));
+    let root: PathBuf = std::env::temp_dir().join(format!("xray-ltx-project-verify-test-{}", std::process::id()));
     fs::create_dir_all(&root)?;
     fs::write(root.join("array_sections.ltx"), "[array@one]\nvalue = 1\n")?;
 
@@ -228,9 +216,7 @@ mod tests {
         ..Default::default()
       },
     )?;
-    let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions {
-      ..Default::default()
-    })?;
+    let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions { ..Default::default() })?;
 
     assert_eq!(result.checked_sections, 0);
     assert_eq!(result.skipped_sections, 1);
@@ -244,10 +230,8 @@ mod tests {
 
   #[test]
   fn skips_inheritance_for_entry_with_header_metadata() -> XRayResult {
-    let root: PathBuf = std::env::temp_dir().join(format!(
-      "xray-ltx-project-skip-inheritance-test-{}",
-      std::process::id()
-    ));
+    let root: PathBuf =
+      std::env::temp_dir().join(format!("xray-ltx-project-skip-inheritance-test-{}", std::process::id()));
     fs::create_dir_all(&root)?;
     fs::write(
       root.join("disabled.ltx"),
