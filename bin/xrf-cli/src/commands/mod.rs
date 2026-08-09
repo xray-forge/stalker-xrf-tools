@@ -7,4 +7,5 @@ pub(crate) mod omf;
 pub(crate) mod particle;
 pub(crate) mod spawn;
 pub(crate) mod texture;
+pub(crate) mod thm;
 pub(crate) mod translation;

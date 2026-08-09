@@ -33,6 +33,7 @@ use commands::texture::pack_texture_description::PackTextureDescriptionCommand;
 use commands::texture::unpack_equipment_icons::UnpackEquipmentIconsCommand;
 use commands::texture::unpack_texture_description::UnpackTextureDescriptionCommand;
 use commands::texture::verify_equipment_icons::VerifyEquipmentIconsCommand;
+use commands::thm::patch_thm_bump::PatchThmBumpCommand;
 use commands::translation::build_translations::BuildTranslationsCommand;
 use commands::translation::initialize_translations::InitializeTranslationsCommand;
 use commands::translation::parse_translations::ParseTranslationsCommand;
@@ -126,6 +127,8 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     UnpackEquipmentIconsCommand::new_box(),
     VerifyEquipmentIconsCommand::new_box(),
     UnpackTextureDescriptionCommand::new_box(),
+    // THM:
+    PatchThmBumpCommand::new_box(),
     // Translations:
     BuildTranslationsCommand::new_box(),
     InitializeTranslationsCommand::new_box(),
