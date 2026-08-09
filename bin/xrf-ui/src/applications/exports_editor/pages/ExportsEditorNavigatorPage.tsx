@@ -1,4 +1,3 @@
-import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { ReactElement, useMemo } from "react";
 
@@ -8,7 +7,6 @@ export function ExportsEditorNavigatorPage(): ReactElement {
   const items = useMemo(
     () => [
       { label: "Open", icon: <FolderOpenIcon />, to: "/exports_editor/exports" },
-      { label: "Back", icon: <ArrowBackIcon />, to: "/", isSecondary: true },
     ],
     []
   );

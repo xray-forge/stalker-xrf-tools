@@ -3,7 +3,7 @@ import { createTheme, PaletteOptions, Theme } from "@mui/material/styles";
 // which registers the `MuiDataGrid` slot on MUI's `Components` type.
 import type {} from "@mui/x-data-grid/themeAugmentation";
 
-import { ACCENT, DIVIDER, RADIUS, STATUS, SURFACE, TEXT } from "@/lib/theme/tokens";
+import { ACCENT, DIVIDER, LAYOUT, RADIUS, STATUS, SURFACE, TEXT } from "@/lib/theme/tokens";
 
 type ColorScheme = "light" | "dark";
 
@@ -33,9 +33,12 @@ export function createApplicationTheme(): Theme {
       borderRadius: RADIUS.md,
     },
     typography: {
-      fontFamily: ["'Roboto'", "'Segoe UI'", "system-ui", "sans-serif"].join(", "),
+      // Segoe first: it is the strongest native signal on windows and covers cyrillic on its own.
+      // Roboto stays as a bundled fallback for platforms without segoe.
+      fontFamily: ["'Segoe UI Variable Text'", "'Segoe UI'", "'Roboto'", "system-ui", "sans-serif"].join(", "),
+      fontSize: 13,
       h5: { fontWeight: 600 },
-      h6: { fontWeight: 600 },
+      h6: { fontWeight: 600, fontSize: "0.9375rem" },
       button: {
         textTransform: "none",
         fontWeight: 500,
@@ -46,11 +49,73 @@ export function createApplicationTheme(): Theme {
       dark: { palette: createColorSchemePalette("dark") },
     },
     components: {
+      // Thin, unobtrusive scrollbars. The default chromium ones are wide enough to read as a web page.
+      MuiCssBaseline: {
+        styleOverrides: (theme) => ({
+          "*::-webkit-scrollbar": { width: 10, height: 10 },
+          "*::-webkit-scrollbar-track": { backgroundColor: "transparent" },
+          "*::-webkit-scrollbar-thumb": {
+            backgroundColor: (theme.vars ?? theme).palette.divider,
+            borderRadius: RADIUS.sm,
+          },
+          "*::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: (theme.vars ?? theme).palette.text.secondary,
+          },
+        }),
+      },
       // Flat surfaces: MUI's dark elevation overlay tints `paper`.
       MuiPaper: {
         styleOverrides: {
           root: { backgroundImage: "none" },
         },
+      },
+      // Neutral command bar instead of material's filled accent bar.
+      MuiAppBar: {
+        defaultProps: { color: "default", elevation: 0 },
+        styleOverrides: {
+          root: ({ theme }) => ({
+            backgroundColor: (theme.vars ?? theme).palette.background.paper,
+            borderBottom: `1px solid ${(theme.vars ?? theme).palette.divider}`,
+          }),
+        },
+      },
+      MuiToolbar: {
+        defaultProps: { variant: "dense" },
+        styleOverrides: {
+          dense: { minHeight: LAYOUT.toolbarHeight, paddingLeft: 8, paddingRight: 8 },
+        },
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: { paddingTop: 4, paddingBottom: 4 },
+        },
+      },
+      MuiListItemIcon: {
+        styleOverrides: {
+          root: { minWidth: 32 },
+        },
+      },
+      MuiListItemText: {
+        styleOverrides: {
+          primary: { fontSize: "0.8125rem" },
+          secondary: { fontSize: "0.75rem" },
+        },
+      },
+      MuiTabs: {
+        styleOverrides: {
+          root: { minHeight: LAYOUT.toolbarHeight },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: { minHeight: LAYOUT.toolbarHeight, textTransform: "none", fontSize: "0.8125rem" },
+        },
+      },
+      MuiIconButton: {
+        defaultProps: { size: "small" },
+      },
+      MuiTooltip: {
+        defaultProps: { enterDelay: 400 },
       },
       MuiCard: {
         defaultProps: { variant: "outlined" },

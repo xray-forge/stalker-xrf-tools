@@ -1,4 +1,3 @@
-import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
 import { default as DescriptionIcon } from "@mui/icons-material/Description";
 import { default as ImageIcon } from "@mui/icons-material/Image";
 import { default as InventoryIcon } from "@mui/icons-material/Inventory2";
@@ -15,7 +14,6 @@ export function IconsEditorNavigatorPage(): ReactElement {
       { label: "Description editor", icon: <DescriptionIcon />, to: "/icons_editor/icons_description" },
       { label: "Description pack", icon: <DescriptionIcon />, to: "/icons_editor/icons_description_pack" },
       { label: "Description unpack", icon: <DescriptionIcon />, to: "/icons_editor/icons_description_unpack" },
-      { label: "Back", icon: <ArrowBackIcon />, to: "/", isSecondary: true },
     ],
     []
   );

@@ -1,7 +1,14 @@
+// Desktop radii. Windows 11 keeps most controls at 4-8px; anything rounder reads as a touch target.
 export const RADIUS = {
-  sm: 6,
-  md: 8,
-  lg: 12,
+  sm: 4,
+  md: 6,
+  lg: 8,
+} as const;
+
+export const LAYOUT = {
+  railWidth: 48,
+  toolbarHeight: 40,
+  statusBarHeight: 24,
 } as const;
 
 export const ACCENT = {

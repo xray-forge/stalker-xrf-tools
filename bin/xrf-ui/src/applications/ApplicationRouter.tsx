@@ -4,6 +4,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { Root } from "@/applications/Root";
 import { ApplicationLoader } from "@/core/components/ApplicationLoader";
 import { NavigationError } from "@/core/components/NavigationError";
+import { ApplicationShell } from "@/core/components/shell/ApplicationShell";
 
 /**
  * Editor routers are fetched on demand.
@@ -48,20 +49,22 @@ const VisualsEditorRouter: ComponentType = lazyRouter(
 export function ApplicationRouter(): ReactElement {
   return (
     <Router>
-      <Suspense fallback={<ApplicationLoader />}>
-        <Routes>
-          <Route path={"/"} element={<Root />} />
-          <Route path={"spawn_editor/*"} element={<SpawnEditorRouter />} />
-          <Route path={"archives_editor/*"} element={<ArchivesEditorRouter />} />
-          <Route path={"dialog_editor/*"} element={<DialogEditorRouter />} />
-          <Route path={"icons_editor/*"} element={<IconsEditorRouter />} />
-          <Route path={"configs_editor/*"} element={<ConfigsEditorRouter />} />
-          <Route path={"exports_editor/*"} element={<ExportsEditorRouter />} />
-          <Route path={"translations_editor/*"} element={<TranslationsEditorRouter />} />
-          <Route path={"visuals_editor/*"} element={<VisualsEditorRouter />} />
-          <Route path={"*"} element={<NavigationError />} />
-        </Routes>
-      </Suspense>
+      <ApplicationShell>
+        <Suspense fallback={<ApplicationLoader />}>
+          <Routes>
+            <Route path={"/"} element={<Root />} />
+            <Route path={"spawn_editor/*"} element={<SpawnEditorRouter />} />
+            <Route path={"archives_editor/*"} element={<ArchivesEditorRouter />} />
+            <Route path={"dialog_editor/*"} element={<DialogEditorRouter />} />
+            <Route path={"icons_editor/*"} element={<IconsEditorRouter />} />
+            <Route path={"configs_editor/*"} element={<ConfigsEditorRouter />} />
+            <Route path={"exports_editor/*"} element={<ExportsEditorRouter />} />
+            <Route path={"translations_editor/*"} element={<TranslationsEditorRouter />} />
+            <Route path={"visuals_editor/*"} element={<VisualsEditorRouter />} />
+            <Route path={"*"} element={<NavigationError />} />
+          </Routes>
+        </Suspense>
+      </ApplicationShell>
     </Router>
   );
 }

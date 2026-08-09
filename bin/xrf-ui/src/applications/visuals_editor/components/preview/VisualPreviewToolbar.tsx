@@ -60,7 +60,7 @@ export function VisualPreviewToolbar({
             </span>
           </Tooltip>
 
-          <Divider orientation={"vertical"} flexItem sx={{ marginX: 1, borderColor: "rgba(255, 255, 255, 0.3)" }} />
+          <Divider orientation={"vertical"} flexItem sx={{ marginX: 0.5, marginY: 1 }} />
 
           <Tooltip title={"Wireframe"}>
             <IconButton color={"inherit"} sx={{ opacity: options.isWireframe ? 1 : 0.45 }} onClick={onToggleWireframe}>

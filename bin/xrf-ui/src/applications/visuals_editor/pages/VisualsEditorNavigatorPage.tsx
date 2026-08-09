@@ -1,5 +1,4 @@
 import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
-import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
 import { default as ViewInArIcon } from "@mui/icons-material/ViewInAr";
 import { ReactElement, useMemo } from "react";
 
@@ -10,7 +9,6 @@ export function VisualsEditorNavigatorPage(): ReactElement {
     () => [
       { label: "Visual preview", icon: <ViewInArIcon />, to: "/visuals_editor/visual_preview" },
       { label: "Project visuals", icon: <AccountTreeIcon />, to: "/visuals_editor/visual_project" },
-      { label: "Back", icon: <ArrowBackIcon />, to: "/", isSecondary: true },
     ],
     []
   );

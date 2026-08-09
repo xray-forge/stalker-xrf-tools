@@ -1,4 +1,3 @@
-import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { default as UnarchiveIcon } from "@mui/icons-material/Unarchive";
 import { ReactElement, useMemo } from "react";
@@ -10,7 +9,6 @@ export function ArchivesEditorNavigatorPage(): ReactElement {
     () => [
       { label: "Open", icon: <FolderOpenIcon />, to: "/archives_editor/editor" },
       { label: "Unpack", icon: <UnarchiveIcon />, to: "/archives_editor/unpacker" },
-      { label: "Back", icon: <ArrowBackIcon />, to: "/", isSecondary: true },
     ],
     []
   );
