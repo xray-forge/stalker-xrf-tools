@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 
-import { mockInvoke } from "@/fixtures/tauri.mocks";
+import { mockAppWindow, mockInvoke } from "@/fixtures/tauri.mocks";
 
 /**
  * Mock the tauri surface, none of which exists under jsdom.
@@ -17,6 +17,11 @@ export function mockTauri(): void {
   jest.mock("@tauri-apps/api/core", () => ({
     invoke: mockInvoke,
     convertFileSrc: (path: string) => `asset://${path}`,
+    isTauri: () => true,
+  }));
+
+  jest.mock("@tauri-apps/api/window", () => ({
+    getCurrentWindow: () => mockAppWindow,
   }));
 
   jest.mock("@tauri-apps/api", () => ({

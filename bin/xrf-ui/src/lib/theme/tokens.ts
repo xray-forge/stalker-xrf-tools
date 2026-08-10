@@ -21,6 +21,8 @@ export const LAYOUT = {
   railWidth: 48,
   toolbarHeight: 40,
   statusBarHeight: 24,
+  titleBarHeight: 28,
+  windowControlWidth: 36,
 } as const;
 
 export const ACCENT = {

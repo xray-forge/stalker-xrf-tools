@@ -87,7 +87,6 @@ export function ApplicationRail(): ReactElement {
         backgroundColor: "background.paper",
       }}
     >
-      {}
       <RailButton
         /*
           Navigation is blocked while the active editor is running a command. Leaving mid-operation left

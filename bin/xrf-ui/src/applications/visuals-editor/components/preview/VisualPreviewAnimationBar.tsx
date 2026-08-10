@@ -14,7 +14,15 @@ export function VisualPreviewAnimationBar(): ReactElement {
     <Paper
       square
       elevation={3}
-      sx={{ display: "flex", alignItems: "center", gap: 1, paddingX: 1, paddingY: 1, flexShrink: 0 }}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        paddingX: 1,
+        paddingY: 1,
+        flexShrink: 0,
+        backgroundColor: "background.default",
+      }}
     >
       <Select size={"small"} value={"none"} disabled sx={{ minWidth: 200 }}>
         <MenuItem value={"none"}>No motions loaded</MenuItem>

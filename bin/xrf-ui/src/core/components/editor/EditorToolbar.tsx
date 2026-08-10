@@ -76,7 +76,7 @@ export function EditorToolbar({
             marginLeft: backPath || onBack ? 0 : 2,
           }}
         >
-          {title ?? tool?.title ?? "XRF tools"}
+          {title ?? tool?.title ?? "Tools"}
         </Typography>
 
         {subtitle ? (

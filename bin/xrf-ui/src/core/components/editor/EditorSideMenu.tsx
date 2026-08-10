@@ -57,7 +57,7 @@ export function EditorSideMenu({
     >
       {header ? <Box sx={{ flexShrink: 0 }}>{header}</Box> : null}
 
-      <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto" }}>
+      <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto", backgroundColor: "background.default" }}>
         {sections?.length ? <List disablePadding>{sections.map(renderItem)}</List> : null}
         {children}
       </Box>

@@ -27,6 +27,42 @@ export function resetMockInvoke(): void {
   state.handlers = {};
 }
 
+const windowState: { isMaximized: boolean; listeners: Array<() => void> } = { isMaximized: false, listeners: [] };
+
+/**
+ * Stand in for the handle `getCurrentWindow` hands back inside a tauri webview.
+ *
+ * Only the caption's surface is modelled. `onResized` keeps its listeners so a test can assert that the
+ * bar follows the window when it is maximized by something other than its own buttons.
+ */
+export const mockAppWindow = {
+  isMaximized: jest.fn(async (): Promise<boolean> => windowState.isMaximized),
+  minimize: jest.fn(async (): Promise<void> => undefined),
+  close: jest.fn(async (): Promise<void> => undefined),
+  toggleMaximize: jest.fn(async (): Promise<void> => setMockWindowMaximized(!windowState.isMaximized)),
+  onResized: jest.fn(async (handler: () => void): Promise<() => void> => {
+    windowState.listeners.push(handler);
+
+    return () => {
+      windowState.listeners = windowState.listeners.filter((it: () => void) => it !== handler);
+    };
+  }),
+};
+
+/** Maximize or restore the fake window the way the system would, listeners included. */
+export function setMockWindowMaximized(next: boolean): void {
+  windowState.isMaximized = next;
+
+  for (const listener of windowState.listeners) {
+    listener();
+  }
+}
+
+export function resetMockAppWindow(): void {
+  windowState.isMaximized = false;
+  windowState.listeners = [];
+}
+
 export const mockInvoke = jest.fn(async (command: string, args?: Record<string, unknown>): Promise<unknown> => {
   const handler: unknown = state.handlers[command];
 

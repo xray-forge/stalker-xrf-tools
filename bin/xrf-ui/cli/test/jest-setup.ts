@@ -5,7 +5,7 @@ import { cleanup } from "@testing-library/react";
 
 import { mockLogger } from "@/fixtures/mock-logger";
 import { mockTauri } from "@/fixtures/mock-tauri";
-import { resetMockInvoke } from "@/fixtures/tauri.mocks";
+import { resetMockAppWindow, resetMockInvoke } from "@/fixtures/tauri.mocks";
 
 mockLogger();
 mockTauri();
@@ -13,4 +13,5 @@ mockTauri();
 afterEach(() => {
   cleanup();
   resetMockInvoke();
+  resetMockAppWindow();
 });

@@ -7,6 +7,7 @@ import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { ApplicationToolStripe } from "@/core/components/shell/ApplicationToolStripe";
 import { IEditorTool, useEditorToolsRegistry } from "@/core/components/shell/EditorToolsContext";
+import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
 import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 
@@ -58,6 +59,8 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
+      <ApplicationTitleBar />
+
       <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
         <ApplicationRail />
 
@@ -74,7 +77,7 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
               overflowY: "auto",
               borderLeft: 1,
               borderColor: "divider",
-              backgroundColor: "background.paper",
+              backgroundColor: "background.default",
             }}
           >
             {activeTool.render()}

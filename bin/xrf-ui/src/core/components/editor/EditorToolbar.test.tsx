@@ -32,7 +32,7 @@ describe("EditorToolbar", () => {
   it("falls back to the application name on a route owned by no tool", () => {
     const { getByText } = renderWithProviders(<EditorToolbar />, { route: "/nonsense" });
 
-    expect(getByText("XRF tools")).toBeInTheDocument();
+    expect(getByText("Tools")).toBeInTheDocument();
   });
 
   it("shows no leaving control when it can neither navigate nor close", () => {
