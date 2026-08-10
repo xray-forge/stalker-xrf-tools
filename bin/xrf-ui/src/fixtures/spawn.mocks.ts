@@ -1,4 +1,4 @@
-import { IAlifeObjectBase, IPatrol, ISpawnFile, IVector3d } from "@/lib/spawn_file";
+import { IAlifeObjectBase, IPatrol, ISpawnFile, IVector3d } from "@/lib/spawn-file";
 
 export function mockVector3d(overrides: Partial<IVector3d> = {}): IVector3d {
   return { x: 0, y: 0, z: 0, ...overrides };

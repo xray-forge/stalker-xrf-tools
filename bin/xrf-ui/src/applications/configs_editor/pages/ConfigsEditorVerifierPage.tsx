@@ -1,19 +1,19 @@
-import { default as FolderIcon } from "@mui/icons-material/Folder";
-import { Alert, Button, IconButton, InputAdornment, OutlinedInput, Paper } from "@mui/material";
+import { Alert, Button, Paper } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
-import { MouseEvent, useCallback, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs_editor/components/ConfigsVerifyResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
+import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
+import { usePathState } from "@/lib/file-picker/use-path-state";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectVerifyResult } from "@/lib/ltx";
 
-export function ConfigsEditorVerifierPage() {
+export function ConfigsEditorVerifierPage(): ReactElement {
   const log: Logger = useLogger("configs-verifier");
 
   const projectService: ProjectService = useInjection(ProjectService);
@@ -21,37 +21,20 @@ export function ConfigsEditorVerifierPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);
   const [result, setResult] = useState<Optional<ILtxProjectVerifyResult>>(null);
-  const [configsPath, setConfigsPath] = useState<Optional<string>>(projectService.xrfConfigsPath);
 
-  const onSelectConfigsPath = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      if (isLoading) {
-        return;
-      }
+  const [configsPath, setConfigsPath, selectConfigsPath] = usePathState({
+    isDirectory: true,
+    isDisabled: isLoading,
+    title: "Provide path to xrf configs",
+  });
 
-      event.stopPropagation();
-      event.preventDefault();
+  // Picking a different directory invalidates whatever the previous run reported.
+  const onSelectConfigsPath = useCallback(async () => {
+    setError(null);
+    setResult(null);
 
-      const newXrfConfigsPath: Optional<string> = (await open({
-        title: "Provide path to xrf configs",
-        directory: true,
-      })) as Optional<string>;
-
-      if (newXrfConfigsPath) {
-        log.info("Selected new configs path:", newXrfConfigsPath);
-
-        setError(null);
-        setResult(null);
-        setConfigsPath(newXrfConfigsPath);
-      }
-    },
-    [isLoading, log]
-  );
-
-  const onSelectConfigsPathClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectConfigsPath(event),
-    [onSelectConfigsPath]
-  );
+    await selectConfigsPath();
+  }, [selectConfigsPath]);
 
   const onVerifyPathClicked = useCallback(async () => {
     try {
@@ -61,16 +44,16 @@ export function ConfigsEditorVerifierPage() {
 
       log.info("Verifying:", configsPath);
 
-      const result: ILtxProjectVerifyResult = await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, {
+      const verified: ILtxProjectVerifyResult = await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, {
         path: configsPath,
       });
 
       log.info("Verified:", configsPath);
 
-      setResult(result);
-    } catch (error: unknown) {
-      log.error("Verify error:", error);
-      setError(String(error));
+      setResult(verified);
+    } catch (caught: unknown) {
+      log.error("Verify error:", caught);
+      setError(String(caught));
     } finally {
       setIsLoading(false);
     }
@@ -78,16 +61,17 @@ export function ConfigsEditorVerifierPage() {
 
   useEffect(() => {
     setConfigsPath(projectService.xrfConfigsPath);
-  }, [projectService.xrfConfigsPath]);
+  }, [projectService.xrfConfigsPath, setConfigsPath]);
 
   return (
     <PickerForm
+      isLoading={isLoading}
       title={"Provide LTX files directory to verify"}
       error={error ?? undefined}
-      isLoading={isLoading}
       backPath={"/configs_editor"}
+      backDisabled={isLoading}
       actions={
-        <Button variant={"contained"} fullWidth disabled={isLoading || !configsPath} onClick={onVerifyPathClicked}>
+        <Button variant={"contained"} disabled={isLoading || !configsPath} onClick={onVerifyPathClicked}>
           Verify
         </Button>
       }
@@ -108,20 +92,13 @@ export function ConfigsEditorVerifierPage() {
         ) : null
       }
     >
-      <OutlinedInput
-        size={"small"}
-        disabled={isLoading}
-        value={configsPath || ""}
-        placeholder={"Configs directory"}
-        readOnly={true}
-        endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
-            <IconButton disabled={isLoading} edge={"end"}>
-              <FolderIcon />
-            </IconButton>
-          </InputAdornment>
-        }
-        onClick={onSelectConfigsPathClicked}
+      <FilePickerInput
+        isDisabled={isLoading}
+        isInvalid={Boolean(error)}
+        label={"Configs directory"}
+        description={"Directory of LTX files to validate"}
+        value={configsPath}
+        onSelect={onSelectConfigsPath}
       />
     </PickerForm>
   );

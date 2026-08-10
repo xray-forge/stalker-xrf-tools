@@ -3,7 +3,7 @@ import { Injectable, OnProvision, ProvisionId, WireStatus } from "@wirestate/cor
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Optional } from "@/core/types/general";
-import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local_storage";
+import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 import { Logger } from "@/lib/logging";
 
 @Injectable()

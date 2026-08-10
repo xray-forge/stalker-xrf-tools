@@ -7,7 +7,7 @@ import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
-import { FilePickerInput, usePathState } from "@/lib/file_picker";
+import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { IPackEquipmentResult } from "@/lib/icons";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
@@ -16,7 +16,7 @@ import {
   getProjectEquipmentDDSPath,
   getProjectEquipmentSourcePath,
   getProjectSystemLtxPath,
-} from "@/lib/xrf_path";
+} from "@/lib/xrf-path";
 
 export function IconsEditorEquipmentPackPage(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");
@@ -105,24 +105,24 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
       result={result.value ? <EquipmentPackResult result={result.value} /> : null}
     >
       <FilePickerInput
+        isDisabled={result.isLoading}
         label={"System ltx"}
         value={systemLtxPath || ""}
-        disabled={result.isLoading}
-        onClick={onSelectSystemLtxPath}
+        onSelect={onSelectSystemLtxPath}
       />
 
       <FilePickerInput
+        isDisabled={result.isLoading}
         label={"Input icons directory"}
         value={inputIconsPath}
-        disabled={result.isLoading}
-        onClick={onSelectInputIconsPath}
+        onSelect={onSelectInputIconsPath}
       />
 
       <FilePickerInput
+        isDisabled={result.isLoading}
         label={"Output equipment_editor sprite"}
         value={outputSpritePath}
-        disabled={result.isLoading}
-        onClick={onSelectOutputSpritePath}
+        onSelect={onSelectOutputSpritePath}
       />
     </PickerForm>
   );

@@ -6,7 +6,7 @@ import { Optional } from "@/core/types/general";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
-import { ISpawnFile } from "@/lib/spawn_file";
+import { ISpawnFile } from "@/lib/spawn-file";
 
 @Injectable()
 export class SpawnFileService {

@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
 import { AnyObject } from "@/core/types/general";
-import { IArtefactSpawnNode } from "@/lib/spawn_file";
+import { IArtefactSpawnNode } from "@/lib/spawn-file";
 
 interface ISpawnEditorArtefactsNodesTableProps {
   nodes: Array<IArtefactSpawnNode>;

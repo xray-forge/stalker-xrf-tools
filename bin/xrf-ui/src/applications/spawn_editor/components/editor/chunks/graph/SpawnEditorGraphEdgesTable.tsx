@@ -2,7 +2,7 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
-import { IGraphEdge } from "@/lib/spawn_file";
+import { IGraphEdge } from "@/lib/spawn-file";
 
 interface ISpawnEditorGraphEdgesTableProps {
   edges: Array<IGraphEdge>;

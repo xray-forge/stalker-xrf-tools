@@ -1,15 +1,14 @@
-import { default as FolderIcon } from "@mui/icons-material/Folder";
-import { Alert, Button, IconButton, InputAdornment, OutlinedInput } from "@mui/material";
-import { open, save } from "@tauri-apps/plugin-dialog";
+import { Alert, Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { MouseEvent, ReactElement, useCallback, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
+import { usePathState } from "@/lib/file-picker/use-path-state";
 import { Logger, useLogger } from "@/lib/logging";
-import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/lib/xrf_path";
+import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/lib/xrf-path";
 
 export function SpawnEditorPackForm(): ReactElement {
   const log: Logger = useLogger("spawn-pack");
@@ -17,76 +16,22 @@ export function SpawnEditorPackForm(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const [isSelecting, setIsSelecting] = useState(false);
   const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);
-  const [spawnPath, setSpawnPath] = useState<Optional<string>>(null);
-  const [inputPath, setInputPath] = useState<Optional<string>>(null);
 
-  const onSelectSpawnFile = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      event.preventDefault();
+  const isLoading: boolean = spawnFileService.spawnFile.isLoading;
 
-      if (spawnFileService.spawnFile.isLoading) {
-        return;
-      }
+  const [inputPath, setInputPath, onSelectInputPath] = usePathState({
+    isDirectory: true,
+    isDisabled: isLoading,
+    title: "Select unpacked spawn folder",
+  });
 
-      try {
-        setIsFinishedSuccessfully(false);
-        setIsSelecting(true);
-
-        const selected: Optional<string> = (await save({
-          title: "Select spawn file output",
-          filters: [{ name: "spawn", extensions: ["spawn"] }],
-        })) as Optional<string>;
-
-        setSpawnPath(selected);
-
-        log.info("Selected file output:", selected);
-      } finally {
-        setIsSelecting(false);
-      }
-    },
-    [log, spawnFileService.spawnFile.isLoading]
-  );
-
-  const onSelectSpawnFileClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectSpawnFile(event),
-    [onSelectSpawnFile]
-  );
-
-  const onSelectInput = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      event.preventDefault();
-
-      if (spawnFileService.spawnFile.isLoading) {
-        return;
-      }
-
-      try {
-        setIsFinishedSuccessfully(false);
-        setIsSelecting(true);
-
-        const selected: Optional<string> = (await open({
-          title: "Select unpacked spawn folder",
-          directory: true,
-        })) as Optional<string>;
-
-        setInputPath(selected);
-
-        log.info("Selected output:", selected);
-      } finally {
-        setIsSelecting(false);
-      }
-    },
-    [log, spawnFileService.spawnFile.isLoading]
-  );
-
-  const onSelectInputClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectInput(event),
-    [onSelectInput]
-  );
+  const [spawnPath, setSpawnPath, onSelectSpawnPath] = usePathState({
+    filters: [{ name: "spawn", extensions: ["spawn"] }],
+    isDisabled: isLoading,
+    isSave: true,
+    title: "Select spawn file output",
+  });
 
   const onPackClicked = useCallback(async () => {
     log.info("Packing path:", inputPath, spawnPath);
@@ -109,30 +54,25 @@ export function SpawnEditorPackForm(): ReactElement {
     }
   }, [log, inputPath, spawnPath, spawnFileService]);
 
+  const onClearInputPath = useCallback(() => setInputPath(null), [setInputPath]);
+  const onClearSpawnPath = useCallback(() => setSpawnPath(null), [setSpawnPath]);
+
   useEffect(() => {
     if (projectService.xrfProjectPath) {
-      getExistingProjectUnpackedAllSpawnPath(projectService.xrfProjectPath).then((inputPath) => {
-        setInputPath(inputPath);
-      });
-
-      getProjectAllSpawnRepackPath(projectService.xrfProjectPath).then((outputPath) => setSpawnPath(outputPath));
+      getExistingProjectUnpackedAllSpawnPath(projectService.xrfProjectPath).then((path) => setInputPath(path));
+      getProjectAllSpawnRepackPath(projectService.xrfProjectPath).then((path) => setSpawnPath(path));
     }
-  }, []);
+  }, [projectService.xrfProjectPath, setInputPath, setSpawnPath]);
 
   return (
     <PickerForm
+      isLoading={isLoading}
       title={"Select *.spawn file to pack"}
       error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
-      isLoading={spawnFileService.spawnFile.isLoading}
       backPath={"/spawn_editor"}
-      backDisabled={spawnFileService.spawnFile.isLoading || isSelecting}
+      backDisabled={isLoading}
       actions={
-        <Button
-          fullWidth
-          disabled={!spawnPath || !inputPath || isSelecting || spawnFileService.spawnFile.isLoading}
-          variant={"contained"}
-          onClick={onPackClicked}
-        >
+        <Button disabled={!spawnPath || !inputPath || isLoading} variant={"contained"} onClick={onPackClicked}>
           Pack
         </Button>
       }
@@ -144,38 +84,24 @@ export function SpawnEditorPackForm(): ReactElement {
         ) : null
       }
     >
-      <OutlinedInput
-        size={"small"}
-        disabled={isSelecting || spawnFileService.spawnFile.isLoading}
-        value={inputPath ?? ""}
-        placeholder={"Source"}
-        readOnly={true}
-        error={Boolean(spawnFileService.spawnFile.error)}
-        endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectInputClicked}>
-            <IconButton edge={"end"}>
-              <FolderIcon />
-            </IconButton>
-          </InputAdornment>
-        }
-        onClick={onSelectInput}
+      <FilePickerInput
+        isDisabled={isLoading}
+        isInvalid={Boolean(spawnFileService.spawnFile.error)}
+        label={"Source"}
+        description={"Directory holding the unpacked spawn chunks"}
+        value={inputPath}
+        onSelect={onSelectInputPath}
+        onClear={onClearInputPath}
       />
 
-      <OutlinedInput
-        size={"small"}
-        disabled={isSelecting || spawnFileService.spawnFile.isLoading}
-        value={spawnPath ?? ""}
-        placeholder={"Output spawn"}
-        readOnly={true}
-        error={Boolean(spawnFileService.spawnFile.error)}
-        endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectSpawnFile}>
-            <IconButton edge={"end"}>
-              <FolderIcon />
-            </IconButton>
-          </InputAdornment>
-        }
-        onClick={onSelectSpawnFileClicked}
+      <FilePickerInput
+        isDisabled={isLoading}
+        isInvalid={Boolean(spawnFileService.spawnFile.error)}
+        label={"Output spawn"}
+        description={"Where the packed *.spawn file is written"}
+        value={spawnPath}
+        onSelect={onSelectSpawnPath}
+        onClear={onClearSpawnPath}
       />
     </PickerForm>
   );

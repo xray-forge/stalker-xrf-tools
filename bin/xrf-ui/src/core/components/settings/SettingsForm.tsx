@@ -10,7 +10,7 @@ import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/lib/theme";
-import { getProjectConfigsPath } from "@/lib/xrf_path";
+import { getProjectConfigsPath } from "@/lib/xrf-path";
 
 const COLOR_SCHEME_MODE_LABELS: Record<ColorSchemeMode, string> = {
   light: "Light",
@@ -81,12 +81,7 @@ export function SettingsForm(): ReactElement {
           Follow the system theme, or pin the application to one.
         </Typography>
 
-        <ToggleButtonGroup
-          exclusive
-          size={"small"}
-          value={mode ?? DEFAULT_COLOR_SCHEME_MODE}
-          onChange={onChangeMode}
-        >
+        <ToggleButtonGroup exclusive size={"small"} value={mode ?? DEFAULT_COLOR_SCHEME_MODE} onChange={onChangeMode}>
           {COLOR_SCHEME_MODES.map((it: ColorSchemeMode) => (
             <ToggleButton key={it} value={it}>
               {COLOR_SCHEME_MODE_LABELS[it]}

@@ -24,13 +24,26 @@ describe("PickerForm", () => {
     expect(getAllByRole("button")).toHaveLength(1);
   });
 
-  it("suppresses leaving while an operation is in flight", () => {
-    const { queryByLabelText } = renderWithProviders(
+  it("keeps leaving visible but inert while an operation is in flight", () => {
+    const { getByLabelText } = renderWithProviders(
       <PickerForm title={"Open"} backPath={"/spawn_editor"} backDisabled />,
       { route: "/spawn_editor/open" }
     );
 
-    expect(queryByLabelText("Back")).not.toBeInTheDocument();
+    // Disabled rather than removed: a control that vanishes mid-operation is harder to trust.
+    expect(getByLabelText("Back")).toBeDisabled();
+  });
+
+  it("shows progress only while an operation is in flight", () => {
+    const idle = renderWithProviders(<PickerForm title={"Open"} />, { route: "/spawn_editor/open" });
+
+    expect(idle.queryByRole("progressbar")).not.toBeInTheDocument();
+
+    idle.unmount();
+
+    const busy = renderWithProviders(<PickerForm title={"Open"} isLoading />, { route: "/spawn_editor/open" });
+
+    expect(busy.getByRole("progressbar")).toBeInTheDocument();
   });
 
   it("surfaces an error without hiding the form", () => {

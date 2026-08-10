@@ -2,7 +2,7 @@ import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
-import { IGraphPoint } from "@/lib/spawn_file";
+import { IGraphPoint } from "@/lib/spawn-file";
 
 interface ISpawnEditorGraphPointsTableProps {
   points: Array<IGraphPoint>;

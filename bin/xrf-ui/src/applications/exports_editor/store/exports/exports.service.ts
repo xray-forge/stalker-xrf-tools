@@ -12,7 +12,7 @@ import {
   getProjectExportConditionsPath,
   getProjectExportDialogsPath,
   getProjectExportEffectsPath,
-} from "@/lib/xrf_path";
+} from "@/lib/xrf-path";
 
 @Injectable()
 export class ExportsService {

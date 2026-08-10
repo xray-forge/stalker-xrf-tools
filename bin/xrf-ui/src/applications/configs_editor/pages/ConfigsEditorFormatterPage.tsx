@@ -1,23 +1,14 @@
-import { default as FolderIcon } from "@mui/icons-material/Folder";
-import {
-  Alert,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  IconButton,
-  InputAdornment,
-  OutlinedInput,
-  Paper,
-} from "@mui/material";
+import { Alert, Button, Checkbox, FormControlLabel, Paper } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
-import { ChangeEvent, MouseEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 
 import { ConfigsFormatResult } from "@/applications/configs_editor/components/ConfigsFormatResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
+import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
+import { usePathState } from "@/lib/file-picker/use-path-state";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectFormatResult } from "@/lib/ltx";
@@ -31,37 +22,19 @@ export function ConfigsEditorFormatterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
   const [result, setResult] = useState<Optional<ILtxProjectFormatResult>>(null);
-  const [configsPath, setConfigsPath] = useState<Optional<string>>(projectService.xrfConfigsPath);
+  const [configsPath, setConfigsPath, selectConfigsPath] = usePathState({
+    isDirectory: true,
+    isDisabled: isLoading,
+    title: "Provide path to xrf configs",
+  });
 
-  const onSelectConfigsPath = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      if (isLoading) {
-        return;
-      }
+  // Picking a different directory invalidates whatever the previous run reported.
+  const onSelectConfigsPath = useCallback(async () => {
+    setError(null);
+    setResult(null);
 
-      event.stopPropagation();
-      event.preventDefault();
-
-      const newXrfConfigsPath: Optional<string> = (await open({
-        title: "Provide path to xrf configs",
-        directory: true,
-      })) as Optional<string>;
-
-      if (newXrfConfigsPath) {
-        log.info("Selected new configs path:", newXrfConfigsPath);
-
-        setError(null);
-        setResult(null);
-        setConfigsPath(newXrfConfigsPath);
-      }
-    },
-    [isLoading, log]
-  );
-
-  const onSelectConfigsPathClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectConfigsPath(event),
-    [onSelectConfigsPath]
-  );
+    await selectConfigsPath();
+  }, [selectConfigsPath]);
 
   const onFormatPathClicked = useCallback(async () => {
     try {
@@ -95,7 +68,7 @@ export function ConfigsEditorFormatterPage() {
 
   useEffect(() => {
     setConfigsPath(projectService.xrfConfigsPath);
-  }, [projectService.xrfConfigsPath]);
+  }, [projectService.xrfConfigsPath, setConfigsPath]);
 
   return (
     <PickerForm
@@ -129,20 +102,13 @@ export function ConfigsEditorFormatterPage() {
         ) : null
       }
     >
-      <OutlinedInput
-        size={"small"}
-        disabled={isLoading}
-        value={configsPath || ""}
-        placeholder={"Configs directory"}
-        readOnly={true}
-        endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectConfigsPath}>
-            <IconButton edge={"end"}>
-              <FolderIcon />
-            </IconButton>
-          </InputAdornment>
-        }
-        onClick={onSelectConfigsPathClicked}
+      <FilePickerInput
+        isDisabled={isLoading}
+        isInvalid={Boolean(error)}
+        label={"Configs directory"}
+        description={"Directory of LTX files to format"}
+        value={configsPath}
+        onSelect={onSelectConfigsPath}
       />
 
       <FormControlLabel

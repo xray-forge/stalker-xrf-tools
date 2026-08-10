@@ -7,22 +7,29 @@ import { findApplicationTool, IApplicationTool } from "@/core/components/shell/a
 import { Optional } from "@/core/types/general";
 
 export interface IEditorToolbarProps {
+  /** Keeps the leaving control in place but inert, rather than removing it mid-operation. */
+  isBackDisabled?: boolean;
   /** Overrides the tool name resolved from the route. Rarely needed. */
   title?: string;
   /** What is open, when the editor knows. Counts and state belong in the status bar instead. */
   subtitle?: ReactNode;
   backPath?: string;
-  /**
-   * Runs instead of plain navigation when leaving.
-   */
-  onBack?: () => void;
   actions?: ReactNode;
+  /** Runs instead of plain navigation when leaving. */
+  onBack?: () => void;
 }
 
 /**
  * Header bar shared by every editor surface, including the landing panes.
  */
-export function EditorToolbar({ title, subtitle, backPath, onBack, actions }: IEditorToolbarProps): ReactElement {
+export function EditorToolbar({
+  isBackDisabled,
+  title,
+  subtitle,
+  backPath,
+  actions,
+  onBack,
+}: IEditorToolbarProps): ReactElement {
   const navigate: NavigateFunction = useNavigate();
   const { pathname } = useLocation();
 
@@ -40,10 +47,23 @@ export function EditorToolbar({ title, subtitle, backPath, onBack, actions }: IE
     <AppBar position={"relative"} sx={{ flexShrink: 0 }}>
       <Toolbar variant={"dense"}>
         {backPath || onBack ? (
-          <Tooltip title={onBack ? "Close and go back" : "Back"}>
-            <IconButton edge={"start"} color={"inherit"} sx={{ marginRight: 1 }} onClick={onLeave}>
-              <ArrowBackIcon />
-            </IconButton>
+          // A disabled button cannot receive the tooltip's events, so it is wrapped in a span. That
+          // wrapper is why the accessible name is set on the button itself and the tooltip is marked
+          // `describeChild`: left to its default the tooltip would label the span as well, giving the
+          // control two names.
+          <Tooltip describeChild title={onBack ? "Close and go back" : "Back"}>
+            <span>
+              <IconButton
+                edge={"start"}
+                color={"inherit"}
+                aria-label={onBack ? "Close and go back" : "Back"}
+                disabled={isBackDisabled}
+                sx={{ marginRight: 1 }}
+                onClick={onLeave}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+            </span>
           </Tooltip>
         ) : null}
 

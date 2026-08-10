@@ -1,44 +1,40 @@
-import { default as FolderIcon } from "@mui/icons-material/Folder";
-import { Button, IconButton, InputAdornment, OutlinedInput } from "@mui/material";
+import { Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { useCallback, useState } from "react";
+import { ReactElement, useEffect } from "react";
 
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
+import { usePathState } from "@/lib/file-picker/use-path-state";
 
-export function ConfigsEditorExplorerPage() {
+export function ConfigsEditorExplorerPage(): ReactElement {
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const [configsPath] = useState<Optional<string>>(projectService.xrfConfigsPath);
+  const [configsPath, setConfigsPath, onSelectConfigsPath] = usePathState({
+    isDirectory: true,
+    title: "Provide path to xrf configs",
+  });
 
-  const onSelectTargetDirectory = useCallback(() => {}, []);
-
-  const onSelectTargetDirectoryClicked = useCallback(() => {}, []);
+  useEffect(() => {
+    setConfigsPath(projectService.xrfConfigsPath);
+  }, [projectService.xrfConfigsPath, setConfigsPath]);
 
   return (
     <PickerForm
       title={"Provide LTX files directory to open"}
       backPath={"/configs_editor"}
       actions={
-        <Button variant={"contained"} fullWidth>
+        // The explorer itself is not implemented yet; picking a directory is all this screen does.
+        <Button variant={"contained"} disabled>
           Open
         </Button>
       }
     >
-      <OutlinedInput
-        size={"small"}
-        placeholder={"Configs directory"}
-        readOnly={true}
-        endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectTargetDirectory}>
-            <IconButton edge={"end"}>
-              <FolderIcon />
-            </IconButton>
-          </InputAdornment>
-        }
-        value={configsPath || ""}
-        onClick={onSelectTargetDirectoryClicked}
+      <FilePickerInput
+        label={"Configs directory"}
+        description={"Directory of LTX files to browse"}
+        value={configsPath}
+        onSelect={onSelectConfigsPath}
       />
     </PickerForm>
   );

@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { TableToolbar } from "@/applications/spawn_editor/components/editor/table/TableToolbar";
 import { AnyObject } from "@/core/types/general";
-import { IGraphLevel } from "@/lib/spawn_file";
+import { IGraphLevel } from "@/lib/spawn-file";
 
 interface ISpawnEditorGraphLevelsTableProps {
   levels: Array<IGraphLevel>;

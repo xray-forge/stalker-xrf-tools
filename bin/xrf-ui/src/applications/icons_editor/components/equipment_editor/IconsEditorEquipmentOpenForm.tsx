@@ -5,9 +5,9 @@ import { ReactElement, useCallback, useEffect } from "react";
 import { EquipmentService } from "@/applications/icons_editor/store/equipment";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { FilePickerInput, usePathState } from "@/lib/file_picker";
+import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { Logger, useLogger } from "@/lib/logging";
-import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf_path";
+import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf-path";
 
 export function IconsEditorEquipmentOpenForm(): ReactElement {
   const log: Logger = useLogger("equipment-editor-open");
@@ -65,17 +65,17 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
       }
     >
       <FilePickerInput
+        isDisabled={equipmentService.spriteImage.isLoading}
         label={"System ltx"}
         value={systemLtxPath}
-        disabled={equipmentService.spriteImage.isLoading}
-        onClick={onSelectSystemLtxPath}
+        onSelect={onSelectSystemLtxPath}
       />
 
       <FilePickerInput
+        isDisabled={equipmentService.spriteImage.isLoading}
         label={"Equipment sprite"}
         value={spritePath}
-        disabled={equipmentService.spriteImage.isLoading}
-        onClick={onSelectEquipmentPath}
+        onSelect={onSelectEquipmentPath}
       />
     </PickerForm>
   );

@@ -5,9 +5,9 @@ import { ReactElement, useCallback, useEffect } from "react";
 import { TranslationsService } from "@/applications/translations_editor/store/translations";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { FilePickerInput, usePathState } from "@/lib/file_picker";
+import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { Logger, useLogger } from "@/lib/logging";
-import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf_path";
+import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf-path";
 
 export function TranslationsEditorOpenForm(): ReactElement {
   const log: Logger = useLogger("translations-editor-open");
@@ -59,8 +59,8 @@ export function TranslationsEditorOpenForm(): ReactElement {
       <FilePickerInput
         label={"Translations path"}
         value={translationsPath}
-        disabled={translationsService.project.isLoading}
-        onClick={onSelectTranslationsPath}
+        isDisabled={translationsService.project.isLoading}
+        onSelect={onSelectTranslationsPath}
       />
     </PickerForm>
   );

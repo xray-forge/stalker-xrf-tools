@@ -1,20 +1,20 @@
-import { default as FolderIcon } from "@mui/icons-material/Folder";
-import { Alert, Button, IconButton, InputAdornment, OutlinedInput, Paper } from "@mui/material";
+import { Alert, Button, Paper } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
-import { MouseEvent, useCallback, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archive_editor/components/ArchivesUnpackResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
 import { IArchiveUnpackResult } from "@/lib/archive";
+import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
+import { usePathState } from "@/lib/file-picker/use-path-state";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
-import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf_path";
+import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf-path";
 
-export function ArchivesEditorUnpackerPage() {
+export function ArchivesEditorUnpackerPage(): ReactElement {
   const log: Logger = useLogger("archives-unpacker");
 
   const projectService: ProjectService = useInjection(ProjectService);
@@ -22,68 +22,32 @@ export function ArchivesEditorUnpackerPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Optional<string>>(null);
   const [result, setResult] = useState<Optional<IArchiveUnpackResult>>(null);
-  const [archivesPath, setArchivesPath] = useState<Optional<string>>(null);
-  const [archivesUnpackPath, setArchivesUnpackPath] = useState<Optional<string>>(null);
+  const [archivesPath, setArchivesPath, selectArchivesPath] = usePathState({
+    isDirectory: true,
+    isDisabled: isLoading,
+    title: "Provide path to packed archives",
+  });
 
-  const onSelectArchivesPath = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      if (isLoading) {
-        return;
-      }
+  const [archivesUnpackPath, setArchivesUnpackPath, selectArchivesUnpackPath] = usePathState({
+    isDirectory: true,
+    isDisabled: isLoading,
+    title: "Provide output directory to unpack into",
+  });
 
-      event.stopPropagation();
-      event.preventDefault();
+  // Picking different paths invalidates whatever the previous run reported.
+  const onSelectArchivesPath = useCallback(async () => {
+    setError(null);
+    setResult(null);
 
-      const newXrfConfigsPath: Optional<string> = (await open({
-        title: "Provide path to packed archives",
-        directory: true,
-      })) as Optional<string>;
+    await selectArchivesPath();
+  }, [selectArchivesPath]);
 
-      if (newXrfConfigsPath) {
-        log.info("Selected new archives path:", newXrfConfigsPath);
+  const onSelectArchivesUnpackPath = useCallback(async () => {
+    setError(null);
+    setResult(null);
 
-        setError(null);
-        setResult(null);
-        setArchivesPath(newXrfConfigsPath);
-      }
-    },
-    [isLoading, log]
-  );
-
-  const onSelectArchivesPathClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectArchivesPath(event),
-    [onSelectArchivesPath]
-  );
-
-  const onSelectArchivesUnpackPath = useCallback(
-    async (event: MouseEvent<HTMLInputElement>) => {
-      if (isLoading) {
-        return;
-      }
-
-      event.stopPropagation();
-      event.preventDefault();
-
-      const newUnpackPath: Optional<string> = (await open({
-        title: "Provide output directory to unpack into",
-        directory: true,
-      })) as Optional<string>;
-
-      if (newUnpackPath) {
-        log.info("Selected new archives unpack path:", newUnpackPath);
-
-        setError(null);
-        setResult(null);
-        setArchivesUnpackPath(newUnpackPath);
-      }
-    },
-    [isLoading, log]
-  );
-
-  const onSelectArchivesUnpackPathClicked = useCallback(
-    (event: MouseEvent<HTMLInputElement>) => onSelectArchivesUnpackPath(event),
-    [onSelectArchivesUnpackPath]
-  );
+    await selectArchivesUnpackPath();
+  }, [selectArchivesUnpackPath]);
 
   const onUnpackArchivesPathClicked = useCallback(async () => {
     try {
@@ -116,7 +80,7 @@ export function ArchivesEditorUnpackerPage() {
         setArchivesUnpackPath(unpackPath)
       );
     }
-  }, [projectService.xrfProjectPath]);
+  }, [projectService.xrfProjectPath, setArchivesPath, setArchivesUnpackPath]);
 
   return (
     <PickerForm
@@ -144,36 +108,22 @@ export function ArchivesEditorUnpackerPage() {
         ) : null
       }
     >
-      <OutlinedInput
-        size={"small"}
-        disabled={isLoading}
-        value={archivesPath || ""}
-        placeholder={"Source"}
-        readOnly={true}
-        endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectArchivesPath}>
-            <IconButton disabled={isLoading} edge={"end"}>
-              <FolderIcon />
-            </IconButton>
-          </InputAdornment>
-        }
-        onClick={onSelectArchivesPathClicked}
+      <FilePickerInput
+        isDisabled={isLoading}
+        isInvalid={Boolean(error)}
+        label={"Source"}
+        description={"Directory holding the packed game archives"}
+        value={archivesPath}
+        onSelect={onSelectArchivesPath}
       />
 
-      <OutlinedInput
-        size={"small"}
-        disabled={isLoading}
-        value={archivesUnpackPath || ""}
-        placeholder={"Output"}
-        readOnly={true}
-        endAdornment={
-          <InputAdornment position={"end"} onClick={onSelectArchivesUnpackPath}>
-            <IconButton disabled={isLoading} edge={"end"}>
-              <FolderIcon />
-            </IconButton>
-          </InputAdornment>
-        }
-        onClick={onSelectArchivesUnpackPathClicked}
+      <FilePickerInput
+        isDisabled={isLoading}
+        isInvalid={Boolean(error)}
+        label={"Output"}
+        description={"Directory the archives are unpacked into"}
+        value={archivesUnpackPath}
+        onSelect={onSelectArchivesUnpackPath}
       />
     </PickerForm>
   );

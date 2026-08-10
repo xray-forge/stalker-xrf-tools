@@ -22,7 +22,7 @@ export function ExportsEditorDeclarationList({ descriptors }: IExportsViewerDecl
         sx={{ display: "flex", flexDirection: "column", flexGrow: 1, gap: 1, flexWrap: "nowrap", overflowY: "auto" }}
       >
         {descriptors
-          .filter((descriptor) => {
+          ?.filter((descriptor) => {
             return filter ? descriptor.name.includes(filter) || descriptor.comment?.includes(filter) : true;
           })
           .map((descriptor) => (
