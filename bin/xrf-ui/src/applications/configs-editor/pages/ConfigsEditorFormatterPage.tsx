@@ -70,7 +70,7 @@ export function ConfigsEditorFormatterPage(): ReactElement {
       isLoading={isLoading}
       title={isCheck ? "Check LTX formatting" : "Format LTX configs"}
       error={error ?? undefined}
-      backPath={"/configs_editor"}
+      backPath={"/configs-editor"}
       backDisabled={isLoading}
       submitLabel={isCheck ? "Check" : "Format"}
       isSubmitDisabled={!configs.isValid}

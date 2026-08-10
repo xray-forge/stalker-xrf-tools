@@ -64,7 +64,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
       isLoading={isLoading}
       title={"Unpack spawn file"}
       error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
-      backPath={"/spawn_editor"}
+      backPath={"/spawn-editor"}
       backDisabled={isLoading}
       submitLabel={"Unpack"}
       isSubmitDisabled={!source.isValid || !destination.isValid}

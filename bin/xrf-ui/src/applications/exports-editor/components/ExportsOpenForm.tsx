@@ -37,7 +37,7 @@ export function ExportsOpenForm(): ReactElement {
       isLoading={isLoading}
       title={"Open script exports"}
       error={exportsService.declarations.error ? String(exportsService.declarations.error) : undefined}
-      backPath={"/exports_editor"}
+      backPath={"/exports-editor"}
       backDisabled={isLoading}
       submitLabel={"Open exports"}
       isSubmitDisabled={!project.isValid}

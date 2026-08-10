@@ -15,7 +15,7 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
   const equipmentService: EquipmentService = useInjection(EquipmentService);
 
   const [spritePath, setSpritePath, onSelectEquipmentPath] = usePathState({
-    title: "Provide path to equipment_editor dds",
+    title: "Provide path to equipment-editor dds",
     filters: [{ name: "dds", extensions: ["dds"] }],
     isDisabled: equipmentService.spriteImage.isLoading,
   });
@@ -30,7 +30,7 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
     if (spritePath && systemLtxPath) {
       equipmentService.openEquipmentProject(spritePath, systemLtxPath);
     } else {
-      log.info("Cannot open equipment_editor when have no provided paths:", { spritePath, systemLtxPath });
+      log.info("Cannot open equipment-editor when have no provided paths:", { spritePath, systemLtxPath });
     }
   }, [spritePath, systemLtxPath, equipmentService, log]);
 
@@ -51,7 +51,7 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
       title={"Provide equipment details"}
       error={equipmentService.spriteImage.error ? String(equipmentService.spriteImage.error) : undefined}
       isLoading={equipmentService.spriteImage.isLoading}
-      backPath={"/icons_editor"}
+      backPath={"/icons-editor"}
       submitLabel={"Open"}
       isSubmitDisabled={equipmentService.spriteImage.isLoading || !spritePath || !systemLtxPath}
       onSubmit={onOpenEquipmentClicked}

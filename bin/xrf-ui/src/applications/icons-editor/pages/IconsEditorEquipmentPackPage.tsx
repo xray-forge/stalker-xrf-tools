@@ -1,7 +1,7 @@
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
-import { EquipmentPackResult } from "@/applications/icons-editor/components/equipment_pack/EquipmentPackResult";
+import { EquipmentPackResult } from "@/applications/icons-editor/components/equipment-pack/EquipmentPackResult";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
@@ -26,7 +26,7 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
   const [result, setResult] = useState<Loadable<Optional<IPackEquipmentResult>>>(() => createLoadable(null));
 
   const [inputIconsPath, setInputIconsPath, onSelectInputIconsPath] = usePathState({
-    title: "Provide path to resulting equipment_editor dds",
+    title: "Provide path to resulting equipment-editor dds",
     filters: [{ name: "dds", extensions: ["dds"] }],
     isDisabled: result.isLoading,
   });
@@ -56,12 +56,12 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
 
         setResult(createLoadable(packResult));
       } catch (error) {
-        log.error("Failed to pack equipment_editor:", error);
+        log.error("Failed to pack equipment-editor:", error);
 
         setResult(createLoadable(null, false, error instanceof Error ? error : new Error(String(error))));
       }
     } else {
-      log.info("Cannot open equipment_editor when have no provided paths:", {
+      log.info("Cannot open equipment-editor when have no provided paths:", {
         spritePath: outputSpritePath,
         systemLtxPath,
       });
@@ -89,7 +89,7 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
       title={"Provide equipment details"}
       error={result.error ? String(result.error) : undefined}
       isLoading={result.isLoading}
-      backPath={"/icons_editor"}
+      backPath={"/icons-editor"}
       backDisabled={result.isLoading}
       submitLabel={"Pack"}
       isSubmitDisabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
@@ -112,7 +112,7 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
 
       <FilePickerInput
         isDisabled={result.isLoading}
-        label={"Output equipment_editor sprite"}
+        label={"Output equipment-editor sprite"}
         value={outputSpritePath}
         onSelect={onSelectOutputSpritePath}
       />

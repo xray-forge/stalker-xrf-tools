@@ -54,7 +54,7 @@ export function SpawnEditorMenu(): ReactElement {
         label: it.label,
         icon: it.icon,
         isSelected: pathname.endsWith(`/${it.path}`),
-        onClick: () => navigate(`/spawn_editor/editor/${it.path}`, { replace: true }),
+        onClick: () => navigate(`/spawn-editor/editor/${it.path}`, { replace: true }),
       })),
     [navigate, pathname]
   );

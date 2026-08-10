@@ -15,14 +15,10 @@ export function ExportsEditor(): ReactElement {
 
   const declarations = exportsService.declarations.value;
 
-  useEditorStatus(
-    declarations
-      ? [`${declarations.length} exports`]
-      : []
-  );
+  useEditorStatus(declarations ? [`${declarations.length} exports`] : []);
 
   const onClose = useCallback(() => {
-    navigate("/exports_editor", { replace: true });
+    navigate("/exports-editor", { replace: true });
 
     return exportsService.closeExports();
   }, [exportsService, navigate]);

@@ -25,7 +25,7 @@ export function SpawnEditor(): ReactElement {
   );
 
   const onClose = useCallback(() => {
-    navigate("/spawn_editor", { replace: true });
+    navigate("/spawn-editor", { replace: true });
 
     return spawnFileService.closeSpawnFile();
   }, [navigate, spawnFileService]);

@@ -20,7 +20,7 @@ export function ConfigsEditorExplorerPage(): ReactElement {
   return (
     <PickerForm
       title={"Browse LTX configs"}
-      backPath={"/configs_editor"}
+      backPath={"/configs-editor"}
       // The explorer itself is not implemented yet; this screen only remembers where it would look.
       submitLabel={"Open"}
       isSubmitDisabled

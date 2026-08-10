@@ -39,7 +39,7 @@ export function SpawnEditorOpenForm(): ReactElement {
       isLoading={isLoading}
       title={"Open spawn file"}
       error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
-      backPath={"/spawn_editor"}
+      backPath={"/spawn-editor"}
       backDisabled={isLoading}
       submitLabel={"Open"}
       isSubmitDisabled={!spawn.isValid}

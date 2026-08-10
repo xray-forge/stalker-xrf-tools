@@ -65,7 +65,7 @@ export function SpawnEditorPackForm(): ReactElement {
       isLoading={isLoading}
       title={"Pack spawn file"}
       error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
-      backPath={"/spawn_editor"}
+      backPath={"/spawn-editor"}
       backDisabled={isLoading}
       submitLabel={"Pack"}
       isSubmitDisabled={!source.isValid || !destination.isValid}

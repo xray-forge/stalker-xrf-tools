@@ -87,7 +87,7 @@ export function ArchivesEditorUnpackerPage(): ReactElement {
       title={"Provide archives to unpack"}
       error={error ?? undefined}
       isLoading={isLoading}
-      backPath={"/archives_editor"}
+      backPath={"/archives-editor"}
       backDisabled={isLoading}
       submitLabel={"Unpack"}
       isSubmitDisabled={isLoading || !archivesPath || !archivesUnpackPath}

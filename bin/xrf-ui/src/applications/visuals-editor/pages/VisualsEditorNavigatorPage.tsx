@@ -7,15 +7,11 @@ import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 export function VisualsEditorNavigatorPage(): ReactElement {
   const items = useMemo(
     () => [
-      { label: "Visual preview", icon: <ViewInArIcon />, to: "/visuals_editor/visual_preview" },
-      { label: "Project visuals", icon: <AccountTreeIcon />, to: "/visuals_editor/visual_project" },
+      { label: "Visual preview", icon: <ViewInArIcon />, to: "/visuals-editor/visual-preview" },
+      { label: "Project visuals", icon: <AccountTreeIcon />, to: "/visuals-editor/visual-project" },
     ],
     []
   );
 
-  return (
-    <ToolNavigator
-      items={items}
-    />
-  );
+  return <ToolNavigator items={items} />;
 }

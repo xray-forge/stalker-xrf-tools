@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { ReactElement } from "react";
 
-import { EquipmentSpriteViewer } from "@/applications/icons-editor/components/sprite_view/EquipmentSpriteViewer";
+import { EquipmentSpriteViewer } from "@/applications/icons-editor/components/sprite-view/EquipmentSpriteViewer";
 
 export function EquipmentSpriteEditorWorkspace(): ReactElement {
   return (

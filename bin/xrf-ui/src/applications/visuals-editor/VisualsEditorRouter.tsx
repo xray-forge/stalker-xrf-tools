@@ -11,8 +11,8 @@ export function VisualsEditorRouter(): ReactElement {
     <Routes>
       <Route path={"/"} element={<VisualsEditorNavigatorPage />} />
 
-      <Route path={"/visual_preview"} element={<VisualsEditorPreviewPage />} />
-      <Route path={"/visual_project"} element={<VisualsEditorProjectPage />} />
+      <Route path={"/visual-preview"} element={<VisualsEditorPreviewPage />} />
+      <Route path={"/visual-project"} element={<VisualsEditorProjectPage />} />
 
       <Route path={"*"} element={<NavigationError />} />
     </Routes>

@@ -22,13 +22,13 @@ export function IconsEditorRouter(): ReactElement {
       <Routes>
         <Route path={"/"} element={<IconsEditorNavigatorPage />} />
 
-        <Route path={"/icons_equipment"} element={<IconsEditorEquipmentPage />} />
-        <Route path={"/icons_equipment_pack"} element={<IconsEditorEquipmentPackPage />} />
-        <Route path={"/icons_equipment_unpack"} element={<IconsEditorEquipmentUnpackPage />} />
+        <Route path={"/icons-equipment"} element={<IconsEditorEquipmentPage />} />
+        <Route path={"/icons-equipment-pack"} element={<IconsEditorEquipmentPackPage />} />
+        <Route path={"/icons-equipment-unpack"} element={<IconsEditorEquipmentUnpackPage />} />
 
-        <Route path={"/icons_description"} element={<IconsEditorDescriptionOpenPage />} />
-        <Route path={"/icons_description_pack"} element={<IconsEditorDescriptionPackPage />} />
-        <Route path={"/icons_description_unpack"} element={<IconsEditorDescriptionUnpackPage />} />
+        <Route path={"/icons-description"} element={<IconsEditorDescriptionOpenPage />} />
+        <Route path={"/icons-description-pack"} element={<IconsEditorDescriptionPackPage />} />
+        <Route path={"/icons-description-unpack"} element={<IconsEditorDescriptionUnpackPage />} />
 
         <Route path={"*"} element={<NavigationError />} />
       </Routes>

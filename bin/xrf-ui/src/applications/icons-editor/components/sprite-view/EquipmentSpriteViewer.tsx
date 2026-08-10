@@ -4,11 +4,11 @@ import { clamp } from "@mui/x-data-grid/internals";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useMemo, useState, WheelEvent } from "react";
 
-import { EquipmentGridControls } from "@/applications/icons-editor/components/sprite_view/EquipmentGridControls";
-import { EquipmentGridDetails } from "@/applications/icons-editor/components/sprite_view/EquipmentGridDetails";
-import { EquipmentGridMoveOver } from "@/applications/icons-editor/components/sprite_view/EquipmentGridMoveOver";
-import { EquipmentGridZoom } from "@/applications/icons-editor/components/sprite_view/EquipmentGridZoom";
-import { EquipmentSpriteGrid } from "@/applications/icons-editor/components/sprite_view/EquipmentSpriteGrid";
+import { EquipmentGridControls } from "@/applications/icons-editor/components/sprite-view/EquipmentGridControls";
+import { EquipmentGridDetails } from "@/applications/icons-editor/components/sprite-view/EquipmentGridDetails";
+import { EquipmentGridMoveOver } from "@/applications/icons-editor/components/sprite-view/EquipmentGridMoveOver";
+import { EquipmentGridZoom } from "@/applications/icons-editor/components/sprite-view/EquipmentGridZoom";
+import { EquipmentSpriteGrid } from "@/applications/icons-editor/components/sprite-view/EquipmentSpriteGrid";
 import { equipmentViewerConfig } from "@/applications/icons-editor/configs/EquipmentViewerConfig";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { Optional } from "@/core/types/general";

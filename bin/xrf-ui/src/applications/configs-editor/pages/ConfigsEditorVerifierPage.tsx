@@ -59,7 +59,7 @@ export function ConfigsEditorVerifierPage(): ReactElement {
       isLoading={isLoading}
       title={"Verify LTX configs"}
       error={error ?? undefined}
-      backPath={"/configs_editor"}
+      backPath={"/configs-editor"}
       backDisabled={isLoading}
       submitLabel={"Verify"}
       isSubmitDisabled={!configs.isValid}

@@ -8,16 +8,12 @@ import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 export function ConfigsEditorNavigatorPage(): ReactElement {
   const items = useMemo(
     () => [
-      { label: "Explorer", icon: <FolderOpenIcon />, to: "/configs_editor/explorer" },
-      { label: "Verifier", icon: <FactCheckIcon />, to: "/configs_editor/verifier" },
-      { label: "Formatter", icon: <FormatAlignLeftIcon />, to: "/configs_editor/formatter" },
+      { label: "Explorer", icon: <FolderOpenIcon />, to: "/configs-editor/explorer" },
+      { label: "Verifier", icon: <FactCheckIcon />, to: "/configs-editor/verifier" },
+      { label: "Formatter", icon: <FormatAlignLeftIcon />, to: "/configs-editor/formatter" },
     ],
     []
   );
 
-  return (
-    <ToolNavigator
-      items={items}
-    />
-  );
+  return <ToolNavigator items={items} />;
 }

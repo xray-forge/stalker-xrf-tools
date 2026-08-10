@@ -2,8 +2,8 @@ import { CircularProgress, Grid } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
-import { EquipmentSpriteEditor } from "@/applications/icons-editor/components/equipment_editor/EquipmentSpriteEditor";
-import { IconsEditorEquipmentOpenForm } from "@/applications/icons-editor/components/equipment_editor/IconsEditorEquipmentOpenForm";
+import { EquipmentSpriteEditor } from "@/applications/icons-editor/components/equipment-editor/EquipmentSpriteEditor";
+import { IconsEditorEquipmentOpenForm } from "@/applications/icons-editor/components/equipment-editor/IconsEditorEquipmentOpenForm";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 
 export function IconsEditorEquipmentPage(): ReactElement {

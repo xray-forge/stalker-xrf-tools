@@ -6,17 +6,17 @@ import { renderWithProviders } from "@/fixtures/render";
 
 describe("EditorToolbar", () => {
   it("resolves its title from the route rather than a caller supplied string", () => {
-    const { getByText } = renderWithProviders(<EditorToolbar />, { route: "/spawn_editor/editor/alife" });
+    const { getByText } = renderWithProviders(<EditorToolbar />, { route: "/spawn-editor/editor/alife" });
 
     expect(getByText("Spawn editor")).toBeInTheDocument();
   });
 
   it("names every tool consistently with the rail, including nested routes", () => {
     const cases: Array<[string, string]> = [
-      ["/archives_editor", "Archives editor"],
-      ["/icons_editor/icons_equipment", "Icons editor"],
-      ["/visuals_editor/visual_project", "Visuals editor"],
-      ["/translations_editor", "Translations editor"],
+      ["/archives-editor", "Archives editor"],
+      ["/icons-editor/icons-equipment", "Icons editor"],
+      ["/visuals-editor/visual-project", "Visuals editor"],
+      ["/translations-editor", "Translations editor"],
     ];
 
     for (const [route, expected] of cases) {
@@ -36,7 +36,7 @@ describe("EditorToolbar", () => {
   });
 
   it("shows no leaving control when it can neither navigate nor close", () => {
-    const { queryByRole } = renderWithProviders(<EditorToolbar />, { route: "/spawn_editor" });
+    const { queryByRole } = renderWithProviders(<EditorToolbar />, { route: "/spawn-editor" });
 
     expect(queryByRole("button")).not.toBeInTheDocument();
   });
@@ -44,8 +44,8 @@ describe("EditorToolbar", () => {
   it("prefers onBack over navigation, so leaving also releases the open file", async () => {
     const onBack = jest.fn();
 
-    const { getByRole } = renderWithProviders(<EditorToolbar backPath={"/spawn_editor"} onBack={onBack} />, {
-      route: "/spawn_editor",
+    const { getByRole } = renderWithProviders(<EditorToolbar backPath={"/spawn-editor"} onBack={onBack} />, {
+      route: "/spawn-editor",
     });
 
     await userEvent.click(getByRole("button"));
@@ -54,13 +54,13 @@ describe("EditorToolbar", () => {
   });
 
   it("distinguishes a plain back from one that discards state", () => {
-    const navigating = renderWithProviders(<EditorToolbar backPath={"/spawn_editor"} />, { route: "/spawn_editor" });
+    const navigating = renderWithProviders(<EditorToolbar backPath={"/spawn-editor"} />, { route: "/spawn-editor" });
 
     expect(navigating.getByLabelText("Back")).toBeInTheDocument();
 
     navigating.unmount();
 
-    const closing = renderWithProviders(<EditorToolbar onBack={() => {}} />, { route: "/spawn_editor" });
+    const closing = renderWithProviders(<EditorToolbar onBack={() => {}} />, { route: "/spawn-editor" });
 
     expect(closing.getByLabelText("Close and go back")).toBeInTheDocument();
   });

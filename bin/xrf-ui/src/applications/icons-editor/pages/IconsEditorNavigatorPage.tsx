@@ -8,19 +8,15 @@ import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 export function IconsEditorNavigatorPage(): ReactElement {
   const items = useMemo(
     () => [
-      { label: "Equipment editor", icon: <ImageIcon />, to: "/icons_editor/icons_equipment" },
-      { label: "Equipment pack", icon: <InventoryIcon />, to: "/icons_editor/icons_equipment_pack" },
-      { label: "Equipment unpack", icon: <InventoryIcon />, to: "/icons_editor/icons_equipment_unpack" },
-      { label: "Description editor", icon: <DescriptionIcon />, to: "/icons_editor/icons_description" },
-      { label: "Description pack", icon: <DescriptionIcon />, to: "/icons_editor/icons_description_pack" },
-      { label: "Description unpack", icon: <DescriptionIcon />, to: "/icons_editor/icons_description_unpack" },
+      { label: "Equipment editor", icon: <ImageIcon />, to: "/icons-editor/icons-equipment" },
+      { label: "Equipment pack", icon: <InventoryIcon />, to: "/icons-editor/icons-equipment-pack" },
+      { label: "Equipment unpack", icon: <InventoryIcon />, to: "/icons-editor/icons-equipment-unpack" },
+      { label: "Description editor", icon: <DescriptionIcon />, to: "/icons-editor/icons-description" },
+      { label: "Description pack", icon: <DescriptionIcon />, to: "/icons-editor/icons-description-pack" },
+      { label: "Description unpack", icon: <DescriptionIcon />, to: "/icons-editor/icons-description-unpack" },
     ],
     []
   );
 
-  return (
-    <ToolNavigator
-      items={items}
-    />
-  );
+  return <ToolNavigator items={items} />;
 }

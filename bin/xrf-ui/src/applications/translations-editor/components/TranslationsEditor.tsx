@@ -25,13 +25,11 @@ export function TranslationsEditor(): ReactElement {
 
     await translationsService.closeTranslationsProject();
 
-    navigate("/translations_editor", { replace: true });
+    navigate("/translations-editor", { replace: true });
   }, [log, navigate, translationsService]);
 
   return (
-    <EditorLayout
-      toolbar={<EditorToolbar onBack={onClose} />}
-    >
+    <EditorLayout toolbar={<EditorToolbar onBack={onClose} />}>
       <TranslationsEditorWorkspace />
     </EditorLayout>
   );

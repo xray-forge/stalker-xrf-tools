@@ -19,11 +19,11 @@ describe("SpawnEditor", () => {
     return renderWithProviders(
       <>
         <Routes>
-          <Route path={"/spawn_editor/editor/*"} element={<SpawnEditor />} />
+          <Route path={"/spawn-editor/editor/*"} element={<SpawnEditor />} />
         </Routes>
         <ApplicationStatusBar />
       </>,
-      { route: "/spawn_editor/editor/header", bindings: [SpawnFileService] }
+      { route: "/spawn-editor/editor/header", bindings: [SpawnFileService] }
     );
   }
 

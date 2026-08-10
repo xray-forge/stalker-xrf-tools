@@ -23,9 +23,7 @@ export function TranslationsEditorOpenForm(): ReactElement {
     isDirectory: true,
     isDisabled: isLoading,
     seed: async () =>
-      projectService.xrfProjectPath
-        ? getPathIfExists(getProjectTranslationsPath(projectService.xrfProjectPath))
-        : null,
+      projectService.xrfProjectPath ? getPathIfExists(getProjectTranslationsPath(projectService.xrfProjectPath)) : null,
   });
 
   const onOpen = useCallback(() => {
@@ -41,7 +39,7 @@ export function TranslationsEditorOpenForm(): ReactElement {
       isLoading={isLoading}
       title={"Open translations"}
       error={translationsService.project.error ? String(translationsService.project.error) : undefined}
-      backPath={"/translations_editor"}
+      backPath={"/translations-editor"}
       backDisabled={isLoading}
       submitLabel={"Open"}
       isSubmitDisabled={!translations.isValid}

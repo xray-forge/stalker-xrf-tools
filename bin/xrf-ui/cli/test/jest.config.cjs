@@ -11,9 +11,9 @@ const ROOT_DIR = path.resolve(__dirname, "../../");
  * @type {import('jest').Config}
  */
 module.exports = {
-  cacheDirectory: "<rootDir>/target/jest_cache",
+  cacheDirectory: "<rootDir>/target/jest-cache",
   clearMocks: true,
-  coverageDirectory: "<rootDir>/target/coverage_report",
+  coverageDirectory: "<rootDir>/target/coverage-report",
   coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/src/fixtures/"],
   moduleNameMapper: {
     "\\.(css|less|svg|png|jpg|woff2?)$": path.resolve(__dirname, "./asset-stub.cjs"),

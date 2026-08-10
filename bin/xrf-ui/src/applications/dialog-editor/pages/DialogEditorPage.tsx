@@ -4,16 +4,7 @@ import { ReactElement, useMemo } from "react";
 import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 
 export function DialogEditorPage(): ReactElement {
-  const items = useMemo(
-    () => [
-      { label: "Open", icon: <FolderOpenIcon />, to: "/dialog_editor/todo" },
-    ],
-    []
-  );
+  const items = useMemo(() => [{ label: "Open", icon: <FolderOpenIcon />, to: "/dialog-editor/todo" }], []);
 
-  return (
-    <ToolNavigator
-      items={items}
-    />
-  );
+  return <ToolNavigator items={items} />;
 }

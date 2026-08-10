@@ -8,16 +8,12 @@ import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 export function SpawnEditorNavigatorPage(): ReactElement {
   const items = useMemo(
     () => [
-      { label: "Open", icon: <FolderOpenIcon />, to: "/spawn_editor/editor" },
-      { label: "Unpack", icon: <UnarchiveIcon />, to: "/spawn_editor/unpack" },
-      { label: "Pack", icon: <Inventory2Icon />, to: "/spawn_editor/pack" },
+      { label: "Open", icon: <FolderOpenIcon />, to: "/spawn-editor/editor" },
+      { label: "Unpack", icon: <UnarchiveIcon />, to: "/spawn-editor/unpack" },
+      { label: "Pack", icon: <Inventory2Icon />, to: "/spawn-editor/pack" },
     ],
     []
   );
 
-  return (
-    <ToolNavigator
-      items={items}
-    />
-  );
+  return <ToolNavigator items={items} />;
 }

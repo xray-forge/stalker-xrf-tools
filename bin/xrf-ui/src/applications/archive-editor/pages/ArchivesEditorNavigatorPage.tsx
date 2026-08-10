@@ -7,15 +7,11 @@ import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 export function ArchivesEditorNavigatorPage(): ReactElement {
   const items = useMemo(
     () => [
-      { label: "Open", icon: <FolderOpenIcon />, to: "/archives_editor/editor" },
-      { label: "Unpack", icon: <UnarchiveIcon />, to: "/archives_editor/unpacker" },
+      { label: "Open", icon: <FolderOpenIcon />, to: "/archives-editor/editor" },
+      { label: "Unpack", icon: <UnarchiveIcon />, to: "/archives-editor/unpacker" },
     ],
     []
   );
 
-  return (
-    <ToolNavigator
-      items={items}
-    />
-  );
+  return <ToolNavigator items={items} />;
 }
