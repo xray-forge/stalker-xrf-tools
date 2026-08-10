@@ -16,13 +16,13 @@ module.exports = {
   coverageDirectory: "<rootDir>/target/coverage_report",
   coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/src/fixtures/"],
   moduleNameMapper: {
-    "\\.(css|less|svg|png|jpg|woff2?)$": path.resolve(__dirname, "./asset_stub.cjs"),
+    "\\.(css|less|svg|png|jpg|woff2?)$": path.resolve(__dirname, "./asset-stub.cjs"),
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   rootDir: ROOT_DIR,
   roots: ["<rootDir>"],
-  setupFiles: [path.resolve(__dirname, "./jest_global.cjs")],
-  setupFilesAfterEnv: [path.resolve(__dirname, "./jest_setup.ts")],
+  setupFiles: [path.resolve(__dirname, "./jest-global.cjs")],
+  setupFilesAfterEnv: [path.resolve(__dirname, "./jest-setup.ts")],
   testEnvironment: "jsdom",
   testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],
   transform: {
