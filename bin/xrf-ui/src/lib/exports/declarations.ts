@@ -11,12 +11,9 @@ export interface IExportDescriptor {
   name: string;
   comment: Optional<string>;
   parameters: Array<IExportParameterDescriptor>;
+  typing: Optional<string>;
   line: number;
   col: number;
 }
 
-export interface IExportsDeclarations {
-  conditions: Array<IExportDescriptor>;
-  dialogs: Array<IExportDescriptor>;
-  effects: Array<IExportDescriptor>;
-}
+export type TExportsDeclarations = Array<IExportDescriptor>;

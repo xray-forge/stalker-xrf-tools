@@ -47,7 +47,7 @@ export function ExportsOpenForm(): ReactElement {
   return (
     <PickerForm
       isLoading={isLoading}
-      title={"Provide paths to ltx project"}
+      title={"Provide XRF project"}
       error={exportsService.declarations.error ? String(exportsService.declarations.error) : undefined}
       backPath={"/exports_editor"}
       backDisabled={isLoading}
@@ -65,7 +65,7 @@ export function ExportsOpenForm(): ReactElement {
         isDisabled={isLoading}
         isInvalid={Boolean(exportsService.declarations.error)}
         label={"Project"}
-        description={"Root of the xrf project whose script exports are read"}
+        description={"Root of the XRF project whose extern declarations are read"}
         value={projectService.xrfProjectPath}
         onSelect={onSelectProjectPath}
       />

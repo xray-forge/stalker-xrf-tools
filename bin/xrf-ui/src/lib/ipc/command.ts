@@ -22,14 +22,9 @@ export enum EIconsEditorCommand {
 }
 
 export enum EExportsEditorCommand {
-  CLOSE_XR_EFFECTS = "plugin:exports-editor|close_xr_effects",
   CLOSE_XR_EXPORTS = "plugin:exports-editor|close_xr_exports",
-  GET_XR_EFFECTS = "plugin:exports-editor|get_xr_effects",
   GET_XR_EXPORTS = "plugin:exports-editor|get_xr_exports",
-  HAS_XR_EFFECTS = "plugin:exports-editor|has_xr_effects",
-  OPEN_XR_EFFECTS = "plugin:exports-editor|open_xr_effects",
   OPEN_XR_EXPORTS = "plugin:exports-editor|open_xr_exports",
-  PARSE_XR_EFFECTS = "plugin:exports-editor|parse_xr_effects",
 }
 
 export enum ESpawnsEditorCommand {

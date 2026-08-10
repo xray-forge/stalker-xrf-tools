@@ -4,15 +4,10 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
-import { IExportsDeclarations } from "@/lib/exports";
+import { TExportsDeclarations } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
-import {
-  getProjectExportConditionsPath,
-  getProjectExportDialogsPath,
-  getProjectExportEffectsPath,
-} from "@/lib/xrf-path";
 
 @Injectable()
 export class ExportsService {
@@ -20,7 +15,7 @@ export class ExportsService {
   public isReady: boolean = false;
 
   @Observable()
-  public declarations: Loadable<Optional<IExportsDeclarations>> = createLoadable(null);
+  public declarations: Loadable<Optional<TExportsDeclarations>> = createLoadable(null);
 
   public readonly log: Logger = new Logger(this.constructor.name);
 
@@ -30,7 +25,7 @@ export class ExportsService {
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const declarations: Optional<IExportsDeclarations> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
+    const declarations: Optional<TExportsDeclarations> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
 
     if (declarations) {
       this.log.info("Existing parsed exports detected");
@@ -61,21 +56,11 @@ export class ExportsService {
 
     this.log.info("Parsing on path:", path);
 
-    const [effectsPath, conditionsPath, dialogsPath] = await Promise.all([
-      getProjectExportEffectsPath(path),
-      getProjectExportConditionsPath(path),
-      getProjectExportDialogsPath(path),
-    ]);
-
-    this.log.info("Parsing on paths:", effectsPath, conditionsPath, dialogsPath);
-
     try {
       this.declarations = this.declarations.asLoading();
 
-      const result: IExportsDeclarations = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
-        effectsPath,
-        conditionsPath,
-        dialogsPath,
+      const result: TExportsDeclarations = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
+        projectPath: path,
       });
 
       runInAction(() => (this.declarations = createLoadable(result)));

@@ -1,5 +1,5 @@
 import { IArchiveDescriptor, IArchiveFileReplicationDescriptor, IArchivesProject } from "@/lib/archive";
-import { IExportDescriptor, IExportsDeclarations } from "@/lib/exports";
+import { IExportDescriptor, TExportsDeclarations } from "@/lib/exports";
 import { IEquipmentSectionDescriptor } from "@/lib/icons";
 import { ITranslationsProjectJson } from "@/lib/translations";
 
@@ -51,22 +51,21 @@ export function mockExportDescriptor(overrides: Partial<IExportDescriptor> = {})
     name: "play_sound",
     comment: null,
     parameters: [{ name: "actor", typing: "game_object", comment: null }],
+    typing: null,
     line: 42,
     col: 2,
     ...overrides,
   };
 }
 
-export function mockExportsDeclarations(overrides: Partial<IExportsDeclarations> = {}): IExportsDeclarations {
-  return {
-    conditions: [mockExportDescriptor({ filename: "xr_conditions.ts", name: "is_wounded" })],
-    dialogs: [
-      mockExportDescriptor({ filename: "dialogs.ts", name: "is_friend" }),
-      mockExportDescriptor({ filename: "dialogs.ts", name: "has_item" }),
-    ],
-    effects: [mockExportDescriptor()],
+export function mockExportsDeclarations(overrides: TExportsDeclarations = []): TExportsDeclarations {
+  return [
+    mockExportDescriptor({ filename: "xr_conditions.ts", name: "xr_conditions.is_wounded" }),
+    mockExportDescriptor({ filename: "dialogs.ts", name: "dialogs.is_friend" }),
+    mockExportDescriptor({ filename: "dialogs.ts", name: "dialogs.has_item" }),
+    mockExportDescriptor({ name: "xr_effects.play_sound" }),
     ...overrides,
-  };
+  ];
 }
 
 export function mockTranslationsProject(overrides: Partial<ITranslationsProjectJson> = {}): ITranslationsProjectJson {

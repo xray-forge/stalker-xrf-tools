@@ -42,6 +42,15 @@ export function ExportsEditorDeclaration({ descriptor }: IExportsViewerDeclarati
             </Box>
           ) : null}
 
+          {descriptor.typing ? (
+            <Box>
+              <Typography variant={"subtitle1"} color={"secondary"}>
+                Type:
+              </Typography>
+              <Typography variant={"body2"}>{descriptor.typing}</Typography>
+            </Box>
+          ) : null}
+
           <Box>
             <Typography variant={"subtitle1"} color={"secondary"}>
               Location:
