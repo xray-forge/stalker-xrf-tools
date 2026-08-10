@@ -37,16 +37,7 @@ fn apply_inline_plugins(attributes: Attributes) -> Attributes {
     .plugin(
       "exports-editor",
       tauri_build::InlinedPlugin::new()
-        .commands(&[
-          "open_xr_effects",
-          "parse_xr_effects",
-          "close_xr_effects",
-          "has_xr_effects",
-          "close_xr_exports",
-          "open_xr_exports",
-          "get_xr_effects",
-          "get_xr_exports",
-        ])
+        .commands(&["close_xr_exports", "open_xr_exports", "get_xr_exports"])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )
     .plugin(

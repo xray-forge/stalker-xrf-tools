@@ -4413,10 +4413,10 @@
           "markdownDescription": "Denies the save command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-open-xr-effects`\n- `allow-parse-xr-effects`\n- `allow-close-xr-effects`\n- `allow-has-xr-effects`\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-effects`\n- `allow-get-xr-exports`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`",
           "type": "string",
           "const": "exports-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-open-xr-effects`\n- `allow-parse-xr-effects`\n- `allow-close-xr-effects`\n- `allow-has-xr-effects`\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-effects`\n- `allow-get-xr-exports`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`"
         },
         {
           "description": "Enables the close_xr_effects command without any pre-configured scope.",
