@@ -18,6 +18,8 @@ export interface IEditorSideMenuProps {
   header?: ReactNode;
   sections?: Array<IEditorSideMenuItem>;
   actions?: Array<IEditorSideMenuItem>;
+  /** Pinned directly above the actions, for whatever the last one of them has to report. */
+  footer?: ReactNode;
   children?: ReactNode;
 }
 
@@ -45,6 +47,7 @@ export function EditorSideMenu({
   header,
   sections,
   actions,
+  footer,
   children,
 }: IEditorSideMenuProps): ReactElement {
   return (
@@ -61,6 +64,8 @@ export function EditorSideMenu({
         {sections?.length ? <List disablePadding>{sections.map(renderItem)}</List> : null}
         {children}
       </Box>
+
+      {footer ? <Box sx={{ flexShrink: 0 }}>{footer}</Box> : null}
 
       {actions?.length ? (
         <>

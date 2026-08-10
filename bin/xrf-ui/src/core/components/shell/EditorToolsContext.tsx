@@ -4,6 +4,7 @@ export interface IEditorTool {
   id: string;
   label: string;
   icon: ReactNode;
+  isOpenByDefault?: boolean;
   render: () => ReactNode;
 }
 
@@ -40,7 +41,7 @@ export function useEditorTools(tools: Array<IEditorTool>): void {
   const { setTools } = useContext(EditorToolsContext);
 
   const latest = useRef<Array<IEditorTool>>(tools);
-  const key: string = tools.map((tool) => `${tool.id}:${tool.label}`).join("|");
+  const key: string = tools.map((tool) => `${tool.id}:${tool.label}:${tool.isOpenByDefault !== false}`).join("|");
 
   latest.current = tools;
 
