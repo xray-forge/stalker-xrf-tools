@@ -13,7 +13,6 @@ export function TranslationsEditorNavigatorPage(): ReactElement {
 
   return (
     <ToolNavigator
-      helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/translations_editor.html"}
       items={items}
     />
   );

@@ -92,16 +92,9 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
       isLoading={result.isLoading}
       backPath={"/icons_editor"}
       backDisabled={result.isLoading}
-      actions={
-        <Button
-          fullWidth
-          disabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
-          variant={"contained"}
-          onClick={onPackEquipmentClicked}
-        >
-          Pack
-        </Button>
-      }
+      submitLabel={"Pack"}
+      isSubmitDisabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
+      onSubmit={onPackEquipmentClicked}
       result={result.value ? <EquipmentPackResult result={result.value} /> : null}
     >
       <FilePickerInput

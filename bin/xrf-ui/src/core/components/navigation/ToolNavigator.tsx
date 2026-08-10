@@ -1,7 +1,5 @@
-import { default as HelpIcon } from "@mui/icons-material/Help";
-import { Box, Card, CardActionArea, IconButton, Tooltip, Typography } from "@mui/material";
-import { open } from "@tauri-apps/plugin-shell";
-import { ReactElement, ReactNode, useCallback } from "react";
+import { Box, Card, CardActionArea, Typography } from "@mui/material";
+import { ReactElement, ReactNode } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
@@ -15,35 +13,21 @@ export interface IToolNavigatorItem {
 }
 
 export interface IToolNavigatorProps {
-  helpLink: string;
   items: Array<IToolNavigatorItem>;
 }
 
 /**
- * Landing pane for one editor, listing what that editor can do.
- *
- * Carries the same toolbar as the workspaces so the frame does not change shape when you move between
- * a tool's landing pane and its editors. The tool name comes from the route, not from the caller.
+ * Landing pane for one editor, listing the things that editor can do.
  */
-export function ToolNavigator({ helpLink, items }: IToolNavigatorProps): ReactElement {
+export function ToolNavigator({ items }: IToolNavigatorProps): ReactElement {
   const navigate: NavigateFunction = useNavigate();
-
-  const onOpenHelp = useCallback(() => {
-    open(helpLink).catch(console.error);
-  }, [helpLink]);
 
   return (
     <EditorLayout
       toolbar={
-        <EditorToolbar
-          actions={
-            <Tooltip title={"Documentation"}>
-              <IconButton color={"inherit"} onClick={onOpenHelp}>
-                <HelpIcon />
-              </IconButton>
-            </Tooltip>
-          }
-        />
+        // A tool landing pane is one level down from home, so it offers the same way back as the
+        // editors inside it do.
+        <EditorToolbar backPath={"/"} />
       }
     >
       <Box sx={{ width: "100%", height: "100%", overflowY: "auto", padding: 3 }}>

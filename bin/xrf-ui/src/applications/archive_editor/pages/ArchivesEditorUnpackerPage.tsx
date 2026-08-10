@@ -89,16 +89,9 @@ export function ArchivesEditorUnpackerPage(): ReactElement {
       isLoading={isLoading}
       backPath={"/archives_editor"}
       backDisabled={isLoading}
-      actions={
-        <Button
-          variant={"contained"}
-          fullWidth
-          disabled={isLoading || !archivesPath || !archivesUnpackPath}
-          onClick={onUnpackArchivesPathClicked}
-        >
-          Unpack
-        </Button>
-      }
+      submitLabel={"Unpack"}
+      isSubmitDisabled={isLoading || !archivesPath || !archivesUnpackPath}
+      onSubmit={onUnpackArchivesPathClicked}
       status={result ? <Alert severity={"success"}>Archives unpacked.</Alert> : null}
       result={result ? <ArchivesUnpackResult result={result} /> : null}
     >

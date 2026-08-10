@@ -82,7 +82,14 @@ export function createApplicationTheme(): Theme {
       MuiToolbar: {
         defaultProps: { variant: "dense" },
         styleOverrides: {
-          dense: { minHeight: LAYOUT.toolbarHeight, paddingLeft: 8, paddingRight: 8 },
+          dense: { minHeight: LAYOUT.toolbarHeight },
+          // Tight enough that the leading control sits close to the window edge, like a desktop
+          // command bar rather than a web header.
+          gutters: ({ theme }) => ({
+            paddingLeft: 4,
+            paddingRight: 4,
+            [theme.breakpoints.up("sm")]: { paddingLeft: 4, paddingRight: 4 },
+          }),
         },
       },
       MuiListItemButton: {

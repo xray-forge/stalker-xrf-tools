@@ -20,7 +20,6 @@ export function IconsEditorNavigatorPage(): ReactElement {
 
   return (
     <ToolNavigator
-      helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/icon_editor.html"}
       items={items}
     />
   );

@@ -17,7 +17,6 @@ export function SpawnEditorNavigatorPage(): ReactElement {
 
   return (
     <ToolNavigator
-      helpLink={"https://xray-forge.github.io/stalker-xrf-book/tools/app/spawn_editor.html"}
       items={items}
     />
   );

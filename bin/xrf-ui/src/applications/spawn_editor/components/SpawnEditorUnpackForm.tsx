@@ -68,7 +68,6 @@ export function SpawnEditorUnpackForm(): ReactElement {
       backDisabled={isLoading}
       submitLabel={"Unpack"}
       isSubmitDisabled={!source.isValid || !destination.isValid}
-      onSubmit={onUnpack}
       status={
         isFinishedSuccessfully ? (
           <Alert severity={"success"} variant={"outlined"}>
@@ -76,6 +75,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
           </Alert>
         ) : null
       }
+      onSubmit={onUnpack}
     >
       <PathFormRow
         label={"Source"}

@@ -1,4 +1,3 @@
-import { BaseDomElementProps } from "@/lib/dom/element-types";
 import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
 import { AppBar, Box, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
 import { ReactElement, ReactNode, useCallback } from "react";
@@ -6,6 +5,7 @@ import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { findApplicationTool, IApplicationTool } from "@/core/components/shell/applicationTools";
 import { Optional } from "@/core/types/general";
+import { BaseDomElementProps } from "@/lib/dom/element-types";
 
 export interface IEditorToolbarProps extends BaseDomElementProps {
   /** Keeps the leaving control in place but inert, rather than removing it mid-operation. */
@@ -56,20 +56,26 @@ export function EditorToolbar({
           <Tooltip describeChild title={onBack ? "Close and go back" : "Back"}>
             <span>
               <IconButton
-                edge={"start"}
                 color={"inherit"}
                 aria-label={onBack ? "Close and go back" : "Back"}
                 disabled={isBackDisabled}
-                sx={{ marginRight: 1 }}
+                sx={{ marginRight: 0.5 }}
                 onClick={onLeave}
               >
-                <ArrowBackIcon />
+                <ArrowBackIcon fontSize={"small"} />
               </IconButton>
             </span>
           </Tooltip>
         ) : null}
 
-        <Typography variant={"h6"} component={"div"} noWrap>
+        <Typography
+          variant={"h6"}
+          component={"div"}
+          noWrap={true}
+          sx={{
+            marginLeft: backPath || onBack ? 0 : 2,
+          }}
+        >
           {title ?? tool?.title ?? "XRF tools"}
         </Typography>
 

@@ -53,16 +53,9 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
       error={equipmentService.spriteImage.error ? String(equipmentService.spriteImage.error) : undefined}
       isLoading={equipmentService.spriteImage.isLoading}
       backPath={"/icons_editor"}
-      actions={
-        <Button
-          fullWidth
-          disabled={equipmentService.spriteImage.isLoading || !spritePath || !systemLtxPath}
-          variant={"contained"}
-          onClick={onOpenEquipmentClicked}
-        >
-          Open
-        </Button>
-      }
+      submitLabel={"Open"}
+      isSubmitDisabled={equipmentService.spriteImage.isLoading || !spritePath || !systemLtxPath}
+      onSubmit={onOpenEquipmentClicked}
     >
       <FilePickerInput
         isDisabled={equipmentService.spriteImage.isLoading}
