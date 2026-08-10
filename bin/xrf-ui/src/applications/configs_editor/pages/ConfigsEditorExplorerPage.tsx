@@ -1,41 +1,31 @@
-import { Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useEffect } from "react";
+import { ReactElement } from "react";
 
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
-import { usePathState } from "@/lib/file-picker/use-path-state";
+import { PathFormRow } from "@/lib/form/PathFormRow";
+import { IPathField, usePathField } from "@/lib/form/use-path-field";
+import { getProjectConfigsPath } from "@/lib/xrf-path";
 
 export function ConfigsEditorExplorerPage(): ReactElement {
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const [configsPath, setConfigsPath, onSelectConfigsPath] = usePathState({
-    isDirectory: true,
+  const configs: IPathField = usePathField({
+    id: "configs.explore.directory",
     title: "Provide path to xrf configs",
+    isDirectory: true,
+    seed: async () => (projectService.xrfProjectPath ? getProjectConfigsPath(projectService.xrfProjectPath) : null),
   });
-
-  useEffect(() => {
-    setConfigsPath(projectService.xrfConfigsPath);
-  }, [projectService.xrfConfigsPath, setConfigsPath]);
 
   return (
     <PickerForm
-      title={"Provide LTX files directory to open"}
+      title={"Browse LTX configs"}
       backPath={"/configs_editor"}
-      actions={
-        // The explorer itself is not implemented yet; picking a directory is all this screen does.
-        <Button variant={"contained"} disabled>
-          Open
-        </Button>
-      }
+      // The explorer itself is not implemented yet; this screen only remembers where it would look.
+      submitLabel={"Open"}
+      isSubmitDisabled
     >
-      <FilePickerInput
-        label={"Configs directory"}
-        description={"Directory of LTX files to browse"}
-        value={configsPath}
-        onSelect={onSelectConfigsPath}
-      />
+      <PathFormRow label={"Configs directory"} description={"Directory of LTX files to browse"} field={configs} />
     </PickerForm>
   );
 }

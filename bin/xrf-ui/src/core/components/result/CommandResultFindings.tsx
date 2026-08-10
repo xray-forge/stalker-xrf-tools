@@ -2,8 +2,6 @@ import { Box, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { ReactElement, useMemo, useState } from "react";
 
-const GRID_HEIGHT: number = 420;
-
 export interface ICommandResultFindingsProps<T> {
   rows: Array<T>;
   columns: Array<GridColDef>;
@@ -50,7 +48,7 @@ export function CommandResultFindings<T>({
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, width: "100%" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, width: "100%", flexGrow: 1, minHeight: 0 }}>
       <TextField
         size={"small"}
         placeholder={searchPlaceholder}
@@ -65,7 +63,7 @@ export function CommandResultFindings<T>({
           : `${filtered.length} of ${rows.length} finding(s)`}
       </Typography>
 
-      <Box sx={{ height: GRID_HEIGHT, width: "100%" }}>
+      <Box sx={{ flexGrow: 1, minHeight: 200, width: "100%" }}>
         <DataGrid rows={filtered} columns={columns} getRowId={getRowId} disableColumnMenu />
       </Box>
     </Box>

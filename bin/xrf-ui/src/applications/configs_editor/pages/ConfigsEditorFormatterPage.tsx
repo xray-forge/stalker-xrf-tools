@@ -1,19 +1,20 @@
-import { Alert, Button, Checkbox, FormControlLabel } from "@mui/material";
+import { Alert, Checkbox, FormControlLabel } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ConfigsFormatResult } from "@/applications/configs_editor/components/ConfigsFormatResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { Optional } from "@/core/types/general";
-import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
-import { usePathState } from "@/lib/file-picker/use-path-state";
+import { PathFormRow } from "@/lib/form/PathFormRow";
+import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectFormatResult } from "@/lib/ltx";
+import { getProjectConfigsPath } from "@/lib/xrf-path";
 
-export function ConfigsEditorFormatterPage() {
+export function ConfigsEditorFormatterPage(): ReactElement {
   const log: Logger = useLogger("configs-formatter");
 
   const projectService: ProjectService = useInjection(ProjectService);
@@ -22,43 +23,36 @@ export function ConfigsEditorFormatterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
   const [result, setResult] = useState<Optional<ILtxProjectFormatResult>>(null);
-  const [configsPath, setConfigsPath, selectConfigsPath] = usePathState({
+
+  const configs: IPathField = usePathField({
+    id: "configs.format.directory",
+    title: "Provide path to xrf configs",
     isDirectory: true,
     isDisabled: isLoading,
-    title: "Provide path to xrf configs",
+    seed: async () => (projectService.xrfProjectPath ? getProjectConfigsPath(projectService.xrfProjectPath) : null),
   });
 
-  // Picking a different directory invalidates whatever the previous run reported.
-  const onSelectConfigsPath = useCallback(async () => {
-    setError(null);
-    setResult(null);
-
-    await selectConfigsPath();
-  }, [selectConfigsPath]);
-
-  const onFormatPathClicked = useCallback(async () => {
+  const onFormat = useCallback(async () => {
     try {
       setIsLoading(true);
       setResult(null);
       setError(null);
 
-      log.info("Performing format command:", isCheck, configsPath);
+      log.info("Performing format command:", isCheck, configs.value);
 
-      const result: ILtxProjectFormatResult = await invoke(
-        isCheck ? EConfigsEditorCommand.CHECK_FORMAT_CONFIGS_PATH : EConfigsEditorCommand.FORMAT_CONFIGS_PATH,
-        { path: configsPath }
+      setResult(
+        await invoke(
+          isCheck ? EConfigsEditorCommand.CHECK_FORMAT_CONFIGS_PATH : EConfigsEditorCommand.FORMAT_CONFIGS_PATH,
+          { path: configs.value }
+        )
       );
-
-      log.info("Finished format command:", isCheck, configsPath);
-
-      setResult(result);
-    } catch (error) {
-      log.error("Format error:", error);
-      setError(String(error));
+    } catch (caught) {
+      log.error("Format error:", caught);
+      setError(String(caught));
     } finally {
       setIsLoading(false);
     }
-  }, [configsPath, isCheck, log]);
+  }, [configs.value, isCheck, log]);
 
   const onCheckModeChange = useCallback((_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
     setResult(null);
@@ -67,20 +61,20 @@ export function ConfigsEditorFormatterPage() {
   }, []);
 
   useEffect(() => {
-    setConfigsPath(projectService.xrfConfigsPath);
-  }, [projectService.xrfConfigsPath, setConfigsPath]);
+    setResult(null);
+    setError(null);
+  }, [configs.value]);
 
   return (
     <PickerForm
-      title={`Provide LTX files directory to ${isCheck ? "check format" : "format"}`}
-      error={error ?? undefined}
       isLoading={isLoading}
+      title={isCheck ? "Check LTX formatting" : "Format LTX configs"}
+      error={error ?? undefined}
       backPath={"/configs_editor"}
-      actions={
-        <Button variant={"contained"} fullWidth disabled={isLoading || !configsPath} onClick={onFormatPathClicked}>
-          Format
-        </Button>
-      }
+      backDisabled={isLoading}
+      submitLabel={isCheck ? "Check" : "Format"}
+      isSubmitDisabled={!configs.isValid}
+      onSubmit={onFormat}
       status={
         result ? (
           result.toFormat.length ? (
@@ -96,13 +90,11 @@ export function ConfigsEditorFormatterPage() {
       }
       result={result ? <ConfigsFormatResult isCheck={isCheck} result={result} /> : null}
     >
-      <FilePickerInput
-        isDisabled={isLoading}
-        isInvalid={Boolean(error)}
+      <PathFormRow
         label={"Configs directory"}
         description={"Directory of LTX files to format"}
-        value={configsPath}
-        onSelect={onSelectConfigsPath}
+        isDisabled={isLoading}
+        field={configs}
       />
 
       <FormControlLabel

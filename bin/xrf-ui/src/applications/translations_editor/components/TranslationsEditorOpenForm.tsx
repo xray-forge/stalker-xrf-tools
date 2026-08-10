@@ -1,11 +1,11 @@
-import { Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useEffect } from "react";
+import { ReactElement, useCallback } from "react";
 
 import { TranslationsService } from "@/applications/translations_editor/store/translations";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { FilePickerInput, usePathState } from "@/lib/file-picker";
+import { PathFormRow } from "@/lib/form/PathFormRow";
+import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf-path";
 
@@ -15,52 +15,43 @@ export function TranslationsEditorOpenForm(): ReactElement {
   const translationsService: TranslationsService = useInjection(TranslationsService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const [translationsPath, setTranslationsPath, onSelectTranslationsPath] = usePathState({
-    title: "Provide path to equipment_editor dds",
-    filters: [{ name: "dds", extensions: ["dds"] }],
-    isDisabled: translationsService.project.isLoading,
+  const isLoading: boolean = translationsService.project.isLoading;
+
+  const translations: IPathField = usePathField({
+    id: "translations.open.directory",
+    title: "Provide path to translations",
+    isDirectory: true,
+    isDisabled: isLoading,
+    seed: async () =>
+      projectService.xrfProjectPath
+        ? getPathIfExists(getProjectTranslationsPath(projectService.xrfProjectPath))
+        : null,
   });
 
-  const onOpenTranslationsClicked = useCallback(() => {
-    if (translationsPath) {
-      translationsService.openTranslationsProject(translationsPath);
+  const onOpen = useCallback(() => {
+    if (translations.value) {
+      translationsService.openTranslationsProject(translations.value);
     } else {
-      log.info("Cannot open translations when have no provided paths:", {
-        translationsPath,
-      });
+      log.info("Cannot open translations without a path");
     }
-  }, [log, translationsService, translationsPath]);
-
-  useEffect(() => {
-    if (projectService.xrfProjectPath) {
-      getPathIfExists(getProjectTranslationsPath(projectService.xrfProjectPath)).then((translationsPath) => {
-        setTranslationsPath(translationsPath);
-      });
-    }
-  }, []);
+  }, [log, translationsService, translations.value]);
 
   return (
     <PickerForm
-      title={"Provide translations details"}
+      isLoading={isLoading}
+      title={"Open translations"}
       error={translationsService.project.error ? String(translationsService.project.error) : undefined}
-      isLoading={translationsService.project.isLoading}
       backPath={"/translations_editor"}
-      actions={
-        <Button
-          fullWidth
-          disabled={translationsService.project.isLoading || !translationsPath}
-          variant={"contained"}
-          onClick={onOpenTranslationsClicked}
-        >
-          Open
-        </Button>
-      }
+      backDisabled={isLoading}
+      submitLabel={"Open"}
+      isSubmitDisabled={!translations.isValid}
+      onSubmit={onOpen}
     >
-      <FilePickerInput
-        label={"Translations path"}
-        value={translationsPath}
-        isDisabled={translationsService.project.isLoading}
-        onSelect={onSelectTranslationsPath}
+      <PathFormRow
+        label={"Translations directory"}
+        description={"Directory holding the localization tables"}
+        isDisabled={isLoading}
+        field={translations}
       />
     </PickerForm>
   );

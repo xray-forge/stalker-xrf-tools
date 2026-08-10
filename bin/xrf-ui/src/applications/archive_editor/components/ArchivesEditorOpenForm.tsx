@@ -1,12 +1,11 @@
-import { Button } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useEffect } from "react";
+import { ReactElement, useCallback } from "react";
 
 import { ArchivesService } from "@/applications/archive_editor/store/archives";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
-import { usePathState } from "@/lib/file-picker/use-path-state";
+import { PathFormRow } from "@/lib/form/PathFormRow";
+import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectLinkedGamePath } from "@/lib/xrf-path";
 
@@ -18,49 +17,39 @@ export function ArchivesEditorOpenForm(): ReactElement {
 
   const isLoading: boolean = archivesService.project.isLoading;
 
-  const [archivesPath, setArchivesPath, onSelectArchivesPath] = usePathState({
+  const archives: IPathField = usePathField({
+    id: "archives.open.source",
     title: "Provide path to packed archives",
     isDirectory: true,
     isDisabled: isLoading,
+    seed: async () =>
+      projectService.xrfProjectPath ? getExistingProjectLinkedGamePath(projectService.xrfProjectPath) : null,
   });
 
-  const onOpenPathClicked = useCallback(() => {
-    if (archivesPath) {
-      archivesService.openArchivesProject(archivesPath);
+  const onOpen = useCallback(() => {
+    if (archives.value) {
+      archivesService.openArchivesProject(archives.value);
     } else {
       log.info("Cannot parse archives project without path");
     }
-  }, [archivesPath, log, archivesService]);
-
-  const onClearArchivesPath = useCallback(() => setArchivesPath(null), [setArchivesPath]);
-
-  useEffect(() => {
-    if (projectService.xrfProjectPath) {
-      getExistingProjectLinkedGamePath(projectService.xrfProjectPath).then((gamePath) => setArchivesPath(gamePath));
-    }
-  }, [projectService.xrfProjectPath, setArchivesPath]);
+  }, [archives.value, log, archivesService]);
 
   return (
     <PickerForm
       isLoading={isLoading}
-      title={"Provide archives to open"}
+      title={"Open game archives"}
       error={archivesService.project.error ? archivesService.project.error.message : undefined}
       backDisabled={isLoading}
       backPath={"/archives_editor"}
-      actions={
-        <Button variant={"contained"} disabled={isLoading || !archivesPath} onClick={onOpenPathClicked}>
-          Open
-        </Button>
-      }
+      submitLabel={"Open"}
+      isSubmitDisabled={!archives.isValid}
+      onSubmit={onOpen}
     >
-      <FilePickerInput
-        isDisabled={isLoading}
-        isInvalid={Boolean(archivesService.project.error)}
+      <PathFormRow
         label={"Archives directory"}
         description={"Directory holding the packed game archives"}
-        value={archivesPath}
-        onSelect={onSelectArchivesPath}
-        onClear={onClearArchivesPath}
+        isDisabled={isLoading}
+        field={archives}
       />
     </PickerForm>
   );

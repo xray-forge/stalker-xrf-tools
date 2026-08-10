@@ -1,32 +1,24 @@
-import { Box } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
-import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
-import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
+import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
 import { EditorStatusProvider } from "@/core/components/shell/EditorStatusContext";
+import { EditorToolsProvider } from "@/core/components/shell/EditorToolsContext";
 
 export interface IApplicationShellProps {
   children: ReactNode;
 }
 
 /**
- * Window chrome that outlives every route: tool rail on the left, status bar along the bottom.
+ * Supplies the shell's contexts and renders the frame that consumes them.
  *
- * Routes render into the middle only. Nothing inside can take the window over, which is what separates
- * a desktop tool from a stack of full screen pages.
+ * Split so the frame can read those contexts: a provider cannot consume what it provides.
  */
 export function ApplicationShell({ children }: IApplicationShellProps): ReactElement {
   return (
     <EditorStatusProvider>
-      <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
-        <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
-          <ApplicationRail />
-
-          <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>{children}</Box>
-        </Box>
-
-        <ApplicationStatusBar />
-      </Box>
+      <EditorToolsProvider>
+        <ApplicationShellFrame>{children}</ApplicationShellFrame>
+      </EditorToolsProvider>
     </EditorStatusProvider>
   );
 }

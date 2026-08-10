@@ -32,7 +32,7 @@ const TONE_COLORS: Record<TCommandResultTone, string> = {
  */
 export function CommandResult({ headline, tone, stats, children }: ICommandResultProps): ReactElement {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", minHeight: 0 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", flexGrow: 1, minHeight: 0 }}>
       <Typography variant={"subtitle2"} sx={{ color: TONE_COLORS[tone] }}>
         {headline}
       </Typography>
@@ -53,7 +53,7 @@ export function CommandResult({ headline, tone, stats, children }: ICommandResul
       {children ? (
         <>
           <Divider sx={{ marginY: 2 }} />
-          {children}
+          <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minHeight: 0 }}>{children}</Box>
         </>
       ) : null}
     </Box>

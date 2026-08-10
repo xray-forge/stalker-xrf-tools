@@ -1,8 +1,5 @@
-import { Box, Divider, Tab, Tabs, Typography } from "@mui/material";
-import { ReactElement, useMemo } from "react";
-
-import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
-import { useTabState } from "@/lib/tab";
+import { Box, Typography } from "@mui/material";
+import { ReactElement } from "react";
 
 const HEADER_FIELDS: Array<string> = ["Format version", "Model type", "Shader", "Texture", "Bounding box", "Source"];
 
@@ -15,63 +12,34 @@ function renderEmpty(label: string): ReactElement {
 }
 
 /**
- * Right side panel for the data behind the rendered visual.
- *
- * Placeholder content only. The tabs mirror what an ogf and its omf motions actually carry, so the
- * panel keeps its shape once the rust side starts feeding it: header and material info from the ogf
- * chunks, the bone tree, and the motion list resolved through the visual's motion refs.
+ * The panels behind the visuals tool stripe.
  */
-export function VisualDataPanel(): ReactElement {
-  const [activeTab, , onActiveTabChange] = useTabState<string>("header");
-
-  const activeContent: ReactElement = useMemo(() => {
-    switch (activeTab) {
-      case "header":
-        return (
-          <Box>
-            {HEADER_FIELDS.map((field) => (
-              <Box key={field} sx={{ display: "flex", justifyContent: "space-between", paddingY: 0.5 }}>
-                <Typography variant={"body2"} sx={{ opacity: 0.6 }}>
-                  {field}
-                </Typography>
-                <Typography variant={"body2"}>&mdash;</Typography>
-              </Box>
-            ))}
-          </Box>
-        );
-
-      case "bones":
-        return renderEmpty("No skeleton. Ogf bone and ik chunks land here.");
-
-      case "motions":
-        return renderEmpty("No motions. Resolved from the visual's omf motion refs.");
-
-      case "materials":
-        return renderEmpty("No materials. Texture and shader names per child visual.");
-
-      default:
-        return renderEmpty("Unknown tab");
-    }
-  }, [activeTab]);
-
+export function VisualHeaderPanel(): ReactElement {
   return (
-    <EditorSideMenu
-      anchor={"right"}
-      width={300}
-      header={
-        <>
-          <Tabs value={activeTab} variant={"scrollable"} scrollButtons={"auto"} onChange={onActiveTabChange}>
-            <Tab value={"header"} label={"Header"} />
-            <Tab value={"bones"} label={"Bones"} />
-            <Tab value={"motions"} label={"Motions"} />
-            <Tab value={"materials"} label={"Materials"} />
-          </Tabs>
-
-          <Divider />
-        </>
-      }
-    >
-      <Box sx={{ padding: 2 }}>{activeContent}</Box>
-    </EditorSideMenu>
+    <Box sx={{ padding: 2 }}>
+      {HEADER_FIELDS.map((field) => (
+        <Box key={field} sx={{ display: "flex", justifyContent: "space-between", paddingY: 0.5 }}>
+          <Typography variant={"body2"} sx={{ opacity: 0.6 }}>
+            {field}
+          </Typography>
+          <Typography variant={"body2"}>&mdash;</Typography>
+        </Box>
+      ))}
+    </Box>
   );
+}
+
+// todo: Split.
+export function VisualBonesPanel(): ReactElement {
+  return <Box sx={{ padding: 2 }}>{renderEmpty("No skeleton. Ogf bone and ik chunks land here.")}</Box>;
+}
+
+// todo: Split.
+export function VisualMotionsPanel(): ReactElement {
+  return <Box sx={{ padding: 2 }}>{renderEmpty("No motions. Resolved from the visual's omf motion refs.")}</Box>;
+}
+
+// todo: Split.
+export function VisualMaterialsPanel(): ReactElement {
+  return <Box sx={{ padding: 2 }}>{renderEmpty("No materials. Texture and shader names per child visual.")}</Box>;
 }

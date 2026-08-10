@@ -1,12 +1,12 @@
-import { Alert, Button } from "@mui/material";
+import { Alert } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { ReactElement, useCallback, useState } from "react";
 
 import { SpawnFileService } from "@/applications/spawn_editor/store/spawn";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
-import { usePathState } from "@/lib/file-picker/use-path-state";
+import { PathFormRow } from "@/lib/form/PathFormRow";
+import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf-path";
 
@@ -20,30 +20,36 @@ export function SpawnEditorUnpackForm(): ReactElement {
 
   const isLoading: boolean = spawnFileService.spawnFile.isLoading;
 
-  const [spawnPath, setSpawnPath, onSelectSpawnPath] = usePathState({
-    isDisabled: isLoading,
+  const source: IPathField = usePathField({
+    id: "spawn.unpack.source",
     title: "Select spawn file",
     filters: [{ name: "spawn", extensions: ["spawn"] }],
+    isDisabled: isLoading,
+    seed: async () =>
+      projectService.xrfProjectPath ? getExistingProjectBuiltAllSpawnPath(projectService.xrfProjectPath) : null,
   });
 
-  const [outputPath, setOutputPath, onSelectOutputPath] = usePathState({
+  const destination: IPathField = usePathField({
+    id: "spawn.unpack.destination",
+    title: "Select output folder",
     isDirectory: true,
     isDisabled: isLoading,
-    title: "Select output folder",
+    seed: async () =>
+      projectService.xrfProjectPath ? getProjectAllSpawnUnpackPath(projectService.xrfProjectPath) : null,
   });
 
-  const onUnpackClicked = useCallback(async () => {
-    log.info("Unpacking file:", spawnPath, outputPath);
+  const onUnpack = useCallback(async () => {
+    log.info("Unpacking file:", source.value, destination.value);
 
     setIsFinishedSuccessfully(false);
 
-    if (!spawnPath || !outputPath) {
-      return log.error("Cannot unpack file, expected correct paths:", spawnPath, outputPath);
+    if (!source.value || !destination.value) {
+      return log.error("Cannot unpack file, expected correct paths");
     }
 
     try {
-      await spawnFileService.openSpawnFile(spawnPath);
-      await spawnFileService.exportSpawnFile(outputPath);
+      await spawnFileService.openSpawnFile(source.value);
+      await spawnFileService.exportSpawnFile(destination.value);
 
       setIsFinishedSuccessfully(true);
     } catch (error) {
@@ -51,56 +57,38 @@ export function SpawnEditorUnpackForm(): ReactElement {
     } finally {
       await spawnFileService.closeSpawnFile();
     }
-  }, [log, spawnPath, outputPath, spawnFileService]);
-
-  const onClearSpawnPath = useCallback(() => setSpawnPath(null), [setSpawnPath]);
-  const onClearOutputPath = useCallback(() => setOutputPath(null), [setOutputPath]);
-
-  useEffect(() => {
-    if (projectService.xrfProjectPath) {
-      getExistingProjectBuiltAllSpawnPath(projectService.xrfProjectPath).then((path) => setSpawnPath(path));
-      getProjectAllSpawnUnpackPath(projectService.xrfProjectPath).then((path) => setOutputPath(path));
-    }
-  }, [projectService.xrfProjectPath, setSpawnPath, setOutputPath]);
+  }, [log, source.value, destination.value, spawnFileService]);
 
   return (
     <PickerForm
-      title={"Select *.spawn file to unpack"}
-      error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
       isLoading={isLoading}
+      title={"Unpack spawn file"}
+      error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
       backPath={"/spawn_editor"}
       backDisabled={isLoading}
-      actions={
-        <Button disabled={!spawnPath || !outputPath || isLoading} variant={"contained"} onClick={onUnpackClicked}>
-          Unpack
-        </Button>
-      }
+      submitLabel={"Unpack"}
+      isSubmitDisabled={!source.isValid || !destination.isValid}
+      onSubmit={onUnpack}
       status={
         isFinishedSuccessfully ? (
           <Alert severity={"success"} variant={"outlined"}>
-            Successfully unpacked spawn to {outputPath}
+            Successfully unpacked spawn to {destination.value}
           </Alert>
         ) : null
       }
     >
-      <FilePickerInput
+      <PathFormRow
         label={"Source"}
         description={"The packed *.spawn file to read"}
-        value={spawnPath}
         isDisabled={isLoading}
-        isInvalid={Boolean(spawnFileService.spawnFile.error)}
-        onSelect={onSelectSpawnPath}
-        onClear={onClearSpawnPath}
+        field={source}
       />
 
-      <FilePickerInput
+      <PathFormRow
         label={"Destination"}
         description={"Directory the unpacked chunks are written to"}
-        value={outputPath}
         isDisabled={isLoading}
-        isInvalid={Boolean(spawnFileService.spawnFile.error)}
-        onSelect={onSelectOutputPath}
-        onClear={onClearOutputPath}
+        field={destination}
       />
     </PickerForm>
   );

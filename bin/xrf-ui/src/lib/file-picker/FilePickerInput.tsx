@@ -4,11 +4,15 @@ import { Box, IconButton, TextField, Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 
 import { Optional } from "@/core/types/general";
+import { FormRow } from "@/lib/form/FormRow";
 
 export interface IFilePickerInputProps {
+  /** When given, the control labels itself by composing a `FormRow`. */
   label?: string;
-  placeholder?: string;
   description?: string;
+  isRequired?: boolean;
+  error?: Optional<string>;
+  placeholder?: string;
   value?: Optional<string>;
   isDisabled?: boolean;
   isInvalid?: boolean;
@@ -17,25 +21,26 @@ export interface IFilePickerInputProps {
 }
 
 /**
- * One path to pick, in the compact form every open and unpack screen uses.
+ * The control half of a path row. Labelling and description belong to the surrounding `FormRow`.
+ * The value is monospaced because these are filesystem paths, compared by eye.
  */
 export function FilePickerInput({
   label,
-  placeholder = "Not selected",
   description,
+  isRequired,
+  error,
+  placeholder = "Not selected",
   value,
   isDisabled,
   isInvalid,
   onSelect,
   onClear,
 }: IFilePickerInputProps): ReactElement {
-  return (
+  const control: ReactElement = (
     <TextField
       fullWidth
       size={"small"}
-      label={label}
       placeholder={placeholder}
-      helperText={description}
       disabled={isDisabled}
       error={isInvalid}
       value={value ?? ""}
@@ -61,7 +66,6 @@ export function FilePickerInput({
               ) : null}
 
               <Tooltip title={"Choose"}>
-                {/* Stops the click reaching the field's own handler, which would open a second dialog. */}
                 <IconButton
                   disabled={isDisabled}
                   onClick={(event) => {
@@ -78,5 +82,13 @@ export function FilePickerInput({
       }}
       onClick={isDisabled ? undefined : onSelect}
     />
+  );
+
+  return label ? (
+    <FormRow label={label} description={description} isRequired={isRequired} error={error}>
+      {control}
+    </FormRow>
+  ) : (
+    control
   );
 }

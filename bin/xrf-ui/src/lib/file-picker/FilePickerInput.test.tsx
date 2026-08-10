@@ -81,7 +81,7 @@ describe("FilePickerInput", () => {
 
   it("describes what the path is for", () => {
     const { getByText } = renderWithProviders(
-      <FilePickerInput description={"Directory of LTX files to validate"} onSelect={jest.fn()} />
+      <FilePickerInput label={"Configs"} description={"Directory of LTX files to validate"} onSelect={jest.fn()} />
     );
 
     expect(getByText("Directory of LTX files to validate")).toBeInTheDocument();
