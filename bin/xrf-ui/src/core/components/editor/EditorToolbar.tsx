@@ -5,9 +5,9 @@ import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { findApplicationTool, IApplicationTool } from "@/core/components/shell/applicationTools";
 import { Optional } from "@/core/types/general";
-import { BaseDomElementProps } from "@/lib/dom/element-types";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 
-export interface IEditorToolbarProps extends BaseDomElementProps {
+export interface IEditorToolbarProps extends BaseComponentProps {
   /** Keeps the leaving control in place but inert, rather than removing it mid-operation. */
   isBackDisabled?: boolean;
   /** Overrides the tool name resolved from the route. Rarely needed. */

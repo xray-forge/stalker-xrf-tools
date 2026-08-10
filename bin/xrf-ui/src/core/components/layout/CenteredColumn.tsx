@@ -1,7 +1,9 @@
 import { Box, SxProps, Theme } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
-export interface ICenteredColumnProps {
+import { BaseComponentProps } from "@/lib/dom/element-types";
+
+export interface ICenteredColumnProps extends BaseComponentProps {
   children: ReactNode;
   sx?: SxProps<Theme>;
 }
@@ -9,9 +11,18 @@ export interface ICenteredColumnProps {
 /**
  * Full-size flex column that centers its children both axes.
  */
-export function CenteredColumn({ children, sx }: ICenteredColumnProps): ReactElement {
+export function CenteredColumn({
+  "data-testid": dataTestId,
+  id,
+  className,
+  children,
+  sx,
+}: ICenteredColumnProps): ReactElement {
   return (
     <Box
+      data-testid={dataTestId}
+      id={id}
+      className={className}
       sx={[
         {
           display: "flex",
