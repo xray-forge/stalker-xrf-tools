@@ -35,11 +35,12 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
 
   const [activeToolId, setActiveToolId] = useState<Nullable<string>>(null);
 
-  // Nothing stored means "not chosen yet", which resolves to the first tool: an editor that gains a
-  // panel behaves as it did before the stripe existed, the panel is simply collapsible now. An empty
+  const defaultToolId: Nullable<string> = tools.find((tool) => tool.isOpenByDefault !== false)?.id ?? null;
+
+  // Nothing stored means "not chosen yet", which resolves to the first default-open tool. An empty
   // string is a deliberate collapse and stays collapsed.
   const resolvedToolId: Nullable<string> =
-    activeToolId === null ? (tools[0]?.id ?? null) : tools.some((it) => it.id === activeToolId) ? activeToolId : null;
+    activeToolId === null ? defaultToolId : tools.some((it) => it.id === activeToolId) ? activeToolId : null;
 
   const activeTool: Nullable<IEditorTool> = tools.find((it) => it.id === resolvedToolId) ?? null;
 
