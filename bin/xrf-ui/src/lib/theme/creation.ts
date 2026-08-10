@@ -143,7 +143,12 @@ export function createApplicationTheme(): Theme {
           disableRowSelectionOnClick: true,
         },
         styleOverrides: {
-          root: { border: "none" },
+          root: {
+            border: "none",
+            // Opt-in per column: identifiers, paths and file positions are compared by eye and read
+            // badly in proportional type.
+            "& .monospace": { fontFamily: "'Cascadia Mono', 'Consolas', monospace", fontSize: "0.75rem" },
+          },
         },
       },
     },

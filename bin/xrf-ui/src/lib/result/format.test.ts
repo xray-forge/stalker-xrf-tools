@@ -1,0 +1,26 @@
+import { describe, expect, it } from "@jest/globals";
+
+import { formatDuration } from "@/lib/result/format";
+
+describe("formatDuration", () => {
+  it("keeps sub second runs in milliseconds", () => {
+    expect(formatDuration(123)).toBe("123 ms");
+    expect(formatDuration(999)).toBe("999 ms");
+  });
+
+  it("rounds fractional milliseconds rather than printing them", () => {
+    // The result components used to render `duration / 1000` directly, producing `0.1234 sec`.
+    expect(formatDuration(123.456)).toBe("123 ms");
+  });
+
+  it("switches to seconds with one decimal", () => {
+    expect(formatDuration(1000)).toBe("1.0 s");
+    expect(formatDuration(59_400)).toBe("59.4 s");
+  });
+
+  it("switches to minutes once a run is long enough to care", () => {
+    expect(formatDuration(60_000)).toBe("1 m 0 s");
+    expect(formatDuration(98_431)).toBe("1 m 38 s");
+    expect(formatDuration(185_000)).toBe("3 m 5 s");
+  });
+});
