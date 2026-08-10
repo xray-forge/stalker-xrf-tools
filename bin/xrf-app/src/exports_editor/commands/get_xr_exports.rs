@@ -2,22 +2,12 @@ use serde_json::{Value, json};
 use tauri::State;
 use xray_export::ExportDescriptor;
 
-use crate::exports_editor::state::{ExportsDeclarations, ExportsEditorState};
+use crate::exports_editor::state::ExportsEditorState;
 use crate::types::TauriResult;
 
 #[tauri::command]
 pub async fn get_xr_exports(state: State<'_, ExportsEditorState>) -> TauriResult<Option<Value>> {
-  let conditions: Option<Vec<ExportDescriptor>> = state.conditions.lock().unwrap().as_ref().cloned();
-  let dialogs: Option<Vec<ExportDescriptor>> = state.dialogs.lock().unwrap().as_ref().cloned();
-  let effects: Option<Vec<ExportDescriptor>> = state.effects.lock().unwrap().as_ref().cloned();
+  let declarations: Option<Vec<ExportDescriptor>> = state.exports.lock().unwrap().as_ref().cloned();
 
-  if conditions.is_some() && dialogs.is_some() && effects.is_some() {
-    Ok(Some(json!(ExportsDeclarations {
-      conditions: conditions.unwrap(),
-      dialogs: dialogs.unwrap(),
-      effects: effects.unwrap(),
-    })))
-  } else {
-    Ok(None)
-  }
+  Ok(declarations.map(|declarations: Vec<ExportDescriptor>| json!(declarations)))
 }

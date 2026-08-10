@@ -10,7 +10,7 @@ use crate::types::TauriResult;
 pub fn close_xr_exports(state: State<'_, ExportsEditorState>) -> TauriResult {
   log::info!("Closing xr exports");
 
-  let mut lock: MutexGuard<Option<Vec<ExportDescriptor>>> = state.effects.lock().unwrap();
+  let mut lock: MutexGuard<Option<Vec<ExportDescriptor>>> = state.exports.lock().unwrap();
 
   if lock.is_some() {
     *lock = None;
