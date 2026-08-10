@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::ErrorKind::UnexpectedEof;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use byteorder::ReadBytesExt;
 use delharc::decode::{Decoder, Lh1Decoder};
@@ -65,6 +66,7 @@ impl ArchiveReader {
 impl ArchiveReader {
   pub fn read_archive(&mut self) -> XRayResult<ArchiveDescriptor> {
     let header: ArchiveHeader = self.read_archive_header()?.unwrap();
+    let metadata = self.file.metadata()?;
     let files: HashMap<String, ArchiveFileDescriptor> = header
       .files
       .into_iter()
@@ -77,10 +79,19 @@ impl ArchiveReader {
       .collect();
 
     Ok(ArchiveDescriptor {
+      created_at: Self::timestamp_millis(metadata.created().ok()),
       files,
+      modified_at: Self::timestamp_millis(metadata.modified().ok()),
       output_root_path: header.output_root_path,
       path: header.archive_path,
     })
+  }
+
+  fn timestamp_millis(timestamp: Option<SystemTime>) -> Option<u64> {
+    timestamp?
+      .duration_since(UNIX_EPOCH)
+      .ok()
+      .and_then(|duration| u64::try_from(duration.as_millis()).ok())
   }
 }
 

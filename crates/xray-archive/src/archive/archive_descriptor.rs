@@ -8,6 +8,8 @@ use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveDescriptor {
+  pub created_at: Option<u64>,
+  pub modified_at: Option<u64>,
   pub files: HashMap<String, ArchiveFileDescriptor>,
   pub output_root_path: PathBuf,
   pub path: PathBuf,

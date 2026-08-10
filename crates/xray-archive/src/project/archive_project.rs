@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::path::Path;
+use std::ffi::OsString;
+use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 use walkdir::WalkDir;
@@ -16,6 +17,8 @@ use crate::archive::reader::ArchiveReader;
 pub struct ArchiveProject {
   pub archives: Vec<ArchiveDescriptor>,
   pub files: HashMap<String, ArchiveFileDescriptor>,
+  pub root: PathBuf,
+  pub size_real: u64,
 }
 
 impl ArchiveProject {
@@ -56,19 +59,21 @@ impl ArchiveProject {
       }
     }
 
-    Ok(Self { archives, files })
+    let root: PathBuf = Self::root_from_archives(&archives);
+    let size_real: u64 = files.values().map(|file| u64::from(file.size_real)).sum();
+
+    Ok(Self {
+      archives,
+      files,
+      root,
+      size_real,
+    })
   }
 }
 
 impl ArchiveProject {
   pub fn get_real_size(&self) -> u64 {
-    let mut total: u64 = 0;
-
-    for file in self.files.values() {
-      total += file.size_real as u64;
-    }
-
-    total
+    self.size_real
   }
 
   pub fn get_compressed_size(&self) -> u64 {
@@ -103,5 +108,70 @@ impl ArchiveProject {
         }
       }
     });
+  }
+
+  fn root_from_archives(archives: &[ArchiveDescriptor]) -> PathBuf {
+    let Some(first) = archives.first() else {
+      return PathBuf::new();
+    };
+    let mut common: Vec<OsString> = first
+      .path
+      .parent()
+      .unwrap_or_else(|| Path::new(""))
+      .components()
+      .map(|component| component.as_os_str().to_owned())
+      .collect();
+
+    for archive in &archives[1..] {
+      let components: Vec<OsString> = archive
+        .path
+        .parent()
+        .unwrap_or_else(|| Path::new(""))
+        .components()
+        .map(|component| component.as_os_str().to_owned())
+        .collect();
+      let common_length: usize = common
+        .iter()
+        .zip(&components)
+        .take_while(|(left, right)| left == right)
+        .count();
+
+      common.truncate(common_length);
+    }
+
+    common.into_iter().collect()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::collections::HashMap;
+  use std::path::Path;
+
+  use crate::archive::archive_descriptor::ArchiveDescriptor;
+
+  use super::ArchiveProject;
+
+  #[test]
+  fn project_root_is_the_common_parent_of_all_archives() {
+    let archives = [
+      archive("/game/database/configs.db0"),
+      archive("/game/database/patches/patch.db"),
+    ];
+
+    assert_eq!(
+      ArchiveProject::root_from_archives(&archives),
+      Path::new("/game/database")
+    );
+  }
+
+  fn archive(path: &str) -> ArchiveDescriptor {
+    ArchiveDescriptor {
+      created_at: None,
+      files: HashMap::new(),
+      modified_at: None,
+      output_root_path: Path::new("gamedata").into(),
+      path: Path::new(path).into(),
+    }
   }
 }
