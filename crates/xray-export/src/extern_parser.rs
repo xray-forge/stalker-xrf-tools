@@ -7,10 +7,11 @@ mod type_renderer;
 mod value_parser;
 
 use std::collections::BTreeMap;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 pub use editor_projection::{ExportDescriptor, ExportParameterDescriptor, ExportsEditorParser};
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
 use xray_typescript::{TypeScriptSymbolResolver, parse_typescript_file};
 
@@ -30,6 +31,14 @@ impl ExternManifestParser {
 
   /// Scan `declarations_root` and parse every eligible TypeScript declaration.
   pub fn parse_directory(&self, declarations_root: &Path) -> XRayResult<ParsedExternManifest> {
+    // todo: Allow single file parsing?
+    if !declarations_root.is_dir() {
+      return Err(XRayError::new_invalid_error(format!(
+        "Extern source root '{}' is not a directory.",
+        declarations_root.display(),
+      )));
+    }
+
     let files: Vec<PathBuf> = self.read_source_files(declarations_root);
 
     self.parse_files(&files, declarations_root)
@@ -38,11 +47,11 @@ impl ExternManifestParser {
   fn parse_files(&self, files: &[PathBuf], declarations_root: &Path) -> XRayResult<ParsedExternManifest> {
     let mut parsed = Vec::new();
 
-    let symbol_resolver: TypeScriptSymbolResolver = TypeScriptSymbolResolver::discover(declarations_root)?;
-
     for path in files {
       let source = parse_typescript_file(path)?;
       let source_path: String = self.normalize_declaration_path(path, declarations_root)?;
+      let symbol_resolver: TypeScriptSymbolResolver =
+        TypeScriptSymbolResolver::discover(path.parent().expect("TypeScript source path has a parent directory"))?;
       let mut declarations = declaration_parser::ExternDeclarationParser::new(
         &source.source_map,
         &source.comments,
@@ -88,14 +97,33 @@ impl ExternManifestParser {
   fn read_source_files(&self, declarations_root: &Path) -> Vec<PathBuf> {
     let mut files: Vec<PathBuf> = WalkDir::new(declarations_root)
       .into_iter()
+      .filter_entry(|entry: &DirEntry| Self::should_visit(entry, declarations_root))
       .filter_map(Result::ok)
       .map(|entry| entry.into_path())
       .filter(|path| Self::is_source_path(path))
+      .filter(|path| Self::contains_extern_call(path))
       .collect();
 
     files.sort();
 
     files
+  }
+
+  fn contains_extern_call(path: &Path) -> bool {
+    fs::read_to_string(path).is_ok_and(|source: String| {
+      source
+        .match_indices("extern")
+        .any(|(offset, _)| source[offset + "extern".len()..].trim_start().starts_with('('))
+    })
+  }
+
+  fn should_visit(entry: &DirEntry, declarations_root: &Path) -> bool {
+    entry.path() == declarations_root
+      || !entry.file_type().is_dir()
+      || !matches!(
+        entry.file_name().to_str(),
+        Some(".git" | "node_modules" | "target" | "dist")
+      )
   }
 
   fn normalize_declaration_path(&self, path: &Path, declarations_root: &Path) -> XRayResult<String> {
@@ -355,5 +383,18 @@ mod tests {
     assert!(ExternManifestParser::is_source_path(Path::new(
       "declarations/example.ts"
     )));
+  }
+
+  #[test]
+  fn rejects_a_missing_source_root() {
+    let root: PathBuf = std::env::temp_dir().join(format!("xray-export-missing-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&root);
+
+    let error = ExternManifestParser::new()
+      .parse_directory(&root)
+      .unwrap_err()
+      .to_string();
+
+    assert!(error.contains("is not a directory"), "{error}");
   }
 }
