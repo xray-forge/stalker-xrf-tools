@@ -14,35 +14,35 @@ function lazyRouter(loader: () => Promise<Record<string, ComponentType>>, name: 
 }
 
 const ArchivesEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/archive_editor/ArchivesEditorRouter"),
+  () => import("@/applications/archive-editor/ArchivesEditorRouter"),
   "ArchivesEditorRouter"
 );
 const ConfigsEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/configs_editor/ConfigsEditorRouter"),
+  () => import("@/applications/configs-editor/ConfigsEditorRouter"),
   "ConfigsEditorRouter"
 );
 const DialogEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/dialog_editor/DialogEditorRouter"),
+  () => import("@/applications/dialog-editor/DialogEditorRouter"),
   "DialogEditorRouter"
 );
 const ExportsEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/exports_editor/ExportsEditorRouter"),
+  () => import("@/applications/exports-editor/ExportsEditorRouter"),
   "ExportsEditorRouter"
 );
 const IconsEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/icons_editor/IconsEditorRouter"),
+  () => import("@/applications/icons-editor/IconsEditorRouter"),
   "IconsEditorRouter"
 );
 const SpawnEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/spawn_editor/SpawnEditorRouter"),
+  () => import("@/applications/spawn-editor/SpawnEditorRouter"),
   "SpawnEditorRouter"
 );
 const TranslationsEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/translations_editor/TranslationsEditorRouter"),
+  () => import("@/applications/translations-editor/TranslationsEditorRouter"),
   "TranslationsEditorRouter"
 );
 const VisualsEditorRouter: ComponentType = lazyRouter(
-  () => import("@/applications/visuals_editor/VisualsEditorRouter"),
+  () => import("@/applications/visuals-editor/VisualsEditorRouter"),
   "VisualsEditorRouter"
 );
 
