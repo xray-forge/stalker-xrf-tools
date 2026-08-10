@@ -31,7 +31,10 @@ describe("groupExports", () => {
       ["namespace:xr_effects", "xr_effects"],
     ]);
     expect(groups[0]?.declarations.map((declaration) => declaration.name)).toEqual(["start"]);
-    expect(groups[1]?.declarations.map((declaration) => declaration.name)).toEqual(["quest.answer"]);
-    expect(groups[2]?.declarations.map((declaration) => declaration.name)).toEqual(["run", "stop"]);
+    expect(groups[1]?.declarations.map((declaration) => declaration.name)).toEqual(["dialogs_zaton.quest.answer"]);
+    expect(groups[2]?.declarations.map((declaration) => declaration.name)).toEqual([
+      "xr_effects.run",
+      "xr_effects.stop",
+    ]);
   });
 });

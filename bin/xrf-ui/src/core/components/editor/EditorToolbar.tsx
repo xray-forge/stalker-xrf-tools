@@ -1,3 +1,4 @@
+import { BaseDomElementProps } from "@/lib/dom/element-types";
 import { default as ArrowBackIcon } from "@mui/icons-material/ArrowBack";
 import { AppBar, Box, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
 import { ReactElement, ReactNode, useCallback } from "react";
@@ -6,7 +7,7 @@ import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 import { findApplicationTool, IApplicationTool } from "@/core/components/shell/applicationTools";
 import { Optional } from "@/core/types/general";
 
-export interface IEditorToolbarProps {
+export interface IEditorToolbarProps extends BaseDomElementProps {
   /** Keeps the leaving control in place but inert, rather than removing it mid-operation. */
   isBackDisabled?: boolean;
   /** Overrides the tool name resolved from the route. Rarely needed. */
@@ -23,6 +24,7 @@ export interface IEditorToolbarProps {
  * Header bar shared by every editor surface, including the landing panes.
  */
 export function EditorToolbar({
+  id = "editor-toolbar",
   isBackDisabled,
   title,
   subtitle,
@@ -44,7 +46,7 @@ export function EditorToolbar({
   }, [navigate, backPath, onBack]);
 
   return (
-    <AppBar position={"relative"} sx={{ flexShrink: 0 }}>
+    <AppBar id={id} position={"relative"} sx={{ flexShrink: 0 }}>
       <Toolbar variant={"dense"}>
         {backPath || onBack ? (
           // A disabled button cannot receive the tooltip's events, so it is wrapped in a span. That

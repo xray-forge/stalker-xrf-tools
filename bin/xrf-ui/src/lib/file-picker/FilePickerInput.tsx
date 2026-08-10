@@ -21,7 +21,8 @@ export interface IFilePickerInputProps {
 }
 
 /**
- * The control half of a path row. Labelling and description belong to the surrounding `FormRow`.
+ * The control half of a path row.
+ *
  * The value is monospaced because these are filesystem paths, compared by eye.
  */
 export function FilePickerInput({
@@ -52,29 +53,35 @@ export function FilePickerInput({
           endAdornment: (
             <Box sx={{ display: "flex", flexShrink: 0 }}>
               {value && onClear ? (
-                <Tooltip title={"Clear"}>
-                  <IconButton
-                    disabled={isDisabled}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onClear();
-                    }}
-                  >
-                    <ClearIcon fontSize={"small"} />
-                  </IconButton>
+                <Tooltip describeChild title={"Clear"}>
+                  <span>
+                    <IconButton
+                      aria-label={"Clear"}
+                      disabled={isDisabled}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onClear();
+                      }}
+                    >
+                      <ClearIcon fontSize={"small"} />
+                    </IconButton>
+                  </span>
                 </Tooltip>
               ) : null}
 
-              <Tooltip title={"Choose"}>
-                <IconButton
-                  disabled={isDisabled}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onSelect();
-                  }}
-                >
-                  <FolderOpenIcon fontSize={"small"} />
-                </IconButton>
+              <Tooltip describeChild title={"Choose"}>
+                <span>
+                  <IconButton
+                    aria-label={"Choose"}
+                    disabled={isDisabled}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelect();
+                    }}
+                  >
+                    <FolderOpenIcon fontSize={"small"} />
+                  </IconButton>
+                </span>
               </Tooltip>
             </Box>
           ),
