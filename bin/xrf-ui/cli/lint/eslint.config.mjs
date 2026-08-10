@@ -129,7 +129,6 @@ export default [
           pathGroupsExcludedImportTypes: ["builtin"],
         },
       ],
-      indent: ["error", 2, { SwitchCase: 1 }],
       "key-spacing": ["error", { afterColon: true, beforeColon: false }],
       "keyword-spacing": "error",
       "linebreak-style": ["error", "unix"],

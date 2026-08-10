@@ -56,7 +56,9 @@ function applyObserver(source, filename) {
     babelrc: false,
     configFile: false,
     filename,
-    parserOpts: { plugins: ["jsx", "typescript"] },
+    // `decorators-legacy` matches the `legacyDecorator` swc runs with. Babel only has to parse here,
+    // not transform, but a `.tsx` carrying a decorated class fails at the parse without it.
+    parserOpts: { plugins: ["jsx", "typescript", "decorators-legacy"] },
     plugins: [createObserverPlugin({ importPath: "mobx-react-observer" })],
   });
 
