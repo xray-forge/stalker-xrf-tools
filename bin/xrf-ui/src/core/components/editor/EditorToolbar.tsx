@@ -3,7 +3,7 @@ import { AppBar, Box, IconButton, Toolbar, Tooltip, Typography } from "@mui/mate
 import { ReactElement, ReactNode, useCallback } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
-import { findApplicationTool, IApplicationTool } from "@/core/components/shell/applicationTools";
+import { findApplicationTool, IApplicationTool } from "@/core/components/shell/application-tools";
 import { Optional } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 

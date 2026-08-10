@@ -3,7 +3,6 @@ const fs = require("node:fs");
 
 const babel = require("@babel/core");
 const swcJest = require("@swc/jest");
-
 const observingComponents = require("babel-plugin-observing-components");
 
 // The package default-exports a factory returning a `[plugin, options]` tuple, so it has to be called
@@ -61,7 +60,7 @@ function applyObserver(source, filename) {
     plugins: [createObserverPlugin({ importPath: "mobx-react-observer" })],
   });
 
-  return result && result.code != null ? result.code : source;
+  return result?.code ?? source;
 }
 
 module.exports = {

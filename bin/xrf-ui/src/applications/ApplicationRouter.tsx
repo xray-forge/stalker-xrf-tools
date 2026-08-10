@@ -1,8 +1,8 @@
 import { ReactElement } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 
-import { ApplicationRoutes } from "@/core/router/ApplicationRoutes";
 import { ApplicationShell } from "@/core/components/shell/ApplicationShell";
+import { ApplicationRoutes } from "@/core/router/ApplicationRoutes";
 
 /**
  * Puts the application inside a router and the window chrome that outlives every route.

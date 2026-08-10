@@ -1,8 +1,9 @@
 import { Box, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { useEditorStatusSegments } from "@/core/components/shell/EditorStatusContext";
 import { LAYOUT } from "@/lib/theme/tokens";
+
+import { useEditorStatusSegments } from "./EditorStatusContext";
 
 /**
  * Bottom status strip.

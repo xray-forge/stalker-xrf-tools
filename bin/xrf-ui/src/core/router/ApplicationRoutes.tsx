@@ -2,10 +2,10 @@ import { ReactElement, Suspense } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import { Root } from "@/applications/Root";
-import { APPLICATION_ROUTES, IApplicationRoute } from "@/core/router/lazy-routers";
 import { ApplicationLoader } from "@/core/components/ApplicationLoader";
 import { NavigationError } from "@/core/components/NavigationError";
-import { findApplicationTool } from "@/core/components/shell/applicationTools";
+import { findApplicationTool } from "@/core/components/shell/application-tools";
+import { APPLICATION_ROUTES, IApplicationRoute } from "@/core/router/lazy-routers";
 
 /**
  * Maps urls onto editors, inside a suspense boundary keyed by the tool that owns the route.

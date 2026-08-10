@@ -10,7 +10,7 @@ import { ReactElement, ReactNode, useCallback, useState } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { SettingsDialog } from "@/core/components/settings/SettingsDialog";
-import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/applicationTools";
+import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/application-tools";
 import { useIsEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { Maybe } from "@/core/types/general";
 import { LAYOUT } from "@/lib/theme/tokens";

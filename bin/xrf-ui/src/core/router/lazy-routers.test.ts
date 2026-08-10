@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
+import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/application-tools";
 import { APPLICATION_ROUTES, IApplicationRoute } from "@/core/router/lazy-routers";
-import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/applicationTools";
 
 describe("APPLICATION_ROUTES", () => {
   it("answers every tool the rail offers", () => {

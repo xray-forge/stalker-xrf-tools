@@ -1,4 +1,5 @@
 import { CircularProgress } from "@mui/material";
+import { keyframes } from "@mui/system";
 import { ReactElement } from "react";
 
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
@@ -8,6 +9,11 @@ import { BaseComponentProps } from "@/lib/dom/element-types";
 
 import { EditorLayout } from "./editor/EditorLayout";
 
+const LOADER_KEYFRAMES = keyframes`
+  from { visibility: hidden; }
+  to { visibility: visible; }
+`;
+
 /**
  * Suspense fallback shown while an editor's chunk is fetched.
  */
@@ -16,7 +22,18 @@ export function ApplicationLoader({ "data-testid": dataTestId, id, className }: 
 
   return (
     <EditorLayout toolbar={<EditorToolbar backPath={"/"} isBackDisabled={true} />}>
-      <CenteredColumn data-testid={dataTestId} id={id} className={className}>
+      <CenteredColumn
+        data-testid={dataTestId}
+        id={id}
+        className={className}
+        sx={{
+          visibility: "hidden",
+          animationName: `${LOADER_KEYFRAMES}`,
+          animationDuration: "0s",
+          animationDelay: "500ms",
+          animationFillMode: "forwards",
+        }}
+      >
         <CircularProgress />
       </CenteredColumn>
     </EditorLayout>

@@ -4,7 +4,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/applicationTools";
+import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/application-tools";
 
 /**
  * Start page rendered inside the shell.

@@ -2,9 +2,9 @@ import { Box } from "@mui/material";
 import { ReactElement, ReactNode, useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+import { findApplicationTool } from "@/core/components/shell/application-tools";
 import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
-import { findApplicationTool } from "@/core/components/shell/applicationTools";
 import { ApplicationToolStripe } from "@/core/components/shell/ApplicationToolStripe";
 import { IEditorTool, useEditorToolsRegistry } from "@/core/components/shell/EditorToolsContext";
 import { Optional } from "@/core/types/general";

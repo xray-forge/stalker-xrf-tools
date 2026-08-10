@@ -8,6 +8,8 @@ import { default as TranslateIcon } from "@mui/icons-material/Translate";
 import { default as ViewInArIcon } from "@mui/icons-material/ViewInAr";
 import { ReactElement } from "react";
 
+import { Optional } from "@/core/types/general";
+
 export interface IApplicationTool {
   label: string;
   title: string;
@@ -22,7 +24,7 @@ export interface IApplicationTool {
  * Every surface that needs to name the current tool goes through here, so the rail, the toolbar and
  * the navigator cannot drift into three different names for one thing.
  */
-export function findApplicationTool(pathname: string): IApplicationTool | null {
+export function findApplicationTool(pathname: string): Optional<IApplicationTool> {
   return APPLICATION_TOOLS.find((tool) => pathname.startsWith(tool.path)) ?? null;
 }
 
