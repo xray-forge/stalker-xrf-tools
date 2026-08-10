@@ -15,8 +15,6 @@ export interface IPickerFormProps {
   children?: ReactNode;
   submitLabel?: string;
   isSubmitDisabled?: boolean;
-  /** Escape hatch for screens whose action is not a single primary command. */
-  actions?: ReactNode;
   /** Follow-up actions shown beside the primary one, such as opening an output directory. */
   secondaryActions?: ReactNode;
   isLoading?: boolean;
@@ -37,7 +35,6 @@ export function PickerForm({
   submitLabel,
   isSubmitDisabled,
   onSubmit,
-  actions,
   secondaryActions,
   error,
   isLoading,
@@ -159,7 +156,6 @@ export function PickerForm({
           }}
         >
           {secondaryActions}
-          {actions}
 
           {submitLabel ? (
             <Button type={"submit"} variant={"contained"} disabled={isSubmitDisabled || isLoading}>

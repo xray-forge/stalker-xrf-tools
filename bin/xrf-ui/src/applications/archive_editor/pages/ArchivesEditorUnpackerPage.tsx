@@ -1,4 +1,4 @@
-import { Alert, Button } from "@mui/material";
+import { Alert } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
