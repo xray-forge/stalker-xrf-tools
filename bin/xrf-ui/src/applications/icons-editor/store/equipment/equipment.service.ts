@@ -5,7 +5,7 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { Injectable, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons";
 import { blobToImage } from "@/lib/image";
 import { EIconsEditorCommand } from "@/lib/ipc";
@@ -33,7 +33,7 @@ export class EquipmentService {
   public isGridVisible: boolean = true;
 
   @Observable()
-  public spriteImage: Loadable<Optional<IEquipmentPngDescriptor>> = createLoadable(null);
+  public spriteImage: Loadable<Nullable<IEquipmentPngDescriptor>> = createLoadable(null);
 
   public readonly log: Logger = new Logger(this.constructor.name);
 

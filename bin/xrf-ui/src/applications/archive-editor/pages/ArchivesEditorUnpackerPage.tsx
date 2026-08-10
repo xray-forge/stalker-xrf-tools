@@ -6,7 +6,7 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 import { ArchivesUnpackResult } from "@/applications/archive-editor/components/ArchivesUnpackResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { IArchiveUnpackResult } from "@/lib/archive";
 import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";
@@ -20,8 +20,8 @@ export function ArchivesEditorUnpackerPage(): ReactElement {
   const projectService: ProjectService = useInjection(ProjectService);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Optional<string>>(null);
-  const [result, setResult] = useState<Optional<IArchiveUnpackResult>>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
+  const [result, setResult] = useState<Nullable<IArchiveUnpackResult>>(null);
   const [archivesPath, setArchivesPath, selectArchivesPath] = usePathState({
     isDirectory: true,
     isDisabled: isLoading,

@@ -2,7 +2,7 @@ import { DialogFilter } from "@tauri-apps/plugin-dialog";
 import { exists } from "@tauri-apps/plugin-fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 
@@ -18,22 +18,22 @@ export interface IPathFieldOptions {
    */
   id: string;
   title?: string;
-  filters?: Optional<Array<DialogFilter>>;
+  filters?: Nullable<Array<DialogFilter>>;
   isDirectory?: boolean;
   isSave?: boolean;
   isDisabled?: boolean;
   isRequired?: boolean;
   /** Produces a first guess when nothing has been remembered yet, usually from the project root. */
-  seed?: () => Promise<Optional<string>>;
+  seed?: () => Promise<Nullable<string>>;
 }
 
 export interface IPathField {
-  value: Optional<string>;
-  error: Optional<string>;
+  value: Nullable<string>;
+  error: Nullable<string>;
   isValid: boolean;
   select: () => Promise<void>;
   clear: () => void;
-  setValue: (value: Optional<string>) => void;
+  setValue: (value: Nullable<string>) => void;
 }
 
 export function getPathFieldStorageKey(id: string): string {
@@ -54,7 +54,7 @@ export function usePathField({
   seed,
 }: IPathFieldOptions): IPathField {
   const [value, setValue, select] = usePathState({ title, filters, isDirectory, isSave, isDisabled });
-  const [error, setError] = useState<Optional<string>>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
 
   const isSeeded = useRef<boolean>(false);
   const storageKey: string = getPathFieldStorageKey(id);
@@ -69,7 +69,7 @@ export function usePathField({
 
     isSeeded.current = true;
 
-    const stored: Optional<string> = getLocalStorageValue(storageKey);
+    const stored: Nullable<string> = getLocalStorageValue(storageKey);
 
     if (stored) {
       setValue(stored);

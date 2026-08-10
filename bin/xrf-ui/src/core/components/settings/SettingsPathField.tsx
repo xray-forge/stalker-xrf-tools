@@ -3,12 +3,12 @@ import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 
 export interface ISettingsPathFieldProps {
   label: string;
   description: string;
-  value: Optional<string>;
+  value: Nullable<string>;
   onSelect: () => void;
   onClear: () => void;
 }

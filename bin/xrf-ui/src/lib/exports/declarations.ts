@@ -1,17 +1,17 @@
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 
 export interface IExportParameterDescriptor {
   name: string;
   typing: string;
-  comment: Optional<string>;
+  comment: Nullable<string>;
 }
 
 export interface IExportDescriptor {
   filename: string;
   name: string;
-  comment: Optional<string>;
+  comment: Nullable<string>;
   parameters: Array<IExportParameterDescriptor>;
-  typing: Optional<string>;
+  typing: Nullable<string>;
   line: number;
   col: number;
 }

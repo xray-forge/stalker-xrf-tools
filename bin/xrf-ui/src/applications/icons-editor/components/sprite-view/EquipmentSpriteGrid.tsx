@@ -2,12 +2,12 @@ import { Box } from "@mui/material";
 import { SxProps } from "@mui/system";
 import { memo, ReactElement, useMemo } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { GridMapper, TEquipmentCell } from "@/lib/icons";
 
 interface IEquipmentSpriteGridProps {
   isGridVisible: boolean;
-  selectedCell: Optional<TEquipmentCell>;
+  selectedCell: Nullable<TEquipmentCell>;
   gridMapper: GridMapper;
   onCellSelected: (row: number, column: number) => void;
   onCellMovedOver: (row: number, column: number) => void;

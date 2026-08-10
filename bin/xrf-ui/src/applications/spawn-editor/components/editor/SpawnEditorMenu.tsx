@@ -12,7 +12,7 @@ import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
 import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 
 export function SpawnEditorMenu(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
@@ -21,7 +21,7 @@ export function SpawnEditorMenu(): ReactElement {
   const { pathname } = useLocation();
 
   const onSaveClicked = useCallback(async () => {
-    const path: Optional<string> = await dialog.save({
+    const path: Nullable<string> = await dialog.save({
       title: "Save spawn file",
       filters: [{ name: "spawn", extensions: ["spawn"] }],
     });
@@ -32,10 +32,10 @@ export function SpawnEditorMenu(): ReactElement {
   }, [spawnFileService]);
 
   const onExportClicked = useCallback(async () => {
-    const path: Optional<string> = (await dialog.open({
+    const path: Nullable<string> = (await dialog.open({
       title: "Export spawn file",
       directory: true,
-    })) as Optional<string>;
+    })) as Nullable<string>;
 
     if (path) {
       await spawnFileService.exportSpawnFile(path);

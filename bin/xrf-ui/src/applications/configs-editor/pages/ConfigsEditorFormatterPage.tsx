@@ -6,7 +6,7 @@ import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from "rea
 import { ConfigsFormatResult } from "@/applications/configs-editor/components/ConfigsFormatResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { EConfigsEditorCommand } from "@/lib/ipc";
@@ -21,8 +21,8 @@ export function ConfigsEditorFormatterPage(): ReactElement {
 
   const [isCheck, setIsCheck] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Optional<string>>(null);
-  const [result, setResult] = useState<Optional<ILtxProjectFormatResult>>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
+  const [result, setResult] = useState<Nullable<ILtxProjectFormatResult>>(null);
 
   const configs: IPathField = usePathField({
     id: "configs.format.directory",

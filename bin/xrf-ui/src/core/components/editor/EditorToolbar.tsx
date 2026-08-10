@@ -4,7 +4,7 @@ import { ReactElement, ReactNode, useCallback } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { findApplicationTool, IApplicationTool } from "@/core/components/shell/application-tools";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 export interface IEditorToolbarProps extends BaseComponentProps {
@@ -35,7 +35,7 @@ export function EditorToolbar({
   const navigate: NavigateFunction = useNavigate();
   const { pathname } = useLocation();
 
-  const tool: Optional<IApplicationTool> = findApplicationTool(pathname);
+  const tool: Nullable<IApplicationTool> = findApplicationTool(pathname);
 
   const onLeave = useCallback(() => {
     if (onBack) {

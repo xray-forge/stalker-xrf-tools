@@ -3,7 +3,7 @@ import { inject, Injectable, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { TExportsDeclarations } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
@@ -15,7 +15,7 @@ export class ExportsService {
   public isReady: boolean = false;
 
   @Observable()
-  public declarations: Loadable<Optional<TExportsDeclarations>> = createLoadable(null);
+  public declarations: Loadable<Nullable<TExportsDeclarations>> = createLoadable(null);
 
   public readonly log: Logger = new Logger(this.constructor.name);
 
@@ -25,7 +25,7 @@ export class ExportsService {
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const declarations: Optional<TExportsDeclarations> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
+    const declarations: Nullable<TExportsDeclarations> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
 
     if (declarations) {
       this.log.info("Existing parsed exports detected");
@@ -35,7 +35,7 @@ export class ExportsService {
         this.isReady = true;
       });
     } else {
-      const projectPath: Optional<string> = this.projectService.xrfProjectPath;
+      const projectPath: Nullable<string> = this.projectService.xrfProjectPath;
 
       if (projectPath) {
         this.openExports(projectPath).finally(() => {

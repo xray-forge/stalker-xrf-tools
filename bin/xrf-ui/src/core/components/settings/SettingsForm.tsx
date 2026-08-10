@@ -6,7 +6,7 @@ import { ReactElement, useCallback } from "react";
 
 import { SettingsPathField } from "@/core/components/settings/SettingsPathField";
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/lib/theme";
 
@@ -23,7 +23,7 @@ export function SettingsForm(): ReactElement {
   const { mode, setMode } = useColorScheme();
 
   const onSelectProjectPath = useCallback(async () => {
-    const newXrfProjectPath: Optional<string> = await open({
+    const newXrfProjectPath: Nullable<string> = await open({
       title: "Provide path to xrf project",
       directory: true,
     });
@@ -38,7 +38,7 @@ export function SettingsForm(): ReactElement {
   const onClearProjectPath = useCallback(() => projectService.setXrfProjectPath(null), [projectService]);
 
   const onChangeMode = useCallback(
-    (_: unknown, value: Optional<ColorSchemeMode>) => {
+    (_: unknown, value: Nullable<ColorSchemeMode>) => {
       if (value) {
         setMode(value);
       }

@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { ReactElement, useEffect, useRef } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { IVisualMeshData, IVisualPreviewViewOptions, VisualPreviewScene } from "@/lib/visuals";
 
 interface IVisualPreviewViewportProps {
@@ -19,7 +19,7 @@ interface IVisualPreviewViewportProps {
  */
 export function VisualPreviewViewport({ mesh, options, cameraResetToken }: IVisualPreviewViewportProps): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<Optional<VisualPreviewScene>>(null);
+  const sceneRef = useRef<Nullable<VisualPreviewScene>>(null);
   const optionsRef = useRef<IVisualPreviewViewOptions>(options);
   const meshRef = useRef<IVisualMeshData>(mesh);
 

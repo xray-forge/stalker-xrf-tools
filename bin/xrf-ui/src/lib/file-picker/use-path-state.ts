@@ -1,18 +1,18 @@
 import { DialogFilter, open, save } from "@tauri-apps/plugin-dialog";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 
 export interface IPathStateOptions {
   title?: string;
-  filters?: Optional<Array<DialogFilter>>;
+  filters?: Nullable<Array<DialogFilter>>;
   isDisabled?: boolean;
   isDirectory?: boolean;
   /** Ask where to write instead of what to read. Pack screens choose an output file this way. */
   isSave?: boolean;
 }
 
-export type TPathState = [Optional<string>, Dispatch<SetStateAction<Optional<string>>>, () => Promise<void>];
+export type TPathState = [Nullable<string>, Dispatch<SetStateAction<Nullable<string>>>, () => Promise<void>];
 
 /**
  * Hold a picked path and the action that fills it.
@@ -27,7 +27,7 @@ export function usePathState({
   isDirectory = false,
   isSave = false,
 }: IPathStateOptions = {}): TPathState {
-  const [pathState, setPathState] = useState<Optional<string>>(null);
+  const [pathState, setPathState] = useState<Nullable<string>>(null);
 
   // Filters are declared inline by callers, so their identity changes every render. Comparing by
   // content keeps the callback stable without asking every caller to memoise.
@@ -38,7 +38,7 @@ export function usePathState({
       return;
     }
 
-    const pathResponse: Optional<string> = isSave
+    const pathResponse: Nullable<string> = isSave
       ? await save({ title, filters: filters ? filters : undefined })
       : await open({ title, filters: filters ? filters : undefined, directory: isDirectory });
 

@@ -2,7 +2,7 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { Injectable, OnProvision, ProvisionId, WireStatus } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 import { Logger } from "@/lib/logging";
 
@@ -13,7 +13,7 @@ export class ProjectService {
   public readonly status: WireStatus = WireStatus.for(this, { initialize: true });
 
   @Observable()
-  public xrfProjectPath: Optional<string> = null;
+  public xrfProjectPath: Nullable<string> = null;
 
   public constructor() {
     makeObservable(this);
@@ -30,15 +30,15 @@ export class ProjectService {
   }
 
   @BoundAction()
-  public setXrfProjectPath(path: Optional<string>): void {
+  public setXrfProjectPath(path: Nullable<string>): void {
     this.log.info("Set xrf project path:", path);
 
     this.xrfProjectPath = path;
     setLocalStorageValue("xrf-project-path", path);
   }
 
-  public async getXrfProjectPath(): Promise<Optional<string>> {
-    const xrfProjectPath: Optional<string> = getLocalStorageValue("xrf-project-path");
+  public async getXrfProjectPath(): Promise<Nullable<string>> {
+    const xrfProjectPath: Nullable<string> = getLocalStorageValue("xrf-project-path");
 
     if (xrfProjectPath && (await exists(xrfProjectPath))) {
       return xrfProjectPath;

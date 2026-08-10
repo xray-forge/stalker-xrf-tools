@@ -7,7 +7,7 @@ import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { ApplicationToolStripe } from "@/core/components/shell/ApplicationToolStripe";
 import { IEditorTool, useEditorToolsRegistry } from "@/core/components/shell/EditorToolsContext";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 
 const TOOL_PANEL_WIDTH: number = 300;
@@ -32,15 +32,15 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
   // Keyed per tool so the visuals panel choice does not leak into another editor.
   const storageKey: string = `${STORAGE_PREFIX}${findApplicationTool(pathname)?.path ?? "root"}`;
 
-  const [activeToolId, setActiveToolId] = useState<Optional<string>>(null);
+  const [activeToolId, setActiveToolId] = useState<Nullable<string>>(null);
 
   // Nothing stored means "not chosen yet", which resolves to the first tool: an editor that gains a
   // panel behaves as it did before the stripe existed, the panel is simply collapsible now. An empty
   // string is a deliberate collapse and stays collapsed.
-  const resolvedToolId: Optional<string> =
+  const resolvedToolId: Nullable<string> =
     activeToolId === null ? (tools[0]?.id ?? null) : tools.some((it) => it.id === activeToolId) ? activeToolId : null;
 
-  const activeTool: Optional<IEditorTool> = tools.find((it) => it.id === resolvedToolId) ?? null;
+  const activeTool: Nullable<IEditorTool> = tools.find((it) => it.id === resolvedToolId) ?? null;
 
   const onToggleTool = useCallback(
     (id: string) => {

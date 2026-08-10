@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Injectable, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { IArchiveFileReadResult, IArchivesProject } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
@@ -14,10 +14,10 @@ export class ArchivesService {
   public isReady: boolean = false;
 
   @Observable()
-  public project: Loadable<Optional<IArchivesProject>> = createLoadable(null);
+  public project: Loadable<Nullable<IArchivesProject>> = createLoadable(null);
 
   @Observable()
-  public file: Loadable<Optional<IArchiveFileReadResult>> = createLoadable(null);
+  public file: Loadable<Nullable<IArchiveFileReadResult>> = createLoadable(null);
 
   public readonly log: Logger = new Logger(this.constructor.name);
 

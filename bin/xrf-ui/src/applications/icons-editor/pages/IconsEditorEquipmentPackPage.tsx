@@ -5,7 +5,7 @@ import { EquipmentPackResult } from "@/applications/icons-editor/components/equi
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { IPackEquipmentResult } from "@/lib/icons";
 import { createLoadable, Loadable } from "@/lib/loadable";
@@ -23,7 +23,7 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
   const equipmentService: EquipmentService = useInjection(EquipmentService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const [result, setResult] = useState<Loadable<Optional<IPackEquipmentResult>>>(() => createLoadable(null));
+  const [result, setResult] = useState<Loadable<Nullable<IPackEquipmentResult>>>(() => createLoadable(null));
 
   const [inputIconsPath, setInputIconsPath, onSelectInputIconsPath] = usePathState({
     title: "Provide path to resulting equipment-editor dds",

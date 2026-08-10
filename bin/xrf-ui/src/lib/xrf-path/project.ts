@@ -1,7 +1,7 @@
 import * as path from "@tauri-apps/api/path";
 import { exists } from "@tauri-apps/plugin-fs";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 
 export function getProjectConfigsPath(projectPath: string): Promise<string> {
   return path.resolve(projectPath, "src", "engine", "configs");
@@ -43,19 +43,19 @@ export async function getProjectSystemLtxPath(projectPath: string): Promise<stri
   return path.resolve(await getProjectConfigsPath(projectPath), "system.ltx");
 }
 
-export async function getExistingProjectBuiltAllSpawnPath(projectPath: string): Promise<Optional<string>> {
+export async function getExistingProjectBuiltAllSpawnPath(projectPath: string): Promise<Nullable<string>> {
   return getPathIfExists(getProjectBuiltAllSpawnPath(projectPath));
 }
 
-export async function getExistingProjectUnpackedAllSpawnPath(projectPath: string): Promise<Optional<string>> {
+export async function getExistingProjectUnpackedAllSpawnPath(projectPath: string): Promise<Nullable<string>> {
   return getPathIfExists(getProjectAllSpawnUnpackPath(projectPath));
 }
 
-export async function getExistingProjectLinkedGamePath(projectPath: string): Promise<Optional<string>> {
+export async function getExistingProjectLinkedGamePath(projectPath: string): Promise<Nullable<string>> {
   return getPathIfExists(getProjectLinkedGamePath(projectPath));
 }
 
-export async function getPathIfExists(path: string | Promise<string>): Promise<Optional<string>> {
+export async function getPathIfExists(path: string | Promise<string>): Promise<Nullable<string>> {
   const resolved: string = await path;
 
   return (await exists(resolved)) ? resolved : null;

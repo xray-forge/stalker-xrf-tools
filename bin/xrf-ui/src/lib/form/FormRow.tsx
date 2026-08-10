@@ -1,13 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 
 export interface IFormRowProps {
   label: string;
   description?: string;
   isRequired?: boolean;
-  error?: Optional<string>;
+  error?: Nullable<string>;
   /**
    * Puts the control beside the label instead of under it.
    */

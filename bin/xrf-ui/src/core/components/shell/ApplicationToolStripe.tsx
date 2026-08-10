@@ -2,12 +2,12 @@ import { Box, IconButton, Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 
 import { IEditorTool } from "@/core/components/shell/EditorToolsContext";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { LAYOUT } from "@/lib/theme/tokens";
 
 export interface IApplicationToolStripeProps {
   tools: Array<IEditorTool>;
-  activeToolId: Optional<string>;
+  activeToolId: Nullable<string>;
   onToggleTool: (id: string) => void;
 }
 

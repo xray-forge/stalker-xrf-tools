@@ -2,7 +2,7 @@ import { default as CloseIcon } from "@mui/icons-material/Close";
 import { Box, Card, Divider, Grid, IconButton, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { stopPropagation } from "@/lib/event";
 import { GridMapper, IEquipmentSectionDescriptor, TEquipmentCell } from "@/lib/icons";
 
@@ -14,7 +14,7 @@ interface IEquipmentGridDetailsProps {
 
 export function EquipmentGridDetails({ gridMapper, cell, onClose }: IEquipmentGridDetailsProps): ReactElement {
   const [row, column] = cell;
-  const items: Optional<Array<IEquipmentSectionDescriptor>> = gridMapper.grid[row][column] ?? null;
+  const items: Nullable<Array<IEquipmentSectionDescriptor>> = gridMapper.grid[row][column] ?? null;
 
   const list = items?.map((it, index) => (
     <Box key={index} sx={{ marginTop: "4px" }}>

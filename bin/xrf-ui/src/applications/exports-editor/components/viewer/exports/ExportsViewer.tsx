@@ -5,7 +5,7 @@ import { ReactElement, useLayoutEffect, useMemo } from "react";
 import { ExportsEditorDeclarationList } from "@/applications/exports-editor/components/viewer/declarations/ExportsEditorDeclarationList";
 import { groupExports, IExportGroup } from "@/applications/exports-editor/components/viewer/exports/exports-groups";
 import { ExportsService } from "@/applications/exports-editor/store/exports";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { useTabState } from "@/lib/tab";
 
 export function ExportsViewer(): ReactElement {
@@ -18,7 +18,7 @@ export function ExportsViewer(): ReactElement {
     [exportsService.declarations.value]
   );
 
-  const activeGroup: Optional<IExportGroup> =
+  const activeGroup: Nullable<IExportGroup> =
     groups.find((group: IExportGroup) => group.id === activeTab) ?? groups[0] ?? null;
 
   useLayoutEffect(() => {

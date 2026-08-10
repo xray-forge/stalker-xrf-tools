@@ -3,7 +3,7 @@ import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box, IconButton, TextField, Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { FormRow } from "@/lib/form/FormRow";
 
 export interface IFilePickerInputProps {
@@ -11,9 +11,9 @@ export interface IFilePickerInputProps {
   label?: string;
   description?: string;
   isRequired?: boolean;
-  error?: Optional<string>;
+  error?: Nullable<string>;
   placeholder?: string;
-  value?: Optional<string>;
+  value?: Nullable<string>;
   isDisabled?: boolean;
   isInvalid?: boolean;
   onSelect: () => void;

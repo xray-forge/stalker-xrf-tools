@@ -14,7 +14,7 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { IVisualMeshData } from "@/lib/visuals/visual-mesh";
 
 const BACKGROUND_COLOR: number = 0x353535;
@@ -65,7 +65,7 @@ export class VisualPreviewScene {
   private readonly axes: AxesHelper;
   private readonly resizeObserver: ResizeObserver;
 
-  private container: Optional<HTMLElement> = null;
+  private container: Nullable<HTMLElement> = null;
   private frameHandle: number = 0;
 
   public constructor(mesh: IVisualMeshData) {

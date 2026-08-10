@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Injectable, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { ETranslationsEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
@@ -14,7 +14,7 @@ export class TranslationsService {
   public isReady: boolean = false;
 
   @Observable()
-  public project: Loadable<Optional<ITranslationsProjectJson>> = createLoadable(null);
+  public project: Loadable<Nullable<ITranslationsProjectJson>> = createLoadable(null);
 
   public readonly log: Logger = new Logger(this.constructor.name);
 

@@ -5,7 +5,7 @@ import { ReactElement, SyntheticEvent, useCallback, useMemo } from "react";
 
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { parseTree } from "@/lib/archive";
 
 export function ArchivesMenu(): ReactElement {
@@ -17,7 +17,7 @@ export function ArchivesMenu(): ReactElement {
   );
 
   const onSelectListItem = useCallback(
-    (_: Optional<SyntheticEvent>, file: Optional<string>) => {
+    (_: Nullable<SyntheticEvent>, file: Nullable<string>) => {
       if (file) {
         // trim '~/' root
         return archivesService.openArchiveFile(file.slice(2));

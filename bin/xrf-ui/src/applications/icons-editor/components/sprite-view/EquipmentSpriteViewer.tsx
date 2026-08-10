@@ -11,21 +11,21 @@ import { EquipmentGridZoom } from "@/applications/icons-editor/components/sprite
 import { EquipmentSpriteGrid } from "@/applications/icons-editor/components/sprite-view/EquipmentSpriteGrid";
 import { equipmentViewerConfig } from "@/applications/icons-editor/configs/EquipmentViewerConfig";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { GridMapper } from "@/lib/icons";
 
 export function EquipmentSpriteViewer(): ReactElement {
   const equipmentService: EquipmentService = useInjection(EquipmentService);
 
-  const [holdingOrigin, setHoldingOrigin] = useState<Optional<[number, number]>>(null);
+  const [holdingOrigin, setHoldingOrigin] = useState<Nullable<[number, number]>>(null);
   const [zoomValue, setZoomValue] = useState(1);
   const [zoomOriginX, setZoomOriginX] = useState(0);
   const [zoomOriginY, setZoomOriginY] = useState(0);
 
-  const [selectedCell, setSelectedCell] = useState<Optional<[number, number]>>(null);
-  const [moveOverCell, setMoveOverCell] = useState<Optional<[number, number]>>(null);
+  const [selectedCell, setSelectedCell] = useState<Nullable<[number, number]>>(null);
+  const [moveOverCell, setMoveOverCell] = useState<Nullable<[number, number]>>(null);
 
-  const gridMapper: Optional<GridMapper> = useMemo(() => {
+  const gridMapper: Nullable<GridMapper> = useMemo(() => {
     if (!equipmentService.spriteImage.value) {
       return null;
     }

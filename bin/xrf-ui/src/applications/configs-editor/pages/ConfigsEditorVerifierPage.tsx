@@ -6,7 +6,7 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 import { ConfigsVerifyResult } from "@/applications/configs-editor/components/ConfigsVerifyResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
-import { Optional } from "@/core/types/general";
+import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { EConfigsEditorCommand } from "@/lib/ipc";
@@ -20,8 +20,8 @@ export function ConfigsEditorVerifierPage(): ReactElement {
   const projectService: ProjectService = useInjection(ProjectService);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Optional<string>>(null);
-  const [result, setResult] = useState<Optional<ILtxProjectVerifyResult>>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
+  const [result, setResult] = useState<Nullable<ILtxProjectVerifyResult>>(null);
 
   const configs: IPathField = usePathField({
     id: "configs.verify.directory",
