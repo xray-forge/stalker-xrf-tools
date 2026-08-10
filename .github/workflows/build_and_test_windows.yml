@@ -65,6 +65,12 @@ jobs:
       - name: Install UI dependencies
         run: pnpm.cmd --dir bin/xrf-ui install --frozen-lockfile
 
+      - name: Typecheck UI
+        run: pnpm.cmd --dir bin/xrf-ui typecheck
+
+      - name: Lint UI
+        run: pnpm.cmd --dir bin/xrf-ui lint
+
       - name: Run UI tests
         run: pnpm.cmd --dir bin/xrf-ui test
 
