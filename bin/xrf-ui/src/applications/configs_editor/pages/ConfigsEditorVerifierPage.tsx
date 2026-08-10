@@ -1,4 +1,4 @@
-import { Alert, Button, Paper } from "@mui/material";
+import { Alert, Button } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
@@ -84,13 +84,7 @@ export function ConfigsEditorVerifierPage(): ReactElement {
           )
         ) : null
       }
-      result={
-        result ? (
-          <Paper elevation={4}>
-            <ConfigsVerifyResult result={result} />
-          </Paper>
-        ) : null
-      }
+      result={result ? <ConfigsVerifyResult result={result} /> : null}
     >
       <FilePickerInput
         isDisabled={isLoading}

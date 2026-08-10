@@ -1,48 +1,61 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, Typography } from "@mui/material";
-import { ReactElement } from "react";
+import { GridColDef } from "@mui/x-data-grid";
+import { ReactElement, useMemo } from "react";
 
+import { CommandResult, ICommandResultStat, TCommandResultTone } from "@/core/components/result/CommandResult";
+import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
 import { ILtxProjectFormatResult } from "@/lib/ltx";
+import { formatDuration } from "@/lib/result";
 
-interface IConfigsVerifyResultProps {
+interface IConfigsFormatResultProps {
   isCheck: boolean;
   result: ILtxProjectFormatResult;
 }
 
-export function ConfigsFormatResult({ isCheck, result }: IConfigsVerifyResultProps): ReactElement {
+export function ConfigsFormatResult({ isCheck, result }: IConfigsFormatResultProps): ReactElement {
+  const columns: Array<GridColDef> = useMemo(
+    () => [{ field: "file", headerName: "File", flex: 1, minWidth: 320, cellClassName: "monospace" }],
+    []
+  );
+
+  const rows: Array<{ file: string }> = useMemo(() => result.toFormat.map((file) => ({ file })), [result.toFormat]);
+
+  const stats: Array<ICommandResultStat> = useMemo(
+    () => [
+      { label: "files", value: result.totalFiles },
+      { label: "valid", value: result.validFiles, tone: "success" },
+      {
+        label: isCheck ? "need formatting" : "formatted",
+        value: result.invalidFiles,
+        tone: result.invalidFiles ? (isCheck ? "error" : "warning") : "success",
+      },
+      { label: "elapsed", value: formatDuration(result.duration) },
+    ],
+    [isCheck, result]
+  );
+
+  // In check mode a badly formatted file is a failure; in write mode the same number is work done.
+  const tone: TCommandResultTone = result.invalidFiles ? (isCheck ? "error" : "warning") : "success";
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", padding: 2, maxWidth: 540 }}>
-      <Grid container sx={{ justifyContent: "center", gap: 1 }}>
-        <Chip variant={"outlined"} label={`${result.duration / 1000} sec`} />
-        <Chip variant={"outlined"} label={`${result.totalFiles} files total`} />
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", gap: 1, marginTop: 1, padding: `0 ${16}px` }}>
-        <Chip variant={"outlined"} label={`${result.validFiles} file(s) valid`} />
-        <Chip
-          variant={"outlined"}
-          color={result.invalidFiles ? (isCheck ? "error" : "warning") : "success"}
-          label={isCheck ? `${result.invalidFiles} file(s) to format` : `${result.invalidFiles} file(s) formatted`}
-        />
-      </Grid>
-
-      {result.toFormat.length ? (
-        <Box sx={{ marginTop: 2 }}>
-          <Accordion>
-            <AccordionSummary>
-              {isCheck ? `Invalid (${result.toFormat.length})` : `Formatted (${result.toFormat.length})`}
-            </AccordionSummary>
-            <AccordionDetails sx={{ maxHeight: 300, overflowY: "auto" }}>
-              {result.toFormat.map((it, index) => (
-                <Box key={index}>
-                  <Typography color={"green"}>
-                    ({index + 1}) ({it})
-                  </Typography>
-                </Box>
-              ))}
-            </AccordionDetails>
-          </Accordion>
-        </Box>
-      ) : null}
-    </Box>
+    <CommandResult
+      headline={
+        result.invalidFiles
+          ? isCheck
+            ? `${result.invalidFiles} file(s) are not correctly formatted`
+            : `Formatted ${result.invalidFiles} file(s)`
+          : "All files are correctly formatted"
+      }
+      tone={tone}
+      stats={stats}
+    >
+      <CommandResultFindings<{ file: string }>
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.file}
+        getSearchText={(row) => row.file}
+        emptyLabel={"Nothing to format."}
+        searchPlaceholder={"Filter by file"}
+      />
+    </CommandResult>
   );
 }

@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, FormControlLabel, Paper } from "@mui/material";
+import { Alert, Button, Checkbox, FormControlLabel } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
@@ -94,13 +94,7 @@ export function ConfigsEditorFormatterPage() {
           )
         ) : null
       }
-      result={
-        result ? (
-          <Paper elevation={4}>
-            <ConfigsFormatResult isCheck={isCheck} result={result} />
-          </Paper>
-        ) : null
-      }
+      result={result ? <ConfigsFormatResult isCheck={isCheck} result={result} /> : null}
     >
       <FilePickerInput
         isDisabled={isLoading}

@@ -1,4 +1,4 @@
-import { Alert, Button, Paper } from "@mui/material";
+import { Alert, Button } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
@@ -100,13 +100,7 @@ export function ArchivesEditorUnpackerPage(): ReactElement {
         </Button>
       }
       status={result ? <Alert severity={"success"}>Archives unpacked.</Alert> : null}
-      result={
-        result ? (
-          <Paper elevation={4}>
-            <ArchivesUnpackResult result={result} />
-          </Paper>
-        ) : null
-      }
+      result={result ? <ArchivesUnpackResult result={result} /> : null}
     >
       <FilePickerInput
         isDisabled={isLoading}

@@ -1,51 +1,57 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, Typography } from "@mui/material";
-import { ReactElement } from "react";
+import { GridColDef } from "@mui/x-data-grid";
+import { ReactElement, useMemo } from "react";
 
-import { ILtxProjectVerifyResult } from "@/lib/ltx";
+import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
+import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
+import { ILtxProjectVerifyError, ILtxProjectVerifyResult } from "@/lib/ltx";
+import { formatDuration } from "@/lib/result";
 
 interface IConfigsVerifyResultProps {
   result: ILtxProjectVerifyResult;
 }
 
 export function ConfigsVerifyResult({ result }: IConfigsVerifyResultProps): ReactElement {
+  const columns: Array<GridColDef> = useMemo(
+    () => [
+      { field: "section", headerName: "Section", width: 180, cellClassName: "monospace" },
+      { field: "field", headerName: "Field", width: 150, cellClassName: "monospace" },
+      { field: "message", headerName: "Problem", flex: 1, minWidth: 220 },
+      { field: "at", headerName: "Location", width: 220, cellClassName: "monospace" },
+    ],
+    []
+  );
+
+  const stats: Array<ICommandResultStat> = useMemo(
+    () => [
+      { label: "files", value: result.totalFiles },
+      { label: "sections checked", value: result.checkedSections },
+      { label: "fields checked", value: result.checkedFields },
+      { label: "valid", value: result.validSections, tone: "success" },
+      { label: "skipped", value: result.skippedSections },
+      { label: "invalid", value: result.invalidSections, tone: result.invalidSections ? "error" : "success" },
+      { label: "elapsed", value: formatDuration(result.duration) },
+    ],
+    [result]
+  );
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", padding: 2, maxWidth: 540 }}>
-      <Grid container sx={{ justifyContent: "center", gap: 1 }}>
-        <Chip variant={"outlined"} label={`${result.duration / 1000} sec`} />
-        <Chip variant={"outlined"} label={`${result.totalFiles} files total`} />
-        <Chip variant={"outlined"} label={`${result.totalSections} sections total`} />
-      </Grid>
-
-      <Grid container sx={{ justifyContent: "center", gap: 1, marginTop: 1, padding: `0 ${16}px` }}>
-        <Chip variant={"outlined"} label={`${result.checkedFields} field(s) checked`} />
-        <Chip variant={"outlined"} label={`${result.checkedSections} section(s) checked`} />
-        <Chip variant={"outlined"} color={"success"} label={`${result.validSections} section(s) valid`} />
-        <Chip variant={"outlined"} color={"info"} label={`${result.skippedSections} section(s) skipped`} />
-        <Chip
-          variant={"outlined"}
-          color={result.invalidSections ? "error" : "success"}
-          label={`${result.invalidSections} section(s) invalid`}
-        />
-      </Grid>
-
-      {result.errors.length ? (
-        <Box sx={{ marginTop: 2 }}>
-          <Accordion>
-            <AccordionSummary>Errors ({result.errors.length})</AccordionSummary>
-            <AccordionDetails sx={{ maxHeight: 300, overflowY: "auto" }}>
-              {result.errors.map((it, index) => (
-                <Box key={index}>
-                  <Typography color={"green"}>
-                    ({index + 1}) [{it.section}] {it.field}
-                  </Typography>
-                  {it.message}
-                  <Typography color={"primary"}>{it.at}</Typography>
-                </Box>
-              ))}
-            </AccordionDetails>
-          </Accordion>
-        </Box>
-      ) : null}
-    </Box>
+    <CommandResult
+      headline={
+        result.errors.length
+          ? `${result.errors.length} problem(s) found in ${result.invalidSections} section(s)`
+          : "All sections passed validation"
+      }
+      tone={result.errors.length ? "error" : "success"}
+      stats={stats}
+    >
+      <CommandResultFindings<ILtxProjectVerifyError>
+        rows={result.errors}
+        columns={columns}
+        getRowId={(row) => `${row.at}:${row.section}:${row.field}`}
+        getSearchText={(row) => `${row.section} ${row.field} ${row.message} ${row.at}`}
+        emptyLabel={"Nothing to report."}
+        searchPlaceholder={"Filter by section, field or file"}
+      />
+    </CommandResult>
   );
 }
