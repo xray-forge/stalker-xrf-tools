@@ -7,7 +7,7 @@ use walkdir::WalkDir;
 use xray_error::{XRayError, XRayResult};
 
 use crate::archive::archive_descriptor::ArchiveDescriptor;
-use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
+use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::archive::reader::ArchiveReader;
 
 // todo: Add reading from fsgame.ltx file.
@@ -15,13 +15,13 @@ use crate::archive::reader::ArchiveReader;
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveProject {
   pub archives: Vec<ArchiveDescriptor>,
-  pub files: HashMap<String, ArchiveFileReplicationDescriptor>,
+  pub files: HashMap<String, ArchiveFileDescriptor>,
 }
 
 impl ArchiveProject {
   pub fn new<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
     let mut archives: Vec<ArchiveDescriptor> = Vec::new();
-    let mut files: HashMap<String, ArchiveFileReplicationDescriptor> = HashMap::new();
+    let mut files: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
 
     if path.as_ref().is_file() {
       log::info!("Reading archive file: {}", path.as_ref().display());
@@ -52,10 +52,7 @@ impl ArchiveProject {
 
     for archive in &archives {
       for (name, descriptor) in &archive.files {
-        files.insert(
-          name.clone(),
-          ArchiveFileReplicationDescriptor::from_descriptor(descriptor, &archive.path, &archive.output_root_path),
-        );
+        files.insert(name.clone(), descriptor.clone());
       }
     }
 

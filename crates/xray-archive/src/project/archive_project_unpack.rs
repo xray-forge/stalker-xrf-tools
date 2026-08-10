@@ -12,7 +12,7 @@ use xray_error::XRayResult;
 use xray_utils::{assert, assert_equal, assert_not_equal};
 
 use crate::ArchiveProject;
-use crate::archive::archive_file_descriptor::ArchiveFileReplicationDescriptor;
+use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::project::archive_project_unpack_result::ArchiveUnpackResult;
 
 impl ArchiveProject {
@@ -77,7 +77,7 @@ impl ArchiveProject {
     // Unpack each separate file.
     for file_descriptor in self.files.values() {
       if file_descriptor.size_real > 0 {
-        let descriptor: ArchiveFileReplicationDescriptor = file_descriptor.clone();
+        let descriptor: ArchiveFileDescriptor = file_descriptor.clone();
         let destination: PathBuf = destination.as_ref().into();
 
         tasks_set.spawn(async move { Self::unpack_file(&LZO::init().unwrap(), destination, &descriptor) });
@@ -108,11 +108,7 @@ impl ArchiveProject {
     })
   }
 
-  fn unpack_file<P: AsRef<Path>>(
-    lzo: &LZO,
-    destination: P,
-    file_descriptor: &ArchiveFileReplicationDescriptor,
-  ) -> XRayResult {
+  fn unpack_file<P: AsRef<Path>>(lzo: &LZO, destination: P, file_descriptor: &ArchiveFileDescriptor) -> XRayResult {
     let mut file_path: PathBuf = destination.as_ref().into();
 
     file_path.push(&file_descriptor.destination);

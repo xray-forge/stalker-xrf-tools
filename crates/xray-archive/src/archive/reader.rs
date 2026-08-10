@@ -65,9 +65,19 @@ impl ArchiveReader {
 impl ArchiveReader {
   pub fn read_archive(&mut self) -> XRayResult<ArchiveDescriptor> {
     let header: ArchiveHeader = self.read_archive_header()?.unwrap();
+    let files: HashMap<String, ArchiveFileDescriptor> = header
+      .files
+      .into_iter()
+      .map(|(name, descriptor)| {
+        (
+          name,
+          descriptor.with_archive_paths(&header.archive_path, &header.output_root_path),
+        )
+      })
+      .collect();
 
     Ok(ArchiveDescriptor {
-      files: header.files,
+      files,
       output_root_path: header.output_root_path,
       path: header.archive_path,
     })
@@ -216,13 +226,7 @@ impl ArchiveReader {
 
       file_descriptors.insert(
         name.clone(),
-        ArchiveFileDescriptor {
-          name,
-          offset,
-          size_real,
-          size_compressed,
-          crc,
-        },
+        ArchiveFileDescriptor::new(crc, name, offset, size_compressed, size_real),
       );
     }
 
