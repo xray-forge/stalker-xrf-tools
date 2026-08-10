@@ -34,6 +34,7 @@
     "@wirestate/mobx": "^1.0.0-experimental.15",
     "@wirestate/react": "^1.0.0-experimental.15",
     "@wirestate/react-mobx": "^1.0.0-experimental.15",
+    "date-fns": "^4.4.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.17.0",
