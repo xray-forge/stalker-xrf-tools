@@ -20,7 +20,7 @@ export function SpawnEditorHeaderTable({ header }: ISpawnEditorHeaderTableProps)
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => [{ ...header, id: "main" }], []);
+  const rows: GridRowsProp = useMemo(() => [{ ...header, id: "main" }], [header]);
 
   return (
     <DataGrid

@@ -15,25 +15,28 @@ export function useInvokeCommand<T>(command: string): IAsyncCommandData<T> {
   const [value, setValue] = useState<Nullable<T>>(null);
   const [error, setError] = useState<Nullable<string>>(null);
 
-  const get = useCallback(async (args?: InvokeArgs) => {
-    setIsLoading(true);
-    setError(null);
+  const get = useCallback(
+    async (args?: InvokeArgs) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const value: Nullable<T> = await invoke<T>(command, args);
+      try {
+        const value: Nullable<T> = await invoke<T>(command, args);
 
-      setValue(value);
-      setIsLoading(false);
+        setValue(value);
+        setIsLoading(false);
 
-      return value;
-    } catch (error) {
-      setError(error as string);
-      setValue(null);
-      setIsLoading(false);
+        return value;
+      } catch (error) {
+        setError(error as string);
+        setValue(null);
+        setIsLoading(false);
 
-      return null;
-    }
-  }, []);
+        return null;
+      }
+    },
+    [command]
+  );
 
   return { value, isLoading, error, get };
 }

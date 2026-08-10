@@ -25,16 +25,19 @@ export function ExportsFilterForm({
     [debounceDelay, onFilterValueChangeDebounced]
   );
 
-  const onValueChanged = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const value: string = event.target.value;
+  const onValueChanged = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value: string = event.target.value;
 
-    setFilter(value);
-    onValueChangedDebounced(value);
+      setFilter(value);
+      onValueChangedDebounced(value);
 
-    if (onFilterValueChange) {
-      onFilterValueChange(value);
-    }
-  }, []);
+      if (onFilterValueChange) {
+        onFilterValueChange(value);
+      }
+    },
+    [onFilterValueChange, onValueChangedDebounced]
+  );
 
   const onClearFilter = useCallback(() => {
     setFilter("");
@@ -43,7 +46,7 @@ export function ExportsFilterForm({
     if (onFilterValueChange) {
       onFilterValueChange("");
     }
-  }, []);
+  }, [onFilterValueChange, onValueChangedDebounced]);
 
   return (
     <FormControl>

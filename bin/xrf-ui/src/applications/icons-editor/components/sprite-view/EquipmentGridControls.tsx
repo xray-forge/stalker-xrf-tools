@@ -18,11 +18,11 @@ export function EquipmentGridControls({
 }: IEquipmentGridControlsProps): ReactElement {
   const onGridVisibilityToggled = useCallback(() => {
     onSetGridVisibility(!isGridVisible);
-  }, [isGridVisible]);
+  }, [isGridVisible, onSetGridVisibility]);
 
   const onDecreaseGridSize = useCallback(() => {
     onSetGridSize(gridSize - 5);
-  }, [gridSize]);
+  }, [gridSize, onSetGridSize]);
 
   const onIncreaseGridSize = useCallback(() => {
     onSetGridSize(gridSize + 5);

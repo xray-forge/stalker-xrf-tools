@@ -24,7 +24,7 @@ export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolsTab
         valueGetter: (it: AnyObject) => (it?.row?.position ? JSON.stringify(it.row.position) : null),
       },
     ],
-    [patrols]
+    []
   );
 
   const rows: GridRowsProp = useMemo(() => {

@@ -15,7 +15,7 @@ export function SpawnEditorPatrolsTable({ patrols }: ISpawnEditorPatrolsTablePro
       { field: "pointsCount", headerName: "points count" },
       { field: "linksCount", headerName: "links count" },
     ],
-    [patrols]
+    []
   );
 
   const rows: GridRowsProp = useMemo(

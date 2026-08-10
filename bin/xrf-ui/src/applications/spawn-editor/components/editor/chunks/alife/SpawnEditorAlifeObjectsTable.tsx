@@ -58,6 +58,8 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
         innerId: it.id,
         type: it.inherited.type,
       })),
+    // Expected memo propagation without static analysis:
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     objects
   );
 
