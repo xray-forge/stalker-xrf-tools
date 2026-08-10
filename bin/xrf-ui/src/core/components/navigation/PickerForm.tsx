@@ -6,6 +6,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 
 const FORM_WIDTH: number = 460;
 
@@ -44,6 +45,9 @@ export function PickerForm({
   backDisabled,
 }: IPickerFormProps): ReactElement {
   const navigate: NavigateFunction = useNavigate();
+
+  // Blocks navigation away from a running command, not just this form controls.
+  useEditorBusy(Boolean(isLoading));
 
   const parametersRef = useRef<HTMLDivElement>(null);
   const [isCollapsed, setCollapsed] = useState<boolean>(false);

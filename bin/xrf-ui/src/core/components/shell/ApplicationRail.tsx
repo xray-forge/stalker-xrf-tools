@@ -11,31 +11,37 @@ import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { SettingsDialog } from "@/core/components/settings/SettingsDialog";
 import { APPLICATION_TOOLS, IApplicationTool } from "@/core/components/shell/applicationTools";
+import { useIsEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { Maybe } from "@/core/types/general";
 import { LAYOUT } from "@/lib/theme/tokens";
 
 interface IRailButtonProps {
+  isSelected?: boolean;
+  isDisabled?: boolean;
   label: string;
   icon: ReactNode;
-  isSelected?: boolean;
   onClick: () => void;
 }
 
-function RailButton({ label, icon, isSelected, onClick }: IRailButtonProps): ReactElement {
+function RailButton({ isSelected, isDisabled, label, icon, onClick }: IRailButtonProps): ReactElement {
   return (
-    <Tooltip title={label} placement={"right"}>
-      <IconButton
-        sx={{
-          width: 36,
-          height: 36,
-          borderRadius: 1,
-          color: isSelected ? "primary.main" : "text.secondary",
-          backgroundColor: isSelected ? "action.selected" : "transparent",
-        }}
-        onClick={onClick}
-      >
-        {icon}
-      </IconButton>
+    <Tooltip describeChild title={label} placement={"right"}>
+      <span>
+        <IconButton
+          aria-label={label}
+          disabled={isDisabled}
+          sx={{
+            width: 36,
+            height: 36,
+            borderRadius: 1,
+            color: isSelected ? "primary.main" : "text.secondary",
+            backgroundColor: isSelected ? "action.selected" : "transparent",
+          }}
+          onClick={onClick}
+        >
+          {icon}
+        </IconButton>
+      </span>
     </Tooltip>
   );
 }
@@ -52,6 +58,8 @@ export function ApplicationRail(): ReactElement {
   const { mode, setMode, systemMode } = useColorScheme();
 
   const [isSettingsOpen, setSettingsOpen] = useState(false);
+
+  const isBusy: boolean = useIsEditorBusy();
 
   const resolvedMode: Maybe<string> = mode === "system" ? systemMode : mode;
   const isLightMode: boolean = resolvedMode === "light";
@@ -79,10 +87,17 @@ export function ApplicationRail(): ReactElement {
         backgroundColor: "background.paper",
       }}
     >
+      {}
       <RailButton
+        /*
+          Navigation is blocked while the active editor is running a command. Leaving mid-operation left
+          it running against a screen nobody could see. Only the navigating controls are blocked: the
+          theme toggle, settings and the source link do not abandon anything.
+        */
+        isDisabled={isBusy}
+        isSelected={pathname === "/"}
         label={"Home"}
         icon={<HomeIcon />}
-        isSelected={pathname === "/"}
         onClick={() => navigate("/", { replace: true })}
       />
 
@@ -90,10 +105,11 @@ export function ApplicationRail(): ReactElement {
 
       {APPLICATION_TOOLS.map((tool: IApplicationTool) => (
         <RailButton
+          isSelected={pathname.startsWith(tool.path)}
+          isDisabled={isBusy}
           key={tool.path}
           label={tool.label}
           icon={tool.icon}
-          isSelected={pathname.startsWith(tool.path)}
           onClick={() => navigate(tool.path, { replace: true })}
         />
       ))}
