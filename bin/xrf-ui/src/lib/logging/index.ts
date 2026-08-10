@@ -1,2 +1,2 @@
 export * from "@/lib/logging/Logger";
-export * from "@/lib/logging/useLogger";
+export * from "@/lib/logging/use-logger";

@@ -15,7 +15,7 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 import { Optional } from "@/core/types/general";
-import { IVisualMeshData } from "@/lib/visuals/visual_mesh";
+import { IVisualMeshData } from "@/lib/visuals/visual-mesh";
 
 const BACKGROUND_COLOR: number = 0x353535;
 const GRID_COLOR: number = 0x505050;

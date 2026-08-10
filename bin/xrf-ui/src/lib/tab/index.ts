@@ -1,1 +1,1 @@
-export * from "@/lib/tab/useTabState";
+export * from "@/lib/tab/use-tab-state";
