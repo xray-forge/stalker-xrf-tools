@@ -3,7 +3,9 @@ packages:
 
 allowBuilds:
   "@parcel/watcher": true
+  '@swc/core': false
   esbuild: true
+  unrs-resolver: false
 
 minimumReleaseAge: 0
 
