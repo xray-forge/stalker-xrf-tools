@@ -1,35 +1,73 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { mockArchiveFileDescriptor } from "@/fixtures/archive.mocks";
+import { mockArchiveFileDescriptor, mockArchiveReadPolicy } from "@/fixtures/archive.mocks";
 import { getArchivePreviewSupport } from "@/lib/archive/preview";
+import { IArchiveReadPolicy } from "@/lib/archive/types";
+
+const READ_POLICY: IArchiveReadPolicy = mockArchiveReadPolicy();
 
 describe("archive preview support", () => {
-  it("accepts uncompressed LTX and script files within the backend limit", () => {
-    expect(getArchivePreviewSupport(mockArchiveFileDescriptor())).toEqual({ kind: "supported" });
-    expect(getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "script", name: "actor.SCRIPT" }))).toEqual({
-      kind: "supported",
-    });
+  it.each(READ_POLICY.extensions)(
+    "accepts uncompressed .%s files within the backend limit",
+    (extension: string) => {
+      expect(
+        getArchivePreviewSupport(mockArchiveFileDescriptor({ extension, name: `preview.${extension}` }), READ_POLICY)
+      ).toEqual({ kind: "supported" });
+    }
+  );
+
+  it("accepts the normalized extension regardless of filename casing", () => {
+    expect(
+      getArchivePreviewSupport(
+        mockArchiveFileDescriptor({ extension: "script", name: "actor.SCRIPT" }),
+        READ_POLICY
+      )
+    ).toEqual({ kind: "supported" });
   });
 
   it("identifies each unsupported reason before a backend read", () => {
     expect(
-      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" }))
+      getArchivePreviewSupport(
+        mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" }),
+        READ_POLICY
+      )
     ).toEqual({
       kind: "unsupported-extension",
       extension: "dds",
     });
-    expect(getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: 2048, sizeCompressed: 1024 }))).toEqual({
-      kind: "compressed",
-    });
-    expect(getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: 10 * 1024 * 1024 + 1 }))).toEqual({
-      kind: "too-large",
-      maximumSize: 10 * 1024 * 1024,
-    });
+    expect(
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: 2048, sizeCompressed: 1024 }), READ_POLICY)
+    ).toEqual({ kind: "compressed" });
+    expect(
+      getArchivePreviewSupport(
+        mockArchiveFileDescriptor({ sizeReal: READ_POLICY.maximumSize + 1 }),
+        READ_POLICY
+      )
+    ).toEqual({ kind: "too-large", maximumSize: READ_POLICY.maximumSize });
   });
 
   it("uses the extension supplied by the archive descriptor", () => {
-    expect(getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "script", name: "actor.bin" }))).toEqual({
-      kind: "supported",
+    expect(
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "script", name: "actor.bin" }), READ_POLICY)
+    ).toEqual({ kind: "supported" });
+  });
+
+  it("uses backend-provided policy values", () => {
+    const policy: IArchiveReadPolicy = mockArchiveReadPolicy({
+      extensions: ["xml"],
+      maximumSize: 1024,
+      supportsCompressedFiles: true,
+    });
+
+    expect(
+      getArchivePreviewSupport(
+        mockArchiveFileDescriptor({ extension: "xml", name: "preview.xml", sizeReal: 1024, sizeCompressed: 512 }),
+        policy
+      )
+    ).toEqual({ kind: "supported" });
+    expect(getArchivePreviewSupport(mockArchiveFileDescriptor(), policy)).toEqual({
+      kind: "unsupported-extension",
+      extension: "ltx",
     });
   });
 });

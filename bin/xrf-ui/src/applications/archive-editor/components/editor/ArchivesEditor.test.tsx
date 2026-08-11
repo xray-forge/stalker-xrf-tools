@@ -81,7 +81,7 @@ describe("opened archives editor", () => {
     await userEvent.click(await findByText("texture.dds"));
 
     expect(getByText("Preview unavailable")).toBeInTheDocument();
-    expect(getByText(/only LTX and script files have text previews/)).toBeInTheDocument();
+    expect(getByText(/this file type does not have a text preview/)).toBeInTheDocument();
     expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
       path: BINARY_FILE.name,
     });

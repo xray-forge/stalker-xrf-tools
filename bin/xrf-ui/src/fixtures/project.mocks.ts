@@ -3,6 +3,8 @@ import { IExportDescriptor, TExportsDeclarations } from "@/lib/exports";
 import { IEquipmentSectionDescriptor } from "@/lib/icons";
 import { ITranslationsProjectJson } from "@/lib/translations";
 
+import { mockArchiveReadPolicy } from "./archive.mocks";
+
 export function mockArchiveFile(
   overrides: Partial<IArchiveFileDescriptor> = {}
 ): IArchiveFileDescriptor {
@@ -43,6 +45,7 @@ export function mockArchivesProject(overrides: Partial<IArchivesProject> = {}): 
         destination: "gamedata\\meshes\\dynamics\\weapons\\wpn_ak74.ogf",
       }),
     },
+    readPolicy: mockArchiveReadPolicy(),
     root: "db",
     sizeReal: 6144,
     ...overrides,

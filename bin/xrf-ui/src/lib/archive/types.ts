@@ -15,9 +15,16 @@ export interface IArchiveDescriptor {
   path: string;
 }
 
+export interface IArchiveReadPolicy {
+  extensions: Array<string>;
+  maximumSize: number;
+  supportsCompressedFiles: boolean;
+}
+
 export interface IArchivesProject {
   archives: Array<IArchiveDescriptor>;
   files: Record<string, IArchiveFileDescriptor>;
+  readPolicy: IArchiveReadPolicy;
   root: string;
   sizeReal: number;
 }

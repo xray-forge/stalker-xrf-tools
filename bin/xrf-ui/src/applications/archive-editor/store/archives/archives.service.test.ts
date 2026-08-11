@@ -1,12 +1,21 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
-import { mockArchiveFileDescriptor } from "@/fixtures/archive.mocks";
+import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/tauri.mocks";
-import { IArchiveFileReadResult } from "@/lib/archive";
+import { IArchiveFileDescriptor, IArchiveFileReadResult } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
+import { createLoadable } from "@/lib/loadable";
 
 function ignoreReadResult(): void {}
+
+function mockArchivesService(files: Array<IArchiveFileDescriptor>): ArchivesService {
+  const service: ArchivesService = new ArchivesService();
+
+  service.project = createLoadable(mockArchivesProject(files));
+
+  return service;
+}
 
 describe("ArchivesService file selection", () => {
   it("loads supported selected files", async () => {
@@ -15,7 +24,7 @@ describe("ArchivesService file selection", () => {
 
     setMockInvokeResponses({ [EArchivesEditorCommand.READ_ARCHIVE_FILE]: result });
 
-    const service = new ArchivesService();
+    const service: ArchivesService = mockArchivesService([descriptor]);
 
     await service.selectArchiveFile(descriptor);
 
@@ -26,7 +35,7 @@ describe("ArchivesService file selection", () => {
 
   it("selects unsupported files without invoking the read command", async () => {
     const descriptor = mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" });
-    const service = new ArchivesService();
+    const service: ArchivesService = mockArchivesService([descriptor]);
 
     await service.selectArchiveFile(descriptor);
 
@@ -52,7 +61,7 @@ describe("ArchivesService file selection", () => {
         args?.path === first.name ? firstResult : secondResult,
     });
 
-    const service = new ArchivesService();
+    const service: ArchivesService = mockArchivesService([first, second]);
     const firstRead: Promise<void> = service.selectArchiveFile(first);
     const secondRead: Promise<void> = service.selectArchiveFile(second);
 
@@ -71,7 +80,7 @@ describe("ArchivesService file selection", () => {
 
     setMockInvokeResponses({ [EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT]: undefined });
 
-    const service = new ArchivesService();
+    const service: ArchivesService = mockArchivesService([descriptor]);
 
     await service.selectArchiveFile(descriptor);
     await service.closeArchivesProject();
@@ -82,7 +91,7 @@ describe("ArchivesService file selection", () => {
 
   it("clears file state when the project is reset", async () => {
     const descriptor = mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" });
-    const service = new ArchivesService();
+    const service: ArchivesService = mockArchivesService([descriptor]);
 
     await service.selectArchiveFile(descriptor);
     service.resetArchivesProject();
@@ -100,7 +109,7 @@ describe("ArchivesService file selection", () => {
       },
     });
 
-    const service = new ArchivesService();
+    const service: ArchivesService = mockArchivesService([descriptor]);
 
     await service.selectArchiveFile(descriptor);
 

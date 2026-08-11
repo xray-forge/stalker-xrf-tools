@@ -114,7 +114,7 @@ export class ArchivesService {
     this.fileRequestId += 1;
     this.file = createLoadable(null);
 
-    if (getArchivePreviewSupport(descriptor).kind !== "supported") {
+    if (!this.isPreviewSupported(descriptor)) {
       return;
     }
 
@@ -125,7 +125,7 @@ export class ArchivesService {
   public async retrySelectedFile(): Promise<void> {
     const descriptor: Nullable<IArchiveFileDescriptor> = this.fileDescriptor;
 
-    if (!descriptor || getArchivePreviewSupport(descriptor).kind !== "supported") {
+    if (!descriptor || !this.isPreviewSupported(descriptor)) {
       return;
     }
 
@@ -137,6 +137,12 @@ export class ArchivesService {
     this.fileRequestId += 1;
     this.fileDescriptor = null;
     this.file = createLoadable(null);
+  }
+
+  private isPreviewSupported(descriptor: IArchiveFileDescriptor): boolean {
+    const project: Nullable<IArchivesProject> = this.project.value;
+
+    return Boolean(project && getArchivePreviewSupport(descriptor, project.readPolicy).kind === "supported");
   }
 
   private async readArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
