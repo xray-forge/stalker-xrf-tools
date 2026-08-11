@@ -1,5 +1,5 @@
-import { Box, CircularProgress, LinearProgress, Typography } from "@mui/material";
-import { SxProps } from "@mui/system";
+import { Box, CircularProgress, LinearProgress, Theme, Typography } from "@mui/material";
+import { SystemStyleObject } from "@mui/system";
 import { clamp } from "@mui/x-data-grid/internals";
 import { useInjection } from "@wirestate/react";
 import { MouseEvent, ReactElement, useCallback, useMemo, useState, WheelEvent } from "react";
@@ -11,6 +11,7 @@ import { EquipmentGridZoom } from "@/applications/icons-editor/components/sprite
 import { EquipmentSpriteGrid } from "@/applications/icons-editor/components/sprite-view/EquipmentSpriteGrid";
 import { equipmentViewerConfig } from "@/applications/icons-editor/configs/EquipmentViewerConfig";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
+import { IMAGE_CHECKERBOARD } from "@/core/components/media/media.styles";
 import { Nullable } from "@/core/types/general";
 import { GridMapper } from "@/lib/icons";
 
@@ -38,14 +39,10 @@ export function EquipmentSpriteViewer(): ReactElement {
     );
   }, [equipmentService.spriteImage.value, equipmentService.gridSize]);
 
-  const sx: SxProps = useMemo(
+  const sx: SystemStyleObject<Theme> = useMemo(
     () => ({
+      ...IMAGE_CHECKERBOARD,
       backgroundColor: "#353535",
-      backgroundImage:
-        "linear-gradient(45deg, #707070 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%)," +
-        "linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%)",
-      backgroundSize: "20px 20px",
-      backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
       userSelect: "none",
       transform: `scale(${zoomValue}) translate(${zoomOriginX}px, ${zoomOriginY}px)`,
     }),

@@ -5,6 +5,7 @@ import { default as ZoomOutIcon } from "@mui/icons-material/ZoomOut";
 import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { MouseEvent, ReactElement, useCallback, useEffect, useRef, useState, WheelEvent } from "react";
 
+import { IMAGE_CHECKERBOARD } from "@/core/components/media/media.styles";
 import { Nullable } from "@/core/types/general";
 import {
   clampScale,
@@ -15,14 +16,6 @@ import {
   zoomAround,
   zoomByWheel,
 } from "@/lib/media/pan-zoom";
-
-/** Alpha checkerboard, so a transparent region reads as transparent rather than as black. */
-const CHECKERBOARD: string = [
-  "linear-gradient(45deg, #707070 25%, transparent 25%)",
-  "linear-gradient(-45deg, #808080 25%, transparent 25%)",
-  "linear-gradient(45deg, transparent 75%, #808080 75%)",
-  "linear-gradient(-45deg, transparent 75%, #808080 75%)",
-].join(",");
 
 export interface IImageViewportProps {
   src: string;
@@ -112,18 +105,18 @@ export function ImageViewport({ src, alt, width, height }: IImageViewportProps):
     <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0, minHeight: 0 }}>
       <Box
         ref={viewportRef}
-        sx={{
-          position: "relative",
-          flexGrow: 1,
-          minHeight: 0,
-          overflow: "hidden",
-          cursor: "grab",
-          "&:active": { cursor: "grabbing" },
-          backgroundColor: "#353535",
-          backgroundImage: CHECKERBOARD,
-          backgroundSize: "20px 20px",
-          backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
-        }}
+        sx={[
+          {
+            position: "relative",
+            flexGrow: 1,
+            minHeight: 0,
+            overflow: "hidden",
+            cursor: "grab",
+            "&:active": { cursor: "grabbing" },
+            backgroundColor: "#353535",
+          },
+          IMAGE_CHECKERBOARD,
+        ]}
         onWheel={onWheel}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
