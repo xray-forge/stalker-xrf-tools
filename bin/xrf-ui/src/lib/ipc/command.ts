@@ -3,6 +3,7 @@ export enum EArchivesEditorCommand {
   GET_ARCHIVES_PROJECT = "plugin:archives-editor|get_archives_project",
   HAS_ARCHIVES_PROJECT = "plugin:archives-editor|has_archives_project",
   OPEN_ARCHIVES_PROJECT = "plugin:archives-editor|open_archives_project",
+  READ_ARCHIVE_AUDIO = "plugin:archives-editor|read_archive_audio",
   READ_ARCHIVE_FILE = "plugin:archives-editor|read_archive_file",
   READ_ARCHIVE_IMAGE = "plugin:archives-editor|read_archive_image",
   EXTRACT_ARCHIVE_FILE = "plugin:archives-editor|extract_archive_file",

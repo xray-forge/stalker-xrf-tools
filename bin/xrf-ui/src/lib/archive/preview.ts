@@ -3,8 +3,16 @@ import { IArchiveFileDescriptor, IArchiveReadPolicy } from "@/lib/archive/types"
 export type ArchivePreviewSupport =
   | { kind: "supported" }
   | { kind: "image" }
+  | { kind: "audio" }
   | { kind: "unsupported-extension"; extension: string }
   | { kind: "too-large"; maximumSize: number };
+
+/** Whether the webview can play this file back, given the project policy. */
+export function isArchiveAudio(descriptor: IArchiveFileDescriptor, policy: IArchiveReadPolicy): boolean {
+  const extension: string = descriptor.extension.toLowerCase();
+
+  return policy.audioExtensions.some((candidate: string) => candidate.toLowerCase() === extension);
+}
 
 /**
  * Whether the backend will decode this file into a picture rather than read it as text.
@@ -31,6 +39,12 @@ export function getArchivePreviewSupport(
 ): ArchivePreviewSupport {
   // Images are decoded rather than read as text, so they answer to their own limit and - unlike text -
   // do not care whether the entry was stored compressed. Decompression happens on the way out anyway.
+  if (isArchiveAudio(descriptor, policy)) {
+    return descriptor.sizeReal > policy.maximumAudioSize
+      ? { kind: "too-large", maximumSize: policy.maximumAudioSize }
+      : { kind: "audio" };
+  }
+
   if (isArchiveImage(descriptor, policy)) {
     return descriptor.sizeReal > policy.maximumImageSize
       ? { kind: "too-large", maximumSize: policy.maximumImageSize }

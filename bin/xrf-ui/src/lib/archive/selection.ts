@@ -1,4 +1,5 @@
 import {
+  IArchiveAudioPreview,
   IArchiveFileDescriptor,
   IArchiveFileReadResult,
   IArchiveFolderExtractResult,
@@ -18,7 +19,8 @@ export type TArchiveSelection =
  */
 export type TArchiveContent =
   | { kind: "text"; result: IArchiveFileReadResult }
-  | { kind: "image"; preview: IArchiveImagePreview };
+  | { kind: "image"; preview: IArchiveImagePreview }
+  | { kind: "audio"; preview: IArchiveAudioPreview };
 
 /** The last thing written to disk, so the surface that started it can report what happened. */
 export type TArchiveOperation =

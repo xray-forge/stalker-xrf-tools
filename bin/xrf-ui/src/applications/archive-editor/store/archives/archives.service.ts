@@ -5,11 +5,13 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 import { Nullable } from "@/core/types/general";
 import {
   getArchivePreviewSupport,
+  IArchiveAudioPreview,
   IArchiveFileDescriptor,
   IArchiveFileReadResult,
   IArchiveFolderExtractResult,
   IArchiveImagePreview,
   IArchivesProject,
+  isArchiveAudio,
   isArchiveImage,
   TArchiveContent,
   TArchiveOperation,
@@ -243,14 +245,16 @@ export class ArchivesService {
       return;
     }
 
-    if (isArchiveImage(descriptor, project.readPolicy)) {
-      await this.readContent(descriptor, "image");
+    if (isArchiveAudio(descriptor, project.readPolicy)) {
+      return await this.readContent(descriptor, "audio");
+    }
 
-      return;
+    if (isArchiveImage(descriptor, project.readPolicy)) {
+      return await this.readContent(descriptor, "image");
     }
 
     if (getArchivePreviewSupport(descriptor, project.readPolicy).kind === "supported") {
-      await this.readContent(descriptor, "text");
+      return await this.readContent(descriptor, "text");
     }
   }
 
@@ -268,19 +272,26 @@ export class ArchivesService {
 
     try {
       const content: TArchiveContent =
-        kind === "image"
+        kind === "audio"
           ? {
-              kind: "image",
-              preview: await invoke<IArchiveImagePreview>(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
+              kind: "audio",
+              preview: await invoke<IArchiveAudioPreview>(EArchivesEditorCommand.READ_ARCHIVE_AUDIO, {
                 path: descriptor.name,
               }),
             }
-          : {
-              kind: "text",
-              result: await invoke<IArchiveFileReadResult>(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
-                path: descriptor.name,
-              }),
-            };
+          : kind === "image"
+            ? {
+                kind: "image",
+                preview: await invoke<IArchiveImagePreview>(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
+                  path: descriptor.name,
+                }),
+              }
+            : {
+                kind: "text",
+                result: await invoke<IArchiveFileReadResult>(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
+                  path: descriptor.name,
+                }),
+              };
 
       if (requestId !== this.contentRequestId) {
         return;

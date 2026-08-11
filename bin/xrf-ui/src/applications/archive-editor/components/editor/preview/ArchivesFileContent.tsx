@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
+import { ArchiveAudioPreview } from "@/applications/archive-editor/components/editor/preview/ArchiveAudioPreview";
 import { ArchiveFileHeader } from "@/applications/archive-editor/components/editor/preview/ArchiveFileHeader";
 import { ArchiveFolderContent } from "@/applications/archive-editor/components/editor/preview/ArchiveFolderContent";
 import { ArchiveImagePreview } from "@/applications/archive-editor/components/editor/preview/ArchiveImagePreview";
@@ -22,6 +23,9 @@ import {
 import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/size";
 
+// Everything that renders its own preview leaves this union; what is left is a reason to explain.
+type TUnsupported = Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" } | { kind: "audio" }>;
+
 export function ArchivesFileContent(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
@@ -29,23 +33,20 @@ export function ArchivesFileContent(): ReactElement {
   const project: Nullable<IArchivesProject> = archivesService.project.value;
   const content: Loadable<Nullable<TArchiveContent>> = archivesService.content;
 
-  const onGetUnsupportedDescription = useCallback(
-    (support: Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" }>): string => {
-      switch (support.kind) {
-        case "unsupported-extension":
-          return support.extension
-            ? `.${support.extension} files can be inspected in Details, ` +
-                "but this file type does not have a text preview."
-            : "Files without an extension can be inspected in Details, but do not have a text preview.";
-        case "too-large":
-          return (
-            `This file exceeds the ${formatBytes(support.maximumSize)} preview limit. ` +
-            "Its archive metadata is still available in Details."
-          );
-      }
-    },
-    []
-  );
+  const onGetUnsupportedDescription = useCallback((support: TUnsupported): string => {
+    switch (support.kind) {
+      case "unsupported-extension":
+        return support.extension
+          ? `.${support.extension} files can be inspected in Details, ` +
+              "but this file type does not have a text preview."
+          : "Files without an extension can be inspected in Details, but do not have a text preview.";
+      case "too-large":
+        return (
+          `This file exceeds the ${formatBytes(support.maximumSize)} preview limit. ` +
+          "Its archive metadata is still available in Details."
+        );
+    }
+  }, []);
 
   // A directory selection is a different kind of thing, not a file that happens to be missing.
   if (selection.kind === "directory") {
@@ -76,6 +77,8 @@ export function ArchivesFileContent(): ReactElement {
       <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
         {support.kind === "image" ? (
           <ArchiveImagePreview />
+        ) : support.kind === "audio" ? (
+          <ArchiveAudioPreview />
         ) : support.kind !== "supported" ? (
           <ArchivePreviewState title={"Preview unavailable"} description={onGetUnsupportedDescription(support)} />
         ) : content.isLoading ? (

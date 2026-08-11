@@ -7,6 +7,8 @@ export function mockArchiveReadPolicy(overrides: Partial<IArchiveReadPolicy> = {
     maximumSize: 10 * 1024 * 1024,
     imageExtensions: ["dds"],
     maximumImageSize: 32 * 1024 * 1024,
+    audioExtensions: ["ogg"],
+    maximumAudioSize: 64 * 1024 * 1024,
     ...overrides,
   };
 }
