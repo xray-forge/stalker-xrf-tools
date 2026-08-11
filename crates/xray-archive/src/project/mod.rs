@@ -1,5 +1,6 @@
 pub(crate) mod archive_project;
 pub(crate) mod archive_project_constants;
+pub(crate) mod archive_project_extract;
 pub(crate) mod archive_project_read;
 pub(crate) mod archive_project_read_policy;
 pub(crate) mod archive_project_read_result;

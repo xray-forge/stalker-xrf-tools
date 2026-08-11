@@ -1,15 +1,13 @@
-use std::cmp::{max, min};
+use std::cmp::max;
 use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
 use std::io::ErrorKind::AlreadyExists;
-use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use minilzo_rs::LZO;
 use xray_error::XRayResult;
-use xray_utils::{assert, assert_equal, assert_not_equal};
 
 use crate::ArchiveProject;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
@@ -18,7 +16,7 @@ use crate::project::archive_project_unpack_result::ArchiveUnpackResult;
 impl ArchiveProject {
   pub fn unpack<P: AsRef<Path>>(&self, destination: P) -> XRayResult<ArchiveUnpackResult> {
     let start: Instant = Instant::now();
-    let lzo: LZO = LZO::init().unwrap();
+    let lzo: LZO = Self::init_lzo()?;
 
     let mut unpacked_files_count: usize = 0;
     let unpacked_files_chunk: usize = max(self.files.len() / 100 * 5, 5);
@@ -80,7 +78,7 @@ impl ArchiveProject {
         let descriptor: ArchiveFileDescriptor = file_descriptor.clone();
         let destination: PathBuf = destination.as_ref().into();
 
-        tasks_set.spawn(async move { Self::unpack_file(&LZO::init().unwrap(), destination, &descriptor) });
+        tasks_set.spawn(async move { Self::unpack_file(&Self::init_lzo()?, destination, &descriptor) });
       }
     }
 
@@ -114,59 +112,14 @@ impl ArchiveProject {
     file_path.push(&file_descriptor.destination);
     file_path.push(&file_descriptor.name);
 
-    let mut source_file: File = File::open(file_descriptor.source.as_path())?;
-
-    source_file
-      .seek(SeekFrom::Start(file_descriptor.offset as u64))
-      .expect("Expected to be able to seek to start of the source file");
-
     let mut dest_file: File = File::options()
       .read(false)
       .write(true)
       .create(true)
       .truncate(true)
-      .open(file_path)
-      .expect("File can not be opened for writing");
+      .open(file_path)?;
 
-    if file_descriptor.size_real != file_descriptor.size_compressed {
-      let mut buf: Vec<u8> = vec![0u8; file_descriptor.size_compressed as usize];
-      source_file.read_exact(buf.as_mut_slice())?;
-
-      let decompressed_buf: Vec<u8> = lzo
-        .decompress_safe(buf.as_slice(), file_descriptor.size_real as usize)
-        .expect("Valid LZO data");
-
-      let actual_crc: u32 = crc32fast::hash(decompressed_buf.as_slice());
-
-      assert_equal(file_descriptor.crc, actual_crc, "CRCs do not match")?;
-
-      dest_file
-        .write_all(decompressed_buf.as_slice())
-        .expect("Unable to write to dest file");
-    } else {
-      let mut remaining_bytes: usize = file_descriptor.size_real as usize;
-      let mut buf: Vec<u8> = vec![0u8; min(256 * 1024, remaining_bytes)];
-
-      while remaining_bytes > 0 {
-        let to_read: usize = min(buf.len(), remaining_bytes);
-        let read: usize = source_file.read(&mut buf[..to_read])?;
-
-        assert(read <= remaining_bytes, "Must not read more bytes than remaining")?;
-        assert_not_equal(read, 0, "Unexpected End Of File")?;
-
-        let written: usize = dest_file
-          .write(&buf[..read])
-          .expect("Unable to write to destination file");
-
-        remaining_bytes -= read;
-
-        assert_not_equal(written, 0, "Unable to write bytes")?;
-      }
-    }
-
-    dest_file.set_len(file_descriptor.size_real as u64)?;
-
-    Ok(())
+    Self::write_file_contents(lzo, &mut dest_file, file_descriptor)
   }
 
   fn unpack_dirs<P: AsRef<Path>>(&self, destination: P) -> XRayResult {
