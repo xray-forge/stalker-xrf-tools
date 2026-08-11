@@ -94,7 +94,7 @@ describe("opened archives editor", () => {
     fireEvent.change(search, { target: { value: "readme" } });
 
     expect(search).toHaveValue("readme");
-    expect(getByText("texture.dds")).toBeInTheDocument();
+
     await waitFor(() => expect(queryByText("texture.dds")).not.toBeInTheDocument());
     expect(getByText("readme.ltx")).toBeInTheDocument();
 

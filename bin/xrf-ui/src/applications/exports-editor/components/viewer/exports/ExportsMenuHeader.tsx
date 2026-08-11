@@ -1,7 +1,7 @@
 import { default as ClearIcon } from "@mui/icons-material/Clear";
 import { default as SearchIcon } from "@mui/icons-material/Search";
 import { Box, IconButton, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
-import { ChangeEvent, ReactElement } from "react";
+import { ChangeEvent, KeyboardEvent, ReactElement } from "react";
 
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
@@ -9,6 +9,8 @@ export interface IExportsMenuHeaderProps extends BaseComponentProps {
   exportCount: number;
   query: string;
   onClear: () => void;
+  /** Lets the search field drive the result list without losing focus. */
+  onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
   onQueryChange: (query: string) => void;
 }
 
@@ -16,6 +18,7 @@ export function ExportsMenuHeader({
   exportCount,
   query,
   onClear,
+  onKeyDown,
   onQueryChange,
 }: IExportsMenuHeaderProps): ReactElement {
   return (
@@ -60,6 +63,7 @@ export function ExportsMenuHeader({
             ) : null,
           },
         }}
+        onKeyDown={onKeyDown}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onQueryChange(event.target.value)}
       />
     </Box>

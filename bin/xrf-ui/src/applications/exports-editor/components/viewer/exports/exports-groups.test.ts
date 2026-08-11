@@ -1,8 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { ICallableExportDescriptor, IExportDescriptor, IValueExportDescriptor } from "@/lib/exports";
+import { ICallableExportDescriptor } from "@/lib/exports";
 
-import { filterExportGroups, groupExports, ROOT_EXPORT_GROUP_ID } from "./exports-groups";
+import { groupExports, ROOT_EXPORT_GROUP_ID } from "./exports-groups";
 
 function callable(name: string, description: string | null = null): ICallableExportDescriptor {
   return {
@@ -11,16 +11,6 @@ function callable(name: string, description: string | null = null): ICallableExp
     description,
     parameters: [],
     returns: { typing: "void", description: null },
-    source: { path: `${name}.ts`, line: 1, column: 1 },
-  };
-}
-
-function value(name: string, description: string | null = null): IValueExportDescriptor {
-  return {
-    kind: "value",
-    name,
-    description,
-    typing: "string",
     source: { path: `${name}.ts`, line: 1, column: 1 },
   };
 }
@@ -47,19 +37,4 @@ describe("groupExports", () => {
     ]);
   });
 
-  it("filters globally and case-insensitively through every documentation field", () => {
-    const callback: ICallableExportDescriptor = {
-      ...callable("callbacks.run", "Runs a callback"),
-      parameters: [{ name: "actor", typing: "game_object", description: "Target STALKER", isOptional: false }],
-      returns: { typing: "boolean", description: "Whether it SUCCEEDED" },
-    };
-    const declarations: Array<IExportDescriptor> = [callback, value("settings", "Shared configuration")];
-    const groups = groupExports(declarations);
-
-    expect(filterExportGroups(groups, "CALLBACK")[0]?.declarations).toEqual([callback]);
-    expect(filterExportGroups(groups, "stalker")[0]?.declarations).toEqual([callback]);
-    expect(filterExportGroups(groups, "succeeded")[0]?.declarations).toEqual([callback]);
-    expect(filterExportGroups(groups, "CONFIGURATION")[0]?.declarations[0]?.name).toBe("settings");
-    expect(filterExportGroups(groups, "missing")).toEqual([]);
-  });
 });

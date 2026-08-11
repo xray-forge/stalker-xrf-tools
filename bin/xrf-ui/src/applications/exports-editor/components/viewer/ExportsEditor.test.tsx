@@ -104,12 +104,13 @@ describe("opened exports editor", () => {
 
     fireEvent.change(search, { target: { value: "TARGET STALKER" } });
 
-    expect(await findByText("xr_effects.play_sound")).toBeInTheDocument();
+    expect(await findByText("play_sound")).toBeInTheDocument();
+    expect(await findByText("xr_effects")).toBeInTheDocument();
     expect(queryByText("settings")).not.toBeInTheDocument();
 
     await userEvent.click(getByLabelText("Clear export filter"));
 
-    await waitFor(() => expect(queryByText("xr_effects.play_sound")).not.toBeInTheDocument());
+    await waitFor(() => expect(queryByText("play_sound")).not.toBeInTheDocument());
     expect(search).toHaveValue("");
   });
 

@@ -3,24 +3,25 @@ import { default as FolderIcon } from "@mui/icons-material/Folder";
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box, Typography } from "@mui/material";
 import { RichTreeView } from "@mui/x-tree-view";
-import { ReactElement, SyntheticEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from "react";
 
 import {
   exportDeclarationItemId,
   exportGroupsToTree,
-  filterExportGroups,
+  getExportSearchText,
   groupExports,
   IExportGroup,
   IExportTreeItem,
 } from "@/applications/exports-editor/components/viewer/exports/exports-groups";
 import { ExportsMenuHeader } from "@/applications/exports-editor/components/viewer/exports/ExportsMenuHeader";
+import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { IExportDescriptor } from "@/lib/exports";
+import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 
 const EXPLORER_WIDTH: number = 300;
-const FILTER_DEBOUNCE_MS: number = 250;
 const DECLARATION_ITEM_PREFIX: string = "declaration:";
 
 export interface IExportsMenuProps extends BaseComponentProps {
@@ -30,20 +31,38 @@ export interface IExportsMenuProps extends BaseComponentProps {
 }
 
 export function ExportsMenu({ declarations, selectedName, onSelect }: IExportsMenuProps): ReactElement {
-  const [query, setQuery] = useState<string>("");
-  const [filterQuery, setFilterQuery] = useState<string>("");
   const [expandedItems, setExpandedItems] = useState<Array<string>>([]);
 
   const groups: Array<IExportGroup> = useMemo(() => groupExports(declarations), [declarations]);
-  const filteredGroups: Array<IExportGroup> = useMemo(
-    () => filterExportGroups(groups, filterQuery),
-    [filterQuery, groups]
+  const items: Array<IExportTreeItem> = useMemo(() => exportGroupsToTree(groups), [groups]);
+
+  const onSelectDeclaration = useCallback(
+    (declaration: IExportDescriptor) => {
+      onSelect(declaration.name);
+    },
+    [onSelect]
   );
 
-  const items: Array<IExportTreeItem> = useMemo(() => exportGroupsToTree(filteredGroups), [filteredGroups]);
-  const visibleExpandedItems: Array<string> = filterQuery
-    ? filteredGroups.map((group: IExportGroup) => group.id)
-    : expandedItems;
+  const search: IUseRankedSearch<IExportDescriptor> = useRankedSearch({
+    items: declarations,
+    toSearchText: (it) => it.name,
+    toSecondaryText: getExportSearchText,
+    onSelect: onSelectDeclaration,
+  });
+
+  const rows: Array<IEditorSearchResultRow> = useMemo(
+    () =>
+      search.results.map((result: ISearchResult<IExportDescriptor>) => {
+        const separatorAt: number = result.item.name.lastIndexOf(".");
+
+        return {
+          id: result.item.name,
+          label: separatorAt === -1 ? result.item.name : result.item.name.slice(separatorAt + 1),
+          description: separatorAt === -1 ? undefined : result.item.name.slice(0, separatorAt),
+        };
+      }),
+    [search.results]
+  );
 
   const selectedItem: Nullable<string> = selectedName ? exportDeclarationItemId(selectedName) : null;
 
@@ -56,35 +75,36 @@ export function ExportsMenu({ declarations, selectedName, onSelect }: IExportsMe
     [onSelect]
   );
 
-  const onClearFilter = useCallback(() => {
-    setQuery("");
-    setFilterQuery("");
-  }, []);
-
-  useEffect(() => {
-    const timeoutId: ReturnType<typeof setTimeout> = setTimeout(() => setFilterQuery(query), FILTER_DEBOUNCE_MS);
-
-    return () => clearTimeout(timeoutId);
-  }, [query]);
-
   return (
     <EditorSideMenu
       width={EXPLORER_WIDTH}
       header={
         <ExportsMenuHeader
           exportCount={declarations.length}
-          query={query}
-          onClear={onClearFilter}
-          onQueryChange={setQuery}
+          query={search.query}
+          onClear={search.clear}
+          onKeyDown={search.onInputKeyDown}
+          onQueryChange={search.setQuery}
         />
       }
     >
-      {items.length ? (
+      {search.isSearching ? (
+        <EditorSearchResults
+          ariaLabel={"Export search results"}
+          emptyLabel={`No exports match ${search.query.trim()}.`}
+          rows={rows}
+          total={search.total}
+          activeIndex={search.activeIndex}
+          isStale={search.isStale}
+          onHoverIndex={search.setActiveIndex}
+          onSelect={onSelect}
+        />
+      ) : items.length ? (
         <Box sx={{ padding: 0.5 }}>
           <RichTreeView
             isItemSelectionDisabled={(item: IExportTreeItem) => item.kind === "group"}
             items={items}
-            expandedItems={visibleExpandedItems}
+            expandedItems={expandedItems}
             selectedItems={selectedItem}
             expansionTrigger={"content"}
             slots={{
@@ -92,14 +112,14 @@ export function ExportsMenu({ declarations, selectedName, onSelect }: IExportsMe
               expandIcon: FolderIcon,
               endIcon: DataObjectIcon,
             }}
-            onExpandedItemsChange={filterQuery ? undefined : (_, next: Array<string>) => setExpandedItems(next)}
+            onExpandedItemsChange={(_, next: Array<string>) => setExpandedItems(next)}
             onSelectedItemsChange={onSelectItem}
           />
         </Box>
       ) : (
         <Box sx={{ padding: 2, textAlign: "center" }}>
           <Typography variant={"body2"} sx={{ color: "text.secondary" }}>
-            {declarations.length ? `No exports match ${filterQuery.trim()}.` : "No externs found."}
+            No externs found.
           </Typography>
         </Box>
       )}

@@ -54,23 +54,6 @@ export function groupExports(declarations: ReadonlyArray<IExportDescriptor>): Ar
     }));
 }
 
-export function filterExportGroups(groups: ReadonlyArray<IExportGroup>, query: string): Array<IExportGroup> {
-  const normalized: string = query.trim().toLocaleLowerCase();
-
-  if (!normalized) {
-    return [...groups];
-  }
-
-  return groups
-    .map((group: IExportGroup) => ({
-      ...group,
-      declarations: group.declarations.filter((declaration: IExportDescriptor) =>
-        getExportSearchText(declaration).includes(normalized)
-      ),
-    }))
-    .filter((group: IExportGroup) => group.declarations.length > 0);
-}
-
 export function exportDeclarationItemId(name: string): string {
   return `declaration:${name}`;
 }
@@ -88,7 +71,7 @@ export function exportGroupsToTree(groups: ReadonlyArray<IExportGroup>): Array<I
   }));
 }
 
-function getExportSearchText(declaration: IExportDescriptor): string {
+export function getExportSearchText(declaration: IExportDescriptor): string {
   const documentation: Array<string> = [declaration.name, declaration.description ?? ""];
 
   if (declaration.kind === "callable") {

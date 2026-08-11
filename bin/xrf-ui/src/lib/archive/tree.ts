@@ -1,4 +1,4 @@
-import { Nullable, Optional } from "@/core/types/general";
+import { Optional } from "@/core/types/general";
 import { IArchiveFileDescriptor } from "@/lib/archive/types";
 
 export interface IArchiveDirectoryTreeItem {
@@ -18,11 +18,6 @@ export interface IArchiveFileTreeItem {
 }
 
 export type IArchiveTreeItem = IArchiveDirectoryTreeItem | IArchiveFileTreeItem;
-
-export interface IFilteredArchiveTree {
-  items: Array<IArchiveTreeItem>;
-  expandedItems: Array<string>;
-}
 
 /**
  * Build a directory-first explorer tree from effective archive file descriptors.
@@ -47,34 +42,6 @@ export function parseTree(files: Array<IArchiveFileDescriptor>, separator: strin
   sortTree(root.children);
 
   return root.children;
-}
-
-/**
- * Filter an archive tree by canonical path while retaining the hierarchy needed to reach each match.
- *
- * @param items - Root-level archive tree items to search.
- * @param rawQuery - Case-insensitive path query; surrounding whitespace is ignored.
- * @returns The filtered tree and directory identifiers that should be expanded to reveal its matches.
- */
-export function filterArchiveTree(items: Array<IArchiveTreeItem>, rawQuery: string): IFilteredArchiveTree {
-  const query: string = rawQuery.trim().toLocaleLowerCase();
-
-  if (!query) {
-    return { items, expandedItems: [] };
-  }
-
-  const expandedItems = new Set<string>();
-  const filteredItems: Array<IArchiveTreeItem> = [];
-
-  for (const item of items) {
-    const filtered: IArchiveTreeItem | null = filterItem(item, query, expandedItems);
-
-    if (filtered) {
-      filteredItems.push(filtered);
-    }
-  }
-
-  return { items: filteredItems, expandedItems: Array.from(expandedItems) };
 }
 
 /**
@@ -142,36 +109,3 @@ function sortTree(items: Array<IArchiveTreeItem>): void {
   });
 }
 
-/**
- * Retain one matching tree branch and record directories that expose its matches.
- *
- * @param item - Tree item to compare with the normalized query.
- * @param query - Trimmed lowercase path query.
- * @param expandedItems - Mutable accumulator for directory identifiers that should be expanded.
- * @returns The retained tree item, including filtered descendants, or null when the branch does not match.
- */
-function filterItem(item: IArchiveTreeItem, query: string, expandedItems: Set<string>): Nullable<IArchiveTreeItem> {
-  const isMatch: boolean = item.path.toLocaleLowerCase().includes(query);
-
-  if (item.kind === "file") {
-    return isMatch ? item : null;
-  }
-
-  if (isMatch) {
-    expandedItems.add(item.id);
-
-    return item;
-  }
-
-  const children: Array<IArchiveTreeItem> = item.children
-    .map((child: IArchiveTreeItem) => filterItem(child, query, expandedItems))
-    .filter((child: Nullable<IArchiveTreeItem>): child is IArchiveTreeItem => child !== null);
-
-  if (!children.length) {
-    return null;
-  }
-
-  expandedItems.add(item.id);
-
-  return { ...item, children };
-}

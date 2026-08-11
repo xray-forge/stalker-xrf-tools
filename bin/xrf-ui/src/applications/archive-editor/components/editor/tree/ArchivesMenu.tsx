@@ -4,77 +4,112 @@ import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box, Typography } from "@mui/material";
 import { RichTreeView } from "@mui/x-tree-view";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, SyntheticEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from "react";
 
 import { ArchivesMenuHeader } from "@/applications/archive-editor/components/editor/tree/ArchivesMenuHeader";
 import { ArchiveTreeItem } from "@/applications/archive-editor/components/editor/tree/ArchiveTreeItem";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
+import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
-import { Nullable } from "@/core/types/general";
-import { filterArchiveTree, IArchiveTreeItem, IFilteredArchiveTree, parseTree } from "@/lib/archive";
+import { Nullable, Optional } from "@/core/types/general";
+import { IArchiveFileDescriptor, IArchiveTreeItem, parseTree } from "@/lib/archive";
+import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 
 const EXPLORER_WIDTH: number = 300;
-const FILTER_DEBOUNCE_MS: number = 250;
 
 export function ArchivesMenu(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  const [query, setQuery] = useState<string>("");
-  const [filterQuery, setFilterQuery] = useState<string>("");
   const [expandedItems, setExpandedItems] = useState<Array<string>>([]);
 
-  const items: Array<IArchiveTreeItem> = useMemo(
-    () => parseTree(Object.values(archivesService.project.value?.files ?? {}), "\\"),
+  const files: Array<IArchiveFileDescriptor> = useMemo(
+    () => Object.values(archivesService.project.value?.files ?? {}),
     [archivesService.project.value?.files]
   );
 
-  const fileCount: number = Object.keys(archivesService.project.value?.files ?? {}).length;
-  const filtered: IFilteredArchiveTree = useMemo(() => filterArchiveTree(items, filterQuery), [filterQuery, items]);
-  const visibleExpandedItems: Array<string> = filterQuery ? filtered.expandedItems : expandedItems;
-  const selectedItem: Nullable<string> = archivesService.fileDescriptor
-    ? `file:${archivesService.fileDescriptor.name}`
-    : null;
+  const items: Array<IArchiveTreeItem> = useMemo(() => parseTree(files, "\\"), [files]);
 
-  const onSelectItem = useCallback(
-    (_: Nullable<SyntheticEvent>, itemId: Nullable<string>) => {
-      if (!itemId?.startsWith("file:")) {
-        return;
-      }
-
-      const path: string = itemId.slice("file:".length);
-      const descriptor = archivesService.project.value?.files[path];
-
-      if (descriptor) {
-        void archivesService.selectArchiveFile(descriptor);
-      }
+  const onSelectDescriptor = useCallback(
+    (descriptor: IArchiveFileDescriptor) => {
+      void archivesService.selectArchiveFile(descriptor);
     },
     [archivesService]
   );
 
-  const onClearFilter = useCallback(() => {
-    setQuery("");
-    setFilterQuery("");
-  }, []);
+  const search: IUseRankedSearch<IArchiveFileDescriptor> = useRankedSearch({
+    items: files,
+    toSearchText: (it) => it.name,
+    onSelect: onSelectDescriptor,
+  });
 
-  useEffect(() => {
-    const timeoutId: ReturnType<typeof setTimeout> = setTimeout(() => setFilterQuery(query), FILTER_DEBOUNCE_MS);
+  const rows: Array<IEditorSearchResultRow> = useMemo(
+    () =>
+      search.results.map((result: ISearchResult<IArchiveFileDescriptor>) => {
+        const separatorAt: number = result.item.name.lastIndexOf("\\");
 
-    return () => clearTimeout(timeoutId);
-  }, [query]);
+        return {
+          id: result.item.name,
+          label: separatorAt === -1 ? result.item.name : result.item.name.slice(separatorAt + 1),
+          description: separatorAt === -1 ? undefined : result.item.name.slice(0, separatorAt),
+        };
+      }),
+    [search.results]
+  );
+
+  const selectedItem: Nullable<string> = archivesService.fileDescriptor
+    ? `file:${archivesService.fileDescriptor.name}`
+    : null;
+
+  const onSelectPath = useCallback(
+    (path: string) => {
+      const descriptor: Optional<IArchiveFileDescriptor> = archivesService.project.value?.files[path];
+
+      if (descriptor) {
+        onSelectDescriptor(descriptor);
+      }
+    },
+    [archivesService, onSelectDescriptor]
+  );
+
+  const onSelectItem = useCallback(
+    (_: Nullable<SyntheticEvent>, itemId: Nullable<string>) => {
+      if (itemId?.startsWith("file:")) {
+        onSelectPath(itemId.slice("file:".length));
+      }
+    },
+    [onSelectPath]
+  );
 
   return (
     <EditorSideMenu
       width={EXPLORER_WIDTH}
       header={
-        <ArchivesMenuHeader fileCount={fileCount} query={query} onClear={onClearFilter} onQueryChange={setQuery} />
+        <ArchivesMenuHeader
+          fileCount={files.length}
+          query={search.query}
+          onClear={search.clear}
+          onKeyDown={search.onInputKeyDown}
+          onQueryChange={search.setQuery}
+        />
       }
     >
-      {filtered.items.length ? (
+      {search.isSearching ? (
+        <EditorSearchResults
+          ariaLabel={"Archive search results"}
+          isStale={search.isStale}
+          emptyLabel={`No files match ${search.query.trim()}.`}
+          rows={rows}
+          total={search.total}
+          activeIndex={search.activeIndex}
+          onHoverIndex={search.setActiveIndex}
+          onSelect={onSelectPath}
+        />
+      ) : items.length ? (
         <Box sx={{ padding: 0.5 }}>
           <RichTreeView
             isItemSelectionDisabled={(item: IArchiveTreeItem) => item.kind === "directory"}
-            items={filtered.items}
-            expandedItems={visibleExpandedItems}
+            items={items}
+            expandedItems={expandedItems}
             selectedItems={selectedItem}
             expansionTrigger={"content"}
             slots={{
@@ -83,14 +118,14 @@ export function ArchivesMenu(): ReactElement {
               expandIcon: FolderIcon,
               endIcon: DescriptionIcon,
             }}
-            onExpandedItemsChange={filterQuery ? undefined : (_, next: Array<string>) => setExpandedItems(next)}
+            onExpandedItemsChange={(_, next: Array<string>) => setExpandedItems(next)}
             onSelectedItemsChange={onSelectItem}
           />
         </Box>
       ) : (
         <Box sx={{ padding: 2, textAlign: "center" }}>
           <Typography variant={"body2"} sx={{ color: "text.secondary" }}>
-            No files match {filterQuery.trim()}.
+            No archive files found.
           </Typography>
         </Box>
       )}
