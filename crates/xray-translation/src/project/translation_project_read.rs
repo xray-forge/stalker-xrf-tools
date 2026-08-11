@@ -6,6 +6,7 @@ use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
 use xray_error::XRayResult;
 use xray_utils::{XRayEncoding, decode_bytes_to_string};
+use xray_xml::deserialize_xml;
 
 use crate::language::MULTILANGUAGE;
 use crate::project::translation_project::TranslationProject;
@@ -70,8 +71,7 @@ impl TranslationProject {
     let xml_language: TranslationLanguage = Self::get_locale_from_path(&path).unwrap_or(TranslationLanguage::English);
     let xml_encoding: XRayEncoding = xml_language.get_language_encoder();
     let xml_content: String = decode_bytes_to_string(&data, xml_encoding)?;
-    let xml_data: TranslationCompiledXml =
-      quick_xml::de::from_str(&xml_content).expect("Expected valid XML source file with standard format");
+    let xml_data: TranslationCompiledXml = deserialize_xml(&xml_content)?;
 
     let mut json: TranslationJson = HashMap::new();
 

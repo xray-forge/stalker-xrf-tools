@@ -7,7 +7,6 @@ rust-version.workspace = true
 [dependencies]
 derive_more = { workspace = true, features = ["display", "from_str"] }
 log = { workspace = true }
-quick-xml = { version = "0.41.0", features = ["serialize", "serde"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 walkdir = { workspace = true }
@@ -15,6 +14,7 @@ xray-error = { workspace = true }
 xray-output = { workspace = true }
 xray-report = { workspace = true }
 xray-utils = { workspace = true }
+xray-xml = { workspace = true }
 
 [dev-dependencies]
 xray-test-utils = { workspace = true }

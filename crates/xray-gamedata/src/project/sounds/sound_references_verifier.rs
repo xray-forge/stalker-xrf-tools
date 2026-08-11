@@ -1,9 +1,9 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use regex::Regex;
 use xray_error::XRayResult;
 use xray_ltx::{Ltx, LtxProject};
+use xray_xml::{XmlDocument, XmlParseOptions};
 
 use crate::GamedataFindingFactory;
 use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
@@ -82,8 +82,6 @@ impl<'a> SoundReferencesVerifier<'a> {
     sound_roots: &HashSet<String>,
     result: &mut GamedataSoundReferencesVerificationResult,
   ) {
-    let sound_tag: Regex = Regex::new(r"(?is)<sound>\s*([^<]+?)\s*</sound>").unwrap();
-
     for asset in self.project.assets.assets() {
       let relative_path = asset.logical_path();
 
@@ -92,8 +90,8 @@ impl<'a> SoundReferencesVerifier<'a> {
       }
 
       let path = asset.absolute_path();
-      let contents: String = match std::fs::read(&path) {
-        Ok(contents) => String::from_utf8_lossy(&contents).into_owned(),
+      let contents: Vec<u8> = match std::fs::read(&path) {
+        Ok(contents) => contents,
         Err(error) => {
           result.checked_references_count += 1;
           result.invalid_references_count += 1;
@@ -106,8 +104,22 @@ impl<'a> SoundReferencesVerifier<'a> {
         }
       };
 
-      for capture in sound_tag.captures_iter(&contents) {
-        let reference: &str = &capture[1];
+      let document: XmlDocument = match XmlDocument::parse_bytes(&contents, XmlParseOptions { allow_dtd: true }) {
+        Ok(document) => document,
+        Err(error) => {
+          result.checked_references_count += 1;
+          result.invalid_references_count += 1;
+          result.findings.push(GamedataFindingFactory::for_asset(
+            GamedataVerificationRule::SoundsReferences,
+            &path,
+            format!("Could not inspect XML sound references: {error}"),
+          ));
+          continue;
+        }
+      };
+
+      for sound in document.elements_named("sound") {
+        let reference: &str = sound.text();
         if Self::is_direct_sound_reference(sound_roots, reference) {
           self.verify_reference(sound_names, reference, &path, "<sound>", result);
         }

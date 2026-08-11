@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 use std::fs;
-use std::fs::{File, ReadDir};
-use std::io::Read;
+use std::fs::ReadDir;
 use std::path::{Path, PathBuf};
 
-use roxmltree::{Document, Node, ParsingOptions};
 use xray_error::{XRayError, XRayResult};
+use xray_xml::{XmlDocument, XmlElement, XmlParseOptions};
 
 use crate::constants::{XML_ATTRIBUTE_ID, XML_ATTRIBUTE_NAME, XML_TAG_FILE, XML_TAG_TEXTURE, XML_TAG_WINDOW};
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
@@ -135,18 +134,8 @@ impl XmlDescriptionCollection {
 
     let mut descriptions: HashMap<String, TextureFileDescriptor> = HashMap::new();
 
-    let mut file: File = File::open(path)?;
-    let mut text: String = String::new();
-
-    file.read_to_string(&mut text)?;
-
-    let document: Document = match Document::parse_with_options(
-      &text,
-      ParsingOptions {
-        allow_dtd: true,
-        ..ParsingOptions::default()
-      },
-    ) {
+    let contents: Vec<u8> = fs::read(path)?;
+    let document: XmlDocument = match XmlDocument::parse_bytes(&contents, XmlParseOptions { allow_dtd: true }) {
       Ok(doc) => doc,
       Err(error) => {
         if options.is_strict {
@@ -162,16 +151,10 @@ impl XmlDescriptionCollection {
       }
     };
 
-    let window: Option<Node> = document
-      .root()
-      .children()
-      .find(|it| it.is_element() && it.tag_name().name().eq(XML_TAG_WINDOW));
+    let window: Option<&XmlElement> = (document.root().name() == XML_TAG_WINDOW).then_some(document.root());
 
     if let Some(window) = window {
-      for file in window
-        .children()
-        .filter(|it| it.is_element() && it.tag_name().name().eq(XML_TAG_FILE))
-      {
+      for file in window.children_named(XML_TAG_FILE) {
         let file_name: Option<&str> = file.attribute(XML_ATTRIBUTE_NAME);
 
         if let Some(file_name) = file_name {
@@ -179,10 +162,7 @@ impl XmlDescriptionCollection {
 
           let mut file_description: TextureFileDescriptor = TextureFileDescriptor::new(file_name);
 
-          for node in file
-            .descendants()
-            .filter(|it| it.is_element() && it.tag_name().name().eq(XML_TAG_TEXTURE))
-          {
+          for node in file.descendants_named(XML_TAG_TEXTURE) {
             if let Some(sprite) = TextureSpriteDescriptor::new_optional_from_node(node) {
               file_description.add_sprite(sprite);
             } else {
@@ -192,7 +172,7 @@ impl XmlDescriptionCollection {
                 node.attribute(XML_ATTRIBUTE_ID).unwrap_or("unknown"),
                 node
                   .attributes()
-                  .map(|it| format!("{}={}", it.name(), it.value()))
+                  .map(|(name, value)| format!("{name}={value}"))
                   .collect::<Vec<String>>()
                   .join(","),
               );

@@ -4,11 +4,10 @@ use std::io::{Write, copy};
 use std::path::{Display, Path};
 use std::time::Instant;
 
-use quick_xml::se::Serializer;
-use serde::Serialize;
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
 use xray_utils::{XRayEncoding, encode_string_to_bytes};
+use xray_xml::serialize_xml;
 
 use crate::types::{TranslationCompiledXml, TranslationEntryCompiled, TranslationJson, TranslationVariant};
 use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
@@ -157,7 +156,6 @@ impl TranslationProject {
       "<?xml version=\"1.0\" encoding=\"{}\" ?>\n\n",
       language.get_language_encoding()
     );
-    let mut serializer: Serializer<String> = Serializer::new(&mut buffer);
     let mut compiled: TranslationCompiledXml = TranslationCompiledXml::default();
 
     let language_key: String = language.to_string();
@@ -184,12 +182,7 @@ impl TranslationProject {
       compiled.string.sort_by(|first, second| first.id.cmp(&second.id))
     }
 
-    serializer.expand_empty_elements(true);
-    serializer.indent(' ', 2);
-
-    compiled
-      .serialize(serializer)
-      .map_err(|error| XRayError::new_serialization_error(error.to_string()))?;
+    buffer.push_str(&serialize_xml(&compiled)?);
 
     Ok(buffer)
   }

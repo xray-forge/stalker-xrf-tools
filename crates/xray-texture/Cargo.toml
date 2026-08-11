@@ -13,12 +13,12 @@ image_dds = "0.7.2"
 log = { workspace = true }
 path-absolutize = "4.0.1"
 rayon = { workspace = true }
-roxmltree = "0.21.1"
 serde = { workspace = true }
 xray-error = { workspace = true }
 xray-ltx = { workspace = true }
 xray-output = { workspace = true }
 xray-utils = { workspace = true }
+xray-xml = { workspace = true }
 
 [lints]
 workspace = true

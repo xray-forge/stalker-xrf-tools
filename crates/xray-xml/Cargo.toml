@@ -1,16 +1,15 @@
 [package]
-name = "xray-export"
+name = "xray-xml"
 version = "0.1.0"
 edition = "2024"
 rust-version.workspace = true
 
 [dependencies]
+quick-xml = { version = "0.41.0", features = ["serialize", "serde"] }
+roxmltree = "0.21.1"
 serde = { workspace = true }
-serde_json = { workspace = true }
-walkdir = { workspace = true }
 xray-error = { workspace = true }
-xray-typescript = { workspace = true }
-xray-xml = { workspace = true }
+xray-utils = { workspace = true }
 
 [lints]
 workspace = true

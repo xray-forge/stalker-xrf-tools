@@ -1,15 +1,15 @@
 use std::sync::{Arc, Mutex};
 
-use xray_export::ExportDescriptor;
+use xray_export::ExportsProject;
 
 pub struct ExportsEditorState {
-  pub exports: Arc<Mutex<Option<Vec<ExportDescriptor>>>>,
+  pub project: Arc<Mutex<Option<ExportsProject>>>,
 }
 
 impl ExportsEditorState {
   pub fn new() -> Self {
     Self {
-      exports: Arc::new(Mutex::new(None)),
+      project: Arc::new(Mutex::new(None)),
     }
   }
 }

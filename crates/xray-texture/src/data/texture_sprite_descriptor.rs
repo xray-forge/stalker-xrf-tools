@@ -1,4 +1,4 @@
-use roxmltree::Node;
+use xray_xml::XmlElement;
 
 use crate::constants::{XML_ATTRIBUTE_HEIGHT, XML_ATTRIBUTE_ID, XML_ATTRIBUTE_WIDTH, XML_ATTRIBUTE_X, XML_ATTRIBUTE_Y};
 
@@ -28,7 +28,7 @@ impl TextureSpriteDescriptor {
     }
   }
 
-  pub fn new_optional_from_node(node: Node) -> Option<Self> {
+  pub fn new_optional_from_node(node: &XmlElement) -> Option<Self> {
     let id: Option<&str> = node.attribute(XML_ATTRIBUTE_ID);
     let x: Option<&str> = node.attribute(XML_ATTRIBUTE_X);
     let y: Option<&str> = node.attribute(XML_ATTRIBUTE_Y);

@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 use tauri::State;
-use xray_export::{ExportDescriptor, ExportsEditorParser};
+use xray_export::{ExportsEditorParser, ExportsProject};
 
 use crate::exports_editor::state::ExportsEditorState;
 use crate::types::TauriResult;
@@ -11,10 +11,10 @@ pub async fn open_xr_exports(project_path: &str, state: State<'_, ExportsEditorS
   log::info!("Parsing externs from project: {project_path}");
 
   let parser: ExportsEditorParser = ExportsEditorParser::new();
-  let declarations: Vec<ExportDescriptor> = parser.parse_project_from_path(project_path).map_err(error_to_string)?;
-  let json: Value = json!(&declarations);
+  let project: ExportsProject = parser.parse_project_from_path(project_path).map_err(error_to_string)?;
+  let json: Value = json!(&project);
 
-  *state.exports.lock().unwrap() = Some(declarations);
+  *state.project.lock().unwrap() = Some(project);
 
   Ok(json)
 }

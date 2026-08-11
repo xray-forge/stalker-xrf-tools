@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use xray_error::{XRayError, XRayResult};
+use xray_xml::escape_xml;
 
 use crate::extern_manifest::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
 
@@ -288,15 +289,6 @@ fn render_html_docs(export: &ExternExport) -> String {
   parts.join("\n")
 }
 
-fn escape_xml(value: &str) -> String {
-  value
-    .replace('&', "&amp;")
-    .replace('<', "&lt;")
-    .replace('>', "&gt;")
-    .replace('"', "&quot;")
-    .replace('\'', "&apos;")
-}
-
 fn escape_html(value: &str) -> String {
   value
     .replace('&', "&amp;")
@@ -311,7 +303,8 @@ mod tests {
   use std::collections::BTreeMap;
 
   use super::{ExternFormat, LineEndings, render_extern_manifest};
-  use crate::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
+  use crate::{ExternCallable, ExternExport, ExternManifest, ExternParameter, ExternValue};
+  use xray_xml::{XmlDocument, XmlParseOptions};
 
   #[test]
   fn renders_stable_json_with_crlf_by_default() {
@@ -345,5 +338,33 @@ mod tests {
       render_extern_manifest(&ExternManifest::default(), ExternFormat::Json, Some(LineEndings::Lf)).unwrap();
 
     assert!(!rendered.contains("\r\n"));
+  }
+
+  #[test]
+  fn renders_well_formed_xml_with_escaped_values() {
+    let manifest: ExternManifest = ExternManifest {
+      exports: BTreeMap::from([(
+        String::from("test.<run>&\"'"),
+        ExternExport::Value(ExternValue {
+          doc: None,
+          source: String::from("src/<test>&\"'.ts"),
+          type_name: String::from("Record<A, B> & C"),
+        }),
+      )]),
+    };
+
+    let rendered: String = render_extern_manifest(&manifest, ExternFormat::Xml, None).unwrap();
+    let document: XmlDocument = XmlDocument::parse(&rendered, XmlParseOptions::default()).unwrap();
+    let export = document.elements_named("export").next().unwrap();
+
+    assert_eq!(export.attribute("name"), Some("test.<run>&\"'"));
+    assert_eq!(
+      document.elements_named("source").next().unwrap().text(),
+      "src/<test>&\"'.ts"
+    );
+    assert_eq!(
+      document.elements_named("type").next().unwrap().text(),
+      "Record<A, B> & C"
+    );
   }
 }

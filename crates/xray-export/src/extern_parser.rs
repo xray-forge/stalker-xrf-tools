@@ -10,7 +10,10 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub use editor_projection::{ExportDescriptor, ExportParameterDescriptor, ExportsEditorParser};
+pub use editor_projection::{
+  ExportContractDescriptor, ExportDescriptor, ExportParameterDescriptor, ExportReturnDescriptor,
+  ExportSourceDescriptor, ExportsEditorParser, ExportsProject,
+};
 use walkdir::{DirEntry, WalkDir};
 use xray_error::{XRayError, XRayResult};
 use xray_typescript::{TypeScriptSymbolResolver, parse_typescript_file};

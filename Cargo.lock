@@ -6798,6 +6798,7 @@ dependencies = [
  "walkdir",
  "xray-error",
  "xray-typescript",
+ "xray-xml",
 ]
 
 [[package]]
@@ -6807,7 +6808,6 @@ dependencies = [
  "ddsfile",
  "derive_more 2.1.1",
  "rayon",
- "regex",
  "uuid",
  "walkdir",
  "xray-assets",
@@ -6821,6 +6821,7 @@ dependencies = [
  "xray-shaders",
  "xray-sound",
  "xray-utils",
+ "xray-xml",
 ]
 
 [[package]]
@@ -6890,12 +6891,12 @@ dependencies = [
  "log",
  "path-absolutize",
  "rayon",
- "roxmltree",
  "serde",
  "xray-error",
  "xray-ltx",
  "xray-output",
  "xray-utils",
+ "xray-xml",
 ]
 
 [[package]]
@@ -6904,7 +6905,6 @@ version = "0.1.0"
 dependencies = [
  "derive_more 2.1.1",
  "log",
- "quick-xml 0.41.0",
  "serde",
  "serde_json",
  "walkdir",
@@ -6913,6 +6913,7 @@ dependencies = [
  "xray-report",
  "xray-test-utils",
  "xray-utils",
+ "xray-xml",
 ]
 
 [[package]]
@@ -6935,6 +6936,17 @@ dependencies = [
  "base64 0.23.1",
  "encoding_rs",
  "xray-error",
+]
+
+[[package]]
+name = "xray-xml"
+version = "0.1.0"
+dependencies = [
+ "quick-xml 0.41.0",
+ "roxmltree",
+ "serde",
+ "xray-error",
+ "xray-utils",
 ]
 
 [[package]]

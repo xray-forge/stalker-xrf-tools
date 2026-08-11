@@ -23,6 +23,7 @@ members = [
     "crates/xray-typescript",
     "crates/xray-translation",
     "crates/xray-utils",
+    "crates/xray-xml",
 ]
 
 [workspace.package]
@@ -62,6 +63,7 @@ xray-texture = { path = "crates/xray-texture" }
 xray-translation = { path = "crates/xray-translation" }
 xray-typescript = { path = "crates/xray-typescript" }
 xray-utils = { path = "crates/xray-utils" }
+xray-xml = { path = "crates/xray-xml" }
 
 [profile.release]
 panic = "abort"
