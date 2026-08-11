@@ -1,4 +1,4 @@
-import { Alert, Box, Tooltip } from "@mui/material";
+import { Alert, Box, LinearProgress, Tooltip } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useMemo, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
@@ -32,6 +32,12 @@ export function ArchivesEditor(): ReactElement {
   const projectRoot: string = project?.root ?? "";
   const archiveTools = useMemo(() => createArchiveEditorTools(archivesService), [archivesService]);
 
+  // Extraction writes to disk outside the archive. Walking away mid-write left it running against a
+  // screen nobody could see, and the only signal it was happening was one button in the content area.
+  const isExtracting: boolean =
+    archivesService.singleFileExtraction.isLoading || archivesService.folderExtraction.isLoading;
+  const isBusy: boolean = isClosing || isExtracting;
+
   const onClose = useCallback(async (): Promise<void> => {
     setClosing(true);
     setCloseError(null);
@@ -46,7 +52,7 @@ export function ArchivesEditor(): ReactElement {
     }
   }, [archivesService, navigate]);
 
-  useEditorBusy(isClosing);
+  useEditorBusy(isBusy);
 
   useEditorTools(archiveTools);
 
@@ -57,7 +63,7 @@ export function ArchivesEditor(): ReactElement {
       toolbar={
         <>
           <EditorToolbar
-            isBackDisabled={isClosing}
+            isBackDisabled={isBusy}
             onBack={() => void onClose()}
             subtitle={
               projectRoot ? (
@@ -69,6 +75,8 @@ export function ArchivesEditor(): ReactElement {
               ) : null
             }
           />
+          {isExtracting ? <LinearProgress sx={{ height: 2 }} /> : null}
+
           {closeError ? (
             <Alert severity={"error"} onClose={() => setCloseError(null)}>
               Could not close archives: {closeError}

@@ -5,6 +5,7 @@ export enum EArchivesEditorCommand {
   OPEN_ARCHIVES_PROJECT = "plugin:archives-editor|open_archives_project",
   READ_ARCHIVE_FILE = "plugin:archives-editor|read_archive_file",
   EXTRACT_ARCHIVE_FILE = "plugin:archives-editor|extract_archive_file",
+  EXTRACT_ARCHIVE_FOLDER = "plugin:archives-editor|extract_archive_folder",
   UNPACK_ARCHIVES_PATH = "plugin:archives-editor|unpack_archives_path",
 }
 

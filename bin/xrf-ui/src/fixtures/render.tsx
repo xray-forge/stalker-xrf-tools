@@ -5,6 +5,7 @@ import { ReactElement, ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 
 import { ApplicationProvider } from "@/applications/ApplicationProvider";
+import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
 import { EditorStatusProvider } from "@/core/components/shell/EditorStatusContext";
 
 export interface IRenderOptions {
@@ -21,7 +22,9 @@ export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] 
       <MemoryRouter initialEntries={[route]}>
         <ApplicationProvider>
           <ContainerProvider config={{ bindings }}>
-            <EditorStatusProvider>{children}</EditorStatusProvider>
+            <EditorBusyProvider>
+              <EditorStatusProvider>{children}</EditorStatusProvider>
+            </EditorBusyProvider>
           </ContainerProvider>
         </ApplicationProvider>
       </MemoryRouter>

@@ -58,7 +58,9 @@ export function ArchivesMenu(): ReactElement {
 
   const selectedItem: Nullable<string> = archivesService.fileDescriptor
     ? `file:${archivesService.fileDescriptor.name}`
-    : null;
+    : archivesService.directoryPath !== null
+      ? `directory:${archivesService.directoryPath || "~"}`
+      : null;
 
   const onSelectPath = useCallback(
     (path: string) => {
@@ -75,9 +77,15 @@ export function ArchivesMenu(): ReactElement {
     (_: Nullable<SyntheticEvent>, itemId: Nullable<string>) => {
       if (itemId?.startsWith("file:")) {
         onSelectPath(itemId.slice("file:".length));
+      } else if (itemId?.startsWith("directory:")) {
+        const path: string = itemId.slice("directory:".length);
+
+        // The synthetic root node stands for the whole archive, which the backend spells as an empty
+        // prefix rather than a literal path.
+        archivesService.selectArchiveDirectory(path === "~" ? "" : path);
       }
     },
-    [onSelectPath]
+    [archivesService, onSelectPath]
   );
 
   return (
@@ -107,7 +115,6 @@ export function ArchivesMenu(): ReactElement {
       ) : items.length ? (
         <Box sx={{ padding: 0.5 }}>
           <RichTreeView
-            isItemSelectionDisabled={(item: IArchiveTreeItem) => item.kind === "directory"}
             items={items}
             expandedItems={expandedItems}
             selectedItems={selectedItem}

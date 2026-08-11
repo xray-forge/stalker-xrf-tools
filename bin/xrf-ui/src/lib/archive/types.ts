@@ -34,3 +34,12 @@ export interface IArchiveFileReadResult {
   content: string;
   size: number;
 }
+
+/** What the backend reports after writing a whole archived directory to disk. */
+export interface IArchiveFolderExtractResult {
+  /** Archive-relative directory that was extracted, empty for the archive root. */
+  prefix: string;
+  destination: string;
+  extractedCount: number;
+  size: number;
+}

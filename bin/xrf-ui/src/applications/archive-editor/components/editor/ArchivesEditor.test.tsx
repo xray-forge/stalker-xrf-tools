@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from "@jest/globals";
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import * as dialog from "@tauri-apps/plugin-dialog";
 import { fireEvent, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
@@ -226,5 +227,38 @@ describe("opened archives editor", () => {
 
     expect(await findByText("Could not close archives: archive is busy")).toBeInTheDocument();
     expect(getByText("Archives editor")).toBeInTheDocument();
+  });
+
+  it("locks navigation while a file is being written to disk", async () => {
+    // Extraction writes outside the archive; leaving mid-write leaves it running against a screen
+    // nobody can see. The rail is the thing that has to stop, not just the button that started it.
+    const save = jest.spyOn(dialog, "save").mockResolvedValue("C:\\out\\readme.ltx");
+
+    setMockInvokeResponses({
+      [EArchivesEditorCommand.GET_ARCHIVES_PROJECT]: PROJECT,
+      [EArchivesEditorCommand.READ_ARCHIVE_FILE]: { name: TEXT_FILE.name, content: "line", size: 4 },
+      // Never settles, so the editor stays mid-extraction for the length of the assertion.
+      [EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE]: () => new Promise(() => {}),
+    });
+
+    const { findByLabelText, findByText, getByLabelText } = renderWithProviders(
+      <EditorBusyProvider>
+        <EditorToolsProvider>
+          <ApplicationShellFrame>
+            <ArchivesEditorPage />
+          </ApplicationShellFrame>
+        </EditorToolsProvider>
+      </EditorBusyProvider>,
+      { route: "/archives-editor/editor", bindings: [ProjectService, ArchivesService] }
+    );
+
+    await userEvent.click(await findByText("readme.ltx"));
+    await userEvent.click(await findByLabelText("Extract file"));
+
+    await waitFor(() => expect(getByLabelText("Home")).toBeDisabled());
+    expect(getByLabelText("Archives")).toBeDisabled();
+    expect(getByLabelText("Close and go back")).toBeDisabled();
+
+    save.mockRestore();
   });
 });

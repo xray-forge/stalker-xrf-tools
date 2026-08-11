@@ -7,6 +7,7 @@ import {
   getArchivePreviewSupport,
   IArchiveFileDescriptor,
   IArchiveFileReadResult,
+  IArchiveFolderExtractResult,
   IArchivesProject,
 } from "@/lib/archive";
 import { transformError } from "@/lib/error";
@@ -33,6 +34,19 @@ export class ArchivesService {
   /** Outcome of the last single file extraction, holding the path it was written to when it worked. */
   @Observable()
   public singleFileExtraction: Loadable<Nullable<string>> = createLoadable(null);
+
+  /**
+   * Archive-relative path of the selected directory, empty string for the archive root.
+   *
+   * Held separately from `fileDescriptor` rather than as one selection union: only one of the two can
+   * be set, and keeping them apart means neither view has to interrogate the other's shape.
+   */
+  @Observable()
+  public directoryPath: Nullable<string> = null;
+
+  /** Outcome of the last folder extraction, holding how much was written when it worked. */
+  @Observable()
+  public folderExtraction: Loadable<Nullable<IArchiveFolderExtractResult>> = createLoadable(null);
 
   private fileRequestId: number = 0;
 
@@ -115,6 +129,7 @@ export class ArchivesService {
   @BoundAction()
   public async selectArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
     this.fileDescriptor = descriptor;
+    this.directoryPath = null;
     this.fileRequestId += 1;
     this.file = createLoadable(null);
 
@@ -164,11 +179,56 @@ export class ArchivesService {
     this.singleFileExtraction = createLoadable(null);
   }
 
+  /** Select a directory, which is a different kind of selection than a file rather than a wider one. */
+  @BoundAction()
+  public selectArchiveDirectory(path: string): void {
+    this.fileRequestId += 1;
+    this.fileDescriptor = null;
+    this.file = createLoadable(null);
+    this.directoryPath = path;
+    this.folderExtraction = createLoadable(null);
+  }
+
+  /**
+   * Write every archived file under a directory into a destination root.
+   *
+   * An empty prefix extracts the whole archive, which is what selecting the tree root means.
+   */
+  @BoundAction()
+  public async extractArchiveFolder(prefix: string, destination: string): Promise<void> {
+    this.log.info("Extracting archive folder:", prefix || "<root>", destination);
+
+    try {
+      this.folderExtraction = createLoadable(null, true);
+
+      const result: IArchiveFolderExtractResult = await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER, {
+        prefix,
+        destination,
+      });
+
+      runInAction(() => (this.folderExtraction = createLoadable(result)));
+    } catch (error: unknown) {
+      this.log.error("Failed to extract archive folder:", error);
+
+      runInAction(() => (this.folderExtraction = createLoadable(null, false, transformError(error))));
+
+      throw transformError(error);
+    }
+  }
+
+  /** Dismiss whatever the last folder extraction reported. */
+  @BoundAction()
+  public clearFolderExtraction(): void {
+    this.folderExtraction = createLoadable(null);
+  }
+
   @BoundAction()
   public clearFileSelection(): void {
     this.fileRequestId += 1;
     this.fileDescriptor = null;
+    this.directoryPath = null;
     this.file = createLoadable(null);
+    this.folderExtraction = createLoadable(null);
   }
 
   private isPreviewSupported(descriptor: IArchiveFileDescriptor): boolean {

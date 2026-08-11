@@ -3,6 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { ArchiveFileHeader } from "@/applications/archive-editor/components/editor/preview/ArchiveFileHeader";
+import { ArchiveFolderContent } from "@/applications/archive-editor/components/editor/preview/ArchiveFolderContent";
 import { ArchivePreviewError } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewError";
 import { ArchivePreviewState } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewState";
 import { ArchiveTextPreview } from "@/applications/archive-editor/components/editor/preview/ArchiveTextPreview";
@@ -19,8 +20,10 @@ import { formatBytes } from "@/lib/size";
 
 export function ArchivesFileContent(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
+
   const descriptor: Nullable<IArchiveFileDescriptor> = archivesService.fileDescriptor;
   const project: Nullable<IArchivesProject> = archivesService.project.value;
+  const directoryPath: Nullable<string> = archivesService.directoryPath;
 
   const onGetUnsupportedDescription = useCallback(
     (support: Exclude<ArchivePreviewSupport, { kind: "supported" }>): string => {
@@ -28,7 +31,7 @@ export function ArchivesFileContent(): ReactElement {
         case "unsupported-extension":
           return support.extension
             ? `.${support.extension} files can be inspected in Details, ` +
-              "but this file type does not have a text preview."
+                "but this file type does not have a text preview."
             : "Files without an extension can be inspected in Details, but do not have a text preview.";
         case "compressed":
           return (
@@ -44,6 +47,11 @@ export function ArchivesFileContent(): ReactElement {
     },
     []
   );
+
+  // A directory selection is a different kind of thing, not a file that happens to be missing.
+  if (directoryPath !== null) {
+    return <ArchiveFolderContent path={directoryPath} />;
+  }
 
   if (!descriptor || !project) {
     return (

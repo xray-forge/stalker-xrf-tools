@@ -1,6 +1,29 @@
 import { Optional } from "@/core/types/general";
 import { IArchiveFileDescriptor } from "@/lib/archive/types";
 
+/**
+ * Whether an archived file would be written when its directory is extracted.
+ *
+ * Mirrors `ArchiveProject::extract_folder` on the rust side, including both of its skips. Counting with
+ * a plain `startsWith` here instead would promise more files than the backend writes, and would let
+ * `configs` swallow `configs_backup`.
+ */
+export function isUnderArchiveDirectory(descriptor: IArchiveFileDescriptor, prefix: string): boolean {
+  // Directory entries and empty entries are never written out.
+  if (!descriptor.sizeReal || /[\\/]$/.test(descriptor.name)) {
+    return false;
+  }
+
+  if (!prefix) {
+    return true;
+  }
+
+  const name: string = descriptor.name.toLowerCase();
+  const normalized: string = prefix.replace(/[\\/]+$/, "").toLowerCase();
+
+  return name.length > normalized.length && name.startsWith(normalized) && /[\\/]/.test(name[normalized.length]);
+}
+
 export interface IArchiveDirectoryTreeItem {
   id: string;
   label: string;
