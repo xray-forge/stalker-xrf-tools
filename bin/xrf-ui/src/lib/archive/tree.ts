@@ -1,68 +1,177 @@
-import { TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
+import { Nullable, Optional } from "@/core/types/general";
+import { IArchiveFileDescriptor } from "@/lib/archive/types";
 
-import { Maybe } from "@/core/types/general";
-import { IArchiveFileReplicationDescriptor } from "@/lib/archive/types";
-
-export function parseTree(
-  files: Array<IArchiveFileReplicationDescriptor>,
-  separator: string
-): Array<TreeViewDefaultItemModelProperties> {
-  const node: TreeViewDefaultItemModelProperties = { id: "~", label: "root", children: [] };
-
-  for (const file of files) {
-    const path: string = file.name;
-    const split: Array<string> = path.split(separator);
-
-    createNode(split, node);
-  }
-
-  sortNode(node);
-
-  return node.children!;
+export interface IArchiveDirectoryTreeItem {
+  id: string;
+  label: string;
+  path: string;
+  kind: "directory";
+  children: Array<IArchiveTreeItem>;
 }
 
-function createNode(path: Array<string>, parent: TreeViewDefaultItemModelProperties): void {
-  const name: Maybe<string> = path.shift();
+export interface IArchiveFileTreeItem {
+  id: string;
+  label: string;
+  path: string;
+  kind: "file";
+  descriptor: IArchiveFileDescriptor;
+}
+
+export type IArchiveTreeItem = IArchiveDirectoryTreeItem | IArchiveFileTreeItem;
+
+export interface IFilteredArchiveTree {
+  items: Array<IArchiveTreeItem>;
+  expandedItems: Array<string>;
+}
+
+/**
+ * Build a directory-first explorer tree from effective archive file descriptors.
+ *
+ * @param files - Effective archive files to attach to leaf nodes.
+ * @param separator - Separator used by the archive-relative file paths.
+ * @returns Sorted root-level tree items with descriptors attached to file leaves.
+ */
+export function parseTree(files: Array<IArchiveFileDescriptor>, separator: string): Array<IArchiveTreeItem> {
+  const root: IArchiveDirectoryTreeItem = {
+    id: "directory:~",
+    label: "root",
+    path: "",
+    kind: "directory",
+    children: [],
+  };
+
+  for (const descriptor of files) {
+    appendFile(root, descriptor.name.split(separator), descriptor, separator);
+  }
+
+  sortTree(root.children);
+
+  return root.children;
+}
+
+/**
+ * Filter an archive tree by canonical path while retaining the hierarchy needed to reach each match.
+ *
+ * @param items - Root-level archive tree items to search.
+ * @param rawQuery - Case-insensitive path query; surrounding whitespace is ignored.
+ * @returns The filtered tree and directory identifiers that should be expanded to reveal its matches.
+ */
+export function filterArchiveTree(items: Array<IArchiveTreeItem>, rawQuery: string): IFilteredArchiveTree {
+  const query: string = rawQuery.trim().toLocaleLowerCase();
+
+  if (!query) {
+    return { items, expandedItems: [] };
+  }
+
+  const expandedItems = new Set<string>();
+  const filteredItems: Array<IArchiveTreeItem> = [];
+
+  for (const item of items) {
+    const filtered: IArchiveTreeItem | null = filterItem(item, query, expandedItems);
+
+    if (filtered) {
+      filteredItems.push(filtered);
+    }
+  }
+
+  return { items: filteredItems, expandedItems: Array.from(expandedItems) };
+}
+
+/**
+ * Append one archive file to a mutable directory tree.
+ *
+ * @param parent - Directory node that receives the next path segment.
+ * @param remainingPath - Mutable path segments still to consume for the file.
+ * @param descriptor - File descriptor attached to the resulting leaf node.
+ * @param separator - Separator used to reconstruct each canonical node path.
+ */
+function appendFile(
+  parent: IArchiveDirectoryTreeItem,
+  remainingPath: Array<string>,
+  descriptor: IArchiveFileDescriptor,
+  separator: string
+): void {
+  const name: Optional<string> = remainingPath.shift();
 
   if (!name) {
     return;
   }
 
-  const element: Maybe<TreeViewDefaultItemModelProperties> = parent.children!.find(
-    (element: TreeViewDefaultItemModelProperties) => {
-      return element.label === name;
-    }
-  );
+  const path: string = parent.path ? `${parent.path}${separator}${name}` : name;
 
-  if (element) {
-    createNode(path, element);
-  } else {
-    const node: TreeViewDefaultItemModelProperties = {
-      id: parent.id + "\\" + name,
-      label: name,
-      children: [],
-    };
+  if (!remainingPath.length) {
+    parent.children.push({ id: `file:${path}`, label: name, path, kind: "file", descriptor });
 
-    parent.children!.push(node);
-
-    if (path.length) {
-      createNode(path, node);
-    }
+    return;
   }
+
+  const existing: Optional<IArchiveTreeItem> = parent.children.find(
+    (child: IArchiveTreeItem) => child.kind === "directory" && child.label === name
+  );
+  const directory: IArchiveDirectoryTreeItem =
+    existing?.kind === "directory"
+      ? existing
+      : { id: `directory:${path}`, label: name, path, kind: "directory", children: [] };
+
+  if (!existing) {
+    parent.children.push(directory);
+  }
+
+  appendFile(directory, remainingPath, descriptor, separator);
 }
 
-function sortNode(node: TreeViewDefaultItemModelProperties): void {
-  for (const children of node.children!) {
-    if (children.children?.length) {
-      sortNode(children);
+/**
+ * Sort a mutable tree recursively with directories before files and labels in locale order.
+ *
+ * @param items - Tree items to sort in place.
+ * @returns {void} Nothing.
+ */
+function sortTree(items: Array<IArchiveTreeItem>): void {
+  for (const item of items) {
+    if (item.kind === "directory") {
+      sortTree(item.children);
     }
   }
 
-  node.children!.sort((a, b) => {
-    if ((!a.children!.length && !b.children!.length) || (a.children!.length && b.children!.length)) {
-      return a.label.localeCompare(b.label);
+  items.sort((first: IArchiveTreeItem, second: IArchiveTreeItem) => {
+    if (first.kind !== second.kind) {
+      return first.kind === "directory" ? -1 : 1;
     }
 
-    return (b.children?.length ?? 0) - (a.children?.length ?? 0);
+    return first.label.localeCompare(second.label);
   });
+}
+
+/**
+ * Retain one matching tree branch and record directories that expose its matches.
+ *
+ * @param item - Tree item to compare with the normalized query.
+ * @param query - Trimmed lowercase path query.
+ * @param expandedItems - Mutable accumulator for directory identifiers that should be expanded.
+ * @returns The retained tree item, including filtered descendants, or null when the branch does not match.
+ */
+function filterItem(item: IArchiveTreeItem, query: string, expandedItems: Set<string>): Nullable<IArchiveTreeItem> {
+  const isMatch: boolean = item.path.toLocaleLowerCase().includes(query);
+
+  if (item.kind === "file") {
+    return isMatch ? item : null;
+  }
+
+  if (isMatch) {
+    expandedItems.add(item.id);
+
+    return item;
+  }
+
+  const children: Array<IArchiveTreeItem> = item.children
+    .map((child: IArchiveTreeItem) => filterItem(child, query, expandedItems))
+    .filter((child: Nullable<IArchiveTreeItem>): child is IArchiveTreeItem => child !== null);
+
+  if (!children.length) {
+    return null;
+  }
+
+  expandedItems.add(item.id);
+
+  return { ...item, children };
 }

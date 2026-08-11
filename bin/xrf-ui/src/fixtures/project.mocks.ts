@@ -1,14 +1,15 @@
-import { IArchiveDescriptor, IArchiveFileReplicationDescriptor, IArchivesProject } from "@/lib/archive";
+import { IArchiveDescriptor, IArchiveFileDescriptor, IArchivesProject } from "@/lib/archive";
 import { IExportDescriptor, TExportsDeclarations } from "@/lib/exports";
 import { IEquipmentSectionDescriptor } from "@/lib/icons";
 import { ITranslationsProjectJson } from "@/lib/translations";
 
 export function mockArchiveFile(
-  overrides: Partial<IArchiveFileReplicationDescriptor> = {}
-): IArchiveFileReplicationDescriptor {
+  overrides: Partial<IArchiveFileDescriptor> = {}
+): IArchiveFileDescriptor {
   return {
     crc: 123456,
     destination: "gamedata\\config\\system.ltx",
+    extension: "ltx",
     name: "system.ltx",
     offset: 0,
     sizeCompressed: 512,
@@ -37,10 +38,13 @@ export function mockArchivesProject(overrides: Partial<IArchivesProject> = {}): 
         destination: "gamedata\\config\\weapons\\wpn_ak74.ltx",
       }),
       "meshes\\dynamics\\weapons\\wpn_ak74.ogf": mockArchiveFile({
+        extension: "ogf",
         name: "wpn_ak74.ogf",
         destination: "gamedata\\meshes\\dynamics\\weapons\\wpn_ak74.ogf",
       }),
     },
+    root: "db",
+    sizeReal: 6144,
     ...overrides,
   };
 }

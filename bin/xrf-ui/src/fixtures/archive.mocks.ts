@@ -1,11 +1,12 @@
-import { IArchiveDescriptor, IArchiveFileReplicationDescriptor, IArchivesProject } from "@/lib/archive";
+import { IArchiveDescriptor, IArchiveFileDescriptor, IArchivesProject } from "@/lib/archive";
 
 export function mockArchiveFileDescriptor(
-  overrides: Partial<IArchiveFileReplicationDescriptor> = {}
-): IArchiveFileReplicationDescriptor {
+  overrides: Partial<IArchiveFileDescriptor> = {}
+): IArchiveFileDescriptor {
   return {
     crc: 0x12345678,
     destination: "gamedata",
+    extension: "ltx",
     name: "configs\\system.ltx",
     offset: 4096,
     sizeCompressed: 2048,
@@ -15,10 +16,15 @@ export function mockArchiveFileDescriptor(
   };
 }
 
-export function mockArchivesProject(files?: Array<IArchiveFileReplicationDescriptor>): IArchivesProject {
-  const descriptors: Array<IArchiveFileReplicationDescriptor> = files ?? [
+export function mockArchivesProject(files?: Array<IArchiveFileDescriptor>): IArchivesProject {
+  const descriptors: Array<IArchiveFileDescriptor> = files ?? [
     mockArchiveFileDescriptor(),
-    mockArchiveFileDescriptor({ name: "scripts\\actor.script", sizeReal: 1024, sizeCompressed: 1024 }),
+    mockArchiveFileDescriptor({
+      extension: "script",
+      name: "scripts\\actor.script",
+      sizeReal: 1024,
+      sizeCompressed: 1024,
+    }),
   ];
   const archive: IArchiveDescriptor = {
     files: {},
@@ -29,5 +35,7 @@ export function mockArchivesProject(files?: Array<IArchiveFileReplicationDescrip
   return {
     archives: [archive],
     files: Object.fromEntries(descriptors.map((descriptor) => [descriptor.name, descriptor])),
+    root: "C:\\game\\database",
+    sizeReal: descriptors.reduce((total: number, descriptor) => total + descriptor.sizeReal, 0),
   };
 }

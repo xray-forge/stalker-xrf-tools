@@ -23,8 +23,7 @@ export interface IEquipmentPngDescriptor {
 
 @Injectable()
 export class EquipmentService {
-  @Observable()
-  public gridSize: number = 50;
+  public readonly log: Logger = new Logger(this.constructor.name);
 
   @Observable()
   public isReady: boolean = false;
@@ -33,9 +32,20 @@ export class EquipmentService {
   public isGridVisible: boolean = true;
 
   @Observable()
+  public gridSize: number = 50;
+
+  @Observable()
   public spriteImage: Loadable<Nullable<IEquipmentPngDescriptor>> = createLoadable(null);
 
-  public readonly log: Logger = new Logger(this.constructor.name);
+  /**
+   * Directory the sprite can be rebuilt from, or null when there is nothing to rebuild from.
+   */
+  @Observable()
+  public repackSourcePath: Nullable<string> = null;
+
+  /** Timestamp of the last successful repack, so the status bar can confirm the write happened. */
+  @Observable()
+  public repackedAt: Nullable<number> = null;
 
   public constructor() {
     makeObservable(this);
@@ -52,6 +62,8 @@ export class EquipmentService {
       const spriteImage: IEquipmentPngDescriptor = await this.spriteFromResponse(response);
 
       runInAction(() => (this.spriteImage = createLoadable(spriteImage)));
+
+      await this.resolveRepackSource(spriteImage.path);
     } else {
       this.log.info("No existing sprite detected file");
       runInAction(() => (this.isReady = true));
@@ -61,6 +73,12 @@ export class EquipmentService {
   @BoundAction()
   public setGridVisibility(isVisible: boolean): void {
     this.isGridVisible = isVisible;
+  }
+
+  /** Dismiss a reported failure, keeping whatever sprite is still on screen behind it. */
+  @BoundAction()
+  public clearSpriteError(): void {
+    this.spriteImage = this.spriteImage.asReady();
   }
 
   @BoundAction()
@@ -86,6 +104,8 @@ export class EquipmentService {
       const spriteImage: IEquipmentPngDescriptor = await this.spriteFromResponse(response);
 
       runInAction(() => (this.spriteImage = createLoadable(spriteImage)));
+
+      await this.resolveRepackSource(spriteImage.path);
     } catch (error) {
       this.log.error("Failed to open equipment editor project:", error);
 
@@ -104,46 +124,80 @@ export class EquipmentService {
 
       this.log.info("Equipment project reopened:", response);
 
-      this.cleanupAssets();
-
       const spriteImage: IEquipmentPngDescriptor = await this.spriteFromResponse(response);
 
+      // Revoked only once the replacement exists. Revoking first leaves the viewer pointed at a dead
+      // url for as long as building the new one takes, and permanently if it throws.
+      this.cleanupAssets();
+
       runInAction(() => (this.spriteImage = createLoadable(spriteImage)));
+
+      await this.resolveRepackSource(spriteImage.path);
     } catch (error) {
       this.log.error("Failed to reopen equipment editor project:", error);
+
+      // Left loading, this disables every command in the editor for the rest of the session, and the
+      // only way out is closing the project. The previous sprite stays on screen behind the error.
+      runInAction(() => (this.spriteImage = this.spriteImage.asFailed(error as Error)));
+
       throw error;
     }
   }
 
   @BoundAction()
   public async repackAndOpenProject(): Promise<void> {
-    const { spriteImage } = this;
+    const { spriteImage, repackSourcePath } = this;
 
     if (!spriteImage.value || spriteImage.isLoading) {
       throw new Error("Invalid attempt to reopen project that is loading or not open.");
     }
 
-    this.log.info("Repack and reopen equipment editor project");
-
-    const inputPath: string = await path.join(
-      await path.dirname(spriteImage.value.path),
-      await path.basename(spriteImage.value.path, await path.extname(spriteImage.value.path))
-    );
-
-    if (!(await exists(inputPath))) {
-      throw new Error(`Invalid attempt to repack DDS without base icons in '${inputPath}'.`);
+    if (!repackSourcePath) {
+      throw new Error(`Invalid attempt to repack DDS without base icons for '${spriteImage.value.path}'.`);
     }
+
+    this.log.info("Repack and reopen equipment editor project");
 
     try {
       this.spriteImage = this.spriteImage.asLoading();
 
-      await this.packEquipmentSprite(inputPath, spriteImage.value.path, spriteImage.value.ltxPath);
+      await this.packEquipmentSprite(repackSourcePath, spriteImage.value.path, spriteImage.value.ltxPath);
+
+      runInAction(() => (this.repackedAt = Date.now()));
 
       await this.reopenEquipmentProject();
-    } finally {
-      if (this.spriteImage.isLoading) {
-        runInAction(() => (this.spriteImage = this.spriteImage.asReady()));
-      }
+    } catch (error) {
+      this.log.error("Failed to repack equipment editor project:", error);
+
+      // Kept as a failure rather than reset to ready. Discarding it here is what made a repack that
+      // wrote nothing look exactly like one that succeeded.
+      runInAction(() => (this.spriteImage = this.spriteImage.asFailed(error as Error)));
+
+      throw error;
+    }
+  }
+
+  /**
+   * Work out whether this sprite has an unpacked icons directory beside it.
+   *
+   * The convention is a sibling folder named after the sprite without its extension, which is what the
+   * unpacker writes and what the packer reads back.
+   */
+  @BoundAction()
+  public async resolveRepackSource(spritePath: string): Promise<void> {
+    try {
+      const sourcePath: string = await path.join(
+        await path.dirname(spritePath),
+        await path.basename(spritePath, await path.extname(spritePath))
+      );
+
+      const isPresent: boolean = await exists(sourcePath);
+
+      runInAction(() => (this.repackSourcePath = isPresent ? sourcePath : null));
+    } catch (error) {
+      this.log.error("Failed to resolve repack source directory:", error);
+
+      runInAction(() => (this.repackSourcePath = null));
     }
   }
 
@@ -159,7 +213,11 @@ export class EquipmentService {
 
       this.log.info("Equipment project closed");
 
-      runInAction(() => (this.spriteImage = createLoadable(null)));
+      runInAction(() => {
+        this.spriteImage = createLoadable(null);
+        this.repackSourcePath = null;
+        this.repackedAt = null;
+      });
     } catch (error) {
       this.log.error("Failed to close equipment editor project:", error);
       runInAction(() => (this.spriteImage = this.spriteImage.asFailed(new Error(error as string))));

@@ -1,24 +1,81 @@
+import { Alert, Box, Tooltip } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement } from "react";
+import { ReactElement, useCallback, useMemo, useState } from "react";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { ArchivesFileContent } from "@/applications/archive-editor/components/editor/ArchivesFileContent";
-import { ArchivesMenu } from "@/applications/archive-editor/components/editor/ArchivesMenu";
+import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archive-editor/components/editor/archive-editor.styles";
+import { createArchiveEditorTools } from "@/applications/archive-editor/components/editor/archive-tools";
+import { ArchivesFileContent } from "@/applications/archive-editor/components/editor/preview/ArchivesFileContent";
+import { ArchivesMenu } from "@/applications/archive-editor/components/editor/tree/ArchivesMenu";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { useEditorTools } from "@/core/components/shell/EditorToolsContext";
+import { Nullable } from "@/core/types/general";
+import { IArchivesProject } from "@/lib/archive";
+import { formatBytes } from "@/lib/size";
 
 export function ArchivesEditor(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  const archiveCount: number = archivesService.project.value?.archives.length ?? 0;
-  const fileCount: number = Object.keys(archivesService.project.value?.files ?? {}).length;
+  const navigate: NavigateFunction = useNavigate();
 
-  useEditorStatus([`${archiveCount} archives`, `${fileCount} files`]);
+  const [isClosing, setClosing] = useState<boolean>(false);
+  const [closeError, setCloseError] = useState<Nullable<string>>(null);
+
+  const project: IArchivesProject | null = archivesService.project.value;
+  const archiveCount: number = project?.archives.length ?? 0;
+  const fileCount: number = Object.keys(project?.files ?? {}).length;
+  const totalSize: number = project?.sizeReal ?? 0;
+  const projectRoot: string = project?.root ?? "";
+  const archiveTools = useMemo(() => createArchiveEditorTools(archivesService), [archivesService]);
+
+  const onClose = useCallback(async (): Promise<void> => {
+    setClosing(true);
+    setCloseError(null);
+
+    try {
+      await archivesService.closeArchivesProject();
+      navigate("/archives-editor", { replace: true });
+    } catch (error: unknown) {
+      setCloseError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setClosing(false);
+    }
+  }, [archivesService, navigate]);
+
+  useEditorBusy(isClosing);
+
+  useEditorTools(archiveTools);
+
+  useEditorStatus([`${archiveCount} archives`, `${fileCount} files`, formatBytes(totalSize)]);
 
   return (
     <EditorLayout
-      toolbar={<EditorToolbar onBack={archivesService.closeArchivesProject} />}
+      toolbar={
+        <>
+          <EditorToolbar
+            isBackDisabled={isClosing}
+            onBack={() => void onClose()}
+            subtitle={
+              projectRoot ? (
+                <Tooltip title={projectRoot}>
+                  <Box component={"span"} sx={{ fontFamily: ARCHIVE_EDITOR_MONOSPACE_FONT }}>
+                    {projectRoot}
+                  </Box>
+                </Tooltip>
+              ) : null
+            }
+          />
+          {closeError ? (
+            <Alert severity={"error"} onClose={() => setCloseError(null)}>
+              Could not close archives: {closeError}
+            </Alert>
+          ) : null}
+        </>
+      }
       menu={<ArchivesMenu />}
     >
       <ArchivesFileContent />

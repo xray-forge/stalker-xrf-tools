@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, CircularProgress, LinearProgress, Typography } from "@mui/material";
 import { SxProps } from "@mui/system";
 import { clamp } from "@mui/x-data-grid/internals";
 import { useInjection } from "@wirestate/react";
@@ -145,6 +145,10 @@ export function EquipmentSpriteViewer(): ReactElement {
 
   return (
     <Box sx={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
+      {equipmentService.spriteImage.isLoading && equipmentService.spriteImage.value ? (
+        <LinearProgress sx={{ position: "absolute", left: 0, top: 0, width: "100%", zIndex: 2 }} />
+      ) : null}
+
       <Box
         sx={{
           position: "absolute",
@@ -155,7 +159,6 @@ export function EquipmentSpriteViewer(): ReactElement {
           top: 0,
           width: "100%",
           height: "100%",
-          bgcolor: "#353535",
         }}
       >
         {equipmentService.spriteImage.value ? (
@@ -191,8 +194,12 @@ export function EquipmentSpriteViewer(): ReactElement {
               />
             ) : null}
           </Box>
+        ) : equipmentService.spriteImage.isLoading ? (
+          <CircularProgress size={28} />
         ) : (
-          "loading..."
+          <Typography variant={"body2"} color={"text.secondary"}>
+            No sprite open
+          </Typography>
         )}
 
         {selectedCell && gridMapper ? (

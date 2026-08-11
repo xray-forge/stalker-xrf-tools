@@ -14,7 +14,6 @@ export function EquipmentSpriteEditorWorkspace(): ReactElement {
         maxWidth: "100%",
         maxHeight: "100%",
         flexGrow: 1,
-        padding: 1,
       }}
     >
       <EquipmentSpriteViewer />

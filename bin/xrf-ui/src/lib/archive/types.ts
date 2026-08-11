@@ -1,19 +1,12 @@
-export interface IArchiveFileReplicationDescriptor {
+export interface IArchiveFileDescriptor {
   crc: number;
   destination: string;
+  extension: string;
   name: string;
   offset: number;
   sizeCompressed: number;
   sizeReal: number;
   source: string;
-}
-
-export interface IArchiveFileDescriptor {
-  crc: number;
-  name: string;
-  offset: number;
-  sizeCompressed: number;
-  sizeReal: number;
 }
 
 export interface IArchiveDescriptor {
@@ -24,7 +17,9 @@ export interface IArchiveDescriptor {
 
 export interface IArchivesProject {
   archives: Array<IArchiveDescriptor>;
-  files: Record<string, IArchiveFileReplicationDescriptor>;
+  files: Record<string, IArchiveFileDescriptor>;
+  root: string;
+  sizeReal: number;
 }
 
 export interface IArchiveFileReadResult {

@@ -3,13 +3,21 @@ import { Injectable, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Nullable } from "@/core/types/general";
-import { IArchiveFileReadResult, IArchivesProject } from "@/lib/archive";
+import {
+  getArchivePreviewSupport,
+  IArchiveFileDescriptor,
+  IArchiveFileReadResult,
+  IArchivesProject,
+} from "@/lib/archive";
+import { transformError } from "@/lib/error";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 
 @Injectable()
 export class ArchivesService {
+  public readonly log: Logger = new Logger(this.constructor.name);
+
   @Observable()
   public isReady: boolean = false;
 
@@ -19,7 +27,10 @@ export class ArchivesService {
   @Observable()
   public file: Loadable<Nullable<IArchiveFileReadResult>> = createLoadable(null);
 
-  public readonly log: Logger = new Logger(this.constructor.name);
+  @Observable()
+  public fileDescriptor: Nullable<IArchiveFileDescriptor> = null;
+
+  private fileRequestId: number = 0;
 
   public constructor() {
     makeObservable(this);
@@ -27,7 +38,7 @@ export class ArchivesService {
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const existing: IArchivesProject = await invoke(EArchivesEditorCommand.GET_ARCHIVES_PROJECT);
+    const existing: Nullable<IArchivesProject> = await invoke(EArchivesEditorCommand.GET_ARCHIVES_PROJECT);
 
     if (existing) {
       this.log.info("Existing archives project detected");
@@ -47,6 +58,7 @@ export class ArchivesService {
 
   @BoundAction()
   public resetArchivesProject(): void {
+    this.clearFileSelection();
     this.project = createLoadable(null);
   }
 
@@ -55,6 +67,7 @@ export class ArchivesService {
     this.log.info("Opening archives project:", path);
 
     try {
+      this.clearFileSelection();
       this.project = createLoadable(null, true);
 
       const response: IArchivesProject = await invoke(EArchivesEditorCommand.OPEN_ARCHIVES_PROJECT, { path });
@@ -62,10 +75,10 @@ export class ArchivesService {
       this.log.info("Archives project opened");
 
       runInAction(() => (this.project = createLoadable(response, false)));
-    } catch (error) {
+    } catch (error: unknown) {
       this.log.error("Failed to open archives project:", error);
 
-      runInAction(() => (this.project = createLoadable(null, false, error as Error)));
+      runInAction(() => (this.project = createLoadable(null, false, transformError(error))));
     }
   }
 
@@ -76,28 +89,74 @@ export class ArchivesService {
     try {
       await invoke(EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT);
 
-      runInAction(() => (this.project = createLoadable(null)));
-    } catch (error) {
+      runInAction(() => {
+        this.clearFileSelection();
+        this.project = createLoadable(null);
+      });
+    } catch (error: unknown) {
       this.log.error("Failed to close archives project:", error);
+
+      throw transformError(error);
     }
   }
 
   @BoundAction()
-  public async openArchiveFile(path: string): Promise<void> {
-    this.log.info("Opening archive file:", path);
+  public async selectArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
+    this.fileDescriptor = descriptor;
+    this.fileRequestId += 1;
+    this.file = createLoadable(null);
 
-    this.file = this.file.asLoading();
+    if (getArchivePreviewSupport(descriptor).kind !== "supported") {
+      return;
+    }
+
+    await this.readArchiveFile(descriptor);
+  }
+
+  @BoundAction()
+  public async retrySelectedFile(): Promise<void> {
+    const descriptor: Nullable<IArchiveFileDescriptor> = this.fileDescriptor;
+
+    if (!descriptor || getArchivePreviewSupport(descriptor).kind !== "supported") {
+      return;
+    }
+
+    await this.readArchiveFile(descriptor);
+  }
+
+  @BoundAction()
+  public clearFileSelection(): void {
+    this.fileRequestId += 1;
+    this.fileDescriptor = null;
+    this.file = createLoadable(null);
+  }
+
+  private async readArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
+    const requestId: number = ++this.fileRequestId;
+
+    this.log.info("Opening archive file:", descriptor.name);
+    this.file = createLoadable(null, true);
 
     try {
-      const result: IArchiveFileReadResult = await invoke(EArchivesEditorCommand.READ_ARCHIVE_FILE, { path });
+      const result: IArchiveFileReadResult = await invoke(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
+        path: descriptor.name,
+      });
 
-      this.log.info("Opened file:", path);
+      if (requestId !== this.fileRequestId) {
+        return;
+      }
+
+      this.log.info("Opened file:", descriptor.name);
 
       runInAction(() => (this.file = createLoadable(result)));
-    } catch (error) {
-      this.log.error("Failed to open archive file:", path, error);
+    } catch (error: unknown) {
+      if (requestId !== this.fileRequestId) {
+        return;
+      }
 
-      runInAction(() => (this.file = createLoadable(null, false, new Error(String(error)))));
+      this.log.error("Failed to open archive file:", descriptor.name, error);
+
+      runInAction(() => (this.file = createLoadable(null, false, transformError(error))));
     }
   }
 }
