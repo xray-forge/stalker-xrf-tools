@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { mockArchiveFileDescriptor } from "@/fixtures/archive.mocks";
+import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { IArchiveTreeItem, isUnderArchiveDirectory, parseTree } from "@/lib/archive/tree";
 
 const CONFIGS_DIALOGS: string = ["configs", "gameplay", "dialogs.xml"].join("\\");
@@ -29,7 +29,6 @@ describe("archive tree", () => {
       });
     }
   });
-
 });
 
 describe("isUnderArchiveDirectory", () => {

@@ -4,7 +4,7 @@ import { ReactElement, useState } from "react";
 
 import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { EditorBusyProvider, useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 function Busy({ isBusy }: { isBusy: boolean }): ReactElement {
   useEditorBusy(isBusy);

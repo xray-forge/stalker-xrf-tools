@@ -4,7 +4,7 @@ import { ReactElement, useState } from "react";
 
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 function Publisher({ segments }: { segments: Array<string> }): ReactElement {
   useEditorStatus(segments);

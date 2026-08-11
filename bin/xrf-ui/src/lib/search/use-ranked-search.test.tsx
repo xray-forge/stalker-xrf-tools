@@ -3,7 +3,7 @@ import { RenderResult } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
 
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { IUseRankedSearch, useRankedSearch } from "@/lib/search/use-ranked-search";
 
 interface IFile {

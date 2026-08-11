@@ -4,9 +4,9 @@ import { Route, Routes } from "react-router-dom";
 
 import { ExportsEditorRouter } from "@/applications/exports-editor/ExportsEditorRouter";
 import { ProjectService } from "@/core/store/project";
-import { mockExportsProject } from "@/fixtures/project.mocks";
-import { renderWithProviders } from "@/fixtures/render";
-import { mockInvoke, setMockInvokeResponses } from "@/fixtures/tauri.mocks";
+import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
+import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { EExportsEditorCommand } from "@/lib/ipc";
 
 describe("ExportsEditorRouter", () => {

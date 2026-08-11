@@ -6,9 +6,9 @@ import { Injectable } from "@wirestate/core";
 
 import { ArchiveFileExtractAction } from "@/applications/archive-editor/components/editor/preview/ArchiveFileExtractAction";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
-import { mockArchiveFileDescriptor } from "@/fixtures/archive.mocks";
-import { renderWithProviders } from "@/fixtures/render";
-import { mockInvoke } from "@/fixtures/tauri.mocks";
+import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
+import { mockInvoke } from "@/fixtures/mocks/tauri.mocks";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { IArchiveFileDescriptor } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 

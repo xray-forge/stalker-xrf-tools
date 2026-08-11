@@ -3,8 +3,8 @@ import { act, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
 import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
-import { renderWithProviders } from "@/fixtures/render";
-import { mockAppWindow, setMockWindowMaximized } from "@/fixtures/tauri.mocks";
+import { mockAppWindow, setMockWindowMaximized } from "@/fixtures/mocks/tauri.mocks";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("ApplicationTitleBar", () => {
   it("drives the host window from its controls", async () => {

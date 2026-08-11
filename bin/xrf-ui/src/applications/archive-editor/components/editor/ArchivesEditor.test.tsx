@@ -11,9 +11,9 @@ import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusB
 import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
 import { EditorToolsProvider } from "@/core/components/shell/EditorToolsContext";
 import { ProjectService } from "@/core/store/project";
-import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/archive.mocks";
-import { renderWithProviders } from "@/fixtures/render";
-import { mockInvoke, setMockInvokeResponses } from "@/fixtures/tauri.mocks";
+import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
+import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { IArchivesProject } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 

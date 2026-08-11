@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { FormRow } from "@/lib/form/FormRow";
 
 describe("FormRow", () => {

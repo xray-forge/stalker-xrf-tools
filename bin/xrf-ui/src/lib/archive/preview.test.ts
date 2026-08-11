@@ -1,36 +1,27 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { mockArchiveFileDescriptor, mockArchiveReadPolicy } from "@/fixtures/archive.mocks";
+import { mockArchiveFileDescriptor, mockArchiveReadPolicy } from "@/fixtures/mocks/archive.mocks";
 import { getArchivePreviewSupport } from "@/lib/archive/preview";
 import { IArchiveReadPolicy } from "@/lib/archive/types";
 
 const READ_POLICY: IArchiveReadPolicy = mockArchiveReadPolicy();
 
 describe("archive preview support", () => {
-  it.each(READ_POLICY.extensions)(
-    "accepts uncompressed .%s files within the backend limit",
-    (extension: string) => {
-      expect(
-        getArchivePreviewSupport(mockArchiveFileDescriptor({ extension, name: `preview.${extension}` }), READ_POLICY)
-      ).toEqual({ kind: "supported" });
-    }
-  );
+  it.each(READ_POLICY.extensions)("accepts uncompressed .%s files within the backend limit", (extension: string) => {
+    expect(
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension, name: `preview.${extension}` }), READ_POLICY)
+    ).toEqual({ kind: "supported" });
+  });
 
   it("accepts the normalized extension regardless of filename casing", () => {
     expect(
-      getArchivePreviewSupport(
-        mockArchiveFileDescriptor({ extension: "script", name: "actor.SCRIPT" }),
-        READ_POLICY
-      )
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "script", name: "actor.SCRIPT" }), READ_POLICY)
     ).toEqual({ kind: "supported" });
   });
 
   it("identifies each unsupported reason before a backend read", () => {
     expect(
-      getArchivePreviewSupport(
-        mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" }),
-        READ_POLICY
-      )
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" }), READ_POLICY)
     ).toEqual({
       kind: "unsupported-extension",
       extension: "dds",
@@ -39,10 +30,7 @@ describe("archive preview support", () => {
       getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: 2048, sizeCompressed: 1024 }), READ_POLICY)
     ).toEqual({ kind: "compressed" });
     expect(
-      getArchivePreviewSupport(
-        mockArchiveFileDescriptor({ sizeReal: READ_POLICY.maximumSize + 1 }),
-        READ_POLICY
-      )
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: READ_POLICY.maximumSize + 1 }), READ_POLICY)
     ).toEqual({ kind: "too-large", maximumSize: READ_POLICY.maximumSize });
   });
 

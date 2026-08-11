@@ -1,7 +1,7 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { userEvent } from "@testing-library/user-event";
 
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 
 describe("FilePickerInput", () => {

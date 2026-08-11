@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { userEvent } from "@testing-library/user-event";
 
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("EditorToolbar", () => {
   it("resolves its title from the route rather than a caller supplied string", () => {

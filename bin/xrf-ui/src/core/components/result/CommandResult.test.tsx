@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { CommandResult } from "@/core/components/result/CommandResult";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("CommandResult", () => {
   it("leads with the outcome, which is what the command was run to learn", () => {
@@ -30,9 +30,7 @@ describe("CommandResult", () => {
   });
 
   it("takes its severity colour from the palette rather than a literal", () => {
-    const { getByText } = renderWithProviders(
-      <CommandResult headline={"Failed"} tone={"error"} stats={[]} />
-    );
+    const { getByText } = renderWithProviders(<CommandResult headline={"Failed"} tone={"error"} stats={[]} />);
 
     const color: string = getComputedStyle(getByText("Failed")).color;
 

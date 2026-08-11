@@ -3,7 +3,7 @@ import { userEvent } from "@testing-library/user-event";
 
 import { ApplicationToolStripe } from "@/core/components/shell/ApplicationToolStripe";
 import { IEditorTool } from "@/core/components/shell/EditorToolsContext";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 const TOOLS: Array<IEditorTool> = [
   { id: "header", label: "Header", icon: <span>h</span>, render: () => <div>header panel</div> },

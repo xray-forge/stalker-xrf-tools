@@ -1,8 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
-import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/archive.mocks";
-import { mockInvoke, setMockInvokeResponses } from "@/fixtures/tauri.mocks";
+import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
+import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IArchiveFileDescriptor, IArchiveFileReadResult } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable } from "@/lib/loadable";

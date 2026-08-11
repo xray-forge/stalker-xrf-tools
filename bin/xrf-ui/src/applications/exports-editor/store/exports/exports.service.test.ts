@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { ExportsService } from "@/applications/exports-editor/store/exports/exports.service";
-import { mockExportsProject } from "@/fixtures/project.mocks";
-import { mockInvoke, setMockInvokeResponses } from "@/fixtures/tauri.mocks";
+import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
+import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IExportsProject } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
 

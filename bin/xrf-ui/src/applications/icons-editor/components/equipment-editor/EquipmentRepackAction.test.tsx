@@ -6,7 +6,7 @@ import { Injectable } from "@wirestate/core";
 import { EquipmentRepackAction } from "@/applications/icons-editor/components/equipment-editor/EquipmentRepackAction";
 import { EquipmentService, IEquipmentPngDescriptor } from "@/applications/icons-editor/store/equipment";
 import { Nullable } from "@/core/types/general";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 const SPRITE: IEquipmentPngDescriptor = {
   ltxPath: "C:\\game\\system.ltx",

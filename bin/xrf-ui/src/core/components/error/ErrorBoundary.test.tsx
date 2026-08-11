@@ -5,7 +5,7 @@ import { ReactElement, useState } from "react";
 
 import { ApplicationCrash } from "@/core/components/error/ApplicationCrash";
 import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/components/error/ErrorBoundary";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 function Boom(): ReactElement {
   throw new Error("render exploded");

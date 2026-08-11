@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import { userEvent } from "@testing-library/user-event";
 
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 interface IRow {
   file: string;

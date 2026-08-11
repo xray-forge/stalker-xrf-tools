@@ -7,8 +7,8 @@ import { ExportsEditorPage } from "@/applications/exports-editor/pages/ExportsEd
 import { ExportsService } from "@/applications/exports-editor/store/exports";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { ProjectService } from "@/core/store/project";
-import { renderWithProviders } from "@/fixtures/render";
-import { mockInvoke, setMockInvokeResponses } from "@/fixtures/tauri.mocks";
+import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { ICallableExportDescriptor, IExportsProject, IValueExportDescriptor } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";

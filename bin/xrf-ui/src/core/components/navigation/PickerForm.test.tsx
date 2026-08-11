@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("PickerForm", () => {
   it("carries the standard toolbar so the frame does not change between a form and a workspace", () => {

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { Container } from "@wirestate/core";
 
 import { EquipmentService } from "@/applications/icons-editor/store/equipment/equipment.service";
-import { mockInvoke, setMockInvokeResponses } from "@/fixtures/tauri.mocks";
+import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { EIconsEditorCommand } from "@/lib/ipc";
 
 function closeCalls(): number {

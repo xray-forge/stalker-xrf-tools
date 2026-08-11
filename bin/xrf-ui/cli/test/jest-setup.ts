@@ -3,9 +3,9 @@ import "@testing-library/jest-dom";
 import { afterEach } from "@jest/globals";
 import { cleanup } from "@testing-library/react";
 
-import { mockLogger } from "@/fixtures/mock-logger";
-import { mockTauri } from "@/fixtures/mock-tauri";
-import { resetMockAppWindow, resetMockInvoke } from "@/fixtures/tauri.mocks";
+import { resetMockAppWindow, resetMockInvoke } from "@/fixtures/mocks/tauri.mocks";
+import { mockLogger } from "@/fixtures/setup/mock-logger";
+import { mockTauri } from "@/fixtures/setup/mock-tauri";
 
 mockLogger();
 mockTauri();

@@ -5,9 +5,9 @@ import { Route, Routes } from "react-router-dom";
 import { SpawnEditor } from "@/applications/spawn-editor/components/editor/SpawnEditor";
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
-import { renderWithProviders } from "@/fixtures/render";
-import { mockSpawnFile } from "@/fixtures/spawn.mocks";
-import { setMockInvokeResponses } from "@/fixtures/tauri.mocks";
+import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
+import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { renderWithProviders } from "@/fixtures/utils/render";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
 
 describe("SpawnEditor", () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { ApplicationLoader } from "@/core/components/ApplicationLoader";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("ApplicationLoader", () => {
   it("delays displaying the progress indicator for 500 milliseconds", () => {

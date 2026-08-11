@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { userEvent } from "@testing-library/user-event";
 
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
-import { renderWithProviders } from "@/fixtures/render";
+import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("EditorSideMenu", () => {
   it("lists sections and actions together", () => {
