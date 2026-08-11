@@ -2211,10 +2211,10 @@
       "description": "Permission identifier",
       "oneOf": [
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-file`\n- `allow-unpack-archives-path`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-file`\n- `allow-unpack-archives-path`",
           "type": "string",
           "const": "archives-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-file`\n- `allow-unpack-archives-path`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-file`\n- `allow-unpack-archives-path`"
         },
         {
           "description": "Enables the close_archives_project command without any pre-configured scope.",
@@ -2227,6 +2227,12 @@
           "type": "string",
           "const": "archives-editor:allow-extract-archive-file",
           "markdownDescription": "Enables the extract_archive_file command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the extract_archive_folder command without any pre-configured scope.",
+          "type": "string",
+          "const": "archives-editor:allow-extract-archive-folder",
+          "markdownDescription": "Enables the extract_archive_folder command without any pre-configured scope."
         },
         {
           "description": "Enables the get_archives_project command without any pre-configured scope.",
@@ -2269,6 +2275,12 @@
           "type": "string",
           "const": "archives-editor:deny-extract-archive-file",
           "markdownDescription": "Denies the extract_archive_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the extract_archive_folder command without any pre-configured scope.",
+          "type": "string",
+          "const": "archives-editor:deny-extract-archive-folder",
+          "markdownDescription": "Denies the extract_archive_folder command without any pre-configured scope."
         },
         {
           "description": "Denies the get_archives_project command without any pre-configured scope.",

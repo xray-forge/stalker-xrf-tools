@@ -1,5 +1,6 @@
 pub mod close_archives_project;
 pub mod extract_archive_file;
+pub mod extract_archive_folder;
 pub mod get_archives_project;
 pub mod has_archives_project;
 pub mod open_archives_project;

@@ -17,6 +17,7 @@ fn apply_inline_plugins(attributes: Attributes) -> Attributes {
         .commands(&[
           "close_archives_project",
           "extract_archive_file",
+          "extract_archive_folder",
           "get_archives_project",
           "has_archives_project",
           "open_archives_project",
