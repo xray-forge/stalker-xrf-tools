@@ -5,7 +5,6 @@ export function mockArchiveReadPolicy(overrides: Partial<IArchiveReadPolicy> = {
   return {
     extensions: ["ltx", "script", "ps", "ds", "h", "hs", "s", "vs", "cmd", "xml"],
     maximumSize: 10 * 1024 * 1024,
-    supportsCompressedFiles: false,
     imageExtensions: ["dds"],
     maximumImageSize: 32 * 1024 * 1024,
     ...overrides,

@@ -55,7 +55,7 @@ describe("ArchivesService extraction", () => {
 
     service.clearOperation();
 
-    expect((service.operation.value?.kind === "extract-file" ? service.operation.value.destination : null)).toBeNull();
+    expect(service.operation.value?.kind === "extract-file" ? service.operation.value.destination : null).toBeNull();
     expect(service.operation.error).toBeNull();
   });
 });

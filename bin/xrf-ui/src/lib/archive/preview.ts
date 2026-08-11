@@ -4,7 +4,6 @@ export type ArchivePreviewSupport =
   | { kind: "supported" }
   | { kind: "image" }
   | { kind: "unsupported-extension"; extension: string }
-  | { kind: "compressed" }
   | { kind: "too-large"; maximumSize: number };
 
 /**
@@ -44,10 +43,6 @@ export function getArchivePreviewSupport(
 
   if (descriptor.sizeReal > policy.maximumSize) {
     return { kind: "too-large", maximumSize: policy.maximumSize };
-  }
-
-  if (!policy.supportsCompressedFiles && descriptor.sizeReal !== descriptor.sizeCompressed) {
-    return { kind: "compressed" };
   }
 
   return { kind: "supported" };

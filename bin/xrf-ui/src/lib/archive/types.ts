@@ -18,7 +18,6 @@ export interface IArchiveDescriptor {
 export interface IArchiveReadPolicy {
   extensions: Array<string>;
   maximumSize: number;
-  supportsCompressedFiles: boolean;
   /** Extensions decoded into a picture rather than read as text. */
   imageExtensions: Array<string>;
   maximumImageSize: number;

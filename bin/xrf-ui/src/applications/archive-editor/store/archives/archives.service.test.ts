@@ -29,7 +29,7 @@ describe("ArchivesService file selection", () => {
     await service.selectArchiveFile(descriptor);
 
     expect(service.selectedFile).toStrictEqual(descriptor);
-    expect((service.content.value?.kind === "text" ? service.content.value.result : null)).toEqual(result);
+    expect(service.content.value?.kind === "text" ? service.content.value.result : null).toEqual(result);
     expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, { path: descriptor.name });
   });
 
@@ -40,7 +40,7 @@ describe("ArchivesService file selection", () => {
     await service.selectArchiveFile(descriptor);
 
     expect(service.selectedFile).toStrictEqual(descriptor);
-    expect((service.content.value?.kind === "text" ? service.content.value.result : null)).toBeNull();
+    expect(service.content.value?.kind === "text" ? service.content.value.result : null).toBeNull();
     expect(mockInvoke).not.toHaveBeenCalled();
   });
 
@@ -71,8 +71,8 @@ describe("ArchivesService file selection", () => {
     await firstRead;
 
     expect(service.selectedFile).toStrictEqual(second);
-    expect((service.content.value?.kind === "text" ? service.content.value.result.name : null)).toBe(second.name);
-    expect((service.content.value?.kind === "text" ? service.content.value.result.content : null)).toBe("second");
+    expect(service.content.value?.kind === "text" ? service.content.value.result.name : null).toBe(second.name);
+    expect(service.content.value?.kind === "text" ? service.content.value.result.content : null).toBe("second");
   });
 
   it("clears file state when the project closes", async () => {
@@ -86,7 +86,7 @@ describe("ArchivesService file selection", () => {
     await service.closeArchivesProject();
 
     expect(service.selectedFile).toBeNull();
-    expect((service.content.value?.kind === "text" ? service.content.value.result : null)).toBeNull();
+    expect(service.content.value?.kind === "text" ? service.content.value.result : null).toBeNull();
   });
 
   it("clears file state when the project is reset", async () => {
@@ -97,7 +97,7 @@ describe("ArchivesService file selection", () => {
     service.resetArchivesProject();
 
     expect(service.selectedFile).toBeNull();
-    expect((service.content.value?.kind === "text" ? service.content.value.result : null)).toBeNull();
+    expect(service.content.value?.kind === "text" ? service.content.value.result : null).toBeNull();
   });
 
   it("preserves the open project and selection when closing fails", async () => {

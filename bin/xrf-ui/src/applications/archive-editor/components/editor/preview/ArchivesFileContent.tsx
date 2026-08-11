@@ -37,11 +37,6 @@ export function ArchivesFileContent(): ReactElement {
             ? `.${support.extension} files can be inspected in Details, ` +
                 "but this file type does not have a text preview."
             : "Files without an extension can be inspected in Details, but do not have a text preview.";
-        case "compressed":
-          return (
-            "This file is compressed. Its archive metadata is available in Details, " +
-            "but compressed previews are not supported yet."
-          );
         case "too-large":
           return (
             `This file exceeds the ${formatBytes(support.maximumSize)} preview limit. ` +

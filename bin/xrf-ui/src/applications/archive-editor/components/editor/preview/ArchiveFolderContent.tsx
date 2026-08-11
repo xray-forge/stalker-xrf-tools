@@ -95,7 +95,7 @@ export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): Reac
         sx={{ marginTop: 1 }}
         onClick={onExtract}
       >
-        {operation.isLoading ? "Extracting..." : "Extract folder..."}
+        {operation.isLoading ? "Extracting..." : "Extract folder"}
       </Button>
 
       {operation.error ? (

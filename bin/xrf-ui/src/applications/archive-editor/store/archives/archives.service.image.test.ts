@@ -43,7 +43,7 @@ describe("ArchivesService image preview", () => {
     expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, { path: TEXTURE.name });
     // The text path would have refused it anyway: this entry is compressed and .dds is not readable.
     expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, expect.anything());
-    expect((service.content.value?.kind === "image" ? service.content.value.preview.width : null)).toBe(256);
+    expect(service.content.value?.kind === "image" ? service.content.value.preview.width : null).toBe(256);
   });
 
   it("leaves text files on the text path", async () => {
@@ -52,7 +52,7 @@ describe("ArchivesService image preview", () => {
     await service.selectArchiveFile(TEXT);
 
     expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, expect.anything());
-    expect((service.content.value?.kind === "image" ? service.content.value.preview : null)).toBeNull();
+    expect(service.content.value?.kind === "image" ? service.content.value.preview : null).toBeNull();
   });
 
   it("reports a failed decode instead of staying loading", async () => {
@@ -88,10 +88,10 @@ describe("ArchivesService image preview", () => {
     const service: ArchivesService = createService();
 
     await service.selectArchiveFile(TEXTURE);
-    expect((service.content.value?.kind === "image" ? service.content.value.preview : null)).not.toBeNull();
+    expect(service.content.value?.kind === "image" ? service.content.value.preview : null).not.toBeNull();
 
     // An image outliving its file would be shown beside the next selection.
     service.selectArchiveDirectory("textures");
-    expect((service.content.value?.kind === "image" ? service.content.value.preview : null)).toBeNull();
+    expect(service.content.value?.kind === "image" ? service.content.value.preview : null).toBeNull();
   });
 });
