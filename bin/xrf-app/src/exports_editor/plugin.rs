@@ -15,11 +15,14 @@ impl ExportsEditorPlugin {
 
         Ok(())
       })
-      .invoke_handler(tauri::generate_handler![
-        crate::exports_editor::commands::close_xr_exports::close_xr_exports,
-        crate::exports_editor::commands::open_xr_exports::open_xr_exports,
-        crate::exports_editor::commands::get_xr_exports::get_xr_exports,
-      ])
+      .invoke_handler(crate::logging::warn_on_unhandled_command(
+        Self::NAME,
+        tauri::generate_handler![
+          crate::exports_editor::commands::close_xr_exports::close_xr_exports,
+          crate::exports_editor::commands::open_xr_exports::open_xr_exports,
+          crate::exports_editor::commands::get_xr_exports::get_xr_exports,
+        ],
+      ))
       .build()
   }
 }

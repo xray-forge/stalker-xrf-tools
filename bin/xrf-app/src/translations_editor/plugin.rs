@@ -15,12 +15,15 @@ impl TranslationsEditorPlugin {
 
         Ok(())
       })
-      .invoke_handler(tauri::generate_handler![
-        crate::translations_editor::commands::close_translations_project::close_translations_project,
-        crate::translations_editor::commands::get_translations_project::get_translations_project,
-        crate::translations_editor::commands::open_translations_project::open_translations_project,
-        crate::translations_editor::commands::read_translations_project::read_translations_project,
-      ])
+      .invoke_handler(crate::logging::warn_on_unhandled_command(
+        Self::NAME,
+        tauri::generate_handler![
+          crate::translations_editor::commands::close_translations_project::close_translations_project,
+          crate::translations_editor::commands::get_translations_project::get_translations_project,
+          crate::translations_editor::commands::open_translations_project::open_translations_project,
+          crate::translations_editor::commands::read_translations_project::read_translations_project,
+        ],
+      ))
       .build()
   }
 }

@@ -11,6 +11,8 @@ use crate::utils::error_to_string;
 
 #[tauri::command]
 pub async fn reopen_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult<Value> {
+  log::info!("Reopening equipment sprite");
+
   let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
   let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
   let dds_name_lock: MutexGuard<Option<String>> = state.equipment_sprite_name.as_ref().lock().unwrap();

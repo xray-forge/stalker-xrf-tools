@@ -9,6 +9,8 @@ use crate::types::TauriResult;
 
 #[tauri::command]
 pub async fn get_archives_project(state: State<'_, ArchivesEditorState>) -> TauriResult<Option<Value>> {
+  log::debug!("Getting archives project");
+
   let lock: MutexGuard<Option<ArchiveProject>> = state.project.lock().unwrap();
 
   if (*lock).is_none() {

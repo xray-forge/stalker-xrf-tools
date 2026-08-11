@@ -9,6 +9,8 @@ use crate::types::TauriResult;
 
 #[tauri::command]
 pub async fn get_spawn_file_patrols(state: State<'_, SpawnsEditorState>) -> TauriResult<Option<Value>> {
+  log::debug!("Getting spawn file patrols");
+
   let lock: MutexGuard<Option<SpawnFile>> = state.file.lock().unwrap();
 
   if lock.is_none() {

@@ -5,5 +5,7 @@ use crate::types::TauriResult;
 
 #[tauri::command]
 pub fn has_spawn_file(state: State<'_, SpawnsEditorState>) -> TauriResult<bool> {
+  log::debug!("Checking spawn file presence");
+
   Ok(state.file.lock().unwrap().is_some())
 }

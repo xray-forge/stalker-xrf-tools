@@ -5,6 +5,7 @@ mod archives_editor;
 mod configs_editor;
 mod exports_editor;
 mod icons_editor;
+mod logging;
 mod spawns_editor;
 mod translations_editor;
 mod types;
@@ -47,9 +48,12 @@ pub fn setup_logger() {
   if let Ok(rust_log) = env::var("RUST_LOG") {
     logger.parse_filters(&rust_log);
   } else {
+    // Debug builds trace every command dispatch; release keeps the info lines the commands already
+    // write, which is what makes a user's log useful in a bug report. At the previous warn/error
+    // levels none of them were ever emitted, so the logging in the commands did nothing at all.
     match cfg!(debug_assertions) {
-      true => logger.filter_level(LevelFilter::Warn),
-      false => logger.filter_level(LevelFilter::Error),
+      true => logger.filter_level(LevelFilter::Debug),
+      false => logger.filter_level(LevelFilter::Info),
     };
   }
 

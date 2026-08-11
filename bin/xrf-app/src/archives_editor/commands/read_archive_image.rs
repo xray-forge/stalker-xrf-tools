@@ -26,6 +26,8 @@ pub struct ArchiveImagePreview {
 /// of the archive, so compression is invisible by the time there is an image to decode.
 #[tauri::command]
 pub async fn read_archive_image(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<Value> {
+  log::info!("Reading archive image: {}", path);
+
   let lock: MutexGuard<Option<ArchiveProject>> = state
     .project
     .lock()

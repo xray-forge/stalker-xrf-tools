@@ -29,13 +29,16 @@ impl IconsEditorPlugin {
             .unwrap()
         })
       })
-      .invoke_handler(tauri::generate_handler![
-        crate::icons_editor::commands::close_equipment_sprite::close_equipment_sprite,
-        crate::icons_editor::commands::get_equipment_sprite::get_equipment_sprite,
-        crate::icons_editor::commands::open_equipment_sprite::open_equipment_sprite,
-        crate::icons_editor::commands::reopen_equipment_sprite::reopen_equipment_sprite,
-        crate::icons_editor::commands::pack_equipment::pack_equipment,
-      ])
+      .invoke_handler(crate::logging::warn_on_unhandled_command(
+        Self::NAME,
+        tauri::generate_handler![
+          crate::icons_editor::commands::close_equipment_sprite::close_equipment_sprite,
+          crate::icons_editor::commands::get_equipment_sprite::get_equipment_sprite,
+          crate::icons_editor::commands::open_equipment_sprite::open_equipment_sprite,
+          crate::icons_editor::commands::reopen_equipment_sprite::reopen_equipment_sprite,
+          crate::icons_editor::commands::pack_equipment::pack_equipment,
+        ],
+      ))
       .build()
   }
 }

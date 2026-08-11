@@ -8,11 +8,14 @@ impl ConfigsEditorPlugin {
 
   pub fn init<R: Runtime>() -> TauriPlugin<R> {
     tauri::plugin::Builder::new(Self::NAME)
-      .invoke_handler(tauri::generate_handler![
-        crate::configs_editor::commands::check_format_configs_path::check_format_configs_path,
-        crate::configs_editor::commands::format_configs_path::format_configs_path,
-        crate::configs_editor::commands::verify_configs_path::verify_configs_path,
-      ])
+      .invoke_handler(crate::logging::warn_on_unhandled_command(
+        Self::NAME,
+        tauri::generate_handler![
+          crate::configs_editor::commands::check_format_configs_path::check_format_configs_path,
+          crate::configs_editor::commands::format_configs_path::format_configs_path,
+          crate::configs_editor::commands::verify_configs_path::verify_configs_path,
+        ],
+      ))
       .build()
   }
 }

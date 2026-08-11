@@ -9,6 +9,8 @@ use crate::types::TauriResult;
 
 #[tauri::command]
 pub async fn get_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult<Option<Value>> {
+  log::debug!("Getting equipment sprite");
+
   let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
   let dds_path_lock: MutexGuard<Option<String>> = state.equipment_sprite_path.lock().unwrap();
   let name_lock: MutexGuard<Option<String>> = state.equipment_sprite_name.lock().unwrap();
