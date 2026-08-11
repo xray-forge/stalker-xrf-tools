@@ -2,8 +2,10 @@ import { Box } from "@mui/material";
 import { ReactElement, useMemo } from "react";
 
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archive-editor/components/editor/archive-editor.styles";
+import { SyntaxContent } from "@/core/components/code/SyntaxContent";
 import { IArchiveFileReadResult } from "@/lib/archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
+import { ESyntaxLanguage, getSyntaxLanguage } from "@/lib/syntax";
 
 interface IArchiveTextPreviewProps extends BaseComponentProps {
   file: IArchiveFileReadResult;
@@ -15,6 +17,8 @@ export function ArchiveTextPreview({ file }: IArchiveTextPreviewProps): ReactEle
 
     return Array.from({ length: count }, (_, index: number) => index + 1).join("\n");
   }, [file.content]);
+
+  const language: ESyntaxLanguage = useMemo(() => getSyntaxLanguage(file.name), [file.name]);
 
   return (
     <Box
@@ -65,7 +69,7 @@ export function ArchiveTextPreview({ file }: IArchiveTextPreviewProps): ReactEle
           whiteSpace: "pre",
         }}
       >
-        {file.content}
+        <SyntaxContent content={file.content} language={language} />
       </Box>
     </Box>
   );
