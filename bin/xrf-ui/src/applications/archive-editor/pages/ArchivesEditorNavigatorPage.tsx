@@ -7,8 +7,18 @@ import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 export function ArchivesEditorNavigatorPage(): ReactElement {
   const items = useMemo(
     () => [
-      { label: "Open", icon: <FolderOpenIcon />, to: "/archives-editor/editor" },
-      { label: "Unpack", icon: <UnarchiveIcon />, to: "/archives-editor/unpacker" },
+      {
+        label: "Open",
+        description: "Browse files stored in game archives",
+        icon: <FolderOpenIcon />,
+        to: "/archives-editor/editor",
+      },
+      {
+        label: "Unpack",
+        description: "Extract game archives into a directory",
+        icon: <UnarchiveIcon />,
+        to: "/archives-editor/unpacker",
+      },
     ],
     []
   );

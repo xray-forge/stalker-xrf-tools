@@ -4,7 +4,17 @@ import { ReactElement, useMemo } from "react";
 import { ToolNavigator } from "@/core/components/navigation/ToolNavigator";
 
 export function TranslationsEditorNavigatorPage(): ReactElement {
-  const items = useMemo(() => [{ label: "Open", icon: <FolderOpenIcon />, to: "/translations-editor/project" }], []);
+  const items = useMemo(
+    () => [
+      {
+        label: "Open",
+        description: "Browse and edit localization tables",
+        icon: <FolderOpenIcon />,
+        to: "/translations-editor/project",
+      },
+    ],
+    []
+  );
 
   return <ToolNavigator items={items} />;
 }
