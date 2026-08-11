@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Injectable, OnProvision } from "@wirestate/core";
+import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Nullable } from "@/core/types/general";
@@ -10,7 +10,7 @@ import {
   IArchivesProject,
 } from "@/lib/archive";
 import { transformError } from "@/lib/error";
-import { EArchivesEditorCommand } from "@/lib/ipc";
+import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 
@@ -54,6 +54,14 @@ export class ArchivesService {
         this.isReady = true;
       });
     }
+  }
+
+  /**
+   * Release the archive project when the editor is navigated away from.
+   */
+  @OnDeactivation()
+  public onDeactivation(): void {
+    releaseEditorProject(EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT);
   }
 
   @BoundAction()

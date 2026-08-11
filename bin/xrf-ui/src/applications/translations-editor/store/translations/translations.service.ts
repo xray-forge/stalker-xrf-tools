@@ -1,9 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Injectable, OnProvision } from "@wirestate/core";
+import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Nullable } from "@/core/types/general";
-import { ETranslationsEditorCommand } from "@/lib/ipc";
+import { ETranslationsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { ITranslationsProjectJson } from "@/lib/translations";
@@ -40,6 +40,14 @@ export class TranslationsService {
         this.isReady = true;
       });
     }
+  }
+
+  /**
+   * Release the translations project when the editor is navigated away from.
+   */
+  @OnDeactivation()
+  public onDeactivation(): void {
+    releaseEditorProject(ETranslationsEditorCommand.CLOSE_TRANSLATIONS_PROJECT);
   }
 
   @BoundAction()

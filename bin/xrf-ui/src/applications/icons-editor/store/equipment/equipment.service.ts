@@ -2,13 +2,13 @@ import { clamp } from "@mui/x-data-grid/internals";
 import { path } from "@tauri-apps/api";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
-import { Injectable, OnProvision } from "@wirestate/core";
+import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Nullable } from "@/core/types/general";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons";
 import { blobToImage } from "@/lib/image";
-import { EIconsEditorCommand } from "@/lib/ipc";
+import { EIconsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 
@@ -68,6 +68,16 @@ export class EquipmentService {
       this.log.info("No existing sprite detected file");
       runInAction(() => (this.isReady = true));
     }
+  }
+
+  /**
+   * Release the sprite when the editor is navigated away from.
+   */
+  @OnDeactivation()
+  public onDeactivation(): void {
+    this.cleanupAssets();
+
+    releaseEditorProject(EIconsEditorCommand.CLOSE_EQUIPMENT_SPRITE);
   }
 
   @BoundAction()

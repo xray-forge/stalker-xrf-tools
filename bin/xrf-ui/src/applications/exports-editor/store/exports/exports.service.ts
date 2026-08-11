@@ -1,23 +1,23 @@
 import { invoke } from "@tauri-apps/api/core";
-import { inject, Injectable, OnProvision } from "@wirestate/core";
+import { inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { TExportsDeclarations } from "@/lib/exports";
-import { EExportsEditorCommand } from "@/lib/ipc";
+import { EExportsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 
 @Injectable()
 export class ExportsService {
+  public readonly log: Logger = new Logger(this.constructor.name);
+
   @Observable()
   public isReady: boolean = false;
 
   @Observable()
   public declarations: Loadable<Nullable<TExportsDeclarations>> = createLoadable(null);
-
-  public readonly log: Logger = new Logger(this.constructor.name);
 
   public constructor(private readonly projectService: ProjectService = inject(ProjectService)) {
     makeObservable(this);
@@ -46,6 +46,14 @@ export class ExportsService {
         runInAction(() => (this.isReady = true));
       }
     }
+  }
+
+  /**
+   * Release the parsed exports when the editor is navigated away from.
+   */
+  @OnDeactivation()
+  public onDeactivation(): void {
+    releaseEditorProject(EExportsEditorCommand.CLOSE_XR_EXPORTS);
   }
 
   @BoundAction()

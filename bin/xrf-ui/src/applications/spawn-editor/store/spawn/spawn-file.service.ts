@@ -1,9 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Injectable, OnProvision } from "@wirestate/core";
+import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { Nullable } from "@/core/types/general";
-import { ESpawnsEditorCommand } from "@/lib/ipc";
+import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { ISpawnFile } from "@/lib/spawn-file";
@@ -40,6 +40,14 @@ export class SpawnFileService {
         this.isReady = true;
       });
     }
+  }
+
+  /**
+   * Release the spawn file when the editor is navigated away from.
+   */
+  @OnDeactivation()
+  public onDeactivation(): void {
+    releaseEditorProject(ESpawnsEditorCommand.CLOSE_SPAWN_FILE);
   }
 
   @BoundAction()
