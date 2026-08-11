@@ -15,7 +15,7 @@
     "test:watch": "jest --watch",
     "preview": "vite preview",
     "preview:prod": "pnpm run build && vite preview",
-    "lint": "eslint . --config cli/lint/eslint.config.mjs --cache --cache-location target/eslint/cache.json --cache-strategy content",
+    "lint": "eslint . --config cli/lint/eslint.config.mjs --max-warnings 0 --cache --cache-location target/eslint/cache.json --cache-strategy content",
     "format": "prettier --write \"**/*.(js|ts|tsx|md)\" && pnpm run lint --fix"
   },
   "dependencies": {

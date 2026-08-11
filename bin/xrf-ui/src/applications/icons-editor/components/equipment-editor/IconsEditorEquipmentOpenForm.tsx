@@ -1,11 +1,12 @@
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useEffect } from "react";
+import { ReactElement, useCallback } from "react";
 
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { Logger, useLogger } from "@/lib/logging";
+import { useMountEffect } from "@/lib/react";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf-path";
 
 export function IconsEditorEquipmentOpenForm(): ReactElement {
@@ -34,7 +35,8 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
     }
   }, [spritePath, systemLtxPath, equipmentService, log]);
 
-  useEffect(() => {
+  // Prefills from the project once: after mount these fields belong to whoever is typing in them.
+  useMountEffect(() => {
     if (projectService.xrfProjectPath) {
       getPathIfExists(getProjectEquipmentDDSPath(projectService.xrfProjectPath)).then((equipmentPath) => {
         setSpritePath(equipmentPath);
@@ -44,7 +46,7 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
         setSystemLtxPath(ltxPath);
       });
     }
-  }, []);
+  });
 
   return (
     <PickerForm

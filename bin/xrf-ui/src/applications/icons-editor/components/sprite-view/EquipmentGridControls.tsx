@@ -26,7 +26,7 @@ export function EquipmentGridControls({
 
   const onIncreaseGridSize = useCallback(() => {
     onSetGridSize(gridSize + 5);
-  }, [gridSize]);
+  }, [gridSize, onSetGridSize]);
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", position: "absolute", right: 4, top: 4 }}>

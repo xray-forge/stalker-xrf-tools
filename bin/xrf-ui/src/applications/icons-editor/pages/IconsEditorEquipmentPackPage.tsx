@@ -1,5 +1,5 @@
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { ReactElement, useCallback, useState } from "react";
 
 import { EquipmentPackResult } from "@/applications/icons-editor/components/equipment-pack/EquipmentPackResult";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
@@ -10,6 +10,7 @@ import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { IPackEquipmentResult } from "@/lib/icons";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
+import { useMountEffect } from "@/lib/react";
 import {
   getPathIfExists,
   getProjectEquipmentDDSPath,
@@ -68,7 +69,8 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
     }
   }, [inputIconsPath, outputSpritePath, systemLtxPath, equipmentService, log]);
 
-  useEffect(() => {
+  // Prefills from the project once: after mount these fields belong to whoever is typing in them.
+  useMountEffect(() => {
     if (projectService.xrfProjectPath) {
       getProjectEquipmentDDSPath(projectService.xrfProjectPath).then((outputPath) => {
         setOutputSpritePath(outputPath);
@@ -82,7 +84,7 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
         setSystemLtxPath(ltxPath);
       });
     }
-  }, []);
+  });
 
   return (
     <PickerForm
