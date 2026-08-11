@@ -1,11 +1,8 @@
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
-use std::path::PathBuf;
-
 use xray_error::{XRayError, XRayResult};
 
 use crate::ArchiveProject;
-use crate::project::archive_project_constants::{ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE};
 use crate::project::archive_project_read_result::ProjectReadResult;
 
 impl ArchiveProject {
@@ -13,7 +10,7 @@ impl ArchiveProject {
   pub fn read_file_as_string(&self, filename: &str) -> XRayResult<ProjectReadResult> {
     log::info!("Trying to read file from archive: {}", filename);
 
-    if !self.can_read_file(filename) {
+    if !self.read_policy.supports_file(filename) {
       return Err(XRayError::new_read_error(format!(
         "File '{}' cannot be read, file extension is not allowed to be read",
         filename
@@ -26,12 +23,14 @@ impl ArchiveProject {
         filename
       ))),
       Some(file_descriptor) => {
-        if file_descriptor.size_real > ALLOWED_PROJECT_READ_SIZE {
+        if file_descriptor.size_real > self.read_policy.maximum_size {
           return Err(XRayError::new_read_error(format!(
             "File '{}' is too big to be read - {}, {} is maximum allowed",
-            filename, file_descriptor.size_real, ALLOWED_PROJECT_READ_SIZE
+            filename, file_descriptor.size_real, self.read_policy.maximum_size
           )));
-        } else if file_descriptor.size_real != file_descriptor.size_compressed {
+        } else if !self.read_policy.supports_compressed_files
+          && file_descriptor.size_real != file_descriptor.size_compressed
+        {
           return Err(XRayError::new_read_error(format!(
             "File '{}' is compressed, reading compressed files is not supported yet",
             filename
@@ -54,17 +53,5 @@ impl ArchiveProject {
         ))
       }
     }
-  }
-
-  pub fn can_read_file(&self, filename: &str) -> bool {
-    if let Some(extension) = PathBuf::from(filename).extension() {
-      for allowed in ALLOWED_PROJECT_READ_EXTENSIONS {
-        if (*allowed).eq(extension) {
-          return true;
-        }
-      }
-    }
-
-    false
   }
 }
