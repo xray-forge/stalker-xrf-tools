@@ -1,22 +1,23 @@
 import { default as Inventory2Icon } from "@mui/icons-material/Inventory2";
-import { Alert, Box, Typography } from "@mui/material";
+import { IconButton, Tooltip, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useMemo, useState } from "react";
+import { ReactElement, useCallback, useState } from "react";
 
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
-import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
 import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 
-export function EquipmentSpriteEditorMenu(): ReactElement {
-  const log: Logger = useLogger("equipment-editor-menu");
+/**
+ * Toolbar command that rebuilds the open sprite from its unpacked icons.
+ */
+export function EquipmentRepackAction(): ReactElement {
+  const log: Logger = useLogger("equipment-repack");
 
   const equipmentService: EquipmentService = useInjection(EquipmentService);
 
   const [isConfirmOpen, setConfirmOpen] = useState<boolean>(false);
 
-  const error: Nullable<Error> = equipmentService.spriteImage.error;
   const isLoading: boolean = equipmentService.spriteImage.isLoading;
   const repackSourcePath: Nullable<string> = equipmentService.repackSourcePath;
   const spritePath: Nullable<string> = equipmentService.spriteImage.value?.path ?? null;
@@ -27,43 +28,33 @@ export function EquipmentSpriteEditorMenu(): ReactElement {
     try {
       await equipmentService.repackAndOpenProject();
     } catch (error) {
+      // Already published as the sprite failure, which the editor renders. Logged here for the stack.
       log.error("Failed to repack and reopen DDS:", error);
     }
   }, [log, equipmentService]);
 
-  const actions: Array<IEditorSideMenuItem> = useMemo(
-    () => [
-      {
-        label: "Repack sprite",
-        icon: <Inventory2Icon />,
-        description: repackSourcePath ? "Rebuild from unpacked icons" : "No unpacked icons beside the sprite",
-        isDisabled: isLoading || !repackSourcePath,
-        onClick: () => setConfirmOpen(true),
-      },
-    ],
-    [isLoading, repackSourcePath]
-  );
+  const onOpenConfirmation = useCallback(() => setConfirmOpen(true), []);
 
-  const onDeclineConfirmation = useCallback(() => {
-    setConfirmOpen(false);
-  }, []);
+  const onDeclineConfirmation = useCallback(() => setConfirmOpen(false), []);
 
   return (
     <>
-      <EditorSideMenu
-        actions={actions}
-        footer={
-          error ? (
-            <Box sx={{ padding: 1 }}>
-              <Alert severity={"error"} variant={"outlined"} onClose={equipmentService.clearSpriteError}>
-                <Typography variant={"caption"} sx={{ wordBreak: "break-word" }}>
-                  {String(error)}
-                </Typography>
-              </Alert>
-            </Box>
-          ) : null
-        }
-      />
+      <Tooltip
+        describeChild
+        title={repackSourcePath ? "Rebuild the sprite from its unpacked icons" : "No unpacked icons beside the sprite"}
+      >
+        <span>
+          <IconButton
+            aria-label={"Repack sprite"}
+            color={"inherit"}
+            size={"small"}
+            disabled={isLoading || !repackSourcePath}
+            onClick={onOpenConfirmation}
+          >
+            <Inventory2Icon fontSize={"small"} />
+          </IconButton>
+        </span>
+      </Tooltip>
 
       <ConfirmDialog
         isOpen={isConfirmOpen}

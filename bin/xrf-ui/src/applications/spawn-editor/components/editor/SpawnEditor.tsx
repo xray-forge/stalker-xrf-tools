@@ -7,6 +7,7 @@ import { SpawnEditorArtefacts } from "@/applications/spawn-editor/components/edi
 import { SpawnEditorGraphs } from "@/applications/spawn-editor/components/editor/chunks/graph/SpawnEditorGraphs";
 import { SpawnEditorHeader } from "@/applications/spawn-editor/components/editor/chunks/header/SpawnEditorHeader";
 import { SpawnEditorPatrols } from "@/applications/spawn-editor/components/editor/chunks/patrol/SpawnEditorPatrols";
+import { SpawnEditorActions } from "@/applications/spawn-editor/components/editor/SpawnEditorActions";
 import { SpawnEditorMenu } from "@/applications/spawn-editor/components/editor/SpawnEditorMenu";
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
@@ -31,7 +32,10 @@ export function SpawnEditor(): ReactElement {
   }, [navigate, spawnFileService]);
 
   return (
-    <EditorLayout toolbar={<EditorToolbar onBack={onClose} />} menu={<SpawnEditorMenu />}>
+    <EditorLayout
+      toolbar={<EditorToolbar actions={<SpawnEditorActions />} onBack={onClose} />}
+      menu={<SpawnEditorMenu />}
+    >
       <Routes>
         <Route path={"/header"} element={<SpawnEditorHeader />} />
         <Route path={"/alife"} element={<SpawnEditorAlife />} />

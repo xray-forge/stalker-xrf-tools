@@ -3,7 +3,7 @@ import { RenderResult, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Injectable } from "@wirestate/core";
 
-import { EquipmentSpriteEditorMenu } from "@/applications/icons-editor/components/equipment-editor/EquipmentSpriteEditorMenu";
+import { EquipmentRepackAction } from "@/applications/icons-editor/components/equipment-editor/EquipmentRepackAction";
 import { EquipmentService, IEquipmentPngDescriptor } from "@/applications/icons-editor/store/equipment";
 import { Nullable } from "@/core/types/general";
 import { renderWithProviders } from "@/fixtures/render";
@@ -44,27 +44,29 @@ class TestEquipmentService extends EquipmentService {
   }
 }
 
-function renderMenu(repackSourcePath: Nullable<string>): RenderResult {
+function renderAction(repackSourcePath: Nullable<string>): RenderResult {
   seed.repackSourcePath = repackSourcePath;
 
-  return renderWithProviders(<EquipmentSpriteEditorMenu />, {
+  return renderWithProviders(<EquipmentRepackAction />, {
     bindings: [{ token: EquipmentService, type: "Instance", value: TestEquipmentService }],
   });
 }
 
-describe("EquipmentSpriteEditorMenu", () => {
+describe("EquipmentRepackAction", () => {
   it("withholds repacking when there is nothing to rebuild from", () => {
-    const { getByRole } = renderMenu(null);
+    const { getByRole, getByTitle } = renderAction(null);
 
     // Previously the command was offered, then failed after the click, in the console.
-    expect(getByRole("button", { name: /Repack sprite/ })).toHaveAttribute("aria-disabled", "true");
-    expect(getByRole("button", { name: /Repack sprite/ })).toHaveTextContent("No unpacked icons beside the sprite");
+    expect(getByRole("button", { name: /Repack/ })).toBeDisabled();
+    // The reason moved into the tooltip when the command became a toolbar button, so it still has to
+    // be reachable rather than leaving a dead control with no explanation.
+    expect(getByTitle("No unpacked icons beside the sprite")).toBeInTheDocument();
   });
 
   it("names both paths before overwriting anything", async () => {
-    const { getByRole, findByText } = renderMenu("C:\\game\\equipment");
+    const { getByRole, findByText } = renderAction("C:\\game\\equipment");
 
-    await userEvent.click(getByRole("button", { name: /Repack sprite/ }));
+    await userEvent.click(getByRole("button", { name: /Repack/ }));
 
     // The dialog has to say what is read and what is destroyed, not just that something will happen.
     expect(await findByText("C:\\game\\equipment")).toBeInTheDocument();
@@ -73,9 +75,9 @@ describe("EquipmentSpriteEditorMenu", () => {
   });
 
   it("does not repack when the confirmation is dismissed", async () => {
-    const { getByRole, queryByRole } = renderMenu("C:\\game\\equipment");
+    const { getByRole, queryByRole } = renderAction("C:\\game\\equipment");
 
-    await userEvent.click(getByRole("button", { name: /Repack sprite/ }));
+    await userEvent.click(getByRole("button", { name: /Repack/ }));
     await userEvent.click(getByRole("button", { name: "Cancel" }));
 
     // The dialog leaves on a transition, so its absence has to be waited for rather than asserted

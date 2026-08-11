@@ -1,11 +1,11 @@
 import { default as RefreshIcon } from "@mui/icons-material/Refresh";
-import { IconButton, Tooltip } from "@mui/material";
+import { Alert, IconButton, Tooltip, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { format } from "date-fns";
 import { ReactElement, useCallback, useEffect } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { EquipmentSpriteEditorMenu } from "@/applications/icons-editor/components/equipment-editor/EquipmentSpriteEditorMenu";
+import { EquipmentRepackAction } from "@/applications/icons-editor/components/equipment-editor/EquipmentRepackAction";
 import { EquipmentSpriteEditorWorkspace } from "@/applications/icons-editor/components/equipment-editor/EquipmentSpriteEditorWorkspace";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
@@ -25,6 +25,7 @@ export function EquipmentSpriteEditor(): ReactElement {
 
   const isLoading: boolean = equipmentService.spriteImage.isLoading;
   const repackedAt: Nullable<number> = equipmentService.repackedAt;
+  const error: Nullable<Error> = equipmentService.spriteImage.error;
 
   const onReload = useCallback(async () => {
     try {
@@ -73,19 +74,30 @@ export function EquipmentSpriteEditor(): ReactElement {
           subtitle={spriteImage?.path}
           isBackDisabled={isLoading}
           actions={
-            <Tooltip describeChild title={"Reload sprite (F5)"}>
-              <span>
-                <IconButton aria-label={"Reload sprite"} color={"inherit"} disabled={isLoading} onClick={onReload}>
-                  <RefreshIcon fontSize={"small"} />
-                </IconButton>
-              </span>
-            </Tooltip>
+            <>
+              <EquipmentRepackAction />
+
+              <Tooltip describeChild title={"Reload sprite (F5)"}>
+                <span>
+                  <IconButton aria-label={"Reload sprite"} color={"inherit"} disabled={isLoading} onClick={onReload}>
+                    <RefreshIcon fontSize={"small"} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </>
           }
           onBack={onClose}
         />
       }
-      menu={<EquipmentSpriteEditorMenu />}
     >
+      {error ? (
+        <Alert severity={"error"} variant={"outlined"} onClose={equipmentService.clearSpriteError}>
+          <Typography variant={"caption"} sx={{ wordBreak: "break-word" }}>
+            {String(error)}
+          </Typography>
+        </Alert>
+      ) : null}
+
       <EquipmentSpriteEditorWorkspace />
     </EditorLayout>
   );

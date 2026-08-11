@@ -41,12 +41,16 @@ describe("SpawnEditor", () => {
     }
   });
 
-  it("keeps file actions in the menu and leaving in the toolbar", async () => {
-    const { findByText, getByLabelText, getByText, queryByText } = renderEditor();
+  it("keeps navigation in the menu and commands on the toolbar", async () => {
+    const { findByRole, getByLabelText, getByRole, getByText, queryByText } = renderEditor();
 
-    expect(await findByText("Save")).toBeInTheDocument();
-    expect(getByText("Export")).toBeInTheDocument();
-    // Close moved onto the toolbar's back control, so it must no longer appear as a menu entry.
+    // Commands that act on the open file sit in the toolbar; the menu is only for moving between
+    // chunks. Splitting them by kind is what makes either half predictable to look in.
+    expect(await findByRole("button", { name: /Save/ })).toBeInTheDocument();
+    expect(getByRole("button", { name: /Export/ })).toBeInTheDocument();
+    expect(getByText("Alife")).toBeInTheDocument();
+
+    // Close moved onto the toolbar back control, so it must no longer appear as a menu entry.
     expect(queryByText("Close")).not.toBeInTheDocument();
     expect(getByLabelText("Close and go back")).toBeInTheDocument();
   });

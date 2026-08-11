@@ -1,9 +1,8 @@
-import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box } from "@mui/material";
 import { RichTreeView, TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
 import { ReactElement, useMemo } from "react";
 
-import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
+import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 
 /**
  * Left side panel listing visuals available in a gamedata or resources tree.
@@ -44,13 +43,8 @@ export function VisualProjectTree(): ReactElement {
     []
   );
 
-  const actions: Array<IEditorSideMenuItem> = useMemo(
-    () => [{ label: "Open project", description: "Needs backend", icon: <FolderOpenIcon />, isDisabled: true }],
-    []
-  );
-
   return (
-    <EditorSideMenu actions={actions}>
+    <EditorSideMenu>
       <Box sx={{ padding: 1 }}>
         <RichTreeView items={items} />
       </Box>
