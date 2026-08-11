@@ -10,6 +10,7 @@ use xray_error::{XRayError, XRayResult};
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::archive::reader::ArchiveReader;
+use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
 
 // todo: Add reading from fsgame.ltx file.
 #[derive(Serialize)]
@@ -17,6 +18,7 @@ use crate::archive::reader::ArchiveReader;
 pub struct ArchiveProject {
   pub archives: Vec<ArchiveDescriptor>,
   pub files: HashMap<String, ArchiveFileDescriptor>,
+  pub read_policy: ArchiveProjectReadPolicy,
   pub root: PathBuf,
   pub size_real: u64,
 }
@@ -65,6 +67,7 @@ impl ArchiveProject {
     Ok(Self {
       archives,
       files,
+      read_policy: ArchiveProjectReadPolicy::default(),
       root,
       size_real,
     })
