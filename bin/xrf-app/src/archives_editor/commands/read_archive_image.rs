@@ -5,13 +5,10 @@ use serde_json::{Value, json};
 use tauri::State;
 use xray_archive::{ArchiveFileDescriptor, ArchiveProject};
 use xray_texture::dds_bytes_as_png;
-use xray_utils::encode_bytes_to_base64;
+use xray_utils::encode_bytes_to_standard_base64;
 
 use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
-
-/// Largest archived image this will decode, guarding against holding a very large texture in memory.
-const MAXIMUM_IMAGE_SIZE: u32 = 32 * 1024 * 1024;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,9 +40,15 @@ pub async fn read_archive_image(path: &str, state: State<'_, ArchivesEditorState
     .get(path)
     .ok_or_else(|| format!("Failed to read image - '{path}' is not in the archive"))?;
 
-  if descriptor.size_real > MAXIMUM_IMAGE_SIZE {
+  // Both rules come from the project policy, which is the same object the frontend decides with.
+  if !project.read_policy.supports_image(path) {
+    return Err(format!("Failed to read image - '{path}' is not a decodable texture"));
+  }
+
+  if descriptor.size_real > project.read_policy.maximum_image_size {
     return Err(format!(
-      "Failed to read image - '{path}' exceeds the {MAXIMUM_IMAGE_SIZE} byte preview limit"
+      "Failed to read image - '{path}' exceeds the {} byte preview limit",
+      project.read_policy.maximum_image_size
     ));
   }
 
@@ -56,6 +59,6 @@ pub async fn read_archive_image(path: &str, state: State<'_, ArchivesEditorState
     name: descriptor.name.clone(),
     width,
     height,
-    base64: encode_bytes_to_base64(&png),
+    base64: encode_bytes_to_standard_base64(&png),
   }))
 }
