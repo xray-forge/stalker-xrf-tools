@@ -14,12 +14,7 @@ export interface IRenderOptions {
   bindings?: ContainerConfig["bindings"];
 }
 
-/**
- * Render a component inside the same providers the real application mounts it under.
- *
- * `MemoryRouter` rather than `BrowserRouter`: routing is an input to these components, and the route
- * is what `EditorToolbar` and the status bar resolve their content from.
- */
+/** Render a component with the application's test providers. */
 export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] }: IRenderOptions = {}): RenderResult {
   function Wrapper({ children }: { children: ReactNode }): ReactElement {
     return (

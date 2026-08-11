@@ -2,17 +2,7 @@ import { jest } from "@jest/globals";
 
 import { mockAppWindow, mockInvoke } from "@/fixtures/tauri.mocks";
 
-/**
- * Mock the tauri surface, none of which exists under jsdom.
- *
- * Registered centrally rather than per test file: a component that quietly reaches for a plugin would
- * otherwise fail in a way that looks like a render bug. Commands are answered through
- * `setMockInvokeResponses`, so a test only describes the commands it cares about.
- *
- * The `jest.mock` calls live inside a function on purpose. They are not hoisted when invoked from a
- * module, so importing this file has no side effect until a setup file calls it - and the factories are
- * free to close over `mockInvoke`, which hoisted mocks could not do.
- */
+/** Register the Tauri API mocks used by jsdom tests. */
 export function mockTauri(): void {
   jest.mock("@tauri-apps/api/core", () => ({
     invoke: mockInvoke,

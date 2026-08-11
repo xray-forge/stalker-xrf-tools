@@ -1,9 +1,11 @@
 import { IAlifeObjectBase, IPatrol, ISpawnFile, IVector3d } from "@/lib/spawn-file";
 
+/** Create a vector fixture with optional field overrides. */
 export function mockVector3d(overrides: Partial<IVector3d> = {}): IVector3d {
   return { x: 0, y: 0, z: 0, ...overrides };
 }
 
+/** Create an ALife object fixture with optional field overrides. */
 export function mockAlifeObject(overrides: Partial<IAlifeObjectBase> = {}): IAlifeObjectBase {
   return {
     clientDataSize: 0,
@@ -30,6 +32,7 @@ export function mockAlifeObject(overrides: Partial<IAlifeObjectBase> = {}): IAli
   };
 }
 
+/** Create a patrol fixture with optional field overrides. */
 export function mockPatrol(overrides: Partial<IPatrol> = {}): IPatrol {
   return {
     name: "esc_walker_walk",
@@ -54,12 +57,7 @@ export function mockPatrol(overrides: Partial<IPatrol> = {}): IPatrol {
   };
 }
 
-/**
- * A small but structurally complete spawn file.
- *
- * Counts in the header deliberately match the collections below, because editors report them and a
- * fixture that disagrees with itself makes those assertions meaningless.
- */
+/** Create a structurally complete spawn file fixture with optional field overrides. */
 export function mockSpawnFile(overrides: Partial<ISpawnFile> = {}): ISpawnFile {
   return {
     header: {

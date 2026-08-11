@@ -1,13 +1,12 @@
 import { IArchiveDescriptor, IArchiveFileDescriptor, IArchivesProject } from "@/lib/archive";
-import { IExportDescriptor, TExportsDeclarations } from "@/lib/exports";
+import { ICallableExportDescriptor, IExportDescriptor, IExportsProject } from "@/lib/exports";
 import { IEquipmentSectionDescriptor } from "@/lib/icons";
 import { ITranslationsProjectJson } from "@/lib/translations";
 
 import { mockArchiveReadPolicy } from "./archive.mocks";
 
-export function mockArchiveFile(
-  overrides: Partial<IArchiveFileDescriptor> = {}
-): IArchiveFileDescriptor {
+/** Create an archive file fixture with optional field overrides. */
+export function mockArchiveFile(overrides: Partial<IArchiveFileDescriptor> = {}): IArchiveFileDescriptor {
   return {
     crc: 123456,
     destination: "gamedata\\config\\system.ltx",
@@ -21,6 +20,7 @@ export function mockArchiveFile(
   };
 }
 
+/** Create an archive descriptor fixture with optional field overrides. */
 export function mockArchiveDescriptor(overrides: Partial<IArchiveDescriptor> = {}): IArchiveDescriptor {
   return {
     files: {},
@@ -30,6 +30,7 @@ export function mockArchiveDescriptor(overrides: Partial<IArchiveDescriptor> = {
   };
 }
 
+/** Create an archives project fixture with optional field overrides. */
 export function mockArchivesProject(overrides: Partial<IArchivesProject> = {}): IArchivesProject {
   return {
     archives: [mockArchiveDescriptor(), mockArchiveDescriptor({ path: "db\\db1" })],
@@ -52,29 +53,43 @@ export function mockArchivesProject(overrides: Partial<IArchivesProject> = {}): 
   };
 }
 
-export function mockExportDescriptor(overrides: Partial<IExportDescriptor> = {}): IExportDescriptor {
+/** Create a callable export fixture with optional field overrides. */
+export function mockExportDescriptor(overrides: Partial<ICallableExportDescriptor> = {}): ICallableExportDescriptor {
   return {
-    filename: "xr_effects.ts",
+    kind: "callable",
     name: "play_sound",
-    comment: null,
-    parameters: [{ name: "actor", typing: "game_object", comment: null }],
-    typing: null,
-    line: 42,
-    col: 2,
+    description: null,
+    parameters: [{ name: "actor", typing: "game_object", description: null, isOptional: false }],
+    returns: { typing: "void", description: null },
+    source: { path: "xr_effects.ts", line: 42, column: 2 },
     ...overrides,
   };
 }
 
-export function mockExportsDeclarations(overrides: TExportsDeclarations = []): TExportsDeclarations {
+/** Create export declaration fixtures with optional additional declarations. */
+export function mockExportsDeclarations(overrides: Array<IExportDescriptor> = []): Array<IExportDescriptor> {
   return [
-    mockExportDescriptor({ filename: "xr_conditions.ts", name: "xr_conditions.is_wounded" }),
-    mockExportDescriptor({ filename: "dialogs.ts", name: "dialogs.is_friend" }),
-    mockExportDescriptor({ filename: "dialogs.ts", name: "dialogs.has_item" }),
+    mockExportDescriptor({
+      source: { path: "xr_conditions.ts", line: 1, column: 1 },
+      name: "xr_conditions.is_wounded",
+    }),
+    mockExportDescriptor({ source: { path: "dialogs.ts", line: 1, column: 1 }, name: "dialogs.is_friend" }),
+    mockExportDescriptor({ source: { path: "dialogs.ts", line: 1, column: 1 }, name: "dialogs.has_item" }),
     mockExportDescriptor({ name: "xr_effects.play_sound" }),
     ...overrides,
   ];
 }
 
+/** Create an exports project fixture with optional field overrides. */
+export function mockExportsProject(overrides: Partial<IExportsProject> = {}): IExportsProject {
+  return {
+    root: "C:\\projects\\xrf",
+    declarations: mockExportsDeclarations(),
+    ...overrides,
+  };
+}
+
+/** Create a translations project fixture with optional field overrides. */
 export function mockTranslationsProject(overrides: Partial<ITranslationsProjectJson> = {}): ITranslationsProjectJson {
   return {
     "st_dialogs.json": {
@@ -88,6 +103,7 @@ export function mockTranslationsProject(overrides: Partial<ITranslationsProjectJ
   };
 }
 
+/** Create equipment descriptor fixtures. */
 export function mockEquipmentDescriptors(): Array<IEquipmentSectionDescriptor> {
   return [
     { section: "wpn_ak74", w: 2, h: 1, x: 0, y: 0 },

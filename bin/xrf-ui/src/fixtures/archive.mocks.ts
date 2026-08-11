@@ -1,5 +1,6 @@
 import { IArchiveDescriptor, IArchiveFileDescriptor, IArchiveReadPolicy, IArchivesProject } from "@/lib/archive";
 
+/** Create an archive read policy fixture with optional field overrides. */
 export function mockArchiveReadPolicy(overrides: Partial<IArchiveReadPolicy> = {}): IArchiveReadPolicy {
   return {
     extensions: ["ltx", "script", "ps", "ds", "h", "hs", "s", "vs", "cmd", "xml"],
@@ -9,9 +10,8 @@ export function mockArchiveReadPolicy(overrides: Partial<IArchiveReadPolicy> = {
   };
 }
 
-export function mockArchiveFileDescriptor(
-  overrides: Partial<IArchiveFileDescriptor> = {}
-): IArchiveFileDescriptor {
+/** Create an archive file descriptor fixture with optional field overrides. */
+export function mockArchiveFileDescriptor(overrides: Partial<IArchiveFileDescriptor> = {}): IArchiveFileDescriptor {
   return {
     crc: 0x12345678,
     destination: "gamedata",
@@ -25,6 +25,7 @@ export function mockArchiveFileDescriptor(
   };
 }
 
+/** Create an archives project fixture from optional file descriptors. */
 export function mockArchivesProject(files?: Array<IArchiveFileDescriptor>): IArchivesProject {
   const descriptors: Array<IArchiveFileDescriptor> = files ?? [
     mockArchiveFileDescriptor(),

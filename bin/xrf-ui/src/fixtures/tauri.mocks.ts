@@ -12,29 +12,19 @@ export type InvokeMap = Record<string, unknown | InvokeHandler>;
 
 const state: { handlers: InvokeMap } = { handlers: {} };
 
-/**
- * Point the mocked `invoke` at a new set of responses.
- *
- * The browser preview cannot run these editors at all, because `invoke` does not exist outside the
- * tauri runtime and every service fails its provisioning. Driving it from here is what makes those
- * workspaces testable without building the rust application.
- */
+/** Configure responses for mocked Tauri commands. */
 export function setMockInvokeResponses(handlers: InvokeMap): void {
   state.handlers = handlers;
 }
 
+/** Clear all mocked Tauri command responses. */
 export function resetMockInvoke(): void {
   state.handlers = {};
 }
 
 const windowState: { isMaximized: boolean; listeners: Array<() => void> } = { isMaximized: false, listeners: [] };
 
-/**
- * Stand in for the handle `getCurrentWindow` hands back inside a tauri webview.
- *
- * Only the caption's surface is modelled. `onResized` keeps its listeners so a test can assert that the
- * bar follows the window when it is maximized by something other than its own buttons.
- */
+/** Provide the mocked Tauri window used by component tests. */
 export const mockAppWindow = {
   isMaximized: jest.fn(async (): Promise<boolean> => windowState.isMaximized),
   minimize: jest.fn(async (): Promise<void> => undefined),
@@ -49,7 +39,7 @@ export const mockAppWindow = {
   }),
 };
 
-/** Maximize or restore the fake window the way the system would, listeners included. */
+/** Set the mocked window maximized state and notify listeners. */
 export function setMockWindowMaximized(next: boolean): void {
   windowState.isMaximized = next;
 
@@ -58,11 +48,13 @@ export function setMockWindowMaximized(next: boolean): void {
   }
 }
 
+/** Restore the mocked window to its initial state. */
 export function resetMockAppWindow(): void {
   windowState.isMaximized = false;
   windowState.listeners = [];
 }
 
+/** Invoke a configured mocked Tauri command. */
 export const mockInvoke = jest.fn(async (command: string, args?: Record<string, unknown>): Promise<unknown> => {
   const handler: unknown = state.handlers[command];
 
