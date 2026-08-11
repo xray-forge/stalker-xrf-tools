@@ -150,7 +150,6 @@ export default [
         { blankLine: "always", next: ["function", "class"], prev: ["function", "class"] },
         { blankLine: "any", next: ["const", "let", "var"], prev: ["const", "let", "var"] },
       ],
-      quotes: ["error", "double"],
       "react/jsx-curly-brace-presence": [
         "error",
         {
