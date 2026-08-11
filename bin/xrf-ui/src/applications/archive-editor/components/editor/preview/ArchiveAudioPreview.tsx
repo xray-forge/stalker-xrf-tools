@@ -1,6 +1,6 @@
 import { Box, Divider, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { ArchiveFileDetailRow } from "@/applications/archive-editor/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivePreviewError } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewError";
@@ -8,14 +8,18 @@ import { ArchivePreviewState } from "@/applications/archive-editor/components/ed
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
+import { AudioPlayer } from "@/core/components/media/AudioPlayer";
 import { AssetService } from "@/core/store/assets";
 import { Nullable } from "@/core/types/general";
 import { IArchiveAudioPreview, TArchiveContent } from "@/lib/archive";
 import { Loadable } from "@/lib/loadable";
-import { base64ToBlob } from "@/lib/media/base64";
+import { base64ToBytes } from "@/lib/media/base64";
 
 /** One sound is previewed at a time, so its url lives under a fixed key and displaces the last one. */
 const ARCHIVE_AUDIO_ASSET_KEY: string = "archive-audio";
+
+/** Wide enough for a waveform to be readable, narrow enough that the detail rows stay scannable. */
+const ARCHIVE_AUDIO_PREVIEW_WIDTH: number = 640;
 
 /**
  * Plays an archived sound and reports what the engine would read from it.
@@ -29,9 +33,30 @@ export function ArchiveAudioPreview(): ReactElement {
   const content: Loadable<Nullable<TArchiveContent>> = archivesService.content;
   const preview: Nullable<IArchiveAudioPreview> = content.value?.kind === "audio" ? content.value.preview : null;
 
+  // Decoded once and shared: the element streams from the url, the waveform reads the same bytes.
+  const bytes: Nullable<Uint8Array> = useMemo(() => (preview ? base64ToBytes(preview.base64) : null), [preview]);
+
+  const formatChannels = useCallback((channels: number): string => {
+    switch (channels) {
+      case 0:
+        return "-";
+
+      case 1:
+        return "1 (mono)";
+
+      case 2:
+        return "2 (stereo)";
+
+      default:
+        return String(channels);
+    }
+  }, []);
+
   useEffect(() => {
-    setUrl(preview ? assetService.swap(ARCHIVE_AUDIO_ASSET_KEY, base64ToBlob(preview.base64, "audio/ogg")) : null);
-  }, [assetService, preview]);
+    const blob: Nullable<Blob> = bytes ? new Blob([bytes.buffer as ArrayBuffer], { type: "audio/ogg" }) : null;
+
+    setUrl(blob ? assetService.swap(ARCHIVE_AUDIO_ASSET_KEY, blob) : null);
+  }, [assetService, bytes]);
 
   if (content.isLoading) {
     return <DelayedProgress />;
@@ -46,13 +71,22 @@ export function ArchiveAudioPreview(): ReactElement {
   }
 
   return (
-    <CenteredColumn sx={{ padding: 3, gap: 2 }}>
-      <Box component={"audio"} controls={true} src={url} sx={{ width: "100%", maxWidth: 480 }} />
+    <CenteredColumn
+      sx={{
+        padding: 3,
+        gap: 2.5,
+        overflowY: "auto",
+        justifyContent: "safe center",
+      }}
+    >
+      <Box sx={{ flexShrink: 0, width: "100%", maxWidth: ARCHIVE_AUDIO_PREVIEW_WIDTH }}>
+        <AudioPlayer src={url} bytes={bytes} />
+      </Box>
 
-      <Box sx={{ width: "100%", maxWidth: 480 }}>
+      <Box sx={{ flexShrink: 0, width: "100%", maxWidth: ARCHIVE_AUDIO_PREVIEW_WIDTH }}>
         <Typography variant={"subtitle2"}>Stream</Typography>
 
-        <ArchiveFileDetailRow label={"Channels"} value={preview.channels ? String(preview.channels) : "-"} />
+        <ArchiveFileDetailRow label={"Channels"} value={formatChannels(preview.channels)} />
         <ArchiveFileDetailRow label={"Sample rate"} value={preview.sampleRate ? `${preview.sampleRate} Hz` : "-"} />
 
         <Divider sx={{ marginY: 1.5 }} />
@@ -61,10 +95,13 @@ export function ArchiveAudioPreview(): ReactElement {
 
         {preview.parameters ? (
           <>
-            <ArchiveFileDetailRow label={"Min distance"} value={String(preview.parameters.minDistance)} />
-            <ArchiveFileDetailRow label={"Max distance"} value={String(preview.parameters.maxDistance)} />
-            <ArchiveFileDetailRow label={"Base volume"} value={String(preview.parameters.baseVolume)} />
-            <ArchiveFileDetailRow label={"Max AI distance"} value={String(preview.parameters.maxAiDistance)} />
+            <ArchiveFileDetailRow label={"Min distance"} value={`${preview.parameters.minDistance} m`} />
+            <ArchiveFileDetailRow label={"Max distance"} value={`${preview.parameters.maxDistance} m`} />
+            <ArchiveFileDetailRow label={"Max AI distance"} value={`${preview.parameters.maxAiDistance} m`} />
+            <ArchiveFileDetailRow
+              label={"Base volume"}
+              value={`${preview.parameters.baseVolume} (${Math.round(preview.parameters.baseVolume * 100)}%)`}
+            />
             <ArchiveFileDetailRow label={"Game type"} value={String(preview.parameters.gameType)} mono />
           </>
         ) : (
