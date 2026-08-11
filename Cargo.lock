@@ -6968,6 +6968,7 @@ dependencies = [
  "xray-export",
  "xray-ltx",
  "xray-output",
+ "xray-sound",
  "xray-texture",
  "xray-translation",
  "xray-utils",

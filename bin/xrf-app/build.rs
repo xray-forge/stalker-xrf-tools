@@ -21,6 +21,7 @@ fn apply_inline_plugins(attributes: Attributes) -> Attributes {
           "get_archives_project",
           "has_archives_project",
           "open_archives_project",
+          "read_archive_audio",
           "read_archive_file",
           "read_archive_image",
           "unpack_archives_path",

@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io::{Cursor, Read, Seek};
 use std::path::Path;
 
 use ogg::reading::PacketReader;
@@ -28,6 +29,12 @@ impl SoundFile {
     Self::read_from_path_with_strictness(path, false)
   }
 
+  /// Read the headers and X-Ray metadata of a sound held in memory.
+  pub fn read_from_bytes(bytes: &[u8]) -> XRayResult<Self> {
+    read_xray_sound_from(Cursor::new(bytes), false)
+      .map_err(|error| XRayError::new_verify_error(format!("Failed to read sound from memory: {error}")))
+  }
+
   /// Read and fully decode an X-Ray Ogg/Vorbis sound file.
   pub fn read_strictly_from_path<P>(path: P) -> XRayResult<Self>
   where
@@ -50,7 +57,15 @@ impl SoundFile {
 fn read_xray_sound(path: &Path, is_strict: bool) -> Result<SoundFile, String> {
   let file: File = File::open(path).map_err(|error| format!("Could not open sound: {error}"))?;
 
-  let mut reader: PacketReader<File> = PacketReader::new(file);
+  read_xray_sound_from(file, is_strict)
+}
+
+/// Shared by the path and in-memory readers so the two cannot disagree about what a sound file is.
+fn read_xray_sound_from<R>(source: R, is_strict: bool) -> Result<SoundFile, String>
+where
+  R: Read + Seek,
+{
+  let mut reader: PacketReader<R> = PacketReader::new(source);
 
   let headers: VorbisHeaders = read_vorbis_headers(&mut reader)?;
   let (channels, sample_rate): (u16, u32) = parse_identification_packet(&headers.identification)?;

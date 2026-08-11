@@ -2211,10 +2211,10 @@
       "description": "Permission identifier",
       "oneOf": [
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-file`\n- `allow-read-archive-image`\n- `allow-unpack-archives-path`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-audio`\n- `allow-read-archive-file`\n- `allow-read-archive-image`\n- `allow-unpack-archives-path`",
           "type": "string",
           "const": "archives-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-file`\n- `allow-read-archive-image`\n- `allow-unpack-archives-path`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-audio`\n- `allow-read-archive-file`\n- `allow-read-archive-image`\n- `allow-unpack-archives-path`"
         },
         {
           "description": "Enables the close_archives_project command without any pre-configured scope.",
@@ -2251,6 +2251,12 @@
           "type": "string",
           "const": "archives-editor:allow-open-archives-project",
           "markdownDescription": "Enables the open_archives_project command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the read_archive_audio command without any pre-configured scope.",
+          "type": "string",
+          "const": "archives-editor:allow-read-archive-audio",
+          "markdownDescription": "Enables the read_archive_audio command without any pre-configured scope."
         },
         {
           "description": "Enables the read_archive_file command without any pre-configured scope.",
@@ -2305,6 +2311,12 @@
           "type": "string",
           "const": "archives-editor:deny-open-archives-project",
           "markdownDescription": "Denies the open_archives_project command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the read_archive_audio command without any pre-configured scope.",
+          "type": "string",
+          "const": "archives-editor:deny-read-archive-audio",
+          "markdownDescription": "Denies the read_archive_audio command without any pre-configured scope."
         },
         {
           "description": "Denies the read_archive_file command without any pre-configured scope.",

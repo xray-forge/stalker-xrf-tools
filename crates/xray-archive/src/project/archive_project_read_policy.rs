@@ -3,8 +3,8 @@ use std::path::Path;
 use serde::Serialize;
 
 use crate::project::archive_project_constants::{
-  ALLOWED_PROJECT_IMAGE_EXTENSIONS, ALLOWED_PROJECT_IMAGE_SIZE, ALLOWED_PROJECT_READ_EXTENSIONS,
-  ALLOWED_PROJECT_READ_SIZE,
+  ALLOWED_PROJECT_AUDIO_EXTENSIONS, ALLOWED_PROJECT_AUDIO_SIZE, ALLOWED_PROJECT_IMAGE_EXTENSIONS,
+  ALLOWED_PROJECT_IMAGE_SIZE, ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
@@ -15,12 +15,20 @@ pub struct ArchiveProjectReadPolicy {
   /// Extensions decoded into a picture. Compression does not apply: it is undone before decoding.
   pub image_extensions: &'static [&'static str],
   pub maximum_image_size: u32,
+  /// Extensions played by the webview itself, so the backend only has to hand over the bytes.
+  pub audio_extensions: &'static [&'static str],
+  pub maximum_audio_size: u32,
 }
 
 impl ArchiveProjectReadPolicy {
   /// Whether this file is one the backend decodes into a picture rather than reading as text.
   pub fn supports_image(&self, filename: &str) -> bool {
     Self::has_extension(filename, self.image_extensions)
+  }
+
+  /// Whether this file is one the webview can play back directly.
+  pub fn supports_audio(&self, filename: &str) -> bool {
+    Self::has_extension(filename, self.audio_extensions)
   }
 
   pub fn supports_file(&self, filename: &str) -> bool {
@@ -42,6 +50,8 @@ impl Default for ArchiveProjectReadPolicy {
       maximum_size: ALLOWED_PROJECT_READ_SIZE,
       image_extensions: ALLOWED_PROJECT_IMAGE_EXTENSIONS,
       maximum_image_size: ALLOWED_PROJECT_IMAGE_SIZE,
+      audio_extensions: ALLOWED_PROJECT_AUDIO_EXTENSIONS,
+      maximum_audio_size: ALLOWED_PROJECT_AUDIO_SIZE,
     }
   }
 }
@@ -65,5 +75,8 @@ mod tests {
     assert!(policy.supports_image("preview.dds"));
     assert!(policy.supports_image("preview.DDS"));
     assert!(!policy.supports_image("preview.ltx"));
+    assert!(policy.supports_audio("ambient.ogg"));
+    assert!(policy.supports_audio("ambient.OGG"));
+    assert!(!policy.supports_audio("preview.dds"));
   }
 }
