@@ -2,6 +2,8 @@ import { Box } from "@mui/material";
 import { ReactElement, ReactNode, useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+import { ApplicationCrash } from "@/core/components/error/ApplicationCrash";
+import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/components/error/ErrorBoundary";
 import { findApplicationTool } from "@/core/components/shell/application-tools";
 import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
@@ -44,6 +46,8 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
 
   const activeTool: Nullable<IEditorTool> = tools.find((it) => it.id === resolvedToolId) ?? null;
 
+  const onError = useCallback((props: IErrorBoundaryFallbackProps) => <ApplicationCrash {...props} />, []);
+
   const onToggleTool = useCallback(
     (id: string) => {
       const next: string = resolvedToolId === id ? "" : id;
@@ -65,7 +69,11 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
       <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
         <ApplicationRail />
 
-        <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>{children}</Box>
+        <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
+          <ErrorBoundary resetKey={pathname} fallback={onError}>
+            {children}
+          </ErrorBoundary>
+        </Box>
 
         {activeTool ? (
           <Box
