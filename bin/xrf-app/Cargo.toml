@@ -27,6 +27,7 @@ xray-export = { workspace = true }
 xray-ltx = { workspace = true }
 xray-output = { workspace = true }
 xray-texture = { workspace = true }
+xray-utils = { workspace = true }
 xray-translation = { workspace = true }
 
 [features]

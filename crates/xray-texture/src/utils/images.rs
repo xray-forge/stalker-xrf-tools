@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, Cursor, Write};
 use std::path::Path;
 
 use ddsfile::Dds;
@@ -145,6 +145,25 @@ pub fn warn_on_reshaped_ui_dds(output: &OutputOptions, path: &Path, width: u32, 
 
 pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> XRayResult {
   Ok(image.save_with_format(path, ImageFormat::Png)?)
+}
+
+/// Decode a DDS held in memory and re-encode it as PNG.
+///
+/// The path based variant cannot serve callers whose bytes live inside an archive, and writing them to
+/// a temporary file first only to read it back would be doing the same work twice.
+pub fn dds_bytes_as_png(bytes: &[u8]) -> XRayResult<(u32, u32, Vec<u8>)> {
+  let dds: Dds = Dds::read(&mut Cursor::new(bytes))
+    .map_err(|error| XRayError::new_texture_processing_error(format!("Failed to read DDS from memory: {error}.")))?;
+
+  let image: RgbaImage = dds_to_image(&dds)?;
+
+  let mut buffer: Vec<u8> = Vec::new();
+
+  PngEncoder::new(buffer.by_ref())
+    .write_image(image.as_raw(), image.width(), image.height(), ExtendedColorType::Rgba8)
+    .map_err(|error| XRayError::new_texture_processing_error(format!("Failed to encode DDS as PNG: {error}.")))?;
+
+  Ok((image.width(), image.height(), buffer))
 }
 
 pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XRayResult<(RgbaImage, Vec<u8>)> {

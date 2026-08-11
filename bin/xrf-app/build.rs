@@ -22,6 +22,7 @@ fn apply_inline_plugins(attributes: Attributes) -> Attributes {
           "has_archives_project",
           "open_archives_project",
           "read_archive_file",
+          "read_archive_image",
           "unpack_archives_path",
         ])
         .default_permission(DefaultPermissionRule::AllowAllCommands),

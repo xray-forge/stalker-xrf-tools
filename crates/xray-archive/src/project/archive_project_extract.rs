@@ -136,6 +136,48 @@ impl ArchiveProject {
     })
   }
 
+  /// Read one archived file into memory, decompressing it when it is stored compressed.
+  ///
+  /// Separate from `write_file_contents`, which streams uncompressed entries straight to disk without
+  /// ever holding them whole. Callers that need the bytes themselves - previewing an image, say - have
+  /// to accept holding them, so the size guard belongs with them rather than here.
+  pub fn read_file_bytes(&self, name: &str) -> XRayResult<Vec<u8>> {
+    let descriptor: &ArchiveFileDescriptor = self
+      .files
+      .get(name)
+      .ok_or_else(|| XRayError::new_not_found_error(format!("Cannot read '{name}' - no such file in the archive.")))?;
+
+    let mut source: File = File::open(descriptor.source.as_path())?;
+
+    source.seek(SeekFrom::Start(descriptor.offset as u64))?;
+
+    let mut raw: Vec<u8> = vec![0u8; descriptor.size_compressed as usize];
+
+    source.read_exact(raw.as_mut_slice())?;
+
+    if descriptor.size_real == descriptor.size_compressed {
+      return Ok(raw);
+    }
+
+    let decompressed: Vec<u8> = Self::init_lzo()?
+      .decompress_safe(raw.as_slice(), descriptor.size_real as usize)
+      .map_err(|error| {
+        XRayError::new_read_error(format!(
+          "Failed to decompress '{}' from '{}': {error:?}.",
+          descriptor.name,
+          descriptor.source.display()
+        ))
+      })?;
+
+    assert_equal(
+      descriptor.crc,
+      crc32fast::hash(decompressed.as_slice()),
+      "CRCs do not match",
+    )?;
+
+    Ok(decompressed)
+  }
+
   /// Build the decompressor, reporting a failure instead of taking the process down with it.
   pub(crate) fn init_lzo() -> XRayResult<LZO> {
     LZO::init().map_err(|error| XRayError::new_unexpected_error(format!("Failed to initialize LZO: {error:?}.")))

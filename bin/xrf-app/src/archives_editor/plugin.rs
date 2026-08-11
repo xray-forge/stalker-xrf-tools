@@ -23,6 +23,7 @@ impl ArchivesEditorPlugin {
         crate::archives_editor::commands::has_archives_project::has_archives_project,
         crate::archives_editor::commands::open_archives_project::open_archives_project,
         crate::archives_editor::commands::read_archive_file::read_archive_file,
+        crate::archives_editor::commands::read_archive_image::read_archive_image,
         crate::archives_editor::commands::unpack_archives_path::unpack_archives_path,
       ])
       .build()

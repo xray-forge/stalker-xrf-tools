@@ -172,6 +172,48 @@ fn extract_file_writes_to_the_exact_path_it_is_given() {
 }
 
 #[test]
+fn read_file_bytes_returns_the_stored_contents() {
+  let directory: PathBuf = create_temporary_directory("bytes");
+  let project: ArchiveProject = create_project(
+    &directory,
+    &[
+      Entry {
+        name: "configs\\system.ltx",
+        contents: b"[section]",
+      },
+      Entry {
+        name: "textures\\wall.dds",
+        contents: b"\x44\x44\x53\x20not-a-real-dds",
+      },
+    ],
+  );
+
+  // Reads by offset, so the second entry must not bleed into the first.
+  assert_eq!(
+    project.read_file_bytes("configs\\system.ltx").expect("bytes"),
+    b"[section]"
+  );
+  assert_eq!(
+    project.read_file_bytes("textures\\wall.dds").expect("bytes"),
+    b"\x44\x44\x53\x20not-a-real-dds"
+  );
+}
+
+#[test]
+fn read_file_bytes_reports_an_unknown_name() {
+  let directory: PathBuf = create_temporary_directory("bytes-missing");
+  let project: ArchiveProject = create_project(
+    &directory,
+    &[Entry {
+      name: "configs\\system.ltx",
+      contents: b"[section]",
+    }],
+  );
+
+  assert!(project.read_file_bytes("configs\\other.ltx").is_err());
+}
+
+#[test]
 fn extract_folder_reports_a_prefix_that_matches_nothing() {
   let directory: PathBuf = create_temporary_directory("missing");
   let project: ArchiveProject = create_project(

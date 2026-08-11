@@ -10,6 +10,7 @@ pub use image_dds::ImageFormat;
 pub use image_dds::Mipmaps;
 pub use image_dds::image::GenericImage;
 pub use image_dds::image::GenericImageView;
+pub use utils::images::dds_bytes_as_png;
 pub use utils::images::dds_to_image;
 pub use utils::images::fit_image_into_bounds;
 pub use utils::images::open_dds_as_png;
