@@ -36,5 +36,4 @@ describe("groupExports", () => {
       "xr_effects.stop",
     ]);
   });
-
 });

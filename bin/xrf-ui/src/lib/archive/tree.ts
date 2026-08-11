@@ -131,4 +131,3 @@ function sortTree(items: Array<IArchiveTreeItem>): void {
     return first.label.localeCompare(second.label);
   });
 }
-

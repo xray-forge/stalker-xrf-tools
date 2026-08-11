@@ -45,12 +45,7 @@ export function ConfirmDialog({
           {cancelLabel}
         </Button>
 
-        <Button
-          size={"small"}
-          variant={"contained"}
-          color={isDestructive ? "error" : "primary"}
-          onClick={onConfirm}
-        >
+        <Button size={"small"} variant={"contained"} color={isDestructive ? "error" : "primary"} onClick={onConfirm}>
           {confirmLabel}
         </Button>
       </DialogActions>
