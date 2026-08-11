@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { Container } from "@wirestate/core";
 
 import { EquipmentService } from "@/applications/icons-editor/store/equipment/equipment.service";
+import { AssetService } from "@/core/store/assets";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { EIconsEditorCommand } from "@/lib/ipc";
 
@@ -18,7 +19,7 @@ describe("EquipmentService deactivation", () => {
   });
 
   it("does not release on deprovision alone, which strict mode reaches on every mount", async () => {
-    const container: Container = new Container({ bindings: [EquipmentService] });
+    const container: Container = new Container({ bindings: [AssetService, EquipmentService] });
 
     await container.provision();
     container.get(EquipmentService);
@@ -31,7 +32,7 @@ describe("EquipmentService deactivation", () => {
   });
 
   it("releases once the container is actually unbound", async () => {
-    const container: Container = new Container({ bindings: [EquipmentService] });
+    const container: Container = new Container({ bindings: [AssetService, EquipmentService] });
 
     await container.provision();
 
@@ -44,7 +45,7 @@ describe("EquipmentService deactivation", () => {
   });
 
   it("survives a strict mode style remount without releasing", async () => {
-    const container: Container = new Container({ bindings: [EquipmentService] });
+    const container: Container = new Container({ bindings: [AssetService, EquipmentService] });
 
     await container.provision();
 

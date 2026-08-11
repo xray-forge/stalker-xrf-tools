@@ -5,6 +5,7 @@ import { Injectable } from "@wirestate/core";
 
 import { EquipmentRepackAction } from "@/applications/icons-editor/components/equipment-editor/EquipmentRepackAction";
 import { EquipmentService, IEquipmentPngDescriptor } from "@/applications/icons-editor/store/equipment";
+import { AssetService } from "@/core/store/assets";
 import { Nullable } from "@/core/types/general";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
@@ -48,7 +49,7 @@ function renderAction(repackSourcePath: Nullable<string>): RenderResult {
   seed.repackSourcePath = repackSourcePath;
 
   return renderWithProviders(<EquipmentRepackAction />, {
-    bindings: [{ token: EquipmentService, type: "Instance", value: TestEquipmentService }],
+    bindings: [AssetService, { token: EquipmentService, type: "Instance", value: TestEquipmentService }],
   });
 }
 

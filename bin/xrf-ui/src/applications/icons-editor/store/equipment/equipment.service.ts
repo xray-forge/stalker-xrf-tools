@@ -2,12 +2,13 @@ import { clamp } from "@mui/x-data-grid/internals";
 import { path } from "@tauri-apps/api";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
-import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import { inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { AssetService } from "@/core/store/assets";
 import { Nullable } from "@/core/types/general";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons";
-import { blobToImage } from "@/lib/image";
+import { urlToImage } from "@/lib/image";
 import { EIconsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
@@ -20,6 +21,9 @@ export interface IEquipmentPngDescriptor {
   blob: Blob;
   image: HTMLImageElement;
 }
+
+/** One sprite is open at a time, so its url lives under a fixed key rather than being tracked by hand. */
+const SPRITE_ASSET_KEY: string = "equipment-sprite";
 
 @Injectable()
 export class EquipmentService {
@@ -47,7 +51,7 @@ export class EquipmentService {
   @Observable()
   public repackedAt: Nullable<number> = null;
 
-  public constructor() {
+  public constructor(private readonly assetService: AssetService = inject(AssetService)) {
     makeObservable(this);
   }
 
@@ -135,10 +139,6 @@ export class EquipmentService {
       this.log.info("Equipment project reopened:", response);
 
       const spriteImage: IEquipmentPngDescriptor = await this.spriteFromResponse(response);
-
-      // Revoked only once the replacement exists. Revoking first leaves the viewer pointed at a dead
-      // url for as long as building the new one takes, and permanently if it throws.
-      this.cleanupAssets();
 
       runInAction(() => (this.spriteImage = createLoadable(spriteImage)));
 
@@ -260,15 +260,13 @@ export class EquipmentService {
       blob,
       ltxPath: response.systemLtxPath,
       descriptors: response.equipmentDescriptors,
-      image: await blobToImage(blob),
+      image: await urlToImage(this.assetService.swap(SPRITE_ASSET_KEY, blob)),
       name: response.name,
       path: response.path,
     };
   }
 
   public cleanupAssets(): void {
-    if (this.spriteImage.value) {
-      URL.revokeObjectURL(this.spriteImage.value.image.src);
-    }
+    this.assetService.releaseKey(SPRITE_ASSET_KEY);
   }
 }

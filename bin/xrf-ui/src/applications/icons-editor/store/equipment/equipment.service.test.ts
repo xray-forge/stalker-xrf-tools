@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { EquipmentService } from "@/applications/icons-editor/store/equipment/equipment.service";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { EIconsEditorCommand } from "@/lib/ipc";
 
 describe("EquipmentService", () => {
@@ -10,7 +11,7 @@ describe("EquipmentService", () => {
   });
 
   it("reports a failed reload instead of staying loading forever", async () => {
-    const service: EquipmentService = new EquipmentService();
+    const { service } = mockInjectedService(EquipmentService);
 
     setMockInvokeResponses({
       [EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE]: () => {
@@ -27,7 +28,7 @@ describe("EquipmentService", () => {
   });
 
   it("refuses to repack when nothing has been unpacked beside the sprite", async () => {
-    const service: EquipmentService = new EquipmentService();
+    const { service } = mockInjectedService(EquipmentService);
 
     service.spriteImage = service.spriteImage.asUpdated({
       ltxPath: "C:\\game\\system.ltx",
@@ -46,7 +47,7 @@ describe("EquipmentService", () => {
   });
 
   it("keeps a failed repack reported rather than silently returning to ready", async () => {
-    const service: EquipmentService = new EquipmentService();
+    const { service } = mockInjectedService(EquipmentService);
 
     service.spriteImage = service.spriteImage.asUpdated({
       ltxPath: "C:\\game\\system.ltx",
@@ -73,7 +74,7 @@ describe("EquipmentService", () => {
   });
 
   it("clears a reported failure without discarding the sprite behind it", () => {
-    const service: EquipmentService = new EquipmentService();
+    const { service } = mockInjectedService(EquipmentService);
 
     service.spriteImage = service.spriteImage.asFailed(new Error("boom"), null);
 

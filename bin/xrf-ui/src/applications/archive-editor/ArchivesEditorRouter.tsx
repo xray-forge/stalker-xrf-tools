@@ -8,10 +8,11 @@ import { ArchivesEditorPage } from "@/applications/archive-editor/pages/Archives
 import { ArchivesEditorUnpackerPage } from "@/applications/archive-editor/pages/ArchivesEditorUnpackerPage";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { NavigationError } from "@/core/components/NavigationError";
+import { AssetService } from "@/core/store/assets";
 
 export function ArchivesEditorRouter(): ReactElement {
   const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ArchivesService] }), [parent]);
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [AssetService, ArchivesService] }), [parent]);
 
   return (
     <ContainerProvider config={config}>

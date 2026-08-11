@@ -12,10 +12,11 @@ import { IconsEditorEquipmentUnpackPage } from "@/applications/icons-editor/page
 import { IconsEditorNavigatorPage } from "@/applications/icons-editor/pages/IconsEditorNavigatorPage";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { NavigationError } from "@/core/components/NavigationError";
+import { AssetService } from "@/core/store/assets";
 
 export function IconsEditorRouter(): ReactElement {
   const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [EquipmentService] }), [parent]);
+  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [AssetService, EquipmentService] }), [parent]);
 
   return (
     <ContainerProvider config={config}>
