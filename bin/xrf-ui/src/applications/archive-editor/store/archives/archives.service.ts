@@ -30,6 +30,10 @@ export class ArchivesService {
   @Observable()
   public fileDescriptor: Nullable<IArchiveFileDescriptor> = null;
 
+  /** Outcome of the last single file extraction, holding the path it was written to when it worked. */
+  @Observable()
+  public singleFileExtraction: Loadable<Nullable<string>> = createLoadable(null);
+
   private fileRequestId: number = 0;
 
   public constructor() {
@@ -130,6 +134,34 @@ export class ArchivesService {
     }
 
     await this.readArchiveFile(descriptor);
+  }
+
+  /**
+   * Write one archived file to a path of the user's choosing.
+   */
+  @BoundAction()
+  public async extractArchiveFile(descriptor: IArchiveFileDescriptor, destination: string): Promise<void> {
+    this.log.info("Extracting archive file:", descriptor.name, destination);
+
+    try {
+      this.singleFileExtraction = createLoadable(null, true);
+
+      await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE, { name: descriptor.name, destination });
+
+      runInAction(() => (this.singleFileExtraction = createLoadable(destination)));
+    } catch (error) {
+      this.log.error("Failed to extract archive file:", error);
+
+      runInAction(() => (this.singleFileExtraction = createLoadable(null, false, error as Error)));
+
+      throw error;
+    }
+  }
+
+  /** Dismiss whatever the last extraction reported, success or failure. */
+  @BoundAction()
+  public clearExtraction(): void {
+    this.singleFileExtraction = createLoadable(null);
   }
 
   @BoundAction()

@@ -42,7 +42,13 @@ export function SpawnEditorActions(): ReactElement {
     <>
       <Tooltip describeChild title={"Write the open spawn file to a chosen path"}>
         <span>
-          <IconButton color={"inherit"} size={"small"} disabled={isLoading} onClick={onSave}>
+          <IconButton
+            aria-label={"Save spawn file"}
+            color={"inherit"}
+            size={"small"}
+            disabled={isLoading}
+            onClick={onSave}
+          >
             <SaveIcon fontSize={"small"} />
           </IconButton>
         </span>
@@ -50,7 +56,13 @@ export function SpawnEditorActions(): ReactElement {
 
       <Tooltip describeChild title={"Export the spawn file into a directory"}>
         <span>
-          <IconButton color={"inherit"} size={"small"} disabled={isLoading} onClick={onExport}>
+          <IconButton
+            aria-label={"Export spawn file"}
+            color={"inherit"}
+            size={"small"}
+            disabled={isLoading}
+            onClick={onExport}
+          >
             <ImportExportIcon fontSize={"small"} />
           </IconButton>
         </span>

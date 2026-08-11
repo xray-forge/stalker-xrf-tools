@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archive-editor/components/editor/archive-editor.styles";
+import { ArchiveFileExtractAction } from "@/applications/archive-editor/components/editor/preview/ArchiveFileExtractAction";
 import { IArchiveFileDescriptor } from "@/lib/archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
@@ -34,6 +35,8 @@ export function ArchiveFileHeader({ descriptor }: IArchiveFileHeaderProps): Reac
       <Typography noWrap variant={"caption"} sx={{ color: "text.secondary" }}>
         {formatBytes(descriptor.sizeReal)}
       </Typography>
+
+      <ArchiveFileExtractAction descriptor={descriptor} />
     </Box>
   );
 }
