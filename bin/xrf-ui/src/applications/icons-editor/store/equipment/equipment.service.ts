@@ -79,8 +79,7 @@ export class EquipmentService {
    */
   @OnDeactivation()
   public onDeactivation(): void {
-    this.cleanupAssets();
-
+    this.assetService.releaseKey(SPRITE_ASSET_KEY);
     releaseEditorProject(EIconsEditorCommand.CLOSE_EQUIPMENT_SPRITE);
   }
 
@@ -105,7 +104,7 @@ export class EquipmentService {
     this.log.info("Opening equipment project:", equipmentDdsPath, systemLtxPath);
 
     try {
-      this.cleanupAssets();
+      this.assetService.releaseKey(SPRITE_ASSET_KEY);
       this.spriteImage = createLoadable(null, true);
 
       const response: IEquipmentResponse = await invoke(EIconsEditorCommand.OPEN_EQUIPMENT_SPRITE, {
@@ -217,7 +216,7 @@ export class EquipmentService {
 
     try {
       this.spriteImage = this.spriteImage.asLoading();
-      this.cleanupAssets();
+      this.assetService.releaseKey(SPRITE_ASSET_KEY);
 
       await invoke(EIconsEditorCommand.CLOSE_EQUIPMENT_SPRITE);
 
@@ -264,9 +263,5 @@ export class EquipmentService {
       name: response.name,
       path: response.path,
     };
-  }
-
-  public cleanupAssets(): void {
-    this.assetService.releaseKey(SPRITE_ASSET_KEY);
   }
 }
