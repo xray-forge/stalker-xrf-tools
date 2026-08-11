@@ -25,7 +25,7 @@ export function ArchiveTextPreview({ file }: IArchiveTextPreviewProps): ReactEle
         minWidth: 0,
         minHeight: 0,
         overflow: "auto",
-        backgroundColor: "background.paper",
+        backgroundColor: "background.default",
       }}
     >
       <Box
