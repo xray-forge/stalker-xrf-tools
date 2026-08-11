@@ -287,4 +287,23 @@ describe("opened archives editor", () => {
 
     save.mockRestore();
   });
+
+  it("refuses a second selection while a read is still in flight", async () => {
+    setMockInvokeResponses({
+      [EArchivesEditorCommand.GET_ARCHIVES_PROJECT]: PROJECT,
+      // Never settles, so the first selection stays in flight for the length of the assertion.
+      [EArchivesEditorCommand.READ_ARCHIVE_FILE]: () => new Promise(() => {}),
+    });
+
+    const { findByText, getByText } = renderEditor();
+
+    await userEvent.click(await findByText("readme.ltx"));
+
+    // A texture, so it would reach the backend on its own decode command rather than being ignored
+    // as an unreadable type. Letting it through would leave the tree pointing at one file while the
+    // content area still belongs to another.
+    await userEvent.click(getByText("texture.dds"));
+
+    expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, expect.anything());
+  });
 });

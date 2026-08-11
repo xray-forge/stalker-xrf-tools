@@ -29,6 +29,14 @@ export function ArchivesMenu(): ReactElement {
 
   const items: Array<IArchiveTreeItem> = useMemo(() => parseTree(files, "\\"), [files]);
 
+  // Selecting again while a read or a write is in flight starts work that the previous one will
+  // outlive, and the tree would show a selection whose content is still the old one.
+  const isBusy: boolean =
+    archivesService.file.isLoading ||
+    archivesService.image.isLoading ||
+    archivesService.singleFileExtraction.isLoading ||
+    archivesService.folderExtraction.isLoading;
+
   const onSelectDescriptor = useCallback(
     (descriptor: IArchiveFileDescriptor) => {
       void archivesService.selectArchiveFile(descriptor);
@@ -64,17 +72,25 @@ export function ArchivesMenu(): ReactElement {
 
   const onSelectPath = useCallback(
     (path: string) => {
+      if (isBusy) {
+        return;
+      }
+
       const descriptor: Optional<IArchiveFileDescriptor> = archivesService.project.value?.files[path];
 
       if (descriptor) {
         onSelectDescriptor(descriptor);
       }
     },
-    [archivesService, onSelectDescriptor]
+    [archivesService, isBusy, onSelectDescriptor]
   );
 
   const onSelectItem = useCallback(
     (_: Nullable<SyntheticEvent>, itemId: Nullable<string>) => {
+      if (isBusy) {
+        return;
+      }
+
       if (itemId?.startsWith("file:")) {
         onSelectPath(itemId.slice("file:".length));
       } else if (itemId?.startsWith("directory:")) {
@@ -85,7 +101,7 @@ export function ArchivesMenu(): ReactElement {
         archivesService.selectArchiveDirectory(path === "~" ? "" : path);
       }
     },
-    [archivesService, onSelectPath]
+    [archivesService, isBusy, onSelectPath]
   );
 
   return (
@@ -104,6 +120,7 @@ export function ArchivesMenu(): ReactElement {
       {search.isSearching ? (
         <EditorSearchResults
           ariaLabel={"Archive search results"}
+          isDisabled={isBusy}
           isStale={search.isStale}
           emptyLabel={`No files match ${search.query.trim()}.`}
           rows={rows}
@@ -115,6 +132,7 @@ export function ArchivesMenu(): ReactElement {
       ) : items.length ? (
         <Box sx={{ padding: 0.5 }}>
           <RichTreeView
+            isItemSelectionDisabled={() => isBusy}
             items={items}
             expandedItems={expandedItems}
             selectedItems={selectedItem}

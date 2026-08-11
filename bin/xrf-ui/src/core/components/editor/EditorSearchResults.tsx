@@ -16,6 +16,8 @@ export interface IEditorSearchResultsProps {
   total: number;
   activeIndex: number;
   isStale?: boolean;
+  /** Set while a read or write is in flight, so a second selection cannot outrun the first. */
+  isDisabled?: boolean;
   onHoverIndex: (index: number) => void;
   onSelect: (id: string) => void;
 }
@@ -30,6 +32,7 @@ export function EditorSearchResults({
   total,
   activeIndex,
   isStale,
+  isDisabled,
   onHoverIndex,
   onSelect,
 }: IEditorSearchResultsProps): ReactElement {
@@ -72,6 +75,7 @@ export function EditorSearchResults({
           <ListItemButton
             key={row.id}
             ref={index === activeIndex ? activeRef : undefined}
+            disabled={isDisabled}
             selected={index === activeIndex}
             sx={{ paddingY: 0.25 }}
             onMouseEnter={() => onHoverIndex(index)}
