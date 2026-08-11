@@ -34,7 +34,7 @@ describe("ArchivesService file selection", () => {
   });
 
   it("selects unsupported files without invoking the read command", async () => {
-    const descriptor = mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" });
+    const descriptor = mockArchiveFileDescriptor({ extension: "ogf", name: "meshes\\actor.ogf" });
     const service: ArchivesService = mockArchivesService([descriptor]);
 
     await service.selectArchiveFile(descriptor);

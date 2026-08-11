@@ -19,6 +19,9 @@ export interface IArchiveReadPolicy {
   extensions: Array<string>;
   maximumSize: number;
   supportsCompressedFiles: boolean;
+  /** Extensions decoded into a picture rather than read as text. */
+  imageExtensions: Array<string>;
+  maximumImageSize: number;
 }
 
 export interface IArchivesProject {
@@ -42,4 +45,13 @@ export interface IArchiveFolderExtractResult {
   destination: string;
   extractedCount: number;
   size: number;
+}
+
+/** A decoded archived texture, ready to be used as an image source. */
+export interface IArchiveImagePreview {
+  name: string;
+  width: number;
+  height: number;
+  /** PNG bytes, base64 encoded by the backend. */
+  base64: string;
 }

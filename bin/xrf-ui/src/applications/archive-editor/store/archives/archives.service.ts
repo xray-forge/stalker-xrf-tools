@@ -8,7 +8,9 @@ import {
   IArchiveFileDescriptor,
   IArchiveFileReadResult,
   IArchiveFolderExtractResult,
+  IArchiveImagePreview,
   IArchivesProject,
+  isArchiveImage,
 } from "@/lib/archive";
 import { transformError } from "@/lib/error";
 import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/ipc";
@@ -30,6 +32,10 @@ export class ArchivesService {
 
   @Observable()
   public fileDescriptor: Nullable<IArchiveFileDescriptor> = null;
+
+  /** Decoded texture for the selected file, when it is one the backend can turn into a picture. */
+  @Observable()
+  public image: Loadable<Nullable<IArchiveImagePreview>> = createLoadable(null);
 
   /** Outcome of the last single file extraction, holding the path it was written to when it worked. */
   @Observable()
@@ -132,6 +138,13 @@ export class ArchivesService {
     this.directoryPath = null;
     this.fileRequestId += 1;
     this.file = createLoadable(null);
+    this.image = createLoadable(null);
+
+    if (this.isImage(descriptor)) {
+      await this.readArchiveImage(descriptor);
+
+      return;
+    }
 
     if (!this.isPreviewSupported(descriptor)) {
       return;
@@ -144,7 +157,19 @@ export class ArchivesService {
   public async retrySelectedFile(): Promise<void> {
     const descriptor: Nullable<IArchiveFileDescriptor> = this.fileDescriptor;
 
-    if (!descriptor || !this.isPreviewSupported(descriptor)) {
+    if (!descriptor) {
+      return;
+    }
+
+    // Retry has to repeat whichever read failed. Always re-reading as text would leave a failed image
+    // showing a decode error that the retry button could never clear.
+    if (this.isImage(descriptor)) {
+      await this.readArchiveImage(descriptor);
+
+      return;
+    }
+
+    if (!this.isPreviewSupported(descriptor)) {
       return;
     }
 
@@ -185,6 +210,7 @@ export class ArchivesService {
     this.fileRequestId += 1;
     this.fileDescriptor = null;
     this.file = createLoadable(null);
+    this.image = createLoadable(null);
     this.directoryPath = path;
     this.folderExtraction = createLoadable(null);
   }
@@ -228,13 +254,53 @@ export class ArchivesService {
     this.fileDescriptor = null;
     this.directoryPath = null;
     this.file = createLoadable(null);
+    this.image = createLoadable(null);
     this.folderExtraction = createLoadable(null);
+  }
+
+  private isImage(descriptor: IArchiveFileDescriptor): boolean {
+    const project: Nullable<IArchivesProject> = this.project.value;
+
+    return Boolean(project && isArchiveImage(descriptor, project.readPolicy));
   }
 
   private isPreviewSupported(descriptor: IArchiveFileDescriptor): boolean {
     const project: Nullable<IArchivesProject> = this.project.value;
 
     return Boolean(project && getArchivePreviewSupport(descriptor, project.readPolicy).kind === "supported");
+  }
+
+  /**
+   * Ask the backend to decode an archived texture into something the webview can show.
+   *
+   * Guarded by the same request identifier as text reads: clicking through a directory of textures
+   * starts a decode per file, and an earlier one finishing last would otherwise win.
+   */
+  private async readArchiveImage(descriptor: IArchiveFileDescriptor): Promise<void> {
+    const requestId: number = ++this.fileRequestId;
+
+    this.log.info("Reading archive image:", descriptor.name);
+    this.image = createLoadable(null, true);
+
+    try {
+      const result: IArchiveImagePreview = await invoke(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
+        path: descriptor.name,
+      });
+
+      if (requestId !== this.fileRequestId) {
+        return;
+      }
+
+      runInAction(() => (this.image = createLoadable(result)));
+    } catch (error: unknown) {
+      if (requestId !== this.fileRequestId) {
+        return;
+      }
+
+      this.log.error("Failed to read archive image:", descriptor.name, error);
+
+      runInAction(() => (this.image = createLoadable(null, false, transformError(error))));
+    }
   }
 
   private async readArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {

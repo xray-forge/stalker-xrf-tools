@@ -4,6 +4,7 @@ import { ReactElement, useCallback } from "react";
 
 import { ArchiveFileHeader } from "@/applications/archive-editor/components/editor/preview/ArchiveFileHeader";
 import { ArchiveFolderContent } from "@/applications/archive-editor/components/editor/preview/ArchiveFolderContent";
+import { ArchiveImagePreview } from "@/applications/archive-editor/components/editor/preview/ArchiveImagePreview";
 import { ArchivePreviewError } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewError";
 import { ArchivePreviewState } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewState";
 import { ArchiveTextPreview } from "@/applications/archive-editor/components/editor/preview/ArchiveTextPreview";
@@ -26,7 +27,7 @@ export function ArchivesFileContent(): ReactElement {
   const directoryPath: Nullable<string> = archivesService.directoryPath;
 
   const onGetUnsupportedDescription = useCallback(
-    (support: Exclude<ArchivePreviewSupport, { kind: "supported" }>): string => {
+    (support: Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" }>): string => {
       switch (support.kind) {
         case "unsupported-extension":
           return support.extension
@@ -73,7 +74,9 @@ export function ArchivesFileContent(): ReactElement {
       <ArchiveFileHeader descriptor={descriptor} />
 
       <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
-        {support.kind !== "supported" ? (
+        {support.kind === "image" ? (
+          <ArchiveImagePreview />
+        ) : support.kind !== "supported" ? (
           <ArchivePreviewState title={"Preview unavailable"} description={onGetUnsupportedDescription(support)} />
         ) : archivesService.file.isLoading ? (
           <DelayedProgress />

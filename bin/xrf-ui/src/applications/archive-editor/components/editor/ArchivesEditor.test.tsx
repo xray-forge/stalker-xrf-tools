@@ -26,7 +26,14 @@ const BINARY_FILE = mockArchiveFileDescriptor({
   sizeCompressed: 2048,
 });
 
-const PROJECT: IArchivesProject = mockArchivesProject([TEXT_FILE, BINARY_FILE]);
+const MESH_FILE = mockArchiveFileDescriptor({
+  extension: "ogf",
+  name: "actor.ogf",
+  sizeReal: 4096,
+  sizeCompressed: 4096,
+});
+
+const PROJECT: IArchivesProject = mockArchivesProject([TEXT_FILE, BINARY_FILE, MESH_FILE]);
 
 describe("opened archives editor", () => {
   beforeEach(() => {
@@ -40,6 +47,12 @@ describe("opened archives editor", () => {
         size: TEXT_FILE.sizeReal,
       },
       [EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT]: undefined,
+      [EArchivesEditorCommand.READ_ARCHIVE_IMAGE]: {
+        name: BINARY_FILE.name,
+        width: 64,
+        height: 64,
+        base64: "iVBORw0KGgo=",
+      },
     });
   });
 
@@ -60,8 +73,8 @@ describe("opened archives editor", () => {
     expect(getByText("Archives editor")).toBeInTheDocument();
     expect(getByText("C:\\game\\database")).toBeInTheDocument();
     expect(getByText("1 archives")).toBeInTheDocument();
-    expect(getByText("2 files")).toBeInTheDocument();
-    expect(getByText("3 KB")).toBeInTheDocument();
+    expect(getByText("3 files")).toBeInTheDocument();
+    expect(getByText("7 KB")).toBeInTheDocument();
   });
 
   it("selects and renders readable files as code with line numbers", async () => {
@@ -76,15 +89,28 @@ describe("opened archives editor", () => {
     expect(contents).toHaveTextContent("line one line two");
   });
 
-  it("selects unsupported files without asking the backend to read them", async () => {
-    const { findByText, getByText } = renderEditor();
+  it("decodes a texture into a picture rather than refusing it", async () => {
+    const { findByAltText, findByText } = renderEditor();
 
     await userEvent.click(await findByText("texture.dds"));
+
+    // Compressed and not a readable extension, so the text path would have refused it outright.
+    expect(await findByAltText(BINARY_FILE.name)).toHaveAttribute("src", "data:image/png;base64,iVBORw0KGgo=");
+    expect(await findByText("64 x 64")).toBeInTheDocument();
+    expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
+      path: BINARY_FILE.name,
+    });
+  });
+
+  it("selects genuinely unsupported files without asking the backend to read them", async () => {
+    const { findByText, getByText } = renderEditor();
+
+    await userEvent.click(await findByText("actor.ogf"));
 
     expect(getByText("Preview unavailable")).toBeInTheDocument();
     expect(getByText(/this file type does not have a text preview/)).toBeInTheDocument();
     expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
-      path: BINARY_FILE.name,
+      path: MESH_FILE.name,
     });
   });
 

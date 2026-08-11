@@ -20,11 +20,12 @@ describe("archive preview support", () => {
   });
 
   it("identifies each unsupported reason before a backend read", () => {
+    // `.dds` is decoded as an image now, so an unreadable-extension case needs a different type.
     expect(
-      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" }), READ_POLICY)
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "ogf", name: "meshes\\actor.ogf" }), READ_POLICY)
     ).toEqual({
       kind: "unsupported-extension",
-      extension: "dds",
+      extension: "ogf",
     });
     expect(
       getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: 2048, sizeCompressed: 1024 }), READ_POLICY)
@@ -32,6 +33,24 @@ describe("archive preview support", () => {
     expect(
       getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: READ_POLICY.maximumSize + 1 }), READ_POLICY)
     ).toEqual({ kind: "too-large", maximumSize: READ_POLICY.maximumSize });
+  });
+
+  it("routes textures to the image path, compressed or not", () => {
+    // Compression is invisible by the time there is an image to decode, so unlike text it is no reason
+    // to refuse. The size limit is the decoder's own, not the text read policy's.
+    expect(
+      getArchivePreviewSupport(
+        mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds", sizeReal: 2048, sizeCompressed: 512 }),
+        READ_POLICY
+      )
+    ).toEqual({ kind: "image" });
+
+    expect(
+      getArchivePreviewSupport(
+        mockArchiveFileDescriptor({ extension: "dds", sizeReal: READ_POLICY.maximumImageSize + 1 }),
+        READ_POLICY
+      )
+    ).toEqual({ kind: "too-large", maximumSize: READ_POLICY.maximumImageSize });
   });
 
   it("uses the extension supplied by the archive descriptor", () => {
