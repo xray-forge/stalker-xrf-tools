@@ -1,9 +1,16 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { ArchivesService } from "@/applications/archive-editor/store/archives/archives.service";
+import { Nullable } from "@/core/types/general";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { IArchiveFolderExtractResult } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
+
+/** The operation union carries every kind of write, so a folder assertion has to name its own. */
+function extractedFolder(service: ArchivesService): Nullable<IArchiveFolderExtractResult> {
+  return service.operation.value?.kind === "extract-folder" ? service.operation.value.result : null;
+}
 
 describe("ArchivesService folder extraction", () => {
   beforeEach(() => {
@@ -28,7 +35,7 @@ describe("ArchivesService folder extraction", () => {
       prefix: "configs",
       destination: "C:\\out",
     });
-    expect(service.folderExtraction.value?.extractedCount).toBe(12);
+    expect(extractedFolder(service)?.extractedCount).toBe(12);
   });
 
   it("treats the archive root as an empty prefix", async () => {
@@ -36,7 +43,7 @@ describe("ArchivesService folder extraction", () => {
 
     service.selectArchiveDirectory("");
 
-    expect(service.directoryPath).toBe("");
+    expect(service.selectedDirectory).toBe("");
 
     await service.extractArchiveFolder("", "C:\\out");
 
@@ -57,22 +64,22 @@ describe("ArchivesService folder extraction", () => {
 
     await expect(service.extractArchiveFolder("configs", "C:\\out")).rejects.toThrow("read only");
 
-    expect(service.folderExtraction.isLoading).toBe(false);
-    expect(String(service.folderExtraction.error)).toContain("read only");
+    expect(service.operation.isLoading).toBe(false);
+    expect(String(service.operation.error)).toContain("read only");
   });
 
   it("keeps file and directory selection mutually exclusive", async () => {
     const service: ArchivesService = new ArchivesService();
 
     service.selectArchiveDirectory("configs");
-    expect(service.directoryPath).toBe("configs");
+    expect(service.selectedDirectory).toBe("configs");
 
     // Both being set at once would leave the content area with two things claiming to be selected.
     await service.selectArchiveFile(mockArchiveFileDescriptor({ name: "configs\\system.ltx" }));
-    expect(service.directoryPath).toBeNull();
-    expect(service.fileDescriptor).not.toBeNull();
+    expect(service.selectedDirectory).toBeNull();
+    expect(service.selectedFile).not.toBeNull();
 
     service.selectArchiveDirectory("configs");
-    expect(service.fileDescriptor).toBeNull();
+    expect(service.selectedFile).toBeNull();
   });
 });

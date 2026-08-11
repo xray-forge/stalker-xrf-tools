@@ -34,8 +34,7 @@ export function ArchivesEditor(): ReactElement {
 
   // Extraction writes to disk outside the archive. Walking away mid-write left it running against a
   // screen nobody could see, and the only signal it was happening was one button in the content area.
-  const isExtracting: boolean =
-    archivesService.singleFileExtraction.isLoading || archivesService.folderExtraction.isLoading;
+  const isExtracting: boolean = archivesService.operation.isLoading;
   const isBusy: boolean = isClosing || isExtracting;
 
   const onClose = useCallback(async (): Promise<void> => {

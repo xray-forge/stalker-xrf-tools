@@ -1,12 +1,18 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { ArchivesService } from "@/applications/archive-editor/store/archives/archives.service";
+import { Nullable } from "@/core/types/general";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IArchiveFileDescriptor } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 
 const FILE: IArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "configs\\system.ltx" });
+
+/** The operation union carries every kind of write, so a file assertion has to name its own. */
+function extractedFile(service: ArchivesService): Nullable<string> {
+  return service.operation.value?.kind === "extract-file" ? service.operation.value.destination : null;
+}
 
 describe("ArchivesService extraction", () => {
   beforeEach(() => {
@@ -22,8 +28,8 @@ describe("ArchivesService extraction", () => {
       name: "configs\\system.ltx",
       destination: "C:\\out\\system.ltx",
     });
-    expect(service.singleFileExtraction.value).toBe("C:\\out\\system.ltx");
-    expect(service.singleFileExtraction.isLoading).toBe(false);
+    expect(extractedFile(service)).toBe("C:\\out\\system.ltx");
+    expect(service.operation.isLoading).toBe(false);
   });
 
   it("reports a refused extraction instead of staying loading", async () => {
@@ -38,8 +44,8 @@ describe("ArchivesService extraction", () => {
     await expect(service.extractArchiveFile(FILE, "C:\\out\\system.ltx")).rejects.toThrow("read only");
 
     // Left loading, the header's extract control stays disabled with no way back.
-    expect(service.singleFileExtraction.isLoading).toBe(false);
-    expect(String(service.singleFileExtraction.error)).toContain("read only");
+    expect(service.operation.isLoading).toBe(false);
+    expect(String(service.operation.error)).toContain("read only");
   });
 
   it("clears a reported outcome", async () => {
@@ -47,9 +53,9 @@ describe("ArchivesService extraction", () => {
 
     await service.extractArchiveFile(FILE, "C:\\out\\system.ltx");
 
-    service.clearExtraction();
+    service.clearOperation();
 
-    expect(service.singleFileExtraction.value).toBeNull();
-    expect(service.singleFileExtraction.error).toBeNull();
+    expect((service.operation.value?.kind === "extract-file" ? service.operation.value.destination : null)).toBeNull();
+    expect(service.operation.error).toBeNull();
   });
 });

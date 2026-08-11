@@ -12,7 +12,7 @@ import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { Nullable, Optional } from "@/core/types/general";
-import { IArchiveFileDescriptor, IArchiveTreeItem, parseTree } from "@/lib/archive";
+import { IArchiveFileDescriptor, IArchiveTreeItem, parseTree, TArchiveSelection } from "@/lib/archive";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 
 const EXPLORER_WIDTH: number = 300;
@@ -31,11 +31,7 @@ export function ArchivesMenu(): ReactElement {
 
   // Selecting again while a read or a write is in flight starts work that the previous one will
   // outlive, and the tree would show a selection whose content is still the old one.
-  const isBusy: boolean =
-    archivesService.file.isLoading ||
-    archivesService.image.isLoading ||
-    archivesService.singleFileExtraction.isLoading ||
-    archivesService.folderExtraction.isLoading;
+  const isBusy: boolean = archivesService.isBusy;
 
   const onSelectDescriptor = useCallback(
     (descriptor: IArchiveFileDescriptor) => {
@@ -64,11 +60,13 @@ export function ArchivesMenu(): ReactElement {
     [search.results]
   );
 
-  const selectedItem: Nullable<string> = archivesService.fileDescriptor
-    ? `file:${archivesService.fileDescriptor.name}`
-    : archivesService.directoryPath !== null
-      ? `directory:${archivesService.directoryPath || "~"}`
-      : null;
+  const selection: TArchiveSelection = archivesService.selection;
+  const selectedItem: Nullable<string> =
+    selection.kind === "file"
+      ? `file:${selection.descriptor.name}`
+      : selection.kind === "directory"
+        ? `directory:${selection.path || "~"}`
+        : null;
 
   const onSelectPath = useCallback(
     (path: string) => {

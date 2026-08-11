@@ -16,15 +16,18 @@ import {
   getArchivePreviewSupport,
   IArchiveFileDescriptor,
   IArchivesProject,
+  TArchiveContent,
+  TArchiveSelection,
 } from "@/lib/archive";
+import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/size";
 
 export function ArchivesFileContent(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  const descriptor: Nullable<IArchiveFileDescriptor> = archivesService.fileDescriptor;
+  const selection: TArchiveSelection = archivesService.selection;
   const project: Nullable<IArchivesProject> = archivesService.project.value;
-  const directoryPath: Nullable<string> = archivesService.directoryPath;
+  const content: Loadable<Nullable<TArchiveContent>> = archivesService.content;
 
   const onGetUnsupportedDescription = useCallback(
     (support: Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" }>): string => {
@@ -50,9 +53,11 @@ export function ArchivesFileContent(): ReactElement {
   );
 
   // A directory selection is a different kind of thing, not a file that happens to be missing.
-  if (directoryPath !== null) {
-    return <ArchiveFolderContent path={directoryPath} />;
+  if (selection.kind === "directory") {
+    return <ArchiveFolderContent path={selection.path} />;
   }
+
+  const descriptor: Nullable<IArchiveFileDescriptor> = selection.kind === "file" ? selection.descriptor : null;
 
   if (!descriptor || !project) {
     return (
@@ -78,12 +83,12 @@ export function ArchivesFileContent(): ReactElement {
           <ArchiveImagePreview />
         ) : support.kind !== "supported" ? (
           <ArchivePreviewState title={"Preview unavailable"} description={onGetUnsupportedDescription(support)} />
-        ) : archivesService.file.isLoading ? (
+        ) : content.isLoading ? (
           <DelayedProgress />
-        ) : archivesService.file.error ? (
-          <ArchivePreviewError error={archivesService.file.error} onRetry={archivesService.retrySelectedFile} />
-        ) : archivesService.file.value ? (
-          <ArchiveTextPreview file={archivesService.file.value} />
+        ) : content.error ? (
+          <ArchivePreviewError error={content.error} onRetry={archivesService.retrySelectedFile} />
+        ) : content.value?.kind === "text" ? (
+          <ArchiveTextPreview file={content.value.result} />
         ) : (
           <ArchivePreviewState
             title={"Preview unavailable"}

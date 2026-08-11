@@ -14,7 +14,9 @@ import {
   IArchiveFolderExtractResult,
   IArchivesProject,
   isUnderArchiveDirectory,
+  TArchiveOperation,
 } from "@/lib/archive";
+import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { formatBytes } from "@/lib/size";
 
@@ -35,7 +37,10 @@ export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): Reac
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
   const project: Nullable<IArchivesProject> = archivesService.project.value;
-  const extraction = archivesService.folderExtraction;
+  const operation: Loadable<Nullable<TArchiveOperation>> = archivesService.operation;
+  // A file extraction started elsewhere must not be reported here as if this folder had been written.
+  const extracted: Nullable<IArchiveFolderExtractResult> =
+    operation.value?.kind === "extract-folder" ? operation.value.result : null;
 
   const summary: { count: number; size: number } = useMemo(() => {
     let count: number = 0;
@@ -85,30 +90,29 @@ export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): Reac
       <Button
         variant={"contained"}
         size={"small"}
-        disabled={extraction.isLoading || !summary.count}
+        disabled={operation.isLoading || !summary.count}
         startIcon={<SaveAltIcon fontSize={"small"} />}
         sx={{ marginTop: 1 }}
         onClick={onExtract}
       >
-        {extraction.isLoading ? "Extracting..." : "Extract folder..."}
+        {operation.isLoading ? "Extracting..." : "Extract folder..."}
       </Button>
 
-      {extraction.error ? (
+      {operation.error ? (
         <Box sx={{ marginTop: 2, maxWidth: 480 }}>
-          <Alert severity={"error"} variant={"outlined"} onClose={archivesService.clearFolderExtraction}>
+          <Alert severity={"error"} variant={"outlined"} onClose={archivesService.clearOperation}>
             <Typography variant={"caption"} sx={{ wordBreak: "break-word" }}>
-              {String(extraction.error)}
+              {String(operation.error)}
             </Typography>
           </Alert>
         </Box>
       ) : null}
 
-      {extraction.value ? (
+      {extracted ? (
         <Box sx={{ marginTop: 2, maxWidth: 480 }}>
-          <Alert severity={"success"} variant={"outlined"} onClose={archivesService.clearFolderExtraction}>
+          <Alert severity={"success"} variant={"outlined"} onClose={archivesService.clearOperation}>
             <Typography variant={"caption"} sx={{ wordBreak: "break-word" }}>
-              {`Extracted ${(extraction.value as IArchiveFolderExtractResult).extractedCount} files to `}
-              {(extraction.value as IArchiveFolderExtractResult).destination}
+              {`Extracted ${extracted.extractedCount} files to ${extracted.destination}`}
             </Typography>
           </Alert>
         </Box>

@@ -11,6 +11,9 @@ import {
   IArchiveImagePreview,
   IArchivesProject,
   isArchiveImage,
+  TArchiveContent,
+  TArchiveOperation,
+  TArchiveSelection,
 } from "@/lib/archive";
 import { transformError } from "@/lib/error";
 import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/ipc";
@@ -27,34 +30,39 @@ export class ArchivesService {
   @Observable()
   public project: Loadable<Nullable<IArchivesProject>> = createLoadable(null);
 
+  /** What the explorer points at. Exactly one kind at a time, by construction. */
   @Observable()
-  public file: Loadable<Nullable<IArchiveFileReadResult>> = createLoadable(null);
+  public selection: TArchiveSelection = { kind: "none" };
 
+  /** Whatever was loaded for the selection - text, a decoded texture, and later audio. */
   @Observable()
-  public fileDescriptor: Nullable<IArchiveFileDescriptor> = null;
+  public content: Loadable<Nullable<TArchiveContent>> = createLoadable(null);
 
-  /** Decoded texture for the selected file, when it is one the backend can turn into a picture. */
+  /** The last write to disk, so whichever surface started it can report the outcome. */
   @Observable()
-  public image: Loadable<Nullable<IArchiveImagePreview>> = createLoadable(null);
+  public operation: Loadable<Nullable<TArchiveOperation>> = createLoadable(null);
 
-  /** Outcome of the last single file extraction, holding the path it was written to when it worked. */
-  @Observable()
-  public singleFileExtraction: Loadable<Nullable<string>> = createLoadable(null);
+  private contentRequestId: number = 0;
+
+  /** The selected file, or null when a directory or nothing is selected. */
+  public get selectedFile(): Nullable<IArchiveFileDescriptor> {
+    return this.selection.kind === "file" ? this.selection.descriptor : null;
+  }
+
+  /** The selected directory, empty string for the archive root, or null when a file is selected. */
+  public get selectedDirectory(): Nullable<string> {
+    return this.selection.kind === "directory" ? this.selection.path : null;
+  }
 
   /**
-   * Archive-relative path of the selected directory, empty string for the archive root.
+   * Whether something is in flight that a second command would race.
    *
-   * Held separately from `fileDescriptor` rather than as one selection union: only one of the two can
-   * be set, and keeping them apart means neither view has to interrogate the other's shape.
+   * Read by the editor to lock navigation and by the explorer to refuse a new selection. Derived here
+   * rather than reassembled at each call site, which is how the three copies of it drifted apart.
    */
-  @Observable()
-  public directoryPath: Nullable<string> = null;
-
-  /** Outcome of the last folder extraction, holding how much was written when it worked. */
-  @Observable()
-  public folderExtraction: Loadable<Nullable<IArchiveFolderExtractResult>> = createLoadable(null);
-
-  private fileRequestId: number = 0;
+  public get isBusy(): boolean {
+    return this.content.isLoading || this.operation.isLoading;
+  }
 
   public constructor() {
     makeObservable(this);
@@ -134,46 +142,29 @@ export class ArchivesService {
 
   @BoundAction()
   public async selectArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
-    this.fileDescriptor = descriptor;
-    this.directoryPath = null;
-    this.fileRequestId += 1;
-    this.file = createLoadable(null);
-    this.image = createLoadable(null);
+    this.selection = { kind: "file", descriptor };
+    this.contentRequestId += 1;
+    this.content = createLoadable(null);
 
-    if (this.isImage(descriptor)) {
-      await this.readArchiveImage(descriptor);
+    await this.loadSelectedContent(descriptor);
+  }
 
-      return;
-    }
-
-    if (!this.isPreviewSupported(descriptor)) {
-      return;
-    }
-
-    await this.readArchiveFile(descriptor);
+  /** Select a directory, which is a different kind of selection than a file rather than a wider one. */
+  @BoundAction()
+  public selectArchiveDirectory(path: string): void {
+    this.contentRequestId += 1;
+    this.selection = { kind: "directory", path };
+    this.content = createLoadable(null);
+    this.operation = createLoadable(null);
   }
 
   @BoundAction()
   public async retrySelectedFile(): Promise<void> {
-    const descriptor: Nullable<IArchiveFileDescriptor> = this.fileDescriptor;
+    const descriptor: Nullable<IArchiveFileDescriptor> = this.selectedFile;
 
-    if (!descriptor) {
-      return;
+    if (descriptor) {
+      await this.loadSelectedContent(descriptor);
     }
-
-    // Retry has to repeat whichever read failed. Always re-reading as text would leave a failed image
-    // showing a decode error that the retry button could never clear.
-    if (this.isImage(descriptor)) {
-      await this.readArchiveImage(descriptor);
-
-      return;
-    }
-
-    if (!this.isPreviewSupported(descriptor)) {
-      return;
-    }
-
-    await this.readArchiveFile(descriptor);
   }
 
   /**
@@ -184,35 +175,18 @@ export class ArchivesService {
     this.log.info("Extracting archive file:", descriptor.name, destination);
 
     try {
-      this.singleFileExtraction = createLoadable(null, true);
+      this.operation = createLoadable(null, true);
 
       await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE, { name: descriptor.name, destination });
 
-      runInAction(() => (this.singleFileExtraction = createLoadable(destination)));
-    } catch (error) {
+      runInAction(() => (this.operation = createLoadable({ kind: "extract-file", destination })));
+    } catch (error: unknown) {
       this.log.error("Failed to extract archive file:", error);
 
-      runInAction(() => (this.singleFileExtraction = createLoadable(null, false, error as Error)));
+      runInAction(() => (this.operation = createLoadable(null, false, transformError(error))));
 
-      throw error;
+      throw transformError(error);
     }
-  }
-
-  /** Dismiss whatever the last extraction reported, success or failure. */
-  @BoundAction()
-  public clearExtraction(): void {
-    this.singleFileExtraction = createLoadable(null);
-  }
-
-  /** Select a directory, which is a different kind of selection than a file rather than a wider one. */
-  @BoundAction()
-  public selectArchiveDirectory(path: string): void {
-    this.fileRequestId += 1;
-    this.fileDescriptor = null;
-    this.file = createLoadable(null);
-    this.image = createLoadable(null);
-    this.directoryPath = path;
-    this.folderExtraction = createLoadable(null);
   }
 
   /**
@@ -225,110 +199,102 @@ export class ArchivesService {
     this.log.info("Extracting archive folder:", prefix || "<root>", destination);
 
     try {
-      this.folderExtraction = createLoadable(null, true);
+      this.operation = createLoadable(null, true);
 
       const result: IArchiveFolderExtractResult = await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER, {
         prefix,
         destination,
       });
 
-      runInAction(() => (this.folderExtraction = createLoadable(result)));
+      runInAction(() => (this.operation = createLoadable({ kind: "extract-folder", result })));
     } catch (error: unknown) {
       this.log.error("Failed to extract archive folder:", error);
 
-      runInAction(() => (this.folderExtraction = createLoadable(null, false, transformError(error))));
+      runInAction(() => (this.operation = createLoadable(null, false, transformError(error))));
 
       throw transformError(error);
     }
   }
 
-  /** Dismiss whatever the last folder extraction reported. */
+  /** Dismiss whatever the last write reported, success or failure. */
   @BoundAction()
-  public clearFolderExtraction(): void {
-    this.folderExtraction = createLoadable(null);
+  public clearOperation(): void {
+    this.operation = createLoadable(null);
   }
 
   @BoundAction()
   public clearFileSelection(): void {
-    this.fileRequestId += 1;
-    this.fileDescriptor = null;
-    this.directoryPath = null;
-    this.file = createLoadable(null);
-    this.image = createLoadable(null);
-    this.folderExtraction = createLoadable(null);
-  }
-
-  private isImage(descriptor: IArchiveFileDescriptor): boolean {
-    const project: Nullable<IArchivesProject> = this.project.value;
-
-    return Boolean(project && isArchiveImage(descriptor, project.readPolicy));
-  }
-
-  private isPreviewSupported(descriptor: IArchiveFileDescriptor): boolean {
-    const project: Nullable<IArchivesProject> = this.project.value;
-
-    return Boolean(project && getArchivePreviewSupport(descriptor, project.readPolicy).kind === "supported");
+    this.contentRequestId += 1;
+    this.selection = { kind: "none" };
+    this.content = createLoadable(null);
+    this.operation = createLoadable(null);
   }
 
   /**
-   * Ask the backend to decode an archived texture into something the webview can show.
+   * Load whatever the selected file can be shown as.
    *
-   * Guarded by the same request identifier as text reads: clicking through a directory of textures
-   * starts a decode per file, and an earlier one finishing last would otherwise win.
+   * The single entry point for every content kind, so selecting and retrying cannot disagree about
+   * which one applies - they did, until retry started re-reading textures as text.
    */
-  private async readArchiveImage(descriptor: IArchiveFileDescriptor): Promise<void> {
-    const requestId: number = ++this.fileRequestId;
+  private async loadSelectedContent(descriptor: IArchiveFileDescriptor): Promise<void> {
+    const project: Nullable<IArchivesProject> = this.project.value;
 
-    this.log.info("Reading archive image:", descriptor.name);
-    this.image = createLoadable(null, true);
+    if (!project) {
+      return;
+    }
 
-    try {
-      const result: IArchiveImagePreview = await invoke(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
-        path: descriptor.name,
-      });
+    if (isArchiveImage(descriptor, project.readPolicy)) {
+      await this.readContent(descriptor, "image");
 
-      if (requestId !== this.fileRequestId) {
-        return;
-      }
+      return;
+    }
 
-      runInAction(() => (this.image = createLoadable(result)));
-    } catch (error: unknown) {
-      if (requestId !== this.fileRequestId) {
-        return;
-      }
-
-      this.log.error("Failed to read archive image:", descriptor.name, error);
-
-      runInAction(() => (this.image = createLoadable(null, false, transformError(error))));
+    if (getArchivePreviewSupport(descriptor, project.readPolicy).kind === "supported") {
+      await this.readContent(descriptor, "text");
     }
   }
 
-  private async readArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
-    const requestId: number = ++this.fileRequestId;
+  /**
+   * Ask the backend for one representation of a file and publish it as the current content.
+   *
+   * Guarded by a request identifier: clicking through a directory starts a read per file, and an
+   * earlier one finishing last would otherwise overwrite a newer selection's content.
+   */
+  private async readContent(descriptor: IArchiveFileDescriptor, kind: TArchiveContent["kind"]): Promise<void> {
+    const requestId: number = ++this.contentRequestId;
 
-    this.log.info("Opening archive file:", descriptor.name);
-    this.file = createLoadable(null, true);
+    this.log.info("Reading archive content:", kind, descriptor.name);
+    this.content = createLoadable(null, true);
 
     try {
-      const result: IArchiveFileReadResult = await invoke(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
-        path: descriptor.name,
-      });
+      const content: TArchiveContent =
+        kind === "image"
+          ? {
+              kind: "image",
+              preview: await invoke<IArchiveImagePreview>(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
+                path: descriptor.name,
+              }),
+            }
+          : {
+              kind: "text",
+              result: await invoke<IArchiveFileReadResult>(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
+                path: descriptor.name,
+              }),
+            };
 
-      if (requestId !== this.fileRequestId) {
+      if (requestId !== this.contentRequestId) {
         return;
       }
 
-      this.log.info("Opened file:", descriptor.name);
-
-      runInAction(() => (this.file = createLoadable(result)));
+      runInAction(() => (this.content = createLoadable(content)));
     } catch (error: unknown) {
-      if (requestId !== this.fileRequestId) {
+      if (requestId !== this.contentRequestId) {
         return;
       }
 
-      this.log.error("Failed to open archive file:", descriptor.name, error);
+      this.log.error("Failed to read archive content:", descriptor.name, error);
 
-      runInAction(() => (this.file = createLoadable(null, false, transformError(error))));
+      runInAction(() => (this.content = createLoadable(null, false, transformError(error))));
     }
   }
 }

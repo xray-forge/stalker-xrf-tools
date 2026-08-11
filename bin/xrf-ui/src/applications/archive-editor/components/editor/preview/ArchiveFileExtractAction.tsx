@@ -21,7 +21,7 @@ export function ArchiveFileExtractAction({ descriptor }: IArchiveFileExtractActi
 
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  const isExtracting: boolean = archivesService.singleFileExtraction.isLoading;
+  const isExtracting: boolean = archivesService.operation.isLoading;
 
   const onExtract = useCallback(async () => {
     // The archived name is a full path with windows separators; only its leaf is a file name.

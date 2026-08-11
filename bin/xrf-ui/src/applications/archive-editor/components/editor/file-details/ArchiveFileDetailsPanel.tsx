@@ -4,6 +4,7 @@ import { ReactElement, useCallback } from "react";
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archive-editor/components/editor/archive-editor.styles";
 import { ArchiveFileDetailRow } from "@/applications/archive-editor/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
+import { Nullable } from "@/core/types/general";
 import { IArchiveFileDescriptor } from "@/lib/archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
@@ -13,7 +14,7 @@ export interface IArchiveFileDetailsPanelProps extends BaseComponentProps {
 }
 
 export function ArchiveFileDetailsPanel({ archivesService }: IArchiveFileDetailsPanelProps): ReactElement {
-  const descriptor = archivesService.fileDescriptor;
+  const descriptor: Nullable<IArchiveFileDescriptor> = archivesService.selectedFile;
 
   const getCompressionLabel = useCallback((descriptor: IArchiveFileDescriptor): string => {
     if (descriptor.sizeReal === descriptor.sizeCompressed) {

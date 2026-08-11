@@ -7,7 +7,8 @@ import { ArchivePreviewState } from "@/applications/archive-editor/components/ed
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { Nullable } from "@/core/types/general";
-import { IArchiveImagePreview } from "@/lib/archive";
+import { IArchiveImagePreview, TArchiveContent } from "@/lib/archive";
+import { Loadable } from "@/lib/loadable";
 
 /**
  * Shows an archived texture the backend decoded into a PNG.
@@ -18,12 +19,13 @@ import { IArchiveImagePreview } from "@/lib/archive";
 export function ArchiveImagePreview(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  const preview: Nullable<IArchiveImagePreview> = archivesService.image.value;
+  const content: Loadable<Nullable<TArchiveContent>> = archivesService.content;
+  const preview: Nullable<IArchiveImagePreview> = content.value?.kind === "image" ? content.value.preview : null;
 
-  if (archivesService.image.isLoading) {
+  if (content.isLoading) {
     return <DelayedProgress />;
-  } else if (archivesService.image.error) {
-    return <ArchivePreviewError error={archivesService.image.error} onRetry={archivesService.retrySelectedFile} />;
+  } else if (content.error) {
+    return <ArchivePreviewError error={content.error} onRetry={archivesService.retrySelectedFile} />;
   }
 
   return preview ? (
