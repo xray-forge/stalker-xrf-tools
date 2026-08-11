@@ -1,8 +1,7 @@
-use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
 use xray_error::{XRayError, XRayResult};
 
 use crate::ArchiveProject;
+use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::project::archive_project_read_result::ProjectReadResult;
 
 impl ArchiveProject {
@@ -17,41 +16,24 @@ impl ArchiveProject {
       )));
     }
 
-    match self.files.get(filename) {
-      None => Err(XRayError::new_read_error(format!(
-        "File '{}' is not found in the archive project",
-        filename
-      ))),
-      Some(file_descriptor) => {
-        if file_descriptor.size_real > self.read_policy.maximum_size {
-          return Err(XRayError::new_read_error(format!(
-            "File '{}' is too big to be read - {}, {} is maximum allowed",
-            filename, file_descriptor.size_real, self.read_policy.maximum_size
-          )));
-        } else if !self.read_policy.supports_compressed_files
-          && file_descriptor.size_real != file_descriptor.size_compressed
-        {
-          return Err(XRayError::new_read_error(format!(
-            "File '{}' is compressed, reading compressed files is not supported yet",
-            filename
-          )));
-        }
+    let descriptor: &ArchiveFileDescriptor = self
+      .files
+      .get(filename)
+      .ok_or_else(|| XRayError::new_read_error(format!("File '{}' is not found in the archive project", filename)))?;
 
-        let mut source_file: File = File::open(file_descriptor.source.as_path())?;
-        let mut buf: Vec<u8> = vec![0u8; file_descriptor.size_real as usize];
-
-        source_file
-          .seek(SeekFrom::Start(file_descriptor.offset as u64))
-          .expect("Expected to be able to seek to start of the source file");
-
-        source_file.read_exact(&mut buf)?;
-
-        Ok(ProjectReadResult::new(
-          filename,
-          &String::from_utf8_lossy(&buf),
-          file_descriptor.size_real,
-        ))
-      }
+    if descriptor.size_real > self.read_policy.maximum_size {
+      return Err(XRayError::new_read_error(format!(
+        "File '{}' is too big to be read - {}, {} is maximum allowed",
+        filename, descriptor.size_real, self.read_policy.maximum_size
+      )));
     }
+
+    let bytes: Vec<u8> = self.read_file_bytes(filename)?;
+
+    Ok(ProjectReadResult::new(
+      filename,
+      &String::from_utf8_lossy(&bytes),
+      descriptor.size_real,
+    ))
   }
 }

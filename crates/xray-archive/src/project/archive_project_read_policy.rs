@@ -12,7 +12,6 @@ use crate::project::archive_project_constants::{
 pub struct ArchiveProjectReadPolicy {
   pub extensions: &'static [&'static str],
   pub maximum_size: u32,
-  pub supports_compressed_files: bool,
   /// Extensions decoded into a picture. Compression does not apply: it is undone before decoding.
   pub image_extensions: &'static [&'static str],
   pub maximum_image_size: u32,
@@ -41,7 +40,6 @@ impl Default for ArchiveProjectReadPolicy {
     Self {
       extensions: ALLOWED_PROJECT_READ_EXTENSIONS,
       maximum_size: ALLOWED_PROJECT_READ_SIZE,
-      supports_compressed_files: false,
       image_extensions: ALLOWED_PROJECT_IMAGE_EXTENSIONS,
       maximum_image_size: ALLOWED_PROJECT_IMAGE_SIZE,
     }

@@ -4,6 +4,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use crc32fast::hash;
+use minilzo_rs::LZO;
 
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
@@ -12,6 +13,26 @@ use crate::{ArchiveExtractFolderResult, ArchiveProject};
 struct Entry {
   name: &'static str,
   contents: &'static [u8],
+  /// Stored LZO compressed, the way real archives hold most of their payload.
+  is_compressed: bool,
+}
+
+impl Entry {
+  fn stored(name: &'static str, contents: &'static [u8]) -> Self {
+    Self {
+      name,
+      contents,
+      is_compressed: false,
+    }
+  }
+
+  fn compressed(name: &'static str, contents: &'static [u8]) -> Self {
+    Self {
+      name,
+      contents,
+      is_compressed: true,
+    }
+  }
 }
 
 /// Lay out entries end to end in one file and describe them, the way an archive stores its payload.
@@ -21,16 +42,26 @@ fn create_project(directory: &Path, entries: &[Entry]) -> ArchiveProject {
   let mut payload: Vec<u8> = Vec::new();
   let mut files: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
 
+  let mut lzo: LZO = LZO::init().expect("lzo");
+
   for entry in entries {
     let offset: u32 = payload.len() as u32;
 
-    payload.extend_from_slice(entry.contents);
+    // A compressed entry stores fewer bytes than it yields, which is exactly the case the reader used
+    // to get wrong by copying `size_real` bytes straight out of the archive.
+    let stored: Vec<u8> = if entry.is_compressed {
+      lzo.compress(entry.contents).expect("lzo compression")
+    } else {
+      entry.contents.to_vec()
+    };
+
+    payload.extend_from_slice(&stored);
 
     let mut descriptor: ArchiveFileDescriptor = ArchiveFileDescriptor::new(
       hash(entry.contents),
       entry.name.into(),
       offset,
-      entry.contents.len() as u32,
+      stored.len() as u32,
       entry.contents.len() as u32,
     );
 
@@ -69,18 +100,9 @@ fn extract_folder_writes_every_file_under_the_prefix() {
   let project: ArchiveProject = create_project(
     &directory,
     &[
-      Entry {
-        name: "configs\\gameplay\\dialogs.xml",
-        contents: b"<game_dialogs/>",
-      },
-      Entry {
-        name: "configs\\system.ltx",
-        contents: b"[section]",
-      },
-      Entry {
-        name: "meshes\\actor.ogf",
-        contents: b"ogf",
-      },
+      Entry::stored("configs\\gameplay\\dialogs.xml", b"<game_dialogs/>"),
+      Entry::stored("configs\\system.ltx", b"[section]"),
+      Entry::stored("meshes\\actor.ogf", b"ogf"),
     ],
   );
 
@@ -108,14 +130,8 @@ fn extract_folder_skips_entries_that_carry_no_bytes() {
     &[
       // Archives contain zero length entries, and some of them name a directory. Opening one as a
       // file is what produced "the system cannot find the path specified".
-      Entry {
-        name: "configs\\gameplay\\",
-        contents: b"",
-      },
-      Entry {
-        name: "configs\\gameplay\\dialogs.xml",
-        contents: b"<game_dialogs/>",
-      },
+      Entry::stored("configs\\gameplay\\", b""),
+      Entry::stored("configs\\gameplay\\dialogs.xml", b"<game_dialogs/>"),
     ],
   );
 
@@ -132,14 +148,8 @@ fn extract_folder_takes_the_whole_archive_for_an_empty_prefix() {
   let project: ArchiveProject = create_project(
     &directory,
     &[
-      Entry {
-        name: "configs\\system.ltx",
-        contents: b"[section]",
-      },
-      Entry {
-        name: "meshes\\actor.ogf",
-        contents: b"ogf",
-      },
+      Entry::stored("configs\\system.ltx", b"[section]"),
+      Entry::stored("meshes\\actor.ogf", b"ogf"),
     ],
   );
 
@@ -154,13 +164,7 @@ fn extract_folder_takes_the_whole_archive_for_an_empty_prefix() {
 #[test]
 fn extract_file_writes_to_the_exact_path_it_is_given() {
   let directory: PathBuf = create_temporary_directory("single");
-  let project: ArchiveProject = create_project(
-    &directory,
-    &[Entry {
-      name: "configs\\system.ltx",
-      contents: b"[section]",
-    }],
-  );
+  let project: ArchiveProject = create_project(&directory, &[Entry::stored("configs\\system.ltx", b"[section]")]);
 
   let target: PathBuf = directory.join("chosen").join("renamed.ltx");
 
@@ -177,14 +181,8 @@ fn read_file_bytes_returns_the_stored_contents() {
   let project: ArchiveProject = create_project(
     &directory,
     &[
-      Entry {
-        name: "configs\\system.ltx",
-        contents: b"[section]",
-      },
-      Entry {
-        name: "textures\\wall.dds",
-        contents: b"\x44\x44\x53\x20not-a-real-dds",
-      },
+      Entry::stored("configs\\system.ltx", b"[section]"),
+      Entry::stored("textures\\wall.dds", b"\x44\x44\x53\x20not-a-real-dds"),
     ],
   );
 
@@ -202,27 +200,64 @@ fn read_file_bytes_returns_the_stored_contents() {
 #[test]
 fn read_file_bytes_reports_an_unknown_name() {
   let directory: PathBuf = create_temporary_directory("bytes-missing");
-  let project: ArchiveProject = create_project(
-    &directory,
-    &[Entry {
-      name: "configs\\system.ltx",
-      contents: b"[section]",
-    }],
-  );
+  let project: ArchiveProject = create_project(&directory, &[Entry::stored("configs\\system.ltx", b"[section]")]);
 
   assert!(project.read_file_bytes("configs\\other.ltx").is_err());
+}
+
+/// Compressible enough that lzo actually shrinks it, so `size_compressed` really differs.
+const COMPRESSIBLE: &[u8] = b"[section]\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\n";
+
+#[test]
+fn read_file_bytes_decompresses_a_compressed_entry() {
+  let directory: PathBuf = create_temporary_directory("compressed-bytes");
+  let project: ArchiveProject = create_project(&directory, &[Entry::compressed("configs\\system.ltx", COMPRESSIBLE)]);
+
+  let descriptor = project.files.get("configs\\system.ltx").expect("descriptor");
+
+  assert!(
+    descriptor.size_compressed < descriptor.size_real,
+    "the fixture has to be genuinely compressed for this to test anything"
+  );
+
+  // Also verifies the crc, which is computed over the decompressed bytes.
+  assert_eq!(
+    project.read_file_bytes("configs\\system.ltx").expect("bytes"),
+    COMPRESSIBLE
+  );
+}
+
+#[test]
+fn read_file_as_string_accepts_a_compressed_entry() {
+  let directory: PathBuf = create_temporary_directory("compressed-string");
+  let project: ArchiveProject = create_project(&directory, &[Entry::compressed("configs\\system.ltx", COMPRESSIBLE)]);
+
+  let result = project.read_file_as_string("configs\\system.ltx").expect("read");
+
+  // Previously refused outright, because reading raw bytes at the offset would have produced rubbish.
+  assert_eq!(result.content, String::from_utf8_lossy(COMPRESSIBLE));
+  assert_eq!(result.size, COMPRESSIBLE.len() as u32);
+}
+
+#[test]
+fn extract_file_writes_a_compressed_entry_decompressed() {
+  let directory: PathBuf = create_temporary_directory("compressed-extract");
+  let project: ArchiveProject = create_project(&directory, &[Entry::compressed("configs\\system.ltx", COMPRESSIBLE)]);
+
+  let target: PathBuf = directory.join("out").join("system.ltx");
+
+  project
+    .extract_file("configs\\system.ltx", &target)
+    .expect("extraction");
+
+  // What lands on disk is the file, not the archive's compressed image of it.
+  assert_eq!(fs::read(&target).expect("written file"), COMPRESSIBLE);
 }
 
 #[test]
 fn extract_folder_reports_a_prefix_that_matches_nothing() {
   let directory: PathBuf = create_temporary_directory("missing");
-  let project: ArchiveProject = create_project(
-    &directory,
-    &[Entry {
-      name: "configs\\system.ltx",
-      contents: b"[section]",
-    }],
-  );
+  let project: ArchiveProject = create_project(&directory, &[Entry::stored("configs\\system.ltx", b"[section]")]);
 
   assert!(project.extract_folder("meshes", directory.join("out")).is_err());
 }
