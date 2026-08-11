@@ -1,89 +1,34 @@
-import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useInjection } from "@wirestate/react";
-import { ReactElement, useLayoutEffect, useMemo } from "react";
+import { ReactElement } from "react";
 
-import { ExportsEditorDeclarationList } from "@/applications/exports-editor/components/viewer/declarations/ExportsEditorDeclarationList";
-import { groupExports, IExportGroup } from "@/applications/exports-editor/components/viewer/exports/exports-groups";
-import { ExportsService } from "@/applications/exports-editor/store/exports";
+import { ExportDeclarationView } from "@/applications/exports-editor/components/viewer/exports/ExportDeclarationView";
+import { ExportsViewerState } from "@/applications/exports-editor/components/viewer/exports/ExportsViewerState";
 import { Nullable } from "@/core/types/general";
-import { useTabState } from "@/lib/tab";
+import { BaseComponentProps } from "@/lib/dom/element-types";
+import { IExportDescriptor } from "@/lib/exports";
 
-export function ExportsViewer(): ReactElement {
-  const exportsService: ExportsService = useInjection(ExportsService);
+export interface IExportsViewerProps extends BaseComponentProps {
+  declaration: Nullable<IExportDescriptor>;
+  exportCount: number;
+}
 
-  const [activeTab, setActiveTab, onActiveTabChange] = useTabState<string>("");
-
-  const groups: Array<IExportGroup> = useMemo(
-    () => groupExports(exportsService.declarations.value ?? []),
-    [exportsService.declarations.value]
-  );
-
-  const activeGroup: Nullable<IExportGroup> =
-    groups.find((group: IExportGroup) => group.id === activeTab) ?? groups[0] ?? null;
-
-  useLayoutEffect(() => {
-    if (activeGroup && activeTab !== activeGroup.id) {
-      setActiveTab(activeGroup.id);
-    }
-  }, [activeGroup, activeTab, setActiveTab]);
-
-  if (exportsService.declarations.isLoading) {
+export function ExportsViewer({ declaration, exportCount }: IExportsViewerProps): ReactElement {
+  if (!exportCount) {
     return (
-      <Grid
-        container
-        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
-      >
-        <CircularProgress />
-      </Grid>
+      <ExportsViewerState
+        title={"No externs found"}
+        description={"This project is open, but it does not currently declare any externs."}
+      />
     );
   }
 
-  if (exportsService.declarations.error || !exportsService.declarations.value) {
+  if (!declaration) {
     return (
-      <Grid
-        container
-        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
-      >
-        {exportsService.declarations.error ? String(exportsService.declarations.error) : "No value."}
-      </Grid>
+      <ExportsViewerState
+        title={"Select an export to inspect"}
+        description={"Expand a namespace in the explorer and select one of its declarations."}
+      />
     );
   }
 
-  if (!activeGroup) {
-    return (
-      <Grid
-        container
-        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
-      >
-        No externs found.
-      </Grid>
-    );
-  }
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        width: "auto",
-        height: "100%",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        overflow: "auto",
-        p: 2,
-        flexGrow: 1,
-      }}
-    >
-      <Typography variant={"h5"}>Exports ({exportsService.declarations.value.length})</Typography>
-      <Divider sx={{ margin: "16px 0" }} />
-
-      <Tabs value={activeGroup.id} variant={"scrollable"} scrollButtons={"auto"} onChange={onActiveTabChange}>
-        {groups.map((group: IExportGroup) => (
-          <Tab key={group.id} value={group.id} label={`${group.label} (${group.declarations.length})`} />
-        ))}
-      </Tabs>
-
-      <Box sx={{ marginBottom: 2 }} />
-      <ExportsEditorDeclarationList descriptors={activeGroup.declarations} />
-    </Box>
-  );
+  return <ExportDeclarationView declaration={declaration} />;
 }

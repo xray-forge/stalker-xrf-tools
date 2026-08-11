@@ -1,19 +1,43 @@
 import { Nullable } from "@/core/types/general";
 
+export interface IExportsProject {
+  root: string;
+  declarations: Array<IExportDescriptor>;
+}
+
+export interface IExportSourceDescriptor {
+  path: string;
+  line: number;
+  column: number;
+}
+
 export interface IExportParameterDescriptor {
   name: string;
   typing: string;
-  comment: Nullable<string>;
+  description: Nullable<string>;
+  isOptional: boolean;
 }
 
-export interface IExportDescriptor {
-  filename: string;
+export interface IExportReturnDescriptor {
+  typing: string;
+  description: Nullable<string>;
+}
+
+export interface IExportDescriptorBase {
   name: string;
-  comment: Nullable<string>;
-  parameters: Array<IExportParameterDescriptor>;
-  typing: Nullable<string>;
-  line: number;
-  col: number;
+  description: Nullable<string>;
+  source: IExportSourceDescriptor;
 }
 
-export type TExportsDeclarations = Array<IExportDescriptor>;
+export interface ICallableExportDescriptor extends IExportDescriptorBase {
+  kind: "callable";
+  parameters: Array<IExportParameterDescriptor>;
+  returns: IExportReturnDescriptor;
+}
+
+export interface IValueExportDescriptor extends IExportDescriptorBase {
+  kind: "value";
+  typing: string;
+}
+
+export type IExportDescriptor = ICallableExportDescriptor | IValueExportDescriptor;

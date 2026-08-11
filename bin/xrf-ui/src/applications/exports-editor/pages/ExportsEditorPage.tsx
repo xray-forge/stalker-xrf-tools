@@ -9,7 +9,7 @@ export function ExportsEditorPage() {
   const exportsService: ExportsService = useInjection(ExportsService);
 
   if (exportsService.isReady) {
-    return exportsService.declarations.value ? <ExportsEditor /> : <ExportsOpenForm />;
+    return exportsService.project.value ? <ExportsEditor /> : <ExportsOpenForm />;
   }
 
   return (

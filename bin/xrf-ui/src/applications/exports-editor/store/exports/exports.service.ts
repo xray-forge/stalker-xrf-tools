@@ -1,10 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
-import { inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
-import { TExportsDeclarations } from "@/lib/exports";
+import { transformError } from "@/lib/error";
+import { IExportsProject } from "@/lib/exports";
 import { EExportsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
@@ -17,75 +17,116 @@ export class ExportsService {
   public isReady: boolean = false;
 
   @Observable()
-  public declarations: Loadable<Nullable<TExportsDeclarations>> = createLoadable(null);
+  public project: Loadable<Nullable<IExportsProject>> = createLoadable(null);
 
-  public constructor(private readonly projectService: ProjectService = inject(ProjectService)) {
+  public constructor() {
     makeObservable(this);
   }
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const declarations: Nullable<TExportsDeclarations> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
+    try {
+      const project: Nullable<IExportsProject> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
 
-    if (declarations) {
-      this.log.info("Existing parsed exports detected");
+      if (project) {
+        this.log.info("Existing exports project detected");
+      } else {
+        this.log.info("No existing exports project");
+      }
 
       runInAction(() => {
-        this.declarations = createLoadable(declarations);
+        this.project = createLoadable(project);
         this.isReady = true;
       });
-    } else {
-      const projectPath: Nullable<string> = this.projectService.xrfProjectPath;
+    } catch (error: unknown) {
+      const transformed: Error = transformError(error);
 
-      if (projectPath) {
-        this.openExports(projectPath).finally(() => {
-          runInAction(() => (this.isReady = true));
-        });
-      } else {
-        this.log.info("No existing parsed effects", projectPath);
-        runInAction(() => (this.isReady = true));
-      }
+      this.log.error("Failed to restore exports project:", transformed);
+
+      runInAction(() => {
+        this.project = this.project.asFailed(transformed, null);
+        this.isReady = true;
+      });
     }
   }
 
-  /**
-   * Release the parsed exports when the editor is navigated away from.
-   */
+  /** Release parsed exports when the editor is navigated away from. */
   @OnDeactivation()
   public onDeactivation(): void {
     releaseEditorProject(EExportsEditorCommand.CLOSE_XR_EXPORTS);
   }
 
   @BoundAction()
-  public async openExports(path: string): Promise<void> {
-    if (this.declarations.isLoading) {
-      return this.log.info("Skip loading parsing on path:", path);
+  public async openExportsProject(path: string): Promise<void> {
+    if (this.project.isLoading) {
+      return this.log.info("Skip parsing exports while another operation is running:", path);
     }
 
-    this.log.info("Parsing on path:", path);
+    this.log.info("Parsing exports from project:", path);
+    this.project = this.project.asLoading(null);
 
     try {
-      this.declarations = this.declarations.asLoading();
-
-      const result: TExportsDeclarations = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
+      const result: IExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
         projectPath: path,
       });
 
-      runInAction(() => (this.declarations = createLoadable(result)));
-    } catch (error) {
-      this.log.error("Got error when parsing exports:", error);
-      runInAction(() => (this.declarations = createLoadable(null, false, new Error(error as string))));
+      runInAction(() => (this.project = this.project.asReady(result)));
+    } catch (error: unknown) {
+      const transformed: Error = transformError(error);
+
+      this.log.error("Failed to parse exports:", transformed);
+      runInAction(() => (this.project = this.project.asFailed(transformed, null)));
     }
   }
 
   @BoundAction()
-  public async closeExports(): Promise<void> {
-    this.log.info("Closing exports");
+  public async refreshExportsProject(): Promise<void> {
+    const existing: Nullable<IExportsProject> = this.project.value;
 
-    this.declarations = this.declarations.asLoading();
+    if (!existing || this.project.isLoading) {
+      return;
+    }
 
-    await invoke(EExportsEditorCommand.CLOSE_XR_EXPORTS);
+    this.log.info("Refreshing exports project:", existing.root);
+    this.project = this.project.asLoading(existing);
 
-    runInAction(() => (this.declarations = createLoadable(null)));
+    try {
+      const result: IExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
+        projectPath: existing.root,
+      });
+
+      runInAction(() => (this.project = this.project.asReady(result)));
+    } catch (error: unknown) {
+      const transformed: Error = transformError(error);
+
+      this.log.error("Failed to refresh exports project:", transformed);
+      runInAction(() => (this.project = this.project.asFailed(transformed, existing)));
+    }
+  }
+
+  @BoundAction()
+  public async closeExportsProject(): Promise<void> {
+    const existing: Nullable<IExportsProject> = this.project.value;
+
+    if (this.project.isLoading) {
+      return;
+    }
+
+    this.log.info("Closing exports project");
+    this.project = this.project.asLoading(existing);
+
+    try {
+      await invoke(EExportsEditorCommand.CLOSE_XR_EXPORTS);
+      // Keep the rendered project alive until its caller navigates away; clearing it here unmounts the
+      // editor before React Router can process that navigation.
+      runInAction(() => (this.project = this.project.asReady(existing)));
+    } catch (error: unknown) {
+      const transformed: Error = transformError(error);
+
+      this.log.error("Failed to close exports project:", transformed);
+      runInAction(() => (this.project = this.project.asReady(existing)));
+
+      throw transformed;
+    }
   }
 }

@@ -14,19 +14,19 @@ export function ExportsOpenForm(): ReactElement {
   const exportsService: ExportsService = useInjection(ExportsService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const isLoading: boolean = exportsService.declarations.isLoading;
+  const isLoading: boolean = exportsService.project.isLoading;
 
   const project: IPathField = usePathField({
     id: "exports.open.project",
     title: "Provide path to xrf project",
     isDirectory: true,
     isDisabled: isLoading,
-    seed: async () => projectService.xrfProjectPath,
+    seed: async () => projectService.xrfProjectPath ?? projectService.getXrfProjectPath(),
   });
 
   const onOpen = useCallback(() => {
     if (project.value) {
-      exportsService.openExports(project.value);
+      void exportsService.openExportsProject(project.value);
     } else {
       log.info("Cannot open exports without a project path");
     }
@@ -36,7 +36,7 @@ export function ExportsOpenForm(): ReactElement {
     <PickerForm
       isLoading={isLoading}
       title={"Open script exports"}
-      error={exportsService.declarations.error ? String(exportsService.declarations.error) : undefined}
+      error={exportsService.project.error ? exportsService.project.error.message : undefined}
       backPath={"/exports-editor"}
       backDisabled={isLoading}
       submitLabel={"Open exports"}

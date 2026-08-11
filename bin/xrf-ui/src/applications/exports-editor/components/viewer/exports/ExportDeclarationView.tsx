@@ -1,0 +1,76 @@
+import { default as DataObjectIcon } from "@mui/icons-material/DataObject";
+import { Box, Chip, Typography } from "@mui/material";
+import { ReactElement } from "react";
+
+import { CallableExportDetails } from "@/applications/exports-editor/components/viewer/exports/CallableExportDetails";
+import { ExportSection } from "@/applications/exports-editor/components/viewer/exports/ExportSection";
+import { formatExportSignature } from "@/applications/exports-editor/components/viewer/exports/format-export-signature";
+import { BaseComponentProps } from "@/lib/dom/element-types";
+import { IExportDescriptor } from "@/lib/exports";
+
+export interface IExportDeclarationViewProps extends BaseComponentProps {
+  declaration: IExportDescriptor;
+}
+
+export function ExportDeclarationView({ declaration }: IExportDeclarationViewProps): ReactElement {
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0, minHeight: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          minHeight: 40,
+          paddingX: 1.5,
+          borderBottom: 1,
+          borderColor: "divider",
+          backgroundColor: "background.paper",
+        }}
+      >
+        <DataObjectIcon fontSize={"small"} sx={{ color: "text.secondary" }} />
+        <Typography noWrap variant={"body2"} className={"monospace"} sx={{ flexGrow: 1, minWidth: 0 }}>
+          {declaration.name}
+        </Typography>
+        <Chip size={"small"} variant={"outlined"} label={declaration.kind === "callable" ? "Callable" : "Value"} />
+      </Box>
+
+      <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto", padding: 3 }}>
+        <Box sx={{ width: "100%", maxWidth: 920 }}>
+          <ExportSection title={"Signature"}>
+            <Typography
+              component={"pre"}
+              className={"monospace"}
+              sx={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
+            >
+              {formatExportSignature(declaration)}
+            </Typography>
+          </ExportSection>
+
+          {declaration.description ? (
+            <ExportSection title={"Description"}>
+              <Typography variant={"body2"} sx={{ whiteSpace: "pre-wrap" }}>
+                {declaration.description}
+              </Typography>
+            </ExportSection>
+          ) : null}
+
+          {declaration.kind === "callable" ? (
+            <CallableExportDetails declaration={declaration} />
+          ) : (
+            <ExportSection title={"Value type"}>
+              <Typography variant={"body2"} className={"monospace"} sx={{ overflowWrap: "anywhere" }}>
+                {declaration.typing}
+              </Typography>
+            </ExportSection>
+          )}
+
+          <ExportSection title={"Source"} isLast={true}>
+            <Typography variant={"body2"} className={"monospace"} sx={{ overflowWrap: "anywhere" }}>
+              {declaration.source.path}:{declaration.source.line}:{declaration.source.column}
+            </Typography>
+          </ExportSection>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
