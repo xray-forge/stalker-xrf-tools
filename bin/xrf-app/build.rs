@@ -72,11 +72,14 @@ fn apply_inline_plugins(attributes: Attributes) -> Attributes {
           "get_spawn_file_artefact_spawns",
           "get_spawn_file_graphs",
           "get_spawn_file_header",
+          "get_spawn_file_path",
           "get_spawn_file_patrols",
           "has_spawn_file",
           "import_spawn_file",
           "open_spawn_file",
+          "pack_spawn_file",
           "save_spawn_file",
+          "unpack_spawn_file",
         ])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )

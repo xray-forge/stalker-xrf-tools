@@ -6459,10 +6459,10 @@
           "markdownDescription": "Denies the stdin_write command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-export-spawn-file`\n- `allow-close-spawn-file`\n- `allow-get-spawn-file`\n- `allow-get-spawn-file-alife-spawns`\n- `allow-get-spawn-file-artefact-spawns`\n- `allow-get-spawn-file-graphs`\n- `allow-get-spawn-file-header`\n- `allow-get-spawn-file-patrols`\n- `allow-has-spawn-file`\n- `allow-import-spawn-file`\n- `allow-open-spawn-file`\n- `allow-save-spawn-file`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-export-spawn-file`\n- `allow-close-spawn-file`\n- `allow-get-spawn-file`\n- `allow-get-spawn-file-alife-spawns`\n- `allow-get-spawn-file-artefact-spawns`\n- `allow-get-spawn-file-graphs`\n- `allow-get-spawn-file-header`\n- `allow-get-spawn-file-path`\n- `allow-get-spawn-file-patrols`\n- `allow-has-spawn-file`\n- `allow-import-spawn-file`\n- `allow-open-spawn-file`\n- `allow-pack-spawn-file`\n- `allow-save-spawn-file`\n- `allow-unpack-spawn-file`",
           "type": "string",
           "const": "spawns-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-export-spawn-file`\n- `allow-close-spawn-file`\n- `allow-get-spawn-file`\n- `allow-get-spawn-file-alife-spawns`\n- `allow-get-spawn-file-artefact-spawns`\n- `allow-get-spawn-file-graphs`\n- `allow-get-spawn-file-header`\n- `allow-get-spawn-file-patrols`\n- `allow-has-spawn-file`\n- `allow-import-spawn-file`\n- `allow-open-spawn-file`\n- `allow-save-spawn-file`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-export-spawn-file`\n- `allow-close-spawn-file`\n- `allow-get-spawn-file`\n- `allow-get-spawn-file-alife-spawns`\n- `allow-get-spawn-file-artefact-spawns`\n- `allow-get-spawn-file-graphs`\n- `allow-get-spawn-file-header`\n- `allow-get-spawn-file-path`\n- `allow-get-spawn-file-patrols`\n- `allow-has-spawn-file`\n- `allow-import-spawn-file`\n- `allow-open-spawn-file`\n- `allow-pack-spawn-file`\n- `allow-save-spawn-file`\n- `allow-unpack-spawn-file`"
         },
         {
           "description": "Enables the close_spawn_file command without any pre-configured scope.",
@@ -6507,6 +6507,12 @@
           "markdownDescription": "Enables the get_spawn_file_header command without any pre-configured scope."
         },
         {
+          "description": "Enables the get_spawn_file_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "spawns-editor:allow-get-spawn-file-path",
+          "markdownDescription": "Enables the get_spawn_file_path command without any pre-configured scope."
+        },
+        {
           "description": "Enables the get_spawn_file_patrols command without any pre-configured scope.",
           "type": "string",
           "const": "spawns-editor:allow-get-spawn-file-patrols",
@@ -6531,10 +6537,22 @@
           "markdownDescription": "Enables the open_spawn_file command without any pre-configured scope."
         },
         {
+          "description": "Enables the pack_spawn_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "spawns-editor:allow-pack-spawn-file",
+          "markdownDescription": "Enables the pack_spawn_file command without any pre-configured scope."
+        },
+        {
           "description": "Enables the save_spawn_file command without any pre-configured scope.",
           "type": "string",
           "const": "spawns-editor:allow-save-spawn-file",
           "markdownDescription": "Enables the save_spawn_file command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the unpack_spawn_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "spawns-editor:allow-unpack-spawn-file",
+          "markdownDescription": "Enables the unpack_spawn_file command without any pre-configured scope."
         },
         {
           "description": "Denies the close_spawn_file command without any pre-configured scope.",
@@ -6579,6 +6597,12 @@
           "markdownDescription": "Denies the get_spawn_file_header command without any pre-configured scope."
         },
         {
+          "description": "Denies the get_spawn_file_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "spawns-editor:deny-get-spawn-file-path",
+          "markdownDescription": "Denies the get_spawn_file_path command without any pre-configured scope."
+        },
+        {
           "description": "Denies the get_spawn_file_patrols command without any pre-configured scope.",
           "type": "string",
           "const": "spawns-editor:deny-get-spawn-file-patrols",
@@ -6603,10 +6627,22 @@
           "markdownDescription": "Denies the open_spawn_file command without any pre-configured scope."
         },
         {
+          "description": "Denies the pack_spawn_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "spawns-editor:deny-pack-spawn-file",
+          "markdownDescription": "Denies the pack_spawn_file command without any pre-configured scope."
+        },
+        {
           "description": "Denies the save_spawn_file command without any pre-configured scope.",
           "type": "string",
           "const": "spawns-editor:deny-save-spawn-file",
           "markdownDescription": "Denies the save_spawn_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the unpack_spawn_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "spawns-editor:deny-unpack-spawn-file",
+          "markdownDescription": "Denies the unpack_spawn_file command without any pre-configured scope."
         },
         {
           "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-translations-project`\n- `allow-open-translations-project`\n- `allow-get-translations-project`\n- `allow-close-translations-project`",
