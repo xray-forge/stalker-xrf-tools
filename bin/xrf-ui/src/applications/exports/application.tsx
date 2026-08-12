@@ -1,9 +1,16 @@
 import { default as SwapHorizIcon } from "@mui/icons-material/SwapHoriz";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import { ExportsService } from "@/applications/exports/store/exports";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const EXPORTS_APPLICATION: IApplication = {
+export const EXPORTS_APPLICATION: IApplicationDescriptor = {
+  container: { bindings: [ExportsService] },
   Component: lazy(() =>
     import("@/applications/exports").then((it) => ({
       default: it.ExportsApplication,

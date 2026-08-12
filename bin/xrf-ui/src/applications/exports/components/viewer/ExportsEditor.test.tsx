@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { fireEvent, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
-import { ExportsApplicationScreen } from "@/applications/exports/ExportsApplicationScreen";
+import { ExportsApplication } from "@/applications/exports/ExportsApplication";
 import { ExportsService } from "@/applications/exports/store/exports";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { ProjectService } from "@/core/store/project";
@@ -58,7 +58,7 @@ describe("opened exports editor", () => {
   function renderEditor() {
     return renderWithProviders(
       <>
-        <ExportsApplicationScreen />
+        <ExportsApplication />
         <ApplicationStatusBar />
       </>,
       { route: "/exports", bindings: [ProjectService, ExportsService] }
@@ -157,7 +157,7 @@ describe("opened exports editor", () => {
   it("closes into its own picker rather than navigating away", async () => {
     // Closing used to leave for the exports landing pane, which held a single card. The application
     // draws its own picker whenever nothing is open, so there is nowhere else to go.
-    const { findByLabelText, findByText } = renderWithProviders(<ExportsApplicationScreen />, {
+    const { findByLabelText, findByText } = renderWithProviders(<ExportsApplication />, {
       route: "/exports",
       bindings: [ProjectService, ExportsService],
     });
@@ -204,7 +204,7 @@ describe("empty exports editor", () => {
       [EExportsEditorCommand.GET_XR_EXPORTS]: { root: PROJECT.root, declarations: [] },
     });
 
-    const { findAllByText, findByText } = renderWithProviders(<ExportsApplicationScreen />, {
+    const { findAllByText, findByText } = renderWithProviders(<ExportsApplication />, {
       route: "/exports",
       bindings: [ProjectService, ExportsService],
     });

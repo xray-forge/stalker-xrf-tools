@@ -3,7 +3,7 @@ import * as dialog from "@tauri-apps/plugin-dialog";
 import { fireEvent, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
-import { ArchivesApplicationScreen } from "@/applications/archives/ArchivesApplicationScreen";
+import { ArchivesApplication } from "@/applications/archives/ArchivesApplication";
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
@@ -58,7 +58,7 @@ describe("opened archives editor", () => {
   function renderEditor() {
     return renderWithProviders(
       <>
-        <ArchivesApplicationScreen />
+        <ArchivesApplication />
         <ApplicationStatusBar />
       </>,
       { route: "/archives", bindings: [ProjectService, ArchivesService] }
@@ -187,7 +187,7 @@ describe("opened archives editor", () => {
       <EditorBusyProvider>
         <EditorPanelsProvider>
           <ApplicationShellFrame>
-            <ArchivesApplicationScreen />
+            <ArchivesApplication />
           </ApplicationShellFrame>
         </EditorPanelsProvider>
       </EditorBusyProvider>,
@@ -208,7 +208,7 @@ describe("opened archives editor", () => {
       <EditorBusyProvider>
         <EditorPanelsProvider>
           <ApplicationShellFrame>
-            <ArchivesApplicationScreen />
+            <ArchivesApplication />
           </ApplicationShellFrame>
         </EditorPanelsProvider>
       </EditorBusyProvider>,
@@ -227,7 +227,7 @@ describe("opened archives editor", () => {
   it("closes into its own picker rather than navigating away", async () => {
     // Closing used to leave for the archives landing pane. There is no pane above an application any
     // more, and the application already draws its picker whenever nothing is open.
-    const { findByLabelText, findByText, queryByText } = renderWithProviders(<ArchivesApplicationScreen />, {
+    const { findByLabelText, findByText, queryByText } = renderWithProviders(<ArchivesApplication />, {
       route: "/archives",
       bindings: [ProjectService, ArchivesService],
     });
@@ -270,7 +270,7 @@ describe("opened archives editor", () => {
       <EditorBusyProvider>
         <EditorPanelsProvider>
           <ApplicationShellFrame>
-            <ArchivesApplicationScreen />
+            <ArchivesApplication />
           </ApplicationShellFrame>
         </EditorPanelsProvider>
       </EditorBusyProvider>,

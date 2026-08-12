@@ -7,13 +7,14 @@ import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/components/er
 import { ApplicationPanelSlot } from "@/core/components/shell/ApplicationPanelSlot";
 import { ApplicationPanelStripe } from "@/core/components/shell/ApplicationPanelStripe";
 import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
+import { ApplicationScope } from "@/core/components/shell/ApplicationScope";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { IEditorPanel, selectPanelsOnSide, useEditorPanelsRegistry } from "@/core/components/shell/EditorPanelsContext";
 import { NOTIFICATIONS_PANEL } from "@/core/components/shell/global-panels";
 import { PanelStripeButton } from "@/core/components/shell/PanelStripeButton";
 import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
 import { IPanelSlot, usePanelSlot } from "@/core/components/shell/use-panel-slot";
-import { APPLICATION_SOURCE } from "@/core/router/application";
+import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/router/application";
 import { findApplication } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
@@ -35,8 +36,10 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
 
   const { pathname } = useLocation();
 
+  const application: Nullable<IApplicationDescriptor> = findApplication(pathname);
+
   // Keyed per application so the visuals panel choice does not leak into another one.
-  const applicationPath: string = findApplication(pathname)?.path ?? "root";
+  const applicationPath: string = application?.path ?? "root";
 
   const leftPanels: Array<IEditorPanel> = selectPanelsOnSide(panels, "left");
   const rightPanels: Array<IEditorPanel> = selectPanelsOnSide(panels, "right");
@@ -70,15 +73,17 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
           onTogglePanel={leftSlot.onTogglePanel}
         />
 
-        <ApplicationPanelSlot side={"left"} slot={leftSlot} />
+        <ApplicationScope key={applicationPath} application={application}>
+          <ApplicationPanelSlot side={"left"} slot={leftSlot} />
 
-        <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
-          <ErrorBoundary resetKey={pathname} fallback={onError} onCaught={onCaught}>
-            {children}
-          </ErrorBoundary>
-        </Box>
+          <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
+            <ErrorBoundary resetKey={pathname} fallback={onError} onCaught={onCaught}>
+              {children}
+            </ErrorBoundary>
+          </Box>
 
-        <ApplicationPanelSlot side={"right"} slot={rightSlot} />
+          <ApplicationPanelSlot side={"right"} slot={rightSlot} />
+        </ApplicationScope>
 
         <ApplicationPanelStripe
           side={"right"}

@@ -26,7 +26,7 @@ import { SPAWN_PACK_APPLICATION } from "@/applications/spawn-pack/application";
 import { SPAWN_UNPACK_APPLICATION } from "@/applications/spawn-unpack/application";
 import { TRANSLATIONS_APPLICATION } from "@/applications/translations/application";
 import { VISUAL_PREVIEW_APPLICATION } from "@/applications/visual-preview/application";
-import { EApplicationGroupId, IApplication, IApplicationGroup } from "@/core/router/application";
+import { EApplicationGroupId, IApplicationDescriptor, IApplicationGroup } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
 
 /**
@@ -53,7 +53,7 @@ export const APPLICATION_GROUPS: Array<IApplicationGroup> = [
  * single act inside its own directory plus a line in this list. Deliberately flat: the group is a
  * label home reads, not a level anything routes through.
  */
-export const APPLICATIONS: Array<IApplication> = [
+export const APPLICATIONS: Array<IApplicationDescriptor> = [
   ARCHIVES_APPLICATION,
   ARCHIVES_UNPACK_APPLICATION,
   CONFIGS_EXPLORER_APPLICATION,
@@ -81,18 +81,18 @@ export const APPLICATIONS: Array<IApplication> = [
  * Matches the whole segment rather than a bare prefix: `/spawn` is a prefix of `/spawn-pack`, so
  * `startsWith` alone would hand every pack route to the editor.
  */
-export function findApplication(pathname: string): Nullable<IApplication> {
+export function findApplication(pathname: string): Nullable<IApplicationDescriptor> {
   return (
     APPLICATIONS.find(
-      (application: IApplication) =>
+      (application: IApplicationDescriptor) =>
         pathname === application.path || pathname.startsWith(`${application.path}/`)
     ) ?? null
   );
 }
 
 /** Resolve an application from what a notification recorded as its source. */
-export function findApplicationById(id: string): Nullable<IApplication> {
-  return APPLICATIONS.find((application: IApplication) => application.id === id) ?? null;
+export function findApplicationById(id: string): Nullable<IApplicationDescriptor> {
+  return APPLICATIONS.find((application: IApplicationDescriptor) => application.id === id) ?? null;
 }
 
 /**

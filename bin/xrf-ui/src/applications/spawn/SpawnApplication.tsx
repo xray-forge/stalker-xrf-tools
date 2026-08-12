@@ -1,23 +1,18 @@
-import { Container, ContainerConfig } from "@wirestate/core";
-import { ContainerProvider, useContainer } from "@wirestate/react";
-import { ReactElement, useMemo } from "react";
+import { useInjection } from "@wirestate/react";
+import { ReactElement } from "react";
 
-import { SpawnApplicationScreen } from "@/applications/spawn/SpawnApplicationScreen";
+import { SpawnEditor } from "@/applications/spawn/components/editor/SpawnEditor";
+import { SpawnEditorOpenForm } from "@/applications/spawn/components/SpawnEditorOpenForm";
+import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { SpawnFileService } from "@/lib/spawn-file";
 
-/**
- * Browse and edit a packed spawn file.
- *
- * The pack and unpack applications bind their own `SpawnFileService`, which is the point: they used to
- * share this one and closed the file out from under an open editor on their way out.
- */
+/** Picker until a spawn file is open, editor once it is. */
 export function SpawnApplication(): ReactElement {
-  const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [SpawnFileService] }), [parent]);
+  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
-  return (
-    <ContainerProvider config={config}>
-      <SpawnApplicationScreen />
-    </ContainerProvider>
-  );
+  if (!spawnFileService.isReady) {
+    return <DelayedProgress />;
+  }
+
+  return spawnFileService.isOpen ? <SpawnEditor /> : <SpawnEditorOpenForm />;
 }

@@ -1,9 +1,14 @@
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const CONFIGS_EXPLORER_APPLICATION: IApplication = {
+export const CONFIGS_EXPLORER_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("@/applications/configs-explorer").then((it) => ({
       default: it.ConfigsExplorerApplication,

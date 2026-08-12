@@ -1,9 +1,14 @@
 import { default as FactCheckIcon } from "@mui/icons-material/FactCheck";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const CONFIGS_VERIFY_APPLICATION: IApplication = {
+export const CONFIGS_VERIFY_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("@/applications/configs-verify").then((it) => ({
       default: it.ConfigsVerifyApplication,

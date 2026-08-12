@@ -1,9 +1,17 @@
 import { default as Inventory2Icon } from "@mui/icons-material/Inventory2";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
+import { AssetService } from "@/lib/assets";
+import { EquipmentService } from "@/lib/icons";
 
-export const EQUIPMENT_ICONS_PACK_APPLICATION: IApplication = {
+export const EQUIPMENT_ICONS_PACK_APPLICATION: IApplicationDescriptor = {
+  container: { bindings: [AssetService, EquipmentService] },
   Component: lazy(() =>
     import("@/applications/equipment-icons-pack").then((it) => ({
       default: it.EquipmentIconsPackApplication,

@@ -1,20 +1,22 @@
-import { Container, ContainerConfig } from "@wirestate/core";
-import { ContainerProvider, useContainer } from "@wirestate/react";
-import { ReactElement, useMemo } from "react";
+import { CircularProgress, Grid } from "@mui/material";
+import { useInjection } from "@wirestate/react";
+import { ReactElement } from "react";
 
-import { ExportsApplicationScreen } from "@/applications/exports/ExportsApplicationScreen";
+import { ExportsOpenForm } from "@/applications/exports/components/ExportsOpenForm";
+import { ExportsEditor } from "@/applications/exports/components/viewer/ExportsEditor";
 import { ExportsService } from "@/applications/exports/store/exports";
 
-/**
- * Inspect the typescript extern declarations an XRF project exports.
- */
+/** Picker until a project is open, viewer once it is. */
 export function ExportsApplication(): ReactElement {
-  const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [ExportsService] }), [parent]);
+  const exportsService: ExportsService = useInjection(ExportsService);
+
+  if (exportsService.isReady) {
+    return exportsService.project.value ? <ExportsEditor /> : <ExportsOpenForm />;
+  }
 
   return (
-    <ContainerProvider config={config}>
-      <ExportsApplicationScreen />
-    </ContainerProvider>
+    <Grid container sx={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}>
+      <CircularProgress />
+    </Grid>
   );
 }

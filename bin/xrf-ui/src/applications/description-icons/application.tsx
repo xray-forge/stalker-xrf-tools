@@ -1,9 +1,14 @@
 import { default as DescriptionIcon } from "@mui/icons-material/Description";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const DESCRIPTION_ICONS_APPLICATION: IApplication = {
+export const DESCRIPTION_ICONS_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("@/applications/description-icons").then((it) => ({
       default: it.DescriptionIconsApplication,

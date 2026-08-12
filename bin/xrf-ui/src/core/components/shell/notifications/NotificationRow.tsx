@@ -10,7 +10,7 @@ import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/mater
 import { format } from "date-fns";
 import { ReactElement, ReactNode, useCallback, useState } from "react";
 
-import { IApplication, IApplicationGroup } from "@/core/router/application";
+import { IApplicationDescriptor, IApplicationGroup } from "@/core/router/application";
 import { findApplicationById, findApplicationGroupById } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
@@ -47,7 +47,7 @@ export function NotificationRow({ notification }: INotificationRowProps): ReactE
 
   const [isExpanded, setExpanded] = useState<boolean>(false);
 
-  const application: Nullable<IApplication> = findApplicationById(notification.source);
+  const application: Nullable<IApplicationDescriptor> = findApplicationById(notification.source);
   const group: Nullable<IApplicationGroup> = application ? null : findApplicationGroupById(notification.source);
   const createdAt: Date = new Date(notification.createdAt);
   const isDev: boolean = notification.severity === ENotificationSeverity.DEV;

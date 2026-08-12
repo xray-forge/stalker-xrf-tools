@@ -1,9 +1,14 @@
 import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const PROJECT_VISUALS_APPLICATION: IApplication = {
+export const PROJECT_VISUALS_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("@/applications/project-visuals").then((it) => ({
       default: it.ProjectVisualsApplication,

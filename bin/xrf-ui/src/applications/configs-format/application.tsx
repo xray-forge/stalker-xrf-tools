@@ -1,9 +1,14 @@
 import { default as FormatAlignLeftIcon } from "@mui/icons-material/FormatAlignLeft";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const CONFIGS_FORMAT_APPLICATION: IApplication = {
+export const CONFIGS_FORMAT_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("@/applications/configs-format").then((it) => ({
       default: it.ConfigsFormatApplication,

@@ -7,7 +7,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { ApplicationCard } from "@/core/components/navigation/ApplicationCard";
-import { EApplicationStatus, IApplication, IApplicationGroup } from "@/core/router/application";
+import { EApplicationStatus, IApplicationDescriptor, IApplicationGroup } from "@/core/router/application";
 import { APPLICATION_GROUPS, APPLICATIONS } from "@/core/router/applications";
 import { SettingsService } from "@/core/store/settings";
 
@@ -31,12 +31,12 @@ export function Root(): ReactElement {
 
   const isDevModeEnabled: boolean = settingsService.isDevModeEnabled;
 
-  const matched: Array<IApplication> = useMemo(() => {
+  const matched: Array<IApplicationDescriptor> = useMemo(() => {
     const needle: string = query.trim().toLowerCase();
 
     return needle
       ? APPLICATIONS.filter(
-          (application: IApplication) =>
+          (application: IApplicationDescriptor) =>
             application.label.toLowerCase().includes(needle) || application.description.toLowerCase().includes(needle)
         )
       : APPLICATIONS;
@@ -44,7 +44,10 @@ export function Root(): ReactElement {
 
   const onChangeQuery = useCallback((event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value), []);
 
-  const onOpen = useCallback((application: IApplication) => navigate(application.path, { replace: true }), [navigate]);
+  const onOpen = useCallback(
+    (application: IApplicationDescriptor) => navigate(application.path, { replace: true }),
+    [navigate]
+  );
 
   return (
     <EditorLayout toolbar={<EditorToolbar />}>
@@ -74,7 +77,9 @@ export function Root(): ReactElement {
 
         {matched.length ? (
           APPLICATION_GROUPS.map((group: IApplicationGroup) => {
-            const applications: Array<IApplication> = matched.filter((it: IApplication) => it.group === group.id);
+            const applications: Array<IApplicationDescriptor> = matched.filter(
+              (it: IApplicationDescriptor) => it.group === group.id
+            );
 
             if (!applications.length) {
               return null;
@@ -90,7 +95,7 @@ export function Root(): ReactElement {
                 </Box>
 
                 <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 2 }}>
-                  {applications.map((application: IApplication) => (
+                  {applications.map((application: IApplicationDescriptor) => (
                     <ApplicationCard
                       key={application.id}
                       application={application}

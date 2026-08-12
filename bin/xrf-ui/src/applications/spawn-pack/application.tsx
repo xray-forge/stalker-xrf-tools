@@ -1,9 +1,16 @@
 import { default as Inventory2Icon } from "@mui/icons-material/Inventory2";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
+import { SpawnFileService } from "@/lib/spawn-file";
 
-export const SPAWN_PACK_APPLICATION: IApplication = {
+export const SPAWN_PACK_APPLICATION: IApplicationDescriptor = {
+  container: { bindings: [SpawnFileService] },
   Component: lazy(() =>
     import("@/applications/spawn-pack").then((it) => ({
       default: it.SpawnPackApplication,

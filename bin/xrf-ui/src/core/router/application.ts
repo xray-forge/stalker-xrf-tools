@@ -1,3 +1,4 @@
+import { ContainerConfig } from "@wirestate/core";
 import { ComponentType, ReactElement } from "react";
 
 /**
@@ -50,17 +51,17 @@ export enum EApplicationStatus {
   READY = "ready",
 }
 
-export interface IApplication {
+export interface IApplicationDescriptor {
   id: EApplicationId;
   group: EApplicationGroupId;
-  /**
-   * The one name this application answers to, everywhere.
-   */
+  /** The one name this application answers to, everywhere. */
   label: string;
   description: string;
   icon: ReactElement;
   path: string;
   status: EApplicationStatus;
+  /** The container this application's services live in. Omit it to run in the root one. */
+  container?: Omit<ContainerConfig, "parent">;
   Component: ComponentType;
 }
 

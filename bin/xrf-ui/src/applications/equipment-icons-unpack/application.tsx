@@ -1,9 +1,14 @@
 import { default as UnarchiveIcon } from "@mui/icons-material/Unarchive";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const EQUIPMENT_ICONS_UNPACK_APPLICATION: IApplication = {
+export const EQUIPMENT_ICONS_UNPACK_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("@/applications/equipment-icons-unpack").then((it) => ({
       default: it.EquipmentIconsUnpackApplication,

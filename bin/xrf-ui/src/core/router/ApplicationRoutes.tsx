@@ -4,7 +4,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { Root } from "@/applications/Root";
 import { ApplicationLoader } from "@/core/components/ApplicationLoader";
 import { NavigationError } from "@/core/components/NavigationError";
-import { IApplication } from "@/core/router/application";
+import { IApplicationDescriptor } from "@/core/router/application";
 import { APPLICATIONS, findApplication } from "@/core/router/applications";
 
 /**
@@ -22,7 +22,7 @@ export function ApplicationRoutes(): ReactElement {
       <Routes>
         <Route path={"/"} element={<Root />} />
 
-        {APPLICATIONS.map(({ path, Component }: IApplication) => (
+        {APPLICATIONS.map(({ path, Component }: IApplicationDescriptor) => (
           <Route key={path} path={`${path}/*`} element={<Component />} />
         ))}
 

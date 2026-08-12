@@ -3,7 +3,7 @@ import { AppBar, Box, IconButton, Toolbar, Tooltip, Typography } from "@mui/mate
 import { ReactElement, ReactNode, useCallback } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
-import { IApplication } from "@/core/router/application";
+import { IApplicationDescriptor } from "@/core/router/application";
 import { findApplication } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
@@ -36,7 +36,7 @@ export function EditorToolbar({
   const navigate: NavigateFunction = useNavigate();
   const { pathname } = useLocation();
 
-  const application: Nullable<IApplication> = findApplication(pathname);
+  const application: Nullable<IApplicationDescriptor> = findApplication(pathname);
 
   const onLeave = useCallback(() => {
     if (onBack) {

@@ -1,21 +1,22 @@
-import { Container, ContainerConfig } from "@wirestate/core";
-import { ContainerProvider, useContainer } from "@wirestate/react";
-import { ReactElement, useMemo } from "react";
+import { CircularProgress, Grid } from "@mui/material";
+import { useInjection } from "@wirestate/react";
+import { ReactElement } from "react";
 
-import { EquipmentIconsApplicationScreen } from "@/applications/equipment-icons/EquipmentIconsApplicationScreen";
-import { AssetService } from "@/lib/assets";
+import { EquipmentSpriteEditor } from "@/applications/equipment-icons/components/equipment-editor/EquipmentSpriteEditor";
+import { IconsEditorEquipmentOpenForm } from "@/applications/equipment-icons/components/equipment-editor/IconsEditorEquipmentOpenForm";
 import { EquipmentService } from "@/lib/icons";
 
-/**
- * Inspect and edit the equipment inventory icon sprite.
- */
+/** Picker until a sprite is open, editor once it is. */
 export function EquipmentIconsApplication(): ReactElement {
-  const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [AssetService, EquipmentService] }), [parent]);
+  const equipmentService: EquipmentService = useInjection(EquipmentService);
+
+  if (equipmentService.isReady) {
+    return equipmentService.spriteImage.value ? <EquipmentSpriteEditor /> : <IconsEditorEquipmentOpenForm />;
+  }
 
   return (
-    <ContainerProvider config={config}>
-      <EquipmentIconsApplicationScreen />
-    </ContainerProvider>
+    <Grid container sx={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}>
+      <CircularProgress />
+    </Grid>
   );
 }

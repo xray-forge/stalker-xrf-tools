@@ -3,6 +3,7 @@ import { userEvent } from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 
 import { ExportsApplication } from "@/applications/exports/ExportsApplication";
+import { ApplicationShell } from "@/core/components/shell/ApplicationShell";
 import { ProjectService } from "@/core/store/project";
 import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
@@ -20,12 +21,19 @@ describe("ExportsApplication", () => {
     });
   });
 
+  /**
+   * Through the shell rather than on its own: the container an application's services live in is built
+   * by the frame from the descriptor, so mounting the component alone would prove nothing about how it
+   * is actually wired.
+   */
   function renderApplication(route: string) {
     return renderWithProviders(
-      <Routes>
-        <Route path={"/exports/*"} element={<ExportsApplication />} />
-        <Route path={"/"} element={<div>Application home</div>} />
-      </Routes>,
+      <ApplicationShell>
+        <Routes>
+          <Route path={"/exports/*"} element={<ExportsApplication />} />
+          <Route path={"/"} element={<div>Application home</div>} />
+        </Routes>
+      </ApplicationShell>,
       { route, bindings: [ProjectService] }
     );
   }
@@ -41,7 +49,9 @@ describe("ExportsApplication", () => {
     expect(mockInvoke).not.toHaveBeenCalledWith(EExportsEditorCommand.OPEN_XR_EXPORTS, expect.anything());
   });
 
-  it("opens the project the picker was given", async () => {
+  it("resolves the services its descriptor declares, with nothing bound above the shell", async () => {
+    // `ExportsService` is bound by the frame out of `EXPORTS_APPLICATION.bindings`. Only
+    // `ProjectService` is provided here, so if that wiring broke this would throw rather than render.
     const { findByRole } = renderApplication("/exports");
 
     await userEvent.click(await findByRole("button", { name: "Open exports" }));
@@ -49,11 +59,5 @@ describe("ExportsApplication", () => {
     expect(mockInvoke).toHaveBeenCalledWith(EExportsEditorCommand.OPEN_XR_EXPORTS, {
       projectPath: "C:\\projects\\active-xrf",
     });
-  });
-
-  it("provides its own container, so it needs nothing bound above it", async () => {
-    const { findByText } = renderApplication("/exports");
-
-    expect(await findByText("Open script exports")).toBeInTheDocument();
   });
 });

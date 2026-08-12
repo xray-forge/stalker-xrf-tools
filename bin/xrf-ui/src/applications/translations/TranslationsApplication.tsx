@@ -1,20 +1,22 @@
-import { Container, ContainerConfig } from "@wirestate/core";
-import { ContainerProvider, useContainer } from "@wirestate/react";
-import { ReactElement, useMemo } from "react";
+import { CircularProgress, Grid } from "@mui/material";
+import { useInjection } from "@wirestate/react";
+import { ReactElement } from "react";
 
+import { TranslationsEditor } from "@/applications/translations/components/TranslationsEditor";
+import { TranslationsEditorOpenForm } from "@/applications/translations/components/TranslationsEditorOpenForm";
 import { TranslationsService } from "@/applications/translations/store/translations";
-import { TranslationsApplicationScreen } from "@/applications/translations/TranslationsApplicationScreen";
 
-/**
- * Browse and edit localization tables.
- */
+/** Picker until a project is open, editor once it is. */
 export function TranslationsApplication(): ReactElement {
-  const parent: Container = useContainer();
-  const config: ContainerConfig = useMemo(() => ({ parent, bindings: [TranslationsService] }), [parent]);
+  const translationsService: TranslationsService = useInjection(TranslationsService);
+
+  if (translationsService.isReady) {
+    return translationsService.project.value ? <TranslationsEditor /> : <TranslationsEditorOpenForm />;
+  }
 
   return (
-    <ContainerProvider config={config}>
-      <TranslationsApplicationScreen />
-    </ContainerProvider>
+    <Grid container sx={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}>
+      <CircularProgress />
+    </Grid>
   );
 }

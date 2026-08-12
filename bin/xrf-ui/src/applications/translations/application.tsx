@@ -1,9 +1,16 @@
 import { default as TranslateIcon } from "@mui/icons-material/Translate";
 import { lazy } from "react";
 
-import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+import { TranslationsService } from "@/applications/translations/store/translations";
+import {
+  EApplicationGroupId,
+  EApplicationId,
+  EApplicationStatus,
+  IApplicationDescriptor,
+} from "@/core/router/application";
 
-export const TRANSLATIONS_APPLICATION: IApplication = {
+export const TRANSLATIONS_APPLICATION: IApplicationDescriptor = {
+  container: { bindings: [TranslationsService] },
   Component: lazy(() =>
     import("@/applications/translations").then((it) => ({
       default: it.TranslationsApplication,

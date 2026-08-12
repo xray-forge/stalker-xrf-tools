@@ -24,7 +24,7 @@ export interface IRenderOptions {
 }
 
 /**
- * Renders whatever the subject publishes to the left, the way the shell's rail slot does.
+ * Renders whatever the subject publishes to the left, standing in for `ApplicationPanelSlot`.
  */
 function LeftPanelsOutlet(): ReactElement {
   const panels: Array<IEditorPanel> = useEditorPanelsRegistry();

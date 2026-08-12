@@ -1,12 +1,12 @@
 import { Box, Card, CardActionArea, Tooltip, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { IApplication } from "@/core/router/application";
+import { IApplicationDescriptor } from "@/core/router/application";
 
 export interface IApplicationCardProps {
-  application: IApplication;
+  application: IApplicationDescriptor;
   isEnabled: boolean;
-  onOpen: (application: IApplication) => void;
+  onOpen: (application: IApplicationDescriptor) => void;
 }
 
 /**
