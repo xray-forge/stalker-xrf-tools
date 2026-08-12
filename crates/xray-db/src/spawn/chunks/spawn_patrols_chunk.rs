@@ -13,6 +13,11 @@ use crate::data::patrols::patrol::Patrol;
 use crate::export::FileImportExport;
 
 /// `CPatrolPathStorage::load` in xray engine.
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-db.ts")
+)]
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct SpawnPatrolsChunk {
   pub patrols: Vec<Patrol>,

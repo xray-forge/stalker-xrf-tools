@@ -13,6 +13,11 @@ use crate::export::{FileImportExport, LtxImportExport};
 
 /// Artefacts spawns samples.
 /// Is single plain chunk with nodes list in it.
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-db.ts")
+)]
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SpawnArtefactSpawnsChunk {

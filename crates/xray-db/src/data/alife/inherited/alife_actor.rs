@@ -9,6 +9,11 @@ use crate::data::alife::inherited::alife_object_actor::AlifeObjectActor;
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-db.ts")
+)]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AlifeActor {

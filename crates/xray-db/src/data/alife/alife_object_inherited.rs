@@ -38,6 +38,11 @@ use crate::data::alife::inherited::alife_zone_visual::AlifeZoneVisual;
 use crate::data::meta::alife_class::AlifeClass;
 use crate::export::LtxImportExport;
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-db.ts")
+)]
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum AlifeObjectInherited {

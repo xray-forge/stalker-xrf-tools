@@ -1,6 +1,11 @@
 use serde::{Deserialize, Serialize};
 use xray_error::{XRayError, XRayResult};
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-db.ts")
+)]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AlifeSmartCoverLoophole {

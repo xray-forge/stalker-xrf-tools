@@ -8,6 +8,11 @@ use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
 use crate::data::generic::shape::Shape;
 use crate::export::LtxImportExport;
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-db.ts")
+)]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AlifeObjectShape {

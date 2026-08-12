@@ -1,6 +1,11 @@
 use serde::Serialize;
 use xray_error::XRayError;
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-ltx.ts")
+)]
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LtxProjectVerifyResult {

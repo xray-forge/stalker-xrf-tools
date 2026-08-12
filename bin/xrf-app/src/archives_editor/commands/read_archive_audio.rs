@@ -11,6 +11,11 @@ use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
 /// The X-Ray source parameters carried in a sound's first vorbis comment.
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xrf-app.ts")
+)]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveAudioParameters {
@@ -21,6 +26,11 @@ pub struct ArchiveAudioParameters {
   pub max_ai_distance: f32,
 }
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xrf-app.ts")
+)]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveAudioPreview {

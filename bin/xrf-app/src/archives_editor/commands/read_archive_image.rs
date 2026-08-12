@@ -10,6 +10,11 @@ use xray_utils::encode_bytes_to_standard_base64;
 use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xrf-app.ts")
+)]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveImagePreview {

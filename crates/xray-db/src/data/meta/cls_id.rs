@@ -6,6 +6,11 @@ use xray_error::{XRayError, XRayResult};
 use crate::data::meta::map::SECTION_TO_CLS_ID;
 
 /// todo: Add script to parse system ltx and read all the data from ltx/txt file instead.
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-db.ts")
+)]
 #[derive(Clone, Debug, Enum, PartialEq, Serialize, Deserialize, Eq)]
 pub enum ClsId {
   AiCrow,

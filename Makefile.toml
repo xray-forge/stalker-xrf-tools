@@ -86,7 +86,7 @@ args = [
   "test",
   "--workspace",
   "--features",
-  "xray-archive/typescript-bindings,xray-db/typescript-bindings,xray-export/typescript-bindings",
+  "xray-archive/typescript-bindings,xray-db/typescript-bindings,xray-export/typescript-bindings,xray-error/typescript-bindings,xray-ltx/typescript-bindings,xrf-app/typescript-bindings",
   "export_bindings",
 ]
 
