@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { ExportsService } from "@/applications/exports-editor/store/exports/exports.service";
 import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { IExportsProject } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
 
@@ -20,7 +21,7 @@ describe("ExportsService", () => {
   it("restores an existing backend session", async () => {
     setMockInvokeResponses({ [EExportsEditorCommand.GET_XR_EXPORTS]: PROJECT });
 
-    const service = new ExportsService();
+    const service = mockInjectedService(ExportsService).service;
 
     await service.onProvision();
 
@@ -30,7 +31,7 @@ describe("ExportsService", () => {
   });
 
   it("does not open a project when no retained session exists", async () => {
-    const service = new ExportsService();
+    const service = mockInjectedService(ExportsService).service;
 
     await service.onProvision();
 
@@ -47,7 +48,7 @@ describe("ExportsService", () => {
       },
     });
 
-    const service = new ExportsService();
+    const service = mockInjectedService(ExportsService).service;
 
     await service.onProvision();
 
@@ -57,7 +58,7 @@ describe("ExportsService", () => {
   });
 
   it("opens only the explicitly provided project", async () => {
-    const service = new ExportsService();
+    const service = mockInjectedService(ExportsService).service;
 
     await service.onProvision();
     await service.openExportsProject("C:\\chosen\\xrf");
@@ -76,7 +77,7 @@ describe("ExportsService", () => {
       },
     });
 
-    const service = new ExportsService();
+    const service = mockInjectedService(ExportsService).service;
 
     await service.onProvision();
     await service.refreshExportsProject();
@@ -94,7 +95,7 @@ describe("ExportsService", () => {
       },
     });
 
-    const service = new ExportsService();
+    const service = mockInjectedService(ExportsService).service;
 
     await service.onProvision();
 

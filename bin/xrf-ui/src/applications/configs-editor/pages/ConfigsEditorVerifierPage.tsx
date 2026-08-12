@@ -5,6 +5,7 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs-editor/components/ConfigsVerifyResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
@@ -12,10 +13,12 @@ import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectVerifyResult } from "@/lib/ltx";
+import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { getProjectConfigsPath } from "@/lib/xrf-path";
 
 export function ConfigsEditorVerifierPage(): ReactElement {
   const log: Logger = useLogger("configs-verifier");
+  const notify: TNotify = useNotify();
 
   const projectService: ProjectService = useInjection(ProjectService);
 
@@ -39,14 +42,34 @@ export function ConfigsEditorVerifierPage(): ReactElement {
 
       log.info("Verifying:", configs.value);
 
-      setResult(await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, { path: configs.value }));
+      const verified: ILtxProjectVerifyResult = await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, {
+        path: configs.value,
+      });
+
+      setResult(verified);
+
+      notify({
+        details: String(configs.value),
+        severity: verified.errors.length ? ENotificationSeverity.WARNING : ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.CONFIGS,
+        title: verified.errors.length
+          ? `Configs did not pass validation: ${verified.errors.length} problem(s)`
+          : "Configs passed validation",
+      });
     } catch (caught: unknown) {
       log.error("Verify error:", caught);
       setError(String(caught));
+
+      notify({
+        details: `${configs.value}\n${String(caught)}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.CONFIGS,
+        title: "Could not verify configs",
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [configs.value, log]);
+  }, [configs.value, log, notify]);
 
   // A different directory invalidates whatever the previous run reported.
   useEffect(() => {

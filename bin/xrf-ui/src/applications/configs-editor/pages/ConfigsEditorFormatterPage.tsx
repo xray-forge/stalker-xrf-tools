@@ -5,6 +5,7 @@ import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from "rea
 
 import { ConfigsFormatResult } from "@/applications/configs-editor/components/ConfigsFormatResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
@@ -12,10 +13,12 @@ import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ILtxProjectFormatResult } from "@/lib/ltx";
+import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { getProjectConfigsPath } from "@/lib/xrf-path";
 
 export function ConfigsEditorFormatterPage(): ReactElement {
   const log: Logger = useLogger("configs-formatter");
+  const notify: TNotify = useNotify();
 
   const projectService: ProjectService = useInjection(ProjectService);
 
@@ -40,19 +43,41 @@ export function ConfigsEditorFormatterPage(): ReactElement {
 
       log.info("Performing format command:", isCheck, configs.value);
 
-      setResult(
-        await invoke(
-          isCheck ? EConfigsEditorCommand.CHECK_FORMAT_CONFIGS_PATH : EConfigsEditorCommand.FORMAT_CONFIGS_PATH,
-          { path: configs.value }
-        )
+      const formatted: ILtxProjectFormatResult = await invoke(
+        isCheck ? EConfigsEditorCommand.CHECK_FORMAT_CONFIGS_PATH : EConfigsEditorCommand.FORMAT_CONFIGS_PATH,
+        { path: configs.value }
       );
+
+      setResult(formatted);
+
+      notify({
+        details: String(configs.value),
+        severity: formatted.toFormat.length
+          ? isCheck
+            ? ENotificationSeverity.ERROR
+            : ENotificationSeverity.WARNING
+          : ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.CONFIGS,
+        title: formatted.toFormat.length
+          ? isCheck
+            ? `${formatted.toFormat.length} file(s) have invalid formatting`
+            : `Formatted ${formatted.toFormat.length} file(s)`
+          : "All files are in correct format",
+      });
     } catch (caught) {
       log.error("Format error:", caught);
       setError(String(caught));
+
+      notify({
+        details: `${configs.value}\n${String(caught)}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.CONFIGS,
+        title: isCheck ? "Could not check formatting" : "Could not format configs",
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [configs.value, isCheck, log]);
+  }, [configs.value, isCheck, log, notify]);
 
   const onCheckModeChange = useCallback((_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
     setResult(null);

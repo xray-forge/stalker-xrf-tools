@@ -5,6 +5,7 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archive-editor/components/ArchivesUnpackResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { IArchiveUnpackResult } from "@/lib/archive";
@@ -12,10 +13,12 @@ import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
+import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf-path";
 
 export function ArchivesEditorUnpackerPage(): ReactElement {
   const log: Logger = useLogger("archives-unpacker");
+  const notify: TNotify = useNotify();
 
   const projectService: ProjectService = useInjection(ProjectService);
 
@@ -65,13 +68,27 @@ export function ArchivesEditorUnpackerPage(): ReactElement {
       log.info("Unpacked:", archivesPath);
 
       setResult(result);
+
+      notify({
+        details: `${archivesPath}\n${archivesUnpackPath}`,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.ARCHIVES,
+        title: "Unpacked archives",
+      });
     } catch (error: unknown) {
       log.error("Unpack error:", error);
       setError(String(error));
+
+      notify({
+        details: `${archivesPath}\n${String(error)}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.ARCHIVES,
+        title: "Could not unpack archives",
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [archivesPath, archivesUnpackPath, log]);
+  }, [archivesPath, archivesUnpackPath, log, notify]);
 
   useEffect(() => {
     if (projectService.xrfProjectPath) {

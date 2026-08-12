@@ -1,11 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { Nullable } from "@/core/types/general";
+import { transformError } from "@/lib/error";
 import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
+import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import { ISpawnFile } from "@/lib/spawn-file";
 
 @Injectable()
@@ -18,7 +21,7 @@ export class SpawnFileService {
 
   public readonly log: Logger = new Logger(this.constructor.name);
 
-  public constructor() {
+  public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
     makeObservable(this);
   }
 
@@ -71,6 +74,13 @@ export class SpawnFileService {
       this.log.error("Failed to open spawn file:", error);
 
       runInAction(() => (this.spawnFile = createLoadable(null, false, error as Error)));
+
+      emitNotification(this.eventBus, {
+        details: `${path}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.SPAWNS,
+        title: "Could not open spawn file",
+      });
     }
   }
 
@@ -89,6 +99,15 @@ export class SpawnFileService {
     } catch (error) {
       this.log.error("Failed to import spawn file:", error);
       runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
+
+      // The state lands back on ready with no error attached, so without this the failed import is
+      // indistinguishable from one that worked.
+      emitNotification(this.eventBus, {
+        details: `${path}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.SPAWNS,
+        title: "Could not import spawn file",
+      });
     }
   }
 
@@ -103,10 +122,24 @@ export class SpawnFileService {
       await invoke(ESpawnsEditorCommand.EXPORT_SPAWN_FILE, { path });
 
       runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
+
+      emitNotification(this.eventBus, {
+        details: path,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.SPAWNS,
+        title: "Exported spawn file",
+      });
     } catch (error) {
       this.log.error("Failed to export spawn file:", error);
 
       runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
+
+      emitNotification(this.eventBus, {
+        details: `${path}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.SPAWNS,
+        title: "Could not export spawn file",
+      });
     }
   }
 
@@ -121,10 +154,24 @@ export class SpawnFileService {
       await invoke(ESpawnsEditorCommand.SAVE_SPAWN_FILE, { path });
 
       runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
+
+      emitNotification(this.eventBus, {
+        details: path,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.SPAWNS,
+        title: "Saved spawn file",
+      });
     } catch (error) {
       this.log.error("Failed to save spawn file:", error);
 
       runInAction(() => (this.spawnFile = this.spawnFile.asReady()));
+
+      emitNotification(this.eventBus, {
+        details: `${path}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.SPAWNS,
+        title: "Could not save spawn file",
+      });
     }
   }
 
@@ -138,6 +185,13 @@ export class SpawnFileService {
       runInAction(() => (this.spawnFile = createLoadable(null)));
     } catch (error) {
       this.log.error("Failed to close spawn file:", error);
+
+      emitNotification(this.eventBus, {
+        details: transformError(error).message,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.SPAWNS,
+        title: "Could not close spawn file",
+      });
     }
   }
 

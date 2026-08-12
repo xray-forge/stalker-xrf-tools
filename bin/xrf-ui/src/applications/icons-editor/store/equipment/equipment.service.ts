@@ -2,16 +2,19 @@ import { clamp } from "@mui/x-data-grid/internals";
 import { path } from "@tauri-apps/api";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
-import { inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { AssetService } from "@/core/store/assets";
 import { Nullable } from "@/core/types/general";
+import { transformError } from "@/lib/error";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons";
 import { urlToImage } from "@/lib/image";
 import { EIconsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
+import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 
 export interface IEquipmentPngDescriptor {
   ltxPath: string;
@@ -51,7 +54,10 @@ export class EquipmentService {
   @Observable()
   public repackedAt: Nullable<number> = null;
 
-  public constructor(private readonly assetService: AssetService = inject(AssetService)) {
+  public constructor(
+    private readonly assetService: AssetService = inject(AssetService),
+    private readonly eventBus: EventBus = inject(EventBus)
+  ) {
     makeObservable(this);
   }
 
@@ -123,6 +129,13 @@ export class EquipmentService {
       this.log.error("Failed to open equipment editor project:", error);
 
       runInAction(() => (this.spriteImage = createLoadable(null, false, error as Error)));
+
+      emitNotification(this.eventBus, {
+        details: `${equipmentDdsPath}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.ICONS,
+        title: "Could not open equipment sprite",
+      });
     }
   }
 
@@ -174,6 +187,13 @@ export class EquipmentService {
 
       runInAction(() => (this.repackedAt = Date.now()));
 
+      emitNotification(this.eventBus, {
+        details: `${repackSourcePath}\n${spriteImage.value.path}`,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.ICONS,
+        title: "Repacked equipment sprite",
+      });
+
       await this.reopenEquipmentProject();
     } catch (error) {
       this.log.error("Failed to repack equipment editor project:", error);
@@ -181,6 +201,13 @@ export class EquipmentService {
       // Kept as a failure rather than reset to ready. Discarding it here is what made a repack that
       // wrote nothing look exactly like one that succeeded.
       runInAction(() => (this.spriteImage = this.spriteImage.asFailed(error as Error)));
+
+      emitNotification(this.eventBus, {
+        details: `${spriteImage.value.path}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.ICONS,
+        title: "Could not repack equipment sprite",
+      });
 
       throw error;
     }
@@ -230,6 +257,13 @@ export class EquipmentService {
     } catch (error) {
       this.log.error("Failed to close equipment editor project:", error);
       runInAction(() => (this.spriteImage = this.spriteImage.asFailed(new Error(error as string))));
+
+      emitNotification(this.eventBus, {
+        details: transformError(error).message,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.ICONS,
+        title: "Could not close equipment sprite",
+      });
     }
   }
 

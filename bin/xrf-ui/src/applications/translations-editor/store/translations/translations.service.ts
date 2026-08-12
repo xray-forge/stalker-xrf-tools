@@ -1,11 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { Nullable } from "@/core/types/general";
+import { transformError } from "@/lib/error";
 import { ETranslationsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
+import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import { ITranslationsProjectJson } from "@/lib/translations";
 
 @Injectable()
@@ -18,7 +21,7 @@ export class TranslationsService {
 
   public readonly log: Logger = new Logger(this.constructor.name);
 
-  public constructor() {
+  public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
     makeObservable(this);
   }
 
@@ -68,6 +71,13 @@ export class TranslationsService {
       this.log.error("Failed to open translations project:", error);
 
       runInAction(() => (this.project = createLoadable(null, false, error as Error)));
+
+      emitNotification(this.eventBus, {
+        details: `${translationsPath}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.TRANSLATIONS,
+        title: "Could not open translations project",
+      });
     }
   }
 

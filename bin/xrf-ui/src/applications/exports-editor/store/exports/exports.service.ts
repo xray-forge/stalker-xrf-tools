@@ -1,13 +1,15 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { Nullable } from "@/core/types/general";
 import { transformError } from "@/lib/error";
 import { IExportSourceContent, IExportsProject } from "@/lib/exports";
 import { EExportsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
+import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 
 @Injectable()
 export class ExportsService {
@@ -19,7 +21,7 @@ export class ExportsService {
   @Observable()
   public project: Loadable<Nullable<IExportsProject>> = createLoadable(null);
 
-  public constructor() {
+  public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
     makeObservable(this);
   }
 
@@ -46,6 +48,13 @@ export class ExportsService {
       runInAction(() => {
         this.project = this.project.asFailed(transformed, null);
         this.isReady = true;
+      });
+
+      emitNotification(this.eventBus, {
+        details: transformed.message,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.EXPORTS,
+        title: "Could not restore the open exports project",
       });
     }
   }
@@ -89,6 +98,13 @@ export class ExportsService {
 
       this.log.error("Failed to parse exports:", transformed);
       runInAction(() => (this.project = this.project.asFailed(transformed, null)));
+
+      emitNotification(this.eventBus, {
+        details: `${path}\n${transformed.message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.EXPORTS,
+        title: "Could not parse exports",
+      });
     }
   }
 
@@ -114,6 +130,13 @@ export class ExportsService {
 
       this.log.error("Failed to refresh exports project:", transformed);
       runInAction(() => (this.project = this.project.asFailed(transformed, existing)));
+
+      emitNotification(this.eventBus, {
+        details: `${existing.root}\n${transformed.message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.EXPORTS,
+        title: "Could not refresh exports",
+      });
     }
   }
 
@@ -138,6 +161,13 @@ export class ExportsService {
 
       this.log.error("Failed to close exports project:", transformed);
       runInAction(() => (this.project = this.project.asReady(existing)));
+
+      emitNotification(this.eventBus, {
+        details: transformed.message,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.EXPORTS,
+        title: "Could not close exports project",
+      });
 
       throw transformed;
     }

@@ -4,12 +4,14 @@ import { ReactElement, useCallback, useState } from "react";
 import { EquipmentPackResult } from "@/applications/icons-editor/components/equipment-pack/EquipmentPackResult";
 import { EquipmentService } from "@/applications/icons-editor/store/equipment";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { IPackEquipmentResult } from "@/lib/icons";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
+import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { useMountEffect } from "@/lib/react";
 import {
   getPathIfExists,
@@ -20,6 +22,7 @@ import {
 
 export function IconsEditorEquipmentPackPage(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");
+  const notify: TNotify = useNotify();
 
   const equipmentService: EquipmentService = useInjection(EquipmentService);
   const projectService: ProjectService = useInjection(ProjectService);
@@ -56,10 +59,24 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
         );
 
         setResult(createLoadable(packResult));
+
+        notify({
+          details: outputSpritePath,
+          severity: ENotificationSeverity.SUCCESS,
+          source: EApplicationToolId.ICONS,
+          title: "Packed equipment sprite",
+        });
       } catch (error) {
         log.error("Failed to pack equipment-editor:", error);
 
         setResult(createLoadable(null, false, error instanceof Error ? error : new Error(String(error))));
+
+        notify({
+          details: `${outputSpritePath}\n${String(error)}`,
+          severity: ENotificationSeverity.ERROR,
+          source: EApplicationToolId.ICONS,
+          title: "Could not pack equipment sprite",
+        });
       }
     } else {
       log.info("Cannot open equipment-editor when have no provided paths:", {
@@ -67,7 +84,7 @@ export function IconsEditorEquipmentPackPage(): ReactElement {
         systemLtxPath,
       });
     }
-  }, [inputIconsPath, outputSpritePath, systemLtxPath, equipmentService, log]);
+  }, [inputIconsPath, outputSpritePath, systemLtxPath, equipmentService, log, notify]);
 
   // Prefills from the project once: after mount these fields belong to whoever is typing in them.
   useMountEffect(() => {
