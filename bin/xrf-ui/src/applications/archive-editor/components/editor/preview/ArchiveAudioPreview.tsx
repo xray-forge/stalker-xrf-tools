@@ -4,10 +4,10 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { ArchiveFileDetailRow } from "@/applications/archive-editor/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivePreviewError } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewError";
-import { ArchivePreviewState } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewState";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
+import { EmptyState } from "@/core/components/layout/EmptyState";
 import { AudioPlayer } from "@/core/components/media/AudioPlayer";
 import { AssetService } from "@/core/store/assets";
 import { Nullable } from "@/core/types/general";
@@ -67,7 +67,7 @@ export function ArchiveAudioPreview(): ReactElement {
   }
 
   if (!preview || !url) {
-    return <ArchivePreviewState title={"Preview unavailable"} description={"This sound could not be read."} />;
+    return <EmptyState title={"Preview unavailable"} description={"This sound could not be read."} />;
   }
 
   return (

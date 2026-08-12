@@ -3,9 +3,9 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { ArchivePreviewError } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewError";
-import { ArchivePreviewState } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewState";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
+import { EmptyState } from "@/core/components/layout/EmptyState";
 import { ImageViewport } from "@/core/components/media/ImageViewport";
 import { Nullable } from "@/core/types/general";
 import { IArchiveImagePreview, TArchiveContent } from "@/lib/archive";
@@ -45,6 +45,6 @@ export function ArchiveImagePreview(): ReactElement {
       </Box>
     </Box>
   ) : (
-    <ArchivePreviewState title={"Preview unavailable"} description={"This texture could not be decoded."} />
+    <EmptyState title={"Preview unavailable"} description={"This texture could not be decoded."} />
   );
 }

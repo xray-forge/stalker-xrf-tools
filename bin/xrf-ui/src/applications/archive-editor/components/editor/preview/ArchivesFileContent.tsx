@@ -7,10 +7,10 @@ import { ArchiveFileHeader } from "@/applications/archive-editor/components/edit
 import { ArchiveFolderContent } from "@/applications/archive-editor/components/editor/preview/ArchiveFolderContent";
 import { ArchiveImagePreview } from "@/applications/archive-editor/components/editor/preview/ArchiveImagePreview";
 import { ArchivePreviewError } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewError";
-import { ArchivePreviewState } from "@/applications/archive-editor/components/editor/preview/ArchivePreviewState";
 import { ArchiveTextPreview } from "@/applications/archive-editor/components/editor/preview/ArchiveTextPreview";
 import { ArchivesService } from "@/applications/archive-editor/store/archives";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
+import { EmptyState } from "@/core/components/layout/EmptyState";
 import { Nullable } from "@/core/types/general";
 import {
   ArchivePreviewSupport,
@@ -57,7 +57,7 @@ export function ArchivesFileContent(): ReactElement {
 
   if (!descriptor || !project) {
     return (
-      <ArchivePreviewState
+      <EmptyState
         title={"Select a file to preview"}
         description={
           project
@@ -80,7 +80,7 @@ export function ArchivesFileContent(): ReactElement {
         ) : support.kind === "audio" ? (
           <ArchiveAudioPreview />
         ) : support.kind !== "supported" ? (
-          <ArchivePreviewState title={"Preview unavailable"} description={onGetUnsupportedDescription(support)} />
+          <EmptyState title={"Preview unavailable"} description={onGetUnsupportedDescription(support)} />
         ) : content.isLoading ? (
           <DelayedProgress />
         ) : content.error ? (
@@ -88,10 +88,7 @@ export function ArchivesFileContent(): ReactElement {
         ) : content.value?.kind === "text" ? (
           <ArchiveTextPreview file={content.value.result} />
         ) : (
-          <ArchivePreviewState
-            title={"Preview unavailable"}
-            description={"The selected file did not return any content."}
-          />
+          <EmptyState title={"Preview unavailable"} description={"The selected file did not return any content."} />
         )}
       </Box>
     </Box>
