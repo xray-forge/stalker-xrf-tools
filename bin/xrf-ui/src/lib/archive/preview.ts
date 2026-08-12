@@ -1,4 +1,4 @@
-import { IArchiveFileDescriptor, IArchiveReadPolicy } from "@/lib/archive/types";
+import { ArchiveFileDescriptor, ArchiveProjectReadPolicy } from "@/lib/bindings/xray-archive";
 
 export type ArchivePreviewSupport =
   | { kind: "supported" }
@@ -8,7 +8,7 @@ export type ArchivePreviewSupport =
   | { kind: "too-large"; maximumSize: number };
 
 /** Whether the webview can play this file back, given the project policy. */
-export function isArchiveAudio(descriptor: IArchiveFileDescriptor, policy: IArchiveReadPolicy): boolean {
+export function isArchiveAudio(descriptor: ArchiveFileDescriptor, policy: ArchiveProjectReadPolicy): boolean {
   const extension: string = descriptor.extension.toLowerCase();
 
   return policy.audioExtensions.some((candidate: string) => candidate.toLowerCase() === extension);
@@ -20,7 +20,7 @@ export function isArchiveAudio(descriptor: IArchiveFileDescriptor, policy: IArch
  * Both lists come from the project's own read policy, so the frontend never has to keep its own copy of
  * what the backend is willing to do.
  */
-export function isArchiveImage(descriptor: IArchiveFileDescriptor, policy: IArchiveReadPolicy): boolean {
+export function isArchiveImage(descriptor: ArchiveFileDescriptor, policy: ArchiveProjectReadPolicy): boolean {
   const extension: string = descriptor.extension.toLowerCase();
 
   return policy.imageExtensions.some((candidate: string) => candidate.toLowerCase() === extension);
@@ -34,8 +34,8 @@ export function isArchiveImage(descriptor: IArchiveFileDescriptor, policy: IArch
  * @returns A discriminated result describing preview support or the reason it is unavailable.
  */
 export function getArchivePreviewSupport(
-  descriptor: IArchiveFileDescriptor,
-  policy: IArchiveReadPolicy
+  descriptor: ArchiveFileDescriptor,
+  policy: ArchiveProjectReadPolicy
 ): ArchivePreviewSupport {
   // Images are decoded rather than read as text, so they answer to their own limit and - unlike text -
   // do not care whether the entry was stored compressed. Decompression happens on the way out anyway.

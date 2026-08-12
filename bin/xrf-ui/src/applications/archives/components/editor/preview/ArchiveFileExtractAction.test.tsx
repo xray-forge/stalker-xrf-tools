@@ -9,10 +9,10 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { IArchiveFileDescriptor } from "@/lib/archive";
+import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 
-const FILE: IArchiveFileDescriptor = mockArchiveFileDescriptor({
+const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "xml",
   name: "configs\\gameplay\\dialogs.xml",
 });

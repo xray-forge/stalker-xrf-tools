@@ -1,54 +1,11 @@
-import { Nullable } from "@/core/types/general";
+import { ExportDescriptor } from "@/lib/bindings/xray-export";
 
-export interface IExportsProject {
-  root: string;
-  declarations: Array<IExportDescriptor>;
-}
+/**
+ * The two halves of the generated descriptor union, for call sites that have already narrowed.
+ *
+ * Derived rather than declared: the backend models the contract as one struct with a flattened enum, so
+ * these follow whatever that becomes instead of restating it.
+ */
+export type TCallableExportDescriptor = Extract<ExportDescriptor, { kind: "callable" }>;
 
-export interface IExportSourceDescriptor {
-  path: string;
-  line: number;
-  column: number;
-  /** Last line of the declaration, inclusive, so its body can be fetched without parsing again. */
-  endLine: number;
-}
-
-/** The source text declaring one extern, read back on demand rather than shipped with the project. */
-export interface IExportSourceContent {
-  name: string;
-  path: string;
-  line: number;
-  endLine: number;
-  content: string;
-}
-
-export interface IExportParameterDescriptor {
-  name: string;
-  typing: string;
-  description: Nullable<string>;
-  isOptional: boolean;
-}
-
-export interface IExportReturnDescriptor {
-  typing: string;
-  description: Nullable<string>;
-}
-
-export interface IExportDescriptorBase {
-  name: string;
-  description: Nullable<string>;
-  source: IExportSourceDescriptor;
-}
-
-export interface ICallableExportDescriptor extends IExportDescriptorBase {
-  kind: "callable";
-  parameters: Array<IExportParameterDescriptor>;
-  returns: IExportReturnDescriptor;
-}
-
-export interface IValueExportDescriptor extends IExportDescriptorBase {
-  kind: "value";
-  typing: string;
-}
-
-export type IExportDescriptor = ICallableExportDescriptor | IValueExportDescriptor;
+export type TValueExportDescriptor = Extract<ExportDescriptor, { kind: "value" }>;

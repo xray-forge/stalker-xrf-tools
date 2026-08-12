@@ -3,11 +3,12 @@ import { ReactElement, useMemo } from "react";
 
 import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { ILtxProjectVerifyError, ILtxProjectVerifyResult } from "@/lib/ltx";
+import { LtxProjectVerifyResult } from "@/lib/bindings/xray-ltx";
+import { TLtxSchemeError, toLtxSchemeErrors } from "@/lib/ltx";
 import { formatDuration } from "@/lib/result";
 
 interface IConfigsVerifyResultProps {
-  result: ILtxProjectVerifyResult;
+  result: LtxProjectVerifyResult;
 }
 
 export function ConfigsVerifyResult({ result }: IConfigsVerifyResultProps): ReactElement {
@@ -20,6 +21,8 @@ export function ConfigsVerifyResult({ result }: IConfigsVerifyResultProps): Reac
     ],
     []
   );
+
+  const findings: Array<TLtxSchemeError> = useMemo(() => toLtxSchemeErrors(result.errors), [result]);
 
   const stats: Array<ICommandResultStat> = useMemo(
     () => [
@@ -37,15 +40,15 @@ export function ConfigsVerifyResult({ result }: IConfigsVerifyResultProps): Reac
   return (
     <CommandResult
       headline={
-        result.errors.length
-          ? `${result.errors.length} problem(s) found in ${result.invalidSections} section(s)`
+        findings.length
+          ? `${findings.length} problem(s) found in ${result.invalidSections} section(s)`
           : "All sections passed validation"
       }
-      tone={result.errors.length ? "error" : "success"}
+      tone={findings.length ? "error" : "success"}
       stats={stats}
     >
-      <CommandResultFindings<ILtxProjectVerifyError>
-        rows={result.errors}
+      <CommandResultFindings<TLtxSchemeError>
+        rows={findings}
         columns={columns}
         getRowId={(row) => `${row.at}:${row.section}:${row.field}`}
         getSearchText={(row) => `${row.section} ${row.field} ${row.message} ${row.at}`}

@@ -1,11 +1,12 @@
-import { ICallableExportDescriptor, IExportDescriptor } from "@/lib/exports";
+import { ExportDescriptor } from "@/lib/bindings/xray-export";
+import { TCallableExportDescriptor } from "@/lib/exports";
 
 export const ROOT_EXPORT_GROUP_ID: string = "group:root";
 
 export interface IExportGroup {
   id: string;
   label: string;
-  declarations: Array<IExportDescriptor>;
+  declarations: Array<ExportDescriptor>;
 }
 
 export interface IExportTreeItem {
@@ -16,7 +17,7 @@ export interface IExportTreeItem {
 }
 
 /** Group externs by the namespace before their first dot. */
-export function groupExports(declarations: ReadonlyArray<IExportDescriptor>): Array<IExportGroup> {
+export function groupExports(declarations: ReadonlyArray<ExportDescriptor>): Array<IExportGroup> {
   const groups: Map<string, IExportGroup> = new Map();
 
   for (const declaration of declarations) {
@@ -48,7 +49,7 @@ export function groupExports(declarations: ReadonlyArray<IExportDescriptor>): Ar
     })
     .map((group: IExportGroup) => ({
       ...group,
-      declarations: [...group.declarations].sort((left: IExportDescriptor, right: IExportDescriptor) =>
+      declarations: [...group.declarations].sort((left: ExportDescriptor, right: ExportDescriptor) =>
         left.name.localeCompare(right.name)
       ),
     }));
@@ -63,7 +64,7 @@ export function exportGroupsToTree(groups: ReadonlyArray<IExportGroup>): Array<I
     id: group.id,
     label: `${group.label} (${group.declarations.length})`,
     kind: "group",
-    children: group.declarations.map((declaration: IExportDescriptor) => ({
+    children: group.declarations.map((declaration: ExportDescriptor) => ({
       id: exportDeclarationItemId(declaration.name),
       label: declaration.name,
       kind: "declaration",
@@ -71,11 +72,11 @@ export function exportGroupsToTree(groups: ReadonlyArray<IExportGroup>): Array<I
   }));
 }
 
-export function getExportSearchText(declaration: IExportDescriptor): string {
+export function getExportSearchText(declaration: ExportDescriptor): string {
   const documentation: Array<string> = [declaration.name, declaration.description ?? ""];
 
   if (declaration.kind === "callable") {
-    const callable: ICallableExportDescriptor = declaration;
+    const callable: TCallableExportDescriptor = declaration;
 
     documentation.push(callable.returns.description ?? "");
     documentation.push(...callable.parameters.map((parameter) => parameter.description ?? ""));

@@ -6,11 +6,11 @@ import { CallableExportDetails } from "@/applications/exports/components/viewer/
 import { ExportSection } from "@/applications/exports/components/viewer/exports/ExportSection";
 import { ExportSourceView } from "@/applications/exports/components/viewer/exports/ExportSourceView";
 import { formatExportSignature } from "@/applications/exports/components/viewer/exports/format-export-signature";
+import { ExportDescriptor } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { IExportDescriptor } from "@/lib/exports";
 
 export interface IExportDeclarationViewProps extends BaseComponentProps {
-  declaration: IExportDescriptor;
+  declaration: ExportDescriptor;
 }
 
 export function ExportDeclarationView({ declaration }: IExportDeclarationViewProps): ReactElement {

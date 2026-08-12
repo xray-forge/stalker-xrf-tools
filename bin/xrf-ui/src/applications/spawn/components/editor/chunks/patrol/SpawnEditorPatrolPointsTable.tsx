@@ -3,15 +3,15 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { flagsColumn, identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
-import { IPatrol, IPatrolPoint } from "@/lib/spawn-file";
+import { Patrol, PatrolPoint } from "@/lib/bindings/xray-db";
 
-interface IPatrolPointRow extends IPatrolPoint {
+interface IPatrolPointRow extends PatrolPoint {
   id: string;
   patrol: string;
 }
 
 interface ISpawnEditorPatrolPointsTableProps {
-  patrols: Array<IPatrol>;
+  patrols: Array<Patrol>;
 }
 
 export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolPointsTableProps): ReactElement {
@@ -29,8 +29,8 @@ export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolPoin
 
   const rows: Array<IPatrolPointRow> = useMemo(
     () =>
-      patrols.flatMap((patrol: IPatrol) =>
-        patrol.points.map((point: IPatrolPoint) => ({
+      patrols.flatMap((patrol: Patrol) =>
+        patrol.points.map((point: PatrolPoint) => ({
           ...point,
           id: `${patrol.name}/${point.name}`,
           patrol: patrol.name,

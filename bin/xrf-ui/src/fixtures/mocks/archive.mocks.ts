@@ -1,7 +1,7 @@
-import { IArchiveDescriptor, IArchiveFileDescriptor, IArchiveReadPolicy, IArchivesProject } from "@/lib/archive";
+import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject, ArchiveProjectReadPolicy } from "@/lib/bindings/xray-archive";
 
 /** Create an archive read policy fixture with optional field overrides. */
-export function mockArchiveReadPolicy(overrides: Partial<IArchiveReadPolicy> = {}): IArchiveReadPolicy {
+export function mockArchiveReadPolicy(overrides: Partial<ArchiveProjectReadPolicy> = {}): ArchiveProjectReadPolicy {
   return {
     extensions: ["ltx", "script", "ps", "ds", "h", "hs", "s", "vs", "cmd", "xml"],
     maximumSize: 10 * 1024 * 1024,
@@ -14,7 +14,7 @@ export function mockArchiveReadPolicy(overrides: Partial<IArchiveReadPolicy> = {
 }
 
 /** Create an archive file descriptor fixture with optional field overrides. */
-export function mockArchiveFileDescriptor(overrides: Partial<IArchiveFileDescriptor> = {}): IArchiveFileDescriptor {
+export function mockArchiveFileDescriptor(overrides: Partial<ArchiveFileDescriptor> = {}): ArchiveFileDescriptor {
   return {
     crc: 0x12345678,
     destination: "gamedata",
@@ -29,8 +29,8 @@ export function mockArchiveFileDescriptor(overrides: Partial<IArchiveFileDescrip
 }
 
 /** Create an archives project fixture from optional file descriptors. */
-export function mockArchivesProject(files?: Array<IArchiveFileDescriptor>): IArchivesProject {
-  const descriptors: Array<IArchiveFileDescriptor> = files ?? [
+export function mockArchivesProject(files?: Array<ArchiveFileDescriptor>): ArchiveProject {
+  const descriptors: Array<ArchiveFileDescriptor> = files ?? [
     mockArchiveFileDescriptor(),
     mockArchiveFileDescriptor({
       extension: "script",
@@ -39,7 +39,9 @@ export function mockArchivesProject(files?: Array<IArchiveFileDescriptor>): IArc
       sizeCompressed: 1024,
     }),
   ];
-  const archive: IArchiveDescriptor = {
+  const archive: ArchiveDescriptor = {
+    createdAt: null,
+    modifiedAt: null,
     files: {},
     outputRootPath: "gamedata",
     path: "C:\\game\\database\\configs.db0",

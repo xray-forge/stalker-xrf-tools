@@ -12,14 +12,8 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { Nullable } from "@/core/types/general";
-import {
-  ArchivePreviewSupport,
-  getArchivePreviewSupport,
-  IArchiveFileDescriptor,
-  IArchivesProject,
-  TArchiveContent,
-  TArchiveSelection,
-} from "@/lib/archive";
+import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/lib/archive";
+import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/bindings/xray-archive";
 import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/size";
 
@@ -30,7 +24,7 @@ export function ArchivesFileContent(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
   const selection: TArchiveSelection = archivesService.selection;
-  const project: Nullable<IArchivesProject> = archivesService.project.value;
+  const project: Nullable<ArchiveProject> = archivesService.project.value;
   const content: Loadable<Nullable<TArchiveContent>> = archivesService.content;
 
   const onGetUnsupportedDescription = useCallback((support: TUnsupported): string => {
@@ -53,7 +47,7 @@ export function ArchivesFileContent(): ReactElement {
     return <ArchiveFolderContent path={selection.path} />;
   }
 
-  const descriptor: Nullable<IArchiveFileDescriptor> = selection.kind === "file" ? selection.descriptor : null;
+  const descriptor: Nullable<ArchiveFileDescriptor> = selection.kind === "file" ? selection.descriptor : null;
 
   if (!descriptor || !project) {
     return (

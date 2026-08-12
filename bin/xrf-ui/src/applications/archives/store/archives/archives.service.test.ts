@@ -4,13 +4,13 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { IArchiveFileDescriptor, IArchiveFileReadResult } from "@/lib/archive";
+import { ArchiveFileDescriptor, ProjectReadResult } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable } from "@/lib/loadable";
 
 function ignoreReadResult(): void {}
 
-function mockArchivesService(files: Array<IArchiveFileDescriptor>): ArchivesService {
+function mockArchivesService(files: Array<ArchiveFileDescriptor>): ArchivesService {
   const { service } = mockInjectedService(ArchivesService);
 
   service.project = createLoadable(mockArchivesProject(files));
@@ -21,7 +21,7 @@ function mockArchivesService(files: Array<IArchiveFileDescriptor>): ArchivesServ
 describe("ArchivesService file selection", () => {
   it("loads supported selected files", async () => {
     const descriptor = mockArchiveFileDescriptor();
-    const result: IArchiveFileReadResult = { name: descriptor.name, content: "[system]", size: 8 };
+    const result: ProjectReadResult = { name: descriptor.name, content: "[system]", size: 8 };
 
     setMockInvokeResponses({ [EArchivesEditorCommand.READ_ARCHIVE_FILE]: result });
 
@@ -48,12 +48,12 @@ describe("ArchivesService file selection", () => {
   it("allows only the latest selection to publish a completed read", async () => {
     const first = mockArchiveFileDescriptor({ name: "configs\\first.ltx" });
     const second = mockArchiveFileDescriptor({ name: "configs\\second.ltx" });
-    let resolveFirst: (value: IArchiveFileReadResult) => void = ignoreReadResult;
-    let resolveSecond: (value: IArchiveFileReadResult) => void = ignoreReadResult;
-    const firstResult: Promise<IArchiveFileReadResult> = new Promise((resolve) => {
+    let resolveFirst: (value: ProjectReadResult) => void = ignoreReadResult;
+    let resolveSecond: (value: ProjectReadResult) => void = ignoreReadResult;
+    const firstResult: Promise<ProjectReadResult> = new Promise((resolve) => {
       resolveFirst = resolve;
     });
-    const secondResult: Promise<IArchiveFileReadResult> = new Promise((resolve) => {
+    const secondResult: Promise<ProjectReadResult> = new Promise((resolve) => {
       resolveSecond = resolve;
     });
 

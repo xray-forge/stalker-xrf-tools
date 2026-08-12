@@ -10,8 +10,9 @@ import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { AudioPlayer } from "@/core/components/media/AudioPlayer";
 import { Nullable } from "@/core/types/general";
-import { IArchiveAudioPreview, TArchiveContent } from "@/lib/archive";
+import { TArchiveContent } from "@/lib/archive";
 import { AssetService } from "@/lib/assets";
+import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/lib/bindings/xrf-app";
 import { Loadable } from "@/lib/loadable";
 import { base64ToBytes } from "@/lib/media/base64";
 
@@ -31,7 +32,7 @@ export function ArchiveAudioPreview(): ReactElement {
   const [url, setUrl] = useState<Nullable<string>>(null);
 
   const content: Loadable<Nullable<TArchiveContent>> = archivesService.content;
-  const preview: Nullable<IArchiveAudioPreview> = content.value?.kind === "audio" ? content.value.preview : null;
+  const preview: Nullable<TArchiveAudioPreview> = content.value?.kind === "audio" ? content.value.preview : null;
 
   // Decoded once and shared: the element streams from the url, the waveform reads the same bytes.
   const bytes: Nullable<Uint8Array> = useMemo(() => (preview ? base64ToBytes(preview.base64) : null), [preview]);

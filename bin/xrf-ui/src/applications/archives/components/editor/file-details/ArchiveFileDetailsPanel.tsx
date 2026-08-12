@@ -5,7 +5,7 @@ import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/component
 import { ArchiveFileDetailRow } from "@/applications/archives/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { Nullable } from "@/core/types/general";
-import { IArchiveFileDescriptor } from "@/lib/archive";
+import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
 
@@ -14,9 +14,9 @@ export interface IArchiveFileDetailsPanelProps extends BaseComponentProps {
 }
 
 export function ArchiveFileDetailsPanel({ archivesService }: IArchiveFileDetailsPanelProps): ReactElement {
-  const descriptor: Nullable<IArchiveFileDescriptor> = archivesService.selectedFile;
+  const descriptor: Nullable<ArchiveFileDescriptor> = archivesService.selectedFile;
 
-  const getCompressionLabel = useCallback((descriptor: IArchiveFileDescriptor): string => {
+  const getCompressionLabel = useCallback((descriptor: ArchiveFileDescriptor): string => {
     if (descriptor.sizeReal === descriptor.sizeCompressed) {
       return "Stored";
     }

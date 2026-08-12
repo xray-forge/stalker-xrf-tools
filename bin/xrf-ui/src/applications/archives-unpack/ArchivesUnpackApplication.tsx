@@ -8,7 +8,7 @@ import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
-import { IArchiveUnpackResult } from "@/lib/archive";
+import { ArchiveUnpackResult } from "@/lib/bindings/xray-archive";
 import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { EArchivesEditorCommand } from "@/lib/ipc";
@@ -24,7 +24,7 @@ export function ArchivesUnpackApplication(): ReactElement {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Nullable<string>>(null);
-  const [result, setResult] = useState<Nullable<IArchiveUnpackResult>>(null);
+  const [result, setResult] = useState<Nullable<ArchiveUnpackResult>>(null);
   const [archivesPath, setArchivesPath, selectArchivesPath] = usePathState({
     isDirectory: true,
     isDisabled: isLoading,
@@ -60,7 +60,7 @@ export function ArchivesUnpackApplication(): ReactElement {
 
       log.info("Unpacking:", archivesPath);
 
-      const result: IArchiveUnpackResult = await invoke(EArchivesEditorCommand.UNPACK_ARCHIVES_PATH, {
+      const result: ArchiveUnpackResult = await invoke(EArchivesEditorCommand.UNPACK_ARCHIVES_PATH, {
         from: archivesPath,
         destination: archivesUnpackPath,
       });

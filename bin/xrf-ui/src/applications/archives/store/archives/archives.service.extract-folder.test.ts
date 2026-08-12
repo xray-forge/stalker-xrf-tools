@@ -5,11 +5,11 @@ import { Nullable } from "@/core/types/general";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { IArchiveFolderExtractResult } from "@/lib/archive";
+import { ArchiveExtractFolderResult } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 
 /** The operation union carries every kind of write, so a folder assertion has to name its own. */
-function extractedFolder(service: ArchivesService): Nullable<IArchiveFolderExtractResult> {
+function extractedFolder(service: ArchivesService): Nullable<ArchiveExtractFolderResult> {
   return service.operation.value?.kind === "extract-folder" ? service.operation.value.result : null;
 }
 

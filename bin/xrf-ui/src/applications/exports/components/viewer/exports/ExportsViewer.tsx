@@ -3,11 +3,11 @@ import { ReactElement } from "react";
 import { ExportDeclarationView } from "@/applications/exports/components/viewer/exports/ExportDeclarationView";
 import { ExportsViewerState } from "@/applications/exports/components/viewer/exports/ExportsViewerState";
 import { Nullable } from "@/core/types/general";
+import { ExportDescriptor } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { IExportDescriptor } from "@/lib/exports";
 
 export interface IExportsViewerProps extends BaseComponentProps {
-  declaration: Nullable<IExportDescriptor>;
+  declaration: Nullable<ExportDescriptor>;
   exportCount: number;
 }
 

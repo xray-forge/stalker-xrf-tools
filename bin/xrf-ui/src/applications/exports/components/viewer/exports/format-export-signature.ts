@@ -1,11 +1,10 @@
-import { IExportDescriptor, IExportParameterDescriptor } from "@/lib/exports";
 
-export function formatExportSignature(declaration: IExportDescriptor): string {
+export function formatExportSignature(declaration: ExportDescriptor): string {
   switch (declaration.kind) {
     case "callable":
       return `${declaration.name}(${declaration.parameters
         .map(
-          (parameter: IExportParameterDescriptor) =>
+          (parameter: ExportParameterDescriptor) =>
             `${parameter.name}${parameter.isOptional ? "?" : ""}: ${parameter.typing}`
         )
         .join(", ")}): ${declaration.returns.typing}`;
@@ -17,4 +16,5 @@ export function formatExportSignature(declaration: IExportDescriptor): string {
       return declaration as never;
     }
   }
-}
+} import { ExportDescriptor, ExportParameterDescriptor } from "@/lib/bindings/xray-export";
+

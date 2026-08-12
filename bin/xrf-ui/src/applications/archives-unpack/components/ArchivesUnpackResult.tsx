@@ -3,12 +3,12 @@ import { ReactElement, useMemo } from "react";
 
 import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { IArchiveUnpackResult } from "@/lib/archive";
+import { ArchiveUnpackResult } from "@/lib/bindings/xray-archive";
 import { formatDuration } from "@/lib/result";
 import { bytesToMegabytes } from "@/lib/size";
 
 interface IArchivesUnpackResultProps {
-  result: IArchiveUnpackResult;
+  result: ArchiveUnpackResult;
 }
 
 export function ArchivesUnpackResult({ result }: IArchivesUnpackResultProps): ReactElement {

@@ -8,11 +8,11 @@ import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
+import { LtxProjectVerifyResult } from "@/lib/bindings/xray-ltx";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
-import { ILtxProjectVerifyResult } from "@/lib/ltx";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { getProjectConfigsPath } from "@/lib/xrf-path";
 
@@ -24,7 +24,7 @@ export function ConfigsVerifyApplication(): ReactElement {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Nullable<string>>(null);
-  const [result, setResult] = useState<Nullable<ILtxProjectVerifyResult>>(null);
+  const [result, setResult] = useState<Nullable<LtxProjectVerifyResult>>(null);
 
   const configs: IPathField = usePathField({
     id: "configs.verify.directory",
@@ -42,7 +42,7 @@ export function ConfigsVerifyApplication(): ReactElement {
 
       log.info("Verifying:", configs.value);
 
-      const verified: ILtxProjectVerifyResult = await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, {
+      const verified: LtxProjectVerifyResult = await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, {
         path: configs.value,
       });
 

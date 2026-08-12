@@ -14,7 +14,7 @@ import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
-import { IArchivesProject } from "@/lib/archive";
+import { ArchiveProject } from "@/lib/bindings/xray-archive";
 import { formatBytes } from "@/lib/size";
 
 export function ArchivesEditor(): ReactElement {
@@ -23,7 +23,7 @@ export function ArchivesEditor(): ReactElement {
   const [isClosing, setClosing] = useState<boolean>(false);
   const [closeError, setCloseError] = useState<Nullable<string>>(null);
 
-  const project: IArchivesProject | null = archivesService.project.value;
+  const project: ArchiveProject | null = archivesService.project.value;
   const archiveCount: number = project?.archives.length ?? 0;
   const fileCount: number = Object.keys(project?.files ?? {}).length;
   const totalSize: number = project?.sizeReal ?? 0;

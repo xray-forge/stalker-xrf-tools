@@ -13,17 +13,12 @@ import { BoundAction, Computed, makeObservable, Observable, runInAction } from "
 
 import { EApplicationGroupId } from "@/core/router/application";
 import { AnyObject, Nullable } from "@/core/types/general";
+import { SpawnALifeSpawnsChunk, SpawnArtefactSpawnsChunk, SpawnGraphsChunk, SpawnHeaderChunk, SpawnPatrolsChunk } from "@/lib/bindings/xray-db";
 import { transformError } from "@/lib/error";
 import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
-import { SpawnGraphsChunk, SpawnHeaderChunk } from "@/lib/bindings/xray-db";
-import {
-  ISpawnFileAlifeSpawnsChunk,
-  ISpawnFileArtefactSpawnsChunk,
-  ISpawnFilePatrolsChunk,
-} from "@/lib/spawn-file/types";
 
 export interface ISpawnRowSelection {
   /** What kind of row this is, for the panel heading. */
@@ -54,13 +49,13 @@ export class SpawnFileService {
   public header: Loadable<Nullable<SpawnHeaderChunk>> = createLoadable(null);
 
   @Observable()
-  public alifeSpawn: Loadable<Nullable<ISpawnFileAlifeSpawnsChunk>> = createLoadable(null);
+  public alifeSpawn: Loadable<Nullable<SpawnALifeSpawnsChunk>> = createLoadable(null);
 
   @Observable()
-  public artefactSpawn: Loadable<Nullable<ISpawnFileArtefactSpawnsChunk>> = createLoadable(null);
+  public artefactSpawn: Loadable<Nullable<SpawnArtefactSpawnsChunk>> = createLoadable(null);
 
   @Observable()
-  public patrols: Loadable<Nullable<ISpawnFilePatrolsChunk>> = createLoadable(null);
+  public patrols: Loadable<Nullable<SpawnPatrolsChunk>> = createLoadable(null);
 
   @Observable()
   public graphs: Loadable<Nullable<SpawnGraphsChunk>> = createLoadable(null);

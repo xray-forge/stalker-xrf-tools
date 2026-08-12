@@ -9,13 +9,8 @@ import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/component
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { Nullable } from "@/core/types/general";
-import {
-  IArchiveFileDescriptor,
-  IArchiveFolderExtractResult,
-  IArchivesProject,
-  isUnderArchiveDirectory,
-  TArchiveOperation,
-} from "@/lib/archive";
+import { isUnderArchiveDirectory, TArchiveOperation } from "@/lib/archive";
+import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/bindings/xray-archive";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { formatBytes } from "@/lib/size";
@@ -36,10 +31,10 @@ export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): Reac
 
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
-  const project: Nullable<IArchivesProject> = archivesService.project.value;
+  const project: Nullable<ArchiveProject> = archivesService.project.value;
   const operation: Loadable<Nullable<TArchiveOperation>> = archivesService.operation;
   // A file extraction started elsewhere must not be reported here as if this folder had been written.
-  const extracted: Nullable<IArchiveFolderExtractResult> =
+  const extracted: Nullable<ArchiveExtractFolderResult> =
     operation.value?.kind === "extract-folder" ? operation.value.result : null;
 
   const summary: { count: number; size: number } = useMemo(() => {
@@ -47,7 +42,7 @@ export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): Reac
     let size: number = 0;
 
     // Same rule the backend extracts by, so the promised count is the delivered one.
-    for (const descriptor of Object.values(project?.files ?? {}) as Array<IArchiveFileDescriptor>) {
+    for (const descriptor of Object.values(project?.files ?? {}) as Array<ArchiveFileDescriptor>) {
       if (isUnderArchiveDirectory(descriptor, path)) {
         count += 1;
         size += descriptor.sizeReal;

@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { identifierColumn, textColumn } from "@/core/components/table";
-import { IPatrol, IPatrolLink } from "@/lib/spawn-file";
+import { Patrol, PatrolLink } from "@/lib/bindings/xray-db";
 
 interface IPatrolLinkRow {
   id: string;
@@ -15,7 +15,7 @@ interface IPatrolLinkRow {
 }
 
 interface ISpawnEditorPatrolLinksTableProps {
-  patrols: Array<IPatrol>;
+  patrols: Array<Patrol>;
 }
 
 export function SpawnEditorPatrolLinksTable({ patrols }: ISpawnEditorPatrolLinksTableProps): ReactElement {
@@ -31,8 +31,8 @@ export function SpawnEditorPatrolLinksTable({ patrols }: ISpawnEditorPatrolLinks
 
   const rows: Array<IPatrolLinkRow> = useMemo(
     () =>
-      patrols.flatMap((patrol: IPatrol) =>
-        patrol.links.map((link: IPatrolLink) => ({
+      patrols.flatMap((patrol: Patrol) =>
+        patrol.links.map((link: PatrolLink) => ({
           id: `${patrol.name}/${link.index}`,
           index: link.index,
           links: link.links.map(([to, weight]: [number, number]) => `${to}(${weight})`).join(", "),

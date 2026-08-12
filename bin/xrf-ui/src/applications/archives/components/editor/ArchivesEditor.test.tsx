@@ -13,7 +13,7 @@ import { ProjectService } from "@/core/store/project";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { IArchivesProject } from "@/lib/archive";
+import { ArchiveProject } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 
 const TEXT_FILE = mockArchiveFileDescriptor({ name: "readme.ltx", sizeReal: 1024, sizeCompressed: 1024 });
@@ -32,7 +32,7 @@ const MESH_FILE = mockArchiveFileDescriptor({
   sizeCompressed: 4096,
 });
 
-const PROJECT: IArchivesProject = mockArchivesProject([TEXT_FILE, BINARY_FILE, MESH_FILE]);
+const PROJECT: ArchiveProject = mockArchivesProject([TEXT_FILE, BINARY_FILE, MESH_FILE]);
 
 describe("opened archives editor", () => {
   beforeEach(() => {

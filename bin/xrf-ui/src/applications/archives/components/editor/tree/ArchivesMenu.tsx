@@ -12,7 +12,8 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { Nullable, Optional } from "@/core/types/general";
-import { IArchiveFileDescriptor, IArchiveTreeItem, parseTree, TArchiveSelection } from "@/lib/archive";
+import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/lib/archive";
+import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 
 export function ArchivesMenu(): ReactElement {
@@ -20,7 +21,7 @@ export function ArchivesMenu(): ReactElement {
 
   const [expandedItems, setExpandedItems] = useState<Array<string>>([]);
 
-  const files: Array<IArchiveFileDescriptor> = useMemo(
+  const files: Array<ArchiveFileDescriptor> = useMemo(
     () => Object.values(archivesService.project.value?.files ?? {}),
     [archivesService.project.value?.files]
   );
@@ -32,13 +33,13 @@ export function ArchivesMenu(): ReactElement {
   const isBusy: boolean = archivesService.isBusy;
 
   const onSelectDescriptor = useCallback(
-    (descriptor: IArchiveFileDescriptor) => {
+    (descriptor: ArchiveFileDescriptor) => {
       void archivesService.selectArchiveFile(descriptor);
     },
     [archivesService]
   );
 
-  const search: IUseRankedSearch<IArchiveFileDescriptor> = useRankedSearch({
+  const search: IUseRankedSearch<ArchiveFileDescriptor> = useRankedSearch({
     items: files,
     toSearchText: (it) => it.name,
     onSelect: onSelectDescriptor,
@@ -46,7 +47,7 @@ export function ArchivesMenu(): ReactElement {
 
   const rows: Array<IEditorSearchResultRow> = useMemo(
     () =>
-      search.results.map((result: ISearchResult<IArchiveFileDescriptor>) => {
+      search.results.map((result: ISearchResult<ArchiveFileDescriptor>) => {
         const separatorAt: number = result.item.name.lastIndexOf("\\");
 
         return {
@@ -72,7 +73,7 @@ export function ArchivesMenu(): ReactElement {
         return;
       }
 
-      const descriptor: Optional<IArchiveFileDescriptor> = archivesService.project.value?.files[path];
+      const descriptor: Optional<ArchiveFileDescriptor> = archivesService.project.value?.files[path];
 
       if (descriptor) {
         onSelectDescriptor(descriptor);

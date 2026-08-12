@@ -6,9 +6,9 @@ import { ExportsService } from "@/applications/exports/store/exports";
 import { CodeView } from "@/core/components/code/CodeView";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { Nullable } from "@/core/types/general";
+import { ExportSourceContent } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { transformError } from "@/lib/error";
-import { IExportSourceContent } from "@/lib/exports";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { getSyntaxLanguage } from "@/lib/syntax";
 
@@ -22,7 +22,7 @@ export interface IExportSourceViewProps extends BaseComponentProps {
 export function ExportSourceView({ name }: IExportSourceViewProps): ReactElement {
   const exportsService: ExportsService = useInjection(ExportsService);
 
-  const [source, setSource] = useState<Loadable<Nullable<IExportSourceContent>>>(() => createLoadable(null, true));
+  const [source, setSource] = useState<Loadable<Nullable<ExportSourceContent>>>(() => createLoadable(null, true));
 
   useEffect(() => {
     let isActive: boolean = true;
@@ -31,7 +31,7 @@ export function ExportSourceView({ name }: IExportSourceViewProps): ReactElement
 
     exportsService
       .readExportSource(name)
-      .then((result: IExportSourceContent) => isActive && setSource(createLoadable(result)))
+      .then((result: ExportSourceContent) => isActive && setSource(createLoadable(result)))
       .catch((error: unknown) => isActive && setSource(createLoadable(null, false, transformError(error))));
 
     // Reads need not come back in order, so one abandoned by a newer selection is dropped here.

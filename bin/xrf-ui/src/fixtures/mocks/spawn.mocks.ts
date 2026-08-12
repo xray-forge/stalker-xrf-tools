@@ -1,5 +1,4 @@
-import { Vector3d } from "@/lib/bindings/xray-db";
-import { IAlifeObjectBase, IPatrol, ISpawnFile } from "@/lib/spawn-file";
+import { AlifeObject, Patrol, SpawnFile, Vector3d } from "@/lib/bindings/xray-db";
 
 /** Create a vector fixture with optional field overrides. */
 export function mockVector3d(overrides: Partial<Vector3d> = {}): Vector3d {
@@ -7,14 +6,23 @@ export function mockVector3d(overrides: Partial<Vector3d> = {}): Vector3d {
 }
 
 /** Create an ALife object fixture with optional field overrides. */
-export function mockAlifeObject(overrides: Partial<IAlifeObjectBase> = {}): IAlifeObjectBase {
+export function mockAlifeObject(overrides: Partial<AlifeObject> = {}): AlifeObject {
   return {
     clientDataSize: 0,
-    clsid: "AI_STL_S",
+    clsid: "EStlk",
     direction: mockVector3d(),
     gameType: 1,
     id: 1,
-    inherited: { type: "cse_alife_human_stalker" },
+    // The narrowest variant of the inherited union, since these fixtures only need a valid payload.
+    inherited: {
+      type: "CseAlifeGraphPoint",
+      connectionPointName: "",
+      connectionLevelName: "",
+      location0: 0,
+      location1: 0,
+      location2: 0,
+      location3: 0,
+    },
     name: "esc_smart_stalker_1",
     netAction: 1,
     parentId: 65535,
@@ -34,7 +42,7 @@ export function mockAlifeObject(overrides: Partial<IAlifeObjectBase> = {}): IAli
 }
 
 /** Create a patrol fixture with optional field overrides. */
-export function mockPatrol(overrides: Partial<IPatrol> = {}): IPatrol {
+export function mockPatrol(overrides: Partial<Patrol> = {}): Patrol {
   return {
     name: "esc_walker_walk",
     points: [
@@ -59,7 +67,7 @@ export function mockPatrol(overrides: Partial<IPatrol> = {}): IPatrol {
 }
 
 /** Create a structurally complete spawn file fixture with optional field overrides. */
-export function mockSpawnFile(overrides: Partial<ISpawnFile> = {}): ISpawnFile {
+export function mockSpawnFile(overrides: Partial<SpawnFile> = {}): SpawnFile {
   return {
     header: {
       version: 124,

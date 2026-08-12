@@ -1,5 +1,5 @@
 import { Optional } from "@/core/types/general";
-import { IArchiveFileDescriptor } from "@/lib/archive/types";
+import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 
 /**
  * Whether an archived file would be written when its directory is extracted.
@@ -8,7 +8,7 @@ import { IArchiveFileDescriptor } from "@/lib/archive/types";
  * a plain `startsWith` here instead would promise more files than the backend writes, and would let
  * `configs` swallow `configs_backup`.
  */
-export function isUnderArchiveDirectory(descriptor: IArchiveFileDescriptor, prefix: string): boolean {
+export function isUnderArchiveDirectory(descriptor: ArchiveFileDescriptor, prefix: string): boolean {
   // Directory entries and empty entries are never written out.
   if (!descriptor.sizeReal || /[\\/]$/.test(descriptor.name)) {
     return false;
@@ -37,7 +37,7 @@ export interface IArchiveFileTreeItem {
   label: string;
   path: string;
   kind: "file";
-  descriptor: IArchiveFileDescriptor;
+  descriptor: ArchiveFileDescriptor;
 }
 
 export type IArchiveTreeItem = IArchiveDirectoryTreeItem | IArchiveFileTreeItem;
@@ -49,7 +49,7 @@ export type IArchiveTreeItem = IArchiveDirectoryTreeItem | IArchiveFileTreeItem;
  * @param separator - Separator used by the archive-relative file paths.
  * @returns Sorted root-level tree items with descriptors attached to file leaves.
  */
-export function parseTree(files: Array<IArchiveFileDescriptor>, separator: string): Array<IArchiveTreeItem> {
+export function parseTree(files: Array<ArchiveFileDescriptor>, separator: string): Array<IArchiveTreeItem> {
   const root: IArchiveDirectoryTreeItem = {
     id: "directory:~",
     label: "root",
@@ -78,7 +78,7 @@ export function parseTree(files: Array<IArchiveFileDescriptor>, separator: strin
 function appendFile(
   parent: IArchiveDirectoryTreeItem,
   remainingPath: Array<string>,
-  descriptor: IArchiveFileDescriptor,
+  descriptor: ArchiveFileDescriptor,
   separator: string
 ): void {
   const name: Optional<string> = remainingPath.shift();

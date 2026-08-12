@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { ExportsService } from "@/applications/exports/store/exports/exports.service";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { IExportSourceContent } from "@/lib/exports";
+import { ExportSourceContent } from "@/lib/bindings/xray-export";
 import { EExportsEditorCommand } from "@/lib/ipc";
 
-const SOURCE: IExportSourceContent = {
+const SOURCE: ExportSourceContent = {
   name: "xr_effects.play",
   path: "effects/sound.ts",
   line: 18,

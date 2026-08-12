@@ -8,11 +8,12 @@ import { ApplicationStatusBar } from "@/core/components/shell/footer/Application
 import { ProjectService } from "@/core/store/project";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { ICallableExportDescriptor, IExportsProject, IValueExportDescriptor } from "@/lib/exports";
+import { ExportsProject } from "@/lib/bindings/xray-export";
+import { TCallableExportDescriptor, TValueExportDescriptor } from "@/lib/exports";
 import { EExportsEditorCommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 
-const PLAY_SOUND: ICallableExportDescriptor = {
+const PLAY_SOUND: TCallableExportDescriptor = {
   kind: "callable",
   name: "xr_effects.play_sound",
   description: "Plays an actor sound.",
@@ -24,7 +25,7 @@ const PLAY_SOUND: ICallableExportDescriptor = {
   source: { path: "src/engine/declarations/effects/sound.ts", line: 18, column: 3, endLine: 21 },
 };
 
-const SETTINGS: IValueExportDescriptor = {
+const SETTINGS: TValueExportDescriptor = {
   kind: "value",
   name: "settings",
   description: "Shared configuration.",
@@ -32,7 +33,7 @@ const SETTINGS: IValueExportDescriptor = {
   source: { path: "src/engine/declarations/settings.ts", line: 4, column: 1, endLine: 7 },
 };
 
-const DIALOG: ICallableExportDescriptor = {
+const DIALOG: TCallableExportDescriptor = {
   kind: "callable",
   name: "dialogs_zaton.quest.answer",
   description: null,
@@ -41,7 +42,7 @@ const DIALOG: ICallableExportDescriptor = {
   source: { path: "src/engine/declarations/dialogs/answer.ts", line: 9, column: 2, endLine: 12 },
 };
 
-const PROJECT: IExportsProject = {
+const PROJECT: ExportsProject = {
   root: "C:\\projects\\xrf",
   declarations: [DIALOG, SETTINGS, PLAY_SOUND],
 };
@@ -114,7 +115,7 @@ describe("opened exports editor", () => {
   });
 
   it("refreshes explicitly and preserves a declaration that still exists", async () => {
-    const refreshed: IExportsProject = {
+    const refreshed: ExportsProject = {
       ...PROJECT,
       declarations: [{ ...PLAY_SOUND, description: "Updated sound documentation." }, SETTINGS, DIALOG],
     };

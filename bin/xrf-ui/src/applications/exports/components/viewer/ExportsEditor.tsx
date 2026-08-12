@@ -14,7 +14,7 @@ import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
-import { IExportDescriptor, IExportsProject } from "@/lib/exports";
+import { ExportDescriptor, ExportsProject } from "@/lib/bindings/xray-export";
 
 export function ExportsEditor(): ReactElement {
   const exportsService: ExportsService = useInjection(ExportsService);
@@ -23,11 +23,11 @@ export function ExportsEditor(): ReactElement {
   const [isClosing, setClosing] = useState<boolean>(false);
   const [closeError, setCloseError] = useState<Nullable<string>>(null);
 
-  const project: Nullable<IExportsProject> = exportsService.project.value;
-  const declarations: Array<IExportDescriptor> = useMemo(() => project?.declarations ?? [], [project?.declarations]);
+  const project: Nullable<ExportsProject> = exportsService.project.value;
+  const declarations: Array<ExportDescriptor> = useMemo(() => project?.declarations ?? [], [project?.declarations]);
   const groups: Array<IExportGroup> = useMemo(() => groupExports(declarations), [declarations]);
-  const selectedDeclaration: Nullable<IExportDescriptor> =
-    declarations.find((declaration: IExportDescriptor) => declaration.name === selectedName) ?? null;
+  const selectedDeclaration: Nullable<ExportDescriptor> =
+    declarations.find((declaration: ExportDescriptor) => declaration.name === selectedName) ?? null;
   const isBusy: boolean = exportsService.project.isLoading || isClosing;
 
   const onSelect = useCallback((name: string): void => setSelectedName(name), []);

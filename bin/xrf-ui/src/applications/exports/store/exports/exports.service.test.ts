@@ -4,10 +4,10 @@ import { ExportsService } from "@/applications/exports/store/exports/exports.ser
 import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { IExportsProject } from "@/lib/exports";
+import { ExportsProject } from "@/lib/bindings/xray-export";
 import { EExportsEditorCommand } from "@/lib/ipc";
 
-const PROJECT: IExportsProject = mockExportsProject();
+const PROJECT: ExportsProject = mockExportsProject();
 
 describe("ExportsService", () => {
   beforeEach(() => {

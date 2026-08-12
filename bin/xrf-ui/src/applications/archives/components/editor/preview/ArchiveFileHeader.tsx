@@ -4,12 +4,12 @@ import { ReactElement } from "react";
 
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/components/editor/archive-editor.styles";
 import { ArchiveFileExtractAction } from "@/applications/archives/components/editor/preview/ArchiveFileExtractAction";
-import { IArchiveFileDescriptor } from "@/lib/archive";
+import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
 
 interface IArchiveFileHeaderProps extends BaseComponentProps {
-  descriptor: IArchiveFileDescriptor;
+  descriptor: ArchiveFileDescriptor;
 }
 
 export function ArchiveFileHeader({ descriptor }: IArchiveFileHeaderProps): ReactElement {

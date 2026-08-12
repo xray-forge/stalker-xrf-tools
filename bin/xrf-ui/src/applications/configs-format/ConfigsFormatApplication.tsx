@@ -8,11 +8,11 @@ import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
+import { LtxProjectFormatResult } from "@/lib/bindings/xray-ltx";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
-import { ILtxProjectFormatResult } from "@/lib/ltx";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { getProjectConfigsPath } from "@/lib/xrf-path";
 
@@ -25,7 +25,7 @@ export function ConfigsFormatApplication(): ReactElement {
   const [isCheck, setIsCheck] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Nullable<string>>(null);
-  const [result, setResult] = useState<Nullable<ILtxProjectFormatResult>>(null);
+  const [result, setResult] = useState<Nullable<LtxProjectFormatResult>>(null);
 
   const configs: IPathField = usePathField({
     id: "configs.format.directory",
@@ -43,7 +43,7 @@ export function ConfigsFormatApplication(): ReactElement {
 
       log.info("Performing format command:", isCheck, configs.value);
 
-      const formatted: ILtxProjectFormatResult = await invoke(
+      const formatted: LtxProjectFormatResult = await invoke(
         isCheck ? EConfigsEditorCommand.CHECK_FORMAT_CONFIGS_PATH : EConfigsEditorCommand.FORMAT_CONFIGS_PATH,
         { path: configs.value }
       );

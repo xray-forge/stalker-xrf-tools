@@ -4,8 +4,8 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { EApplicationId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
+import { ExportSourceContent, ExportsProject } from "@/lib/bindings/xray-export";
 import { transformError } from "@/lib/error";
-import { IExportSourceContent, IExportsProject } from "@/lib/exports";
 import { EExportsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
@@ -19,7 +19,7 @@ export class ExportsService {
   public isReady: boolean = false;
 
   @Observable()
-  public project: Loadable<Nullable<IExportsProject>> = createLoadable(null);
+  public project: Loadable<Nullable<ExportsProject>> = createLoadable(null);
 
   public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
     makeObservable(this);
@@ -28,7 +28,7 @@ export class ExportsService {
   @OnProvision()
   public async onProvision(): Promise<void> {
     try {
-      const project: Nullable<IExportsProject> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
+      const project: Nullable<ExportsProject> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
 
       if (project) {
         this.log.info("Existing exports project detected");
@@ -72,7 +72,7 @@ export class ExportsService {
    * @returns The source text declaring it.
    */
   @BoundAction()
-  public async readExportSource(name: string): Promise<IExportSourceContent> {
+  public async readExportSource(name: string): Promise<ExportSourceContent> {
     this.log.info("Reading export source:", name);
 
     return invoke(EExportsEditorCommand.GET_XR_EXPORT_SOURCE, { name });
@@ -88,7 +88,7 @@ export class ExportsService {
     this.project = this.project.asLoading(null);
 
     try {
-      const result: IExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
+      const result: ExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
         projectPath: path,
       });
 
@@ -110,7 +110,7 @@ export class ExportsService {
 
   @BoundAction()
   public async refreshExportsProject(): Promise<void> {
-    const existing: Nullable<IExportsProject> = this.project.value;
+    const existing: Nullable<ExportsProject> = this.project.value;
 
     if (!existing || this.project.isLoading) {
       return;
@@ -120,7 +120,7 @@ export class ExportsService {
     this.project = this.project.asLoading(existing);
 
     try {
-      const result: IExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
+      const result: ExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
         projectPath: existing.root,
       });
 
@@ -142,7 +142,7 @@ export class ExportsService {
 
   @BoundAction()
   public async closeExportsProject(): Promise<void> {
-    const existing: Nullable<IExportsProject> = this.project.value;
+    const existing: Nullable<ExportsProject> = this.project.value;
 
     if (this.project.isLoading) {
       return;

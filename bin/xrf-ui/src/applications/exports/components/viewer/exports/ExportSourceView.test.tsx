@@ -6,10 +6,10 @@ import { ExportsService } from "@/applications/exports/store/exports";
 import { Nullable } from "@/core/types/general";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { IExportSourceContent } from "@/lib/exports";
+import { ExportSourceContent } from "@/lib/bindings/xray-export";
 import { EExportsEditorCommand } from "@/lib/ipc";
 
-function mockSource(name: string, content: string, line: number = 18): IExportSourceContent {
+function mockSource(name: string, content: string, line: number = 18): ExportSourceContent {
   return { name, path: "effects/sound.ts", line, endLine: line + 2, content };
 }
 
@@ -60,11 +60,11 @@ describe("ExportSourceView", () => {
   it("ignores a read abandoned by a newer selection", async () => {
     // Clicking down a long list starts a read per declaration and they need not come back in order,
     // so the body of one already navigated away from must never replace what is on screen.
-    const pending: Record<string, (value: IExportSourceContent) => void> = {};
+    const pending: Record<string, (value: ExportSourceContent) => void> = {};
 
     setMockInvokeResponses({
       [EExportsEditorCommand.GET_XR_EXPORT_SOURCE]: (parameters?: Record<string, unknown>) =>
-        new Promise<IExportSourceContent>((resolve) => {
+        new Promise<ExportSourceContent>((resolve) => {
           pending[parameters?.name as string] = resolve;
         }),
     });

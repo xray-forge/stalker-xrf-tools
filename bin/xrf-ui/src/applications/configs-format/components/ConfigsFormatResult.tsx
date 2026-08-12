@@ -3,12 +3,12 @@ import { ReactElement, useMemo } from "react";
 
 import { CommandResult, ICommandResultStat, TCommandResultTone } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { ILtxProjectFormatResult } from "@/lib/ltx";
+import { LtxProjectFormatResult } from "@/lib/bindings/xray-ltx";
 import { formatDuration } from "@/lib/result";
 
 interface IConfigsFormatResultProps {
   isCheck: boolean;
-  result: ILtxProjectFormatResult;
+  result: LtxProjectFormatResult;
 }
 
 export function ConfigsFormatResult({ isCheck, result }: IConfigsFormatResultProps): ReactElement {

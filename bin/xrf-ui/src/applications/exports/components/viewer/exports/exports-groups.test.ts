@@ -1,10 +1,10 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { ICallableExportDescriptor } from "@/lib/exports";
+import { TCallableExportDescriptor } from "@/lib/exports";
 
 import { groupExports, ROOT_EXPORT_GROUP_ID } from "./exports-groups";
 
-function callable(name: string, description: string | null = null): ICallableExportDescriptor {
+function callable(name: string, description: string | null = null): TCallableExportDescriptor {
   return {
     kind: "callable",
     name,

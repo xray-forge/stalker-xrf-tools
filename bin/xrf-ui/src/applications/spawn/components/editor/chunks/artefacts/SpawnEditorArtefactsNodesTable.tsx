@@ -3,14 +3,14 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { decimalColumn, textColumn, vectorColumn } from "@/core/components/table";
-import { IArtefactSpawnNode } from "@/lib/spawn-file";
+import { ArtefactSpawnPoint } from "@/lib/bindings/xray-db";
 
-interface IArtefactNodeRow extends IArtefactSpawnNode {
+interface IArtefactNodeRow extends ArtefactSpawnPoint {
   index: number;
 }
 
 interface ISpawnEditorArtefactsNodesTableProps {
-  nodes: Array<IArtefactSpawnNode>;
+  nodes: Array<ArtefactSpawnPoint>;
 }
 
 export function SpawnEditorArtefactsNodesTable({ nodes }: ISpawnEditorArtefactsNodesTableProps): ReactElement {
@@ -25,7 +25,7 @@ export function SpawnEditorArtefactsNodesTable({ nodes }: ISpawnEditorArtefactsN
   );
 
   const rows: Array<IArtefactNodeRow> = useMemo(
-    () => nodes.map((it: IArtefactSpawnNode, index: number) => ({ ...it, index })),
+    () => nodes.map((it: ArtefactSpawnPoint, index: number) => ({ ...it, index })),
     [nodes]
   );
 

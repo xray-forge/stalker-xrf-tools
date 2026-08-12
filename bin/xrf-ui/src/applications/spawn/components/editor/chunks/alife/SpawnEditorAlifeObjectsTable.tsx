@@ -3,13 +3,13 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { flagsColumn, identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
-import { IAlifeObjectBase } from "@/lib/spawn-file";
+import { AlifeObject } from "@/lib/bindings/xray-db";
 
 interface ISpawnEditorAlifeObjectsTableProps {
-  objects: Array<IAlifeObjectBase>;
+  objects: Array<AlifeObject>;
 }
 
-interface IAlifeObjectRow extends IAlifeObjectBase {
+interface IAlifeObjectRow extends AlifeObject {
   index: number;
   type: string;
 }
@@ -57,7 +57,7 @@ export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjec
   );
 
   const rows: Array<IAlifeObjectRow> = useMemo(
-    () => objects.map((it: IAlifeObjectBase, index: number) => ({ ...it, index, type: it.inherited.type })),
+    () => objects.map((it: AlifeObject, index: number) => ({ ...it, index, type: it.inherited.type })),
     [objects]
   );
 

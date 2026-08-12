@@ -2,11 +2,12 @@ import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@m
 import { ReactElement } from "react";
 
 import { ExportSection } from "@/applications/exports/components/viewer/exports/ExportSection";
+import { ExportParameterDescriptor } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { ICallableExportDescriptor, IExportParameterDescriptor } from "@/lib/exports";
+import { TCallableExportDescriptor } from "@/lib/exports";
 
 export interface ICallableExportDetailsProps extends BaseComponentProps {
-  declaration: ICallableExportDescriptor;
+  declaration: TCallableExportDescriptor;
 }
 
 export function CallableExportDetails({ declaration }: ICallableExportDetailsProps): ReactElement {
@@ -24,7 +25,7 @@ export function CallableExportDetails({ declaration }: ICallableExportDetailsPro
             </TableHead>
 
             <TableBody>
-              {declaration.parameters.map((parameter: IExportParameterDescriptor) => (
+              {declaration.parameters.map((parameter: ExportParameterDescriptor) => (
                 <TableRow key={parameter.name}>
                   <TableCell className={"monospace"}>
                     {parameter.name}

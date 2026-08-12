@@ -9,9 +9,9 @@ import { IEditorPanel, useEditorPanelsRegistry } from "@/core/components/shell/p
 import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
+import { SpawnFile, SpawnHeaderChunk } from "@/lib/bindings/xray-db";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
-import { SpawnHeaderChunk } from "@/lib/bindings/xray-db";
-import { ISpawnFile, SpawnFileService } from "@/lib/spawn-file";
+import { SpawnFileService } from "@/lib/spawn-file";
 
 const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
 
@@ -23,8 +23,8 @@ function PublishedPanels(): ReactElement {
 }
 
 /** The editor restores from three cheap calls now, rather than one whole-file parse. */
-function mockOpenSpawn(overrides: Partial<ISpawnFile> = {}): void {
-  const file: ISpawnFile = mockSpawnFile(overrides);
+function mockOpenSpawn(overrides: Partial<SpawnFile> = {}): void {
+  const file: SpawnFile = mockSpawnFile(overrides);
 
   setMockInvokeResponses({
     [ESpawnsEditorCommand.HAS_SPAWN_FILE]: true,

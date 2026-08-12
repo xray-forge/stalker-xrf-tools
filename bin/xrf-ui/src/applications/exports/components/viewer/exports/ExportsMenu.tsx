@@ -17,14 +17,14 @@ import { ExportsMenuHeader } from "@/applications/exports/components/viewer/expo
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { Nullable } from "@/core/types/general";
+import { ExportDescriptor } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { IExportDescriptor } from "@/lib/exports";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 
 const DECLARATION_ITEM_PREFIX: string = "declaration:";
 
 export interface IExportsMenuProps extends BaseComponentProps {
-  declarations: Array<IExportDescriptor>;
+  declarations: Array<ExportDescriptor>;
   selectedName: Nullable<string>;
   onSelect: (name: string) => void;
 }
@@ -36,13 +36,13 @@ export function ExportsMenu({ declarations, selectedName, onSelect }: IExportsMe
   const items: Array<IExportTreeItem> = useMemo(() => exportGroupsToTree(groups), [groups]);
 
   const onSelectDeclaration = useCallback(
-    (declaration: IExportDescriptor) => {
+    (declaration: ExportDescriptor) => {
       onSelect(declaration.name);
     },
     [onSelect]
   );
 
-  const search: IUseRankedSearch<IExportDescriptor> = useRankedSearch({
+  const search: IUseRankedSearch<ExportDescriptor> = useRankedSearch({
     items: declarations,
     toSearchText: (it) => it.name,
     toSecondaryText: getExportSearchText,
@@ -51,7 +51,7 @@ export function ExportsMenu({ declarations, selectedName, onSelect }: IExportsMe
 
   const rows: Array<IEditorSearchResultRow> = useMemo(
     () =>
-      search.results.map((result: ISearchResult<IExportDescriptor>) => {
+      search.results.map((result: ISearchResult<ExportDescriptor>) => {
         const separatorAt: number = result.item.name.lastIndexOf(".");
 
         return {

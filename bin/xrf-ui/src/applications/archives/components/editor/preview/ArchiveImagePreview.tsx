@@ -8,7 +8,8 @@ import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { ImageViewport } from "@/core/components/media/ImageViewport";
 import { Nullable } from "@/core/types/general";
-import { IArchiveImagePreview, TArchiveContent } from "@/lib/archive";
+import { TArchiveContent } from "@/lib/archive";
+import { ArchiveImagePreview as TArchiveImagePreview } from "@/lib/bindings/xrf-app";
 import { Loadable } from "@/lib/loadable";
 
 /**
@@ -21,7 +22,7 @@ export function ArchiveImagePreview(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
   const content: Loadable<Nullable<TArchiveContent>> = archivesService.content;
-  const preview: Nullable<IArchiveImagePreview> = content.value?.kind === "image" ? content.value.preview : null;
+  const preview: Nullable<TArchiveImagePreview> = content.value?.kind === "image" ? content.value.preview : null;
 
   if (content.isLoading) {
     return <DelayedProgress />;

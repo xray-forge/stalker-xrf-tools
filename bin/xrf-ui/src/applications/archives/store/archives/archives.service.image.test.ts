@@ -4,18 +4,18 @@ import { ArchivesService } from "@/applications/archives/store/archives/archives
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { IArchiveFileDescriptor } from "@/lib/archive";
+import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable } from "@/lib/loadable";
 
-const TEXTURE: IArchiveFileDescriptor = mockArchiveFileDescriptor({
+const TEXTURE: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "dds",
   name: "textures\\ui\\wall.dds",
   sizeCompressed: 512,
   sizeReal: 2048,
 });
 
-const TEXT: IArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "configs\\system.ltx" });
+const TEXT: ArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "configs\\system.ltx" });
 
 const PREVIEW = { name: TEXTURE.name, width: 256, height: 256, base64: "iVBORw0KGgo=" };
 

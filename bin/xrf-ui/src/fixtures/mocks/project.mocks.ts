@@ -1,12 +1,13 @@
-import { IArchiveDescriptor, IArchiveFileDescriptor, IArchivesProject } from "@/lib/archive";
-import { ICallableExportDescriptor, IExportDescriptor, IExportsProject } from "@/lib/exports";
+import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject } from "@/lib/bindings/xray-archive";
+import { ExportDescriptor, ExportsProject } from "@/lib/bindings/xray-export";
+import { TCallableExportDescriptor } from "@/lib/exports";
 import { IEquipmentSectionDescriptor } from "@/lib/icons";
 import { ITranslationsProjectJson } from "@/lib/translations";
 
 import { mockArchiveReadPolicy } from "./archive.mocks";
 
 /** Create an archive file fixture with optional field overrides. */
-export function mockArchiveFile(overrides: Partial<IArchiveFileDescriptor> = {}): IArchiveFileDescriptor {
+export function mockArchiveFile(overrides: Partial<ArchiveFileDescriptor> = {}): ArchiveFileDescriptor {
   return {
     crc: 123456,
     destination: "gamedata\\config\\system.ltx",
@@ -21,8 +22,10 @@ export function mockArchiveFile(overrides: Partial<IArchiveFileDescriptor> = {})
 }
 
 /** Create an archive descriptor fixture with optional field overrides. */
-export function mockArchiveDescriptor(overrides: Partial<IArchiveDescriptor> = {}): IArchiveDescriptor {
+export function mockArchiveDescriptor(overrides: Partial<ArchiveDescriptor> = {}): ArchiveDescriptor {
   return {
+    createdAt: null,
+    modifiedAt: null,
     files: {},
     outputRootPath: "unpacked",
     path: "db\\db0",
@@ -31,7 +34,7 @@ export function mockArchiveDescriptor(overrides: Partial<IArchiveDescriptor> = {
 }
 
 /** Create an archives project fixture with optional field overrides. */
-export function mockArchivesProject(overrides: Partial<IArchivesProject> = {}): IArchivesProject {
+export function mockArchivesProject(overrides: Partial<ArchiveProject> = {}): ArchiveProject {
   return {
     archives: [mockArchiveDescriptor(), mockArchiveDescriptor({ path: "db\\db1" })],
     files: {
@@ -54,7 +57,7 @@ export function mockArchivesProject(overrides: Partial<IArchivesProject> = {}): 
 }
 
 /** Create a callable export fixture with optional field overrides. */
-export function mockExportDescriptor(overrides: Partial<ICallableExportDescriptor> = {}): ICallableExportDescriptor {
+export function mockExportDescriptor(overrides: Partial<TCallableExportDescriptor> = {}): TCallableExportDescriptor {
   return {
     kind: "callable",
     name: "play_sound",
@@ -67,7 +70,7 @@ export function mockExportDescriptor(overrides: Partial<ICallableExportDescripto
 }
 
 /** Create export declaration fixtures with optional additional declarations. */
-export function mockExportsDeclarations(overrides: Array<IExportDescriptor> = []): Array<IExportDescriptor> {
+export function mockExportsDeclarations(overrides: Array<ExportDescriptor> = []): Array<ExportDescriptor> {
   return [
     mockExportDescriptor({
       source: { path: "xr_conditions.ts", line: 1, column: 1, endLine: 4 },
@@ -81,7 +84,7 @@ export function mockExportsDeclarations(overrides: Array<IExportDescriptor> = []
 }
 
 /** Create an exports project fixture with optional field overrides. */
-export function mockExportsProject(overrides: Partial<IExportsProject> = {}): IExportsProject {
+export function mockExportsProject(overrides: Partial<ExportsProject> = {}): ExportsProject {
   return {
     root: "C:\\projects\\xrf",
     declarations: mockExportsDeclarations(),

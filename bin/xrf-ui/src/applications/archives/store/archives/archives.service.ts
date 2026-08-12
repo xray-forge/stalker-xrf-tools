@@ -13,20 +13,9 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { EApplicationId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
-import {
-  getArchivePreviewSupport,
-  IArchiveAudioPreview,
-  IArchiveFileDescriptor,
-  IArchiveFileReadResult,
-  IArchiveFolderExtractResult,
-  IArchiveImagePreview,
-  IArchivesProject,
-  isArchiveAudio,
-  isArchiveImage,
-  TArchiveContent,
-  TArchiveOperation,
-  TArchiveSelection,
-} from "@/lib/archive";
+import { getArchivePreviewSupport, isArchiveAudio, isArchiveImage, TArchiveContent, TArchiveOperation, TArchiveSelection } from "@/lib/archive";
+import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject, ProjectReadResult } from "@/lib/bindings/xray-archive";
+import { ArchiveAudioPreview, ArchiveImagePreview } from "@/lib/bindings/xrf-app";
 import { transformError } from "@/lib/error";
 import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
@@ -41,7 +30,7 @@ export class ArchivesService {
   public isReady: boolean = false;
 
   @Observable()
-  public project: Loadable<Nullable<IArchivesProject>> = createLoadable(null);
+  public project: Loadable<Nullable<ArchiveProject>> = createLoadable(null);
 
   /** What the explorer points at. Exactly one kind at a time, by construction. */
   @Observable()
@@ -58,7 +47,7 @@ export class ArchivesService {
   private contentRequestId: number = 0;
 
   /** The selected file, or null when a directory or nothing is selected. */
-  public get selectedFile(): Nullable<IArchiveFileDescriptor> {
+  public get selectedFile(): Nullable<ArchiveFileDescriptor> {
     return this.selection.kind === "file" ? this.selection.descriptor : null;
   }
 
@@ -88,7 +77,7 @@ export class ArchivesService {
   public async onProvision(provisionId: ProvisionId): Promise<void> {
     this.log.info("Provisioning:", provisionId);
 
-    const existing: Nullable<IArchivesProject> = await invoke(EArchivesEditorCommand.GET_ARCHIVES_PROJECT);
+    const existing: Nullable<ArchiveProject> = await invoke(EArchivesEditorCommand.GET_ARCHIVES_PROJECT);
 
     if (this.status.provisionId !== provisionId) {
       return this.log.info("Discard outdated get archives request:", provisionId, "<", this.status.provisionId);
@@ -141,7 +130,7 @@ export class ArchivesService {
       this.clearFileSelection();
       this.project = createLoadable(null, true);
 
-      const response: IArchivesProject = await invoke(EArchivesEditorCommand.OPEN_ARCHIVES_PROJECT, { path });
+      const response: ArchiveProject = await invoke(EArchivesEditorCommand.OPEN_ARCHIVES_PROJECT, { path });
 
       this.log.info("Archives project opened");
 
@@ -179,7 +168,7 @@ export class ArchivesService {
   }
 
   @BoundAction()
-  public async selectArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
+  public async selectArchiveFile(descriptor: ArchiveFileDescriptor): Promise<void> {
     this.log.info("Select archive file:", descriptor);
 
     this.selection = { kind: "file", descriptor };
@@ -200,7 +189,7 @@ export class ArchivesService {
 
   @BoundAction()
   public async retrySelectedFile(): Promise<void> {
-    const descriptor: Nullable<IArchiveFileDescriptor> = this.selectedFile;
+    const descriptor: Nullable<ArchiveFileDescriptor> = this.selectedFile;
 
     if (descriptor) {
       await this.loadSelectedContent(descriptor);
@@ -211,7 +200,7 @@ export class ArchivesService {
    * Write one archived file to a path of the user's choosing.
    */
   @BoundAction()
-  public async extractArchiveFile(descriptor: IArchiveFileDescriptor, destination: string): Promise<void> {
+  public async extractArchiveFile(descriptor: ArchiveFileDescriptor, destination: string): Promise<void> {
     this.log.info("Extracting archive file:", descriptor.name, destination);
 
     try {
@@ -255,7 +244,7 @@ export class ArchivesService {
     try {
       this.operation = createLoadable(null, true);
 
-      const result: IArchiveFolderExtractResult = await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER, {
+      const result: ArchiveExtractFolderResult = await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER, {
         prefix,
         destination,
       });
@@ -312,8 +301,8 @@ export class ArchivesService {
    * The single entry point for every content kind, so selecting and retrying cannot disagree about
    * which one applies - they did, until retry started re-reading textures as text.
    */
-  private async loadSelectedContent(descriptor: IArchiveFileDescriptor): Promise<void> {
-    const project: Nullable<IArchivesProject> = this.project.value;
+  private async loadSelectedContent(descriptor: ArchiveFileDescriptor): Promise<void> {
+    const project: Nullable<ArchiveProject> = this.project.value;
 
     if (!project) {
       return;
@@ -338,7 +327,7 @@ export class ArchivesService {
    * Guarded by a request identifier: clicking through a directory starts a read per file, and an
    * earlier one finishing last would otherwise overwrite a newer selection's content.
    */
-  private async readContent(descriptor: IArchiveFileDescriptor, kind: TArchiveContent["kind"]): Promise<void> {
+  private async readContent(descriptor: ArchiveFileDescriptor, kind: TArchiveContent["kind"]): Promise<void> {
     const requestId: number = ++this.contentRequestId;
 
     this.log.info("Reading archive content:", kind, descriptor.name);
@@ -349,20 +338,20 @@ export class ArchivesService {
         kind === "audio"
           ? {
               kind: "audio",
-              preview: await invoke<IArchiveAudioPreview>(EArchivesEditorCommand.READ_ARCHIVE_AUDIO, {
+              preview: await invoke<ArchiveAudioPreview>(EArchivesEditorCommand.READ_ARCHIVE_AUDIO, {
                 path: descriptor.name,
               }),
             }
           : kind === "image"
             ? {
                 kind: "image",
-                preview: await invoke<IArchiveImagePreview>(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
+                preview: await invoke<ArchiveImagePreview>(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
                   path: descriptor.name,
                 }),
               }
             : {
                 kind: "text",
-                result: await invoke<IArchiveFileReadResult>(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
+                result: await invoke<ProjectReadResult>(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
                   path: descriptor.name,
                 }),
               };
