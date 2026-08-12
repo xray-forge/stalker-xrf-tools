@@ -7,7 +7,7 @@ import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { NotificationsPanel } from "@/core/components/shell/notifications/NotificationsPanel";
 import { NotificationsService } from "@/core/store/notifications";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { INotificationPayload } from "@/lib/notifications";
+import { ENotificationSeverity, INotificationPayload } from "@/lib/notifications";
 
 interface IPanelRender {
   render: RenderResult;
@@ -38,7 +38,7 @@ describe("NotificationsPanel", () => {
 
   it("names the tool a record came from the way the rail does", () => {
     const { render } = renderPanel([
-      { severity: "success", source: EApplicationToolId.ARCHIVES, title: "Extracted textures" },
+      { severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ARCHIVES, title: "Extracted textures" },
     ]);
 
     expect(render.getByText("Extracted textures")).toBeInTheDocument();
@@ -47,19 +47,19 @@ describe("NotificationsPanel", () => {
 
   it("shows the newest record first", () => {
     const { render } = renderPanel([
-      { severity: "info", source: EApplicationToolId.ARCHIVES, title: "Older" },
-      { severity: "info", source: EApplicationToolId.ARCHIVES, title: "Newer" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Older" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Newer" },
     ]);
 
-    const titles: Array<string> = render
-      .getAllByText(/Older|Newer/)
-      .map((it: HTMLElement) => it.textContent as string);
+    const titles: Array<string> = render.getAllByText(/Older|Newer/).map((it: HTMLElement) => it.textContent as string);
 
     expect(titles).toEqual(["Newer", "Older"]);
   });
 
   it("reads what it was opened onto", () => {
-    const { service } = renderPanel([{ severity: "error", source: EApplicationToolId.ARCHIVES, title: "Failed" }]);
+    const { service } = renderPanel([
+      { severity: ENotificationSeverity.ERROR, source: EApplicationToolId.ARCHIVES, title: "Failed" },
+    ]);
 
     expect(service.unreadCount).toBe(0);
   });
@@ -67,7 +67,9 @@ describe("NotificationsPanel", () => {
   it("reads what arrives while it is open", () => {
     const { service } = renderPanel();
 
-    act(() => service.push({ severity: "error", source: EApplicationToolId.ARCHIVES, title: "Failed" }));
+    act(() =>
+      service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationToolId.ARCHIVES, title: "Failed" })
+    );
 
     // Left unread, the badge counts records the user is looking at and nothing can dismiss it.
     expect(service.unreadCount).toBe(0);
@@ -77,7 +79,7 @@ describe("NotificationsPanel", () => {
     const { render } = renderPanel([
       {
         details: "C:\\out\\system.ltx",
-        severity: "error",
+        severity: ENotificationSeverity.ERROR,
         source: EApplicationToolId.ARCHIVES,
         title: "Could not extract",
       },
@@ -92,7 +94,7 @@ describe("NotificationsPanel", () => {
 
   it("offers no expander for a record with nothing more to say", () => {
     const { render } = renderPanel([
-      { severity: "info", source: EApplicationToolId.ARCHIVES, title: "Nothing to expand" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Nothing to expand" },
     ]);
 
     expect(render.queryByLabelText("Show details")).not.toBeInTheDocument();
@@ -100,7 +102,7 @@ describe("NotificationsPanel", () => {
 
   it("clears the log on request", async () => {
     const { render, service } = renderPanel([
-      { severity: "info", source: EApplicationToolId.ARCHIVES, title: "Something" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Something" },
     ]);
 
     await userEvent.click(render.getByRole("button", { name: "Clear all" }));

@@ -4,11 +4,11 @@ import { BoundAction, makeObservable, Observable } from "@wirestate/mobx";
 import { Nullable } from "@/core/types/general";
 import { Logger } from "@/lib/logging";
 import {
+  ENotificationSeverity,
   INotification,
   INotificationPayload,
   NOTIFICATION_PUSH_EVENT,
   NOTIFICATION_SEVERITY_RANK,
-  TNotificationSeverity,
 } from "@/lib/notifications";
 
 /**
@@ -32,8 +32,8 @@ export class NotificationsService {
   }
 
   /** Severity the badge takes its colour from, or null when nothing is unread. */
-  public get highestUnreadSeverity(): Nullable<TNotificationSeverity> {
-    let highest: Nullable<TNotificationSeverity> = null;
+  public get highestUnreadSeverity(): Nullable<ENotificationSeverity> {
+    let highest: Nullable<ENotificationSeverity> = null;
 
     for (const notification of this.notifications) {
       if (

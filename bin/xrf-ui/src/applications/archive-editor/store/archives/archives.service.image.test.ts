@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { ArchivesService } from "@/applications/archive-editor/store/archives/archives.service";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { IArchiveFileDescriptor } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable } from "@/lib/loadable";
@@ -23,7 +24,7 @@ const PREVIEW = { name: TEXTURE.name, width: 256, height: 256, base64: "iVBORw0K
  * project has to be present for anything to be classified as a texture.
  */
 function createService(): ArchivesService {
-  const service: ArchivesService = new ArchivesService();
+  const { service } = mockInjectedService(ArchivesService);
 
   service.project = createLoadable(mockArchivesProject([TEXTURE, TEXT]));
 

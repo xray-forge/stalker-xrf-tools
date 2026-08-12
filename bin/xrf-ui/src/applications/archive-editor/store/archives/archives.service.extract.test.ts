@@ -4,6 +4,7 @@ import { ArchivesService } from "@/applications/archive-editor/store/archives/ar
 import { Nullable } from "@/core/types/general";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { IArchiveFileDescriptor } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 
@@ -20,7 +21,7 @@ describe("ArchivesService extraction", () => {
   });
 
   it("asks the backend for the file by its archived name", async () => {
-    const service: ArchivesService = new ArchivesService();
+    const { service } = mockInjectedService(ArchivesService);
 
     await service.extractArchiveFile(FILE, "C:\\out\\system.ltx");
 
@@ -33,7 +34,7 @@ describe("ArchivesService extraction", () => {
   });
 
   it("reports a refused extraction instead of staying loading", async () => {
-    const service: ArchivesService = new ArchivesService();
+    const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
       [EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE]: () => {
@@ -49,7 +50,7 @@ describe("ArchivesService extraction", () => {
   });
 
   it("clears a reported outcome", async () => {
-    const service: ArchivesService = new ArchivesService();
+    const { service } = mockInjectedService(ArchivesService);
 
     await service.extractArchiveFile(FILE, "C:\\out\\system.ltx");
 

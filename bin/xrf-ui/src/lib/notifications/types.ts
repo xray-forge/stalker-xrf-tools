@@ -1,5 +1,10 @@
 /** How urgent a recorded outcome is. Ordered by `NOTIFICATION_SEVERITY_RANK`, not by declaration. */
-export type TNotificationSeverity = "success" | "info" | "warning" | "error";
+export const enum ENotificationSeverity {
+  SUCCESS = "success",
+  INFO = "info",
+  WARNING = "warning",
+  ERROR = "error",
+}
 
 /**
  * Rank used to colour the unread badge when records of several severities are waiting.
@@ -7,18 +12,18 @@ export type TNotificationSeverity = "success" | "info" | "warning" | "error";
  * The badge shows one colour for a mixed pile, so it has to be the most urgent one - a failure hidden
  * behind four successes is exactly the case the panel exists for.
  */
-export const NOTIFICATION_SEVERITY_RANK: Record<TNotificationSeverity, number> = {
-  success: 0,
-  info: 1,
-  warning: 2,
-  error: 3,
+export const NOTIFICATION_SEVERITY_RANK: Record<ENotificationSeverity, number> = {
+  [ENotificationSeverity.SUCCESS]: 0,
+  [ENotificationSeverity.INFO]: 1,
+  [ENotificationSeverity.WARNING]: 2,
+  [ENotificationSeverity.ERROR]: 3,
 };
 
 /**
  * What an emitter supplies. Everything else about a record is stamped by the service.
  */
 export interface INotificationPayload {
-  severity: TNotificationSeverity;
+  severity: ENotificationSeverity;
   /** Tool the outcome belongs to, so the panel names it the way the rail does. */
   source: string;
   title: string;

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { ArchivesService } from "@/applications/archive-editor/store/archives/archives.service";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { IArchiveFileDescriptor } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable } from "@/lib/loadable";
@@ -25,7 +26,7 @@ const PREVIEW = {
 };
 
 function createService(): ArchivesService {
-  const service: ArchivesService = new ArchivesService();
+  const { service } = mockInjectedService(ArchivesService);
 
   service.project = createLoadable(mockArchivesProject([SOUND, TEXTURE]));
 

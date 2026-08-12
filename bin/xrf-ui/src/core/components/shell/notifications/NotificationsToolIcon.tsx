@@ -5,13 +5,13 @@ import { ReactElement } from "react";
 
 import { NotificationsService } from "@/core/store/notifications";
 import { Nullable } from "@/core/types/general";
-import { TNotificationSeverity } from "@/lib/notifications";
+import { ENotificationSeverity } from "@/lib/notifications";
 
-const BADGE_COLORS: Record<TNotificationSeverity, "success" | "info" | "warning" | "error"> = {
-  error: "error",
-  info: "info",
-  success: "success",
-  warning: "warning",
+const BADGE_COLORS: Record<ENotificationSeverity, "success" | "info" | "warning" | "error"> = {
+  [ENotificationSeverity.ERROR]: "error",
+  [ENotificationSeverity.INFO]: "info",
+  [ENotificationSeverity.SUCCESS]: "success",
+  [ENotificationSeverity.WARNING]: "warning",
 };
 
 /**
@@ -20,7 +20,7 @@ const BADGE_COLORS: Record<TNotificationSeverity, "success" | "info" | "warning"
 export function NotificationsToolIcon(): ReactElement {
   const notificationsService: NotificationsService = useInjection(NotificationsService);
 
-  const severity: Nullable<TNotificationSeverity> = notificationsService.highestUnreadSeverity;
+  const severity: Nullable<ENotificationSeverity> = notificationsService.highestUnreadSeverity;
 
   return (
     <Badge

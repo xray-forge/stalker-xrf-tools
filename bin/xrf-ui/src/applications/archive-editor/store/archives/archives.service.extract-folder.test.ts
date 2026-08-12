@@ -4,6 +4,7 @@ import { ArchivesService } from "@/applications/archive-editor/store/archives/ar
 import { Nullable } from "@/core/types/general";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { IArchiveFolderExtractResult } from "@/lib/archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 
@@ -18,7 +19,7 @@ describe("ArchivesService folder extraction", () => {
   });
 
   it("sends the directory prefix and destination root", async () => {
-    const service: ArchivesService = new ArchivesService();
+    const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
       [EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER]: {
@@ -39,7 +40,7 @@ describe("ArchivesService folder extraction", () => {
   });
 
   it("treats the archive root as an empty prefix", async () => {
-    const service: ArchivesService = new ArchivesService();
+    const { service } = mockInjectedService(ArchivesService);
 
     service.selectArchiveDirectory("");
 
@@ -54,7 +55,7 @@ describe("ArchivesService folder extraction", () => {
   });
 
   it("reports a refused extraction instead of staying loading", async () => {
-    const service: ArchivesService = new ArchivesService();
+    const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
       [EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER]: () => {
@@ -69,7 +70,7 @@ describe("ArchivesService folder extraction", () => {
   });
 
   it("keeps file and directory selection mutually exclusive", async () => {
-    const service: ArchivesService = new ArchivesService();
+    const { service } = mockInjectedService(ArchivesService);
 
     service.selectArchiveDirectory("configs");
     expect(service.selectedDirectory).toBe("configs");

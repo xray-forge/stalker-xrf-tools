@@ -12,20 +12,20 @@ import { ReactElement, ReactNode, useCallback, useState } from "react";
 import { findApplicationToolById, IApplicationTool } from "@/core/components/shell/application-tools";
 import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
-import { INotification, TNotificationSeverity } from "@/lib/notifications";
+import { ENotificationSeverity, INotification } from "@/lib/notifications";
 
-const SEVERITY_ICONS: Record<TNotificationSeverity, ReactNode> = {
-  error: <ErrorOutlineIcon fontSize={"small"} />,
-  info: <InfoOutlinedIcon fontSize={"small"} />,
-  success: <CheckCircleOutlineIcon fontSize={"small"} />,
-  warning: <WarningAmberIcon fontSize={"small"} />,
+const SEVERITY_ICONS: Record<ENotificationSeverity, ReactNode> = {
+  [ENotificationSeverity.ERROR]: <ErrorOutlineIcon fontSize={"small"} />,
+  [ENotificationSeverity.INFO]: <InfoOutlinedIcon fontSize={"small"} />,
+  [ENotificationSeverity.SUCCESS]: <CheckCircleOutlineIcon fontSize={"small"} />,
+  [ENotificationSeverity.WARNING]: <WarningAmberIcon fontSize={"small"} />,
 };
 
-const SEVERITY_COLORS: Record<TNotificationSeverity, string> = {
-  error: "error.main",
-  info: "info.main",
-  success: "success.main",
-  warning: "warning.main",
+const SEVERITY_COLORS: Record<ENotificationSeverity, string> = {
+  [ENotificationSeverity.ERROR]: "error.main",
+  [ENotificationSeverity.INFO]: "info.main",
+  [ENotificationSeverity.SUCCESS]: "success.main",
+  [ENotificationSeverity.WARNING]: "warning.main",
 };
 
 export interface INotificationRowProps {

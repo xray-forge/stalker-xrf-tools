@@ -1,7 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { Nullable } from "@/core/types/general";
 import {
   getArchivePreviewSupport,
@@ -21,6 +22,7 @@ import { transformError } from "@/lib/error";
 import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
+import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 
 @Injectable()
 export class ArchivesService {
@@ -66,7 +68,7 @@ export class ArchivesService {
     return this.content.isLoading || this.operation.isLoading;
   }
 
-  public constructor() {
+  public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
     makeObservable(this);
   }
 
@@ -121,6 +123,13 @@ export class ArchivesService {
       this.log.error("Failed to open archives project:", error);
 
       runInAction(() => (this.project = createLoadable(null, false, transformError(error))));
+
+      emitNotification(this.eventBus, {
+        details: `${path}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.ARCHIVES,
+        title: "Could not open archives project",
+      });
     }
   }
 
@@ -182,10 +191,24 @@ export class ArchivesService {
       await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE, { name: descriptor.name, destination });
 
       runInAction(() => (this.operation = createLoadable({ kind: "extract-file", destination })));
+
+      emitNotification(this.eventBus, {
+        details: destination,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.ARCHIVES,
+        title: `Extracted ${descriptor.name}`,
+      });
     } catch (error: unknown) {
       this.log.error("Failed to extract archive file:", error);
 
       runInAction(() => (this.operation = createLoadable(null, false, transformError(error))));
+
+      emitNotification(this.eventBus, {
+        details: `${destination}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.ARCHIVES,
+        title: `Could not extract ${descriptor.name}`,
+      });
 
       throw transformError(error);
     }
@@ -209,10 +232,32 @@ export class ArchivesService {
       });
 
       runInAction(() => (this.operation = createLoadable({ kind: "extract-folder", result })));
+
+      // Reported without a count rather than not at all: a response the parser did not fill in is no
+      // reason to turn a write that happened into a thrown error.
+      const extractedCount: Nullable<number> = result?.extractedCount ?? null;
+      const extractedFrom: string = prefix || "the archive root";
+
+      emitNotification(this.eventBus, {
+        details: destination,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.ARCHIVES,
+        title:
+          extractedCount === null
+            ? `Extracted ${extractedFrom}`
+            : `Extracted ${extractedCount} file(s) from ${extractedFrom}`,
+      });
     } catch (error: unknown) {
       this.log.error("Failed to extract archive folder:", error);
 
       runInAction(() => (this.operation = createLoadable(null, false, transformError(error))));
+
+      emitNotification(this.eventBus, {
+        details: `${destination}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.ARCHIVES,
+        title: `Could not extract ${prefix || "the archive root"}`,
+      });
 
       throw transformError(error);
     }
