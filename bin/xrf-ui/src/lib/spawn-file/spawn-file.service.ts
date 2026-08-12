@@ -18,11 +18,10 @@ import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { SpawnGraphsChunk, SpawnHeaderChunk } from "@/lib/rust-sdk/xray-db";
 import {
   ISpawnFileAlifeSpawnsChunk,
   ISpawnFileArtefactSpawnsChunk,
-  ISpawnFileGraphsChunk,
-  ISpawnFileHeaderChunk,
   ISpawnFilePatrolsChunk,
 } from "@/lib/spawn-file/types";
 
@@ -52,7 +51,7 @@ export class SpawnFileService {
   public path: Nullable<string> = null;
 
   @Observable()
-  public header: Loadable<Nullable<ISpawnFileHeaderChunk>> = createLoadable(null);
+  public header: Loadable<Nullable<SpawnHeaderChunk>> = createLoadable(null);
 
   @Observable()
   public alifeSpawn: Loadable<Nullable<ISpawnFileAlifeSpawnsChunk>> = createLoadable(null);
@@ -64,7 +63,7 @@ export class SpawnFileService {
   public patrols: Loadable<Nullable<ISpawnFilePatrolsChunk>> = createLoadable(null);
 
   @Observable()
-  public graphs: Loadable<Nullable<ISpawnFileGraphsChunk>> = createLoadable(null);
+  public graphs: Loadable<Nullable<SpawnGraphsChunk>> = createLoadable(null);
 
   /** The last write to disk, so whichever surface started it can report the outcome. */
   @Observable()
@@ -157,7 +156,7 @@ export class SpawnFileService {
     this.header = createLoadable(null, true);
 
     try {
-      const header: ISpawnFileHeaderChunk = await invoke(ESpawnsEditorCommand.OPEN_SPAWN_FILE, { path });
+      const header: SpawnHeaderChunk = await invoke(ESpawnsEditorCommand.OPEN_SPAWN_FILE, { path });
 
       this.log.info("Spawn file opened");
 

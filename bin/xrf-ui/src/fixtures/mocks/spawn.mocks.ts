@@ -1,7 +1,8 @@
-import { IAlifeObjectBase, IPatrol, ISpawnFile, IVector3d } from "@/lib/spawn-file";
+import { Vector3d } from "@/lib/rust-sdk/xray-db";
+import { IAlifeObjectBase, IPatrol, ISpawnFile } from "@/lib/spawn-file";
 
 /** Create a vector fixture with optional field overrides. */
-export function mockVector3d(overrides: Partial<IVector3d> = {}): IVector3d {
+export function mockVector3d(overrides: Partial<Vector3d> = {}): Vector3d {
   return { x: 0, y: 0, z: 0, ...overrides };
 }
 
@@ -98,18 +99,18 @@ export function mockSpawnFile(overrides: Partial<ISpawnFile> = {}): ISpawnFile {
           gameGuid: "8f1a1b2c-0000-4000-8000-000000000002",
           levelGuid: "8f1a1b2c-0000-4000-8000-000000000003",
           nodesCount: 1,
-          vertexCount: 1,
+          verticesCount: 1,
         },
       ],
       edges: [{ distance: 12.5, gameVertexId: 1 }],
-      points: [{ distance: 3.25, levelVertexId: 100 }],
+      points: [{ distance: 3.25, levelVertexId: 100, position: mockVector3d({ x: 3, y: 0, z: 4 }) }],
       vertices: [
         {
           edgesCount: 1,
           edgesOffset: 0,
           levelId: 1,
-          levelPointCount: 1,
-          levelPointOffset: 0,
+          levelPointsCount: 1,
+          levelPointsOffset: 0,
           levelVertexId: 100,
           vertexType: [0, 0, 0, 0],
           gamePoint: mockVector3d(),

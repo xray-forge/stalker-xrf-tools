@@ -3,14 +3,14 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { identifierColumn, textColumn } from "@/core/components/table";
-import { ISpawnFileHeaderChunk } from "@/lib/spawn-file";
+import { SpawnHeaderChunk } from "@/lib/rust-sdk/xray-db";
 
-interface IHeaderRow extends ISpawnFileHeaderChunk {
+interface IHeaderRow extends SpawnHeaderChunk {
   id: string;
 }
 
 interface ISpawnEditorHeaderTableProps {
-  header: ISpawnFileHeaderChunk;
+  header: SpawnHeaderChunk;
 }
 
 export function SpawnEditorHeaderTable({ header }: ISpawnEditorHeaderTableProps): ReactElement {

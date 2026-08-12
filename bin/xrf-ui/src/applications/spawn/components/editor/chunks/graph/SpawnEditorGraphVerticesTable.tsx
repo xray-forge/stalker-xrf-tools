@@ -3,17 +3,17 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { textColumn, tupleColumn, vectorColumn } from "@/core/components/table";
-import { IGraphVertex } from "@/lib/spawn-file";
+import { GraphVertex } from "@/lib/rust-sdk/xray-db";
 
 /** Offsets locate a vertex inside the file rather than in the world; available, off by default. */
-const HIDDEN_COLUMNS: Array<string> = ["edgesOffset", "levelPointOffset"];
+const HIDDEN_COLUMNS: Array<string> = ["edgesOffset", "levelPointsOffset"];
 
-interface IGraphVertexRow extends IGraphVertex {
+interface IGraphVertexRow extends GraphVertex {
   index: number;
 }
 
 interface ISpawnEditorGraphVerticesTableProps {
-  vertices: Array<IGraphVertex>;
+  vertices: Array<GraphVertex>;
 }
 
 export function SpawnEditorGraphVerticesTable({ vertices }: ISpawnEditorGraphVerticesTableProps): ReactElement {
@@ -25,17 +25,16 @@ export function SpawnEditorGraphVerticesTable({ vertices }: ISpawnEditorGraphVer
       vectorColumn("gamePoint", "Game point"),
       vectorColumn("levelPoint", "Level point"),
       textColumn("edgesCount", "Edges", 100),
-      // Was `levelPointsCount`, which the vertex does not carry - the column read empty in every file.
-      textColumn("levelPointCount", "Points", 100),
+      textColumn("levelPointsCount", "Points", 100),
       tupleColumn("vertexType", "Vertex type"),
       textColumn("edgesOffset", "Edges offset", 130),
-      textColumn("levelPointOffset", "Points offset", 130),
+      textColumn("levelPointsOffset", "Points offset", 130),
     ],
     []
   );
 
   const rows: Array<IGraphVertexRow> = useMemo(
-    () => vertices.map((it: IGraphVertex, index: number) => ({ ...it, index })),
+    () => vertices.map((it: GraphVertex, index: number) => ({ ...it, index })),
     [vertices]
   );
 

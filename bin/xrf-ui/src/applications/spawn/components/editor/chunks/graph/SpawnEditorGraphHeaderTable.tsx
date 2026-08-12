@@ -3,14 +3,14 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { identifierColumn, textColumn } from "@/core/components/table";
-import { IGraphHeader } from "@/lib/spawn-file";
+import { GraphHeader } from "@/lib/rust-sdk/xray-db";
 
-interface IGraphHeaderRow extends IGraphHeader {
+interface IGraphHeaderRow extends GraphHeader {
   id: string;
 }
 
 interface ISpawnEditorGraphHeaderTableProps {
-  header: IGraphHeader;
+  header: GraphHeader;
 }
 
 export function SpawnEditorGraphHeaderTable({ header }: ISpawnEditorGraphHeaderTableProps): ReactElement {

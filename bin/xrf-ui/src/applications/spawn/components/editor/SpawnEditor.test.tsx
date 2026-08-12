@@ -10,7 +10,8 @@ import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
-import { ISpawnFile, ISpawnFileHeaderChunk, SpawnFileService } from "@/lib/spawn-file";
+import { SpawnHeaderChunk } from "@/lib/rust-sdk/xray-db";
+import { ISpawnFile, SpawnFileService } from "@/lib/spawn-file";
 
 const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
 
@@ -98,7 +99,7 @@ describe("SpawnEditor", () => {
   });
 
   it("reflects the fixture rather than a fixed string", async () => {
-    const header: ISpawnFileHeaderChunk = {
+    const header: SpawnHeaderChunk = {
       version: 118,
       guid: "guid",
       graphGuid: "graph-guid",

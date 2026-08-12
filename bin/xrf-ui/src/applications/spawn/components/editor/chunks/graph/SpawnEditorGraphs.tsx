@@ -10,7 +10,8 @@ import { SpawnEditorGraphPointsTable } from "@/applications/spawn/components/edi
 import { SpawnEditorGraphVerticesTable } from "@/applications/spawn/components/editor/chunks/graph/SpawnEditorGraphVerticesTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
 import { TChunkTabChange, useChunkTab } from "@/applications/spawn/components/editor/chunks/use-chunk-tab";
-import { ISpawnFileGraphsChunk, SpawnFileService } from "@/lib/spawn-file";
+import { SpawnGraphsChunk } from "@/lib/rust-sdk/xray-db";
+import { SpawnFileService } from "@/lib/spawn-file";
 
 const BASE_PATH: string = "/spawn/graph";
 const TABS: Array<string> = ["header", "levels", "vertices", "edges", "points", "cross-tables"];
@@ -21,9 +22,9 @@ export function SpawnEditorGraphs(): ReactElement {
   const [activeTab, onChangeTab]: [string, TChunkTabChange] = useChunkTab(BASE_PATH, TABS, "header");
 
   return (
-    <SpawnChunkView<ISpawnFileGraphsChunk>
+    <SpawnChunkView<SpawnGraphsChunk>
       chunk={spawnFileService.graphs}
-      render={(chunk: ISpawnFileGraphsChunk) => (
+      render={(chunk: SpawnGraphsChunk) => (
         <>
           <Tabs value={activeTab} variant={"scrollable"} sx={{ marginBottom: 1, flexShrink: 0 }} onChange={onChangeTab}>
             <Tab value={"header"} label={"Header"} />

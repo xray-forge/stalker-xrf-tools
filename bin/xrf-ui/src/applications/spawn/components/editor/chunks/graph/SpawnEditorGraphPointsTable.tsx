@@ -3,14 +3,14 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { decimalColumn, textColumn } from "@/core/components/table";
-import { IGraphPoint } from "@/lib/spawn-file";
+import { GraphLevelPoint } from "@/lib/rust-sdk/xray-db";
 
-interface IGraphPointRow extends IGraphPoint {
+interface IGraphPointRow extends GraphLevelPoint {
   index: number;
 }
 
 interface ISpawnEditorGraphPointsTableProps {
-  points: Array<IGraphPoint>;
+  points: Array<GraphLevelPoint>;
 }
 
 export function SpawnEditorGraphPointsTable({ points }: ISpawnEditorGraphPointsTableProps): ReactElement {
@@ -24,7 +24,7 @@ export function SpawnEditorGraphPointsTable({ points }: ISpawnEditorGraphPointsT
   );
 
   const rows: Array<IGraphPointRow> = useMemo(
-    () => points.map((it: IGraphPoint, index: number) => ({ ...it, index })),
+    () => points.map((it: GraphLevelPoint, index: number) => ({ ...it, index })),
     [points]
   );
 

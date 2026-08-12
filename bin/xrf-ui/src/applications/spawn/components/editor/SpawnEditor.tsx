@@ -18,14 +18,15 @@ import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
-import { ISpawnFileHeaderChunk, SpawnFileService } from "@/lib/spawn-file";
+import { SpawnHeaderChunk } from "@/lib/rust-sdk/xray-db";
+import { SpawnFileService } from "@/lib/spawn-file";
 
 const MONOSPACE_FONT: string = "'Cascadia Mono', 'Consolas', monospace";
 
 export function SpawnEditor(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
-  const header: Nullable<ISpawnFileHeaderChunk> = spawnFileService.header.value;
+  const header: Nullable<SpawnHeaderChunk> = spawnFileService.header.value;
   const path: Nullable<string> = spawnFileService.path;
   const isWriting: boolean = spawnFileService.operation.isLoading;
 

@@ -3,10 +3,10 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
-import { IGraphLevel } from "@/lib/spawn-file";
+import { GraphLevel } from "@/lib/rust-sdk/xray-db";
 
 interface ISpawnEditorGraphLevelsTableProps {
-  levels: Array<IGraphLevel>;
+  levels: Array<GraphLevel>;
 }
 
 export function SpawnEditorGraphLevelsTable({ levels }: ISpawnEditorGraphLevelsTableProps): ReactElement {
@@ -22,14 +22,14 @@ export function SpawnEditorGraphLevelsTable({ levels }: ISpawnEditorGraphLevelsT
   );
 
   return (
-    <SpawnTable<IGraphLevel>
+    <SpawnTable<GraphLevel>
       columns={columns}
       rows={levels}
       countNoun={"level"}
       emptyLabel={"This graph has no levels."}
       source={"Graph level"}
-      getRowId={(row: IGraphLevel): GridRowId => row.id}
-      getSearchText={(row: IGraphLevel): string => `${row.name} ${row.section}`}
+      getRowId={(row: GraphLevel): GridRowId => row.id}
+      getSearchText={(row: GraphLevel): string => `${row.name} ${row.section}`}
     />
   );
 }

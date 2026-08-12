@@ -3,14 +3,14 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { decimalColumn, textColumn } from "@/core/components/table";
-import { IGraphEdge } from "@/lib/spawn-file";
+import { GraphEdge } from "@/lib/rust-sdk/xray-db";
 
-interface IGraphEdgeRow extends IGraphEdge {
+interface IGraphEdgeRow extends GraphEdge {
   index: number;
 }
 
 interface ISpawnEditorGraphEdgesTableProps {
-  edges: Array<IGraphEdge>;
+  edges: Array<GraphEdge>;
 }
 
 export function SpawnEditorGraphEdgesTable({ edges }: ISpawnEditorGraphEdgesTableProps): ReactElement {
@@ -24,7 +24,7 @@ export function SpawnEditorGraphEdgesTable({ edges }: ISpawnEditorGraphEdgesTabl
   );
 
   const rows: Array<IGraphEdgeRow> = useMemo(
-    () => edges.map((it: IGraphEdge, index: number) => ({ ...it, index })),
+    () => edges.map((it: GraphEdge, index: number) => ({ ...it, index })),
     [edges]
   );
 
