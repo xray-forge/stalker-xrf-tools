@@ -5,6 +5,7 @@ import { EquipmentService } from "@/applications/icons-editor/store/equipment/eq
 import { AssetService } from "@/core/store/assets";
 import { Nullable } from "@/core/types/general";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { EIconsEditorCommand } from "@/lib/ipc";
 
 const RESPONSE = {
@@ -19,7 +20,7 @@ const RESPONSE = {
  * blob arrives from a stub. What matters here is the url lifetime, not what the bytes decode to.
  */
 function createService(): { service: EquipmentService; assets: AssetService; container: Container } {
-  const container: Container = new Container({ bindings: [AssetService, EquipmentService] });
+  const { service, container } = mockInjectedService(EquipmentService);
 
   global.fetch = jest.fn(async () => ({ blob: async () => new Blob() })) as unknown as typeof fetch;
 
@@ -42,8 +43,8 @@ function createService(): { service: EquipmentService; assets: AssetService; con
   } as unknown as typeof Image;
 
   return {
-    service: container.get(EquipmentService),
     assets: container.get(AssetService),
+    service,
     container,
   };
 }

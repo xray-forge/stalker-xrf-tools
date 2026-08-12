@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
-import { Container } from "@wirestate/core";
 
 import { EquipmentService } from "@/applications/icons-editor/store/equipment/equipment.service";
-import { AssetService } from "@/core/store/assets";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
+import { mockInjectedService } from "@/fixtures/utils/container";
 import { EIconsEditorCommand } from "@/lib/ipc";
 
 function closeCalls(): number {
@@ -19,11 +18,11 @@ describe("EquipmentService deactivation", () => {
   });
 
   it("does not release on deprovision alone, which strict mode reaches on every mount", async () => {
-    const container: Container = new Container({ bindings: [AssetService, EquipmentService] });
+    const { container } = mockInjectedService(EquipmentService);
 
     await container.provision();
-    container.get(EquipmentService);
 
+    container.get(EquipmentService);
     container.deprovision();
 
     // The strict mode remount cancels the pending `unbindAll`, so this is the whole teardown it sees.
@@ -32,7 +31,7 @@ describe("EquipmentService deactivation", () => {
   });
 
   it("releases once the container is actually unbound", async () => {
-    const container: Container = new Container({ bindings: [AssetService, EquipmentService] });
+    const { container } = mockInjectedService(EquipmentService);
 
     await container.provision();
 
@@ -45,7 +44,7 @@ describe("EquipmentService deactivation", () => {
   });
 
   it("survives a strict mode style remount without releasing", async () => {
-    const container: Container = new Container({ bindings: [AssetService, EquipmentService] });
+    const { container } = mockInjectedService(EquipmentService);
 
     await container.provision();
 
