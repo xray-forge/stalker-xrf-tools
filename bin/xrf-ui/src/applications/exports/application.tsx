@@ -16,6 +16,7 @@ export const EXPORTS_APPLICATION: IApplicationDescriptor = {
       default: it.ExportsApplication,
     }))
   ),
+  preload: () => import("@/applications/exports"),
   description: "Browse typescript extern declarations from an XRF project",
   group: EApplicationGroupId.EXPORTS,
   icon: <SwapHorizIcon />,

@@ -15,10 +15,10 @@ import { SpawnEditorMenu } from "@/applications/spawn/components/editor/SpawnEdi
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/EditorPanelsContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
-import { ISpawnFileHeaderChunk , SpawnFileService } from "@/lib/spawn-file";
+import { ISpawnFileHeaderChunk, SpawnFileService } from "@/lib/spawn-file";
 
 const MONOSPACE_FONT: string = "'Cascadia Mono', 'Consolas', monospace";
 

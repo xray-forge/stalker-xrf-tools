@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import { userEvent } from "@testing-library/user-event";
 import { ReactElement, useState } from "react";
 
-import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
+import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { EditorBusyProvider, useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
@@ -23,43 +23,41 @@ function Unmountable(): ReactElement {
   );
 }
 
-function renderRail(editor: ReactElement) {
+/**
+ * Against the toolbar rather than the rail: the rail used to carry a Home button and that was what a
+ * running command blocked. Home is gone, so the toolbar's leaving control is the only way out of an
+ * application and the one that has to stop.
+ */
+function renderToolbar(editor: ReactElement) {
   return renderWithProviders(
     <EditorBusyProvider>
       {editor}
-      <ApplicationRail panels={[]} activePanelId={null} onTogglePanel={() => {}} />
+      <EditorToolbar backPath={"/"} />
     </EditorBusyProvider>
   );
 }
 
 describe("useEditorBusy", () => {
   it("leaves navigation available when nothing is running", () => {
-    const { getByLabelText } = renderRail(<Busy isBusy={false} />);
+    const { getByLabelText } = renderToolbar(<Busy isBusy={false} />);
 
-    expect(getByLabelText("Home")).not.toBeDisabled();
+    expect(getByLabelText("Back")).not.toBeDisabled();
   });
 
   it("blocks navigation while a command is running", () => {
-    const { getByLabelText } = renderRail(<Busy isBusy />);
+    const { getByLabelText } = renderToolbar(<Busy isBusy />);
 
     // Walking away used to leave the command running against a screen nobody could see.
-    expect(getByLabelText("Home")).toBeDisabled();
-  });
-
-  it("leaves controls that abandon nothing alone", () => {
-    const { getByLabelText } = renderRail(<Busy isBusy />);
-
-    expect(getByLabelText("Settings")).not.toBeDisabled();
-    expect(getByLabelText("Source on github")).not.toBeDisabled();
+    expect(getByLabelText("Back")).toBeDisabled();
   });
 
   it("releases the block when the editor unmounts, so a crash cannot strand the application", async () => {
-    const { getByLabelText, getByText } = renderRail(<Unmountable />);
+    const { getByLabelText, getByText } = renderToolbar(<Unmountable />);
 
-    expect(getByLabelText("Home")).toBeDisabled();
+    expect(getByLabelText("Back")).toBeDisabled();
 
     await userEvent.click(getByText("unmount"));
 
-    expect(getByLabelText("Home")).not.toBeDisabled();
+    expect(getByLabelText("Back")).not.toBeDisabled();
   });
 });

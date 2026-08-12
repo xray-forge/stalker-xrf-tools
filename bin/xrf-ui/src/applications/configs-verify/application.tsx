@@ -14,6 +14,7 @@ export const CONFIGS_VERIFY_APPLICATION: IApplicationDescriptor = {
       default: it.ConfigsVerifyApplication,
     }))
   ),
+  preload: () => import("@/applications/configs-verify"),
   description: "Validate LTX configuration files",
   group: EApplicationGroupId.CONFIGS,
   icon: <FactCheckIcon />,

@@ -14,6 +14,7 @@ export const DESCRIPTION_ICONS_UNPACK_APPLICATION: IApplicationDescriptor = {
       default: it.DescriptionIconsUnpackApplication,
     }))
   ),
+  preload: () => import("@/applications/description-icons-unpack"),
   description: "Extract individual icons from a description sprite",
   group: EApplicationGroupId.ICONS,
   icon: <UnarchiveIcon />,

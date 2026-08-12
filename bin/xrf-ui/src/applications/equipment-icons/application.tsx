@@ -17,6 +17,7 @@ export const EQUIPMENT_ICONS_APPLICATION: IApplicationDescriptor = {
       default: it.EquipmentIconsApplication,
     }))
   ),
+  preload: () => import("@/applications/equipment-icons"),
   description: "Inspect and edit equipment inventory icons",
   group: EApplicationGroupId.ICONS,
   icon: <ImageIcon />,

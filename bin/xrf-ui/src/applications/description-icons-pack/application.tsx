@@ -14,6 +14,7 @@ export const DESCRIPTION_ICONS_PACK_APPLICATION: IApplicationDescriptor = {
       default: it.DescriptionIconsPackApplication,
     }))
   ),
+  preload: () => import("@/applications/description-icons-pack"),
   description: "Build a description sprite from individual icons",
   group: EApplicationGroupId.ICONS,
   icon: <Inventory2Icon />,

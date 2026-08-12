@@ -14,6 +14,7 @@ export const ARCHIVES_UNPACK_APPLICATION: IApplicationDescriptor = {
       default: it.ArchivesUnpackApplication,
     }))
   ),
+  preload: () => import("@/applications/archives-unpack"),
   description: "Extract game archives into a directory",
   group: EApplicationGroupId.ARCHIVES,
   icon: <UnarchiveIcon />,

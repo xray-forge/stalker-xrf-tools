@@ -16,6 +16,7 @@ export const TRANSLATIONS_APPLICATION: IApplicationDescriptor = {
       default: it.TranslationsApplication,
     }))
   ),
+  preload: () => import("@/applications/translations"),
   description: "Browse and edit localization tables",
   group: EApplicationGroupId.TRANSLATIONS,
   icon: <TranslateIcon />,

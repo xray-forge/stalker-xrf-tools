@@ -6,6 +6,7 @@ import { ApplicationLoader } from "@/core/components/ApplicationLoader";
 import { NavigationError } from "@/core/components/NavigationError";
 import { IApplicationDescriptor } from "@/core/router/application";
 import { APPLICATIONS, findApplication } from "@/core/router/applications";
+import { useApplicationPreload } from "@/core/router/use-application-preload";
 
 /**
  * Maps urls onto applications, inside a suspense boundary keyed by the application that owns the route.
@@ -16,6 +17,8 @@ import { APPLICATIONS, findApplication } from "@/core/router/applications";
  */
 export function ApplicationRoutes(): ReactElement {
   const { pathname } = useLocation();
+
+  useApplicationPreload();
 
   return (
     <Suspense key={findApplication(pathname)?.path ?? "root"} fallback={<ApplicationLoader />}>

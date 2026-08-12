@@ -1,19 +1,24 @@
 import { Box } from "@mui/material";
-import { ReactElement, ReactNode, useCallback } from "react";
+import { ReactElement, ReactNode, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { ApplicationCrash } from "@/core/components/error/ApplicationCrash";
 import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/components/error/ErrorBoundary";
-import { ApplicationPanelSlot } from "@/core/components/shell/ApplicationPanelSlot";
-import { ApplicationPanelStripe } from "@/core/components/shell/ApplicationPanelStripe";
-import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationScope } from "@/core/components/shell/ApplicationScope";
-import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
-import { IEditorPanel, selectPanelsOnSide, useEditorPanelsRegistry } from "@/core/components/shell/EditorPanelsContext";
-import { NOTIFICATIONS_PANEL } from "@/core/components/shell/global-panels";
-import { PanelStripeButton } from "@/core/components/shell/PanelStripeButton";
+import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
+import { EditorToolbarHostContext } from "@/core/components/shell/header/editor-toolbar-host";
+import { ApplicationPanelSlot } from "@/core/components/shell/panel/ApplicationPanelSlot";
+import { ApplicationPanelStripe } from "@/core/components/shell/panel/ApplicationPanelStripe";
+import { ApplicationRail } from "@/core/components/shell/panel/ApplicationRail";
+import {
+  IEditorPanel,
+  selectPanelsOnSide,
+  useEditorPanelsRegistry,
+} from "@/core/components/shell/panel/EditorPanelsContext";
+import { NOTIFICATIONS_PANEL } from "@/core/components/shell/panel/global-panels";
+import { PanelStripeButton } from "@/core/components/shell/panel/PanelStripeButton";
+import { IPanelSlot, usePanelSlot } from "@/core/components/shell/panel/use-panel-slot";
 import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
-import { IPanelSlot, usePanelSlot } from "@/core/components/shell/use-panel-slot";
 import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/router/application";
 import { findApplication } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
@@ -35,6 +40,10 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
   const notify: TNotify = useNotify();
 
   const { pathname } = useLocation();
+
+  // The element the routed content portals its toolbar into. Held here rather than in a provider of
+  // its own: the frame hands it down and never reads it back.
+  const [toolbarHost, setToolbarHost] = useState<Nullable<HTMLElement>>(null);
 
   const application: Nullable<IApplicationDescriptor> = findApplication(pathname);
 
@@ -63,46 +72,50 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
-      <ApplicationTitleBar />
+    <EditorToolbarHostContext.Provider value={toolbarHost}>
+      <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
+        <ApplicationTitleBar />
 
-      <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
-        <ApplicationRail
-          panels={leftPanels}
-          activePanelId={leftSlot.activePanelId}
-          onTogglePanel={leftSlot.onTogglePanel}
-        />
+        <Box ref={setToolbarHost} sx={{ flexShrink: 0 }} />
 
-        <ApplicationScope key={applicationPath} application={application}>
-          <ApplicationPanelSlot side={"left"} slot={leftSlot} />
+        <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
+          <ApplicationRail
+            panels={leftPanels}
+            activePanelId={leftSlot.activePanelId}
+            onTogglePanel={leftSlot.onTogglePanel}
+          />
 
-          <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
-            <ErrorBoundary resetKey={pathname} fallback={onError} onCaught={onCaught}>
-              {children}
-            </ErrorBoundary>
-          </Box>
+          <ApplicationScope key={applicationPath} application={application}>
+            <ApplicationPanelSlot side={"left"} slot={leftSlot} />
 
-          <ApplicationPanelSlot side={"right"} slot={rightSlot} />
-        </ApplicationScope>
+            <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
+              <ErrorBoundary resetKey={pathname} fallback={onError} onCaught={onCaught}>
+                {children}
+              </ErrorBoundary>
+            </Box>
 
-        <ApplicationPanelStripe
-          side={"right"}
-          panels={rightPanels}
-          activePanelId={rightSlot.activePanelId}
-          /* The mirror of Home: same band, same size, opposite corner. */
-          header={
-            <PanelStripeButton
-              panel={NOTIFICATIONS_PANEL}
-              side={"right"}
-              isActive={rightSlot.activePanelId === NOTIFICATIONS_PANEL.id}
-              onTogglePanel={rightSlot.onTogglePanel}
-            />
-          }
-          onTogglePanel={rightSlot.onTogglePanel}
-        />
+            <ApplicationPanelSlot side={"right"} slot={rightSlot} />
+          </ApplicationScope>
+
+          <ApplicationPanelStripe
+            side={"right"}
+            panels={rightPanels}
+            activePanelId={rightSlot.activePanelId}
+            /* Below the application's own panels, mirroring the window controls in the opposite stripe. */
+            footer={
+              <PanelStripeButton
+                panel={NOTIFICATIONS_PANEL}
+                side={"right"}
+                isActive={rightSlot.activePanelId === NOTIFICATIONS_PANEL.id}
+                onTogglePanel={rightSlot.onTogglePanel}
+              />
+            }
+            onTogglePanel={rightSlot.onTogglePanel}
+          />
+        </Box>
+
+        <ApplicationStatusBar />
       </Box>
-
-      <ApplicationStatusBar />
-    </Box>
+    </EditorToolbarHostContext.Provider>
   );
 }

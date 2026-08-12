@@ -1,10 +1,9 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { userEvent } from "@testing-library/user-event";
 
-import { ApplicationPanelStripe } from "@/core/components/shell/ApplicationPanelStripe";
-import { IEditorPanel } from "@/core/components/shell/EditorPanelsContext";
+import { ApplicationPanelStripe } from "@/core/components/shell/panel/ApplicationPanelStripe";
+import { IEditorPanel } from "@/core/components/shell/panel/EditorPanelsContext";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { LAYOUT } from "@/lib/theme/tokens";
 
 const PANELS: Array<IEditorPanel> = [
   { id: "header", label: "Header", icon: <span>h</span>, render: () => <div>header panel</div> },
@@ -14,13 +13,7 @@ const PANELS: Array<IEditorPanel> = [
 describe("ApplicationPanelStripe", () => {
   it("offers one control per declared panel", () => {
     const { getByLabelText } = renderWithProviders(
-      <ApplicationPanelStripe
-        side={"right"}
-        panels={PANELS}
-
-        activePanelId={null}
-        onTogglePanel={jest.fn()}
-      />
+      <ApplicationPanelStripe side={"right"} panels={PANELS} activePanelId={null} onTogglePanel={jest.fn()} />
     );
 
     expect(getByLabelText("Header")).toBeInTheDocument();
@@ -29,13 +22,7 @@ describe("ApplicationPanelStripe", () => {
 
   it("marks which panel is open", () => {
     const { getByLabelText } = renderWithProviders(
-      <ApplicationPanelStripe
-        side={"right"}
-        panels={PANELS}
-
-        activePanelId={"bones"}
-        onTogglePanel={jest.fn()}
-      />
+      <ApplicationPanelStripe side={"right"} panels={PANELS} activePanelId={"bones"} onTogglePanel={jest.fn()} />
     );
 
     expect(getByLabelText("Bones")).toHaveAttribute("aria-pressed", "true");
@@ -46,13 +33,7 @@ describe("ApplicationPanelStripe", () => {
     const onTogglePanel = jest.fn();
 
     const { getByLabelText } = renderWithProviders(
-      <ApplicationPanelStripe
-        side={"right"}
-        panels={PANELS}
-
-        activePanelId={"header"}
-        onTogglePanel={onTogglePanel}
-      />
+      <ApplicationPanelStripe side={"right"} panels={PANELS} activePanelId={"header"} onTogglePanel={onTogglePanel} />
     );
 
     await userEvent.click(getByLabelText("Bones"));
@@ -64,13 +45,7 @@ describe("ApplicationPanelStripe", () => {
     const onTogglePanel = jest.fn();
 
     const { getByLabelText } = renderWithProviders(
-      <ApplicationPanelStripe
-        side={"right"}
-        panels={PANELS}
-
-        activePanelId={"header"}
-        onTogglePanel={onTogglePanel}
-      />
+      <ApplicationPanelStripe side={"right"} panels={PANELS} activePanelId={"header"} onTogglePanel={onTogglePanel} />
     );
 
     await userEvent.click(getByLabelText("Header"));
@@ -78,30 +53,12 @@ describe("ApplicationPanelStripe", () => {
     expect(onTogglePanel).toHaveBeenCalledWith("header");
   });
 
-  it("gives the header the toolbar's own height, so it lines up with the title beside it", () => {
-    const { getByText } = renderWithProviders(
-      <ApplicationPanelStripe
-        side={"left"}
-        panels={PANELS}
-        activePanelId={null}
-        header={<span>home</span>}
-        footer={<span>settings</span>}
-        onTogglePanel={jest.fn()}
-      />
-    );
-
-    const band: HTMLElement = getByText("home").parentElement!;
-
-    expect(getComputedStyle(band).height).toBe(`${LAYOUT.toolbarHeight}px`);
-  });
-
-  it("puts the header first and the footer last, whatever the application declared between them", () => {
+  it("keeps the footer last, below whatever the application declared", () => {
     const { container } = renderWithProviders(
       <ApplicationPanelStripe
         side={"left"}
         panels={PANELS}
         activePanelId={null}
-        header={<span>home</span>}
         footer={<span>settings</span>}
         onTogglePanel={jest.fn()}
       />
@@ -112,19 +69,13 @@ describe("ApplicationPanelStripe", () => {
       .map((it: Element) => it.textContent ?? "")
       .filter((it: string) => it.length > 0);
 
-    expect(order[0]).toBe("home");
+    // What the shell owns sits under what the application published, on both sides.
     expect(order.at(-1)).toBe("settings");
   });
 
   it("stays present when an application declares nothing, so the frame does not shift", () => {
     const { container } = renderWithProviders(
-      <ApplicationPanelStripe
-        side={"right"}
-        panels={[]}
-
-        activePanelId={null}
-        onTogglePanel={jest.fn()}
-      />
+      <ApplicationPanelStripe side={"right"} panels={[]} activePanelId={null} onTogglePanel={jest.fn()} />
     );
 
     expect(container.firstElementChild).toBeInTheDocument();

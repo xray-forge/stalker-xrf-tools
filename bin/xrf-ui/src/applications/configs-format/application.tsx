@@ -14,6 +14,7 @@ export const CONFIGS_FORMAT_APPLICATION: IApplicationDescriptor = {
       default: it.ConfigsFormatApplication,
     }))
   ),
+  preload: () => import("@/applications/configs-format"),
   description: "Check or format LTX configuration files",
   group: EApplicationGroupId.CONFIGS,
   icon: <FormatAlignLeftIcon />,

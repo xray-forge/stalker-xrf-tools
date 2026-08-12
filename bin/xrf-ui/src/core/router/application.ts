@@ -63,6 +63,8 @@ export interface IApplicationDescriptor {
   /** The container this application's services live in. Omit it to run in the root one. */
   container?: Omit<ContainerConfig, "parent">;
   Component: ComponentType;
+  /** Pulls this application's chunk in before it is navigated to. */
+  preload?: () => Promise<unknown>;
 }
 
 export interface IApplicationGroup {

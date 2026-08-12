@@ -4,7 +4,7 @@ import { userEvent } from "@testing-library/user-event";
 
 import { ExportsApplication } from "@/applications/exports/ExportsApplication";
 import { ExportsService } from "@/applications/exports/store/exports";
-import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
+import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
 import { ProjectService } from "@/core/store/project";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";

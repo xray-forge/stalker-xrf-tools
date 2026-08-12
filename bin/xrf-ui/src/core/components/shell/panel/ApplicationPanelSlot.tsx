@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import { ReactElement } from "react";
 
-import { TEditorPanelSide } from "@/core/components/shell/EditorPanelsContext";
-import { PanelResizer } from "@/core/components/shell/PanelResizer";
-import { IPanelSlot } from "@/core/components/shell/use-panel-slot";
+import { TEditorPanelSide } from "@/core/components/shell/panel/EditorPanelsContext";
+import { PanelResizer } from "@/core/components/shell/panel/PanelResizer";
+import { IPanelSlot } from "@/core/components/shell/panel/use-panel-slot";
 
 export interface IApplicationPanelSlotProps {
   side: TEditorPanelSide;

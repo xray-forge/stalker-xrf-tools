@@ -4,13 +4,13 @@ import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { SpawnEditor } from "@/applications/spawn/components/editor/SpawnEditor";
-import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
-import { IEditorPanel, useEditorPanelsRegistry } from "@/core/components/shell/EditorPanelsContext";
+import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
+import { IEditorPanel, useEditorPanelsRegistry } from "@/core/components/shell/panel/EditorPanelsContext";
 import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
-import { ISpawnFile , ISpawnFileHeaderChunk, SpawnFileService } from "@/lib/spawn-file";
+import { ISpawnFile, ISpawnFileHeaderChunk, SpawnFileService } from "@/lib/spawn-file";
 
 const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
 

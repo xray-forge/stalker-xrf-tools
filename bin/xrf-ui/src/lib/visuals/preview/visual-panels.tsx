@@ -3,7 +3,7 @@ import { default as AnimationIcon } from "@mui/icons-material/Animation";
 import { default as InfoIcon } from "@mui/icons-material/Info";
 import { default as LayersIcon } from "@mui/icons-material/Layers";
 
-import { IEditorPanel } from "@/core/components/shell/EditorPanelsContext";
+import { IEditorPanel } from "@/core/components/shell/panel/EditorPanelsContext";
 import {
   VisualBonesPanel,
   VisualHeaderPanel,

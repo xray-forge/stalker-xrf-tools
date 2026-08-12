@@ -1,6 +1,6 @@
-import { IEditorPanel } from "@/core/components/shell/EditorPanelsContext";
-import { NotificationsPanel } from "@/core/components/shell/notifications/NotificationsPanel";
-import { NotificationsPanelIcon } from "@/core/components/shell/notifications/NotificationsPanelIcon";
+import { IEditorPanel } from "@/core/components/shell/panel/EditorPanelsContext";
+import { NotificationsPanel } from "@/core/components/shell/panel/notifications/NotificationsPanel";
+import { NotificationsPanelIcon } from "@/core/components/shell/panel/notifications/NotificationsPanelIcon";
 
 export const NOTIFICATIONS_PANEL_ID: string = "notifications";
 

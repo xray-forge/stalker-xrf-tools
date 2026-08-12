@@ -2,8 +2,8 @@ import { ReactElement, ReactNode } from "react";
 
 import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
 import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
-import { EditorPanelsProvider } from "@/core/components/shell/EditorPanelsContext";
 import { EditorStatusProvider } from "@/core/components/shell/EditorStatusContext";
+import { EditorPanelsProvider } from "@/core/components/shell/panel/EditorPanelsContext";
 
 export interface IApplicationShellProps {
   children: ReactNode;

@@ -14,6 +14,7 @@ export const PROJECT_VISUALS_APPLICATION: IApplicationDescriptor = {
       default: it.ProjectVisualsApplication,
     }))
   ),
+  preload: () => import("@/applications/project-visuals"),
   description: "Browse visuals referenced by a project",
   group: EApplicationGroupId.VISUALS,
   icon: <AccountTreeIcon />,

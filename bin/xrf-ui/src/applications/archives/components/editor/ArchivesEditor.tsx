@@ -11,8 +11,8 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/EditorPanelsContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
 import { IArchivesProject } from "@/lib/archive";
 import { formatBytes } from "@/lib/size";
@@ -95,7 +95,6 @@ export function ArchivesEditor(): ReactElement {
           ) : null}
         </>
       }
-
     >
       <ArchivesFileContent />
     </EditorLayout>

@@ -1,10 +1,10 @@
-import { CircularProgress, Grid } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { ArchivesEditorOpenForm } from "@/applications/archives/components/ArchivesEditorOpenForm";
 import { ArchivesEditor } from "@/applications/archives/components/editor/ArchivesEditor";
 import { ArchivesService } from "@/applications/archives/store/archives";
+import { ApplicationLoader } from "@/core/components/ApplicationLoader";
 
 /**
  * Picker until something is open, editor once it is.
@@ -18,9 +18,5 @@ export function ArchivesApplication(): ReactElement {
     return archivesService.project.value ? <ArchivesEditor /> : <ArchivesEditorOpenForm />;
   }
 
-  return (
-    <Grid container sx={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}>
-      <CircularProgress />
-    </Grid>
-  );
+  return <ApplicationLoader />;
 }

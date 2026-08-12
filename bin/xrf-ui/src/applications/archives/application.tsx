@@ -17,6 +17,7 @@ export const ARCHIVES_APPLICATION: IApplicationDescriptor = {
       default: it.ArchivesApplication,
     }))
   ),
+  preload: () => import("@/applications/archives"),
   description: "Browse files stored in game archives",
   group: EApplicationGroupId.ARCHIVES,
   icon: <ArchiveIcon />,

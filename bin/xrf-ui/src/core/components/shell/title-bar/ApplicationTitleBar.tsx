@@ -34,11 +34,8 @@ export function ApplicationTitleBar({
 
       <Typography>XRF</Typography>
 
-      {/*
-        Reserved for what the caption is expected to gain next - a menu bar, and the open document
-        alongside it. Claiming the space now means adding either one moves nothing else on screen.
-      */}
       <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, minWidth: 0 }} />
+
       <WindowControls />
     </Box>
   );

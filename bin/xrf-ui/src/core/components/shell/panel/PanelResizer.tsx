@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { PointerEvent, ReactElement, useCallback, useRef } from "react";
 
-import { TEditorPanelSide } from "@/core/components/shell/EditorPanelsContext";
+import { TEditorPanelSide } from "@/core/components/shell/panel/EditorPanelsContext";
 import { PANEL } from "@/lib/theme/tokens";
 
 export interface IPanelResizerProps {
@@ -66,7 +66,6 @@ export function PanelResizer({ side, width, onResize }: IPanelResizerProps): Rea
           bottom: 0,
           left: 3,
           width: "1px",
-          backgroundColor: "primary.main",
         },
       }}
       onPointerDown={onPointerDown}

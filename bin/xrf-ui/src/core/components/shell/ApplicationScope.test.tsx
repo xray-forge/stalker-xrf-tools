@@ -10,7 +10,7 @@ import {
   selectPanelsOnSide,
   useEditorPanels,
   useEditorPanelsRegistry,
-} from "@/core/components/shell/EditorPanelsContext";
+} from "@/core/components/shell/panel/EditorPanelsContext";
 import {
   EApplicationGroupId,
   EApplicationId,

@@ -16,6 +16,7 @@ export const SPAWN_UNPACK_APPLICATION: IApplicationDescriptor = {
       default: it.SpawnUnpackApplication,
     }))
   ),
+  preload: () => import("@/applications/spawn-unpack"),
   description: "Extract a spawn file into editable chunks",
   group: EApplicationGroupId.SPAWNS,
   icon: <UnarchiveIcon />,

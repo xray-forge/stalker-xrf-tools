@@ -16,6 +16,7 @@ export const SPAWN_APPLICATION: IApplicationDescriptor = {
       default: it.SpawnApplication,
     }))
   ),
+  preload: () => import("@/applications/spawn"),
   description: "Browse and edit a packed spawn file",
   group: EApplicationGroupId.SPAWNS,
   icon: <MapIcon />,

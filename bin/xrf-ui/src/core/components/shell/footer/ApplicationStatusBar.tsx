@@ -1,15 +1,11 @@
 import { Box, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
+import { useEditorStatusSegments } from "@/core/components/shell/EditorStatusContext";
 import { LAYOUT } from "@/lib/theme/tokens";
-
-import { useEditorStatusSegments } from "./EditorStatusContext";
 
 /**
  * Bottom status strip.
- *
- * Reports what the active editor publishes through `useEditorStatus`. It deliberately does not repeat
- * the tool name: the rail already shows that, and the header says it again.
  */
 export function ApplicationStatusBar(): ReactElement {
   const segments: Array<string> = useEditorStatusSegments();

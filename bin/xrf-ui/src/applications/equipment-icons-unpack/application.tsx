@@ -14,6 +14,7 @@ export const EQUIPMENT_ICONS_UNPACK_APPLICATION: IApplicationDescriptor = {
       default: it.EquipmentIconsUnpackApplication,
     }))
   ),
+  preload: () => import("@/applications/equipment-icons-unpack"),
   description: "Extract individual icons from an equipment sprite",
   group: EApplicationGroupId.ICONS,
   icon: <UnarchiveIcon />,

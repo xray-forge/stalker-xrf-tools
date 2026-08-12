@@ -18,7 +18,7 @@ export const RADIUS = {
 } as const;
 
 export const LAYOUT = {
-  railWidth: 48,
+  railWidth: 44,
   /**
    * Every control in either stripe.
    *

@@ -25,10 +25,9 @@ describe("PickerForm", () => {
   });
 
   it("keeps leaving visible but inert while an operation is in flight", () => {
-    const { getByLabelText } = renderWithProviders(
-      <PickerForm title={"Open"} backPath={"/"} backDisabled />,
-      { route: "/spawn" }
-    );
+    const { getByLabelText } = renderWithProviders(<PickerForm title={"Open"} backPath={"/"} backDisabled />, {
+      route: "/spawn",
+    });
 
     // Disabled rather than removed: a control that vanishes mid-operation is harder to trust.
     expect(getByLabelText("Back")).toBeDisabled();

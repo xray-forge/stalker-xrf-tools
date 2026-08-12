@@ -4,7 +4,7 @@ import { userEvent } from "@testing-library/user-event";
 import { ReactElement, ReactNode } from "react";
 
 import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
-import { EditorPanelsProvider, useEditorPanels } from "@/core/components/shell/EditorPanelsContext";
+import { EditorPanelsProvider, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { NotificationsService } from "@/core/store/notifications";
 import { renderWithProviders } from "@/fixtures/utils/render";
 

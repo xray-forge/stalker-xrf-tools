@@ -17,6 +17,7 @@ export const EQUIPMENT_ICONS_PACK_APPLICATION: IApplicationDescriptor = {
       default: it.EquipmentIconsPackApplication,
     }))
   ),
+  preload: () => import("@/applications/equipment-icons-pack"),
   description: "Build an equipment sprite from individual icons",
   group: EApplicationGroupId.ICONS,
   icon: <Inventory2Icon />,

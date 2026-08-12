@@ -16,6 +16,7 @@ export const SPAWN_PACK_APPLICATION: IApplicationDescriptor = {
       default: it.SpawnPackApplication,
     }))
   ),
+  preload: () => import("@/applications/spawn-pack"),
   description: "Build a spawn file from unpacked chunks",
   group: EApplicationGroupId.SPAWNS,
   icon: <Inventory2Icon />,

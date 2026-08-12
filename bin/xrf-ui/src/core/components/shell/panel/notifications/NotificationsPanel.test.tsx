@@ -3,7 +3,7 @@ import { act, RenderResult } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Binding, Container } from "@wirestate/core";
 
-import { NotificationsPanel } from "@/core/components/shell/notifications/NotificationsPanel";
+import { NotificationsPanel } from "@/core/components/shell/panel/notifications/NotificationsPanel";
 import { EApplicationId } from "@/core/router/application";
 import { NotificationsService } from "@/core/store/notifications";
 import { SettingsService } from "@/core/store/settings";

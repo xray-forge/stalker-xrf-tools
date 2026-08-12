@@ -2,8 +2,8 @@ import { describe, expect, it } from "@jest/globals";
 import { userEvent } from "@testing-library/user-event";
 import { ReactElement, useState } from "react";
 
-import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
 function Publisher({ segments }: { segments: Array<string> }): ReactElement {

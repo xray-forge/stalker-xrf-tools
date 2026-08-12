@@ -11,8 +11,8 @@ import { ExportsService } from "@/applications/exports/store/exports";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { useEditorPanels } from "@/core/components/shell/EditorPanelsContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
 import { IExportDescriptor, IExportsProject } from "@/lib/exports";
 

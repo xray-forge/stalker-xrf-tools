@@ -6,13 +6,13 @@ import { MemoryRouter } from "react-router-dom";
 
 import { ApplicationProvider } from "@/applications/ApplicationProvider";
 import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
+import { EditorStatusProvider } from "@/core/components/shell/EditorStatusContext";
 import {
   EditorPanelsProvider,
   IEditorPanel,
   selectPanelsOnSide,
   useEditorPanelsRegistry,
-} from "@/core/components/shell/EditorPanelsContext";
-import { EditorStatusProvider } from "@/core/components/shell/EditorStatusContext";
+} from "@/core/components/shell/panel/EditorPanelsContext";
 import { NotificationsService } from "@/core/store/notifications";
 import { SettingsService } from "@/core/store/settings";
 

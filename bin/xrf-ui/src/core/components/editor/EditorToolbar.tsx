@@ -3,13 +3,16 @@ import { AppBar, Box, IconButton, Toolbar, Tooltip, Typography } from "@mui/mate
 import { ReactElement, ReactNode, useCallback } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
+import { useIsEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { IApplicationDescriptor } from "@/core/router/application";
 import { findApplication } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 export interface IEditorToolbarProps extends BaseComponentProps {
-  /** Keeps the leaving control in place but inert, rather than removing it mid-operation. */
+  /**
+   * Keeps the leaving control in place but inert, rather than removing it mid-operation.
+   */
   isBackDisabled?: boolean;
   /** Overrides the application name resolved from the route. Rarely needed. */
   title?: string;
@@ -36,6 +39,7 @@ export function EditorToolbar({
   const navigate: NavigateFunction = useNavigate();
   const { pathname } = useLocation();
 
+  const isBusy: boolean = useIsEditorBusy();
   const application: Nullable<IApplicationDescriptor> = findApplication(pathname);
 
   const onLeave = useCallback(() => {
@@ -59,7 +63,7 @@ export function EditorToolbar({
               <IconButton
                 color={"inherit"}
                 aria-label={onBack ? "Close and go back" : "Back"}
-                disabled={isBackDisabled}
+                disabled={isBackDisabled || isBusy}
                 sx={{ marginRight: 0.5 }}
                 onClick={onLeave}
               >

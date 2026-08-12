@@ -14,6 +14,7 @@ export const CONFIGS_EXPLORER_APPLICATION: IApplicationDescriptor = {
       default: it.ConfigsExplorerApplication,
     }))
   ),
+  preload: () => import("@/applications/configs-explorer"),
   description: "Browse LTX configuration files",
   group: EApplicationGroupId.CONFIGS,
   icon: <FolderOpenIcon />,

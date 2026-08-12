@@ -6,9 +6,9 @@ import { userEvent } from "@testing-library/user-event";
 import { ArchivesApplication } from "@/applications/archives/ArchivesApplication";
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
-import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
-import { EditorPanelsProvider } from "@/core/components/shell/EditorPanelsContext";
+import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
+import { EditorPanelsProvider } from "@/core/components/shell/panel/EditorPanelsContext";
 import { ProjectService } from "@/core/store/project";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
@@ -280,9 +280,7 @@ describe("opened archives editor", () => {
     await userEvent.click(await findByText("readme.ltx"));
     await userEvent.click(await findByLabelText("Extract file"));
 
-    // Home is the only navigating control on the rail now, so it is the one that has to stop.
-    await waitFor(() => expect(getByLabelText("Home")).toBeDisabled());
-    expect(getByLabelText("Close and go back")).toBeDisabled();
+    await waitFor(() => expect(getByLabelText("Close and go back")).toBeDisabled());
 
     save.mockRestore();
   });

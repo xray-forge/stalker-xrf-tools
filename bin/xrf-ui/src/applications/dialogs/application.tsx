@@ -14,6 +14,7 @@ export const DIALOGS_APPLICATION: IApplicationDescriptor = {
       default: it.DialogsApplication,
     }))
   ),
+  preload: () => import("@/applications/dialogs"),
   description: "Edit NPC dialog graphs",
   group: EApplicationGroupId.DIALOGS,
   icon: <ForumIcon />,

@@ -5,6 +5,8 @@ import { addEdge, Background, Connection, Controls, Edge, ReactFlow, useEdgesSta
 import { DialogNode } from "@/applications/dialogs/components/DialogNode";
 import { PhraseNode } from "@/applications/dialogs/components/PhraseNode";
 import { EGraphNodeType } from "@/applications/dialogs/types";
+import { EditorLayout } from "@/core/components/editor/EditorLayout";
+import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 
 import "reactflow/dist/style.css";
 
@@ -28,23 +30,25 @@ export function DialogsApplication(): ReactElement {
   const onConnect = useCallback((params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   return (
-    <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%", gap: 1 }}>
-      <Box sx={{ width: 120, padding: 2, height: "100%", borderRight: "1px solid red" }}>left menu</Box>
+    <EditorLayout toolbar={<EditorToolbar backPath={"/"} />}>
+      <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%", gap: 1 }}>
+        <Box sx={{ width: 120, padding: 2, height: "100%", borderRight: "1px solid red" }}>left menu</Box>
 
-      <Box sx={{ flexGrow: 1, height: "100%" }}>
-        <ReactFlow
-          proOptions={proOptions}
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-        >
-          <Controls position={"bottom-right"} />
-          <Background gap={12} size={1} />
-        </ReactFlow>
-      </Box>
-    </Grid>
+        <Box sx={{ flexGrow: 1, height: "100%" }}>
+          <ReactFlow
+            proOptions={proOptions}
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+          >
+            <Controls position={"bottom-right"} />
+            <Background gap={12} size={1} />
+          </ReactFlow>
+        </Box>
+      </Grid>
+    </EditorLayout>
   );
 }

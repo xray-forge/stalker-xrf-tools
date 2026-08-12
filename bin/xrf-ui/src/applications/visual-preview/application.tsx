@@ -14,6 +14,7 @@ export const VISUAL_PREVIEW_APPLICATION: IApplicationDescriptor = {
       default: it.VisualPreviewApplication,
     }))
   ),
+  preload: () => import("@/applications/visual-preview"),
   description: "Preview a game visual in 3D",
   group: EApplicationGroupId.VISUALS,
   icon: <ViewInArIcon />,

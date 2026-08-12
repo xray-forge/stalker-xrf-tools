@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { IEditorPanel, TEditorPanelSide } from "@/core/components/shell/EditorPanelsContext";
-import { GLOBAL_PANELS, isGlobalPanelId } from "@/core/components/shell/global-panels";
+import { IEditorPanel, TEditorPanelSide } from "@/core/components/shell/panel/EditorPanelsContext";
+import { GLOBAL_PANELS, isGlobalPanelId } from "@/core/components/shell/panel/global-panels";
 import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 import { PANEL } from "@/lib/theme/tokens";
@@ -28,11 +28,7 @@ function readWidth(side: TEditorPanelSide): number {
  * unset choice means. Widths are per side and outlive the application; the open panel is remembered
  * per application, because the tree an editor wants open says nothing about the next one.
  */
-export function usePanelSlot(
-  side: TEditorPanelSide,
-  panels: Array<IEditorPanel>,
-  applicationPath: string
-): IPanelSlot {
+export function usePanelSlot(side: TEditorPanelSide, panels: Array<IEditorPanel>, applicationPath: string): IPanelSlot {
   const storageKey: string = `xrf.panels.${side}.${applicationPath}`;
   const globalStorageKey: string = `xrf.panels.${side}.global`;
 

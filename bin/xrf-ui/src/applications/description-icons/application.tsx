@@ -14,6 +14,7 @@ export const DESCRIPTION_ICONS_APPLICATION: IApplicationDescriptor = {
       default: it.DescriptionIconsApplication,
     }))
   ),
+  preload: () => import("@/applications/description-icons"),
   description: "Inspect and edit item description icons",
   group: EApplicationGroupId.ICONS,
   icon: <DescriptionIcon />,
