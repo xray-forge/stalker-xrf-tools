@@ -5780,6 +5780,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
+name = "ts-rs"
+version = "12.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "756050066659291d47a554a9f558125db17428b073c5ffce1daf5dcb0f7231d8"
+dependencies = [
+ "thiserror 2.0.20",
+ "ts-rs-macros",
+ "uuid",
+]
+
+[[package]]
+name = "ts-rs-macros"
+version = "12.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38d90eea51bc7988ef9e674bf80a85ba6804739e535e9cab48e4bb34a8b652aa"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.111",
+ "termcolor",
+]
+
+[[package]]
 name = "typeid"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6723,6 +6746,7 @@ dependencies = [
  "minilzo-rs",
  "regex",
  "serde",
+ "ts-rs",
  "walkdir",
  "xray-error",
  "xray-utils",
@@ -6760,6 +6784,7 @@ dependencies = [
  "phf 0.14.0",
  "serde",
  "serde_json",
+ "ts-rs",
  "uuid",
  "xray-chunk",
  "xray-error",
@@ -6795,6 +6820,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
+ "ts-rs",
  "walkdir",
  "xray-error",
  "xray-typescript",

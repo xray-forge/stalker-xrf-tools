@@ -71,3 +71,33 @@ workspace = false
 dependencies = [
   { name = "serve-ui", path = "bin/xrf-app" },
 ]
+
+[tasks.generate-typescript-bindings]
+description = "Emit the frontend mirrors of serialized Rust types."
+workspace = false
+# The export directory is resolved against the crate manifest directory, so it is the same string
+# wherever the task runs from. Wide integers become `number` rather than the default `bigint`: these
+# cross a JSON transport, so that is what the frontend actually receives.
+env = { TS_RS_EXPORT_DIR = "../../bin/xrf-ui/src/lib/rust-sdk", TS_RS_LARGE_INT = "number" }
+command = "cargo"
+# One run over the whole workspace: each crate opts in by adding its own `typescript` feature here, and
+# `#[ts(export)]` puts the emitting test in the crate that defines the type.
+args = [
+  "test",
+  "--workspace",
+  "--features",
+  "xray-archive/typescript-bindings,xray-db/typescript-bindings,xray-export/typescript-bindings",
+  "export_bindings",
+]
+
+[tasks.format-typescript-bindings]
+description = "Apply frontend formatting and lint rules to generated mirrors."
+workspace = false
+cwd = "bin/xrf-ui"
+script_runner = "@shell"
+script = 'pnpm run format:bindings'
+
+[tasks.generate-typescript]
+description = "Regenerate and format the frontend mirrors of serialized Rust types."
+workspace = false
+dependencies = ["generate-typescript-bindings", "format-typescript-bindings"]

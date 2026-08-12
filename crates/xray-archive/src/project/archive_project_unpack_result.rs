@@ -1,5 +1,10 @@
 use serde::Serialize;
 
+#[cfg_attr(
+  feature = "typescript-bindings",
+  derive(ts_rs::TS),
+  ts(export, export_to = "xray-archive.ts")
+)]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveUnpackResult {

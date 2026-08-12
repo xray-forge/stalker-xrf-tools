@@ -16,9 +16,14 @@ log = { workspace = true }
 minilzo-rs = "0.6.1"
 regex = { workspace = true }
 serde = { workspace = true }
+ts-rs = { workspace = true, optional = true }
 walkdir = { workspace = true }
 xray-error = { workspace = true }
 xray-utils = { workspace = true }
+
+[features]
+# Emits TypeScript mirrors of the serialized types. Nothing in a normal build turns this on.
+typescript-bindings = ["ts-rs"]
 
 [lints]
 workspace = true
