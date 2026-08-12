@@ -1,4 +1,3 @@
-
 export function formatExportSignature(declaration: ExportDescriptor): string {
   switch (declaration.kind) {
     case "callable":
@@ -16,5 +15,5 @@ export function formatExportSignature(declaration: ExportDescriptor): string {
       return declaration as never;
     }
   }
-} import { ExportDescriptor, ExportParameterDescriptor } from "@/lib/bindings/xray-export";
-
+}
+import { ExportDescriptor, ExportParameterDescriptor } from "@/lib/xrf/bindings/xray-export";

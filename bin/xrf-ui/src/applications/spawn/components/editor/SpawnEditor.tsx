@@ -18,8 +18,8 @@ import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
-import { SpawnHeaderChunk } from "@/lib/bindings/xray-db";
 import { SpawnFileService } from "@/lib/spawn-file";
+import { SpawnHeaderChunk } from "@/lib/xrf/bindings/xray-db";
 
 const MONOSPACE_FONT: string = "'Cascadia Mono', 'Consolas', monospace";
 

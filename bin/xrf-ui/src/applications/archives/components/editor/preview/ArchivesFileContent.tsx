@@ -13,9 +13,9 @@ import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { Nullable } from "@/core/types/general";
 import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/lib/archive";
-import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/bindings/xray-archive";
 import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/size";
+import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
 
 // Everything that renders its own preview leaves this union; what is left is a reason to explain.
 type TUnsupported = Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" } | { kind: "audio" }>;

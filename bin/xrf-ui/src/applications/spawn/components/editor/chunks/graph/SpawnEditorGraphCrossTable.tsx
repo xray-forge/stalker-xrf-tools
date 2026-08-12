@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { identifierColumn, textColumn } from "@/core/components/table";
-import { GraphCrossTable } from "@/lib/bindings/xray-db";
+import { GraphCrossTable } from "@/lib/xrf/bindings/xray-db";
 
 interface ISpawnEditorGraphCrossTableProps {
   crossTables: Array<GraphCrossTable>;

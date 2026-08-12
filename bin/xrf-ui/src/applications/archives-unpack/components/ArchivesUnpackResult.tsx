@@ -3,9 +3,9 @@ import { ReactElement, useMemo } from "react";
 
 import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { ArchiveUnpackResult } from "@/lib/bindings/xray-archive";
 import { formatDuration } from "@/lib/result";
 import { bytesToMegabytes } from "@/lib/size";
+import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xray-archive";
 
 interface IArchivesUnpackResultProps {
   result: ArchiveUnpackResult;

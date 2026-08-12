@@ -9,8 +9,8 @@ import { EmptyState } from "@/core/components/layout/EmptyState";
 import { ImageViewport } from "@/core/components/media/ImageViewport";
 import { Nullable } from "@/core/types/general";
 import { TArchiveContent } from "@/lib/archive";
-import { ArchiveImagePreview as TArchiveImagePreview } from "@/lib/bindings/xrf-app";
 import { Loadable } from "@/lib/loadable";
+import { ArchiveImagePreview as TArchiveImagePreview } from "@/lib/xrf/bindings/xrf-app";
 
 /**
  * Shows an archived texture the backend decoded into a PNG.

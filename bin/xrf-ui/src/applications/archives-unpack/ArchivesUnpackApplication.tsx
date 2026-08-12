@@ -8,12 +8,12 @@ import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
-import { ArchiveUnpackResult } from "@/lib/bindings/xray-archive";
 import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xray-archive";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf-path";
 
 export function ArchivesUnpackApplication(): ReactElement {

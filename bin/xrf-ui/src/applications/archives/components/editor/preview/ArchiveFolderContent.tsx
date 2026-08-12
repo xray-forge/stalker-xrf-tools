@@ -10,10 +10,10 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { Nullable } from "@/core/types/general";
 import { isUnderArchiveDirectory, TArchiveOperation } from "@/lib/archive";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/bindings/xray-archive";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { formatBytes } from "@/lib/size";
+import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
 
 export interface IArchiveFolderContentProps {
   path: string;

@@ -3,9 +3,9 @@ import { ReactElement, useMemo } from "react";
 
 import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { LtxProjectVerifyResult } from "@/lib/bindings/xray-ltx";
 import { TLtxSchemeError, toLtxSchemeErrors } from "@/lib/ltx";
 import { formatDuration } from "@/lib/result";
+import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xray-ltx";
 
 interface IConfigsVerifyResultProps {
   result: LtxProjectVerifyResult;

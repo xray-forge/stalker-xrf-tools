@@ -4,12 +4,12 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { EApplicationId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
-import { ExportSourceContent, ExportsProject } from "@/lib/bindings/xray-export";
 import { transformError } from "@/lib/error";
 import { EExportsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { ExportSourceContent, ExportsProject } from "@/lib/xrf/bindings/xray-export";
 
 @Injectable()
 export class ExportsService {

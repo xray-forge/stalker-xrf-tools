@@ -6,8 +6,8 @@ import { ReactElement, useCallback } from "react";
 
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { Nullable } from "@/core/types/general";
-import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { Logger, useLogger } from "@/lib/logging";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
 
 export interface IArchiveFileExtractActionProps {
   descriptor: ArchiveFileDescriptor;

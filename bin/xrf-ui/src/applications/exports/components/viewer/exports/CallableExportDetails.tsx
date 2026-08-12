@@ -2,9 +2,9 @@ import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@m
 import { ReactElement } from "react";
 
 import { ExportSection } from "@/applications/exports/components/viewer/exports/ExportSection";
-import { ExportParameterDescriptor } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { TCallableExportDescriptor } from "@/lib/exports";
+import { ExportParameterDescriptor } from "@/lib/xrf/bindings/xray-export";
 
 export interface ICallableExportDetailsProps extends BaseComponentProps {
   declaration: TCallableExportDescriptor;

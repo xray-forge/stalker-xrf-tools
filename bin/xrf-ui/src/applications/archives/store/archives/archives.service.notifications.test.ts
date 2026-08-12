@@ -5,9 +5,9 @@ import { ArchivesService } from "@/applications/archives/store/archives/archives
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
-import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "textures\\wpn.dds" });
 

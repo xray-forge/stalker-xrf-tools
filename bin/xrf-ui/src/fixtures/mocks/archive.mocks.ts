@@ -1,4 +1,9 @@
-import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject, ArchiveProjectReadPolicy } from "@/lib/bindings/xray-archive";
+import {
+  ArchiveDescriptor,
+  ArchiveFileDescriptor,
+  ArchiveProject,
+  ArchiveProjectReadPolicy,
+} from "@/lib/xrf/bindings/xray-archive";
 
 /** Create an archive read policy fixture with optional field overrides. */
 export function mockArchiveReadPolicy(overrides: Partial<ArchiveProjectReadPolicy> = {}): ArchiveProjectReadPolicy {

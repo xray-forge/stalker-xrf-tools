@@ -17,9 +17,9 @@ import { ExportsMenuHeader } from "@/applications/exports/components/viewer/expo
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { Nullable } from "@/core/types/general";
-import { ExportDescriptor } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
+import { ExportDescriptor } from "@/lib/xrf/bindings/xray-export";
 
 const DECLARATION_ITEM_PREFIX: string = "declaration:";
 

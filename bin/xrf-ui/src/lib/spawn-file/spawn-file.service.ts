@@ -13,12 +13,18 @@ import { BoundAction, Computed, makeObservable, Observable, runInAction } from "
 
 import { EApplicationGroupId } from "@/core/router/application";
 import { AnyObject, Nullable } from "@/core/types/general";
-import { SpawnALifeSpawnsChunk, SpawnArtefactSpawnsChunk, SpawnGraphsChunk, SpawnHeaderChunk, SpawnPatrolsChunk } from "@/lib/bindings/xray-db";
 import { transformError } from "@/lib/error";
 import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import {
+  SpawnALifeSpawnsChunk,
+  SpawnArtefactSpawnsChunk,
+  SpawnGraphsChunk,
+  SpawnHeaderChunk,
+  SpawnPatrolsChunk,
+} from "@/lib/xrf/bindings/xray-db";
 
 export interface ISpawnRowSelection {
   /** What kind of row this is, for the panel heading. */

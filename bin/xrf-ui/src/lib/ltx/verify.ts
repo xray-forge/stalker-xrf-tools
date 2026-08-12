@@ -1,4 +1,4 @@
-import { XRayError } from "@/lib/bindings/xray-error";
+import { XRayError } from "@/lib/xrf/bindings/xray-error";
 
 /**
  * One scheme problem, unwrapped from the error variant that carries it.
@@ -13,6 +13,7 @@ export type TLtxSchemeError = Extract<XRayError, { LtxScheme: unknown }>["LtxSch
  * Take the scheme problems out of a verification result, discarding any other error variant.
  */
 export function toLtxSchemeErrors(errors: Array<XRayError>): Array<TLtxSchemeError> {
-  return errors.filter((it: XRayError): it is Extract<XRayError, { LtxScheme: unknown }> => "LtxScheme" in it).
-    map((it) => it.LtxScheme);
+  return errors
+    .filter((it: XRayError): it is Extract<XRayError, { LtxScheme: unknown }> => "LtxScheme" in it)
+    .map((it) => it.LtxScheme);
 }

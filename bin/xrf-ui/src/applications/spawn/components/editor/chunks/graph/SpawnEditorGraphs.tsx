@@ -10,8 +10,8 @@ import { SpawnEditorGraphPointsTable } from "@/applications/spawn/components/edi
 import { SpawnEditorGraphVerticesTable } from "@/applications/spawn/components/editor/chunks/graph/SpawnEditorGraphVerticesTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
 import { TChunkTabChange, useChunkTab } from "@/applications/spawn/components/editor/chunks/use-chunk-tab";
-import { SpawnGraphsChunk } from "@/lib/bindings/xray-db";
 import { SpawnFileService } from "@/lib/spawn-file";
+import { SpawnGraphsChunk } from "@/lib/xrf/bindings/xray-db";
 
 const BASE_PATH: string = "/spawn/graph";
 const TABS: Array<string> = ["header", "levels", "vertices", "edges", "points", "cross-tables"];

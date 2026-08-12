@@ -9,8 +9,8 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "xml",

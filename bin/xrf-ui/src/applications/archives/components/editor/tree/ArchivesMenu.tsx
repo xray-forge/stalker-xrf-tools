@@ -13,8 +13,8 @@ import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/e
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { Nullable, Optional } from "@/core/types/general";
 import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/lib/archive";
-import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
 
 export function ArchivesMenu(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);

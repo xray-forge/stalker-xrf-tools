@@ -5,9 +5,9 @@ import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/component
 import { ArchiveFileDetailRow } from "@/applications/archives/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { Nullable } from "@/core/types/general";
-import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
 
 export interface IArchiveFileDetailsPanelProps extends BaseComponentProps {
   archivesService: ArchivesService;

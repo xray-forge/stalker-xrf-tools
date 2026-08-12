@@ -13,8 +13,8 @@ import { ProjectService } from "@/core/store/project";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { ArchiveProject } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
+import { ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
 
 const TEXT_FILE = mockArchiveFileDescriptor({ name: "readme.ltx", sizeReal: 1024, sizeCompressed: 1024 });
 

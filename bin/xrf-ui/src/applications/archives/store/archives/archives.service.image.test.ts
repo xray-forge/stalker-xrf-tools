@@ -4,9 +4,9 @@ import { ArchivesService } from "@/applications/archives/store/archives/archives
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { ArchiveFileDescriptor } from "@/lib/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/ipc";
 import { createLoadable } from "@/lib/loadable";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
 
 const TEXTURE: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "dds",

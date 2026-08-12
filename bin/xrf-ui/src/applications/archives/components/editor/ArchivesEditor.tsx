@@ -14,8 +14,8 @@ import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
 import { Nullable } from "@/core/types/general";
-import { ArchiveProject } from "@/lib/bindings/xray-archive";
 import { formatBytes } from "@/lib/size";
+import { ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
 
 export function ArchivesEditor(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);

@@ -3,8 +3,8 @@ import { ReactElement } from "react";
 
 import { SpawnEditorAlifeObjectsTable } from "@/applications/spawn/components/editor/chunks/alife/SpawnEditorAlifeObjectsTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
-import { SpawnALifeSpawnsChunk } from "@/lib/bindings/xray-db";
 import { SpawnFileService } from "@/lib/spawn-file";
+import { SpawnALifeSpawnsChunk } from "@/lib/xrf/bindings/xray-db";
 
 export function SpawnEditorAlife(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);

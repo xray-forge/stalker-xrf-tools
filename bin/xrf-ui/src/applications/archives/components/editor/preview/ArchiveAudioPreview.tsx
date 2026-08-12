@@ -12,9 +12,9 @@ import { AudioPlayer } from "@/core/components/media/AudioPlayer";
 import { Nullable } from "@/core/types/general";
 import { TArchiveContent } from "@/lib/archive";
 import { AssetService } from "@/lib/assets";
-import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/lib/bindings/xrf-app";
 import { Loadable } from "@/lib/loadable";
 import { base64ToBytes } from "@/lib/media/base64";
+import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/lib/xrf/bindings/xrf-app";
 
 /** One sound is previewed at a time, so its url lives under a fixed key and displaces the last one. */
 const ARCHIVE_AUDIO_ASSET_KEY: string = "archive-audio";

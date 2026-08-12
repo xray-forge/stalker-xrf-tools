@@ -6,11 +6,11 @@ import { ExportsService } from "@/applications/exports/store/exports";
 import { CodeView } from "@/core/components/code/CodeView";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { Nullable } from "@/core/types/general";
-import { ExportSourceContent } from "@/lib/bindings/xray-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { transformError } from "@/lib/error";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { getSyntaxLanguage } from "@/lib/syntax";
+import { ExportSourceContent } from "@/lib/xrf/bindings/xray-export";
 
 export interface IExportSourceViewProps extends BaseComponentProps {
   name: string;

@@ -1,4 +1,4 @@
-import { ArchiveFileDescriptor, ArchiveProjectReadPolicy } from "@/lib/bindings/xray-archive";
+import { ArchiveFileDescriptor, ArchiveProjectReadPolicy } from "@/lib/xrf/bindings/xray-archive";
 
 export type ArchivePreviewSupport =
   | { kind: "supported" }

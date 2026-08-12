@@ -13,14 +13,26 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { EApplicationId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
-import { getArchivePreviewSupport, isArchiveAudio, isArchiveImage, TArchiveContent, TArchiveOperation, TArchiveSelection } from "@/lib/archive";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject, ProjectReadResult } from "@/lib/bindings/xray-archive";
-import { ArchiveAudioPreview, ArchiveImagePreview } from "@/lib/bindings/xrf-app";
+import {
+  getArchivePreviewSupport,
+  isArchiveAudio,
+  isArchiveImage,
+  TArchiveContent,
+  TArchiveOperation,
+  TArchiveSelection,
+} from "@/lib/archive";
 import { transformError } from "@/lib/error";
 import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import {
+  ArchiveExtractFolderResult,
+  ArchiveFileDescriptor,
+  ArchiveProject,
+  ProjectReadResult,
+} from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveAudioPreview, ArchiveImagePreview } from "@/lib/xrf/bindings/xrf-app";
 
 @Injectable()
 export class ArchivesService {

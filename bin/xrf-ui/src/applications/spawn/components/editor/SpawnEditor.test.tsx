@@ -9,9 +9,9 @@ import { IEditorPanel, useEditorPanelsRegistry } from "@/core/components/shell/p
 import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { SpawnFile, SpawnHeaderChunk } from "@/lib/bindings/xray-db";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
 import { SpawnFileService } from "@/lib/spawn-file";
+import { SpawnFile, SpawnHeaderChunk } from "@/lib/xrf/bindings/xray-db";
 
 const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
 

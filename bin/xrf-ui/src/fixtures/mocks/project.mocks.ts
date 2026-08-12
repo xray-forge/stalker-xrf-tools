@@ -1,8 +1,8 @@
-import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject } from "@/lib/bindings/xray-archive";
-import { ExportDescriptor, ExportsProject } from "@/lib/bindings/xray-export";
 import { TCallableExportDescriptor } from "@/lib/exports";
 import { IEquipmentSectionDescriptor } from "@/lib/icons";
 import { ITranslationsProjectJson } from "@/lib/translations";
+import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
+import { ExportDescriptor, ExportsProject } from "@/lib/xrf/bindings/xray-export";
 
 import { mockArchiveReadPolicy } from "./archive.mocks";
 

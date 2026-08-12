@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { flagsColumn, identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
-import { Patrol, PatrolPoint } from "@/lib/bindings/xray-db";
+import { Patrol, PatrolPoint } from "@/lib/xrf/bindings/xray-db";
 
 interface IPatrolPointRow extends PatrolPoint {
   id: string;
