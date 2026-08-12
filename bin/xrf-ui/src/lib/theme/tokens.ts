@@ -19,10 +19,26 @@ export const RADIUS = {
 
 export const LAYOUT = {
   railWidth: 48,
+  /**
+   * Every control in either stripe.
+   *
+   * Sized to sit inside `toolbarHeight` with room to breathe, because Home and Notifications share
+   * that band with the toolbar and have to line up with its title.
+   */
+  railButtonSize: 32,
   toolbarHeight: 40,
   statusBarHeight: 24,
   titleBarHeight: 28,
   windowControlWidth: 36,
+} as const;
+
+/**
+ * Side panels, same on both sides.
+ */
+export const PANEL = {
+  defaultWidth: 300,
+  minWidth: 200,
+  maxWidth: 640,
 } as const;
 
 export const ACCENT = {

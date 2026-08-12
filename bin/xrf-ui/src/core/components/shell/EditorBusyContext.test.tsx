@@ -27,7 +27,7 @@ function renderRail(editor: ReactElement) {
   return renderWithProviders(
     <EditorBusyProvider>
       {editor}
-      <ApplicationRail />
+      <ApplicationRail panels={[]} activePanelId={null} onTogglePanel={() => {}} />
     </EditorBusyProvider>
   );
 }
@@ -36,7 +36,6 @@ describe("useEditorBusy", () => {
   it("leaves navigation available when nothing is running", () => {
     const { getByLabelText } = renderRail(<Busy isBusy={false} />);
 
-    expect(getByLabelText("Spawns")).not.toBeDisabled();
     expect(getByLabelText("Home")).not.toBeDisabled();
   });
 
@@ -44,7 +43,6 @@ describe("useEditorBusy", () => {
     const { getByLabelText } = renderRail(<Busy isBusy />);
 
     // Walking away used to leave the command running against a screen nobody could see.
-    expect(getByLabelText("Spawns")).toBeDisabled();
     expect(getByLabelText("Home")).toBeDisabled();
   });
 
@@ -58,10 +56,10 @@ describe("useEditorBusy", () => {
   it("releases the block when the editor unmounts, so a crash cannot strand the application", async () => {
     const { getByLabelText, getByText } = renderRail(<Unmountable />);
 
-    expect(getByLabelText("Spawns")).toBeDisabled();
+    expect(getByLabelText("Home")).toBeDisabled();
 
     await userEvent.click(getByText("unmount"));
 
-    expect(getByLabelText("Spawns")).not.toBeDisabled();
+    expect(getByLabelText("Home")).not.toBeDisabled();
   });
 });

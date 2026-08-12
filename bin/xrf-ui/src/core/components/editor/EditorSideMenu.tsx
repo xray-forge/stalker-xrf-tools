@@ -1,7 +1,5 @@
-import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
-
-export const EDITOR_SIDE_MENU_WIDTH: number = 240;
 
 export interface IEditorSideMenuItem {
   label: string;
@@ -13,8 +11,6 @@ export interface IEditorSideMenuItem {
 }
 
 export interface IEditorSideMenuProps {
-  anchor?: "left" | "right";
-  width?: number;
   header?: ReactNode;
   sections?: Array<IEditorSideMenuItem>;
   actions?: Array<IEditorSideMenuItem>;
@@ -35,32 +31,15 @@ function renderItem(item: IEditorSideMenuItem): ReactElement {
 }
 
 /**
- * Side panel shared by every editor workspace.
- *
- * Same width, same anatomy on both sides: an optional header, a scrolling middle that is either a
- * section list or arbitrary content, and actions pinned to the bottom. Editors used to hand roll this
- * drawer each time and drifted on width, paper positioning and where actions ended up.
+ * Body of a navigation panel: an optional header, a scrolling middle that is either a section list or
+ * arbitrary content, and actions pinned to the bottom.
  */
-export function EditorSideMenu({
-  anchor = "left",
-  width = EDITOR_SIDE_MENU_WIDTH,
-  header,
-  sections,
-  actions,
-  footer,
-  children,
-}: IEditorSideMenuProps): ReactElement {
+export function EditorSideMenu({ header, sections, actions, footer, children }: IEditorSideMenuProps): ReactElement {
   return (
-    <Drawer
-      anchor={anchor}
-      variant={"permanent"}
-      open={true}
-      sx={{ width, flexShrink: 0, height: "100%" }}
-      slotProps={{ paper: { sx: { position: "relative", width, display: "flex", flexDirection: "column" } } }}
-    >
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", minHeight: 0 }}>
       {header ? <Box sx={{ flexShrink: 0 }}>{header}</Box> : null}
 
-      <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto", backgroundColor: "background.default" }}>
+      <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto" }}>
         {sections?.length ? <List disablePadding>{sections.map(renderItem)}</List> : null}
         {children}
       </Box>
@@ -75,6 +54,6 @@ export function EditorSideMenu({
           </List>
         </>
       ) : null}
-    </Drawer>
+    </Box>
   );
 }

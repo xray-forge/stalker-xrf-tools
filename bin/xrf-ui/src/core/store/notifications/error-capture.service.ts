@@ -1,7 +1,7 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable } from "@wirestate/mobx";
 
-import { APPLICATION_SOURCE } from "@/core/components/shell/application-tools";
+import { APPLICATION_SOURCE } from "@/core/router/application";
 import { transformError } from "@/lib/error";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";

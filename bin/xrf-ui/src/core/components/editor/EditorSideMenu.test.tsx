@@ -67,15 +67,15 @@ describe("EditorSideMenu", () => {
     expect(queryByRole("button")).not.toBeInTheDocument();
   });
 
-  it("takes the same width on either side, so the two panels agree", () => {
-    const left = renderWithProviders(<EditorSideMenu sections={[{ label: "Header" }]} />);
-    const leftWidth: string = getComputedStyle(left.baseElement.querySelector(".MuiPaper-root")!).width;
+  it("keeps the header and the actions outside the scrolling middle", () => {
+    const { getByText } = renderWithProviders(
+      <EditorSideMenu header={<div>search</div>} sections={[{ label: "Header" }]} actions={[{ label: "Save" }]} />
+    );
 
-    left.unmount();
+    const scrolling: Element = getByText("Header").closest("ul")!.parentElement!;
 
-    const right = renderWithProviders(<EditorSideMenu anchor={"right"} sections={[{ label: "Header" }]} />);
-    const rightWidth: string = getComputedStyle(right.baseElement.querySelector(".MuiPaper-root")!).width;
-
-    expect(leftWidth).toBe(rightWidth);
+    expect(getComputedStyle(scrolling).overflowY).toBe("auto");
+    expect(scrolling).not.toContainElement(getByText("search"));
+    expect(scrolling).not.toContainElement(getByText("Save"));
   });
 });

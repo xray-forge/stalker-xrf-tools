@@ -10,7 +10,8 @@ import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/mater
 import { format } from "date-fns";
 import { ReactElement, ReactNode, useCallback, useState } from "react";
 
-import { findApplicationToolById, IApplicationTool } from "@/core/components/shell/application-tools";
+import { IApplication, IApplicationGroup } from "@/core/router/application";
+import { findApplicationById, findApplicationGroupById } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, INotification } from "@/lib/notifications";
@@ -46,7 +47,8 @@ export function NotificationRow({ notification }: INotificationRowProps): ReactE
 
   const [isExpanded, setExpanded] = useState<boolean>(false);
 
-  const tool: Nullable<IApplicationTool> = findApplicationToolById(notification.source);
+  const application: Nullable<IApplication> = findApplicationById(notification.source);
+  const group: Nullable<IApplicationGroup> = application ? null : findApplicationGroupById(notification.source);
   const createdAt: Date = new Date(notification.createdAt);
   const isDev: boolean = notification.severity === ENotificationSeverity.DEV;
 
@@ -102,7 +104,7 @@ export function NotificationRow({ notification }: INotificationRowProps): ReactE
             ) : null}
 
             <Typography variant={"caption"} sx={{ color: "text.secondary" }}>
-              {tool ? tool.label : notification.source}
+              {application?.label ?? group?.label ?? notification.source}
             </Typography>
 
             <Tooltip describeChild title={format(createdAt, "yyyy-MM-dd HH:mm:ss")} placement={"left"}>

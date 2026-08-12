@@ -4,22 +4,22 @@ import { userEvent } from "@testing-library/user-event";
 import { ReactElement, ReactNode } from "react";
 
 import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
-import { EditorToolsProvider, useEditorTools } from "@/core/components/shell/EditorToolsContext";
+import { EditorPanelsProvider, useEditorPanels } from "@/core/components/shell/EditorPanelsContext";
 import { NotificationsService } from "@/core/store/notifications";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
 /** Stands in for an editor that publishes one default-open panel, which most of them do. */
 function EditorWithPanel({ name }: { name: string }): ReactElement {
-  useEditorTools([{ icon: <span>{name}</span>, id: name, label: name, render: () => <div>{name} panel</div> }]);
+  useEditorPanels([{ icon: <span>{name}</span>, id: name, label: name, render: () => <div>{name} panel</div> }]);
 
   return <div>{name} editor</div>;
 }
 
 function renderFrame(children: ReactNode): RenderResult {
   return renderWithProviders(
-    <EditorToolsProvider>
+    <EditorPanelsProvider>
       <ApplicationShellFrame>{children}</ApplicationShellFrame>
-    </EditorToolsProvider>,
+    </EditorPanelsProvider>,
     { bindings: [NotificationsService] }
   );
 }
@@ -54,11 +54,11 @@ describe("ApplicationShellFrame", () => {
     await userEvent.click(getByLabelText("Notifications"));
 
     rerender(
-      <EditorToolsProvider>
+      <EditorPanelsProvider>
         <ApplicationShellFrame>
           <EditorWithPanel name={"Header"} />
         </ApplicationShellFrame>
-      </EditorToolsProvider>
+      </EditorPanelsProvider>
     );
 
     expect(getByText("Header editor")).toBeInTheDocument();

@@ -1,0 +1,19 @@
+import { default as Inventory2Icon } from "@mui/icons-material/Inventory2";
+import { lazy } from "react";
+
+import { EApplicationGroupId, EApplicationId, EApplicationStatus, IApplication } from "@/core/router/application";
+
+export const SPAWN_PACK_APPLICATION: IApplication = {
+  Component: lazy(() =>
+    import("@/applications/spawn-pack").then((it) => ({
+      default: it.SpawnPackApplication,
+    }))
+  ),
+  description: "Build a spawn file from unpacked chunks",
+  group: EApplicationGroupId.SPAWNS,
+  icon: <Inventory2Icon />,
+  id: EApplicationId.SPAWN_PACK,
+  label: "Spawn pack",
+  path: "/spawn-pack",
+  status: EApplicationStatus.READY,
+};

@@ -3,8 +3,8 @@ import { act, RenderResult } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Binding, Container } from "@wirestate/core";
 
-import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { NotificationsPanel } from "@/core/components/shell/notifications/NotificationsPanel";
+import { EApplicationId } from "@/core/router/application";
 import { NotificationsService } from "@/core/store/notifications";
 import { SettingsService } from "@/core/store/settings";
 import { renderWithProviders } from "@/fixtures/utils/render";
@@ -45,7 +45,7 @@ describe("NotificationsPanel", () => {
 
   it("names the tool a record came from the way the rail does", () => {
     const { render } = renderPanel([
-      { severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ARCHIVES, title: "Extracted textures" },
+      { severity: ENotificationSeverity.SUCCESS, source: EApplicationId.ARCHIVES, title: "Extracted textures" },
     ]);
 
     expect(render.getByText("Extracted textures")).toBeInTheDocument();
@@ -54,8 +54,8 @@ describe("NotificationsPanel", () => {
 
   it("shows the newest record first", () => {
     const { render } = renderPanel([
-      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Older" },
-      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Newer" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationId.ARCHIVES, title: "Older" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationId.ARCHIVES, title: "Newer" },
     ]);
 
     const titles: Array<string> = render.getAllByText(/Older|Newer/).map((it: HTMLElement) => it.textContent as string);
@@ -65,7 +65,7 @@ describe("NotificationsPanel", () => {
 
   it("reads what it was opened onto", () => {
     const { service } = renderPanel([
-      { severity: ENotificationSeverity.ERROR, source: EApplicationToolId.ARCHIVES, title: "Failed" },
+      { severity: ENotificationSeverity.ERROR, source: EApplicationId.ARCHIVES, title: "Failed" },
     ]);
 
     expect(service.unreadCount).toBe(0);
@@ -75,7 +75,7 @@ describe("NotificationsPanel", () => {
     const { service } = renderPanel();
 
     act(() =>
-      service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationToolId.ARCHIVES, title: "Failed" })
+      service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationId.ARCHIVES, title: "Failed" })
     );
 
     // Left unread, the badge counts records the user is looking at and nothing can dismiss it.
@@ -87,7 +87,7 @@ describe("NotificationsPanel", () => {
       {
         details: "C:\\out\\system.ltx",
         severity: ENotificationSeverity.ERROR,
-        source: EApplicationToolId.ARCHIVES,
+        source: EApplicationId.ARCHIVES,
         title: "Could not extract",
       },
     ]);
@@ -101,7 +101,7 @@ describe("NotificationsPanel", () => {
 
   it("offers no expander for a record with nothing more to say", () => {
     const { render } = renderPanel([
-      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Nothing to expand" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationId.ARCHIVES, title: "Nothing to expand" },
     ]);
 
     expect(render.queryByLabelText("Show details")).not.toBeInTheDocument();
@@ -109,8 +109,8 @@ describe("NotificationsPanel", () => {
 
   it("hides dev traces while dev mode is off", () => {
     const { render } = renderPanel([
-      { severity: ENotificationSeverity.DEV, source: EApplicationToolId.ICONS, title: "grid recomputed" },
-      { severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ICONS, title: "Packed sprite" },
+      { severity: ENotificationSeverity.DEV, source: EApplicationId.EQUIPMENT_ICONS, title: "grid recomputed" },
+      { severity: ENotificationSeverity.SUCCESS, source: EApplicationId.EQUIPMENT_ICONS, title: "Packed sprite" },
     ]);
 
     expect(render.getByText("Packed sprite")).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe("NotificationsPanel", () => {
 
   it("reveals traces that were recorded before dev mode was turned on", () => {
     const { render } = renderPanel(
-      [{ severity: ENotificationSeverity.DEV, source: EApplicationToolId.ICONS, title: "grid recomputed" }],
+      [{ severity: ENotificationSeverity.DEV, source: EApplicationId.EQUIPMENT_ICONS, title: "grid recomputed" }],
       true
     );
 
@@ -131,7 +131,7 @@ describe("NotificationsPanel", () => {
 
   it("does not mark a real outcome as a dev trace", () => {
     const { render } = renderPanel(
-      [{ severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ICONS, title: "Packed sprite" }],
+      [{ severity: ENotificationSeverity.SUCCESS, source: EApplicationId.EQUIPMENT_ICONS, title: "Packed sprite" }],
       true
     );
 
@@ -140,7 +140,7 @@ describe("NotificationsPanel", () => {
 
   it("clears the log on request", async () => {
     const { render, service } = renderPanel([
-      { severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Something" },
+      { severity: ENotificationSeverity.INFO, source: EApplicationId.ARCHIVES, title: "Something" },
     ]);
 
     await userEvent.click(render.getByRole("button", { name: "Clear all" }));

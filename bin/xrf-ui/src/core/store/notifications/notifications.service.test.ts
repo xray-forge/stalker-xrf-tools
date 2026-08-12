@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { Container, EventBus, EventsPlugin } from "@wirestate/core";
 
-import { EApplicationToolId } from "@/core/components/shell/application-tools";
+import { EApplicationId } from "@/core/router/application";
 import { NotificationsService } from "@/core/store/notifications/notifications.service";
 import { emitNotification, ENotificationSeverity, INotification } from "@/lib/notifications";
 
@@ -13,8 +13,8 @@ describe("NotificationsService", () => {
   it("stamps a record and keeps the newest first", () => {
     const service: NotificationsService = createService();
 
-    service.push({ severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ARCHIVES, title: "First" });
-    service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationToolId.ARCHIVES, title: "Second" });
+    service.push({ severity: ENotificationSeverity.SUCCESS, source: EApplicationId.ARCHIVES, title: "First" });
+    service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationId.ARCHIVES, title: "Second" });
 
     expect(service.notifications.map((it: INotification) => it.title)).toEqual(["Second", "First"]);
     expect(service.notifications.every((it: INotification) => Boolean(it.id) && !it.isRead)).toBe(true);
@@ -27,7 +27,7 @@ describe("NotificationsService", () => {
     for (let it = 0; it <= NotificationsService.LIMIT; it += 1) {
       service.push({
         severity: ENotificationSeverity.INFO,
-        source: EApplicationToolId.ARCHIVES,
+        source: EApplicationId.ARCHIVES,
         title: `Record ${it}`,
       });
     }
@@ -40,8 +40,8 @@ describe("NotificationsService", () => {
   it("badges the most urgent unread severity, not the newest one", () => {
     const service: NotificationsService = createService();
 
-    service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationToolId.ARCHIVES, title: "Failed" });
-    service.push({ severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ARCHIVES, title: "Worked" });
+    service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationId.ARCHIVES, title: "Failed" });
+    service.push({ severity: ENotificationSeverity.SUCCESS, source: EApplicationId.ARCHIVES, title: "Worked" });
 
     expect(service.unreadCount).toBe(2);
     expect(service.highestUnreadSeverity).toBe(ENotificationSeverity.ERROR);
@@ -50,7 +50,7 @@ describe("NotificationsService", () => {
   it("has nothing to badge once everything is read", () => {
     const service: NotificationsService = createService();
 
-    service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationToolId.ARCHIVES, title: "Failed" });
+    service.push({ severity: ENotificationSeverity.ERROR, source: EApplicationId.ARCHIVES, title: "Failed" });
     service.markAllRead();
 
     expect(service.unreadCount).toBe(0);
@@ -62,7 +62,7 @@ describe("NotificationsService", () => {
   it("clears everything on request", () => {
     const service: NotificationsService = createService();
 
-    service.push({ severity: ENotificationSeverity.INFO, source: EApplicationToolId.ARCHIVES, title: "Something" });
+    service.push({ severity: ENotificationSeverity.INFO, source: EApplicationId.ARCHIVES, title: "Something" });
     service.clear();
 
     expect(service.notifications).toHaveLength(0);
@@ -81,7 +81,7 @@ describe("NotificationsService", () => {
     emitNotification(container.get(EventBus), {
       details: "C:\\out",
       severity: ENotificationSeverity.SUCCESS,
-      source: EApplicationToolId.ARCHIVES,
+      source: EApplicationId.ARCHIVES,
       title: "Extracted textures",
     });
 

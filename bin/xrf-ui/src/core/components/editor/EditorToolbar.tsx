@@ -3,14 +3,15 @@ import { AppBar, Box, IconButton, Toolbar, Tooltip, Typography } from "@mui/mate
 import { ReactElement, ReactNode, useCallback } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
-import { findApplicationTool, IApplicationTool } from "@/core/components/shell/application-tools";
+import { IApplication } from "@/core/router/application";
+import { findApplication } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 export interface IEditorToolbarProps extends BaseComponentProps {
   /** Keeps the leaving control in place but inert, rather than removing it mid-operation. */
   isBackDisabled?: boolean;
-  /** Overrides the tool name resolved from the route. Rarely needed. */
+  /** Overrides the application name resolved from the route. Rarely needed. */
   title?: string;
   /** What is open, when the editor knows. Counts and state belong in the status bar instead. */
   subtitle?: ReactNode;
@@ -35,7 +36,7 @@ export function EditorToolbar({
   const navigate: NavigateFunction = useNavigate();
   const { pathname } = useLocation();
 
-  const tool: Nullable<IApplicationTool> = findApplicationTool(pathname);
+  const application: Nullable<IApplication> = findApplication(pathname);
 
   const onLeave = useCallback(() => {
     if (onBack) {
@@ -69,14 +70,17 @@ export function EditorToolbar({
         ) : null}
 
         <Typography
-          variant={"h6"}
+          // Sized against the rail controls either side of it rather than as a page heading: they share
+          // the toolbar's band, and an `h6` beside a 32px button read as two different registers.
+          variant={"subtitle1"}
           component={"div"}
           noWrap={true}
           sx={{
+            fontWeight: 600,
             marginLeft: backPath || onBack ? 0 : 2,
           }}
         >
-          {title ?? tool?.title ?? "Tools"}
+          {title ?? application?.label ?? "Tools"}
         </Typography>
 
         {subtitle ? (

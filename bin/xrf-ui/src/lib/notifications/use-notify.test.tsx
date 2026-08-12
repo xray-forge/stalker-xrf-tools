@@ -3,7 +3,7 @@ import { userEvent } from "@testing-library/user-event";
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
-import { EApplicationToolId } from "@/core/components/shell/application-tools";
+import { EApplicationId } from "@/core/router/application";
 import { NotificationsService } from "@/core/store/notifications";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ENotificationSeverity, INotification, TNotify, useNotify } from "@/lib/notifications";
@@ -25,7 +25,7 @@ function NotifyingPage(): ReactElement {
           notify({
             details: "C:\\configs",
             severity: ENotificationSeverity.WARNING,
-            source: EApplicationToolId.CONFIGS,
+            source: EApplicationId.CONFIGS_VERIFY,
             title: "Configs did not pass validation",
           })
         }
@@ -50,7 +50,9 @@ describe("useNotify", () => {
 
     await userEvent.click(getByRole("button", { name: "Verify" }));
 
-    expect(getByTestId("recorded")).toHaveTextContent("configs/warning/Configs did not pass validation/C:\\configs");
+    expect(getByTestId("recorded")).toHaveTextContent(
+      "configs-verify/warning/Configs did not pass validation/C:\\configs"
+    );
   });
 
   it("records every raise rather than collapsing repeats", async () => {
