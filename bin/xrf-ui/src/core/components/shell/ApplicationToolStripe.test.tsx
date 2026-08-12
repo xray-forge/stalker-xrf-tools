@@ -13,7 +13,7 @@ const TOOLS: Array<IEditorTool> = [
 describe("ApplicationToolStripe", () => {
   it("offers one control per declared tool", () => {
     const { getByLabelText } = renderWithProviders(
-      <ApplicationToolStripe tools={TOOLS} activeToolId={null} onToggleTool={jest.fn()} />
+      <ApplicationToolStripe tools={TOOLS} globalTools={[]} activeToolId={null} onToggleTool={jest.fn()} />
     );
 
     expect(getByLabelText("Header")).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe("ApplicationToolStripe", () => {
 
   it("marks which panel is open", () => {
     const { getByLabelText } = renderWithProviders(
-      <ApplicationToolStripe tools={TOOLS} activeToolId={"bones"} onToggleTool={jest.fn()} />
+      <ApplicationToolStripe tools={TOOLS} globalTools={[]} activeToolId={"bones"} onToggleTool={jest.fn()} />
     );
 
     expect(getByLabelText("Bones")).toHaveAttribute("aria-pressed", "true");
@@ -33,7 +33,7 @@ describe("ApplicationToolStripe", () => {
     const onToggleTool = jest.fn();
 
     const { getByLabelText } = renderWithProviders(
-      <ApplicationToolStripe tools={TOOLS} activeToolId={"header"} onToggleTool={onToggleTool} />
+      <ApplicationToolStripe tools={TOOLS} globalTools={[]} activeToolId={"header"} onToggleTool={onToggleTool} />
     );
 
     await userEvent.click(getByLabelText("Bones"));
@@ -45,7 +45,7 @@ describe("ApplicationToolStripe", () => {
     const onToggleTool = jest.fn();
 
     const { getByLabelText } = renderWithProviders(
-      <ApplicationToolStripe tools={TOOLS} activeToolId={"header"} onToggleTool={onToggleTool} />
+      <ApplicationToolStripe tools={TOOLS} globalTools={[]} activeToolId={"header"} onToggleTool={onToggleTool} />
     );
 
     await userEvent.click(getByLabelText("Header"));
@@ -55,7 +55,7 @@ describe("ApplicationToolStripe", () => {
 
   it("stays present when an editor declares nothing, so the frame does not shift", () => {
     const { container } = renderWithProviders(
-      <ApplicationToolStripe tools={[]} activeToolId={null} onToggleTool={jest.fn()} />
+      <ApplicationToolStripe tools={[]} globalTools={[]} activeToolId={null} onToggleTool={jest.fn()} />
     );
 
     expect(container.firstElementChild).toBeInTheDocument();

@@ -1,15 +1,21 @@
-import { ContainerConfig } from "@wirestate/core";
-import { DevToolsPlugin } from "@wirestate/core/devtools";
+import { ContainerConfig, EventsPlugin } from "@wirestate/core";
 import { ContainerProvider } from "@wirestate/react";
 import { ReactElement, useMemo } from "react";
 
 import { ApplicationProvider } from "@/applications/ApplicationProvider";
 import { ApplicationRouter } from "@/applications/ApplicationRouter";
+import { NotificationsService } from "@/core/store/notifications";
 import { ProjectService } from "@/core/store/project";
 
+/**
+ * The root container.
+ */
 export function Application(): ReactElement {
   const config: ContainerConfig = useMemo(
-    () => ({ bindings: [ProjectService], plugins: [new DevToolsPlugin({ label: "xrf-tools" })] }),
+    () => ({
+      bindings: [ProjectService, NotificationsService],
+      plugins: [new EventsPlugin()],
+    }),
     []
   );
 

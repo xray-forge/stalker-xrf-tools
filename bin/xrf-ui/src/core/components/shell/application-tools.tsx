@@ -10,7 +10,28 @@ import { ReactElement } from "react";
 
 import { Nullable } from "@/core/types/general";
 
+/**
+ * Stable identity of a tool, independent of its route and its display name.
+ *
+ * Notification records carry one of these rather than a label, so a renamed tool renames its own
+ * history instead of leaving two spellings of it in the log.
+ */
+export enum EApplicationToolId {
+  ARCHIVES = "archives",
+  CONFIGS = "configs",
+  DIALOGS = "dialogs",
+  EXPORTS = "exports",
+  ICONS = "icons",
+  SPAWNS = "spawns",
+  TRANSLATIONS = "translations",
+  VISUALS = "visuals",
+}
+
+/** Sources that raise notifications without owning a tool of their own. */
+export const APPLICATION_SOURCE: string = "application";
+
 export interface IApplicationTool {
+  id: EApplicationToolId;
   label: string;
   title: string;
   description: string;
@@ -28,6 +49,11 @@ export function findApplicationTool(pathname: string): Nullable<IApplicationTool
   return APPLICATION_TOOLS.find((tool) => pathname.startsWith(tool.path)) ?? null;
 }
 
+/** Resolve a tool from what a notification recorded as its source. */
+export function findApplicationToolById(id: string): Nullable<IApplicationTool> {
+  return APPLICATION_TOOLS.find((tool) => tool.id === id) ?? null;
+}
+
 /**
  * The tool roster: the single source for how a tool is named anywhere in the application.
  *
@@ -37,6 +63,7 @@ export function findApplicationTool(pathname: string): Nullable<IApplicationTool
  */
 export const APPLICATION_TOOLS: Array<IApplicationTool> = [
   {
+    id: EApplicationToolId.ARCHIVES,
     label: "Archives",
     title: "Archives editor",
     description: "Browse and unpack game archives",
@@ -44,6 +71,7 @@ export const APPLICATION_TOOLS: Array<IApplicationTool> = [
     path: "/archives-editor",
   },
   {
+    id: EApplicationToolId.DIALOGS,
     label: "Dialogs",
     title: "Dialog editor",
     description: "Edit NPC dialog graphs",
@@ -51,6 +79,7 @@ export const APPLICATION_TOOLS: Array<IApplicationTool> = [
     path: "/dialog-editor",
   },
   {
+    id: EApplicationToolId.CONFIGS,
     label: "Configs",
     title: "Configs editor",
     description: "Explore, verify and format LTX",
@@ -58,6 +87,7 @@ export const APPLICATION_TOOLS: Array<IApplicationTool> = [
     path: "/configs-editor",
   },
   {
+    id: EApplicationToolId.EXPORTS,
     label: "Exports",
     title: "Exports editor",
     description: "Inspect script exports",
@@ -65,6 +95,7 @@ export const APPLICATION_TOOLS: Array<IApplicationTool> = [
     path: "/exports-editor",
   },
   {
+    id: EApplicationToolId.ICONS,
     label: "Icons",
     title: "Icons editor",
     description: "Edit equipment and icon sprites",
@@ -72,6 +103,7 @@ export const APPLICATION_TOOLS: Array<IApplicationTool> = [
     path: "/icons-editor",
   },
   {
+    id: EApplicationToolId.SPAWNS,
     label: "Spawns",
     title: "Spawn editor",
     description: "Inspect spawn files",
@@ -79,6 +111,7 @@ export const APPLICATION_TOOLS: Array<IApplicationTool> = [
     path: "/spawn-editor",
   },
   {
+    id: EApplicationToolId.TRANSLATIONS,
     label: "Translations",
     title: "Translations editor",
     description: "Manage localization tables",
@@ -86,6 +119,7 @@ export const APPLICATION_TOOLS: Array<IApplicationTool> = [
     path: "/translations-editor",
   },
   {
+    id: EApplicationToolId.VISUALS,
     label: "Visuals",
     title: "Visuals editor",
     description: "Preview models and animations",

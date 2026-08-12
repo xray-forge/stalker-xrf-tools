@@ -9,12 +9,14 @@ import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { ApplicationToolStripe } from "@/core/components/shell/ApplicationToolStripe";
 import { IEditorTool, useEditorToolsRegistry } from "@/core/components/shell/EditorToolsContext";
+import { GLOBAL_TOOLS, isGlobalToolId } from "@/core/components/shell/global-tools";
 import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
 import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 
 const TOOL_PANEL_WIDTH: number = 300;
 const STORAGE_PREFIX: string = "xrf.tools.";
+const GLOBAL_STORAGE_KEY: string = "xrf.tools.global";
 
 export interface IApplicationShellFrameProps {
   children: ReactNode;
@@ -36,26 +38,49 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
   const storageKey: string = `${STORAGE_PREFIX}${findApplicationTool(pathname)?.path ?? "root"}`;
 
   const [activeToolId, setActiveToolId] = useState<Nullable<string>>(null);
+  const [globalToolId, setGlobalToolId] = useState<Nullable<string>>(() => getLocalStorageValue(GLOBAL_STORAGE_KEY));
 
   const defaultToolId: Nullable<string> = tools.find((tool) => tool.isOpenByDefault !== false)?.id ?? null;
 
   // Nothing stored means "not chosen yet", which resolves to the first default-open tool. An empty
   // string is a deliberate collapse and stays collapsed.
-  const resolvedToolId: Nullable<string> =
+  const resolvedEditorToolId: Nullable<string> =
     activeToolId === null ? defaultToolId : tools.some((it) => it.id === activeToolId) ? activeToolId : null;
 
-  const activeTool: Nullable<IEditorTool> = tools.find((it) => it.id === resolvedToolId) ?? null;
+  const activeGlobalTool: Nullable<IEditorTool> =
+    globalToolId && isGlobalToolId(globalToolId) ? (GLOBAL_TOOLS.find((it) => it.id === globalToolId) ?? null) : null;
+
+  const resolvedToolId: Nullable<string> = activeGlobalTool ? activeGlobalTool.id : resolvedEditorToolId;
+
+  const activeTool: Nullable<IEditorTool> = activeGlobalTool ?? tools.find((it) => it.id === resolvedToolId) ?? null;
 
   const onError = useCallback((props: IErrorBoundaryFallbackProps) => <ApplicationCrash {...props} />, []);
 
   const onToggleTool = useCallback(
     (id: string) => {
-      const next: string = resolvedToolId === id ? "" : id;
+      if (isGlobalToolId(id)) {
+        const next: string = globalToolId === id ? "" : id;
+
+        setGlobalToolId(next);
+        setLocalStorageValue(GLOBAL_STORAGE_KEY, next);
+
+        return;
+      }
+
+      // Both claim the same slot, so picking an editor panel has to release the global one - otherwise
+      // the click reads as broken.
+      if (activeGlobalTool) {
+        setGlobalToolId("");
+        setLocalStorageValue(GLOBAL_STORAGE_KEY, "");
+      }
+
+      // Collapsing by clicking the open panel again only applies when that panel is the one on screen.
+      const next: string = !activeGlobalTool && resolvedEditorToolId === id ? "" : id;
 
       setActiveToolId(next);
       setLocalStorageValue(storageKey, next);
     },
-    [resolvedToolId, storageKey]
+    [activeGlobalTool, globalToolId, resolvedEditorToolId, storageKey]
   );
 
   useEffect(() => {
@@ -93,7 +118,12 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
           </Box>
         ) : null}
 
-        <ApplicationToolStripe tools={tools} activeToolId={resolvedToolId} onToggleTool={onToggleTool} />
+        <ApplicationToolStripe
+          tools={tools}
+          globalTools={GLOBAL_TOOLS}
+          activeToolId={resolvedToolId}
+          onToggleTool={onToggleTool}
+        />
       </Box>
 
       <ApplicationStatusBar />
