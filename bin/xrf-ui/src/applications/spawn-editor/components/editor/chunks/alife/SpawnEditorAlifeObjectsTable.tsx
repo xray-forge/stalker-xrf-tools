@@ -1,85 +1,76 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
-import { AnyObject } from "@/core/types/general";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { flagsColumn, identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
 import { IAlifeObjectBase } from "@/lib/spawn-file";
 
 interface ISpawnEditorAlifeObjectsTableProps {
   objects: Array<IAlifeObjectBase>;
 }
 
+interface IAlifeObjectRow extends IAlifeObjectBase {
+  index: number;
+  type: string;
+}
+
+/**
+ * Columns the file carries but nobody scans a table by: available in the columns panel, off by default
+ * so the twenty-three column grid opens on the ones that identify an object.
+ */
+const HIDDEN_COLUMNS: Array<string> = [
+  "scriptVersion",
+  "version",
+  "scriptGameId",
+  "scriptRp",
+  "respawnTime",
+  "phantomId",
+  "netAction",
+  "clientDataSize",
+  "direction",
+];
+
 export function SpawnEditorAlifeObjectsTable({ objects }: ISpawnEditorAlifeObjectsTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "index", headerName: "index" },
-      { field: "scriptVersion", headerName: "script version" },
-      { field: "version", headerName: "version" },
-      { field: "clsid", headerName: "clsid" },
-      { field: "type", headerName: "type", width: 200 },
-      { field: "name", headerName: "name", width: 200 },
-      { field: "section", headerName: "section", width: 160 },
-      { field: "gameType", headerName: "game type" },
-      { field: "scriptGameId", headerName: "script game id" },
-      { field: "scriptRp", headerName: "script rp" },
-      { field: "respawnTime", headerName: "respawn time" },
-      { field: "scriptFlags", headerName: "script flags" },
-      { field: "innerId", headerName: "id" },
-      { field: "spawnId", headerName: "spawn id" },
-      { field: "parentId", headerName: "parent id" },
-      { field: "phantomId", headerName: "phantom id" },
-      { field: "netAction", headerName: "net action" },
-      { field: "clientDataSize", headerName: "client data size" },
-      {
-        field: "direction",
-        headerName: "direction",
-        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
-      },
-      {
-        field: "position",
-        headerName: "position",
-        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
-      },
-      {
-        field: "inherited",
-        headerName: "inherited",
-        valueGetter: (it: AnyObject) => (it?.row?.inherited ? JSON.stringify(it.row.inherited) : null),
-      },
-      { field: "updateData", headerName: "update data" },
+      textColumn("index", "#", 70),
+      identifierColumn("name", "Name", 220),
+      identifierColumn("section", "Section", 180),
+      identifierColumn("type", "Type", 200),
+      identifierColumn("clsid", "Clsid", 120),
+      textColumn("id", "Id", 90),
+      textColumn("parentId", "Parent", 90),
+      vectorColumn("position", "Position"),
+      textColumn("gameType", "Game type", 110),
+      flagsColumn("scriptFlags", "Script flags"),
+      textColumn("scriptVersion", "Script version", 130),
+      textColumn("version", "Version", 100),
+      textColumn("scriptGameId", "Script game id", 130),
+      textColumn("scriptRp", "Script rp", 110),
+      textColumn("respawnTime", "Respawn time", 130),
+      textColumn("phantomId", "Phantom", 100),
+      textColumn("netAction", "Net action", 110),
+      textColumn("clientDataSize", "Client data", 110),
+      vectorColumn("direction", "Direction"),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(
-    () =>
-      objects.map((it, index) => ({
-        ...it,
-        id: index,
-        innerId: it.id,
-        type: it.inherited.type,
-      })),
-    // Expected memo propagation without static analysis:
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    objects
+  const rows: Array<IAlifeObjectRow> = useMemo(
+    () => objects.map((it: IAlifeObjectBase, index: number) => ({ ...it, index, type: it.inherited.type })),
+    [objects]
   );
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IAlifeObjectRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      countNoun={"object"}
+      emptyLabel={"This file spawns no alife objects."}
+      hiddenColumns={HIDDEN_COLUMNS}
+      rows={rows}
+      source={"Alife object"}
+      getRowId={(row: IAlifeObjectRow): GridRowId => row.index}
+      getSearchText={(row: IAlifeObjectRow): string => `${row.name} ${row.section} ${row.type} ${row.clsid}`}
     />
   );
 }

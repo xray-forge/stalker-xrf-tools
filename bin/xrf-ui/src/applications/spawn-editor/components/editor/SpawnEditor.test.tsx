@@ -1,29 +1,58 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { RenderResult } from "@testing-library/react";
+import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { SpawnEditor } from "@/applications/spawn-editor/components/editor/SpawnEditor";
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
+import { EditorToolsProvider, IEditorTool, useEditorToolsRegistry } from "@/core/components/shell/EditorToolsContext";
 import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
+import { ISpawnFile, ISpawnFileHeaderChunk } from "@/lib/spawn-file";
+
+const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
+
+/** Stands in for the window frame, which is what actually renders the published tool panels. */
+function PublishedTools(): ReactElement {
+  const tools: Array<IEditorTool> = useEditorToolsRegistry();
+
+  return <div data-testid={"published-tools"}>{tools.map((it: IEditorTool) => it.label).join(",")}</div>;
+}
+
+/** The editor restores from three cheap calls now, rather than one whole-file parse. */
+function mockOpenSpawn(overrides: Partial<ISpawnFile> = {}): void {
+  const file: ISpawnFile = mockSpawnFile(overrides);
+
+  setMockInvokeResponses({
+    [ESpawnsEditorCommand.HAS_SPAWN_FILE]: true,
+    [ESpawnsEditorCommand.GET_SPAWN_FILE_HEADER]: file.header,
+    [ESpawnsEditorCommand.GET_SPAWN_FILE_PATH]: SPAWN_PATH,
+    [ESpawnsEditorCommand.GET_SPAWN_FILE_PATROLS]: file.patrols,
+    [ESpawnsEditorCommand.GET_SPAWN_FILE_GRAPHS]: file.graphs,
+    [ESpawnsEditorCommand.GET_SPAWN_FILE_ALIFE_SPAWNS]: file.alifeSpawn,
+    [ESpawnsEditorCommand.GET_SPAWN_FILE_ARTEFACT_SPAWNS]: file.artefactSpawn,
+  });
+}
 
 describe("SpawnEditor", () => {
   beforeEach(() => {
-    setMockInvokeResponses({ [ESpawnsEditorCommand.GET_SPAWN_FILE]: mockSpawnFile() });
+    window.localStorage.clear();
+    mockOpenSpawn();
   });
 
-  function renderEditor(): RenderResult {
+  function renderEditor(route: string = "/spawn-editor/editor/header"): RenderResult {
     return renderWithProviders(
-      <>
+      <EditorToolsProvider>
         <Routes>
           <Route path={"/spawn-editor/editor/*"} element={<SpawnEditor />} />
         </Routes>
         <ApplicationStatusBar />
-      </>,
-      { route: "/spawn-editor/editor/header", bindings: [SpawnFileService] }
+        <PublishedTools />
+      </EditorToolsProvider>,
+      { route, bindings: [SpawnFileService] }
     );
   }
 
@@ -41,16 +70,20 @@ describe("SpawnEditor", () => {
     }
   });
 
+  it("names the open file in the toolbar, which the backend has to report", async () => {
+    const { findByText } = renderEditor();
+
+    // The parsed file carries no path, so this only works because the session keeps it.
+    expect(await findByText(SPAWN_PATH)).toBeInTheDocument();
+  });
+
   it("keeps navigation in the menu and commands on the toolbar", async () => {
     const { findByRole, getByLabelText, getByRole, getByText, queryByText } = renderEditor();
 
-    // Commands that act on the open file sit in the toolbar; the menu is only for moving between
-    // chunks. Splitting them by kind is what makes either half predictable to look in.
     expect(await findByRole("button", { name: /Save/ })).toBeInTheDocument();
     expect(getByRole("button", { name: /Export/ })).toBeInTheDocument();
     expect(getByText("Alife")).toBeInTheDocument();
 
-    // Close moved onto the toolbar back control, so it must no longer appear as a menu entry.
     expect(queryByText("Close")).not.toBeInTheDocument();
     expect(getByLabelText("Close and go back")).toBeInTheDocument();
   });
@@ -63,27 +96,16 @@ describe("SpawnEditor", () => {
     expect(getByText("1 levels")).toBeInTheDocument();
   });
 
-  it("reports nothing when the backend has no file open", async () => {
-    setMockInvokeResponses({ [ESpawnsEditorCommand.GET_SPAWN_FILE]: null });
-
-    const { findByText, queryByText } = renderEditor();
-
-    expect(await findByText("Ready")).toBeInTheDocument();
-    expect(queryByText("2 objects")).not.toBeInTheDocument();
-  });
-
   it("reflects the fixture rather than a fixed string", async () => {
-    setMockInvokeResponses({
-      [ESpawnsEditorCommand.GET_SPAWN_FILE]: mockSpawnFile({
-        header: {
-          version: 118,
-          guid: "guid",
-          graphGuid: "graph-guid",
-          objectsCount: 9001,
-          levelsCount: 32,
-        },
-      }),
-    });
+    const header: ISpawnFileHeaderChunk = {
+      version: 118,
+      guid: "guid",
+      graphGuid: "graph-guid",
+      objectsCount: 9001,
+      levelsCount: 32,
+    };
+
+    mockOpenSpawn({ header });
 
     const { findByText, getByText } = renderEditor();
 
@@ -98,5 +120,43 @@ describe("SpawnEditor", () => {
     const header: HTMLElement = await findByText("Header");
 
     expect(header.closest("[role='button']")).toHaveClass("Mui-selected");
+  });
+
+  it("keeps the chunk section selected while a sub-table of it is showing", async () => {
+    const { findByText } = renderEditor("/spawn-editor/editor/graph/levels");
+
+    const graph: HTMLElement = await findByText("Graph");
+
+    // Selection used to be decided by the end of the path, so entering a sub-table deselected the
+    // section it belongs to.
+    expect(graph.closest("[role='button']")).toHaveClass("Mui-selected");
+  });
+
+  it("takes the visible sub-table from the route, so it can be linked to", async () => {
+    // Asserted through the row count rather than a column header: the grid virtualises to nothing
+    // without layout, which is why the shared table's own tests read its chrome too.
+    const { findByText } = renderEditor("/spawn-editor/editor/graph/levels");
+
+    expect(await findByText("1 level(s)")).toBeInTheDocument();
+  });
+
+  it("defaults to the first sub-table when the route names none", async () => {
+    const { findByText } = renderEditor("/spawn-editor/editor/graph");
+
+    expect(await findByText("1 header(s)")).toBeInTheDocument();
+  });
+
+  it("marks the sub-table tab the route selected", async () => {
+    const { findByRole } = renderEditor("/spawn-editor/editor/graph/vertices");
+
+    expect(await findByRole("tab", { name: "Vertices", selected: true })).toBeInTheDocument();
+  });
+
+  it("publishes a details panel to the shell rather than rendering one itself", async () => {
+    const { findByTestId } = renderEditor();
+
+    // The stripe that renders these lives in the window frame, so what this can check is that the
+    // editor declared it.
+    expect(await findByTestId("published-tools")).toHaveTextContent("Row details");
   });
 });

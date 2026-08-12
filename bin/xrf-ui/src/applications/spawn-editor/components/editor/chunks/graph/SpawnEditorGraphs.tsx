@@ -1,6 +1,6 @@
-import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tab, Tabs } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useMemo } from "react";
+import { ReactElement } from "react";
 
 import { SpawnEditorGraphCrossTable } from "@/applications/spawn-editor/components/editor/chunks/graph/SpawnEditorGraphCrossTable";
 import { SpawnEditorGraphEdgesTable } from "@/applications/spawn-editor/components/editor/chunks/graph/SpawnEditorGraphEdgesTable";
@@ -8,94 +8,44 @@ import { SpawnEditorGraphHeaderTable } from "@/applications/spawn-editor/compone
 import { SpawnEditorGraphLevelsTable } from "@/applications/spawn-editor/components/editor/chunks/graph/SpawnEditorGraphLevelsTable";
 import { SpawnEditorGraphPointsTable } from "@/applications/spawn-editor/components/editor/chunks/graph/SpawnEditorGraphPointsTable";
 import { SpawnEditorGraphVerticesTable } from "@/applications/spawn-editor/components/editor/chunks/graph/SpawnEditorGraphVerticesTable";
+import { SpawnChunkView } from "@/applications/spawn-editor/components/editor/chunks/SpawnChunkView";
+import { TChunkTabChange, useChunkTab } from "@/applications/spawn-editor/components/editor/chunks/use-chunk-tab";
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
-import { useTabState } from "@/lib/tab";
+import { ISpawnFileGraphsChunk } from "@/lib/spawn-file";
+
+const BASE_PATH: string = "/spawn-editor/editor/graph";
+const TABS: Array<string> = ["header", "levels", "vertices", "edges", "points", "cross-tables"];
 
 export function SpawnEditorGraphs(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
-  const { value: spawnFile, isLoading, error } = spawnFileService.spawnFile;
 
-  const [activeTab, , onActiveTabChange] = useTabState<string>("header");
-
-  const activeTable: ReactElement = useMemo(() => {
-    if (!spawnFile?.graphs) {
-      return <Box>No file</Box>;
-    }
-
-    switch (activeTab) {
-      case "header":
-        return <SpawnEditorGraphHeaderTable header={spawnFile.graphs.header} />;
-
-      case "levels":
-        return <SpawnEditorGraphLevelsTable levels={spawnFile.graphs.levels} />;
-
-      case "edges":
-        return <SpawnEditorGraphEdgesTable edges={spawnFile.graphs.edges} />;
-
-      case "points":
-        return <SpawnEditorGraphPointsTable points={spawnFile.graphs.points} />;
-
-      case "vertices":
-        return <SpawnEditorGraphVerticesTable vertices={spawnFile.graphs.vertices} />;
-
-      case "cross_tables":
-        return <SpawnEditorGraphCrossTable crossTables={spawnFile.graphs.crossTables} />;
-
-      default:
-        return <Box>Unknown tab</Box>;
-    }
-  }, [activeTab, spawnFile?.graphs]);
-
-  if (isLoading) {
-    return (
-      <Grid
-        container
-        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
-      >
-        <CircularProgress />
-      </Grid>
-    );
-  }
-
-  if (error || !spawnFile) {
-    return (
-      <Grid
-        container
-        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
-      >
-        {error ? String(error) : "No value."}
-      </Grid>
-    );
-  }
+  const [activeTab, onChangeTab]: [string, TChunkTabChange] = useChunkTab(BASE_PATH, TABS, "header");
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        width: "auto",
-        height: "100%",
-        flexDirection: "column",
-        overflow: "auto",
-        p: 2,
-        flexGrow: 1,
-      }}
-    >
-      <Typography variant={"h5"}>Graph</Typography>
+    <SpawnChunkView<ISpawnFileGraphsChunk>
+      chunk={spawnFileService.graphs}
+      render={(chunk: ISpawnFileGraphsChunk) => (
+        <>
+          <Tabs value={activeTab} variant={"scrollable"} sx={{ marginBottom: 1, flexShrink: 0 }} onChange={onChangeTab}>
+            <Tab value={"header"} label={"Header"} />
+            <Tab value={"levels"} label={"Levels"} />
+            <Tab value={"vertices"} label={"Vertices"} />
+            <Tab value={"edges"} label={"Edges"} />
+            <Tab value={"points"} label={"Points"} />
+            <Tab value={"cross-tables"} label={"Cross tables"} />
+          </Tabs>
 
-      <Divider sx={{ margin: "16px 0" }} />
-
-      <Tabs value={activeTab} onChange={onActiveTabChange}>
-        <Tab value={"header"} label={"Header"} />
-        <Tab value={"levels"} label={"Levels"} />
-        <Tab value={"edges"} label={"Edges"} />
-        <Tab value={"points"} label={"Points"} />
-        <Tab value={"vertices"} label={"Vertices"} />
-        <Tab value={"cross_tables"} label={"Cross tables"} />
-      </Tabs>
-
-      <Box sx={{ marginBottom: 1 }} />
-
-      {activeTable}
-    </Box>
+          <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0 }}>
+            {activeTab === "levels" ? <SpawnEditorGraphLevelsTable levels={chunk.levels} /> : null}
+            {activeTab === "vertices" ? <SpawnEditorGraphVerticesTable vertices={chunk.vertices} /> : null}
+            {activeTab === "edges" ? <SpawnEditorGraphEdgesTable edges={chunk.edges} /> : null}
+            {activeTab === "points" ? <SpawnEditorGraphPointsTable points={chunk.points} /> : null}
+            {activeTab === "cross-tables" ? <SpawnEditorGraphCrossTable crossTables={chunk.crossTables} /> : null}
+            {activeTab === "header" ? <SpawnEditorGraphHeaderTable header={chunk.header} /> : null}
+          </Box>
+        </>
+      )}
+      onLoad={spawnFileService.loadGraphs}
+    />
   );
 }

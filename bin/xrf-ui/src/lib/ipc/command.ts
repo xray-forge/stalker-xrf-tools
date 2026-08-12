@@ -40,10 +40,14 @@ export enum ESpawnsEditorCommand {
   GET_SPAWN_FILE_ARTEFACT_SPAWNS = "plugin:spawns-editor|get_spawn_file_artefact_spawns",
   GET_SPAWN_FILE_GRAPHS = "plugin:spawns-editor|get_spawn_file_graphs",
   GET_SPAWN_FILE_HEADER = "plugin:spawns-editor|get_spawn_file_header",
+  GET_SPAWN_FILE_PATH = "plugin:spawns-editor|get_spawn_file_path",
   GET_SPAWN_FILE_PATROLS = "plugin:spawns-editor|get_spawn_file_patrols",
+  HAS_SPAWN_FILE = "plugin:spawns-editor|has_spawn_file",
   IMPORT_SPAWN_FILE = "plugin:spawns-editor|import_spawn_file",
   OPEN_SPAWN_FILE = "plugin:spawns-editor|open_spawn_file",
+  PACK_SPAWN_FILE = "plugin:spawns-editor|pack_spawn_file",
   SAVE_SPAWN_FILE = "plugin:spawns-editor|save_spawn_file",
+  UNPACK_SPAWN_FILE = "plugin:spawns-editor|unpack_spawn_file",
 }
 
 export enum ETranslationsEditorCommand {

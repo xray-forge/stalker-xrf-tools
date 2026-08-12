@@ -1,8 +1,13 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { decimalColumn, textColumn } from "@/core/components/table";
 import { IGraphPoint } from "@/lib/spawn-file";
+
+interface IGraphPointRow extends IGraphPoint {
+  index: number;
+}
 
 interface ISpawnEditorGraphPointsTableProps {
   points: Array<IGraphPoint>;
@@ -11,32 +16,26 @@ interface ISpawnEditorGraphPointsTableProps {
 export function SpawnEditorGraphPointsTable({ points }: ISpawnEditorGraphPointsTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "id", headerName: "id" },
-      { field: "distance", headerName: "distance", width: 240 },
-      { field: "levelVertexId", headerName: "level vertex id", width: 160 },
+      textColumn("index", "#", 90),
+      textColumn("levelVertexId", "Level vertex", 140),
+      decimalColumn("distance", "Distance", 130),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => points.map((it, index) => ({ ...it, id: index })), [points]);
+  const rows: Array<IGraphPointRow> = useMemo(
+    () => points.map((it: IGraphPoint, index: number) => ({ ...it, index })),
+    [points]
+  );
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IGraphPointRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={rows}
+      countNoun={"point"}
+      emptyLabel={"This graph has no points."}
+      source={"Graph point"}
+      getRowId={(row: IGraphPointRow): GridRowId => row.index}
     />
   );
 }

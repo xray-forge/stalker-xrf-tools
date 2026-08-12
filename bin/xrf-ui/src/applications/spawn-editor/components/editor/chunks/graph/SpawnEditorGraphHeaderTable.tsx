@@ -1,8 +1,13 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { identifierColumn, textColumn } from "@/core/components/table";
 import { IGraphHeader } from "@/lib/spawn-file";
+
+interface IGraphHeaderRow extends IGraphHeader {
+  id: string;
+}
 
 interface ISpawnEditorGraphHeaderTableProps {
   header: IGraphHeader;
@@ -11,35 +16,26 @@ interface ISpawnEditorGraphHeaderTableProps {
 export function SpawnEditorGraphHeaderTable({ header }: ISpawnEditorGraphHeaderTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "guid", headerName: "guid", width: 240 },
-      { field: "version", headerName: "version" },
-      { field: "levelsCount", headerName: "levels count" },
-      { field: "edgesCount", headerName: "edges count" },
-      { field: "pointsCount", headerName: "points count" },
-      { field: "verticesCount", headerName: "vertices count", width: 120 },
+      identifierColumn("guid", "Guid", 260),
+      textColumn("version", "Version", 100),
+      textColumn("levelsCount", "Levels", 110),
+      textColumn("verticesCount", "Vertices", 110),
+      textColumn("edgesCount", "Edges", 110),
+      textColumn("pointsCount", "Points", 110),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => [{ ...header, id: header.guid }], [header]);
+  const rows: Array<IGraphHeaderRow> = useMemo(() => [{ ...header, id: header.guid }], [header]);
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IGraphHeaderRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={rows}
+      countNoun={"header"}
+      emptyLabel={"This graph has no header."}
+      source={"Graph header"}
+      getRowId={(row: IGraphHeaderRow): GridRowId => row.id}
     />
   );
 }

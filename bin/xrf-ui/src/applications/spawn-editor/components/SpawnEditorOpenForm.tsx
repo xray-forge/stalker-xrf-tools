@@ -15,7 +15,7 @@ export function SpawnEditorOpenForm(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const isLoading: boolean = spawnFileService.spawnFile.isLoading;
+  const isLoading: boolean = spawnFileService.header.isLoading;
 
   const spawn: IPathField = usePathField({
     id: "spawn.open.file",
@@ -38,7 +38,7 @@ export function SpawnEditorOpenForm(): ReactElement {
     <PickerForm
       isLoading={isLoading}
       title={"Open spawn file"}
-      error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
+      error={spawnFileService.header.error ? String(spawnFileService.header.error) : undefined}
       backPath={"/spawn-editor"}
       backDisabled={isLoading}
       submitLabel={"Open"}

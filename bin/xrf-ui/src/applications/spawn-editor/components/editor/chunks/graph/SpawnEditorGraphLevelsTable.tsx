@@ -1,8 +1,8 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
-import { AnyObject } from "@/core/types/general";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
 import { IGraphLevel } from "@/lib/spawn-file";
 
 interface ISpawnEditorGraphLevelsTableProps {
@@ -12,38 +12,24 @@ interface ISpawnEditorGraphLevelsTableProps {
 export function SpawnEditorGraphLevelsTable({ levels }: ISpawnEditorGraphLevelsTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "id", headerName: "id" },
-      { field: "name", headerName: "name", width: 160 },
-      { field: "section", headerName: "section" },
-      { field: "guid", headerName: "guid", width: 240 },
-      {
-        field: "offset",
-        headerName: "offset",
-        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
-      },
+      textColumn("id", "Id", 80),
+      identifierColumn("name", "Name", 200),
+      identifierColumn("section", "Section", 180),
+      vectorColumn("offset", "Offset"),
+      identifierColumn("guid", "Guid", 260),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => levels, [levels]);
-
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IGraphLevel>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={levels}
+      countNoun={"level"}
+      emptyLabel={"This graph has no levels."}
+      source={"Graph level"}
+      getRowId={(row: IGraphLevel): GridRowId => row.id}
+      getSearchText={(row: IGraphLevel): string => `${row.name} ${row.section}`}
     />
   );
 }

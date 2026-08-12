@@ -1,8 +1,13 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { decimalColumn, textColumn } from "@/core/components/table";
 import { IGraphEdge } from "@/lib/spawn-file";
+
+interface IGraphEdgeRow extends IGraphEdge {
+  index: number;
+}
 
 interface ISpawnEditorGraphEdgesTableProps {
   edges: Array<IGraphEdge>;
@@ -11,32 +16,26 @@ interface ISpawnEditorGraphEdgesTableProps {
 export function SpawnEditorGraphEdgesTable({ edges }: ISpawnEditorGraphEdgesTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "id", headerName: "id" },
-      { field: "distance", headerName: "distance", width: 240 },
-      { field: "gameVertexId", headerName: "game vertex id", width: 160 },
+      textColumn("index", "#", 90),
+      textColumn("gameVertexId", "Game vertex", 140),
+      decimalColumn("distance", "Distance", 130),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => edges.map((it, index) => ({ ...it, id: index })), [edges]);
+  const rows: Array<IGraphEdgeRow> = useMemo(
+    () => edges.map((it: IGraphEdge, index: number) => ({ ...it, index })),
+    [edges]
+  );
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IGraphEdgeRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={rows}
+      countNoun={"edge"}
+      emptyLabel={"This graph has no edges."}
+      source={"Graph edge"}
+      getRowId={(row: IGraphEdgeRow): GridRowId => row.index}
     />
   );
 }

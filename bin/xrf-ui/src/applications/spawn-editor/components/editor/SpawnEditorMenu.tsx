@@ -3,10 +3,26 @@ import { default as GroupsIcon } from "@mui/icons-material/Groups";
 import { default as InfoIcon } from "@mui/icons-material/Info";
 import { default as RouteIcon } from "@mui/icons-material/Route";
 import { default as ScienceIcon } from "@mui/icons-material/Science";
-import { ReactElement, useMemo } from "react";
+import { ReactElement, ReactNode, useMemo } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
+
+const EDITOR_PATH: string = "/spawn-editor/editor";
+
+interface ISpawnChunkSection {
+  label: string;
+  icon: ReactNode;
+  path: string;
+}
+
+const SECTIONS: Array<ISpawnChunkSection> = [
+  { label: "Header", icon: <InfoIcon />, path: "header" },
+  { label: "Alife", icon: <GroupsIcon />, path: "alife" },
+  { label: "Artefacts", icon: <ScienceIcon />, path: "artefacts" },
+  { label: "Patrols", icon: <RouteIcon />, path: "patrols" },
+  { label: "Graph", icon: <AccountTreeIcon />, path: "graph" },
+];
 
 export function SpawnEditorMenu(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
@@ -14,17 +30,11 @@ export function SpawnEditorMenu(): ReactElement {
 
   const sections: Array<IEditorSideMenuItem> = useMemo(
     () =>
-      [
-        { label: "Header", icon: <InfoIcon />, path: "header" },
-        { label: "Alife", icon: <GroupsIcon />, path: "alife" },
-        { label: "Artefacts", icon: <ScienceIcon />, path: "artefacts" },
-        { label: "Patrols", icon: <RouteIcon />, path: "patrols" },
-        { label: "Graph", icon: <AccountTreeIcon />, path: "graph" },
-      ].map((it) => ({
-        label: it.label,
+      SECTIONS.map((it: ISpawnChunkSection) => ({
         icon: it.icon,
-        isSelected: pathname.endsWith(`/${it.path}`),
-        onClick: () => navigate(`/spawn-editor/editor/${it.path}`, { replace: true }),
+        label: it.label,
+        isSelected: pathname.startsWith(`${EDITOR_PATH}/${it.path}`),
+        onClick: () => navigate(`${EDITOR_PATH}/${it.path}`, { replace: true }),
       })),
     [navigate, pathname]
   );

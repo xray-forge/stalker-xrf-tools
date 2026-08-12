@@ -2,12 +2,11 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { EventBus, WireEvent } from "@wirestate/core";
 
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn/spawn-file.service";
+import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
 import { ESpawnsEditorCommand } from "@/lib/ipc";
-import { createLoadable } from "@/lib/loadable";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
-import { ISpawnFile } from "@/lib/spawn-file";
 
 interface IWatchedService {
   service: SpawnFileService;
@@ -28,11 +27,6 @@ function watchNotifications(): IWatchedService {
   return { raised, service };
 }
 
-/** Saving and exporting assert an open file, so one has to be present before either is reachable. */
-function withOpenSpawnFile(service: SpawnFileService): void {
-  service.spawnFile = createLoadable({} as ISpawnFile);
-}
-
 describe("SpawnFileService notifications", () => {
   beforeEach(() => {
     setMockInvokeResponses({});
@@ -40,8 +34,6 @@ describe("SpawnFileService notifications", () => {
 
   it("reports a written save", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
-
-    withOpenSpawnFile(service);
 
     await service.saveSpawnFile("C:\\out\\all.spawn");
 
@@ -51,10 +43,8 @@ describe("SpawnFileService notifications", () => {
     expect(raised[0].details).toContain("C:\\out\\all.spawn");
   });
 
-  it("reports a save that failed, which the state alone cannot say", async () => {
+  it("reports a save the backend refused", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
-
-    withOpenSpawnFile(service);
 
     setMockInvokeResponses({
       [ESpawnsEditorCommand.SAVE_SPAWN_FILE]: () => {
@@ -64,19 +54,25 @@ describe("SpawnFileService notifications", () => {
 
     await service.saveSpawnFile("C:\\out\\all.spawn");
 
-    // The service lands back on ready either way, so the notification is the only difference between
-    // a save that wrote and one that did not.
-    expect(service.spawnFile.isLoading).toBe(false);
-    expect(service.spawnFile.error).toBeNull();
+    // The failure is now carried by the operation rather than dropped, so the toolbar can report it.
+    expect(service.operation.isLoading).toBe(false);
+    expect(String(service.operation.error)).toContain("read only");
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.ERROR);
-    expect(raised[0].details).toContain("destination is read only");
   });
 
-  it("reports an export that failed", async () => {
+  it("reports a written export", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    withOpenSpawnFile(service);
+    await service.exportSpawnFile("C:\\out\\unpacked");
+
+    expect(raised).toHaveLength(1);
+    expect(raised[0].severity).toBe(ENotificationSeverity.SUCCESS);
+    expect(raised[0].details).toContain("C:\\out\\unpacked");
+  });
+
+  it("reports an export the backend refused", async () => {
+    const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
       [ESpawnsEditorCommand.EXPORT_SPAWN_FILE]: () => {
@@ -91,29 +87,51 @@ describe("SpawnFileService notifications", () => {
     expect(raised[0].details).toContain("no such directory");
   });
 
-  it("reports an import that failed", async () => {
+  it("reports a spawn file that could not be opened", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [ESpawnsEditorCommand.IMPORT_SPAWN_FILE]: () => {
-        throw new Error("not a spawn directory");
+      [ESpawnsEditorCommand.OPEN_SPAWN_FILE]: () => {
+        throw new Error("not a spawn file");
       },
     });
 
-    await service.importSpawnFile("C:\\game\\unpacked");
+    await service.openSpawnFile("C:\\game\\all.spawn");
 
+    expect(service.isOpen).toBe(false);
+    expect(service.path).toBeNull();
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.ERROR);
-    expect(raised[0].details).toContain("not a spawn directory");
+    expect(raised[0].details).toContain("not a spawn file");
   });
 
-  it("says nothing about an open that worked", async () => {
+  it("becomes ready even when the presence check fails", async () => {
+    const { service }: IWatchedService = watchNotifications();
+
+    setMockInvokeResponses({
+      [ESpawnsEditorCommand.HAS_SPAWN_FILE]: () => {
+        throw new Error("backend is gone");
+      },
+    });
+
+    await service.onProvision(1);
+
+    // Left unready, the editor parks on a spinner with no route back to the open form.
+    expect(service.isReady).toBe(true);
+    expect(service.isOpen).toBe(false);
+  });
+
+  it("says nothing about a file that opened", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
+
+    setMockInvokeResponses({
+      [ESpawnsEditorCommand.OPEN_SPAWN_FILE]: mockSpawnFile().header,
+    });
 
     await service.openSpawnFile("C:\\game\\all.spawn");
 
-    // Loading something is its own confirmation - the editor fills. Only writes and failures are worth
-    // a record that outlives the screen.
+    expect(service.isOpen).toBe(true);
+    expect(service.path).toBe("C:\\game\\all.spawn");
     expect(raised).toHaveLength(0);
   });
 });

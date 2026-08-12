@@ -1,21 +1,17 @@
-import { CircularProgress, Grid } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { SpawnEditor } from "@/applications/spawn-editor/components/editor/SpawnEditor";
 import { SpawnEditorOpenForm } from "@/applications/spawn-editor/components/SpawnEditorOpenForm";
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
+import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 
 export function SpawnEditorPage(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
 
-  if (spawnFileService.isReady) {
-    return spawnFileService.spawnFile.value ? <SpawnEditor /> : <SpawnEditorOpenForm />;
+  if (!spawnFileService.isReady) {
+    return <DelayedProgress />;
   }
 
-  return (
-    <Grid container sx={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}>
-      <CircularProgress />
-    </Grid>
-  );
+  return spawnFileService.isOpen ? <SpawnEditor /> : <SpawnEditorOpenForm />;
 }

@@ -1,8 +1,13 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { identifierColumn, textColumn } from "@/core/components/table";
 import { ISpawnFileHeaderChunk } from "@/lib/spawn-file";
+
+interface IHeaderRow extends ISpawnFileHeaderChunk {
+  id: string;
+}
 
 interface ISpawnEditorHeaderTableProps {
   header: ISpawnFileHeaderChunk;
@@ -11,34 +16,26 @@ interface ISpawnEditorHeaderTableProps {
 export function SpawnEditorHeaderTable({ header }: ISpawnEditorHeaderTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "version", headerName: "version" },
-      { field: "objectsCount", headerName: "objects count" },
-      { field: "levelCount", headerName: "levels count" },
-      { field: "guid", headerName: "guid", width: 240 },
-      { field: "graphGuid", headerName: "graph guid", width: 240 },
+      textColumn("version", "Version"),
+      textColumn("objectsCount", "Objects", 110),
+      // Was `levelCount`, which is not a field the header carries - the column read empty in every file.
+      textColumn("levelsCount", "Levels", 110),
+      identifierColumn("guid", "Guid", 260),
+      identifierColumn("graphGuid", "Graph guid", 260),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => [{ ...header, id: "main" }], [header]);
+  const rows: Array<IHeaderRow> = useMemo(() => [{ ...header, id: "header" }], [header]);
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IHeaderRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={rows}
+      countNoun={"header"}
+      emptyLabel={"This file has no header chunk."}
+      source={"Spawn header"}
+      getRowId={(row: IHeaderRow): GridRowId => row.id}
     />
   );
 }

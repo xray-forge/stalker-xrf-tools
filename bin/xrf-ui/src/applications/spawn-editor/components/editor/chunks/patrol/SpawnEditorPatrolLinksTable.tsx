@@ -1,62 +1,57 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
-import { AnyObject } from "@/core/types/general";
-import { IPatrol } from "@/lib/spawn-file";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { identifierColumn, textColumn } from "@/core/components/table";
+import { IPatrol, IPatrolLink } from "@/lib/spawn-file";
 
-interface ISpawnEditorPatrolsTableProps {
+interface IPatrolLinkRow {
+  id: string;
+  patrol: string;
+  index: number;
+  linksCount: number;
+  /** `to(weight)` pairs, which is how a link list reads without expanding the panel. */
+  links: string;
+}
+
+interface ISpawnEditorPatrolLinksTableProps {
   patrols: Array<IPatrol>;
 }
 
-export function SpawnEditorPatrolLinksTable({ patrols }: ISpawnEditorPatrolsTableProps): ReactElement {
+export function SpawnEditorPatrolLinksTable({ patrols }: ISpawnEditorPatrolLinksTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "patrol", headerName: "patrol", width: 300 },
-      { field: "index", headerName: "index" },
-      {
-        field: "links",
-        headerName: "links",
-        width: 160,
-        valueGetter: (it: AnyObject) => (it?.row?.links ? JSON.stringify(it.row.links) : null),
-      },
+      identifierColumn("patrol", "Patrol", 300),
+      textColumn("index", "From point", 120),
+      textColumn("linksCount", "Links", 100),
+      identifierColumn("links", "Targets", 260),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => {
-    const links = [];
-
-    for (const patrol of patrols) {
-      for (const link of patrol.links) {
-        links.push({
-          ...link,
-          id: patrol.name + link.index,
+  const rows: Array<IPatrolLinkRow> = useMemo(
+    () =>
+      patrols.flatMap((patrol: IPatrol) =>
+        patrol.links.map((link: IPatrolLink) => ({
+          id: `${patrol.name}/${link.index}`,
+          index: link.index,
+          links: link.links.map(([to, weight]: [number, number]) => `${to}(${weight})`).join(", "),
+          linksCount: link.links.length,
           patrol: patrol.name,
-        });
-      }
-    }
-
-    return links;
-  }, [patrols]);
+        }))
+      ),
+    [patrols]
+  );
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IPatrolLinkRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={rows}
+      countNoun={"link"}
+      emptyLabel={"These patrols have no links."}
+      source={"Patrol link"}
+      getRowId={(row: IPatrolLinkRow): GridRowId => row.id}
+      getSearchText={(row: IPatrolLinkRow): string => row.patrol}
     />
   );
 }

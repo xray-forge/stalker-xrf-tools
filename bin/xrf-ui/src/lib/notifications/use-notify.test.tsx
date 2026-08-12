@@ -50,9 +50,7 @@ describe("useNotify", () => {
 
     await userEvent.click(getByRole("button", { name: "Verify" }));
 
-    expect(getByTestId("recorded")).toHaveTextContent(
-      "configs/warning/Configs did not pass validation/C:\\configs"
-    );
+    expect(getByTestId("recorded")).toHaveTextContent("configs/warning/Configs did not pass validation/C:\\configs");
   });
 
   it("records every raise rather than collapsing repeats", async () => {

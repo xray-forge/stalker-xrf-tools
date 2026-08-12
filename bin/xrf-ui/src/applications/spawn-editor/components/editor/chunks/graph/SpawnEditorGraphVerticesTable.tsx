@@ -1,9 +1,16 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
-import { AnyObject } from "@/core/types/general";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { textColumn, tupleColumn, vectorColumn } from "@/core/components/table";
 import { IGraphVertex } from "@/lib/spawn-file";
+
+/** Offsets locate a vertex inside the file rather than in the world; available, off by default. */
+const HIDDEN_COLUMNS: Array<string> = ["edgesOffset", "levelPointOffset"];
+
+interface IGraphVertexRow extends IGraphVertex {
+  index: number;
+}
 
 interface ISpawnEditorGraphVerticesTableProps {
   vertices: Array<IGraphVertex>;
@@ -12,47 +19,35 @@ interface ISpawnEditorGraphVerticesTableProps {
 export function SpawnEditorGraphVerticesTable({ vertices }: ISpawnEditorGraphVerticesTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "id", headerName: "id" },
-      { field: "edgesCount", headerName: "edges count" },
-      { field: "edgesOffset", headerName: "edges offset" },
-      { field: "levelId", headerName: "level id" },
-      { field: "levelPointsCount", headerName: "level points count", width: 132 },
-      { field: "levelPointsOffset", headerName: "level points offset", width: 132 },
-      { field: "levelVertexId", headerName: "level vertex id", width: 132 },
-      { field: "vertexType", headerName: "vertex type" },
-      {
-        field: "gamePoint",
-        headerName: "game point",
-        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
-      },
-      {
-        field: "levelPoint",
-        headerName: "level point",
-        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
-      },
+      textColumn("index", "#", 90),
+      textColumn("levelId", "Level", 90),
+      textColumn("levelVertexId", "Level vertex", 130),
+      vectorColumn("gamePoint", "Game point"),
+      vectorColumn("levelPoint", "Level point"),
+      textColumn("edgesCount", "Edges", 100),
+      // Was `levelPointsCount`, which the vertex does not carry - the column read empty in every file.
+      textColumn("levelPointCount", "Points", 100),
+      tupleColumn("vertexType", "Vertex type"),
+      textColumn("edgesOffset", "Edges offset", 130),
+      textColumn("levelPointOffset", "Points offset", 130),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => vertices.map((it, index) => ({ ...it, id: index })), [vertices]);
+  const rows: Array<IGraphVertexRow> = useMemo(
+    () => vertices.map((it: IGraphVertex, index: number) => ({ ...it, index })),
+    [vertices]
+  );
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IGraphVertexRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={rows}
+      countNoun={"vertex"}
+      emptyLabel={"This graph has no vertices."}
+      hiddenColumns={HIDDEN_COLUMNS}
+      source={"Graph vertex"}
+      getRowId={(row: IGraphVertexRow): GridRowId => row.index}
     />
   );
 }

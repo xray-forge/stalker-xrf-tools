@@ -1,86 +1,42 @@
-import { Box, CircularProgress, Divider, Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tab, Tabs } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useMemo } from "react";
+import { ReactElement } from "react";
 
 import { SpawnEditorPatrolLinksTable } from "@/applications/spawn-editor/components/editor/chunks/patrol/SpawnEditorPatrolLinksTable";
 import { SpawnEditorPatrolPointsTable } from "@/applications/spawn-editor/components/editor/chunks/patrol/SpawnEditorPatrolPointsTable";
 import { SpawnEditorPatrolsTable } from "@/applications/spawn-editor/components/editor/chunks/patrol/SpawnEditorPatrolsTable";
+import { SpawnChunkView } from "@/applications/spawn-editor/components/editor/chunks/SpawnChunkView";
+import { TChunkTabChange, useChunkTab } from "@/applications/spawn-editor/components/editor/chunks/use-chunk-tab";
 import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
-import { useTabState } from "@/lib/tab";
+import { ISpawnFilePatrolsChunk } from "@/lib/spawn-file";
+
+const BASE_PATH: string = "/spawn-editor/editor/patrols";
+const TABS: Array<string> = ["patrols", "points", "links"];
 
 export function SpawnEditorPatrols(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
-  const { value: spawnFile, isLoading, error } = spawnFileService.spawnFile;
 
-  const [activeTab, , onActiveTabChange] = useTabState<string>("patrols");
-
-  const activeTable: ReactElement = useMemo(() => {
-    if (!spawnFile?.patrols) {
-      return <Box>No file</Box>;
-    }
-
-    switch (activeTab) {
-      case "patrols":
-        return <SpawnEditorPatrolsTable patrols={spawnFile.patrols.patrols} />;
-
-      case "points":
-        return <SpawnEditorPatrolPointsTable patrols={spawnFile.patrols.patrols} />;
-
-      case "links":
-        return <SpawnEditorPatrolLinksTable patrols={spawnFile.patrols.patrols} />;
-
-      default:
-        return <Box>Unknown tab</Box>;
-    }
-  }, [activeTab, spawnFile?.patrols]);
-
-  if (isLoading) {
-    return (
-      <Grid
-        container
-        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
-      >
-        <CircularProgress />
-      </Grid>
-    );
-  }
-
-  if (error || !spawnFile) {
-    return (
-      <Grid
-        container
-        sx={{ justifyContent: "center", alignItems: "center", width: "auto", height: "100%", flexGrow: 1 }}
-      >
-        {error ? String(error) : "No value."}
-      </Grid>
-    );
-  }
+  const [activeTab, onChangeTab]: [string, TChunkTabChange] = useChunkTab(BASE_PATH, TABS, "patrols");
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        width: "auto",
-        height: "100%",
-        flexDirection: "column",
-        overflow: "auto",
-        p: 2,
-        flexGrow: 1,
-        flexWrap: "nowrap",
-      }}
-    >
-      <Typography variant={"h5"}>Patrols</Typography>
-      <Divider sx={{ margin: "16px 0" }} />
+    <SpawnChunkView<ISpawnFilePatrolsChunk>
+      chunk={spawnFileService.patrols}
+      render={(chunk: ISpawnFilePatrolsChunk) => (
+        <>
+          <Tabs value={activeTab} sx={{ marginBottom: 1, flexShrink: 0 }} onChange={onChangeTab}>
+            <Tab value={"patrols"} label={"Patrols"} />
+            <Tab value={"points"} label={"Points"} />
+            <Tab value={"links"} label={"Links"} />
+          </Tabs>
 
-      <Tabs value={activeTab} onChange={onActiveTabChange}>
-        <Tab value={"patrols"} label={"Patrols"} />
-        <Tab value={"points"} label={"Points"} />
-        <Tab value={"links"} label={"Links"} />
-      </Tabs>
-
-      <Box sx={{ marginBottom: 1 }} />
-
-      {activeTable}
-    </Box>
+          <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0 }}>
+            {activeTab === "points" ? <SpawnEditorPatrolPointsTable patrols={chunk.patrols} /> : null}
+            {activeTab === "links" ? <SpawnEditorPatrolLinksTable patrols={chunk.patrols} /> : null}
+            {activeTab === "patrols" ? <SpawnEditorPatrolsTable patrols={chunk.patrols} /> : null}
+          </Box>
+        </>
+      )}
+      onLoad={spawnFileService.loadPatrols}
+    />
   );
 }

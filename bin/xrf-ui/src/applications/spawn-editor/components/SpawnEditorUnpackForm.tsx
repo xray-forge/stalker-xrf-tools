@@ -1,24 +1,31 @@
 import { Alert } from "@mui/material";
+import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
-import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { ProjectService } from "@/core/store/project";
+import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
+import { ESpawnsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
+import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf-path";
 
+/**
+ * Expand a packed spawn file into chunks on disk.
+ */
 export function SpawnEditorUnpackForm(): ReactElement {
   const log: Logger = useLogger("spawn-unpack");
+  const notify: TNotify = useNotify();
 
-  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);
-
-  const isLoading: boolean = spawnFileService.spawnFile.isLoading;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Nullable<string>>(null);
+  const [unpackedTo, setUnpackedTo] = useState<Nullable<string>>(null);
 
   const source: IPathField = usePathField({
     id: "spawn.unpack.source",
@@ -39,39 +46,55 @@ export function SpawnEditorUnpackForm(): ReactElement {
   });
 
   const onUnpack = useCallback(async () => {
-    log.info("Unpacking file:", source.value, destination.value);
-
-    setIsFinishedSuccessfully(false);
-
     if (!source.value || !destination.value) {
-      return log.error("Cannot unpack file, expected correct paths");
+      return log.error("Cannot unpack spawn file, expected correct paths");
     }
+
+    log.info("Unpacking spawn file:", source.value, destination.value);
+
+    setIsLoading(true);
+    setError(null);
+    setUnpackedTo(null);
 
     try {
-      await spawnFileService.openSpawnFile(source.value);
-      await spawnFileService.exportSpawnFile(destination.value);
+      await invoke(ESpawnsEditorCommand.UNPACK_SPAWN_FILE, { from: source.value, destination: destination.value });
 
-      setIsFinishedSuccessfully(true);
-    } catch (error) {
-      log.error("Failed to unpack file:", error);
+      setUnpackedTo(destination.value);
+
+      notify({
+        details: `${source.value}\n${destination.value}`,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.SPAWNS,
+        title: "Unpacked spawn file",
+      });
+    } catch (caught: unknown) {
+      log.error("Failed to unpack spawn file:", caught);
+      setError(String(caught));
+
+      notify({
+        details: `${source.value}\n${String(caught)}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.SPAWNS,
+        title: "Could not unpack spawn file",
+      });
     } finally {
-      await spawnFileService.closeSpawnFile();
+      setIsLoading(false);
     }
-  }, [log, source.value, destination.value, spawnFileService]);
+  }, [destination.value, log, notify, source.value]);
 
   return (
     <PickerForm
       isLoading={isLoading}
       title={"Unpack spawn file"}
-      error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
+      error={error ?? undefined}
       backPath={"/spawn-editor"}
       backDisabled={isLoading}
       submitLabel={"Unpack"}
       isSubmitDisabled={!source.isValid || !destination.isValid}
       status={
-        isFinishedSuccessfully ? (
+        unpackedTo ? (
           <Alert severity={"success"} variant={"outlined"}>
-            Successfully unpacked spawn to {destination.value}
+            Successfully unpacked spawn to {unpackedTo}
           </Alert>
         ) : null
       }

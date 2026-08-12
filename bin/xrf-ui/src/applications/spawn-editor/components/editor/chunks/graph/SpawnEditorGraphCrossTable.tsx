@@ -1,7 +1,8 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { identifierColumn, textColumn } from "@/core/components/table";
 import { IGraphCrossTable } from "@/lib/spawn-file";
 
 interface ISpawnEditorGraphCrossTableProps {
@@ -11,34 +12,25 @@ interface ISpawnEditorGraphCrossTableProps {
 export function SpawnEditorGraphCrossTable({ crossTables }: ISpawnEditorGraphCrossTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "gameGuid", headerName: "gam guid", width: 240 },
-      { field: "levelGuid", headerName: "level guid", width: 240 },
-      { field: "version", headerName: "version" },
-      { field: "nodesCount", headerName: "nodes count" },
-      { field: "verticesCount", headerName: "vertices count", width: 120 },
+      identifierColumn("levelGuid", "Level guid", 260),
+      identifierColumn("gameGuid", "Game guid", 260),
+      textColumn("version", "Version", 100),
+      textColumn("nodesCount", "Nodes", 110),
+      // Was `verticesCount`, which a cross table does not carry - the column read empty in every file.
+      textColumn("vertexCount", "Vertices", 110),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => crossTables.map((it) => ({ ...it, id: it.levelGuid })), [crossTables]);
-
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IGraphCrossTable>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      countNoun={"cross table"}
+      emptyLabel={"This graph has no cross tables."}
+      rows={crossTables}
+      source={"Graph cross table"}
+      getRowId={(row: IGraphCrossTable): GridRowId => row.levelGuid}
+      getSearchText={(row: IGraphCrossTable): string => row.levelGuid}
     />
   );
 }

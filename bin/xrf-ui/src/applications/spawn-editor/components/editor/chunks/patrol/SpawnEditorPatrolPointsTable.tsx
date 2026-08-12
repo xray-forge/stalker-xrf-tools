@@ -1,65 +1,53 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
-import { AnyObject } from "@/core/types/general";
-import { IPatrol } from "@/lib/spawn-file";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { flagsColumn, identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
+import { IPatrol, IPatrolPoint } from "@/lib/spawn-file";
 
-interface ISpawnEditorPatrolsTableProps {
+interface IPatrolPointRow extends IPatrolPoint {
+  id: string;
+  patrol: string;
+}
+
+interface ISpawnEditorPatrolPointsTableProps {
   patrols: Array<IPatrol>;
 }
 
-export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolsTableProps): ReactElement {
+export function SpawnEditorPatrolPointsTable({ patrols }: ISpawnEditorPatrolPointsTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "patrol", headerName: "patrol", width: 300 },
-      { field: "name", headerName: "name" },
-      { field: "flags", headerName: "flags" },
-      { field: "levelVertexId", headerName: "level vertex id", width: 120 },
-      { field: "gameVertexId", headerName: "game vertex id", width: 120 },
-      {
-        field: "position",
-        headerName: "position",
-        width: 160,
-        valueGetter: (it: AnyObject) => (it?.row?.position ? JSON.stringify(it.row.position) : null),
-      },
+      identifierColumn("patrol", "Patrol", 300),
+      identifierColumn("name", "Point", 180),
+      flagsColumn("flags", "Flags"),
+      textColumn("levelVertexId", "Level vertex", 130),
+      textColumn("gameVertexId", "Game vertex", 130),
+      vectorColumn("position", "Position"),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(() => {
-    const points = [];
-
-    for (const patrol of patrols) {
-      for (const point of patrol.points) {
-        points.push({
+  const rows: Array<IPatrolPointRow> = useMemo(
+    () =>
+      patrols.flatMap((patrol: IPatrol) =>
+        patrol.points.map((point: IPatrolPoint) => ({
           ...point,
-          id: patrol.name + point.name,
+          id: `${patrol.name}/${point.name}`,
           patrol: patrol.name,
-        });
-      }
-    }
-
-    return points;
-  }, [patrols]);
+        }))
+      ),
+    [patrols]
+  );
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IPatrolPointRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      rows={rows}
+      countNoun={"point"}
+      emptyLabel={"These patrols have no points."}
+      source={"Patrol point"}
+      getRowId={(row: IPatrolPointRow): GridRowId => row.id}
+      getSearchText={(row: IPatrolPointRow): string => `${row.patrol} ${row.name}`}
     />
   );
 }

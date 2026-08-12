@@ -1,24 +1,31 @@
 import { Alert } from "@mui/material";
+import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
-import { SpawnFileService } from "@/applications/spawn-editor/store/spawn";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
+import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { ProjectService } from "@/core/store/project";
+import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
+import { ESpawnsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
+import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/lib/xrf-path";
 
+/**
+ * Build a packed spawn file from chunks on disk.
+ */
 export function SpawnEditorPackForm(): ReactElement {
   const log: Logger = useLogger("spawn-pack");
+  const notify: TNotify = useNotify();
 
-  const spawnFileService: SpawnFileService = useInjection(SpawnFileService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const [isFinishedSuccessfully, setIsFinishedSuccessfully] = useState(false);
-
-  const isLoading: boolean = spawnFileService.spawnFile.isLoading;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Nullable<string>>(null);
+  const [packedTo, setPackedTo] = useState<Nullable<string>>(null);
 
   const source: IPathField = usePathField({
     id: "spawn.pack.source",
@@ -40,43 +47,59 @@ export function SpawnEditorPackForm(): ReactElement {
   });
 
   const onPack = useCallback(async () => {
-    log.info("Packing path:", source.value, destination.value);
-
-    setIsFinishedSuccessfully(false);
-
     if (!source.value || !destination.value) {
-      return log.error("Cannot pack file, expected correct paths");
+      return log.error("Cannot pack spawn file, expected correct paths");
     }
+
+    log.info("Packing spawn file:", source.value, destination.value);
+
+    setIsLoading(true);
+    setError(null);
+    setPackedTo(null);
 
     try {
-      await spawnFileService.importSpawnFile(source.value);
-      await spawnFileService.saveSpawnFile(destination.value);
+      await invoke(ESpawnsEditorCommand.PACK_SPAWN_FILE, { from: source.value, destination: destination.value });
 
-      setIsFinishedSuccessfully(true);
-    } catch (error) {
-      log.error("Failed to pack file:", error);
+      setPackedTo(destination.value);
+
+      notify({
+        details: `${source.value}\n${destination.value}`,
+        severity: ENotificationSeverity.SUCCESS,
+        source: EApplicationToolId.SPAWNS,
+        title: "Packed spawn file",
+      });
+    } catch (caught: unknown) {
+      log.error("Failed to pack spawn file:", caught);
+      setError(String(caught));
+
+      notify({
+        details: `${source.value}\n${String(caught)}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationToolId.SPAWNS,
+        title: "Could not pack spawn file",
+      });
     } finally {
-      await spawnFileService.closeSpawnFile();
+      setIsLoading(false);
     }
-  }, [log, source.value, destination.value, spawnFileService]);
+  }, [destination.value, log, notify, source.value]);
 
   return (
     <PickerForm
       isLoading={isLoading}
       title={"Pack spawn file"}
-      error={spawnFileService.spawnFile.error ? String(spawnFileService.spawnFile.error) : undefined}
+      error={error ?? undefined}
       backPath={"/spawn-editor"}
       backDisabled={isLoading}
       submitLabel={"Pack"}
       isSubmitDisabled={!source.isValid || !destination.isValid}
-      onSubmit={onPack}
       status={
-        isFinishedSuccessfully ? (
+        packedTo ? (
           <Alert severity={"success"} variant={"outlined"}>
-            Successfully packed spawn to {destination.value}
+            Successfully packed spawn to {packedTo}
           </Alert>
         ) : null
       }
+      onSubmit={onPack}
     >
       <PathFormRow
         label={"Source"}

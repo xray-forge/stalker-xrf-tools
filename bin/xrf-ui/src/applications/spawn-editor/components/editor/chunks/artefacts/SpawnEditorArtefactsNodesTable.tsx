@@ -1,9 +1,13 @@
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { TableToolbar } from "@/applications/spawn-editor/components/editor/table/TableToolbar";
-import { AnyObject } from "@/core/types/general";
+import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
+import { decimalColumn, textColumn, vectorColumn } from "@/core/components/table";
 import { IArtefactSpawnNode } from "@/lib/spawn-file";
+
+interface IArtefactNodeRow extends IArtefactSpawnNode {
+  index: number;
+}
 
 interface ISpawnEditorArtefactsNodesTableProps {
   nodes: Array<IArtefactSpawnNode>;
@@ -12,45 +16,27 @@ interface ISpawnEditorArtefactsNodesTableProps {
 export function SpawnEditorArtefactsNodesTable({ nodes }: ISpawnEditorArtefactsNodesTableProps): ReactElement {
   const columns: Array<GridColDef> = useMemo(
     () => [
-      { field: "id", headerName: "id" },
-      { field: "levelVertexId", headerName: "level vertex id", width: 120 },
-      { field: "distance", headerName: "distance", width: 172 },
-      {
-        field: "position",
-        headerName: "position",
-        width: 240,
-        valueGetter: (it: AnyObject) => (it.value ? JSON.stringify(it.value) : null),
-      },
+      textColumn("index", "#", 70),
+      textColumn("levelVertexId", "Level vertex", 130),
+      decimalColumn("distance", "Distance"),
+      vectorColumn("position", "Position"),
     ],
     []
   );
 
-  const rows: GridRowsProp = useMemo(
-    () =>
-      nodes.map((it, index) => ({
-        ...it,
-        id: index,
-      })),
+  const rows: Array<IArtefactNodeRow> = useMemo(
+    () => nodes.map((it: IArtefactSpawnNode, index: number) => ({ ...it, index })),
     [nodes]
   );
 
   return (
-    <DataGrid
-      rowHeight={24}
-      rows={rows}
+    <SpawnTable<IArtefactNodeRow>
       columns={columns}
-      sx={{
-        maxWidth: "100%",
-      }}
-      slots={{ toolbar: TableToolbar }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: true,
-        },
-      }}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 50 } },
-      }}
+      countNoun={"node"}
+      emptyLabel={"This file spawns no artefacts."}
+      rows={rows}
+      source={"Artefact spawn node"}
+      getRowId={(row: IArtefactNodeRow): GridRowId => row.index}
     />
   );
 }
