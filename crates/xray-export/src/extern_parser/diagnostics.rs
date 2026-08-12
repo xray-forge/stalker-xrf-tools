@@ -1,17 +1,26 @@
 use xray_error::XRayError;
-use xray_typescript::swc_common::{BytePos, SourceMap, SourceMapper, Spanned};
+use xray_typescript::swc_common::{BytePos, SourceMap, SourceMapper, Span, Spanned};
 use xray_typescript::swc_ecma_ast::Expr;
 
 use crate::extern_manifest::ExternSourceLocation;
 
-/// Return an extern declaration source location.
+/// Return an extern declaration source location, spanning a single line.
 pub fn source_location(source_map: &SourceMap, position: BytePos, source_path: &str) -> ExternSourceLocation {
   let location = source_map.lookup_char_pos(position);
 
   ExternSourceLocation {
     column: location.col.0 + 1,
     line: location.line,
+    end_line: location.line,
     path: source_path.into(),
+  }
+}
+
+/// Return an extern declaration source location covering every line of `span`.
+pub fn source_span_location(source_map: &SourceMap, span: Span, source_path: &str) -> ExternSourceLocation {
+  ExternSourceLocation {
+    end_line: source_map.lookup_char_pos(span.hi).line,
+    ..source_location(source_map, span.lo, source_path)
   }
 }
 

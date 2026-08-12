@@ -4461,10 +4461,10 @@
           "markdownDescription": "Denies the save command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`\n- `allow-get-xr-export-source`",
           "type": "string",
           "const": "exports-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`\n- `allow-get-xr-export-source`"
         },
         {
           "description": "Enables the close_xr_effects command without any pre-configured scope.",
@@ -4483,6 +4483,12 @@
           "type": "string",
           "const": "exports-editor:allow-get-xr-effects",
           "markdownDescription": "Enables the get_xr_effects command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_xr_export_source command without any pre-configured scope.",
+          "type": "string",
+          "const": "exports-editor:allow-get-xr-export-source",
+          "markdownDescription": "Enables the get_xr_export_source command without any pre-configured scope."
         },
         {
           "description": "Enables the get_xr_exports command without any pre-configured scope.",
@@ -4531,6 +4537,12 @@
           "type": "string",
           "const": "exports-editor:deny-get-xr-effects",
           "markdownDescription": "Denies the get_xr_effects command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_xr_export_source command without any pre-configured scope.",
+          "type": "string",
+          "const": "exports-editor:deny-get-xr-export-source",
+          "markdownDescription": "Denies the get_xr_export_source command without any pre-configured scope."
         },
         {
           "description": "Denies the get_xr_exports command without any pre-configured scope.",

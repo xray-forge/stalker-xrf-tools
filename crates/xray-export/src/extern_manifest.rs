@@ -87,6 +87,8 @@ pub struct ParsedExtern {
 pub struct ExternSourceLocation {
   pub column: usize,
   pub line: usize,
+  /// Last line of the declaration, inclusive. Equal to `line` for a single line declaration.
+  pub end_line: usize,
   pub path: String,
 }
 

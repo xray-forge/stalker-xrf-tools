@@ -8,5 +8,5 @@ mod tests;
 pub use export_descriptor::{
   ExportContractDescriptor, ExportDescriptor, ExportParameterDescriptor, ExportReturnDescriptor, ExportSourceDescriptor,
 };
-pub use exports_project::ExportsProject;
+pub use exports_project::{ExportSourceContent, ExportsProject};
 pub use parser::ExportsEditorParser;

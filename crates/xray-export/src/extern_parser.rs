@@ -11,7 +11,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 pub use editor_projection::{
-  ExportContractDescriptor, ExportDescriptor, ExportParameterDescriptor, ExportReturnDescriptor,
+  ExportContractDescriptor, ExportDescriptor, ExportParameterDescriptor, ExportReturnDescriptor, ExportSourceContent,
   ExportSourceDescriptor, ExportsEditorParser, ExportsProject,
 };
 use walkdir::{DirEntry, WalkDir};

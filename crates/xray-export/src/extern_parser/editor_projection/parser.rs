@@ -39,6 +39,7 @@ impl ExportsEditorParser {
           path: entry.location.path,
           line: entry.location.line,
           column: entry.location.column,
+          end_line: entry.location.end_line,
         };
 
         match entry.export {

@@ -21,6 +21,7 @@ impl ExportsEditorPlugin {
           crate::exports_editor::commands::close_xr_exports::close_xr_exports,
           crate::exports_editor::commands::open_xr_exports::open_xr_exports,
           crate::exports_editor::commands::get_xr_exports::get_xr_exports,
+          crate::exports_editor::commands::get_xr_export_source::get_xr_export_source,
         ],
       ))
       .build()

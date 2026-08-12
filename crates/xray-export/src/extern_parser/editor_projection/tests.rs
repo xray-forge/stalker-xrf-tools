@@ -149,3 +149,56 @@ fn keeps_an_empty_project_open() {
 
   fs::remove_dir_all(root).unwrap();
 }
+
+#[test]
+fn records_the_last_line_of_a_declaration_and_reads_it_back() {
+  let root: PathBuf = create_test_root("source");
+
+  // The whole point is the multi-line case: a body is what the reader came for, and recording only
+  // the opening line would show them one line of it.
+  write_source(
+    &root,
+    "declarations.ts",
+    "export {};\nextern(\"xr_effects.run\", (): void => {\n  const first: number = 1;\n\n  log(first);\n});\nconst tail: number = 2;\n",
+  );
+
+  let project = ExportsEditorParser::new().parse_project_from_path(&root).unwrap();
+  let declaration = project
+    .declarations
+    .iter()
+    .find(|declaration| declaration.name == "xr_effects.run")
+    .expect("declaration is parsed");
+
+  assert_eq!(declaration.source.line, 2);
+  assert_eq!(declaration.source.end_line, 6);
+
+  let source = project.read_declaration_source("xr_effects.run").unwrap();
+
+  assert_eq!(
+    source.content,
+    "extern(\"xr_effects.run\", (): void => {\n  const first: number = 1;\n\n  log(first);\n});"
+  );
+  assert_eq!(source.path, "declarations.ts");
+
+  fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn records_the_span_of_one_property_inside_an_object_extern() {
+  let root: PathBuf = create_test_root("object-source");
+
+  // Object externs record the property span, not the whole statement, so each name reads back only
+  // its own body rather than every sibling declared alongside it.
+  write_source(
+    &root,
+    "declarations.ts",
+    "export {};\nextern(\"xr_effects\", {\n  first: (): void => {\n    log(1);\n  },\n  second: (): void => {},\n});\n",
+  );
+
+  let project = ExportsEditorParser::new().parse_project_from_path(&root).unwrap();
+  let source = project.read_declaration_source("xr_effects.first").unwrap();
+
+  assert_eq!(source.content, "  first: (): void => {\n    log(1);\n  },");
+
+  fs::remove_dir_all(root).unwrap();
+}

@@ -7,7 +7,7 @@ use xray_typescript::ast::{expression_callee_name, expression_string_argument};
 use xray_typescript::swc_common::{SourceMap, Spanned, comments::Comments};
 use xray_typescript::swc_ecma_ast::{Expr, ModuleItem, Program, Prop, PropName, Stmt};
 
-use super::diagnostics::{invalid_at, source_location};
+use super::diagnostics::{invalid_at, source_span_location};
 use super::jsdoc_parser::JsDocParser;
 use super::value_parser::ExternValueParser;
 use crate::extern_manifest::{ExternDocumentation, ExternSourceLocation, ParsedExtern};
@@ -75,7 +75,7 @@ impl<'a> ExternDeclarationParser<'a> {
       })?;
       let documentation: Option<ExternDocumentation> = self.jsdoc_parser.parse(statement.span.lo);
       let parameter_docs: BTreeMap<String, String> = self.jsdoc_parser.parameter_docs(statement.span.lo);
-      let location: ExternSourceLocation = source_location(self.source_map, statement.span.lo, self.source_path);
+      let location: ExternSourceLocation = source_span_location(self.source_map, statement.span, self.source_path);
 
       match call.args[1].expr.as_ref() {
         Expr::Object(object) => self.parse_object(
@@ -159,7 +159,7 @@ impl<'a> ExternDeclarationParser<'a> {
           property_doc,
           property_parameter_docs,
         )?,
-        location: source_location(self.source_map, property.span().lo, self.source_path),
+        location: source_span_location(self.source_map, property.span(), self.source_path),
         name: export_name,
       });
     }
