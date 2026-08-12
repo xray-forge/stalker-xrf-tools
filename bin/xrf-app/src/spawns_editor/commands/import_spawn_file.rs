@@ -15,6 +15,7 @@ pub async fn import_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) 
       log::info!("Imported spawn file");
 
       *state.file.lock().unwrap() = Some(file);
+      *state.path.lock().unwrap() = Some(String::from(path));
 
       Ok(String::from("Imported spawn file"))
     }

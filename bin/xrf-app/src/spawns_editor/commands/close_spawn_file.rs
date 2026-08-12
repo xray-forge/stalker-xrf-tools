@@ -16,5 +16,8 @@ pub fn close_spawn_file(state: State<'_, SpawnsEditorState>) -> TauriResult {
     *lock = None;
   }
 
+  // Released with the file rather than left behind.
+  *state.path.lock().unwrap() = None;
+
   Ok(())
 }

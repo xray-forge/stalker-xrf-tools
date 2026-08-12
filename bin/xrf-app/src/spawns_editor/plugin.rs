@@ -26,10 +26,13 @@ impl SpawnsEditorPlugin {
           crate::spawns_editor::commands::get_spawn_file_graphs::get_spawn_file_graphs,
           crate::spawns_editor::commands::get_spawn_file_header::get_spawn_file_header,
           crate::spawns_editor::commands::get_spawn_file_patrols::get_spawn_file_patrols,
+          crate::spawns_editor::commands::get_spawn_file_path::get_spawn_file_path,
           crate::spawns_editor::commands::has_spawn_file::has_spawn_file,
           crate::spawns_editor::commands::import_spawn_file::import_spawn_file,
           crate::spawns_editor::commands::open_spawn_file::open_spawn_file,
+          crate::spawns_editor::commands::pack_spawn_file::pack_spawn_file,
           crate::spawns_editor::commands::save_spawn_file::save_spawn_file,
+          crate::spawns_editor::commands::unpack_spawn_file::unpack_spawn_file,
         ],
       ))
       .build()
