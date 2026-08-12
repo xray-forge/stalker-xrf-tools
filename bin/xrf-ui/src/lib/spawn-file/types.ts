@@ -1,4 +1,4 @@
-import { SpawnGraphsChunk, SpawnHeaderChunk, Vector3d } from "@/lib/rust-sdk/xray-db";
+import { SpawnGraphsChunk, SpawnHeaderChunk, Vector3d } from "@/lib/bindings/xray-db";
 
 export interface ISpawnFile {
   header: SpawnHeaderChunk;

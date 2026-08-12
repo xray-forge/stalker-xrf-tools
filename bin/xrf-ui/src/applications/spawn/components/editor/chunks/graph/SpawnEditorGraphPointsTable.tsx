@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { decimalColumn, textColumn } from "@/core/components/table";
-import { GraphLevelPoint } from "@/lib/rust-sdk/xray-db";
+import { GraphLevelPoint } from "@/lib/bindings/xray-db";
 
 interface IGraphPointRow extends GraphLevelPoint {
   index: number;

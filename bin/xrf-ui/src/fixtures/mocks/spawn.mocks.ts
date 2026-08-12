@@ -1,4 +1,4 @@
-import { Vector3d } from "@/lib/rust-sdk/xray-db";
+import { Vector3d } from "@/lib/bindings/xray-db";
 import { IAlifeObjectBase, IPatrol, ISpawnFile } from "@/lib/spawn-file";
 
 /** Create a vector fixture with optional field overrides. */

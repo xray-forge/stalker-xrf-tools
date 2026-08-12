@@ -18,7 +18,7 @@ import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
-import { SpawnGraphsChunk, SpawnHeaderChunk } from "@/lib/rust-sdk/xray-db";
+import { SpawnGraphsChunk, SpawnHeaderChunk } from "@/lib/bindings/xray-db";
 import {
   ISpawnFileAlifeSpawnsChunk,
   ISpawnFileArtefactSpawnsChunk,

@@ -10,7 +10,7 @@ import { SpawnEditorGraphPointsTable } from "@/applications/spawn/components/edi
 import { SpawnEditorGraphVerticesTable } from "@/applications/spawn/components/editor/chunks/graph/SpawnEditorGraphVerticesTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
 import { TChunkTabChange, useChunkTab } from "@/applications/spawn/components/editor/chunks/use-chunk-tab";
-import { SpawnGraphsChunk } from "@/lib/rust-sdk/xray-db";
+import { SpawnGraphsChunk } from "@/lib/bindings/xray-db";
 import { SpawnFileService } from "@/lib/spawn-file";
 
 const BASE_PATH: string = "/spawn/graph";

@@ -18,7 +18,7 @@
     "lint": "eslint . --config cli/lint/eslint.config.mjs --max-warnings 0 --cache --cache-location target/eslint/cache.json --cache-strategy content",
     "format": "prettier --write \"**/*.(js|ts|tsx|md)\" && pnpm run lint --fix",
     "generate:bindings": "cargo make --cwd ../.. generate-typescript",
-    "format:bindings": "eslint --config cli/lint/eslint.generated.config.mjs --no-cache --fix src/lib/rust-sdk && prettier --write --log-level warn \"src/lib/rust-sdk/**/*.ts\""
+    "format:bindings": "eslint --config cli/lint/eslint.generated.config.mjs --no-cache --fix src/lib/bindings && prettier --write --log-level warn \"src/lib/bindings/**/*.ts\""
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",

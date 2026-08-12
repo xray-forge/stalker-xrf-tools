@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { decimalColumn, textColumn } from "@/core/components/table";
-import { GraphEdge } from "@/lib/rust-sdk/xray-db";
+import { GraphEdge } from "@/lib/bindings/xray-db";
 
 interface IGraphEdgeRow extends GraphEdge {
   index: number;

@@ -12,7 +12,7 @@ import baseConfig from "./eslint.config.mjs";
 export default [
   ...baseConfig,
   {
-    files: ["src/lib/rust-sdk/**/*.ts"],
+    files: ["src/lib/bindings/**/*.ts"],
     rules: {
       "max-len": "off",
     },

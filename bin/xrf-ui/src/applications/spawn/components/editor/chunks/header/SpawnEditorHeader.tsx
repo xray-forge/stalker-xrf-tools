@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 
 import { SpawnEditorHeaderTable } from "@/applications/spawn/components/editor/chunks/header/SpawnEditorHeaderTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
-import { SpawnHeaderChunk } from "@/lib/rust-sdk/xray-db";
+import { SpawnHeaderChunk } from "@/lib/bindings/xray-db";
 import { SpawnFileService } from "@/lib/spawn-file";
 
 export function SpawnEditorHeader(): ReactElement {
