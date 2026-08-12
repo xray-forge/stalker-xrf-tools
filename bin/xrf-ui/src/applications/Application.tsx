@@ -4,8 +4,9 @@ import { ReactElement, useMemo } from "react";
 
 import { ApplicationProvider } from "@/applications/ApplicationProvider";
 import { ApplicationRouter } from "@/applications/ApplicationRouter";
-import { NotificationsService } from "@/core/store/notifications";
+import { ErrorCaptureService, NotificationsService } from "@/core/store/notifications";
 import { ProjectService } from "@/core/store/project";
+import { SettingsService } from "@/core/store/settings";
 
 /**
  * The root container.
@@ -13,7 +14,7 @@ import { ProjectService } from "@/core/store/project";
 export function Application(): ReactElement {
   const config: ContainerConfig = useMemo(
     () => ({
-      bindings: [ProjectService, NotificationsService],
+      bindings: [ProjectService, SettingsService, NotificationsService, ErrorCaptureService],
       plugins: [new EventsPlugin()],
     }),
     []

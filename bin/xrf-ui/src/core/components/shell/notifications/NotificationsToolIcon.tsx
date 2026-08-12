@@ -7,7 +7,8 @@ import { NotificationsService } from "@/core/store/notifications";
 import { Nullable } from "@/core/types/general";
 import { ENotificationSeverity } from "@/lib/notifications";
 
-const BADGE_COLORS: Record<ENotificationSeverity, "success" | "info" | "warning" | "error"> = {
+const BADGE_COLORS: Record<ENotificationSeverity, "default" | "success" | "info" | "warning" | "error"> = {
+  [ENotificationSeverity.DEV]: "default",
   [ENotificationSeverity.ERROR]: "error",
   [ENotificationSeverity.INFO]: "info",
   [ENotificationSeverity.SUCCESS]: "success",

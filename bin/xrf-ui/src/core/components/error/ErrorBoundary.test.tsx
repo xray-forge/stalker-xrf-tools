@@ -30,6 +30,26 @@ function withSilencedConsole(run: () => RenderResult): RenderResult {
 }
 
 describe("ErrorBoundary", () => {
+  it("reports a caught crash, which is the only place a swallowed one is observable", () => {
+    const onCaught = jest.fn();
+
+    withSilencedConsole(() =>
+      renderWithProviders(
+        <ErrorBoundary fallback={renderCrash} onCaught={onCaught}>
+          <Boom />
+        </ErrorBoundary>
+      )
+    );
+
+    // React does not rethrow what a boundary caught, so no global handler ever sees this.
+    expect(onCaught).toHaveBeenCalledTimes(1);
+
+    const [error, componentStack] = onCaught.mock.calls[0] as [Error, string];
+
+    expect(error.message).toBe("render exploded");
+    expect(componentStack).toContain("Boom");
+  });
+
   it("shows the fallback instead of taking the window down", () => {
     const { getByText } = withSilencedConsole(() =>
       renderWithProviders(

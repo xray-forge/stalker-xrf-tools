@@ -1,5 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
-import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
+import {
+  EventBus,
+  inject,
+  Injectable,
+  OnDeactivation,
+  OnDeprovision,
+  OnProvision,
+  ProvisionId,
+  WireStatus,
+} from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { EApplicationToolId } from "@/core/components/shell/application-tools";
@@ -68,13 +77,22 @@ export class ArchivesService {
     return this.content.isLoading || this.operation.isLoading;
   }
 
-  public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
+  public constructor(
+    private readonly status: WireStatus = WireStatus.for(this, { initialize: true }),
+    private readonly eventBus: EventBus = inject(EventBus)
+  ) {
     makeObservable(this);
   }
 
   @OnProvision()
-  public async onProvision(): Promise<void> {
+  public async onProvision(provisionId: ProvisionId): Promise<void> {
+    this.log.info("Provisioning:", provisionId);
+
     const existing: Nullable<IArchivesProject> = await invoke(EArchivesEditorCommand.GET_ARCHIVES_PROJECT);
+
+    if (this.status.provisionId !== provisionId) {
+      return this.log.info("Discard outdated get archives request:", provisionId, "<", this.status.provisionId);
+    }
 
     if (existing) {
       this.log.info("Existing archives project detected");
@@ -92,16 +110,25 @@ export class ArchivesService {
     }
   }
 
+  @OnDeprovision()
+  public onDeprovision(provisionId: ProvisionId): void {
+    this.log.info("Deprovisioning:", provisionId);
+  }
+
   /**
    * Release the archive project when the editor is navigated away from.
    */
   @OnDeactivation()
   public onDeactivation(): void {
+    this.log.info("Deactivating");
+
     releaseEditorProject(EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT);
   }
 
   @BoundAction()
   public resetArchivesProject(): void {
+    this.log.info("Reset archives project");
+
     this.clearFileSelection();
     this.project = createLoadable(null);
   }
@@ -153,6 +180,8 @@ export class ArchivesService {
 
   @BoundAction()
   public async selectArchiveFile(descriptor: IArchiveFileDescriptor): Promise<void> {
+    this.log.info("Select archive file:", descriptor);
+
     this.selection = { kind: "file", descriptor };
     this.contentRequestId += 1;
     this.content = createLoadable(null);

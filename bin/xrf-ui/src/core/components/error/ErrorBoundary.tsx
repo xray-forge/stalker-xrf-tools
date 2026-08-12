@@ -19,6 +19,10 @@ export interface IErrorBoundaryProps {
    * navigated somewhere else, because nothing else ever resets the state.
    */
   resetKey?: string;
+  /**
+   * Reports a caught crash to whoever wants a durable record of it.
+   */
+  onCaught?: (error: Error, componentStack: Nullable<string>) => void;
 }
 
 interface IErrorBoundaryState {
@@ -44,6 +48,8 @@ export class ErrorBoundary extends Component<IErrorBoundaryProps, IErrorBoundary
   public componentDidCatch(error: Error, info: ErrorInfo): void {
     // The component stack is the only part that says *where* it broke, and it exists nowhere else.
     this.log.error("Render failed:", error, info.componentStack);
+
+    this.props.onCaught?.(error, info.componentStack ?? null);
   }
 
   public componentDidUpdate(previous: IErrorBoundaryProps): void {

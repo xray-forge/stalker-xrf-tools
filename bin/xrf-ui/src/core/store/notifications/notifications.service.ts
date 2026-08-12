@@ -1,5 +1,5 @@
 import { Injectable, OnEvent, WireEvent } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable } from "@wirestate/mobx";
+import { BoundAction, Computed, makeObservable, Observable } from "@wirestate/mobx";
 
 import { Nullable } from "@/core/types/general";
 import { Logger } from "@/lib/logging";
@@ -19,19 +19,43 @@ export class NotificationsService {
   /** Ring cap. A loop that reports per file would otherwise grow the panel until it stops being read. */
   public static readonly LIMIT: number = 200;
 
+  /** Dev traces get their own budget, so a chatty one cannot evict the failure being chased. */
+  public static readonly DEV_LIMIT: number = 100;
+
   public readonly log: Logger = new Logger(this.constructor.name);
+
+  private nextId: number = 0;
 
   /** Newest first, so the panel renders the array as it stands and the cap drops the tail. */
   @Observable()
   public notifications: Array<INotification> = [];
 
-  private nextId: number = 0;
+  /** Dev traces, recorded whatever the dev mode switch says. */
+  @Observable()
+  public devNotifications: Array<INotification> = [];
 
+  /**
+   * Both lists in one chronology, which is the reading dev mode is turned on for.
+   *
+   * Computed rather than a plain getter: it allocates and sorts, and a fresh array on every read is
+   * one nobody can compare by reference.
+   */
+  @Computed()
+  public get allNotifications(): Array<INotification> {
+    // Ids are a monotonic counter, so they order records that share a millisecond.
+    return [...this.notifications, ...this.devNotifications].sort(
+      (first: INotification, second: INotification) => Number(second.id) - Number(first.id)
+    );
+  }
+
+  /** What the badge counts. Dev traces are not in this list, so they cannot light it. */
+  @Computed()
   public get unreadCount(): number {
     return this.notifications.reduce((count: number, it: INotification) => (it.isRead ? count : count + 1), 0);
   }
 
   /** Severity the badge takes its colour from, or null when nothing is unread. */
+  @Computed()
   public get highestUnreadSeverity(): Nullable<ENotificationSeverity> {
     let highest: Nullable<ENotificationSeverity> = null;
 
@@ -66,6 +90,14 @@ export class NotificationsService {
       isRead: false,
     };
 
+    if (payload.severity === ENotificationSeverity.DEV) {
+      this.devNotifications = [notification, ...this.devNotifications].slice(0, NotificationsService.DEV_LIMIT);
+
+      return;
+    }
+
+    this.log.info("Notification pushed:", payload.title, notification);
+
     this.notifications = [notification, ...this.notifications].slice(0, NotificationsService.LIMIT);
   }
 
@@ -78,13 +110,16 @@ export class NotificationsService {
   @BoundAction()
   public markAllRead(): void {
     if (this.unreadCount) {
+      this.log.info("Marking all notifications as read");
       this.notifications = this.notifications.map((it: INotification) => (it.isRead ? it : { ...it, isRead: true }));
     }
   }
 
   @BoundAction()
   public clear(): void {
+    this.log.info("Clear all notifications");
     this.notifications = [];
+    this.devNotifications = [];
   }
 
   /**

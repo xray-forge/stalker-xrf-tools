@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 
 import { ApplicationCrash } from "@/core/components/error/ApplicationCrash";
 import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/components/error/ErrorBoundary";
-import { findApplicationTool } from "@/core/components/shell/application-tools";
+import { APPLICATION_SOURCE, findApplicationTool } from "@/core/components/shell/application-tools";
 import { ApplicationRail } from "@/core/components/shell/ApplicationRail";
 import { ApplicationStatusBar } from "@/core/components/shell/ApplicationStatusBar";
 import { ApplicationToolStripe } from "@/core/components/shell/ApplicationToolStripe";
@@ -13,6 +13,7 @@ import { GLOBAL_TOOLS, isGlobalToolId } from "@/core/components/shell/global-too
 import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
 import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
+import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 
 const TOOL_PANEL_WIDTH: number = 300;
 const STORAGE_PREFIX: string = "xrf.tools.";
@@ -32,6 +33,8 @@ export interface IApplicationShellFrameProps {
  */
 export function ApplicationShellFrame({ children }: IApplicationShellFrameProps): ReactElement {
   const tools: Array<IEditorTool> = useEditorToolsRegistry();
+  const notify: TNotify = useNotify();
+
   const { pathname } = useLocation();
 
   // Keyed per tool so the visuals panel choice does not leak into another editor.
@@ -55,6 +58,19 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
   const activeTool: Nullable<IEditorTool> = activeGlobalTool ?? tools.find((it) => it.id === resolvedToolId) ?? null;
 
   const onError = useCallback((props: IErrorBoundaryFallbackProps) => <ApplicationCrash {...props} />, []);
+
+  // Recorded as a real outcome rather than a dev trace: the user has already met the crash screen, and
+  // this is what survives navigating away from it.
+  const onCaught = useCallback(
+    (error: Error, componentStack: Nullable<string>) =>
+      notify({
+        details: componentStack ? `${error.message}\n${componentStack}` : error.message,
+        severity: ENotificationSeverity.ERROR,
+        source: findApplicationTool(pathname)?.id ?? APPLICATION_SOURCE,
+        title: "The interface crashed and was replaced",
+      }),
+    [notify, pathname]
+  );
 
   const onToggleTool = useCallback(
     (id: string) => {
@@ -95,7 +111,7 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
         <ApplicationRail />
 
         <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
-          <ErrorBoundary resetKey={pathname} fallback={onError}>
+          <ErrorBoundary resetKey={pathname} fallback={onError} onCaught={onCaught}>
             {children}
           </ErrorBoundary>
         </Box>

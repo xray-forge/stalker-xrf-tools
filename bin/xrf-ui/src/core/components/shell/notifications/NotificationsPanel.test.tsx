@@ -6,6 +6,7 @@ import { Binding, Container } from "@wirestate/core";
 import { EApplicationToolId } from "@/core/components/shell/application-tools";
 import { NotificationsPanel } from "@/core/components/shell/notifications/NotificationsPanel";
 import { NotificationsService } from "@/core/store/notifications";
+import { SettingsService } from "@/core/store/settings";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ENotificationSeverity, INotificationPayload } from "@/lib/notifications";
 
@@ -15,14 +16,20 @@ interface IPanelRender {
 }
 
 /** Seeded before rendering, which is the ordering the panel actually meets - it opens onto a log. */
-function renderPanel(seed: Array<INotificationPayload> = []): IPanelRender {
-  const service: NotificationsService = new Container({ bindings: [NotificationsService] }).get(NotificationsService);
+function renderPanel(seed: Array<INotificationPayload> = [], isDevModeEnabled: boolean = false): IPanelRender {
+  const container: Container = new Container({ bindings: [NotificationsService, SettingsService] });
+  const service: NotificationsService = container.get(NotificationsService);
+  const settingsService: SettingsService = container.get(SettingsService);
 
+  settingsService.setDevModeEnabled(isDevModeEnabled);
   seed.forEach((payload: INotificationPayload) => service.push(payload));
 
   return {
     render: renderWithProviders(<NotificationsPanel />, {
-      bindings: [{ token: NotificationsService, value: service } as Binding],
+      bindings: [
+        { token: NotificationsService, value: service } as Binding,
+        { token: SettingsService, value: settingsService } as Binding,
+      ],
     }),
     service,
   };
@@ -98,6 +105,37 @@ describe("NotificationsPanel", () => {
     ]);
 
     expect(render.queryByLabelText("Show details")).not.toBeInTheDocument();
+  });
+
+  it("hides dev traces while dev mode is off", () => {
+    const { render } = renderPanel([
+      { severity: ENotificationSeverity.DEV, source: EApplicationToolId.ICONS, title: "grid recomputed" },
+      { severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ICONS, title: "Packed sprite" },
+    ]);
+
+    expect(render.getByText("Packed sprite")).toBeInTheDocument();
+    expect(render.queryByText("grid recomputed")).not.toBeInTheDocument();
+  });
+
+  it("reveals traces that were recorded before dev mode was turned on", () => {
+    const { render } = renderPanel(
+      [{ severity: ENotificationSeverity.DEV, source: EApplicationToolId.ICONS, title: "grid recomputed" }],
+      true
+    );
+
+    // The point of recording them regardless: the switch is useful after something odd happened, not
+    // only before it.
+    expect(render.getByText("grid recomputed")).toBeInTheDocument();
+    expect(render.getByText("DEV")).toBeInTheDocument();
+  });
+
+  it("does not mark a real outcome as a dev trace", () => {
+    const { render } = renderPanel(
+      [{ severity: ENotificationSeverity.SUCCESS, source: EApplicationToolId.ICONS, title: "Packed sprite" }],
+      true
+    );
+
+    expect(render.queryByText("DEV")).not.toBeInTheDocument();
   });
 
   it("clears the log on request", async () => {

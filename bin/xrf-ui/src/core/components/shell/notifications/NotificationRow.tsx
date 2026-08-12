@@ -4,8 +4,9 @@ import { default as ErrorOutlineIcon } from "@mui/icons-material/ErrorOutlineOut
 import { default as ExpandLessIcon } from "@mui/icons-material/ExpandLess";
 import { default as ExpandMoreIcon } from "@mui/icons-material/ExpandMore";
 import { default as InfoOutlinedIcon } from "@mui/icons-material/InfoOutlined";
+import { default as TerminalIcon } from "@mui/icons-material/Terminal";
 import { default as WarningAmberIcon } from "@mui/icons-material/WarningAmber";
-import { Box, Collapse, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/material";
 import { format } from "date-fns";
 import { ReactElement, ReactNode, useCallback, useState } from "react";
 
@@ -15,6 +16,7 @@ import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, INotification } from "@/lib/notifications";
 
 const SEVERITY_ICONS: Record<ENotificationSeverity, ReactNode> = {
+  [ENotificationSeverity.DEV]: <TerminalIcon fontSize={"small"} />,
   [ENotificationSeverity.ERROR]: <ErrorOutlineIcon fontSize={"small"} />,
   [ENotificationSeverity.INFO]: <InfoOutlinedIcon fontSize={"small"} />,
   [ENotificationSeverity.SUCCESS]: <CheckCircleOutlineIcon fontSize={"small"} />,
@@ -22,6 +24,7 @@ const SEVERITY_ICONS: Record<ENotificationSeverity, ReactNode> = {
 };
 
 const SEVERITY_COLORS: Record<ENotificationSeverity, string> = {
+  [ENotificationSeverity.DEV]: "text.disabled",
   [ENotificationSeverity.ERROR]: "error.main",
   [ENotificationSeverity.INFO]: "info.main",
   [ENotificationSeverity.SUCCESS]: "success.main",
@@ -45,6 +48,7 @@ export function NotificationRow({ notification }: INotificationRowProps): ReactE
 
   const tool: Nullable<IApplicationTool> = findApplicationToolById(notification.source);
   const createdAt: Date = new Date(notification.createdAt);
+  const isDev: boolean = notification.severity === ENotificationSeverity.DEV;
 
   const onCopyDetails = useCallback(() => {
     navigator.clipboard?.writeText(notification.details ?? "").catch((error: unknown) => {
@@ -53,18 +57,50 @@ export function NotificationRow({ notification }: INotificationRowProps): ReactE
   }, [log, notification.details]);
 
   return (
-    <Box sx={{ paddingX: 1.5, paddingY: 1, borderBottom: 1, borderColor: "divider" }}>
+    <Box
+      sx={{
+        paddingX: 1.5,
+        paddingY: 1,
+        borderBottom: 1,
+        borderColor: "divider",
+        // A dev trace is subordinate to everything around it: struck out of the normal reading order by
+        // the dashed edge, and dimmed so a panel full of them still scans for real outcomes.
+        ...(isDev
+          ? {
+              borderLeft: "2px dashed",
+              borderLeftColor: "divider",
+              backgroundColor: "action.hover",
+              opacity: 0.85,
+            }
+          : {}),
+      }}
+    >
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
         <Box sx={{ display: "flex", paddingTop: 0.25, color: SEVERITY_COLORS[notification.severity] }}>
           {SEVERITY_ICONS[notification.severity]}
         </Box>
 
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Typography variant={"body2"} sx={{ overflowWrap: "anywhere" }}>
+          <Typography
+            variant={"body2"}
+            sx={{
+              overflowWrap: "anywhere",
+              ...(isDev ? { fontFamily: "monospace", fontSize: "0.78rem", color: "text.secondary" } : {}),
+            }}
+          >
             {notification.title}
           </Typography>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            {isDev ? (
+              <Chip
+                label={"DEV"}
+                size={"small"}
+                variant={"outlined"}
+                sx={{ height: 16, fontSize: "0.6rem", letterSpacing: 0.5, "& .MuiChip-label": { paddingX: 0.5 } }}
+              />
+            ) : null}
+
             <Typography variant={"caption"} sx={{ color: "text.secondary" }}>
               {tool ? tool.label : notification.source}
             </Typography>

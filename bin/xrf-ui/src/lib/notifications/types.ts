@@ -1,5 +1,9 @@
 /** How urgent a recorded outcome is. Ordered by `NOTIFICATION_SEVERITY_RANK`, not by declaration. */
 export const enum ENotificationSeverity {
+  /**
+   * A trace meant for whoever is working on the application, not for whoever is using it.
+   */
+  DEV = "dev",
   SUCCESS = "success",
   INFO = "info",
   WARNING = "warning",
@@ -13,6 +17,7 @@ export const enum ENotificationSeverity {
  * behind four successes is exactly the case the panel exists for.
  */
 export const NOTIFICATION_SEVERITY_RANK: Record<ENotificationSeverity, number> = {
+  [ENotificationSeverity.DEV]: -1,
   [ENotificationSeverity.SUCCESS]: 0,
   [ENotificationSeverity.INFO]: 1,
   [ENotificationSeverity.WARNING]: 2,

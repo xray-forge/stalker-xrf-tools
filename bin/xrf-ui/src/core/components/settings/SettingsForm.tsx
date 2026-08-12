@@ -1,11 +1,12 @@
-import { Box, Divider, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, Checkbox, Divider, FormControlLabel, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback } from "react";
+import { ChangeEvent, ReactElement, useCallback } from "react";
 
 import { SettingsPathField } from "@/core/components/settings/SettingsPathField";
 import { ProjectService } from "@/core/store/project";
+import { SettingsService } from "@/core/store/settings";
 import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/lib/theme";
@@ -20,7 +21,14 @@ export function SettingsForm(): ReactElement {
   const log: Logger = useLogger("settings-modal");
 
   const projectService: ProjectService = useInjection(ProjectService);
+  const settingsService: SettingsService = useInjection(SettingsService);
+
   const { mode, setMode } = useColorScheme();
+
+  const onChangeDevMode = useCallback(
+    (_: ChangeEvent<HTMLInputElement>, checked: boolean) => settingsService.setDevModeEnabled(checked),
+    [settingsService]
+  );
 
   const onSelectProjectPath = useCallback(async () => {
     const newXrfProjectPath: Nullable<string> = await open({
@@ -77,6 +85,22 @@ export function SettingsForm(): ReactElement {
         onSelect={onSelectProjectPath}
         onClear={onClearProjectPath}
       />
+
+      <Divider />
+
+      <Box>
+        <Typography variant={"subtitle2"}>Diagnostics</Typography>
+
+        <Typography variant={"caption"} sx={{ display: "block", color: "text.secondary", marginBottom: 1 }}>
+          Show tracing and captured runtime errors in the notifications panel. Recorded either way, so turning this on
+          also reveals what happened before it was switched.
+        </Typography>
+
+        <FormControlLabel
+          control={<Checkbox checked={settingsService.isDevModeEnabled} onChange={onChangeDevMode} />}
+          label={"Developer mode"}
+        />
+      </Box>
     </Box>
   );
 }

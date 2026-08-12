@@ -4,6 +4,7 @@ import { ReactElement, useEffect } from "react";
 
 import { NotificationRow } from "@/core/components/shell/notifications/NotificationRow";
 import { NotificationsService } from "@/core/store/notifications";
+import { SettingsService } from "@/core/store/settings";
 import { INotification } from "@/lib/notifications";
 
 /**
@@ -14,8 +15,11 @@ import { INotification } from "@/lib/notifications";
  */
 export function NotificationsPanel(): ReactElement {
   const notificationsService: NotificationsService = useInjection(NotificationsService);
+  const settingsService: SettingsService = useInjection(SettingsService);
 
-  const notifications: Array<INotification> = notificationsService.notifications;
+  const notifications: Array<INotification> = settingsService.isDevModeEnabled
+    ? notificationsService.allNotifications
+    : notificationsService.notifications;
   const unreadCount: number = notificationsService.unreadCount;
 
   // Anything visible is read, including what arrives while the panel is open - otherwise the badge
