@@ -1,4 +1,4 @@
-import { Binding, Container, ServiceToken } from "@wirestate/core";
+import { Binding, Container, EventsPlugin, ServiceToken } from "@wirestate/core";
 
 import { AssetService } from "@/core/store/assets";
 
@@ -20,6 +20,7 @@ export function mockInjectedService<T>(
 ): IInjectedServiceMockDescriptor<T> {
   const container: Container = new Container({
     bindings: [AssetService, ...bindings, token as Binding],
+    plugins: [new EventsPlugin()],
   });
 
   return {
