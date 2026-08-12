@@ -3,7 +3,16 @@ import { default as PlayArrowIcon } from "@mui/icons-material/PlayArrow";
 import { default as RepeatIcon } from "@mui/icons-material/Repeat";
 import { default as VolumeUpIcon } from "@mui/icons-material/VolumeUp";
 import { Box, IconButton, Slider, Tooltip, Typography, useTheme } from "@mui/material";
-import { KeyboardEvent, MouseEvent, ReactElement, SyntheticEvent, useCallback, useEffect, useRef, useState } from "react";
+import {
+  KeyboardEvent,
+  MouseEvent,
+  ReactElement,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Nullable } from "@/core/types/general";
 import { extractPeaks, formatPlaybackTime } from "@/lib/media/waveform";

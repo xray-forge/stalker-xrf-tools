@@ -61,7 +61,7 @@ export function mockExportDescriptor(overrides: Partial<ICallableExportDescripto
     description: null,
     parameters: [{ name: "actor", typing: "game_object", description: null, isOptional: false }],
     returns: { typing: "void", description: null },
-    source: { path: "xr_effects.ts", line: 42, column: 2 },
+    source: { path: "xr_effects.ts", line: 42, column: 2, endLine: 45 },
     ...overrides,
   };
 }
@@ -70,11 +70,11 @@ export function mockExportDescriptor(overrides: Partial<ICallableExportDescripto
 export function mockExportsDeclarations(overrides: Array<IExportDescriptor> = []): Array<IExportDescriptor> {
   return [
     mockExportDescriptor({
-      source: { path: "xr_conditions.ts", line: 1, column: 1 },
+      source: { path: "xr_conditions.ts", line: 1, column: 1, endLine: 4 },
       name: "xr_conditions.is_wounded",
     }),
-    mockExportDescriptor({ source: { path: "dialogs.ts", line: 1, column: 1 }, name: "dialogs.is_friend" }),
-    mockExportDescriptor({ source: { path: "dialogs.ts", line: 1, column: 1 }, name: "dialogs.has_item" }),
+    mockExportDescriptor({ source: { path: "dialogs.ts", line: 1, column: 1, endLine: 4 }, name: "dialogs.is_friend" }),
+    mockExportDescriptor({ source: { path: "dialogs.ts", line: 1, column: 1, endLine: 4 }, name: "dialogs.has_item" }),
     mockExportDescriptor({ name: "xr_effects.play_sound" }),
     ...overrides,
   ];

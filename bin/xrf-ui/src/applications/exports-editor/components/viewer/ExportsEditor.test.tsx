@@ -22,7 +22,7 @@ const PLAY_SOUND: ICallableExportDescriptor = {
     { name: "volume", typing: "number", description: "Optional volume.", isOptional: true },
   ],
   returns: { typing: "boolean", description: "Whether playback started." },
-  source: { path: "src/engine/declarations/effects/sound.ts", line: 18, column: 3 },
+  source: { path: "src/engine/declarations/effects/sound.ts", line: 18, column: 3, endLine: 21 },
 };
 
 const SETTINGS: IValueExportDescriptor = {
@@ -30,7 +30,7 @@ const SETTINGS: IValueExportDescriptor = {
   name: "settings",
   description: "Shared configuration.",
   typing: "Record<string, boolean>",
-  source: { path: "src/engine/declarations/settings.ts", line: 4, column: 1 },
+  source: { path: "src/engine/declarations/settings.ts", line: 4, column: 1, endLine: 7 },
 };
 
 const DIALOG: ICallableExportDescriptor = {
@@ -39,7 +39,7 @@ const DIALOG: ICallableExportDescriptor = {
   description: null,
   parameters: [],
   returns: { typing: "void", description: null },
-  source: { path: "src/engine/declarations/dialogs/answer.ts", line: 9, column: 2 },
+  source: { path: "src/engine/declarations/dialogs/answer.ts", line: 9, column: 2, endLine: 12 },
 };
 
 const PROJECT: IExportsProject = {

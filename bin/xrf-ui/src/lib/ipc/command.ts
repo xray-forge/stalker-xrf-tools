@@ -28,6 +28,7 @@ export enum EIconsEditorCommand {
 export enum EExportsEditorCommand {
   CLOSE_XR_EXPORTS = "plugin:exports-editor|close_xr_exports",
   GET_XR_EXPORTS = "plugin:exports-editor|get_xr_exports",
+  GET_XR_EXPORT_SOURCE = "plugin:exports-editor|get_xr_export_source",
   OPEN_XR_EXPORTS = "plugin:exports-editor|open_xr_exports",
 }
 

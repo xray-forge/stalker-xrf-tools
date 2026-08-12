@@ -8,6 +8,7 @@ const LANGUAGES: Array<ESyntaxLanguage> = [
   ESyntaxLanguage.LTX,
   ESyntaxLanguage.LUA,
   ESyntaxLanguage.SHADER,
+  ESyntaxLanguage.TYPESCRIPT,
   ESyntaxLanguage.XML,
 ];
 
@@ -182,5 +183,30 @@ describe("syntax rules", () => {
         empty: false,
       });
     }
+  });
+});
+
+describe("highlightSyntax over typescript", () => {
+  it("colours an extern declaration the way the exports editor shows it", () => {
+    const spans: Array<ISyntaxSpan> = highlightSyntax(
+      'extern("xr_effects.run", (actor: number): void => {});',
+      ESyntaxLanguage.TYPESCRIPT
+    );
+
+    expect(textOf(spans, ESyntaxToken.DIRECTIVE)).toEqual(["extern"]);
+    expect(textOf(spans, ESyntaxToken.STRING)).toEqual(['"xr_effects.run"']);
+    expect(textOf(spans, ESyntaxToken.TYPE)).toEqual(["number", "void"]);
+  });
+
+  it("keeps a template literal whole across lines", () => {
+    const spans: Array<ISyntaxSpan> = highlightSyntax("const a = `one\ntwo`;\n", ESyntaxLanguage.TYPESCRIPT);
+
+    expect(textOf(spans, ESyntaxToken.STRING)).toEqual(["`one\ntwo`"]);
+  });
+
+  it("does not colour a keyword that is only part of an identifier", () => {
+    const spans: Array<ISyntaxSpan> = highlightSyntax("const constant = 1;", ESyntaxLanguage.TYPESCRIPT);
+
+    expect(textOf(spans, ESyntaxToken.KEYWORD)).toEqual(["const"]);
   });
 });

@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 import { CallableExportDetails } from "@/applications/exports-editor/components/viewer/exports/CallableExportDetails";
 import { ExportSection } from "@/applications/exports-editor/components/viewer/exports/ExportSection";
+import { ExportSourceView } from "@/applications/exports-editor/components/viewer/exports/ExportSourceView";
 import { formatExportSignature } from "@/applications/exports-editor/components/viewer/exports/format-export-signature";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { IExportDescriptor } from "@/lib/exports";
@@ -35,7 +36,7 @@ export function ExportDeclarationView({ declaration }: IExportDeclarationViewPro
       </Box>
 
       <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto", padding: 3 }}>
-        <Box sx={{ width: "100%", maxWidth: 920 }}>
+        <Box sx={{ width: "100%", maxWidth: 1440 }}>
           <ExportSection title={"Signature"}>
             <Typography
               component={"pre"}
@@ -65,9 +66,15 @@ export function ExportDeclarationView({ declaration }: IExportDeclarationViewPro
           )}
 
           <ExportSection title={"Source"} isLast={true}>
-            <Typography variant={"body2"} className={"monospace"} sx={{ overflowWrap: "anywhere" }}>
+            <Typography
+              className={"monospace"}
+              variant={"body2"}
+              sx={{ marginBottom: 1, color: "text.secondary", overflowWrap: "anywhere" }}
+            >
               {declaration.source.path}:{declaration.source.line}:{declaration.source.column}
             </Typography>
+
+            <ExportSourceView key={declaration.name} name={declaration.name} />
           </ExportSection>
         </Box>
       </Box>

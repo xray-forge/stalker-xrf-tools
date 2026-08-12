@@ -4,7 +4,7 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { Nullable } from "@/core/types/general";
 import { transformError } from "@/lib/error";
-import { IExportsProject } from "@/lib/exports";
+import { IExportSourceContent, IExportsProject } from "@/lib/exports";
 import { EExportsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
@@ -54,6 +54,19 @@ export class ExportsService {
   @OnDeactivation()
   public onDeactivation(): void {
     releaseEditorProject(EExportsEditorCommand.CLOSE_XR_EXPORTS);
+  }
+
+  /**
+   * Read back the source declaring one extern.
+   *
+   * @param name - Name of the declaration to read, as the project reported it.
+   * @returns The source text declaring it.
+   */
+  @BoundAction()
+  public async readExportSource(name: string): Promise<IExportSourceContent> {
+    this.log.info("Reading export source:", name);
+
+    return invoke(EExportsEditorCommand.GET_XR_EXPORT_SOURCE, { name });
   }
 
   @BoundAction()

@@ -11,7 +11,7 @@ function callable(name: string, description: string | null = null): ICallableExp
     description,
     parameters: [],
     returns: { typing: "void", description: null },
-    source: { path: `${name}.ts`, line: 1, column: 1 },
+    source: { path: `${name}.ts`, line: 1, column: 1, endLine: 4 },
   };
 }
 

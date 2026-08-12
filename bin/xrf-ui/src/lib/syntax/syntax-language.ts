@@ -20,6 +20,10 @@ const SYNTAX_LANGUAGE_BY_EXTENSION: Record<string, ESyntaxLanguage> = {
   cs: ESyntaxLanguage.SHADER,
   h: ESyntaxLanguage.SHADER,
   hlsl: ESyntaxLanguage.SHADER,
+  ts: ESyntaxLanguage.TYPESCRIPT,
+  tsx: ESyntaxLanguage.TYPESCRIPT,
+  js: ESyntaxLanguage.TYPESCRIPT,
+  json: ESyntaxLanguage.TYPESCRIPT,
   xml: ESyntaxLanguage.XML,
 };
 

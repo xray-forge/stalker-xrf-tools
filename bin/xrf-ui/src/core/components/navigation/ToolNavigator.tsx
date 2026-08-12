@@ -34,10 +34,7 @@ export function ToolNavigator({ items }: IToolNavigatorProps): ReactElement {
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 2 }}>
           {items.map((item: IToolNavigatorItem) => (
             <Card key={item.to + item.label} sx={{ display: "flex", flexDirection: "column" }}>
-              <CardActionArea
-                sx={{ flexGrow: 1, padding: 2 }}
-                onClick={() => navigate(item.to, { replace: true })}
-              >
+              <CardActionArea sx={{ flexGrow: 1, padding: 2 }} onClick={() => navigate(item.to, { replace: true })}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   {item.icon ? <Box sx={{ display: "flex", color: "primary.main" }}>{item.icon}</Box> : null}
                   <Typography variant={"subtitle2"}>{item.label}</Typography>

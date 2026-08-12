@@ -9,6 +9,17 @@ export interface IExportSourceDescriptor {
   path: string;
   line: number;
   column: number;
+  /** Last line of the declaration, inclusive, so its body can be fetched without parsing again. */
+  endLine: number;
+}
+
+/** The source text declaring one extern, read back on demand rather than shipped with the project. */
+export interface IExportSourceContent {
+  name: string;
+  path: string;
+  line: number;
+  endLine: number;
+  content: string;
 }
 
 export interface IExportParameterDescriptor {

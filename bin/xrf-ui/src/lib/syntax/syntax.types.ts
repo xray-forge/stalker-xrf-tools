@@ -6,6 +6,7 @@ export enum ESyntaxLanguage {
   LTX = "ltx",
   LUA = "lua",
   SHADER = "shader",
+  TYPESCRIPT = "typescript",
   XML = "xml",
 }
 
