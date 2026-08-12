@@ -1,7 +1,8 @@
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box } from "@mui/material";
 import { ReactElement } from "react";
 
 import { IEditorTool } from "@/core/components/shell/EditorToolsContext";
+import { ToolStripeButton } from "@/core/components/shell/ToolStripeButton";
 import { Nullable } from "@/core/types/general";
 import { LAYOUT } from "@/lib/theme/tokens";
 
@@ -10,33 +11,6 @@ export interface IApplicationToolStripeProps {
   globalTools: Array<IEditorTool>;
   activeToolId: Nullable<string>;
   onToggleTool: (id: string) => void;
-}
-
-interface IToolStripeButtonProps {
-  tool: IEditorTool;
-  isActive: boolean;
-  onToggleTool: (id: string) => void;
-}
-
-function ToolStripeButton({ tool, isActive, onToggleTool }: IToolStripeButtonProps): ReactElement {
-  return (
-    <Tooltip title={tool.label} placement={"left"}>
-      <IconButton
-        aria-label={tool.label}
-        aria-pressed={isActive}
-        sx={{
-          width: 36,
-          height: 36,
-          borderRadius: 1,
-          color: isActive ? "primary.main" : "text.secondary",
-          backgroundColor: isActive ? "action.selected" : "transparent",
-        }}
-        onClick={() => onToggleTool(tool.id)}
-      >
-        {tool.icon}
-      </IconButton>
-    </Tooltip>
-  );
 }
 
 /**
