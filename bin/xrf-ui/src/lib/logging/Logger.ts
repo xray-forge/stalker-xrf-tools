@@ -1,4 +1,4 @@
-import { noop } from "@/lib/callbacks";
+import { noop } from "@/lib/callbacks/noop";
 import { ILogger } from "@/lib/logging/ILogger";
 import { PREFIX_TIMESTAMP_TAG } from "@/lib/logging/prefix";
 import { AnyCallable } from "@/lib/types/general";

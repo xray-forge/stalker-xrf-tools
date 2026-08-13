@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 
-import { noop } from "@/lib/callbacks";
+import { noop } from "@/lib/callbacks/noop";
 import { Logger } from "@/lib/logging";
 
 /**
