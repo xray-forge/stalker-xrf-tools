@@ -1,6 +1,6 @@
 // Auto-generated rust bindings. Do not edit it manually.
 
-/**  Error while working with translation file */
+/** Error while working with translation file */
 export type XRayError =
   | ({
       Assertion: {

@@ -5,14 +5,14 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 /** Commands */
 export const commands = {
   closeArchivesProject: () => __TAURI_INVOKE<null>("plugin:archives-editor|close_archives_project"),
-  /**  Write a single archived file to a path the user chose. */
+  /** Write a single archived file to a path the user chose. */
   extractArchiveFile: (name: string, destination: string) =>
     __TAURI_INVOKE<ArchiveExtractResult>("plugin:archives-editor|extract_archive_file", { name, destination }),
   /**
-   *  Write every archived file under one directory into a destination root.
+   * Write every archived file under one directory into a destination root.
    *
-   *  An empty prefix means the whole archive, so this also covers extracting everything without needing
-   *  a separate command.
+   * An empty prefix means the whole archive, so this also covers extracting everything without needing
+   * a separate command.
    */
   extractArchiveFolder: (prefix: string, destination: string) =>
     __TAURI_INVOKE<ArchiveExtractFolderResult>("plugin:archives-editor|extract_archive_folder", {
@@ -30,16 +30,16 @@ export const commands = {
   hasArchivesProject: () => __TAURI_INVOKE<boolean>("plugin:archives-editor|has_archives_project"),
   openArchivesProject: (path: string) =>
     __TAURI_INVOKE<ArchiveProject>("plugin:archives-editor|open_archives_project", { path }),
-  /**  Hand an archived sound to the webview, along with whatever the engine would read from it. */
+  /** Hand an archived sound to the webview, along with whatever the engine would read from it. */
   readArchiveAudio: (path: string) =>
     __TAURI_INVOKE<ArchiveAudioPreview>("plugin:archives-editor|read_archive_audio", { path }),
   readArchiveFile: (path: string) =>
     __TAURI_INVOKE<ProjectReadResult>("plugin:archives-editor|read_archive_file", { path }),
   /**
-   *  Decode an archived DDS into a PNG the webview can display.
+   * Decode an archived DDS into a PNG the webview can display.
    *
-   *  Compressed entries are fine here, unlike the text preview: the bytes are decompressed on the way out
-   *  of the archive, so compression is invisible by the time there is an image to decode.
+   * Compressed entries are fine here, unlike the text preview: the bytes are decompressed on the way out
+   * of the archive, so compression is invisible by the time there is an image to decode.
    */
   readArchiveImage: (path: string) =>
     __TAURI_INVOKE<ArchiveImagePreview>("plugin:archives-editor|read_archive_image", { path }),
@@ -48,7 +48,7 @@ export const commands = {
 };
 
 /* Types */
-/**  The X-Ray source parameters carried in a sound's first vorbis comment. */
+/** The X-Ray source parameters carried in a sound's first vorbis comment. */
 export type ArchiveAudioParameters = {
   minDistance: number | null;
   maxDistance: number | null;
@@ -61,9 +61,9 @@ export type ArchiveAudioPreview = {
   name: string;
   channels: number;
   sampleRate: number;
-  /**  Absent for a sound carrying no recognized X-Ray comment, where the engine uses its own defaults. */
+  /** Absent for a sound carrying no recognized X-Ray comment, where the engine uses its own defaults. */
   parameters: ArchiveAudioParameters | null;
-  /**  The ogg bytes as stored, base64 encoded. The webview decodes vorbis itself. */
+  /** The ogg bytes as stored, base64 encoded. The webview decodes vorbis itself. */
   base64: string;
 };
 
@@ -103,7 +103,7 @@ export type ArchiveImagePreview = {
   name: string;
   width: number;
   height: number;
-  /**  PNG bytes, base64 encoded so the webview can use them directly as an image source. */
+  /** PNG bytes, base64 encoded so the webview can use them directly as an image source. */
   base64: string;
 };
 
@@ -118,10 +118,10 @@ export type ArchiveProject = {
 export type ArchiveProjectReadPolicy = {
   extensions: Array<string>;
   maximumSize: number;
-  /**  Extensions decoded into a picture. Compression does not apply: it is undone before decoding. */
+  /** Extensions decoded into a picture. Compression does not apply: it is undone before decoding. */
   imageExtensions: Array<string>;
   maximumImageSize: number;
-  /**  Extensions played by the webview itself, so the backend only has to hand over the bytes. */
+  /** Extensions played by the webview itself, so the backend only has to hand over the bytes. */
   audioExtensions: Array<string>;
   maximumAudioSize: number;
 };

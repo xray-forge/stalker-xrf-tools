@@ -43,10 +43,10 @@ export type ArchiveProject = {
 export type ArchiveProjectReadPolicy = {
   extensions: Array<string>;
   maximumSize: number;
-  /**  Extensions decoded into a picture. Compression does not apply: it is undone before decoding. */
+  /** Extensions decoded into a picture. Compression does not apply: it is undone before decoding. */
   imageExtensions: Array<string>;
   maximumImageSize: number;
-  /**  Extensions played by the webview itself, so the backend only has to hand over the bytes. */
+  /** Extensions played by the webview itself, so the backend only has to hand over the bytes. */
   audioExtensions: Array<string>;
   maximumAudioSize: number;
 };

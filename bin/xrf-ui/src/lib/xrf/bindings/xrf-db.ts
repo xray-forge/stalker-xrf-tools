@@ -35,7 +35,7 @@ export type AlifeLevelChanger = {
   saveMarker: number;
 };
 
-/**  Generic abstract ALife object base. */
+/** Generic abstract ALife object base. */
 export type AlifeObject = {
   id: number;
   netAction: number;
@@ -59,7 +59,7 @@ export type AlifeObject = {
   updateData: Array<number>;
 };
 
-/**  Generic ALife object abstraction data. */
+/** Generic ALife object abstraction data. */
 export type AlifeObjectAbstract = {
   gameVertexId: number;
   distance: number | null;
@@ -384,7 +384,7 @@ export type AlifeObjectVisual = {
   visualFlags: number;
 };
 
-/**  Represents script extension of base server smart cover class. */
+/** Represents script extension of base server smart cover class. */
 export type AlifeSmartCover = {
   base: AlifeObjectSmartCover;
   lastDescription: string;
@@ -425,7 +425,7 @@ export type ArtefactSpawnPoint = {
   distance: number | null;
 };
 
-/**  todo: Add script to parse system ltx and read all the data from ltx/txt file instead. */
+/** todo: Add script to parse system ltx and read all the data from ltx/txt file instead. */
 export type ClsId =
   | "AiCrow"
   | "AiFleG"
@@ -547,7 +547,7 @@ export type GraphHeader = {
   levelsCount: number;
 };
 
-/**  `GameGraph::SLevel::load` in xray codebase. */
+/** `GameGraph::SLevel::load` in xray codebase. */
 export type GraphLevel = {
   name: string;
   offset: Vector3d;
@@ -575,18 +575,18 @@ export type GraphVertex = {
 };
 
 /**
- *  Patrols list is represented by list of samples containing patrol chunk.
- *  0...N, where N is chunk.
+ * Patrols list is represented by list of samples containing patrol chunk.
+ * 0...N, where N is chunk.
  *
- *  `CPatrolPathStorage::load`, `CPatrolPath::load_raw` in xray codebase.
+ * `CPatrolPathStorage::load`, `CPatrolPath::load_raw` in xray codebase.
  *
- *  Patrol chunk has the following structure:
- *  0 - metadata
- *    - name
- *  1 - data
- *      0 - points count
- *      1 - patrol points
- *      2 - patrol points links
+ * Patrol chunk has the following structure:
+ * 0 - metadata
+ *   - name
+ * 1 - data
+ *     0 - points count
+ *     1 - patrol points
+ *     2 - patrol points links
  */
 export type Patrol = {
   name: string;
@@ -599,7 +599,7 @@ export type PatrolLink = {
   links: Array<[number, number | null]>;
 };
 
-/**  `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase. */
+/** `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase. */
 export type PatrolPoint = {
   name: string;
   position: Vector3d;
@@ -614,38 +614,38 @@ export type RgbColor = {
   b: number | null;
 };
 
-/**  Shape enumeration stored in objects descriptors. */
+/** Shape enumeration stored in objects descriptors. */
 export type Shape =
   | ({ Sphere: [Vector3d, number | null] } & { Box?: never })
   | ({ Box: [Vector3d, Vector3d, Vector3d, Vector3d] } & { Sphere?: never });
 
 /**
- *  ALife spawns chunk has the following structure:
- *  0 - count
- *  1 - objects
- *  2 - edges
+ * ALife spawns chunk has the following structure:
+ * 0 - count
+ * 1 - objects
+ * 2 - edges
  */
 export type SpawnALifeSpawnsChunk = {
   objects: Array<AlifeObject>;
 };
 
 /**
- *  Artefacts spawns samples.
- *  Is single plain chunk with nodes list in it.
+ * Artefacts spawns samples.
+ * Is single plain chunk with nodes list in it.
  */
 export type SpawnArtefactSpawnsChunk = {
   nodes: Array<ArtefactSpawnPoint>;
 };
 
 /**
- *  Descriptor of generic spawn file used by xray game engine.
+ * Descriptor of generic spawn file used by xray game engine.
  *
- *  Root level samples by ID:
- *  0 - header
- *  1 - alife spawns
- *  2 - alife objects
- *  3 - patrols
- *  4 - game graphs
+ * Root level samples by ID:
+ * 0 - header
+ * 1 - alife spawns
+ * 2 - alife objects
+ * 3 - patrols
+ * 4 - game graphs
  */
 export type SpawnFile = {
   header: SpawnHeaderChunk;
@@ -655,7 +655,7 @@ export type SpawnFile = {
   graphs: SpawnGraphsChunk;
 };
 
-/**  `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize` */
+/** `GameGraph::CHeader::load`, `GameGraph::SLevel::load`, `CGameGraph::Initialize` */
 export type SpawnGraphsChunk = {
   header: GraphHeader;
   levels: Array<GraphLevel>;
@@ -673,7 +673,7 @@ export type SpawnHeaderChunk = {
   levelsCount: number;
 };
 
-/**  `CPatrolPathStorage::load` in xray engine. */
+/** `CPatrolPathStorage::load` in xray engine. */
 export type SpawnPatrolsChunk = {
   patrols: Array<Patrol>;
 };

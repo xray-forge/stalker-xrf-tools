@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 
 use specta::datatype::{DataType, Primitive};
@@ -28,13 +29,20 @@ impl LanguageExt for CommandTypescript {
 
   fn export(self, config: &BuilderConfiguration, path: &Path) -> Result<(), Self::Error> {
     LanguageExt::export(self.0, config, path)?;
-
-    let bindings = fs::read_to_string(path)?;
-
-    fs::write(path, bindings.replacen(TAURI_SPECTA_HEADER, "", 1))?;
+    normalize_generated_bindings(path)?;
 
     Ok(())
   }
+}
+
+fn normalize_generated_bindings(path: &Path) -> io::Result<()> {
+  let bindings = fs::read_to_string(path)?;
+  let bindings = bindings
+    .replacen(TAURI_SPECTA_HEADER, "", 1)
+    .replace("/**  ", "/** ")
+    .replace(" *  ", " * ");
+
+  fs::write(path, bindings)
 }
 
 #[derive(Debug, Clone)]
@@ -89,6 +97,8 @@ fn export_types(path: &Path, types: &Types) {
   exporter()
     .export_to(path, types, TypeScriptFormat::default())
     .unwrap_or_else(|error| panic!("Failed to export {}: {error}", path.display()));
+
+  normalize_generated_bindings(path).unwrap_or_else(|error| panic!("Failed to normalize {}: {error}", path.display()));
 }
 
 #[cfg(test)]

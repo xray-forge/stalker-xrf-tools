@@ -33,7 +33,7 @@ export type LtxProjectVerifyResult = {
   validSections: number;
 };
 
-/**  Error while working with translation file */
+/** Error while working with translation file */
 export type XRayError =
   | ({
       Assertion: {

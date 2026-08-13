@@ -1,6 +1,6 @@
 // Auto-generated rust bindings. Do not edit it manually.
 
-/**  The X-Ray source parameters carried in a sound's first vorbis comment. */
+/** The X-Ray source parameters carried in a sound's first vorbis comment. */
 export type ArchiveAudioParameters = {
   minDistance: number | null;
   maxDistance: number | null;
@@ -13,9 +13,9 @@ export type ArchiveAudioPreview = {
   name: string;
   channels: number;
   sampleRate: number;
-  /**  Absent for a sound carrying no recognized X-Ray comment, where the engine uses its own defaults. */
+  /** Absent for a sound carrying no recognized X-Ray comment, where the engine uses its own defaults. */
   parameters: ArchiveAudioParameters | null;
-  /**  The ogg bytes as stored, base64 encoded. The webview decodes vorbis itself. */
+  /** The ogg bytes as stored, base64 encoded. The webview decodes vorbis itself. */
   base64: string;
 };
 
@@ -23,6 +23,6 @@ export type ArchiveImagePreview = {
   name: string;
   width: number;
   height: number;
-  /**  PNG bytes, base64 encoded so the webview can use them directly as an image source. */
+  /** PNG bytes, base64 encoded so the webview can use them directly as an image source. */
   base64: string;
 };
