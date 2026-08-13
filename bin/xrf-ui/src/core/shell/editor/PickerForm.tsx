@@ -26,7 +26,7 @@ export interface IPickerFormProps {
 }
 
 /**
- * Shared layout for the editors' "pick some paths, run a command, read the output" screens.
+ * Shared shell layout for the editors' "pick some paths, run a command, read the output" screens.
  */
 export function PickerForm({
   title,

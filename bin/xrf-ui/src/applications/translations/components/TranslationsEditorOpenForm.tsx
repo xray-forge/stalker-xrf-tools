@@ -2,9 +2,9 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { TranslationsService } from "@/applications/translations/store/translations";
-import { PickerForm } from "@/core/routing/components/PickerForm";
 import { getPathIfExists, getProjectTranslationsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { PickerForm } from "@/core/shell/editor/PickerForm";
 import { PathFormRow } from "@/core/ui/form/PathFormRow";
 import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";

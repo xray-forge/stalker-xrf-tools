@@ -2,9 +2,9 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { EquipmentService } from "@/core/equipment-icons";
-import { PickerForm } from "@/core/routing/components/PickerForm";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { PickerForm } from "@/core/shell/editor/PickerForm";
 import { FilePickerInput, usePathState } from "@/core/ui/form/file-picker";
 import { Logger, useLogger } from "@/lib/logging";
 import { useMountEffect } from "@/lib/react";

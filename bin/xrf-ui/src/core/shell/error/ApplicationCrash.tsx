@@ -8,7 +8,7 @@ import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 
 /**
- * What the window shows in place of a tool that failed to render.
+ * What the application shell shows in place of a tool that failed to render.
  */
 export function ApplicationCrash({ error, onRetry }: IErrorBoundaryFallbackProps): ReactElement {
   const navigate: NavigateFunction = useNavigate();

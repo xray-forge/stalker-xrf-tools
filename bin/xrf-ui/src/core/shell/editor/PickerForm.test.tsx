@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { PickerForm } from "@/core/routing/components/PickerForm";
+import { PickerForm } from "@/core/shell/editor/PickerForm";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("PickerForm", () => {

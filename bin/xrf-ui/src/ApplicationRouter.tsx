@@ -2,7 +2,7 @@ import { ReactElement, Suspense } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
-import { ApplicationRoot } from "@/ApplicationRoot";
+import { ApplicationLauncher } from "@/core/launcher/ApplicationLauncher";
 import { IApplicationDescriptor } from "@/core/routing/application";
 import { CurrentApplicationProvider } from "@/core/routing/current-application.context";
 import { ApplicationShell } from "@/core/shell/ApplicationShell";
@@ -27,7 +27,15 @@ export function ApplicationRouter(): ReactElement {
       <ApplicationShell>
         <Suspense key={application?.path ?? "root"} fallback={<ApplicationLoader />}>
           <Routes>
-            <Route path={"/"} element={<ApplicationRoot />} />
+            <Route
+              path={"/"}
+              element={
+                <ApplicationLauncher
+                  applications={APPLICATION_CATALOG.applications}
+                  groups={APPLICATION_CATALOG.groups}
+                />
+              }
+            />
 
             {APPLICATION_CATALOG.applications.map(({ path, Component }: IApplicationDescriptor) => (
               <Route key={path} path={`${path}/*`} element={<Component />} />

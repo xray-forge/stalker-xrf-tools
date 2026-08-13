@@ -2,13 +2,13 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { fireEvent } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
+import { ApplicationLauncherCard } from "@/core/launcher/ApplicationLauncherCard";
 import {
   EApplicationGroupId,
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
 } from "@/core/routing/application";
-import { ApplicationCard } from "@/core/routing/components/ApplicationCard";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
 function mockApplication(overrides: Partial<IApplicationDescriptor> = {}): IApplicationDescriptor {
@@ -25,12 +25,12 @@ function mockApplication(overrides: Partial<IApplicationDescriptor> = {}): IAppl
   };
 }
 
-describe("ApplicationCard", () => {
+describe("ApplicationLauncherCard", () => {
   it("warms the chunk when the pointer arrives, before any click", async () => {
     const preload = jest.fn(async () => {});
 
     const { getByRole } = renderWithProviders(
-      <ApplicationCard application={mockApplication({ preload })} isEnabled onOpen={jest.fn()} />
+      <ApplicationLauncherCard application={mockApplication({ preload })} isEnabled onOpen={jest.fn()} />
     );
 
     await userEvent.hover(getByRole("button"));
@@ -43,7 +43,7 @@ describe("ApplicationCard", () => {
     const preload = jest.fn(async () => {});
 
     const { getByRole } = renderWithProviders(
-      <ApplicationCard application={mockApplication({ preload })} isEnabled onOpen={jest.fn()} />
+      <ApplicationLauncherCard application={mockApplication({ preload })} isEnabled onOpen={jest.fn()} />
     );
 
     await userEvent.tab();
@@ -56,7 +56,7 @@ describe("ApplicationCard", () => {
     const preload = jest.fn(async () => {});
 
     const { getByRole } = renderWithProviders(
-      <ApplicationCard
+      <ApplicationLauncherCard
         application={mockApplication({ preload, status: EApplicationStatus.PLANNED })}
         isEnabled={false}
         onOpen={jest.fn()}
@@ -72,7 +72,7 @@ describe("ApplicationCard", () => {
 
   it("survives a statically imported application, which has nothing to warm", async () => {
     const { getByRole } = renderWithProviders(
-      <ApplicationCard application={mockApplication()} isEnabled onOpen={jest.fn()} />
+      <ApplicationLauncherCard application={mockApplication()} isEnabled onOpen={jest.fn()} />
     );
 
     await userEvent.hover(getByRole("button"));
@@ -84,7 +84,7 @@ describe("ApplicationCard", () => {
     const onOpen = jest.fn();
 
     const { getByRole } = renderWithProviders(
-      <ApplicationCard application={mockApplication()} isEnabled onOpen={onOpen} />
+      <ApplicationLauncherCard application={mockApplication()} isEnabled onOpen={onOpen} />
     );
 
     await userEvent.click(getByRole("button"));

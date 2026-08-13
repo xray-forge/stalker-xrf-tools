@@ -3,20 +3,24 @@ import { ReactElement, useCallback } from "react";
 
 import { IApplicationDescriptor } from "@/core/routing/application";
 
-export interface IApplicationCardProps {
+export interface IApplicationLauncherCardProps {
   application: IApplicationDescriptor;
   isEnabled: boolean;
   onOpen: (application: IApplicationDescriptor) => void;
 }
 
 /**
- * One application on the home grid.
+ * One application on the root catalog grid.
  *
  * Pointing at a card warms whatever chunk opening it would need. Intent runs a few hundred milliseconds
  * ahead of the click, which is longer than the load takes, so the split applications open as if they
  * were not split. Statically imported ones have no `preload` and nothing to do here.
  */
-export function ApplicationCard({ application, isEnabled, onOpen }: IApplicationCardProps): ReactElement {
+export function ApplicationLauncherCard({
+  application,
+  isEnabled,
+  onOpen,
+}: IApplicationLauncherCardProps): ReactElement {
   const onWarm = useCallback(() => {
     if (isEnabled) {
       // Nothing awaits this: the point is only that the fetch has started before the click.

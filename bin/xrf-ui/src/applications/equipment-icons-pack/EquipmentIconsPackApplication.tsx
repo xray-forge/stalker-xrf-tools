@@ -5,7 +5,6 @@ import { EquipmentPackResult } from "@/applications/equipment-icons-pack/compone
 import { EquipmentService, IPackEquipmentResult } from "@/core/equipment-icons";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
-import { PickerForm } from "@/core/routing/components/PickerForm";
 import {
   getPathIfExists,
   getProjectEquipmentDDSPath,
@@ -13,6 +12,7 @@ import {
   getProjectSystemLtxPath,
 } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { PickerForm } from "@/core/shell/editor/PickerForm";
 import { FilePickerInput, usePathState } from "@/core/ui/form/file-picker";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";

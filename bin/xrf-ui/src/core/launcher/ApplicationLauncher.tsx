@@ -4,9 +4,8 @@ import { useInjection } from "@wirestate/react";
 import { ChangeEvent, Fragment, ReactElement, useCallback, useMemo, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
+import { ApplicationLauncherCard } from "@/core/launcher/ApplicationLauncherCard";
 import { EApplicationStatus, IApplicationDescriptor, IApplicationGroup } from "@/core/routing/application";
-import { ApplicationCard } from "@/core/routing/components/ApplicationCard";
 import { SettingsService } from "@/core/settings/services/settings";
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
@@ -22,10 +21,15 @@ const GRID_COLUMNS = {
   xl: "repeat(5, minmax(0, 1fr))",
 } as const;
 
+export interface IApplicationLauncherProps {
+  applications: ReadonlyArray<IApplicationDescriptor>;
+  groups: ReadonlyArray<IApplicationGroup>;
+}
+
 /**
- * Start page, and the only route between applications.
+ * The searchable home surface for launching applications.
  */
-export function ApplicationRoot(): ReactElement {
+export function ApplicationLauncher({ applications, groups }: IApplicationLauncherProps): ReactElement {
   const settingsService: SettingsService = useInjection(SettingsService);
 
   const navigate: NavigateFunction = useNavigate();
@@ -36,16 +40,16 @@ export function ApplicationRoot(): ReactElement {
     const match: string = query.trim().toLowerCase();
 
     return match
-      ? APPLICATION_CATALOG.applications.filter(
+      ? applications.filter(
           (application: IApplicationDescriptor) =>
             application.label.toLowerCase().includes(match) || application.description.toLowerCase().includes(match)
         )
-      : APPLICATION_CATALOG.applications;
-  }, [query]);
+      : applications;
+  }, [applications, query]);
 
   const sections: Array<[IApplicationGroup, Array<IApplicationDescriptor>]> = useMemo(
     () =>
-      APPLICATION_CATALOG.groups
+      groups
         .map((group: IApplicationGroup): [IApplicationGroup, Array<IApplicationDescriptor>] => [
           group,
           matched
@@ -59,7 +63,7 @@ export function ApplicationRoot(): ReactElement {
             }),
         ])
         .filter(([, applications]) => applications.length > 0),
-    [matched]
+    [groups, matched]
   );
 
   const onChangeQuery = useCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -115,7 +119,7 @@ export function ApplicationRoot(): ReactElement {
                   </Box>
 
                   {applications.map((application: IApplicationDescriptor) => (
-                    <ApplicationCard
+                    <ApplicationLauncherCard
                       key={application.id}
                       application={application}
                       isEnabled={application.status === EApplicationStatus.READY || settingsService.isDevModeEnabled}

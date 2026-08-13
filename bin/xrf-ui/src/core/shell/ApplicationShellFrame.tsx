@@ -2,12 +2,12 @@ import { Box } from "@mui/material";
 import { ReactElement, ReactNode, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import { ApplicationCrash } from "@/core/error/components/ApplicationCrash";
 import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/error/components/ErrorBoundary";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/routing/application";
 import { useCurrentApplication } from "@/core/routing/current-application.context";
 import { ApplicationScope } from "@/core/shell/ApplicationScope";
+import { ApplicationCrash } from "@/core/shell/error/ApplicationCrash";
 import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
 import { EditorToolbarHostContext } from "@/core/shell/header/editor-toolbar-host";
 import { ApplicationPanelSlot } from "@/core/shell/panel/ApplicationPanelSlot";

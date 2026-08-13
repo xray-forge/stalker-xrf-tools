@@ -2,8 +2,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { ExportsService } from "@/applications/exports/store/exports";
-import { PickerForm } from "@/core/routing/components/PickerForm";
 import { ProjectService } from "@/core/settings/services/project";
+import { PickerForm } from "@/core/shell/editor/PickerForm";
 import { PathFormRow } from "@/core/ui/form/PathFormRow";
 import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";

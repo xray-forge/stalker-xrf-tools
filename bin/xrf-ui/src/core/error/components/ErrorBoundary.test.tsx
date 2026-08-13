@@ -3,7 +3,6 @@ import { RenderResult } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { ReactElement, useState } from "react";
 
-import { ApplicationCrash } from "@/core/error/components/ApplicationCrash";
 import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/error/components/ErrorBoundary";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
@@ -11,8 +10,13 @@ function Boom(): ReactElement {
   throw new Error("render exploded");
 }
 
-function renderCrash(props: IErrorBoundaryFallbackProps): ReactElement {
-  return <ApplicationCrash {...props} />;
+function RenderFallback({ error, onRetry }: IErrorBoundaryFallbackProps): ReactElement {
+  return (
+    <>
+      <span>Fallback: {error.message}</span>
+      <button onClick={onRetry}>Try again</button>
+    </>
+  );
 }
 
 /**
@@ -35,7 +39,7 @@ describe("ErrorBoundary", () => {
 
     withSilencedConsole(() =>
       renderWithProviders(
-        <ErrorBoundary fallback={renderCrash} onCaught={onCaught}>
+        <ErrorBoundary fallback={RenderFallback} onCaught={onCaught}>
           <Boom />
         </ErrorBoundary>
       )
@@ -53,24 +57,24 @@ describe("ErrorBoundary", () => {
   it("shows the fallback instead of taking the window down", () => {
     const { getByText } = withSilencedConsole(() =>
       renderWithProviders(
-        <ErrorBoundary fallback={renderCrash}>
+        <ErrorBoundary fallback={RenderFallback}>
           <Boom />
         </ErrorBoundary>
       )
     );
 
-    expect(getByText("This tool stopped rendering")).toBeInTheDocument();
+    expect(getByText("Fallback: render exploded")).toBeInTheDocument();
   });
 
   it("renders children untouched when nothing throws", () => {
     const { getByText, queryByText } = renderWithProviders(
-      <ErrorBoundary fallback={renderCrash}>
+      <ErrorBoundary fallback={RenderFallback}>
         <div>healthy</div>
       </ErrorBoundary>
     );
 
     expect(getByText("healthy")).toBeInTheDocument();
-    expect(queryByText("This tool stopped rendering")).not.toBeInTheDocument();
+    expect(queryByText("Fallback: render exploded")).not.toBeInTheDocument();
   });
 
   it("re-renders the subtree on retry rather than reloading", async () => {
@@ -84,7 +88,7 @@ describe("ErrorBoundary", () => {
 
     const { getByText } = withSilencedConsole(() =>
       renderWithProviders(
-        <ErrorBoundary fallback={renderCrash}>
+        <ErrorBoundary fallback={RenderFallback}>
           <Flaky />
         </ErrorBoundary>
       )
@@ -107,7 +111,7 @@ describe("ErrorBoundary", () => {
         <>
           <button onClick={() => setRoute("/healthy")}>navigate</button>
 
-          <ErrorBoundary resetKey={route} fallback={renderCrash}>
+          <ErrorBoundary resetKey={route} fallback={RenderFallback}>
             {route === "/broken" ? <Boom /> : <div>next tool</div>}
           </ErrorBoundary>
         </>
@@ -116,13 +120,13 @@ describe("ErrorBoundary", () => {
 
     const { getByText, queryByText } = withSilencedConsole(() => renderWithProviders(<Host />));
 
-    expect(getByText("This tool stopped rendering")).toBeInTheDocument();
+    expect(getByText("Fallback: render exploded")).toBeInTheDocument();
 
     // Without the reset the fallback outlives the route that caused it, and the next tool never
     // renders - the crash follows the user around the application.
     await userEvent.click(getByText("navigate"));
 
     expect(getByText("next tool")).toBeInTheDocument();
-    expect(queryByText("This tool stopped rendering")).not.toBeInTheDocument();
+    expect(queryByText("Fallback: render exploded")).not.toBeInTheDocument();
   });
 });
