@@ -10,8 +10,8 @@ import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
+import { Nullable } from "@/lib/types/general";
 import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/xrf/icons";
 
 export function EquipmentSpriteEditor(): ReactElement {

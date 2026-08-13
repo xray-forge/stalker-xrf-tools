@@ -1,4 +1,4 @@
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export interface ITranslationEntry {
   [language: string]: Nullable<string | Array<string>>;

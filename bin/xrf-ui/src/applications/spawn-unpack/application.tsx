@@ -7,7 +7,7 @@ import {
   EApplicationStatus,
   IApplicationDescriptor,
 } from "@/core/router/application";
-import { SpawnFileService } from "@/lib/spawn-file";
+import { SpawnFileService } from "@/lib/xrf/spawn-file";
 
 export const SPAWN_UNPACK_APPLICATION: IApplicationDescriptor = {
   container: { bindings: [SpawnFileService] },

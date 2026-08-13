@@ -6,11 +6,11 @@ import { ConfigsVerifyResult } from "@/applications/configs-verify/components/Co
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/services/project";
-import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { Nullable } from "@/lib/types/general";
 import { commands as configsEditorCommands } from "@/lib/xrf/bindings/xrf-app-configs-editor";
 import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xrf-ltx";
 import { getProjectConfigsPath } from "@/lib/xrf/project-path";

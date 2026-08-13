@@ -4,9 +4,9 @@ import { userEvent } from "@testing-library/user-event";
 import { Injectable } from "@wirestate/core";
 
 import { EquipmentRepackAction } from "@/applications/equipment-icons/components/equipment-editor/EquipmentRepackAction";
-import { Nullable } from "@/core/types/general";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { AssetService } from "@/lib/assets";
+import { Nullable } from "@/lib/types/general";
+import { AssetService } from "@/lib/xrf/assets";
 import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/xrf/icons";
 
 const SPRITE: IEquipmentPngDescriptor = {

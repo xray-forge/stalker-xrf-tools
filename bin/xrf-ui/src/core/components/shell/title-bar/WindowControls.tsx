@@ -3,8 +3,8 @@ import { ReactElement } from "react";
 
 import { CloseGlyph, MaximizeGlyph, MinimizeGlyph, RestoreGlyph } from "@/core/components/shell/title-bar/CaptionGlyph";
 import { WindowControlButton } from "@/core/components/shell/title-bar/WindowControlButton";
-import { Nullable } from "@/core/types/general";
 import { IWindowControls, useWindowControls } from "@/lib/tauri/use-window-controls";
+import { Nullable } from "@/lib/types/general";
 
 /**
  * The minimize, maximize and close group, in the order the system puts them.

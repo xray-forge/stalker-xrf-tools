@@ -5,7 +5,7 @@ import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
-import { SpawnFileService } from "@/lib/spawn-file/spawn-file.service";
+import { SpawnFileService } from "@/lib/xrf/spawn-file/spawn-file.service";
 
 interface IWatchedService {
   service: SpawnFileService;

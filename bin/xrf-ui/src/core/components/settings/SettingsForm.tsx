@@ -7,9 +7,9 @@ import { ChangeEvent, ReactElement, useCallback } from "react";
 import { SettingsPathField } from "@/core/components/settings/SettingsPathField";
 import { ProjectService } from "@/core/services/project";
 import { SettingsService } from "@/core/services/settings";
-import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/lib/theme";
+import { Nullable } from "@/lib/types/general";
 
 const COLOR_SCHEME_MODE_LABELS: Record<ColorSchemeMode, string> = {
   light: "Light",

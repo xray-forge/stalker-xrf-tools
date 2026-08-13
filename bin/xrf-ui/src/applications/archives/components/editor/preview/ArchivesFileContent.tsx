@@ -11,10 +11,10 @@ import { ArchivePreviewError } from "@/applications/archives/components/editor/p
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
-import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/size";
+import { Nullable } from "@/lib/types/general";
 import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/lib/xrf/archive";
 import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 

@@ -1,7 +1,7 @@
 import { Component, ErrorInfo, ReactElement, ReactNode } from "react";
 
-import { Nullable } from "@/core/types/general";
 import { Logger } from "@/lib/logging";
+import { Nullable } from "@/lib/types/general";
 
 export interface IErrorBoundaryFallbackProps {
   error: Error;

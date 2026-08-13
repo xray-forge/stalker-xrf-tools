@@ -3,8 +3,8 @@ import { ReactElement, ReactNode } from "react";
 
 import { IEditorPanel, TEditorPanelSide } from "@/core/components/shell/panel/context";
 import { PanelStripeButton } from "@/core/components/shell/panel/PanelStripeButton";
-import { Nullable } from "@/core/types/general";
 import { LAYOUT } from "@/lib/theme/tokens";
+import { Nullable } from "@/lib/types/general";
 
 export interface IApplicationPanelStripeProps {
   side: TEditorPanelSide;

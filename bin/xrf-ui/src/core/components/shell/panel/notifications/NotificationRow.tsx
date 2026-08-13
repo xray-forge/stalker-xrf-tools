@@ -12,9 +12,9 @@ import { ReactElement, ReactNode, useCallback, useState } from "react";
 
 import { IApplicationDescriptor, IApplicationGroup } from "@/core/router/application";
 import { findApplicationById, findApplicationGroupById } from "@/core/router/applications";
-import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, INotification } from "@/lib/notifications";
+import { Nullable } from "@/lib/types/general";
 
 const SEVERITY_ICONS: Record<ENotificationSeverity, ReactNode> = {
   [ENotificationSeverity.DEV]: <TerminalIcon fontSize={"small"} />,

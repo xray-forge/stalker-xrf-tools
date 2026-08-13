@@ -1,15 +1,10 @@
 import { Injectable, OnDeactivation } from "@wirestate/core";
 
-import { Nullable } from "@/core/types/general";
 import { Logger } from "@/lib/logging";
+import { Nullable } from "@/lib/types/general";
 
 /**
  * Owns the lifetime of every object url an editor hands to the webview.
- *
- * Object urls are not garbage collected: a blob stays alive until its url is revoked, so anything that
- * creates one has to remember to release it. Every place that did this by hand got it wrong in a
- * different way - `blobToImage` gave up and left the revoke commented out, and the icons editor revoked
- * before its replacement existed, leaving the viewer pointed at a dead url.
  */
 @Injectable()
 export class AssetService {

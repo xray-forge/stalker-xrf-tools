@@ -2,7 +2,7 @@ import { Paper, Stack, TextField, Typography } from "@mui/material";
 import { ChangeEvent, ReactElement, useCallback } from "react";
 import { Handle, Position } from "reactflow";
 
-import { AnyObject } from "@/core/types/general";
+import { AnyObject } from "@/lib/types/general";
 
 interface IPhraseNodeProps {
   data: AnyObject;

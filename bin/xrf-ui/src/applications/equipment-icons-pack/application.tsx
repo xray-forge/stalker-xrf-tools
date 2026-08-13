@@ -7,7 +7,7 @@ import {
   EApplicationStatus,
   IApplicationDescriptor,
 } from "@/core/router/application";
-import { AssetService } from "@/lib/assets";
+import { AssetService } from "@/lib/xrf/assets";
 import { EquipmentService } from "@/lib/xrf/icons";
 
 export const EQUIPMENT_ICONS_PACK_APPLICATION: IApplicationDescriptor = {

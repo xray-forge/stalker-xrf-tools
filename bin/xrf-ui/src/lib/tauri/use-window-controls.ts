@@ -2,7 +2,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { getCurrentWindow, Window } from "@tauri-apps/api/window";
 import { useCallback, useEffect, useState } from "react";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export interface IWindowControls {
   /** False whenever the window cannot be driven, so the caller can render the bar without controls. */

@@ -14,7 +14,7 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 import { IVisualMeshData } from "@/lib/visuals/visual-mesh";
 
 const BACKGROUND_COLOR: number = 0x353535;

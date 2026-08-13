@@ -4,9 +4,9 @@ import { ReactElement, useCallback } from "react";
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/components/editor/archive-editor.styles";
 import { ArchiveFileDetailRow } from "@/applications/archives/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivesService } from "@/applications/archives/store/archives";
-import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
+import { Nullable } from "@/lib/types/general";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 export interface IArchiveFileDetailsPanelProps extends BaseComponentProps {

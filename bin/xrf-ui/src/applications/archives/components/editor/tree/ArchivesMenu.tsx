@@ -11,8 +11,8 @@ import { ArchiveTreeItem } from "@/applications/archives/components/editor/tree/
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
-import { Nullable, Optional } from "@/core/types/general";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
+import { Nullable, Optional } from "@/lib/types/general";
 import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/lib/xrf/archive";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 

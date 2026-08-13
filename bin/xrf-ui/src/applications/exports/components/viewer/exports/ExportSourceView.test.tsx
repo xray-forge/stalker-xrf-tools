@@ -3,9 +3,9 @@ import { act, waitFor } from "@testing-library/react";
 
 import { ExportSourceView } from "@/applications/exports/components/viewer/exports/ExportSourceView";
 import { ExportsService } from "@/applications/exports/store/exports";
-import { Nullable } from "@/core/types/general";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
+import { Nullable } from "@/lib/types/general";
 import { ExportSourceContent } from "@/lib/xrf/bindings/xrf-export";
 
 function mockSource(name: string, content: string, line: number = 18): ExportSourceContent {

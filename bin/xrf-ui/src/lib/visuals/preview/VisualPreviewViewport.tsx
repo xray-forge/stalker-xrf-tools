@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { ReactElement, useEffect, useRef } from "react";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 import { IVisualMeshData, IVisualPreviewViewOptions, VisualPreviewScene } from "@/lib/visuals";
 
 interface IVisualPreviewViewportProps {

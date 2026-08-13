@@ -4,8 +4,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { NotificationsService } from "@/core/services/notifications";
-import { Nullable } from "@/core/types/general";
 import { ENotificationSeverity } from "@/lib/notifications";
+import { Nullable } from "@/lib/types/general";
 
 const BADGE_COLORS: Record<ENotificationSeverity, "default" | "success" | "info" | "warning" | "error"> = {
   [ENotificationSeverity.DEV]: "default",

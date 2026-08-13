@@ -7,8 +7,8 @@ import { EditorToolbarPathSeparator } from "@/core/components/editor/EditorToolb
 import { useIsEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { IApplicationDescriptor } from "@/core/router/application";
 import { findApplication } from "@/core/router/applications";
-import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
+import { Nullable } from "@/lib/types/general";
 
 export interface IEditorToolbarProps extends BaseComponentProps {
   /** Overrides the application name resolved from the route. Rarely needed. */

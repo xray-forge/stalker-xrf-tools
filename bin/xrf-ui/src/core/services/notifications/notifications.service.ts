@@ -1,7 +1,6 @@
 import { Injectable, OnEvent, WireEvent } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable } from "@wirestate/mobx";
 
-import { Nullable } from "@/core/types/general";
 import { Logger } from "@/lib/logging";
 import {
   ENotificationSeverity,
@@ -10,6 +9,7 @@ import {
   NOTIFICATION_PUSH_EVENT,
   NOTIFICATION_SEVERITY_RANK,
 } from "@/lib/notifications";
+import { Nullable } from "@/lib/types/general";
 
 /**
  * The application wide record of what commands did.

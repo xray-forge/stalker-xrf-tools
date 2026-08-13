@@ -8,10 +8,10 @@ import { ReactElement, useCallback, useMemo } from "react";
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/components/editor/archive-editor.styles";
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
-import { Nullable } from "@/core/types/general";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { formatBytes } from "@/lib/size";
+import { Nullable } from "@/lib/types/general";
 import { isUnderArchiveDirectory, TArchiveOperation } from "@/lib/xrf/archive";
 import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 

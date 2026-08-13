@@ -16,9 +16,9 @@ import {
 import { ExportsMenuHeader } from "@/applications/exports/components/viewer/exports/ExportsMenuHeader";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
-import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
+import { Nullable } from "@/lib/types/general";
 import { ExportDescriptor } from "@/lib/xrf/bindings/xrf-export";
 
 const DECLARATION_ITEM_PREFIX: string = "declaration:";

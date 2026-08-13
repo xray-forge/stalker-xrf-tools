@@ -1,7 +1,7 @@
 import { DialogFilter, open, save } from "@tauri-apps/plugin-dialog";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export interface IPathStateOptions {
   title?: string;

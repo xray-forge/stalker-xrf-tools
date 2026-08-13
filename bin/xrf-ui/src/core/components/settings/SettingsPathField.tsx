@@ -3,7 +3,7 @@ import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export interface ISettingsPathFieldProps {
   label: string;

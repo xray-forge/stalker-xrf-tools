@@ -5,11 +5,11 @@ import { ReactElement, useCallback, useState } from "react";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/services/project";
-import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { Nullable } from "@/lib/types/general";
 import { commands as spawnsEditorCommands } from "@/lib/xrf/bindings/xrf-app-spawns-editor";
 import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/lib/xrf/project-path";
 

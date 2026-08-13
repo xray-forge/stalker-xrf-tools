@@ -10,7 +10,7 @@ import { SettingsDialog } from "@/core/components/settings/SettingsDialog";
 import { ApplicationPanelStripe } from "@/core/components/shell/panel/ApplicationPanelStripe";
 import { IEditorPanel } from "@/core/components/shell/panel/context";
 import { RailButton } from "@/core/components/shell/panel/RailButton";
-import { Maybe, Nullable } from "@/core/types/general";
+import { Maybe, Nullable } from "@/lib/types/general";
 
 export interface IApplicationRailProps {
   panels: Array<IEditorPanel>;

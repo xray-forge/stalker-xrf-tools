@@ -1,7 +1,7 @@
 import * as path from "@tauri-apps/api/path";
 import { exists } from "@tauri-apps/plugin-fs";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export function getProjectConfigsPath(projectPath: string): Promise<string> {
   return path.resolve(projectPath, "src", "engine", "configs");

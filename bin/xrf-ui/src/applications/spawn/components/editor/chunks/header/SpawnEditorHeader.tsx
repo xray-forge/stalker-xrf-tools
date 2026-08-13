@@ -3,8 +3,8 @@ import { ReactElement } from "react";
 
 import { SpawnEditorHeaderTable } from "@/applications/spawn/components/editor/chunks/header/SpawnEditorHeaderTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
-import { SpawnFileService } from "@/lib/spawn-file";
 import { SpawnHeaderChunk } from "@/lib/xrf/bindings/xrf-db";
+import { SpawnFileService } from "@/lib/xrf/spawn-file";
 
 export function SpawnEditorHeader(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);

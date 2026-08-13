@@ -13,8 +13,8 @@ import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/components/shell/panel/context";
-import { Nullable } from "@/core/types/general";
 import { formatBytes } from "@/lib/size";
+import { Nullable } from "@/lib/types/general";
 import { ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 export function ArchivesEditor(): ReactElement {

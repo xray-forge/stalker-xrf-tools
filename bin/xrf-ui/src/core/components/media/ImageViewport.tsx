@@ -6,7 +6,6 @@ import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { MouseEvent, ReactElement, useCallback, useEffect, useRef, useState, WheelEvent } from "react";
 
 import { IMAGE_CHECKERBOARD } from "@/core/components/media/media.styles";
-import { Nullable } from "@/core/types/general";
 import {
   clampScale,
   fitToViewport,
@@ -16,6 +15,7 @@ import {
   zoomAround,
   zoomByWheel,
 } from "@/lib/media/pan-zoom";
+import { Nullable } from "@/lib/types/general";
 
 export interface IImageViewportProps {
   src: string;

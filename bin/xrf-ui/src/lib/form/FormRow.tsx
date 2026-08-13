@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export interface IFormRowProps {
   label: string;

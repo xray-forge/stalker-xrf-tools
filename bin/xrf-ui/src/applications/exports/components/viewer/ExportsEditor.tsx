@@ -13,7 +13,7 @@ import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/components/shell/panel/context";
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 import { ExportDescriptor, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 
 export function ExportsEditor(): ReactElement {

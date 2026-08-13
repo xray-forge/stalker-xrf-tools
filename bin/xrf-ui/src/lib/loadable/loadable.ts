@@ -1,4 +1,4 @@
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export class Loadable<T, E = Error> {
   public constructor(

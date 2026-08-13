@@ -3,8 +3,8 @@ import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box, IconButton, TextField, Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 
-import { Nullable } from "@/core/types/general";
 import { FormRow } from "@/lib/form/FormRow";
+import { Nullable } from "@/lib/types/general";
 
 export interface IFilePickerInputProps {
   /** When given, the control labels itself by composing a `FormRow`. */

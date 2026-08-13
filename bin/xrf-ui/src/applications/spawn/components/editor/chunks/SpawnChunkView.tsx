@@ -3,9 +3,9 @@ import { ReactElement, ReactNode } from "react";
 
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
-import { Nullable } from "@/core/types/general";
 import { Loadable } from "@/lib/loadable";
 import { useMountEffect } from "@/lib/react";
+import { Nullable } from "@/lib/types/general";
 
 export interface ISpawnChunkViewProps<T> {
   chunk: Loadable<Nullable<T>>;

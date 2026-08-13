@@ -1,6 +1,6 @@
-import { Nullable } from "@/core/types/general";
 import { getSyntaxRules } from "@/lib/syntax/syntax-rules";
 import { ESyntaxLanguage, ESyntaxToken, ISyntaxRule, ISyntaxSpan } from "@/lib/syntax/syntax.types";
+import { Nullable } from "@/lib/types/general";
 
 /**
  * Size past which a file is shown uncoloured.

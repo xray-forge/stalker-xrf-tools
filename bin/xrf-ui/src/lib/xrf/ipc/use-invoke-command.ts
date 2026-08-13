@@ -1,7 +1,7 @@
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 import { useCallback, useState } from "react";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export interface IAsyncCommandData<T> {
   isLoading: boolean;

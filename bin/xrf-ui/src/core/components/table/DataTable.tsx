@@ -2,8 +2,8 @@ import { Box, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef, GridRowId, GridRowParams } from "@mui/x-data-grid";
 import { ReactElement, useCallback, useMemo, useState } from "react";
 
-import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
+import { Nullable } from "@/lib/types/general";
 
 export interface IDataTableProps<T> extends BaseComponentProps {
   rows: Array<T>;

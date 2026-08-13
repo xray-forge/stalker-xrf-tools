@@ -2,9 +2,9 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { Injectable, OnDeprovision, OnProvision, ProvisionId, WireStatus } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 import { Logger } from "@/lib/logging";
+import { Nullable } from "@/lib/types/general";
 
 @Injectable()
 export class ProjectService {

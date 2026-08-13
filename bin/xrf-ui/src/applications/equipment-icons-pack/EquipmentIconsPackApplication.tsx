@@ -5,12 +5,12 @@ import { EquipmentPackResult } from "@/applications/equipment-icons-pack/compone
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/services/project";
-import { Nullable } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { useMountEffect } from "@/lib/react";
+import { Nullable } from "@/lib/types/general";
 import { EquipmentService, IPackEquipmentResult } from "@/lib/xrf/icons";
 import {
   getPathIfExists,

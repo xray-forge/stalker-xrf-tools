@@ -6,11 +6,11 @@ import { ArchivesUnpackResult } from "@/applications/archives-unpack/components/
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/services/project";
-import { Nullable } from "@/core/types/general";
 import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { Nullable } from "@/lib/types/general";
 import { commands as archivesEditorCommands } from "@/lib/xrf/bindings/xrf-app-archives-editor";
 import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xrf-archive";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf/project-path";

@@ -1,4 +1,4 @@
-import { AnyObject } from "@/core/types/general";
+import { AnyObject } from "@/lib/types/general";
 
 /** Vectors, tuples and nested objects all have to land as something a person can read in one line. */
 export function formatSpawnRowDetailsValue(value: unknown): string {

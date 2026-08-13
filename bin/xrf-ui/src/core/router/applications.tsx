@@ -27,7 +27,7 @@ import { SPAWN_UNPACK_APPLICATION } from "@/applications/spawn-unpack/applicatio
 import { TRANSLATIONS_APPLICATION } from "@/applications/translations/application";
 import { VISUAL_PREVIEW_APPLICATION } from "@/applications/visual-preview/application";
 import { EApplicationGroupId, IApplicationDescriptor, IApplicationGroup } from "@/core/router/application";
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 /**
  * The groups home draws, in the order it draws them.

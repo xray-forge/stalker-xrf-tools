@@ -8,7 +8,7 @@ import {
   EApplicationStatus,
   IApplicationDescriptor,
 } from "@/core/router/application";
-import { AssetService } from "@/lib/assets";
+import { AssetService } from "@/lib/xrf/assets";
 
 export const ARCHIVES_APPLICATION: IApplicationDescriptor = {
   container: { bindings: [AssetService, ArchivesService] },

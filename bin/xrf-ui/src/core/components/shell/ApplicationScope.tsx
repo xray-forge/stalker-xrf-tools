@@ -3,7 +3,7 @@ import { ContainerProvider, useContainer } from "@wirestate/react";
 import { Fragment, ReactElement, ReactNode, useMemo } from "react";
 
 import { IApplicationDescriptor } from "@/core/router/application";
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 export interface IApplicationScopeProps {
   application: Nullable<IApplicationDescriptor>;

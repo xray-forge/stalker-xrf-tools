@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-import { Nullable } from "@/core/types/general";
+import { Nullable } from "@/lib/types/general";
 
 /**
  * The element the active application's toolbar is rendered into.

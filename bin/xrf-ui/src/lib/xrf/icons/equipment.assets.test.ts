@@ -1,10 +1,10 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { Container } from "@wirestate/core";
 
-import { Nullable } from "@/core/types/general";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { AssetService } from "@/lib/assets";
+import { Nullable } from "@/lib/types/general";
+import { AssetService } from "@/lib/xrf/assets";
 import { EquipmentService } from "@/lib/xrf/icons/equipment.service";
 
 const RESPONSE = {

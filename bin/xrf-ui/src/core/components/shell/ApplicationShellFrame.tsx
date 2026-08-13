@@ -17,9 +17,9 @@ import { IPanelSlot, usePanelSlot } from "@/core/components/shell/panel/use-pane
 import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
 import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/router/application";
 import { findApplication } from "@/core/router/applications";
-import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { Nullable } from "@/lib/types/general";
 
 export interface IApplicationShellFrameProps extends BaseComponentProps {
   children: ReactNode;

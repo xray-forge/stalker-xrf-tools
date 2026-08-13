@@ -14,8 +14,8 @@ import {
   useState,
 } from "react";
 
-import { Nullable } from "@/core/types/general";
 import { extractPeaks, formatPlaybackTime } from "@/lib/media/waveform";
+import { Nullable } from "@/lib/types/general";
 
 /** One peak per two pixels: finer reads as noise, coarser loses short transients. */
 const PEAKS_PER_PIXEL: number = 0.5;

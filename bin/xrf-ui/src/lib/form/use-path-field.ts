@@ -2,9 +2,9 @@ import { DialogFilter } from "@tauri-apps/plugin-dialog";
 import { exists } from "@tauri-apps/plugin-fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Nullable } from "@/core/types/general";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
+import { Nullable } from "@/lib/types/general";
 
 const STORAGE_PREFIX: string = "xrf.form.";
 const VALIDATE_DEBOUNCE_MS: number = 250;

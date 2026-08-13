@@ -3,8 +3,8 @@ import { ReactElement } from "react";
 
 import { SpawnEditorArtefactsNodesTable } from "@/applications/spawn/components/editor/chunks/artefacts/SpawnEditorArtefactsNodesTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
-import { SpawnFileService } from "@/lib/spawn-file";
 import { SpawnArtefactSpawnsChunk } from "@/lib/xrf/bindings/xrf-db";
+import { SpawnFileService } from "@/lib/xrf/spawn-file";
 
 export function SpawnEditorArtefacts(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);

@@ -1,4 +1,4 @@
-import { Optional } from "@/core/types/general";
+import { Optional } from "@/lib/types/general";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 /**
