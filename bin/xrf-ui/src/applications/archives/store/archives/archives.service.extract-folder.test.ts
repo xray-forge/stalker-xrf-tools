@@ -6,7 +6,6 @@ import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { ArchiveExtractFolderResult } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 /** The operation union carries every kind of write, so a folder assertion has to name its own. */
 function extractedFolder(service: ArchivesService): Nullable<ArchiveExtractFolderResult> {
@@ -22,7 +21,7 @@ describe("ArchivesService folder extraction", () => {
     const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER]: {
+      ["plugin:archives-editor|extract_archive_folder"]: {
         prefix: "configs",
         destination: "C:\\out",
         extractedCount: 12,
@@ -32,7 +31,7 @@ describe("ArchivesService folder extraction", () => {
 
     await service.extractArchiveFolder("configs", "C:\\out");
 
-    expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER, {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|extract_archive_folder", {
       prefix: "configs",
       destination: "C:\\out",
     });
@@ -48,7 +47,7 @@ describe("ArchivesService folder extraction", () => {
 
     await service.extractArchiveFolder("", "C:\\out");
 
-    expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER, {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|extract_archive_folder", {
       prefix: "",
       destination: "C:\\out",
     });
@@ -58,7 +57,7 @@ describe("ArchivesService folder extraction", () => {
     const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER]: () => {
+      ["plugin:archives-editor|extract_archive_folder"]: () => {
         throw new Error("destination is read only");
       },
     });

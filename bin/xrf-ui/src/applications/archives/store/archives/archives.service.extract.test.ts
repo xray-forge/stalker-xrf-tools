@@ -6,7 +6,6 @@ import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "configs\\system.ltx" });
 
@@ -25,7 +24,7 @@ describe("ArchivesService extraction", () => {
 
     await service.extractArchiveFile(FILE, "C:\\out\\system.ltx");
 
-    expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE, {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|extract_archive_file", {
       name: "configs\\system.ltx",
       destination: "C:\\out\\system.ltx",
     });
@@ -37,7 +36,7 @@ describe("ArchivesService extraction", () => {
     const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE]: () => {
+      ["plugin:archives-editor|extract_archive_file"]: () => {
         throw new Error("destination is read only");
       },
     });

@@ -1,5 +1,4 @@
 import { Alert } from "@mui/material";
-import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
@@ -11,7 +10,7 @@ import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
-import { ESpawnsEditorCommand } from "@/lib/xrf/ipc";
+import { commands as spawnsEditorCommands } from "@/lib/xrf/bindings/xrf-app-spawns-editor";
 import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf/project-path";
 
 /**
@@ -57,7 +56,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
     setUnpackedTo(null);
 
     try {
-      await invoke(ESpawnsEditorCommand.UNPACK_SPAWN_FILE, { from: source.value, destination: destination.value });
+      await spawnsEditorCommands.unpackSpawnFile(source.value, destination.value);
 
       setUnpackedTo(destination.value);
 

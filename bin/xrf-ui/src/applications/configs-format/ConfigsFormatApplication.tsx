@@ -1,5 +1,4 @@
 import { Alert, Checkbox, FormControlLabel } from "@mui/material";
-import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
@@ -12,8 +11,8 @@ import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { commands as configsEditorCommands } from "@/lib/xrf/bindings/xrf-app-configs-editor";
 import { LtxProjectFormatResult } from "@/lib/xrf/bindings/xrf-ltx";
-import { EConfigsEditorCommand } from "@/lib/xrf/ipc";
 import { getProjectConfigsPath } from "@/lib/xrf/project-path";
 
 export function ConfigsFormatApplication(): ReactElement {
@@ -36,6 +35,10 @@ export function ConfigsFormatApplication(): ReactElement {
   });
 
   const onFormat = useCallback(async () => {
+    if (!configs.value) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       setResult(null);
@@ -43,10 +46,9 @@ export function ConfigsFormatApplication(): ReactElement {
 
       log.info("Performing format command:", isCheck, configs.value);
 
-      const formatted: LtxProjectFormatResult = await invoke(
-        isCheck ? EConfigsEditorCommand.CHECK_FORMAT_CONFIGS_PATH : EConfigsEditorCommand.FORMAT_CONFIGS_PATH,
-        { path: configs.value }
-      );
+      const formatted: LtxProjectFormatResult = await (isCheck
+        ? configsEditorCommands.checkFormatConfigsPath(configs.value)
+        : configsEditorCommands.formatConfigsPath(configs.value));
 
       setResult(formatted);
 

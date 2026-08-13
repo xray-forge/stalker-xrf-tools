@@ -6,7 +6,6 @@ import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { createLoadable } from "@/lib/loadable";
 import { ArchiveFileDescriptor, ProjectReadResult } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 function ignoreReadResult(): void {}
 
@@ -23,7 +22,7 @@ describe("ArchivesService file selection", () => {
     const descriptor = mockArchiveFileDescriptor();
     const result: ProjectReadResult = { name: descriptor.name, content: "[system]", size: 8 };
 
-    setMockInvokeResponses({ [EArchivesEditorCommand.READ_ARCHIVE_FILE]: result });
+    setMockInvokeResponses({ ["plugin:archives-editor|read_archive_file"]: result });
 
     const service: ArchivesService = mockArchivesService([descriptor]);
 
@@ -31,7 +30,7 @@ describe("ArchivesService file selection", () => {
 
     expect(service.selectedFile).toStrictEqual(descriptor);
     expect(service.content.value?.kind === "text" ? service.content.value.result : null).toEqual(result);
-    expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, { path: descriptor.name });
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", { path: descriptor.name });
   });
 
   it("selects unsupported files without invoking the read command", async () => {
@@ -58,7 +57,7 @@ describe("ArchivesService file selection", () => {
     });
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.READ_ARCHIVE_FILE]: (args?: Record<string, unknown>) =>
+      ["plugin:archives-editor|read_archive_file"]: (args?: Record<string, unknown>) =>
         args?.path === first.name ? firstResult : secondResult,
     });
 
@@ -79,7 +78,7 @@ describe("ArchivesService file selection", () => {
   it("clears file state when the project closes", async () => {
     const descriptor = mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" });
 
-    setMockInvokeResponses({ [EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT]: undefined });
+    setMockInvokeResponses({ ["plugin:archives-editor|close_archives_project"]: undefined });
 
     const service: ArchivesService = mockArchivesService([descriptor]);
 
@@ -105,7 +104,7 @@ describe("ArchivesService file selection", () => {
     const descriptor = mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" });
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT]: () => {
+      ["plugin:archives-editor|close_archives_project"]: () => {
         throw new Error("archive is busy");
       },
     });

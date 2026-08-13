@@ -6,7 +6,6 @@ import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
-import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 interface IWatchedService {
   service: ExportsService;
@@ -35,7 +34,7 @@ describe("ExportsService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [EExportsEditorCommand.OPEN_XR_EXPORTS]: () => {
+      ["plugin:exports-editor|open_xr_exports"]: () => {
         throw new Error("no scripts directory");
       },
     });
@@ -51,12 +50,12 @@ describe("ExportsService notifications", () => {
   it("reports a refresh that could not complete", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    setMockInvokeResponses({ [EExportsEditorCommand.OPEN_XR_EXPORTS]: mockExportsProject() });
+    setMockInvokeResponses({ ["plugin:exports-editor|open_xr_exports"]: mockExportsProject() });
 
     await service.openExportsProject("C:\\game\\scripts");
 
     setMockInvokeResponses({
-      [EExportsEditorCommand.OPEN_XR_EXPORTS]: () => {
+      ["plugin:exports-editor|open_xr_exports"]: () => {
         throw new Error("scripts moved");
       },
     });
@@ -71,7 +70,7 @@ describe("ExportsService notifications", () => {
   it("says nothing about a project that opened", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    setMockInvokeResponses({ [EExportsEditorCommand.OPEN_XR_EXPORTS]: mockExportsProject() });
+    setMockInvokeResponses({ ["plugin:exports-editor|open_xr_exports"]: mockExportsProject() });
 
     await service.openExportsProject("C:\\game\\scripts");
 

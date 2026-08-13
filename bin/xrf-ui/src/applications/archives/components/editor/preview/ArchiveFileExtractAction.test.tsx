@@ -10,7 +10,6 @@ import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "xml",
@@ -27,7 +26,7 @@ function renderAction(): RenderResult {
 }
 
 function extractCalls(): Array<unknown> {
-  return mockInvoke.mock.calls.filter(([command]) => command === EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE);
+  return mockInvoke.mock.calls.filter(([command]) => command === "plugin:archives-editor|extract_archive_file");
 }
 
 describe("ArchiveFileExtractAction", () => {
@@ -61,7 +60,7 @@ describe("ArchiveFileExtractAction", () => {
 
     await waitFor(() => expect(extractCalls()).toHaveLength(1));
     expect(extractCalls()[0]).toEqual([
-      EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE,
+      "plugin:archives-editor|extract_archive_file",
       { name: FILE.name, destination: "C:\\out\\dialogs.xml" },
     ]);
 

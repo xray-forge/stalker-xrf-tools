@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import {
   EventBus,
   inject,
@@ -16,6 +15,7 @@ import { AnyObject, Nullable } from "@/core/types/general";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { commands as spawnsEditorCommands } from "@/lib/xrf/bindings/xrf-app-spawns-editor";
 import {
   SpawnALifeSpawnsChunk,
   SpawnArtefactSpawnsChunk,
@@ -24,7 +24,7 @@ import {
   SpawnPatrolsChunk,
 } from "@/lib/xrf/bindings/xrf-db";
 import { transformError } from "@/lib/xrf/error";
-import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc";
 
 export interface ISpawnRowSelection {
   /** What kind of row this is, for the panel heading. */
@@ -112,7 +112,7 @@ export class SpawnFileService {
     this.log.info("Provisioning:", provisionId);
 
     try {
-      const isOpen: boolean = await invoke(ESpawnsEditorCommand.HAS_SPAWN_FILE);
+      const isOpen: boolean = await spawnsEditorCommands.hasSpawnFile();
 
       this.log.info(isOpen ? "Existing spawn file detected" : "No existing spawn file");
 
@@ -146,7 +146,7 @@ export class SpawnFileService {
   public onDeactivation(): void {
     this.log.info("Deactivating");
 
-    releaseEditorProject(ESpawnsEditorCommand.CLOSE_SPAWN_FILE);
+    releaseEditorProject(spawnsEditorCommands.closeSpawnFile);
   }
 
   @BoundAction()
@@ -157,7 +157,7 @@ export class SpawnFileService {
     this.header = createLoadable(null, true);
 
     try {
-      const header: SpawnHeaderChunk = await invoke(ESpawnsEditorCommand.OPEN_SPAWN_FILE, { path });
+      const header: SpawnHeaderChunk = await spawnsEditorCommands.openSpawnFile(path);
 
       this.log.info("Spawn file opened");
 
@@ -189,7 +189,7 @@ export class SpawnFileService {
     this.log.info("Closing existing spawn file");
 
     try {
-      await invoke(ESpawnsEditorCommand.CLOSE_SPAWN_FILE);
+      await spawnsEditorCommands.closeSpawnFile();
 
       runInAction(() => {
         this.isOpen = false;
@@ -217,7 +217,7 @@ export class SpawnFileService {
     this.operation = createLoadable(null, true);
 
     try {
-      await invoke(ESpawnsEditorCommand.SAVE_SPAWN_FILE, { path });
+      await spawnsEditorCommands.saveSpawnFile(path);
 
       runInAction(() => (this.operation = createLoadable("save")));
 
@@ -248,7 +248,7 @@ export class SpawnFileService {
     this.operation = createLoadable(null, true);
 
     try {
-      await invoke(ESpawnsEditorCommand.EXPORT_SPAWN_FILE, { path });
+      await spawnsEditorCommands.exportSpawnFile(path);
 
       runInAction(() => (this.operation = createLoadable("export")));
 
@@ -290,27 +290,27 @@ export class SpawnFileService {
 
   @BoundAction()
   public async loadAlifeSpawn(): Promise<void> {
-    await this.loadChunk("alifeSpawn", ESpawnsEditorCommand.GET_SPAWN_FILE_ALIFE_SPAWNS);
+    await this.loadChunk("alifeSpawn", spawnsEditorCommands.getSpawnFileAlifeSpawns);
   }
 
   @BoundAction()
   public async loadArtefactSpawn(): Promise<void> {
-    await this.loadChunk("artefactSpawn", ESpawnsEditorCommand.GET_SPAWN_FILE_ARTEFACT_SPAWNS);
+    await this.loadChunk("artefactSpawn", spawnsEditorCommands.getSpawnFileArtefactSpawns);
   }
 
   @BoundAction()
   public async loadPatrols(): Promise<void> {
-    await this.loadChunk("patrols", ESpawnsEditorCommand.GET_SPAWN_FILE_PATROLS);
+    await this.loadChunk("patrols", spawnsEditorCommands.getSpawnFilePatrols);
   }
 
   @BoundAction()
   public async loadGraphs(): Promise<void> {
-    await this.loadChunk("graphs", ESpawnsEditorCommand.GET_SPAWN_FILE_GRAPHS);
+    await this.loadChunk("graphs", spawnsEditorCommands.getSpawnFileGraphs);
   }
 
   @BoundAction()
   public async loadHeader(): Promise<void> {
-    await this.loadChunk("header", ESpawnsEditorCommand.GET_SPAWN_FILE_HEADER);
+    await this.loadChunk("header", spawnsEditorCommands.getSpawnFileHeader);
   }
 
   /**
@@ -321,7 +321,7 @@ export class SpawnFileService {
    */
   private async loadChunk<K extends "header" | "alifeSpawn" | "artefactSpawn" | "patrols" | "graphs">(
     key: K,
-    command: ESpawnsEditorCommand
+    request: () => Promise<unknown>
   ): Promise<void> {
     const current: Loadable<unknown> = this[key];
 
@@ -335,7 +335,7 @@ export class SpawnFileService {
     runInAction(() => ((this[key] as Loadable<unknown>) = createLoadable(null, true)));
 
     try {
-      const chunk: unknown = await invoke(command);
+      const chunk: unknown = await request();
 
       runInAction(() => ((this[key] as Loadable<unknown>) = createLoadable(chunk)));
     } catch (error: unknown) {
@@ -354,7 +354,7 @@ export class SpawnFileService {
 
   private async loadPath(): Promise<void> {
     try {
-      const path: Nullable<string> = await invoke(ESpawnsEditorCommand.GET_SPAWN_FILE_PATH);
+      const path: Nullable<string> = await spawnsEditorCommands.getSpawnFilePath();
 
       runInAction(() => (this.path = path));
     } catch (error: unknown) {

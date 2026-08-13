@@ -7,7 +7,6 @@ import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "textures\\wpn.dds" });
 
@@ -50,7 +49,7 @@ describe("ArchivesService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE]: () => {
+      ["plugin:archives-editor|extract_archive_file"]: () => {
         throw new Error("destination is read only");
       },
     });
@@ -66,7 +65,7 @@ describe("ArchivesService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER]: () => ({
+      ["plugin:archives-editor|extract_archive_folder"]: () => ({
         destination: "C:\\out",
         extractedCount: 12,
         prefix: "textures",
@@ -85,7 +84,7 @@ describe("ArchivesService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.OPEN_ARCHIVES_PROJECT]: () => {
+      ["plugin:archives-editor|open_archives_project"]: () => {
         throw new Error("not an archive folder");
       },
     });

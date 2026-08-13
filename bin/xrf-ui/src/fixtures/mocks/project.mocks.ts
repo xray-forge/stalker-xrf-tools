@@ -96,11 +96,11 @@ export function mockExportsProject(overrides: Partial<ExportsProject> = {}): Exp
 export function mockTranslationsProject(overrides: Partial<ITranslationsProjectJson> = {}): ITranslationsProjectJson {
   return {
     "st_dialogs.json": {
-      dialog_greeting: "Hello, stalker",
+      dialog_greeting: { eng: "Hello, stalker" },
     },
     "st_items.json": {
-      wpn_ak74: "AK-74",
-      wpn_ak74_descr: "Assault rifle",
+      wpn_ak74: { eng: "AK-74" },
+      wpn_ak74_descr: { eng: "Assault rifle" },
     },
     ...overrides,
   };

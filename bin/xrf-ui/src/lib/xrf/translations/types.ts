@@ -1,5 +1,11 @@
+import { Nullable } from "@/core/types/general";
+
+export interface ITranslationEntry {
+  [language: string]: Nullable<string | Array<string>>;
+}
+
 export interface ITranslationJson {
-  [language: string]: string | Array<string>;
+  [entry: string]: ITranslationEntry;
 }
 
 export interface ITranslationsProjectJson {

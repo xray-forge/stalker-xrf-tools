@@ -8,7 +8,6 @@ import { ProjectService } from "@/core/services/project";
 import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 describe("ExportsApplication", () => {
   beforeEach(() => {
@@ -16,8 +15,8 @@ describe("ExportsApplication", () => {
     window.localStorage.setItem("xrf-project-path", "C:\\projects\\active-xrf");
 
     setMockInvokeResponses({
-      [EExportsEditorCommand.GET_XR_EXPORTS]: null,
-      [EExportsEditorCommand.OPEN_XR_EXPORTS]: mockExportsProject({ root: "C:\\projects\\active-xrf" }),
+      ["plugin:exports-editor|get_xr_exports"]: null,
+      ["plugin:exports-editor|open_xr_exports"]: mockExportsProject({ root: "C:\\projects\\active-xrf" }),
     });
   });
 
@@ -46,7 +45,7 @@ describe("ExportsApplication", () => {
     expect(await findByText("Open script exports")).toBeInTheDocument();
     expect(await findByDisplayValue("C:\\projects\\active-xrf")).toBeInTheDocument();
     expect(queryByText("Open")).not.toBeInTheDocument();
-    expect(mockInvoke).not.toHaveBeenCalledWith(EExportsEditorCommand.OPEN_XR_EXPORTS, expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:exports-editor|open_xr_exports", expect.anything());
   });
 
   it("resolves the services its descriptor declares, with nothing bound above the shell", async () => {
@@ -56,7 +55,7 @@ describe("ExportsApplication", () => {
 
     await userEvent.click(await findByRole("button", { name: "Open exports" }));
 
-    expect(mockInvoke).toHaveBeenCalledWith(EExportsEditorCommand.OPEN_XR_EXPORTS, {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports-editor|open_xr_exports", {
       projectPath: "C:\\projects\\active-xrf",
     });
   });

@@ -6,7 +6,6 @@ import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { AssetService } from "@/lib/assets";
 import { EquipmentService } from "@/lib/xrf/icons/equipment.service";
-import { EIconsEditorCommand } from "@/lib/xrf/ipc";
 
 const RESPONSE = {
   name: "equipment.dds",
@@ -51,7 +50,7 @@ function createService(): { service: EquipmentService; assets: AssetService; con
 
 describe("EquipmentService object urls", () => {
   it("holds exactly one url no matter how often the sprite is reloaded", async () => {
-    setMockInvokeResponses({ [EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE]: RESPONSE });
+    setMockInvokeResponses({ ["plugin:icons-editor|reopen_equipment_sprite"]: RESPONSE });
 
     const { service, assets } = createService();
 
@@ -65,7 +64,7 @@ describe("EquipmentService object urls", () => {
   });
 
   it("keeps the url the reload just produced rather than revoking it", async () => {
-    setMockInvokeResponses({ [EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE]: RESPONSE });
+    setMockInvokeResponses({ ["plugin:icons-editor|reopen_equipment_sprite"]: RESPONSE });
 
     const { service, assets } = createService();
 
@@ -89,7 +88,7 @@ describe("EquipmentService object urls", () => {
   });
 
   it("releases the sprite url when the editor is navigated away from", async () => {
-    setMockInvokeResponses({ [EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE]: RESPONSE });
+    setMockInvokeResponses({ ["plugin:icons-editor|reopen_equipment_sprite"]: RESPONSE });
 
     const { service, assets, container } = createService();
 

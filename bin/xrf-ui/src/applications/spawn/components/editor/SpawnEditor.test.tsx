@@ -11,7 +11,6 @@ import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { SpawnFileService } from "@/lib/spawn-file";
 import { SpawnFile, SpawnHeaderChunk } from "@/lib/xrf/bindings/xrf-db";
-import { ESpawnsEditorCommand } from "@/lib/xrf/ipc";
 
 const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
 
@@ -27,13 +26,13 @@ function mockOpenSpawn(overrides: Partial<SpawnFile> = {}): void {
   const file: SpawnFile = mockSpawnFile(overrides);
 
   setMockInvokeResponses({
-    [ESpawnsEditorCommand.HAS_SPAWN_FILE]: true,
-    [ESpawnsEditorCommand.GET_SPAWN_FILE_HEADER]: file.header,
-    [ESpawnsEditorCommand.GET_SPAWN_FILE_PATH]: SPAWN_PATH,
-    [ESpawnsEditorCommand.GET_SPAWN_FILE_PATROLS]: file.patrols,
-    [ESpawnsEditorCommand.GET_SPAWN_FILE_GRAPHS]: file.graphs,
-    [ESpawnsEditorCommand.GET_SPAWN_FILE_ALIFE_SPAWNS]: file.alifeSpawn,
-    [ESpawnsEditorCommand.GET_SPAWN_FILE_ARTEFACT_SPAWNS]: file.artefactSpawn,
+    ["plugin:spawns-editor|has_spawn_file"]: true,
+    ["plugin:spawns-editor|get_spawn_file_header"]: file.header,
+    ["plugin:spawns-editor|get_spawn_file_path"]: SPAWN_PATH,
+    ["plugin:spawns-editor|get_spawn_file_patrols"]: file.patrols,
+    ["plugin:spawns-editor|get_spawn_file_graphs"]: file.graphs,
+    ["plugin:spawns-editor|get_spawn_file_alife_spawns"]: file.alifeSpawn,
+    ["plugin:spawns-editor|get_spawn_file_artefact_spawns"]: file.artefactSpawn,
   });
 }
 

@@ -6,7 +6,6 @@ import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { createLoadable } from "@/lib/loadable";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 const TEXTURE: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "dds",
@@ -33,7 +32,7 @@ function createService(): ArchivesService {
 
 describe("ArchivesService image preview", () => {
   beforeEach(() => {
-    setMockInvokeResponses({ [EArchivesEditorCommand.READ_ARCHIVE_IMAGE]: PREVIEW });
+    setMockInvokeResponses({ ["plugin:archives-editor|read_archive_image"]: PREVIEW });
   });
 
   it("decodes a texture instead of reading it as text", async () => {
@@ -41,9 +40,9 @@ describe("ArchivesService image preview", () => {
 
     await service.selectArchiveFile(TEXTURE);
 
-    expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, { path: TEXTURE.name });
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|read_archive_image", { path: TEXTURE.name });
     // The text path would have refused it anyway: this entry is compressed and .dds is not readable.
-    expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", expect.anything());
     expect(service.content.value?.kind === "image" ? service.content.value.preview.width : null).toBe(256);
   });
 
@@ -52,7 +51,7 @@ describe("ArchivesService image preview", () => {
 
     await service.selectArchiveFile(TEXT);
 
-    expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_image", expect.anything());
     expect(service.content.value?.kind === "image" ? service.content.value.preview : null).toBeNull();
   });
 
@@ -60,7 +59,7 @@ describe("ArchivesService image preview", () => {
     const service: ArchivesService = createService();
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.READ_ARCHIVE_IMAGE]: () => {
+      ["plugin:archives-editor|read_archive_image"]: () => {
         throw new Error("unsupported DXT format");
       },
     });
@@ -78,11 +77,11 @@ describe("ArchivesService image preview", () => {
     await service.retrySelectedFile();
 
     const imageCalls = mockInvoke.mock.calls.filter(
-      ([command]) => command === EArchivesEditorCommand.READ_ARCHIVE_IMAGE
+      ([command]) => command === "plugin:archives-editor|read_archive_image"
     );
 
     expect(imageCalls).toHaveLength(2);
-    expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", expect.anything());
   });
 
   it("drops the decoded image when the selection changes", async () => {

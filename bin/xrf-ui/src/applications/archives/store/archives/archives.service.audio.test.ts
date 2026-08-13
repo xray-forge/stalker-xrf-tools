@@ -6,7 +6,6 @@ import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { createLoadable } from "@/lib/loadable";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 const SOUND: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "ogg",
@@ -35,7 +34,7 @@ function createService(): ArchivesService {
 
 describe("ArchivesService audio preview", () => {
   beforeEach(() => {
-    setMockInvokeResponses({ [EArchivesEditorCommand.READ_ARCHIVE_AUDIO]: PREVIEW });
+    setMockInvokeResponses({ ["plugin:archives-editor|read_archive_audio"]: PREVIEW });
   });
 
   it("routes a sound to the audio command rather than reading it as text", async () => {
@@ -43,8 +42,8 @@ describe("ArchivesService audio preview", () => {
 
     await service.selectArchiveFile(SOUND);
 
-    expect(mockInvoke).toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_AUDIO, { path: SOUND.name });
-    expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_FILE, expect.anything());
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|read_archive_audio", { path: SOUND.name });
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", expect.anything());
     expect(service.content.value?.kind).toBe("audio");
   });
 
@@ -65,7 +64,7 @@ describe("ArchivesService audio preview", () => {
 
     await service.selectArchiveFile(TEXTURE);
 
-    expect(mockInvoke).not.toHaveBeenCalledWith(EArchivesEditorCommand.READ_ARCHIVE_AUDIO, expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_audio", expect.anything());
     expect(service.content.value?.kind).toBe("image");
   });
 
@@ -73,7 +72,7 @@ describe("ArchivesService audio preview", () => {
     const service: ArchivesService = createService();
 
     setMockInvokeResponses({
-      [EArchivesEditorCommand.READ_ARCHIVE_AUDIO]: () => {
+      ["plugin:archives-editor|read_archive_audio"]: () => {
         throw new Error("not a playable sound");
       },
     });
@@ -91,7 +90,7 @@ describe("ArchivesService audio preview", () => {
     await service.retrySelectedFile();
 
     const audioCalls = mockInvoke.mock.calls.filter(
-      ([command]) => command === EArchivesEditorCommand.READ_ARCHIVE_AUDIO
+      ([command]) => command === "plugin:archives-editor|read_archive_audio"
     );
 
     expect(audioCalls).toHaveLength(2);

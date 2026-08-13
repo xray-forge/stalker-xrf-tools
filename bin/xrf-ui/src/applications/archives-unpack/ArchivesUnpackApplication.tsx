@@ -1,5 +1,4 @@
 import { Alert } from "@mui/material";
-import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
@@ -12,8 +11,8 @@ import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { commands as archivesEditorCommands } from "@/lib/xrf/bindings/xrf-app-archives-editor";
 import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xrf-archive";
-import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf/project-path";
 
 export function ArchivesUnpackApplication(): ReactElement {
@@ -54,6 +53,10 @@ export function ArchivesUnpackApplication(): ReactElement {
   }, [selectArchivesUnpackPath]);
 
   const onUnpackArchivesPathClicked = useCallback(async () => {
+    if (!archivesPath || !archivesUnpackPath) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       setResult(null);
@@ -61,10 +64,10 @@ export function ArchivesUnpackApplication(): ReactElement {
 
       log.info("Unpacking:", archivesPath);
 
-      const result: ArchiveUnpackResult = await invoke(EArchivesEditorCommand.UNPACK_ARCHIVES_PATH, {
-        from: archivesPath,
-        destination: archivesUnpackPath,
-      });
+      const result: ArchiveUnpackResult = await archivesEditorCommands.unpackArchivesPath(
+        archivesPath,
+        archivesUnpackPath
+      );
 
       log.info("Unpacked:", archivesPath);
 

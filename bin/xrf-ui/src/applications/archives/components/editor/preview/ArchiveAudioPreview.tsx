@@ -101,7 +101,9 @@ export function ArchiveAudioPreview(): ReactElement {
             <ArchiveFileDetailRow label={"Max AI distance"} value={`${preview.parameters.maxAiDistance} m`} />
             <ArchiveFileDetailRow
               label={"Base volume"}
-              value={`${preview.parameters.baseVolume} (${Math.round(preview.parameters.baseVolume * 100)}%)`}
+              value={`${preview.parameters.baseVolume ?? 0} (${Math.round(
+                (preview.parameters.baseVolume ?? 0) * 100
+              )}%)`}
             />
             <ArchiveFileDetailRow label={"Game type"} value={String(preview.parameters.gameType)} mono />
           </>

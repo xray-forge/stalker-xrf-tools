@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
@@ -7,9 +6,10 @@ import { Nullable } from "@/core/types/general";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { commands as exportsEditorCommands } from "@/lib/xrf/bindings/xrf-app-exports-editor";
 import { ExportSourceContent, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 import { transformError } from "@/lib/xrf/error";
-import { EExportsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc";
 
 @Injectable()
 export class ExportsService {
@@ -28,7 +28,7 @@ export class ExportsService {
   @OnProvision()
   public async onProvision(): Promise<void> {
     try {
-      const project: Nullable<ExportsProject> = await invoke(EExportsEditorCommand.GET_XR_EXPORTS);
+      const project: Nullable<ExportsProject> = await exportsEditorCommands.getXrExports();
 
       if (project) {
         this.log.info("Existing exports project detected");
@@ -62,7 +62,7 @@ export class ExportsService {
   /** Release parsed exports when the editor is navigated away from. */
   @OnDeactivation()
   public onDeactivation(): void {
-    releaseEditorProject(EExportsEditorCommand.CLOSE_XR_EXPORTS);
+    releaseEditorProject(exportsEditorCommands.closeXrExports);
   }
 
   /**
@@ -75,7 +75,7 @@ export class ExportsService {
   public async readExportSource(name: string): Promise<ExportSourceContent> {
     this.log.info("Reading export source:", name);
 
-    return invoke(EExportsEditorCommand.GET_XR_EXPORT_SOURCE, { name });
+    return exportsEditorCommands.getXrExportSource(name);
   }
 
   @BoundAction()
@@ -88,9 +88,7 @@ export class ExportsService {
     this.project = this.project.asLoading(null);
 
     try {
-      const result: ExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
-        projectPath: path,
-      });
+      const result: ExportsProject = await exportsEditorCommands.openXrExports(path);
 
       runInAction(() => (this.project = this.project.asReady(result)));
     } catch (error: unknown) {
@@ -120,9 +118,7 @@ export class ExportsService {
     this.project = this.project.asLoading(existing);
 
     try {
-      const result: ExportsProject = await invoke(EExportsEditorCommand.OPEN_XR_EXPORTS, {
-        projectPath: existing.root,
-      });
+      const result: ExportsProject = await exportsEditorCommands.openXrExports(existing.root);
 
       runInAction(() => (this.project = this.project.asReady(result)));
     } catch (error: unknown) {
@@ -152,7 +148,7 @@ export class ExportsService {
     this.project = this.project.asLoading(existing);
 
     try {
-      await invoke(EExportsEditorCommand.CLOSE_XR_EXPORTS);
+      await exportsEditorCommands.closeXrExports();
       // Cleared on purpose: closing swaps the viewer for the application's picker in place. It used to
       // hold the project until the caller navigated away, because clearing it unmounted the editor
       // before React Router could process that navigation. Nothing navigates on close any more.

@@ -3,6 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { identifierColumn, textColumn } from "@/core/components/table";
+import { Nullable } from "@/core/types/general";
 import { Patrol, PatrolLink } from "@/lib/xrf/bindings/xrf-db";
 
 interface IPatrolLinkRow {
@@ -35,7 +36,7 @@ export function SpawnEditorPatrolLinksTable({ patrols }: ISpawnEditorPatrolLinks
         patrol.links.map((link: PatrolLink) => ({
           id: `${patrol.name}/${link.index}`,
           index: link.index,
-          links: link.links.map(([to, weight]: [number, number]) => `${to}(${weight})`).join(", "),
+          links: link.links.map(([to, weight]: [number, Nullable<number>]) => `${to}(${weight ?? 0})`).join(", "),
           linksCount: link.links.length,
           patrol: patrol.name,
         }))

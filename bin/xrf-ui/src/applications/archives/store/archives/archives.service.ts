@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import {
   EventBus,
   inject,
@@ -24,18 +23,10 @@ import {
   TArchiveOperation,
   TArchiveSelection,
 } from "@/lib/xrf/archive";
-import {
-  ArchiveAudioPreview,
-  ArchiveImagePreview,
-} from "@/lib/xrf/bindings/xrf-app";
-import {
-  ArchiveExtractFolderResult,
-  ArchiveFileDescriptor,
-  ArchiveProject,
-  ProjectReadResult,
-} from "@/lib/xrf/bindings/xrf-archive";
+import { commands as archivesEditorCommands } from "@/lib/xrf/bindings/xrf-app-archives-editor";
+import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 import { transformError } from "@/lib/xrf/error";
-import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc";
 
 @Injectable()
 export class ArchivesService {
@@ -92,7 +83,7 @@ export class ArchivesService {
   public async onProvision(provisionId: ProvisionId): Promise<void> {
     this.log.info("Provisioning:", provisionId);
 
-    const existing: Nullable<ArchiveProject> = await invoke(EArchivesEditorCommand.GET_ARCHIVES_PROJECT);
+    const existing: Nullable<ArchiveProject> = await archivesEditorCommands.getArchivesProject();
 
     if (this.status.provisionId !== provisionId) {
       return this.log.info("Discard outdated get archives request:", provisionId, "<", this.status.provisionId);
@@ -126,7 +117,7 @@ export class ArchivesService {
   public onDeactivation(): void {
     this.log.info("Deactivating");
 
-    releaseEditorProject(EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT);
+    releaseEditorProject(archivesEditorCommands.closeArchivesProject);
   }
 
   @BoundAction()
@@ -145,7 +136,7 @@ export class ArchivesService {
       this.clearFileSelection();
       this.project = createLoadable(null, true);
 
-      const response: ArchiveProject = await invoke(EArchivesEditorCommand.OPEN_ARCHIVES_PROJECT, { path });
+      const response: ArchiveProject = await archivesEditorCommands.openArchivesProject(path);
 
       this.log.info("Archives project opened");
 
@@ -169,7 +160,7 @@ export class ArchivesService {
     this.log.info("Closing existing archives project");
 
     try {
-      await invoke(EArchivesEditorCommand.CLOSE_ARCHIVES_PROJECT);
+      await archivesEditorCommands.closeArchivesProject();
 
       runInAction(() => {
         this.clearFileSelection();
@@ -221,7 +212,7 @@ export class ArchivesService {
     try {
       this.operation = createLoadable(null, true);
 
-      await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FILE, { name: descriptor.name, destination });
+      await archivesEditorCommands.extractArchiveFile(descriptor.name, destination);
 
       runInAction(() => (this.operation = createLoadable({ kind: "extract-file", destination })));
 
@@ -259,10 +250,7 @@ export class ArchivesService {
     try {
       this.operation = createLoadable(null, true);
 
-      const result: ArchiveExtractFolderResult = await invoke(EArchivesEditorCommand.EXTRACT_ARCHIVE_FOLDER, {
-        prefix,
-        destination,
-      });
+      const result: ArchiveExtractFolderResult = await archivesEditorCommands.extractArchiveFolder(prefix, destination);
 
       runInAction(() => (this.operation = createLoadable({ kind: "extract-folder", result })));
 
@@ -353,22 +341,16 @@ export class ArchivesService {
         kind === "audio"
           ? {
               kind: "audio",
-              preview: await invoke<ArchiveAudioPreview>(EArchivesEditorCommand.READ_ARCHIVE_AUDIO, {
-                path: descriptor.name,
-              }),
+              preview: await archivesEditorCommands.readArchiveAudio(descriptor.name),
             }
           : kind === "image"
             ? {
                 kind: "image",
-                preview: await invoke<ArchiveImagePreview>(EArchivesEditorCommand.READ_ARCHIVE_IMAGE, {
-                  path: descriptor.name,
-                }),
+                preview: await archivesEditorCommands.readArchiveImage(descriptor.name),
               }
             : {
                 kind: "text",
-                result: await invoke<ProjectReadResult>(EArchivesEditorCommand.READ_ARCHIVE_FILE, {
-                  path: descriptor.name,
-                }),
+                result: await archivesEditorCommands.readArchiveFile(descriptor.name),
               };
 
       if (requestId !== this.contentRequestId) {

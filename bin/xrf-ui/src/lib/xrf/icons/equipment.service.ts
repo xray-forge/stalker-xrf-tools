@@ -1,6 +1,6 @@
 import { clamp } from "@mui/x-data-grid/internals";
 import { path } from "@tauri-apps/api";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
@@ -12,9 +12,10 @@ import { urlToImage } from "@/lib/image";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { commands as iconsEditorCommands } from "@/lib/xrf/bindings/xrf-app-icons-editor";
 import { transformError } from "@/lib/xrf/error";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/xrf/icons/equipment";
-import { EIconsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc";
 
 export interface IEquipmentPngDescriptor {
   ltxPath: string;
@@ -63,7 +64,7 @@ export class EquipmentService {
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const response: IEquipmentResponse = await invoke(EIconsEditorCommand.GET_EQUIPMENT_SPRITE);
+    const response: Nullable<IEquipmentResponse> = await iconsEditorCommands.getEquipmentSprite();
 
     if (response) {
       this.log.info("Existing equipment sprite detected");
@@ -86,7 +87,7 @@ export class EquipmentService {
   @OnDeactivation()
   public onDeactivation(): void {
     this.assetService.releaseKey(SPRITE_ASSET_KEY);
-    releaseEditorProject(EIconsEditorCommand.CLOSE_EQUIPMENT_SPRITE);
+    releaseEditorProject(iconsEditorCommands.closeEquipmentSprite);
   }
 
   @BoundAction()
@@ -113,10 +114,10 @@ export class EquipmentService {
       this.assetService.releaseKey(SPRITE_ASSET_KEY);
       this.spriteImage = createLoadable(null, true);
 
-      const response: IEquipmentResponse = await invoke(EIconsEditorCommand.OPEN_EQUIPMENT_SPRITE, {
+      const response: IEquipmentResponse = await iconsEditorCommands.openEquipmentSprite(
         equipmentDdsPath,
-        systemLtxPath,
-      });
+        systemLtxPath
+      );
 
       this.log.info("Equipment project opened:", response);
 
@@ -146,7 +147,7 @@ export class EquipmentService {
     try {
       this.spriteImage = this.spriteImage.asLoading();
 
-      const response: IEquipmentResponse = await invoke(EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE);
+      const response: IEquipmentResponse = await iconsEditorCommands.reopenEquipmentSprite();
 
       this.log.info("Equipment project reopened:", response);
 
@@ -245,7 +246,7 @@ export class EquipmentService {
       this.spriteImage = this.spriteImage.asLoading();
       this.assetService.releaseKey(SPRITE_ASSET_KEY);
 
-      await invoke(EIconsEditorCommand.CLOSE_EQUIPMENT_SPRITE);
+      await iconsEditorCommands.closeEquipmentSprite();
 
       this.log.info("Equipment project closed");
 
@@ -275,11 +276,7 @@ export class EquipmentService {
     this.log.info("Packing equipment editor:", sourcePath, outputPath, systemLtxPath);
 
     try {
-      return await invoke(EIconsEditorCommand.PACK_EQUIPMENT, {
-        sourcePath,
-        outputPath,
-        systemLtxPath,
-      });
+      return await iconsEditorCommands.packEquipment(sourcePath, outputPath, systemLtxPath);
     } catch (error) {
       this.log.error("Failed to pack equipment editor:", error);
       throw error;

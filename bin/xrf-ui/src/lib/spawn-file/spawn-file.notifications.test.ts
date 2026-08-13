@@ -6,7 +6,6 @@ import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
 import { SpawnFileService } from "@/lib/spawn-file/spawn-file.service";
-import { ESpawnsEditorCommand } from "@/lib/xrf/ipc";
 
 interface IWatchedService {
   service: SpawnFileService;
@@ -47,7 +46,7 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [ESpawnsEditorCommand.SAVE_SPAWN_FILE]: () => {
+      ["plugin:spawns-editor|save_spawn_file"]: () => {
         throw new Error("destination is read only");
       },
     });
@@ -75,7 +74,7 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [ESpawnsEditorCommand.EXPORT_SPAWN_FILE]: () => {
+      ["plugin:spawns-editor|export_spawn_file"]: () => {
         throw new Error("no such directory");
       },
     });
@@ -91,7 +90,7 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [ESpawnsEditorCommand.OPEN_SPAWN_FILE]: () => {
+      ["plugin:spawns-editor|open_spawn_file"]: () => {
         throw new Error("not a spawn file");
       },
     });
@@ -109,7 +108,7 @@ describe("SpawnFileService notifications", () => {
     const { service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [ESpawnsEditorCommand.HAS_SPAWN_FILE]: () => {
+      ["plugin:spawns-editor|has_spawn_file"]: () => {
         throw new Error("backend is gone");
       },
     });
@@ -125,7 +124,7 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      [ESpawnsEditorCommand.OPEN_SPAWN_FILE]: mockSpawnFile().header,
+      ["plugin:spawns-editor|open_spawn_file"]: mockSpawnFile().header,
     });
 
     await service.openSpawnFile("C:\\game\\all.spawn");

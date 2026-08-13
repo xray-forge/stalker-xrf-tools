@@ -1,5 +1,4 @@
 import { Alert } from "@mui/material";
-import { invoke } from "@tauri-apps/api/core";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
@@ -12,8 +11,8 @@ import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { commands as configsEditorCommands } from "@/lib/xrf/bindings/xrf-app-configs-editor";
 import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xrf-ltx";
-import { EConfigsEditorCommand } from "@/lib/xrf/ipc";
 import { getProjectConfigsPath } from "@/lib/xrf/project-path";
 
 export function ConfigsVerifyApplication(): ReactElement {
@@ -35,6 +34,10 @@ export function ConfigsVerifyApplication(): ReactElement {
   });
 
   const onVerify = useCallback(async () => {
+    if (!configs.value) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       setResult(null);
@@ -42,9 +45,7 @@ export function ConfigsVerifyApplication(): ReactElement {
 
       log.info("Verifying:", configs.value);
 
-      const verified: LtxProjectVerifyResult = await invoke(EConfigsEditorCommand.VERIFY_CONFIGS_PATH, {
-        path: configs.value,
-      });
+      const verified: LtxProjectVerifyResult = await configsEditorCommands.verifyConfigsPath(configs.value);
 
       setResult(verified);
 

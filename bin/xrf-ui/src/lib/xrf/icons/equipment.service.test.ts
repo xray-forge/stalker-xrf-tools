@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { EquipmentService } from "@/lib/xrf/icons/equipment.service";
-import { EIconsEditorCommand } from "@/lib/xrf/ipc";
 
 describe("EquipmentService", () => {
   beforeEach(() => {
@@ -14,7 +13,7 @@ describe("EquipmentService", () => {
     const { service } = mockInjectedService(EquipmentService);
 
     setMockInvokeResponses({
-      [EIconsEditorCommand.REOPEN_EQUIPMENT_SPRITE]: () => {
+      ["plugin:icons-editor|reopen_equipment_sprite"]: () => {
         throw new Error("backend refused");
       },
     });
@@ -60,7 +59,7 @@ describe("EquipmentService", () => {
     service.repackSourcePath = "C:\\game\\equipment";
 
     setMockInvokeResponses({
-      [EIconsEditorCommand.PACK_EQUIPMENT]: () => {
+      ["plugin:icons-editor|pack_equipment"]: () => {
         throw new Error("pack failed");
       },
     });

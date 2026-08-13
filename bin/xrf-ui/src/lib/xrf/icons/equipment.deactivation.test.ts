@@ -3,10 +3,9 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { EquipmentService } from "@/lib/xrf/icons/equipment.service";
-import { EIconsEditorCommand } from "@/lib/xrf/ipc";
 
 function closeCalls(): number {
-  return mockInvoke.mock.calls.filter(([command]) => command === EIconsEditorCommand.CLOSE_EQUIPMENT_SPRITE).length;
+  return mockInvoke.mock.calls.filter(([command]) => command === "plugin:icons-editor|close_equipment_sprite").length;
 }
 
 /**

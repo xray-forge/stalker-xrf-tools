@@ -7,7 +7,6 @@ import { Nullable } from "@/core/types/general";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ExportSourceContent } from "@/lib/xrf/bindings/xrf-export";
-import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 function mockSource(name: string, content: string, line: number = 18): ExportSourceContent {
   return { name, path: "effects/sound.ts", line, endLine: line + 2, content };
@@ -20,7 +19,7 @@ function renderSource(name: string) {
 describe("ExportSourceView", () => {
   beforeEach(() => {
     setMockInvokeResponses({
-      [EExportsEditorCommand.GET_XR_EXPORT_SOURCE]: mockSource(
+      ["plugin:exports-editor|get_xr_export_source"]: mockSource(
         "xr_effects.play",
         'extern("xr_effects.play", () => {});'
       ),
@@ -35,7 +34,7 @@ describe("ExportSourceView", () => {
 
   it("numbers lines from where the declaration starts in its file", async () => {
     setMockInvokeResponses({
-      [EExportsEditorCommand.GET_XR_EXPORT_SOURCE]: mockSource("play", "line one\nline two\nline three", 18),
+      ["plugin:exports-editor|get_xr_export_source"]: mockSource("play", "line one\nline two\nline three", 18),
     });
 
     const { findByLabelText } = renderSource("play");
@@ -47,7 +46,7 @@ describe("ExportSourceView", () => {
 
   it("reports a read that failed", async () => {
     setMockInvokeResponses({
-      [EExportsEditorCommand.GET_XR_EXPORT_SOURCE]: () => {
+      ["plugin:exports-editor|get_xr_export_source"]: () => {
         throw new Error("declaration file is gone");
       },
     });
@@ -63,7 +62,7 @@ describe("ExportSourceView", () => {
     const pending: Record<string, (value: ExportSourceContent) => void> = {};
 
     setMockInvokeResponses({
-      [EExportsEditorCommand.GET_XR_EXPORT_SOURCE]: (parameters?: Record<string, unknown>) =>
+      ["plugin:exports-editor|get_xr_export_source"]: (parameters?: Record<string, unknown>) =>
         new Promise<ExportSourceContent>((resolve) => {
           pending[parameters?.name as string] = resolve;
         }),

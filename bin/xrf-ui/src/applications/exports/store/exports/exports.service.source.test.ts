@@ -4,7 +4,6 @@ import { ExportsService } from "@/applications/exports/store/exports/exports.ser
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { ExportSourceContent } from "@/lib/xrf/bindings/xrf-export";
-import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 const SOURCE: ExportSourceContent = {
   name: "xr_effects.play",
@@ -16,14 +15,14 @@ const SOURCE: ExportSourceContent = {
 
 describe("ExportsService export source", () => {
   beforeEach(() => {
-    setMockInvokeResponses({ [EExportsEditorCommand.GET_XR_EXPORT_SOURCE]: SOURCE });
+    setMockInvokeResponses({ ["plugin:exports-editor|get_xr_export_source"]: SOURCE });
   });
 
   it("reads the source of one declaration by name", async () => {
     const service: ExportsService = mockInjectedService(ExportsService).service;
 
     await expect(service.readExportSource("xr_effects.play")).resolves.toEqual(SOURCE);
-    expect(mockInvoke).toHaveBeenCalledWith(EExportsEditorCommand.GET_XR_EXPORT_SOURCE, { name: "xr_effects.play" });
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports-editor|get_xr_export_source", { name: "xr_effects.play" });
   });
 
   it("propagates a failed read to its caller", async () => {
@@ -31,7 +30,7 @@ describe("ExportsService export source", () => {
     const service: ExportsService = mockInjectedService(ExportsService).service;
 
     setMockInvokeResponses({
-      [EExportsEditorCommand.GET_XR_EXPORT_SOURCE]: () => {
+      ["plugin:exports-editor|get_xr_export_source"]: () => {
         throw new Error("declaration file is gone");
       },
     });
