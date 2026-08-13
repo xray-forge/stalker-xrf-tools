@@ -1,4 +1,4 @@
-import { Component, ErrorInfo, ReactElement, ReactNode } from "react";
+import { Component, ComponentType, ErrorInfo, ReactNode } from "react";
 
 import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
@@ -11,7 +11,7 @@ export interface IErrorBoundaryFallbackProps {
 
 export interface IErrorBoundaryProps {
   children: ReactNode;
-  fallback: (props: IErrorBoundaryFallbackProps) => ReactElement;
+  fallback: ComponentType<IErrorBoundaryFallbackProps>;
   /**
    * Clears a caught error whenever it changes.
    *
@@ -61,6 +61,12 @@ export class ErrorBoundary extends Component<IErrorBoundaryProps, IErrorBoundary
   public render(): ReactNode {
     const { error } = this.state;
 
-    return error ? this.props.fallback({ error, onRetry: () => this.setState({ error: null }) }) : this.props.children;
+    if (error) {
+      const Fallback: ComponentType<IErrorBoundaryFallbackProps> = this.props.fallback;
+
+      return <Fallback error={error} onRetry={() => this.setState({ error: null })} />;
+    } else {
+      return this.props.children;
+    }
   }
 }
