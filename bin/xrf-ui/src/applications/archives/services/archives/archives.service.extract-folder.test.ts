@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { ArchivesService } from "@/applications/archives/services/archives/archives.service";
+import { ArchiveExtractFolderResult } from "@/core/bindings/xrf-archive";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { Nullable } from "@/lib/types/general";
-import { ArchiveExtractFolderResult } from "@/lib/xrf/bindings/xrf-archive";
 
 /** The operation union carries every kind of write, so a folder assertion has to name its own. */
 function extractedFolder(service: ArchivesService): Nullable<ArchiveExtractFolderResult> {

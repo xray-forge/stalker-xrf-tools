@@ -3,10 +3,10 @@ import { act, waitFor } from "@testing-library/react";
 
 import { ExportSourceView } from "@/applications/exports/components/viewer/exports/ExportSourceView";
 import { ExportsService } from "@/applications/exports/store/exports";
+import { ExportSourceContent } from "@/core/bindings/xrf-export";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { Nullable } from "@/lib/types/general";
-import { ExportSourceContent } from "@/lib/xrf/bindings/xrf-export";
 
 function mockSource(name: string, content: string, line: number = 18): ExportSourceContent {
   return { name, path: "effects/sound.ts", line, endLine: line + 2, content };

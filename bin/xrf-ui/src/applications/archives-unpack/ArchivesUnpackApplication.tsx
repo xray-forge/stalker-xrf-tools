@@ -3,6 +3,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archives-unpack/components/ArchivesUnpackResult";
+import { commands as archivesEditorCommands } from "@/core/bindings/xrf-app-archives-editor";
+import { ArchiveUnpackResult } from "@/core/bindings/xrf-archive";
 import { FilePickerInput } from "@/core/components/form/file-picker/FilePickerInput";
 import { usePathState } from "@/core/components/form/file-picker/use-path-state";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
@@ -12,8 +14,6 @@ import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "
 import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-import { commands as archivesEditorCommands } from "@/lib/xrf/bindings/xrf-app-archives-editor";
-import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xrf-archive";
 
 export function ArchivesUnpackApplication(): ReactElement {
   const log: Logger = useLogger("archives-unpacker");

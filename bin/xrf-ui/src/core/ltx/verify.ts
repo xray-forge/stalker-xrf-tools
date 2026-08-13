@@ -1,4 +1,4 @@
-import { XRayError } from "@/lib/xrf/bindings/xrf-error";
+import { XRayError } from "@/core/bindings/xrf-error";
 
 /**
  * One scheme problem, unwrapped from the error variant that carries it.

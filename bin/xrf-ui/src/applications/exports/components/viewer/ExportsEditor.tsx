@@ -8,13 +8,13 @@ import { groupExports, IExportGroup } from "@/applications/exports/components/vi
 import { ExportsMenu } from "@/applications/exports/components/viewer/exports/ExportsMenu";
 import { ExportsViewer } from "@/applications/exports/components/viewer/exports/ExportsViewer";
 import { ExportsService } from "@/applications/exports/store/exports";
+import { ExportDescriptor, ExportsProject } from "@/core/bindings/xrf-export";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";
 import { Nullable } from "@/lib/types/general";
-import { ExportDescriptor, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 
 export function ExportsEditor(): ReactElement {
   const exportsService: ExportsService = useInjection(ExportsService);

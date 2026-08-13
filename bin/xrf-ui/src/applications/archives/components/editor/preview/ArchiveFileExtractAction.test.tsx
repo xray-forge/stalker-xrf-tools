@@ -6,10 +6,10 @@ import { Injectable } from "@wirestate/core";
 
 import { ArchiveFileExtractAction } from "@/applications/archives/components/editor/preview/ArchiveFileExtractAction";
 import { ArchivesService } from "@/applications/archives/services/archives";
+import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({
   extension: "xml",

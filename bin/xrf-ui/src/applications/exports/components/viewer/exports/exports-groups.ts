@@ -1,5 +1,5 @@
+import { ExportDescriptor } from "@/core/bindings/xrf-export";
 import { TCallableExportDescriptor } from "@/core/exports";
-import { ExportDescriptor } from "@/lib/xrf/bindings/xrf-export";
 
 export const ROOT_EXPORT_GROUP_ID: string = "group:root";
 

@@ -1,6 +1,7 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { commands as translationsEditorCommands } from "@/core/bindings/xrf-app-translations-editor";
 import { transformError } from "@/core/error";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications";
@@ -9,7 +10,6 @@ import { ITranslationsProjectJson } from "@/core/translations";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-import { commands as translationsEditorCommands } from "@/lib/xrf/bindings/xrf-app-translations-editor";
 
 @Injectable()
 export class TranslationsService {

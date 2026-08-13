@@ -1,8 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { getArchivePreviewSupport } from "@/core/archive/preview";
+import { ArchiveProjectReadPolicy } from "@/core/bindings/xrf-archive";
 import { mockArchiveFileDescriptor, mockArchiveReadPolicy } from "@/fixtures/mocks/archive.mocks";
-import { ArchiveProjectReadPolicy } from "@/lib/xrf/bindings/xrf-archive";
 
 const READ_POLICY: ArchiveProjectReadPolicy = mockArchiveReadPolicy();
 

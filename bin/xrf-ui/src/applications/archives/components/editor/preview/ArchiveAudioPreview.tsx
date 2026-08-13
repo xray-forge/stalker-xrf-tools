@@ -7,6 +7,7 @@ import { ArchivePreviewError } from "@/applications/archives/components/editor/p
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { TArchiveContent } from "@/core/archive";
 import { AssetService } from "@/core/assets/services";
+import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/core/bindings/xrf-app";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
@@ -14,7 +15,6 @@ import { AudioPlayer } from "@/core/components/media/AudioPlayer";
 import { Loadable } from "@/lib/loadable";
 import { base64ToBytes } from "@/lib/media/base64";
 import { Nullable } from "@/lib/types/general";
-import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/lib/xrf/bindings/xrf-app";
 
 /** One sound is previewed at a time, so its url lives under a fixed key and displaces the last one. */
 const ARCHIVE_AUDIO_ASSET_KEY: string = "archive-audio";

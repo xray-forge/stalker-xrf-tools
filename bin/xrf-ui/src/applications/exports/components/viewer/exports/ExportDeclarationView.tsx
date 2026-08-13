@@ -6,8 +6,8 @@ import { CallableExportDetails } from "@/applications/exports/components/viewer/
 import { ExportSection } from "@/applications/exports/components/viewer/exports/ExportSection";
 import { ExportSourceView } from "@/applications/exports/components/viewer/exports/ExportSourceView";
 import { formatExportSignature } from "@/applications/exports/components/viewer/exports/format-export-signature";
+import { ExportDescriptor } from "@/core/bindings/xrf-export";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { ExportDescriptor } from "@/lib/xrf/bindings/xrf-export";
 
 export interface IExportDeclarationViewProps extends BaseComponentProps {
   declaration: ExportDescriptor;

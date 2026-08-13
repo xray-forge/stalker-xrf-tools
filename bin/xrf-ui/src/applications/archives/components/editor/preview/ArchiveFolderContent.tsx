@@ -8,12 +8,12 @@ import { ReactElement, useCallback, useMemo } from "react";
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/components/editor/archive-editor.styles";
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { isUnderArchiveDirectory, TArchiveOperation } from "@/core/archive";
+import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { formatBytes } from "@/lib/format/memory";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 export interface IArchiveFolderContentProps {
   path: string;

@@ -1,4 +1,4 @@
-import { AlifeObject, Patrol, SpawnFile, Vector3d } from "@/lib/xrf/bindings/xrf-db";
+import { AlifeObject, Patrol, SpawnFile, Vector3d } from "@/core/bindings/xrf-db";
 
 /** Create a vector fixture with optional field overrides. */
 export function mockVector3d(overrides: Partial<Vector3d> = {}): Vector3d {

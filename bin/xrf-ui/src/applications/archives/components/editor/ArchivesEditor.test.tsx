@@ -5,6 +5,7 @@ import { userEvent } from "@testing-library/user-event";
 
 import { ArchivesApplication } from "@/applications/archives/ArchivesApplication";
 import { ArchivesService } from "@/applications/archives/services/archives";
+import { ArchiveProject } from "@/core/bindings/xrf-archive";
 import { ProjectService } from "@/core/settings/services/project";
 import { ApplicationShellFrame } from "@/core/shell/ApplicationShellFrame";
 import { EditorBusyProvider } from "@/core/shell/EditorBusyContext";
@@ -13,7 +14,6 @@ import { EditorPanelsProvider } from "@/core/shell/panel/context";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 const TEXT_FILE = mockArchiveFileDescriptor({ name: "readme.ltx", sizeReal: 1024, sizeCompressed: 1024 });
 

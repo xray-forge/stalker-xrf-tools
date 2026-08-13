@@ -2,8 +2,8 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
+import { GraphCrossTable } from "@/core/bindings/xrf-db";
 import { identifierColumn, textColumn } from "@/core/components/table";
-import { GraphCrossTable } from "@/lib/xrf/bindings/xrf-db";
 
 interface ISpawnEditorGraphCrossTableProps {
   crossTables: Array<GraphCrossTable>;

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { ExportsService } from "@/applications/exports/store/exports/exports.service";
+import { ExportSourceContent } from "@/core/bindings/xrf-export";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { ExportSourceContent } from "@/lib/xrf/bindings/xrf-export";
 
 const SOURCE: ExportSourceContent = {
   name: "xr_effects.play",

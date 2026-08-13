@@ -10,13 +10,13 @@ import { ArchiveImagePreview } from "@/applications/archives/components/editor/p
 import { ArchivePreviewError } from "@/applications/archives/components/editor/preview/ArchivePreviewError";
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/core/archive";
+import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/format/memory";
 import { Loadable } from "@/lib/loadable";
 import { Nullable } from "@/lib/types/general";
-import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 // Everything that renders its own preview leaves this union; what is left is a reason to explain.
 type TUnsupported = Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" } | { kind: "audio" }>;

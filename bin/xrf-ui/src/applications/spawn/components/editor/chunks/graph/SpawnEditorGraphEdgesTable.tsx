@@ -2,8 +2,8 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
+import { GraphEdge } from "@/core/bindings/xrf-db";
 import { decimalColumn, textColumn } from "@/core/components/table";
-import { GraphEdge } from "@/lib/xrf/bindings/xrf-db";
 
 interface IGraphEdgeRow extends GraphEdge {
   index: number;

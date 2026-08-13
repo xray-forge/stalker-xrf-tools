@@ -10,11 +10,11 @@ import { ArchivesMenuHeader } from "@/applications/archives/components/editor/tr
 import { ArchiveTreeItem } from "@/applications/archives/components/editor/tree/ArchiveTreeItem";
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/core/archive";
+import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 import { Nullable, Optional } from "@/lib/types/general";
-import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 export function ArchivesMenu(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);

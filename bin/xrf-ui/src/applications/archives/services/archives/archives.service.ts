@@ -18,6 +18,8 @@ import {
   TArchiveOperation,
   TArchiveSelection,
 } from "@/core/archive";
+import { commands as archivesEditorCommands } from "@/core/bindings/xrf-app-archives-editor";
+import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { transformError } from "@/core/error";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications";
@@ -25,8 +27,6 @@ import { EApplicationId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-import { commands as archivesEditorCommands } from "@/lib/xrf/bindings/xrf-app-archives-editor";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 @Injectable()
 export class ArchivesService {

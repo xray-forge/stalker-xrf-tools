@@ -1,10 +1,10 @@
 import { GridColDef } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
+import { LtxProjectFormatResult } from "@/core/bindings/xrf-ltx";
 import { CommandResult, ICommandResultStat, TCommandResultTone } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
 import { formatDuration } from "@/lib/format/duration";
-import { LtxProjectFormatResult } from "@/lib/xrf/bindings/xrf-ltx";
 
 interface IConfigsFormatResultProps {
   isCheck: boolean;

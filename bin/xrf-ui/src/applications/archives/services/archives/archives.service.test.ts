@@ -1,11 +1,11 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { ArchivesService } from "@/applications/archives/services/archives/index";
+import { ArchiveFileDescriptor, ProjectReadResult } from "@/core/bindings/xrf-archive";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { createLoadable } from "@/lib/loadable";
-import { ArchiveFileDescriptor, ProjectReadResult } from "@/lib/xrf/bindings/xrf-archive";
 
 function ignoreReadResult(): void {}
 

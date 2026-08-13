@@ -8,6 +8,7 @@ import { createArchiveEditorPanels } from "@/applications/archives/components/ed
 import { ArchivesFileContent } from "@/applications/archives/components/editor/preview/ArchivesFileContent";
 import { ArchivesMenu } from "@/applications/archives/components/editor/tree/ArchivesMenu";
 import { ArchivesService } from "@/applications/archives/services/archives";
+import { ArchiveProject } from "@/core/bindings/xrf-archive";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
@@ -15,7 +16,6 @@ import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";
 import { formatBytes } from "@/lib/format/memory";
 import { Nullable } from "@/lib/types/general";
-import { ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 export function ArchivesEditor(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);

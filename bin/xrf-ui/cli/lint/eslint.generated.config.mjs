@@ -6,7 +6,7 @@ import baseConfig from "./eslint.config.mjs";
 export default [
   ...baseConfig,
   {
-    files: ["src/lib/xrf/bindings/**/*.ts"],
+    files: ["src/core/bindings/**/*.ts"],
     rules: {
       "max-len": "off",
     },

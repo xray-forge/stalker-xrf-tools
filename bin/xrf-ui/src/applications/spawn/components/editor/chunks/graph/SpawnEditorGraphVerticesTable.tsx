@@ -2,8 +2,8 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
+import { GraphVertex } from "@/core/bindings/xrf-db";
 import { textColumn, tupleColumn, vectorColumn } from "@/core/components/table";
-import { GraphVertex } from "@/lib/xrf/bindings/xrf-db";
 
 /** Offsets locate a vertex inside the file rather than in the world; available, off by default. */
 const HIDDEN_COLUMNS: Array<string> = ["edgesOffset", "levelPointsOffset"];

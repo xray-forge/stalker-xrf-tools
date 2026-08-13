@@ -3,6 +3,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs-verify/components/ConfigsVerifyResult";
+import { commands as configsEditorCommands } from "@/core/bindings/xrf-app-configs-editor";
+import { LtxProjectVerifyResult } from "@/core/bindings/xrf-ltx";
 import { PathFormRow } from "@/core/components/form/PathFormRow";
 import { IPathField, usePathField } from "@/core/components/form/use-path-field";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
@@ -12,8 +14,6 @@ import { getProjectConfigsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-import { commands as configsEditorCommands } from "@/lib/xrf/bindings/xrf-app-configs-editor";
-import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xrf-ltx";
 
 export function ConfigsVerifyApplication(): ReactElement {
   const log: Logger = useLogger("configs-verifier");

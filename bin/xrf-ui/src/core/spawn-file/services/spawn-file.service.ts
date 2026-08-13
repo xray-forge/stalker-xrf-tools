@@ -10,6 +10,14 @@ import {
 } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { commands as spawnsEditorCommands } from "@/core/bindings/xrf-app-spawns-editor";
+import {
+  SpawnALifeSpawnsChunk,
+  SpawnArtefactSpawnsChunk,
+  SpawnGraphsChunk,
+  SpawnHeaderChunk,
+  SpawnPatrolsChunk,
+} from "@/core/bindings/xrf-db";
 import { transformError } from "@/core/error";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications";
@@ -17,14 +25,6 @@ import { EApplicationGroupId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { AnyObject, Nullable } from "@/lib/types/general";
-import { commands as spawnsEditorCommands } from "@/lib/xrf/bindings/xrf-app-spawns-editor";
-import {
-  SpawnALifeSpawnsChunk,
-  SpawnArtefactSpawnsChunk,
-  SpawnGraphsChunk,
-  SpawnHeaderChunk,
-  SpawnPatrolsChunk,
-} from "@/lib/xrf/bindings/xrf-db";
 
 export interface ISpawnRowSelection {
   /** What kind of row this is, for the panel heading. */
