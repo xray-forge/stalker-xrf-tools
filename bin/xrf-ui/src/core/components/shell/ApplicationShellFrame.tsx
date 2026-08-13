@@ -10,11 +10,7 @@ import { EditorToolbarHostContext } from "@/core/components/shell/header/editor-
 import { ApplicationPanelSlot } from "@/core/components/shell/panel/ApplicationPanelSlot";
 import { ApplicationPanelStripe } from "@/core/components/shell/panel/ApplicationPanelStripe";
 import { ApplicationRail } from "@/core/components/shell/panel/ApplicationRail";
-import {
-  IEditorPanel,
-  selectPanelsOnSide,
-  useEditorPanelsRegistry,
-} from "@/core/components/shell/panel/context";
+import { IEditorPanel, selectPanelsOnSide, useEditorPanelsRegistry } from "@/core/components/shell/panel/context";
 import { NOTIFICATIONS_PANEL } from "@/core/components/shell/panel/global-panels";
 import { PanelStripeButton } from "@/core/components/shell/panel/PanelStripeButton";
 import { IPanelSlot, usePanelSlot } from "@/core/components/shell/panel/use-panel-slot";

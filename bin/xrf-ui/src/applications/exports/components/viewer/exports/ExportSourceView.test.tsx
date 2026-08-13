@@ -6,8 +6,8 @@ import { ExportsService } from "@/applications/exports/store/exports";
 import { Nullable } from "@/core/types/general";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { EExportsEditorCommand } from "@/lib/ipc";
 import { ExportSourceContent } from "@/lib/xrf/bindings/xray-export";
+import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 function mockSource(name: string, content: string, line: number = 18): ExportSourceContent {
   return { name, path: "effects/sound.ts", line, endLine: line + 2, content };

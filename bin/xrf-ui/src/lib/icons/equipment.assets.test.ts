@@ -6,7 +6,7 @@ import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { AssetService } from "@/lib/assets";
 import { EquipmentService } from "@/lib/icons/equipment.service";
-import { EIconsEditorCommand } from "@/lib/ipc";
+import { EIconsEditorCommand } from "@/lib/xrf/ipc";
 
 const RESPONSE = {
   name: "equipment.dds",

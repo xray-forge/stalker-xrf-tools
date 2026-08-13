@@ -11,10 +11,10 @@ import { AssetService } from "@/lib/assets";
 import { transformError } from "@/lib/error";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons/equipment";
 import { urlToImage } from "@/lib/image";
-import { EIconsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { EIconsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 
 export interface IEquipmentPngDescriptor {
   ltxPath: string;

@@ -5,11 +5,11 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 import { EApplicationId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
 import { transformError } from "@/lib/error";
-import { ETranslationsEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import { ITranslationsProjectJson } from "@/lib/translations";
+import { ETranslationsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 
 @Injectable()
 export class TranslationsService {

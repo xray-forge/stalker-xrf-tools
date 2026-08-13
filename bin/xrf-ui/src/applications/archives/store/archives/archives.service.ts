@@ -22,7 +22,6 @@ import {
   TArchiveSelection,
 } from "@/lib/archive";
 import { transformError } from "@/lib/error";
-import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/ipc";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
@@ -33,6 +32,7 @@ import {
   ProjectReadResult,
 } from "@/lib/xrf/bindings/xray-archive";
 import { ArchiveAudioPreview, ArchiveImagePreview } from "@/lib/xrf/bindings/xrf-app";
+import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 
 @Injectable()
 export class ArchivesService {

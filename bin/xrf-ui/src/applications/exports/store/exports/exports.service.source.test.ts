@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { ExportsService } from "@/applications/exports/store/exports/exports.service";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { EExportsEditorCommand } from "@/lib/ipc";
 import { ExportSourceContent } from "@/lib/xrf/bindings/xray-export";
+import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 const SOURCE: ExportSourceContent = {
   name: "xr_effects.play",

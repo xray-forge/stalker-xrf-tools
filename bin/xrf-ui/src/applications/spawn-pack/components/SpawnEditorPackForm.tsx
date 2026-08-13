@@ -9,9 +9,9 @@ import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
-import { ESpawnsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
+import { ESpawnsEditorCommand } from "@/lib/xrf/ipc";
 import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/lib/xrf-path";
 
 /**

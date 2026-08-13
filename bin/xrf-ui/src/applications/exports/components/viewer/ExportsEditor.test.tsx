@@ -9,9 +9,9 @@ import { ProjectService } from "@/core/store/project";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { TCallableExportDescriptor, TValueExportDescriptor } from "@/lib/exports";
-import { EExportsEditorCommand } from "@/lib/ipc";
 import { Logger } from "@/lib/logging";
 import { ExportsProject } from "@/lib/xrf/bindings/xray-export";
+import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 const PLAY_SOUND: TCallableExportDescriptor = {
   kind: "callable",

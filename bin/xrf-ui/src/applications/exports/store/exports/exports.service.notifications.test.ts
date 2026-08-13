@@ -5,8 +5,8 @@ import { ExportsService } from "@/applications/exports/store/exports/exports.ser
 import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
-import { EExportsEditorCommand } from "@/lib/ipc";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
+import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 
 interface IWatchedService {
   service: ExportsService;

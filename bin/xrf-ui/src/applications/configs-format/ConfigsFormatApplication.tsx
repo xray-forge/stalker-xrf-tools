@@ -10,10 +10,10 @@ import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
-import { EConfigsEditorCommand } from "@/lib/ipc";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { LtxProjectFormatResult } from "@/lib/xrf/bindings/xray-ltx";
+import { EConfigsEditorCommand } from "@/lib/xrf/ipc";
 import { getProjectConfigsPath } from "@/lib/xrf-path";
 
 export function ConfigsFormatApplication(): ReactElement {
