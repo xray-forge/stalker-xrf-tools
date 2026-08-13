@@ -6,7 +6,7 @@ pub fn typescript_bindings() -> Types {
     .register::<crate::ArchiveFileDescriptor>()
     .register::<crate::ArchiveProject>()
     .register::<crate::ArchiveExtractResult>()
-    .register::<crate::ArchiveExtractFolderResult>()
+    .register::<crate::ArchiveExtractDirectoryResult>()
     .register::<crate::ArchiveProjectReadPolicy>()
     .register::<crate::ProjectReadResult>()
     .register::<crate::ArchiveUnpackResult>()

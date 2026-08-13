@@ -1,8 +1,8 @@
 mod callable_parser;
 mod declaration_parser;
 mod diagnostics;
-mod editor_projection;
 mod jsdoc_parser;
+mod project_projection;
 mod type_renderer;
 mod value_parser;
 
@@ -10,9 +10,9 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub use editor_projection::{
+pub use project_projection::{
   ExportContractDescriptor, ExportDescriptor, ExportParameterDescriptor, ExportReturnDescriptor, ExportSourceContent,
-  ExportSourceDescriptor, ExportsEditorParser, ExportsProject,
+  ExportSourceDescriptor, ExportsProject, ExportsProjectParser,
 };
 use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XRayError, XRayResult};

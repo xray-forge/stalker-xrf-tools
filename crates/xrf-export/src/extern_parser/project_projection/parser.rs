@@ -9,17 +9,17 @@ use super::{
 use crate::extern_manifest::{ExternExport, ExternParameter, ParsedExtern, ParsedExternManifest};
 use crate::extern_parser::ExternManifestParser;
 
-/// Projects canonical externs for the desktop editor.
+/// Projects canonical externs into the application-facing exports project.
 #[derive(Default)]
-pub struct ExportsEditorParser;
+pub struct ExportsProjectParser;
 
-impl ExportsEditorParser {
-  /// Create a parser that projects canonical externs for the desktop editor.
+impl ExportsProjectParser {
+  /// Create a parser that builds the application-facing exports project.
   pub fn new() -> Self {
     Self
   }
 
-  /// Scan one project and project every extern for the editor.
+  /// Scan one project and project every extern into its application-facing form.
   pub fn parse_project_from_path<P: AsRef<Path>>(&self, path: P) -> XRayResult<ExportsProject> {
     let root: &Path = path.as_ref();
     let parsed: ParsedExternManifest = ExternManifestParser::new().parse_directory(root)?;

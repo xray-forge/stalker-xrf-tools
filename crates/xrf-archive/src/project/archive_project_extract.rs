@@ -24,7 +24,7 @@ pub struct ArchiveExtractResult {
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ArchiveExtractFolderResult {
+pub struct ArchiveExtractDirectoryResult {
   pub prefix: String,
   pub destination: String,
   pub extracted_count: usize,
@@ -36,10 +36,14 @@ impl ArchiveProject {
   ///
   /// Keeps the layout below the prefix but not the prefix itself: extracting `configs\gameplay` into
   /// `C:\out` produces `C:\out\dialogs.xml`, not `C:\out\configs\gameplay\dialogs.xml`. The user picked
-  /// the destination for the folder they named, so repeating that folder inside it is surprising.
+  /// the destination for the directory they named, so repeating that directory inside it is surprising.
   ///
   /// An empty prefix means the whole archive, which is what selecting the tree root does.
-  pub fn extract_folder<P: AsRef<Path>>(&self, prefix: &str, destination: P) -> XRayResult<ArchiveExtractFolderResult> {
+  pub fn extract_directory<P: AsRef<Path>>(
+    &self,
+    prefix: &str,
+    destination: P,
+  ) -> XRayResult<ArchiveExtractDirectoryResult> {
     let normalized: String = prefix.trim_end_matches(['\\', '/']).to_string();
     let lzo: LZO = Self::init_lzo()?;
 
@@ -82,7 +86,7 @@ impl ArchiveProject {
       )));
     }
 
-    Ok(ArchiveExtractFolderResult {
+    Ok(ArchiveExtractDirectoryResult {
       prefix: normalized,
       destination: destination.as_ref().to_string_lossy().into(),
       extracted_count,

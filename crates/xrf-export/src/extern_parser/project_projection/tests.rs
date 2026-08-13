@@ -3,10 +3,10 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{Value, json};
 
-use super::{ExportContractDescriptor, ExportsEditorParser};
+use super::{ExportContractDescriptor, ExportsProjectParser};
 
 fn create_test_root(name: &str) -> PathBuf {
-  let root: PathBuf = std::env::temp_dir().join(format!("xrf-export-editor-{name}-{}", std::process::id()));
+  let root: PathBuf = std::env::temp_dir().join(format!("xrf-export-project-{name}-{}", std::process::id()));
   let _ = fs::remove_dir_all(&root);
   fs::create_dir_all(&root).unwrap();
   root
@@ -20,7 +20,7 @@ fn write_source(root: &Path, name: &str, source: &str) {
 }
 
 #[test]
-fn parses_all_editor_exports_from_the_project_root() {
+fn parses_all_project_exports_from_the_project_root() {
   let root: PathBuf = create_test_root("project");
 
   write_source(
@@ -73,7 +73,7 @@ fn parses_all_editor_exports_from_the_project_root() {
   write_source(&root, "node_modules/invalid.ts", "this is not TypeScript {{{");
   write_source(&root, "target/invalid.ts", "this is not TypeScript {{{");
 
-  let project = ExportsEditorParser::new().parse_project_from_path(&root).unwrap();
+  let project = ExportsProjectParser::new().parse_project_from_path(&root).unwrap();
 
   assert_eq!(project.root, root);
   assert_eq!(project.declarations.len(), 5);
@@ -110,7 +110,7 @@ fn projects_complete_callable_and_value_contracts() {
     "#,
   );
 
-  let project = ExportsEditorParser::new().parse_project_from_path(&root).unwrap();
+  let project = ExportsProjectParser::new().parse_project_from_path(&root).unwrap();
   let json: Value = json!(project);
 
   assert_eq!(json["root"], root.to_string_lossy().as_ref());
@@ -142,7 +142,7 @@ fn projects_complete_callable_and_value_contracts() {
 fn keeps_an_empty_project_open() {
   let root: PathBuf = create_test_root("empty");
 
-  let project = ExportsEditorParser::new().parse_project_from_path(&root).unwrap();
+  let project = ExportsProjectParser::new().parse_project_from_path(&root).unwrap();
 
   assert_eq!(project.root, root);
   assert!(project.declarations.is_empty());
@@ -162,7 +162,7 @@ fn records_the_last_line_of_a_declaration_and_reads_it_back() {
     "export {};\nextern(\"xr_effects.run\", (): void => {\n  const first: number = 1;\n\n  log(first);\n});\nconst tail: number = 2;\n",
   );
 
-  let project = ExportsEditorParser::new().parse_project_from_path(&root).unwrap();
+  let project = ExportsProjectParser::new().parse_project_from_path(&root).unwrap();
   let declaration = project
     .declarations
     .iter()
@@ -195,7 +195,7 @@ fn records_the_span_of_one_property_inside_an_object_extern() {
     "export {};\nextern(\"xr_effects\", {\n  first: (): void => {\n    log(1);\n  },\n  second: (): void => {},\n});\n",
   );
 
-  let project = ExportsEditorParser::new().parse_project_from_path(&root).unwrap();
+  let project = ExportsProjectParser::new().parse_project_from_path(&root).unwrap();
   let source = project.read_declaration_source("xr_effects.first").unwrap();
 
   assert_eq!(source.content, "  first: (): void => {\n    log(1);\n  },");

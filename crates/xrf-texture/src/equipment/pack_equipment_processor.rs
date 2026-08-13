@@ -178,7 +178,7 @@ impl PackEquipmentProcessor {
     fit_image_into_bounds(image, width, height, path)
   }
 
-  /// Read equipment icon from custom path defined in ltx config folder.
+  /// Read equipment icon from custom path defined in ltx config directory.
   pub fn read_sprite_path(options: &PackEquipmentOptions, descriptor: &InventorySpriteDescriptor) -> PathBuf {
     match descriptor.custom_icon.as_deref() {
       None => {

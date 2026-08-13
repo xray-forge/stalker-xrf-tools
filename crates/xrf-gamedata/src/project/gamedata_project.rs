@@ -39,7 +39,7 @@ impl GamedataProject {
         io::Error::new(
           ErrorKind::NotFound,
           format!(
-            "Invalid gamedata configs folder provided: {}, existing folder with system.ltx is required",
+            "Invalid gamedata configs directory provided: {}, existing directory with system.ltx is required",
             configs.display()
           ),
         )

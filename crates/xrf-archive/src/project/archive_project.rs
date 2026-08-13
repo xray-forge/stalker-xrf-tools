@@ -34,7 +34,7 @@ impl ArchiveProject {
 
       archives.push(ArchiveReader::from_path_windows1251(path)?.read_archive()?);
     } else {
-      log::info!("Reading archive folder: {}", path.as_ref().display());
+      log::info!("Reading archive directory: {}", path.as_ref().display());
 
       for entry in WalkDir::new(path).into_iter().filter_map(Result::ok) {
         let path: &Path = entry.path();

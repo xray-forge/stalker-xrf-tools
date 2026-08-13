@@ -180,13 +180,13 @@ mod tests {
       levels_count: 12,
     };
 
-    let export_folder: &Path =
+    let export_directory: &Path =
       &get_absolute_generated_test_resource_path(&get_relative_test_sample_file_directory(file!()));
-    std::fs::create_dir_all(export_folder)?;
+    std::fs::create_dir_all(export_directory)?;
 
-    original.export(&export_folder)?;
+    original.export(&export_directory)?;
 
-    assert_eq!(SpawnHeaderChunk::import(&export_folder)?, original);
+    assert_eq!(SpawnHeaderChunk::import(&export_directory)?, original);
 
     Ok(())
   }

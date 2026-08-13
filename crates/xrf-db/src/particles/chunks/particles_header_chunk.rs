@@ -186,13 +186,13 @@ mod tests {
   fn test_import_export() -> XRayResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
-    let export_folder: &Path =
+    let export_directory: &Path =
       &get_absolute_generated_test_resource_path(&get_relative_test_sample_file_directory(file!()));
-    std::fs::create_dir_all(export_folder)?;
+    std::fs::create_dir_all(export_directory)?;
 
-    original.export(&export_folder)?;
+    original.export(&export_directory)?;
 
-    let read: ParticlesHeaderChunk = ParticlesHeaderChunk::import(&export_folder)?;
+    let read: ParticlesHeaderChunk = ParticlesHeaderChunk::import(&export_directory)?;
 
     assert_eq!(read, original);
 

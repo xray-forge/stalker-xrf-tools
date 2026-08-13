@@ -74,7 +74,7 @@ pub struct ExternParameter {
   pub type_name: String,
 }
 
-/// A parsed declaration together with the location used by editor projections.
+/// A parsed declaration together with the location used by project projections.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ParsedExtern {
   pub export: ExternExport,

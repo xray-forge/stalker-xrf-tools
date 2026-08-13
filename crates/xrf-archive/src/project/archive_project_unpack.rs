@@ -21,7 +21,7 @@ impl ArchiveProject {
     let mut unpacked_files_count: usize = 0;
     let unpacked_files_chunk: usize = max(self.files.len() / 100 * 5, 5);
 
-    // Prepare structure of folders for further unpacking.
+    // Prepare structure of directories for further unpacking.
     self.unpack_dirs(destination.as_ref())?;
 
     let prepared_at: Duration = start.elapsed();
@@ -65,7 +65,7 @@ impl ArchiveProject {
     let mut unpacked_files_count: usize = 0;
     let unpacked_files_chunk: usize = max(self.files.len() / 100 * 5, 5);
 
-    // Prepare structure of folders for further unpacking.
+    // Prepare structure of directories for further unpacking.
     self.unpack_dirs(destination.as_ref())?;
 
     let prepared_at: Duration = start.elapsed();

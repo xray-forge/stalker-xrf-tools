@@ -29,7 +29,7 @@ pub struct ExportSourceContent {
 impl ExportsProject {
   /// Read back the source that declares one extern.
   ///
-  /// Resolved from the name rather than from a path supplied by the caller: the editor may only read
+  /// Resolved from the name rather than from a path supplied by the caller: this Interface may only read
   /// what this project already parsed, so the surface cannot be used to read arbitrary files.
   pub fn read_declaration_source(&self, name: &str) -> XRayResult<ExportSourceContent> {
     let declaration: &ExportDescriptor = self
@@ -73,7 +73,7 @@ mod tests {
   use std::fs;
 
   use super::*;
-  use crate::extern_parser::editor_projection::{ExportContractDescriptor, ExportReturnDescriptor};
+  use crate::extern_parser::project_projection::{ExportContractDescriptor, ExportReturnDescriptor};
 
   fn descriptor(name: &str, path: &str, line: usize, end_line: usize) -> ExportDescriptor {
     ExportDescriptor {

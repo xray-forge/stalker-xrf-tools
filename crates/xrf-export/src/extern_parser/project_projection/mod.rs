@@ -9,4 +9,4 @@ pub use export_descriptor::{
   ExportContractDescriptor, ExportDescriptor, ExportParameterDescriptor, ExportReturnDescriptor, ExportSourceDescriptor,
 };
 pub use exports_project::{ExportSourceContent, ExportsProject};
-pub use parser::ExportsEditorParser;
+pub use parser::ExportsProjectParser;

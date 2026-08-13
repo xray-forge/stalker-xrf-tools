@@ -1,4 +1,4 @@
-/// One extern declaration projected for the desktop editor.
+/// One extern declaration projected for the application-facing exports project.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,7 +24,7 @@ pub enum ExportContractDescriptor {
   },
 }
 
-/// One callable parameter projected for the desktop editor.
+/// One callable parameter projected for the application-facing exports project.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]

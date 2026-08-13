@@ -8,7 +8,7 @@ use minilzo_rs::LZO;
 
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
-use crate::{ArchiveExtractFolderResult, ArchiveProject};
+use crate::{ArchiveExtractDirectoryResult, ArchiveProject};
 
 struct Entry {
   name: &'static str,
@@ -95,8 +95,8 @@ fn create_temporary_directory(name: &str) -> PathBuf {
 }
 
 #[test]
-fn extract_folder_writes_every_file_under_the_prefix() {
-  let directory: PathBuf = create_temporary_directory("folder");
+fn extract_directory_writes_every_file_under_the_prefix() {
+  let directory: PathBuf = create_temporary_directory("directory");
   let project: ArchiveProject = create_project(
     &directory,
     &[
@@ -107,10 +107,10 @@ fn extract_folder_writes_every_file_under_the_prefix() {
   );
 
   let out: PathBuf = directory.join("out");
-  let result: ArchiveExtractFolderResult = project.extract_folder("configs", &out).expect("extraction");
+  let result: ArchiveExtractDirectoryResult = project.extract_directory("configs", &out).expect("extraction");
 
   assert_eq!(result.extracted_count, 2);
-  // The prefix is stripped: the user chose the destination for that folder already.
+  // The prefix is stripped: the user chose the destination for that directory already.
   assert_eq!(
     fs::read_to_string(out.join("gameplay").join("dialogs.xml")).expect("nested file"),
     "<game_dialogs/>"
@@ -123,7 +123,7 @@ fn extract_folder_writes_every_file_under_the_prefix() {
 }
 
 #[test]
-fn extract_folder_skips_entries_that_carry_no_bytes() {
+fn extract_directory_skips_entries_that_carry_no_bytes() {
   let directory: PathBuf = create_temporary_directory("empty");
   let project: ArchiveProject = create_project(
     &directory,
@@ -136,14 +136,14 @@ fn extract_folder_skips_entries_that_carry_no_bytes() {
   );
 
   let out: PathBuf = directory.join("out");
-  let result: ArchiveExtractFolderResult = project.extract_folder("configs", &out).expect("extraction");
+  let result: ArchiveExtractDirectoryResult = project.extract_directory("configs", &out).expect("extraction");
 
   assert_eq!(result.extracted_count, 1);
   assert!(out.join("gameplay").join("dialogs.xml").exists());
 }
 
 #[test]
-fn extract_folder_takes_the_whole_archive_for_an_empty_prefix() {
+fn extract_directory_takes_the_whole_archive_for_an_empty_prefix() {
   let directory: PathBuf = create_temporary_directory("root");
   let project: ArchiveProject = create_project(
     &directory,
@@ -154,7 +154,7 @@ fn extract_folder_takes_the_whole_archive_for_an_empty_prefix() {
   );
 
   let out: PathBuf = directory.join("out");
-  let result: ArchiveExtractFolderResult = project.extract_folder("", &out).expect("extraction");
+  let result: ArchiveExtractDirectoryResult = project.extract_directory("", &out).expect("extraction");
 
   assert_eq!(result.extracted_count, 2);
   assert!(out.join("configs").join("system.ltx").exists());
@@ -255,9 +255,9 @@ fn extract_file_writes_a_compressed_entry_decompressed() {
 }
 
 #[test]
-fn extract_folder_reports_a_prefix_that_matches_nothing() {
+fn extract_directory_reports_a_prefix_that_matches_nothing() {
   let directory: PathBuf = create_temporary_directory("missing");
   let project: ArchiveProject = create_project(&directory, &[Entry::stored("configs\\system.ltx", b"[section]")]);
 
-  assert!(project.extract_folder("meshes", directory.join("out")).is_err());
+  assert!(project.extract_directory("meshes", directory.join("out")).is_err());
 }
