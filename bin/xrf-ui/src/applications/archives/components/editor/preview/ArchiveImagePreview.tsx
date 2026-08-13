@@ -6,9 +6,9 @@ import { ArchivePreviewError } from "@/applications/archives/components/editor/p
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { TArchiveContent } from "@/core/archive";
 import { ArchiveImagePreview as TArchiveImagePreview } from "@/core/bindings/xrf-app";
-import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
-import { EmptyState } from "@/core/components/layout/EmptyState";
-import { ImageViewport } from "@/core/components/media/ImageViewport";
+import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
+import { EmptyState } from "@/core/ui/layout/EmptyState";
+import { ImageViewport } from "@/core/ui/media/ImageViewport";
 import { Loadable } from "@/lib/loadable";
 import { Nullable } from "@/lib/types/general";
 

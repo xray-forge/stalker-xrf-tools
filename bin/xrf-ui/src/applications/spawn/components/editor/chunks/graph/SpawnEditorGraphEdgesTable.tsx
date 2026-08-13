@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { GraphEdge } from "@/core/bindings/xrf-db";
-import { decimalColumn, textColumn } from "@/core/components/table";
+import { decimalColumn, textColumn } from "@/core/ui/table";
 
 interface IGraphEdgeRow extends GraphEdge {
   index: number;

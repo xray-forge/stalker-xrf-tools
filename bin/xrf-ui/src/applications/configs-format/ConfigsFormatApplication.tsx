@@ -5,19 +5,19 @@ import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from "rea
 import { ConfigsFormatResult } from "@/applications/configs-format/components/ConfigsFormatResult";
 import { commands as configsEditorCommands } from "@/core/bindings/xrf-app-configs-editor";
 import { LtxProjectFormatResult } from "@/core/bindings/xrf-ltx";
-import { PathFormRow } from "@/core/components/form/PathFormRow";
-import { IPathField, usePathField } from "@/core/components/form/use-path-field";
-import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
+import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
+import { PickerForm } from "@/core/routing/components/PickerForm";
 import { getProjectConfigsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { PathFormRow } from "@/core/ui/form/PathFormRow";
+import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 
 export function ConfigsFormatApplication(): ReactElement {
   const log: Logger = useLogger("configs-formatter");
-  const notify: TNotify = useNotify();
+  const notify: TEmitNotification = useEmitNotification();
 
   const projectService: ProjectService = useInjection(ProjectService);
 

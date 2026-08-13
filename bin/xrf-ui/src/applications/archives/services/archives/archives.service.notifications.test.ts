@@ -3,7 +3,7 @@ import { EventBus, WireEvent } from "@wirestate/core";
 
 import { ArchivesService } from "@/applications/archives/services/archives/archives.service";
 import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
-import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/core/notifications";
+import { EMIT_NOTIFICATION_EVENT, ENotificationSeverity, INotificationPayload } from "@/core/notifications/lib";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
@@ -21,7 +21,7 @@ function watchNotifications(): IWatchedService {
 
   container
     .get(EventBus)
-    .subscribe(NOTIFICATION_PUSH_EVENT, (event: WireEvent<INotificationPayload>) =>
+    .subscribe(EMIT_NOTIFICATION_EVENT, (event: WireEvent<INotificationPayload>) =>
       raised.push(event.payload as INotificationPayload)
     );
 

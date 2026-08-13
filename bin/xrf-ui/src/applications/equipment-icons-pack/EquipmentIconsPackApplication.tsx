@@ -2,11 +2,10 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
 import { EquipmentPackResult } from "@/applications/equipment-icons-pack/components/EquipmentPackResult";
-import { FilePickerInput, usePathState } from "@/core/components/form/file-picker";
-import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EquipmentService, IPackEquipmentResult } from "@/core/equipment-icons";
-import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
+import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
+import { PickerForm } from "@/core/routing/components/PickerForm";
 import {
   getPathIfExists,
   getProjectEquipmentDDSPath,
@@ -14,6 +13,7 @@ import {
   getProjectSystemLtxPath,
 } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { FilePickerInput, usePathState } from "@/core/ui/form/file-picker";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { useMountEffect } from "@/lib/react";
@@ -21,7 +21,7 @@ import { Nullable } from "@/lib/types/general";
 
 export function EquipmentIconsPackApplication(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");
-  const notify: TNotify = useNotify();
+  const notify: TEmitNotification = useEmitNotification();
 
   const equipmentService: EquipmentService = useInjection(EquipmentService);
   const projectService: ProjectService = useInjection(ProjectService);

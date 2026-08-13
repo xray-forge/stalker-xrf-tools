@@ -1,7 +1,7 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
-import { LAYOUT } from "@/lib/theme/tokens";
+import { LAYOUT } from "@/core/theme/tokens";
 
 export interface IRailButtonProps {
   isSelected?: boolean;

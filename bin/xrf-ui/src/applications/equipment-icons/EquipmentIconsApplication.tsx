@@ -3,8 +3,8 @@ import { ReactElement } from "react";
 
 import { EquipmentSpriteEditor } from "@/applications/equipment-icons/components/equipment-editor/EquipmentSpriteEditor";
 import { IconsEditorEquipmentOpenForm } from "@/applications/equipment-icons/components/equipment-editor/IconsEditorEquipmentOpenForm";
-import { ApplicationLoader } from "@/core/components/ApplicationLoader";
 import { EquipmentService } from "@/core/equipment-icons";
+import { ApplicationLoader } from "@/core/shell/loading/ApplicationLoader";
 
 /** Picker until a sprite is open, editor once it is. */
 export function EquipmentIconsApplication(): ReactElement {

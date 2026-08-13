@@ -3,8 +3,8 @@ import { ReactElement, useCallback } from "react";
 
 import { TranslationsEditorWorkspace } from "@/applications/translations/components/TranslationsEditorWorkspace";
 import { TranslationsService } from "@/applications/translations/store/translations";
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { Logger, useLogger } from "@/lib/logging";
 

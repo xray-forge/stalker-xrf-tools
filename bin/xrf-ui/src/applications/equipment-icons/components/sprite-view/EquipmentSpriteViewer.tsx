@@ -10,8 +10,8 @@ import { EquipmentGridMoveOver } from "@/applications/equipment-icons/components
 import { EquipmentGridZoom } from "@/applications/equipment-icons/components/sprite-view/EquipmentGridZoom";
 import { EquipmentSpriteGrid } from "@/applications/equipment-icons/components/sprite-view/EquipmentSpriteGrid";
 import { equipmentViewerConfig } from "@/applications/equipment-icons/configs/EquipmentViewerConfig";
-import { IMAGE_CHECKERBOARD } from "@/core/components/media/media.styles";
 import { EquipmentService, GridMapper } from "@/core/equipment-icons";
+import { IMAGE_CHECKERBOARD } from "@/core/ui/media/media.styles";
 import { Nullable } from "@/lib/types/general";
 
 export function EquipmentSpriteViewer(): ReactElement {

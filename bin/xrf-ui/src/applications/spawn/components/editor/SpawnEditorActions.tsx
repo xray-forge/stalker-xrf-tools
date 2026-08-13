@@ -5,8 +5,8 @@ import * as dialog from "@tauri-apps/plugin-dialog";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
-import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
 import { SpawnFileService } from "@/core/spawn/services";
+import { ConfirmDialog } from "@/core/ui/dialog/ConfirmDialog";
 import { Nullable } from "@/lib/types/general";
 
 /**

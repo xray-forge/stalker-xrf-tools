@@ -1,9 +1,9 @@
 import { ReactElement, useMemo } from "react";
 
 import { ProjectReadResult } from "@/core/bindings/xrf-archive";
-import { CodeView } from "@/core/components/code/CodeView";
+import { CodeView } from "@/core/syntax/components/CodeView";
+import { ESyntaxLanguage, getSyntaxLanguage } from "@/core/syntax/lib";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { ESyntaxLanguage, getSyntaxLanguage } from "@/lib/syntax";
 
 interface IArchiveCodePreviewProps extends BaseComponentProps {
   file: ProjectReadResult;

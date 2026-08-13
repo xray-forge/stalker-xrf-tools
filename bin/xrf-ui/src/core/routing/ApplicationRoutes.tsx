@@ -2,10 +2,10 @@ import { ReactElement, Suspense } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import { Root } from "@/applications/Root";
-import { ApplicationLoader } from "@/core/components/ApplicationLoader";
-import { NavigationError } from "@/core/components/NavigationError";
 import { IApplicationDescriptor } from "@/core/routing/application";
 import { APPLICATIONS, findApplication } from "@/core/routing/applications";
+import { NavigationError } from "@/core/shell/error/NavigationError";
+import { ApplicationLoader } from "@/core/shell/loading/ApplicationLoader";
 
 /**
  * Maps urls onto applications, inside a suspense boundary keyed by the application that owns the route.

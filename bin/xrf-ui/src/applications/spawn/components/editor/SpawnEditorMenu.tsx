@@ -6,7 +6,7 @@ import { default as ScienceIcon } from "@mui/icons-material/Science";
 import { ReactElement, ReactNode, useMemo } from "react";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
-import { EditorSideMenu, IEditorSideMenuItem } from "@/core/components/editor/EditorSideMenu";
+import { EditorSideMenu, IEditorSideMenuItem } from "@/core/shell/editor/EditorSideMenu";
 
 const EDITOR_PATH: string = "/spawn";
 

@@ -2,7 +2,7 @@ import { default as DataObjectIcon } from "@mui/icons-material/DataObject";
 import { Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
+import { CenteredColumn } from "@/core/ui/layout/CenteredColumn";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 export interface IExportsViewerStateProps extends BaseComponentProps {

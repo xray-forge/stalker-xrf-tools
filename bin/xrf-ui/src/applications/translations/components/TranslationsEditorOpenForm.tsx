@@ -2,11 +2,11 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { TranslationsService } from "@/applications/translations/store/translations";
-import { PathFormRow } from "@/core/components/form/PathFormRow";
-import { IPathField, usePathField } from "@/core/components/form/use-path-field";
-import { PickerForm } from "@/core/components/navigation/PickerForm";
+import { PickerForm } from "@/core/routing/components/PickerForm";
 import { getPathIfExists, getProjectTranslationsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { PathFormRow } from "@/core/ui/form/PathFormRow";
+import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function TranslationsEditorOpenForm(): ReactElement {

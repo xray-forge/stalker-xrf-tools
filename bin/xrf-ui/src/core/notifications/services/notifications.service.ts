@@ -2,12 +2,12 @@ import { Injectable, OnEvent, WireEvent } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable } from "@wirestate/mobx";
 
 import {
+  EMIT_NOTIFICATION_EVENT,
   ENotificationSeverity,
   INotification,
   INotificationPayload,
-  NOTIFICATION_PUSH_EVENT,
   NOTIFICATION_SEVERITY_RANK,
-} from "@/core/notifications";
+} from "@/core/notifications/lib";
 import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 
@@ -16,21 +16,23 @@ import { Nullable } from "@/lib/types/general";
  */
 @Injectable()
 export class NotificationsService {
-  /** Ring cap. A loop that reports per file would otherwise grow the panel until it stops being read. */
+  /** Maximum number of user-facing notifications retained by the service. */
   public static readonly LIMIT: number = 200;
 
-  /** Dev traces get their own budget, so a chatty one cannot evict the failure being chased. */
+  /** Maximum number of developer traces retained separately by the service. */
   public static readonly DEV_LIMIT: number = 100;
 
+  /** Logger scoped to the notification service. */
   public readonly log: Logger = new Logger(this.constructor.name);
 
+  /** Counter used to stamp unique, chronologically ordered record identifiers. */
   private nextId: number = 0;
 
-  /** Newest first, so the panel renders the array as it stands and the cap drops the tail. */
+  /** User-facing notifications in newest-first order. */
   @Observable()
   public notifications: Array<INotification> = [];
 
-  /** Dev traces, recorded whatever the dev mode switch says. */
+  /** Developer traces in newest-first order, recorded regardless of the dev mode setting. */
   @Observable()
   public devNotifications: Array<INotification> = [];
 
@@ -39,6 +41,8 @@ export class NotificationsService {
    *
    * Computed rather than a plain getter: it allocates and sorts, and a fresh array on every read is
    * one nobody can compare by reference.
+   *
+   * @returns User-facing notifications and developer traces in newest-first order.
    */
   @Computed()
   public get allNotifications(): Array<INotification> {
@@ -48,13 +52,21 @@ export class NotificationsService {
     );
   }
 
-  /** What the badge counts. Dev traces are not in this list, so they cannot light it. */
+  /**
+   * Count unread user-facing notifications for the panel badge.
+   *
+   * @returns Number of unread user-facing notifications.
+   */
   @Computed()
   public get unreadCount(): number {
     return this.notifications.reduce((count: number, it: INotification) => (it.isRead ? count : count + 1), 0);
   }
 
-  /** Severity the badge takes its colour from, or null when nothing is unread. */
+  /**
+   * Find the highest severity among unread user-facing notifications.
+   *
+   * @returns Highest unread severity, or `null` when every notification is read.
+   */
   @Computed()
   public get highestUnreadSeverity(): Nullable<ENotificationSeverity> {
     let highest: Nullable<ENotificationSeverity> = null;
@@ -71,6 +83,7 @@ export class NotificationsService {
     return highest;
   }
 
+  /** Create an observable notification service. */
   public constructor() {
     makeObservable(this);
   }
@@ -80,6 +93,9 @@ export class NotificationsService {
    *
    * Public as well as bus-driven so a test does not need a provisioned container to describe what the
    * store should do with a record.
+   *
+   * @param payload - Notification details to stamp and store.
+   * @returns {void} Nothing.
    */
   @BoundAction()
   public push(payload: INotificationPayload): void {
@@ -106,6 +122,8 @@ export class NotificationsService {
    *
    * Called by the panel while it is open, including for records that arrive while it is open - they
    * were on screen as they landed, so calling them unread would leave a badge nothing can dismiss.
+   *
+   * @returns {void} Nothing.
    */
   @BoundAction()
   public markAllRead(): void {
@@ -115,6 +133,11 @@ export class NotificationsService {
     }
   }
 
+  /**
+   * Remove all user-facing notifications and developer traces.
+   *
+   * @returns {void} Nothing.
+   */
   @BoundAction()
   public clear(): void {
     this.log.info("Clear all notifications");
@@ -123,9 +146,12 @@ export class NotificationsService {
   }
 
   /**
-   * Handlers register when the root container is provisioned, which happens before any editor mounts.
+   * Store a notification delivered after the root container is provisioned.
+   *
+   * @param event - Notification event delivered by the application event bus.
+   * @returns {void} Nothing.
    */
-  @OnEvent(NOTIFICATION_PUSH_EVENT)
+  @OnEvent(EMIT_NOTIFICATION_EVENT)
   public onNotificationPush(event: WireEvent<INotificationPayload>): void {
     if (!event.payload) {
       return this.log.warn("Ignoring notification event with no payload");

@@ -9,8 +9,8 @@ import { ExportsMenu } from "@/applications/exports/components/viewer/exports/Ex
 import { ExportsViewer } from "@/applications/exports/components/viewer/exports/ExportsViewer";
 import { ExportsService } from "@/applications/exports/store/exports";
 import { ExportDescriptor, ExportsProject } from "@/core/bindings/xrf-export";
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";

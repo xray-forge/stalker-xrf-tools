@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { SpawnHeaderChunk } from "@/core/bindings/xrf-db";
-import { identifierColumn, textColumn } from "@/core/components/table";
+import { identifierColumn, textColumn } from "@/core/ui/table";
 
 interface IHeaderRow extends SpawnHeaderChunk {
   id: string;

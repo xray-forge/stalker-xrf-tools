@@ -1,7 +1,7 @@
 import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from "react";
 
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";
 import { createStubVisualMeshData, IVisualMeshData, IVisualPreviewViewOptions } from "@/core/visuals";

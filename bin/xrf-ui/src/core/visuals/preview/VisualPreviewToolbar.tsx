@@ -7,7 +7,7 @@ import { default as TuneIcon } from "@mui/icons-material/Tune";
 import { Divider, IconButton, Tooltip } from "@mui/material";
 import { ReactElement, useCallback } from "react";
 
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { IVisualPreviewViewOptions } from "@/core/visuals";
 
 interface IVisualPreviewToolbarProps {

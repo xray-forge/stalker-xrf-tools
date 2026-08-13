@@ -20,9 +20,9 @@ import {
 } from "@/core/archive";
 import { commands as archivesEditorCommands } from "@/core/bindings/xrf-app-archives-editor";
 import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
-import { transformError } from "@/core/error";
+import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
-import { emitNotification, ENotificationSeverity } from "@/core/notifications";
+import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";

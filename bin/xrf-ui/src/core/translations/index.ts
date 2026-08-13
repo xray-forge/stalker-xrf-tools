@@ -1,1 +1,1 @@
-export * from "@/core/translations/types";
+export * from "@/core/translations/translations-types";

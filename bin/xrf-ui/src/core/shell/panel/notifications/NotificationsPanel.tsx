@@ -2,7 +2,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useEffect } from "react";
 
-import { INotification } from "@/core/notifications";
+import { INotification } from "@/core/notifications/lib";
 import { NotificationsService } from "@/core/notifications/services";
 import { SettingsService } from "@/core/settings/services/settings";
 import { NotificationRow } from "@/core/shell/panel/notifications/NotificationRow";

@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { ArchivesEditorOpenForm } from "@/applications/archives/components/ArchivesEditorOpenForm";
 import { ArchivesEditor } from "@/applications/archives/components/editor/ArchivesEditor";
 import { ArchivesService } from "@/applications/archives/services/archives";
-import { ApplicationLoader } from "@/core/components/ApplicationLoader";
+import { ApplicationLoader } from "@/core/shell/loading/ApplicationLoader";
 
 /**
  * Picker until something is open, editor once it is.

@@ -18,9 +18,9 @@ import {
   SpawnHeaderChunk,
   SpawnPatrolsChunk,
 } from "@/core/bindings/xrf-db";
-import { transformError } from "@/core/error";
+import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
-import { emitNotification, ENotificationSeverity } from "@/core/notifications";
+import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { EApplicationGroupId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";

@@ -11,8 +11,8 @@ import { ArchivePreviewError } from "@/applications/archives/components/editor/p
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/core/archive";
 import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
-import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
-import { EmptyState } from "@/core/components/layout/EmptyState";
+import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
+import { EmptyState } from "@/core/ui/layout/EmptyState";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/format/memory";
 import { Loadable } from "@/lib/loadable";

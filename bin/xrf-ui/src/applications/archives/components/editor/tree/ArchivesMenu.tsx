@@ -11,9 +11,9 @@ import { ArchiveTreeItem } from "@/applications/archives/components/editor/tree/
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/core/archive";
 import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
-import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
-import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
-import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
+import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/lib";
+import { EditorSearchResults, IEditorSearchResultRow } from "@/core/shell/editor/EditorSearchResults";
+import { EditorSideMenu } from "@/core/shell/editor/EditorSideMenu";
 import { Nullable, Optional } from "@/lib/types/general";
 
 export function ArchivesMenu(): ReactElement {

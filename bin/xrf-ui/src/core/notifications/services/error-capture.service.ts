@@ -1,8 +1,8 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable } from "@wirestate/mobx";
 
-import { transformError } from "@/core/error";
-import { emitNotification, ENotificationSeverity } from "@/core/notifications";
+import { transformError } from "@/core/error/lib";
+import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { APPLICATION_SOURCE } from "@/core/routing/application";
 import { Logger } from "@/lib/logging";
 
@@ -11,27 +11,49 @@ import { Logger } from "@/lib/logging";
  */
 @Injectable()
 export class ErrorCaptureService {
+  /** Logger scoped to the error capture service. */
   public readonly log: Logger = new Logger(this.constructor.name);
 
   /** Set while a capture is being recorded, so a failure in that path cannot re-enter and loop. */
   private isRecording: boolean = false;
 
+  /**
+   * Create an error capture service.
+   *
+   * @param eventBus - Event bus that delivers captured failures to the notification service.
+   */
   public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
     makeObservable(this);
   }
 
+  /**
+   * Register global error and rejection listeners when the service is provisioned.
+   *
+   * @returns {void} Nothing.
+   */
   @OnProvision()
   public onProvision(): void {
     window.addEventListener("error", this.onWindowError);
     window.addEventListener("unhandledrejection", this.onUnhandledRejection);
   }
 
+  /**
+   * Remove global error and rejection listeners when the service is deactivated.
+   *
+   * @returns {void} Nothing.
+   */
   @OnDeactivation()
   public onDeactivation(): void {
     window.removeEventListener("error", this.onWindowError);
     window.removeEventListener("unhandledrejection", this.onUnhandledRejection);
   }
 
+  /**
+   * Record an uncaught window error when it contains useful failure details.
+   *
+   * @param event - Uncaught window error event.
+   * @returns {void} Nothing.
+   */
   @BoundAction()
   public onWindowError(event: ErrorEvent): void {
     // Resource load failures reach the same event without an `error`, and say nothing worth recording.
@@ -44,6 +66,12 @@ export class ErrorCaptureService {
     this.record(event.error ? transformError(event.error).message : event.message, where);
   }
 
+  /**
+   * Record an unhandled promise rejection.
+   *
+   * @param event - Unhandled promise rejection event.
+   * @returns {void} Nothing.
+   */
   @BoundAction()
   public onUnhandledRejection(event: PromiseRejectionEvent): void {
     this.record(transformError(event.reason).message, "unhandled rejection");
@@ -51,6 +79,10 @@ export class ErrorCaptureService {
 
   /**
    * Record one captured failure, guarding against the loop where recording it fails again.
+   *
+   * @param message - Failure message to record.
+   * @param where - Location or failure context shown in the notification details.
+   * @returns {void} Nothing.
    */
   private record(message: string, where: string): void {
     if (this.isRecording) {

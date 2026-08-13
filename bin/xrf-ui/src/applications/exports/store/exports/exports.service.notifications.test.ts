@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { EventBus, WireEvent } from "@wirestate/core";
 
 import { ExportsService } from "@/applications/exports/store/exports/exports.service";
-import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/core/notifications";
+import { EMIT_NOTIFICATION_EVENT, ENotificationSeverity, INotificationPayload } from "@/core/notifications/lib";
 import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { IInjectedServiceMockDescriptor, mockInjectedService } from "@/fixtures/utils/container";
@@ -18,7 +18,7 @@ function watchNotifications(): IWatchedService {
 
   container
     .get(EventBus)
-    .subscribe(NOTIFICATION_PUSH_EVENT, (event: WireEvent<INotificationPayload>) =>
+    .subscribe(EMIT_NOTIFICATION_EVENT, (event: WireEvent<INotificationPayload>) =>
       raised.push(event.payload as INotificationPayload)
     );
 

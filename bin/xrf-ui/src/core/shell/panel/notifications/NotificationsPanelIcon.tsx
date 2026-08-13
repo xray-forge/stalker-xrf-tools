@@ -3,7 +3,7 @@ import { Badge } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
-import { ENotificationSeverity } from "@/core/notifications";
+import { ENotificationSeverity } from "@/core/notifications/lib";
 import { NotificationsService } from "@/core/notifications/services";
 import { Nullable } from "@/lib/types/general";
 

@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { RichTreeView, TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
 import { ReactElement, useMemo } from "react";
 
-import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
+import { EditorSideMenu } from "@/core/shell/editor/EditorSideMenu";
 
 /**
  * Left side panel listing visuals available in a gamedata or resources tree.

@@ -3,7 +3,7 @@ import { act, RenderResult } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Binding, Container } from "@wirestate/core";
 
-import { ENotificationSeverity, INotificationPayload } from "@/core/notifications";
+import { ENotificationSeverity, INotificationPayload } from "@/core/notifications/lib";
 import { NotificationsService } from "@/core/notifications/services";
 import { EApplicationId } from "@/core/routing/application";
 import { SettingsService } from "@/core/settings/services/settings";

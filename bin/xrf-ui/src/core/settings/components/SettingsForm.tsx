@@ -7,8 +7,8 @@ import { ChangeEvent, ReactElement, useCallback } from "react";
 import { SettingsPathField } from "@/core/settings/components/SettingsPathField";
 import { ProjectService } from "@/core/settings/services/project";
 import { SettingsService } from "@/core/settings/services/settings";
+import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/core/theme";
 import { Logger, useLogger } from "@/lib/logging";
-import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/lib/theme";
 import { Nullable } from "@/lib/types/general";
 
 const COLOR_SCHEME_MODE_LABELS: Record<ColorSchemeMode, string> = {

@@ -3,13 +3,13 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
 import { commands as spawnsEditorCommands } from "@/core/bindings/xrf-app-spawns-editor";
-import { PathFormRow } from "@/core/components/form/PathFormRow";
-import { IPathField, usePathField } from "@/core/components/form/use-path-field";
-import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
+import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
+import { PickerForm } from "@/core/routing/components/PickerForm";
 import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { PathFormRow } from "@/core/ui/form/PathFormRow";
+import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 
@@ -18,7 +18,7 @@ import { Nullable } from "@/lib/types/general";
  */
 export function SpawnEditorPackForm(): ReactElement {
   const log: Logger = useLogger("spawn-pack");
-  const notify: TNotify = useNotify();
+  const notify: TEmitNotification = useEmitNotification();
 
   const projectService: ProjectService = useInjection(ProjectService);
 

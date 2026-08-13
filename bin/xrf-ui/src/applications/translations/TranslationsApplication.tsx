@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { TranslationsEditor } from "@/applications/translations/components/TranslationsEditor";
 import { TranslationsEditorOpenForm } from "@/applications/translations/components/TranslationsEditorOpenForm";
 import { TranslationsService } from "@/applications/translations/store/translations";
-import { ApplicationLoader } from "@/core/components/ApplicationLoader";
+import { ApplicationLoader } from "@/core/shell/loading/ApplicationLoader";
 
 /** Picker until a project is open, editor once it is. */
 export function TranslationsApplication(): ReactElement {

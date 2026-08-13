@@ -3,8 +3,8 @@ import { ReactElement, Ref } from "react";
 
 import { ApplicationTitleBarIcon } from "@/core/shell/title-bar/ApplicationTitleBarIcon";
 import { WindowControls } from "@/core/shell/title-bar/WindowControls";
+import { LAYOUT } from "@/core/theme/tokens";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { LAYOUT } from "@/lib/theme/tokens";
 
 export interface IApplicationTitleBarProps extends BaseComponentProps {
   /** Where the active application portals its toolbar. The frame owns the element. */

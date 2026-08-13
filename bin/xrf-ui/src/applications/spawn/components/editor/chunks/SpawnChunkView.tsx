@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
-import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
-import { EmptyState } from "@/core/components/layout/EmptyState";
+import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
+import { EmptyState } from "@/core/ui/layout/EmptyState";
 import { Loadable } from "@/lib/loadable";
 import { useMountEffect } from "@/lib/react";
 import { Nullable } from "@/lib/types/general";

@@ -3,9 +3,9 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { commands as exportsEditorCommands } from "@/core/bindings/xrf-app-exports-editor";
 import { ExportSourceContent, ExportsProject } from "@/core/bindings/xrf-export";
-import { transformError } from "@/core/error";
+import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
-import { emitNotification, ENotificationSeverity } from "@/core/notifications";
+import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";

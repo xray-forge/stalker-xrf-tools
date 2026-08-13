@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { IEditorPanel, TEditorPanelSide } from "@/core/shell/panel/context";
+import { PANEL } from "@/core/theme/tokens";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
-import { PANEL } from "@/lib/theme/tokens";
 import { Nullable } from "@/lib/types/general";
 
 export interface IPanelSlot {

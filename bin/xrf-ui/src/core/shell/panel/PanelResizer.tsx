@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { PointerEvent, ReactElement, useCallback, useRef } from "react";
 
 import { TEditorPanelSide } from "@/core/shell/panel/context";
-import { PANEL } from "@/lib/theme/tokens";
+import { PANEL } from "@/core/theme/tokens";
 
 export interface IPanelResizerProps {
   side: TEditorPanelSide;

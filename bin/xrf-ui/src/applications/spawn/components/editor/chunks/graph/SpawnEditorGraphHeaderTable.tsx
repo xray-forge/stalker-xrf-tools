@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { GraphHeader } from "@/core/bindings/xrf-db";
-import { identifierColumn, textColumn } from "@/core/components/table";
+import { identifierColumn, textColumn } from "@/core/ui/table";
 
 interface IGraphHeaderRow extends GraphHeader {
   id: string;

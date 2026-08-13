@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { ArtefactSpawnPoint } from "@/core/bindings/xrf-db";
-import { decimalColumn, textColumn, vectorColumn } from "@/core/components/table";
+import { decimalColumn, textColumn, vectorColumn } from "@/core/ui/table";
 
 interface IArtefactNodeRow extends ArtefactSpawnPoint {
   index: number;

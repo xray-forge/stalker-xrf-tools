@@ -2,7 +2,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 
 import { IEditorPanel, TEditorPanelSide } from "@/core/shell/panel/context";
-import { LAYOUT } from "@/lib/theme/tokens";
+import { LAYOUT } from "@/core/theme/tokens";
 
 export interface IPanelStripeButtonProps {
   panel: IEditorPanel;

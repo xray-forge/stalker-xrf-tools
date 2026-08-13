@@ -2,12 +2,17 @@ import { describe, expect, it } from "@jest/globals";
 import { Container } from "@wirestate/core";
 import { autorun, IReactionDisposer } from "@wirestate/mobx";
 
-import { ENotificationSeverity, INotification } from "@/core/notifications";
+import { ENotificationSeverity, INotification } from "@/core/notifications/lib";
 import { NotificationsService } from "@/core/notifications/services/notifications.service";
 import { EApplicationId } from "@/core/routing/application";
 
 const SOURCE: EApplicationId = EApplicationId.EQUIPMENT_ICONS;
 
+/**
+ * Create an isolated notification service for developer trace tests.
+ *
+ * @returns Notification service under test.
+ */
 function mockService(): NotificationsService {
   return new Container({ bindings: [NotificationsService] }).get(NotificationsService);
 }

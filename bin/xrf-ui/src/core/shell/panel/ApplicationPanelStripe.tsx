@@ -3,7 +3,7 @@ import { ReactElement, ReactNode } from "react";
 
 import { IEditorPanel, TEditorPanelSide } from "@/core/shell/panel/context";
 import { PanelStripeButton } from "@/core/shell/panel/PanelStripeButton";
-import { LAYOUT } from "@/lib/theme/tokens";
+import { LAYOUT } from "@/core/theme/tokens";
 import { Nullable } from "@/lib/types/general";
 
 export interface IApplicationPanelStripeProps {

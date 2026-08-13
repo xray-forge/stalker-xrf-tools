@@ -9,8 +9,8 @@ import { ArchivesFileContent } from "@/applications/archives/components/editor/p
 import { ArchivesMenu } from "@/applications/archives/components/editor/tree/ArchivesMenu";
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { ArchiveProject } from "@/core/bindings/xrf-archive";
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";

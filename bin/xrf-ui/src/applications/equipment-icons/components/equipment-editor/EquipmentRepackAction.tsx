@@ -3,8 +3,8 @@ import { IconButton, Tooltip, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
-import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
 import { EquipmentService } from "@/core/equipment-icons";
+import { ConfirmDialog } from "@/core/ui/dialog/ConfirmDialog";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 

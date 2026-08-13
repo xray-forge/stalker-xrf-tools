@@ -15,10 +15,10 @@ import {
 } from "@/applications/exports/components/viewer/exports/exports-groups";
 import { ExportsMenuHeader } from "@/applications/exports/components/viewer/exports/ExportsMenuHeader";
 import { ExportDescriptor } from "@/core/bindings/xrf-export";
-import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
-import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
+import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/lib";
+import { EditorSearchResults, IEditorSearchResultRow } from "@/core/shell/editor/EditorSearchResults";
+import { EditorSideMenu } from "@/core/shell/editor/EditorSideMenu";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 import { Nullable } from "@/lib/types/general";
 
 const DECLARATION_ITEM_PREFIX: string = "declaration:";

@@ -5,19 +5,19 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 import { ArchivesUnpackResult } from "@/applications/archives-unpack/components/ArchivesUnpackResult";
 import { commands as archivesEditorCommands } from "@/core/bindings/xrf-app-archives-editor";
 import { ArchiveUnpackResult } from "@/core/bindings/xrf-archive";
-import { FilePickerInput } from "@/core/components/form/file-picker/FilePickerInput";
-import { usePathState } from "@/core/components/form/file-picker/use-path-state";
-import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
+import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
+import { PickerForm } from "@/core/routing/components/PickerForm";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
+import { FilePickerInput } from "@/core/ui/form/file-picker/FilePickerInput";
+import { usePathState } from "@/core/ui/form/file-picker/use-path-state";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 
 export function ArchivesUnpackApplication(): ReactElement {
   const log: Logger = useLogger("archives-unpacker");
-  const notify: TNotify = useNotify();
+  const notify: TEmitNotification = useEmitNotification();
 
   const projectService: ProjectService = useInjection(ProjectService);
 

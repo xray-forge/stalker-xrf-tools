@@ -2,8 +2,8 @@ import { GridColDef } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { ArchiveUnpackResult } from "@/core/bindings/xrf-archive";
-import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
-import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
+import { CommandResult, ICommandResultStat } from "@/core/ui/command-result/CommandResult";
+import { CommandResultFindings } from "@/core/ui/command-result/CommandResultFindings";
 import { formatDuration } from "@/lib/format/duration";
 import { bytesToMegabytes } from "@/lib/format/memory";
 

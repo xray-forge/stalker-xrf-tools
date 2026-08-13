@@ -10,7 +10,7 @@ import { ReactNode, useMemo } from "react";
 import { ErrorCaptureService, NotificationsService } from "@/core/notifications/services";
 import { ProjectService } from "@/core/settings/services/project";
 import { SettingsService } from "@/core/settings/services/settings";
-import { createApplicationStyleCache, createApplicationTheme } from "@/lib/theme";
+import { createApplicationStyleCache, createApplicationTheme } from "@/core/theme";
 
 interface IApplicationProviderProps {
   children: ReactNode;

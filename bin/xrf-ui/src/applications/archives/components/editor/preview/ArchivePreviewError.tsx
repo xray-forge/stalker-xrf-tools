@@ -2,7 +2,7 @@ import { default as ErrorOutlineIcon } from "@mui/icons-material/ErrorOutlineOut
 import { Button, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
+import { CenteredColumn } from "@/core/ui/layout/CenteredColumn";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 interface IArchivePreviewErrorProps extends BaseComponentProps {

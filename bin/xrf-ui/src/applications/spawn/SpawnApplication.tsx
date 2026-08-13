@@ -3,8 +3,8 @@ import { ReactElement } from "react";
 
 import { SpawnEditor } from "@/applications/spawn/components/editor/SpawnEditor";
 import { SpawnEditorOpenForm } from "@/applications/spawn/components/SpawnEditorOpenForm";
-import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { SpawnFileService } from "@/core/spawn/services";
+import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 
 /** Picker until a spawn file is open, editor once it is. */
 export function SpawnApplication(): ReactElement {

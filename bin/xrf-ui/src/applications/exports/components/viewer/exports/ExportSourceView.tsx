@@ -4,12 +4,12 @@ import { ReactElement, useEffect, useState } from "react";
 
 import { ExportsService } from "@/applications/exports/store/exports";
 import { ExportSourceContent } from "@/core/bindings/xrf-export";
-import { CodeView } from "@/core/components/code/CodeView";
-import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
-import { transformError } from "@/core/error";
+import { transformError } from "@/core/error/lib";
+import { CodeView } from "@/core/syntax/components/CodeView";
+import { getSyntaxLanguage } from "@/core/syntax/lib";
+import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { createLoadable, Loadable } from "@/lib/loadable";
-import { getSyntaxLanguage } from "@/lib/syntax";
 import { Nullable } from "@/lib/types/general";
 
 export interface IExportSourceViewProps extends BaseComponentProps {

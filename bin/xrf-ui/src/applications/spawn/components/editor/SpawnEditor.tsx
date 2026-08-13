@@ -13,8 +13,8 @@ import { createSpawnEditorPanels } from "@/applications/spawn/components/editor/
 import { SpawnEditorActions } from "@/applications/spawn/components/editor/SpawnEditorActions";
 import { SpawnEditorMenu } from "@/applications/spawn/components/editor/SpawnEditorMenu";
 import { SpawnHeaderChunk } from "@/core/bindings/xrf-db";
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";

@@ -2,9 +2,9 @@ import { Box } from "@mui/material";
 import { ReactElement, ReactNode, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import { ApplicationCrash } from "@/core/components/error/ApplicationCrash";
-import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/components/error/ErrorBoundary";
-import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
+import { ApplicationCrash } from "@/core/error/components/ApplicationCrash";
+import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/error/components/ErrorBoundary";
+import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/routing/application";
 import { findApplication } from "@/core/routing/applications";
 import { ApplicationScope } from "@/core/shell/ApplicationScope";
@@ -35,7 +35,7 @@ export function ApplicationShellFrame({
   className,
   children,
 }: IApplicationShellFrameProps): ReactElement {
-  const notify: TNotify = useNotify();
+  const notify: TEmitNotification = useEmitNotification();
   const panels: ReadonlyArray<IEditorPanel> = useEditorPanelsRegistry();
 
   const { pathname } = useLocation();

@@ -6,9 +6,9 @@ import { ReactElement, useCallback, useEffect } from "react";
 
 import { EquipmentRepackAction } from "@/applications/equipment-icons/components/equipment-editor/EquipmentRepackAction";
 import { EquipmentSpriteEditorWorkspace } from "@/applications/equipment-icons/components/equipment-editor/EquipmentSpriteEditorWorkspace";
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { EquipmentService, IEquipmentPngDescriptor } from "@/core/equipment-icons";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { Logger, useLogger } from "@/lib/logging";

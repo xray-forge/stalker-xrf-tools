@@ -2,9 +2,9 @@ import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wire
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { commands as translationsEditorCommands } from "@/core/bindings/xrf-app-translations-editor";
-import { transformError } from "@/core/error";
+import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
-import { emitNotification, ENotificationSeverity } from "@/core/notifications";
+import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
 import { ITranslationsProjectJson } from "@/core/translations";
 import { createLoadable, Loadable } from "@/lib/loadable";

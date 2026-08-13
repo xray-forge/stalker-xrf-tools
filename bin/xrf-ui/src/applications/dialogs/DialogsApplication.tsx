@@ -5,8 +5,8 @@ import { addEdge, Background, Connection, Controls, Edge, ReactFlow, useEdgesSta
 import { DialogNode } from "@/applications/dialogs/components/DialogNode";
 import { PhraseNode } from "@/applications/dialogs/components/PhraseNode";
 import { EGraphNodeType } from "@/applications/dialogs/types";
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 
 import "reactflow/dist/style.css";
 

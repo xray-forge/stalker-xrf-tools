@@ -4,12 +4,12 @@ import { useInjection } from "@wirestate/react";
 import { ChangeEvent, Fragment, ReactElement, useCallback, useMemo, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { EditorLayout } from "@/core/components/editor/EditorLayout";
-import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { ApplicationCard } from "@/core/components/navigation/ApplicationCard";
 import { EApplicationStatus, IApplicationDescriptor, IApplicationGroup } from "@/core/routing/application";
 import { APPLICATION_GROUPS, APPLICATIONS } from "@/core/routing/applications";
+import { ApplicationCard } from "@/core/routing/components/ApplicationCard";
 import { SettingsService } from "@/core/settings/services/settings";
+import { EditorLayout } from "@/core/shell/editor/EditorLayout";
+import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 
 /**
  * Column counts at chosen widths rather than wherever a `minmax` happens to divide.

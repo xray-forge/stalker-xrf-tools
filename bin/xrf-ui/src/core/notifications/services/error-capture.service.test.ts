@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Container, EventBus, EventsPlugin, WireEvent } from "@wirestate/core";
 
-import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/core/notifications";
+import { EMIT_NOTIFICATION_EVENT, ENotificationSeverity, INotificationPayload } from "@/core/notifications/lib";
 import { ErrorCaptureService } from "@/core/notifications/services/error-capture.service";
 
 interface IWatchedCapture {
@@ -10,6 +10,11 @@ interface IWatchedCapture {
   raised: Array<INotificationPayload>;
 }
 
+/**
+ * Create an error capture service and collect the notifications it emits.
+ *
+ * @returns Provisionable container, service instance, and emitted payload collection.
+ */
 function watchCapture(): IWatchedCapture {
   const container: Container = new Container({
     bindings: [ErrorCaptureService],
@@ -20,7 +25,7 @@ function watchCapture(): IWatchedCapture {
 
   container
     .get(EventBus)
-    .subscribe(NOTIFICATION_PUSH_EVENT, (event: WireEvent<INotificationPayload>) =>
+    .subscribe(EMIT_NOTIFICATION_EVENT, (event: WireEvent<INotificationPayload>) =>
       raised.push(event.payload as INotificationPayload)
     );
 

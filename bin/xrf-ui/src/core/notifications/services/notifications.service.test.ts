@@ -1,10 +1,15 @@
 import { describe, expect, it } from "@jest/globals";
 import { Container, EventBus, EventsPlugin } from "@wirestate/core";
 
-import { emitNotification, ENotificationSeverity, INotification } from "@/core/notifications";
+import { emitNotification, ENotificationSeverity, INotification } from "@/core/notifications/lib";
 import { NotificationsService } from "@/core/notifications/services/notifications.service";
 import { EApplicationId } from "@/core/routing/application";
 
+/**
+ * Create an isolated notification service for unit tests.
+ *
+ * @returns Notification service under test.
+ */
 function createService(): NotificationsService {
   return new Container({ bindings: [NotificationsService] }).get(NotificationsService);
 }

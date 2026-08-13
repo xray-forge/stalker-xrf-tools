@@ -2,8 +2,8 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
-import { DataTable } from "@/core/components/table";
 import { SpawnFileService } from "@/core/spawn/services";
+import { DataTable } from "@/core/ui/table";
 import { AnyObject, Nullable } from "@/lib/types/general";
 
 export interface ISpawnTableProps<T> {
