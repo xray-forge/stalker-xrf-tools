@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { Injectable } from "@wirestate/core";
 import { useInjection } from "@wirestate/react";
-import { ReactElement } from "react";
+import { Fragment, ReactElement } from "react";
 
 import { ApplicationScope } from "@/core/components/shell/ApplicationScope";
 import {
@@ -49,7 +49,13 @@ function Publisher(): ReactElement {
 function PanelSlot(): ReactElement {
   const panels: Array<IEditorPanel> = useEditorPanelsRegistry();
 
-  return <>{selectPanelsOnSide(panels, "left").map((panel: IEditorPanel) => panel.render())}</>;
+  return (
+    <>
+      {selectPanelsOnSide(panels, "left").map((panel: IEditorPanel) => (
+        <Fragment key={panel.id}>{panel.render()}</Fragment>
+      ))}
+    </>
+  );
 }
 
 const APPLICATION: IApplicationDescriptor = {

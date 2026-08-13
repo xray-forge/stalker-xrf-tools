@@ -25,6 +25,7 @@ module.exports = {
   setupFilesAfterEnv: [path.resolve(__dirname, "./jest-setup.ts")],
   testEnvironment: "jsdom",
   testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],
+  maxWorkers: "50%",
   transform: {
     "^.+\\.[jt]sx?$": path.resolve(__dirname, "./transformer.cjs"),
   },

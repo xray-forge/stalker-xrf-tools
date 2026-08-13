@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
+import { userEvent } from "@testing-library/user-event";
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 import { NavigateFunction, Route, Routes, useNavigate } from "react-router-dom";
@@ -56,7 +57,7 @@ describe("panel handover between applications", () => {
 
     expect(await findByText(/archives panel/)).toBeInTheDocument();
 
-    getByText("leave").click();
+    await userEvent.click(getByText("leave"));
 
     expect(await findByText("spawn editor")).toBeInTheDocument();
     expect(queryByText(/archives panel/)).not.toBeInTheDocument();

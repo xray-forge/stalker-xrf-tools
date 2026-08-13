@@ -72,7 +72,7 @@ jobs:
         run: pnpm.cmd --dir bin/xrf-ui lint
 
       - name: Run UI tests
-        run: pnpm.cmd --dir bin/xrf-ui test
+        run: pnpm.cmd --dir bin/xrf-ui test --maxWorkers=100%
 
       - name: Build UI
         run: pnpm.cmd --dir bin/xrf-ui build
