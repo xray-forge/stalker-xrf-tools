@@ -48,7 +48,7 @@ export function useApplicationPreload(): void {
     }
 
     scheduleWhenIdle(() => {
-      log.info("Warming application chunks:", warmed.map((it: IApplicationDescriptor) => it.id).join(", "));
+      log.debug("Warming application chunks:", warmed.map((it: IApplicationDescriptor) => it.id).join(", "));
 
       for (const application of warmed) {
         application

@@ -11,27 +11,30 @@ import { ApplicationPanelSlot } from "@/core/components/shell/panel/ApplicationP
 import { ApplicationPanelStripe } from "@/core/components/shell/panel/ApplicationPanelStripe";
 import { ApplicationRail } from "@/core/components/shell/panel/ApplicationRail";
 import { IEditorPanel, selectPanelsOnSide, useEditorPanelsRegistry } from "@/core/components/shell/panel/context";
-import { NOTIFICATIONS_PANEL } from "@/core/components/shell/panel/global-panels";
+import { NOTIFICATIONS_PANEL } from "@/core/components/shell/panel/notifications/notification-panel";
 import { PanelStripeButton } from "@/core/components/shell/panel/PanelStripeButton";
 import { IPanelSlot, usePanelSlot } from "@/core/components/shell/panel/use-panel-slot";
 import { ApplicationTitleBar } from "@/core/components/shell/title-bar/ApplicationTitleBar";
 import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/router/application";
 import { findApplication } from "@/core/router/applications";
 import { Nullable } from "@/core/types/general";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 
-export interface IApplicationShellFrameProps {
+export interface IApplicationShellFrameProps extends BaseComponentProps {
   children: ReactNode;
 }
 
 /**
  * The window frame itself: rail and its panel on the left, panel and stripe on the right, status bar
  * along the bottom.
- *
- * Applications render into the middle only. Nothing inside can take the window over, which is what
- * separates a desktop tool from a stack of full screen pages.
  */
-export function ApplicationShellFrame({ children }: IApplicationShellFrameProps): ReactElement {
+export function ApplicationShellFrame({
+  "data-testid": dataTestId = "application-shell-frame",
+  id = "application-shell-frame",
+  className,
+  children,
+}: IApplicationShellFrameProps): ReactElement {
   const panels: Array<IEditorPanel> = useEditorPanelsRegistry();
   const notify: TNotify = useNotify();
 
@@ -42,20 +45,17 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
   const [toolbarHost, setToolbarHost] = useState<Nullable<HTMLElement>>(null);
 
   const application: Nullable<IApplicationDescriptor> = findApplication(pathname);
-
-  // Keyed per application so the visuals panel choice does not leak into another one.
   const applicationPath: string = application?.path ?? "root";
 
   const leftPanels: Array<IEditorPanel> = selectPanelsOnSide(panels, "left");
-  const rightPanels: Array<IEditorPanel> = selectPanelsOnSide(panels, "right");
+  const applicationRightPanels: Array<IEditorPanel> = selectPanelsOnSide(panels, "right");
+  const rightPanels: Array<IEditorPanel> = [...applicationRightPanels, NOTIFICATIONS_PANEL];
 
   const leftSlot: IPanelSlot = usePanelSlot("left", leftPanels, applicationPath);
-  const rightSlot: IPanelSlot = usePanelSlot("right", rightPanels, applicationPath);
+  const rightSlot: IPanelSlot = usePanelSlot("right", rightPanels, "global");
 
   const onError = useCallback((props: IErrorBoundaryFallbackProps) => <ApplicationCrash {...props} />, []);
 
-  // Recorded as a real outcome rather than a dev trace: the user has already met the crash screen, and
-  // this is what survives navigating away from it.
   const onCaught = useCallback(
     (error: Error, componentStack: Nullable<string>) =>
       notify({
@@ -69,7 +69,12 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
 
   return (
     <EditorToolbarHostContext.Provider value={toolbarHost}>
-      <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
+      <Box
+        data-testid={dataTestId}
+        id={id}
+        className={className}
+        sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}
+      >
         <ApplicationTitleBar toolbarRef={setToolbarHost} />
 
         <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
@@ -93,9 +98,8 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
 
           <ApplicationPanelStripe
             side={"right"}
-            panels={rightPanels}
+            panels={applicationRightPanels}
             activePanelId={rightSlot.activePanelId}
-            /* Below the application's own panels, mirroring the window controls in the opposite stripe. */
             footer={
               <PanelStripeButton
                 panel={NOTIFICATIONS_PANEL}
