@@ -13,7 +13,7 @@ path = "src/lib.rs"
 fxhash = "0.2.1"
 indexmap = "2.14.0"
 serde = { workspace = true }
-ts-rs = { workspace = true, optional = true }
+specta = { workspace = true, optional = true }
 walkdir = { workspace = true }
 xrf-error = { workspace = true }
 xrf-utils = { workspace = true }
@@ -24,7 +24,7 @@ xrf-test-utils = { workspace = true }
 
 [features]
 # Emits TypeScript mirrors of the serialized types. Nothing in a normal build turns this on.
-typescript-bindings = ["ts-rs"]
+typescript-bindings = ["specta", "xrf-error/typescript-bindings"]
 
 [lints]
 workspace = true

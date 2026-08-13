@@ -1,4 +1,3 @@
-use serde_json::{Value, json};
 use tauri::State;
 use xrf_ltx::Ltx;
 use xrf_texture::{InventorySpriteDescriptor, open_dds_as_png};
@@ -7,12 +6,13 @@ use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState}
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
 pub async fn open_equipment_sprite(
   equipment_dds_path: &str,
   system_ltx_path: &str,
   state: State<'_, IconsEditorState>,
-) -> TauriResult<Value> {
+) -> TauriResult<IconsEditorEquipmentResponse> {
   log::info!("Opening equipment file: {equipment_dds_path} - {system_ltx_path}");
 
   let name: &str = "equipment.png";
@@ -39,5 +39,5 @@ pub async fn open_equipment_sprite(
   *state.equipment_sprite_preview.lock().unwrap() = Some(preview_buffer);
   *state.equipment_descriptors.lock().unwrap() = Some(descriptors);
 
-  Ok(json!(response))
+  Ok(response)
 }

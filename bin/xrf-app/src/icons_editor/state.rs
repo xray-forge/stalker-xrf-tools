@@ -26,6 +26,7 @@ impl IconsEditorState {
 }
 
 #[derive(Serialize)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub struct IconsEditorEquipmentResponse {
   pub path: String,

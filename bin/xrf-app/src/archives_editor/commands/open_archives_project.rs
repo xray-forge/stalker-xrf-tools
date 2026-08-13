@@ -1,14 +1,14 @@
 use std::path::Path;
 
-use serde_json::{Value, json};
 use tauri::State;
 use xrf_archive::ArchiveProject;
 
 use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
-pub async fn open_archives_project(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<Value> {
+pub async fn open_archives_project(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<ArchiveProject> {
   log::info!("Opening archives project");
 
   let project: ArchiveProject = ArchiveProject::new(&Path::new(path))
@@ -16,9 +16,7 @@ pub async fn open_archives_project(path: &str, state: State<'_, ArchivesEditorSt
 
   log::info!("Opened archives project");
 
-  let json: Value = json!(project);
+  *state.project.lock().unwrap() = Some(project.clone());
 
-  *state.project.lock().unwrap() = Some(project);
-
-  Ok(json)
+  Ok(project)
 }

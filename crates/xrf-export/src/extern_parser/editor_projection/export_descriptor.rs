@@ -1,9 +1,5 @@
 /// One extern declaration projected for the desktop editor.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-export.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportDescriptor {
@@ -15,11 +11,7 @@ pub struct ExportDescriptor {
 }
 
 /// The mutually exclusive contracts an extern can expose.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-export.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum ExportContractDescriptor {
@@ -33,11 +25,7 @@ pub enum ExportContractDescriptor {
 }
 
 /// One callable parameter projected for the desktop editor.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-export.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportParameterDescriptor {
@@ -48,11 +36,7 @@ pub struct ExportParameterDescriptor {
 }
 
 /// The return contract of a callable extern.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-export.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportReturnDescriptor {
@@ -61,11 +45,7 @@ pub struct ExportReturnDescriptor {
 }
 
 /// Project-relative source location of an extern declaration.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-export.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportSourceDescriptor {

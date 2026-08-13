@@ -3,6 +3,12 @@
 version = 4
 
 [[package]]
+name = "Inflector"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4680,6 +4686,58 @@ dependencies = [
 ]
 
 [[package]]
+name = "specta"
+version = "2.0.0-rc.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38f9a30cbcbb7011f1da7d73483983bf838af123883e45f2b36ed76328df9c50"
+dependencies = [
+ "paste",
+ "rustc_version",
+ "specta-macros",
+ "uuid",
+]
+
+[[package]]
+name = "specta-macros"
+version = "2.0.0-rc.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ce14957ecc2897f1f848b8255b6531d13ddf49cbcf506b7c2c9fb1d005593bb"
+dependencies = [
+ "Inflector",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.111",
+]
+
+[[package]]
+name = "specta-serde"
+version = "0.0.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee8a72b755ddb8949fd8f17c5db43f0e8a806ea587d9bc602ee3f73240c00029"
+dependencies = [
+ "specta",
+ "specta-macros",
+]
+
+[[package]]
+name = "specta-typescript"
+version = "0.0.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "639404ee95557f2f8b7e4cb773ffefd45304c7ab8ba21ac83b69051595e083c0"
+dependencies = [
+ "specta",
+]
+
+[[package]]
+name = "specta-util"
+version = "0.0.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29b1fc02b446f7244a92924fe68c0555921209f1d342990cd1539e9138e69502"
+dependencies = [
+ "specta",
+]
+
+[[package]]
 name = "stable_deref_trait"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5131,6 +5189,7 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "serialize-to-javascript",
+ "specta",
  "swift-rs",
  "tauri-build",
  "tauri-macros",
@@ -5340,6 +5399,23 @@ dependencies = [
  "webview2-com",
  "windows",
  "wry",
+]
+
+[[package]]
+name = "tauri-specta"
+version = "2.0.0-rc.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee080f36d2ac17ce2f3a82fb53f02d664e8345457de51b56dad3c394dacc41a2"
+dependencies = [
+ "heck 0.5.0",
+ "serde",
+ "serde_json",
+ "specta",
+ "specta-serde",
+ "specta-typescript",
+ "specta-util",
+ "tauri",
+ "thiserror 2.0.20",
 ]
 
 [[package]]
@@ -5778,29 +5854,6 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
-
-[[package]]
-name = "ts-rs"
-version = "12.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "756050066659291d47a554a9f558125db17428b073c5ffce1daf5dcb0f7231d8"
-dependencies = [
- "thiserror 2.0.20",
- "ts-rs-macros",
- "uuid",
-]
-
-[[package]]
-name = "ts-rs-macros"
-version = "12.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38d90eea51bc7988ef9e674bf80a85ba6804739e535e9cab48e4bb34a8b652aa"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.111",
- "termcolor",
-]
 
 [[package]]
 name = "typeid"
@@ -6742,15 +6795,19 @@ dependencies = [
  "log",
  "percent-encoding",
  "serde",
- "serde_json",
+ "specta",
+ "specta-serde",
+ "specta-typescript",
+ "specta-util",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-plugin-fs",
  "tauri-plugin-shell",
- "ts-rs",
+ "tauri-specta",
  "xrf-archive",
  "xrf-db",
+ "xrf-error",
  "xrf-export",
  "xrf-ltx",
  "xrf-output",
@@ -6772,7 +6829,7 @@ dependencies = [
  "minilzo-rs",
  "regex",
  "serde",
- "ts-rs",
+ "specta",
  "walkdir",
  "xrf-error",
  "xrf-utils",
@@ -6835,7 +6892,7 @@ dependencies = [
  "phf 0.14.0",
  "serde",
  "serde_json",
- "ts-rs",
+ "specta",
  "uuid",
  "xrf-chunk",
  "xrf-error",
@@ -6851,8 +6908,8 @@ dependencies = [
  "image",
  "serde",
  "serde_json",
+ "specta",
  "thiserror 2.0.20",
- "ts-rs",
  "xrf-error-derive",
 ]
 
@@ -6872,7 +6929,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
- "ts-rs",
+ "specta",
  "walkdir",
  "xrf-error",
  "xrf-typescript",
@@ -6909,7 +6966,7 @@ dependencies = [
  "fxhash",
  "indexmap 2.14.0",
  "serde",
- "ts-rs",
+ "specta",
  "walkdir",
  "xrf-error",
  "xrf-output",
@@ -6971,6 +7028,7 @@ dependencies = [
  "path-absolutize",
  "rayon",
  "serde",
+ "specta",
  "xrf-error",
  "xrf-ltx",
  "xrf-output",
@@ -6986,6 +7044,7 @@ dependencies = [
  "log",
  "serde",
  "serde_json",
+ "specta",
  "walkdir",
  "xrf-error",
  "xrf-output",

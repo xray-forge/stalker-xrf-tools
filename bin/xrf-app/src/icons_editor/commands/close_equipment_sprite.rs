@@ -3,6 +3,7 @@ use tauri::State;
 use crate::icons_editor::state::IconsEditorState;
 use crate::types::TauriResult;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
 pub async fn close_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult {
   log::info!("Closing equipment file:");

@@ -16,12 +16,8 @@ use crate::export::{FileImportExport, LtxImportExport};
 /// 0 - count
 /// 1 - objects
 /// 2 - edges
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-db.ts")
-)]
-#[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SpawnALifeSpawnsChunk {
   pub objects: Vec<AlifeObject>,
 }

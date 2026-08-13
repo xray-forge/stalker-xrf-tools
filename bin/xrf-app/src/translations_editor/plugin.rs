@@ -26,4 +26,19 @@ impl TranslationsEditorPlugin {
       ))
       .build()
   }
+
+  #[cfg(feature = "typescript-bindings")]
+  pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
+    tauri_specta::Builder::new()
+      .plugin_name(Self::NAME)
+      .error_handling(tauri_specta::ErrorHandlingMode::Throw)
+      .commands(tauri_specta::collect_commands![
+        crate::translations_editor::commands::close_translations_project::close_translations_project,
+        crate::translations_editor::commands::get_translations_project::get_translations_project,
+        crate::translations_editor::commands::open_translations_project::open_translations_project,
+        crate::translations_editor::commands::read_translations_project::read_translations_project,
+      ])
+      .disable_serde_phases()
+      .dangerously_cast_bigints_to_number()
+  }
 }

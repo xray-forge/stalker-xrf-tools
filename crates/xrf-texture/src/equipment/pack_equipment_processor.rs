@@ -96,6 +96,7 @@ impl PackEquipmentProcessor {
       saved_width: image.width(),
       saved_height: image.height(),
       packed_count: count,
+      skipped_count: skipped_sections.len() as u32,
     })
   }
 

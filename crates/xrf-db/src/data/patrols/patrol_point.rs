@@ -12,11 +12,7 @@ use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 
 /// `CPatrolPoint::load_raw`, `CPatrolPoint::load` in xray codebase.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-db.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PatrolPoint {

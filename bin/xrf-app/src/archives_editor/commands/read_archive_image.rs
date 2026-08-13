@@ -1,7 +1,6 @@
 use std::sync::MutexGuard;
 
 use serde::Serialize;
-use serde_json::{Value, json};
 use tauri::State;
 use xrf_archive::{ArchiveFileDescriptor, ArchiveProject};
 use xrf_texture::dds_bytes_as_png;
@@ -10,11 +9,7 @@ use xrf_utils::encode_bytes_to_standard_base64;
 use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-app.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveImagePreview {
@@ -29,8 +24,9 @@ pub struct ArchiveImagePreview {
 ///
 /// Compressed entries are fine here, unlike the text preview: the bytes are decompressed on the way out
 /// of the archive, so compression is invisible by the time there is an image to decode.
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
-pub async fn read_archive_image(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<Value> {
+pub async fn read_archive_image(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<ArchiveImagePreview> {
   log::info!("Reading archive image: {}", path);
 
   let lock: MutexGuard<Option<ArchiveProject>> = state
@@ -62,10 +58,10 @@ pub async fn read_archive_image(path: &str, state: State<'_, ArchivesEditorState
   let bytes: Vec<u8> = project.read_file_bytes(path).map_err(|error| error.to_string())?;
   let (width, height, png) = dds_bytes_as_png(&bytes).map_err(|error| error.to_string())?;
 
-  Ok(json!(ArchiveImagePreview {
+  Ok(ArchiveImagePreview {
     name: descriptor.name.clone(),
     width,
     height,
     base64: encode_bytes_to_standard_base64(&png),
-  }))
+  })
 }

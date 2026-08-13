@@ -5,11 +5,7 @@ use serde::Serialize;
 
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-archive.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveDescriptor {

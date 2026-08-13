@@ -1,4 +1,3 @@
-use serde_json::{Value, json};
 use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
 use xrf_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult};
@@ -6,8 +5,13 @@ use xrf_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, Pac
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
-pub async fn pack_equipment(source_path: &str, output_path: &str, system_ltx_path: &str) -> TauriResult<Value> {
+pub async fn pack_equipment(
+  source_path: &str,
+  output_path: &str,
+  system_ltx_path: &str,
+) -> TauriResult<PackEquipmentResult> {
   let options = PackEquipmentOptions {
     ltx: Ltx::read_from_file_full(system_ltx_path).map_err(|error| error.to_string())?,
     source: source_path.into(),
@@ -22,5 +26,5 @@ pub async fn pack_equipment(source_path: &str, output_path: &str, system_ltx_pat
 
   let result: PackEquipmentResult = PackEquipmentProcessor::pack_sprites(options).map_err(error_to_string)?;
 
-  Ok(json!(result))
+  Ok(result)
 }

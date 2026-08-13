@@ -5,11 +5,7 @@ use thiserror::Error as ThisError;
 use xrf_error_derive::ErrorConstructors;
 
 /// Error while working with translation file
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-error.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(ThisError, Debug, ErrorConstructors, Serialize)]
 pub enum XRayError {
   #[constructor]
@@ -86,9 +82,9 @@ pub enum XRayError {
   #[error("IO error: {message}")]
   Io {
     message: String,
-    // ts-rs honours `skip`, but not the serialize-only form, so the omission is spelled out for it too.
+    // The source error is diagnostic context and is intentionally absent from the wire contract.
     #[serde(skip_serializing)]
-    #[cfg_attr(feature = "typescript-bindings", ts(skip))]
+    #[cfg_attr(feature = "typescript-bindings", specta(skip))]
     kind: ErrorKind,
   },
 }

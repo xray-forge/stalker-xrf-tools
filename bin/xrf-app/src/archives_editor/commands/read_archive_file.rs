@@ -1,14 +1,14 @@
 use std::sync::MutexGuard;
 
-use serde_json::{Value, json};
 use tauri::State;
-use xrf_archive::ArchiveProject;
+use xrf_archive::{ArchiveProject, ProjectReadResult};
 
 use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
-pub async fn read_archive_file(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<Value> {
+pub async fn read_archive_file(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<ProjectReadResult> {
   log::info!("Reading archive file: {}", path);
 
   let lock: MutexGuard<Option<ArchiveProject>> = state.project.lock().unwrap();
@@ -21,6 +21,5 @@ pub async fn read_archive_file(path: &str, state: State<'_, ArchivesEditorState>
     .as_ref()
     .unwrap()
     .read_file_as_string(path)
-    .map(|result| json!(result))
     .map_err(|error| error.to_string())
 }

@@ -6,6 +6,7 @@ use crate::types::TauriResult;
 use crate::utils::error_to_string;
 
 /// Build a packed spawn file from unpacked chunks on disk.
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
 pub async fn pack_spawn_file(from: &str, destination: &str) -> TauriResult {
   log::info!("Packing spawn file from: {}", from);

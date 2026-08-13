@@ -41,4 +41,20 @@ impl IconsEditorPlugin {
       ))
       .build()
   }
+
+  #[cfg(feature = "typescript-bindings")]
+  pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
+    tauri_specta::Builder::new()
+      .plugin_name(Self::NAME)
+      .error_handling(tauri_specta::ErrorHandlingMode::Throw)
+      .commands(tauri_specta::collect_commands![
+        crate::icons_editor::commands::close_equipment_sprite::close_equipment_sprite,
+        crate::icons_editor::commands::get_equipment_sprite::get_equipment_sprite,
+        crate::icons_editor::commands::open_equipment_sprite::open_equipment_sprite,
+        crate::icons_editor::commands::reopen_equipment_sprite::reopen_equipment_sprite,
+        crate::icons_editor::commands::pack_equipment::pack_equipment,
+      ])
+      .disable_serde_phases()
+      .dangerously_cast_bigints_to_number()
+  }
 }

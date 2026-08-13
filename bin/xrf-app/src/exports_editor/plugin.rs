@@ -26,4 +26,19 @@ impl ExportsEditorPlugin {
       ))
       .build()
   }
+
+  #[cfg(feature = "typescript-bindings")]
+  pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
+    tauri_specta::Builder::new()
+      .plugin_name(Self::NAME)
+      .error_handling(tauri_specta::ErrorHandlingMode::Throw)
+      .commands(tauri_specta::collect_commands![
+        crate::exports_editor::commands::close_xr_exports::close_xr_exports,
+        crate::exports_editor::commands::open_xr_exports::open_xr_exports,
+        crate::exports_editor::commands::get_xr_exports::get_xr_exports,
+        crate::exports_editor::commands::get_xr_export_source::get_xr_export_source,
+      ])
+      .disable_serde_phases()
+      .dangerously_cast_bigints_to_number()
+  }
 }

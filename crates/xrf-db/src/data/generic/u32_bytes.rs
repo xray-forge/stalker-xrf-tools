@@ -7,11 +7,7 @@ use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XRayError, XRayResult};
 use xrf_utils::vector_from_string_sized;
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-db.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct U32Bytes(pub u8, pub u8, pub u8, pub u8);
 

@@ -1,6 +1,5 @@
 use std::sync::MutexGuard;
 
-use serde_json::{Value, json};
 use tauri::State;
 use xrf_archive::{ArchiveExtractFolderResult, ArchiveProject};
 
@@ -11,12 +10,13 @@ use crate::types::TauriResult;
 ///
 /// An empty prefix means the whole archive, so this also covers extracting everything without needing
 /// a separate command.
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
 pub async fn extract_archive_folder(
   prefix: &str,
   destination: &str,
   state: State<'_, ArchivesEditorState>,
-) -> TauriResult<Value> {
+) -> TauriResult<ArchiveExtractFolderResult> {
   let lock: MutexGuard<Option<ArchiveProject>> = state
     .project
     .lock()
@@ -32,5 +32,5 @@ pub async fn extract_archive_folder(
     .extract_folder(prefix, destination)
     .map_err(|error| error.to_string())?;
 
-  Ok(json!(result))
+  Ok(result)
 }

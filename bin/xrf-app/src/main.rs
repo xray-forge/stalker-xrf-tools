@@ -9,6 +9,8 @@ mod logging;
 mod spawns_editor;
 mod translations_editor;
 mod types;
+#[cfg(all(test, feature = "typescript-bindings"))]
+mod typescript_bindings;
 mod utils;
 
 use std::env;

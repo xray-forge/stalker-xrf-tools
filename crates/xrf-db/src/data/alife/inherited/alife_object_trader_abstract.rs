@@ -7,11 +7,7 @@ use xrf_ltx::{Ltx, Section};
 use crate::export::LtxImportExport;
 use crate::file_import::read_ltx_field;
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-db.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AlifeObjectTraderAbstract {

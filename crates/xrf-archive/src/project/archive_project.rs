@@ -13,12 +13,8 @@ use crate::archive::reader::ArchiveReader;
 use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
 
 // todo: Add reading from fsgame.ltx file.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-archive.ts")
-)]
-#[derive(Serialize)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveProject {
   pub archives: Vec<ArchiveDescriptor>,

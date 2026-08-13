@@ -1,11 +1,11 @@
-use serde_json::{Value, json};
 use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
-pub async fn verify_configs_path(path: &str) -> TauriResult<Value> {
+pub async fn verify_configs_path(path: &str) -> TauriResult<LtxProjectVerifyResult> {
   log::info!("Open ltx folder: {}", path);
 
   let project: LtxProject = LtxProject::open_at_path_opt(
@@ -24,5 +24,5 @@ pub async fn verify_configs_path(path: &str) -> TauriResult<Value> {
     .verify_entries_opt(LtxVerifyOptions::default())
     .map_err(error_to_string)?;
 
-  Ok(json!(result))
+  Ok(result)
 }

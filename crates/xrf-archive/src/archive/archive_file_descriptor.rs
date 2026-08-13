@@ -2,11 +2,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-archive.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveFileDescriptor {

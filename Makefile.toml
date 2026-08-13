@@ -73,21 +73,16 @@ dependencies = [
 ]
 
 [tasks.generate-typescript-bindings]
-description = "Emit the frontend mirrors of serialized Rust types."
+description = "Emit Specta-generated frontend types and Tauri command bindings."
 workspace = false
-# The export directory is resolved against the crate manifest directory, so it is the same string
-# wherever the task runs from. Wide integers become `number` rather than the default `bigint`: these
-# cross a JSON transport, so that is what the frontend actually receives.
-env = { TS_RS_EXPORT_DIR = "../../bin/xrf-ui/src/lib/xrf/bindings", TS_RS_LARGE_INT = "number" }
 command = "cargo"
-# One run over the whole workspace: each crate opts in by adding its own `typescript` feature here, and
-# `#[ts(export)]` puts the emitting test in the crate that defines the type.
 args = [
   "test",
-  "--workspace",
+  "-p",
+  "xrf-app",
   "--features",
-  "xrf-archive/typescript-bindings,xrf-db/typescript-bindings,xrf-export/typescript-bindings,xrf-error/typescript-bindings,xrf-ltx/typescript-bindings,xrf-app/typescript-bindings",
-  "export_bindings",
+  "typescript-bindings",
+  "export_typescript_bindings",
 ]
 
 [tasks.format-typescript-bindings]

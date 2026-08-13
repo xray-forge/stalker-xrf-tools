@@ -6,6 +6,7 @@ use xrf_db::{SpawnFile, XRayByteOrder};
 use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
 pub async fn import_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> TauriResult<String> {
   log::info!("Importing spawn file");

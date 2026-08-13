@@ -8,6 +8,7 @@ use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
 pub fn save_spawn_file(path: &str, state: State<'_, SpawnsEditorState>) -> TauriResult {
   log::info!("Saving spawn file");

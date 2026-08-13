@@ -1,0 +1,112 @@
+use std::borrow::Cow;
+use std::path::{Path, PathBuf};
+
+use specta::datatype::{DataType, Primitive};
+use specta::{Format, Type, Types};
+use specta_typescript::Typescript;
+use specta_util::Remapper;
+
+use crate::archives_editor::commands::read_archive_audio::{ArchiveAudioParameters, ArchiveAudioPreview};
+use crate::archives_editor::commands::read_archive_image::ArchiveImagePreview;
+use crate::archives_editor::plugin::ArchivesEditorPlugin;
+use crate::configs_editor::plugin::ConfigsEditorPlugin;
+use crate::exports_editor::plugin::ExportsEditorPlugin;
+use crate::icons_editor::plugin::IconsEditorPlugin;
+use crate::spawns_editor::plugin::SpawnsEditorPlugin;
+use crate::translations_editor::plugin::TranslationsEditorPlugin;
+
+const GENERATED_HEADER: &str = "// Auto-generated rust bindings. Do not edit it manually.\n";
+
+#[derive(Debug, Clone)]
+struct TypeScriptFormat {
+  remapper: Remapper,
+}
+
+impl Default for TypeScriptFormat {
+  fn default() -> Self {
+    let number = <specta_typescript::Number as Type>::definition(&mut Types::default());
+    let remapper = Remapper::new()
+      .rule(DataType::Primitive(Primitive::usize), number.clone())
+      .rule(DataType::Primitive(Primitive::isize), number.clone())
+      .rule(DataType::Primitive(Primitive::u64), number.clone())
+      .rule(DataType::Primitive(Primitive::i64), number.clone())
+      .rule(DataType::Primitive(Primitive::u128), number.clone())
+      .rule(DataType::Primitive(Primitive::i128), number.clone())
+      .rule(
+        <specta_typescript::BigInt as Type>::definition(&mut Types::default()),
+        number,
+      );
+
+    Self { remapper }
+  }
+}
+
+impl Format for TypeScriptFormat {
+  fn map_types(&self, types: &Types) -> Result<Cow<'_, Types>, specta::FormatError> {
+    let types = specta_serde::Format.map_types(types)?;
+
+    Ok(Cow::Owned(self.remapper.remap_types(types.into_owned())))
+  }
+
+  fn map_type(&'_ self, types: &Types, data_type: &DataType) -> Result<Cow<'_, DataType>, specta::FormatError> {
+    let data_type = specta_serde::Format.map_type(types, data_type)?;
+
+    Ok(Cow::Owned(self.remapper.remap_dt(data_type.into_owned())))
+  }
+}
+
+fn exporter() -> Typescript {
+  Typescript::default().header(GENERATED_HEADER)
+}
+
+fn export_types(path: &Path, types: &Types) {
+  exporter()
+    .export_to(path, types, TypeScriptFormat::default())
+    .unwrap_or_else(|error| panic!("Failed to export {}: {error}", path.display()));
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn export_typescript_bindings() {
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../xrf-ui/src/lib/xrf/bindings");
+
+    export_types(&output.join("xrf-archive.ts"), &xrf_archive::typescript_bindings());
+    export_types(&output.join("xrf-db.ts"), &xrf_db::typescript_bindings());
+    export_types(&output.join("xrf-error.ts"), &xrf_error::typescript_bindings());
+    export_types(&output.join("xrf-export.ts"), &xrf_export::typescript_bindings());
+    export_types(&output.join("xrf-ltx.ts"), &xrf_ltx::typescript_bindings());
+    export_types(
+      &output.join("xrf-app.ts"),
+      &Types::default()
+        .register::<ArchiveAudioParameters>()
+        .register::<ArchiveAudioPreview>()
+        .register::<ArchiveImagePreview>(),
+    );
+
+    export_commands::<tauri::Wry>(&output);
+  }
+
+  fn export_commands<R: tauri::Runtime>(output: &Path) {
+    ArchivesEditorPlugin::specta_builder::<R>()
+      .export(exporter(), output.join("xrf-app-archives-editor.ts"))
+      .expect("Failed to export archives editor commands");
+    ConfigsEditorPlugin::specta_builder::<R>()
+      .export(exporter(), output.join("xrf-app-configs-editor.ts"))
+      .expect("Failed to export configs editor commands");
+    ExportsEditorPlugin::specta_builder::<R>()
+      .export(exporter(), output.join("xrf-app-exports-editor.ts"))
+      .expect("Failed to export exports editor commands");
+    IconsEditorPlugin::specta_builder::<R>()
+      .export(exporter(), output.join("xrf-app-icons-editor.ts"))
+      .expect("Failed to export icons editor commands");
+    SpawnsEditorPlugin::specta_builder::<R>()
+      .export(exporter(), output.join("xrf-app-spawns-editor.ts"))
+      .expect("Failed to export spawns editor commands");
+    TranslationsEditorPlugin::specta_builder::<R>()
+      .export(exporter(), output.join("xrf-app-translations-editor.ts"))
+      .expect("Failed to export translations editor commands");
+  }
+}

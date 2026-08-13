@@ -8,11 +8,7 @@ use xrf_error::{XRayError, XRayResult};
 
 use crate::constants::NIL;
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-db.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "camelCase")]
 #[display("{year},{month},{day},{hour},{minute},{second},{millis}")]

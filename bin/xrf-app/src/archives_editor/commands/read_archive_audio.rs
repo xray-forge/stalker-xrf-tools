@@ -1,7 +1,6 @@
 use std::sync::MutexGuard;
 
 use serde::Serialize;
-use serde_json::{Value, json};
 use tauri::State;
 use xrf_archive::{ArchiveFileDescriptor, ArchiveProject};
 use xrf_sound::{SoundFile, SoundMetadata};
@@ -11,11 +10,7 @@ use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;
 
 /// The X-Ray source parameters carried in a sound's first vorbis comment.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-app.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveAudioParameters {
@@ -26,11 +21,7 @@ pub struct ArchiveAudioParameters {
   pub max_ai_distance: f32,
 }
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-app.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveAudioPreview {
@@ -44,8 +35,9 @@ pub struct ArchiveAudioPreview {
 }
 
 /// Hand an archived sound to the webview, along with whatever the engine would read from it.
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
-pub async fn read_archive_audio(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<Value> {
+pub async fn read_archive_audio(path: &str, state: State<'_, ArchivesEditorState>) -> TauriResult<ArchiveAudioPreview> {
   log::info!("Reading archive audio: {}", path);
 
   let lock: MutexGuard<Option<ArchiveProject>> = state
@@ -86,7 +78,7 @@ pub async fn read_archive_audio(path: &str, state: State<'_, ArchivesEditorState
     }
   };
 
-  Ok(json!(ArchiveAudioPreview {
+  Ok(ArchiveAudioPreview {
     name: descriptor.name.clone(),
     channels: sound.as_ref().map_or(0, |it| it.channels),
     sample_rate: sound.as_ref().map_or(0, |it| it.sample_rate),
@@ -101,5 +93,5 @@ pub async fn read_archive_audio(path: &str, state: State<'_, ArchivesEditorState
       SoundMetadata::EngineDefaults => None,
     }),
     base64: encode_bytes_to_standard_base64(&bytes),
-  }))
+  })
 }

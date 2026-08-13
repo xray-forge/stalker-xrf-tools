@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use serde::Serialize;
 
 #[derive(Debug, Default, Serialize)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub struct PackEquipmentResult {
   pub duration: u128,
@@ -10,4 +11,5 @@ pub struct PackEquipmentResult {
   pub saved_width: u32,
   pub saved_height: u32,
   pub packed_count: u32,
+  pub skipped_count: u32,
 }

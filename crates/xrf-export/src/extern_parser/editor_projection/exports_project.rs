@@ -6,11 +6,7 @@ use xrf_error::{XRayError, XRayResult};
 use super::{ExportDescriptor, ExportSourceDescriptor};
 
 /// Parsed externs and the project they came from.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-export.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportsProject {
@@ -19,11 +15,7 @@ pub struct ExportsProject {
 }
 
 /// The source text that declares one extern.
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-export.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportSourceContent {

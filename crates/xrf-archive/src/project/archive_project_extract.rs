@@ -12,11 +12,7 @@ use xrf_utils::{assert, assert_equal, assert_not_equal};
 use crate::ArchiveProject;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-archive.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveExtractResult {
@@ -25,11 +21,7 @@ pub struct ArchiveExtractResult {
   pub size: u64,
 }
 
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-archive.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveExtractFolderResult {

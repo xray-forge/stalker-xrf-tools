@@ -37,4 +37,30 @@ impl SpawnsEditorPlugin {
       ))
       .build()
   }
+
+  #[cfg(feature = "typescript-bindings")]
+  pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
+    tauri_specta::Builder::new()
+      .plugin_name(Self::NAME)
+      .error_handling(tauri_specta::ErrorHandlingMode::Throw)
+      .commands(tauri_specta::collect_commands![
+        crate::spawns_editor::commands::export_spawn_file::export_spawn_file,
+        crate::spawns_editor::commands::close_spawn_file::close_spawn_file,
+        crate::spawns_editor::commands::get_spawn_file::get_spawn_file,
+        crate::spawns_editor::commands::get_spawn_file_alife_spawns::get_spawn_file_alife_spawns,
+        crate::spawns_editor::commands::get_spawn_file_artefact_spawns::get_spawn_file_artefact_spawns,
+        crate::spawns_editor::commands::get_spawn_file_graphs::get_spawn_file_graphs,
+        crate::spawns_editor::commands::get_spawn_file_header::get_spawn_file_header,
+        crate::spawns_editor::commands::get_spawn_file_patrols::get_spawn_file_patrols,
+        crate::spawns_editor::commands::get_spawn_file_path::get_spawn_file_path,
+        crate::spawns_editor::commands::has_spawn_file::has_spawn_file,
+        crate::spawns_editor::commands::import_spawn_file::import_spawn_file,
+        crate::spawns_editor::commands::open_spawn_file::open_spawn_file,
+        crate::spawns_editor::commands::pack_spawn_file::pack_spawn_file,
+        crate::spawns_editor::commands::save_spawn_file::save_spawn_file,
+        crate::spawns_editor::commands::unpack_spawn_file::unpack_spawn_file,
+      ])
+      .disable_serde_phases()
+      .dangerously_cast_bigints_to_number()
+  }
 }

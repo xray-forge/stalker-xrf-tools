@@ -24,11 +24,7 @@ use crate::file_import::read_ltx_field;
 ///     0 - points count
 ///     1 - patrol points
 ///     2 - patrol points links
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-db.ts")
-)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Patrol {

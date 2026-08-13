@@ -1,14 +1,16 @@
 use std::sync::MutexGuard;
 
-use serde_json::{Value, json};
 use tauri::State;
 use xrf_texture::InventorySpriteDescriptor;
 
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
 use crate::types::TauriResult;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
-pub async fn get_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriResult<Option<Value>> {
+pub async fn get_equipment_sprite(
+  state: State<'_, IconsEditorState>,
+) -> TauriResult<Option<IconsEditorEquipmentResponse>> {
   log::debug!("Getting equipment sprite");
 
   let ltx_path_lock: MutexGuard<Option<String>> = state.system_ltx_path.as_ref().lock().unwrap();
@@ -20,10 +22,10 @@ pub async fn get_equipment_sprite(state: State<'_, IconsEditorState>) -> TauriRe
     return Ok(None);
   }
 
-  Ok(Some(json!(IconsEditorEquipmentResponse {
+  Ok(Some(IconsEditorEquipmentResponse {
     system_ltx_path: ltx_path_lock.as_ref().unwrap().clone(),
     path: dds_path_lock.as_ref().unwrap().clone(),
     name: name_lock.as_ref().unwrap().clone(),
     equipment_descriptors: equipment_lock.as_ref().unwrap().clone(),
-  })))
+  }))
 }

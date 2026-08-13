@@ -11,6 +11,7 @@ use crate::constants::{
 };
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub struct InventorySpriteDescriptor {
   pub section: String,

@@ -24,12 +24,8 @@ use crate::spawn::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
 /// 2 - alife objects
 /// 3 - patrols
 /// 4 - game graphs
-#[cfg_attr(
-  feature = "typescript-bindings",
-  derive(ts_rs::TS),
-  ts(export, export_to = "xrf-db.ts")
-)]
-#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SpawnFile {
   pub header: SpawnHeaderChunk,

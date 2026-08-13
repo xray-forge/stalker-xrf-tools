@@ -6,6 +6,7 @@ use xrf_db::SpawnFile;
 use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;
 
+#[cfg_attr(feature = "typescript-bindings", specta::specta)]
 #[tauri::command]
 pub fn close_spawn_file(state: State<'_, SpawnsEditorState>) -> TauriResult {
   log::info!("Closing spawn file");

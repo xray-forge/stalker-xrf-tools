@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[serde(untagged)]
 pub enum TranslationVariant {
   String(String),
