@@ -8,12 +8,12 @@ import { IPathField, usePathField } from "@/core/components/form/use-path-field"
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
 import { EApplicationId } from "@/core/routing/application";
+import { getProjectConfigsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 import { commands as configsEditorCommands } from "@/lib/xrf/bindings/xrf-app-configs-editor";
 import { LtxProjectFormatResult } from "@/lib/xrf/bindings/xrf-ltx";
-import { getProjectConfigsPath } from "@/lib/xrf/project-path";
 
 export function ConfigsFormatApplication(): ReactElement {
   const log: Logger = useLogger("configs-formatter");

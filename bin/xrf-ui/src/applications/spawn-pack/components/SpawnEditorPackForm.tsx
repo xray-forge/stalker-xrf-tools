@@ -7,11 +7,11 @@ import { IPathField, usePathField } from "@/core/components/form/use-path-field"
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
 import { EApplicationId } from "@/core/routing/application";
+import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 import { commands as spawnsEditorCommands } from "@/lib/xrf/bindings/xrf-app-spawns-editor";
-import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/lib/xrf/project-path";
 
 /**
  * Build a packed spawn file from chunks on disk.

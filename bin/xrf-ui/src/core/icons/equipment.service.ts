@@ -9,13 +9,13 @@ import { urlToImage } from "@/core/assets/image";
 import { AssetService } from "@/core/assets/services";
 import { transformError } from "@/core/error";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/core/icons/equipment";
+import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications";
 import { EApplicationGroupId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 import { commands as iconsEditorCommands } from "@/lib/xrf/bindings/xrf-app-icons-editor";
-import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 
 export interface IEquipmentPngDescriptor {
   ltxPath: string;

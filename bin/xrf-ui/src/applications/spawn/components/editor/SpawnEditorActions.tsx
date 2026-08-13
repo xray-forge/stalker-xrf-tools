@@ -6,8 +6,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
 import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
+import { SpawnFileService } from "@/core/spawn-file/services";
 import { Nullable } from "@/lib/types/general";
-import { SpawnFileService } from "@/lib/xrf/spawn-file";
 
 /**
  * Commands that act on the open spawn file.

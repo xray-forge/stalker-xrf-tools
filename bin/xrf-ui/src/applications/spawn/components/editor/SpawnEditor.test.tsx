@@ -6,11 +6,11 @@ import { Route, Routes } from "react-router-dom";
 import { SpawnEditor } from "@/applications/spawn/components/editor/SpawnEditor";
 import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
 import { IEditorPanel, useEditorPanelsRegistry } from "@/core/shell/panel/context";
+import { SpawnFileService } from "@/core/spawn-file/services";
 import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { SpawnFile, SpawnHeaderChunk } from "@/lib/xrf/bindings/xrf-db";
-import { SpawnFileService } from "@/lib/xrf/spawn-file";
 
 const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
 

@@ -3,8 +3,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { DataTable } from "@/core/components/table";
+import { SpawnFileService } from "@/core/spawn-file/services";
 import { AnyObject, Nullable } from "@/lib/types/general";
-import { SpawnFileService } from "@/lib/xrf/spawn-file";
 
 export interface ISpawnTableProps<T> {
   /** What one row is, for the details panel heading. */

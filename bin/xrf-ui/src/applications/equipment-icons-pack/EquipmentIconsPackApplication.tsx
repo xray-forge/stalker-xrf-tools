@@ -7,17 +7,17 @@ import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EquipmentService, IPackEquipmentResult } from "@/core/icons";
 import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
 import { EApplicationId } from "@/core/routing/application";
-import { ProjectService } from "@/core/settings/services/project";
-import { createLoadable, Loadable } from "@/lib/loadable";
-import { Logger, useLogger } from "@/lib/logging";
-import { useMountEffect } from "@/lib/react";
-import { Nullable } from "@/lib/types/general";
 import {
   getPathIfExists,
   getProjectEquipmentDDSPath,
   getProjectEquipmentSourcePath,
   getProjectSystemLtxPath,
-} from "@/lib/xrf/project-path";
+} from "@/core/settings/lib/path";
+import { ProjectService } from "@/core/settings/services/project";
+import { createLoadable, Loadable } from "@/lib/loadable";
+import { Logger, useLogger } from "@/lib/logging";
+import { useMountEffect } from "@/lib/react";
+import { Nullable } from "@/lib/types/general";
 
 export function EquipmentIconsPackApplication(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");

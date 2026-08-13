@@ -2,6 +2,7 @@ import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wire
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { transformError } from "@/core/error";
+import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications";
 import { EApplicationId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
@@ -9,7 +10,6 @@ import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 import { commands as exportsEditorCommands } from "@/lib/xrf/bindings/xrf-app-exports-editor";
 import { ExportSourceContent, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
-import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 
 @Injectable()
 export class ExportsService {

@@ -8,12 +8,12 @@ import { usePathState } from "@/core/components/form/file-picker/use-path-state"
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
 import { EApplicationId } from "@/core/routing/application";
+import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 import { commands as archivesEditorCommands } from "@/lib/xrf/bindings/xrf-app-archives-editor";
 import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xrf-archive";
-import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf/project-path";
 
 export function ArchivesUnpackApplication(): ReactElement {
   const log: Logger = useLogger("archives-unpacker");

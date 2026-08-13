@@ -11,6 +11,7 @@ import {
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { transformError } from "@/core/error";
+import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications";
 import { EApplicationGroupId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
@@ -24,7 +25,6 @@ import {
   SpawnHeaderChunk,
   SpawnPatrolsChunk,
 } from "@/lib/xrf/bindings/xrf-db";
-import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 
 export interface ISpawnRowSelection {
   /** What kind of row this is, for the panel heading. */
