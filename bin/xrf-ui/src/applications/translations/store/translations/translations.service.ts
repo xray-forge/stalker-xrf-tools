@@ -8,8 +8,8 @@ import { transformError } from "@/lib/error";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
-import { ITranslationsProjectJson } from "@/lib/translations";
 import { ETranslationsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
+import { ITranslationsProjectJson } from "@/lib/xrf/translations";
 
 @Injectable()
 export class TranslationsService {
