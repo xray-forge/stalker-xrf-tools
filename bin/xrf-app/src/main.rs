@@ -1,13 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod archives_editor;
-mod configs_editor;
-mod exports_editor;
-mod icons_editor;
+mod archives;
+mod configs;
+mod equipment_icons;
+mod exports;
 mod logging;
-mod spawns_editor;
-mod translations_editor;
+mod spawn;
+mod translations;
 mod types;
 #[cfg(all(test, feature = "typescript-bindings"))]
 mod typescript_bindings;
@@ -18,12 +18,12 @@ use std::env;
 use env_logger::Builder;
 use log::LevelFilter;
 
-use crate::archives_editor::plugin::ArchivesEditorPlugin;
-use crate::configs_editor::plugin::ConfigsEditorPlugin;
-use crate::exports_editor::plugin::ExportsEditorPlugin;
-use crate::icons_editor::plugin::IconsEditorPlugin;
-use crate::spawns_editor::plugin::SpawnsEditorPlugin;
-use crate::translations_editor::plugin::TranslationsEditorPlugin;
+use crate::archives::plugin::ArchivesPlugin;
+use crate::configs::plugin::ConfigsPlugin;
+use crate::equipment_icons::plugin::EquipmentIconsPlugin;
+use crate::exports::plugin::ExportsPlugin;
+use crate::spawn::plugin::SpawnPlugin;
+use crate::translations::plugin::TranslationsPlugin;
 
 fn main() {
   setup_logger();
@@ -33,12 +33,12 @@ fn main() {
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
     // Custom plugins.
-    .plugin(ArchivesEditorPlugin::init())
-    .plugin(ExportsEditorPlugin::init())
-    .plugin(SpawnsEditorPlugin::init())
-    .plugin(ConfigsEditorPlugin::init())
-    .plugin(IconsEditorPlugin::init())
-    .plugin(TranslationsEditorPlugin::init())
+    .plugin(ArchivesPlugin::init())
+    .plugin(ExportsPlugin::init())
+    .plugin(SpawnPlugin::init())
+    .plugin(ConfigsPlugin::init())
+    .plugin(EquipmentIconsPlugin::init())
+    .plugin(TranslationsPlugin::init())
     .run(tauri::generate_context!())
     .expect("Error while running tauri application")
 }

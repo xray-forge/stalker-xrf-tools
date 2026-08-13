@@ -2211,172 +2211,172 @@
       "description": "Permission identifier",
       "oneOf": [
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-audio`\n- `allow-read-archive-file`\n- `allow-read-archive-image`\n- `allow-unpack-archives-path`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-project`\n- `allow-extract-file`\n- `allow-extract-directory`\n- `allow-get-project`\n- `allow-has-project`\n- `allow-open-project`\n- `allow-read-audio`\n- `allow-read-file`\n- `allow-read-image`\n- `allow-unpack-directory`",
           "type": "string",
-          "const": "archives-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-archives-project`\n- `allow-extract-archive-file`\n- `allow-extract-archive-folder`\n- `allow-get-archives-project`\n- `allow-has-archives-project`\n- `allow-open-archives-project`\n- `allow-read-archive-audio`\n- `allow-read-archive-file`\n- `allow-read-archive-image`\n- `allow-unpack-archives-path`"
+          "const": "archives:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-project`\n- `allow-extract-file`\n- `allow-extract-directory`\n- `allow-get-project`\n- `allow-has-project`\n- `allow-open-project`\n- `allow-read-audio`\n- `allow-read-file`\n- `allow-read-image`\n- `allow-unpack-directory`"
         },
         {
-          "description": "Enables the close_archives_project command without any pre-configured scope.",
+          "description": "Enables the close_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-close-archives-project",
-          "markdownDescription": "Enables the close_archives_project command without any pre-configured scope."
+          "const": "archives:allow-close-project",
+          "markdownDescription": "Enables the close_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the extract_archive_file command without any pre-configured scope.",
+          "description": "Enables the extract_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-extract-archive-file",
-          "markdownDescription": "Enables the extract_archive_file command without any pre-configured scope."
+          "const": "archives:allow-extract-directory",
+          "markdownDescription": "Enables the extract_directory command without any pre-configured scope."
         },
         {
-          "description": "Enables the extract_archive_folder command without any pre-configured scope.",
+          "description": "Enables the extract_file command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-extract-archive-folder",
-          "markdownDescription": "Enables the extract_archive_folder command without any pre-configured scope."
+          "const": "archives:allow-extract-file",
+          "markdownDescription": "Enables the extract_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_archives_project command without any pre-configured scope.",
+          "description": "Enables the get_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-get-archives-project",
-          "markdownDescription": "Enables the get_archives_project command without any pre-configured scope."
+          "const": "archives:allow-get-project",
+          "markdownDescription": "Enables the get_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the has_archives_project command without any pre-configured scope.",
+          "description": "Enables the has_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-has-archives-project",
-          "markdownDescription": "Enables the has_archives_project command without any pre-configured scope."
+          "const": "archives:allow-has-project",
+          "markdownDescription": "Enables the has_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the open_archives_project command without any pre-configured scope.",
+          "description": "Enables the open_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-open-archives-project",
-          "markdownDescription": "Enables the open_archives_project command without any pre-configured scope."
+          "const": "archives:allow-open-project",
+          "markdownDescription": "Enables the open_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the read_archive_audio command without any pre-configured scope.",
+          "description": "Enables the read_audio command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-read-archive-audio",
-          "markdownDescription": "Enables the read_archive_audio command without any pre-configured scope."
+          "const": "archives:allow-read-audio",
+          "markdownDescription": "Enables the read_audio command without any pre-configured scope."
         },
         {
-          "description": "Enables the read_archive_file command without any pre-configured scope.",
+          "description": "Enables the read_file command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-read-archive-file",
-          "markdownDescription": "Enables the read_archive_file command without any pre-configured scope."
+          "const": "archives:allow-read-file",
+          "markdownDescription": "Enables the read_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the read_archive_image command without any pre-configured scope.",
+          "description": "Enables the read_image command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-read-archive-image",
-          "markdownDescription": "Enables the read_archive_image command without any pre-configured scope."
+          "const": "archives:allow-read-image",
+          "markdownDescription": "Enables the read_image command without any pre-configured scope."
         },
         {
-          "description": "Enables the unpack_archives_path command without any pre-configured scope.",
+          "description": "Enables the unpack_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:allow-unpack-archives-path",
-          "markdownDescription": "Enables the unpack_archives_path command without any pre-configured scope."
+          "const": "archives:allow-unpack-directory",
+          "markdownDescription": "Enables the unpack_directory command without any pre-configured scope."
         },
         {
-          "description": "Denies the close_archives_project command without any pre-configured scope.",
+          "description": "Denies the close_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-close-archives-project",
-          "markdownDescription": "Denies the close_archives_project command without any pre-configured scope."
+          "const": "archives:deny-close-project",
+          "markdownDescription": "Denies the close_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the extract_archive_file command without any pre-configured scope.",
+          "description": "Denies the extract_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-extract-archive-file",
-          "markdownDescription": "Denies the extract_archive_file command without any pre-configured scope."
+          "const": "archives:deny-extract-directory",
+          "markdownDescription": "Denies the extract_directory command without any pre-configured scope."
         },
         {
-          "description": "Denies the extract_archive_folder command without any pre-configured scope.",
+          "description": "Denies the extract_file command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-extract-archive-folder",
-          "markdownDescription": "Denies the extract_archive_folder command without any pre-configured scope."
+          "const": "archives:deny-extract-file",
+          "markdownDescription": "Denies the extract_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_archives_project command without any pre-configured scope.",
+          "description": "Denies the get_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-get-archives-project",
-          "markdownDescription": "Denies the get_archives_project command without any pre-configured scope."
+          "const": "archives:deny-get-project",
+          "markdownDescription": "Denies the get_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the has_archives_project command without any pre-configured scope.",
+          "description": "Denies the has_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-has-archives-project",
-          "markdownDescription": "Denies the has_archives_project command without any pre-configured scope."
+          "const": "archives:deny-has-project",
+          "markdownDescription": "Denies the has_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the open_archives_project command without any pre-configured scope.",
+          "description": "Denies the open_project command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-open-archives-project",
-          "markdownDescription": "Denies the open_archives_project command without any pre-configured scope."
+          "const": "archives:deny-open-project",
+          "markdownDescription": "Denies the open_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the read_archive_audio command without any pre-configured scope.",
+          "description": "Denies the read_audio command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-read-archive-audio",
-          "markdownDescription": "Denies the read_archive_audio command without any pre-configured scope."
+          "const": "archives:deny-read-audio",
+          "markdownDescription": "Denies the read_audio command without any pre-configured scope."
         },
         {
-          "description": "Denies the read_archive_file command without any pre-configured scope.",
+          "description": "Denies the read_file command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-read-archive-file",
-          "markdownDescription": "Denies the read_archive_file command without any pre-configured scope."
+          "const": "archives:deny-read-file",
+          "markdownDescription": "Denies the read_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the read_archive_image command without any pre-configured scope.",
+          "description": "Denies the read_image command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-read-archive-image",
-          "markdownDescription": "Denies the read_archive_image command without any pre-configured scope."
+          "const": "archives:deny-read-image",
+          "markdownDescription": "Denies the read_image command without any pre-configured scope."
         },
         {
-          "description": "Denies the unpack_archives_path command without any pre-configured scope.",
+          "description": "Denies the unpack_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "archives-editor:deny-unpack-archives-path",
-          "markdownDescription": "Denies the unpack_archives_path command without any pre-configured scope."
+          "const": "archives:deny-unpack-directory",
+          "markdownDescription": "Denies the unpack_directory command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-check-format-configs-path`\n- `allow-format-configs-path`\n- `allow-verify-configs-path`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-check-directory-format`\n- `allow-format-directory`\n- `allow-verify-directory`",
           "type": "string",
-          "const": "configs-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-check-format-configs-path`\n- `allow-format-configs-path`\n- `allow-verify-configs-path`"
+          "const": "configs:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-check-directory-format`\n- `allow-format-directory`\n- `allow-verify-directory`"
         },
         {
-          "description": "Enables the check_format_configs_path command without any pre-configured scope.",
+          "description": "Enables the check_directory_format command without any pre-configured scope.",
           "type": "string",
-          "const": "configs-editor:allow-check-format-configs-path",
-          "markdownDescription": "Enables the check_format_configs_path command without any pre-configured scope."
+          "const": "configs:allow-check-directory-format",
+          "markdownDescription": "Enables the check_directory_format command without any pre-configured scope."
         },
         {
-          "description": "Enables the format_configs_path command without any pre-configured scope.",
+          "description": "Enables the format_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "configs-editor:allow-format-configs-path",
-          "markdownDescription": "Enables the format_configs_path command without any pre-configured scope."
+          "const": "configs:allow-format-directory",
+          "markdownDescription": "Enables the format_directory command without any pre-configured scope."
         },
         {
-          "description": "Enables the verify_configs_path command without any pre-configured scope.",
+          "description": "Enables the verify_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "configs-editor:allow-verify-configs-path",
-          "markdownDescription": "Enables the verify_configs_path command without any pre-configured scope."
+          "const": "configs:allow-verify-directory",
+          "markdownDescription": "Enables the verify_directory command without any pre-configured scope."
         },
         {
-          "description": "Denies the check_format_configs_path command without any pre-configured scope.",
+          "description": "Denies the check_directory_format command without any pre-configured scope.",
           "type": "string",
-          "const": "configs-editor:deny-check-format-configs-path",
-          "markdownDescription": "Denies the check_format_configs_path command without any pre-configured scope."
+          "const": "configs:deny-check-directory-format",
+          "markdownDescription": "Denies the check_directory_format command without any pre-configured scope."
         },
         {
-          "description": "Denies the format_configs_path command without any pre-configured scope.",
+          "description": "Denies the format_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "configs-editor:deny-format-configs-path",
-          "markdownDescription": "Denies the format_configs_path command without any pre-configured scope."
+          "const": "configs:deny-format-directory",
+          "markdownDescription": "Denies the format_directory command without any pre-configured scope."
         },
         {
-          "description": "Denies the verify_configs_path command without any pre-configured scope.",
+          "description": "Denies the verify_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "configs-editor:deny-verify-configs-path",
-          "markdownDescription": "Denies the verify_configs_path command without any pre-configured scope."
+          "const": "configs:deny-verify-directory",
+          "markdownDescription": "Denies the verify_directory command without any pre-configured scope."
         },
         {
           "description": "Default core plugins set.\n#### This default permission set includes:\n\n- `core:path:default`\n- `core:event:default`\n- `core:window:default`\n- `core:webview:default`\n- `core:app:default`\n- `core:image:default`\n- `core:resources:default`\n- `core:menu:default`\n- `core:tray:default`",
@@ -4461,118 +4461,124 @@
           "markdownDescription": "Denies the save command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`\n- `allow-get-xr-export-source`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-sprite`\n- `allow-get-sprite`\n- `allow-open-sprite`\n- `allow-reopen-sprite`\n- `allow-pack-sprite`",
           "type": "string",
-          "const": "exports-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-xr-exports`\n- `allow-open-xr-exports`\n- `allow-get-xr-exports`\n- `allow-get-xr-export-source`"
+          "const": "equipment-icons:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-sprite`\n- `allow-get-sprite`\n- `allow-open-sprite`\n- `allow-reopen-sprite`\n- `allow-pack-sprite`"
         },
         {
-          "description": "Enables the close_xr_effects command without any pre-configured scope.",
+          "description": "Enables the close_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-close-xr-effects",
-          "markdownDescription": "Enables the close_xr_effects command without any pre-configured scope."
+          "const": "equipment-icons:allow-close-sprite",
+          "markdownDescription": "Enables the close_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the close_xr_exports command without any pre-configured scope.",
+          "description": "Enables the get_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-close-xr-exports",
-          "markdownDescription": "Enables the close_xr_exports command without any pre-configured scope."
+          "const": "equipment-icons:allow-get-sprite",
+          "markdownDescription": "Enables the get_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_xr_effects command without any pre-configured scope.",
+          "description": "Enables the open_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-get-xr-effects",
-          "markdownDescription": "Enables the get_xr_effects command without any pre-configured scope."
+          "const": "equipment-icons:allow-open-sprite",
+          "markdownDescription": "Enables the open_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_xr_export_source command without any pre-configured scope.",
+          "description": "Enables the pack_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-get-xr-export-source",
-          "markdownDescription": "Enables the get_xr_export_source command without any pre-configured scope."
+          "const": "equipment-icons:allow-pack-sprite",
+          "markdownDescription": "Enables the pack_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_xr_exports command without any pre-configured scope.",
+          "description": "Enables the reopen_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-get-xr-exports",
-          "markdownDescription": "Enables the get_xr_exports command without any pre-configured scope."
+          "const": "equipment-icons:allow-reopen-sprite",
+          "markdownDescription": "Enables the reopen_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the has_xr_effects command without any pre-configured scope.",
+          "description": "Denies the close_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-has-xr-effects",
-          "markdownDescription": "Enables the has_xr_effects command without any pre-configured scope."
+          "const": "equipment-icons:deny-close-sprite",
+          "markdownDescription": "Denies the close_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the open_xr_effects command without any pre-configured scope.",
+          "description": "Denies the get_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-open-xr-effects",
-          "markdownDescription": "Enables the open_xr_effects command without any pre-configured scope."
+          "const": "equipment-icons:deny-get-sprite",
+          "markdownDescription": "Denies the get_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the open_xr_exports command without any pre-configured scope.",
+          "description": "Denies the open_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-open-xr-exports",
-          "markdownDescription": "Enables the open_xr_exports command without any pre-configured scope."
+          "const": "equipment-icons:deny-open-sprite",
+          "markdownDescription": "Denies the open_sprite command without any pre-configured scope."
         },
         {
-          "description": "Enables the parse_xr_effects command without any pre-configured scope.",
+          "description": "Denies the pack_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:allow-parse-xr-effects",
-          "markdownDescription": "Enables the parse_xr_effects command without any pre-configured scope."
+          "const": "equipment-icons:deny-pack-sprite",
+          "markdownDescription": "Denies the pack_sprite command without any pre-configured scope."
         },
         {
-          "description": "Denies the close_xr_effects command without any pre-configured scope.",
+          "description": "Denies the reopen_sprite command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-close-xr-effects",
-          "markdownDescription": "Denies the close_xr_effects command without any pre-configured scope."
+          "const": "equipment-icons:deny-reopen-sprite",
+          "markdownDescription": "Denies the reopen_sprite command without any pre-configured scope."
         },
         {
-          "description": "Denies the close_xr_exports command without any pre-configured scope.",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-project`\n- `allow-open-project`\n- `allow-get-project`\n- `allow-get-source`",
           "type": "string",
-          "const": "exports-editor:deny-close-xr-exports",
-          "markdownDescription": "Denies the close_xr_exports command without any pre-configured scope."
+          "const": "exports:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-project`\n- `allow-open-project`\n- `allow-get-project`\n- `allow-get-source`"
         },
         {
-          "description": "Denies the get_xr_effects command without any pre-configured scope.",
+          "description": "Enables the close_project command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-get-xr-effects",
-          "markdownDescription": "Denies the get_xr_effects command without any pre-configured scope."
+          "const": "exports:allow-close-project",
+          "markdownDescription": "Enables the close_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_xr_export_source command without any pre-configured scope.",
+          "description": "Enables the get_project command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-get-xr-export-source",
-          "markdownDescription": "Denies the get_xr_export_source command without any pre-configured scope."
+          "const": "exports:allow-get-project",
+          "markdownDescription": "Enables the get_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_xr_exports command without any pre-configured scope.",
+          "description": "Enables the get_source command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-get-xr-exports",
-          "markdownDescription": "Denies the get_xr_exports command without any pre-configured scope."
+          "const": "exports:allow-get-source",
+          "markdownDescription": "Enables the get_source command without any pre-configured scope."
         },
         {
-          "description": "Denies the has_xr_effects command without any pre-configured scope.",
+          "description": "Enables the open_project command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-has-xr-effects",
-          "markdownDescription": "Denies the has_xr_effects command without any pre-configured scope."
+          "const": "exports:allow-open-project",
+          "markdownDescription": "Enables the open_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the open_xr_effects command without any pre-configured scope.",
+          "description": "Denies the close_project command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-open-xr-effects",
-          "markdownDescription": "Denies the open_xr_effects command without any pre-configured scope."
+          "const": "exports:deny-close-project",
+          "markdownDescription": "Denies the close_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the open_xr_exports command without any pre-configured scope.",
+          "description": "Denies the get_project command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-open-xr-exports",
-          "markdownDescription": "Denies the open_xr_exports command without any pre-configured scope."
+          "const": "exports:deny-get-project",
+          "markdownDescription": "Denies the get_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the parse_xr_effects command without any pre-configured scope.",
+          "description": "Denies the get_source command without any pre-configured scope.",
           "type": "string",
-          "const": "exports-editor:deny-parse-xr-effects",
-          "markdownDescription": "Denies the parse_xr_effects command without any pre-configured scope."
+          "const": "exports:deny-get-source",
+          "markdownDescription": "Denies the get_source command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the open_project command without any pre-configured scope.",
+          "type": "string",
+          "const": "exports:deny-open-project",
+          "markdownDescription": "Denies the open_project command without any pre-configured scope."
         },
         {
           "description": "This set of permissions describes the what kind of\nfile system access the `fs` plugin has enabled or denied by default.\n\n#### Granted Permissions\n\nThis default permission set enables read access to the\napplication specific directories (AppConfig, AppData, AppLocalData, AppCache,\nAppLog) and all files and sub directories created in it.\nThe location of these directories depends on the operating system,\nwhere the application is run.\n\nIn general these directories need to be manually created\nby the application at runtime, before accessing files or folders\nin it is possible.\n\nTherefore, it is also allowed to create all of these folders via\nthe `mkdir` command.\n\n#### Denied Permissions\n\nThis default permission set prevents access to critical components\nof the Tauri application by default.\nOn Windows the webview data folder access is denied.\n\n#### This default permission set includes:\n\n- `create-app-specific-dirs`\n- `read-app-specific-dirs-recursive`\n- `deny-default`",
@@ -6327,72 +6333,6 @@
           "markdownDescription": "This enables all file write related commands without any pre-configured accessible paths."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-equipment-sprite`\n- `allow-get-equipment-sprite`\n- `allow-open-equipment-sprite`\n- `allow-reopen-equipment-sprite`\n- `allow-pack-equipment`",
-          "type": "string",
-          "const": "icons-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-equipment-sprite`\n- `allow-get-equipment-sprite`\n- `allow-open-equipment-sprite`\n- `allow-reopen-equipment-sprite`\n- `allow-pack-equipment`"
-        },
-        {
-          "description": "Enables the close_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:allow-close-equipment-sprite",
-          "markdownDescription": "Enables the close_equipment_sprite command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the get_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:allow-get-equipment-sprite",
-          "markdownDescription": "Enables the get_equipment_sprite command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the open_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:allow-open-equipment-sprite",
-          "markdownDescription": "Enables the open_equipment_sprite command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the pack_equipment command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:allow-pack-equipment",
-          "markdownDescription": "Enables the pack_equipment command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the reopen_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:allow-reopen-equipment-sprite",
-          "markdownDescription": "Enables the reopen_equipment_sprite command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the close_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:deny-close-equipment-sprite",
-          "markdownDescription": "Denies the close_equipment_sprite command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the get_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:deny-get-equipment-sprite",
-          "markdownDescription": "Denies the get_equipment_sprite command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the open_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:deny-open-equipment-sprite",
-          "markdownDescription": "Denies the open_equipment_sprite command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the pack_equipment command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:deny-pack-equipment",
-          "markdownDescription": "Denies the pack_equipment command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the reopen_equipment_sprite command without any pre-configured scope.",
-          "type": "string",
-          "const": "icons-editor:deny-reopen-equipment-sprite",
-          "markdownDescription": "Denies the reopen_equipment_sprite command without any pre-configured scope."
-        },
-        {
           "description": "This permission set configures which\nshell functionality is exposed by default.\n\n#### Granted Permissions\n\nIt allows to use the `open` functionality with a reasonable\nscope pre-configured. It will allow opening `http(s)://`,\n`tel:` and `mailto:` links.\n\n#### This default permission set includes:\n\n- `allow-open`",
           "type": "string",
           "const": "shell:default",
@@ -6459,244 +6399,244 @@
           "markdownDescription": "Denies the stdin_write command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-export-spawn-file`\n- `allow-close-spawn-file`\n- `allow-get-spawn-file`\n- `allow-get-spawn-file-alife-spawns`\n- `allow-get-spawn-file-artefact-spawns`\n- `allow-get-spawn-file-graphs`\n- `allow-get-spawn-file-header`\n- `allow-get-spawn-file-path`\n- `allow-get-spawn-file-patrols`\n- `allow-has-spawn-file`\n- `allow-import-spawn-file`\n- `allow-open-spawn-file`\n- `allow-pack-spawn-file`\n- `allow-save-spawn-file`\n- `allow-unpack-spawn-file`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-save-unpacked-directory`\n- `allow-close-file`\n- `allow-get-file`\n- `allow-get-alife-spawns`\n- `allow-get-artefact-spawns`\n- `allow-get-graphs`\n- `allow-get-header`\n- `allow-get-path`\n- `allow-get-patrols`\n- `allow-has-file`\n- `allow-open-unpacked-directory`\n- `allow-open-file`\n- `allow-pack-file`\n- `allow-save-file`\n- `allow-unpack-file`",
           "type": "string",
-          "const": "spawns-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-export-spawn-file`\n- `allow-close-spawn-file`\n- `allow-get-spawn-file`\n- `allow-get-spawn-file-alife-spawns`\n- `allow-get-spawn-file-artefact-spawns`\n- `allow-get-spawn-file-graphs`\n- `allow-get-spawn-file-header`\n- `allow-get-spawn-file-path`\n- `allow-get-spawn-file-patrols`\n- `allow-has-spawn-file`\n- `allow-import-spawn-file`\n- `allow-open-spawn-file`\n- `allow-pack-spawn-file`\n- `allow-save-spawn-file`\n- `allow-unpack-spawn-file`"
+          "const": "spawn:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-save-unpacked-directory`\n- `allow-close-file`\n- `allow-get-file`\n- `allow-get-alife-spawns`\n- `allow-get-artefact-spawns`\n- `allow-get-graphs`\n- `allow-get-header`\n- `allow-get-path`\n- `allow-get-patrols`\n- `allow-has-file`\n- `allow-open-unpacked-directory`\n- `allow-open-file`\n- `allow-pack-file`\n- `allow-save-file`\n- `allow-unpack-file`"
         },
         {
-          "description": "Enables the close_spawn_file command without any pre-configured scope.",
+          "description": "Enables the close_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-close-spawn-file",
-          "markdownDescription": "Enables the close_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-close-file",
+          "markdownDescription": "Enables the close_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the export_spawn_file command without any pre-configured scope.",
+          "description": "Enables the get_alife_spawns command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-export-spawn-file",
-          "markdownDescription": "Enables the export_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-get-alife-spawns",
+          "markdownDescription": "Enables the get_alife_spawns command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_spawn_file command without any pre-configured scope.",
+          "description": "Enables the get_artefact_spawns command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-get-spawn-file",
-          "markdownDescription": "Enables the get_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-get-artefact-spawns",
+          "markdownDescription": "Enables the get_artefact_spawns command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_spawn_file_alife_spawns command without any pre-configured scope.",
+          "description": "Enables the get_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-get-spawn-file-alife-spawns",
-          "markdownDescription": "Enables the get_spawn_file_alife_spawns command without any pre-configured scope."
+          "const": "spawn:allow-get-file",
+          "markdownDescription": "Enables the get_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_spawn_file_artefact_spawns command without any pre-configured scope.",
+          "description": "Enables the get_graphs command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-get-spawn-file-artefact-spawns",
-          "markdownDescription": "Enables the get_spawn_file_artefact_spawns command without any pre-configured scope."
+          "const": "spawn:allow-get-graphs",
+          "markdownDescription": "Enables the get_graphs command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_spawn_file_graphs command without any pre-configured scope.",
+          "description": "Enables the get_header command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-get-spawn-file-graphs",
-          "markdownDescription": "Enables the get_spawn_file_graphs command without any pre-configured scope."
+          "const": "spawn:allow-get-header",
+          "markdownDescription": "Enables the get_header command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_spawn_file_header command without any pre-configured scope.",
+          "description": "Enables the get_path command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-get-spawn-file-header",
-          "markdownDescription": "Enables the get_spawn_file_header command without any pre-configured scope."
+          "const": "spawn:allow-get-path",
+          "markdownDescription": "Enables the get_path command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_spawn_file_path command without any pre-configured scope.",
+          "description": "Enables the get_patrols command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-get-spawn-file-path",
-          "markdownDescription": "Enables the get_spawn_file_path command without any pre-configured scope."
+          "const": "spawn:allow-get-patrols",
+          "markdownDescription": "Enables the get_patrols command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_spawn_file_patrols command without any pre-configured scope.",
+          "description": "Enables the has_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-get-spawn-file-patrols",
-          "markdownDescription": "Enables the get_spawn_file_patrols command without any pre-configured scope."
+          "const": "spawn:allow-has-file",
+          "markdownDescription": "Enables the has_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the has_spawn_file command without any pre-configured scope.",
+          "description": "Enables the open_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-has-spawn-file",
-          "markdownDescription": "Enables the has_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-open-file",
+          "markdownDescription": "Enables the open_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the import_spawn_file command without any pre-configured scope.",
+          "description": "Enables the open_unpacked_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-import-spawn-file",
-          "markdownDescription": "Enables the import_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-open-unpacked-directory",
+          "markdownDescription": "Enables the open_unpacked_directory command without any pre-configured scope."
         },
         {
-          "description": "Enables the open_spawn_file command without any pre-configured scope.",
+          "description": "Enables the pack_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-open-spawn-file",
-          "markdownDescription": "Enables the open_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-pack-file",
+          "markdownDescription": "Enables the pack_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the pack_spawn_file command without any pre-configured scope.",
+          "description": "Enables the save_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-pack-spawn-file",
-          "markdownDescription": "Enables the pack_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-save-file",
+          "markdownDescription": "Enables the save_file command without any pre-configured scope."
         },
         {
-          "description": "Enables the save_spawn_file command without any pre-configured scope.",
+          "description": "Enables the save_unpacked_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-save-spawn-file",
-          "markdownDescription": "Enables the save_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-save-unpacked-directory",
+          "markdownDescription": "Enables the save_unpacked_directory command without any pre-configured scope."
         },
         {
-          "description": "Enables the unpack_spawn_file command without any pre-configured scope.",
+          "description": "Enables the unpack_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:allow-unpack-spawn-file",
-          "markdownDescription": "Enables the unpack_spawn_file command without any pre-configured scope."
+          "const": "spawn:allow-unpack-file",
+          "markdownDescription": "Enables the unpack_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the close_spawn_file command without any pre-configured scope.",
+          "description": "Denies the close_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-close-spawn-file",
-          "markdownDescription": "Denies the close_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-close-file",
+          "markdownDescription": "Denies the close_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the export_spawn_file command without any pre-configured scope.",
+          "description": "Denies the get_alife_spawns command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-export-spawn-file",
-          "markdownDescription": "Denies the export_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-get-alife-spawns",
+          "markdownDescription": "Denies the get_alife_spawns command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_spawn_file command without any pre-configured scope.",
+          "description": "Denies the get_artefact_spawns command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-get-spawn-file",
-          "markdownDescription": "Denies the get_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-get-artefact-spawns",
+          "markdownDescription": "Denies the get_artefact_spawns command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_spawn_file_alife_spawns command without any pre-configured scope.",
+          "description": "Denies the get_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-get-spawn-file-alife-spawns",
-          "markdownDescription": "Denies the get_spawn_file_alife_spawns command without any pre-configured scope."
+          "const": "spawn:deny-get-file",
+          "markdownDescription": "Denies the get_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_spawn_file_artefact_spawns command without any pre-configured scope.",
+          "description": "Denies the get_graphs command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-get-spawn-file-artefact-spawns",
-          "markdownDescription": "Denies the get_spawn_file_artefact_spawns command without any pre-configured scope."
+          "const": "spawn:deny-get-graphs",
+          "markdownDescription": "Denies the get_graphs command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_spawn_file_graphs command without any pre-configured scope.",
+          "description": "Denies the get_header command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-get-spawn-file-graphs",
-          "markdownDescription": "Denies the get_spawn_file_graphs command without any pre-configured scope."
+          "const": "spawn:deny-get-header",
+          "markdownDescription": "Denies the get_header command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_spawn_file_header command without any pre-configured scope.",
+          "description": "Denies the get_path command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-get-spawn-file-header",
-          "markdownDescription": "Denies the get_spawn_file_header command without any pre-configured scope."
+          "const": "spawn:deny-get-path",
+          "markdownDescription": "Denies the get_path command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_spawn_file_path command without any pre-configured scope.",
+          "description": "Denies the get_patrols command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-get-spawn-file-path",
-          "markdownDescription": "Denies the get_spawn_file_path command without any pre-configured scope."
+          "const": "spawn:deny-get-patrols",
+          "markdownDescription": "Denies the get_patrols command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_spawn_file_patrols command without any pre-configured scope.",
+          "description": "Denies the has_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-get-spawn-file-patrols",
-          "markdownDescription": "Denies the get_spawn_file_patrols command without any pre-configured scope."
+          "const": "spawn:deny-has-file",
+          "markdownDescription": "Denies the has_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the has_spawn_file command without any pre-configured scope.",
+          "description": "Denies the open_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-has-spawn-file",
-          "markdownDescription": "Denies the has_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-open-file",
+          "markdownDescription": "Denies the open_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the import_spawn_file command without any pre-configured scope.",
+          "description": "Denies the open_unpacked_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-import-spawn-file",
-          "markdownDescription": "Denies the import_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-open-unpacked-directory",
+          "markdownDescription": "Denies the open_unpacked_directory command without any pre-configured scope."
         },
         {
-          "description": "Denies the open_spawn_file command without any pre-configured scope.",
+          "description": "Denies the pack_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-open-spawn-file",
-          "markdownDescription": "Denies the open_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-pack-file",
+          "markdownDescription": "Denies the pack_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the pack_spawn_file command without any pre-configured scope.",
+          "description": "Denies the save_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-pack-spawn-file",
-          "markdownDescription": "Denies the pack_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-save-file",
+          "markdownDescription": "Denies the save_file command without any pre-configured scope."
         },
         {
-          "description": "Denies the save_spawn_file command without any pre-configured scope.",
+          "description": "Denies the save_unpacked_directory command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-save-spawn-file",
-          "markdownDescription": "Denies the save_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-save-unpacked-directory",
+          "markdownDescription": "Denies the save_unpacked_directory command without any pre-configured scope."
         },
         {
-          "description": "Denies the unpack_spawn_file command without any pre-configured scope.",
+          "description": "Denies the unpack_file command without any pre-configured scope.",
           "type": "string",
-          "const": "spawns-editor:deny-unpack-spawn-file",
-          "markdownDescription": "Denies the unpack_spawn_file command without any pre-configured scope."
+          "const": "spawn:deny-unpack-file",
+          "markdownDescription": "Denies the unpack_file command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-translations-project`\n- `allow-open-translations-project`\n- `allow-get-translations-project`\n- `allow-close-translations-project`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-project`\n- `allow-open-project`\n- `allow-get-project`\n- `allow-close-project`",
           "type": "string",
-          "const": "translations-editor:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-translations-project`\n- `allow-open-translations-project`\n- `allow-get-translations-project`\n- `allow-close-translations-project`"
+          "const": "translations:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-project`\n- `allow-open-project`\n- `allow-get-project`\n- `allow-close-project`"
         },
         {
-          "description": "Enables the close_translations_project command without any pre-configured scope.",
+          "description": "Enables the close_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:allow-close-translations-project",
-          "markdownDescription": "Enables the close_translations_project command without any pre-configured scope."
+          "const": "translations:allow-close-project",
+          "markdownDescription": "Enables the close_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the get_translations_project command without any pre-configured scope.",
+          "description": "Enables the get_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:allow-get-translations-project",
-          "markdownDescription": "Enables the get_translations_project command without any pre-configured scope."
+          "const": "translations:allow-get-project",
+          "markdownDescription": "Enables the get_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the open_translations_project command without any pre-configured scope.",
+          "description": "Enables the open_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:allow-open-translations-project",
-          "markdownDescription": "Enables the open_translations_project command without any pre-configured scope."
+          "const": "translations:allow-open-project",
+          "markdownDescription": "Enables the open_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the read_translations_project command without any pre-configured scope.",
+          "description": "Enables the read_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:allow-read-translations-project",
-          "markdownDescription": "Enables the read_translations_project command without any pre-configured scope."
+          "const": "translations:allow-read-project",
+          "markdownDescription": "Enables the read_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the close_translations_project command without any pre-configured scope.",
+          "description": "Denies the close_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:deny-close-translations-project",
-          "markdownDescription": "Denies the close_translations_project command without any pre-configured scope."
+          "const": "translations:deny-close-project",
+          "markdownDescription": "Denies the close_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_translations_project command without any pre-configured scope.",
+          "description": "Denies the get_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:deny-get-translations-project",
-          "markdownDescription": "Denies the get_translations_project command without any pre-configured scope."
+          "const": "translations:deny-get-project",
+          "markdownDescription": "Denies the get_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the open_translations_project command without any pre-configured scope.",
+          "description": "Denies the open_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:deny-open-translations-project",
-          "markdownDescription": "Denies the open_translations_project command without any pre-configured scope."
+          "const": "translations:deny-open-project",
+          "markdownDescription": "Denies the open_project command without any pre-configured scope."
         },
         {
-          "description": "Denies the read_translations_project command without any pre-configured scope.",
+          "description": "Denies the read_project command without any pre-configured scope.",
           "type": "string",
-          "const": "translations-editor:deny-read-translations-project",
-          "markdownDescription": "Denies the read_translations_project command without any pre-configured scope."
+          "const": "translations:deny-read-project",
+          "markdownDescription": "Denies the read_project command without any pre-configured scope."
         }
       ]
     },

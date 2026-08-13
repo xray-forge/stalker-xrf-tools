@@ -28,11 +28,11 @@
     "shell:default",
     "dialog:default",
     "fs:default",
-    "archives-editor:default",
-    "configs-editor:default",
-    "exports-editor:default",
-    "icons-editor:default",
-    "spawns-editor:default",
-    "translations-editor:default"
+    "archives:default",
+    "configs:default",
+    "exports:default",
+    "equipment-icons:default",
+    "spawn:default",
+    "translations:default"
   ]
 }

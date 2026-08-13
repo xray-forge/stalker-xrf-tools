@@ -12,86 +12,72 @@ fn main() {
 fn apply_inline_plugins(attributes: Attributes) -> Attributes {
   attributes
     .plugin(
-      "archives-editor",
+      "archives",
       tauri_build::InlinedPlugin::new()
         .commands(&[
-          "close_archives_project",
-          "extract_archive_file",
-          "extract_archive_folder",
-          "get_archives_project",
-          "has_archives_project",
-          "open_archives_project",
-          "read_archive_audio",
-          "read_archive_file",
-          "read_archive_image",
-          "unpack_archives_path",
+          "close_project",
+          "extract_file",
+          "extract_directory",
+          "get_project",
+          "has_project",
+          "open_project",
+          "read_audio",
+          "read_file",
+          "read_image",
+          "unpack_directory",
         ])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )
     .plugin(
-      "configs-editor",
+      "configs",
+      tauri_build::InlinedPlugin::new()
+        .commands(&["check_directory_format", "format_directory", "verify_directory"])
+        .default_permission(DefaultPermissionRule::AllowAllCommands),
+    )
+    .plugin(
+      "exports",
+      tauri_build::InlinedPlugin::new()
+        .commands(&["close_project", "open_project", "get_project", "get_source"])
+        .default_permission(DefaultPermissionRule::AllowAllCommands),
+    )
+    .plugin(
+      "equipment-icons",
       tauri_build::InlinedPlugin::new()
         .commands(&[
-          "check_format_configs_path",
-          "format_configs_path",
-          "verify_configs_path",
+          "close_sprite",
+          "get_sprite",
+          "open_sprite",
+          "reopen_sprite",
+          "pack_sprite",
         ])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )
     .plugin(
-      "exports-editor",
+      "spawn",
       tauri_build::InlinedPlugin::new()
         .commands(&[
-          "close_xr_exports",
-          "open_xr_exports",
-          "get_xr_exports",
-          "get_xr_export_source",
+          "save_unpacked_directory",
+          "close_file",
+          "get_file",
+          "get_alife_spawns",
+          "get_artefact_spawns",
+          "get_graphs",
+          "get_header",
+          "get_path",
+          "get_patrols",
+          "has_file",
+          "open_unpacked_directory",
+          "open_file",
+          "pack_file",
+          "save_file",
+          "unpack_file",
         ])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )
     .plugin(
-      "icons-editor",
+      "translations",
       tauri_build::InlinedPlugin::new()
-        .commands(&[
-          "close_equipment_sprite",
-          "get_equipment_sprite",
-          "open_equipment_sprite",
-          "reopen_equipment_sprite",
-          "pack_equipment",
-        ])
-        .default_permission(DefaultPermissionRule::AllowAllCommands),
-    )
-    .plugin(
-      "spawns-editor",
-      tauri_build::InlinedPlugin::new()
-        .commands(&[
-          "export_spawn_file",
-          "close_spawn_file",
-          "get_spawn_file",
-          "get_spawn_file_alife_spawns",
-          "get_spawn_file_artefact_spawns",
-          "get_spawn_file_graphs",
-          "get_spawn_file_header",
-          "get_spawn_file_path",
-          "get_spawn_file_patrols",
-          "has_spawn_file",
-          "import_spawn_file",
-          "open_spawn_file",
-          "pack_spawn_file",
-          "save_spawn_file",
-          "unpack_spawn_file",
-        ])
-        .default_permission(DefaultPermissionRule::AllowAllCommands),
-    )
-    .plugin(
-      "translations-editor",
-      tauri_build::InlinedPlugin::new()
-        .commands(&[
-          "read_translations_project",
-          "open_translations_project",
-          "get_translations_project",
-          "close_translations_project",
-        ])
+        .commands(&["read_project", "open_project", "get_project", "close_project"])
         .default_permission(DefaultPermissionRule::AllowAllCommands),
     )
 }

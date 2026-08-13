@@ -1,0 +1,21 @@
+use std::sync::MutexGuard;
+
+use tauri::State;
+use xrf_export::ExportsProject;
+
+use crate::exports::state::ExportsProjectState;
+use crate::types::TauriResult;
+
+#[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "close_project"))]
+#[tauri::command(rename = "close_project")]
+pub fn exports_close_project(state: State<'_, ExportsProjectState>) -> TauriResult {
+  log::info!("Closing xr exports");
+
+  let mut lock: MutexGuard<Option<ExportsProject>> = state.project.lock().unwrap();
+
+  if lock.is_some() {
+    *lock = None;
+  }
+
+  Ok(())
+}
