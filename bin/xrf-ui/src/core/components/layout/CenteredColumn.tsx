@@ -1,11 +1,10 @@
-import { Box, SxProps, Theme } from "@mui/material";
+import { Box } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 export interface ICenteredColumnProps extends BaseComponentProps {
   children: ReactNode;
-  sx?: SxProps<Theme>;
 }
 
 /**
