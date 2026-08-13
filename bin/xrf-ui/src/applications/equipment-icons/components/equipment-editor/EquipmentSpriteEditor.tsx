@@ -11,8 +11,8 @@ import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { Nullable } from "@/core/types/general";
-import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/icons";
 import { Logger, useLogger } from "@/lib/logging";
+import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/xrf/icons";
 
 export function EquipmentSpriteEditor(): ReactElement {
   const log: Logger = useLogger("equipment-editor");

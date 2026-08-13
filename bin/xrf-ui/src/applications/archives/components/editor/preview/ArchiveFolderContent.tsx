@@ -9,10 +9,10 @@ import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/component
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { Nullable } from "@/core/types/general";
-import { isUnderArchiveDirectory, TArchiveOperation } from "@/lib/archive";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { formatBytes } from "@/lib/size";
+import { isUnderArchiveDirectory, TArchiveOperation } from "@/lib/xrf/archive";
 import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
 
 export interface IArchiveFolderContentProps {

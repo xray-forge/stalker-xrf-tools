@@ -7,11 +7,11 @@ import { EApplicationId } from "@/core/router/application";
 import { ProjectService } from "@/core/store/project";
 import { Nullable } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file-picker";
-import { EquipmentService, IPackEquipmentResult } from "@/lib/icons";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { useMountEffect } from "@/lib/react";
+import { EquipmentService, IPackEquipmentResult } from "@/lib/xrf/icons";
 import {
   getPathIfExists,
   getProjectEquipmentDDSPath,

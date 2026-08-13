@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
-import { IArchiveTreeItem, isUnderArchiveDirectory, parseTree } from "@/lib/archive/tree";
+import { IArchiveTreeItem, isUnderArchiveDirectory, parseTree } from "@/lib/xrf/archive/tree";
 
 const CONFIGS_DIALOGS: string = ["configs", "gameplay", "dialogs.xml"].join("\\");
 const CONFIGS_BACKUP: string = ["configs_backup", "a.ltx"].join("\\");

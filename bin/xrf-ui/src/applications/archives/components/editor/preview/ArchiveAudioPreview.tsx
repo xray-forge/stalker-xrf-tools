@@ -10,10 +10,10 @@ import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { AudioPlayer } from "@/core/components/media/AudioPlayer";
 import { Nullable } from "@/core/types/general";
-import { TArchiveContent } from "@/lib/archive";
 import { AssetService } from "@/lib/assets";
 import { Loadable } from "@/lib/loadable";
 import { base64ToBytes } from "@/lib/media/base64";
+import { TArchiveContent } from "@/lib/xrf/archive";
 import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/lib/xrf/bindings/xrf-app";
 
 /** One sound is previewed at a time, so its url lives under a fixed key and displaces the last one. */

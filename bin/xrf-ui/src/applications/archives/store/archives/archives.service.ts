@@ -13,6 +13,9 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { EApplicationId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
+import { createLoadable, Loadable } from "@/lib/loadable";
+import { Logger } from "@/lib/logging";
+import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import {
   getArchivePreviewSupport,
   isArchiveAudio,
@@ -20,11 +23,7 @@ import {
   TArchiveContent,
   TArchiveOperation,
   TArchiveSelection,
-} from "@/lib/archive";
-import { transformError } from "@/lib/error";
-import { createLoadable, Loadable } from "@/lib/loadable";
-import { Logger } from "@/lib/logging";
-import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+} from "@/lib/xrf/archive";
 import {
   ArchiveExtractFolderResult,
   ArchiveFileDescriptor,
@@ -32,6 +31,7 @@ import {
   ProjectReadResult,
 } from "@/lib/xrf/bindings/xray-archive";
 import { ArchiveAudioPreview, ArchiveImagePreview } from "@/lib/xrf/bindings/xrf-app";
+import { transformError } from "@/lib/xrf/error";
 import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 
 @Injectable()

@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 import { Nullable } from "@/core/types/general";
 import { stopPropagation } from "@/lib/event";
-import { GridMapper, IEquipmentSectionDescriptor, TEquipmentCell } from "@/lib/icons";
+import { GridMapper, IEquipmentSectionDescriptor, TEquipmentCell } from "@/lib/xrf/icons";
 
 interface IEquipmentGridDetailsProps {
   cell: TEquipmentCell;

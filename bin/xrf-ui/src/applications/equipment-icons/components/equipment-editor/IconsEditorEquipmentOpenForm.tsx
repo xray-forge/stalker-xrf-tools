@@ -4,9 +4,9 @@ import { ReactElement, useCallback } from "react";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { FilePickerInput, usePathState } from "@/lib/file-picker";
-import { EquipmentService } from "@/lib/icons";
 import { Logger, useLogger } from "@/lib/logging";
 import { useMountEffect } from "@/lib/react";
+import { EquipmentService } from "@/lib/xrf/icons";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf/project-path";
 
 export function IconsEditorEquipmentOpenForm(): ReactElement {

@@ -8,7 +8,7 @@ import {
   IApplicationDescriptor,
 } from "@/core/router/application";
 import { AssetService } from "@/lib/assets";
-import { EquipmentService } from "@/lib/icons";
+import { EquipmentService } from "@/lib/xrf/icons";
 
 export const EQUIPMENT_ICONS_APPLICATION: IApplicationDescriptor = {
   container: { bindings: [AssetService, EquipmentService] },

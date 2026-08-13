@@ -1,5 +1,5 @@
-import { TCallableExportDescriptor } from "@/lib/exports";
 import { ExportDescriptor } from "@/lib/xrf/bindings/xray-export";
+import { TCallableExportDescriptor } from "@/lib/xrf/exports";
 
 export const ROOT_EXPORT_GROUP_ID: string = "group:root";
 

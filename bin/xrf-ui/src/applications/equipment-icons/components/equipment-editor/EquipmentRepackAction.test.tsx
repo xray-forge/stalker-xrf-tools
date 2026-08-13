@@ -7,7 +7,7 @@ import { EquipmentRepackAction } from "@/applications/equipment-icons/components
 import { Nullable } from "@/core/types/general";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { AssetService } from "@/lib/assets";
-import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/icons";
+import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/xrf/icons";
 
 const SPRITE: IEquipmentPngDescriptor = {
   ltxPath: "C:\\game\\system.ltx",

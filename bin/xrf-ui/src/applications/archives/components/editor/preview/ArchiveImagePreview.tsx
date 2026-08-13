@@ -8,8 +8,8 @@ import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { ImageViewport } from "@/core/components/media/ImageViewport";
 import { Nullable } from "@/core/types/general";
-import { TArchiveContent } from "@/lib/archive";
 import { Loadable } from "@/lib/loadable";
+import { TArchiveContent } from "@/lib/xrf/archive";
 import { ArchiveImagePreview as TArchiveImagePreview } from "@/lib/xrf/bindings/xrf-app";
 
 /**

@@ -13,7 +13,6 @@ import { BoundAction, Computed, makeObservable, Observable, runInAction } from "
 
 import { EApplicationGroupId } from "@/core/router/application";
 import { AnyObject, Nullable } from "@/core/types/general";
-import { transformError } from "@/lib/error";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
@@ -24,6 +23,7 @@ import {
   SpawnHeaderChunk,
   SpawnPatrolsChunk,
 } from "@/lib/xrf/bindings/xray-db";
+import { transformError } from "@/lib/xrf/error";
 import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 
 export interface ISpawnRowSelection {

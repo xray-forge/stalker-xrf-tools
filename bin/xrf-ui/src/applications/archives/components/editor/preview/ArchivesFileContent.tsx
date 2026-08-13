@@ -12,10 +12,10 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { Nullable } from "@/core/types/general";
-import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/lib/archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/size";
+import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/lib/xrf/archive";
 import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
 
 // Everything that renders its own preview leaves this union; what is left is a reason to explain.

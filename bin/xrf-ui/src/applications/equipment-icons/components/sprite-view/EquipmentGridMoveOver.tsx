@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { ReactElement } from "react";
 
-import { TEquipmentCell } from "@/lib/icons";
+import { TEquipmentCell } from "@/lib/xrf/icons";
 
 interface IEquipmentGridMoveOver {
   cell: TEquipmentCell;

@@ -8,12 +8,12 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 import { EApplicationGroupId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
 import { AssetService } from "@/lib/assets";
-import { transformError } from "@/lib/error";
-import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/icons/equipment";
 import { urlToImage } from "@/lib/image";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { transformError } from "@/lib/xrf/error";
+import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/xrf/icons/equipment";
 import { EIconsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 
 export interface IEquipmentPngDescriptor {

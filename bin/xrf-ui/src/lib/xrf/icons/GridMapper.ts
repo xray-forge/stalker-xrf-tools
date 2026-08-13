@@ -1,4 +1,4 @@
-import { IEquipmentSectionDescriptor } from "@/lib/icons/equipment";
+import { IEquipmentSectionDescriptor } from "@/lib/xrf/icons/equipment";
 
 export class GridMapper {
   public rows: number;

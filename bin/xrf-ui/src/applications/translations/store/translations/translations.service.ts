@@ -4,10 +4,10 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { EApplicationId } from "@/core/router/application";
 import { Nullable } from "@/core/types/general";
-import { transformError } from "@/lib/error";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
+import { transformError } from "@/lib/xrf/error";
 import { ETranslationsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 import { ITranslationsProjectJson } from "@/lib/xrf/translations";
 

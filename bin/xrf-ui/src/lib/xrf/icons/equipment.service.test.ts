@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { EquipmentService } from "@/lib/icons/equipment.service";
+import { EquipmentService } from "@/lib/xrf/icons/equipment.service";
 import { EIconsEditorCommand } from "@/lib/xrf/ipc";
 
 describe("EquipmentService", () => {

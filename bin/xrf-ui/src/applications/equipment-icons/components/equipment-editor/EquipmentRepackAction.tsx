@@ -5,8 +5,8 @@ import { ReactElement, useCallback, useState } from "react";
 
 import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
 import { Nullable } from "@/core/types/general";
-import { EquipmentService } from "@/lib/icons";
 import { Logger, useLogger } from "@/lib/logging";
+import { EquipmentService } from "@/lib/xrf/icons";
 
 /**
  * Toolbar command that rebuilds the open sprite from its unpacked icons.

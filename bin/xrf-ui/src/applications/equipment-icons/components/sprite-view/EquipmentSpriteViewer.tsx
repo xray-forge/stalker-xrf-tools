@@ -12,7 +12,7 @@ import { EquipmentSpriteGrid } from "@/applications/equipment-icons/components/s
 import { equipmentViewerConfig } from "@/applications/equipment-icons/configs/EquipmentViewerConfig";
 import { IMAGE_CHECKERBOARD } from "@/core/components/media/media.styles";
 import { Nullable } from "@/core/types/general";
-import { EquipmentService, GridMapper } from "@/lib/icons";
+import { EquipmentService, GridMapper } from "@/lib/xrf/icons";
 
 export function EquipmentSpriteViewer(): ReactElement {
   const equipmentService: EquipmentService = useInjection(EquipmentService);
