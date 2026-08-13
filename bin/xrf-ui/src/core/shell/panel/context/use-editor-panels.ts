@@ -1,7 +1,6 @@
 import { DependencyList, useContext, useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
 
-import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
+import { useCurrentApplication } from "@/core/routing/current-application.context";
 import { IEditorPanel } from "@/core/shell/panel/context/editor-panel";
 import {
   EditorPanelsContext,
@@ -15,9 +14,7 @@ import {
 /** Only what the application on screen published. Anything left over from the last one is not rendered. */
 export function useEditorPanelsRegistry(): ReadonlyArray<IEditorPanel> {
   const state: IEditorPanelsState = useContext(EditorPanelsContext);
-  const { pathname } = useLocation();
-
-  const owner: string = APPLICATION_CATALOG.findApplication(pathname)?.path ?? "root";
+  const owner: string = useCurrentApplication()?.path ?? "root";
 
   return state.owner === owner ? state.panels : NO_PANELS;
 }
@@ -30,9 +27,8 @@ export function useEditorPanelsRegistry(): ReadonlyArray<IEditorPanel> {
  */
 export function useEditorPanels(createPanels: () => Array<IEditorPanel>, dependencies: DependencyList): void {
   const setState: TEditorPanelsStateSetter = useContext(EditorPanelsSetterContext);
-  const { pathname } = useLocation();
+  const owner: string = useCurrentApplication()?.path ?? "root";
 
-  const owner: string = APPLICATION_CATALOG.findApplication(pathname)?.path ?? "root";
   // Call sites are checked as dependency-aware hooks by ESLint.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const panels: Array<IEditorPanel> = useMemo(createPanels, dependencies);

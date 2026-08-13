@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import { ReactElement, ReactNode, useCallback } from "react";
-import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
-import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
 import { IApplicationDescriptor } from "@/core/routing/application";
+import { useCurrentApplication } from "@/core/routing/current-application.context";
 import { EditorToolbarCrumb } from "@/core/shell/editor/EditorToolbarCrumb";
 import { EditorToolbarPathSeparator } from "@/core/shell/editor/EditorToolbarPathSeparator";
 import { useIsEditorBusy } from "@/core/shell/EditorBusyContext";
@@ -32,11 +32,10 @@ export function EditorToolbar({
   actions,
   onBack,
 }: IEditorToolbarProps): ReactElement {
+  const application: Nullable<IApplicationDescriptor> = useCurrentApplication();
   const navigate: NavigateFunction = useNavigate();
-  const { pathname } = useLocation();
 
   const isBusy: boolean = useIsEditorBusy();
-  const application: Nullable<IApplicationDescriptor> = APPLICATION_CATALOG.findApplication(pathname);
 
   const label: Nullable<string> = title ?? application?.label ?? null;
 

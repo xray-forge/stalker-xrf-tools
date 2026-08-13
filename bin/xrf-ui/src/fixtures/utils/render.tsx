@@ -2,10 +2,13 @@ import { render, RenderResult } from "@testing-library/react";
 import { ContainerConfig, EventsPlugin } from "@wirestate/core";
 import { ContainerProvider } from "@wirestate/react";
 import { Fragment, PropsWithChildren, ReactElement, ReactNode } from "react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 
+import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
 import { ApplicationProvider } from "@/ApplicationProvider";
 import { NotificationsService } from "@/core/notifications/services";
+import { IApplicationDescriptor } from "@/core/routing/application";
+import { CurrentApplicationProvider } from "@/core/routing/current-application.context";
 import { SettingsService } from "@/core/settings/services/settings";
 import { EditorBusyProvider } from "@/core/shell/EditorBusyContext";
 import { EditorStatusProvider } from "@/core/shell/EditorStatusContext";
@@ -15,6 +18,7 @@ import {
   selectPanelsOnSide,
   useEditorPanelsRegistry,
 } from "@/core/shell/panel/context";
+import { Nullable } from "@/lib/types/general";
 
 export interface IRenderOptions {
   /** Initial route. Components resolve their application name from it, so it is rarely irrelevant. */
@@ -51,19 +55,28 @@ export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] 
     return <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>;
   }
 
+  function TestCurrentApplication({ children }: PropsWithChildren): ReactElement {
+    const { pathname } = useLocation();
+    const application: Nullable<IApplicationDescriptor> = APPLICATION_CATALOG.findApplicationByPath(pathname);
+
+    return <CurrentApplicationProvider application={application}>{children}</CurrentApplicationProvider>;
+  }
+
   function Wrapper({ children }: PropsWithChildren): ReactElement {
     return (
       <ApplicationProvider router={TestRouter}>
-        <ContainerProvider config={config}>
-          <EditorBusyProvider>
-            <EditorStatusProvider>
-              <EditorPanelsProvider>
-                {children}
-                <LeftPanelsOutlet />
-              </EditorPanelsProvider>
-            </EditorStatusProvider>
-          </EditorBusyProvider>
-        </ContainerProvider>
+        <TestCurrentApplication>
+          <ContainerProvider config={config}>
+            <EditorBusyProvider>
+              <EditorStatusProvider>
+                <EditorPanelsProvider>
+                  {children}
+                  <LeftPanelsOutlet />
+                </EditorPanelsProvider>
+              </EditorStatusProvider>
+            </EditorBusyProvider>
+          </ContainerProvider>
+        </TestCurrentApplication>
       </ApplicationProvider>
     );
   }

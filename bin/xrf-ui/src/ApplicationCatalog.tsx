@@ -32,7 +32,7 @@ import { Nullable } from "@/lib/types/general";
 export interface IApplicationCatalog {
   readonly applications: ReadonlyArray<IApplicationDescriptor>;
   readonly groups: ReadonlyArray<IApplicationGroup>;
-  findApplication(pathname: string): Nullable<IApplicationDescriptor>;
+  findApplicationByPath(pathname: string): Nullable<IApplicationDescriptor>;
   findApplicationById(id: string): Nullable<IApplicationDescriptor>;
   findApplicationGroupById(id: string): Nullable<IApplicationGroup>;
 }
@@ -69,7 +69,7 @@ export const APPLICATION_CATALOG: IApplicationCatalog = {
     { id: EApplicationGroupId.TRANSLATIONS, label: "Translations", icon: <TranslateIcon /> },
     { id: EApplicationGroupId.VISUALS, label: "Visuals", icon: <ViewInArIcon /> },
   ],
-  findApplication: (pathname: string): Nullable<IApplicationDescriptor> =>
+  findApplicationByPath: (pathname: string): Nullable<IApplicationDescriptor> =>
     APPLICATION_CATALOG.applications.find(
       (application: IApplicationDescriptor) =>
         pathname === application.path || pathname.startsWith(`${application.path}/`)
