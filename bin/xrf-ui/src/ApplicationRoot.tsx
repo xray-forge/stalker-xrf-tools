@@ -4,8 +4,8 @@ import { useInjection } from "@wirestate/react";
 import { ChangeEvent, Fragment, ReactElement, useCallback, useMemo, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
+import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
 import { EApplicationStatus, IApplicationDescriptor, IApplicationGroup } from "@/core/routing/application";
-import { APPLICATION_GROUPS, APPLICATIONS } from "@/core/routing/applications";
 import { ApplicationCard } from "@/core/routing/components/ApplicationCard";
 import { SettingsService } from "@/core/settings/services/settings";
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
@@ -25,8 +25,9 @@ const GRID_COLUMNS = {
 /**
  * Start page, and the only route between applications.
  */
-export function Root(): ReactElement {
+export function ApplicationRoot(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
+  const { applications, groups } = APPLICATION_CATALOG;
 
   const settingsService: SettingsService = useInjection(SettingsService);
 
@@ -34,32 +35,34 @@ export function Root(): ReactElement {
 
   const isDevModeEnabled: boolean = settingsService.isDevModeEnabled;
 
-  const matched: Array<IApplicationDescriptor> = useMemo(() => {
+  const matched: ReadonlyArray<IApplicationDescriptor> = useMemo(() => {
     const needle: string = query.trim().toLowerCase();
 
     return needle
-      ? APPLICATIONS.filter(
+      ? applications.filter(
           (application: IApplicationDescriptor) =>
             application.label.toLowerCase().includes(needle) || application.description.toLowerCase().includes(needle)
         )
-      : APPLICATIONS;
-  }, [query]);
+      : applications;
+  }, [applications, query]);
 
   const sections: Array<[IApplicationGroup, Array<IApplicationDescriptor>]> = useMemo(
     () =>
-      APPLICATION_GROUPS.map((group: IApplicationGroup): [IApplicationGroup, Array<IApplicationDescriptor>] => [
-        group,
-        matched
-          .filter((it: IApplicationDescriptor) => it.group === group.id)
-          .sort((left: IApplicationDescriptor, right: IApplicationDescriptor) => {
-            if (left.status !== right.status) {
-              return left.status === EApplicationStatus.READY ? -1 : 1;
-            }
+      groups
+        .map((group: IApplicationGroup): [IApplicationGroup, Array<IApplicationDescriptor>] => [
+          group,
+          matched
+            .filter((it: IApplicationDescriptor) => it.group === group.id)
+            .sort((left: IApplicationDescriptor, right: IApplicationDescriptor) => {
+              if (left.status !== right.status) {
+                return left.status === EApplicationStatus.READY ? -1 : 1;
+              }
 
-            return left.label.localeCompare(right.label);
-          }),
-      ]).filter(([, applications]) => applications.length > 0),
-    [matched]
+              return left.label.localeCompare(right.label);
+            }),
+        ])
+        .filter(([, applications]) => applications.length > 0),
+    [groups, matched]
   );
 
   const onChangeQuery = useCallback((event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value), []);

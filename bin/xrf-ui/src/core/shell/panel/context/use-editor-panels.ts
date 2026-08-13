@@ -1,7 +1,7 @@
 import { DependencyList, useContext, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
-import { findApplication } from "@/core/routing/applications";
+import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
 import { IEditorPanel } from "@/core/shell/panel/context/editor-panel";
 import {
   EditorPanelsContext,
@@ -12,19 +12,12 @@ import {
   TEditorPanelsStateSetter,
 } from "@/core/shell/panel/context/EditorPanelsContext";
 
-/**
- * The application a panel belongs to, derived the way the frame derives its container scope.
- */
-function useCurrentPanelOwner(): string {
-  const { pathname } = useLocation();
-
-  return findApplication(pathname)?.path ?? "root";
-}
-
 /** Only what the application on screen published. Anything left over from the last one is not rendered. */
 export function useEditorPanelsRegistry(): ReadonlyArray<IEditorPanel> {
   const state: IEditorPanelsState = useContext(EditorPanelsContext);
-  const owner: string = useCurrentPanelOwner();
+  const { pathname } = useLocation();
+
+  const owner: string = APPLICATION_CATALOG.findApplication(pathname)?.path ?? "root";
 
   return state.owner === owner ? state.panels : NO_PANELS;
 }
@@ -37,8 +30,9 @@ export function useEditorPanelsRegistry(): ReadonlyArray<IEditorPanel> {
  */
 export function useEditorPanels(createPanels: () => Array<IEditorPanel>, dependencies: DependencyList): void {
   const setState: TEditorPanelsStateSetter = useContext(EditorPanelsSetterContext);
+  const { pathname } = useLocation();
 
-  const owner: string = useCurrentPanelOwner();
+  const owner: string = APPLICATION_CATALOG.findApplication(pathname)?.path ?? "root";
   // Call sites are checked as dependency-aware hooks by ESLint.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const panels: Array<IEditorPanel> = useMemo(createPanels, dependencies);

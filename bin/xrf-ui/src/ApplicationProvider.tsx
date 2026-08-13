@@ -5,7 +5,8 @@ import { default as CssBaseline } from "@mui/material/CssBaseline";
 import { Theme, ThemeProvider } from "@mui/material/styles";
 import { ContainerConfig, EventsPlugin } from "@wirestate/core";
 import { ContainerProvider } from "@wirestate/react";
-import { ReactNode, useMemo } from "react";
+import { ComponentType, PropsWithChildren, ReactElement, ReactNode, useMemo } from "react";
+import { BrowserRouter } from "react-router-dom";
 
 import { ErrorCaptureService, NotificationsService } from "@/core/notifications/services";
 import { ProjectService } from "@/core/settings/services/project";
@@ -13,10 +14,14 @@ import { SettingsService } from "@/core/settings/services/settings";
 import { createApplicationStyleCache, createApplicationTheme } from "@/core/theme";
 
 interface IApplicationProviderProps {
+  router?: ComponentType<PropsWithChildren>;
   children: ReactNode;
 }
 
-export function ApplicationProvider({ children }: IApplicationProviderProps) {
+export function ApplicationProvider({
+  router: Router = BrowserRouter,
+  children,
+}: IApplicationProviderProps): ReactElement {
   const theme: Theme = useMemo(() => createApplicationTheme(), []);
   const cache: EmotionCache = useMemo(() => createApplicationStyleCache(), []);
 
@@ -51,7 +56,7 @@ export function ApplicationProvider({ children }: IApplicationProviderProps) {
             }}
           />
 
-          {children}
+          <Router>{children}</Router>
         </ThemeProvider>
       </CacheProvider>
     </ContainerProvider>

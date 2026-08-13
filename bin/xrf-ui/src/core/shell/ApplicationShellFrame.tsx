@@ -2,11 +2,11 @@ import { Box } from "@mui/material";
 import { ReactElement, ReactNode, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+import { APPLICATION_CATALOG } from "@/ApplicationCatalog";
 import { ApplicationCrash } from "@/core/error/components/ApplicationCrash";
 import { ErrorBoundary, IErrorBoundaryFallbackProps } from "@/core/error/components/ErrorBoundary";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/routing/application";
-import { findApplication } from "@/core/routing/applications";
 import { ApplicationScope } from "@/core/shell/ApplicationScope";
 import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
 import { EditorToolbarHostContext } from "@/core/shell/header/editor-toolbar-host";
@@ -44,7 +44,7 @@ export function ApplicationShellFrame({
   // its own: the frame hands it down and never reads it back.
   const [toolbarHost, setToolbarHost] = useState<Nullable<HTMLElement>>(null);
 
-  const application: Nullable<IApplicationDescriptor> = findApplication(pathname);
+  const application: Nullable<IApplicationDescriptor> = APPLICATION_CATALOG.findApplication(pathname);
   const applicationPath: string = application?.path ?? "root";
 
   const leftPanels: Array<IEditorPanel> = selectPanelsOnSide(panels, "left");
@@ -61,7 +61,7 @@ export function ApplicationShellFrame({
       notify({
         details: componentStack ? `${error.message}\n${componentStack}` : error.message,
         severity: ENotificationSeverity.ERROR,
-        source: findApplication(pathname)?.id ?? APPLICATION_SOURCE,
+        source: APPLICATION_CATALOG.findApplication(pathname)?.id ?? APPLICATION_SOURCE,
         title: "The interface crashed and was replaced",
       }),
     [notify, pathname]

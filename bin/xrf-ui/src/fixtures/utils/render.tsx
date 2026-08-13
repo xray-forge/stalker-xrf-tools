@@ -4,7 +4,7 @@ import { ContainerProvider } from "@wirestate/react";
 import { Fragment, PropsWithChildren, ReactElement, ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 
-import { ApplicationProvider } from "@/applications/ApplicationProvider";
+import { ApplicationProvider } from "@/ApplicationProvider";
 import { NotificationsService } from "@/core/notifications/services";
 import { SettingsService } from "@/core/settings/services/settings";
 import { EditorBusyProvider } from "@/core/shell/EditorBusyContext";
@@ -47,22 +47,24 @@ export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] 
     plugins: [new EventsPlugin()],
   };
 
+  function TestRouter({ children }: PropsWithChildren): ReactElement {
+    return <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>;
+  }
+
   function Wrapper({ children }: PropsWithChildren): ReactElement {
     return (
-      <MemoryRouter initialEntries={[route]}>
-        <ApplicationProvider>
-          <ContainerProvider config={config}>
-            <EditorBusyProvider>
-              <EditorStatusProvider>
-                <EditorPanelsProvider>
-                  {children}
-                  <LeftPanelsOutlet />
-                </EditorPanelsProvider>
-              </EditorStatusProvider>
-            </EditorBusyProvider>
-          </ContainerProvider>
-        </ApplicationProvider>
-      </MemoryRouter>
+      <ApplicationProvider router={TestRouter}>
+        <ContainerProvider config={config}>
+          <EditorBusyProvider>
+            <EditorStatusProvider>
+              <EditorPanelsProvider>
+                {children}
+                <LeftPanelsOutlet />
+              </EditorPanelsProvider>
+            </EditorStatusProvider>
+          </EditorBusyProvider>
+        </ContainerProvider>
+      </ApplicationProvider>
     );
   }
 
