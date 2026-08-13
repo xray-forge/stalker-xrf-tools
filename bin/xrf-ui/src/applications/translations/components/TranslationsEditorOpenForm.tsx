@@ -10,7 +10,7 @@ import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function TranslationsEditorOpenForm(): ReactElement {
-  const log: Logger = useLogger("translations-editor-open");
+  const log: Logger = useLogger("translations-open");
 
   const translationsService: TranslationsService = useInjection(TranslationsService);
   const projectService: ProjectService = useInjection(ProjectService);
@@ -28,7 +28,7 @@ export function TranslationsEditorOpenForm(): ReactElement {
 
   const onOpen = useCallback(() => {
     if (translations.value) {
-      translationsService.openTranslationsProject(translations.value);
+      translationsService.openProject(translations.value);
     } else {
       log.info("Cannot open translations without a path");
     }

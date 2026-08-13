@@ -49,9 +49,9 @@ const PROJECT: ExportsProject = {
 describe("opened exports editor", () => {
   beforeEach(() => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|open_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|close_xr_exports"]: undefined,
+      ["plugin:exports|get_project"]: PROJECT,
+      ["plugin:exports|open_project"]: PROJECT,
+      ["plugin:exports|close_project"]: undefined,
     });
   });
 
@@ -120,8 +120,8 @@ describe("opened exports editor", () => {
     };
 
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|open_xr_exports"]: refreshed,
+      ["plugin:exports|get_project"]: PROJECT,
+      ["plugin:exports|open_project"]: refreshed,
     });
 
     const { findByLabelText, findByText } = renderEditor();
@@ -131,15 +131,15 @@ describe("opened exports editor", () => {
     await userEvent.click(await findByLabelText("Refresh exports"));
 
     expect(await findByText("Updated sound documentation.")).toBeInTheDocument();
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports-editor|open_xr_exports", {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports|open_project", {
       projectPath: PROJECT.root,
     });
   });
 
   it("keeps the selected snapshot and reports a refresh failure", async () => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|open_xr_exports"]: () => {
+      ["plugin:exports|get_project"]: PROJECT,
+      ["plugin:exports|open_project"]: () => {
         throw new Error("invalid declaration");
       },
     });
@@ -167,7 +167,7 @@ describe("opened exports editor", () => {
     expect(await findByText("Open script exports")).toBeInTheDocument();
     await waitFor(() => {
       const closeCalls = mockInvoke.mock.calls.filter(
-        ([command]) => command === "plugin:exports-editor|close_xr_exports"
+        ([command]) => command === "plugin:exports|close_project"
       );
 
       expect(closeCalls.length).toBeGreaterThanOrEqual(2);
@@ -178,8 +178,8 @@ describe("opened exports editor", () => {
     const releaseError = jest.spyOn(Logger, "error").mockImplementation(() => undefined);
 
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|close_xr_exports"]: () => {
+      ["plugin:exports|get_project"]: PROJECT,
+      ["plugin:exports|close_project"]: () => {
         throw new Error("project is busy");
       },
     });
@@ -201,7 +201,7 @@ describe("opened exports editor", () => {
 describe("empty exports editor", () => {
   it("keeps an empty project open", async () => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: { root: PROJECT.root, declarations: [] },
+      ["plugin:exports|get_project"]: { root: PROJECT.root, declarations: [] },
     });
 
     const { findAllByText, findByText } = renderWithProviders(<ExportsApplication />, {

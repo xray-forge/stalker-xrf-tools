@@ -7,10 +7,10 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { urlToImage } from "@/core/assets/image";
 import { AssetService } from "@/core/assets/services";
-import { commands as iconsEditorCommands } from "@/core/bindings/xrf-app-icons-editor";
+import { commands as equipmentIconsCommands } from "@/core/bindings/xrf-app-equipment-icons";
 import {
-  IEquipmentResponse,
   IEquipmentSectionDescriptor,
+  IEquipmentSpriteMetadata,
   IPackEquipmentResult,
 } from "@/core/equipment-icons/equipment";
 import { transformError } from "@/core/error/lib";
@@ -68,7 +68,7 @@ export class EquipmentService {
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const response: Nullable<IEquipmentResponse> = await iconsEditorCommands.getEquipmentSprite();
+    const response: Nullable<IEquipmentSpriteMetadata> = await equipmentIconsCommands.getSprite();
 
     if (response) {
       this.log.info("Existing equipment sprite detected");
@@ -91,7 +91,7 @@ export class EquipmentService {
   @OnDeactivation()
   public onDeactivation(): void {
     this.assetService.releaseKey(SPRITE_ASSET_KEY);
-    releaseEditorProject(iconsEditorCommands.closeEquipmentSprite);
+    releaseEditorProject(equipmentIconsCommands.closeSprite);
   }
 
   @BoundAction()
@@ -118,7 +118,7 @@ export class EquipmentService {
       this.assetService.releaseKey(SPRITE_ASSET_KEY);
       this.spriteImage = createLoadable(null, true);
 
-      const response: IEquipmentResponse = await iconsEditorCommands.openEquipmentSprite(
+      const response: IEquipmentSpriteMetadata = await equipmentIconsCommands.openSprite(
         equipmentDdsPath,
         systemLtxPath
       );
@@ -151,7 +151,7 @@ export class EquipmentService {
     try {
       this.spriteImage = this.spriteImage.asLoading();
 
-      const response: IEquipmentResponse = await iconsEditorCommands.reopenEquipmentSprite();
+      const response: IEquipmentSpriteMetadata = await equipmentIconsCommands.reopenSprite();
 
       this.log.info("Equipment project reopened:", response);
 
@@ -221,7 +221,7 @@ export class EquipmentService {
   /**
    * Work out whether this sprite has an unpacked icons directory beside it.
    *
-   * The convention is a sibling folder named after the sprite without its extension, which is what the
+   * The convention is a sibling directory named after the sprite without its extension, which is what the
    * unpacker writes and what the packer reads back.
    */
   @BoundAction()
@@ -250,7 +250,7 @@ export class EquipmentService {
       this.spriteImage = this.spriteImage.asLoading();
       this.assetService.releaseKey(SPRITE_ASSET_KEY);
 
-      await iconsEditorCommands.closeEquipmentSprite();
+      await equipmentIconsCommands.closeSprite();
 
       this.log.info("Equipment project closed");
 
@@ -280,14 +280,14 @@ export class EquipmentService {
     this.log.info("Packing equipment editor:", sourcePath, outputPath, systemLtxPath);
 
     try {
-      return await iconsEditorCommands.packEquipment(sourcePath, outputPath, systemLtxPath);
+      return await equipmentIconsCommands.packSprite(sourcePath, outputPath, systemLtxPath);
     } catch (error) {
       this.log.error("Failed to pack equipment editor:", error);
       throw error;
     }
   }
 
-  public async spriteFromResponse(response: IEquipmentResponse): Promise<IEquipmentPngDescriptor> {
+  public async spriteFromResponse(response: IEquipmentSpriteMetadata): Promise<IEquipmentPngDescriptor> {
     const blob: Blob = await fetch(convertFileSrc(response.name, "stream")).then((response) => response.blob());
 
     return {

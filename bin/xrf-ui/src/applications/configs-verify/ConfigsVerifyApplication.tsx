@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs-verify/components/ConfigsVerifyResult";
-import { commands as configsEditorCommands } from "@/core/bindings/xrf-app-configs-editor";
+import { commands as configsCommands } from "@/core/bindings/xrf-app-configs";
 import { LtxProjectVerifyResult } from "@/core/bindings/xrf-ltx";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
@@ -45,7 +45,7 @@ export function ConfigsVerifyApplication(): ReactElement {
 
       log.info("Verifying:", configs.value);
 
-      const verified: LtxProjectVerifyResult = await configsEditorCommands.verifyConfigsPath(configs.value);
+      const verified: LtxProjectVerifyResult = await configsCommands.verifyDirectory(configs.value);
 
       setResult(verified);
 

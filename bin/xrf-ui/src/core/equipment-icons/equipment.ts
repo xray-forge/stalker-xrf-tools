@@ -6,7 +6,7 @@ export interface IEquipmentSectionDescriptor {
   y: number;
 }
 
-export interface IEquipmentResponse {
+export interface IEquipmentSpriteMetadata {
   systemLtxPath: string;
   path: string;
   name: string;

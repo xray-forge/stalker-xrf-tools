@@ -9,7 +9,7 @@ import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function TranslationsEditor(): ReactElement {
-  const log: Logger = useLogger("translations-editor");
+  const log: Logger = useLogger("translations");
 
   const translationsService: TranslationsService = useInjection(TranslationsService);
 
@@ -21,7 +21,7 @@ export function TranslationsEditor(): ReactElement {
   const onClose = useCallback(async () => {
     log.info("Closing translations");
 
-    await translationsService.closeTranslationsProject();
+    await translationsService.closeProject();
   }, [log, translationsService]);
 
   return (

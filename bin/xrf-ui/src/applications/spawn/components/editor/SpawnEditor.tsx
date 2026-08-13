@@ -46,7 +46,7 @@ export function SpawnEditor(): ReactElement {
   );
 
   // Closing does not navigate: the application shows its own picker again once nothing is open.
-  const onClose = useCallback(() => spawnFileService.closeSpawnFile(), [spawnFileService]);
+  const onClose = useCallback(() => spawnFileService.closeFile(), [spawnFileService]);
 
   useEditorBusy(spawnFileService.isBusy);
 

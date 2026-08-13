@@ -1,18 +1,18 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { ArchivesService } from "@/applications/archives/services/archives/archives.service";
-import { ArchiveExtractFolderResult } from "@/core/bindings/xrf-archive";
+import { ArchiveExtractDirectoryResult } from "@/core/bindings/xrf-archive";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { Nullable } from "@/lib/types/general";
 
-/** The operation union carries every kind of write, so a folder assertion has to name its own. */
-function extractedFolder(service: ArchivesService): Nullable<ArchiveExtractFolderResult> {
-  return service.operation.value?.kind === "extract-folder" ? service.operation.value.result : null;
+/** The operation union carries every kind of write, so a directory assertion has to name its own. */
+function extractedDirectory(service: ArchivesService): Nullable<ArchiveExtractDirectoryResult> {
+  return service.operation.value?.kind === "extract-directory" ? service.operation.value.result : null;
 }
 
-describe("ArchivesService folder extraction", () => {
+describe("ArchivesService directory extraction", () => {
   beforeEach(() => {
     setMockInvokeResponses({});
   });
@@ -21,7 +21,7 @@ describe("ArchivesService folder extraction", () => {
     const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|extract_archive_folder"]: {
+      ["plugin:archives|extract_directory"]: {
         prefix: "configs",
         destination: "C:\\out",
         extractedCount: 12,
@@ -29,13 +29,13 @@ describe("ArchivesService folder extraction", () => {
       },
     });
 
-    await service.extractArchiveFolder("configs", "C:\\out");
+    await service.extractArchiveDirectory("configs", "C:\\out");
 
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|extract_archive_folder", {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives|extract_directory", {
       prefix: "configs",
       destination: "C:\\out",
     });
-    expect(extractedFolder(service)?.extractedCount).toBe(12);
+    expect(extractedDirectory(service)?.extractedCount).toBe(12);
   });
 
   it("treats the archive root as an empty prefix", async () => {
@@ -45,9 +45,9 @@ describe("ArchivesService folder extraction", () => {
 
     expect(service.selectedDirectory).toBe("");
 
-    await service.extractArchiveFolder("", "C:\\out");
+    await service.extractArchiveDirectory("", "C:\\out");
 
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|extract_archive_folder", {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives|extract_directory", {
       prefix: "",
       destination: "C:\\out",
     });
@@ -57,12 +57,12 @@ describe("ArchivesService folder extraction", () => {
     const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|extract_archive_folder"]: () => {
+      ["plugin:archives|extract_directory"]: () => {
         throw new Error("destination is read only");
       },
     });
 
-    await expect(service.extractArchiveFolder("configs", "C:\\out")).rejects.toThrow("read only");
+    await expect(service.extractArchiveDirectory("configs", "C:\\out")).rejects.toThrow("read only");
 
     expect(service.operation.isLoading).toBe(false);
     expect(String(service.operation.error)).toContain("read only");

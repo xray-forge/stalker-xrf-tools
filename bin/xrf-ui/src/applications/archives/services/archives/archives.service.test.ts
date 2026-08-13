@@ -22,7 +22,7 @@ describe("ArchivesService file selection", () => {
     const descriptor = mockArchiveFileDescriptor();
     const result: ProjectReadResult = { name: descriptor.name, content: "[system]", size: 8 };
 
-    setMockInvokeResponses({ ["plugin:archives-editor|read_archive_file"]: result });
+    setMockInvokeResponses({ ["plugin:archives|read_file"]: result });
 
     const service: ArchivesService = mockArchivesService([descriptor]);
 
@@ -30,7 +30,7 @@ describe("ArchivesService file selection", () => {
 
     expect(service.selectedFile).toStrictEqual(descriptor);
     expect(service.content.value?.kind === "text" ? service.content.value.result : null).toEqual(result);
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", { path: descriptor.name });
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives|read_file", { path: descriptor.name });
   });
 
   it("selects unsupported files without invoking the read command", async () => {
@@ -57,7 +57,7 @@ describe("ArchivesService file selection", () => {
     });
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|read_archive_file"]: (args?: Record<string, unknown>) =>
+      ["plugin:archives|read_file"]: (args?: Record<string, unknown>) =>
         args?.path === first.name ? firstResult : secondResult,
     });
 
@@ -78,12 +78,12 @@ describe("ArchivesService file selection", () => {
   it("clears file state when the project closes", async () => {
     const descriptor = mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" });
 
-    setMockInvokeResponses({ ["plugin:archives-editor|close_archives_project"]: undefined });
+    setMockInvokeResponses({ ["plugin:archives|close_project"]: undefined });
 
     const service: ArchivesService = mockArchivesService([descriptor]);
 
     await service.selectArchiveFile(descriptor);
-    await service.closeArchivesProject();
+    await service.closeProject();
 
     expect(service.selectedFile).toBeNull();
     expect(service.content.value?.kind === "text" ? service.content.value.result : null).toBeNull();
@@ -104,7 +104,7 @@ describe("ArchivesService file selection", () => {
     const descriptor = mockArchiveFileDescriptor({ extension: "dds", name: "textures\\ui.dds" });
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|close_archives_project"]: () => {
+      ["plugin:archives|close_project"]: () => {
         throw new Error("archive is busy");
       },
     });
@@ -113,7 +113,7 @@ describe("ArchivesService file selection", () => {
 
     await service.selectArchiveFile(descriptor);
 
-    await expect(service.closeArchivesProject()).rejects.toThrow("archive is busy");
+    await expect(service.closeProject()).rejects.toThrow("archive is busy");
     expect(service.selectedFile).toStrictEqual(descriptor);
   });
 });

@@ -4,7 +4,7 @@ import { Optional } from "@/lib/types/general";
 /**
  * Whether an archived file would be written when its directory is extracted.
  *
- * Mirrors `ArchiveProject::extract_folder` on the rust side, including both of its skips. Counting with
+ * Mirrors `ArchiveProject::extract_directory` on the rust side, including both of its skips. Counting with
  * a plain `startsWith` here instead would promise more files than the backend writes, and would let
  * `configs` swallow `configs_backup`.
  */

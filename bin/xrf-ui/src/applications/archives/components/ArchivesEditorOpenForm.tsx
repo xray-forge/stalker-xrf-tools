@@ -13,7 +13,7 @@ export function ArchivesEditorOpenForm(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
   const projectService: ProjectService = useInjection(ProjectService);
 
-  const log: Logger = useLogger("archives-editor");
+  const log: Logger = useLogger("archives");
 
   const isLoading: boolean = archivesService.project.isLoading;
 
@@ -28,7 +28,7 @@ export function ArchivesEditorOpenForm(): ReactElement {
 
   const onOpen = useCallback(() => {
     if (archives.value) {
-      archivesService.openArchivesProject(archives.value);
+      archivesService.openProject(archives.value);
     } else {
       log.info("Cannot parse archives project without path");
     }

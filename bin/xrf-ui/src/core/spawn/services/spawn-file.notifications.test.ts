@@ -34,7 +34,7 @@ describe("SpawnFileService notifications", () => {
   it("reports a written save", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    await service.saveSpawnFile("C:\\out\\all.spawn");
+    await service.saveFile("C:\\out\\all.spawn");
 
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.SUCCESS);
@@ -46,12 +46,12 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:spawns-editor|save_spawn_file"]: () => {
+      ["plugin:spawn|save_file"]: () => {
         throw new Error("destination is read only");
       },
     });
 
-    await service.saveSpawnFile("C:\\out\\all.spawn");
+    await service.saveFile("C:\\out\\all.spawn");
 
     // The failure is now carried by the operation rather than dropped, so the toolbar can report it.
     expect(service.operation.isLoading).toBe(false);
@@ -63,7 +63,7 @@ describe("SpawnFileService notifications", () => {
   it("reports a written export", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    await service.exportSpawnFile("C:\\out\\unpacked");
+    await service.saveUnpackedDirectory("C:\\out\\unpacked");
 
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.SUCCESS);
@@ -74,12 +74,12 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:spawns-editor|export_spawn_file"]: () => {
+      ["plugin:spawn|save_unpacked_directory"]: () => {
         throw new Error("no such directory");
       },
     });
 
-    await service.exportSpawnFile("C:\\out\\unpacked");
+    await service.saveUnpackedDirectory("C:\\out\\unpacked");
 
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.ERROR);
@@ -90,12 +90,12 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:spawns-editor|open_spawn_file"]: () => {
+      ["plugin:spawn|open_file"]: () => {
         throw new Error("not a spawn file");
       },
     });
 
-    await service.openSpawnFile("C:\\game\\all.spawn");
+    await service.openFile("C:\\game\\all.spawn");
 
     expect(service.isOpen).toBe(false);
     expect(service.path).toBeNull();
@@ -108,7 +108,7 @@ describe("SpawnFileService notifications", () => {
     const { service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:spawns-editor|has_spawn_file"]: () => {
+      ["plugin:spawn|has_file"]: () => {
         throw new Error("backend is gone");
       },
     });
@@ -124,10 +124,10 @@ describe("SpawnFileService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:spawns-editor|open_spawn_file"]: mockSpawnFile().header,
+      ["plugin:spawn|open_file"]: mockSpawnFile().header,
     });
 
-    await service.openSpawnFile("C:\\game\\all.spawn");
+    await service.openFile("C:\\game\\all.spawn");
 
     expect(service.isOpen).toBe(true);
     expect(service.path).toBe("C:\\game\\all.spawn");

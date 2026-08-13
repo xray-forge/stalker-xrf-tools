@@ -36,7 +36,7 @@ describe("ArchivesService notifications", () => {
   it("reports a completed extraction, so the outcome survives leaving the editor", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    await service.extractArchiveFile(FILE, "C:\\out\\wpn.dds");
+    await service.extractFile(FILE, "C:\\out\\wpn.dds");
 
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.SUCCESS);
@@ -49,23 +49,23 @@ describe("ArchivesService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|extract_archive_file"]: () => {
+      ["plugin:archives|extract_file"]: () => {
         throw new Error("destination is read only");
       },
     });
 
-    await expect(service.extractArchiveFile(FILE, "C:\\out\\wpn.dds")).rejects.toThrow("read only");
+    await expect(service.extractFile(FILE, "C:\\out\\wpn.dds")).rejects.toThrow("read only");
 
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.ERROR);
     expect(raised[0].details).toContain("destination is read only");
   });
 
-  it("counts what a folder extraction wrote", async () => {
+  it("counts what a directory extraction wrote", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|extract_archive_folder"]: () => ({
+      ["plugin:archives|extract_directory"]: () => ({
         destination: "C:\\out",
         extractedCount: 12,
         prefix: "textures",
@@ -73,7 +73,7 @@ describe("ArchivesService notifications", () => {
       }),
     });
 
-    await service.extractArchiveFolder("textures", "C:\\out");
+    await service.extractArchiveDirectory("textures", "C:\\out");
 
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.SUCCESS);
@@ -84,15 +84,15 @@ describe("ArchivesService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|open_archives_project"]: () => {
-        throw new Error("not an archive folder");
+      ["plugin:archives|open_project"]: () => {
+        throw new Error("not an archive directory");
       },
     });
 
-    await service.openArchivesProject("C:\\game");
+    await service.openProject("C:\\game");
 
     expect(raised).toHaveLength(1);
     expect(raised[0].severity).toBe(ENotificationSeverity.ERROR);
-    expect(raised[0].details).toContain("not an archive folder");
+    expect(raised[0].details).toContain("not an archive directory");
   });
 });

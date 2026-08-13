@@ -4,8 +4,8 @@ import { ReactElement, useCallback } from "react";
 
 import { ArchiveAudioPreview } from "@/applications/archives/components/editor/preview/ArchiveAudioPreview";
 import { ArchiveCodePreview } from "@/applications/archives/components/editor/preview/ArchiveCodePreview";
+import { ArchiveDirectoryContent } from "@/applications/archives/components/editor/preview/ArchiveDirectoryContent";
 import { ArchiveFileHeader } from "@/applications/archives/components/editor/preview/ArchiveFileHeader";
-import { ArchiveFolderContent } from "@/applications/archives/components/editor/preview/ArchiveFolderContent";
 import { ArchiveImagePreview } from "@/applications/archives/components/editor/preview/ArchiveImagePreview";
 import { ArchivePreviewError } from "@/applications/archives/components/editor/preview/ArchivePreviewError";
 import { ArchivesService } from "@/applications/archives/services/archives";
@@ -49,7 +49,7 @@ export function ArchivesFileContent({
 
   // A directory selection is a different kind of thing, not a file that happens to be missing.
   if (selection.kind === "directory") {
-    return <ArchiveFolderContent path={selection.path} />;
+    return <ArchiveDirectoryContent path={selection.path} />;
   }
 
   const descriptor: Nullable<ArchiveFileDescriptor> = selection.kind === "file" ? selection.descriptor : null;

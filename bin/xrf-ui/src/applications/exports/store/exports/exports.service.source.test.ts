@@ -15,14 +15,14 @@ const SOURCE: ExportSourceContent = {
 
 describe("ExportsService export source", () => {
   beforeEach(() => {
-    setMockInvokeResponses({ ["plugin:exports-editor|get_xr_export_source"]: SOURCE });
+    setMockInvokeResponses({ ["plugin:exports|get_source"]: SOURCE });
   });
 
   it("reads the source of one declaration by name", async () => {
     const service: ExportsService = mockInjectedService(ExportsService).service;
 
     await expect(service.readExportSource("xr_effects.play")).resolves.toEqual(SOURCE);
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports-editor|get_xr_export_source", { name: "xr_effects.play" });
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports|get_source", { name: "xr_effects.play" });
   });
 
   it("propagates a failed read to its caller", async () => {
@@ -30,7 +30,7 @@ describe("ExportsService export source", () => {
     const service: ExportsService = mockInjectedService(ExportsService).service;
 
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_export_source"]: () => {
+      ["plugin:exports|get_source"]: () => {
         throw new Error("declaration file is gone");
       },
     });

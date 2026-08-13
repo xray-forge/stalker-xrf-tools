@@ -10,7 +10,7 @@ import {
 } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { commands as spawnsEditorCommands } from "@/core/bindings/xrf-app-spawns-editor";
+import { commands as spawnCommands } from "@/core/bindings/xrf-app-spawn";
 import {
   SpawnALifeSpawnsChunk,
   SpawnArtefactSpawnsChunk,
@@ -112,7 +112,7 @@ export class SpawnFileService {
     this.log.info("Provisioning:", provisionId);
 
     try {
-      const isOpen: boolean = await spawnsEditorCommands.hasSpawnFile();
+      const isOpen: boolean = await spawnCommands.hasFile();
 
       this.log.info(isOpen ? "Existing spawn file detected" : "No existing spawn file");
 
@@ -146,18 +146,18 @@ export class SpawnFileService {
   public onDeactivation(): void {
     this.log.info("Deactivating");
 
-    releaseEditorProject(spawnsEditorCommands.closeSpawnFile);
+    releaseEditorProject(spawnCommands.closeFile);
   }
 
   @BoundAction()
-  public async openSpawnFile(path: string): Promise<void> {
+  public async openFile(path: string): Promise<void> {
     this.log.info("Opening spawn file:", path);
 
     this.resetChunks();
     this.header = createLoadable(null, true);
 
     try {
-      const header: SpawnHeaderChunk = await spawnsEditorCommands.openSpawnFile(path);
+      const header: SpawnHeaderChunk = await spawnCommands.openFile(path);
 
       this.log.info("Spawn file opened");
 
@@ -185,11 +185,11 @@ export class SpawnFileService {
   }
 
   @BoundAction()
-  public async closeSpawnFile(): Promise<void> {
+  public async closeFile(): Promise<void> {
     this.log.info("Closing existing spawn file");
 
     try {
-      await spawnsEditorCommands.closeSpawnFile();
+      await spawnCommands.closeFile();
 
       runInAction(() => {
         this.isOpen = false;
@@ -211,13 +211,13 @@ export class SpawnFileService {
   }
 
   @BoundAction()
-  public async saveSpawnFile(path: string): Promise<void> {
+  public async saveFile(path: string): Promise<void> {
     this.log.info("Saving spawn file:", path);
 
     this.operation = createLoadable(null, true);
 
     try {
-      await spawnsEditorCommands.saveSpawnFile(path);
+      await spawnCommands.saveFile(path);
 
       runInAction(() => (this.operation = createLoadable("save")));
 
@@ -242,13 +242,13 @@ export class SpawnFileService {
   }
 
   @BoundAction()
-  public async exportSpawnFile(path: string): Promise<void> {
+  public async saveUnpackedDirectory(path: string): Promise<void> {
     this.log.info("Exporting spawn file:", path);
 
     this.operation = createLoadable(null, true);
 
     try {
-      await spawnsEditorCommands.exportSpawnFile(path);
+      await spawnCommands.saveUnpackedDirectory(path);
 
       runInAction(() => (this.operation = createLoadable("export")));
 
@@ -290,27 +290,27 @@ export class SpawnFileService {
 
   @BoundAction()
   public async loadAlifeSpawn(): Promise<void> {
-    await this.loadChunk("alifeSpawn", spawnsEditorCommands.getSpawnFileAlifeSpawns);
+    await this.loadChunk("alifeSpawn", spawnCommands.getAlifeSpawns);
   }
 
   @BoundAction()
   public async loadArtefactSpawn(): Promise<void> {
-    await this.loadChunk("artefactSpawn", spawnsEditorCommands.getSpawnFileArtefactSpawns);
+    await this.loadChunk("artefactSpawn", spawnCommands.getArtefactSpawns);
   }
 
   @BoundAction()
   public async loadPatrols(): Promise<void> {
-    await this.loadChunk("patrols", spawnsEditorCommands.getSpawnFilePatrols);
+    await this.loadChunk("patrols", spawnCommands.getPatrols);
   }
 
   @BoundAction()
   public async loadGraphs(): Promise<void> {
-    await this.loadChunk("graphs", spawnsEditorCommands.getSpawnFileGraphs);
+    await this.loadChunk("graphs", spawnCommands.getGraphs);
   }
 
   @BoundAction()
   public async loadHeader(): Promise<void> {
-    await this.loadChunk("header", spawnsEditorCommands.getSpawnFileHeader);
+    await this.loadChunk("header", spawnCommands.getHeader);
   }
 
   /**
@@ -354,7 +354,7 @@ export class SpawnFileService {
 
   private async loadPath(): Promise<void> {
     try {
-      const path: Nullable<string> = await spawnsEditorCommands.getSpawnFilePath();
+      const path: Nullable<string> = await spawnCommands.getPath();
 
       runInAction(() => (this.path = path));
     } catch (error: unknown) {

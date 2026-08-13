@@ -26,7 +26,7 @@ function renderAction(): RenderResult {
 }
 
 function extractCalls(): Array<unknown> {
-  return mockInvoke.mock.calls.filter(([command]) => command === "plugin:archives-editor|extract_archive_file");
+  return mockInvoke.mock.calls.filter(([command]) => command === "plugin:archives|extract_file");
 }
 
 describe("ArchiveFileExtractAction", () => {
@@ -60,7 +60,7 @@ describe("ArchiveFileExtractAction", () => {
 
     await waitFor(() => expect(extractCalls()).toHaveLength(1));
     expect(extractCalls()[0]).toEqual([
-      "plugin:archives-editor|extract_archive_file",
+      "plugin:archives|extract_file",
       { name: FILE.name, destination: "C:\\out\\dialogs.xml" },
     ]);
 

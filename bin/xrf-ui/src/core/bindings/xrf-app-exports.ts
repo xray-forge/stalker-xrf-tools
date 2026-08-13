@@ -4,16 +4,14 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 /** Commands */
 export const commands = {
-  closeXrExports: () => __TAURI_INVOKE<null>("plugin:exports-editor|close_xr_exports"),
-  openXrExports: (projectPath: string) =>
-    __TAURI_INVOKE<ExportsProject>("plugin:exports-editor|open_xr_exports", { projectPath }),
-  getXrExports: () =>
+  closeProject: () => __TAURI_INVOKE<null>("plugin:exports|close_project"),
+  openProject: (projectPath: string) => __TAURI_INVOKE<ExportsProject>("plugin:exports|open_project", { projectPath }),
+  getProject: () =>
     __TAURI_INVOKE<{
       root: string;
       declarations: Array<ExportDescriptor>;
-    } | null>("plugin:exports-editor|get_xr_exports"),
-  getXrExportSource: (name: string) =>
-    __TAURI_INVOKE<ExportSourceContent>("plugin:exports-editor|get_xr_export_source", { name }),
+    } | null>("plugin:exports|get_project"),
+  getSource: (name: string) => __TAURI_INVOKE<ExportSourceContent>("plugin:exports|get_source", { name }),
 };
 
 /* Types */
@@ -22,14 +20,14 @@ export type ExportContractDescriptor =
   | { kind: "callable"; parameters: Array<ExportParameterDescriptor>; returns: ExportReturnDescriptor }
   | { kind: "value"; typing: string };
 
-/** One extern declaration projected for the desktop editor. */
+/** One extern declaration projected for the application-facing exports project. */
 export type ExportDescriptor = {
   name: string;
   description: string | null;
   source: ExportSourceDescriptor;
 } & ExportContractDescriptor;
 
-/** One callable parameter projected for the desktop editor. */
+/** One callable parameter projected for the application-facing exports project. */
 export type ExportParameterDescriptor = {
   name: string;
   typing: string;

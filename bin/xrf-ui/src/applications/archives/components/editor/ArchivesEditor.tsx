@@ -40,7 +40,7 @@ export function ArchivesEditor(): ReactElement {
     setCloseError(null);
 
     try {
-      await archivesService.closeArchivesProject();
+      await archivesService.closeProject();
     } catch (error: unknown) {
       setCloseError(error instanceof Error ? error.message : String(error));
     } finally {

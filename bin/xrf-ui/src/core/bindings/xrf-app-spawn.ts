@@ -4,25 +4,25 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 /** Commands */
 export const commands = {
-  exportSpawnFile: (path: string) => __TAURI_INVOKE<null>("plugin:spawns-editor|export_spawn_file", { path }),
-  closeSpawnFile: () => __TAURI_INVOKE<null>("plugin:spawns-editor|close_spawn_file"),
-  getSpawnFile: () =>
+  saveUnpackedDirectory: (path: string) => __TAURI_INVOKE<null>("plugin:spawn|save_unpacked_directory", { path }),
+  closeFile: () => __TAURI_INVOKE<null>("plugin:spawn|close_file"),
+  getFile: () =>
     __TAURI_INVOKE<{
       header: SpawnHeaderChunk;
       alifeSpawn: SpawnALifeSpawnsChunk;
       artefactSpawn: SpawnArtefactSpawnsChunk;
       patrols: SpawnPatrolsChunk;
       graphs: SpawnGraphsChunk;
-    } | null>("plugin:spawns-editor|get_spawn_file"),
-  getSpawnFileAlifeSpawns: () =>
+    } | null>("plugin:spawn|get_file"),
+  getAlifeSpawns: () =>
     __TAURI_INVOKE<{
       objects: Array<AlifeObject>;
-    } | null>("plugin:spawns-editor|get_spawn_file_alife_spawns"),
-  getSpawnFileArtefactSpawns: () =>
+    } | null>("plugin:spawn|get_alife_spawns"),
+  getArtefactSpawns: () =>
     __TAURI_INVOKE<{
       nodes: Array<ArtefactSpawnPoint>;
-    } | null>("plugin:spawns-editor|get_spawn_file_artefact_spawns"),
-  getSpawnFileGraphs: () =>
+    } | null>("plugin:spawn|get_artefact_spawns"),
+  getGraphs: () =>
     __TAURI_INVOKE<{
       header: GraphHeader;
       levels: Array<GraphLevel>;
@@ -30,38 +30,38 @@ export const commands = {
       edges: Array<GraphEdge>;
       points: Array<GraphLevelPoint>;
       crossTables: Array<GraphCrossTable>;
-    } | null>("plugin:spawns-editor|get_spawn_file_graphs"),
-  getSpawnFileHeader: () =>
+    } | null>("plugin:spawn|get_graphs"),
+  getHeader: () =>
     __TAURI_INVOKE<{
       version: number;
       guid: string;
       graphGuid: string;
       objectsCount: number;
       levelsCount: number;
-    } | null>("plugin:spawns-editor|get_spawn_file_header"),
-  getSpawnFilePatrols: () =>
+    } | null>("plugin:spawn|get_header"),
+  getPatrols: () =>
     __TAURI_INVOKE<{
       patrols: Array<Patrol>;
-    } | null>("plugin:spawns-editor|get_spawn_file_patrols"),
+    } | null>("plugin:spawn|get_patrols"),
   /** Where the open file came from, so a restored session can name what it is showing. */
-  getSpawnFilePath: () => __TAURI_INVOKE<string | null>("plugin:spawns-editor|get_spawn_file_path"),
-  hasSpawnFile: () => __TAURI_INVOKE<boolean>("plugin:spawns-editor|has_spawn_file"),
-  importSpawnFile: (path: string) => __TAURI_INVOKE<string>("plugin:spawns-editor|import_spawn_file", { path }),
+  getPath: () => __TAURI_INVOKE<string | null>("plugin:spawn|get_path"),
+  hasFile: () => __TAURI_INVOKE<boolean>("plugin:spawn|has_file"),
+  openUnpackedDirectory: (path: string) => __TAURI_INVOKE<string>("plugin:spawn|open_unpacked_directory", { path }),
   /**
-   * Read a packed spawn file into the editor session.
+   * Read a packed spawn file into the application session.
    *
    * Answers with the header rather than the whole file: the UI reads chunks one at a time through the
    * per-chunk commands, so serialising every alife object here only to have it re-requested is waste
    * measured in tens of megabytes on a real all.spawn.
    */
-  openSpawnFile: (path: string) => __TAURI_INVOKE<SpawnHeaderChunk>("plugin:spawns-editor|open_spawn_file", { path }),
+  openFile: (path: string) => __TAURI_INVOKE<SpawnHeaderChunk>("plugin:spawn|open_file", { path }),
   /** Build a packed spawn file from unpacked chunks on disk. */
-  packSpawnFile: (from: string, destination: string) =>
-    __TAURI_INVOKE<null>("plugin:spawns-editor|pack_spawn_file", { from, destination }),
-  saveSpawnFile: (path: string) => __TAURI_INVOKE<null>("plugin:spawns-editor|save_spawn_file", { path }),
+  packFile: (from: string, destination: string) =>
+    __TAURI_INVOKE<null>("plugin:spawn|pack_file", { from, destination }),
+  saveFile: (path: string) => __TAURI_INVOKE<null>("plugin:spawn|save_file", { path }),
   /** Expand a packed spawn file into editable chunks on disk. */
-  unpackSpawnFile: (from: string, destination: string) =>
-    __TAURI_INVOKE<null>("plugin:spawns-editor|unpack_spawn_file", { from, destination }),
+  unpackFile: (from: string, destination: string) =>
+    __TAURI_INVOKE<null>("plugin:spawn|unpack_file", { from, destination }),
 };
 
 /* Types */

@@ -11,14 +11,14 @@ const PROJECT: ExportsProject = mockExportsProject();
 describe("ExportsService", () => {
   beforeEach(() => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: null,
-      ["plugin:exports-editor|open_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|close_xr_exports"]: undefined,
+      ["plugin:exports|get_project"]: null,
+      ["plugin:exports|open_project"]: PROJECT,
+      ["plugin:exports|close_project"]: undefined,
     });
   });
 
   it("restores an existing backend session", async () => {
-    setMockInvokeResponses({ ["plugin:exports-editor|get_xr_exports"]: PROJECT });
+    setMockInvokeResponses({ ["plugin:exports|get_project"]: PROJECT });
 
     const service = mockInjectedService(ExportsService).service;
 
@@ -26,7 +26,7 @@ describe("ExportsService", () => {
 
     expect(service.isReady).toBe(true);
     expect(service.project.value).toEqual(PROJECT);
-    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:exports-editor|open_xr_exports", expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:exports|open_project", expect.anything());
   });
 
   it("does not open a project when no retained session exists", async () => {
@@ -37,12 +37,12 @@ describe("ExportsService", () => {
     expect(service.isReady).toBe(true);
     expect(service.project.value).toBeNull();
     expect(mockInvoke).toHaveBeenCalledTimes(1);
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports-editor|get_xr_exports");
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports|get_project");
   });
 
   it("recovers from a failed session lookup", async () => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: () => {
+      ["plugin:exports|get_project"]: () => {
         throw new Error("backend unavailable");
       },
     });
@@ -62,7 +62,7 @@ describe("ExportsService", () => {
     await service.onProvision();
     await service.openExportsProject("C:\\chosen\\xrf");
 
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports-editor|open_xr_exports", {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports|open_project", {
       projectPath: "C:\\chosen\\xrf",
     });
     expect(service.project.value).toEqual(PROJECT);
@@ -70,8 +70,8 @@ describe("ExportsService", () => {
 
   it("keeps the last successful project when refresh fails", async () => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|open_xr_exports"]: () => {
+      ["plugin:exports|get_project"]: PROJECT,
+      ["plugin:exports|open_project"]: () => {
         throw new Error("parse failed");
       },
     });
@@ -88,8 +88,8 @@ describe("ExportsService", () => {
 
   it("keeps the project and rejects when close fails", async () => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: PROJECT,
-      ["plugin:exports-editor|close_xr_exports"]: () => {
+      ["plugin:exports|get_project"]: PROJECT,
+      ["plugin:exports|close_project"]: () => {
         throw new Error("project is busy");
       },
     });

@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archives-unpack/components/ArchivesUnpackResult";
-import { commands as archivesEditorCommands } from "@/core/bindings/xrf-app-archives-editor";
+import { commands as archivesCommands } from "@/core/bindings/xrf-app-archives";
 import { ArchiveUnpackResult } from "@/core/bindings/xrf-archive";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
@@ -64,7 +64,7 @@ export function ArchivesUnpackApplication(): ReactElement {
 
       log.info("Unpacking:", archivesPath);
 
-      const result: ArchiveUnpackResult = await archivesEditorCommands.unpackArchivesPath(
+      const result: ArchiveUnpackResult = await archivesCommands.unpackDirectory(
         archivesPath,
         archivesUnpackPath
       );

@@ -41,7 +41,7 @@ export function ArchiveFileExtractAction({ descriptor }: IArchiveFileExtractActi
     }
 
     try {
-      await archivesService.extractArchiveFile(descriptor, destination);
+      await archivesService.extractFile(descriptor, destination);
     } catch (error) {
       // Published on the service as the extraction failure, which the header reports. Logged for the stack.
       log.error("Failed to extract archive file:", error);

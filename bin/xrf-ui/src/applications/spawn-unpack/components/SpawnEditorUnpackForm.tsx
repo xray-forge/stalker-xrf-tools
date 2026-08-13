@@ -2,7 +2,7 @@ import { Alert } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
-import { commands as spawnsEditorCommands } from "@/core/bindings/xrf-app-spawns-editor";
+import { commands as spawnCommands } from "@/core/bindings/xrf-app-spawn";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
 import { PickerForm } from "@/core/routing/components/PickerForm";
@@ -37,7 +37,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
 
   const destination: IPathField = usePathField({
     id: "spawn.unpack.destination",
-    title: "Select output folder",
+    title: "Select output directory",
     isDirectory: true,
     isDisabled: isLoading,
     seed: async () =>
@@ -56,7 +56,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
     setUnpackedTo(null);
 
     try {
-      await spawnsEditorCommands.unpackSpawnFile(source.value, destination.value);
+      await spawnCommands.unpackFile(source.value, destination.value);
 
       setUnpackedTo(destination.value);
 

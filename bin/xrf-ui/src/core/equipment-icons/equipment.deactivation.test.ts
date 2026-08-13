@@ -5,7 +5,7 @@ import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks
 import { mockInjectedService } from "@/fixtures/utils/container";
 
 function closeCalls(): number {
-  return mockInvoke.mock.calls.filter(([command]) => command === "plugin:icons-editor|close_equipment_sprite").length;
+  return mockInvoke.mock.calls.filter(([command]) => command === "plugin:equipment-icons|close_sprite").length;
 }
 
 /**

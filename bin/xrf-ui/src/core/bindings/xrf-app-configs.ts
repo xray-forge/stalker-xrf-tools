@@ -4,12 +4,12 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 /** Commands */
 export const commands = {
-  checkFormatConfigsPath: (path: string) =>
-    __TAURI_INVOKE<LtxProjectFormatResult>("plugin:configs-editor|check_format_configs_path", { path }),
-  formatConfigsPath: (path: string) =>
-    __TAURI_INVOKE<LtxProjectFormatResult>("plugin:configs-editor|format_configs_path", { path }),
-  verifyConfigsPath: (path: string) =>
-    __TAURI_INVOKE<LtxProjectVerifyResult>("plugin:configs-editor|verify_configs_path", { path }),
+  checkDirectoryFormat: (path: string) =>
+    __TAURI_INVOKE<LtxProjectFormatResult>("plugin:configs|check_directory_format", { path }),
+  formatDirectory: (path: string) =>
+    __TAURI_INVOKE<LtxProjectFormatResult>("plugin:configs|format_directory", { path }),
+  verifyDirectory: (path: string) =>
+    __TAURI_INVOKE<LtxProjectVerifyResult>("plugin:configs|verify_directory", { path }),
 };
 
 /* Types */

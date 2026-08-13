@@ -5,14 +5,14 @@ export type ExportContractDescriptor =
   | { kind: "callable"; parameters: Array<ExportParameterDescriptor>; returns: ExportReturnDescriptor }
   | { kind: "value"; typing: string };
 
-/** One extern declaration projected for the desktop editor. */
+/** One extern declaration projected for the application-facing exports project. */
 export type ExportDescriptor = {
   name: string;
   description: string | null;
   source: ExportSourceDescriptor;
 } & ExportContractDescriptor;
 
-/** One callable parameter projected for the desktop editor. */
+/** One callable parameter projected for the application-facing exports project. */
 export type ExportParameterDescriptor = {
   name: string;
   typing: string;

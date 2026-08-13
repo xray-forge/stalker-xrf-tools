@@ -34,7 +34,7 @@ describe("ExportsService notifications", () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
     setMockInvokeResponses({
-      ["plugin:exports-editor|open_xr_exports"]: () => {
+      ["plugin:exports|open_project"]: () => {
         throw new Error("no scripts directory");
       },
     });
@@ -50,12 +50,12 @@ describe("ExportsService notifications", () => {
   it("reports a refresh that could not complete", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    setMockInvokeResponses({ ["plugin:exports-editor|open_xr_exports"]: mockExportsProject() });
+    setMockInvokeResponses({ ["plugin:exports|open_project"]: mockExportsProject() });
 
     await service.openExportsProject("C:\\game\\scripts");
 
     setMockInvokeResponses({
-      ["plugin:exports-editor|open_xr_exports"]: () => {
+      ["plugin:exports|open_project"]: () => {
         throw new Error("scripts moved");
       },
     });
@@ -70,7 +70,7 @@ describe("ExportsService notifications", () => {
   it("says nothing about a project that opened", async () => {
     const { raised, service }: IWatchedService = watchNotifications();
 
-    setMockInvokeResponses({ ["plugin:exports-editor|open_xr_exports"]: mockExportsProject() });
+    setMockInvokeResponses({ ["plugin:exports|open_project"]: mockExportsProject() });
 
     await service.openExportsProject("C:\\game\\scripts");
 

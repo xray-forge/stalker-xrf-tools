@@ -26,13 +26,13 @@ function mockOpenSpawn(overrides: Partial<SpawnFile> = {}): void {
   const file: SpawnFile = mockSpawnFile(overrides);
 
   setMockInvokeResponses({
-    ["plugin:spawns-editor|has_spawn_file"]: true,
-    ["plugin:spawns-editor|get_spawn_file_header"]: file.header,
-    ["plugin:spawns-editor|get_spawn_file_path"]: SPAWN_PATH,
-    ["plugin:spawns-editor|get_spawn_file_patrols"]: file.patrols,
-    ["plugin:spawns-editor|get_spawn_file_graphs"]: file.graphs,
-    ["plugin:spawns-editor|get_spawn_file_alife_spawns"]: file.alifeSpawn,
-    ["plugin:spawns-editor|get_spawn_file_artefact_spawns"]: file.artefactSpawn,
+    ["plugin:spawn|has_file"]: true,
+    ["plugin:spawn|get_header"]: file.header,
+    ["plugin:spawn|get_path"]: SPAWN_PATH,
+    ["plugin:spawn|get_patrols"]: file.patrols,
+    ["plugin:spawn|get_graphs"]: file.graphs,
+    ["plugin:spawn|get_alife_spawns"]: file.alifeSpawn,
+    ["plugin:spawn|get_artefact_spawns"]: file.artefactSpawn,
   });
 }
 

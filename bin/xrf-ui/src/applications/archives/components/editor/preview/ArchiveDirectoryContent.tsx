@@ -8,34 +8,34 @@ import { ReactElement, useCallback, useMemo } from "react";
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/components/editor/archive-editor.styles";
 import { ArchivesService } from "@/applications/archives/services/archives";
 import { isUnderArchiveDirectory, TArchiveOperation } from "@/core/archive";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
+import { ArchiveExtractDirectoryResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { CenteredColumn } from "@/core/ui/layout/CenteredColumn";
 import { formatBytes } from "@/lib/format/memory";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 
-export interface IArchiveFolderContentProps {
+export interface IArchiveDirectoryContentProps {
   path: string;
 }
 
 /**
  * What the content area shows when a directory is selected rather than a file.
  *
- * A folder has nothing to preview, so it reports what extracting it would cost - how many files and how
+ * A directory has nothing to preview, so it reports what extracting it would cost - how many files and how
  * much data - and offers the command. The counts are computed here rather than taken from the tree
  * because the tree only knows its own shape, while the totals people care about are recursive.
  */
-export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): ReactElement {
-  const log: Logger = useLogger("archive-folder");
+export function ArchiveDirectoryContent({ path }: IArchiveDirectoryContentProps): ReactElement {
+  const log: Logger = useLogger("archive-directory");
 
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
   const project: Nullable<ArchiveProject> = archivesService.project.value;
   const operation: Loadable<Nullable<TArchiveOperation>> = archivesService.operation;
-  // A file extraction started elsewhere must not be reported here as if this folder had been written.
-  const extracted: Nullable<ArchiveExtractFolderResult> =
-    operation.value?.kind === "extract-folder" ? operation.value.result : null;
+  // A file extraction started elsewhere must not be reported here as if this directory had been written.
+  const extracted: Nullable<ArchiveExtractDirectoryResult> =
+    operation.value?.kind === "extract-directory" ? operation.value.result : null;
 
   const summary: { count: number; size: number } = useMemo(() => {
     let count: number = 0;
@@ -63,10 +63,10 @@ export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): Reac
     }
 
     try {
-      await archivesService.extractArchiveFolder(path, destination);
+      await archivesService.extractArchiveDirectory(path, destination);
     } catch (error: unknown) {
       // Published on the service, which the alert below renders. Logged here for the stack.
-      log.error("Failed to extract archive folder:", error);
+      log.error("Failed to extract archive directory:", error);
     }
   }, [archivesService, log, path]);
 
@@ -90,7 +90,7 @@ export function ArchiveFolderContent({ path }: IArchiveFolderContentProps): Reac
         sx={{ marginTop: 1 }}
         onClick={onExtract}
       >
-        {operation.isLoading ? "Extracting..." : "Extract folder"}
+        {operation.isLoading ? "Extracting..." : "Extract directory"}
       </Button>
 
       {operation.error ? (

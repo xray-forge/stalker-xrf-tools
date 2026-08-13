@@ -60,7 +60,7 @@ describe("SpawnRowDetailsPanel", () => {
   it("drops the selection when the file it pointed into closes", async () => {
     const { render, service }: IPanelRender = renderPanel(mockAlifeObject());
 
-    await act(() => service.closeSpawnFile());
+    await act(() => service.closeFile());
 
     // A selection outliving its data would render a row from a file that is no longer open.
     expect(render.getByText("Nothing selected")).toBeInTheDocument();

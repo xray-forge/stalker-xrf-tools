@@ -15,8 +15,8 @@ describe("ExportsApplication", () => {
     window.localStorage.setItem("xrf-project-path", "C:\\projects\\active-xrf");
 
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_exports"]: null,
-      ["plugin:exports-editor|open_xr_exports"]: mockExportsProject({ root: "C:\\projects\\active-xrf" }),
+      ["plugin:exports|get_project"]: null,
+      ["plugin:exports|open_project"]: mockExportsProject({ root: "C:\\projects\\active-xrf" }),
     });
   });
 
@@ -45,7 +45,7 @@ describe("ExportsApplication", () => {
     expect(await findByText("Open script exports")).toBeInTheDocument();
     expect(await findByDisplayValue("C:\\projects\\active-xrf")).toBeInTheDocument();
     expect(queryByText("Open")).not.toBeInTheDocument();
-    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:exports-editor|open_xr_exports", expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:exports|open_project", expect.anything());
   });
 
   it("resolves the services its descriptor declares, with nothing bound above the shell", async () => {
@@ -55,7 +55,7 @@ describe("ExportsApplication", () => {
 
     await userEvent.click(await findByRole("button", { name: "Open exports" }));
 
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports-editor|open_xr_exports", {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:exports|open_project", {
       projectPath: "C:\\projects\\active-xrf",
     });
   });

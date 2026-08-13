@@ -4,47 +4,40 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 /** Commands */
 export const commands = {
-  closeArchivesProject: () => __TAURI_INVOKE<null>("plugin:archives-editor|close_archives_project"),
+  closeProject: () => __TAURI_INVOKE<null>("plugin:archives|close_project"),
   /** Write a single archived file to a path the user chose. */
-  extractArchiveFile: (name: string, destination: string) =>
-    __TAURI_INVOKE<ArchiveExtractResult>("plugin:archives-editor|extract_archive_file", { name, destination }),
+  extractFile: (name: string, destination: string) =>
+    __TAURI_INVOKE<ArchiveExtractResult>("plugin:archives|extract_file", { name, destination }),
   /**
    * Write every archived file under one directory into a destination root.
    *
    * An empty prefix means the whole archive, so this also covers extracting everything without needing
    * a separate command.
    */
-  extractArchiveFolder: (prefix: string, destination: string) =>
-    __TAURI_INVOKE<ArchiveExtractFolderResult>("plugin:archives-editor|extract_archive_folder", {
-      prefix,
-      destination,
-    }),
-  getArchivesProject: () =>
+  extractDirectory: (prefix: string, destination: string) =>
+    __TAURI_INVOKE<ArchiveExtractDirectoryResult>("plugin:archives|extract_directory", { prefix, destination }),
+  getProject: () =>
     __TAURI_INVOKE<{
       archives: Array<ArchiveDescriptor>;
       files: { [key in string]: ArchiveFileDescriptor };
       readPolicy: ArchiveProjectReadPolicy;
       root: string;
       sizeReal: number;
-    } | null>("plugin:archives-editor|get_archives_project"),
-  hasArchivesProject: () => __TAURI_INVOKE<boolean>("plugin:archives-editor|has_archives_project"),
-  openArchivesProject: (path: string) =>
-    __TAURI_INVOKE<ArchiveProject>("plugin:archives-editor|open_archives_project", { path }),
+    } | null>("plugin:archives|get_project"),
+  hasProject: () => __TAURI_INVOKE<boolean>("plugin:archives|has_project"),
+  openProject: (path: string) => __TAURI_INVOKE<ArchiveProject>("plugin:archives|open_project", { path }),
   /** Hand an archived sound to the webview, along with whatever the engine would read from it. */
-  readArchiveAudio: (path: string) =>
-    __TAURI_INVOKE<ArchiveAudioPreview>("plugin:archives-editor|read_archive_audio", { path }),
-  readArchiveFile: (path: string) =>
-    __TAURI_INVOKE<ProjectReadResult>("plugin:archives-editor|read_archive_file", { path }),
+  readAudio: (path: string) => __TAURI_INVOKE<ArchiveAudioPreview>("plugin:archives|read_audio", { path }),
+  readFile: (path: string) => __TAURI_INVOKE<ProjectReadResult>("plugin:archives|read_file", { path }),
   /**
    * Decode an archived DDS into a PNG the webview can display.
    *
    * Compressed entries are fine here, unlike the text preview: the bytes are decompressed on the way out
    * of the archive, so compression is invisible by the time there is an image to decode.
    */
-  readArchiveImage: (path: string) =>
-    __TAURI_INVOKE<ArchiveImagePreview>("plugin:archives-editor|read_archive_image", { path }),
-  unpackArchivesPath: (from: string, destination: string) =>
-    __TAURI_INVOKE<ArchiveUnpackResult>("plugin:archives-editor|unpack_archives_path", { from, destination }),
+  readImage: (path: string) => __TAURI_INVOKE<ArchiveImagePreview>("plugin:archives|read_image", { path }),
+  unpackDirectory: (from: string, destination: string) =>
+    __TAURI_INVOKE<ArchiveUnpackResult>("plugin:archives|unpack_directory", { from, destination }),
 };
 
 /* Types */
@@ -75,7 +68,7 @@ export type ArchiveDescriptor = {
   path: string;
 };
 
-export type ArchiveExtractFolderResult = {
+export type ArchiveExtractDirectoryResult = {
   prefix: string;
   destination: string;
   extractedCount: number;

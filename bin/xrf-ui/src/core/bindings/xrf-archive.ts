@@ -8,7 +8,7 @@ export type ArchiveDescriptor = {
   path: string;
 };
 
-export type ArchiveExtractFolderResult = {
+export type ArchiveExtractDirectoryResult = {
   prefix: string;
   destination: string;
   extractedCount: number;

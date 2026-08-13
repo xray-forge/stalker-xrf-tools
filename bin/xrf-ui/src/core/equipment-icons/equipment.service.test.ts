@@ -13,7 +13,7 @@ describe("EquipmentService", () => {
     const { service } = mockInjectedService(EquipmentService);
 
     setMockInvokeResponses({
-      ["plugin:icons-editor|reopen_equipment_sprite"]: () => {
+      ["plugin:equipment-icons|reopen_sprite"]: () => {
         throw new Error("backend refused");
       },
     });
@@ -59,7 +59,7 @@ describe("EquipmentService", () => {
     service.repackSourcePath = "C:\\game\\equipment";
 
     setMockInvokeResponses({
-      ["plugin:icons-editor|pack_equipment"]: () => {
+      ["plugin:equipment-icons|pack_sprite"]: () => {
         throw new Error("pack failed");
       },
     });

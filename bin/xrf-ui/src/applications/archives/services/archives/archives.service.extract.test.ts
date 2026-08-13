@@ -22,9 +22,9 @@ describe("ArchivesService extraction", () => {
   it("asks the backend for the file by its archived name", async () => {
     const { service } = mockInjectedService(ArchivesService);
 
-    await service.extractArchiveFile(FILE, "C:\\out\\system.ltx");
+    await service.extractFile(FILE, "C:\\out\\system.ltx");
 
-    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives-editor|extract_archive_file", {
+    expect(mockInvoke).toHaveBeenCalledWith("plugin:archives|extract_file", {
       name: "configs\\system.ltx",
       destination: "C:\\out\\system.ltx",
     });
@@ -36,12 +36,12 @@ describe("ArchivesService extraction", () => {
     const { service } = mockInjectedService(ArchivesService);
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|extract_archive_file"]: () => {
+      ["plugin:archives|extract_file"]: () => {
         throw new Error("destination is read only");
       },
     });
 
-    await expect(service.extractArchiveFile(FILE, "C:\\out\\system.ltx")).rejects.toThrow("read only");
+    await expect(service.extractFile(FILE, "C:\\out\\system.ltx")).rejects.toThrow("read only");
 
     // Left loading, the header's extract control stays disabled with no way back.
     expect(service.operation.isLoading).toBe(false);
@@ -51,7 +51,7 @@ describe("ArchivesService extraction", () => {
   it("clears a reported outcome", async () => {
     const { service } = mockInjectedService(ArchivesService);
 
-    await service.extractArchiveFile(FILE, "C:\\out\\system.ltx");
+    await service.extractFile(FILE, "C:\\out\\system.ltx");
 
     service.clearOperation();
 

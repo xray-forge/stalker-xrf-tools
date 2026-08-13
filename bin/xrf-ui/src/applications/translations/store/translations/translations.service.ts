@@ -1,7 +1,7 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { commands as translationsEditorCommands } from "@/core/bindings/xrf-app-translations-editor";
+import { commands as translationsCommands } from "@/core/bindings/xrf-app-translations";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
@@ -27,7 +27,7 @@ export class TranslationsService {
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const response: Nullable<ITranslationsProjectJson> = await translationsEditorCommands.getTranslationsProject();
+    const response: Nullable<ITranslationsProjectJson> = await translationsCommands.getProject();
 
     if (response) {
       this.log.info("Existing translations project detected");
@@ -50,18 +50,18 @@ export class TranslationsService {
    */
   @OnDeactivation()
   public onDeactivation(): void {
-    releaseEditorProject(translationsEditorCommands.closeTranslationsProject);
+    releaseEditorProject(translationsCommands.closeProject);
   }
 
   @BoundAction()
-  public async openTranslationsProject(translationsPath: string): Promise<void> {
+  public async openProject(translationsPath: string): Promise<void> {
     this.log.info("Opening translations project:", translationsPath);
 
     try {
       this.project = createLoadable(null, true);
 
       const response: ITranslationsProjectJson =
-        await translationsEditorCommands.openTranslationsProject(translationsPath);
+        await translationsCommands.openProject(translationsPath);
 
       this.log.info("Translations project opened:", response);
 
@@ -81,12 +81,12 @@ export class TranslationsService {
   }
 
   @BoundAction()
-  public async closeTranslationsProject(): Promise<void> {
+  public async closeProject(): Promise<void> {
     this.log.info("Closing translations project");
 
     this.project = this.project.asLoading();
 
-    await translationsEditorCommands.closeTranslationsProject();
+    await translationsCommands.closeProject();
 
     runInAction(() => (this.project = createLoadable(null)));
 

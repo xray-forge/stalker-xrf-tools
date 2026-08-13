@@ -19,7 +19,7 @@ function renderSource(name: string) {
 describe("ExportSourceView", () => {
   beforeEach(() => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_export_source"]: mockSource(
+      ["plugin:exports|get_source"]: mockSource(
         "xr_effects.play",
         'extern("xr_effects.play", () => {});'
       ),
@@ -34,7 +34,7 @@ describe("ExportSourceView", () => {
 
   it("numbers lines from where the declaration starts in its file", async () => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_export_source"]: mockSource("play", "line one\nline two\nline three", 18),
+      ["plugin:exports|get_source"]: mockSource("play", "line one\nline two\nline three", 18),
     });
 
     const { findByLabelText } = renderSource("play");
@@ -46,7 +46,7 @@ describe("ExportSourceView", () => {
 
   it("reports a read that failed", async () => {
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_export_source"]: () => {
+      ["plugin:exports|get_source"]: () => {
         throw new Error("declaration file is gone");
       },
     });
@@ -62,7 +62,7 @@ describe("ExportSourceView", () => {
     const pending: Record<string, (value: ExportSourceContent) => void> = {};
 
     setMockInvokeResponses({
-      ["plugin:exports-editor|get_xr_export_source"]: (parameters?: Record<string, unknown>) =>
+      ["plugin:exports|get_source"]: (parameters?: Record<string, unknown>) =>
         new Promise<ExportSourceContent>((resolve) => {
           pending[parameters?.name as string] = resolve;
         }),

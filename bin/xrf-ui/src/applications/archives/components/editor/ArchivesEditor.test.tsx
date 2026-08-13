@@ -38,14 +38,14 @@ describe("opened archives editor", () => {
     window.localStorage.clear();
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|get_archives_project"]: PROJECT,
-      ["plugin:archives-editor|read_archive_file"]: {
+      ["plugin:archives|get_project"]: PROJECT,
+      ["plugin:archives|read_file"]: {
         name: TEXT_FILE.name,
         content: "line one\nline two",
         size: TEXT_FILE.sizeReal,
       },
-      ["plugin:archives-editor|close_archives_project"]: undefined,
-      ["plugin:archives-editor|read_archive_image"]: {
+      ["plugin:archives|close_project"]: undefined,
+      ["plugin:archives|read_image"]: {
         name: BINARY_FILE.name,
         width: 64,
         height: 64,
@@ -95,7 +95,7 @@ describe("opened archives editor", () => {
     // Compressed and not a readable extension, so the text path would have refused it outright.
     expect(await findByAltText(BINARY_FILE.name)).toHaveAttribute("src", "data:image/png;base64,iVBORw0KGgo=");
     expect(await findByText("64 x 64")).toBeInTheDocument();
-    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", {
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives|read_file", {
       path: BINARY_FILE.name,
     });
   });
@@ -107,7 +107,7 @@ describe("opened archives editor", () => {
 
     expect(getByText("Preview unavailable")).toBeInTheDocument();
     expect(getByText(/this file type does not have a text preview/)).toBeInTheDocument();
-    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", {
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives|read_file", {
       path: MESH_FILE.name,
     });
   });
@@ -128,11 +128,11 @@ describe("opened archives editor", () => {
     expect(await findByText("texture.dds")).toBeInTheDocument();
   });
 
-  it("expands folders without reading and restores expansion after filtering", async () => {
+  it("expands directories without reading and restores expansion after filtering", async () => {
     const nestedFile = mockArchiveFileDescriptor({ name: "configs\\system.ltx", sizeReal: 512, sizeCompressed: 512 });
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|get_archives_project"]: mockArchivesProject([nestedFile, BINARY_FILE]),
+      ["plugin:archives|get_project"]: mockArchivesProject([nestedFile, BINARY_FILE]),
     });
 
     const { findByLabelText, findByRole, findByText, getByLabelText, queryByText } = renderEditor();
@@ -140,7 +140,7 @@ describe("opened archives editor", () => {
     await userEvent.click(await findByText("configs"));
 
     expect(await findByText("system.ltx")).toBeInTheDocument();
-    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_file", expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives|read_file", expect.anything());
 
     const search: HTMLElement = await findByRole("textbox", { name: "Filter archive files" });
 
@@ -156,8 +156,8 @@ describe("opened archives editor", () => {
     let readCount: number = 0;
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|get_archives_project"]: PROJECT,
-      ["plugin:archives-editor|read_archive_file"]: () => {
+      ["plugin:archives|get_project"]: PROJECT,
+      ["plugin:archives|read_file"]: () => {
         readCount += 1;
 
         if (readCount === 1) {
@@ -239,8 +239,8 @@ describe("opened archives editor", () => {
 
   it("stays open and reports a close failure", async () => {
     setMockInvokeResponses({
-      ["plugin:archives-editor|get_archives_project"]: PROJECT,
-      ["plugin:archives-editor|close_archives_project"]: () => {
+      ["plugin:archives|get_project"]: PROJECT,
+      ["plugin:archives|close_project"]: () => {
         throw new Error("archive is busy");
       },
     });
@@ -259,10 +259,10 @@ describe("opened archives editor", () => {
     const save = jest.spyOn(dialog, "save").mockResolvedValue("C:\\out\\readme.ltx");
 
     setMockInvokeResponses({
-      ["plugin:archives-editor|get_archives_project"]: PROJECT,
-      ["plugin:archives-editor|read_archive_file"]: { name: TEXT_FILE.name, content: "line", size: 4 },
+      ["plugin:archives|get_project"]: PROJECT,
+      ["plugin:archives|read_file"]: { name: TEXT_FILE.name, content: "line", size: 4 },
       // Never settles, so the editor stays mid-extraction for the length of the assertion.
-      ["plugin:archives-editor|extract_archive_file"]: () => new Promise(() => {}),
+      ["plugin:archives|extract_file"]: () => new Promise(() => {}),
     });
 
     const { findByLabelText, findByText, getByLabelText } = renderWithProviders(
@@ -286,9 +286,9 @@ describe("opened archives editor", () => {
 
   it("refuses a second selection while a read is still in flight", async () => {
     setMockInvokeResponses({
-      ["plugin:archives-editor|get_archives_project"]: PROJECT,
+      ["plugin:archives|get_project"]: PROJECT,
       // Never settles, so the first selection stays in flight for the length of the assertion.
-      ["plugin:archives-editor|read_archive_file"]: () => new Promise(() => {}),
+      ["plugin:archives|read_file"]: () => new Promise(() => {}),
     });
 
     const { findByText, getByText } = renderEditor();
@@ -300,6 +300,6 @@ describe("opened archives editor", () => {
     // content area still belongs to another.
     await userEvent.click(getByText("texture.dds"));
 
-    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives-editor|read_archive_image", expect.anything());
+    expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives|read_image", expect.anything());
   });
 });

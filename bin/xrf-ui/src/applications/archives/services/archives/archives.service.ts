@@ -18,8 +18,8 @@ import {
   TArchiveOperation,
   TArchiveSelection,
 } from "@/core/archive";
-import { commands as archivesEditorCommands } from "@/core/bindings/xrf-app-archives-editor";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
+import { commands as archivesCommands } from "@/core/bindings/xrf-app-archives";
+import { ArchiveExtractDirectoryResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
@@ -83,7 +83,7 @@ export class ArchivesService {
   public async onProvision(provisionId: ProvisionId): Promise<void> {
     this.log.info("Provisioning:", provisionId);
 
-    const existing: Nullable<ArchiveProject> = await archivesEditorCommands.getArchivesProject();
+    const existing: Nullable<ArchiveProject> = await archivesCommands.getProject();
 
     if (this.status.provisionId !== provisionId) {
       return this.log.info("Discard outdated get archives request:", provisionId, "<", this.status.provisionId);
@@ -117,7 +117,7 @@ export class ArchivesService {
   public onDeactivation(): void {
     this.log.info("Deactivating");
 
-    releaseEditorProject(archivesEditorCommands.closeArchivesProject);
+    releaseEditorProject(archivesCommands.closeProject);
   }
 
   @BoundAction()
@@ -129,14 +129,14 @@ export class ArchivesService {
   }
 
   @BoundAction()
-  public async openArchivesProject(path: string): Promise<void> {
+  public async openProject(path: string): Promise<void> {
     this.log.info("Opening archives project:", path);
 
     try {
       this.clearFileSelection();
       this.project = createLoadable(null, true);
 
-      const response: ArchiveProject = await archivesEditorCommands.openArchivesProject(path);
+      const response: ArchiveProject = await archivesCommands.openProject(path);
 
       this.log.info("Archives project opened");
 
@@ -156,11 +156,11 @@ export class ArchivesService {
   }
 
   @BoundAction()
-  public async closeArchivesProject(): Promise<void> {
+  public async closeProject(): Promise<void> {
     this.log.info("Closing existing archives project");
 
     try {
-      await archivesEditorCommands.closeArchivesProject();
+      await archivesCommands.closeProject();
 
       runInAction(() => {
         this.clearFileSelection();
@@ -206,13 +206,13 @@ export class ArchivesService {
    * Write one archived file to a path of the user's choosing.
    */
   @BoundAction()
-  public async extractArchiveFile(descriptor: ArchiveFileDescriptor, destination: string): Promise<void> {
+  public async extractFile(descriptor: ArchiveFileDescriptor, destination: string): Promise<void> {
     this.log.info("Extracting archive file:", descriptor.name, destination);
 
     try {
       this.operation = createLoadable(null, true);
 
-      await archivesEditorCommands.extractArchiveFile(descriptor.name, destination);
+      await archivesCommands.extractFile(descriptor.name, destination);
 
       runInAction(() => (this.operation = createLoadable({ kind: "extract-file", destination })));
 
@@ -244,15 +244,15 @@ export class ArchivesService {
    * An empty prefix extracts the whole archive, which is what selecting the tree root means.
    */
   @BoundAction()
-  public async extractArchiveFolder(prefix: string, destination: string): Promise<void> {
-    this.log.info("Extracting archive folder:", prefix || "<root>", destination);
+  public async extractArchiveDirectory(prefix: string, destination: string): Promise<void> {
+    this.log.info("Extracting archive directory:", prefix || "<root>", destination);
 
     try {
       this.operation = createLoadable(null, true);
 
-      const result: ArchiveExtractFolderResult = await archivesEditorCommands.extractArchiveFolder(prefix, destination);
+      const result: ArchiveExtractDirectoryResult = await archivesCommands.extractDirectory(prefix, destination);
 
-      runInAction(() => (this.operation = createLoadable({ kind: "extract-folder", result })));
+      runInAction(() => (this.operation = createLoadable({ kind: "extract-directory", result })));
 
       // Reported without a count rather than not at all: a response the parser did not fill in is no
       // reason to turn a write that happened into a thrown error.
@@ -269,7 +269,7 @@ export class ArchivesService {
             : `Extracted ${extractedCount} file(s) from ${extractedFrom}`,
       });
     } catch (error: unknown) {
-      this.log.error("Failed to extract archive folder:", error);
+      this.log.error("Failed to extract archive directory:", error);
 
       runInAction(() => (this.operation = createLoadable(null, false, transformError(error))));
 
@@ -341,16 +341,16 @@ export class ArchivesService {
         kind === "audio"
           ? {
               kind: "audio",
-              preview: await archivesEditorCommands.readArchiveAudio(descriptor.name),
+              preview: await archivesCommands.readAudio(descriptor.name),
             }
           : kind === "image"
             ? {
                 kind: "image",
-                preview: await archivesEditorCommands.readArchiveImage(descriptor.name),
+                preview: await archivesCommands.readImage(descriptor.name),
               }
             : {
                 kind: "text",
-                result: await archivesEditorCommands.readArchiveFile(descriptor.name),
+                result: await archivesCommands.readFile(descriptor.name),
               };
 
       if (requestId !== this.contentRequestId) {

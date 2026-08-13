@@ -4,23 +4,19 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 /** Commands */
 export const commands = {
-  closeEquipmentSprite: () => __TAURI_INVOKE<null>("plugin:icons-editor|close_equipment_sprite"),
-  getEquipmentSprite: () =>
+  closeSprite: () => __TAURI_INVOKE<null>("plugin:equipment-icons|close_sprite"),
+  getSprite: () =>
     __TAURI_INVOKE<{
       path: string;
       name: string;
       systemLtxPath: string;
       equipmentDescriptors: Array<InventorySpriteDescriptor>;
-    } | null>("plugin:icons-editor|get_equipment_sprite"),
-  openEquipmentSprite: (equipmentDdsPath: string, systemLtxPath: string) =>
-    __TAURI_INVOKE<IconsEditorEquipmentResponse>("plugin:icons-editor|open_equipment_sprite", {
-      equipmentDdsPath,
-      systemLtxPath,
-    }),
-  reopenEquipmentSprite: () =>
-    __TAURI_INVOKE<IconsEditorEquipmentResponse>("plugin:icons-editor|reopen_equipment_sprite"),
-  packEquipment: (sourcePath: string, outputPath: string, systemLtxPath: string) =>
-    __TAURI_INVOKE<PackEquipmentResult>("plugin:icons-editor|pack_equipment", {
+    } | null>("plugin:equipment-icons|get_sprite"),
+  openSprite: (equipmentDdsPath: string, systemLtxPath: string) =>
+    __TAURI_INVOKE<EquipmentSpriteMetadata>("plugin:equipment-icons|open_sprite", { equipmentDdsPath, systemLtxPath }),
+  reopenSprite: () => __TAURI_INVOKE<EquipmentSpriteMetadata>("plugin:equipment-icons|reopen_sprite"),
+  packSprite: (sourcePath: string, outputPath: string, systemLtxPath: string) =>
+    __TAURI_INVOKE<PackEquipmentResult>("plugin:equipment-icons|pack_sprite", {
       sourcePath,
       outputPath,
       systemLtxPath,
@@ -28,7 +24,7 @@ export const commands = {
 };
 
 /* Types */
-export type IconsEditorEquipmentResponse = {
+export type EquipmentSpriteMetadata = {
   path: string;
   name: string;
   systemLtxPath: string;

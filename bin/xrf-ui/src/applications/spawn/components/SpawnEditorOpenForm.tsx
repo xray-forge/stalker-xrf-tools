@@ -28,7 +28,7 @@ export function SpawnEditorOpenForm(): ReactElement {
 
   const onOpen = useCallback(() => {
     if (spawn.value) {
-      spawnFileService.openSpawnFile(spawn.value);
+      spawnFileService.openFile(spawn.value);
     } else {
       log.info("Cannot parse spawn file without path");
     }

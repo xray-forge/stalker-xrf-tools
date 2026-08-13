@@ -38,7 +38,7 @@ describe("isUnderArchiveDirectory", () => {
 
   it("matches whole path segments only", () => {
     expect(under(CONFIGS_DIALOGS, "configs")).toBe(true);
-    // A plain startsWith would pull the backup folder into an extraction of `configs`.
+    // A plain startsWith would pull the backup directory into an extraction of `configs`.
     expect(under(CONFIGS_BACKUP, "configs")).toBe(false);
   });
 

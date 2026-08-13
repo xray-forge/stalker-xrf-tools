@@ -1,5 +1,5 @@
 import { ArchiveAudioPreview, ArchiveImagePreview } from "@/core/bindings/xrf-app";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ProjectReadResult } from "@/core/bindings/xrf-archive";
+import { ArchiveExtractDirectoryResult, ArchiveFileDescriptor, ProjectReadResult } from "@/core/bindings/xrf-archive";
 
 /**
  * What the explorer currently points at.
@@ -20,4 +20,4 @@ export type TArchiveContent =
 /** The last thing written to disk, so the surface that started it can report what happened. */
 export type TArchiveOperation =
   | { kind: "extract-file"; destination: string }
-  | { kind: "extract-folder"; result: ArchiveExtractFolderResult };
+  | { kind: "extract-directory"; result: ArchiveExtractDirectoryResult };

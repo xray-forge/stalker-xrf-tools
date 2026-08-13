@@ -50,7 +50,7 @@ function createService(): { service: EquipmentService; assets: AssetService; con
 
 describe("EquipmentService object urls", () => {
   it("holds exactly one url no matter how often the sprite is reloaded", async () => {
-    setMockInvokeResponses({ ["plugin:icons-editor|reopen_equipment_sprite"]: RESPONSE });
+    setMockInvokeResponses({ ["plugin:equipment-icons|reopen_sprite"]: RESPONSE });
 
     const { service, assets } = createService();
 
@@ -64,7 +64,7 @@ describe("EquipmentService object urls", () => {
   });
 
   it("keeps the url the reload just produced rather than revoking it", async () => {
-    setMockInvokeResponses({ ["plugin:icons-editor|reopen_equipment_sprite"]: RESPONSE });
+    setMockInvokeResponses({ ["plugin:equipment-icons|reopen_sprite"]: RESPONSE });
 
     const { service, assets } = createService();
 
@@ -88,7 +88,7 @@ describe("EquipmentService object urls", () => {
   });
 
   it("releases the sprite url when the editor is navigated away from", async () => {
-    setMockInvokeResponses({ ["plugin:icons-editor|reopen_equipment_sprite"]: RESPONSE });
+    setMockInvokeResponses({ ["plugin:equipment-icons|reopen_sprite"]: RESPONSE });
 
     const { service, assets, container } = createService();
 

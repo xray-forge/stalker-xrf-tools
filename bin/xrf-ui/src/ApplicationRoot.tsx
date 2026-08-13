@@ -26,29 +26,26 @@ const GRID_COLUMNS = {
  * Start page, and the only route between applications.
  */
 export function ApplicationRoot(): ReactElement {
-  const navigate: NavigateFunction = useNavigate();
-  const { applications, groups } = APPLICATION_CATALOG;
-
   const settingsService: SettingsService = useInjection(SettingsService);
+
+  const navigate: NavigateFunction = useNavigate();
 
   const [query, setQuery] = useState<string>("");
 
-  const isDevModeEnabled: boolean = settingsService.isDevModeEnabled;
-
   const matched: ReadonlyArray<IApplicationDescriptor> = useMemo(() => {
-    const needle: string = query.trim().toLowerCase();
+    const match: string = query.trim().toLowerCase();
 
-    return needle
-      ? applications.filter(
+    return match
+      ? APPLICATION_CATALOG.applications.filter(
           (application: IApplicationDescriptor) =>
-            application.label.toLowerCase().includes(needle) || application.description.toLowerCase().includes(needle)
+            application.label.toLowerCase().includes(match) || application.description.toLowerCase().includes(match)
         )
-      : applications;
-  }, [applications, query]);
+      : APPLICATION_CATALOG.applications;
+  }, [query]);
 
   const sections: Array<[IApplicationGroup, Array<IApplicationDescriptor>]> = useMemo(
     () =>
-      groups
+      APPLICATION_CATALOG.groups
         .map((group: IApplicationGroup): [IApplicationGroup, Array<IApplicationDescriptor>] => [
           group,
           matched
@@ -62,13 +59,17 @@ export function ApplicationRoot(): ReactElement {
             }),
         ])
         .filter(([, applications]) => applications.length > 0),
-    [groups, matched]
+    [matched]
   );
 
-  const onChangeQuery = useCallback((event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value), []);
+  const onChangeQuery = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
+  }, []);
 
   const onOpen = useCallback(
-    (application: IApplicationDescriptor) => navigate(application.path, { replace: true }),
+    (application: IApplicationDescriptor) => {
+      navigate(application.path, { replace: true });
+    },
     [navigate]
   );
 
@@ -117,7 +118,7 @@ export function ApplicationRoot(): ReactElement {
                     <ApplicationCard
                       key={application.id}
                       application={application}
-                      isEnabled={application.status === EApplicationStatus.READY || isDevModeEnabled}
+                      isEnabled={application.status === EApplicationStatus.READY || settingsService.isDevModeEnabled}
                       onOpen={onOpen}
                     />
                   ))}

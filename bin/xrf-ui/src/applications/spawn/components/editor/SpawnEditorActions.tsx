@@ -27,7 +27,7 @@ export function SpawnEditorActions(): ReactElement {
     });
 
     if (path) {
-      await spawnFileService.saveSpawnFile(path);
+      await spawnFileService.saveFile(path);
     }
   }, [spawnFileService]);
 
@@ -48,7 +48,7 @@ export function SpawnEditorActions(): ReactElement {
     setExportPath(null);
 
     if (path) {
-      void spawnFileService.exportSpawnFile(path);
+      void spawnFileService.saveUnpackedDirectory(path);
     }
   }, [exportPath, spawnFileService]);
 

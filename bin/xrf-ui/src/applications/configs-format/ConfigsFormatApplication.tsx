@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ConfigsFormatResult } from "@/applications/configs-format/components/ConfigsFormatResult";
-import { commands as configsEditorCommands } from "@/core/bindings/xrf-app-configs-editor";
+import { commands as configsCommands } from "@/core/bindings/xrf-app-configs";
 import { LtxProjectFormatResult } from "@/core/bindings/xrf-ltx";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
@@ -47,8 +47,8 @@ export function ConfigsFormatApplication(): ReactElement {
       log.info("Performing format command:", isCheck, configs.value);
 
       const formatted: LtxProjectFormatResult = await (isCheck
-        ? configsEditorCommands.checkFormatConfigsPath(configs.value)
-        : configsEditorCommands.formatConfigsPath(configs.value));
+        ? configsCommands.checkDirectoryFormat(configs.value)
+        : configsCommands.formatDirectory(configs.value));
 
       setResult(formatted);
 
