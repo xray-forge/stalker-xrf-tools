@@ -24,7 +24,7 @@ import {
   SpawnPatrolsChunk,
 } from "@/lib/xrf/bindings/xrf-db";
 import { transformError } from "@/lib/xrf/error";
-import { releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 
 export interface ISpawnRowSelection {
   /** What kind of row this is, for the panel heading. */

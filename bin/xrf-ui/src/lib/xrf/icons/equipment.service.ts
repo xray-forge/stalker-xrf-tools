@@ -15,7 +15,7 @@ import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import { commands as iconsEditorCommands } from "@/lib/xrf/bindings/xrf-app-icons-editor";
 import { transformError } from "@/lib/xrf/error";
 import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/lib/xrf/icons/equipment";
-import { releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 
 export interface IEquipmentPngDescriptor {
   ltxPath: string;

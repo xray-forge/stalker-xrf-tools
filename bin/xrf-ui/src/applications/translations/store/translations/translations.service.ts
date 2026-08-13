@@ -8,7 +8,7 @@ import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import { commands as translationsEditorCommands } from "@/lib/xrf/bindings/xrf-app-translations-editor";
 import { transformError } from "@/lib/xrf/error";
-import { releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 import { ITranslationsProjectJson } from "@/lib/xrf/translations";
 
 @Injectable()

@@ -26,7 +26,7 @@ import {
 import { commands as archivesEditorCommands } from "@/lib/xrf/bindings/xrf-app-archives-editor";
 import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 import { transformError } from "@/lib/xrf/error";
-import { releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 
 @Injectable()
 export class ArchivesService {

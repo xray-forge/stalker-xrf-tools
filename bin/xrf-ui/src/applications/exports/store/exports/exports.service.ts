@@ -9,7 +9,7 @@ import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import { commands as exportsEditorCommands } from "@/lib/xrf/bindings/xrf-app-exports-editor";
 import { ExportSourceContent, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 import { transformError } from "@/lib/xrf/error";
-import { releaseEditorProject } from "@/lib/xrf/ipc";
+import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 
 @Injectable()
 export class ExportsService {
