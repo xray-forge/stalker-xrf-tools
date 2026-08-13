@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Container, EventBus, EventsPlugin, WireEvent } from "@wirestate/core";
 
-import { ErrorCaptureService } from "@/core/store/notifications/error-capture.service";
+import { ErrorCaptureService } from "@/core/services/notifications/error-capture.service";
 import { ENotificationSeverity, INotificationPayload, NOTIFICATION_PUSH_EVENT } from "@/lib/notifications";
 
 interface IWatchedCapture {

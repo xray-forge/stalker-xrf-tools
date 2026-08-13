@@ -9,7 +9,7 @@ import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellF
 import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
 import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
 import { EditorPanelsProvider } from "@/core/components/shell/panel/context";
-import { ProjectService } from "@/core/store/project";
+import { ProjectService } from "@/core/services/project";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";

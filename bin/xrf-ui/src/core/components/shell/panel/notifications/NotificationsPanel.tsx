@@ -3,8 +3,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useEffect } from "react";
 
 import { NotificationRow } from "@/core/components/shell/panel/notifications/NotificationRow";
-import { NotificationsService } from "@/core/store/notifications";
-import { SettingsService } from "@/core/store/settings";
+import { NotificationsService } from "@/core/services/notifications";
+import { SettingsService } from "@/core/services/settings";
 import { INotification } from "@/lib/notifications";
 
 /**

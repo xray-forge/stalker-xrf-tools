@@ -6,7 +6,7 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 import { ConfigsVerifyResult } from "@/applications/configs-verify/components/ConfigsVerifyResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
-import { ProjectService } from "@/core/store/project";
+import { ProjectService } from "@/core/services/project";
 import { Nullable } from "@/core/types/general";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";

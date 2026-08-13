@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import { Container, EventBus, EventsPlugin } from "@wirestate/core";
 
 import { EApplicationId } from "@/core/router/application";
-import { NotificationsService } from "@/core/store/notifications/notifications.service";
+import { NotificationsService } from "@/core/services/notifications/notifications.service";
 import { emitNotification, ENotificationSeverity, INotification } from "@/lib/notifications";
 
 function createService(): NotificationsService {

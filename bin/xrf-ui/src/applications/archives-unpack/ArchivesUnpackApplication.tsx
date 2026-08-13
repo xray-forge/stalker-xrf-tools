@@ -6,7 +6,7 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 import { ArchivesUnpackResult } from "@/applications/archives-unpack/components/ArchivesUnpackResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
-import { ProjectService } from "@/core/store/project";
+import { ProjectService } from "@/core/services/project";
 import { Nullable } from "@/core/types/general";
 import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";

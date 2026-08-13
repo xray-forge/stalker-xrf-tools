@@ -5,7 +5,7 @@ import { ReactElement, ReactNode } from "react";
 
 import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
 import { EditorPanelsProvider, useEditorPanels } from "@/core/components/shell/panel/context";
-import { NotificationsService } from "@/core/store/notifications";
+import { NotificationsService } from "@/core/services/notifications";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
 /** Stands in for an editor that publishes one default-open panel, which most of them do. */

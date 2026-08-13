@@ -4,7 +4,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { EApplicationId } from "@/core/router/application";
-import { NotificationsService } from "@/core/store/notifications";
+import { NotificationsService } from "@/core/services/notifications";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ENotificationSeverity, INotification, TNotify, useNotify } from "@/lib/notifications";
 

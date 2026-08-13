@@ -5,8 +5,8 @@ import { Binding, Container } from "@wirestate/core";
 
 import { NotificationsPanel } from "@/core/components/shell/panel/notifications/NotificationsPanel";
 import { EApplicationId } from "@/core/router/application";
-import { NotificationsService } from "@/core/store/notifications";
-import { SettingsService } from "@/core/store/settings";
+import { NotificationsService } from "@/core/services/notifications";
+import { SettingsService } from "@/core/services/settings";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { ENotificationSeverity, INotificationPayload } from "@/lib/notifications";
 

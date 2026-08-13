@@ -13,8 +13,8 @@ import {
   selectPanelsOnSide,
   useEditorPanelsRegistry,
 } from "@/core/components/shell/panel/context";
-import { NotificationsService } from "@/core/store/notifications";
-import { SettingsService } from "@/core/store/settings";
+import { NotificationsService } from "@/core/services/notifications";
+import { SettingsService } from "@/core/services/settings";
 
 export interface IRenderOptions {
   /** Initial route. Components resolve their application name from it, so it is rarely irrelevant. */

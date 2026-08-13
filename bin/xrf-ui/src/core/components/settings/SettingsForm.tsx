@@ -5,8 +5,8 @@ import { useInjection } from "@wirestate/react";
 import { ChangeEvent, ReactElement, useCallback } from "react";
 
 import { SettingsPathField } from "@/core/components/settings/SettingsPathField";
-import { ProjectService } from "@/core/store/project";
-import { SettingsService } from "@/core/store/settings";
+import { ProjectService } from "@/core/services/project";
+import { SettingsService } from "@/core/services/settings";
 import { Nullable } from "@/core/types/general";
 import { Logger, useLogger } from "@/lib/logging";
 import { COLOR_SCHEME_MODES, ColorSchemeMode, DEFAULT_COLOR_SCHEME_MODE } from "@/lib/theme";

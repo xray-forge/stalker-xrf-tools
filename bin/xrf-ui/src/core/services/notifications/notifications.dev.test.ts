@@ -3,7 +3,7 @@ import { Container } from "@wirestate/core";
 import { autorun, IReactionDisposer } from "@wirestate/mobx";
 
 import { EApplicationId } from "@/core/router/application";
-import { NotificationsService } from "@/core/store/notifications/notifications.service";
+import { NotificationsService } from "@/core/services/notifications/notifications.service";
 import { ENotificationSeverity, INotification } from "@/lib/notifications";
 
 const SOURCE: EApplicationId = EApplicationId.EQUIPMENT_ICONS;

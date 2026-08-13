@@ -4,7 +4,7 @@ import { ReactElement, useCallback, useState } from "react";
 import { EquipmentPackResult } from "@/applications/equipment-icons-pack/components/EquipmentPackResult";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { EApplicationId } from "@/core/router/application";
-import { ProjectService } from "@/core/store/project";
+import { ProjectService } from "@/core/services/project";
 import { Nullable } from "@/core/types/general";
 import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { createLoadable, Loadable } from "@/lib/loadable";

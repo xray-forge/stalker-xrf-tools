@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { Container } from "@wirestate/core";
 
-import { SettingsService } from "@/core/store/settings/settings.service";
+import { SettingsService } from "@/core/services/settings/settings.service";
 
 function mockService(): SettingsService {
   return new Container({ bindings: [SettingsService] }).get(SettingsService);

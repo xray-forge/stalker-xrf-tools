@@ -7,9 +7,9 @@ import { ContainerConfig, EventsPlugin } from "@wirestate/core";
 import { ContainerProvider } from "@wirestate/react";
 import { ReactNode, useMemo } from "react";
 
-import { ErrorCaptureService, NotificationsService } from "@/core/store/notifications";
-import { ProjectService } from "@/core/store/project";
-import { SettingsService } from "@/core/store/settings";
+import { ErrorCaptureService, NotificationsService } from "@/core/services/notifications";
+import { ProjectService } from "@/core/services/project";
+import { SettingsService } from "@/core/services/settings";
 import { createApplicationStyleCache, createApplicationTheme } from "@/lib/theme";
 
 interface IApplicationProviderProps {

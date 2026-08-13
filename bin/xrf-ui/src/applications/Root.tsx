@@ -9,7 +9,7 @@ import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { ApplicationCard } from "@/core/components/navigation/ApplicationCard";
 import { EApplicationStatus, IApplicationDescriptor, IApplicationGroup } from "@/core/router/application";
 import { APPLICATION_GROUPS, APPLICATIONS } from "@/core/router/applications";
-import { SettingsService } from "@/core/store/settings";
+import { SettingsService } from "@/core/services/settings";
 
 /**
  * Column counts at chosen widths rather than wherever a `minmax` happens to divide.

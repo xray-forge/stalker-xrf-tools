@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router-dom";
 
 import { ExportsApplication } from "@/applications/exports/ExportsApplication";
 import { ApplicationShell } from "@/core/components/shell/ApplicationShell";
-import { ProjectService } from "@/core/store/project";
+import { ProjectService } from "@/core/services/project";
 import { mockExportsProject } from "@/fixtures/mocks/project.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
