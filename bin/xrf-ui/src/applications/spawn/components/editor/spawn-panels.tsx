@@ -2,7 +2,7 @@ import { default as InfoIcon } from "@mui/icons-material/Info";
 
 import { SpawnRowDetailsPanel } from "@/applications/spawn/components/editor/details/SpawnRowDetailsPanel";
 import { IEditorPanel } from "@/core/shell/panel/context";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 
 export function createSpawnEditorPanels(spawnFileService: SpawnFileService): Array<IEditorPanel> {
   return [

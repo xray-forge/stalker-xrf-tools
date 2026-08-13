@@ -2,7 +2,7 @@ import { default as Inventory2Icon } from "@mui/icons-material/Inventory2";
 import { lazy } from "react";
 
 import { AssetService } from "@/core/assets/services";
-import { EquipmentService } from "@/core/icons";
+import { EquipmentService } from "@/core/equipment-icons";
 import {
   EApplicationGroupId,
   EApplicationId,

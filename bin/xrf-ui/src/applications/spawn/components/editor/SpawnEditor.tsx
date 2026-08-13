@@ -18,7 +18,7 @@ import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 import { Nullable } from "@/lib/types/general";
 
 const MONOSPACE_FONT: string = "'Cascadia Mono', 'Consolas', monospace";

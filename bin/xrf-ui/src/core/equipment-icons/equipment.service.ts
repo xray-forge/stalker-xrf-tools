@@ -8,8 +8,12 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 import { urlToImage } from "@/core/assets/image";
 import { AssetService } from "@/core/assets/services";
 import { commands as iconsEditorCommands } from "@/core/bindings/xrf-app-icons-editor";
+import {
+  IEquipmentResponse,
+  IEquipmentSectionDescriptor,
+  IPackEquipmentResult,
+} from "@/core/equipment-icons/equipment";
 import { transformError } from "@/core/error";
-import { IEquipmentResponse, IEquipmentSectionDescriptor, IPackEquipmentResult } from "@/core/icons/equipment";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications";
 import { EApplicationGroupId } from "@/core/routing/application";

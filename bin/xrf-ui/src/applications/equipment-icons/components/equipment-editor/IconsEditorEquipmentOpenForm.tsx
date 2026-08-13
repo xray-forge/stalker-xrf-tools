@@ -3,7 +3,7 @@ import { ReactElement, useCallback } from "react";
 
 import { FilePickerInput, usePathState } from "@/core/components/form/file-picker";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { EquipmentService } from "@/core/icons";
+import { EquipmentService } from "@/core/equipment-icons";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";

@@ -4,7 +4,7 @@ import { ReactElement, useCallback, useState } from "react";
 import { EquipmentPackResult } from "@/applications/equipment-icons-pack/components/EquipmentPackResult";
 import { FilePickerInput, usePathState } from "@/core/components/form/file-picker";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { EquipmentService, IPackEquipmentResult } from "@/core/icons";
+import { EquipmentService, IPackEquipmentResult } from "@/core/equipment-icons";
 import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
 import { EApplicationId } from "@/core/routing/application";
 import {

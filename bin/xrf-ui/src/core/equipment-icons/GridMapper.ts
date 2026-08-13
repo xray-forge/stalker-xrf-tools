@@ -1,4 +1,4 @@
-import { IEquipmentSectionDescriptor } from "@/core/icons/equipment";
+import { IEquipmentSectionDescriptor } from "@/core/equipment-icons/equipment";
 
 export class GridMapper {
   public rows: number;

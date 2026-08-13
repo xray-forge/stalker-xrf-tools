@@ -1,7 +1,7 @@
 import { Box, Chip, Grid } from "@mui/material";
 import { ReactElement } from "react";
 
-import { IPackEquipmentResult } from "@/core/icons";
+import { IPackEquipmentResult } from "@/core/equipment-icons";
 
 interface IEquipmentPackResultProps {
   result: IPackEquipmentResult;

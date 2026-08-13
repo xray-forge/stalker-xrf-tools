@@ -7,7 +7,7 @@ import {
   EApplicationStatus,
   IApplicationDescriptor,
 } from "@/core/routing/application";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 
 export const SPAWN_APPLICATION: IApplicationDescriptor = {
   container: { bindings: [SpawnFileService] },

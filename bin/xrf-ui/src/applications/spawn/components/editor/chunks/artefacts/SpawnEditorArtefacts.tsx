@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { SpawnEditorArtefactsNodesTable } from "@/applications/spawn/components/editor/chunks/artefacts/SpawnEditorArtefactsNodesTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
 import { SpawnArtefactSpawnsChunk } from "@/core/bindings/xrf-db";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 
 export function SpawnEditorArtefacts(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);

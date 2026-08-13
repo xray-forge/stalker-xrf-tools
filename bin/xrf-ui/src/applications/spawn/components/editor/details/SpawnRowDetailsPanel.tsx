@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
 import { EmptyState } from "@/core/components/layout/EmptyState";
-import { ISpawnRowSelection, SpawnFileService } from "@/core/spawn-file/services";
+import { ISpawnRowSelection, SpawnFileService } from "@/core/spawn/services";
 import { Nullable } from "@/lib/types/general";
 
 import { formatSpawnRowDetailsValue } from "./SpawnRowDetailsPanel.utils";

@@ -11,7 +11,7 @@ import { EquipmentGridZoom } from "@/applications/equipment-icons/components/spr
 import { EquipmentSpriteGrid } from "@/applications/equipment-icons/components/sprite-view/EquipmentSpriteGrid";
 import { equipmentViewerConfig } from "@/applications/equipment-icons/configs/EquipmentViewerConfig";
 import { IMAGE_CHECKERBOARD } from "@/core/components/media/media.styles";
-import { EquipmentService, GridMapper } from "@/core/icons";
+import { EquipmentService, GridMapper } from "@/core/equipment-icons";
 import { Nullable } from "@/lib/types/general";
 
 export function EquipmentSpriteViewer(): ReactElement {

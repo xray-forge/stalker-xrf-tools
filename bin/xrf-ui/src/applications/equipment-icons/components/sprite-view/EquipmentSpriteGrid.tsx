@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { SxProps } from "@mui/system";
 import { memo, ReactElement, useMemo } from "react";
 
-import { GridMapper, TEquipmentCell } from "@/core/icons";
+import { GridMapper, TEquipmentCell } from "@/core/equipment-icons";
 import { Nullable } from "@/lib/types/general";
 
 interface IEquipmentSpriteGridProps {

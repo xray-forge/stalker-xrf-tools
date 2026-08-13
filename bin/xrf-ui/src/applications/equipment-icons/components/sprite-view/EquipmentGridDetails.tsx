@@ -2,7 +2,7 @@ import { default as CloseIcon } from "@mui/icons-material/Close";
 import { Box, Card, Divider, Grid, IconButton, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { GridMapper, IEquipmentSectionDescriptor, TEquipmentCell } from "@/core/icons";
+import { GridMapper, IEquipmentSectionDescriptor, TEquipmentCell } from "@/core/equipment-icons";
 import { stopPropagation } from "@/lib/dom/event";
 import { Nullable } from "@/lib/types/general";
 

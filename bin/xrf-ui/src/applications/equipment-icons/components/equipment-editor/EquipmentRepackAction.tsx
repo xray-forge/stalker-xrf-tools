@@ -4,7 +4,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
 import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
-import { EquipmentService } from "@/core/icons";
+import { EquipmentService } from "@/core/equipment-icons";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 

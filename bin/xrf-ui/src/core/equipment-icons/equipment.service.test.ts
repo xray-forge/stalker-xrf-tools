@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
-import { EquipmentService } from "@/core/icons/equipment.service";
+import { EquipmentService } from "@/core/equipment-icons/equipment.service";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 

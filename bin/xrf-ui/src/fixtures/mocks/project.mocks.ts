@@ -1,7 +1,7 @@
 import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { ExportDescriptor, ExportsProject } from "@/core/bindings/xrf-export";
+import { IEquipmentSectionDescriptor } from "@/core/equipment-icons";
 import { TCallableExportDescriptor } from "@/core/exports";
-import { IEquipmentSectionDescriptor } from "@/core/icons";
 import { ITranslationsProjectJson } from "@/core/translations";
 
 import { mockArchiveReadPolicy } from "./archive.mocks";

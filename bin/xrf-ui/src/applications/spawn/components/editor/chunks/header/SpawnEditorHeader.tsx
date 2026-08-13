@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { SpawnEditorHeaderTable } from "@/applications/spawn/components/editor/chunks/header/SpawnEditorHeaderTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
 import { SpawnHeaderChunk } from "@/core/bindings/xrf-db";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 
 export function SpawnEditorHeader(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);

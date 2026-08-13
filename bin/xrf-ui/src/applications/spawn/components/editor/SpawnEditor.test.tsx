@@ -7,7 +7,7 @@ import { SpawnEditor } from "@/applications/spawn/components/editor/SpawnEditor"
 import { SpawnFile, SpawnHeaderChunk } from "@/core/bindings/xrf-db";
 import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
 import { IEditorPanel, useEditorPanelsRegistry } from "@/core/shell/panel/context";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";

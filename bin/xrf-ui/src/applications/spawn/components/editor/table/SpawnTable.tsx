@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { DataTable } from "@/core/components/table";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 import { AnyObject, Nullable } from "@/lib/types/general";
 
 export interface ISpawnTableProps<T> {

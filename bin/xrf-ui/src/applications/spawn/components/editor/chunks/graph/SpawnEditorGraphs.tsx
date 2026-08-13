@@ -11,7 +11,7 @@ import { SpawnEditorGraphVerticesTable } from "@/applications/spawn/components/e
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
 import { TChunkTabChange, useChunkTab } from "@/applications/spawn/components/editor/chunks/use-chunk-tab";
 import { SpawnGraphsChunk } from "@/core/bindings/xrf-db";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 
 const BASE_PATH: string = "/spawn/graph";
 const TABS: Array<string> = ["header", "levels", "vertices", "edges", "points", "cross-tables"];

@@ -6,7 +6,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
 import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
-import { SpawnFileService } from "@/core/spawn-file/services";
+import { SpawnFileService } from "@/core/spawn/services";
 import { Nullable } from "@/lib/types/general";
 
 /**
