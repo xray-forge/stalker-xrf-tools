@@ -14,7 +14,7 @@ import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xray-archive";
 import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
-import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf-path";
+import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf/project-path";
 
 export function ArchivesUnpackApplication(): ReactElement {
   const log: Logger = useLogger("archives-unpacker");

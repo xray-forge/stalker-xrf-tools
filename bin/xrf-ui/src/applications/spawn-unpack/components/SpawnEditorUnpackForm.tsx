@@ -12,7 +12,7 @@ import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { ESpawnsEditorCommand } from "@/lib/xrf/ipc";
-import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf-path";
+import { getExistingProjectBuiltAllSpawnPath, getProjectAllSpawnUnpackPath } from "@/lib/xrf/project-path";
 
 /**
  * Expand a packed spawn file into chunks on disk.

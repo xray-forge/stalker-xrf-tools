@@ -5,7 +5,7 @@ import { PickerForm } from "@/core/components/navigation/PickerForm";
 import { ProjectService } from "@/core/store/project";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
-import { getProjectConfigsPath } from "@/lib/xrf-path";
+import { getProjectConfigsPath } from "@/lib/xrf/project-path";
 
 export function ConfigsExplorerApplication(): ReactElement {
   const projectService: ProjectService = useInjection(ProjectService);

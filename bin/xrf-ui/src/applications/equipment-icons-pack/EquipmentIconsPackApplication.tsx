@@ -17,7 +17,7 @@ import {
   getProjectEquipmentDDSPath,
   getProjectEquipmentSourcePath,
   getProjectSystemLtxPath,
-} from "@/lib/xrf-path";
+} from "@/lib/xrf/project-path";
 
 export function EquipmentIconsPackApplication(): ReactElement {
   const log: Logger = useLogger("equipment-editor-pack");

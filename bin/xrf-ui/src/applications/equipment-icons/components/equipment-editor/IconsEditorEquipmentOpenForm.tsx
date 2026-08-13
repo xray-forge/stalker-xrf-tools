@@ -7,7 +7,7 @@ import { FilePickerInput, usePathState } from "@/lib/file-picker";
 import { EquipmentService } from "@/lib/icons";
 import { Logger, useLogger } from "@/lib/logging";
 import { useMountEffect } from "@/lib/react";
-import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf-path";
+import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf/project-path";
 
 export function IconsEditorEquipmentOpenForm(): ReactElement {
   const log: Logger = useLogger("equipment-editor-open");

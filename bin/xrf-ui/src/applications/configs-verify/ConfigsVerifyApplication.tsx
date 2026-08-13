@@ -14,7 +14,7 @@ import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xray-ltx";
 import { EConfigsEditorCommand } from "@/lib/xrf/ipc";
-import { getProjectConfigsPath } from "@/lib/xrf-path";
+import { getProjectConfigsPath } from "@/lib/xrf/project-path";
 
 export function ConfigsVerifyApplication(): ReactElement {
   const log: Logger = useLogger("configs-verifier");

@@ -7,7 +7,7 @@ import { ProjectService } from "@/core/store/project";
 import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
-import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf-path";
+import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf/project-path";
 
 export function TranslationsEditorOpenForm(): ReactElement {
   const log: Logger = useLogger("translations-editor-open");
