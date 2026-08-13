@@ -10,7 +10,7 @@ import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { SpawnFileService } from "@/lib/spawn-file";
-import { SpawnFile, SpawnHeaderChunk } from "@/lib/xrf/bindings/xray-db";
+import { SpawnFile, SpawnHeaderChunk } from "@/lib/xrf/bindings/xrf-db";
 import { ESpawnsEditorCommand } from "@/lib/xrf/ipc";
 
 const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";

@@ -7,7 +7,7 @@ import { ExportSection } from "@/applications/exports/components/viewer/exports/
 import { ExportSourceView } from "@/applications/exports/components/viewer/exports/ExportSourceView";
 import { formatExportSignature } from "@/applications/exports/components/viewer/exports/format-export-signature";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { ExportDescriptor } from "@/lib/xrf/bindings/xray-export";
+import { ExportDescriptor } from "@/lib/xrf/bindings/xrf-export";
 
 export interface IExportDeclarationViewProps extends BaseComponentProps {
   declaration: ExportDescriptor;

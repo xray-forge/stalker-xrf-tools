@@ -12,7 +12,7 @@ import { PathFormRow } from "@/lib/form/PathFormRow";
 import { IPathField, usePathField } from "@/lib/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
-import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xray-ltx";
+import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xrf-ltx";
 import { EConfigsEditorCommand } from "@/lib/xrf/ipc";
 import { getProjectConfigsPath } from "@/lib/xrf/project-path";
 

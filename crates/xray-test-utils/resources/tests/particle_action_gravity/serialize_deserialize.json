@@ -1,9 +1,0 @@
-{
-  "actionFlags": 1,
-  "actionType": "Gravity",
-  "direction": {
-    "x": 1.115,
-    "y": -0.255,
-    "z": 1.753
-  }
-}

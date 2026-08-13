@@ -22,7 +22,7 @@ import {
   SpawnGraphsChunk,
   SpawnHeaderChunk,
   SpawnPatrolsChunk,
-} from "@/lib/xrf/bindings/xray-db";
+} from "@/lib/xrf/bindings/xrf-db";
 import { transformError } from "@/lib/xrf/error";
 import { ESpawnsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 

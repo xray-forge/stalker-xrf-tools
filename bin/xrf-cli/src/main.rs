@@ -66,7 +66,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let result: CommandResult = it.execute(matches);
 
         if let Err(error) = &result {
-          xray_output::error!(
+          xrf_output::error!(
             TerminalOutput::from_options(false, false),
             "Execution of command '{}' failed, error: {}",
             it.name(),

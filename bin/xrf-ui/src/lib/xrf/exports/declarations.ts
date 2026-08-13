@@ -1,4 +1,4 @@
-import { ExportDescriptor } from "@/lib/xrf/bindings/xray-export";
+import { ExportDescriptor } from "@/lib/xrf/bindings/xrf-export";
 
 /**
  * The two halves of the generated descriptor union, for call sites that have already narrowed.

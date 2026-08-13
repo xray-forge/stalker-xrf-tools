@@ -1,0 +1,13 @@
+[package]
+name = "xrf-lua"
+version = "0.1.0"
+publish = false
+edition = "2024"
+rust-version.workspace = true
+
+[dependencies]
+full_moon = { version = "2.2.0", features = ["luajit"] }
+xrf-error = { workspace = true }
+
+[lints]
+workspace = true

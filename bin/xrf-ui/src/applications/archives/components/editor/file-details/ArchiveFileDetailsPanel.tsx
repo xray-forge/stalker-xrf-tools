@@ -7,7 +7,7 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
-import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 export interface IArchiveFileDetailsPanelProps extends BaseComponentProps {
   archivesService: ArchivesService;

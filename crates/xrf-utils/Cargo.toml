@@ -1,0 +1,14 @@
+[package]
+name = "xrf-utils"
+version = "0.1.0"
+publish = false
+edition = "2024"
+rust-version.workspace = true
+
+[dependencies]
+base64 = "0.23.1"
+encoding_rs = "0.8.35"
+xrf-error = { workspace = true }
+
+[lints]
+workspace = true

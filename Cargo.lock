@@ -6735,249 +6735,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "xray-archive"
-version = "0.1.0"
-dependencies = [
- "bounded_join_set",
- "byteorder",
- "crc32fast",
- "delharc",
- "log",
- "minilzo-rs",
- "regex",
- "serde",
- "ts-rs",
- "walkdir",
- "xray-error",
- "xray-utils",
-]
-
-[[package]]
-name = "xray-assets"
-version = "0.1.0"
-dependencies = [
- "log",
- "walkdir",
- "xray-error",
-]
-
-[[package]]
-name = "xray-chunk"
-version = "0.1.0"
-dependencies = [
- "byteorder",
- "fileslice",
- "xray-error",
- "xray-test-utils",
- "xray-utils",
-]
-
-[[package]]
-name = "xray-db"
-version = "0.1.0"
-dependencies = [
- "byteorder",
- "derive_more 2.1.1",
- "enum-map",
- "lazy_static",
- "log",
- "phf 0.14.0",
- "serde",
- "serde_json",
- "ts-rs",
- "uuid",
- "xray-chunk",
- "xray-error",
- "xray-ltx",
- "xray-test-utils",
- "xray-utils",
-]
-
-[[package]]
-name = "xray-error"
-version = "0.1.0"
-dependencies = [
- "image",
- "serde",
- "serde_json",
- "thiserror 2.0.20",
- "ts-rs",
- "xray-error-derive",
-]
-
-[[package]]
-name = "xray-error-derive"
-version = "0.1.0"
-dependencies = [
- "convert_case 0.11.0",
- "proc-macro2",
- "quote",
- "syn 3.0.3",
-]
-
-[[package]]
-name = "xray-export"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "ts-rs",
- "walkdir",
- "xray-error",
- "xray-typescript",
- "xray-xml",
-]
-
-[[package]]
-name = "xray-gamedata"
-version = "0.1.0"
-dependencies = [
- "ddsfile",
- "derive_more 2.1.1",
- "rayon",
- "uuid",
- "walkdir",
- "xray-assets",
- "xray-chunk",
- "xray-db",
- "xray-error",
- "xray-ltx",
- "xray-lua",
- "xray-output",
- "xray-report",
- "xray-shaders",
- "xray-sound",
- "xray-utils",
- "xray-xml",
-]
-
-[[package]]
-name = "xray-ltx"
-version = "0.1.0"
-dependencies = [
- "fxhash",
- "indexmap 2.14.0",
- "serde",
- "ts-rs",
- "walkdir",
- "xray-error",
- "xray-output",
- "xray-test-utils",
- "xray-utils",
-]
-
-[[package]]
-name = "xray-lua"
-version = "0.1.0"
-dependencies = [
- "full_moon",
- "xray-error",
-]
-
-[[package]]
-name = "xray-output"
-version = "0.1.0"
-
-[[package]]
-name = "xray-report"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "xray-shaders"
-version = "0.1.0"
-dependencies = [
- "xray-error",
- "xray-lua",
-]
-
-[[package]]
-name = "xray-sound"
-version = "0.1.0"
-dependencies = [
- "ogg",
- "symphonia",
- "xray-error",
-]
-
-[[package]]
-name = "xray-test-utils"
-version = "0.1.0"
-dependencies = [
- "fileslice",
-]
-
-[[package]]
-name = "xray-texture"
-version = "0.1.0"
-dependencies = [
- "ddsfile",
- "image",
- "image_dds",
- "log",
- "path-absolutize",
- "rayon",
- "serde",
- "xray-error",
- "xray-ltx",
- "xray-output",
- "xray-utils",
- "xray-xml",
-]
-
-[[package]]
-name = "xray-translation"
-version = "0.1.0"
-dependencies = [
- "derive_more 2.1.1",
- "log",
- "serde",
- "serde_json",
- "walkdir",
- "xray-error",
- "xray-output",
- "xray-report",
- "xray-test-utils",
- "xray-utils",
- "xray-xml",
-]
-
-[[package]]
-name = "xray-typescript"
-version = "0.1.0"
-dependencies = [
- "log",
- "serde",
- "serde_json",
- "swc_common",
- "swc_ecma_ast",
- "swc_ecma_parser",
- "xray-error",
-]
-
-[[package]]
-name = "xray-utils"
-version = "0.1.0"
-dependencies = [
- "base64 0.23.1",
- "encoding_rs",
- "xray-error",
-]
-
-[[package]]
-name = "xray-xml"
-version = "0.1.0"
-dependencies = [
- "quick-xml 0.41.0",
- "roxmltree",
- "serde",
- "xray-error",
- "xray-utils",
-]
-
-[[package]]
 name = "xrf-app"
 version = "0.1.0"
 dependencies = [
@@ -6992,15 +6749,53 @@ dependencies = [
  "tauri-plugin-fs",
  "tauri-plugin-shell",
  "ts-rs",
- "xray-archive",
- "xray-db",
- "xray-export",
- "xray-ltx",
- "xray-output",
- "xray-sound",
- "xray-texture",
- "xray-translation",
- "xray-utils",
+ "xrf-archive",
+ "xrf-db",
+ "xrf-export",
+ "xrf-ltx",
+ "xrf-output",
+ "xrf-sound",
+ "xrf-texture",
+ "xrf-translation",
+ "xrf-utils",
+]
+
+[[package]]
+name = "xrf-archive"
+version = "0.1.0"
+dependencies = [
+ "bounded_join_set",
+ "byteorder",
+ "crc32fast",
+ "delharc",
+ "log",
+ "minilzo-rs",
+ "regex",
+ "serde",
+ "ts-rs",
+ "walkdir",
+ "xrf-error",
+ "xrf-utils",
+]
+
+[[package]]
+name = "xrf-assets"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "walkdir",
+ "xrf-error",
+]
+
+[[package]]
+name = "xrf-chunk"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "fileslice",
+ "xrf-error",
+ "xrf-test-utils",
+ "xrf-utils",
 ]
 
 [[package]]
@@ -7016,16 +6811,221 @@ dependencies = [
  "serde_json",
  "tokio",
  "walkdir",
- "xray-archive",
- "xray-db",
- "xray-error",
- "xray-export",
- "xray-gamedata",
- "xray-ltx",
- "xray-output",
- "xray-report",
- "xray-texture",
- "xray-translation",
+ "xrf-archive",
+ "xrf-db",
+ "xrf-error",
+ "xrf-export",
+ "xrf-gamedata",
+ "xrf-ltx",
+ "xrf-output",
+ "xrf-report",
+ "xrf-texture",
+ "xrf-translation",
+]
+
+[[package]]
+name = "xrf-db"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "derive_more 2.1.1",
+ "enum-map",
+ "lazy_static",
+ "log",
+ "phf 0.14.0",
+ "serde",
+ "serde_json",
+ "ts-rs",
+ "uuid",
+ "xrf-chunk",
+ "xrf-error",
+ "xrf-ltx",
+ "xrf-test-utils",
+ "xrf-utils",
+]
+
+[[package]]
+name = "xrf-error"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.20",
+ "ts-rs",
+ "xrf-error-derive",
+]
+
+[[package]]
+name = "xrf-error-derive"
+version = "0.1.0"
+dependencies = [
+ "convert_case 0.11.0",
+ "proc-macro2",
+ "quote",
+ "syn 3.0.3",
+]
+
+[[package]]
+name = "xrf-export"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "ts-rs",
+ "walkdir",
+ "xrf-error",
+ "xrf-typescript",
+ "xrf-xml",
+]
+
+[[package]]
+name = "xrf-gamedata"
+version = "0.1.0"
+dependencies = [
+ "ddsfile",
+ "derive_more 2.1.1",
+ "rayon",
+ "uuid",
+ "walkdir",
+ "xrf-assets",
+ "xrf-chunk",
+ "xrf-db",
+ "xrf-error",
+ "xrf-ltx",
+ "xrf-lua",
+ "xrf-output",
+ "xrf-report",
+ "xrf-shaders",
+ "xrf-sound",
+ "xrf-utils",
+ "xrf-xml",
+]
+
+[[package]]
+name = "xrf-ltx"
+version = "0.1.0"
+dependencies = [
+ "fxhash",
+ "indexmap 2.14.0",
+ "serde",
+ "ts-rs",
+ "walkdir",
+ "xrf-error",
+ "xrf-output",
+ "xrf-test-utils",
+ "xrf-utils",
+]
+
+[[package]]
+name = "xrf-lua"
+version = "0.1.0"
+dependencies = [
+ "full_moon",
+ "xrf-error",
+]
+
+[[package]]
+name = "xrf-output"
+version = "0.1.0"
+
+[[package]]
+name = "xrf-report"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "xrf-shaders"
+version = "0.1.0"
+dependencies = [
+ "xrf-error",
+ "xrf-lua",
+]
+
+[[package]]
+name = "xrf-sound"
+version = "0.1.0"
+dependencies = [
+ "ogg",
+ "symphonia",
+ "xrf-error",
+]
+
+[[package]]
+name = "xrf-test-utils"
+version = "0.1.0"
+dependencies = [
+ "fileslice",
+]
+
+[[package]]
+name = "xrf-texture"
+version = "0.1.0"
+dependencies = [
+ "ddsfile",
+ "image",
+ "image_dds",
+ "log",
+ "path-absolutize",
+ "rayon",
+ "serde",
+ "xrf-error",
+ "xrf-ltx",
+ "xrf-output",
+ "xrf-utils",
+ "xrf-xml",
+]
+
+[[package]]
+name = "xrf-translation"
+version = "0.1.0"
+dependencies = [
+ "derive_more 2.1.1",
+ "log",
+ "serde",
+ "serde_json",
+ "walkdir",
+ "xrf-error",
+ "xrf-output",
+ "xrf-report",
+ "xrf-test-utils",
+ "xrf-utils",
+ "xrf-xml",
+]
+
+[[package]]
+name = "xrf-typescript"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "swc_common",
+ "swc_ecma_ast",
+ "swc_ecma_parser",
+ "xrf-error",
+]
+
+[[package]]
+name = "xrf-utils"
+version = "0.1.0"
+dependencies = [
+ "base64 0.23.1",
+ "encoding_rs",
+ "xrf-error",
+]
+
+[[package]]
+name = "xrf-xml"
+version = "0.1.0"
+dependencies = [
+ "quick-xml 0.41.0",
+ "roxmltree",
+ "serde",
+ "xrf-error",
+ "xrf-utils",
 ]
 
 [[package]]

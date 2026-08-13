@@ -3,9 +3,9 @@ use std::process;
 use std::time::Instant;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_ltx::Ltx;
-use xray_output::OutputOptions;
-use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor};
+use xrf_ltx::Ltx;
+use xrf_output::OutputOptions;
+use xrf_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -97,14 +97,14 @@ impl GenericCommand for PackEquipmentIconsCommand {
       TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if !source.is_dir() {
-      xray_output::error!(output_options, "Expected valid source folder containing DDS icons");
+      xrf_output::error!(output_options, "Expected valid source folder containing DDS icons");
       process::exit(1);
     }
 
-    xray_output::info!(output_options, "Starting packing DDS icons file, parallel");
-    xray_output::info!(output_options, "System ltx: {}", system_ltx_path.display());
-    xray_output::info!(output_options, "Source icons dir: {}", source.display());
-    xray_output::info!(output_options, "Output dir: {}", output.display());
+    xrf_output::info!(output_options, "Starting packing DDS icons file, parallel");
+    xrf_output::info!(output_options, "System ltx: {}", system_ltx_path.display());
+    xrf_output::info!(output_options, "Source icons dir: {}", source.display());
+    xrf_output::info!(output_options, "Output dir: {}", output.display());
 
     let started_at: Instant = Instant::now();
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
@@ -123,7 +123,7 @@ impl GenericCommand for PackEquipmentIconsCommand {
 
     PackEquipmentProcessor::pack_sprites(options)?;
 
-    xray_output::info!(
+    xrf_output::info!(
       output_options,
       "Saved resulting file with combined icons {}",
       output.display()

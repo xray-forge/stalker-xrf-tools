@@ -2,8 +2,8 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_output::OutputOptions;
-use xray_texture::{ImageFormat, PackDescriptionOptions, UnpackDescriptionProcessor};
+use xrf_output::OutputOptions;
+use xrf_texture::{ImageFormat, PackDescriptionOptions, UnpackDescriptionProcessor};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -106,7 +106,7 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
     log::info!("Paths: base {}, output {}", base.display(), output_path.display());
     log::info!("Parallel mode: {}", is_parallel);
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Unpacking texture descriptions: {}, from {} to {}, parallel - {}",
       description.display(),

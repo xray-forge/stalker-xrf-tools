@@ -1,6 +1,7 @@
 [package]
 name = "xrf-app"
 version = "0.1.0"
+publish = false
 description = "XRF development tools"
 authors = ["Neloreck"]
 edition = "2024"
@@ -22,15 +23,15 @@ ts-rs = { workspace = true, optional = true }
 tauri-plugin-dialog = "2.7.2"
 tauri-plugin-fs = "2.5.1"
 tauri-plugin-shell = "2.3.5"
-xray-archive = { workspace = true }
-xray-db = { workspace = true }
-xray-export = { workspace = true }
-xray-ltx = { workspace = true }
-xray-output = { workspace = true }
-xray-sound = { workspace = true }
-xray-texture = { workspace = true }
-xray-utils = { workspace = true }
-xray-translation = { workspace = true }
+xrf-archive = { workspace = true }
+xrf-db = { workspace = true }
+xrf-export = { workspace = true }
+xrf-ltx = { workspace = true }
+xrf-output = { workspace = true }
+xrf-sound = { workspace = true }
+xrf-texture = { workspace = true }
+xrf-utils = { workspace = true }
+xrf-translation = { workspace = true }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

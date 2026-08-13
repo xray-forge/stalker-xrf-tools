@@ -9,7 +9,7 @@ import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { getSyntaxLanguage } from "@/lib/syntax";
-import { ExportSourceContent } from "@/lib/xrf/bindings/xray-export";
+import { ExportSourceContent } from "@/lib/xrf/bindings/xrf-export";
 import { transformError } from "@/lib/xrf/error";
 
 export interface IExportSourceViewProps extends BaseComponentProps {

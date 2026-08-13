@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
-use xray_output::OutputOptions;
+use xrf_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -90,7 +90,7 @@ impl GenericCommand for DuplicateOmfMotionCommand {
 
     omf_file.write_to_path::<XRayByteOrder, _>(&destination)?;
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Copied motion '{}' to '{}'{}, written into {}",
       from,

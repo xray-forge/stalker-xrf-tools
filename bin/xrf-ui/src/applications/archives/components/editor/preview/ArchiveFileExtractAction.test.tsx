@@ -9,7 +9,7 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
-import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({

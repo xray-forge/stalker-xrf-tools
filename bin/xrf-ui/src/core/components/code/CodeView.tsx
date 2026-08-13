@@ -45,7 +45,10 @@ export function CodeView({
       aria-label={label}
       id={id}
       className={className}
-      sx={[{ display: "flex", minWidth: 0, overflow: "auto" }, sx ?? {}]}
+      sx={[
+        { display: "flex", minWidth: 0, overflow: "auto" },
+        ...(sx === undefined ? [] : Array.isArray(sx) ? sx : [sx]),
+      ]}
     >
       <Box
         aria-hidden={true}

@@ -1,0 +1,252 @@
+use std::path::Path;
+use std::time::Instant;
+
+use fxhash::FxBuildHasher;
+use indexmap::IndexSet;
+use xrf_error::{XRayError, XRayResult};
+
+use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
+use crate::project::ltx_verify_options::LtxVerifyOptions;
+use crate::{Ltx, LtxProject, LtxProjectVerifyResult};
+
+impl LtxProject {
+  /// Verify all the entries in current ltx project.
+  /// Make sure that:
+  /// - All included files exist or `.ts` counterpart is declared
+  /// - All the inherited sections are valid and declared before inherit attempt
+  pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> XRayResult<LtxProjectVerifyResult> {
+    let mut result: LtxProjectVerifyResult = LtxProjectVerifyResult::new();
+    let started_at: Instant = Instant::now();
+
+    xrf_output::heading!(options.output, "Verify path: {}", self.root.display());
+
+    // For each file entry in the project:
+    for entry in &self.ltx_file_entries {
+      // Do not check scheme definitions for scheme files - makes no sense.
+      if Self::is_ltx_scheme_path(entry) {
+        continue;
+      } else {
+        result.total_files += 1;
+      }
+
+      let ltx: Ltx = Ltx::read_from_file_full(entry)?;
+
+      // For each section in file:
+      for (section_name, section) in &ltx {
+        result.total_sections += 1;
+
+        // Check only if schema is defined:
+        if let Some(scheme_name) = section.get(LTX_SCHEME_FIELD) {
+          let mut section_has_error: bool = false;
+
+          result.checked_sections += 1;
+
+          // Check if definition or required schema exists:
+          if let Some(scheme_definition) = self.ltx_scheme_declarations.get(scheme_name) {
+            let mut validated: IndexSet<String, FxBuildHasher> = Default::default();
+
+            // Check all fields in section data.
+            for (field_name, value) in section {
+              validated.insert(field_name.into());
+
+              // Respect `*` definition for mapping sections.
+              if let Some(field_definition) = scheme_definition
+                .fields
+                .get(field_name)
+                .or_else(|| scheme_definition.fields.get(LTX_SYMBOL_ANY))
+              {
+                xrf_output::verbose!(
+                  options.output,
+                  "Checking {} [{}] {}",
+                  entry.display(),
+                  section_name,
+                  field_name
+                );
+
+                result.checked_fields += 1;
+
+                if let Some(error) = field_definition.validate_value(&ltx, value) {
+                  match error {
+                    XRayError::LtxScheme { message, .. } => {
+                      section_has_error = true;
+
+                      result.errors.push(XRayError::new_scheme_error_at(
+                        section_name,
+                        field_name,
+                        message,
+                        entry.to_str().unwrap(),
+                      ));
+                    }
+                    error => return Err(error),
+                  }
+                }
+              } else if scheme_definition.is_strict {
+                section_has_error = true;
+
+                result.errors.push(XRayError::new_scheme_error_at(
+                  section_name,
+                  field_name,
+                  "Unexpected field, definition is required in strict mode",
+                  entry.to_str().unwrap(),
+                ));
+              }
+            }
+
+            if scheme_definition.is_strict {
+              for (field_name, definition) in &scheme_definition.fields {
+                if !definition.is_optional && field_name != LTX_SYMBOL_ANY && !validated.contains(field_name) {
+                  section_has_error = true;
+
+                  result.errors.push(XRayError::new_scheme_error_at(
+                    section_name,
+                    field_name,
+                    "Required field was not provided",
+                    entry.to_str().unwrap(),
+                  ));
+                }
+              }
+            }
+          } else {
+            section_has_error = true;
+
+            result.errors.push(XRayError::new_scheme_error_at(
+              section_name,
+              "*",
+              format!("Required schema '{scheme_name}' definition is not found"),
+              entry.to_str().unwrap(),
+            ));
+          }
+
+          if section_has_error {
+            result.invalid_sections += 1;
+          } else {
+            result.valid_sections += 1;
+          }
+        } else {
+          result.skipped_sections += 1
+        }
+      }
+    }
+
+    result.duration = started_at.elapsed().as_millis();
+
+    for error in &result.errors {
+      xrf_output::error!(options.output, "{error}");
+    }
+
+    xrf_output::info!(
+      options.output,
+      "Checked {} files, {} sections in {} sec",
+      self.ltx_files.len(),
+      result.total_sections,
+      (result.duration as f64) / 1000.0
+    );
+    xrf_output::info!(
+      options.output,
+      "Verified {:.2}%, {} files, {} sections, {} fields",
+      (result.checked_sections as f32 * 100.0) / result.total_sections as f32,
+      result.total_files,
+      result.checked_sections,
+      result.checked_fields
+    );
+    xrf_output::info!(options.output, "Found {} error(s)", result.errors.len());
+
+    Ok(result)
+  }
+
+  /// Verify all the section/field entries in current ltx project.
+  pub fn verify_entries(&self) -> XRayResult<LtxProjectVerifyResult> {
+    self.verify_entries_opt(Default::default())
+  }
+
+  /// Format single LTX file by provided path
+  pub fn verify_file<P: AsRef<Path>>(path: P) -> XRayResult<()> {
+    Ltx::read_from_file_full(path)?;
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::fs;
+  use std::path::PathBuf;
+
+  use super::*;
+  use crate::{LtxProjectOptions, LtxVerifyOptions};
+
+  #[test]
+  fn validates_condlists_from_project_schemes() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources/tests/ltx_project_verify/condlist");
+    let project = LtxProject::open_at_path_opt(
+      &root,
+      LtxProjectOptions {
+        is_with_schemes_check: true,
+        ..Default::default()
+      },
+    )
+    .expect("Expected test project to open");
+
+    let result = project
+      .verify_entries_opt(LtxVerifyOptions { ..Default::default() })
+      .expect("Expected test project verification to complete");
+
+    assert_eq!(result.valid_sections, 2);
+    assert_eq!(result.invalid_sections, 1);
+    assert_eq!(result.errors.len(), 1);
+    assert_eq!(
+      result.errors[0].to_string(),
+      format!(
+        "Ltx scheme error in '{}' [invalid] value : Parsing error: Invalid condlist syntax at byte 2: Expected a name after condition or effect prefix",
+        root.join("invalid.ltx").display(),
+      ),
+    );
+  }
+
+  #[test]
+  fn skips_schema_less_sections() -> XRayResult {
+    let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-project-verify-test-{}", std::process::id()));
+    fs::create_dir_all(&root)?;
+    fs::write(root.join("array_sections.ltx"), "[array@one]\nvalue = 1\n")?;
+
+    let project: LtxProject = LtxProject::open_at_path_opt(
+      &root,
+      LtxProjectOptions {
+        is_with_schemes_check: true,
+        ..Default::default()
+      },
+    )?;
+    let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions { ..Default::default() })?;
+
+    assert_eq!(result.checked_sections, 0);
+    assert_eq!(result.skipped_sections, 1);
+    assert_eq!(result.invalid_sections, 0);
+    assert!(result.errors.is_empty());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
+
+  #[test]
+  fn skips_inheritance_for_entry_with_header_metadata() -> XRayResult {
+    let root: PathBuf =
+      std::env::temp_dir().join(format!("xrf-ltx-project-skip-inheritance-test-{}", std::process::id()));
+    fs::create_dir_all(&root)?;
+    fs::write(
+      root.join("disabled.ltx"),
+      "; @xrf-ltx skip-inheritance\n[child]:missing\n",
+    )?;
+
+    let project: LtxProject = LtxProject::open_at_path(&root)?;
+    let result: LtxProjectVerifyResult = project.verify_entries()?;
+
+    assert_eq!(result.total_files, 1);
+    assert_eq!(result.total_sections, 1);
+    assert!(result.errors.is_empty());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
+}

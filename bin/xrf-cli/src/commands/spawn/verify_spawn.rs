@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{SpawnFile, XRayByteOrder};
-use xray_error::XRayError;
+use xrf_db::{SpawnFile, XRayByteOrder};
+use xrf_error::XRayError;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 

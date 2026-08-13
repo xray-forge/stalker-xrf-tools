@@ -5,7 +5,7 @@ import { CommandResult, ICommandResultStat } from "@/core/components/result/Comm
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
 import { formatDuration } from "@/lib/result";
 import { bytesToMegabytes } from "@/lib/size";
-import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xrf-archive";
 
 interface IArchivesUnpackResultProps {
   result: ArchiveUnpackResult;

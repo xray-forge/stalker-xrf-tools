@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { flagsColumn, identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
-import { AlifeObject } from "@/lib/xrf/bindings/xray-db";
+import { AlifeObject } from "@/lib/xrf/bindings/xrf-db";
 
 interface ISpawnEditorAlifeObjectsTableProps {
   objects: Array<AlifeObject>;

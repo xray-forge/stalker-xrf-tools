@@ -25,12 +25,15 @@ import {
   TArchiveSelection,
 } from "@/lib/xrf/archive";
 import {
+  ArchiveAudioPreview,
+  ArchiveImagePreview,
+} from "@/lib/xrf/bindings/xrf-app";
+import {
   ArchiveExtractFolderResult,
   ArchiveFileDescriptor,
   ArchiveProject,
   ProjectReadResult,
-} from "@/lib/xrf/bindings/xray-archive";
-import { ArchiveAudioPreview, ArchiveImagePreview } from "@/lib/xrf/bindings/xrf-app";
+} from "@/lib/xrf/bindings/xrf-archive";
 import { transformError } from "@/lib/xrf/error";
 import { EArchivesEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 

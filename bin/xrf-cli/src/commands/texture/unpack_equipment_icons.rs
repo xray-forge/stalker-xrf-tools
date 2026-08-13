@@ -3,9 +3,9 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_ltx::Ltx;
-use xray_output::OutputOptions;
-use xray_texture::{
+use xrf_ltx::Ltx;
+use xrf_output::OutputOptions;
+use xrf_texture::{
   ImageFormat, RgbaImage, UnpackEquipmentOptions, UnpackEquipmentProcessor, dds_to_image, read_dds_by_path,
 };
 
@@ -80,11 +80,11 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
 
     let started_at: Instant = Instant::now();
 
-    xray_output::info!(output_options, "Opening DDS file: {}", source.display());
+    xrf_output::info!(output_options, "Opening DDS file: {}", source.display());
 
     let source_dds: RgbaImage = read_dds_by_path(source)
       .and_then(|dds| {
-        xray_output::info!(
+        xrf_output::info!(
           output_options,
           "Source DDS file details: {}x{}, mip-maps: {}, format: {:?}",
           dds.header.width,
@@ -98,7 +98,7 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
       .expect("Expected path to valid DDS source file");
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
 
-    xray_output::info!(
+    xrf_output::info!(
       output_options,
       "Unpacking equipment DDS file into: {}",
       output.display()
@@ -114,7 +114,7 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
       dds_compression_format: ImageFormat::BC3RgbaUnorm,
     })?;
 
-    xray_output::info!(output_options, "Successfully DDS equipment file based on LTX sections");
+    xrf_output::info!(output_options, "Successfully DDS equipment file based on LTX sections");
 
     log::info!("Unpack equipment took: {}ms", started_at.elapsed().as_millis());
 

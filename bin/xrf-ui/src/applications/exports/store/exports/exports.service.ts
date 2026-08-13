@@ -7,7 +7,7 @@ import { Nullable } from "@/core/types/general";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
 import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
-import { ExportSourceContent, ExportsProject } from "@/lib/xrf/bindings/xray-export";
+import { ExportSourceContent, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 import { transformError } from "@/lib/xrf/error";
 import { EExportsEditorCommand, releaseEditorProject } from "@/lib/xrf/ipc";
 

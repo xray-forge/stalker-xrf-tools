@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 use tauri::State;
-use xray_translation::{TranslationProject, TranslationProjectJson};
+use xrf_translation::{TranslationProject, TranslationProjectJson};
 
 use crate::translations_editor::state::TranslationsEditorState;
 use crate::types::TauriResult;

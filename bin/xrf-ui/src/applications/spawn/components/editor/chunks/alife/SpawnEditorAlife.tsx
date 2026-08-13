@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { SpawnEditorAlifeObjectsTable } from "@/applications/spawn/components/editor/chunks/alife/SpawnEditorAlifeObjectsTable";
 import { SpawnChunkView } from "@/applications/spawn/components/editor/chunks/SpawnChunkView";
 import { SpawnFileService } from "@/lib/spawn-file";
-import { SpawnALifeSpawnsChunk } from "@/lib/xrf/bindings/xray-db";
+import { SpawnALifeSpawnsChunk } from "@/lib/xrf/bindings/xrf-db";
 
 export function SpawnEditorAlife(): ReactElement {
   const spawnFileService: SpawnFileService = useInjection(SpawnFileService);

@@ -2,7 +2,7 @@ use std::sync::MutexGuard;
 
 use serde_json::{Value, json};
 use tauri::State;
-use xray_translation::TranslationProjectJson;
+use xrf_translation::TranslationProjectJson;
 
 use crate::translations_editor::state::TranslationsEditorState;
 use crate::types::TauriResult;

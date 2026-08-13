@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_error::XRayError;
-use xray_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
-use xray_output::OutputOptions;
+use xrf_error::XRayError;
+use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -54,7 +54,7 @@ impl GenericCommand for VerifyLtxCommand {
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if !path.is_dir() {
-      xray_output::error!(
+      xrf_output::error!(
         output,
         "Expected configs root directory path for validation as --path parameter"
       );

@@ -3,8 +3,8 @@ use std::process;
 use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_output::OutputOptions;
-use xray_translation::{ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject};
+use xrf_output::OutputOptions;
+use xrf_translation::{ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject};
 
 use super::translation_verification_report::TranslationVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -89,7 +89,7 @@ impl GenericCommand for VerifyTranslationsCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(is_silent, is_verbose);
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Verifying translation {}, language - {}",
       path.display(),
@@ -113,7 +113,7 @@ impl GenericCommand for VerifyTranslationsCommand {
       TranslationVerificationReportWriter::new(&result).write(&report_path)?;
     }
 
-    xray_output::info!(
+    xrf_output::info!(
       options.output,
       "Verified translation files in {} sec, {} checked, {} missing",
       (result.duration as f64) / 1000.0,

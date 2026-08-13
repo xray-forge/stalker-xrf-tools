@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{ThmBumpPatchReport, ThmBumpProcessor, XRayByteOrder};
-use xray_error::{XRayError, XRayResult};
-use xray_output::OutputOptions;
+use xrf_db::{ThmBumpPatchReport, ThmBumpProcessor, XRayByteOrder};
+use xrf_error::{XRayError, XRayResult};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -124,7 +124,7 @@ impl PatchThmBumpCommand {
     };
 
     if report.is_dry_run {
-      xray_output::info!(
+      xrf_output::info!(
         output,
         "Dry run, nothing written, {} and {} would receive {} bytes instead of {}",
         outcome,
@@ -136,7 +136,7 @@ impl PatchThmBumpCommand {
       return Ok(());
     }
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Patched thm {}, written into {}",
       outcome,

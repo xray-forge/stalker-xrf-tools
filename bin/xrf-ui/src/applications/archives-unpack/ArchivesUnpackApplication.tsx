@@ -12,7 +12,7 @@ import { FilePickerInput } from "@/lib/file-picker/FilePickerInput";
 import { usePathState } from "@/lib/file-picker/use-path-state";
 import { Logger, useLogger } from "@/lib/logging";
 import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
-import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xrf-archive";
 import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/lib/xrf/project-path";
 

@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_output::OutputOptions;
-use xray_translation::{ProjectInitializeOptions, ProjectInitializeResult, TranslationProject};
+use xrf_output::OutputOptions;
+use xrf_translation::{ProjectInitializeOptions, ProjectInitializeResult, TranslationProject};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -55,7 +55,7 @@ impl GenericCommand for InitializeTranslationsCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(is_silent, is_verbose);
 
-    xray_output::info!(output, "Verifying translation {}", path.display());
+    xrf_output::info!(output, "Verifying translation {}", path.display());
 
     let options: ProjectInitializeOptions = ProjectInitializeOptions {
       output,
@@ -68,7 +68,7 @@ impl GenericCommand for InitializeTranslationsCommand {
       TranslationProject::initialize_file(path, &options)?
     };
 
-    xray_output::info!(
+    xrf_output::info!(
       options.output,
       "Initialized translation files in {} sec",
       (result.duration as f64) / 1000.0,

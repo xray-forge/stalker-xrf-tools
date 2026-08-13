@@ -2,7 +2,7 @@ use std::path::Path;
 use std::sync::MutexGuard;
 
 use tauri::State;
-use xray_db::{SpawnFile, XRayByteOrder};
+use xrf_db::{SpawnFile, XRayByteOrder};
 
 use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;

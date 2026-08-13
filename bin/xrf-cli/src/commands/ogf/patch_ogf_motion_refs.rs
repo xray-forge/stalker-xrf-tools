@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{OgfFile, OgfMotionRefsProcessor, OgfRefsPatchReport, XRayByteOrder};
-use xray_error::XRayResult;
-use xray_output::OutputOptions;
+use xrf_db::{OgfFile, OgfMotionRefsProcessor, OgfRefsPatchReport, XRayByteOrder};
+use xrf_error::XRayResult;
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -102,7 +102,7 @@ impl PatchOgfMotionRefsCommand {
   ) -> XRayResult {
     let existing: Vec<String> = OgfFile::read_motion_refs_from_path::<XRayByteOrder, _>(&path)?;
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Patch ogf motion refs {}, {:?} -> {:?}",
       path.display(),
@@ -114,7 +114,7 @@ impl PatchOgfMotionRefsCommand {
       OgfMotionRefsProcessor::patch_motion_refs_to_path::<XRayByteOrder>(path, destination, motion_refs, is_dry_run)?;
 
     if report.is_dry_run {
-      xray_output::info!(
+      xrf_output::info!(
         output,
         "Dry run, nothing written, {} would receive {} bytes instead of {}",
         destination.display(),
@@ -125,7 +125,7 @@ impl PatchOgfMotionRefsCommand {
       return Ok(());
     }
 
-    xray_output::info!(output, "Ogf motion refs written into {}", destination.display());
+    xrf_output::info!(output, "Ogf motion refs written into {}", destination.display());
 
     Ok(())
   }

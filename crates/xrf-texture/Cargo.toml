@@ -1,0 +1,25 @@
+[package]
+name = "xrf-texture"
+version = "0.1.0"
+publish = false
+edition = "2024"
+rust-version.workspace = true
+
+[dependencies]
+ddsfile = { workspace = true }
+image = { workspace = true, features = [
+  "rayon", "bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp",
+] }
+image_dds = "0.7.2"
+log = { workspace = true }
+path-absolutize = "4.0.1"
+rayon = { workspace = true }
+serde = { workspace = true }
+xrf-error = { workspace = true }
+xrf-ltx = { workspace = true }
+xrf-output = { workspace = true }
+xrf-utils = { workspace = true }
+xrf-xml = { workspace = true }
+
+[lints]
+workspace = true

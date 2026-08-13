@@ -19,7 +19,7 @@ import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/context";
 import { Nullable } from "@/core/types/general";
 import { SpawnFileService } from "@/lib/spawn-file";
-import { SpawnHeaderChunk } from "@/lib/xrf/bindings/xray-db";
+import { SpawnHeaderChunk } from "@/lib/xrf/bindings/xrf-db";
 
 const MONOSPACE_FONT: string = "'Cascadia Mono', 'Consolas', monospace";
 

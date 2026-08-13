@@ -13,7 +13,7 @@ import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
 import { formatBytes } from "@/lib/size";
 import { isUnderArchiveDirectory, TArchiveOperation } from "@/lib/xrf/archive";
-import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveExtractFolderResult, ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 export interface IArchiveFolderContentProps {
   path: string;

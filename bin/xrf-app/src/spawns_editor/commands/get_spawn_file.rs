@@ -2,7 +2,7 @@ use std::sync::MutexGuard;
 
 use serde_json::{Value, json};
 use tauri::State;
-use xray_db::SpawnFile;
+use xrf_db::SpawnFile;
 
 use crate::spawns_editor::state::SpawnsEditorState;
 use crate::types::TauriResult;

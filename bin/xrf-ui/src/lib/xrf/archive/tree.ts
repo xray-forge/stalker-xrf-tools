@@ -1,5 +1,5 @@
 import { Optional } from "@/core/types/general";
-import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 /**
  * Whether an archived file would be written when its directory is extracted.

@@ -3,9 +3,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
-use xray_error::{XRayError, XRayResult};
-use xray_output::OutputOptions;
+use xrf_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
+use xrf_error::{XRayError, XRayResult};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -129,17 +129,17 @@ impl RenameOmfMotionsCommand {
       )));
     }
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Renamed omf motions {}, {renamed_count}/{} renamed",
       path.display(),
       omf_file.motions.motions.len()
     );
 
-    xray_output::verbose!(output, "Resulting motions: {}", omf_file.get_motion_names().join(","));
+    xrf_output::verbose!(output, "Resulting motions: {}", omf_file.get_motion_names().join(","));
 
     if is_dry_run {
-      xray_output::info!(
+      xrf_output::info!(
         output,
         "Dry run, nothing written, {} would receive {renamed_count} renamed motions",
         destination.display()
@@ -150,7 +150,7 @@ impl RenameOmfMotionsCommand {
 
     omf_file.write_to_path::<XRayByteOrder, _>(&destination)?;
 
-    xray_output::info!(output, "Renamed omf file written into {}", destination.display());
+    xrf_output::info!(output, "Renamed omf file written into {}", destination.display());
 
     Ok(())
   }

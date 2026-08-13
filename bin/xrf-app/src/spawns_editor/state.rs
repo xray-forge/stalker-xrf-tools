@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use xray_db::SpawnFile;
+use xrf_db::SpawnFile;
 
 pub struct SpawnsEditorState {
   pub file: Arc<Mutex<Option<SpawnFile>>>,

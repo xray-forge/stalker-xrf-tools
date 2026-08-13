@@ -5,7 +5,7 @@ import { Nullable } from "@/core/types/general";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
-import { ArchiveExtractFolderResult } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveExtractFolderResult } from "@/lib/xrf/bindings/xrf-archive";
 import { EArchivesEditorCommand } from "@/lib/xrf/ipc";
 
 /** The operation union carries every kind of write, so a folder assertion has to name its own. */

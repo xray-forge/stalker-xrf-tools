@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{OgfChunksProcessor, OgfFile, XRayByteOrder};
-use xray_output::OutputOptions;
+use xrf_db::{OgfChunksProcessor, OgfFile, XRayByteOrder};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -51,13 +51,13 @@ impl GenericCommand for InfoOgfCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    xray_output::info!(output, "Read ogf file {}", path.display());
+    xrf_output::info!(output, "Read ogf file {}", path.display());
 
     let ogf_file: Box<OgfFile> = Box::new(OgfFile::read_from_path::<XRayByteOrder, _>(path)?);
 
-    xray_output::info!(output, "Ogf file information");
+    xrf_output::info!(output, "Ogf file information");
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Version: {}, model_type: {}, shader_id: {}, {:?} - {:?}",
       ogf_file.header.version,
@@ -67,36 +67,36 @@ impl GenericCommand for InfoOgfCommand {
       ogf_file.header.bounding_sphere
     );
 
-    xray_output::info!(output, "Boundaries box: {:?}", ogf_file.header.bounding_box);
-    xray_output::info!(output, "Boundaries sphere: {:?}", ogf_file.header.bounding_sphere);
+    xrf_output::info!(output, "Boundaries box: {:?}", ogf_file.header.bounding_box);
+    xrf_output::info!(output, "Boundaries sphere: {:?}", ogf_file.header.bounding_sphere);
 
     if let Some(texture) = &ogf_file.texture {
-      xray_output::info!(output, "Texture name: {}", texture.texture_name);
-      xray_output::info!(output, "Shader name: {}", texture.shader_name);
+      xrf_output::info!(output, "Texture name: {}", texture.texture_name);
+      xrf_output::info!(output, "Shader name: {}", texture.shader_name);
     }
 
     if let Some(description) = &ogf_file.description {
-      xray_output::info!(output, "Description: {:?}", description);
+      xrf_output::info!(output, "Description: {:?}", description);
     }
 
     if let Some(bones) = &ogf_file.bones {
-      xray_output::info!(output, "Bones: {}", bones.bones.len());
+      xrf_output::info!(output, "Bones: {}", bones.bones.len());
 
       for (index, bone) in bones.bones.iter().enumerate() {
-        xray_output::info!(output, "[{}] name: {}", index, bone.name);
-        xray_output::info!(output, "[{}] parent: {}", index, bone.parent);
+        xrf_output::info!(output, "[{}] name: {}", index, bone.name);
+        xrf_output::info!(output, "[{}] parent: {}", index, bone.parent);
       }
     }
 
     if let Some(kinematics) = &ogf_file.kinematics {
-      xray_output::info!(output, "Motion refs: {:?}", kinematics.motion_refs);
+      xrf_output::info!(output, "Motion refs: {:?}", kinematics.motion_refs);
     }
 
     if let Some(swi_data) = &ogf_file.swi_data {
-      xray_output::info!(output, "Progressive lods: {}", swi_data.windows.len());
+      xrf_output::info!(output, "Progressive lods: {}", swi_data.windows.len());
 
       for (index, window) in swi_data.windows.iter().enumerate() {
-        xray_output::verbose!(
+        xrf_output::verbose!(
           output,
           "[{}] lod offset: {}, tris: {}, verts: {}",
           index,
@@ -109,24 +109,24 @@ impl GenericCommand for InfoOgfCommand {
 
     match OgfChunksProcessor::find_unknown_chunk_ids::<XRayByteOrder, _>(path) {
       Ok(unknown) if !unknown.is_empty() => {
-        xray_output::info!(output, "Unparsed chunk ids: {:?}", unknown);
+        xrf_output::info!(output, "Unparsed chunk ids: {:?}", unknown);
       }
-      Ok(_) => xray_output::verbose!(output, "Unparsed chunk ids: none"),
-      Err(error) => xray_output::warning!(output, "Could not survey chunks: {}", error),
+      Ok(_) => xrf_output::verbose!(output, "Unparsed chunk ids: none"),
+      Err(error) => xrf_output::warning!(output, "Could not survey chunks: {}", error),
     }
 
     if let Some(children) = &ogf_file.children {
-      xray_output::info!(output, "OGF children ({}):", children.nested.len());
+      xrf_output::info!(output, "OGF children ({}):", children.nested.len());
 
       for (index, child) in children.nested.iter().enumerate() {
         if let Some(texture) = &child.texture {
-          xray_output::info!(output, "[{}] texture name: {}", index, texture.texture_name);
-          xray_output::info!(output, "[{}] shader name: {}", index, texture.shader_name);
+          xrf_output::info!(output, "[{}] texture name: {}", index, texture.texture_name);
+          xrf_output::info!(output, "[{}] shader name: {}", index, texture.shader_name);
         }
 
         // A child is a full visual, so progressive lods live here rather than on the root.
         if let Some(swi_data) = &child.swi_data {
-          xray_output::info!(output, "[{}] progressive lods: {}", index, swi_data.windows.len());
+          xrf_output::info!(output, "[{}] progressive lods: {}", index, swi_data.windows.len());
         }
       }
     }

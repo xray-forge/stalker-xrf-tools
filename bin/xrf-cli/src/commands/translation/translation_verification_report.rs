@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use serde::Serialize;
-use xray_report::{CheckReport, Finding, Report};
-use xray_translation::ProjectVerifyResult;
+use xrf_report::{CheckReport, Finding, Report};
+use xrf_translation::ProjectVerifyResult;
 
 use crate::generic_command::CommandResult;
 
@@ -88,7 +88,7 @@ mod tests {
   use std::path::PathBuf;
   use std::sync::atomic::{AtomicU64, Ordering};
 
-  use xray_translation::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
+  use xrf_translation::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
 
   use super::TranslationVerificationReportWriter;
 
@@ -105,7 +105,7 @@ mod tests {
     let report_path: PathBuf = root.join("report.json");
     let options: ProjectVerifyOptions = ProjectVerifyOptions {
       is_strict: false,
-      output: xray_output::OutputOptions::default(),
+      output: xrf_output::OutputOptions::default(),
       language: TranslationLanguage::Ukrainian,
       path: root.clone(),
     };

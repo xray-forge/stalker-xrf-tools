@@ -1,7 +1,7 @@
 use serde_json::{Value, json};
 use tauri::State;
-use xray_ltx::Ltx;
-use xray_texture::{InventorySpriteDescriptor, open_dds_as_png};
+use xrf_ltx::Ltx;
+use xrf_texture::{InventorySpriteDescriptor, open_dds_as_png};
 
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
 use crate::types::TauriResult;

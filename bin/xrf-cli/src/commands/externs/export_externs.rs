@@ -3,12 +3,12 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_error::XRayError;
-use xray_export::{
+use xrf_error::XRayError;
+use xrf_export::{
   ExternFormat, ExternManifest, ExternManifestParser, LineEndings, ParsedExternManifest, normalize_line_endings,
   render_extern_manifest,
 };
-use xray_output::OutputOptions;
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -102,7 +102,7 @@ impl GenericCommand for ExportExternsCommand {
 
       Self::write_output(path, &content)?;
 
-      xray_output::info!(
+      xrf_output::info!(
         output,
         "Exported {} externs to '{}'.",
         parsed.manifest.exports.len(),
@@ -116,7 +116,7 @@ impl GenericCommand for ExportExternsCommand {
 
     Self::verify_artifact(path, format, &parsed.manifest, line_endings)?;
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Extern artifact '{}' matches {} declarations.",
       path.display(),
@@ -210,7 +210,7 @@ mod tests {
   use std::path::PathBuf;
 
   use clap::ArgMatches;
-  use xray_export::ExternFormat;
+  use xrf_export::ExternFormat;
 
   use super::ExportExternsCommand;
   use crate::generic_command::GenericCommand;

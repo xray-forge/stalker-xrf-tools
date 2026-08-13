@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{OmfFile, XRayByteOrder};
-use xray_output::OutputOptions;
+use xrf_db::{OmfFile, XRayByteOrder};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -51,15 +51,15 @@ impl GenericCommand for InfoOmfCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    xray_output::info!(output, "Read omf file {}", path.display());
+    xrf_output::info!(output, "Read omf file {}", path.display());
 
     let omf_file: Box<OmfFile> = Box::new(OmfFile::read_from_path::<XRayByteOrder, _>(path)?);
 
-    xray_output::info!(output, "Omf file information");
+    xrf_output::info!(output, "Omf file information");
 
-    xray_output::info!(output, "Version: {}", omf_file.parameters.version);
+    xrf_output::info!(output, "Version: {}", omf_file.parameters.version);
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Motions: {} {}",
       omf_file.motions.motions.len(),
@@ -80,7 +80,7 @@ impl GenericCommand for InfoOmfCommand {
         .get(definition.motion as usize)
         .map(|it| it.count);
 
-      xray_output::verbose!(
+      xrf_output::verbose!(
         output,
         "Motion '{}': keyframes {}, flags {:#04b}, speed {}, power {}, accrue {}, falloff {}",
         definition.name,
@@ -93,8 +93,8 @@ impl GenericCommand for InfoOmfCommand {
       );
     }
 
-    xray_output::info!(output, "Bones total: {}", omf_file.parameters.get_bones_count());
-    xray_output::info!(
+    xrf_output::info!(output, "Bones total: {}", omf_file.parameters.get_bones_count());
+    xrf_output::info!(
       output,
       "Parts: {}",
       omf_file
@@ -107,7 +107,7 @@ impl GenericCommand for InfoOmfCommand {
     );
 
     for part in &omf_file.parameters.parts {
-      xray_output::info!(output, "Part '{}' bones: {}", part.name, part.get_bones().join(","));
+      xrf_output::info!(output, "Part '{}' bones: {}", part.name, part.get_bones().join(","));
     }
 
     Ok(())

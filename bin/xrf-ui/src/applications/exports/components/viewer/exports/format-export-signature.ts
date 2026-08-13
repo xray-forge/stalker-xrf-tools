@@ -16,4 +16,4 @@ export function formatExportSignature(declaration: ExportDescriptor): string {
     }
   }
 }
-import { ExportDescriptor, ExportParameterDescriptor } from "@/lib/xrf/bindings/xray-export";
+import { ExportDescriptor, ExportParameterDescriptor } from "@/lib/xrf/bindings/xrf-export";

@@ -14,7 +14,7 @@ import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { Nullable, Optional } from "@/core/types/general";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/lib/xrf/archive";
-import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 export function ArchivesMenu(): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);

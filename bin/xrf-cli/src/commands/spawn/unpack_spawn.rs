@@ -3,8 +3,8 @@ use std::time::{Duration, Instant};
 use std::{fs, io};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{SpawnFile, XRayByteOrder};
-use xray_output::OutputOptions;
+use xrf_db::{SpawnFile, XRayByteOrder};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -76,8 +76,8 @@ impl GenericCommand for UnpackSpawnFileCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    xray_output::info!(output, "Starting parsing spawn file: {}", path.display());
-    xray_output::info!(output, "Unpack destination: {}", destination.display());
+    xrf_output::info!(output, "Starting parsing spawn file: {}", path.display());
+    xrf_output::info!(output, "Unpack destination: {}", destination.display());
 
     // Apply force flag and delete existing directories.
     if force && destination.exists() && destination.is_dir() {
@@ -103,8 +103,8 @@ impl GenericCommand for UnpackSpawnFileCommand {
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    xray_output::info!(output, "Read spawn file took: {}ms", read_duration.as_millis());
-    xray_output::info!(output, "Export spawn file took: {}ms", unpack_duration.as_millis());
+    xrf_output::info!(output, "Read spawn file took: {}ms", read_duration.as_millis());
+    xrf_output::info!(output, "Export spawn file took: {}ms", unpack_duration.as_millis());
 
     Ok(())
   }

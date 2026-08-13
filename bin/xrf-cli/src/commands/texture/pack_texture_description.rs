@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_output::OutputOptions;
-use xray_texture::{ImageFormat, PackDescriptionOptions, PackDescriptionProcessor};
+use xrf_output::OutputOptions;
+use xrf_texture::{ImageFormat, PackDescriptionOptions, PackDescriptionProcessor};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;

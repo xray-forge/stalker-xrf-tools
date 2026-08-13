@@ -2,11 +2,11 @@ use std::path::PathBuf;
 use std::process;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_gamedata::{
+use xrf_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions, GamedataVerificationResult,
   GamedataVerificationStatus, GamedataVerificationType,
 };
-use xray_output::OutputOptions;
+use xrf_output::OutputOptions;
 
 use super::verification_report::GamedataVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -129,8 +129,8 @@ impl GenericCommand for VerifyGamedataCommand {
       checks,
     };
 
-    xray_output::heading!(open_options.output, "Opening gamedata project");
-    xray_output::info!(
+    xrf_output::heading!(open_options.output, "Opening gamedata project");
+    xrf_output::info!(
       open_options.output,
       "Root: {}, ignored: [{}]",
       open_options.root.display(),
@@ -147,9 +147,9 @@ impl GenericCommand for VerifyGamedataCommand {
 
     match status {
       GamedataVerificationStatus::Passed => {
-        xray_output::info!(verify_options.output, "");
-        xray_output::success!(verify_options.output, "Project gamedata is valid");
-        xray_output::info!(
+        xrf_output::info!(verify_options.output, "");
+        xrf_output::success!(verify_options.output, "Project gamedata is valid");
+        xrf_output::info!(
           verify_options.output,
           "Gamedata project verified in {} sec",
           verify_result.duration().as_secs_f64()
@@ -159,7 +159,7 @@ impl GenericCommand for VerifyGamedataCommand {
       | GamedataVerificationStatus::Error
       | GamedataVerificationStatus::Incomplete
       | GamedataVerificationStatus::Skipped => {
-        xray_output::error!(verify_options.output, "");
+        xrf_output::error!(verify_options.output, "");
 
         let status_message = match status {
           GamedataVerificationStatus::Failed => "Project gamedata is invalid",
@@ -180,20 +180,20 @@ impl GenericCommand for VerifyGamedataCommand {
         }
 
         for message in verify_result.get_failure_messages() {
-          xray_output::error!(verify_options.output, "- {message}");
+          xrf_output::error!(verify_options.output, "- {message}");
         }
 
         for report in verify_result.get_failure_reports() {
           for finding in report.findings() {
             match finding.subject() {
-              Some(subject) => xray_output::error!(
+              Some(subject) => xrf_output::error!(
                 verify_options.output,
                 "  - [{}] {}: {}",
                 report.verification_type(),
                 subject,
                 finding.message()
               ),
-              None => xray_output::error!(
+              None => xrf_output::error!(
                 verify_options.output,
                 "  - [{}] {}",
                 report.verification_type(),
@@ -203,7 +203,7 @@ impl GenericCommand for VerifyGamedataCommand {
           }
         }
 
-        xray_output::error!(
+        xrf_output::error!(
           verify_options.output,
           "Gamedata project checked in {} sec",
           verify_result.duration().as_secs_f32()

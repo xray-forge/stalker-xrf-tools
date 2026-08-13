@@ -1,0 +1,30 @@
+[package]
+name = "xrf-gamedata"
+version = "0.1.0"
+publish = false
+edition = "2024"
+rust-version.workspace = true
+
+[dependencies]
+derive_more = { workspace = true, features = ["display"] }
+ddsfile = { workspace = true }
+rayon = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+walkdir = { workspace = true }
+xrf-db = { workspace = true }
+xrf-error = { workspace = true }
+xrf-ltx = { workspace = true }
+xrf-lua = { workspace = true }
+xrf-output = { workspace = true }
+xrf-report = { workspace = true }
+xrf-assets = { workspace = true }
+xrf-shaders = { workspace = true }
+xrf-sound = { workspace = true }
+xrf-utils = { workspace = true }
+xrf-xml = { workspace = true }
+
+[dev-dependencies]
+xrf-chunk = { workspace = true }
+
+[lints]
+workspace = true

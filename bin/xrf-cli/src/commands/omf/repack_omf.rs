@@ -3,9 +3,9 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use walkdir::WalkDir;
-use xray_db::{OmfFile, XRayByteOrder};
-use xray_error::{XRayError, XRayResult};
-use xray_output::OutputOptions;
+use xrf_db::{OmfFile, XRayByteOrder};
+use xrf_error::{XRayError, XRayResult};
+use xrf_output::OutputOptions;
 
 use crate::commands::omf::repack_omf_statistics::{RepackOmfOutcome, RepackOmfStatistics};
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -98,7 +98,7 @@ impl RepackOmfCommand {
       statistics.register(Self::verify_single(output, &path));
     }
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Repacked omf files, {}/{} byte identical, {} failed to read or write",
       statistics.identical(),
@@ -135,11 +135,11 @@ impl RepackOmfCommand {
     let destination: &PathBuf =
       destination.ok_or_else(|| XRayError::new_invalid_error("Destination path is required when not verifying"))?;
 
-    xray_output::info!(output, "Repack omf file {}", path.display());
+    xrf_output::info!(output, "Repack omf file {}", path.display());
 
     OmfFile::read_from_path::<XRayByteOrder, _>(&path)?.write_to_path::<XRayByteOrder, _>(destination)?;
 
-    xray_output::info!(output, "Omf file repacked into {}", destination.display());
+    xrf_output::info!(output, "Omf file repacked into {}", destination.display());
 
     Ok(())
   }
@@ -159,11 +159,11 @@ impl RepackOmfCommand {
     match Self::repack_into_buffer(path) {
       Ok((original, repacked)) => {
         if original == repacked {
-          xray_output::verbose!(output, "Byte identical: {}", path.display());
+          xrf_output::verbose!(output, "Byte identical: {}", path.display());
 
           RepackOmfOutcome::Identical
         } else {
-          xray_output::error!(
+          xrf_output::error!(
             output,
             "Repacked bytes differ: {}, {} bytes original, {} bytes repacked",
             path.display(),
@@ -175,7 +175,7 @@ impl RepackOmfCommand {
         }
       }
       Err(error) => {
-        xray_output::error!(output, "Failed to repack {}: {}", path.display(), error);
+        xrf_output::error!(output, "Failed to repack {}: {}", path.display(), error);
 
         RepackOmfOutcome::Failed
       }

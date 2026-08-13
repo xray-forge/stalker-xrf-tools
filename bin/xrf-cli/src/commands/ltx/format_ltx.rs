@@ -3,9 +3,9 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use walkdir::{DirEntry, WalkDir};
-use xray_error::XRayError;
-use xray_ltx::{LTX_EXTENSION, LtxFilesFormatter, LtxFormatOptions, LtxProjectFormatResult};
-use xray_output::OutputOptions;
+use xrf_error::XRayError;
+use xrf_ltx::{LTX_EXTENSION, LtxFilesFormatter, LtxFormatOptions, LtxProjectFormatResult};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -138,7 +138,7 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use xray_error::XRayResult;
+  use xrf_error::XRayResult;
 
   use super::FormatLtxCommand;
   use crate::generic_command::{CommandResult, GenericCommand};

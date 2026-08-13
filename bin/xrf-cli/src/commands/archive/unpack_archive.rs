@@ -3,8 +3,8 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use tokio::runtime::Runtime;
-use xray_archive::{ArchiveProject, ArchiveUnpackResult};
-use xray_output::OutputOptions;
+use xrf_archive::{ArchiveProject, ArchiveUnpackResult};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -94,15 +94,15 @@ impl GenericCommand for UnpackArchiveCommand {
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if is_dry {
-      xray_output::info!(output, "Unpack in dry mode");
+      xrf_output::info!(output, "Unpack in dry mode");
     }
 
-    xray_output::info!(output, "Unpack source: {}", path.display());
-    xray_output::info!(output, "Unpack destination: {}", destination.display());
+    xrf_output::info!(output, "Unpack source: {}", path.display());
+    xrf_output::info!(output, "Unpack destination: {}", destination.display());
 
     let archive_project: Box<ArchiveProject> = Box::new(ArchiveProject::new(path)?);
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",
       archive_project.archives.len(),
@@ -111,13 +111,13 @@ impl GenericCommand for UnpackArchiveCommand {
       (archive_project.get_real_size() as f64) / 1024.0 / 1024.0,
     );
 
-    xray_output::info!(output, "Unpacking files, parallel {parallel}");
+    xrf_output::info!(output, "Unpacking files, parallel {parallel}");
 
     if !is_dry {
       let result: ArchiveUnpackResult =
         Runtime::new()?.block_on(archive_project.unpack_parallel(&destination, parallel))?;
 
-      xray_output::info!(
+      xrf_output::info!(
         output,
         "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",
         result.duration as f64 / 1000.0,

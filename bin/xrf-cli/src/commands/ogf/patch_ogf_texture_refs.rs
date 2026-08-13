@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{OgfFile, OgfRefsPatchReport, OgfTextureRefsProcessor, XRayByteOrder};
-use xray_error::XRayResult;
-use xray_output::OutputOptions;
+use xrf_db::{OgfFile, OgfRefsPatchReport, OgfTextureRefsProcessor, XRayByteOrder};
+use xrf_error::XRayResult;
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -110,7 +110,7 @@ impl PatchOgfTextureRefsCommand {
   ) -> XRayResult {
     let existing: Vec<String> = OgfFile::read_texture_refs_from_path::<XRayByteOrder, _>(&path)?;
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Patch ogf texture refs {}, '{}' -> '{}', existing {:?}",
       path.display(),
@@ -123,7 +123,7 @@ impl PatchOgfTextureRefsCommand {
       OgfTextureRefsProcessor::patch_texture_refs_to_path::<XRayByteOrder>(path, destination, from, to, is_dry_run)?;
 
     if report.is_dry_run {
-      xray_output::info!(
+      xrf_output::info!(
         output,
         "Dry run, nothing written, {} references would be renamed and {} would receive {} bytes instead of {}",
         report.patched_count,
@@ -135,7 +135,7 @@ impl PatchOgfTextureRefsCommand {
       return Ok(());
     }
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Renamed {} ogf texture references, written into {}",
       report.patched_count,

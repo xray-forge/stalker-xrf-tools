@@ -2,7 +2,7 @@ use std::sync::MutexGuard;
 
 use serde_json::{Value, json};
 use tauri::State;
-use xray_archive::ArchiveProject;
+use xrf_archive::ArchiveProject;
 
 use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;

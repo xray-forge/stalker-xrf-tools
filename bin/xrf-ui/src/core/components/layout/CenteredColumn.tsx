@@ -32,7 +32,7 @@ export function CenteredColumn({
           height: "100%",
           gap: 1,
         },
-        ...(Array.isArray(sx) ? sx : [sx]),
+        ...(sx === undefined ? [] : Array.isArray(sx) ? sx : [sx]),
       ]}
     >
       {children}

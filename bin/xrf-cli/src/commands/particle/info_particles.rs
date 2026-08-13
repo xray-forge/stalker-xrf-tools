@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{ParticlesFile, XRayByteOrder};
-use xray_output::OutputOptions;
+use xrf_db::{ParticlesFile, XRayByteOrder};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -51,15 +51,15 @@ impl GenericCommand for InfoParticlesCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    xray_output::info!(output, "Read particle file {}", path.display());
+    xrf_output::info!(output, "Read particle file {}", path.display());
 
     let particles_file: Box<ParticlesFile> = Box::new(ParticlesFile::read_from_path::<XRayByteOrder, _>(path)?);
 
-    xray_output::info!(output, "Particles file information:");
+    xrf_output::info!(output, "Particles file information:");
 
-    xray_output::info!(output, "Version: {}", particles_file.header.version);
-    xray_output::info!(output, "Effects count: {}", particles_file.effects.effects.len());
-    xray_output::info!(output, "Groups count: {}", particles_file.groups.groups.len());
+    xrf_output::info!(output, "Version: {}", particles_file.header.version);
+    xrf_output::info!(output, "Effects count: {}", particles_file.effects.effects.len());
+    xrf_output::info!(output, "Groups count: {}", particles_file.groups.groups.len());
 
     Ok(())
   }

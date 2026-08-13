@@ -1,7 +1,7 @@
 use serde_json::{Value, json};
-use xray_ltx::Ltx;
-use xray_output::OutputOptions;
-use xray_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult};
+use xrf_ltx::Ltx;
+use xrf_output::OutputOptions;
+use xrf_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult};
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;

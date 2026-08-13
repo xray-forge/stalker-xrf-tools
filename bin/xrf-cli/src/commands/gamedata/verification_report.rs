@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use serde::Serialize;
-use xray_gamedata::{GamedataVerificationCheckReport, GamedataVerificationResult};
-use xray_report::{CheckReport, Finding};
+use xrf_gamedata::{GamedataVerificationCheckReport, GamedataVerificationResult};
+use xrf_report::{CheckReport, Finding};
 
 use crate::generic_command::CommandResult;
 
@@ -110,10 +110,10 @@ mod tests {
   use std::sync::atomic::{AtomicU64, Ordering};
   use std::time::Duration;
 
-  use xray_gamedata::{
+  use xrf_gamedata::{
     Finding, GamedataCheckResult, GamedataVerificationReport, GamedataVerificationStatus, GamedataVerificationType,
   };
-  use xray_report::RuleId;
+  use xrf_report::RuleId;
 
   use super::GamedataVerificationReportWriter;
 

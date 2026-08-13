@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_output::OutputOptions;
-use xray_texture::{
+use xrf_output::OutputOptions;
+use xrf_texture::{
   DynamicImage, GenericImageView, ImageFormat, Mipmaps, PNG_EXTENSION, RgbaImage, dds_to_image, fit_image_into_bounds,
   read_dds_by_path, save_image_as_ui_dds, save_image_as_ui_png,
 };
@@ -131,7 +131,7 @@ impl GenericCommand for CropDdsCommand {
       matches.get_one::<u32>("fit-height"),
     ) {
       (Some(fit_width), Some(fit_height)) => {
-        xray_output::info!(
+        xrf_output::info!(
           output,
           "Fitting cropped {}x{} region into {}x{}",
           width,
@@ -162,7 +162,7 @@ impl GenericCommand for CropDdsCommand {
       )?;
     }
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Wrote {}x{} region from {}:{} of {} to {}",
       result.width(),

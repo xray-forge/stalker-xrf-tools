@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use xray_translation::TranslationProjectJson;
+use xrf_translation::TranslationProjectJson;
 
 pub struct TranslationsEditorState {
   pub project: Arc<Mutex<Option<TranslationProjectJson>>>,

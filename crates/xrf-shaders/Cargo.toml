@@ -1,0 +1,13 @@
+[package]
+name = "xrf-shaders"
+version = "0.1.0"
+publish = false
+edition = "2024"
+rust-version.workspace = true
+
+[dependencies]
+xrf-error = { workspace = true }
+xrf-lua = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use serde_json::{Value, json};
-use xray_archive::ArchiveProject;
+use xrf_archive::ArchiveProject;
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;

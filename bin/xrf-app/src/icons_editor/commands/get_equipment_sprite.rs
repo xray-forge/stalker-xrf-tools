@@ -2,7 +2,7 @@ use std::sync::MutexGuard;
 
 use serde_json::{Value, json};
 use tauri::State;
-use xray_texture::InventorySpriteDescriptor;
+use xrf_texture::InventorySpriteDescriptor;
 
 use crate::icons_editor::state::{IconsEditorEquipmentResponse, IconsEditorState};
 use crate::types::TauriResult;

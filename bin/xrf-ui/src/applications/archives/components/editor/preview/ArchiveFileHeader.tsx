@@ -6,7 +6,7 @@ import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/component
 import { ArchiveFileExtractAction } from "@/applications/archives/components/editor/preview/ArchiveFileExtractAction";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/size";
-import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xray-archive";
+import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 interface IArchiveFileHeaderProps extends BaseComponentProps {
   descriptor: ArchiveFileDescriptor;

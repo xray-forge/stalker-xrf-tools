@@ -14,7 +14,7 @@ import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/components/shell/panel/context";
 import { Nullable } from "@/core/types/general";
-import { ExportDescriptor, ExportsProject } from "@/lib/xrf/bindings/xray-export";
+import { ExportDescriptor, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 
 export function ExportsEditor(): ReactElement {
   const exportsService: ExportsService = useInjection(ExportsService);

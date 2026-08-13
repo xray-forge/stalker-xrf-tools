@@ -2,9 +2,9 @@ use std::path::PathBuf;
 use std::process;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_ltx::Ltx;
-use xray_output::OutputOptions;
-use xray_texture::{EquipmentGridOverlap, VerifyEquipmentGridProcessor};
+use xrf_ltx::Ltx;
+use xrf_output::OutputOptions;
+use xrf_texture::{EquipmentGridOverlap, VerifyEquipmentGridProcessor};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -61,13 +61,13 @@ impl GenericCommand for VerifyEquipmentIconsCommand {
     let overlaps: Vec<EquipmentGridOverlap> = VerifyEquipmentGridProcessor::find_overlaps(&ltx);
 
     if overlaps.is_empty() {
-      xray_output::info!(output, "Inventory icon grid is clean, no overlapping rects");
+      xrf_output::info!(output, "Inventory icon grid is clean, no overlapping rects");
 
       return Ok(());
     }
 
     for overlap in &overlaps {
-      xray_output::error!(
+      xrf_output::error!(
         output,
         "Overlapping icon rects at {}:{}, {} cell(s) shared by '{}' and '{}'",
         overlap.cell.0,
@@ -78,7 +78,7 @@ impl GenericCommand for VerifyEquipmentIconsCommand {
       );
     }
 
-    xray_output::error!(output, "Found {} overlapping icon rect pair(s)", overlaps.len());
+    xrf_output::error!(output, "Found {} overlapping icon rect pair(s)", overlaps.len());
 
     process::exit(1);
   }

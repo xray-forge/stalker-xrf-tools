@@ -4,7 +4,7 @@ import { ReactElement, useMemo } from "react";
 import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
 import { formatDuration } from "@/lib/result";
-import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xray-ltx";
+import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xrf-ltx";
 import { TLtxSchemeError, toLtxSchemeErrors } from "@/lib/xrf/ltx";
 
 interface IConfigsVerifyResultProps {

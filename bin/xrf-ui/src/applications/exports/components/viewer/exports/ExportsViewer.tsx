@@ -4,7 +4,7 @@ import { ExportDeclarationView } from "@/applications/exports/components/viewer/
 import { ExportsViewerState } from "@/applications/exports/components/viewer/exports/ExportsViewerState";
 import { Nullable } from "@/core/types/general";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { ExportDescriptor } from "@/lib/xrf/bindings/xray-export";
+import { ExportDescriptor } from "@/lib/xrf/bindings/xrf-export";
 
 export interface IExportsViewerProps extends BaseComponentProps {
   declaration: Nullable<ExportDescriptor>;

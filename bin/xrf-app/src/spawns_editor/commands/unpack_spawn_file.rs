@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use xray_db::{SpawnFile, XRayByteOrder};
+use xrf_db::{SpawnFile, XRayByteOrder};
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;

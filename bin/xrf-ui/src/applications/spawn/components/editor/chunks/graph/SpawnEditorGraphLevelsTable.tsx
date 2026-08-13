@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn/components/editor/table/SpawnTable";
 import { identifierColumn, textColumn, vectorColumn } from "@/core/components/table";
-import { GraphLevel } from "@/lib/xrf/bindings/xray-db";
+import { GraphLevel } from "@/lib/xrf/bindings/xrf-db";
 
 interface ISpawnEditorGraphLevelsTableProps {
   levels: Array<GraphLevel>;

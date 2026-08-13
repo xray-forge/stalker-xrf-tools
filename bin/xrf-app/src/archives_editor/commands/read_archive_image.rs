@@ -3,9 +3,9 @@ use std::sync::MutexGuard;
 use serde::Serialize;
 use serde_json::{Value, json};
 use tauri::State;
-use xray_archive::{ArchiveFileDescriptor, ArchiveProject};
-use xray_texture::dds_bytes_as_png;
-use xray_utils::encode_bytes_to_standard_base64;
+use xrf_archive::{ArchiveFileDescriptor, ArchiveProject};
+use xrf_texture::dds_bytes_as_png;
+use xrf_utils::encode_bytes_to_standard_base64;
 
 use crate::archives_editor::state::ArchivesEditorState;
 use crate::types::TauriResult;

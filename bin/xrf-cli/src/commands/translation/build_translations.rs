@@ -2,8 +2,8 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_output::OutputOptions;
-use xray_translation::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
+use xrf_output::OutputOptions;
+use xrf_translation::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -89,7 +89,7 @@ impl GenericCommand for BuildTranslationsCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(is_silent, is_verbose);
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Building translation {}, language - {}, sorted - {}",
       path.display(),
@@ -111,7 +111,7 @@ impl GenericCommand for BuildTranslationsCommand {
       TranslationProject::build_file(path, &options)?
     };
 
-    xray_output::info!(
+    xrf_output::info!(
       options.output,
       "Built translation files in {} sec",
       (result.duration as f64) / 1000.0

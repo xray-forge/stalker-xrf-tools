@@ -1,5 +1,5 @@
 use serde_json::{Value, json};
-use xray_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
+use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;

@@ -1,7 +1,7 @@
 use std::sync::MutexGuard;
 
 use tauri::State;
-use xray_export::ExportsProject;
+use xrf_export::ExportsProject;
 
 use crate::exports_editor::state::ExportsEditorState;
 use crate::types::TauriResult;

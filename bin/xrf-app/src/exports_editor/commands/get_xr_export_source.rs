@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 use tauri::State;
-use xray_export::{ExportSourceContent, ExportsProject};
+use xrf_export::{ExportSourceContent, ExportsProject};
 
 use crate::exports_editor::state::ExportsEditorState;
 use crate::types::TauriResult;

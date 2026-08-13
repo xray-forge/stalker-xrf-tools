@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use xray_export::ExportsProject;
+use xrf_export::ExportsProject;
 
 pub struct ExportsEditorState {
   pub project: Arc<Mutex<Option<ExportsProject>>>,

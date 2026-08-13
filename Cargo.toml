@@ -1,29 +1,29 @@
 [workspace]
 resolver = "3"
 members = [
-    "bin/xrf-app",
-    "bin/xrf-cli",
-    "crates/xray-archive",
-    "crates/xray-assets",
-    "crates/xray-chunk",
-    "crates/xray-db",
-    "crates/xray-delharc",
-    "crates/xray-error",
-    "crates/xray-error-derive",
-    "crates/xray-export",
-    "crates/xray-gamedata",
-    "crates/xray-ltx",
-    "crates/xray-lua",
-    "crates/xray-output",
-    "crates/xray-report",
-    "crates/xray-shaders",
-    "crates/xray-sound",
-    "crates/xray-test-utils",
-    "crates/xray-texture",
-    "crates/xray-typescript",
-    "crates/xray-translation",
-    "crates/xray-utils",
-    "crates/xray-xml",
+  "bin/xrf-app",
+  "bin/xrf-cli",
+  "crates/xrf-archive",
+  "crates/xrf-assets",
+  "crates/xrf-chunk",
+  "crates/xrf-db",
+  "crates/xrf-error",
+  "crates/xrf-error-derive",
+  "crates/xrf-export",
+  "crates/xrf-gamedata",
+  "crates/xrf-ltx",
+  "crates/xrf-lua",
+  "crates/xrf-output",
+  "crates/xrf-report",
+  "crates/xrf-shaders",
+  "crates/xrf-sound",
+  "crates/xrf-test-utils",
+  "crates/xrf-texture",
+  "crates/xrf-typescript",
+  "crates/xrf-translation",
+  "crates/xrf-utils",
+  "crates/xrf-xml",
+  "vendor/delharc",
 ]
 
 [workspace.package]
@@ -32,7 +32,7 @@ rust-version = "1.97.1"
 [workspace.dependencies]
 byteorder = "1.5.0"
 ddsfile = "0.5.2"
-delharc = { path = "crates/xray-delharc" }
+delharc = { path = "vendor/delharc" }
 derive_more = "2.1.1"
 env_logger = "0.11.11"
 fileslice = { version = "0.7.0", default-features = false }
@@ -45,26 +45,26 @@ serde_json = "1.0.151"
 ts-rs = "12.0.1"
 uuid = "1.24.0"
 walkdir = "2.5.0"
-xray-archive = { path = "crates/xray-archive" }
-xray-assets = { path = "crates/xray-assets" }
-xray-chunk = { path = "crates/xray-chunk" }
-xray-db = { path = "crates/xray-db" }
-xray-error = { path = "crates/xray-error" }
-xray-error-derive = { path = "crates/xray-error-derive" }
-xray-export = { path = "crates/xray-export" }
-xray-gamedata = { path = "crates/xray-gamedata" }
-xray-ltx = { path = "crates/xray-ltx" }
-xray-lua = { path = "crates/xray-lua" }
-xray-output = { path = "crates/xray-output" }
-xray-report = { path = "crates/xray-report" }
-xray-shaders = { path = "crates/xray-shaders" }
-xray-sound = { path = "crates/xray-sound" }
-xray-test-utils = { path = "crates/xray-test-utils" }
-xray-texture = { path = "crates/xray-texture" }
-xray-translation = { path = "crates/xray-translation" }
-xray-typescript = { path = "crates/xray-typescript" }
-xray-utils = { path = "crates/xray-utils" }
-xray-xml = { path = "crates/xray-xml" }
+xrf-archive = { path = "crates/xrf-archive" }
+xrf-assets = { path = "crates/xrf-assets" }
+xrf-chunk = { path = "crates/xrf-chunk" }
+xrf-db = { path = "crates/xrf-db" }
+xrf-error = { path = "crates/xrf-error" }
+xrf-error-derive = { path = "crates/xrf-error-derive" }
+xrf-export = { path = "crates/xrf-export" }
+xrf-gamedata = { path = "crates/xrf-gamedata" }
+xrf-ltx = { path = "crates/xrf-ltx" }
+xrf-lua = { path = "crates/xrf-lua" }
+xrf-output = { path = "crates/xrf-output" }
+xrf-report = { path = "crates/xrf-report" }
+xrf-shaders = { path = "crates/xrf-shaders" }
+xrf-sound = { path = "crates/xrf-sound" }
+xrf-test-utils = { path = "crates/xrf-test-utils" }
+xrf-texture = { path = "crates/xrf-texture" }
+xrf-translation = { path = "crates/xrf-translation" }
+xrf-typescript = { path = "crates/xrf-typescript" }
+xrf-utils = { path = "crates/xrf-utils" }
+xrf-xml = { path = "crates/xrf-xml" }
 
 [profile.release]
 panic = "abort"

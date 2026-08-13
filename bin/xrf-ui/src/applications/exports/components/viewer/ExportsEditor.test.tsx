@@ -9,7 +9,7 @@ import { ProjectService } from "@/core/services/project";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { Logger } from "@/lib/logging";
-import { ExportsProject } from "@/lib/xrf/bindings/xray-export";
+import { ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 import { TCallableExportDescriptor, TValueExportDescriptor } from "@/lib/xrf/exports";
 import { EExportsEditorCommand } from "@/lib/xrf/ipc";
 

@@ -1,0 +1,177 @@
+use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
+use serde::{Deserialize, Serialize};
+use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_error::{XRayError, XRayResult};
+use xrf_ltx::{Ltx, Section};
+
+use crate::data::generic::vector_3d::Vector3d;
+use crate::data::particles::particle_action_type::ParticleActionType;
+use crate::export::LtxImportExport;
+use crate::file_import::read_ltx_field;
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ParticleActionTargetRotate {
+  pub action_flags: u32,
+  pub action_type: ParticleActionType,
+  pub rot: Vector3d,
+  pub scale: f32,
+}
+
+impl ChunkReadWrite for ParticleActionTargetRotate {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+    Ok(Self {
+      action_flags: reader.read_u32::<T>()?,
+      action_type: reader.read_xr::<T, _>()?,
+      rot: reader.read_xr::<T, _>()?,
+      scale: reader.read_f32::<T>()?,
+    })
+  }
+
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+    writer.write_u32::<T>(self.action_flags)?;
+    writer.write_xr::<T, _>(&self.action_type)?;
+    writer.write_xr::<T, _>(&self.rot)?;
+    writer.write_f32::<T>(self.scale)?;
+
+    Ok(())
+  }
+}
+
+impl LtxImportExport for ParticleActionTargetRotate {
+  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+    let section: &Section = ltx.section(section_name).ok_or_else(|| {
+      XRayError::new_parsing_error(format!(
+        "Particle action section '{}' should be defined in ltx file ({})",
+        section_name,
+        file!()
+      ))
+    })?;
+
+    Ok(Self {
+      action_flags: read_ltx_field("action_flags", section)?,
+      action_type: read_ltx_field("action_type", section)?,
+      rot: read_ltx_field("rot", section)?,
+      scale: read_ltx_field("scale", section)?,
+    })
+  }
+
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+    ltx
+      .with_section(section_name)
+      .set("action_flags", self.action_flags.to_string())
+      .set("action_type", self.action_type.to_string())
+      .set("rot", self.rot.to_string())
+      .set("scale", self.scale.to_string());
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::fs::File;
+  use std::io::{Seek, SeekFrom, Write};
+
+  use serde_json::to_string_pretty;
+  use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xrf_error::XRayResult;
+  use xrf_ltx::Ltx;
+  use xrf_test_utils::FileSlice;
+  use xrf_test_utils::file::read_file_as_string;
+  use xrf_test_utils::utils::{
+    get_absolute_generated_test_resource_path, get_relative_test_sample_file_path,
+    open_generated_test_resource_as_slice, overwrite_generated_test_resource_as_file,
+  };
+
+  use crate::data::generic::vector_3d::Vector3d;
+  use crate::data::particles::actions::particle_action_target_rotate::ParticleActionTargetRotate;
+  use crate::data::particles::particle_action_type::ParticleActionType;
+  use crate::export::LtxImportExport;
+
+  #[test]
+  fn test_read_write() -> XRayResult {
+    let mut writer: ChunkWriter = ChunkWriter::new();
+    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+
+    let original: ParticleActionTargetRotate = ParticleActionTargetRotate {
+      action_flags: 1,
+      action_type: ParticleActionType::TargetRotate,
+      rot: Vector3d::new_mock(),
+      scale: 1.5,
+    };
+
+    original.write::<XRayByteOrder>(&mut writer)?;
+
+    assert_eq!(writer.bytes_written(), 24);
+
+    let bytes_written: usize =
+      writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_generated_test_resource_as_file(&filename)?, 0)?;
+
+    assert_eq!(bytes_written, 24);
+
+    let file: FileSlice = open_generated_test_resource_as_slice(&filename)?;
+
+    assert_eq!(file.bytes_remaining(), 24 + 8);
+
+    let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
+
+    assert_eq!(
+      ParticleActionTargetRotate::read::<XRayByteOrder>(&mut reader)?,
+      original
+    );
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_import_export() -> XRayResult {
+    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let mut ltx: Ltx = Ltx::new();
+
+    let original: ParticleActionTargetRotate = ParticleActionTargetRotate {
+      action_flags: 1,
+      action_type: ParticleActionType::TargetRotate,
+      rot: Vector3d::new_mock(),
+      scale: 1.25,
+    };
+
+    original.export("data", &mut ltx)?;
+
+    ltx.write_to(&mut overwrite_generated_test_resource_as_file(&ltx_filename)?)?;
+
+    let source: Ltx = Ltx::read_from_path(get_absolute_generated_test_resource_path(&ltx_filename))?;
+
+    assert_eq!(ParticleActionTargetRotate::import("data", &source)?, original);
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_serialize_deserialize() -> XRayResult {
+    let original: ParticleActionTargetRotate = ParticleActionTargetRotate {
+      action_flags: 1,
+      action_type: ParticleActionType::TargetRotate,
+      rot: Vector3d::new_mock(),
+      scale: 0.5,
+    };
+
+    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+      file!(),
+      "serialize_deserialize.json",
+    ))?;
+
+    file.write_all(to_string_pretty(&original)?.as_bytes())?;
+    file.seek(SeekFrom::Start(0))?;
+
+    let serialized: String = read_file_as_string(&mut file)?;
+
+    assert_eq!(serialized.to_string(), serialized);
+    assert_eq!(
+      original,
+      serde_json::from_str::<ParticleActionTargetRotate>(&serialized)?
+    );
+
+    Ok(())
+  }
+}

@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xray_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
-use xray_error::{XRayError, XRayResult};
-use xray_output::OutputOptions;
+use xrf_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
+use xrf_error::{XRayError, XRayResult};
+use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -142,16 +142,16 @@ impl FilterOmfMotionsCommand {
       )));
     }
 
-    xray_output::info!(
+    xrf_output::info!(
       output,
       "Filtered omf motions {}, {retained_count}/{original_count} kept",
       path.display()
     );
 
-    xray_output::verbose!(output, "Kept motions: {}", omf_file.get_motion_names().join(","));
+    xrf_output::verbose!(output, "Kept motions: {}", omf_file.get_motion_names().join(","));
 
     if is_dry_run {
-      xray_output::info!(
+      xrf_output::info!(
         output,
         "Dry run, nothing written, {} would receive {retained_count} motions",
         destination.display()
@@ -162,7 +162,7 @@ impl FilterOmfMotionsCommand {
 
     omf_file.write_to_path::<XRayByteOrder, _>(&destination)?;
 
-    xray_output::info!(output, "Filtered omf file written into {}", destination.display());
+    xrf_output::info!(output, "Filtered omf file written into {}", destination.display());
 
     Ok(())
   }

@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::sync::Arc;
 
 use colored::Colorize;
-use xray_output::{Output, OutputOptions, OutputVerbosity};
+use xrf_output::{Output, OutputOptions, OutputVerbosity};
 
 /// Terminal renderer for live workflow output.
 #[derive(Default)]
@@ -53,7 +53,7 @@ impl Output for TerminalOutput {
 
 #[cfg(test)]
 mod tests {
-  use xray_output::OutputVerbosity;
+  use xrf_output::OutputVerbosity;
 
   use super::TerminalOutput;
 
