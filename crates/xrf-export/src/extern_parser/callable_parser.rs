@@ -89,7 +89,7 @@ impl<'a> ExternCallableParser<'a> {
   }
 
   /// Convert a callable contract resolved from another TypeScript source file.
-  pub fn from_signature(
+  pub fn convert_signature(
     &self,
     signature: TypeScriptFunctionSignature,
     documentation: Option<ExternDocumentation>,

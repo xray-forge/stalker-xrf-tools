@@ -81,7 +81,7 @@ impl<'a> LtxParser<'a> {
           if ltx.includes(&included_path) {
             return self.error(format!(
               "Failed to parse include statement in ltx file, including '{}' more than once",
-              &included_path
+              included_path
             ));
           } else {
             ltx.include(included_path)
@@ -241,7 +241,7 @@ impl<'a> LtxParser<'a> {
           if included.contains(&include_path) {
             return self.error(format!(
               "Failed to parse include statement in ltx file, including '{}' more than once",
-              &include_path
+              include_path
             ));
           } else {
             included.push(include_path)

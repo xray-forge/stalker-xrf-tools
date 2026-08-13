@@ -38,10 +38,10 @@ impl ChunkReadWriteOptional for Time {
 
   /// Write optional time object into the writer.
   fn write_optional<T: ByteOrder>(writer: &mut ChunkWriter, time: Option<&Self>) -> XRayResult {
-    if time.is_some() {
+    if let Some(time) = time {
       writer.write_u8(1)?;
 
-      time.as_ref().unwrap().write::<T>(writer)?;
+      time.write::<T>(writer)?;
     } else {
       writer.write_u8(0)?;
     }

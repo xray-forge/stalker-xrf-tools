@@ -74,39 +74,6 @@ impl LtxIncludeConvertor {
   }
 }
 
-#[cfg(test)]
-mod tests {
-  use std::fs;
-  use std::path::PathBuf;
-
-  use xrf_error::XRayResult;
-
-  use crate::Ltx;
-
-  #[test]
-  fn loads_each_file_matched_by_wildcard_include() -> XRayResult {
-    let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-wildcard-include-{}", std::process::id()));
-    let sections: PathBuf = root.join("sections");
-    let root_ltx: PathBuf = root.join("root.ltx");
-
-    fs::create_dir_all(&sections)?;
-    fs::write(&root_ltx, "#include \"sections\\section_*.ltx\"\n")?;
-    fs::write(sections.join("section_first.ltx"), "[first]\n")?;
-    fs::write(sections.join("section_second.ltx"), "[second]\n")?;
-    fs::write(sections.join("ignored.ltx"), "[ignored]\n")?;
-
-    let ltx: Ltx = Ltx::read_from_file_included(&root_ltx)?;
-
-    assert!(ltx.has_section("first"));
-    assert!(ltx.has_section("second"));
-    assert!(!ltx.has_section("ignored"));
-
-    fs::remove_dir_all(root)?;
-
-    Ok(())
-  }
-}
-
 impl LtxIncludeConvertor {
   /// Convert ltx file with inclusion of nested files.
   fn convert_ltx(&self, ltx: Ltx) -> XRayResult<Ltx> {
@@ -247,5 +214,38 @@ impl LtxIncludeConvertor {
     }
 
     mask.ends_with('*') || remaining.is_empty()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::fs;
+  use std::path::PathBuf;
+
+  use xrf_error::XRayResult;
+
+  use crate::Ltx;
+
+  #[test]
+  fn loads_each_file_matched_by_wildcard_include() -> XRayResult {
+    let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-wildcard-include-{}", std::process::id()));
+    let sections: PathBuf = root.join("sections");
+    let root_ltx: PathBuf = root.join("root.ltx");
+
+    fs::create_dir_all(&sections)?;
+    fs::write(&root_ltx, "#include \"sections\\section_*.ltx\"\n")?;
+    fs::write(sections.join("section_first.ltx"), "[first]\n")?;
+    fs::write(sections.join("section_second.ltx"), "[second]\n")?;
+    fs::write(sections.join("ignored.ltx"), "[ignored]\n")?;
+
+    let ltx: Ltx = Ltx::read_from_file_included(&root_ltx)?;
+
+    assert!(ltx.has_section("first"));
+    assert!(ltx.has_section("second"));
+    assert!(!ltx.has_section("ignored"));
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
   }
 }

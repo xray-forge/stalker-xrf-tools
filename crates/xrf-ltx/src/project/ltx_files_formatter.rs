@@ -131,7 +131,7 @@ mod tests {
     fs::write(&first, "[a]\nkey=value\n")?;
     fs::write(&second, "[b]\nkey=value\n")?;
 
-    let result: LtxProjectFormatResult = LtxFilesFormatter::format(&[first.clone()])?;
+    let result: LtxProjectFormatResult = LtxFilesFormatter::format(std::slice::from_ref(&first))?;
 
     assert_eq!(result.total_files, 1);
     assert_eq!(result.invalid_files, 1);
@@ -171,7 +171,7 @@ mod tests {
 
     fs::write(&file, "[a]\nkey=value\n")?;
 
-    let result: LtxProjectFormatResult = LtxFilesFormatter::check_format(&[file.clone()])?;
+    let result: LtxProjectFormatResult = LtxFilesFormatter::check_format(std::slice::from_ref(&file))?;
 
     assert_eq!(result.total_files, 1);
     assert_eq!(result.invalid_files, 1);
@@ -193,7 +193,7 @@ mod tests {
       "#include \"missing\\absent.ltx\"\n[af_custom]:af_base\ncost=100\n",
     )?;
 
-    let result: LtxProjectFormatResult = LtxFilesFormatter::format(&[file.clone()])?;
+    let result: LtxProjectFormatResult = LtxFilesFormatter::format(std::slice::from_ref(&file))?;
 
     assert_eq!(result.total_files, 1);
     assert_eq!(

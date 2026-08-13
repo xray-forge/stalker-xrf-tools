@@ -35,7 +35,7 @@ impl LtxSchemeParser {
           Entry::Occupied(_) => {
             return Err(XRayError::new_convert_error(format!(
               "Failed to parse ltx schemes - duplicate declaration of [{name}] section when reading '{}'",
-              &ltx.path.as_ref().map_or("virtial", |path| path.to_str().unwrap())
+              ltx.path.as_ref().map_or("virtial", |path| path.to_str().unwrap())
             )));
           }
           Entry::Vacant(entry) => {

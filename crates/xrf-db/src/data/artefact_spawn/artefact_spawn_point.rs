@@ -156,7 +156,7 @@ mod tests {
       distance: 3452.123,
     };
 
-    let mut file: File = overwrite_file(&get_absolute_generated_test_sample_file_path(
+    let mut file: File = overwrite_file(get_absolute_generated_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

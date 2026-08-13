@@ -103,7 +103,7 @@ impl PackDescriptionProcessor {
       }
     }
 
-    let destination: PathBuf = options.output_path.join(format!("{}.{}", &file.name, DDS_EXTENSION));
+    let destination: PathBuf = options.output_path.join(format!("{}.{}", file.name, DDS_EXTENSION));
 
     xrf_output::verbose!(options.output, "Saving file: {}", destination.display());
 

@@ -224,8 +224,7 @@ mod tests {
 
   #[test]
   fn test_read_w1251_rn_string_few() -> XRayResult {
-    let mut chunk: ChunkReader<InMemoryChunkDataSource> =
-      ChunkReader::from_bytes(&[b'a', b'b', b'c', b'\r', b'\n', b'c', b'b', b'a', b'\r', b'\n'])?;
+    let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(b"abc\r\ncba\r\n")?;
 
     assert_eq!(chunk.read_bytes_remain(), 10, "Expect 10 bytes remaining");
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");

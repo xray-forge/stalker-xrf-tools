@@ -129,11 +129,11 @@ fn append_xml_export(result: &mut String, export: &ExternExport, indentation: us
           " ".repeat(indentation + 2),
           escape_xml(&parameter.name),
           escape_xml(&parameter.type_name),
-          parameter
-            .optional
-            .is_some_and(|value| value)
-            .then_some(" optional=\"true\"")
-            .unwrap_or_default(),
+          if parameter.optional.is_some_and(|value| value) {
+            " optional=\"true\""
+          } else {
+            ""
+          },
         ));
         if let Some(doc) = &parameter.doc {
           result.push_str(&format!(
@@ -260,11 +260,11 @@ fn render_parameter_contract(parameter: &ExternParameter) -> String {
   format!(
     "{}{}: {}",
     parameter.name,
-    parameter
-      .optional
-      .is_some_and(|value| value)
-      .then_some("?")
-      .unwrap_or_default(),
+    if parameter.optional.is_some_and(|value| value) {
+      "?"
+    } else {
+      ""
+    },
     parameter.type_name,
   )
 }

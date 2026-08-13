@@ -108,7 +108,7 @@ mod tests {
     assert_eq!(writer.bytes_written(), 20);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_file(&get_absolute_generated_test_sample_file_path(file!(), &filename))?,
+      &mut overwrite_file(get_absolute_generated_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
@@ -159,7 +159,7 @@ mod tests {
       level_vertex_id: 5213,
     };
 
-    let mut file: File = overwrite_file(&get_absolute_generated_test_sample_file_path(
+    let mut file: File = overwrite_file(get_absolute_generated_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

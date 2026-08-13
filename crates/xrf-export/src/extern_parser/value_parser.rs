@@ -110,7 +110,7 @@ impl<'a> ExternValueParser<'a> {
       .ok_or_else(|| self.invalid_value(value, export_name))?;
 
     match symbol {
-      TypeScriptSymbol::Callable(signature) => Ok(ExternExport::Callable(self.callable_parser.from_signature(
+      TypeScriptSymbol::Callable(signature) => Ok(ExternExport::Callable(self.callable_parser.convert_signature(
         signature,
         documentation,
         parameter_docs,

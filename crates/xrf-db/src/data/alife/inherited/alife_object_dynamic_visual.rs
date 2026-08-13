@@ -173,7 +173,7 @@ mod tests {
 
     ltx.write_to(&mut overwrite_generated_test_resource_as_file(&ltx_filename)?)?;
 
-    let source: Ltx = Ltx::read_from_path(&get_absolute_generated_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(get_absolute_generated_test_resource_path(&ltx_filename))?;
 
     assert_eq!(AlifeObjectDynamicVisual::import("first", &source)?, first);
     assert_eq!(AlifeObjectDynamicVisual::import("second", &source)?, second);
