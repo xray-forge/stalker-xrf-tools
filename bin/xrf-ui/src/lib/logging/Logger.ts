@@ -29,7 +29,7 @@ export class Logger implements ILogger {
   /** Logs a debug message. */
   public static readonly debug: AnyCallable = this.global.debug;
 
-  public static getLogTagsForPrefix(prefix: string): unknown[] {
+  public static getLogTagsForPrefix(prefix: string): Array<unknown> {
     return [`%c %s [${prefix}]`, Logger.PREFIX_STYLE, PREFIX_TIMESTAMP_TAG];
   }
 
@@ -49,7 +49,7 @@ export class Logger implements ILogger {
     const isActive: boolean = isEnabled && Logger.IS_GLOBAL_LOGGING_ENABLED;
 
     if (isActive) {
-      const tags: unknown[] = Logger.getLogTagsForPrefix(prefix);
+      const tags: Array<unknown> = Logger.getLogTagsForPrefix(prefix);
 
       this.log = console.log.bind(console, ...tags);
       this.info = console.info.bind(console, ...tags);

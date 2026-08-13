@@ -44,6 +44,7 @@ export default [
     },
     rules: {
       "@typescript-eslint/no-misused-new": "off",
+      "@typescript-eslint/array-type": ["error", { default: "generic" }],
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/explicit-member-accessibility": ["error"],
       "@typescript-eslint/explicit-module-boundary-types": "off",
