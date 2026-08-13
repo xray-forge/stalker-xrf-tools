@@ -14,6 +14,6 @@ export interface IEditorPanel {
 }
 
 /** Panels on one side, in declaration order. */
-export function selectPanelsOnSide(panels: Array<IEditorPanel>, side: TEditorPanelSide): Array<IEditorPanel> {
+export function selectPanelsOnSide(panels: ReadonlyArray<IEditorPanel>, side: TEditorPanelSide): Array<IEditorPanel> {
   return panels.filter((panel: IEditorPanel) => (panel.side ?? "right") === side);
 }

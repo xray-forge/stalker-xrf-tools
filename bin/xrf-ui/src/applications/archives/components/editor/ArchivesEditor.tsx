@@ -1,7 +1,7 @@
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Alert, Box, LinearProgress, Tooltip } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useMemo, useState } from "react";
+import { ReactElement, useCallback, useState } from "react";
 
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/components/editor/archive-editor.styles";
 import { createArchiveEditorPanels } from "@/applications/archives/components/editor/archive-panels";
@@ -12,7 +12,7 @@ import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/context";
+import { useEditorPanels } from "@/core/components/shell/panel/context";
 import { Nullable } from "@/core/types/general";
 import { formatBytes } from "@/lib/size";
 import { ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
@@ -30,7 +30,7 @@ export function ArchivesEditor(): ReactElement {
   const totalSize: number = project?.sizeReal ?? 0;
   const projectRoot: string = project?.root ?? "";
 
-  const archivePanels: Array<IEditorPanel> = useMemo(
+  useEditorPanels(
     () => [
       {
         icon: <FolderOpenIcon />,
@@ -64,8 +64,6 @@ export function ArchivesEditor(): ReactElement {
   }, [archivesService]);
 
   useEditorBusy(isBusy);
-
-  useEditorPanels(archivePanels);
 
   useEditorStatus([`${archiveCount} archives`, `${fileCount} files`, formatBytes(totalSize)]);
 

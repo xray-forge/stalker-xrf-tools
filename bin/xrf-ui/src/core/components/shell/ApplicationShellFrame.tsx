@@ -35,8 +35,8 @@ export function ApplicationShellFrame({
   className,
   children,
 }: IApplicationShellFrameProps): ReactElement {
-  const panels: Array<IEditorPanel> = useEditorPanelsRegistry();
   const notify: TNotify = useNotify();
+  const panels: ReadonlyArray<IEditorPanel> = useEditorPanelsRegistry();
 
   const { pathname } = useLocation();
 

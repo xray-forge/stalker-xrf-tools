@@ -21,16 +21,19 @@ function ArchivesScopedPanel(): ReactElement {
 function ArchivesLikeEditor(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
-  useEditorPanels([
-    {
-      icon: <span>a</span>,
-      id: "archives-menu",
-      isOpenByDefault: true,
-      label: "Archives",
-      render: () => <ArchivesScopedPanel />,
-      side: "left",
-    },
-  ]);
+  useEditorPanels(
+    () => [
+      {
+        icon: <span>a</span>,
+        id: "archives-menu",
+        isOpenByDefault: true,
+        label: "Archives",
+        render: () => <ArchivesScopedPanel />,
+        side: "left",
+      },
+    ],
+    []
+  );
 
   return <button onClick={() => navigate("/spawn", { replace: true })}>leave</button>;
 }

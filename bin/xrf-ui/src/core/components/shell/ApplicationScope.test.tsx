@@ -40,14 +40,14 @@ function ScopedPanel(): ReactElement {
 
 /** Publishes a panel and nothing else, the way an editor does. */
 function Publisher(): ReactElement {
-  useEditorPanels([PANEL]);
+  useEditorPanels(() => [PANEL], []);
 
   return <div>content</div>;
 }
 
 /** Stands in for `ApplicationPanelSlot`, which is the thing that renders a published panel. */
 function PanelSlot(): ReactElement {
-  const panels: Array<IEditorPanel> = useEditorPanelsRegistry();
+  const panels: ReadonlyArray<IEditorPanel> = useEditorPanelsRegistry();
 
   return (
     <>

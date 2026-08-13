@@ -11,7 +11,10 @@ import { renderWithProviders } from "@/fixtures/utils/render";
 
 /** Stands in for an editor that publishes one default-open panel, which most of them do. */
 function EditorWithPanel({ name }: { name: string }): ReactElement {
-  useEditorPanels([{ icon: <span>{name}</span>, id: name, label: name, render: () => <div>{name} panel</div> }]);
+  useEditorPanels(
+    () => [{ icon: <span>{name}</span>, id: name, label: name, render: () => <div>{name} panel</div> }],
+    [name]
+  );
 
   return <div>{name} editor</div>;
 }
@@ -22,7 +25,10 @@ function EditorWithRouter(): ReactElement {
 
   const name: string = pathname === "/archives" ? "Bones" : "Header";
 
-  useEditorPanels([{ icon: <span>{name}</span>, id: name, label: name, render: () => <div>{name} panel</div> }]);
+  useEditorPanels(
+    () => [{ icon: <span>{name}</span>, id: name, label: name, render: () => <div>{name} panel</div> }],
+    [name]
+  );
 
   return (
     <>

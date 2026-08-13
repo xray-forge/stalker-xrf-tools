@@ -3,7 +3,7 @@ import { ReactElement, ReactNode, useCallback, useMemo, useState } from "react";
 
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/context";
+import { useEditorPanels } from "@/core/components/shell/panel/context";
 import { createStubVisualMeshData, IVisualMeshData, IVisualPreviewViewOptions } from "@/lib/visuals";
 import { VISUAL_EDITOR_PANELS } from "@/lib/visuals/preview/visual-panels";
 import { VisualPreviewAnimationBar } from "@/lib/visuals/preview/VisualPreviewAnimationBar";
@@ -33,21 +33,23 @@ export function VisualPreviewLayout({ tree }: IVisualPreviewLayoutProps): ReactE
 
   const onResetCamera = useCallback(() => setCameraResetToken((it) => it + 1), []);
 
-  const panels: Array<IEditorPanel> = tree
-    ? [
-        {
-          icon: <AccountTreeIcon />,
-          id: "project",
-          isOpenByDefault: true,
-          label: "Project",
-          render: () => tree,
-          side: "left",
-        },
-        ...VISUAL_EDITOR_PANELS,
-      ]
-    : VISUAL_EDITOR_PANELS;
-
-  useEditorPanels(panels);
+  useEditorPanels(
+    () =>
+      tree
+        ? [
+            {
+              icon: <AccountTreeIcon />,
+              id: "project",
+              isOpenByDefault: true,
+              label: "Project",
+              render: () => tree,
+              side: "left",
+            },
+            ...VISUAL_EDITOR_PANELS,
+          ]
+        : VISUAL_EDITOR_PANELS,
+    [tree]
+  );
 
   useEditorStatus([`${mesh.positions.length / 3} vertices`, `${mesh.indices.length / 3} triangles`]);
 

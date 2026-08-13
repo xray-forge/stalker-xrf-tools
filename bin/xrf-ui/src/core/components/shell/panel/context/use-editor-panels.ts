@@ -1,20 +1,19 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { DependencyList, useContext, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
 import { IEditorPanel } from "@/core/components/shell/panel/context/editor-panel";
 import {
   EditorPanelsContext,
+  EditorPanelsSetterContext,
   EMPTY_PANELS_STATE,
-  IEditorPanelsContextValue,
+  IEditorPanelsState,
   NO_PANELS,
+  TEditorPanelsStateSetter,
 } from "@/core/components/shell/panel/context/EditorPanelsContext";
 import { findApplication } from "@/core/router/applications";
 
 /**
  * The application a panel belongs to, derived the way the frame derives its container scope.
- *
- * An application's inner routes all resolve to its own path, so the owner is stable while you move
- * about inside one.
  */
 function useCurrentPanelOwner(): string {
   const { pathname } = useLocation();
@@ -23,8 +22,8 @@ function useCurrentPanelOwner(): string {
 }
 
 /** Only what the application on screen published. Anything left over from the last one is not rendered. */
-export function useEditorPanelsRegistry(): Array<IEditorPanel> {
-  const { state }: IEditorPanelsContextValue = useContext(EditorPanelsContext);
+export function useEditorPanelsRegistry(): ReadonlyArray<IEditorPanel> {
+  const state: IEditorPanelsState = useContext(EditorPanelsContext);
   const owner: string = useCurrentPanelOwner();
 
   return state.owner === owner ? state.panels : NO_PANELS;
@@ -33,28 +32,22 @@ export function useEditorPanelsRegistry(): Array<IEditorPanel> {
 /**
  * Publish the panels this application offers, for as long as it is mounted.
  *
- * Panels are compared by id, label and side rather than by array identity, so callers can declare them
- * inline without memoising.
+ * Dependencies follow `useMemo` semantics and decide when the factory publishes new render closures.
+ * ESLint checks them at each call site, so captured values cannot change behind a stale panel array.
  */
-export function useEditorPanels(panels: Array<IEditorPanel>): void {
-  const { setState }: IEditorPanelsContextValue = useContext(EditorPanelsContext);
+export function useEditorPanels(createPanels: () => Array<IEditorPanel>, dependencies: DependencyList): void {
+  const setState: TEditorPanelsStateSetter = useContext(EditorPanelsSetterContext);
 
   const owner: string = useCurrentPanelOwner();
+  // Call sites are checked as dependency-aware hooks by ESLint.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const panels: Array<IEditorPanel> = useMemo(createPanels, dependencies);
 
-  const latest = useRef<Array<IEditorPanel>>(panels);
-  const key: string = panels
-    .map((panel) => `${panel.id}:${panel.label}:${panel.side ?? "right"}:${panel.isOpenByDefault !== false}`)
-    .join("|");
-
-  latest.current = panels;
-
-  const publish = useCallback(() => {
-    setState(() => ({ owner, panels: latest.current }));
+  useEffect(() => {
+    setState({ owner, panels });
 
     // Clears only what this application put there. Without the guard, an unmount that lands after the
     // next application has published would wipe the panels it just registered.
     return () => setState((previous) => (previous.owner === owner ? EMPTY_PANELS_STATE : previous));
-  }, [owner, setState]);
-
-  useEffect(publish, [key, publish]);
+  }, [owner, panels, setState]);
 }

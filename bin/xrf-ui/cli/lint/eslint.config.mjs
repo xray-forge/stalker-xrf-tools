@@ -163,7 +163,7 @@ export default [
       "react/no-unknown-property": "off",
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",
-      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/exhaustive-deps": ["warn", { additionalHooks: "^useEditorPanels$" }],
       semi: "error",
       "space-in-parens": ["error", "never"],
       "spaced-comment": ["error", "always"],

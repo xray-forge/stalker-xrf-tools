@@ -51,16 +51,19 @@ export function ExportsEditor(): ReactElement {
     }
   }, [exportsService]);
 
-  useEditorPanels([
-    {
-      icon: <ListAltIcon />,
-      id: "declarations",
-      isOpenByDefault: true,
-      label: "Declarations",
-      render: () => <ExportsMenu declarations={declarations} selectedName={selectedName} onSelect={onSelect} />,
-      side: "left",
-    },
-  ]);
+  useEditorPanels(
+    () => [
+      {
+        icon: <ListAltIcon />,
+        id: "declarations",
+        isOpenByDefault: true,
+        label: "Declarations",
+        render: () => <ExportsMenu declarations={declarations} selectedName={selectedName} onSelect={onSelect} />,
+        side: "left",
+      },
+    ],
+    [declarations, onSelect, selectedName]
+  );
 
   useEffect(() => {
     if (selectedName && !selectedDeclaration) {

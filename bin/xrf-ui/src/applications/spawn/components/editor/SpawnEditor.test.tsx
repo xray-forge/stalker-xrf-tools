@@ -17,7 +17,7 @@ const SPAWN_PATH: string = "C:\\game\\gamedata\\spawns\\all.spawn";
 
 /** Stands in for the window frame, which is what actually renders the published panels. */
 function PublishedPanels(): ReactElement {
-  const panels: Array<IEditorPanel> = useEditorPanelsRegistry();
+  const panels: ReadonlyArray<IEditorPanel> = useEditorPanelsRegistry();
 
   return <div data-testid={"published-tools"}>{panels.map((it: IEditorPanel) => it.label).join(",")}</div>;
 }

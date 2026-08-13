@@ -1,7 +1,7 @@
 import { default as ViewListIcon } from "@mui/icons-material/ViewList";
 import { Box, LinearProgress, Tooltip } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ReactElement, useCallback, useMemo } from "react";
+import { ReactElement, useCallback } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { SpawnEditorAlife } from "@/applications/spawn/components/editor/chunks/alife/SpawnEditorAlife";
@@ -16,7 +16,7 @@ import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/context";
+import { useEditorPanels } from "@/core/components/shell/panel/context";
 import { Nullable } from "@/core/types/general";
 import { SpawnFileService } from "@/lib/spawn-file";
 import { SpawnHeaderChunk } from "@/lib/xrf/bindings/xrf-db";
@@ -30,7 +30,7 @@ export function SpawnEditor(): ReactElement {
   const path: Nullable<string> = spawnFileService.path;
   const isWriting: boolean = spawnFileService.operation.isLoading;
 
-  const spawnPanels: Array<IEditorPanel> = useMemo(
+  useEditorPanels(
     () => [
       {
         icon: <ViewListIcon />,
@@ -49,8 +49,6 @@ export function SpawnEditor(): ReactElement {
   const onClose = useCallback(() => spawnFileService.closeSpawnFile(), [spawnFileService]);
 
   useEditorBusy(spawnFileService.isBusy);
-
-  useEditorPanels(spawnPanels);
 
   useEditorStatus(
     header ? [`version ${header.version}`, `${header.objectsCount} objects`, `${header.levelsCount} levels`] : []
