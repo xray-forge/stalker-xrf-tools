@@ -6399,10 +6399,10 @@
           "markdownDescription": "Denies the stdin_write command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-save-unpacked-directory`\n- `allow-close-file`\n- `allow-get-file`\n- `allow-get-alife-spawns`\n- `allow-get-artefact-spawns`\n- `allow-get-graphs`\n- `allow-get-header`\n- `allow-get-path`\n- `allow-get-patrols`\n- `allow-has-file`\n- `allow-open-unpacked-directory`\n- `allow-open-file`\n- `allow-pack-file`\n- `allow-save-file`\n- `allow-unpack-file`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-save-unpacked-directory`\n- `allow-close-file`\n- `allow-get-file`\n- `allow-get-alife-spawns`\n- `allow-get-artefact-spawns`\n- `allow-get-graphs`\n- `allow-get-header`\n- `allow-get-patrols`\n- `allow-get-path`\n- `allow-has-file`\n- `allow-open-unpacked-directory`\n- `allow-open-file`\n- `allow-pack-file`\n- `allow-save-file`\n- `allow-unpack-file`",
           "type": "string",
           "const": "spawn:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-save-unpacked-directory`\n- `allow-close-file`\n- `allow-get-file`\n- `allow-get-alife-spawns`\n- `allow-get-artefact-spawns`\n- `allow-get-graphs`\n- `allow-get-header`\n- `allow-get-path`\n- `allow-get-patrols`\n- `allow-has-file`\n- `allow-open-unpacked-directory`\n- `allow-open-file`\n- `allow-pack-file`\n- `allow-save-file`\n- `allow-unpack-file`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-save-unpacked-directory`\n- `allow-close-file`\n- `allow-get-file`\n- `allow-get-alife-spawns`\n- `allow-get-artefact-spawns`\n- `allow-get-graphs`\n- `allow-get-header`\n- `allow-get-patrols`\n- `allow-get-path`\n- `allow-has-file`\n- `allow-open-unpacked-directory`\n- `allow-open-file`\n- `allow-pack-file`\n- `allow-save-file`\n- `allow-unpack-file`"
         },
         {
           "description": "Enables the close_file command without any pre-configured scope.",
@@ -6585,10 +6585,10 @@
           "markdownDescription": "Denies the unpack_file command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-project`\n- `allow-open-project`\n- `allow-get-project`\n- `allow-close-project`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-project`\n- `allow-get-project`\n- `allow-open-project`\n- `allow-read-project`",
           "type": "string",
           "const": "translations:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-project`\n- `allow-open-project`\n- `allow-get-project`\n- `allow-close-project`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-project`\n- `allow-get-project`\n- `allow-open-project`\n- `allow-read-project`"
         },
         {
           "description": "Enables the close_project command without any pre-configured scope.",

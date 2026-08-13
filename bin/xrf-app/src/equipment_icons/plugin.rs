@@ -9,7 +9,7 @@ use crate::equipment_icons::stream::get_sprite_stream_response;
 pub struct EquipmentIconsPlugin {}
 
 impl EquipmentIconsPlugin {
-  pub const NAME: &'static str = "equipment-icons";
+  pub const NAME: &'static str = crate::tauri_command_registry::equipment_icons::NAME;
 
   pub fn init<R: Runtime>() -> TauriPlugin<R> {
     tauri::plugin::Builder::new(Self::NAME)
@@ -31,30 +31,13 @@ impl EquipmentIconsPlugin {
       })
       .invoke_handler(crate::logging::warn_on_unhandled_command(
         Self::NAME,
-        tauri::generate_handler![
-          crate::equipment_icons::commands::close_sprite::equipment_icons_close_sprite,
-          crate::equipment_icons::commands::get_sprite::equipment_icons_get_sprite,
-          crate::equipment_icons::commands::open_sprite::equipment_icons_open_sprite,
-          crate::equipment_icons::commands::reopen_sprite::equipment_icons_reopen_sprite,
-          crate::equipment_icons::commands::pack_sprite::equipment_icons_pack_sprite,
-        ],
+        crate::tauri_command_registry::equipment_icons::handler(),
       ))
       .build()
   }
 
   #[cfg(feature = "typescript-bindings")]
   pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
-    tauri_specta::Builder::new()
-      .plugin_name(Self::NAME)
-      .error_handling(tauri_specta::ErrorHandlingMode::Throw)
-      .commands(tauri_specta::collect_commands![
-        crate::equipment_icons::commands::close_sprite::equipment_icons_close_sprite,
-        crate::equipment_icons::commands::get_sprite::equipment_icons_get_sprite,
-        crate::equipment_icons::commands::open_sprite::equipment_icons_open_sprite,
-        crate::equipment_icons::commands::reopen_sprite::equipment_icons_reopen_sprite,
-        crate::equipment_icons::commands::pack_sprite::equipment_icons_pack_sprite,
-      ])
-      .disable_serde_phases()
-      .dangerously_cast_bigints_to_number()
+    crate::tauri_command_registry::equipment_icons::specta_builder()
   }
 }

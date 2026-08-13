@@ -7,6 +7,7 @@ mod equipment_icons;
 mod exports;
 mod logging;
 mod spawn;
+mod tauri_command_registry;
 mod translations;
 mod types;
 #[cfg(all(test, feature = "typescript-bindings"))]
