@@ -1,14 +1,14 @@
 import { default as ImageIcon } from "@mui/icons-material/Image";
 import { lazy } from "react";
 
+import { AssetService } from "@/core/assets/services";
+import { EquipmentService } from "@/core/icons";
 import {
   EApplicationGroupId,
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
-} from "@/core/router/application";
-import { AssetService } from "@/lib/xrf/assets";
-import { EquipmentService } from "@/lib/xrf/icons";
+} from "@/core/routing/application";
 
 export const EQUIPMENT_ICONS_APPLICATION: IApplicationDescriptor = {
   container: { bindings: [AssetService, EquipmentService] },

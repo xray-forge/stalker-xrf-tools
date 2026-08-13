@@ -8,12 +8,12 @@ import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from "re
 
 import { ArchivesMenuHeader } from "@/applications/archives/components/editor/tree/ArchivesMenuHeader";
 import { ArchiveTreeItem } from "@/applications/archives/components/editor/tree/ArchiveTreeItem";
-import { ArchivesService } from "@/applications/archives/store/archives";
+import { ArchivesService } from "@/applications/archives/services/archives";
+import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/core/archive";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/components/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/components/editor/EditorSideMenu";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/lib/search";
 import { Nullable, Optional } from "@/lib/types/general";
-import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/lib/xrf/archive";
 import { ArchiveFileDescriptor } from "@/lib/xrf/bindings/xrf-archive";
 
 export function ArchivesMenu(): ReactElement {

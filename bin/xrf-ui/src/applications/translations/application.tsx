@@ -7,7 +7,7 @@ import {
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
-} from "@/core/router/application";
+} from "@/core/routing/application";
 
 export const TRANSLATIONS_APPLICATION: IApplicationDescriptor = {
   container: { bindings: [TranslationsService] },

@@ -6,7 +6,7 @@ import {
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
-} from "@/core/router/application";
+} from "@/core/routing/application";
 
 export const CONFIGS_FORMAT_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>

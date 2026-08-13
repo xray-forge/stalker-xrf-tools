@@ -6,7 +6,7 @@ import {
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
-} from "@/core/router/application";
+} from "@/core/routing/application";
 import { SpawnFileService } from "@/lib/xrf/spawn-file";
 
 export const SPAWN_APPLICATION: IApplicationDescriptor = {

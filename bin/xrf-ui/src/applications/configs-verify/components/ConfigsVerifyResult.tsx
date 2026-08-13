@@ -3,7 +3,7 @@ import { ReactElement, useMemo } from "react";
 
 import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { formatDuration } from "@/lib/result";
+import { formatDuration } from "@/lib/format/duration";
 import { LtxProjectVerifyResult } from "@/lib/xrf/bindings/xrf-ltx";
 import { TLtxSchemeError, toLtxSchemeErrors } from "@/lib/xrf/ltx";
 

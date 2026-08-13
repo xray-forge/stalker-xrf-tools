@@ -4,13 +4,13 @@ import { userEvent } from "@testing-library/user-event";
 
 import { ExportsApplication } from "@/applications/exports/ExportsApplication";
 import { ExportsService } from "@/applications/exports/store/exports";
-import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
-import { ProjectService } from "@/core/services/project";
+import { TCallableExportDescriptor, TValueExportDescriptor } from "@/core/exports";
+import { ProjectService } from "@/core/settings/services/project";
+import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { Logger } from "@/lib/logging";
 import { ExportsProject } from "@/lib/xrf/bindings/xrf-export";
-import { TCallableExportDescriptor, TValueExportDescriptor } from "@/lib/xrf/exports";
 
 const PLAY_SOUND: TCallableExportDescriptor = {
   kind: "callable",

@@ -8,7 +8,7 @@ import {
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
-} from "@/core/router/application";
+} from "@/core/routing/application";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
 function mockApplication(overrides: Partial<IApplicationDescriptor> = {}): IApplicationDescriptor {

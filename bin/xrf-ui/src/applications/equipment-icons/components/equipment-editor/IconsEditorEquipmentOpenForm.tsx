@@ -1,12 +1,12 @@
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
+import { FilePickerInput, usePathState } from "@/core/components/form/file-picker";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { ProjectService } from "@/core/services/project";
-import { FilePickerInput, usePathState } from "@/lib/file-picker";
+import { EquipmentService } from "@/core/icons";
+import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";
 import { useMountEffect } from "@/lib/react";
-import { EquipmentService } from "@/lib/xrf/icons";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/lib/xrf/project-path";
 
 export function IconsEditorEquipmentOpenForm(): ReactElement {

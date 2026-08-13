@@ -10,9 +10,9 @@ import { ExportsViewer } from "@/applications/exports/components/viewer/exports/
 import { ExportsService } from "@/applications/exports/store/exports";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { useEditorPanels } from "@/core/components/shell/panel/context";
+import { useEditorBusy } from "@/core/shell/EditorBusyContext";
+import { useEditorStatus } from "@/core/shell/EditorStatusContext";
+import { useEditorPanels } from "@/core/shell/panel/context";
 import { Nullable } from "@/lib/types/general";
 import { ExportDescriptor, ExportsProject } from "@/lib/xrf/bindings/xrf-export";
 

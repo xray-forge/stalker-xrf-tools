@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { TCallableExportDescriptor } from "@/lib/xrf/exports";
+import { TCallableExportDescriptor } from "@/core/exports";
 
 import { groupExports, ROOT_EXPORT_GROUP_ID } from "./exports-groups";
 

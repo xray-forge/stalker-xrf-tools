@@ -5,7 +5,7 @@ import { TranslationsEditorWorkspace } from "@/applications/translations/compone
 import { TranslationsService } from "@/applications/translations/store/translations";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function TranslationsEditor(): ReactElement {

@@ -4,9 +4,9 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
 import { ConfirmDialog } from "@/core/components/dialog/ConfirmDialog";
+import { EquipmentService } from "@/core/icons";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-import { EquipmentService } from "@/lib/xrf/icons";
 
 /**
  * Toolbar command that rebuilds the open sprite from its unpacked icons.

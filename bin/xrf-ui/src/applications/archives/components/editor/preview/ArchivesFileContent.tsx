@@ -8,14 +8,14 @@ import { ArchiveFileHeader } from "@/applications/archives/components/editor/pre
 import { ArchiveFolderContent } from "@/applications/archives/components/editor/preview/ArchiveFolderContent";
 import { ArchiveImagePreview } from "@/applications/archives/components/editor/preview/ArchiveImagePreview";
 import { ArchivePreviewError } from "@/applications/archives/components/editor/preview/ArchivePreviewError";
-import { ArchivesService } from "@/applications/archives/store/archives";
+import { ArchivesService } from "@/applications/archives/services/archives";
+import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/core/archive";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { BaseComponentProps } from "@/lib/dom/element-types";
+import { formatBytes } from "@/lib/format/memory";
 import { Loadable } from "@/lib/loadable";
-import { formatBytes } from "@/lib/size";
 import { Nullable } from "@/lib/types/general";
-import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/lib/xrf/archive";
 import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
 // Everything that renders its own preview leaves this union; what is left is a reason to explain.

@@ -6,7 +6,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
+import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 
 const FORM_WIDTH: number = 460;
 

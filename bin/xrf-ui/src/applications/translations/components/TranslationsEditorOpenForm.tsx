@@ -2,10 +2,10 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { TranslationsService } from "@/applications/translations/store/translations";
+import { PathFormRow } from "@/core/components/form/PathFormRow";
+import { IPathField, usePathField } from "@/core/components/form/use-path-field";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { ProjectService } from "@/core/services/project";
-import { PathFormRow } from "@/lib/form/PathFormRow";
-import { IPathField, usePathField } from "@/lib/form/use-path-field";
+import { ProjectService } from "@/core/settings/services/project";
 import { Logger, useLogger } from "@/lib/logging";
 import { getPathIfExists, getProjectTranslationsPath } from "@/lib/xrf/project-path";
 

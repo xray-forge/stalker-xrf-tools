@@ -2,16 +2,16 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
 import { EquipmentPackResult } from "@/applications/equipment-icons-pack/components/EquipmentPackResult";
+import { FilePickerInput, usePathState } from "@/core/components/form/file-picker";
 import { PickerForm } from "@/core/components/navigation/PickerForm";
-import { EApplicationId } from "@/core/router/application";
-import { ProjectService } from "@/core/services/project";
-import { FilePickerInput, usePathState } from "@/lib/file-picker";
+import { EquipmentService, IPackEquipmentResult } from "@/core/icons";
+import { ENotificationSeverity, TNotify, useNotify } from "@/core/notifications";
+import { EApplicationId } from "@/core/routing/application";
+import { ProjectService } from "@/core/settings/services/project";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
-import { ENotificationSeverity, TNotify, useNotify } from "@/lib/notifications";
 import { useMountEffect } from "@/lib/react";
 import { Nullable } from "@/lib/types/general";
-import { EquipmentService, IPackEquipmentResult } from "@/lib/xrf/icons";
 import {
   getPathIfExists,
   getProjectEquipmentDDSPath,

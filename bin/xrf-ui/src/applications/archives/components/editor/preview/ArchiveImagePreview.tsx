@@ -3,13 +3,13 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { ArchivePreviewError } from "@/applications/archives/components/editor/preview/ArchivePreviewError";
-import { ArchivesService } from "@/applications/archives/store/archives";
+import { ArchivesService } from "@/applications/archives/services/archives";
+import { TArchiveContent } from "@/core/archive";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { ImageViewport } from "@/core/components/media/ImageViewport";
 import { Loadable } from "@/lib/loadable";
 import { Nullable } from "@/lib/types/general";
-import { TArchiveContent } from "@/lib/xrf/archive";
 import { ArchiveImagePreview as TArchiveImagePreview } from "@/lib/xrf/bindings/xrf-app";
 
 /**

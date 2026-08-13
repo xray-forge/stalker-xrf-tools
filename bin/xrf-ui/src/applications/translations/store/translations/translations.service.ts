@@ -1,13 +1,13 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { EApplicationId } from "@/core/router/application";
+import { transformError } from "@/core/error";
+import { emitNotification, ENotificationSeverity } from "@/core/notifications";
+import { EApplicationId } from "@/core/routing/application";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
-import { emitNotification, ENotificationSeverity } from "@/lib/notifications";
 import { Nullable } from "@/lib/types/general";
 import { commands as translationsEditorCommands } from "@/lib/xrf/bindings/xrf-app-translations-editor";
-import { transformError } from "@/lib/xrf/error";
 import { releaseEditorProject } from "@/lib/xrf/ipc/release";
 import { ITranslationsProjectJson } from "@/lib/xrf/translations";
 

@@ -4,9 +4,9 @@ import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 
 import { EditorToolbarCrumb } from "@/core/components/editor/EditorToolbarCrumb";
 import { EditorToolbarPathSeparator } from "@/core/components/editor/EditorToolbarPathSeparator";
-import { useIsEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { IApplicationDescriptor } from "@/core/router/application";
-import { findApplication } from "@/core/router/applications";
+import { IApplicationDescriptor } from "@/core/routing/application";
+import { findApplication } from "@/core/routing/applications";
+import { useIsEditorBusy } from "@/core/shell/EditorBusyContext";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Nullable } from "@/lib/types/general";
 

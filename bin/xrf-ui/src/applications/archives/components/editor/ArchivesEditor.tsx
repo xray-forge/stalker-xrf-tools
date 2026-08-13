@@ -7,13 +7,13 @@ import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives/component
 import { createArchiveEditorPanels } from "@/applications/archives/components/editor/archive-panels";
 import { ArchivesFileContent } from "@/applications/archives/components/editor/preview/ArchivesFileContent";
 import { ArchivesMenu } from "@/applications/archives/components/editor/tree/ArchivesMenu";
-import { ArchivesService } from "@/applications/archives/store/archives";
+import { ArchivesService } from "@/applications/archives/services/archives";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { useEditorPanels } from "@/core/components/shell/panel/context";
-import { formatBytes } from "@/lib/size";
+import { useEditorBusy } from "@/core/shell/EditorBusyContext";
+import { useEditorStatus } from "@/core/shell/EditorStatusContext";
+import { useEditorPanels } from "@/core/shell/panel/context";
+import { formatBytes } from "@/lib/format/memory";
 import { Nullable } from "@/lib/types/general";
 import { ArchiveProject } from "@/lib/xrf/bindings/xrf-archive";
 
@@ -29,21 +29,6 @@ export function ArchivesEditor(): ReactElement {
   const fileCount: number = Object.keys(project?.files ?? {}).length;
   const totalSize: number = project?.sizeReal ?? 0;
   const projectRoot: string = project?.root ?? "";
-
-  useEditorPanels(
-    () => [
-      {
-        icon: <FolderOpenIcon />,
-        id: "archives",
-        isOpenByDefault: true,
-        label: "Archives",
-        render: () => <ArchivesMenu />,
-        side: "left",
-      },
-      ...createArchiveEditorPanels(archivesService),
-    ],
-    [archivesService]
-  );
 
   // Extraction writes to disk outside the archive. Walking away mid-write left it running against a
   // screen nobody could see, and the only signal it was happening was one button in the content area.
@@ -62,6 +47,21 @@ export function ArchivesEditor(): ReactElement {
       setClosing(false);
     }
   }, [archivesService]);
+
+  useEditorPanels(
+    () => [
+      {
+        icon: <FolderOpenIcon />,
+        id: "archives",
+        isOpenByDefault: true,
+        label: "Archives",
+        render: () => <ArchivesMenu />,
+        side: "left",
+      },
+      ...createArchiveEditorPanels(archivesService),
+    ],
+    [archivesService]
+  );
 
   useEditorBusy(isBusy);
 

@@ -4,12 +4,12 @@ import { fireEvent, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
 import { ArchivesApplication } from "@/applications/archives/ArchivesApplication";
-import { ArchivesService } from "@/applications/archives/store/archives";
-import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
-import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
-import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
-import { EditorPanelsProvider } from "@/core/components/shell/panel/context";
-import { ProjectService } from "@/core/services/project";
+import { ArchivesService } from "@/applications/archives/services/archives";
+import { ProjectService } from "@/core/settings/services/project";
+import { ApplicationShellFrame } from "@/core/shell/ApplicationShellFrame";
+import { EditorBusyProvider } from "@/core/shell/EditorBusyContext";
+import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
+import { EditorPanelsProvider } from "@/core/shell/panel/context";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";

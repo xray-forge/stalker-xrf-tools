@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-import { useEditorToolbarHost } from "@/core/components/shell/header/editor-toolbar-host";
+import { useEditorToolbarHost } from "@/core/shell/header/editor-toolbar-host";
 import { Nullable } from "@/lib/types/general";
 
 export interface IEditorLayoutProps {

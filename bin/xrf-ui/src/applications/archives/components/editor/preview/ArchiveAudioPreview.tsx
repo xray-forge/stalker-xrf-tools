@@ -4,7 +4,9 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { ArchiveFileDetailRow } from "@/applications/archives/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivePreviewError } from "@/applications/archives/components/editor/preview/ArchivePreviewError";
-import { ArchivesService } from "@/applications/archives/store/archives";
+import { ArchivesService } from "@/applications/archives/services/archives";
+import { TArchiveContent } from "@/core/archive";
+import { AssetService } from "@/core/assets/services";
 import { CenteredColumn } from "@/core/components/layout/CenteredColumn";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
@@ -12,8 +14,6 @@ import { AudioPlayer } from "@/core/components/media/AudioPlayer";
 import { Loadable } from "@/lib/loadable";
 import { base64ToBytes } from "@/lib/media/base64";
 import { Nullable } from "@/lib/types/general";
-import { TArchiveContent } from "@/lib/xrf/archive";
-import { AssetService } from "@/lib/xrf/assets";
 import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/lib/xrf/bindings/xrf-app";
 
 /** One sound is previewed at a time, so its url lives under a fixed key and displaces the last one. */

@@ -8,11 +8,11 @@ import { EquipmentRepackAction } from "@/applications/equipment-icons/components
 import { EquipmentSpriteEditorWorkspace } from "@/applications/equipment-icons/components/equipment-editor/EquipmentSpriteEditorWorkspace";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
+import { EquipmentService, IEquipmentPngDescriptor } from "@/core/icons";
+import { useEditorBusy } from "@/core/shell/EditorBusyContext";
+import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/xrf/icons";
 
 export function EquipmentSpriteEditor(): ReactElement {
   const log: Logger = useLogger("equipment-editor");

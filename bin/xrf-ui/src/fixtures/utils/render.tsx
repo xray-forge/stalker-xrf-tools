@@ -5,16 +5,16 @@ import { Fragment, PropsWithChildren, ReactElement, ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 
 import { ApplicationProvider } from "@/applications/ApplicationProvider";
-import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
-import { EditorStatusProvider } from "@/core/components/shell/EditorStatusContext";
+import { NotificationsService } from "@/core/notifications/services";
+import { SettingsService } from "@/core/settings/services/settings";
+import { EditorBusyProvider } from "@/core/shell/EditorBusyContext";
+import { EditorStatusProvider } from "@/core/shell/EditorStatusContext";
 import {
   EditorPanelsProvider,
   IEditorPanel,
   selectPanelsOnSide,
   useEditorPanelsRegistry,
-} from "@/core/components/shell/panel/context";
-import { NotificationsService } from "@/core/services/notifications";
-import { SettingsService } from "@/core/services/settings";
+} from "@/core/shell/panel/context";
 
 export interface IRenderOptions {
   /** Initial route. Components resolve their application name from it, so it is rarely irrelevant. */

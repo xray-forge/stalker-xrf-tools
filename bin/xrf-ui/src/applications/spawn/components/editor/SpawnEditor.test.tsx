@@ -4,8 +4,8 @@ import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { SpawnEditor } from "@/applications/spawn/components/editor/SpawnEditor";
-import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
-import { IEditorPanel, useEditorPanelsRegistry } from "@/core/components/shell/panel/context";
+import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
+import { IEditorPanel, useEditorPanelsRegistry } from "@/core/shell/panel/context";
 import { mockSpawnFile } from "@/fixtures/mocks/spawn.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";

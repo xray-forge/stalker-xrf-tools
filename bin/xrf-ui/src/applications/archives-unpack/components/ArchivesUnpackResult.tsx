@@ -3,8 +3,8 @@ import { ReactElement, useMemo } from "react";
 
 import { CommandResult, ICommandResultStat } from "@/core/components/result/CommandResult";
 import { CommandResultFindings } from "@/core/components/result/CommandResultFindings";
-import { formatDuration } from "@/lib/result";
-import { bytesToMegabytes } from "@/lib/size";
+import { formatDuration } from "@/lib/format/duration";
+import { bytesToMegabytes } from "@/lib/format/memory";
 import { ArchiveUnpackResult } from "@/lib/xrf/bindings/xrf-archive";
 
 interface IArchivesUnpackResultProps {

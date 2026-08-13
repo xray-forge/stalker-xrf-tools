@@ -1,14 +1,14 @@
 import { default as ArchiveIcon } from "@mui/icons-material/Archive";
 import { lazy } from "react";
 
-import { ArchivesService } from "@/applications/archives/store/archives";
+import { ArchivesService } from "@/applications/archives/services/archives";
+import { AssetService } from "@/core/assets/services";
 import {
   EApplicationGroupId,
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
-} from "@/core/router/application";
-import { AssetService } from "@/lib/xrf/assets";
+} from "@/core/routing/application";
 
 export const ARCHIVES_APPLICATION: IApplicationDescriptor = {
   container: { bindings: [AssetService, ArchivesService] },

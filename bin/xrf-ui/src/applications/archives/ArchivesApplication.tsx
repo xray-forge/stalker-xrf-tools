@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 
 import { ArchivesEditorOpenForm } from "@/applications/archives/components/ArchivesEditorOpenForm";
 import { ArchivesEditor } from "@/applications/archives/components/editor/ArchivesEditor";
-import { ArchivesService } from "@/applications/archives/store/archives";
+import { ArchivesService } from "@/applications/archives/services/archives";
 import { ApplicationLoader } from "@/core/components/ApplicationLoader";
 
 /**

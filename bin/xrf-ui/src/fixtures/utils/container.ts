@@ -1,6 +1,6 @@
 import { Binding, Container, EventsPlugin, ServiceToken } from "@wirestate/core";
 
-import { AssetService } from "@/lib/xrf/assets";
+import { AssetService } from "@/core/assets/services";
 
 export interface IInjectedServiceMockDescriptor<T> {
   service: T;

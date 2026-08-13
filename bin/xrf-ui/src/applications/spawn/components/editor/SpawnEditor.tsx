@@ -14,9 +14,9 @@ import { SpawnEditorActions } from "@/applications/spawn/components/editor/Spawn
 import { SpawnEditorMenu } from "@/applications/spawn/components/editor/SpawnEditorMenu";
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
-import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
-import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { useEditorPanels } from "@/core/components/shell/panel/context";
+import { useEditorBusy } from "@/core/shell/EditorBusyContext";
+import { useEditorStatus } from "@/core/shell/EditorStatusContext";
+import { useEditorPanels } from "@/core/shell/panel/context";
 import { Nullable } from "@/lib/types/general";
 import { SpawnHeaderChunk } from "@/lib/xrf/bindings/xrf-db";
 import { SpawnFileService } from "@/lib/xrf/spawn-file";

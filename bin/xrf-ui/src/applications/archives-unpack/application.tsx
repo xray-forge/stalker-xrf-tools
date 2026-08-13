@@ -6,7 +6,7 @@ import {
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
-} from "@/core/router/application";
+} from "@/core/routing/application";
 
 export const ARCHIVES_UNPACK_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>

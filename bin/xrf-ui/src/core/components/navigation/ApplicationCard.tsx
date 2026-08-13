@@ -1,7 +1,7 @@
 import { Box, Card, CardActionArea, Tooltip, Typography } from "@mui/material";
 import { ReactElement, useCallback } from "react";
 
-import { IApplicationDescriptor } from "@/core/router/application";
+import { IApplicationDescriptor } from "@/core/routing/application";
 
 export interface IApplicationCardProps {
   application: IApplicationDescriptor;

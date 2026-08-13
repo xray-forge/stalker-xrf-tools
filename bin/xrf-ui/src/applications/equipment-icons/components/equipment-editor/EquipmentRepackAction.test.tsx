@@ -4,10 +4,10 @@ import { userEvent } from "@testing-library/user-event";
 import { Injectable } from "@wirestate/core";
 
 import { EquipmentRepackAction } from "@/applications/equipment-icons/components/equipment-editor/EquipmentRepackAction";
+import { AssetService } from "@/core/assets/services";
+import { EquipmentService, IEquipmentPngDescriptor } from "@/core/icons";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { Nullable } from "@/lib/types/general";
-import { AssetService } from "@/lib/xrf/assets";
-import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/xrf/icons";
 
 const SPRITE: IEquipmentPngDescriptor = {
   ltxPath: "C:\\game\\system.ltx",
