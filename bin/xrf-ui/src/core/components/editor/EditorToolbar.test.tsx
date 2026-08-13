@@ -1,5 +1,8 @@
 import { describe, expect, it, jest } from "@jest/globals";
+import { default as RefreshIcon } from "@mui/icons-material/Refresh";
+import { IconButton } from "@mui/material";
 import { userEvent } from "@testing-library/user-event";
+import { Route, Routes } from "react-router-dom";
 
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { renderWithProviders } from "@/fixtures/utils/render";
@@ -30,39 +33,96 @@ describe("EditorToolbar", () => {
     }
   });
 
-  it("falls back to the application name on a route owned by nothing", () => {
-    const { getByText } = renderWithProviders(<EditorToolbar />, { route: "/nonsense" });
+  it("shows only the root on a route owned by nothing", () => {
+    const { getByText, queryByText } = renderWithProviders(<EditorToolbar />, { route: "/nonsense" });
 
-    expect(getByText("Tools")).toBeInTheDocument();
+    expect(getByText("XRF")).toBeInTheDocument();
+    expect(queryByText("Tools")).not.toBeInTheDocument();
   });
 
-  it("shows no leaving control when it can neither navigate nor close", () => {
-    const { queryByRole } = renderWithProviders(<EditorToolbar />, { route: "/spawn" });
+  it("goes home from the breadcrumb root", async () => {
+    const { getByText, findByText } = renderWithProviders(
+      <Routes>
+        <Route path={"/spawn"} element={<EditorToolbar />} />
+        <Route path={"/"} element={<div>home</div>} />
+      </Routes>,
+      { route: "/spawn" }
+    );
 
-    expect(queryByRole("button")).not.toBeInTheDocument();
+    await userEvent.click(getByText("XRF"));
+
+    expect(await findByText("home")).toBeInTheDocument();
   });
 
-  it("prefers onBack over navigation, so leaving also releases the open file", async () => {
+  it("leaves the application segment inert when nothing is open", () => {
+    const { getByText, queryByRole } = renderWithProviders(<EditorToolbar />, { route: "/spawn" });
+
+    // A segment you can follow means there is something to close. The one arrow that did both could
+    // never say that.
+    expect(getByText("Spawn editor")).toBeInTheDocument();
+    expect(queryByRole("button", { name: "Close Spawn editor" })).not.toBeInTheDocument();
+  });
+
+  it("closes through the application segment rather than through a button of its own", async () => {
     const onBack = jest.fn();
 
-    const { getByRole } = renderWithProviders(<EditorToolbar backPath={"/"} onBack={onBack} />, {
-      route: "/spawn",
-    });
+    const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={onBack} />, { route: "/spawn" });
 
-    await userEvent.click(getByRole("button"));
+    await userEvent.click(getByLabelText("Close Spawn editor"));
 
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
-  it("distinguishes a plain back from one that discards state", () => {
-    const navigating = renderWithProviders(<EditorToolbar backPath={"/"} />, { route: "/spawn" });
+  it("names the closing segment so its spoken name still contains what is written on it", () => {
+    const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={() => {}} />, { route: "/spawn" });
 
-    expect(navigating.getByLabelText("Back")).toBeInTheDocument();
+    // A control whose spoken name does not include the word on it is one a voice user cannot ask for.
+    expect(getByLabelText("Close Spawn editor")).toHaveTextContent("Spawn editor");
+  });
 
-    navigating.unmount();
+  it("divides its controls from the window's, and only when it has some", () => {
+    const bare = renderWithProviders(<EditorToolbar />, { route: "/spawn" });
 
-    const closing = renderWithProviders(<EditorToolbar onBack={() => {}} />, { route: "/spawn" });
+    // With nothing to its left the rule was floating in empty space between the breadcrumb and the
+    // window buttons, dividing nothing from nothing.
+    expect(bare.container.querySelectorAll('[aria-hidden="true"]')).toHaveLength(1);
 
-    expect(closing.getByLabelText("Close and go back")).toBeInTheDocument();
+    bare.unmount();
+
+    const acting = renderWithProviders(<EditorToolbar actions={<button>refresh</button>} />, { route: "/spawn" });
+
+    expect(acting.container.querySelectorAll('[aria-hidden="true"]')).toHaveLength(2);
+  });
+
+  it("sizes its controls against the caption rather than a toolbar that no longer exists", () => {
+    const { getByLabelText } = renderWithProviders(
+      <EditorToolbar
+        actions={
+          <IconButton aria-label={"Refresh"}>
+            <RefreshIcon />
+          </IconButton>
+        }
+      />,
+      { route: "/spawn" }
+    );
+
+    expect(getComputedStyle(getByLabelText("Refresh")).height).toBe("24px");
+  });
+
+  it("sets the path smaller than the names it follows", () => {
+    const { getByText } = renderWithProviders(<EditorToolbar subtitle={"C:\\game\\all.spawn"} />, { route: "/spawn" });
+
+    const path: number = Number.parseFloat(getComputedStyle(getByText("C:\\game\\all.spawn")).fontSize);
+    const name: number = Number.parseFloat(getComputedStyle(getByText("Spawn editor")).fontSize);
+
+    // A path is context, not a heading. At the same size it competed with the application it belongs to.
+    expect(path).toBeLessThan(name);
+  });
+
+  it("renders the open document as the last breadcrumb segment", () => {
+    const { getByText } = renderWithProviders(<EditorToolbar subtitle={"C:\\game\\all.spawn"} />, { route: "/spawn" });
+
+    expect(getByText("C:\\game\\all.spawn")).toBeInTheDocument();
+    expect(getByText("Spawn editor")).toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 import { default as SearchIcon } from "@mui/icons-material/Search";
 import { Box, InputAdornment, TextField, Typography } from "@mui/material";
 import { useInjection } from "@wirestate/react";
-import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from "react";
+import { ChangeEvent, Fragment, ReactElement, useCallback, useMemo, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
@@ -12,15 +12,18 @@ import { APPLICATION_GROUPS, APPLICATIONS } from "@/core/router/applications";
 import { SettingsService } from "@/core/store/settings";
 
 /**
+ * Column counts at chosen widths rather than wherever a `minmax` happens to divide.
+ */
+const GRID_COLUMNS = {
+  xs: "repeat(1, minmax(0, 1fr))",
+  sm: "repeat(2, minmax(0, 1fr))",
+  md: "repeat(3, minmax(0, 1fr))",
+  lg: "repeat(4, minmax(0, 1fr))",
+  xl: "repeat(5, minmax(0, 1fr))",
+} as const;
+
+/**
  * Start page, and the only route between applications.
- *
- * It lists all of them rather than eight categories that each led to another list: five of those
- * categories held two entries or fewer, so the level in between was a click and nothing else. The
- * filter is here because this page now carries the traffic that a permanently visible rail list used
- * to.
- *
- * It carries the same toolbar as every other route, including this one - otherwise entering an
- * application from here shifted the content down by the toolbar's height.
  */
 export function Root(): ReactElement {
   const navigate: NavigateFunction = useNavigate();
@@ -42,6 +45,23 @@ export function Root(): ReactElement {
       : APPLICATIONS;
   }, [query]);
 
+  const sections: Array<[IApplicationGroup, Array<IApplicationDescriptor>]> = useMemo(
+    () =>
+      APPLICATION_GROUPS.map((group: IApplicationGroup): [IApplicationGroup, Array<IApplicationDescriptor>] => [
+        group,
+        matched
+          .filter((it: IApplicationDescriptor) => it.group === group.id)
+          .sort((left: IApplicationDescriptor, right: IApplicationDescriptor) => {
+            if (left.status !== right.status) {
+              return left.status === EApplicationStatus.READY ? -1 : 1;
+            }
+
+            return left.label.localeCompare(right.label);
+          }),
+      ]).filter(([, applications]) => applications.length > 0),
+    [matched]
+  );
+
   const onChangeQuery = useCallback((event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value), []);
 
   const onOpen = useCallback(
@@ -52,49 +72,44 @@ export function Root(): ReactElement {
   return (
     <EditorLayout toolbar={<EditorToolbar />}>
       <Box sx={{ width: "100%", height: "100%", overflowY: "auto", padding: 3 }}>
-        <Typography variant={"body2"} sx={{ color: "text.secondary", marginBottom: 2 }}>
-          Inspect and edit S.T.A.L.K.E.R. gamedata. Pick an application below.
-        </Typography>
+        <Box sx={{ maxWidth: 1600 }}>
+          <TextField
+            fullWidth
+            size={"small"}
+            value={query}
+            placeholder={"Filter applications"}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position={"start"}>
+                    <SearchIcon fontSize={"small"} />
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: { "aria-label": "Filter applications" },
+            }}
+            sx={{ marginBottom: 3, maxWidth: 420 }}
+            onChange={onChangeQuery}
+          />
 
-        <TextField
-          fullWidth
-          size={"small"}
-          value={query}
-          placeholder={"Filter applications"}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position={"start"}>
-                  <SearchIcon fontSize={"small"} />
-                </InputAdornment>
-              ),
-            },
-            htmlInput: { "aria-label": "Filter applications" },
-          }}
-          sx={{ marginBottom: 3, maxWidth: 420 }}
-          onChange={onChangeQuery}
-        />
+          {sections.length ? (
+            <Box sx={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, columnGap: 2, rowGap: 2 }}>
+              {sections.map(([group, applications]: [IApplicationGroup, Array<IApplicationDescriptor>]) => (
+                <Fragment key={group.id}>
+                  <Box
+                    sx={{
+                      gridColumn: "1 / -1",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      marginTop: 1,
+                      color: "text.secondary",
+                    }}
+                  >
+                    <Box sx={{ display: "flex" }}>{group.icon}</Box>
+                    <Typography variant={"subtitle2"}>{group.label}</Typography>
+                  </Box>
 
-        {matched.length ? (
-          APPLICATION_GROUPS.map((group: IApplicationGroup) => {
-            const applications: Array<IApplicationDescriptor> = matched.filter(
-              (it: IApplicationDescriptor) => it.group === group.id
-            );
-
-            if (!applications.length) {
-              return null;
-            }
-
-            return (
-              <Box key={group.id} sx={{ marginBottom: 3 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 1 }}>
-                  <Box sx={{ display: "flex", color: "text.secondary" }}>{group.icon}</Box>
-                  <Typography variant={"subtitle2"} sx={{ color: "text.secondary" }}>
-                    {group.label}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 2 }}>
                   {applications.map((application: IApplicationDescriptor) => (
                     <ApplicationCard
                       key={application.id}
@@ -103,15 +118,15 @@ export function Root(): ReactElement {
                       onOpen={onOpen}
                     />
                   ))}
-                </Box>
-              </Box>
-            );
-          })
-        ) : (
-          <Typography variant={"body2"} sx={{ color: "text.secondary" }}>
-            Nothing matches {`"${query}"`}.
-          </Typography>
-        )}
+                </Fragment>
+              ))}
+            </Box>
+          ) : (
+            <Typography variant={"body2"} sx={{ color: "text.secondary" }}>
+              Nothing matches {`"${query}"`}.
+            </Typography>
+          )}
+        </Box>
       </Box>
     </EditorLayout>
   );

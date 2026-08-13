@@ -35,18 +35,16 @@ export function ExportsOpenForm(): ReactElement {
   return (
     <PickerForm
       isLoading={isLoading}
+      isSubmitDisabled={!project.isValid}
       title={"Open script exports"}
       error={exportsService.project.error ? exportsService.project.error.message : undefined}
-      backPath={"/"}
-      backDisabled={isLoading}
       submitLabel={"Open exports"}
-      isSubmitDisabled={!project.isValid}
       onSubmit={onOpen}
     >
       <PathFormRow
+        isDisabled={isLoading}
         label={"Project"}
         description={"Root of the xrf project whose script exports are read"}
-        isDisabled={isLoading}
         field={project}
       />
     </PickerForm>

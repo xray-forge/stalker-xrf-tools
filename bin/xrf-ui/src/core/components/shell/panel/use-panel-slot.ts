@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { IEditorPanel, TEditorPanelSide } from "@/core/components/shell/panel/EditorPanelsContext";
+import { IEditorPanel, TEditorPanelSide } from "@/core/components/shell/panel/context";
 import { GLOBAL_PANELS, isGlobalPanelId } from "@/core/components/shell/panel/global-panels";
 import { Nullable } from "@/core/types/general";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";

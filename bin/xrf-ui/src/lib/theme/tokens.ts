@@ -26,9 +26,13 @@ export const LAYOUT = {
    * that band with the toolbar and have to line up with its title.
    */
   railButtonSize: 32,
+  /** Dense `MuiToolbar` and `MuiTab` still measure themselves against this; the window caption does not. */
   toolbarHeight: 40,
   statusBarHeight: 24,
-  titleBarHeight: 28,
+  /**
+   * The window's only top band: caption and the active application's toolbar in one row.
+   */
+  titleBarHeight: 36,
   windowControlWidth: 36,
 } as const;
 

@@ -3,7 +3,7 @@ import { ReactElement, ReactNode, useCallback, useMemo, useState } from "react";
 
 import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
+import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/context";
 import { createStubVisualMeshData, IVisualMeshData, IVisualPreviewViewOptions } from "@/lib/visuals";
 import { VISUAL_EDITOR_PANELS } from "@/lib/visuals/preview/visual-panels";
 import { VisualPreviewAnimationBar } from "@/lib/visuals/preview/VisualPreviewAnimationBar";

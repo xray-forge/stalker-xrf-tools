@@ -12,7 +12,7 @@ import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
+import { useEditorPanels } from "@/core/components/shell/panel/context";
 import { Nullable } from "@/core/types/general";
 import { ExportDescriptor, ExportsProject } from "@/lib/xrf/bindings/xray-export";
 
@@ -80,8 +80,6 @@ export function ExportsEditor(): ReactElement {
       toolbar={
         <>
           <EditorToolbar
-            isBackDisabled={isBusy}
-            onBack={() => void onClose()}
             subtitle={
               project?.root ? (
                 <Tooltip title={project.root}>
@@ -100,6 +98,7 @@ export function ExportsEditor(): ReactElement {
                 </span>
               </Tooltip>
             }
+            onBack={() => void onClose()}
           />
 
           {exportsService.project.isLoading ? <LinearProgress sx={{ height: 2 }} /> : null}

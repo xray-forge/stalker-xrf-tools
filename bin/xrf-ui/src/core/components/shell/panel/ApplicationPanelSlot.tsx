@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { ReactElement } from "react";
 
-import { TEditorPanelSide } from "@/core/components/shell/panel/EditorPanelsContext";
+import { TEditorPanelSide } from "@/core/components/shell/panel/context";
 import { PanelResizer } from "@/core/components/shell/panel/PanelResizer";
 import { IPanelSlot } from "@/core/components/shell/panel/use-panel-slot";
 

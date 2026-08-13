@@ -2,23 +2,31 @@ import { Box, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
 import { useEditorStatusSegments } from "@/core/components/shell/EditorStatusContext";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 import { LAYOUT } from "@/lib/theme/tokens";
 
 /**
  * Bottom status strip.
  */
-export function ApplicationStatusBar(): ReactElement {
+export function ApplicationStatusBar({
+  "data-testid": dataTestId = "application-status-bar",
+  id = "application-status-bar",
+  className,
+}: BaseComponentProps): ReactElement {
   const segments: Array<string> = useEditorStatusSegments();
 
   return (
     <Box
+      data-testid={dataTestId}
+      id={id}
+      className={className}
       sx={{
         display: "flex",
         alignItems: "center",
         gap: 1.5,
         height: LAYOUT.statusBarHeight,
         minHeight: LAYOUT.statusBarHeight,
-        paddingX: 1.5,
+        paddingX: 1,
         borderTop: 1,
         borderColor: "divider",
         backgroundColor: "background.paper",

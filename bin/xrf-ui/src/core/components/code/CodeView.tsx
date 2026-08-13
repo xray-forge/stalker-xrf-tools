@@ -1,11 +1,11 @@
-import { Box, Theme } from "@mui/material";
-import { SystemStyleObject } from "@mui/system";
+import { Box } from "@mui/material";
 import { ReactElement, useMemo } from "react";
 
 import { SyntaxContent } from "@/core/components/code/SyntaxContent";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 import { ESyntaxLanguage } from "@/lib/syntax";
 
-export interface ICodeViewProps {
+export interface ICodeViewProps extends BaseComponentProps {
   content: string;
   language: ESyntaxLanguage;
   /**
@@ -16,7 +16,6 @@ export interface ICodeViewProps {
    */
   firstLine?: number;
   label?: string;
-  sx?: SystemStyleObject<Theme>;
 }
 
 const CODE_LINE_HEIGHT: number = 1.6;
@@ -24,7 +23,16 @@ const CODE_LINE_HEIGHT: number = 1.6;
 /**
  * Source text with a line gutter, coloured by its grammar.
  */
-export function CodeView({ content, language, firstLine = 1, label, sx }: ICodeViewProps): ReactElement {
+export function CodeView({
+  "data-testid": dataTestId = "code-view",
+  id,
+  className,
+  content,
+  language,
+  firstLine = 1,
+  label,
+  sx,
+}: ICodeViewProps): ReactElement {
   const lineNumbers: string = useMemo(() => {
     const count: number = Math.max(1, content.split("\n").length);
 
@@ -32,7 +40,13 @@ export function CodeView({ content, language, firstLine = 1, label, sx }: ICodeV
   }, [content, firstLine]);
 
   return (
-    <Box aria-label={label} sx={[{ display: "flex", minWidth: 0, overflow: "auto" }, sx ?? {}]}>
+    <Box
+      data-testid={dataTestId}
+      aria-label={label}
+      id={id}
+      className={className}
+      sx={[{ display: "flex", minWidth: 0, overflow: "auto" }, sx ?? {}]}
+    >
       <Box
         aria-hidden={true}
         component={"pre"}

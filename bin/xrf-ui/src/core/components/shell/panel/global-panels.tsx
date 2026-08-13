@@ -1,4 +1,4 @@
-import { IEditorPanel } from "@/core/components/shell/panel/EditorPanelsContext";
+import { IEditorPanel } from "@/core/components/shell/panel/context";
 import { NotificationsPanel } from "@/core/components/shell/panel/notifications/NotificationsPanel";
 import { NotificationsPanelIcon } from "@/core/components/shell/panel/notifications/NotificationsPanelIcon";
 

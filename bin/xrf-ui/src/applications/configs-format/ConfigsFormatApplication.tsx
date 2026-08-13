@@ -93,13 +93,10 @@ export function ConfigsFormatApplication(): ReactElement {
   return (
     <PickerForm
       isLoading={isLoading}
+      isSubmitDisabled={!configs.isValid}
       title={isCheck ? "Check LTX formatting" : "Format LTX configs"}
       error={error ?? undefined}
-      backPath={"/"}
-      backDisabled={isLoading}
       submitLabel={isCheck ? "Check" : "Format"}
-      isSubmitDisabled={!configs.isValid}
-      onSubmit={onFormat}
       status={
         result ? (
           result.toFormat.length ? (
@@ -114,11 +111,12 @@ export function ConfigsFormatApplication(): ReactElement {
         ) : null
       }
       result={result ? <ConfigsFormatResult isCheck={isCheck} result={result} /> : null}
+      onSubmit={onFormat}
     >
       <PathFormRow
+        isDisabled={isLoading}
         label={"Configs directory"}
         description={"Directory of LTX files to format"}
-        isDisabled={isLoading}
         field={configs}
       />
 

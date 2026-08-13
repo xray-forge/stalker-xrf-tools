@@ -16,7 +16,7 @@ import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
+import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/context";
 import { Nullable } from "@/core/types/general";
 import { SpawnFileService } from "@/lib/spawn-file";
 import { SpawnHeaderChunk } from "@/lib/xrf/bindings/xray-db";
@@ -62,7 +62,6 @@ export function SpawnEditor(): ReactElement {
         <>
           <EditorToolbar
             actions={<SpawnEditorActions />}
-            isBackDisabled={spawnFileService.isBusy}
             subtitle={
               path ? (
                 <Tooltip title={path}>

@@ -39,8 +39,6 @@ export function ArchivesEditorOpenForm(): ReactElement {
       isLoading={isLoading}
       title={"Open game archives"}
       error={archivesService.project.error ? archivesService.project.error.message : undefined}
-      backDisabled={isLoading}
-      backPath={"/"}
       submitLabel={"Open"}
       isSubmitDisabled={!archives.isValid}
       onSubmit={onOpen}

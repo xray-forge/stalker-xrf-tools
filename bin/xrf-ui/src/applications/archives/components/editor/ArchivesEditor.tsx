@@ -12,7 +12,7 @@ import { EditorLayout } from "@/core/components/editor/EditorLayout";
 import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
-import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/EditorPanelsContext";
+import { IEditorPanel, useEditorPanels } from "@/core/components/shell/panel/context";
 import { Nullable } from "@/core/types/general";
 import { formatBytes } from "@/lib/size";
 import { ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
@@ -23,11 +23,13 @@ export function ArchivesEditor(): ReactElement {
   const [isClosing, setClosing] = useState<boolean>(false);
   const [closeError, setCloseError] = useState<Nullable<string>>(null);
 
-  const project: ArchiveProject | null = archivesService.project.value;
+  const project: Nullable<ArchiveProject> = archivesService.project.value;
+
   const archiveCount: number = project?.archives.length ?? 0;
   const fileCount: number = Object.keys(project?.files ?? {}).length;
   const totalSize: number = project?.sizeReal ?? 0;
   const projectRoot: string = project?.root ?? "";
+
   const archivePanels: Array<IEditorPanel> = useMemo(
     () => [
       {
@@ -53,8 +55,6 @@ export function ArchivesEditor(): ReactElement {
     setCloseError(null);
 
     try {
-      // Closing does not navigate: the application renders its own picker again as soon as nothing is
-      // open. It used to leave for the category landing pane, which no longer exists.
       await archivesService.closeArchivesProject();
     } catch (error: unknown) {
       setCloseError(error instanceof Error ? error.message : String(error));
@@ -74,8 +74,6 @@ export function ArchivesEditor(): ReactElement {
       toolbar={
         <>
           <EditorToolbar
-            isBackDisabled={isBusy}
-            onBack={() => void onClose()}
             subtitle={
               projectRoot ? (
                 <Tooltip title={projectRoot}>
@@ -85,7 +83,9 @@ export function ArchivesEditor(): ReactElement {
                 </Tooltip>
               ) : null
             }
+            onBack={() => void onClose()}
           />
+
           {isExtracting ? <LinearProgress sx={{ height: 2 }} /> : null}
 
           {closeError ? (

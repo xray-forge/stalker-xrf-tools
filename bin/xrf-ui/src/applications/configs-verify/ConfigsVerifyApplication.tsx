@@ -58,6 +58,7 @@ export function ConfigsVerifyApplication(): ReactElement {
       });
     } catch (caught: unknown) {
       log.error("Verify error:", caught);
+
       setError(String(caught));
 
       notify({
@@ -80,13 +81,10 @@ export function ConfigsVerifyApplication(): ReactElement {
   return (
     <PickerForm
       isLoading={isLoading}
+      isSubmitDisabled={!configs.isValid}
       title={"Verify LTX configs"}
       error={error ?? undefined}
-      backPath={"/"}
-      backDisabled={isLoading}
       submitLabel={"Verify"}
-      isSubmitDisabled={!configs.isValid}
-      onSubmit={onVerify}
       status={
         result ? (
           result.errors.length ? (
@@ -97,11 +95,12 @@ export function ConfigsVerifyApplication(): ReactElement {
         ) : null
       }
       result={result ? <ConfigsVerifyResult result={result} /> : null}
+      onSubmit={onVerify}
     >
       <PathFormRow
+        isDisabled={isLoading}
         label={"Configs directory"}
         description={"Directory of LTX files to validate"}
-        isDisabled={isLoading}
         field={configs}
       />
     </PickerForm>

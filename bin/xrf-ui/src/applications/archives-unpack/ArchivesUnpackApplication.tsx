@@ -25,6 +25,7 @@ export function ArchivesUnpackApplication(): ReactElement {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Nullable<string>>(null);
   const [result, setResult] = useState<Nullable<ArchiveUnpackResult>>(null);
+
   const [archivesPath, setArchivesPath, selectArchivesPath] = usePathState({
     isDirectory: true,
     isDisabled: isLoading,
@@ -101,16 +102,14 @@ export function ArchivesUnpackApplication(): ReactElement {
 
   return (
     <PickerForm
+      isLoading={isLoading}
+      isSubmitDisabled={isLoading || !archivesPath || !archivesUnpackPath}
       title={"Provide archives to unpack"}
       error={error ?? undefined}
-      isLoading={isLoading}
-      backPath={"/"}
-      backDisabled={isLoading}
       submitLabel={"Unpack"}
-      isSubmitDisabled={isLoading || !archivesPath || !archivesUnpackPath}
-      onSubmit={onUnpackArchivesPathClicked}
       status={result ? <Alert severity={"success"}>Archives unpacked.</Alert> : null}
       result={result ? <ArchivesUnpackResult result={result} /> : null}
+      onSubmit={onUnpackArchivesPathClicked}
     >
       <FilePickerInput
         isDisabled={isLoading}

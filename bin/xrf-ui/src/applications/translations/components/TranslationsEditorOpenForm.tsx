@@ -37,18 +37,16 @@ export function TranslationsEditorOpenForm(): ReactElement {
   return (
     <PickerForm
       isLoading={isLoading}
+      isSubmitDisabled={!translations.isValid}
       title={"Open translations"}
       error={translationsService.project.error ? String(translationsService.project.error) : undefined}
-      backPath={"/"}
-      backDisabled={isLoading}
       submitLabel={"Open"}
-      isSubmitDisabled={!translations.isValid}
       onSubmit={onOpen}
     >
       <PathFormRow
+        isDisabled={isLoading}
         label={"Translations directory"}
         description={"Directory holding the localization tables"}
-        isDisabled={isLoading}
         field={translations}
       />
     </PickerForm>

@@ -85,12 +85,10 @@ export function SpawnEditorUnpackForm(): ReactElement {
   return (
     <PickerForm
       isLoading={isLoading}
+      isSubmitDisabled={!source.isValid || !destination.isValid}
       title={"Unpack spawn file"}
       error={error ?? undefined}
-      backPath={"/"}
-      backDisabled={isLoading}
       submitLabel={"Unpack"}
-      isSubmitDisabled={!source.isValid || !destination.isValid}
       status={
         unpackedTo ? (
           <Alert severity={"success"} variant={"outlined"}>
@@ -101,16 +99,16 @@ export function SpawnEditorUnpackForm(): ReactElement {
       onSubmit={onUnpack}
     >
       <PathFormRow
+        isDisabled={isLoading}
         label={"Source"}
         description={"The packed *.spawn file to read"}
-        isDisabled={isLoading}
         field={source}
       />
 
       <PathFormRow
+        isDisabled={isLoading}
         label={"Destination"}
         description={"Directory the unpacked chunks are written to"}
-        isDisabled={isLoading}
         field={destination}
       />
     </PickerForm>

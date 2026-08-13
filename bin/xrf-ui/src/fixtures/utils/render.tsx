@@ -12,7 +12,7 @@ import {
   IEditorPanel,
   selectPanelsOnSide,
   useEditorPanelsRegistry,
-} from "@/core/components/shell/panel/EditorPanelsContext";
+} from "@/core/components/shell/panel/context";
 import { NotificationsService } from "@/core/store/notifications";
 import { SettingsService } from "@/core/store/settings";
 

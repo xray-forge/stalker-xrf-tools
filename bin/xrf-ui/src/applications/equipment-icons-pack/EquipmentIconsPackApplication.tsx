@@ -104,15 +104,13 @@ export function EquipmentIconsPackApplication(): ReactElement {
 
   return (
     <PickerForm
+      isLoading={result.isLoading}
+      isSubmitDisabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
       title={"Provide equipment details"}
       error={result.error ? String(result.error) : undefined}
-      isLoading={result.isLoading}
-      backPath={"/"}
-      backDisabled={result.isLoading}
       submitLabel={"Pack"}
-      isSubmitDisabled={!inputIconsPath || !outputSpritePath || !systemLtxPath || result.isLoading}
-      onSubmit={onPackEquipmentClicked}
       result={result.value ? <EquipmentPackResult result={result.value} /> : null}
+      onSubmit={onPackEquipmentClicked}
     >
       <FilePickerInput
         isDisabled={result.isLoading}

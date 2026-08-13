@@ -18,13 +18,7 @@ export function ConfigsExplorerApplication(): ReactElement {
   });
 
   return (
-    <PickerForm
-      title={"Browse LTX configs"}
-      backPath={"/"}
-      // The explorer itself is not implemented yet; this screen only remembers where it would look.
-      submitLabel={"Open"}
-      isSubmitDisabled
-    >
+    <PickerForm title={"Browse LTX configs"} submitLabel={"Open"} isSubmitDisabled>
       <PathFormRow label={"Configs directory"} description={"Directory of LTX files to browse"} field={configs} />
     </PickerForm>
   );

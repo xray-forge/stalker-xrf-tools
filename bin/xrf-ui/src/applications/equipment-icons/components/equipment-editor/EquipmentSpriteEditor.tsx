@@ -11,14 +11,14 @@ import { EditorToolbar } from "@/core/components/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/components/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/components/shell/EditorStatusContext";
 import { Nullable } from "@/core/types/general";
-import { EquipmentService } from "@/lib/icons";
+import { EquipmentService, IEquipmentPngDescriptor } from "@/lib/icons";
 import { Logger, useLogger } from "@/lib/logging";
 
 export function EquipmentSpriteEditor(): ReactElement {
   const log: Logger = useLogger("equipment-editor");
 
   const equipmentService: EquipmentService = useInjection(EquipmentService);
-  const spriteImage = equipmentService.spriteImage.value;
+  const spriteImage: Nullable<IEquipmentPngDescriptor> = equipmentService.spriteImage.value;
 
   const isLoading: boolean = equipmentService.spriteImage.isLoading;
   const repackedAt: Nullable<number> = equipmentService.repackedAt;
@@ -66,7 +66,6 @@ export function EquipmentSpriteEditor(): ReactElement {
       toolbar={
         <EditorToolbar
           subtitle={spriteImage?.path}
-          isBackDisabled={isLoading}
           actions={
             <>
               <EquipmentRepackAction />

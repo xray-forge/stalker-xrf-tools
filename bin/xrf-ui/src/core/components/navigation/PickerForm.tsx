@@ -22,8 +22,6 @@ export interface IPickerFormProps {
   error?: ReactNode;
   status?: ReactNode;
   result?: ReactNode;
-  backPath?: string;
-  backDisabled?: boolean;
   onSubmit?: () => void;
 }
 
@@ -41,8 +39,6 @@ export function PickerForm({
   isLoading,
   status,
   result,
-  backPath,
-  backDisabled,
 }: IPickerFormProps): ReactElement {
   const navigate: NavigateFunction = useNavigate();
 
@@ -63,13 +59,16 @@ export function PickerForm({
     [isSubmitDisabled, isLoading, onSubmit]
   );
 
+  const onLeave = useCallback(() => navigate("/", { replace: true }), [navigate]);
+
   const onFormKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === "Escape" && backPath && !backDisabled) {
-        navigate(backPath, { replace: true });
+      // Escape leaves the same way the button does, unless a command is still running.
+      if (event.key === "Escape" && !isLoading) {
+        onLeave();
       }
     },
-    [navigate, backPath, backDisabled]
+    [isLoading, onLeave]
   );
 
   // Land on the first thing still to fill in, rather than making the user click into the form.
@@ -80,10 +79,10 @@ export function PickerForm({
   }, []);
 
   return (
-    <EditorLayout toolbar={<EditorToolbar backPath={backPath} isBackDisabled={backDisabled} />}>
+    <EditorLayout toolbar={<EditorToolbar />}>
       <Box
         component={"form"}
-        noValidate
+        noValidate={true}
         sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", minHeight: 0 }}
         onSubmit={onFormSubmit}
         onKeyDown={onFormKeyDown}
@@ -150,7 +149,6 @@ export function PickerForm({
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end",
             gap: 1,
             flexShrink: 0,
             paddingX: 3,
@@ -159,6 +157,12 @@ export function PickerForm({
             borderColor: "divider",
           }}
         >
+          <Button type={"button"} color={"inherit"} disabled={isLoading} onClick={onLeave}>
+            Back
+          </Button>
+
+          <Box sx={{ flexGrow: 1 }} />
+
           {secondaryActions}
 
           {submitLabel ? (

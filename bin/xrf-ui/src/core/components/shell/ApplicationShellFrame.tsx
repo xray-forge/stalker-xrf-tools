@@ -14,7 +14,7 @@ import {
   IEditorPanel,
   selectPanelsOnSide,
   useEditorPanelsRegistry,
-} from "@/core/components/shell/panel/EditorPanelsContext";
+} from "@/core/components/shell/panel/context";
 import { NOTIFICATIONS_PANEL } from "@/core/components/shell/panel/global-panels";
 import { PanelStripeButton } from "@/core/components/shell/panel/PanelStripeButton";
 import { IPanelSlot, usePanelSlot } from "@/core/components/shell/panel/use-panel-slot";
@@ -74,9 +74,7 @@ export function ApplicationShellFrame({ children }: IApplicationShellFrameProps)
   return (
     <EditorToolbarHostContext.Provider value={toolbarHost}>
       <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}>
-        <ApplicationTitleBar />
-
-        <Box ref={setToolbarHost} sx={{ flexShrink: 0 }} />
+        <ApplicationTitleBar toolbarRef={setToolbarHost} />
 
         <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
           <ApplicationRail

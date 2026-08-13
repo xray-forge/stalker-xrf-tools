@@ -3,16 +3,17 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { ArchiveAudioPreview } from "@/applications/archives/components/editor/preview/ArchiveAudioPreview";
+import { ArchiveCodePreview } from "@/applications/archives/components/editor/preview/ArchiveCodePreview";
 import { ArchiveFileHeader } from "@/applications/archives/components/editor/preview/ArchiveFileHeader";
 import { ArchiveFolderContent } from "@/applications/archives/components/editor/preview/ArchiveFolderContent";
 import { ArchiveImagePreview } from "@/applications/archives/components/editor/preview/ArchiveImagePreview";
 import { ArchivePreviewError } from "@/applications/archives/components/editor/preview/ArchivePreviewError";
-import { ArchiveTextPreview } from "@/applications/archives/components/editor/preview/ArchiveTextPreview";
 import { ArchivesService } from "@/applications/archives/store/archives";
 import { DelayedProgress } from "@/core/components/layout/DelayedProgress";
 import { EmptyState } from "@/core/components/layout/EmptyState";
 import { Nullable } from "@/core/types/general";
 import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/lib/archive";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/size";
 import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-archive";
@@ -20,7 +21,11 @@ import { ArchiveFileDescriptor, ArchiveProject } from "@/lib/xrf/bindings/xray-a
 // Everything that renders its own preview leaves this union; what is left is a reason to explain.
 type TUnsupported = Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" } | { kind: "audio" }>;
 
-export function ArchivesFileContent(): ReactElement {
+export function ArchivesFileContent({
+  "data-testid": dataTestId = "archives-file-content",
+  id = "archives-file-content",
+  className,
+}: BaseComponentProps): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
   const selection: TArchiveSelection = archivesService.selection;
@@ -65,10 +70,23 @@ export function ArchivesFileContent(): ReactElement {
   const support: ArchivePreviewSupport = getArchivePreviewSupport(descriptor, project.readPolicy);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0, minHeight: 0 }}>
+    <Box
+      data-testid={dataTestId}
+      id={id}
+      className={className}
+      sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0, minHeight: 0 }}
+    >
       <ArchiveFileHeader descriptor={descriptor} />
 
-      <Box sx={{ display: "flex", flexGrow: 1, minWidth: 0, minHeight: 0, overflow: "hidden" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexGrow: 1,
+          minWidth: 0,
+          minHeight: 0,
+          overflow: "hidden",
+        }}
+      >
         {support.kind === "image" ? (
           <ArchiveImagePreview />
         ) : support.kind === "audio" ? (
@@ -80,7 +98,7 @@ export function ArchivesFileContent(): ReactElement {
         ) : content.error ? (
           <ArchivePreviewError error={content.error} onRetry={archivesService.retrySelectedFile} />
         ) : content.value?.kind === "text" ? (
-          <ArchiveTextPreview file={content.value.result} />
+          <ArchiveCodePreview file={content.value.result} />
         ) : (
           <EmptyState title={"Preview unavailable"} description={"The selected file did not return any content."} />
         )}

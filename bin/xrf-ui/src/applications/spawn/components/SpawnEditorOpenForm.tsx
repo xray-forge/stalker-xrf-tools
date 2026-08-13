@@ -37,18 +37,16 @@ export function SpawnEditorOpenForm(): ReactElement {
   return (
     <PickerForm
       isLoading={isLoading}
+      isSubmitDisabled={!spawn.isValid}
       title={"Open spawn file"}
       error={spawnFileService.header.error ? String(spawnFileService.header.error) : undefined}
-      backPath={"/"}
-      backDisabled={isLoading}
       submitLabel={"Open"}
-      isSubmitDisabled={!spawn.isValid}
       onSubmit={onOpen}
     >
       <PathFormRow
+        isDisabled={isLoading}
         label={"Spawn file"}
         description={"The *.spawn file to read into the editor"}
-        isDisabled={isLoading}
         field={spawn}
       />
     </PickerForm>

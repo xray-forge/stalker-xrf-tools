@@ -11,7 +11,7 @@ import { EditorLayout } from "./editor/EditorLayout";
  */
 export function ApplicationLoader({ "data-testid": dataTestId, id, className }: BaseComponentProps): ReactElement {
   return (
-    <EditorLayout toolbar={<EditorToolbar backPath={"/"} isBackDisabled={true} />}>
+    <EditorLayout toolbar={<EditorToolbar />}>
       <DelayedProgress data-testid={dataTestId} id={id} className={className} />
     </EditorLayout>
   );

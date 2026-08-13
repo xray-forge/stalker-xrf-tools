@@ -50,12 +50,11 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
 
   return (
     <PickerForm
+      isLoading={equipmentService.spriteImage.isLoading}
+      isSubmitDisabled={equipmentService.spriteImage.isLoading || !spritePath || !systemLtxPath}
       title={"Provide equipment details"}
       error={equipmentService.spriteImage.error ? String(equipmentService.spriteImage.error) : undefined}
-      isLoading={equipmentService.spriteImage.isLoading}
-      backPath={"/"}
       submitLabel={"Open"}
-      isSubmitDisabled={equipmentService.spriteImage.isLoading || !spritePath || !systemLtxPath}
       onSubmit={onOpenEquipmentClicked}
     >
       <FilePickerInput

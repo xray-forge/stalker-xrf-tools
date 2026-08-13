@@ -1,23 +1,31 @@
-import { Box, Typography } from "@mui/material";
-import { ReactElement } from "react";
+import { Box } from "@mui/material";
+import { ReactElement, Ref } from "react";
 
 import { ApplicationTitleBarIcon } from "@/core/components/shell/title-bar/ApplicationTitleBarIcon";
 import { WindowControls } from "@/core/components/shell/title-bar/WindowControls";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { LAYOUT } from "@/lib/theme/tokens";
 
+export interface IApplicationTitleBarProps extends BaseComponentProps {
+  /** Where the active application portals its toolbar. The frame owns the element. */
+  toolbarRef?: Ref<HTMLElement>;
+}
+
 /**
- * Drawn window caption, replacing the one the system would have painted.
+ * The window's single top band: drawn caption and the active application's toolbar in one row.
  */
 export function ApplicationTitleBar({
   "data-testid": dataTestId = "application-title-bar",
   id = "application-title-bar",
-}: BaseComponentProps): ReactElement {
+  className,
+  toolbarRef,
+}: IApplicationTitleBarProps): ReactElement {
   return (
     <Box
       data-testid={dataTestId}
       data-tauri-drag-region={"deep"}
       id={id}
+      className={className}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -32,9 +40,7 @@ export function ApplicationTitleBar({
     >
       <ApplicationTitleBarIcon />
 
-      <Typography>XRF</Typography>
-
-      <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, minWidth: 0 }} />
+      <Box ref={toolbarRef} sx={{ display: "flex", alignItems: "center", flexGrow: 1, minWidth: 0, height: "100%" }} />
 
       <WindowControls />
     </Box>

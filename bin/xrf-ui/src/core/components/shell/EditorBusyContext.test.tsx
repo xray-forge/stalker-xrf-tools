@@ -32,32 +32,32 @@ function renderToolbar(editor: ReactElement) {
   return renderWithProviders(
     <EditorBusyProvider>
       {editor}
-      <EditorToolbar backPath={"/"} />
+      <EditorToolbar />
     </EditorBusyProvider>
   );
 }
 
 describe("useEditorBusy", () => {
   it("leaves navigation available when nothing is running", () => {
-    const { getByLabelText } = renderToolbar(<Busy isBusy={false} />);
+    const { getByText } = renderToolbar(<Busy isBusy={false} />);
 
-    expect(getByLabelText("Back")).not.toBeDisabled();
+    expect(getByText("XRF")).not.toBeDisabled();
   });
 
   it("blocks navigation while a command is running", () => {
-    const { getByLabelText } = renderToolbar(<Busy isBusy />);
+    const { getByText } = renderToolbar(<Busy isBusy />);
 
     // Walking away used to leave the command running against a screen nobody could see.
-    expect(getByLabelText("Back")).toBeDisabled();
+    expect(getByText("XRF")).toBeDisabled();
   });
 
   it("releases the block when the editor unmounts, so a crash cannot strand the application", async () => {
-    const { getByLabelText, getByText } = renderToolbar(<Unmountable />);
+    const { getByText } = renderToolbar(<Unmountable />);
 
-    expect(getByLabelText("Back")).toBeDisabled();
+    expect(getByText("XRF")).toBeDisabled();
 
     await userEvent.click(getByText("unmount"));
 
-    expect(getByLabelText("Back")).not.toBeDisabled();
+    expect(getByText("XRF")).not.toBeDisabled();
   });
 });

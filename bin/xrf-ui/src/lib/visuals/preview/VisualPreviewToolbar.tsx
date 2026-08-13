@@ -40,7 +40,6 @@ export function VisualPreviewToolbar({
   return (
     <EditorToolbar
       subtitle={"Stub visual"}
-      backPath={"/"}
       actions={
         <>
           <Tooltip title={"Open visual (needs backend)"}>

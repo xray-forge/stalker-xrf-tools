@@ -13,24 +13,20 @@ describe("PickerForm", () => {
     expect(getByText("Provide spawn file to open")).toBeInTheDocument();
   });
 
-  it("leaves via the toolbar only, rather than carrying a back button of its own", () => {
-    const { getAllByRole, getByLabelText, queryByRole } = renderWithProviders(
-      <PickerForm title={"Open"} backPath={"/"} />,
-      { route: "/spawn" }
-    );
-
-    expect(getByLabelText("Back")).toBeInTheDocument();
-    expect(queryByRole("button", { name: "Back" })).toBe(getByLabelText("Back"));
-    expect(getAllByRole("button")).toHaveLength(1);
-  });
-
-  it("keeps leaving visible but inert while an operation is in flight", () => {
-    const { getByLabelText } = renderWithProviders(<PickerForm title={"Open"} backPath={"/"} backDisabled />, {
+  it("leaves through the breadcrumb root, rather than carrying a back button of its own", () => {
+    const { getByText, queryByLabelText } = renderWithProviders(<PickerForm title={"Open"} />, {
       route: "/spawn",
     });
 
+    expect(getByText("XRF")).toBeInTheDocument();
+    expect(queryByLabelText("Close document")).not.toBeInTheDocument();
+  });
+
+  it("stops the way out while an operation is in flight", () => {
+    const { getByText } = renderWithProviders(<PickerForm title={"Open"} isLoading />, { route: "/spawn" });
+
     // Disabled rather than removed: a control that vanishes mid-operation is harder to trust.
-    expect(getByLabelText("Back")).toBeDisabled();
+    expect(getByText("XRF")).toBeDisabled();
   });
 
   it("shows progress only while an operation is in flight", () => {

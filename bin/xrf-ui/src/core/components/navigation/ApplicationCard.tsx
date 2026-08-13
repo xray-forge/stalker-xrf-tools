@@ -25,28 +25,38 @@ export function ApplicationCard({ application, isEnabled, onOpen }: IApplication
   }, [application, isEnabled]);
 
   const card: ReactElement = (
-    <Card sx={{ display: "flex", flexDirection: "column", opacity: isEnabled ? 1 : 0.5 }}>
+    <Card sx={{ display: "flex", flexDirection: "column", height: 92, opacity: isEnabled ? 1 : 0.5 }}>
       <CardActionArea
         disabled={!isEnabled}
-        sx={{ flexGrow: 1, padding: 2 }}
+        sx={{ display: "flex", flexDirection: "column", alignItems: "stretch", flexGrow: 1, padding: 1.5 }}
         onFocus={onWarm}
         onMouseEnter={onWarm}
         onClick={() => onOpen(application)}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 0.5 }}>
           <Box sx={{ display: "flex", color: "primary.main" }}>{application.icon}</Box>
-          <Typography variant={"subtitle2"}>{application.label}</Typography>
+          <Typography variant={"subtitle2"} noWrap={true}>
+            {application.label}
+          </Typography>
         </Box>
 
-        <Typography variant={"body2"} sx={{ color: "text.secondary" }}>
+        <Typography
+          variant={"body2"}
+          sx={{
+            color: "text.secondary",
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+            overflow: "hidden",
+          }}
+        >
           {application.description}
         </Typography>
       </CardActionArea>
     </Card>
   );
 
-  // A disabled control cannot receive the tooltip's events, so the card is wrapped rather than
-  // targeted directly.
+  // A disabled control cannot receive the tooltip's events, so the card is wrapped rather than targeted directly.
   return isEnabled ? (
     card
   ) : (

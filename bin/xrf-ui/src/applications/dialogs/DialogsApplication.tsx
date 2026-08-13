@@ -30,7 +30,7 @@ export function DialogsApplication(): ReactElement {
   const onConnect = useCallback((params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   return (
-    <EditorLayout toolbar={<EditorToolbar backPath={"/"} />}>
+    <EditorLayout toolbar={<EditorToolbar />}>
       <Grid container sx={{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%", gap: 1 }}>
         <Box sx={{ width: 120, padding: 2, height: "100%", borderRight: "1px solid red" }}>left menu</Box>
 

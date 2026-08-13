@@ -8,7 +8,7 @@ import { ArchivesService } from "@/applications/archives/store/archives";
 import { ApplicationShellFrame } from "@/core/components/shell/ApplicationShellFrame";
 import { EditorBusyProvider } from "@/core/components/shell/EditorBusyContext";
 import { ApplicationStatusBar } from "@/core/components/shell/footer/ApplicationStatusBar";
-import { EditorPanelsProvider } from "@/core/components/shell/panel/EditorPanelsContext";
+import { EditorPanelsProvider } from "@/core/components/shell/panel/context";
 import { ProjectService } from "@/core/store/project";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
@@ -232,7 +232,7 @@ describe("opened archives editor", () => {
       bindings: [ProjectService, ArchivesService],
     });
 
-    await userEvent.click(await findByLabelText("Close and go back"));
+    await userEvent.click(await findByLabelText("Close Archives"));
 
     expect(await findByText("Open game archives")).toBeInTheDocument();
     expect(queryByText("C:\\game\\database")).not.toBeInTheDocument();
@@ -248,7 +248,7 @@ describe("opened archives editor", () => {
 
     const { findByLabelText, findByText, getByText } = renderEditor();
 
-    await userEvent.click(await findByLabelText("Close and go back"));
+    await userEvent.click(await findByLabelText("Close Archives"));
 
     expect(await findByText("Could not close archives: archive is busy")).toBeInTheDocument();
     expect(getByText("Archives")).toBeInTheDocument();
@@ -280,7 +280,7 @@ describe("opened archives editor", () => {
     await userEvent.click(await findByText("readme.ltx"));
     await userEvent.click(await findByLabelText("Extract file"));
 
-    await waitFor(() => expect(getByLabelText("Close and go back")).toBeDisabled());
+    await waitFor(() => expect(getByLabelText("Close Archives")).toBeDisabled());
 
     save.mockRestore();
   });
