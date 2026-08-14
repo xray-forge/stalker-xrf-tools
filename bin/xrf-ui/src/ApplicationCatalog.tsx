@@ -60,14 +60,54 @@ export const APPLICATION_CATALOG: IApplicationCatalog = {
     VISUALS_EXPLORER_APPLICATION,
   ],
   groups: [
-    { id: EApplicationGroupId.ARCHIVES, label: "Archives", icon: <ArchiveIcon /> },
-    { id: EApplicationGroupId.CONFIGS, label: "Configs", icon: <SettingsApplicationsIcon /> },
-    { id: EApplicationGroupId.DIALOGS, label: "Dialogs", icon: <ForumIcon /> },
-    { id: EApplicationGroupId.EXPORTS, label: "Exports", icon: <SwapHorizIcon /> },
-    { id: EApplicationGroupId.ICONS, label: "Icons", icon: <ImageIcon /> },
-    { id: EApplicationGroupId.SPAWNS, label: "Spawns", icon: <MapIcon /> },
-    { id: EApplicationGroupId.TRANSLATIONS, label: "Translations", icon: <TranslateIcon /> },
-    { id: EApplicationGroupId.VISUALS, label: "Visuals", icon: <ViewInArIcon /> },
+    {
+      accent: { light: "#8c6500", dark: "#e7b94e" },
+      id: EApplicationGroupId.ARCHIVES,
+      label: "Archives",
+      icon: <ArchiveIcon />,
+    },
+    {
+      accent: { light: "#2463a6", dark: "#6daaf2" },
+      id: EApplicationGroupId.CONFIGS,
+      label: "Configs",
+      icon: <SettingsApplicationsIcon />,
+    },
+    {
+      accent: { light: "#087c8c", dark: "#53c6d6" },
+      id: EApplicationGroupId.DIALOGS,
+      label: "Dialogs",
+      icon: <ForumIcon />,
+    },
+    {
+      accent: { light: "#5551a8", dark: "#9d96ea" },
+      id: EApplicationGroupId.EXPORTS,
+      label: "Exports",
+      icon: <SwapHorizIcon />,
+    },
+    {
+      accent: { light: "#7b4aa3", dark: "#c291e7" },
+      id: EApplicationGroupId.ICONS,
+      label: "Icons",
+      icon: <ImageIcon />,
+    },
+    {
+      accent: { light: "#677516", dark: "#afcb54" },
+      id: EApplicationGroupId.SPAWNS,
+      label: "Spawns",
+      icon: <MapIcon />,
+    },
+    {
+      accent: { light: "#217414", dark: "#60c85c" },
+      id: EApplicationGroupId.TRANSLATIONS,
+      label: "Translations",
+      icon: <TranslateIcon />,
+    },
+    {
+      accent: { light: "#9a477a", dark: "#dc87ba" },
+      id: EApplicationGroupId.VISUALS,
+      label: "Visuals",
+      icon: <ViewInArIcon />,
+    },
   ],
   findApplicationByPath: (pathname: string): Nullable<IApplicationDescriptor> =>
     APPLICATION_CATALOG.applications.find(

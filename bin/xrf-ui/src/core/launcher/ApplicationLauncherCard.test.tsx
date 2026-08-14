@@ -1,5 +1,4 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { fireEvent } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
 import { ApplicationLauncherCard } from "@/core/launcher/ApplicationLauncherCard";
@@ -8,6 +7,7 @@ import {
   EApplicationId,
   EApplicationStatus,
   IApplicationDescriptor,
+  IApplicationGroup,
 } from "@/core/routing/application";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
@@ -25,12 +25,19 @@ function mockApplication(overrides: Partial<IApplicationDescriptor> = {}): IAppl
   };
 }
 
+const GROUP: IApplicationGroup = {
+  accent: { light: "#677516", dark: "#afcb54" },
+  id: EApplicationGroupId.SPAWNS,
+  icon: <span />,
+  label: "Spawns",
+};
+
 describe("ApplicationLauncherCard", () => {
   it("warms the chunk when the pointer arrives, before any click", async () => {
     const preload = jest.fn(async () => {});
 
     const { getByRole } = renderWithProviders(
-      <ApplicationLauncherCard application={mockApplication({ preload })} isEnabled onOpen={jest.fn()} />
+      <ApplicationLauncherCard application={mockApplication({ preload })} group={GROUP} isEnabled onOpen={jest.fn()} />
     );
 
     await userEvent.hover(getByRole("button"));
@@ -43,7 +50,7 @@ describe("ApplicationLauncherCard", () => {
     const preload = jest.fn(async () => {});
 
     const { getByRole } = renderWithProviders(
-      <ApplicationLauncherCard application={mockApplication({ preload })} isEnabled onOpen={jest.fn()} />
+      <ApplicationLauncherCard application={mockApplication({ preload })} group={GROUP} isEnabled onOpen={jest.fn()} />
     );
 
     await userEvent.tab();
@@ -52,27 +59,31 @@ describe("ApplicationLauncherCard", () => {
     expect(preload).toHaveBeenCalled();
   });
 
-  it("does not warm an application you cannot open", () => {
+  it("keeps a planned application legible without presenting a disabled button", async () => {
     const preload = jest.fn(async () => {});
 
-    const { getByRole } = renderWithProviders(
+    const { findByRole, getByText, queryByRole } = renderWithProviders(
       <ApplicationLauncherCard
         application={mockApplication({ preload, status: EApplicationStatus.PLANNED })}
+        group={GROUP}
         isEnabled={false}
         onOpen={jest.fn()}
       />
     );
 
-    // Dispatched rather than hovered: a disabled card carries `pointer-events: none`, so a real pointer
-    // never reaches it and the guard would go untested behind that.
-    fireEvent.mouseEnter(getByRole("button"));
+    await userEvent.hover(getByText("Spawn editor"));
 
+    expect(getByText("Planned")).toBeInTheDocument();
+    expect(queryByRole("button")).not.toBeInTheDocument();
     expect(preload).not.toHaveBeenCalled();
+
+    // A card that does nothing has to say why: there is no disabled control here to infer it from.
+    expect(await findByRole("tooltip")).toHaveTextContent("Not implemented yet");
   });
 
   it("survives a statically imported application, which has nothing to warm", async () => {
     const { getByRole } = renderWithProviders(
-      <ApplicationLauncherCard application={mockApplication()} isEnabled onOpen={jest.fn()} />
+      <ApplicationLauncherCard application={mockApplication()} group={GROUP} isEnabled onOpen={jest.fn()} />
     );
 
     await userEvent.hover(getByRole("button"));
@@ -84,7 +95,7 @@ describe("ApplicationLauncherCard", () => {
     const onOpen = jest.fn();
 
     const { getByRole } = renderWithProviders(
-      <ApplicationLauncherCard application={mockApplication()} isEnabled onOpen={onOpen} />
+      <ApplicationLauncherCard application={mockApplication()} group={GROUP} isEnabled onOpen={onOpen} />
     );
 
     await userEvent.click(getByRole("button"));

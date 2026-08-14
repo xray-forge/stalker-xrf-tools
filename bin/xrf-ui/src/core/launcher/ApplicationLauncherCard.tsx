@@ -1,10 +1,11 @@
-import { Box, Card, CardActionArea, Tooltip, Typography } from "@mui/material";
+import { Box, Card, CardActionArea, Theme, Tooltip, Typography } from "@mui/material";
 import { ReactElement, useCallback } from "react";
 
-import { IApplicationDescriptor } from "@/core/routing/application";
+import { EApplicationStatus, IApplicationDescriptor, IApplicationGroup } from "@/core/routing/application";
 
 export interface IApplicationLauncherCardProps {
   application: IApplicationDescriptor;
+  group: IApplicationGroup;
   isEnabled: boolean;
   onOpen: (application: IApplicationDescriptor) => void;
 }
@@ -18,9 +19,12 @@ export interface IApplicationLauncherCardProps {
  */
 export function ApplicationLauncherCard({
   application,
+  group,
   isEnabled,
   onOpen,
 }: IApplicationLauncherCardProps): ReactElement {
+  const isPlanned: boolean = application.status === EApplicationStatus.PLANNED;
+
   const onWarm = useCallback(() => {
     if (isEnabled) {
       // Nothing awaits this: the point is only that the fetch has started before the click.
@@ -28,44 +32,125 @@ export function ApplicationLauncherCard({
     }
   }, [application, isEnabled]);
 
-  const card: ReactElement = (
-    <Card sx={{ display: "flex", flexDirection: "column", height: 92, opacity: isEnabled ? 1 : 0.5 }}>
-      <CardActionArea
-        disabled={!isEnabled}
-        sx={{ display: "flex", flexDirection: "column", alignItems: "stretch", flexGrow: 1, padding: 1.5 }}
-        onFocus={onWarm}
-        onMouseEnter={onWarm}
-        onClick={() => onOpen(application)}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 0.5 }}>
-          <Box sx={{ display: "flex", color: "primary.main" }}>{application.icon}</Box>
-          <Typography variant={"subtitle2"} noWrap={true}>
-            {application.label}
-          </Typography>
+  const content: ReactElement = (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.5,
+        height: "100%",
+        padding: 1.25,
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
+        <Box
+          aria-hidden={true}
+          sx={(theme: Theme) => ({
+            display: "flex",
+            flexShrink: 0,
+            color: group.accent.light,
+            "& .MuiSvgIcon-root": { fontSize: 18 },
+            ...theme.applyStyles("dark", { color: group.accent.dark }),
+          })}
+        >
+          {application.icon}
         </Box>
 
         <Typography
-          variant={"body2"}
+          variant={"subtitle2"}
           sx={{
-            color: "text.secondary",
             display: "-webkit-box",
+            flexGrow: 1,
+            minWidth: 0,
+            color: "text.primary",
             WebkitBoxOrient: "vertical",
             WebkitLineClamp: 2,
             overflow: "hidden",
+            lineHeight: 1.3,
           }}
         >
-          {application.description}
+          {application.label}
         </Typography>
-      </CardActionArea>
-    </Card>
+
+        {isPlanned ? (
+          <Typography
+            component={"span"}
+            variant={"caption"}
+            sx={{
+              flexShrink: 0,
+              alignSelf: "flex-start",
+              paddingX: 0.75,
+              color: "text.secondary",
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 1,
+              fontSize: "0.625rem",
+              fontWeight: 600,
+              lineHeight: "17px",
+            }}
+          >
+            Planned
+          </Typography>
+        ) : null}
+      </Box>
+
+      <Typography
+        variant={"body2"}
+        sx={{
+          display: "-webkit-box",
+          // Two lines whether or not this one needs them, so cards keep a shared baseline across sections.
+          minHeight: 32,
+          color: "text.secondary",
+          WebkitBoxOrient: "vertical",
+          WebkitLineClamp: 2,
+          overflow: "hidden",
+          lineHeight: 1.35,
+        }}
+      >
+        {application.description}
+      </Typography>
+    </Box>
   );
 
-  // A disabled control cannot receive the tooltip's events, so the card is wrapped rather than targeted directly.
-  return isEnabled ? (
-    card
-  ) : (
-    <Tooltip describeChild title={"Not implemented yet. Developer mode opens it anyway."}>
-      <span>{card}</span>
-    </Tooltip>
+  return (
+    <Card
+      sx={{
+        height: "100%",
+        backgroundColor: "background.paper",
+        transition: "background-color 140ms ease, border-color 140ms ease",
+        ...(isEnabled
+          ? {
+              "&:hover": {
+                backgroundColor: "action.hover",
+                borderColor: "primary.main",
+              },
+            }
+          : { opacity: 0.6 }),
+      }}
+    >
+      {isEnabled ? (
+        <CardActionArea
+          aria-label={application.label}
+          sx={{
+            display: "block",
+            height: "100%",
+            "&.Mui-focusVisible": {
+              outline: "2px solid",
+              outlineColor: "primary.main",
+              outlineOffset: -2,
+            },
+          }}
+          onFocus={onWarm}
+          onMouseEnter={onWarm}
+          onClick={() => onOpen(application)}
+        >
+          {content}
+        </CardActionArea>
+      ) : (
+        <Tooltip describeChild title={"Not implemented yet"}>
+          <Box sx={{ height: "100%", cursor: "not-allowed" }}>{content}</Box>
+        </Tooltip>
+      )}
+    </Card>
   );
 }

@@ -15,7 +15,7 @@ export const EXPORTS_EXPLORER_APPLICATION: IApplicationDescriptor = {
     import("./ExportsExplorerApplication").then((it) => ({ default: it.ExportsExplorerApplication }))
   ),
   preload: () => import("@/applications/exports-explorer/ExportsExplorerApplication"),
-  description: "Browse typescript extern declarations from an XRF project",
+  description: "Browse TypeScript extern declarations in an XRF project",
   group: EApplicationGroupId.EXPORTS,
   icon: <SwapHorizIcon />,
   id: EApplicationId.EXPORTS_EXPLORER,

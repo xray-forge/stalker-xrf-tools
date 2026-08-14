@@ -65,10 +65,16 @@ export interface IApplicationDescriptor {
   preload?: () => Promise<unknown>;
 }
 
+export interface IApplicationGroupAccent {
+  light: string;
+  dark: string;
+}
+
 export interface IApplicationGroup {
   id: EApplicationGroupId;
   label: string;
   icon: ReactElement;
+  accent: IApplicationGroupAccent;
 }
 
 /** Sources that raise notifications without owning an application of their own. */
