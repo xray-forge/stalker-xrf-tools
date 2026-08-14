@@ -23,7 +23,7 @@ export function useIsEditorBusy(): boolean {
 }
 
 /**
- * Declare that the active editor is running something that should not be walked away from.
+ * Publishes whether the active editor is running an operation that blocks navigation.
  *
  * The shell blocks navigation while this is set. Forms already disable their own submit and back
  * control during a command, but the rail sits outside the route and happily navigated away mid-unpack,
@@ -31,6 +31,8 @@ export function useIsEditorBusy(): boolean {
  *
  * Clears on unmount, like the other editor-published state, so a crash or a route change cannot strand
  * the application in a permanently blocked state.
+ *
+ * @param isBusy - Whether navigation away from the active editor should be blocked.
  */
 export function useEditorBusy(isBusy: boolean): void {
   const { setBusy } = useContext(EditorBusyContext);

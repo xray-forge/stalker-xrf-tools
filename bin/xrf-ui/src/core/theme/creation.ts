@@ -9,6 +9,9 @@ type ColorScheme = "light" | "dark";
 
 /**
  * Maps the design tokens onto a MUI palette for one color scheme.
+ *
+ * @param scheme - Color scheme whose token values populate the palette.
+ * @returns Palette options for the requested color scheme.
  */
 function createColorSchemePalette(scheme: ColorScheme): PaletteOptions {
   return {

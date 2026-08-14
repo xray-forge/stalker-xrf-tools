@@ -1,11 +1,11 @@
 /**
- * Widen base64 into the bytes it stands for.
+ * Decodes base64 into its source bytes.
  *
  * `atob` yields a binary string, one code unit per byte. Handing that string to a `Blob` directly would
  * encode it as UTF-8 and turn every byte above 0x7f into two, corrupting any container header it is
  * used for - which is most of them.
  *
- * @param base64 - Standard alphabet base64, as the backend commands return it.
+ * @param base64 - Standard-alphabet base64 returned by backend commands.
  * @returns The decoded bytes, one per source byte.
  */
 export function base64ToBytes(base64: string): Uint8Array {
@@ -20,10 +20,10 @@ export function base64ToBytes(base64: string): Uint8Array {
 }
 
 /**
- * Wrap base64 encoded bytes as a blob, for anything that needs a url rather than the bytes.
+ * Wraps base64-encoded bytes in a blob.
  *
- * @param base64 - Standard alphabet base64, as the backend commands return it.
- * @param type - Mime type to tag the blob with, so a consumer can decode it.
+ * @param base64 - Standard-alphabet base64 returned by backend commands.
+ * @param type - MIME type used to identify the blob content.
  * @returns A blob over the decoded bytes.
  */
 export function base64ToBlob(base64: string, type: string): Blob {

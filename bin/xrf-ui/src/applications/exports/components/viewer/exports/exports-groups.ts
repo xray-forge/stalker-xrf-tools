@@ -16,7 +16,12 @@ export interface IExportTreeItem {
   children?: Array<IExportTreeItem>;
 }
 
-/** Group externs by the namespace before their first dot. */
+/**
+ * Groups export declarations by the namespace before their first dot.
+ *
+ * @param declarations - Export declarations to group.
+ * @returns Namespace groups sorted by label, with root declarations first.
+ */
 export function groupExports(declarations: ReadonlyArray<ExportDescriptor>): Array<IExportGroup> {
   const groups: Map<string, IExportGroup> = new Map();
 

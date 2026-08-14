@@ -1,5 +1,5 @@
 /**
- * Reduce raw samples to one peak per horizontal pixel.
+ * Reduces raw samples to one peak per horizontal pixel.
  *
  * A sound is tens of thousands of samples wide and a strip is a few hundred pixels, so drawing every
  * sample would be both slow and meaningless. Taking the loudest magnitude in each bucket keeps
@@ -39,7 +39,7 @@ export function extractPeaks(samples: Float32Array, buckets: number): Float32Arr
 }
 
 /**
- * Format a playback position as `mm:ss`, which is how long these sounds are in practice.
+ * Formats a playback position as `mm:ss`.
  *
  * @param seconds - Position or duration in seconds, as a media element reports it.
  * @returns Zero padded `mm:ss`, falling back to `00:00` for the `NaN` an unloaded element reports.

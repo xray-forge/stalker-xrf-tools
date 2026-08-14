@@ -59,17 +59,17 @@ export class ExportsService {
     }
   }
 
-  /** Release parsed exports when the editor is navigated away from. */
+  /** Releases parsed exports when the editor deactivates. */
   @OnDeactivation()
   public onDeactivation(): void {
     releaseEditorProject(exportsCommands.closeProject);
   }
 
   /**
-   * Read back the source declaring one extern.
+   * Reads the source that declares an extern.
    *
-   * @param name - Name of the declaration to read, as the project reported it.
-   * @returns The source text declaring it.
+   * @param name - Declaration name reported by the project.
+   * @returns Resolves to the source content that declares the extern.
    */
   @BoundAction()
   public async readExportSource(name: string): Promise<ExportSourceContent> {

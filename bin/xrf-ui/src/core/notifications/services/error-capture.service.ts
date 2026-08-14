@@ -28,8 +28,6 @@ export class ErrorCaptureService {
 
   /**
    * Register global error and rejection listeners when the service is provisioned.
-   *
-   * @returns {void} Nothing.
    */
   @OnProvision()
   public onProvision(): void {
@@ -39,8 +37,6 @@ export class ErrorCaptureService {
 
   /**
    * Remove global error and rejection listeners when the service is deactivated.
-   *
-   * @returns {void} Nothing.
    */
   @OnDeactivation()
   public onDeactivation(): void {
@@ -52,7 +48,6 @@ export class ErrorCaptureService {
    * Record an uncaught window error when it contains useful failure details.
    *
    * @param event - Uncaught window error event.
-   * @returns {void} Nothing.
    */
   @BoundAction()
   public onWindowError(event: ErrorEvent): void {
@@ -70,7 +65,6 @@ export class ErrorCaptureService {
    * Record an unhandled promise rejection.
    *
    * @param event - Unhandled promise rejection event.
-   * @returns {void} Nothing.
    */
   @BoundAction()
   public onUnhandledRejection(event: PromiseRejectionEvent): void {
@@ -82,7 +76,6 @@ export class ErrorCaptureService {
    *
    * @param message - Failure message to record.
    * @param where - Location or failure context shown in the notification details.
-   * @returns {void} Nothing.
    */
   private record(message: string, where: string): void {
     if (this.isRecording) {

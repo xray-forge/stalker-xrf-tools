@@ -20,8 +20,10 @@ function RenderFallback({ error, onRetry }: IErrorBoundaryFallbackProps): ReactE
 }
 
 /**
- * React logs caught render errors to the console itself, on top of anything the boundary reports.
- * Silenced per test so a passing suite stays readable.
+ * Runs a render while silencing React's expected error log.
+ *
+ * @param run - Render operation that triggers React's expected error log.
+ * @returns Result returned by the render operation.
  */
 function withSilencedConsole(run: () => RenderResult): RenderResult {
   const spy = jest.spyOn(console, "error").mockImplementation(() => {});

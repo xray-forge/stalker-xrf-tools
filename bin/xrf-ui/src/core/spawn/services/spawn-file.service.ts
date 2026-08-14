@@ -81,6 +81,8 @@ export class SpawnFileService {
    *
    * Read by the editor to lock rail navigation and to disable its own commands. Derived here so the
    * toolbar, the rail and the forms cannot disagree about it.
+   *
+   * @returns Whether an operation is in progress.
    */
   @Computed()
   public get isBusy(): boolean {
@@ -106,6 +108,9 @@ export class SpawnFileService {
    *
    * Asks whether a file is open before asking what is in it, so entering the editor with nothing open
    * costs one boolean instead of a parse.
+   *
+   * @param provisionId - Identifier for the current provisioning attempt.
+   * @returns Completes after restoring the backend's open-file state.
    */
   @OnProvision()
   public async onProvision(provisionId: ProvisionId): Promise<void> {
@@ -272,7 +277,9 @@ export class SpawnFileService {
     }
   }
 
-  /** Dismiss whatever the last write reported, success or failure. */
+  /**
+   * Dismisses the last reported write outcome.
+   */
   @BoundAction()
   public clearOperation(): void {
     this.operation = createLoadable(null);
@@ -318,6 +325,10 @@ export class SpawnFileService {
    *
    * Views ask for their chunk on mount, and moving between chunk tabs remounts them, so without the
    * already-loaded guard every tab click would refetch what it is about to render.
+   *
+   * @param key - State field that stores the requested chunk.
+   * @param request - Backend command that loads the chunk.
+   * @returns Completes after the chunk state is already available or updated.
    */
   private async loadChunk<K extends "header" | "alifeSpawn" | "artefactSpawn" | "patrols" | "graphs">(
     key: K,

@@ -1,7 +1,7 @@
 import { EffectCallback, useEffect, useRef } from "react";
 
 /**
- * Run an effect once, when the component mounts.
+ * Runs an effect once when the component mounts.
  *
  * The effect is not re-run when its closure changes, so anything it reads is read as of mount. That is
  * the point for a one-off - prefilling a form, kicking off a load - and the wrong tool for anything that

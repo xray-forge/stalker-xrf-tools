@@ -7,7 +7,12 @@ import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks
 import { mockInjectedService } from "@/fixtures/utils/container";
 import { Nullable } from "@/lib/types/general";
 
-/** The operation union carries every kind of write, so a directory assertion has to name its own. */
+/**
+ * Returns the result from the last directory extraction.
+ *
+ * @param service - Archives service state to inspect.
+ * @returns Directory extraction result, or null when the last operation was not a directory extraction.
+ */
 function extractedDirectory(service: ArchivesService): Nullable<ArchiveExtractDirectoryResult> {
   return service.operation.value?.kind === "extract-directory" ? service.operation.value.result : null;
 }

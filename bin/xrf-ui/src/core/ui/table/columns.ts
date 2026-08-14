@@ -17,17 +17,24 @@ function isVectorLike(value: unknown): value is IVectorLike {
 }
 
 /**
- * A plain numeric or string column.
+ * Creates a plain numeric or string column.
  *
- * Exists so a table declares every column through the same helper, rather than most of them through an
- * object literal and the interesting ones through a helper.
+ * @param field - Field name read from each row.
+ * @param headerName - Label shown in the column header.
+ * @param width - Optional width in pixels.
+ * @returns Grid column definition.
  */
 export function textColumn(field: string, headerName: string, width?: number): GridColDef {
   return width === undefined ? { field, headerName } : { field, headerName, width };
 }
 
 /**
- * An identifier, path or section: compared by eye, so rendered in monospace.
+ * Creates a monospace column for identifiers, paths, or sections.
+ *
+ * @param field - Field name read from each row.
+ * @param headerName - Label shown in the column header.
+ * @param width - Optional width in pixels.
+ * @returns Grid column definition.
  */
 export function identifierColumn(field: string, headerName: string, width?: number): GridColDef {
   return {
@@ -37,10 +44,12 @@ export function identifierColumn(field: string, headerName: string, width?: numb
 }
 
 /**
- * A position or direction, as `x, y, z`.
+ * Creates a fixed-precision vector column.
  *
- * These used to be `JSON.stringify`d into the cell, which spent the width on punctuation and field
- * names that are identical in every row.
+ * @param field - Field name read from each row.
+ * @param headerName - Label shown in the column header.
+ * @param width - Column width in pixels.
+ * @returns Grid column definition that renders vector-like values as `x, y, z` and other values as empty.
  */
 export function vectorColumn(field: string, headerName: string, width: number = 170): GridColDef {
   return {
@@ -59,9 +68,12 @@ export function vectorColumn(field: string, headerName: string, width: number = 
 }
 
 /**
- * A bit field, as hex.
+ * Creates a hexadecimal bit-field column.
  *
- * Decimal flags cannot be read as flags; hex at least groups the bits the engine sets together.
+ * @param field - Field name read from each row.
+ * @param headerName - Label shown in the column header.
+ * @param width - Column width in pixels.
+ * @returns Grid column definition that renders numeric values as hexadecimal and other values as empty.
  */
 export function flagsColumn(field: string, headerName: string, width: number = 110): GridColDef {
   return {
@@ -75,7 +87,12 @@ export function flagsColumn(field: string, headerName: string, width: number = 1
 }
 
 /**
- * A fixed length numeric tuple, such as a vertex type, as a compact list.
+ * Creates a compact numeric-tuple column.
+ *
+ * @param field - Field name read from each row.
+ * @param headerName - Label shown in the column header.
+ * @param width - Column width in pixels.
+ * @returns Grid column definition that renders arrays as comma-separated values and other values as empty.
  */
 export function tupleColumn(field: string, headerName: string, width: number = 150): GridColDef {
   return {
@@ -90,7 +107,12 @@ export function tupleColumn(field: string, headerName: string, width: number = 1
 }
 
 /**
- * A distance or other float, at fixed precision.
+ * Creates a fixed-precision decimal column.
+ *
+ * @param field - Field name read from each row.
+ * @param headerName - Label shown in the column header.
+ * @param width - Column width in pixels.
+ * @returns Grid column definition that renders numeric values at fixed precision and other values as empty.
  */
 export function decimalColumn(field: string, headerName: string, width: number = 110): GridColDef {
   return {

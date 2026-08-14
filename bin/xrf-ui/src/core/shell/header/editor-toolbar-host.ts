@@ -7,7 +7,11 @@ import { Nullable } from "@/lib/types/general";
  */
 export const EditorToolbarHostContext = createContext<Nullable<HTMLElement>>(null);
 
-/** Null until the frame's slot has mounted, and in any test that renders an editor without the frame. */
+/**
+ * Resolves the host for the active editor toolbar.
+ *
+ * @returns The toolbar host, or `null` before the frame slot mounts.
+ */
 export function useEditorToolbarHost(): Nullable<HTMLElement> {
   return useContext(EditorToolbarHostContext);
 }

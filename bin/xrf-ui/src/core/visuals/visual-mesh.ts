@@ -92,6 +92,8 @@ const STUB_MESH_FACES: Array<IStubMeshFace> = [
  *
  * Written out as explicit attribute buffers instead of using `BoxGeometry`, so the prototype exercises
  * the path an ogf visual will take rather than a shortcut that proves nothing.
+ *
+ * @returns Cube mesh data in the renderer's attribute-buffer layout.
  */
 export function createStubVisualMeshData(): IVisualMeshData {
   const vertexCount: number = STUB_MESH_FACES.length * 4;

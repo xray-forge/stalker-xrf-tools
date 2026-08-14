@@ -21,7 +21,11 @@ function PublishedPanels(): ReactElement {
   return <div data-testid={"published-tools"}>{panels.map((it: IEditorPanel) => it.label).join(",")}</div>;
 }
 
-/** The editor restores from three cheap calls now, rather than one whole-file parse. */
+/**
+ * Configures mock responses for opening a spawn file.
+ *
+ * @param overrides - Spawn-file fields to replace in the default fixture.
+ */
 function mockOpenSpawn(overrides: Partial<SpawnFile> = {}): void {
   const file: SpawnFile = mockSpawnFile(overrides);
 

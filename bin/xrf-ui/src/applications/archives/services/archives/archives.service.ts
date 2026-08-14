@@ -52,21 +52,28 @@ export class ArchivesService {
 
   private contentRequestId: number = 0;
 
-  /** The selected file, or null when a directory or nothing is selected. */
+  /**
+   * Returns the selected file, or null when a directory or nothing is selected.
+   *
+   * @returns The selected file descriptor, or null.
+   */
   public get selectedFile(): Nullable<ArchiveFileDescriptor> {
     return this.selection.kind === "file" ? this.selection.descriptor : null;
   }
 
-  /** The selected directory, empty string for the archive root, or null when a file is selected. */
+  /**
+   * Returns the selected directory, or null when a file or nothing is selected.
+   *
+   * @returns The archive-relative directory path, with an empty string for the archive root, or null.
+   */
   public get selectedDirectory(): Nullable<string> {
     return this.selection.kind === "directory" ? this.selection.path : null;
   }
 
   /**
-   * Whether something is in flight that a second command would race.
+   * Reports whether a content or write operation is in progress.
    *
-   * Read by the editor to lock navigation and by the explorer to refuse a new selection. Derived here
-   * rather than reassembled at each call site, which is how the three copies of it drifted apart.
+   * @returns Whether navigation or another command would race with the active operation.
    */
   public get isBusy(): boolean {
     return this.content.isLoading || this.operation.isLoading;
@@ -111,7 +118,7 @@ export class ArchivesService {
   }
 
   /**
-   * Release the archive project when the editor is navigated away from.
+   * Releases the archive project when the editor deactivates.
    */
   @OnDeactivation()
   public onDeactivation(): void {
@@ -184,7 +191,11 @@ export class ArchivesService {
     await this.loadSelectedContent(descriptor);
   }
 
-  /** Select a directory, which is a different kind of selection than a file rather than a wider one. */
+  /**
+   * Selects an archive directory instead of a file.
+   *
+   * @param path - Archive-relative directory path; an empty string selects the archive root.
+   */
   @BoundAction()
   public selectArchiveDirectory(path: string): void {
     this.contentRequestId += 1;
@@ -203,7 +214,11 @@ export class ArchivesService {
   }
 
   /**
-   * Write one archived file to a path of the user's choosing.
+   * Extracts an archived file to a destination path.
+   *
+   * @param descriptor - Archived file to extract.
+   * @param destination - Output file path.
+   * @returns Resolves after the extraction outcome is published.
    */
   @BoundAction()
   public async extractFile(descriptor: ArchiveFileDescriptor, destination: string): Promise<void> {
@@ -239,9 +254,11 @@ export class ArchivesService {
   }
 
   /**
-   * Write every archived file under a directory into a destination root.
+   * Extracts files beneath an archive directory into a destination root. An empty prefix extracts the archive root.
    *
-   * An empty prefix extracts the whole archive, which is what selecting the tree root means.
+   * @param prefix - Archive-relative directory prefix; an empty string selects the archive root.
+   * @param destination - Output directory path.
+   * @returns Resolves after the extraction outcome is published.
    */
   @BoundAction()
   public async extractArchiveDirectory(prefix: string, destination: string): Promise<void> {
@@ -284,7 +301,9 @@ export class ArchivesService {
     }
   }
 
-  /** Dismiss whatever the last write reported, success or failure. */
+  /**
+   * Clears the last extraction outcome.
+   */
   @BoundAction()
   public clearOperation(): void {
     this.operation = createLoadable(null);
@@ -299,10 +318,10 @@ export class ArchivesService {
   }
 
   /**
-   * Load whatever the selected file can be shown as.
+   * Loads a selected file in its supported preview representation.
    *
-   * The single entry point for every content kind, so selecting and retrying cannot disagree about
-   * which one applies - they did, until retry started re-reading textures as text.
+   * @param descriptor - Selected archive file to preview.
+   * @returns Resolves after supported content loading is started or completed.
    */
   private async loadSelectedContent(descriptor: ArchiveFileDescriptor): Promise<void> {
     const project: Nullable<ArchiveProject> = this.project.value;
@@ -325,10 +344,11 @@ export class ArchivesService {
   }
 
   /**
-   * Ask the backend for one representation of a file and publish it as the current content.
+   * Loads and publishes one file preview while ignoring stale responses.
    *
-   * Guarded by a request identifier: clicking through a directory starts a read per file, and an
-   * earlier one finishing last would otherwise overwrite a newer selection's content.
+   * @param descriptor - Archive file to read.
+   * @param kind - Preview representation to request from the backend.
+   * @returns Resolves after the current request publishes content or an error.
    */
   private async readContent(descriptor: ArchiveFileDescriptor, kind: TArchiveContent["kind"]): Promise<void> {
     const requestId: number = ++this.contentRequestId;

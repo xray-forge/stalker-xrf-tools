@@ -8,11 +8,15 @@ export interface IInjectedServiceMockDescriptor<T> {
 }
 
 /**
- * Build a service the way the application does, through a container.
+ * Builds a service through the same container path as the application.
  *
  * Services that resolve dependencies with `inject()` cannot be constructed with `new`: there is no
  * injection context, and the call throws. Resolving without provisioning on purpose, so `@OnProvision`
  * does not fire and a test still sees a service that has asked the backend for nothing.
+ *
+ * @param token - Service token to resolve.
+ * @param bindings - Additional bindings to register before the service token.
+ * @returns The resolved service and its container.
  */
 export function mockInjectedService<T>(
   token: ServiceToken<T>,

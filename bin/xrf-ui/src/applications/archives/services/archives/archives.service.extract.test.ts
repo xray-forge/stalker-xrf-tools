@@ -9,7 +9,12 @@ import { Nullable } from "@/lib/types/general";
 
 const FILE: ArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "configs\\system.ltx" });
 
-/** The operation union carries every kind of write, so a file assertion has to name its own. */
+/**
+ * Returns the file path from the last file extraction.
+ *
+ * @param service - Archives service state to inspect.
+ * @returns Extracted file path, or null when the last operation was not a file extraction.
+ */
 function extractedFile(service: ArchivesService): Nullable<string> {
   return service.operation.value?.kind === "extract-file" ? service.operation.value.destination : null;
 }

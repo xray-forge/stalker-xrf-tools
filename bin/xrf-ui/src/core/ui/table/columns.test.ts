@@ -10,7 +10,13 @@ import {
   vectorColumn,
 } from "@/core/ui/table/columns";
 
-/** The grid calls `valueGetter` with the cell value first, which is all these helpers read. */
+/**
+ * Reads a value through a column's value getter.
+ *
+ * @param column - Column whose value getter to invoke.
+ * @param value - Cell value passed as the getter's first argument.
+ * @returns Value returned by the getter, if present.
+ */
 function readCell(column: GridColDef, value: unknown): unknown {
   return column.valueGetter?.(value as never, {} as never, column, {} as never);
 }

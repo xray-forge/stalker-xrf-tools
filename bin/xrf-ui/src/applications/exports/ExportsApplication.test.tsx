@@ -21,9 +21,10 @@ describe("ExportsApplication", () => {
   });
 
   /**
-   * Through the shell rather than on its own: the container an application's services live in is built
-   * by the frame from the descriptor, so mounting the component alone would prove nothing about how it
-   * is actually wired.
+   * Renders the exports application through its shell.
+   *
+   * @param route - Initial application route.
+   * @returns Testing Library render result for the application shell.
    */
   function renderApplication(route: string) {
     return renderWithProviders(

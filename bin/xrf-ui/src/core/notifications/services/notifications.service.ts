@@ -95,7 +95,6 @@ export class NotificationsService {
    * store should do with a record.
    *
    * @param payload - Notification details to stamp and store.
-   * @returns {void} Nothing.
    */
   @BoundAction()
   public push(payload: INotificationPayload): void {
@@ -122,8 +121,6 @@ export class NotificationsService {
    *
    * Called by the panel while it is open, including for records that arrive while it is open - they
    * were on screen as they landed, so calling them unread would leave a badge nothing can dismiss.
-   *
-   * @returns {void} Nothing.
    */
   @BoundAction()
   public markAllRead(): void {
@@ -135,8 +132,6 @@ export class NotificationsService {
 
   /**
    * Remove all user-facing notifications and developer traces.
-   *
-   * @returns {void} Nothing.
    */
   @BoundAction()
   public clear(): void {
@@ -149,7 +144,6 @@ export class NotificationsService {
    * Store a notification delivered after the root container is provisioned.
    *
    * @param event - Notification event delivered by the application event bus.
-   * @returns {void} Nothing.
    */
   @OnEvent(EMIT_NOTIFICATION_EVENT)
   public onNotificationPush(event: WireEvent<INotificationPayload>): void {

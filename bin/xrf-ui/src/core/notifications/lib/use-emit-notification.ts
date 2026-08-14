@@ -9,7 +9,6 @@ import { INotificationPayload } from "@/core/notifications/lib/notifications-typ
  * Function that emits a notification from a component.
  *
  * @param payload - Notification details supplied by the component.
- * @returns {void} Nothing.
  */
 export type TEmitNotification = (payload: INotificationPayload) => void;
 

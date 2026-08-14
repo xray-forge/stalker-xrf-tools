@@ -1,8 +1,11 @@
 /**
- * Render a millisecond duration the way a report should read.
+ * Formats a millisecond duration for reports.
  *
  * The previous result components printed `duration / 1000` straight into the DOM, which produced
  * values like `0.123 sec` for a fast run and `98.4315 sec` for a slow one.
+ *
+ * @param durationMs - Duration in milliseconds.
+ * @returns The duration in milliseconds, seconds, or minutes and seconds.
  */
 export function formatDuration(durationMs: number): string {
   if (durationMs < 1000) {

@@ -43,7 +43,13 @@ function LeftPanelsOutlet(): ReactElement {
 }
 
 /**
- * Render a component with the application's test providers.
+ * Renders content with the application's test providers.
+ *
+ * @param ui - Content to render.
+ * @param options - Initial route and container bindings.
+ * @param options.route - Initial route for the memory router.
+ * @param options.bindings - Service bindings added to the test container.
+ * @returns The Testing Library render result.
  */
 export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] }: IRenderOptions = {}): RenderResult {
   const config: ContainerConfig = {

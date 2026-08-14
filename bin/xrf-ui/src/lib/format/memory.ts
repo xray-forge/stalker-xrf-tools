@@ -5,6 +5,8 @@ export function bytesToMegabytes(bytes: number): number {
 }
 
 /**
+ * Formats a byte count with an adaptive binary unit.
+ *
  * @param bytes - Byte count to format. Negative values are treated as zero.
  * @returns The byte count formatted with an adaptive binary unit.
  */

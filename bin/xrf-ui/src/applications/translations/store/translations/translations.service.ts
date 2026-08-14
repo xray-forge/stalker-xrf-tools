@@ -46,7 +46,7 @@ export class TranslationsService {
   }
 
   /**
-   * Release the translations project when the editor is navigated away from.
+   * Releases the translations project when the editor deactivates.
    */
   @OnDeactivation()
   public onDeactivation(): void {
@@ -60,8 +60,7 @@ export class TranslationsService {
     try {
       this.project = createLoadable(null, true);
 
-      const response: ITranslationsProjectJson =
-        await translationsCommands.openProject(translationsPath);
+      const response: ITranslationsProjectJson = await translationsCommands.openProject(translationsPath);
 
       this.log.info("Translations project opened:", response);
 

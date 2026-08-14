@@ -2,7 +2,9 @@ import { jest } from "@jest/globals";
 
 import { mockAppWindow, mockInvoke } from "@/fixtures/mocks/tauri.mocks";
 
-/** Register the Tauri API mocks used by jsdom tests. */
+/**
+ * Registers the Tauri API mocks used by jsdom tests.
+ */
 export function mockTauri(): void {
   jest.mock("@tauri-apps/api/core", () => ({
     invoke: mockInvoke,

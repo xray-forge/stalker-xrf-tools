@@ -21,7 +21,12 @@ function readWidth(side: TEditorPanelSide): number {
 }
 
 /**
- * One side of the frame: which panel is showing there, and how wide it is.
+ * Manages the active panel and width for one side of the frame.
+ *
+ * @param side - Frame side managed by the slot.
+ * @param panels - Panels available on that side.
+ * @param selectionScope - Stable scope used to persist the active panel.
+ * @returns The resolved panel, width, and update callbacks.
  */
 export function usePanelSlot(side: TEditorPanelSide, panels: Array<IEditorPanel>, selectionScope: string): IPanelSlot {
   const storageKey: string = `xrf.panels.${side}.${selectionScope}`;

@@ -41,7 +41,18 @@ export function getPathFieldStorageKey(id: string): string {
 }
 
 /**
- * A remembered, validated filesystem path for one form field.
+ * Manages a remembered, validated filesystem path for one form field.
+ *
+ * @param options - Field identity, dialog behavior, and validation options.
+ * @param options.id - Stable identifier used for persistence.
+ * @param options.title - Path dialog title.
+ * @param options.filters - File filters shown by the dialog.
+ * @param options.isDirectory - Whether the dialog selects a directory.
+ * @param options.isSave - Whether the path may identify a new output file.
+ * @param options.isDisabled - Whether selection is disabled.
+ * @param options.isRequired - Whether an empty path is invalid.
+ * @param options.seed - Async fallback used when no path is stored.
+ * @returns The current path state, validation result, and field actions.
  */
 export function usePathField({
   id,

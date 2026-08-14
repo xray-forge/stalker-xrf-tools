@@ -38,13 +38,21 @@ export interface IUseRankedSearch<T> {
 }
 
 /**
- * Filter-as-you-type over a large list, without blocking the field it is typed into.
+ * Searches a large list without blocking the input field.
  *
  * Three things make this fast, and all three matter: the searchable text is lowercased once per dataset
  * rather than once per keystroke, the query is deferred so react can abandon a filter that a newer
  * keystroke has already invalidated, and only `limit` results reach the renderer. The last is the one
  * that counts - filtering tens of thousands of rows costs a couple of milliseconds, while rendering
  * them costs seconds.
+ *
+ * @param options - Search inputs and behavior.
+ * @param options.items - Items to index and search.
+ * @param options.toSearchText - Extracts the primary searchable text.
+ * @param options.toSecondaryText - Extracts optional lower-priority searchable text.
+ * @param options.limit - Maximum number of results exposed to the renderer.
+ * @param options.onSelect - Receives the active result when Enter is pressed.
+ * @returns The query state, ranked results, and keyboard interaction callbacks.
  */
 export function useRankedSearch<T>({
   items,

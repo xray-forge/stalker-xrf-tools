@@ -19,8 +19,9 @@ const TEXT: ArchiveFileDescriptor = mockArchiveFileDescriptor({ name: "configs\\
 const PREVIEW = { name: TEXTURE.name, width: 256, height: 256, base64: "iVBORw0KGgo=" };
 
 /**
- * The service reads the image rules off the open project rather than from its own constants, so a
- * project has to be present for anything to be classified as a texture.
+ * Creates an archive service with fixture files classified by its open project.
+ *
+ * @returns Service ready to preview the fixture files.
  */
 function createService(): ArchivesService {
   const { service } = mockInjectedService(ArchivesService);

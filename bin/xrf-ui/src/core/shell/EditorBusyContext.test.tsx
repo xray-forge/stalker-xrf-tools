@@ -24,9 +24,10 @@ function Unmountable(): ReactElement {
 }
 
 /**
- * Against the toolbar rather than the rail: the rail used to carry a Home button and that was what a
- * running command blocked. Home is gone, so the toolbar's leaving control is the only way out of an
- * application and the one that has to stop.
+ * Renders an editor with the toolbar navigation control.
+ *
+ * @param editor - Editor content that publishes its busy state.
+ * @returns Render result for the editor and toolbar.
  */
 function renderToolbar(editor: ReactElement) {
   return renderWithProviders(

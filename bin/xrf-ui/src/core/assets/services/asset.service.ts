@@ -33,6 +33,9 @@ export class AssetService {
    *
    * Prefer `swap` where there is a natural key - a selection, a sprite - so releasing is not something
    * anyone has to remember.
+   *
+   * @param blob - Data for the object URL.
+   * @returns An object URL the caller must release.
    */
   public create(blob: Blob): string {
     const url: string = URL.createObjectURL(blob);
@@ -48,6 +51,10 @@ export class AssetService {
    * The new url is created before the old is revoked, which is the ordering that matters: revoking
    * first leaves anything still rendering the old url pointing at nothing for as long as the
    * replacement takes, and permanently if creating it fails.
+   *
+   * @param key - Key whose current object URL is replaced.
+   * @param blob - Data for the replacement object URL.
+   * @returns The replacement object URL held under the key.
    */
   public swap(key: string, blob: Blob): string {
     const previous: Nullable<string> = this.keyed.get(key) ?? null;
@@ -62,14 +69,24 @@ export class AssetService {
     return url;
   }
 
-  /** Release one url obtained from `create`. Unknown urls are ignored rather than revoked blindly. */
+  /**
+   * Releases one URL obtained from `create`.
+   *
+   * Unknown URLs are ignored rather than revoked blindly.
+   *
+   * @param url - Caller-owned object URL to release.
+   */
   public release(url: Nullable<string>): void {
     if (url && this.loose.delete(url)) {
       URL.revokeObjectURL(url);
     }
   }
 
-  /** Release whatever is held under a key, if anything. */
+  /**
+   * Releases the object URL held under a key.
+   *
+   * @param key - Key whose object URL should be released.
+   */
   public releaseKey(key: string): void {
     const url: Nullable<string> = this.keyed.get(key) ?? null;
 
@@ -79,7 +96,11 @@ export class AssetService {
     }
   }
 
-  /** Number of urls still held, so a test can assert nothing was left behind. */
+  /**
+   * Counts the object URLs still held by the service.
+   *
+   * @returns The number of keyed and caller-owned object URLs.
+   */
   public get heldCount(): number {
     return this.keyed.size + this.loose.size;
   }

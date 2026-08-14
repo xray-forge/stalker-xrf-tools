@@ -17,7 +17,7 @@ export const PAN_ZOOM_IDENTITY: IPanZoomState = { scale: 1, offsetX: 0, offsetY:
 const WHEEL_STEP: number = 1.2;
 
 /**
- * Hold a scale within the range the viewport is willing to render.
+ * Clamps a scale to the supported viewport range.
  *
  * @param scale - Desired scale, where 1 is one content pixel per viewport pixel.
  * @returns The scale, bounded by the minimum and maximum this module allows.
@@ -27,7 +27,7 @@ export function clampScale(scale: number): number {
 }
 
 /**
- * Rescale while keeping whatever sits under `point` exactly where it is.
+ * Rescales while keeping the content under `point` fixed.
  *
  * Zooming about the viewport centre instead makes the thing being inspected drift off screen at high
  * magnification, which is when it matters most. The anchor point is in viewport coordinates and the
@@ -50,7 +50,7 @@ export function zoomAround(state: IPanZoomState, point: IPanZoomPoint, nextScale
 }
 
 /**
- * Apply one wheel notch at the pointer.
+ * Applies one wheel zoom step at the pointer.
  *
  * @param state - Current pan and zoom.
  * @param point - Pointer position to zoom about, in viewport coordinates.
@@ -62,7 +62,7 @@ export function zoomByWheel(state: IPanZoomState, point: IPanZoomPoint, delta: n
 }
 
 /**
- * Shift the content without changing its scale.
+ * Shifts the content without changing its scale.
  *
  * @param state - Current pan and zoom.
  * @param deltaX - Horizontal movement in viewport pixels.
@@ -74,7 +74,7 @@ export function panBy(state: IPanZoomState, deltaX: number, deltaY: number): IPa
 }
 
 /**
- * Scale to fit within the viewport and centre it.
+ * Scales content to fit within the viewport and centres it.
  *
  * Never enlarges: something smaller than the viewport is shown at its own size, because blowing a 16px
  * icon up to fill a pane tells you less about it than seeing how small it really is.

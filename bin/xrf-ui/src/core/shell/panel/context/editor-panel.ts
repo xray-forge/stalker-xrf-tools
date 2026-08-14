@@ -13,7 +13,13 @@ export interface IEditorPanel {
   render: () => ReactNode;
 }
 
-/** Panels on one side, in declaration order. */
+/**
+ * Selects panels assigned to one side in declaration order.
+ *
+ * @param panels - Panels to filter.
+ * @param side - Side to select.
+ * @returns Panels assigned to the selected side.
+ */
 export function selectPanelsOnSide(panels: ReadonlyArray<IEditorPanel>, side: TEditorPanelSide): Array<IEditorPanel> {
   return panels.filter((panel: IEditorPanel) => (panel.side ?? "right") === side);
 }

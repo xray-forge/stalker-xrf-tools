@@ -12,7 +12,14 @@ import {
   zoomByWheel,
 } from "@/lib/media/pan-zoom";
 
-/** Where a content-space coordinate lands in the viewport under a given transform. */
+/**
+ * Projects a content-space coordinate into the viewport.
+ *
+ * @param state - Pan and zoom transform to apply.
+ * @param contentX - Horizontal content-space coordinate.
+ * @param contentY - Vertical content-space coordinate.
+ * @returns The projected viewport coordinate.
+ */
 function project(state: IPanZoomState, contentX: number, contentY: number): { x: number; y: number } {
   return { x: state.offsetX + contentX * state.scale, y: state.offsetY + contentY * state.scale };
 }

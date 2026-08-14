@@ -47,6 +47,11 @@ const SEGMENT_SEPARATORS: string = "\\/.";
  *
  * The whole point of the index is that `toLowerCase` and segment scanning happen once per dataset
  * rather than once per item per keystroke.
+ *
+ * @param items - Items to index for repeated searching.
+ * @param toSearchText - Returns each item's searchable identity text.
+ * @param toSecondaryText - Optionally returns searchable text that does not affect rank.
+ * @returns Lowercased search entries with path metadata.
  */
 export function buildSearchIndex<T>(
   items: ReadonlyArray<T>,
@@ -95,6 +100,11 @@ function getRank(entry: ISearchIndexEntry<unknown>, query: string, matchAt: numb
  *
  * Everything is visited even though only `limit` come back: the count has to be truthful, and a result
  * cannot be known to be the best match until the rest have been looked at.
+ *
+ * @param index - Precomputed entries to search.
+ * @param rawQuery - Search text before whitespace trimming and case normalization.
+ * @param limit - Maximum number of ranked results to return.
+ * @returns Ranked results and the total number of matches.
  */
 export function rankedSearch<T>(
   index: ReadonlyArray<ISearchIndexEntry<T>>,

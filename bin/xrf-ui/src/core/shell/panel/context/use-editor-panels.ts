@@ -11,7 +11,11 @@ import {
   TEditorPanelsStateSetter,
 } from "@/core/shell/panel/context/EditorPanelsContext";
 
-/** Only what the application on screen published. Anything left over from the last one is not rendered. */
+/**
+ * Resolves the panels published by the active application.
+ *
+ * @returns The active application's panels, excluding stale panels from the previous application.
+ */
 export function useEditorPanelsRegistry(): ReadonlyArray<IEditorPanel> {
   const state: IEditorPanelsState = useContext(EditorPanelsContext);
   const owner: string = useCurrentApplication()?.path ?? "root";
@@ -20,10 +24,13 @@ export function useEditorPanelsRegistry(): ReadonlyArray<IEditorPanel> {
 }
 
 /**
- * Publish the panels this application offers, for as long as it is mounted.
+ * Publishes the active application's panels while it is mounted.
  *
  * Dependencies follow `useMemo` semantics and decide when the factory publishes new render closures.
  * ESLint checks them at each call site, so captured values cannot change behind a stale panel array.
+ *
+ * @param createPanels - Factory that creates the panels to publish.
+ * @param dependencies - Values that invalidate the published panel array.
  */
 export function useEditorPanels(createPanels: () => Array<IEditorPanel>, dependencies: DependencyList): void {
   const setState: TEditorPanelsStateSetter = useContext(EditorPanelsSetterContext);

@@ -1,11 +1,21 @@
 import { AlifeObject, Patrol, SpawnFile, Vector3d } from "@/core/bindings/xrf-db";
 
-/** Create a vector fixture with optional field overrides. */
+/**
+ * Creates a vector fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns A vector fixture.
+ */
 export function mockVector3d(overrides: Partial<Vector3d> = {}): Vector3d {
   return { x: 0, y: 0, z: 0, ...overrides };
 }
 
-/** Create an ALife object fixture with optional field overrides. */
+/**
+ * Creates an ALife object fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns An ALife object fixture.
+ */
 export function mockAlifeObject(overrides: Partial<AlifeObject> = {}): AlifeObject {
   return {
     clientDataSize: 0,
@@ -41,7 +51,12 @@ export function mockAlifeObject(overrides: Partial<AlifeObject> = {}): AlifeObje
   };
 }
 
-/** Create a patrol fixture with optional field overrides. */
+/**
+ * Creates a patrol fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns A patrol fixture.
+ */
 export function mockPatrol(overrides: Partial<Patrol> = {}): Patrol {
   return {
     name: "esc_walker_walk",
@@ -66,7 +81,12 @@ export function mockPatrol(overrides: Partial<Patrol> = {}): Patrol {
   };
 }
 
-/** Create a structurally complete spawn file fixture with optional field overrides. */
+/**
+ * Creates a structurally complete spawn file fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns A spawn file fixture.
+ */
 export function mockSpawnFile(overrides: Partial<SpawnFile> = {}): SpawnFile {
   return {
     header: {

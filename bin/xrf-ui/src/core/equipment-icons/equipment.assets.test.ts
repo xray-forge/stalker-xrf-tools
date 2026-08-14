@@ -17,6 +17,8 @@ const RESPONSE = {
 /**
  * The sprite is fetched through `convertFileSrc` and `fetch`, neither of which jsdom provides, so the
  * blob arrives from a stub. What matters here is the url lifetime, not what the bytes decode to.
+ *
+ * @returns The service, its asset service, and their provisioned container.
  */
 function createService(): { service: EquipmentService; assets: AssetService; container: Container } {
   const { service, container } = mockInjectedService(EquipmentService);

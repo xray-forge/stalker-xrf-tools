@@ -14,10 +14,12 @@ export interface IWindowControls {
 }
 
 /**
- * Resolve the window this document is painted into.
+ * Resolves the window that contains this document.
  *
  * Reads the handle lazily rather than at module scope: the accessor throws outside a tauri webview, and
  * the frontend is also served by `vite preview` and rendered under jsdom by the tests.
+ *
+ * @returns The current Tauri window, or `null` outside a Tauri webview.
  */
 function resolveAppWindow(): Nullable<Window> {
   if (!isTauri()) {
@@ -32,11 +34,13 @@ function resolveAppWindow(): Nullable<Window> {
 }
 
 /**
- * Drive the host window from a drawn title bar.
+ * Provides controls for a custom host-window title bar.
  *
  * The maximized flag is tracked rather than asked for on every render because the window can be
  * maximized without the bar being touched - a double click on the drag region, a snap gesture, or the
  * keyboard - and the button glyph has to follow all of them.
+ *
+ * @returns The current window state and control callbacks.
  */
 export function useWindowControls(): IWindowControls {
   const [appWindow] = useState<Nullable<Window>>(resolveAppWindow);

@@ -7,7 +7,6 @@ import { EMIT_NOTIFICATION_EVENT, INotificationPayload } from "@/core/notificati
  *
  * @param bus - Event bus that delivers the notification.
  * @param payload - Notification details supplied by the emitter.
- * @returns {void} Nothing.
  */
 export function emitNotification(bus: EventBus, payload: INotificationPayload): void {
   bus.emit<INotificationPayload>(EMIT_NOTIFICATION_EVENT, payload);

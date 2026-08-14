@@ -10,7 +10,10 @@ import { XRayError } from "@/core/bindings/xrf-error";
 export type TLtxSchemeError = Extract<XRayError, { LtxScheme: unknown }>["LtxScheme"];
 
 /**
- * Take the scheme problems out of a verification result, discarding any other error variant.
+ * Extracts scheme problems from a verification result, discarding other error variants.
+ *
+ * @param errors - Verification errors to inspect.
+ * @returns Scheme-problem payloads from the supplied errors.
  */
 export function toLtxSchemeErrors(errors: Array<XRayError>): Array<TLtxSchemeError> {
   return errors

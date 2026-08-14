@@ -15,7 +15,13 @@ interface IPanelRender {
   service: NotificationsService;
 }
 
-/** Seeded before rendering, which is the ordering the panel actually meets - it opens onto a log. */
+/**
+ * Renders the notification panel with an optional seeded log.
+ *
+ * @param seed - Notifications recorded before the panel opens.
+ * @param isDevModeEnabled - Whether developer notifications are visible.
+ * @returns Render result and the notifications service used by the panel.
+ */
 function renderPanel(seed: Array<INotificationPayload> = [], isDevModeEnabled: boolean = false): IPanelRender {
   const container: Container = new Container({ bindings: [NotificationsService, SettingsService] });
   const service: NotificationsService = container.get(NotificationsService);

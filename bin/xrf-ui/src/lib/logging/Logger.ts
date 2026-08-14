@@ -39,8 +39,8 @@ export class Logger implements ILogger {
   /**
    * Creates a new Logger instance.
    *
-   * @param prefix - the string to be displayed in the console as a tag
-   * @param isEnabled - whether the logger is enabled (defaults to true)
+   * @param prefix - Text displayed as the console tag.
+   * @param isEnabled - Whether this logger accepts messages.
    */
   public constructor(prefix: string, isEnabled: boolean = true) {
     this.prefix = prefix;

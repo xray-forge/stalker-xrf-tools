@@ -13,7 +13,12 @@ interface IPanelRender {
   service: SpawnFileService;
 }
 
-/** Seeded before rendering, which is the order the panel meets a selection when it is opened. */
+/**
+ * Renders the details panel with an optional selected row.
+ *
+ * @param selected - Spawn row to select before rendering.
+ * @returns Render result and the backing spawn-file service.
+ */
 function renderPanel(selected?: AnyObject): IPanelRender {
   const { service }: { service: SpawnFileService } = mockInjectedService(SpawnFileService);
 

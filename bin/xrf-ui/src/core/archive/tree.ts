@@ -7,6 +7,10 @@ import { Optional } from "@/lib/types/general";
  * Mirrors `ArchiveProject::extract_directory` on the rust side, including both of its skips. Counting with
  * a plain `startsWith` here instead would promise more files than the backend writes, and would let
  * `configs` swallow `configs_backup`.
+ *
+ * @param descriptor - Archive file metadata to test.
+ * @param prefix - Archive-relative directory path to match.
+ * @returns Whether extraction would write the file under the directory.
  */
 export function isUnderArchiveDirectory(descriptor: ArchiveFileDescriptor, prefix: string): boolean {
   // Directory entries and empty entries are never written out.
@@ -114,7 +118,6 @@ function appendFile(
  * Sort a mutable tree recursively with directories before files and labels in locale order.
  *
  * @param items - Tree items to sort in place.
- * @returns {void} Nothing.
  */
 function sortTree(items: Array<IArchiveTreeItem>): void {
   for (const item of items) {

@@ -7,7 +7,13 @@ export type ArchivePreviewSupport =
   | { kind: "unsupported-extension"; extension: string }
   | { kind: "too-large"; maximumSize: number };
 
-/** Whether the webview can play this file back, given the project policy. */
+/**
+ * Checks whether the policy permits audio preview for an archive file.
+ *
+ * @param descriptor - Archive file metadata whose extension is checked.
+ * @param policy - Backend-provided archive read policy.
+ * @returns Whether the descriptor extension supports audio preview.
+ */
 export function isArchiveAudio(descriptor: ArchiveFileDescriptor, policy: ArchiveProjectReadPolicy): boolean {
   const extension: string = descriptor.extension.toLowerCase();
 
@@ -15,10 +21,14 @@ export function isArchiveAudio(descriptor: ArchiveFileDescriptor, policy: Archiv
 }
 
 /**
- * Whether the backend will decode this file into a picture rather than read it as text.
+ * Checks whether the backend decodes an archive file as an image rather than reads it as text.
  *
  * Both lists come from the project's own read policy, so the frontend never has to keep its own copy of
  * what the backend is willing to do.
+ *
+ * @param descriptor - Archive file metadata whose extension is checked.
+ * @param policy - Backend-provided archive read policy.
+ * @returns Whether the descriptor extension supports image preview.
  */
 export function isArchiveImage(descriptor: ArchiveFileDescriptor, policy: ArchiveProjectReadPolicy): boolean {
   const extension: string = descriptor.extension.toLowerCase();

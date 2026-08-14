@@ -4,6 +4,8 @@ import { Logger } from "@/lib/logging";
 
 /**
  * Tell the backend to drop whatever the editor had open, on the way out.
+ *
+ * @param release - Tauri command name or generated release command to invoke.
  */
 export function releaseEditorProject(release: string | (() => Promise<unknown>)): void {
   if (!isTauri()) {

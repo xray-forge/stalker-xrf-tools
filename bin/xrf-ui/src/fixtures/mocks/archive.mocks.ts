@@ -5,7 +5,12 @@ import {
   ArchiveProjectReadPolicy,
 } from "@/core/bindings/xrf-archive";
 
-/** Create an archive read policy fixture with optional field overrides. */
+/**
+ * Creates an archive read policy fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns An archive read policy fixture.
+ */
 export function mockArchiveReadPolicy(overrides: Partial<ArchiveProjectReadPolicy> = {}): ArchiveProjectReadPolicy {
   return {
     extensions: ["ltx", "script", "ps", "ds", "h", "hs", "s", "vs", "cmd", "xml"],
@@ -18,7 +23,12 @@ export function mockArchiveReadPolicy(overrides: Partial<ArchiveProjectReadPolic
   };
 }
 
-/** Create an archive file descriptor fixture with optional field overrides. */
+/**
+ * Creates an archive file descriptor fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns An archive file descriptor fixture.
+ */
 export function mockArchiveFileDescriptor(overrides: Partial<ArchiveFileDescriptor> = {}): ArchiveFileDescriptor {
   return {
     crc: 0x12345678,
@@ -33,7 +43,12 @@ export function mockArchiveFileDescriptor(overrides: Partial<ArchiveFileDescript
   };
 }
 
-/** Create an archives project fixture from optional file descriptors. */
+/**
+ * Creates an archives project fixture.
+ *
+ * @param files - File descriptors to include, or the default fixtures when omitted.
+ * @returns An archives project fixture.
+ */
 export function mockArchivesProject(files?: Array<ArchiveFileDescriptor>): ArchiveProject {
   const descriptors: Array<ArchiveFileDescriptor> = files ?? [
     mockArchiveFileDescriptor(),

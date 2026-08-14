@@ -99,7 +99,9 @@ export class EquipmentService {
     this.isGridVisible = isVisible;
   }
 
-  /** Dismiss a reported failure, keeping whatever sprite is still on screen behind it. */
+  /**
+   * Dismisses a reported failure while keeping the displayed sprite.
+   */
   @BoundAction()
   public clearSpriteError(): void {
     this.spriteImage = this.spriteImage.asReady();
@@ -223,6 +225,9 @@ export class EquipmentService {
    *
    * The convention is a sibling directory named after the sprite without its extension, which is what the
    * unpacker writes and what the packer reads back.
+   *
+   * @param spritePath - Path of the open equipment sprite.
+   * @returns Resolves whether an unpacked sibling directory is available.
    */
   @BoundAction()
   public async resolveRepackSource(spritePath: string): Promise<void> {

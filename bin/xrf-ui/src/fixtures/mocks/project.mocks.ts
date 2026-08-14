@@ -6,7 +6,12 @@ import { ITranslationsProjectJson } from "@/core/translations";
 
 import { mockArchiveReadPolicy } from "./archive.mocks";
 
-/** Create an archive file fixture with optional field overrides. */
+/**
+ * Creates an archive file fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns An archive file fixture.
+ */
 export function mockArchiveFile(overrides: Partial<ArchiveFileDescriptor> = {}): ArchiveFileDescriptor {
   return {
     crc: 123456,
@@ -21,7 +26,12 @@ export function mockArchiveFile(overrides: Partial<ArchiveFileDescriptor> = {}):
   };
 }
 
-/** Create an archive descriptor fixture with optional field overrides. */
+/**
+ * Creates an archive descriptor fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns An archive descriptor fixture.
+ */
 export function mockArchiveDescriptor(overrides: Partial<ArchiveDescriptor> = {}): ArchiveDescriptor {
   return {
     createdAt: null,
@@ -33,7 +43,12 @@ export function mockArchiveDescriptor(overrides: Partial<ArchiveDescriptor> = {}
   };
 }
 
-/** Create an archives project fixture with optional field overrides. */
+/**
+ * Creates an archives project fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns An archives project fixture.
+ */
 export function mockArchivesProject(overrides: Partial<ArchiveProject> = {}): ArchiveProject {
   return {
     archives: [mockArchiveDescriptor(), mockArchiveDescriptor({ path: "db\\db1" })],
@@ -56,7 +71,12 @@ export function mockArchivesProject(overrides: Partial<ArchiveProject> = {}): Ar
   };
 }
 
-/** Create a callable export fixture with optional field overrides. */
+/**
+ * Creates a callable export fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns A callable export fixture.
+ */
 export function mockExportDescriptor(overrides: Partial<TCallableExportDescriptor> = {}): TCallableExportDescriptor {
   return {
     kind: "callable",
@@ -69,7 +89,12 @@ export function mockExportDescriptor(overrides: Partial<TCallableExportDescripto
   };
 }
 
-/** Create export declaration fixtures with optional additional declarations. */
+/**
+ * Creates export declaration fixtures.
+ *
+ * @param overrides - Additional declarations to append.
+ * @returns Export declaration fixtures followed by the additional declarations.
+ */
 export function mockExportsDeclarations(overrides: Array<ExportDescriptor> = []): Array<ExportDescriptor> {
   return [
     mockExportDescriptor({
@@ -83,7 +108,12 @@ export function mockExportsDeclarations(overrides: Array<ExportDescriptor> = [])
   ];
 }
 
-/** Create an exports project fixture with optional field overrides. */
+/**
+ * Creates an exports project fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns An exports project fixture.
+ */
 export function mockExportsProject(overrides: Partial<ExportsProject> = {}): ExportsProject {
   return {
     root: "C:\\projects\\xrf",
@@ -92,7 +122,12 @@ export function mockExportsProject(overrides: Partial<ExportsProject> = {}): Exp
   };
 }
 
-/** Create a translations project fixture with optional field overrides. */
+/**
+ * Creates a translations project fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns A translations project fixture.
+ */
 export function mockTranslationsProject(overrides: Partial<ITranslationsProjectJson> = {}): ITranslationsProjectJson {
   return {
     "st_dialogs.json": {
@@ -106,7 +141,11 @@ export function mockTranslationsProject(overrides: Partial<ITranslationsProjectJ
   };
 }
 
-/** Create equipment descriptor fixtures. */
+/**
+ * Creates equipment descriptor fixtures.
+ *
+ * @returns Equipment descriptor fixtures.
+ */
 export function mockEquipmentDescriptors(): Array<IEquipmentSectionDescriptor> {
   return [
     { section: "wpn_ak74", w: 2, h: 1, x: 0, y: 0 },

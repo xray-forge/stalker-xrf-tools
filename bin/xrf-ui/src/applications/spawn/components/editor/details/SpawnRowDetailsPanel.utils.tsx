@@ -1,6 +1,11 @@
 import { AnyObject } from "@/lib/types/general";
 
-/** Vectors, tuples and nested objects all have to land as something a person can read in one line. */
+/**
+ * Formats a spawn-row value for single-line display.
+ *
+ * @param value - Value from the selected spawn row.
+ * @returns Readable text for the value, including nested values.
+ */
 export function formatSpawnRowDetailsValue(value: unknown): string {
   if (value === null || value === undefined) {
     return "-";
