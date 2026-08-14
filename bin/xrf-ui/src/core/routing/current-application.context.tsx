@@ -1,6 +1,6 @@
 import { createContext, ReactElement, ReactNode, useContext } from "react";
 
-import { XrfError } from "@/core/error/lib";
+import { XrfApplicationError } from "@/core/error/lib";
 import { IApplicationDescriptor } from "@/core/routing/application";
 import { Maybe, Nullable } from "@/lib/types/general";
 
@@ -10,7 +10,7 @@ export function useCurrentApplication(): Nullable<IApplicationDescriptor> {
   const application: Maybe<IApplicationDescriptor> = useContext(CurrentApplicationContext);
 
   if (application === undefined) {
-    throw new XrfError("Current application is not available.");
+    throw new XrfApplicationError("Current application is not available.");
   }
 
   return application;
