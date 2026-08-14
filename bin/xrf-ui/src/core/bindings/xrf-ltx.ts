@@ -12,7 +12,7 @@ export type LtxProjectVerifyResult = {
   checkedFields: number;
   checkedSections: number;
   duration: number;
-  errors: Array<XRayError>;
+  errors: Array<XrfError>;
   invalidSections: number;
   skippedSections: number;
   totalFiles: number;
@@ -20,8 +20,8 @@ export type LtxProjectVerifyResult = {
   validSections: number;
 };
 
-/** Error while working with translation file */
-export type XRayError =
+/** Error produced by XRF tools and libraries. */
+export type XrfError =
   | ({
       Assertion: {
         message: string;
