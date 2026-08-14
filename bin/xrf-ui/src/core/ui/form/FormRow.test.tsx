@@ -15,14 +15,34 @@ describe("FormRow", () => {
     expect(getByText("Directory of LTX files to validate")).toBeInTheDocument();
   });
 
-  it("marks a required field so a disabled action is self explanatory", () => {
-    const { getByText } = renderWithProviders(
+  it("marks the optional field rather than every required one", () => {
+    const required = renderWithProviders(
       <FormRow label={"Source"} isRequired>
         <input />
       </FormRow>
     );
 
-    expect(getByText("*")).toBeInTheDocument();
+    expect(required.queryByText("Optional")).not.toBeInTheDocument();
+
+    required.unmount();
+
+    const optional = renderWithProviders(
+      <FormRow label={"Source"} isRequired={false}>
+        <input />
+      </FormRow>
+    );
+
+    expect(optional.getByText("Optional")).toBeInTheDocument();
+  });
+
+  it("ties the label to the control, so the field is not announced as unlabelled", () => {
+    const { getByLabelText } = renderWithProviders(
+      <FormRow label={"Configs directory"} controlId={"configs-directory"}>
+        <input id={"configs-directory"} />
+      </FormRow>
+    );
+
+    expect(getByLabelText("Configs directory")).toBeInTheDocument();
   });
 
   it("shows a validation message when the value is wrong", () => {

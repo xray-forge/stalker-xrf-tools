@@ -87,6 +87,7 @@ export function SpawnEditorPackForm(): ReactElement {
       isLoading={isLoading}
       isSubmitDisabled={!source.isValid || !destination.isValid}
       title={"Pack spawn file"}
+      description={"Builds one spawn file from the unpacked chunks. The output file is overwritten."}
       error={error ?? undefined}
       submitLabel={"Pack"}
       status={

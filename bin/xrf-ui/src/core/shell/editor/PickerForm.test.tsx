@@ -50,6 +50,28 @@ describe("PickerForm", () => {
     expect(getByText("Open")).toBeInTheDocument();
   });
 
+  it("says what the command touches before it is run", () => {
+    const { getByText } = renderWithProviders(
+      <PickerForm title={"Unpack"} description={"Writes the chunks into the destination directory."} />,
+      { route: "/spawn-unpacker" }
+    );
+
+    expect(getByText("Writes the chunks into the destination directory.")).toBeInTheDocument();
+  });
+
+  it("keeps the actions with the parameters they act on", () => {
+    const { getByText } = renderWithProviders(<PickerForm title={"Open"} submitLabel={"Open file"} />, {
+      route: "/spawn-editor",
+    });
+
+    // Both buttons belong to the one panel, rather than the form floating at the top of a window whose
+    // bottom edge holds the buttons.
+    const panel: HTMLElement | null = getByText("Open").closest(".MuiPaper-root");
+
+    expect(panel).toContainElement(getByText("Open file"));
+    expect(panel).toContainElement(getByText("Back"));
+  });
+
   it("renders a result alongside the form", () => {
     const { getByText } = renderWithProviders(<PickerForm title={"Unpack"} result={<div>unpacked 512 files</div>} />, {
       route: "/archives-unpacker",

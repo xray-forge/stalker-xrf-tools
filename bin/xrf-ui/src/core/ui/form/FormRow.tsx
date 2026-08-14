@@ -8,6 +8,8 @@ export interface IFormRowProps {
   description?: string;
   isRequired?: boolean;
   error?: Nullable<string>;
+  /** Ties the label to the control it names. Without it the field reads as unlabelled. */
+  controlId?: string;
   /**
    * Puts the control beside the label instead of under it.
    */
@@ -18,16 +20,25 @@ export interface IFormRowProps {
 /**
  * One labelled row of a form.
  */
-export function FormRow({ label, description, isRequired, error, isInline, children }: IFormRowProps): ReactElement {
+export function FormRow({
+  label,
+  description,
+  isRequired = true,
+  error,
+  controlId,
+  isInline,
+  children,
+}: IFormRowProps): ReactElement {
   const heading: ReactElement = (
     <Box sx={{ minWidth: 0 }}>
-      <Typography variant={"subtitle2"} component={"div"}>
+      <Typography component={"label"} htmlFor={controlId} variant={"subtitle2"} sx={{ display: "block" }}>
         {label}
-        {isRequired ? (
-          <Typography component={"span"} sx={{ color: "error.main", marginLeft: 0.5 }} aria-hidden>
-            *
+
+        {isRequired ? null : (
+          <Typography component={"span"} variant={"caption"} sx={{ marginLeft: 0.75, color: "text.secondary" }}>
+            Optional
           </Typography>
-        ) : null}
+        )}
       </Typography>
 
       {description ? (

@@ -86,6 +86,7 @@ export function SpawnEditorUnpackForm(): ReactElement {
       isLoading={isLoading}
       isSubmitDisabled={!source.isValid || !destination.isValid}
       title={"Unpack spawn file"}
+      description={"Writes the file's chunks into the destination directory, replacing files of the same name."}
       error={error ?? undefined}
       submitLabel={"Unpack"}
       status={

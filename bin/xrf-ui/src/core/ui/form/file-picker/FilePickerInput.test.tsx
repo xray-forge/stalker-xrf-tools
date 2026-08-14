@@ -19,24 +19,41 @@ describe("FilePickerInput", () => {
     expect(getByPlaceholderText("Not selected")).toBeInTheDocument();
   });
 
-  it("selects from the field itself, not only from the button", async () => {
+  it("leaves the field alone so the path can be selected and copied", async () => {
     const onSelect = jest.fn();
 
     const { getByRole } = renderWithProviders(<FilePickerInput value={"C:\\gamedata"} onSelect={onSelect} />);
 
     await userEvent.click(getByRole("textbox"));
 
-    expect(onSelect).toHaveBeenCalledTimes(1);
+    // Clicking the text used to reopen the dialog, which made the value impossible to select by hand.
+    expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it("selects from the choose button", async () => {
+  it("selects from the browse button", async () => {
     const onSelect = jest.fn();
 
     const { getByLabelText } = renderWithProviders(<FilePickerInput value={"C:\\gamedata"} onSelect={onSelect} />);
 
-    await userEvent.click(getByLabelText("Choose"));
+    await userEvent.click(getByLabelText("Browse"));
 
     expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("takes a typed or pasted path when the caller accepts one", async () => {
+    const onChange = jest.fn();
+
+    const { getByRole } = renderWithProviders(<FilePickerInput onChange={onChange} onSelect={jest.fn()} />);
+
+    await userEvent.type(getByRole("textbox"), "D:");
+
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it("stays read only when the caller has no way to accept typed input", async () => {
+    const { getByRole } = renderWithProviders(<FilePickerInput value={"C:\\gamedata"} onSelect={jest.fn()} />);
+
+    expect(getByRole("textbox")).toHaveAttribute("readonly");
   });
 
   it("clears without also opening the dialog", async () => {
@@ -67,16 +84,13 @@ describe("FilePickerInput", () => {
     expect(queryByLabelText("Clear")).not.toBeInTheDocument();
   });
 
-  it("does not select while disabled", async () => {
-    const onSelect = jest.fn();
-
-    const { getByRole } = renderWithProviders(
-      <FilePickerInput value={"C:\\gamedata"} isDisabled onSelect={onSelect} />
+  it("does not select while disabled", () => {
+    const { getByLabelText, getByRole } = renderWithProviders(
+      <FilePickerInput value={"C:\\gamedata"} isDisabled onSelect={jest.fn()} />
     );
 
-    await userEvent.click(getByRole("textbox"));
-
-    expect(onSelect).not.toHaveBeenCalled();
+    expect(getByLabelText("Browse")).toBeDisabled();
+    expect(getByRole("textbox")).toBeDisabled();
   });
 
   it("describes what the path is for", () => {

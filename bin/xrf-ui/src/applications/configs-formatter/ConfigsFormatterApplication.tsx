@@ -28,7 +28,7 @@ export function ConfigsFormatterApplication(): ReactElement {
 
   const configs: IPathField = usePathField({
     id: "configs.format.directory",
-    title: "Provide path to xrf configs",
+    title: "Select configs directory",
     isDirectory: true,
     isDisabled: isLoading,
     seed: async () => (projectService.xrfProjectPath ? getProjectConfigsPath(projectService.xrfProjectPath) : null),
@@ -97,6 +97,11 @@ export function ConfigsFormatterApplication(): ReactElement {
       isLoading={isLoading}
       isSubmitDisabled={!configs.isValid}
       title={isCheck ? "Check LTX formatting" : "Format LTX configs"}
+      description={
+        isCheck
+          ? "Reports which files are badly formatted. Nothing is written."
+          : "Rewrites every badly formatted file in the directory in place."
+      }
       error={error ?? undefined}
       submitLabel={isCheck ? "Check" : "Format"}
       status={

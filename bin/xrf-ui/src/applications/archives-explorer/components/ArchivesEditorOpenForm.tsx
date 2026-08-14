@@ -19,7 +19,7 @@ export function ArchivesEditorOpenForm(): ReactElement {
 
   const archives: IPathField = usePathField({
     id: "archives.open.source",
-    title: "Provide path to packed archives",
+    title: "Select archives directory",
     isDirectory: true,
     isDisabled: isLoading,
     seed: async () =>
@@ -38,6 +38,7 @@ export function ArchivesEditorOpenForm(): ReactElement {
     <PickerForm
       isLoading={isLoading}
       title={"Open game archives"}
+      description={"Indexes every archive in the directory for browsing. Nothing is written."}
       error={archivesService.project.error ? archivesService.project.error.message : undefined}
       submitLabel={"Open"}
       isSubmitDisabled={!archives.isValid}

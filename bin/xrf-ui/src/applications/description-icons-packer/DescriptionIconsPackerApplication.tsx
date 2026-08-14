@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
-import { PickerForm } from "@/core/shell/editor/PickerForm";
+import { PlannedApplication } from "@/core/shell/editor/PlannedApplication";
 
 export function DescriptionIconsPackerApplication(): ReactElement {
-  return <PickerForm title={"Provide description file to pack"} />;
+  return <PlannedApplication description={"Builds a description sprite from a directory of individual icons."} />;
 }

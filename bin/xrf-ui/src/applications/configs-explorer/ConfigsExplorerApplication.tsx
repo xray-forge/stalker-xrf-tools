@@ -12,13 +12,18 @@ export function ConfigsExplorerApplication(): ReactElement {
 
   const configs: IPathField = usePathField({
     id: "configs.explore.directory",
-    title: "Provide path to xrf configs",
+    title: "Select configs directory",
     isDirectory: true,
     seed: async () => (projectService.xrfProjectPath ? getProjectConfigsPath(projectService.xrfProjectPath) : null),
   });
 
   return (
-    <PickerForm title={"Browse LTX configs"} submitLabel={"Open"} isSubmitDisabled>
+    <PickerForm
+      title={"Browse LTX configs"}
+      description={"Reads the directory into a browsable tree. Nothing is written."}
+      submitLabel={"Open"}
+      isSubmitDisabled
+    >
       <PathFormRow label={"Configs directory"} description={"Directory of LTX files to browse"} field={configs} />
     </PickerForm>
   );

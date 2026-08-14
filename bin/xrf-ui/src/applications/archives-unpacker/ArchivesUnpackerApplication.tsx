@@ -10,8 +10,8 @@ import { EApplicationId } from "@/core/routing/application";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
-import { FilePickerInput } from "@/core/ui/form/file-picker/FilePickerInput";
-import { usePathState } from "@/core/ui/form/file-picker/use-path-state";
+import { PathFormRow } from "@/core/ui/form/PathFormRow";
+import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 
@@ -25,32 +25,27 @@ export function ArchivesUnpackerApplication(): ReactElement {
   const [error, setError] = useState<Nullable<string>>(null);
   const [result, setResult] = useState<Nullable<ArchiveUnpackResult>>(null);
 
-  const [archivesPath, setArchivesPath, selectArchivesPath] = usePathState({
+  const source: IPathField = usePathField({
+    id: "archives.unpack.source",
+    title: "Select archives directory",
     isDirectory: true,
     isDisabled: isLoading,
-    title: "Provide path to packed archives",
+    seed: async () =>
+      projectService.xrfProjectPath ? getExistingProjectLinkedGamePath(projectService.xrfProjectPath) : null,
   });
 
-  const [archivesUnpackPath, setArchivesUnpackPath, selectArchivesUnpackPath] = usePathState({
+  const destination: IPathField = usePathField({
+    id: "archives.unpack.destination",
+    title: "Select output directory",
     isDirectory: true,
+    isSave: true,
     isDisabled: isLoading,
-    title: "Provide output directory to unpack into",
+    seed: async () =>
+      projectService.xrfProjectPath ? getProjectArchivesUnpackPath(projectService.xrfProjectPath) : null,
   });
 
-  // Picking different paths invalidates whatever the previous run reported.
-  const onSelectArchivesPath = useCallback(async () => {
-    setError(null);
-    setResult(null);
-
-    await selectArchivesPath();
-  }, [selectArchivesPath]);
-
-  const onSelectArchivesUnpackPath = useCallback(async () => {
-    setError(null);
-    setResult(null);
-
-    await selectArchivesUnpackPath();
-  }, [selectArchivesUnpackPath]);
+  const archivesPath: Nullable<string> = source.value;
+  const archivesUnpackPath: Nullable<string> = destination.value;
 
   const onUnpackArchivesPathClicked = useCallback(async () => {
     if (!archivesPath || !archivesUnpackPath) {
@@ -94,42 +89,36 @@ export function ArchivesUnpackerApplication(): ReactElement {
     }
   }, [archivesPath, archivesUnpackPath, log, notify]);
 
+  // Changing either path invalidates whatever the previous run reported.
   useEffect(() => {
-    if (projectService.xrfProjectPath) {
-      getExistingProjectLinkedGamePath(projectService.xrfProjectPath).then((gamePath) => setArchivesPath(gamePath));
-      getProjectArchivesUnpackPath(projectService.xrfProjectPath).then((unpackPath) =>
-        setArchivesUnpackPath(unpackPath)
-      );
-    }
-  }, [projectService.xrfProjectPath, setArchivesPath, setArchivesUnpackPath]);
+    setError(null);
+    setResult(null);
+  }, [archivesPath, archivesUnpackPath]);
 
   return (
     <PickerForm
       isLoading={isLoading}
-      isSubmitDisabled={isLoading || !archivesPath || !archivesUnpackPath}
-      title={"Provide archives to unpack"}
+      isSubmitDisabled={!source.isValid || !destination.isValid}
+      title={"Unpack game archives"}
+      description={"Reads every archive in the source directory and writes its files into the output directory."}
       error={error ?? undefined}
       submitLabel={"Unpack"}
       status={result ? <Alert severity={"success"}>Archives unpacked.</Alert> : null}
       result={result ? <ArchivesUnpackResult result={result} /> : null}
       onSubmit={onUnpackArchivesPathClicked}
     >
-      <FilePickerInput
+      <PathFormRow
         isDisabled={isLoading}
-        isInvalid={Boolean(error)}
         label={"Source"}
         description={"Directory holding the packed game archives"}
-        value={archivesPath}
-        onSelect={onSelectArchivesPath}
+        field={source}
       />
 
-      <FilePickerInput
+      <PathFormRow
         isDisabled={isLoading}
-        isInvalid={Boolean(error)}
         label={"Output"}
         description={"Directory the archives are unpacked into"}
-        value={archivesUnpackPath}
-        onSelect={onSelectArchivesUnpackPath}
+        field={destination}
       />
     </PickerForm>
   );

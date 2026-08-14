@@ -1,6 +1,17 @@
 import { default as ExpandLessIcon } from "@mui/icons-material/ExpandLess";
 import { default as ExpandMoreIcon } from "@mui/icons-material/ExpandMore";
-import { Alert, Box, Button, IconButton, LinearProgress, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  Divider,
+  IconButton,
+  LinearProgress,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { FormEvent, KeyboardEvent, ReactElement, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -8,10 +19,16 @@ import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 
-const FORM_WIDTH: number = 460;
+/** Wide enough for a full windows path at the monospace size the picker rows use. */
+const PANEL_WIDTH: number = 560;
+
+/** How much of a window with results the parameters may keep before they start scrolling instead. */
+const PANEL_MAX_HEIGHT_WITH_RESULT: string = "55%";
 
 export interface IPickerFormProps {
   title?: ReactNode;
+  /** What the command reads and writes, in one line. Say it before it runs, not after. */
+  description?: ReactNode;
   /** The parameter rows. */
   children?: ReactNode;
   submitLabel?: string;
@@ -30,6 +47,7 @@ export interface IPickerFormProps {
  */
 export function PickerForm({
   title,
+  description,
   children,
   submitLabel,
   isSubmitDisabled,
@@ -87,90 +105,101 @@ export function PickerForm({
         onSubmit={onFormSubmit}
         onKeyDown={onFormKeyDown}
       >
-        <Box sx={{ height: 2, flexShrink: 0 }}>{isLoading ? <LinearProgress /> : null}</Box>
-
         <Box
-          ref={parametersRef}
           sx={{
             flexShrink: 0,
-            paddingX: 3,
-            paddingTop: 2,
-            paddingBottom: isCollapsed ? 2 : 3,
-            borderBottom: result ? 1 : 0,
-            borderColor: "divider",
+            maxHeight: result ? PANEL_MAX_HEIGHT_WITH_RESULT : "100%",
+            overflowY: "auto",
+            padding: 3,
+            paddingBottom: result ? 2 : 3,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, maxWidth: FORM_WIDTH }}>
-            {title ? (
-              <Typography variant={"subtitle1"} sx={{ flexGrow: 1 }}>
-                {title}
-              </Typography>
-            ) : null}
+          <Card variant={"outlined"} sx={{ position: "relative", width: "100%", maxWidth: PANEL_WIDTH }}>
+            <Box sx={{ position: "absolute", top: 0, right: 0, left: 0, height: 2 }}>
+              {isLoading ? <LinearProgress sx={{ height: 2 }} /> : null}
+            </Box>
 
-            {/* Collapsing is only offered once there are results competing for the space. */}
-            {result ? (
-              <Tooltip title={isCollapsed ? "Show parameters" : "Hide parameters"}>
-                <IconButton
-                  aria-label={isCollapsed ? "Show parameters" : "Hide parameters"}
-                  onClick={() => setCollapsed((it) => !it)}
-                >
-                  {isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-                </IconButton>
-              </Tooltip>
-            ) : null}
+            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, padding: 2 }}>
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                {title ? (
+                  <Typography component={"h1"} variant={"subtitle1"}>
+                    {title}
+                  </Typography>
+                ) : null}
+
+                {description ? (
+                  <Typography variant={"body2"} sx={{ marginTop: 0.25, color: "text.secondary" }}>
+                    {description}
+                  </Typography>
+                ) : null}
+              </Box>
+
+              {result ? (
+                <Tooltip title={isCollapsed ? "Show parameters" : "Hide parameters"}>
+                  <IconButton
+                    aria-label={isCollapsed ? "Show parameters" : "Hide parameters"}
+                    sx={{ flexShrink: 0 }}
+                    onClick={() => setCollapsed((it) => !it)}
+                  >
+                    {isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+                  </IconButton>
+                </Tooltip>
+              ) : null}
+            </Box>
+
+            {isCollapsed ? null : (
+              <>
+                <Divider />
+
+                <Stack ref={parametersRef} spacing={2} sx={{ padding: 2 }}>
+                  {children}
+
+                  {error ? (
+                    <Alert severity={"error"} variant={"outlined"}>
+                      {String(error)}
+                    </Alert>
+                  ) : null}
+
+                  {status ? <Box>{status}</Box> : null}
+                </Stack>
+              </>
+            )}
+
+            <Divider />
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, padding: 1.5 }}>
+              <Button type={"button"} color={"inherit"} disabled={isLoading} onClick={onLeave}>
+                Back
+              </Button>
+
+              <Box sx={{ flexGrow: 1 }} />
+
+              {secondaryActions}
+
+              {submitLabel ? (
+                <Button type={"submit"} variant={"contained"} disabled={isSubmitDisabled || isLoading}>
+                  {submitLabel}
+                </Button>
+              ) : null}
+            </Box>
+          </Card>
+        </Box>
+
+        {result ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              flexGrow: 1,
+              minHeight: 0,
+              overflow: "hidden",
+              paddingX: 3,
+              paddingBottom: 3,
+            }}
+          >
+            {result}
           </Box>
-
-          {isCollapsed ? null : (
-            <Stack spacing={2} sx={{ width: "100%", maxWidth: FORM_WIDTH, marginTop: 2 }}>
-              {children}
-
-              {error ? <Alert severity={"error"}>{String(error)}</Alert> : null}
-
-              {status ? <Box>{status}</Box> : null}
-            </Stack>
-          )}
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flexGrow: 1,
-            minHeight: 0,
-            overflow: "hidden",
-            paddingX: result ? 3 : 0,
-            paddingY: result ? 2 : 0,
-          }}
-        >
-          {result}
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            flexShrink: 0,
-            paddingX: 3,
-            paddingY: 1.5,
-            borderTop: 1,
-            borderColor: "divider",
-          }}
-        >
-          <Button type={"button"} color={"inherit"} disabled={isLoading} onClick={onLeave}>
-            Back
-          </Button>
-
-          <Box sx={{ flexGrow: 1 }} />
-
-          {secondaryActions}
-
-          {submitLabel ? (
-            <Button type={"submit"} variant={"contained"} disabled={isSubmitDisabled || isLoading}>
-              {submitLabel}
-            </Button>
-          ) : null}
-        </Box>
+        ) : null}
       </Box>
     </EditorLayout>
   );

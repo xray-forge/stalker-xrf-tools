@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
-import { PickerForm } from "@/core/shell/editor/PickerForm";
+import { PlannedApplication } from "@/core/shell/editor/PlannedApplication";
 
 export function DescriptionIconsUnpackerApplication(): ReactElement {
-  return <PickerForm title={"Provide description file to unpack"} />;
+  return <PlannedApplication description={"Extracts the individual icons out of a description sprite."} />;
 }

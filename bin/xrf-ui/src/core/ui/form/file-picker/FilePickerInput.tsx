@@ -1,12 +1,13 @@
 import { default as ClearIcon } from "@mui/icons-material/Clear";
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { Box, IconButton, TextField, Tooltip } from "@mui/material";
-import { ReactElement } from "react";
+import { ChangeEvent, ReactElement, useId } from "react";
 
 import { FormRow } from "@/core/ui/form/FormRow";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Nullable } from "@/lib/types/general";
 
-export interface IFilePickerInputProps {
+export interface IFilePickerInputProps extends BaseComponentProps {
   /** When given, the control labels itself by composing a `FormRow`. */
   label?: string;
   description?: string;
@@ -14,9 +15,12 @@ export interface IFilePickerInputProps {
   error?: Nullable<string>;
   placeholder?: string;
   value?: Nullable<string>;
+  /** Ties this control to a label a caller already rendered. */
   isDisabled?: boolean;
   isInvalid?: boolean;
   onSelect: () => void;
+  /** Enables typing and pasting a path. Without it the field only reports what the dialog returned. */
+  onChange?: (value: string) => void;
   onClear?: () => void;
 }
 
@@ -26,6 +30,7 @@ export interface IFilePickerInputProps {
  * The value is monospaced because these are filesystem paths, compared by eye.
  */
 export function FilePickerInput({
+  id,
   label,
   description,
   isRequired,
@@ -35,8 +40,12 @@ export function FilePickerInput({
   isDisabled,
   isInvalid,
   onSelect,
+  onChange,
   onClear,
 }: IFilePickerInputProps): ReactElement {
+  const generatedId: string = useId();
+  const controlId: string = id ?? generatedId;
+
   const control: ReactElement = (
     <TextField
       fullWidth
@@ -47,38 +56,29 @@ export function FilePickerInput({
       value={value ?? ""}
       sx={{ "& .MuiInputBase-input": { fontFamily: "'Cascadia Mono', 'Consolas', monospace", fontSize: "0.75rem" } }}
       slotProps={{
+        htmlInput: {
+          id: controlId,
+          spellCheck: false,
+          // Paths are compared and edited from the end far more often than from the start.
+          autoComplete: "off",
+        },
         input: {
-          readOnly: true,
-          sx: { cursor: isDisabled ? "default" : "pointer" },
+          readOnly: !onChange,
           endAdornment: (
             <Box sx={{ display: "flex", flexShrink: 0 }}>
               {value && onClear ? (
                 <Tooltip describeChild title={"Clear"}>
                   <span>
-                    <IconButton
-                      aria-label={"Clear"}
-                      disabled={isDisabled}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onClear();
-                      }}
-                    >
+                    <IconButton aria-label={"Clear"} disabled={isDisabled} onClick={onClear}>
                       <ClearIcon fontSize={"small"} />
                     </IconButton>
                   </span>
                 </Tooltip>
               ) : null}
 
-              <Tooltip describeChild title={"Choose"}>
+              <Tooltip describeChild title={"Browse"}>
                 <span>
-                  <IconButton
-                    aria-label={"Choose"}
-                    disabled={isDisabled}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onSelect();
-                    }}
-                  >
+                  <IconButton aria-label={"Browse"} disabled={isDisabled} onClick={onSelect}>
                     <FolderOpenIcon fontSize={"small"} />
                   </IconButton>
                 </span>
@@ -87,12 +87,12 @@ export function FilePickerInput({
           ),
         },
       }}
-      onClick={isDisabled ? undefined : onSelect}
+      onChange={(event: ChangeEvent<HTMLInputElement>) => onChange?.(event.target.value)}
     />
   );
 
   return label ? (
-    <FormRow label={label} description={description} isRequired={isRequired} error={error}>
+    <FormRow label={label} description={description} isRequired={isRequired} error={error} controlId={controlId}>
       {control}
     </FormRow>
   ) : (

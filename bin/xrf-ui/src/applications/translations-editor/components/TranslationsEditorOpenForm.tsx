@@ -19,7 +19,7 @@ export function TranslationsEditorOpenForm(): ReactElement {
 
   const translations: IPathField = usePathField({
     id: "translations.open.directory",
-    title: "Provide path to translations",
+    title: "Select translations directory",
     isDirectory: true,
     isDisabled: isLoading,
     seed: async () =>
@@ -39,6 +39,7 @@ export function TranslationsEditorOpenForm(): ReactElement {
       isLoading={isLoading}
       isSubmitDisabled={!translations.isValid}
       title={"Open translations"}
+      description={"Reads the localization tables into the editor. Nothing is written until you save."}
       error={translationsService.project.error ? String(translationsService.project.error) : undefined}
       submitLabel={"Open"}
       onSubmit={onOpen}

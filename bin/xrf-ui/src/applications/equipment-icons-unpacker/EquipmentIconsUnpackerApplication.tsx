@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
-import { PickerForm } from "@/core/shell/editor/PickerForm";
+import { PlannedApplication } from "@/core/shell/editor/PlannedApplication";
 
 export function EquipmentIconsUnpackerApplication(): ReactElement {
-  return <PickerForm title={"Provide equipment paths to unpack"} />;
+  return <PlannedApplication description={"Extracts the individual icons out of an equipment sprite."} />;
 }

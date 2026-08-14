@@ -5,9 +5,9 @@ import { EquipmentService } from "@/core/equipment-icons";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
-import { FilePickerInput, usePathState } from "@/core/ui/form/file-picker";
+import { PathFormRow } from "@/core/ui/form/PathFormRow";
+import { IPathField, usePathField } from "@/core/ui/form/use-path-field";
 import { Logger, useLogger } from "@/lib/logging";
-import { useMountEffect } from "@/lib/react";
 
 export function IconsEditorEquipmentOpenForm(): ReactElement {
   const log: Logger = useLogger("equipment-editor-open");
@@ -15,60 +15,56 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
   const projectService: ProjectService = useInjection(ProjectService);
   const equipmentService: EquipmentService = useInjection(EquipmentService);
 
-  const [spritePath, setSpritePath, onSelectEquipmentPath] = usePathState({
-    title: "Provide path to equipment-editor dds",
+  const isLoading: boolean = equipmentService.spriteImage.isLoading;
+
+  const sprite: IPathField = usePathField({
+    id: "equipment.open.sprite",
+    title: "Select equipment sprite",
     filters: [{ name: "dds", extensions: ["dds"] }],
-    isDisabled: equipmentService.spriteImage.isLoading,
+    isDisabled: isLoading,
+    seed: async () =>
+      projectService.xrfProjectPath ? getPathIfExists(getProjectEquipmentDDSPath(projectService.xrfProjectPath)) : null,
   });
 
-  const [systemLtxPath, setSystemLtxPath, onSelectSystemLtxPath] = usePathState({
-    title: "Provide path to system.ltx",
+  const systemLtx: IPathField = usePathField({
+    id: "equipment.open.system-ltx",
+    title: "Select system.ltx",
     filters: [{ name: "ltx", extensions: ["ltx"] }],
-    isDisabled: equipmentService.spriteImage.isLoading,
+    isDisabled: isLoading,
+    seed: async () =>
+      projectService.xrfProjectPath ? getPathIfExists(getProjectSystemLtxPath(projectService.xrfProjectPath)) : null,
   });
 
   const onOpenEquipmentClicked = useCallback(() => {
-    if (spritePath && systemLtxPath) {
-      equipmentService.openEquipmentProject(spritePath, systemLtxPath);
+    if (sprite.value && systemLtx.value) {
+      equipmentService.openEquipmentProject(sprite.value, systemLtx.value);
     } else {
-      log.info("Cannot open equipment-editor when have no provided paths:", { spritePath, systemLtxPath });
+      log.info("Cannot open equipment editor without every path");
     }
-  }, [spritePath, systemLtxPath, equipmentService, log]);
-
-  // Prefills from the project once: after mount these fields belong to whoever is typing in them.
-  useMountEffect(() => {
-    if (projectService.xrfProjectPath) {
-      getPathIfExists(getProjectEquipmentDDSPath(projectService.xrfProjectPath)).then((equipmentPath) => {
-        setSpritePath(equipmentPath);
-      });
-
-      getPathIfExists(getProjectSystemLtxPath(projectService.xrfProjectPath)).then((ltxPath) => {
-        setSystemLtxPath(ltxPath);
-      });
-    }
-  });
+  }, [equipmentService, log, sprite.value, systemLtx.value]);
 
   return (
     <PickerForm
-      isLoading={equipmentService.spriteImage.isLoading}
-      isSubmitDisabled={equipmentService.spriteImage.isLoading || !spritePath || !systemLtxPath}
-      title={"Provide equipment details"}
+      isLoading={isLoading}
+      isSubmitDisabled={!sprite.isValid || !systemLtx.isValid}
+      title={"Open equipment sprite"}
+      description={"Reads the sprite and the configuration that names its icons. Nothing is written."}
       error={equipmentService.spriteImage.error ? String(equipmentService.spriteImage.error) : undefined}
       submitLabel={"Open"}
       onSubmit={onOpenEquipmentClicked}
     >
-      <FilePickerInput
-        isDisabled={equipmentService.spriteImage.isLoading}
-        label={"System ltx"}
-        value={systemLtxPath}
-        onSelect={onSelectSystemLtxPath}
+      <PathFormRow
+        isDisabled={isLoading}
+        label={"Equipment sprite"}
+        description={"The packed *.dds holding the inventory icons"}
+        field={sprite}
       />
 
-      <FilePickerInput
-        isDisabled={equipmentService.spriteImage.isLoading}
-        label={"Equipment sprite"}
-        value={spritePath}
-        onSelect={onSelectEquipmentPath}
+      <PathFormRow
+        isDisabled={isLoading}
+        label={"System configuration"}
+        description={"The system.ltx that names the icons"}
+        field={systemLtx}
       />
     </PickerForm>
   );

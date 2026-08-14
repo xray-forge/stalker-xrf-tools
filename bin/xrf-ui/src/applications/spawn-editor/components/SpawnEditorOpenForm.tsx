@@ -39,6 +39,7 @@ export function SpawnEditorOpenForm(): ReactElement {
       isLoading={isLoading}
       isSubmitDisabled={!spawn.isValid}
       title={"Open spawn file"}
+      description={"Reads the file into the editor. Nothing is written until you save."}
       error={spawnFileService.header.error ? String(spawnFileService.header.error) : undefined}
       submitLabel={"Open"}
       onSubmit={onOpen}

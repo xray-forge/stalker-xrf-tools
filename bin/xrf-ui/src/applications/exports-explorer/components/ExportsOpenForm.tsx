@@ -18,7 +18,7 @@ export function ExportsOpenForm(): ReactElement {
 
   const project: IPathField = usePathField({
     id: "exports.open.project",
-    title: "Provide path to xrf project",
+    title: "Select project directory",
     isDirectory: true,
     isDisabled: isLoading,
     seed: async () => projectService.xrfProjectPath ?? projectService.getXrfProjectPath(),
@@ -37,6 +37,7 @@ export function ExportsOpenForm(): ReactElement {
       isLoading={isLoading}
       isSubmitDisabled={!project.isValid}
       title={"Open script exports"}
+      description={"Reads the project's TypeScript extern declarations. Nothing is written."}
       error={exportsService.project.error ? exportsService.project.error.message : undefined}
       submitLabel={"Open exports"}
       onSubmit={onOpen}

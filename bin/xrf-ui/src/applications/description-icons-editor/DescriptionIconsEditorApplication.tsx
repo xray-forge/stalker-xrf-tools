@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
-import { PickerForm } from "@/core/shell/editor/PickerForm";
+import { PlannedApplication } from "@/core/shell/editor/PlannedApplication";
 
 export function DescriptionIconsEditorApplication(): ReactElement {
-  return <PickerForm title={"Provide description file to open"} />;
+  return <PlannedApplication description={"Inspects and edits the icons packed into a description sprite."} />;
 }

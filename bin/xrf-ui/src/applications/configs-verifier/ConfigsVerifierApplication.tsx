@@ -27,7 +27,7 @@ export function ConfigsVerifierApplication(): ReactElement {
 
   const configs: IPathField = usePathField({
     id: "configs.verify.directory",
-    title: "Provide path to xrf configs",
+    title: "Select configs directory",
     isDirectory: true,
     isDisabled: isLoading,
     seed: async () => (projectService.xrfProjectPath ? getProjectConfigsPath(projectService.xrfProjectPath) : null),
@@ -84,6 +84,7 @@ export function ConfigsVerifierApplication(): ReactElement {
       isLoading={isLoading}
       isSubmitDisabled={!configs.isValid}
       title={"Verify LTX configs"}
+      description={"Checks every LTX file in the directory. Nothing is written."}
       error={error ?? undefined}
       submitLabel={"Verify"}
       status={

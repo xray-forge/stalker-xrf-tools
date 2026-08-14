@@ -32,7 +32,7 @@ export function SettingsForm(): ReactElement {
 
   const onSelectProjectPath = useCallback(async () => {
     const newXrfProjectPath: Nullable<string> = await open({
-      title: "Provide path to xrf project",
+      title: "Select project directory",
       directory: true,
     });
 
