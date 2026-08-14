@@ -1,5 +1,5 @@
 import { default as ViewListIcon } from "@mui/icons-material/ViewList";
-import { Box, LinearProgress, Tooltip } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 import { Route, Routes } from "react-router-dom";
@@ -28,7 +28,6 @@ export function SpawnEditor(): ReactElement {
 
   const header: Nullable<SpawnHeaderChunk> = spawnFileService.header.value;
   const path: Nullable<string> = spawnFileService.path;
-  const isWriting: boolean = spawnFileService.operation.isLoading;
 
   useEditorPanels(
     () => [
@@ -57,23 +56,19 @@ export function SpawnEditor(): ReactElement {
   return (
     <EditorLayout
       toolbar={
-        <>
-          <EditorToolbar
-            actions={<SpawnEditorActions />}
-            subtitle={
-              path ? (
-                <Tooltip title={path}>
-                  <Box component={"span"} sx={{ fontFamily: MONOSPACE_FONT }}>
-                    {path}
-                  </Box>
-                </Tooltip>
-              ) : null
-            }
-            onBack={onClose}
-          />
-
-          {isWriting ? <LinearProgress sx={{ height: 2 }} /> : null}
-        </>
+        <EditorToolbar
+          actions={<SpawnEditorActions />}
+          subtitle={
+            path ? (
+              <Tooltip title={path}>
+                <Box component={"span"} sx={{ fontFamily: MONOSPACE_FONT }}>
+                  {path}
+                </Box>
+              </Tooltip>
+            ) : null
+          }
+          onBack={onClose}
+        />
       }
     >
       <Routes>

@@ -231,7 +231,7 @@ describe("opened archives editor", () => {
       bindings: [ProjectService, ArchivesService],
     });
 
-    await userEvent.click(await findByLabelText("Close Archives explorer"));
+    await userEvent.click(await findByLabelText("Back to Archives explorer"));
 
     expect(await findByText("Open game archives")).toBeInTheDocument();
     expect(queryByText("C:\\game\\database")).not.toBeInTheDocument();
@@ -247,7 +247,7 @@ describe("opened archives editor", () => {
 
     const { findByLabelText, findByText, getByText } = renderEditor();
 
-    await userEvent.click(await findByLabelText("Close Archives explorer"));
+    await userEvent.click(await findByLabelText("Back to Archives explorer"));
 
     expect(await findByText("Could not close archives: archive is busy")).toBeInTheDocument();
     expect(getByText("Archives explorer")).toBeInTheDocument();
@@ -279,7 +279,7 @@ describe("opened archives editor", () => {
     await userEvent.click(await findByText("readme.ltx"));
     await userEvent.click(await findByLabelText("Extract file"));
 
-    await waitFor(() => expect(getByLabelText("Close Archives explorer")).toBeDisabled());
+    await waitFor(() => expect(getByLabelText("Back to Archives explorer")).toBeDisabled());
 
     save.mockRestore();
   });

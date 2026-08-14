@@ -1,6 +1,6 @@
 import { default as ListAltIcon } from "@mui/icons-material/ListAlt";
 import { default as RefreshIcon } from "@mui/icons-material/Refresh";
-import { Alert, Box, IconButton, LinearProgress, Tooltip } from "@mui/material";
+import { Alert, Box, IconButton, Tooltip } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -81,31 +81,30 @@ export function ExportsEditor(): ReactElement {
   return (
     <EditorLayout
       toolbar={
-        <>
-          <EditorToolbar
-            subtitle={
-              project?.root ? (
-                <Tooltip title={project.root}>
-                  <Box component={"span"} className={"monospace"}>
-                    {project.root}
-                  </Box>
-                </Tooltip>
-              ) : null
-            }
-            actions={
-              <Tooltip describeChild title={"Refresh exports"}>
-                <span>
-                  <IconButton color={"inherit"} aria-label={"Refresh exports"} disabled={isBusy} onClick={onRefresh}>
-                    <RefreshIcon fontSize={"small"} />
-                  </IconButton>
-                </span>
+        <EditorToolbar
+          subtitle={
+            project?.root ? (
+              <Tooltip title={project.root}>
+                <Box component={"span"} className={"monospace"}>
+                  {project.root}
+                </Box>
               </Tooltip>
-            }
-            onBack={() => void onClose()}
-          />
-
-          {exportsService.project.isLoading ? <LinearProgress sx={{ height: 2 }} /> : null}
-
+            ) : null
+          }
+          actions={
+            <Tooltip describeChild title={"Refresh exports"}>
+              <span>
+                <IconButton color={"inherit"} aria-label={"Refresh exports"} disabled={isBusy} onClick={onRefresh}>
+                  <RefreshIcon fontSize={"small"} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          }
+          onBack={() => void onClose()}
+        />
+      }
+      banner={
+        <>
           {exportsService.project.error ? (
             <Alert severity={"error"}>Could not refresh exports: {exportsService.project.error.message}</Alert>
           ) : null}

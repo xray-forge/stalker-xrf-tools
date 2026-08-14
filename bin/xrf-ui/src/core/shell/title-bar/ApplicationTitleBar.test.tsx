@@ -3,6 +3,7 @@ import { act, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 
 import { ApplicationTitleBar } from "@/core/shell/title-bar/ApplicationTitleBar";
+import { REVEAL_DELAY_MS } from "@/core/ui/layout/delayed-reveal";
 import { mockAppWindow, setMockWindowMaximized } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 
@@ -49,6 +50,33 @@ describe("ApplicationTitleBar", () => {
 
     expect(getByAltText("XRF tools")).toBeInTheDocument();
     expect(queryByText("XRF tools")).not.toBeInTheDocument();
+  });
+
+  it("draws the one progress line for whatever the active application is running", () => {
+    // Queried including hidden elements, or the delayed reveal below would make an unrendered bar and
+    // a not-yet-revealed one look the same.
+    const idle = renderWithProviders(<ApplicationTitleBar />);
+
+    expect(idle.queryByRole("progressbar", { hidden: true })).not.toBeInTheDocument();
+
+    idle.unmount();
+
+    // Editors used to portal their own bar in beside the breadcrumb, where a fixed-height flex row
+    // left it competing for width instead of sitting under the caption.
+    const busy = renderWithProviders(<ApplicationTitleBar isBusy />);
+
+    expect(busy.getByRole("progressbar", { hidden: true })).toBeInTheDocument();
+  });
+
+  it("holds the progress line back so fast commands do not flash one", () => {
+    const { getByRole } = renderWithProviders(<ApplicationTitleBar isBusy />);
+
+    // Most commands answer in tens of milliseconds. Appearing and vanishing inside that reads as a
+    // glitch, so the bar waits the same delay every other loader in the application waits.
+    const style: CSSStyleDeclaration = getComputedStyle(getByRole("progressbar", { hidden: true }));
+
+    expect(style.visibility).toBe("hidden");
+    expect(style.animationDelay).toBe(`${REVEAL_DELAY_MS}ms`);
   });
 
   it("reserves the space between the icon and the controls", () => {

@@ -7,6 +7,7 @@ import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@
 import { APPLICATION_SOURCE, IApplicationDescriptor } from "@/core/routing/application";
 import { useCurrentApplication } from "@/core/routing/current-application.context";
 import { ApplicationScope } from "@/core/shell/ApplicationScope";
+import { useIsEditorBusy } from "@/core/shell/EditorBusyContext";
 import { ApplicationCrash } from "@/core/shell/error/ApplicationCrash";
 import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
 import { EditorToolbarHostContext } from "@/core/shell/header/editor-toolbar-host";
@@ -40,6 +41,8 @@ export function ApplicationShellFrame({
   const panels: ReadonlyArray<IEditorPanel> = useEditorPanelsRegistry();
 
   const { pathname } = useLocation();
+
+  const isBusy: boolean = useIsEditorBusy();
 
   // The element the routed content portals its toolbar into. Held here rather than in a provider of
   // its own: the frame hands it down and never reads it back.
@@ -75,7 +78,7 @@ export function ApplicationShellFrame({
         className={className}
         sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", flexWrap: "nowrap" }}
       >
-        <ApplicationTitleBar toolbarRef={setToolbarHost} />
+        <ApplicationTitleBar toolbarRef={setToolbarHost} isBusy={isBusy} />
 
         <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, flexWrap: "nowrap" }}>
           <ApplicationRail

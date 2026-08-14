@@ -162,7 +162,7 @@ describe("opened exports editor", () => {
       bindings: [ProjectService, ExportsService],
     });
 
-    await userEvent.click(await findByLabelText("Close Exports explorer"));
+    await userEvent.click(await findByLabelText("Back to Exports explorer"));
 
     expect(await findByText("Open script exports")).toBeInTheDocument();
     await waitFor(() => {
@@ -186,7 +186,7 @@ describe("opened exports editor", () => {
 
     const { findByLabelText, findByText, getByText, unmount } = renderEditor();
 
-    await userEvent.click(await findByLabelText("Close Exports explorer"));
+    await userEvent.click(await findByLabelText("Back to Exports explorer"));
 
     expect(await findByText("Could not close exports: project is busy")).toBeInTheDocument();
     // Still the viewer, not the picker: a failed close leaves the project loaded.

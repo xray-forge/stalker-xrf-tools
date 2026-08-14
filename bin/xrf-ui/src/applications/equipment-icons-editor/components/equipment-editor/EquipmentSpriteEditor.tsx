@@ -82,15 +82,16 @@ export function EquipmentSpriteEditor(): ReactElement {
           onBack={onClose}
         />
       }
+      banner={
+        error ? (
+          <Alert severity={"error"} variant={"outlined"} onClose={equipmentService.clearSpriteError}>
+            <Typography variant={"caption"} sx={{ wordBreak: "break-word" }}>
+              {String(error)}
+            </Typography>
+          </Alert>
+        ) : null
+      }
     >
-      {error ? (
-        <Alert severity={"error"} variant={"outlined"} onClose={equipmentService.clearSpriteError}>
-          <Typography variant={"caption"} sx={{ wordBreak: "break-word" }}>
-            {String(error)}
-          </Typography>
-        </Alert>
-      ) : null}
-
       <EquipmentSpriteEditorWorkspace />
     </EditorLayout>
   );

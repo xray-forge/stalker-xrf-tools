@@ -60,7 +60,7 @@ describe("EditorToolbar", () => {
     // A segment you can follow means there is something to close. The one arrow that did both could
     // never say that.
     expect(getByText("Spawn editor")).toBeInTheDocument();
-    expect(queryByRole("button", { name: "Close Spawn editor" })).not.toBeInTheDocument();
+    expect(queryByRole("button", { name: "Back to Spawn editor" })).not.toBeInTheDocument();
   });
 
   it("closes through the application segment rather than through a button of its own", async () => {
@@ -68,7 +68,7 @@ describe("EditorToolbar", () => {
 
     const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={onBack} />, { route: "/spawn-editor" });
 
-    await userEvent.click(getByLabelText("Close Spawn editor"));
+    await userEvent.click(getByLabelText("Back to Spawn editor"));
 
     expect(onBack).toHaveBeenCalledTimes(1);
   });
@@ -77,7 +77,7 @@ describe("EditorToolbar", () => {
     const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={() => {}} />, { route: "/spawn-editor" });
 
     // A control whose spoken name does not include the word on it is one a voice user cannot ask for.
-    expect(getByLabelText("Close Spawn editor")).toHaveTextContent("Spawn editor");
+    expect(getByLabelText("Back to Spawn editor")).toHaveTextContent("Spawn editor");
   });
 
   it("divides its controls from the window's, and only when it has some", () => {

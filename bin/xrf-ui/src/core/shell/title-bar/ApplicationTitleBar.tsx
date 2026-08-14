@@ -1,14 +1,17 @@
-import { Box } from "@mui/material";
+import { Box, LinearProgress } from "@mui/material";
 import { ReactElement, Ref } from "react";
 
 import { ApplicationTitleBarIcon } from "@/core/shell/title-bar/ApplicationTitleBarIcon";
 import { WindowControls } from "@/core/shell/title-bar/WindowControls";
 import { LAYOUT } from "@/core/theme/tokens";
+import { DELAYED_REVEAL_SX } from "@/core/ui/layout/delayed-reveal";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 export interface IApplicationTitleBarProps extends BaseComponentProps {
   /** Where the active application portals its toolbar. The frame owns the element. */
   toolbarRef?: Ref<HTMLElement>;
+  /** Draws the band's own progress line. Every editor already publishes this through `useEditorBusy`. */
+  isBusy?: boolean;
 }
 
 /**
@@ -19,6 +22,7 @@ export function ApplicationTitleBar({
   id = "application-title-bar",
   className,
   toolbarRef,
+  isBusy,
 }: IApplicationTitleBarProps): ReactElement {
   return (
     <Box
@@ -27,6 +31,7 @@ export function ApplicationTitleBar({
       id={id}
       className={className}
       sx={{
+        position: "relative",
         display: "flex",
         alignItems: "center",
         flexShrink: 0,
@@ -43,6 +48,10 @@ export function ApplicationTitleBar({
       <Box ref={toolbarRef} sx={{ display: "flex", alignItems: "center", flexGrow: 1, minWidth: 0, height: "100%" }} />
 
       <WindowControls />
+
+      {isBusy ? (
+        <LinearProgress sx={[DELAYED_REVEAL_SX, { position: "absolute", right: 0, bottom: 0, left: 0, height: 2 }]} />
+      ) : null}
     </Box>
   );
 }

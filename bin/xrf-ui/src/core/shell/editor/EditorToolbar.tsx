@@ -16,7 +16,10 @@ export interface IEditorToolbarProps extends BaseComponentProps {
   /** The open document, as the last breadcrumb segment. Counts and state belong in the status bar. */
   subtitle?: ReactNode;
   actions?: ReactNode;
-  /** Closes what is open. Reached through the application's own breadcrumb segment. */
+  /**
+   * Returns to the application's own level, which is the level with nothing open, so this closes the
+   * open document. Omit it and the segment is inert.
+   */
   onBack?: () => void;
 }
 
@@ -57,8 +60,8 @@ export function EditorToolbar({
           <EditorToolbarCrumb
             label={label}
             isDisabled={isBusy}
-            accessibleName={onBack ? `Close ${label}` : undefined}
-            hint={onBack ? "Close what is open" : undefined}
+            accessibleName={onBack ? `Back to ${label}` : undefined}
+            hint={onBack ? `Back to ${label}, closing what is open` : undefined}
             onClick={onBack}
           />
         </>

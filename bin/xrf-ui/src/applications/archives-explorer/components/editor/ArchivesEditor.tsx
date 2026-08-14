@@ -1,5 +1,5 @@
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
-import { Alert, Box, LinearProgress, Tooltip } from "@mui/material";
+import { Alert, Box, Tooltip } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
@@ -70,28 +70,25 @@ export function ArchivesEditor(): ReactElement {
   return (
     <EditorLayout
       toolbar={
-        <>
-          <EditorToolbar
-            subtitle={
-              projectRoot ? (
-                <Tooltip title={projectRoot}>
-                  <Box component={"span"} sx={{ fontFamily: ARCHIVE_EDITOR_MONOSPACE_FONT }}>
-                    {projectRoot}
-                  </Box>
-                </Tooltip>
-              ) : null
-            }
-            onBack={() => void onClose()}
-          />
-
-          {isExtracting ? <LinearProgress sx={{ height: 2 }} /> : null}
-
-          {closeError ? (
-            <Alert severity={"error"} onClose={() => setCloseError(null)}>
-              Could not close archives: {closeError}
-            </Alert>
-          ) : null}
-        </>
+        <EditorToolbar
+          subtitle={
+            projectRoot ? (
+              <Tooltip title={projectRoot}>
+                <Box component={"span"} sx={{ fontFamily: ARCHIVE_EDITOR_MONOSPACE_FONT }}>
+                  {projectRoot}
+                </Box>
+              </Tooltip>
+            ) : null
+          }
+          onBack={() => void onClose()}
+        />
+      }
+      banner={
+        closeError ? (
+          <Alert severity={"error"} onClose={() => setCloseError(null)}>
+            Could not close archives: {closeError}
+          </Alert>
+        ) : null
       }
     >
       <ArchivesFileContent />

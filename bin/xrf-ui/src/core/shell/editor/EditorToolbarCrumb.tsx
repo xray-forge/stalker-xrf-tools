@@ -1,6 +1,8 @@
 import { Tooltip, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
+import { RADIUS } from "@/core/theme/tokens";
+
 export interface IEditorToolbarCrumbProps {
   label: string;
   isDisabled?: boolean;
@@ -39,14 +41,24 @@ export function EditorToolbarCrumb({
         appearance: "none",
         background: "none",
         border: 0,
-        padding: 0,
+        borderRadius: `${RADIUS.sm}px`,
+        paddingX: 0.625,
+        paddingY: 0.25,
         cursor: isDisabled ? "default" : "pointer",
         color: isDisabled ? "text.disabled" : "text.secondary",
         fontWeight: 600,
         flexShrink: 0,
         "&:hover": {
           color: isDisabled ? "text.disabled" : "text.primary",
-          textDecoration: isDisabled ? "none" : "underline",
+          backgroundColor: isDisabled ? "transparent" : "action.hover",
+        },
+        // The caption band draws no focus ring of its own, so a keyboard user had no way to see the
+        // segment they were about to activate.
+        "&:focus-visible": {
+          outline: "1px solid",
+          outlineColor: "primary.main",
+          outlineOffset: "1px",
+          color: "text.primary",
         },
       }}
       onClick={onClick}

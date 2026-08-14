@@ -90,7 +90,7 @@ describe("SpawnEditor", () => {
     expect(getByText("Alife")).toBeInTheDocument();
 
     expect(queryByText("Close")).not.toBeInTheDocument();
-    expect(getByLabelText("Close Spawn editor")).toBeInTheDocument();
+    expect(getByLabelText("Back to Spawn editor")).toBeInTheDocument();
   });
 
   it("publishes header counts to the status bar", async () => {

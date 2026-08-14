@@ -29,16 +29,12 @@ describe("PickerForm", () => {
     expect(getByText("XRF")).toBeDisabled();
   });
 
-  it("shows progress only while an operation is in flight", () => {
-    const idle = renderWithProviders(<PickerForm title={"Open"} />, { route: "/spawn-editor" });
-
-    expect(idle.queryByRole("progressbar")).not.toBeInTheDocument();
-
-    idle.unmount();
-
+  it("draws no progress of its own, leaving the one running command to the caption band", () => {
     const busy = renderWithProviders(<PickerForm title={"Open"} isLoading />, { route: "/spawn-editor" });
 
-    expect(busy.getByRole("progressbar")).toBeInTheDocument();
+    // The form publishes `isLoading` through `useEditorBusy`, and the shell draws it once. Drawing it
+    // here too put two bars on screen for one command.
+    expect(busy.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
   it("surfaces an error without hiding the form", () => {

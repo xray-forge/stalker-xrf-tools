@@ -1,17 +1,6 @@
 import { default as ExpandLessIcon } from "@mui/icons-material/ExpandLess";
 import { default as ExpandMoreIcon } from "@mui/icons-material/ExpandMore";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  Divider,
-  IconButton,
-  LinearProgress,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Card, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { FormEvent, KeyboardEvent, ReactElement, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -115,10 +104,6 @@ export function PickerForm({
           }}
         >
           <Card variant={"outlined"} sx={{ position: "relative", width: "100%", maxWidth: PANEL_WIDTH }}>
-            <Box sx={{ position: "absolute", top: 0, right: 0, left: 0, height: 2 }}>
-              {isLoading ? <LinearProgress sx={{ height: 2 }} /> : null}
-            </Box>
-
             <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, padding: 2 }}>
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 {title ? (
