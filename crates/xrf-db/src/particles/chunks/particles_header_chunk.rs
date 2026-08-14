@@ -3,7 +3,7 @@ use std::path::Path;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, open_export_file};
 
@@ -25,7 +25,7 @@ impl ParticlesHeaderChunk {
 impl ChunkReadWrite for ParticlesHeaderChunk {
   /// Read version chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let header_chunk: Self = Self {
       version: reader.read_u16::<T>()?,
     };
@@ -33,7 +33,7 @@ impl ChunkReadWrite for ParticlesHeaderChunk {
     log::info!("Read header chunk, {} bytes", reader.read_bytes_len());
 
     if header_chunk.version != 1 {
-      return Err(XRayError::new_not_implemented_error(
+      return Err(XrfError::new_not_implemented_error(
         "Unknown version in particles header chunk, expected v1 only",
       ));
     }
@@ -44,7 +44,7 @@ impl ChunkReadWrite for ParticlesHeaderChunk {
   }
 
   /// Write particle header into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u16::<T>(self.version)?;
 
     log::info!("Written header chunk, {} bytes", writer.bytes_written());
@@ -56,7 +56,7 @@ impl ChunkReadWrite for ParticlesHeaderChunk {
 impl FileImportExport for ParticlesHeaderChunk {
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     log::info!("Importing particles header: {}", path.as_ref().display());
 
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("header.ltx"))?;
@@ -81,7 +81,7 @@ impl FileImportExport for ParticlesHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -105,7 +105,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
@@ -118,7 +118,7 @@ mod tests {
   use crate::particles::chunks::particles_header_chunk::ParticlesHeaderChunk;
 
   #[test]
-  fn test_read_write_incorrect() -> XRayResult {
+  fn test_read_write_incorrect() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
 
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 2 };
@@ -153,7 +153,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
@@ -183,7 +183,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let export_directory: &Path =
@@ -200,7 +200,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(

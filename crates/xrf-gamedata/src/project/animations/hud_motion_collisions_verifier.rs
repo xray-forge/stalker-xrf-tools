@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use rayon::prelude::*;
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::GamedataFindingFactory;
@@ -25,7 +25,7 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
     Self { options, project }
   }
 
-  pub fn verify(&self) -> XRayResult<GamedataHudMotionCollisionsVerificationResult> {
+  pub fn verify(&self) -> XrfResult<GamedataHudMotionCollisionsVerificationResult> {
     xrf_output::verbose!(self.options.output, "Verify hud motion collisions");
 
     let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
@@ -38,7 +38,7 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
       .collect();
 
     let checked_huds_count: u32 = u32::try_from(hud_sections.len())
-      .map_err(|_| XRayError::new_verify_error("Player HUD count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Player HUD count exceeds the supported result range"))?;
 
     let mut messages: Vec<String> = hud_sections
       .par_iter()
@@ -51,7 +51,7 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
     messages.dedup();
 
     let collisions_count: u32 = u32::try_from(messages.len())
-      .map_err(|_| XRayError::new_verify_error("Motion collision count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Motion collision count exceeds the supported result range"))?;
 
     xrf_output::info!(
       self.options.output,
@@ -133,7 +133,7 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
   }
 
   /// Resolve omf assets linked by the model motion refs, wildcards included.
-  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XRayResult<Vec<PathBuf>> {
+  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XrfResult<Vec<PathBuf>> {
     let mut assets: Vec<PathBuf> = Vec::new();
 
     for motion_ref in &OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path)? {

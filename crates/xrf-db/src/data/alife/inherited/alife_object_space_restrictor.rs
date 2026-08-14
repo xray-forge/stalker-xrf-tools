@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::data::alife::inherited::alife_object_abstract::AlifeObjectAbstract;
@@ -20,7 +20,7 @@ pub struct AlifeObjectSpaceRestrictor {
 
 impl ChunkReadWrite for AlifeObjectSpaceRestrictor {
   /// Read generic space restrictor data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
       shape: reader.read_xr_list::<T, Shape>()?,
@@ -28,7 +28,7 @@ impl ChunkReadWrite for AlifeObjectSpaceRestrictor {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_xr::<T, _>(&self.base)?;
     writer.write_xr_list::<T, Shape>(&self.shape)?;
     writer.write_u8(self.restrictor_type)?;
@@ -39,9 +39,9 @@ impl ChunkReadWrite for AlifeObjectSpaceRestrictor {
 
 impl LtxImportExport for AlifeObjectSpaceRestrictor {
   /// Import generic space restrictor data from the chunk.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "ALife object '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -56,7 +56,7 @@ impl LtxImportExport for AlifeObjectSpaceRestrictor {
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     self.base.export(section_name, ltx)?;
 
     Shape::export_list(&self.shape, section_name, ltx);
@@ -77,7 +77,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -93,7 +93,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -144,7 +144,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -201,7 +201,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: AlifeObjectSpaceRestrictor = AlifeObjectSpaceRestrictor {
       base: AlifeObjectAbstract {
         game_vertex_id: 4,

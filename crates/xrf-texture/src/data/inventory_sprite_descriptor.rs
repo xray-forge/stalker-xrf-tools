@@ -2,7 +2,7 @@ use std::cmp::max;
 
 use image::{ImageBuffer, Rgba, RgbaImage};
 use serde::Serialize;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::constants::{
@@ -92,11 +92,11 @@ impl InventorySpriteDescriptor {
 
 impl InventorySpriteDescriptor {
   /// Prepare combined equipment image base with suitable base size.
-  pub fn create_equipment_sprite_base_for_ltx(ltx: &Ltx) -> XRayResult<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+  pub fn create_equipment_sprite_base_for_ltx(ltx: &Ltx) -> XrfResult<ImageBuffer<Rgba<u8>, Vec<u8>>> {
     let (max_width, max_height) = Self::get_equipment_sprite_boundaries_from_ltx(ltx);
 
     if max_width > 32 * 1024 || max_height > 32 * 1024 {
-      Err(XRayError::new_texture_processing_error(format!(
+      Err(XrfError::new_texture_processing_error(format!(
         "Trying to create too large resulting dds file over 32k*32k ({max_width}x{max_height}), it is not supported",
       )))
     } else {

@@ -3,7 +3,7 @@ use std::io::{Cursor, Read, Seek};
 use std::path::Path;
 
 use ogg::reading::PacketReader;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::SoundMetadata;
 use crate::sound_file_metadata::read_sound_metadata;
@@ -22,7 +22,7 @@ impl SoundFile {
   /// Successful reads guarantee a structurally valid X-Ray Ogg/Vorbis header. Sounds without a
   /// recognized X-Ray comment use the engine's default source parameters. Use
   /// [`Self::read_strictly_from_path`] to fully decode the audio payload.
-  pub fn read_from_path<P>(path: P) -> XRayResult<Self>
+  pub fn read_from_path<P>(path: P) -> XrfResult<Self>
   where
     P: AsRef<Path>,
   {
@@ -30,27 +30,27 @@ impl SoundFile {
   }
 
   /// Read the headers and X-Ray metadata of a sound held in memory.
-  pub fn read_from_bytes(bytes: &[u8]) -> XRayResult<Self> {
+  pub fn read_from_bytes(bytes: &[u8]) -> XrfResult<Self> {
     read_xrf_sound_from(Cursor::new(bytes), false)
-      .map_err(|error| XRayError::new_verify_error(format!("Failed to read sound from memory: {error}")))
+      .map_err(|error| XrfError::new_verify_error(format!("Failed to read sound from memory: {error}")))
   }
 
   /// Read and fully decode an X-Ray Ogg/Vorbis sound file.
-  pub fn read_strictly_from_path<P>(path: P) -> XRayResult<Self>
+  pub fn read_strictly_from_path<P>(path: P) -> XrfResult<Self>
   where
     P: AsRef<Path>,
   {
     Self::read_from_path_with_strictness(path, true)
   }
 
-  fn read_from_path_with_strictness<P>(path: P, is_strict: bool) -> XRayResult<Self>
+  fn read_from_path_with_strictness<P>(path: P, is_strict: bool) -> XrfResult<Self>
   where
     P: AsRef<Path>,
   {
     let path: &Path = path.as_ref();
 
     read_xrf_sound(path, is_strict)
-      .map_err(|error| XRayError::new_verify_error(format!("Failed to read sound {}: {error}", path.display())))
+      .map_err(|error| XrfError::new_verify_error(format!("Failed to read sound {}: {error}", path.display())))
   }
 }
 

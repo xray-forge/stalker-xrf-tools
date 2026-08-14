@@ -3,7 +3,7 @@ use std::io::Write;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert, assert_equal, assert_not_equal, decode_bytes_from_base64, encode_bytes_to_base64};
 
@@ -49,7 +49,7 @@ impl AlifeObject {
 
 impl ChunkReadWrite for AlifeObject {
   /// Read generic ALife object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let mut spawn_reader: ChunkReader = reader.read_child_by_index(Self::DATA_SPAWN_CHUNK_ID)?;
 
     let data_length: u16 = spawn_reader.read_u16::<T>()?;
@@ -153,7 +153,7 @@ impl ChunkReadWrite for AlifeObject {
   }
 
   /// Write ALife object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     let mut data_spawn_writer: ChunkWriter = ChunkWriter::new();
     let mut data_update_writer: ChunkWriter = ChunkWriter::new();
 
@@ -213,9 +213,9 @@ impl ChunkReadWrite for AlifeObject {
 
 impl LtxImportExport for AlifeObject {
   /// Import ALife object data from ltx file section.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "ALife object base '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -250,7 +250,7 @@ impl LtxImportExport for AlifeObject {
   }
 
   /// Export ALife object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("id", self.id.to_string())
@@ -290,7 +290,7 @@ mod tests {
   use byteorder::WriteBytesExt;
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::{XRayError, XRayResult};
+  use xrf_error::{XrfError, XrfResult};
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -310,7 +310,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn binary_read_returns_error_for_unknown_section() -> XRayResult {
+  fn binary_read_returns_error_for_unknown_section() -> XrfResult {
     let mut object_data_writer: ChunkWriter = ChunkWriter::new();
     object_data_writer.write_u16::<XRayByteOrder>(1)?;
     object_data_writer.write_w1251_string("unknown_section")?;
@@ -324,12 +324,12 @@ mod tests {
     fs::write(&path, bytes)?;
 
     let mut reader: ChunkReader = ChunkReader::from_file(File::open(&path)?)?;
-    let result: XRayResult<AlifeObject> = AlifeObject::read::<XRayByteOrder>(&mut reader);
+    let result: XrfResult<AlifeObject> = AlifeObject::read::<XRayByteOrder>(&mut reader);
 
     drop(reader);
     fs::remove_file(path)?;
 
-    let error: XRayError = result.unwrap_err();
+    let error: XrfError = result.unwrap_err();
 
     assert_eq!(
       error.to_string(),
@@ -344,7 +344,7 @@ mod tests {
     let mut ltx: Ltx = Ltx::new();
     ltx.with_section("object").set("section", "unknown_section");
 
-    let error: XRayError = AlifeObject::import("object", &ltx).unwrap_err();
+    let error: XrfError = AlifeObject::import("object", &ltx).unwrap_err();
 
     assert_eq!(
       error.to_string(),
@@ -353,7 +353,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -420,7 +420,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
@@ -478,7 +478,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: AlifeObject = AlifeObject {
       id: 341,
       net_action: 1,

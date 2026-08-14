@@ -2,7 +2,7 @@ use std::io::SeekFrom;
 
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::{ChunkDataSource, ChunkReader, XRayByteOrder};
 
@@ -14,7 +14,7 @@ pub struct ChunkSizePackedIterator<'a, T: ChunkDataSource = FileSlice> {
 }
 
 impl<T: ChunkDataSource> ChunkSizePackedIterator<'_, T> {
-  pub fn from_start(reader: &mut ChunkReader<T>) -> XRayResult<ChunkSizePackedIterator<'_, T>> {
+  pub fn from_start(reader: &mut ChunkReader<T>) -> XrfResult<ChunkSizePackedIterator<'_, T>> {
     reader.reset_pos()?;
 
     Ok(ChunkSizePackedIterator {
@@ -32,7 +32,7 @@ impl<T: ChunkDataSource> ChunkSizePackedIterator<'_, T> {
     }
   }
 
-  fn fail(&mut self, error: XRayError) -> Option<XRayResult<ChunkReader<T>>> {
+  fn fail(&mut self, error: XrfError) -> Option<XrfResult<ChunkReader<T>>> {
     self.failed = true;
 
     Some(Err(error))
@@ -40,7 +40,7 @@ impl<T: ChunkDataSource> ChunkSizePackedIterator<'_, T> {
 }
 
 impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
-  type Item = XRayResult<ChunkReader<T>>;
+  type Item = XrfResult<ChunkReader<T>>;
 
   fn next(&mut self) -> Option<Self::Item> {
     if self.failed || self.reader.is_ended() {
@@ -56,7 +56,7 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
     let remaining: u64 = self.reader.read_bytes_remain();
 
     if remaining < size_field_size {
-      return self.fail(XRayError::new_invalid_error(format!(
+      return self.fail(XrfError::new_invalid_error(format!(
         "Incomplete packed chunk size at position {position}, expected {size_field_size} bytes but only {remaining} remain"
       )));
     }
@@ -70,7 +70,7 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
     let id: u32 = self.index;
 
     if size < size_field_size {
-      return self.fail(XRayError::new_invalid_error(format!(
+      return self.fail(XrfError::new_invalid_error(format!(
         "Packed chunk {id} at position {position} declares invalid size {size}; size includes the {size_field_size}-byte header"
       )));
     }
@@ -78,14 +78,14 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
     let end_position: u64 = match position.checked_add(size) {
       Some(end_position) => end_position,
       None => {
-        return self.fail(XRayError::new_invalid_error(format!(
+        return self.fail(XrfError::new_invalid_error(format!(
           "Packed chunk {id} size {size} overflows its position {position}"
         )));
       }
     };
 
     if end_position > self.reader.end_pos() {
-      return self.fail(XRayError::new_invalid_error(format!(
+      return self.fail(XrfError::new_invalid_error(format!(
         "Packed chunk {id} at position {position} declares {size} bytes, beyond source end {}",
         self.reader.end_pos()
       )));
@@ -109,12 +109,12 @@ impl<T: ChunkDataSource> Iterator for ChunkSizePackedIterator<'_, T> {
 mod tests {
   use std::io::SeekFrom;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::{ChunkDataSource, ChunkReader, ChunkSizePackedIterator, InMemoryChunkDataSource};
 
   #[test]
-  fn test_iterate_empty() -> XRayResult {
+  fn test_iterate_empty() -> XrfResult {
     let mut chunk_reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[]))?;
 
@@ -133,7 +133,7 @@ mod tests {
   }
 
   #[test]
-  fn test_iterate_single() -> XRayResult {
+  fn test_iterate_single() -> XrfResult {
     let mut chunk_reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[5, 0, 0, 0, 255]))?;
 
@@ -152,7 +152,7 @@ mod tests {
   }
 
   #[test]
-  fn test_iterate_few_start() -> XRayResult {
+  fn test_iterate_few_start() -> XrfResult {
     let mut chunk_reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[
         8, 0, 0, 0, 255, 255, 255, 255, 12, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -176,7 +176,7 @@ mod tests {
   }
 
   #[test]
-  fn test_iterate_few_mid() -> XRayResult {
+  fn test_iterate_few_mid() -> XrfResult {
     let mut chunk_reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[
         8, 0, 0, 0, 255, 255, 255, 255, 12, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -199,10 +199,10 @@ mod tests {
   }
 
   #[test]
-  fn rejects_size_smaller_than_header() -> XRayResult {
+  fn rejects_size_smaller_than_header() -> XrfResult {
     let mut reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[3, 0, 0, 0]))?;
-    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> = ChunkSizePackedIterator::from_start(&mut reader)?
+    let result: XrfResult<ChunkReader<InMemoryChunkDataSource>> = ChunkSizePackedIterator::from_start(&mut reader)?
       .next()
       .expect("Expected one invalid packed chunk");
     let error: String = match result {
@@ -216,10 +216,10 @@ mod tests {
   }
 
   #[test]
-  fn rejects_packed_chunk_data_beyond_source_end() -> XRayResult {
+  fn rejects_packed_chunk_data_beyond_source_end() -> XrfResult {
     let mut reader: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_source(InMemoryChunkDataSource::from_buffer(&[8, 0, 0, 0, 0]))?;
-    let result: XRayResult<ChunkReader<InMemoryChunkDataSource>> = ChunkSizePackedIterator::from_start(&mut reader)?
+    let result: XrfResult<ChunkReader<InMemoryChunkDataSource>> = ChunkSizePackedIterator::from_start(&mut reader)?
       .next()
       .expect("Expected one invalid packed chunk");
     let error: String = match result {

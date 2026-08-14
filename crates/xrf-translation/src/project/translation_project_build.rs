@@ -5,7 +5,7 @@ use std::path::{Display, Path};
 use std::time::Instant;
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{XRayEncoding, encode_string_to_bytes};
 use xrf_xml::serialize_xml;
 
@@ -13,7 +13,7 @@ use crate::types::{TranslationCompiledXml, TranslationEntryCompiled, Translation
 use crate::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
 
 impl TranslationProject {
-  pub fn build_dir(dir: &Path, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
+  pub fn build_dir(dir: &Path, options: &ProjectBuildOptions) -> XrfResult<ProjectBuildResult> {
     log::info!("Building dir {}", dir.display());
     xrf_output::info!(options.output, "Building dir {}", dir.display());
 
@@ -22,7 +22,7 @@ impl TranslationProject {
 
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(dir) {
-      let entry: DirEntry = entry.map_err(|error| XRayError::new_serialization_error(error.to_string()))?;
+      let entry: DirEntry = entry.map_err(|error| XrfError::new_serialization_error(error.to_string()))?;
 
       if entry.path().is_file() {
         Self::build_file(&entry.path(), options)?;
@@ -40,7 +40,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn build_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XRayResult<ProjectBuildResult> {
+  pub fn build_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XrfResult<ProjectBuildResult> {
     let extension: Option<&OsStr> = path.as_ref().extension();
     let started_at: Instant = Instant::now();
 
@@ -68,7 +68,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn build_xml_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XRayResult {
+  pub fn build_xml_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XrfResult {
     let path_display: Display = path.as_ref().display();
     let locale: Option<TranslationLanguage> = Self::get_locale_from_path(path);
 
@@ -110,7 +110,7 @@ impl TranslationProject {
     Ok(())
   }
 
-  pub fn build_json_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XRayResult {
+  pub fn build_json_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> XrfResult {
     xrf_output::info!(
       options.output,
       "Building JSON based translations {}",
@@ -135,7 +135,7 @@ impl TranslationProject {
     source: &TranslationJson,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
-  ) -> XRayResult {
+  ) -> XrfResult {
     let data: Vec<u8> = encode_string_to_bytes(
       &Self::compile_translation_json_by_language(path, source, language, options)?,
       language.get_language_encoder(),
@@ -151,7 +151,7 @@ impl TranslationProject {
     source: &TranslationJson,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
-  ) -> XRayResult<String> {
+  ) -> XrfResult<String> {
     let mut buffer: String = format!(
       "<?xml version=\"1.0\" encoding=\"{}\" ?>\n\n",
       language.get_language_encoding()
@@ -192,10 +192,10 @@ impl TranslationProject {
     language: &TranslationLanguage,
     id: &str,
     text: &str,
-  ) -> XRayResult {
+  ) -> XrfResult {
     for (field, value) in [("id", id), ("text", text)] {
       if let Some(character) = Self::find_unencodable_character(value, language.get_language_encoder()) {
-        return Err(XRayError::new_encoding_error(format!(
+        return Err(XrfError::new_encoding_error(format!(
           "Translation '{}' entry '{}' {} cannot be encoded as {}: '{}' (U+{:04X})",
           path.display(),
           id,

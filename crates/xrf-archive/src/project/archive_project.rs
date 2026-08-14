@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 use walkdir::WalkDir;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
@@ -25,7 +25,7 @@ pub struct ArchiveProject {
 }
 
 impl ArchiveProject {
-  pub fn new<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn new<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     let mut archives: Vec<ArchiveDescriptor> = Vec::new();
     let mut files: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
 
@@ -48,7 +48,7 @@ impl ArchiveProject {
     }
 
     if archives.is_empty() {
-      return Err(XRayError::new_read_error(format!(
+      return Err(XrfError::new_read_error(format!(
         "Unable to read archives at location {}",
         path.as_ref().display()
       )));

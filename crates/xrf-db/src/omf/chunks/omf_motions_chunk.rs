@@ -3,7 +3,7 @@ use std::io::Write;
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, read_u32_chunk};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_equal;
 
 use crate::data::ogf::ogf_motion::OgfMotion;
@@ -18,14 +18,14 @@ impl OmfMotionsChunk {
 }
 
 impl ChunkReadWrite for OmfMotionsChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Reading motions chunk: {} bytes", reader.read_bytes_remain());
 
     let mut chunks: Vec<ChunkReader> = reader.read_children()?;
 
     let (count_chunk, motion_chunks): (&mut ChunkReader, &mut [ChunkReader]) = chunks
       .split_first_mut()
-      .ok_or_else(|| XRayError::new_read_error("OMF motions chunk has no count definition"))?;
+      .ok_or_else(|| XrfError::new_read_error("OMF motions chunk has no count definition"))?;
 
     let bones_motions_count: u32 = read_u32_chunk::<T>(count_chunk)?;
 
@@ -52,7 +52,7 @@ impl ChunkReadWrite for OmfMotionsChunk {
 
   /// Write motions as nested chunks, where leading chunk 0 stores motions count and
   /// following chunks 1..=N store motions themselves.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     let mut count_writer: ChunkWriter = ChunkWriter::new();
 
     count_writer.write_u32::<T>(self.motions.len() as u32)?;

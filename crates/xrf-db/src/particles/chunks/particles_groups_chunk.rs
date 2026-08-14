@@ -4,7 +4,7 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::open_export_file;
 
@@ -25,7 +25,7 @@ impl ParticlesGroupsChunk {
 impl ChunkReadWrite for ParticlesGroupsChunk {
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children()?;
     let mut groups: Vec<ParticleGroup> = Vec::new();
 
@@ -47,7 +47,7 @@ impl ChunkReadWrite for ParticlesGroupsChunk {
   }
 
   /// Write particle groups data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     for (index, group) in self.groups.iter().enumerate() {
       let mut group_writer: ChunkWriter = ChunkWriter::new();
 
@@ -63,7 +63,7 @@ impl ChunkReadWrite for ParticlesGroupsChunk {
 
 impl FileImportExport for ParticlesGroupsChunk {
   /// Import particles groups data from provided path.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     log::info!("Importing particles groups: {}", path.as_ref().display());
 
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("groups.ltx"))?;
@@ -83,7 +83,7 @@ impl FileImportExport for ParticlesGroupsChunk {
   }
 
   /// Export particles groups data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for group in &self.groups {

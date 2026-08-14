@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_length;
 
@@ -18,7 +18,7 @@ pub enum Shape {
 
 impl ChunkReadWrite for Shape {
   /// Read shape from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
 
     Ok(match shape_type {
@@ -30,13 +30,13 @@ impl ChunkReadWrite for Shape {
         reader.read_xr::<T, _>()?,
       )),
       _ => {
-        return Err(XRayError::new_parsing_error("Unexpected shape type provided"));
+        return Err(XrfError::new_parsing_error("Unexpected shape type provided"));
       }
     })
   }
 
   /// Write shape data into the chunk reader.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     match self {
       Self::Sphere(data) => {
         writer.write_u8(0)?;
@@ -61,7 +61,7 @@ impl ChunkReadWrite for Shape {
 
 impl ChunkReadWriteList for Shape {
   /// Read list of shapes from the chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
     let count: u8 = reader.read_u8().expect("Count flag to be read");
 
@@ -79,7 +79,7 @@ impl ChunkReadWriteList for Shape {
   }
 
   /// Write list of shapes data into the chunk reader.
-  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, shapes: &[Self]) -> XRayResult {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, shapes: &[Self]) -> XrfResult {
     writer.write_u8(shapes.len() as u8)?;
 
     for shape in shapes {
@@ -92,7 +92,7 @@ impl ChunkReadWriteList for Shape {
 
 impl Shape {
   /// Import shape objects from ltx config file.
-  pub fn import_list(section: &Section) -> XRayResult<Vec<Self>> {
+  pub fn import_list(section: &Section) -> XrfResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
     let count: usize = read_ltx_field("shapes_count", section)?;
 
@@ -116,7 +116,7 @@ impl Shape {
           )));
         }
         _ => {
-          return Err(XRayError::new_parsing_error(format!(
+          return Err(XrfError::new_parsing_error(format!(
             "Failed to parsed unknown type of shape - {shape_type} when importing from ltx"
           )));
         }
@@ -165,7 +165,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -178,7 +178,7 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
 
   #[test]
-  fn test_read_write_list() -> XRayResult {
+  fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -236,7 +236,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_sphere() -> XRayResult {
+  fn test_read_write_sphere() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_sphere.chunk");
 
@@ -270,7 +270,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_box() -> XRayResult {
+  fn test_read_write_box() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_box.chunk");
 
@@ -302,7 +302,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "test_import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
@@ -351,7 +351,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_sphere() -> XRayResult {
+  fn test_serialize_deserialize_sphere() -> XrfResult {
     let original: Shape = Shape::Sphere((
       Vector3d {
         x: 243.5,
@@ -378,7 +378,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_box() -> XRayResult {
+  fn test_serialize_deserialize_box() -> XrfResult {
     let original: Shape = Shape::Box((
       Vector3d {
         x: 175.5,

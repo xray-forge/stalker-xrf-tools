@@ -1,4 +1,4 @@
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::ArchiveProject;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
@@ -6,11 +6,11 @@ use crate::project::archive_project_read_result::ProjectReadResult;
 
 impl ArchiveProject {
   /// Read single file from project as string.
-  pub fn read_file_as_string(&self, filename: &str) -> XRayResult<ProjectReadResult> {
+  pub fn read_file_as_string(&self, filename: &str) -> XrfResult<ProjectReadResult> {
     log::info!("Trying to read file from archive: {}", filename);
 
     if !self.read_policy.supports_file(filename) {
-      return Err(XRayError::new_read_error(format!(
+      return Err(XrfError::new_read_error(format!(
         "File '{}' cannot be read, file extension is not allowed to be read",
         filename
       )));
@@ -19,10 +19,10 @@ impl ArchiveProject {
     let descriptor: &ArchiveFileDescriptor = self
       .files
       .get(filename)
-      .ok_or_else(|| XRayError::new_read_error(format!("File '{}' is not found in the archive project", filename)))?;
+      .ok_or_else(|| XrfError::new_read_error(format!("File '{}' is not found in the archive project", filename)))?;
 
     if descriptor.size_real > self.read_policy.maximum_size {
-      return Err(XRayError::new_read_error(format!(
+      return Err(XrfError::new_read_error(format!(
         "File '{}' is too big to be read - {}, {} is maximum allowed",
         filename, descriptor.size_real, self.read_policy.maximum_size
       )));

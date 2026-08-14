@@ -2,7 +2,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::export::LtxImportExport;
@@ -22,7 +22,7 @@ pub struct GraphHeader {
 
 impl ChunkReadWrite for GraphHeader {
   /// Read header data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       version: reader.read_u8()?,
       vertices_count: reader.read_u16::<T>()?,
@@ -34,7 +34,7 @@ impl ChunkReadWrite for GraphHeader {
   }
 
   /// Write graph edge data into the chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u8(self.version)?;
     writer.write_u16::<T>(self.vertices_count)?;
     writer.write_u32::<T>(self.edges_count)?;
@@ -48,9 +48,9 @@ impl ChunkReadWrite for GraphHeader {
 
 impl LtxImportExport for GraphHeader {
   /// Import graph header from ltx file.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Graph section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -68,7 +68,7 @@ impl LtxImportExport for GraphHeader {
   }
 
   /// Export graph header data into level ltx.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("version", self.version.to_string())
@@ -91,7 +91,7 @@ mod tests {
   use serde_json::to_string_pretty;
   use uuid::uuid;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -104,7 +104,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -143,7 +143,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let original: GraphHeader = GraphHeader {
       version: 16,
       vertices_count: 6434,
@@ -169,7 +169,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: GraphHeader = GraphHeader {
       version: 12,
       vertices_count: 2341,

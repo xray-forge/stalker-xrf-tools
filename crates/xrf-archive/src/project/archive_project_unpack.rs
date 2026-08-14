@@ -7,14 +7,14 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use minilzo_rs::LZO;
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::ArchiveProject;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::project::archive_project_unpack_result::ArchiveUnpackResult;
 
 impl ArchiveProject {
-  pub fn unpack<P: AsRef<Path>>(&self, destination: P) -> XRayResult<ArchiveUnpackResult> {
+  pub fn unpack<P: AsRef<Path>>(&self, destination: P) -> XrfResult<ArchiveUnpackResult> {
     let start: Instant = Instant::now();
     let lzo: LZO = Self::init_lzo()?;
 
@@ -59,7 +59,7 @@ impl ArchiveProject {
     &self,
     destination: P,
     concurrency: usize,
-  ) -> XRayResult<ArchiveUnpackResult> {
+  ) -> XrfResult<ArchiveUnpackResult> {
     let start: Instant = Instant::now();
 
     let mut unpacked_files_count: usize = 0;
@@ -106,7 +106,7 @@ impl ArchiveProject {
     })
   }
 
-  fn unpack_file<P: AsRef<Path>>(lzo: &LZO, destination: P, file_descriptor: &ArchiveFileDescriptor) -> XRayResult {
+  fn unpack_file<P: AsRef<Path>>(lzo: &LZO, destination: P, file_descriptor: &ArchiveFileDescriptor) -> XrfResult {
     let mut file_path: PathBuf = destination.as_ref().into();
 
     file_path.push(&file_descriptor.destination);
@@ -122,7 +122,7 @@ impl ArchiveProject {
     Self::write_file_contents(lzo, &mut dest_file, file_descriptor)
   }
 
-  fn unpack_dirs<P: AsRef<Path>>(&self, destination: P) -> XRayResult {
+  fn unpack_dirs<P: AsRef<Path>>(&self, destination: P) -> XrfResult {
     let mut set: HashSet<PathBuf> = HashSet::new();
 
     for descriptor in self.files.values() {

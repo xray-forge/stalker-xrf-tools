@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_lua::XRayLuaScript;
 
 use crate::XRayShaderPass;
@@ -14,7 +14,7 @@ pub struct XRayShaderScript {
 
 impl XRayShaderScript {
   /// Parse an X-Ray shader script and collect literal `shader:begin` calls.
-  pub fn parse<P>(path: P, source: &str) -> XRayResult<Self>
+  pub fn parse<P>(path: P, source: &str) -> XrfResult<Self>
   where
     P: AsRef<Path>,
   {
@@ -55,12 +55,12 @@ impl XRayShaderScript {
 mod tests {
   use std::path::Path;
 
-  use xrf_error::{XRayError, XRayResult};
+  use xrf_error::{XrfError, XrfResult};
 
   use super::XRayShaderScript;
 
   #[test]
-  fn collects_literal_shader_passes() -> XRayResult {
+  fn collects_literal_shader_passes() -> XrfResult {
     let script: XRayShaderScript = XRayShaderScript::parse(
       Path::new("shaders/r3/example.s"),
       r#"
@@ -85,6 +85,6 @@ end
   fn reports_luajit_syntax_errors() {
     let result = XRayShaderScript::parse(Path::new("invalid.s"), "function normal(");
 
-    assert!(matches!(result, Err(XRayError::Verify { .. })));
+    assert!(matches!(result, Err(XrfError::Verify { .. })));
   }
 }

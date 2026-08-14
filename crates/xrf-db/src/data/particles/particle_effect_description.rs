@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
 
@@ -24,7 +24,7 @@ impl ParticleDescription {
 
 impl ChunkReadWrite for ParticleDescription {
   /// Read particle effect description data from chunk redder.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let particle_description: Self = Self {
       creator: reader.read_w1251_string()?,
       editor: reader.read_w1251_string()?,
@@ -38,7 +38,7 @@ impl ChunkReadWrite for ParticleDescription {
   }
 
   /// Write particle effect description data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_w1251_string(&self.creator)?;
     writer.write_w1251_string(&self.editor)?;
     writer.write_u32::<T>(self.created_time)?;
@@ -50,9 +50,9 @@ impl ChunkReadWrite for ParticleDescription {
 
 impl LtxImportExport for ParticleDescription {
   /// Import particle effect description data from provided path.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle effect description section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -76,7 +76,7 @@ impl LtxImportExport for ParticleDescription {
   }
 
   /// Export particle effect description data into provided path.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)

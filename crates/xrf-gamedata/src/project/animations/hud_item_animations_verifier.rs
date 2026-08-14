@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use rayon::prelude::*;
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::GamedataFindingFactory;
@@ -32,7 +32,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
     Self { options, project }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataHudItemAnimationsVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataHudItemAnimationsVerificationResult> {
     xrf_output::verbose!(self.options.output, "Verify hud item animations");
 
     let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
@@ -45,7 +45,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
       .collect();
 
     let checked_items_count: u32 = u32::try_from(item_sections.len())
-      .map_err(|_| XRayError::new_verify_error("Hud item count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Hud item count exceeds the supported result range"))?;
 
     // Each section is verified once, reading its model and omf files a single time.
     let messages_per_item: Vec<Vec<String>> = item_sections
@@ -54,7 +54,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
       .collect();
 
     let invalid_items_count: u32 = u32::try_from(messages_per_item.iter().filter(|it| !it.is_empty()).count())
-      .map_err(|_| XRayError::new_verify_error("Invalid hud item count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Invalid hud item count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = messages_per_item
       .into_iter()
@@ -149,9 +149,9 @@ impl<'a> HudItemAnimationsVerifier<'a> {
   }
 
   /// Read motions provided by the model, or `None` when the model carries no animations at all.
-  fn read_model_motions(&self, visual: &str) -> XRayResult<Option<HashSet<String>>> {
+  fn read_model_motions(&self, visual: &str) -> XrfResult<Option<HashSet<String>>> {
     let Some(visual_path) = self.project.assets.ogf(visual)?.map(|asset| asset.absolute_path()) else {
-      return Err(XRayError::new_not_found_error(format!(
+      return Err(XrfError::new_not_found_error(format!(
         "Visual '{visual}' was not found"
       )));
     };
@@ -170,11 +170,11 @@ impl<'a> HudItemAnimationsVerifier<'a> {
   }
 
   /// Resolve omf assets linked by the model motion refs, or `None` when the model has no refs.
-  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XRayResult<Option<HashSet<PathBuf>>> {
+  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XrfResult<Option<HashSet<PathBuf>>> {
     let motion_refs: Vec<String> = match OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path) {
       Ok(refs) => refs,
       // Model has no motion refs chunk, so it is a static visual without animations.
-      Err(XRayError::NotFound { .. }) => return Ok(None),
+      Err(XrfError::NotFound { .. }) => return Ok(None),
       Err(error) => return Err(error),
     };
 

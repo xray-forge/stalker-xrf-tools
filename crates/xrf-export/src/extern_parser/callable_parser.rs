@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_typescript::TypeScriptFunctionSignature;
 use xrf_typescript::swc_common::{SourceMap, SourceMapper, Spanned};
 use xrf_typescript::swc_ecma_ast::{ArrowExpr, Pat, TsFnParam, TsFnType, TsTypeAnn};
@@ -30,7 +30,7 @@ impl<'a> ExternCallableParser<'a> {
     arrow: &ArrowExpr,
     documentation: Option<ExternDocumentation>,
     parameter_docs: &BTreeMap<String, String>,
-  ) -> XRayResult<ExternCallable> {
+  ) -> XrfResult<ExternCallable> {
     let returns: String = arrow.return_type.as_ref().map_or_else(
       || String::from("unknown"),
       |annotation| canonical_type(annotation.type_ann.as_ref(), self.source_map),
@@ -55,7 +55,7 @@ impl<'a> ExternCallableParser<'a> {
     function_type: &TsFnType,
     documentation: Option<ExternDocumentation>,
     parameter_docs: &BTreeMap<String, String>,
-  ) -> XRayResult<ExternCallable> {
+  ) -> XrfResult<ExternCallable> {
     let mut params: Vec<ExternParameter> = Vec::with_capacity(function_type.params.len());
 
     for parameter in &function_type.params {
@@ -115,7 +115,7 @@ impl<'a> ExternCallableParser<'a> {
   }
 
   /// Parse one parameter in an inline arrow function.
-  fn parse_parameter(&self, parameter: &Pat, parameter_docs: &BTreeMap<String, String>) -> XRayResult<ExternParameter> {
+  fn parse_parameter(&self, parameter: &Pat, parameter_docs: &BTreeMap<String, String>) -> XrfResult<ExternParameter> {
     let (name, annotation, optional): (String, Option<&TsTypeAnn>, bool) = match parameter {
       Pat::Ident(binding) => (
         binding.id.sym.to_string(),

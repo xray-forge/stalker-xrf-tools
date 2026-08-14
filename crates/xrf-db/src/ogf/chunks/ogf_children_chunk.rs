@@ -1,7 +1,7 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::OgfFile;
 
@@ -15,7 +15,7 @@ impl OgfChildrenChunk {
 }
 
 impl ChunkReadWrite for OgfChildrenChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Reading children chunk: {} bytes", reader.read_bytes_remain());
 
     let mut children: Vec<OgfFile> = Vec::new();
@@ -24,7 +24,7 @@ impl ChunkReadWrite for OgfChildrenChunk {
       let mut object_reader: ChunkReader = object_reader?;
 
       if object_reader.id != index {
-        return Err(XRayError::new_unexpected_error(format!(
+        return Err(XrfError::new_unexpected_error(format!(
           "Invalid data in OGF children chunk, expected index {}, got {}",
           index, object_reader.id
         )));
@@ -38,7 +38,7 @@ impl ChunkReadWrite for OgfChildrenChunk {
     Ok(Self { nested: children })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     for (index, _child) in self.nested.iter().enumerate() {
       let mut child_writer: ChunkWriter = ChunkWriter::new();
 

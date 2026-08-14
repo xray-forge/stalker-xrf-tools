@@ -1,6 +1,6 @@
 use std::io::{Read, SeekFrom};
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::encode_w1251_bytes_to_string;
 
 use crate::reader::chunk_reader::ChunkReader;
@@ -10,12 +10,12 @@ const STRING_READ_BUFFER_SIZE: usize = 256;
 
 impl<D: ChunkDataSource> ChunkReader<D> {
   /// Read null terminated windows encoded string from file bytes.
-  pub fn read_w1251_string(&mut self) -> XRayResult<String> {
+  pub fn read_w1251_string(&mut self) -> XrfResult<String> {
     self.read_w1251_string_limited(10_240)
   }
 
   /// Read null terminated windows encoded string from file bytes with size limit.
-  pub fn read_w1251_string_limited(&mut self, limit: usize) -> XRayResult<String> {
+  pub fn read_w1251_string_limited(&mut self, limit: usize) -> XrfResult<String> {
     let mut buffer: [u8; STRING_READ_BUFFER_SIZE] = [0u8; STRING_READ_BUFFER_SIZE];
     let mut collected: Vec<u8> = Vec::new();
 
@@ -23,13 +23,13 @@ impl<D: ChunkDataSource> ChunkReader<D> {
       let bytes_read: usize = self.read(&mut buffer)?;
 
       if collected.len() + bytes_read > limit {
-        return Err(XRayError::new_parsing_error(
+        return Err(XrfError::new_parsing_error(
           "Cannot parse string, reading data over buffer size limit",
         ));
       }
 
       if bytes_read == 0 {
-        return Err(XRayError::new_no_terminator_error(
+        return Err(XrfError::new_no_terminator_error(
           "Null terminator is not found in buffer, no data to be read",
         ));
       }
@@ -50,12 +50,12 @@ impl<D: ChunkDataSource> ChunkReader<D> {
   }
 
   /// Read \r\n terminated windows encoded string from file bytes.
-  pub fn read_w1251_rn_string(&mut self) -> XRayResult<String> {
+  pub fn read_w1251_rn_string(&mut self) -> XrfResult<String> {
     self.read_w1251_rn_string_limited(10_240)
   }
 
   /// Read \r\n terminated windows encoded string from file bytes.
-  pub fn read_w1251_rn_string_limited(&mut self, limit: usize) -> XRayResult<String> {
+  pub fn read_w1251_rn_string_limited(&mut self, limit: usize) -> XrfResult<String> {
     let mut buffer: [u8; STRING_READ_BUFFER_SIZE] = [0u8; STRING_READ_BUFFER_SIZE];
     let mut collected: Vec<u8> = Vec::new();
 
@@ -63,13 +63,13 @@ impl<D: ChunkDataSource> ChunkReader<D> {
       let bytes_read: usize = self.read(&mut buffer)?;
 
       if collected.len() + bytes_read > limit {
-        return Err(XRayError::new_parsing_error(
+        return Err(XrfError::new_parsing_error(
           "Cannot parse string, reading data over buffer size limit",
         ));
       }
 
       if bytes_read == 0 {
-        return Err(XRayError::new_no_terminator_error(
+        return Err(XrfError::new_no_terminator_error(
           "RN sequence is not found in buffer, no data to be read",
         ));
       }
@@ -92,13 +92,13 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
 #[cfg(test)]
 mod tests {
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::reader::chunk_reader::ChunkReader;
   use crate::source::chunk_memory_source::InMemoryChunkDataSource;
 
   #[test]
-  fn test_read_w1251_string_empty() -> XRayResult {
+  fn test_read_w1251_string_empty() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[])?;
 
     assert_eq!(chunk.read_bytes_remain(), 0, "Expect 0 bytes remaining");
@@ -115,7 +115,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_string() -> XRayResult {
+  fn test_read_w1251_string() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -129,7 +129,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_string_empty_remaining_data() -> XRayResult {
+  fn test_read_w1251_string_empty_remaining_data() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 0, 0, 0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -143,7 +143,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_string_strings_few() -> XRayResult {
+  fn test_read_w1251_string_strings_few() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_bytes(&[b'a', b'b', b'c', 0, b'c', b'b', b'a', 0])?;
 
@@ -162,7 +162,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_string_limited_over_limit() -> XRayResult {
+  fn test_read_w1251_string_limited_over_limit() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'a'; 1024])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -178,7 +178,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_rn_string_empty() -> XRayResult {
+  fn test_read_w1251_rn_string_empty() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[])?;
 
     assert_eq!(chunk.read_bytes_remain(), 0, "Expect 0 bytes remaining");
@@ -195,7 +195,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_string_empty_null() -> XRayResult {
+  fn test_read_w1251_string_empty_null() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -209,7 +209,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_rn_string_empty_remaining_data() -> XRayResult {
+  fn test_read_w1251_rn_string_empty_remaining_data() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'\r', b'\n', 0, 0, 0])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");
@@ -223,7 +223,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_rn_string_few() -> XRayResult {
+  fn test_read_w1251_rn_string_few() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(b"abc\r\ncba\r\n")?;
 
     assert_eq!(chunk.read_bytes_remain(), 10, "Expect 10 bytes remaining");
@@ -241,7 +241,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_w1251_rn_string_limited_over_limit() -> XRayResult {
+  fn test_read_w1251_rn_string_limited_over_limit() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[b'a'; 1024])?;
 
     assert_eq!(chunk.cursor_pos(), 0, "Expect 0 bytes read");

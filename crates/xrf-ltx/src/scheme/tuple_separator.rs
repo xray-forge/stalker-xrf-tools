@@ -1,4 +1,4 @@
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TupleSeparator {
@@ -7,11 +7,11 @@ pub enum TupleSeparator {
 }
 
 impl TupleSeparator {
-  pub fn from_tuple_type(field_name: &str, section_name: &str, value: &str) -> XRayResult<Self> {
+  pub fn from_tuple_type(field_name: &str, section_name: &str, value: &str) -> XrfResult<Self> {
     match value {
       "tuple" | "tuple@comma" => Ok(Self::Comma),
       "tuple@pipe" => Ok(Self::Pipe),
-      _ => Err(XRayError::new_ltx_scheme_error(
+      _ => Err(XrfError::new_ltx_scheme_error(
         section_name,
         field_name,
         "Failed to parse tuple type, expected 'tuple', 'tuple@comma', or 'tuple@pipe'",

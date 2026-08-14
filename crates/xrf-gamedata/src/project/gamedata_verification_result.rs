@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_report::{CheckId, CheckReport, Finding, Report};
 
 use crate::{
@@ -51,7 +51,7 @@ impl GamedataVerificationReport {
     self.checks.push(report);
   }
 
-  pub fn add_check<T>(&mut self, verification_type: GamedataVerificationType, result: XRayResult<T>)
+  pub fn add_check<T>(&mut self, verification_type: GamedataVerificationType, result: XrfResult<T>)
   where
     T: GamedataCheckResult,
   {
@@ -117,7 +117,7 @@ impl GamedataVerificationCheckReport {
     &self.report
   }
 
-  pub(crate) fn from_check_result<T>(verification_type: GamedataVerificationType, result: XRayResult<T>) -> Self
+  pub(crate) fn from_check_result<T>(verification_type: GamedataVerificationType, result: XrfResult<T>) -> Self
   where
     T: GamedataCheckResult,
   {
@@ -155,7 +155,7 @@ impl GamedataVerificationCheckReport {
 
 #[cfg(test)]
 mod tests {
-  use xrf_error::XRayError;
+  use xrf_error::XrfError;
   use xrf_report::Status;
 
   use super::GamedataVerificationReport;
@@ -230,7 +230,7 @@ mod tests {
 
     result.add_check::<TestCheckResult>(
       GamedataVerificationType::Animations,
-      Err(XRayError::new_unexpected_error("boom")),
+      Err(XrfError::new_unexpected_error("boom")),
     );
 
     assert_eq!(result.status(), GamedataVerificationStatus::Error);

@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::SeekFrom;
 
 use fileslice::FileSlice;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::iterator::chunk_iterator::ChunkIterator;
 use crate::source::chunk_data_source::ChunkDataSource;
@@ -19,14 +19,14 @@ pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
 
 impl ChunkReader<FileSlice> {
   /// Create chunk based on whole file.
-  pub fn from_file(file: File) -> XRayResult<Self> {
+  pub fn from_file(file: File) -> XrfResult<Self> {
     Self::from_slice(FileSlice::new(file))
   }
 
   /// Create chunk based on file slice boundaries.
-  pub fn from_slice(slice: FileSlice) -> XRayResult<Self> {
+  pub fn from_slice(slice: FileSlice) -> XrfResult<Self> {
     if slice.is_empty() {
-      return Err(XRayError::new_invalid_error("Failed to create chunk from empty source"));
+      return Err(XrfError::new_invalid_error("Failed to create chunk from empty source"));
     }
 
     Ok(Self {
@@ -40,12 +40,12 @@ impl ChunkReader<FileSlice> {
 
 impl ChunkReader<InMemoryChunkDataSource> {
   /// Create chunk based on whole file.
-  pub fn from_bytes(buf: &[u8]) -> XRayResult<Self> {
+  pub fn from_bytes(buf: &[u8]) -> XrfResult<Self> {
     Self::from_source(InMemoryChunkDataSource::from_buffer(buf))
   }
 
   /// Create chunk based on source.
-  pub fn from_source(source: InMemoryChunkDataSource) -> XRayResult<Self> {
+  pub fn from_source(source: InMemoryChunkDataSource) -> XrfResult<Self> {
     Ok(Self {
       id: 0,
       size: source.len(),
@@ -87,12 +87,12 @@ impl<T: ChunkDataSource> ChunkReader<T> {
   }
 
   /// Reset seek position in chunk file.
-  pub fn reset_pos(&mut self) -> XRayResult<u64> {
+  pub fn reset_pos(&mut self) -> XrfResult<u64> {
     Ok(self.data.set_seek(SeekFrom::Start(0))?)
   }
 
   /// Navigates to chunk with index and constructs chunk representation.
-  pub fn read_child_by_index(&mut self, id: u32) -> XRayResult<Self> {
+  pub fn read_child_by_index(&mut self, id: u32) -> XrfResult<Self> {
     for (iteration, chunk) in ChunkIterator::from_start(self)?.enumerate() {
       let chunk: ChunkReader<T> = chunk?;
 
@@ -101,29 +101,29 @@ impl<T: ChunkDataSource> ChunkReader<T> {
       }
     }
 
-    Err(XRayError::new_invalid_error(format!(
+    Err(XrfError::new_invalid_error(format!(
       "Attempt to read not existing chunk with id {} in chunk {}",
       id, self.id
     )))
   }
 
   /// Get list of all child samples in current chunk, do not mutate current chunk.
-  pub fn get_children_cloned(&self) -> XRayResult<Vec<Self>> {
+  pub fn get_children_cloned(&self) -> XrfResult<Vec<Self>> {
     ChunkIterator::from_start(&mut self.clone())?.collect()
   }
 
   /// Read list of all child samples in current chunk and advance further.
-  pub fn read_children(&mut self) -> XRayResult<Vec<Self>> {
+  pub fn read_children(&mut self) -> XrfResult<Vec<Self>> {
     ChunkIterator::<T>::from_start(self)?.collect()
   }
 
   /// Assert data in chink is read and nothing remains to read.
   #[inline]
-  pub fn assert_read(&self, message: &str) -> XRayResult {
+  pub fn assert_read(&self, message: &str) -> XrfResult {
     if self.is_ended() {
       Ok(())
     } else {
-      Err(XRayError::new_chunk_not_ended_error(message, self.read_bytes_remain()))
+      Err(XrfError::new_chunk_not_ended_error(message, self.read_bytes_remain()))
     }
   }
 }
@@ -141,19 +141,19 @@ impl fmt::Debug for ChunkReader {
 #[cfg(test)]
 mod tests {
   use fileslice::FileSlice;
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
 
   use crate::reader::chunk_reader::ChunkReader;
 
   #[test]
-  fn test_read_empty_file() -> XRayResult {
+  fn test_read_empty_file() -> XrfResult {
     let file: FileSlice = open_test_resource_as_slice("empty")?;
 
     assert_eq!(file.start_pos(), 0);
     assert_eq!(file.end_pos(), 0);
 
-    let result: XRayResult<ChunkReader> = ChunkReader::from_slice(file);
+    let result: XrfResult<ChunkReader> = ChunkReader::from_slice(file);
 
     assert!(result.is_err(), "File should be empty and fail to read data");
     assert_eq!(
@@ -166,7 +166,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_chunk() -> XRayResult {
+  fn test_read_empty_chunk() -> XrfResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
@@ -181,7 +181,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_children() -> XRayResult {
+  fn test_read_empty_children() -> XrfResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
@@ -204,7 +204,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_empty_unordered_children() -> XRayResult {
+  fn test_read_empty_unordered_children() -> XrfResult {
     let filename: String = get_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
@@ -225,7 +225,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_dummy_children() -> XRayResult {
+  fn test_read_dummy_children() -> XrfResult {
     let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;

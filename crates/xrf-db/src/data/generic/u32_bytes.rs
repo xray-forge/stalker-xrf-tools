@@ -4,7 +4,7 @@ use std::str::FromStr;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::vector_from_string_sized;
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
@@ -12,7 +12,7 @@ use xrf_utils::vector_from_string_sized;
 pub struct U32Bytes(pub u8, pub u8, pub u8, pub u8);
 
 impl ChunkReadWrite for U32Bytes {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(U32Bytes(
       reader.read_u8()?,
       reader.read_u8()?,
@@ -21,7 +21,7 @@ impl ChunkReadWrite for U32Bytes {
     ))
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u8(self.0)?;
     writer.write_u8(self.1)?;
     writer.write_u8(self.2)?;
@@ -38,7 +38,7 @@ impl Display for U32Bytes {
 }
 
 impl FromStr for U32Bytes {
-  type Err = XRayError;
+  type Err = XrfError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
     let values: Vec<u8> = vector_from_string_sized(string, 4)?;

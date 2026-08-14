@@ -4,7 +4,7 @@ use std::io::ErrorKind::AlreadyExists;
 use std::path::{Path, PathBuf};
 
 use serde_json::{Map, Value};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::project::translation_project::TranslationProject;
 use crate::types::{TranslationJson, TranslationVariant};
@@ -16,7 +16,7 @@ impl TranslationProject {
     destination: &P2,
     language: &TranslationLanguage,
     options: &ProjectBuildOptions,
-  ) -> XRayResult<File> {
+  ) -> XrfResult<File> {
     let target: PathBuf = destination
       .as_ref()
       .join(language.to_string())
@@ -42,7 +42,7 @@ impl TranslationProject {
     )
   }
 
-  pub fn prepare_target_json_translation_file<P: AsRef<Path>>(path: &P) -> XRayResult<File> {
+  pub fn prepare_target_json_translation_file<P: AsRef<Path>>(path: &P) -> XrfResult<File> {
     Ok(
       File::options()
         .read(false)

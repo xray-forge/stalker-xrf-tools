@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::time::Instant;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxFormatOptions, LtxProjectFormatResult, LtxProjectVerifyResult, LtxVerifyOptions};
 
 use crate::GamedataFindingFactory;
@@ -9,7 +9,7 @@ use crate::project::ltx::verify_ltx_result::GamedataLtxVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
-  pub fn verify_ltx(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataLtxVerificationResult> {
+  pub fn verify_ltx(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<GamedataLtxVerificationResult> {
     xrf_output::heading!(options.output, "Verify LTX files");
 
     let started_at: Instant = Instant::now();
@@ -52,7 +52,7 @@ impl GamedataProject {
 
     for error in &verification_result.errors {
       match error {
-        XRayError::LtxScheme {
+        XrfError::LtxScheme {
           at: Some(path),
           field,
           message,
@@ -74,7 +74,7 @@ impl GamedataProject {
     findings
   }
 
-  fn verify_ltx_format(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<LtxProjectFormatResult> {
+  fn verify_ltx_format(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<LtxProjectFormatResult> {
     xrf_output::heading!(options.output, "Verify LTX files formatting");
 
     self.ltx_project.check_format_all_files_opt(LtxFormatOptions {
@@ -82,7 +82,7 @@ impl GamedataProject {
     })
   }
 
-  fn verify_ltx_schemes(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<LtxProjectVerifyResult> {
+  fn verify_ltx_schemes(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<LtxProjectVerifyResult> {
     xrf_output::heading!(options.output, "Verify LTX schemas");
 
     self.ltx_project.verify_entries_opt(LtxVerifyOptions {
@@ -95,7 +95,7 @@ impl GamedataProject {
 mod tests {
   use std::path::PathBuf;
 
-  use xrf_error::XRayError;
+  use xrf_error::XrfError;
   use xrf_ltx::{LtxProjectFormatResult, LtxProjectVerifyResult};
 
   use super::GamedataProject;
@@ -109,7 +109,7 @@ mod tests {
       ..Default::default()
     };
     let verification_result: LtxProjectVerifyResult = LtxProjectVerifyResult {
-      errors: vec![XRayError::new_scheme_error_at(
+      errors: vec![XrfError::new_scheme_error_at(
         "weather",
         "fog_density",
         "Expected a number",

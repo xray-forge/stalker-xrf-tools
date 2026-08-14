@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::level::level_shader_entry::{LevelShaderEntry, LevelShaderReference};
 
@@ -35,7 +35,7 @@ impl LevelShadersChunk {
 
 impl ChunkReadWrite for LevelShadersChunk {
   /// Read level shaders table from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let count: u32 = reader.read_u32::<T>()?;
     let mut entries: Vec<LevelShaderEntry> = Vec::with_capacity(count as usize);
 
@@ -49,7 +49,7 @@ impl ChunkReadWrite for LevelShadersChunk {
   }
 
   /// Write level shaders table into the chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.entries.len() as u32)?;
 
     for entry in &self.entries {
@@ -63,7 +63,7 @@ impl ChunkReadWrite for LevelShadersChunk {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -88,7 +88,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 

@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use minilzo_rs::LZO;
 use serde::Serialize;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{assert, assert_equal, assert_not_equal};
 
 use crate::ArchiveProject;
@@ -43,7 +43,7 @@ impl ArchiveProject {
     &self,
     prefix: &str,
     destination: P,
-  ) -> XRayResult<ArchiveExtractDirectoryResult> {
+  ) -> XrfResult<ArchiveExtractDirectoryResult> {
     let normalized: String = prefix.trim_end_matches(['\\', '/']).to_string();
     let lzo: LZO = Self::init_lzo()?;
 
@@ -81,7 +81,7 @@ impl ArchiveProject {
     }
 
     if extracted_count == 0 {
-      return Err(XRayError::new_not_found_error(format!(
+      return Err(XrfError::new_not_found_error(format!(
         "Cannot extract '{normalized}' - no files in the archive are under it."
       )));
     }
@@ -117,9 +117,9 @@ impl ArchiveProject {
   }
 
   /// Write one archived file to an exact path of the caller's choosing.
-  pub fn extract_file<P: AsRef<Path>>(&self, name: &str, destination: P) -> XRayResult<ArchiveExtractResult> {
+  pub fn extract_file<P: AsRef<Path>>(&self, name: &str, destination: P) -> XrfResult<ArchiveExtractResult> {
     let descriptor: &ArchiveFileDescriptor = self.files.get(name).ok_or_else(|| {
-      XRayError::new_not_found_error(format!("Cannot extract '{name}' - no such file in the archive."))
+      XrfError::new_not_found_error(format!("Cannot extract '{name}' - no such file in the archive."))
     })?;
 
     if let Some(parent) = destination.as_ref().parent() {
@@ -147,11 +147,11 @@ impl ArchiveProject {
   /// Separate from `write_file_contents`, which streams uncompressed entries straight to disk without
   /// ever holding them whole. Callers that need the bytes themselves - previewing an image, say - have
   /// to accept holding them, so the size guard belongs with them rather than here.
-  pub fn read_file_bytes(&self, name: &str) -> XRayResult<Vec<u8>> {
+  pub fn read_file_bytes(&self, name: &str) -> XrfResult<Vec<u8>> {
     let descriptor: &ArchiveFileDescriptor = self
       .files
       .get(name)
-      .ok_or_else(|| XRayError::new_not_found_error(format!("Cannot read '{name}' - no such file in the archive.")))?;
+      .ok_or_else(|| XrfError::new_not_found_error(format!("Cannot read '{name}' - no such file in the archive.")))?;
 
     let mut source: File = File::open(descriptor.source.as_path())?;
 
@@ -168,7 +168,7 @@ impl ArchiveProject {
     let decompressed: Vec<u8> = Self::init_lzo()?
       .decompress_safe(raw.as_slice(), descriptor.size_real as usize)
       .map_err(|error| {
-        XRayError::new_read_error(format!(
+        XrfError::new_read_error(format!(
           "Failed to decompress '{}' from '{}': {error:?}.",
           descriptor.name,
           descriptor.source.display()
@@ -185,15 +185,15 @@ impl ArchiveProject {
   }
 
   /// Build the decompressor, reporting a failure instead of taking the process down with it.
-  pub(crate) fn init_lzo() -> XRayResult<LZO> {
-    LZO::init().map_err(|error| XRayError::new_unexpected_error(format!("Failed to initialize LZO: {error:?}.")))
+  pub(crate) fn init_lzo() -> XrfResult<LZO> {
+    LZO::init().map_err(|error| XrfError::new_unexpected_error(format!("Failed to initialize LZO: {error:?}.")))
   }
 
   /// Copy one archived file into an already opened target, decompressing when it is stored compressed.
   ///
   /// Shared by whole-archive unpacking and single file extraction so the two cannot drift on CRC
   /// verification or on how uncompressed entries are streamed.
-  pub(crate) fn write_file_contents(lzo: &LZO, target: &mut File, descriptor: &ArchiveFileDescriptor) -> XRayResult {
+  pub(crate) fn write_file_contents(lzo: &LZO, target: &mut File, descriptor: &ArchiveFileDescriptor) -> XrfResult {
     let mut source: File = File::open(descriptor.source.as_path())?;
 
     source.seek(SeekFrom::Start(descriptor.offset as u64))?;
@@ -206,7 +206,7 @@ impl ArchiveProject {
       let decompressed: Vec<u8> = lzo
         .decompress_safe(buffer.as_slice(), descriptor.size_real as usize)
         .map_err(|error| {
-          XRayError::new_read_error(format!(
+          XrfError::new_read_error(format!(
             "Failed to decompress '{}' from '{}': {error:?}.",
             descriptor.name,
             descriptor.source.display()

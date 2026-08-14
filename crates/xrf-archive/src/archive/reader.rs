@@ -8,7 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use byteorder::ReadBytesExt;
 use delharc::decode::{Decoder, Lh1Decoder};
 use regex::Regex;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{
   XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder, get_windows1251_encoder,
 };
@@ -30,7 +30,7 @@ pub struct ArchiveReader {
 
 impl ArchiveReader {
   /// Create chunk based on whole file.
-  pub fn from_path<P: AsRef<Path>>(path: &P, encoding: XRayEncoding) -> XRayResult<Self> {
+  pub fn from_path<P: AsRef<Path>>(path: &P, encoding: XRayEncoding) -> XrfResult<Self> {
     match File::open(path.as_ref()) {
       Ok(file) => Ok(Self {
         encoding,
@@ -40,7 +40,7 @@ impl ArchiveReader {
         section_regex: Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap(),
         variable_regex: Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap(),
       }),
-      Err(error) => Err(XRayError::new_read_error(format!(
+      Err(error) => Err(XrfError::new_read_error(format!(
         "Failed to read archive file {}, {}",
         path.as_ref().display(),
         error
@@ -49,7 +49,7 @@ impl ArchiveReader {
   }
 
   /// Create chunk based on whole file.
-  pub fn from_path_utf8<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn from_path_utf8<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Self::from_path(path, get_utf8_encoder())
   }
 
@@ -58,13 +58,13 @@ impl ArchiveReader {
   /// X-Ray engine stores archive header and file names using the system ANSI
   /// codepage (windows-1251 for the original localization), so non-ASCII names
   /// are not valid UTF-8 and must be decoded accordingly.
-  pub fn from_path_windows1251<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn from_path_windows1251<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Self::from_path(path, get_windows1251_encoder())
   }
 }
 
 impl ArchiveReader {
-  pub fn read_archive(&mut self) -> XRayResult<ArchiveDescriptor> {
+  pub fn read_archive(&mut self) -> XrfResult<ArchiveDescriptor> {
     let header: ArchiveHeader = self.read_archive_header()?.unwrap();
     let metadata = self.file.metadata()?;
     let files: HashMap<String, ArchiveFileDescriptor> = header
@@ -96,7 +96,7 @@ impl ArchiveReader {
 }
 
 impl ArchiveReader {
-  fn read_archive_header(&mut self) -> XRayResult<Option<ArchiveHeader>> {
+  fn read_archive_header(&mut self) -> XrfResult<Option<ArchiveHeader>> {
     let mut file_descriptors = None;
     let mut root_path: String = String::new();
 
@@ -104,11 +104,11 @@ impl ArchiveReader {
       let raw_chunk_id: u32 = match self.file.read_u32::<XRayByteOrder>() {
         Ok(data) => data,
         Err(error) if error.kind() == UnexpectedEof => break,
-        Err(error) => return Err(XRayError::new_read_error(error.to_string())),
+        Err(error) => return Err(XrfError::new_read_error(error.to_string())),
       };
       let chunk_size: u32 = self.file.read_u32::<XRayByteOrder>()?;
       let chunk_usize: usize = usize::try_from(chunk_size)
-        .map_err(|error| XRayError::new_read_error(format!("Failed to read archive header chunk size: {}", error)))?;
+        .map_err(|error| XrfError::new_read_error(format!("Failed to read archive header chunk size: {}", error)))?;
 
       let chunk_id: u32 = raw_chunk_id & CHUNK_ID_MASK;
       let compressed: bool = (raw_chunk_id & CHUNK_ID_COMPRESSED_MASK) != 0;
@@ -146,7 +146,7 @@ impl ArchiveReader {
   }
 
   // Just Result instead of optional?
-  fn read_root_path(&self, chunk_data: &[u8]) -> XRayResult<Option<String>> {
+  fn read_root_path(&self, chunk_data: &[u8]) -> XrfResult<Option<String>> {
     // let section_regex= Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap();
     // let variable_regex= Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap();
     // let root_regex = Regex::new(r"^\$\w+?\$\\").unwrap();
@@ -176,7 +176,7 @@ impl ArchiveReader {
     Ok(None)
   }
 
-  fn read_chunk<T: Read>(file: &mut T, chunk_usize: usize, compressed: bool) -> XRayResult<Vec<u8>> {
+  fn read_chunk<T: Read>(file: &mut T, chunk_usize: usize, compressed: bool) -> XrfResult<Vec<u8>> {
     match compressed {
       true => {
         let decoded_len: u32 = file.read_u32::<XRayByteOrder>()?;
@@ -189,7 +189,7 @@ impl ArchiveReader {
 
         res
           .fill_buffer(&mut decompressed_buf)
-          .map_err(|error| XRayError::new_parsing_error(error.to_string()))?;
+          .map_err(|error| XrfError::new_parsing_error(error.to_string()))?;
 
         Ok(decompressed_buf)
       }
@@ -206,7 +206,7 @@ impl ArchiveReader {
   fn read_file_descriptors<T: Read>(
     reader: &mut T,
     encoding: XRayEncoding,
-  ) -> XRayResult<HashMap<String, ArchiveFileDescriptor>> {
+  ) -> XrfResult<HashMap<String, ArchiveFileDescriptor>> {
     let mut file_descriptors: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
     let mut name_buf: [u8; 520] = [0u8; 520];
 

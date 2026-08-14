@@ -1,18 +1,18 @@
 use quick_xml::se::Serializer;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 /// Deserialize XML into a Serde model.
 ///
 /// # Errors
 ///
 /// Returns a parsing error when the XML does not match the requested model.
-pub fn deserialize_xml<T>(input: &str) -> XRayResult<T>
+pub fn deserialize_xml<T>(input: &str) -> XrfResult<T>
 where
   T: DeserializeOwned,
 {
-  quick_xml::de::from_str(input).map_err(|error| XRayError::new_parsing_error(error.to_string()))
+  quick_xml::de::from_str(input).map_err(|error| XrfError::new_parsing_error(error.to_string()))
 }
 
 /// Serialize a Serde model as indented XML with expanded empty elements.
@@ -20,7 +20,7 @@ where
 /// # Errors
 ///
 /// Returns a serialization error when the model cannot be represented as XML.
-pub fn serialize_xml<T>(value: &T) -> XRayResult<String>
+pub fn serialize_xml<T>(value: &T) -> XrfResult<String>
 where
   T: Serialize,
 {
@@ -31,7 +31,7 @@ where
   serializer.indent(' ', 2);
   value
     .serialize(serializer)
-    .map_err(|error| XRayError::new_serialization_error(error.to_string()))?;
+    .map_err(|error| XrfError::new_serialization_error(error.to_string()))?;
 
   Ok(output)
 }
@@ -62,7 +62,7 @@ mod tests {
 
   #[test]
   fn returns_an_error_for_invalid_xml() {
-    let result: XRayResult<Fixture> = deserialize_xml("<root>");
+    let result: XrfResult<Fixture> = deserialize_xml("<root>");
 
     assert!(result.is_err());
   }

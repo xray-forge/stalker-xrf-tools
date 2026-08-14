@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 /// Stringify provided vector as comma-separated values.
 #[inline]
@@ -16,13 +16,13 @@ pub fn vector_to_string_sep<T: ToString>(slice: &[T], sep: &str) -> String {
 
 /// Parse vector of values from string.
 #[inline]
-pub fn vector_from_string<T: FromStr>(string: &str) -> XRayResult<Vec<T>> {
+pub fn vector_from_string<T: FromStr>(string: &str) -> XrfResult<Vec<T>> {
   vector_from_string_sep(string, ",")
 }
 
 /// Parse vector of values from string with separator.
 #[inline]
-pub fn vector_from_string_sep<T: FromStr>(string: &str, sep: &str) -> XRayResult<Vec<T>> {
+pub fn vector_from_string_sep<T: FromStr>(string: &str, sep: &str) -> XrfResult<Vec<T>> {
   let source: &str = string.trim();
 
   if source.is_empty() {
@@ -35,7 +35,7 @@ pub fn vector_from_string_sep<T: FromStr>(string: &str, sep: &str) -> XRayResult
     vector.push(match T::from_str(it.trim()) {
       Ok(value) => value,
       _ => {
-        return Err(XRayError::new_parsing_error(format!(
+        return Err(XrfError::new_parsing_error(format!(
           "Failed to parse vector from string value \"{}\"",
           it
         )));
@@ -48,19 +48,19 @@ pub fn vector_from_string_sep<T: FromStr>(string: &str, sep: &str) -> XRayResult
 
 /// Read vector of values from serialized by comma string.
 #[inline]
-pub fn vector_from_string_sized<T: FromStr>(string: &str, size: usize) -> XRayResult<Vec<T>> {
+pub fn vector_from_string_sized<T: FromStr>(string: &str, size: usize) -> XrfResult<Vec<T>> {
   vector_from_string_sep_sized(string, ",", size)
 }
 
 /// Read vector of values from serialized by separator string.
 #[inline]
-pub fn vector_from_string_sep_sized<T: FromStr>(string: &str, sep: &str, size: usize) -> XRayResult<Vec<T>> {
+pub fn vector_from_string_sep_sized<T: FromStr>(string: &str, sep: &str, size: usize) -> XrfResult<Vec<T>> {
   let vector: Vec<T> = vector_from_string_sep(string, sep)?;
 
   if vector.len() == size {
     Ok(vector)
   } else {
-    Err(XRayError::new_parsing_error(format!(
+    Err(XrfError::new_parsing_error(format!(
       "Failed to parse sized vector from string, not matching size ({} instead of {})",
       vector.len(),
       size
@@ -70,7 +70,7 @@ pub fn vector_from_string_sep_sized<T: FromStr>(string: &str, sep: &str, size: u
 
 #[cfg(test)]
 mod tests {
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::{
     vector_from_string, vector_from_string_sep, vector_from_string_sep_sized, vector_from_string_sized,
@@ -78,7 +78,7 @@ mod tests {
   };
 
   #[test]
-  fn test_vector_to_string() -> XRayResult {
+  fn test_vector_to_string() -> XrfResult {
     assert_eq!(vector_to_string(&[1, 2, 3, 4]), "1,2,3,4");
     assert_eq!(vector_to_string(&["ab", "cd", "ef", "gh"]), "ab,cd,ef,gh");
 
@@ -86,7 +86,7 @@ mod tests {
   }
 
   #[test]
-  fn test_vector_to_string_sep() -> XRayResult {
+  fn test_vector_to_string_sep() -> XrfResult {
     assert_eq!(vector_to_string_sep(&[1, 2, 3, 4], "#"), "1#2#3#4");
     assert_eq!(vector_to_string_sep(&["ab", "cd", "ef", "gh"], "$"), "ab$cd$ef$gh");
 
@@ -94,7 +94,7 @@ mod tests {
   }
 
   #[test]
-  fn test_vector_from_string() -> XRayResult {
+  fn test_vector_from_string() -> XrfResult {
     assert_eq!(vector_from_string::<i32>("1,2,3,4")?, [1, 2, 3, 4]);
     assert_eq!(
       vector_from_string::<f32>("1,2.5,-33,4.0")?,
@@ -106,7 +106,7 @@ mod tests {
   }
 
   #[test]
-  fn test_vector_from_string_sep() -> XRayResult {
+  fn test_vector_from_string_sep() -> XrfResult {
     assert_eq!(vector_from_string_sep::<i32>("1#2#3#4", "#")?, [1, 2, 3, 4]);
     assert_eq!(
       vector_from_string_sep::<f32>("1$2.5$-33$4.0", "$")?,
@@ -118,7 +118,7 @@ mod tests {
   }
 
   #[test]
-  fn test_vector_from_string_sized() -> XRayResult {
+  fn test_vector_from_string_sized() -> XrfResult {
     assert_eq!(vector_from_string_sized::<i32>("1,2,3,4", 4)?, [1, 2, 3, 4]);
     assert_eq!(
       vector_from_string_sized::<f32>("1,2.5,-33,4.0,76", 5)?,
@@ -140,7 +140,7 @@ mod tests {
   }
 
   #[test]
-  fn test_vector_from_string_sep_sized() -> XRayResult {
+  fn test_vector_from_string_sep_sized() -> XrfResult {
     assert_eq!(vector_from_string_sep_sized::<i32>("1#2#3#4", "#", 4)?, [1, 2, 3, 4]);
     assert_eq!(
       vector_from_string_sep_sized::<f32>("1$2.5$-33$4.0$45", "$", 5)?,

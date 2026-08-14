@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -119,9 +119,9 @@ impl FilterOmfMotionsCommand {
     names: &[String],
     prefixes: &[String],
     is_dry_run: bool,
-  ) -> XRayResult {
+  ) -> XrfResult {
     if names.is_empty() && prefixes.is_empty() {
-      return Err(XRayError::new_invalid_error(
+      return Err(XrfError::new_invalid_error(
         "Expected at least one of --keep or --keep-prefix to be provided",
       ));
     }
@@ -136,7 +136,7 @@ impl FilterOmfMotionsCommand {
     let retained_count: usize = original_count - removed_count;
 
     if retained_count == 0 {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Refused to filter {}, no motion matched the provided filters, {original_count} motions available",
         path.display()
       )));

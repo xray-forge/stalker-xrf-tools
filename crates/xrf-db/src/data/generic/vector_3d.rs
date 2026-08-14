@@ -4,7 +4,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Display)]
@@ -24,7 +24,7 @@ impl Vector3d<f32> {
 
 impl ChunkReadWrite for Vector3d<f32> {
   /// Read vector coordinates from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       x: reader.read_f32::<T>()?,
       y: reader.read_f32::<T>()?,
@@ -33,7 +33,7 @@ impl ChunkReadWrite for Vector3d<f32> {
   }
 
   /// Write vector coordinates into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_f32::<T>(self.x)?;
     writer.write_f32::<T>(self.y)?;
     writer.write_f32::<T>(self.z)?;
@@ -49,13 +49,13 @@ impl From<(f32, f32, f32)> for Vector3d<f32> {
 }
 
 impl FromStr for Vector3d<f32> {
-  type Err = XRayError;
+  type Err = XrfError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = string.split(',').collect();
 
     if parts.len() != 3 {
-      return Err(XRayError::new_parsing_error(
+      return Err(XrfError::new_parsing_error(
         "Failed to parse 3d vector from string, expected 3 numbers",
       ));
     }
@@ -64,15 +64,15 @@ impl FromStr for Vector3d<f32> {
       x: parts[0]
         .trim()
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error("Failed to parse vector X value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse vector X value")))?,
       y: parts[1]
         .trim()
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error("Failed to parse vector Y value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse vector Y value")))?,
       z: parts[2]
         .trim()
         .parse::<f32>()
-        .or(Err(XRayError::new_parsing_error("Failed to parse vector Z value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse vector Z value")))?,
     })
   }
 }
@@ -96,7 +96,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
@@ -107,7 +107,7 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -139,7 +139,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> XRayResult {
+  fn test_from_to_str() -> XrfResult {
     let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,
@@ -153,7 +153,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: Vector3d = Vector3d {
       x: 10.5,
       y: 20.7,

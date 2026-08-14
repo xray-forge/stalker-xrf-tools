@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::Ltx;
 use crate::file::file_configuration::constants::{LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME};
@@ -31,7 +31,7 @@ pub struct LtxProject {
 
 impl LtxProject {
   /// Initialize project on provided root.
-  pub fn open_at_path_opt<P: AsRef<Path>>(root: P, options: LtxProjectOptions) -> XRayResult<Self> {
+  pub fn open_at_path_opt<P: AsRef<Path>>(root: P, options: LtxProjectOptions) -> XrfResult<Self> {
     let mut ltx_files: Vec<PathBuf> = Vec::new();
     let mut ltx_scheme_files: Vec<PathBuf> = Vec::new();
     let mut included: Vec<PathBuf> = Vec::new();
@@ -47,7 +47,7 @@ impl LtxProject {
         let parent: &Path = match entry_path.parent() {
           Some(parent) => parent,
           None => {
-            return Err(XRayError::new_convert_error(
+            return Err(XrfError::new_convert_error(
               "Failed to parse parent directory of ltx file.",
             ));
           }
@@ -93,7 +93,7 @@ impl LtxProject {
 
     // Prepare big message with list of files referenced in case-insensitive check.
     if !ltx_file_entries_failures.is_empty() {
-      return Err(XRayError::new_convert_error(format!(
+      return Err(XrfError::new_convert_error(format!(
         "Cannot read LTX project safely, detected case-insensitive #include statements:\n{}",
         ltx_file_entries_failures
           .iter()
@@ -128,7 +128,7 @@ impl LtxProject {
   }
 
   /// Initialize project on provided root with default options.
-  pub fn open_at_path<P: AsRef<Path>>(root: P) -> XRayResult<Self> {
+  pub fn open_at_path<P: AsRef<Path>>(root: P) -> XrfResult<Self> {
     Self::open_at_path_opt(root, Default::default())
   }
 }
@@ -147,7 +147,7 @@ impl LtxProject {
     self.root.join("system.ltx")
   }
 
-  pub fn get_system_ltx(&self) -> XRayResult<Ltx> {
+  pub fn get_system_ltx(&self) -> XrfResult<Ltx> {
     Ltx::read_from_file_full(self.get_system_ltx_path())
   }
 }
@@ -157,12 +157,12 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use super::LtxProject;
 
   #[test]
-  fn does_not_treat_wildcard_included_files_as_entries() -> XRayResult {
+  fn does_not_treat_wildcard_included_files_as_entries() -> XrfResult {
     let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-wildcard-project-{}", std::process::id()));
     let sections: PathBuf = root.join("sections");
 

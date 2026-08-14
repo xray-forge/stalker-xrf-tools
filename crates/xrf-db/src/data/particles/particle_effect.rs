@@ -4,7 +4,7 @@ use xrf_chunk::{
   ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
   read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
 };
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
 
@@ -87,7 +87,7 @@ impl ParticleEffect {
 impl ChunkReadWrite for ParticleEffect {
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children()?;
 
     let effect: Self = {
@@ -95,32 +95,32 @@ impl ChunkReadWrite for ParticleEffect {
         version: read_u16_chunk::<T>(
           &mut find_optional_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID).expect("Particle name chunk not found"),
         )
-        .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle version chunk: {}", error)))?,
+        .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle version chunk: {}", error)))?,
         name: read_w1251_string_chunk(
           &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID).expect("Particle name chunk not found"),
         )
-        .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle name chunk: {}", error)))?,
+        .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle name chunk: {}", error)))?,
         max_particles: read_u32_chunk::<T>(
           &mut find_optional_chunk_by_id(&chunks, Self::MAX_PARTICLES_CHUNK_ID)
             .expect("Particle max particles chunk not found"),
         )
         .map_err(|error| {
-          XRayError::new_parsing_error(format!("Failed to read particle max_particles chunk: {}", error))
+          XrfError::new_parsing_error(format!("Failed to read particle max_particles chunk: {}", error))
         })?,
         actions: find_required_chunk_by_id(&chunks, Self::ACTION_LIST_CHUNK_ID)?
           .read_xr_list::<T, _>()
-          .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle actions chunk: {}", error)))?,
+          .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle actions chunk: {}", error)))?,
         flags: read_u32_chunk::<T>(
           &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID).expect("Particle flags chunk not found"),
         )
-        .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle flags chunk: {}", error)))?,
+        .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle flags chunk: {}", error)))?,
         frame: find_optional_chunk_by_id(&chunks, Self::FRAME_CHUNK_ID).map(|mut it| {
           it.read_xr::<T, _>()
             .expect("Invalid frame chunk data in particle effect")
         }),
         sprite: find_required_chunk_by_id(&chunks, Self::SPRITE_CHUNK_ID)?
           .read_xr::<T, _>()
-          .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error)))?,
+          .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error)))?,
         time_limit: find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)
           .map(|mut it| read_f32_chunk::<T>(&mut it).expect("Invalid frame time limit chunk data in particle effect")),
         collision: find_optional_chunk_by_id(&chunks, Self::COLLISION_CHUNK_ID).map(|mut it| {
@@ -154,7 +154,7 @@ impl ChunkReadWrite for ParticleEffect {
   }
 
   /// Write particle effect data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -227,9 +227,9 @@ impl ChunkReadWrite for ParticleEffect {
 
 impl LtxImportExport for ParticleEffect {
   /// Import particle effect data from provided path.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle effect section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -258,7 +258,7 @@ impl LtxImportExport for ParticleEffect {
       }
 
       if action_index >= Self::EFFECT_ACTIONS_LIMIT {
-        return Err(XRayError::new_parsing_error(
+        return Err(XrfError::new_parsing_error(
           "Failed to parse particle effect - reached maximum nested actions limit",
         ));
       }
@@ -282,7 +282,7 @@ impl LtxImportExport for ParticleEffect {
   }
 
   /// Export particle effect data into provided path.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -325,7 +325,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -348,7 +348,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -429,7 +429,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
     let original: ParticleEffect = ParticleEffect {
@@ -493,7 +493,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: ParticleEffect = ParticleEffect {
       version: 1,
       name: String::from("test-particle-effect"),

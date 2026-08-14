@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba};
 use path_absolutize::*;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::constants::{
   DDS_EXTENSION, EXTENSIONS_DIRECTORY, LTX_PATH_EXTENSION_MARKER, LTX_PATH_EXTENSION_MARKER_PREFIX,
@@ -18,7 +18,7 @@ use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_im
 pub struct PackEquipmentProcessor {}
 
 impl PackEquipmentProcessor {
-  pub fn pack_sprites(options: PackEquipmentOptions) -> XRayResult<PackEquipmentResult> {
+  pub fn pack_sprites(options: PackEquipmentOptions) -> XrfResult<PackEquipmentResult> {
     let started_at: Instant = Instant::now();
 
     let mut count: u32 = 0;
@@ -132,12 +132,12 @@ impl PackEquipmentProcessor {
   }
 
   /// Fail once with every section that declares inventory grid coordinates but has no icon to pack.
-  fn assert_every_section_has_an_icon(options: &PackEquipmentOptions, skipped_sections: &[&str]) -> XRayResult {
+  fn assert_every_section_has_an_icon(options: &PackEquipmentOptions, skipped_sections: &[&str]) -> XrfResult {
     if !options.is_strict || skipped_sections.is_empty() {
       return Ok(());
     }
 
-    Err(XRayError::new_texture_processing_error(format!(
+    Err(XrfError::new_texture_processing_error(format!(
       "Expected an icon to exist for each of the {} sections declaring inv_grid_* fields, found none for: {}",
       skipped_sections.len(),
       skipped_sections.join(", ")
@@ -168,7 +168,7 @@ impl PackEquipmentProcessor {
   }
 
   /// Read rescaled png or dds icon to inject into one large equipment file.
-  pub fn read_sprite_from_path(path: &Path, width: u32, height: u32) -> XRayResult<DynamicImage> {
+  pub fn read_sprite_from_path(path: &Path, width: u32, height: u32) -> XrfResult<DynamicImage> {
     let image: DynamicImage = if path.extension().is_some_and(|extension| extension.eq(PNG_EXTENSION)) {
       ImageReader::open(path)?.decode()?
     } else {

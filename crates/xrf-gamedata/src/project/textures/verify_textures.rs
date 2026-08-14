@@ -6,7 +6,7 @@ use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{ThmFile, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::GamedataFindingFactory;
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;
@@ -16,7 +16,7 @@ impl GamedataProject {
   pub fn verify_textures(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataTexturesVerificationResult> {
+  ) -> XrfResult<GamedataTexturesVerificationResult> {
     xrf_output::heading!(options.output, "Verify textures:");
 
     let started_at: Instant = Instant::now();
@@ -28,7 +28,7 @@ impl GamedataProject {
       .collect();
 
     let checked_textures_count: u32 = u32::try_from(texture_paths.len())
-      .map_err(|_| XRayError::new_verify_error("Texture count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Texture count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = texture_paths
       .par_iter()
@@ -75,11 +75,11 @@ impl GamedataProject {
       .collect();
 
     let invalid_textures_count: u32 = u32::try_from(findings.len())
-      .map_err(|_| XRayError::new_verify_error("Invalid texture count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Invalid texture count exceeds the supported result range"))?;
 
     let (bump_findings, checked_bumps_count) = self.verify_texture_bumps(options)?;
     let unresolved_bumps_count: u32 = u32::try_from(bump_findings.len())
-      .map_err(|_| XRayError::new_verify_error("Unresolved bump count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Unresolved bump count exceeds the supported result range"))?;
 
     findings.extend(bump_findings);
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
@@ -117,7 +117,7 @@ impl GamedataProject {
   /// keeps pointing into the source layout.
   ///
   /// Returns the findings and how many descriptors declared a bump at all.
-  fn verify_texture_bumps(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<(Vec<Finding>, u32)> {
+  fn verify_texture_bumps(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<(Vec<Finding>, u32)> {
     let descriptor_paths: Vec<String> = self
       .assets
       .with_type(AssetType::Thm)
@@ -148,7 +148,7 @@ impl GamedataProject {
       .collect();
 
     let checked_bumps_count: u32 = u32::try_from(declarations.len())
-      .map_err(|_| XRayError::new_verify_error("Declared bump count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Declared bump count exceeds the supported result range"))?;
 
     let findings: Vec<Finding> = declarations
       .par_iter()
@@ -173,11 +173,11 @@ impl GamedataProject {
     Ok((findings, checked_bumps_count))
   }
 
-  pub fn verify_texture_by_path(&self, options: &GamedataProjectVerifyOptions, path: &Path) -> XRayResult<bool> {
+  pub fn verify_texture_by_path(&self, options: &GamedataProjectVerifyOptions, path: &Path) -> XrfResult<bool> {
     self.verify_texture(
       options,
       &Dds::read(&mut File::open(path)?).map_err(|error| {
-        XRayError::new_verify_error(format!(
+        XrfError::new_verify_error(format!(
           "Failed to read texture by path {}, error: {}",
           path.display(),
           error
@@ -186,7 +186,7 @@ impl GamedataProject {
     )
   }
 
-  pub fn verify_texture(&self, _options: &GamedataProjectVerifyOptions, dds: &Dds) -> XRayResult<bool> {
+  pub fn verify_texture(&self, _options: &GamedataProjectVerifyOptions, dds: &Dds) -> XrfResult<bool> {
     let mut is_valid: bool = true;
 
     if let Some(header10) = &dds.header10 {

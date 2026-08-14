@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_length;
 
@@ -18,7 +18,7 @@ pub struct PatrolLink {
 
 impl ChunkReadWriteList for PatrolLink {
   /// Read links from chunk file.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
     let mut links: Vec<Self> = Vec::new();
 
     while reader.has_data() {
@@ -31,7 +31,7 @@ impl ChunkReadWriteList for PatrolLink {
   }
 
   /// Write list patrol links into chunk writer.
-  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XRayResult {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XrfResult {
     for link in list {
       link.write::<T>(writer)?;
     }
@@ -42,7 +42,7 @@ impl ChunkReadWriteList for PatrolLink {
 
 impl ChunkReadWrite for PatrolLink {
   /// Read patrol link from chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let index: u32 = reader.read_u32::<T>()?;
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -65,7 +65,7 @@ impl ChunkReadWrite for PatrolLink {
   }
 
   /// Write patrol link data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.index)?;
     writer.write_u32::<T>(self.links.len() as u32)?;
 
@@ -80,9 +80,9 @@ impl ChunkReadWrite for PatrolLink {
 
 impl LtxImportExport for PatrolLink {
   /// Import patrol point link from ltx config.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Patrol point link section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -107,7 +107,7 @@ impl LtxImportExport for PatrolLink {
   }
 
   /// Export patrol link data into ltx.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("index", self.index.to_string())
@@ -132,7 +132,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -145,7 +145,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -177,7 +177,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> XRayResult {
+  fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -215,7 +215,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
@@ -237,7 +237,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: PatrolLink = PatrolLink {
       index: 1000,
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],

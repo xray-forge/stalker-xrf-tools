@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_equal;
 
 use crate::omf::omf_file::OmfFile;
@@ -18,7 +18,7 @@ impl OmfMotionsProcessor {
   /// identity relation the game files rely on.
   ///
   /// Returns the count of removed motions.
-  pub fn retain_motions(file: &mut OmfFile, predicate: impl Fn(&str) -> bool) -> XRayResult<usize> {
+  pub fn retain_motions(file: &mut OmfFile, predicate: impl Fn(&str) -> bool) -> XrfResult<usize> {
     Self::assert_motions_are_paired(file, "filtering")?;
 
     let retained: Vec<bool> = file.parameters.motions.iter().map(|it| predicate(&it.name)).collect();
@@ -40,7 +40,7 @@ impl OmfMotionsProcessor {
 
     for (ordinal, definition) in file.parameters.motions.iter_mut().enumerate() {
       definition.motion = u16::try_from(ordinal)
-        .map_err(|_| XRayError::new_invalid_error("Motions count exceeds the supported range after filtering"))?;
+        .map_err(|_| XrfError::new_invalid_error("Motions count exceeds the supported range after filtering"))?;
     }
 
     Ok(removed_count)
@@ -52,7 +52,7 @@ impl OmfMotionsProcessor {
   /// are updated, because the engine asserts the two match at the same ordinal.
   ///
   /// Returns the count of renamed motions.
-  pub fn rename_motions(file: &mut OmfFile, renames: &HashMap<String, String>) -> XRayResult<usize> {
+  pub fn rename_motions(file: &mut OmfFile, renames: &HashMap<String, String>) -> XrfResult<usize> {
     Self::assert_motions_are_paired(file, "renaming")?;
 
     let mut renamed_count: usize = 0;
@@ -77,7 +77,7 @@ impl OmfMotionsProcessor {
   /// Both the definition and the keyframe payload are duplicated rather than aliased, because the
   /// rest of this processor treats the two lists as ordinal pairs and a definition without a
   /// payload would break every later filter or rename.
-  pub fn duplicate_motion(file: &mut OmfFile, from: &str, to: &str, play_once: bool) -> XRayResult {
+  pub fn duplicate_motion(file: &mut OmfFile, from: &str, to: &str, play_once: bool) -> XrfResult {
     Self::assert_motions_are_paired(file, "duplicating")?;
 
     let index: usize = file
@@ -85,7 +85,7 @@ impl OmfMotionsProcessor {
       .motions
       .iter()
       .position(|it| it.name == from)
-      .ok_or_else(|| XRayError::new_not_found_error(format!("Motion '{from}' was not found in the omf file")))?;
+      .ok_or_else(|| XrfError::new_not_found_error(format!("Motion '{from}' was not found in the omf file")))?;
 
     let mut definition = file.parameters.motions[index].clone();
     let mut motion = file.motions.motions[index].clone();
@@ -99,7 +99,7 @@ impl OmfMotionsProcessor {
 
     // The definition addresses its payload by ordinal, so the copy must point at its own new slot.
     definition.motion = u16::try_from(file.parameters.motions.len())
-      .map_err(|_| XRayError::new_invalid_error("Motions count exceeds the supported range after duplication"))?;
+      .map_err(|_| XrfError::new_invalid_error("Motions count exceeds the supported range after duplication"))?;
 
     file.parameters.motions.push(definition);
     file.motions.motions.push(motion);
@@ -110,7 +110,7 @@ impl OmfMotionsProcessor {
   }
 
   /// Guard that definitions and payloads can be treated as ordinal pairs.
-  fn assert_motions_are_paired(file: &OmfFile, operation: &str) -> XRayResult {
+  fn assert_motions_are_paired(file: &OmfFile, operation: &str) -> XrfResult {
     assert_equal(
       file.parameters.motions.len(),
       file.motions.motions.len(),
@@ -119,12 +119,12 @@ impl OmfMotionsProcessor {
   }
 
   /// Guard that no two motions share a name, which would make one of them unreachable.
-  fn assert_motion_names_are_unique(file: &OmfFile) -> XRayResult {
+  fn assert_motion_names_are_unique(file: &OmfFile) -> XrfResult {
     let mut seen: HashSet<&str> = HashSet::new();
 
     for definition in &file.parameters.motions {
       if !seen.insert(&definition.name) {
-        return Err(XRayError::new_invalid_error(format!(
+        return Err(XrfError::new_invalid_error(format!(
           "Motion name '{}' is duplicated, motion names must be unique within a file",
           definition.name
         )));
@@ -139,7 +139,7 @@ impl OmfMotionsProcessor {
 mod tests {
   use std::collections::HashMap;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::data::ogf::ogf_motion::OgfMotion;
   use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
@@ -185,7 +185,7 @@ mod tests {
   }
 
   #[test]
-  fn test_retain_motions_filters_both_lists_and_reindexes() -> XRayResult {
+  fn test_retain_motions_filters_both_lists_and_reindexes() -> XrfResult {
     let mut file: OmfFile = new_named_mock(&["ak_74_draw", "aek_draw", "ak_74_idle", "akm_idle"]);
 
     assert_eq!(
@@ -214,7 +214,7 @@ mod tests {
   }
 
   #[test]
-  fn test_retain_motions_keeps_payload_paired_with_definition() -> XRayResult {
+  fn test_retain_motions_keeps_payload_paired_with_definition() -> XrfResult {
     let mut file: OmfFile = new_named_mock(&["first", "second", "third"]);
 
     file.motions.motions[1].remaining = vec![42];
@@ -231,7 +231,7 @@ mod tests {
   }
 
   #[test]
-  fn test_rename_motions_updates_definitions_and_payloads() -> XRayResult {
+  fn test_rename_motions_updates_definitions_and_payloads() -> XrfResult {
     let mut file: OmfFile = new_named_mock(&["ak_74_draw", "ak_74_idle_move"]);
 
     let renames: HashMap<String, String> = HashMap::from([
@@ -257,7 +257,7 @@ mod tests {
   }
 
   #[test]
-  fn test_rename_motions_leaves_unmapped_names() -> XRayResult {
+  fn test_rename_motions_leaves_unmapped_names() -> XrfResult {
     let mut file: OmfFile = new_named_mock(&["ak_74_draw", "ak_74_idle"]);
 
     let renames: HashMap<String, String> = HashMap::from([(String::from("ak_74_draw"), String::from("ak74_draw"))]);
@@ -281,7 +281,7 @@ mod tests {
   }
 
   #[test]
-  fn test_duplicate_motion_copies_both_lists_and_points_at_its_own_payload() -> XRayResult {
+  fn test_duplicate_motion_copies_both_lists_and_points_at_its_own_payload() -> XrfResult {
     let mut file: OmfFile = new_named_mock(&["pm_idle", "pm_shoot"]);
 
     OmfMotionsProcessor::duplicate_motion(&mut file, "pm_idle", "pm_idle_bore", false)?;
@@ -297,7 +297,7 @@ mod tests {
   }
 
   #[test]
-  fn test_duplicate_motion_can_clear_looping() -> XRayResult {
+  fn test_duplicate_motion_can_clear_looping() -> XrfResult {
     let mut file: OmfFile = new_named_mock(&["pm_idle"]);
 
     // Start from a looping motion, which is what a real idle is.

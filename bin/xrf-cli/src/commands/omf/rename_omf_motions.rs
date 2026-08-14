@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{OmfFile, OmfMotionsProcessor, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -112,7 +112,7 @@ impl RenameOmfMotionsCommand {
     map_path: &Path,
     is_strict: bool,
     is_dry_run: bool,
-  ) -> XRayResult {
+  ) -> XrfResult {
     let renames: HashMap<String, String> = Self::read_map(map_path)?;
     let mut omf_file: Box<OmfFile> = Box::new(OmfFile::read_from_path::<XRayByteOrder, _>(&path)?);
 
@@ -123,7 +123,7 @@ impl RenameOmfMotionsCommand {
     let renamed_count: usize = OmfMotionsProcessor::rename_motions(&mut omf_file, &renames)?;
 
     if renamed_count == 0 {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Refused to rename {}, no motion matched the provided map",
         path.display()
       )));
@@ -156,16 +156,16 @@ impl RenameOmfMotionsCommand {
   }
 
   /// Read the old name to new name map from provided JSON file.
-  fn read_map(map_path: &Path) -> XRayResult<HashMap<String, String>> {
+  fn read_map(map_path: &Path) -> XrfResult<HashMap<String, String>> {
     let content: String = fs::read_to_string(map_path).map_err(|error| {
-      XRayError::new_not_found_error(format!(
+      XrfError::new_not_found_error(format!(
         "Motions rename map was not read: {}, error: {error}",
         map_path.display()
       ))
     })?;
 
     serde_json::from_str(&content).map_err(|error| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Motions rename map is not a valid JSON object of string to string: {}, error: {error}",
         map_path.display()
       ))
@@ -173,7 +173,7 @@ impl RenameOmfMotionsCommand {
   }
 
   /// Guard that every motion in the file has an entry in the map.
-  fn assert_map_covers_all_motions(path: &Path, omf_file: &OmfFile, renames: &HashMap<String, String>) -> XRayResult {
+  fn assert_map_covers_all_motions(path: &Path, omf_file: &OmfFile, renames: &HashMap<String, String>) -> XrfResult {
     let uncovered: Vec<&str> = omf_file
       .get_motion_names()
       .into_iter()
@@ -181,7 +181,7 @@ impl RenameOmfMotionsCommand {
       .collect();
 
     if !uncovered.is_empty() {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Refused to rename {} in strict mode, {} motions are missing from the map: {}",
         path.display(),
         uncovered.len(),

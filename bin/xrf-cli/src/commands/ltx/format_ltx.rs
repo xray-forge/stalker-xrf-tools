@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 use xrf_ltx::{LTX_EXTENSION, LtxFilesFormatter, LtxFormatOptions, LtxProjectFormatResult};
 use xrf_output::OutputOptions;
 
@@ -83,7 +83,7 @@ impl GenericCommand for FormatLtxCommand {
       let result: LtxProjectFormatResult = LtxFilesFormatter::check_format_opt(&files, options)?;
 
       if result.invalid_files > 0 {
-        return Err(XRayError::new_verify_error("Project includes LTX files with invalid format").into());
+        return Err(XrfError::new_verify_error("Project includes LTX files with invalid format").into());
       }
     } else {
       LtxFilesFormatter::format_opt(&files, options)?;
@@ -98,7 +98,7 @@ impl FormatLtxCommand {
   ///
   /// Folders are walked recursively for `*.ltx` entries, while explicitly provided files are taken
   /// as is - so callers can format an arbitrary subset without matching the folder extension rules.
-  fn collect_ltx_files(paths: &[&PathBuf]) -> Result<Vec<PathBuf>, XRayError> {
+  fn collect_ltx_files(paths: &[&PathBuf]) -> Result<Vec<PathBuf>, XrfError> {
     let mut files: Vec<PathBuf> = Vec::new();
     let mut visited: HashSet<PathBuf> = HashSet::new();
 
@@ -122,7 +122,7 @@ impl FormatLtxCommand {
           files.push((*path).clone());
         }
       } else {
-        return Err(XRayError::new_not_found_error(format!(
+        return Err(XrfError::new_not_found_error(format!(
           "Failed to format ltx, provided path does not exist: {}",
           path.display()
         )));
@@ -138,12 +138,12 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use super::FormatLtxCommand;
   use crate::generic_command::{CommandResult, GenericCommand};
 
-  fn create_root(name: &str) -> XRayResult<PathBuf> {
+  fn create_root(name: &str) -> XrfResult<PathBuf> {
     let root: PathBuf = std::env::temp_dir().join(format!("xrf-cli-format-ltx-{name}-{}", std::process::id()));
 
     if root.exists() {
@@ -156,7 +156,7 @@ mod tests {
   }
 
   #[test]
-  fn collects_ltx_files_from_folder_recursively() -> XRayResult {
+  fn collects_ltx_files_from_folder_recursively() -> XrfResult {
     let root: PathBuf = create_root("folder")?;
     let nested: PathBuf = root.join("nested");
 
@@ -177,7 +177,7 @@ mod tests {
   }
 
   #[test]
-  fn collects_explicitly_provided_files_regardless_of_extension() -> XRayResult {
+  fn collects_explicitly_provided_files_regardless_of_extension() -> XrfResult {
     let root: PathBuf = create_root("explicit")?;
     let ltx: PathBuf = root.join("first.ltx");
     let ini: PathBuf = root.join("second.ini");
@@ -195,7 +195,7 @@ mod tests {
   }
 
   #[test]
-  fn de_duplicates_mixed_folder_and_file_paths() -> XRayResult {
+  fn de_duplicates_mixed_folder_and_file_paths() -> XrfResult {
     let root: PathBuf = create_root("mixed")?;
     let first: PathBuf = root.join("first.ltx");
 
@@ -214,7 +214,7 @@ mod tests {
   }
 
   #[test]
-  fn fails_on_missing_path() -> XRayResult {
+  fn fails_on_missing_path() -> XrfResult {
     let root: PathBuf = create_root("missing")?;
     let missing: PathBuf = root.join("absent.ltx");
 

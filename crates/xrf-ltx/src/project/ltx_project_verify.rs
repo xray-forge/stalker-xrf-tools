@@ -3,7 +3,7 @@ use std::time::Instant;
 
 use fxhash::FxBuildHasher;
 use indexmap::IndexSet;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SYMBOL_ANY};
 use crate::project::ltx_verify_options::LtxVerifyOptions;
@@ -14,7 +14,7 @@ impl LtxProject {
   /// Make sure that:
   /// - All included files exist or `.ts` counterpart is declared
   /// - All the inherited sections are valid and declared before inherit attempt
-  pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> XRayResult<LtxProjectVerifyResult> {
+  pub fn verify_entries_opt(&self, options: LtxVerifyOptions) -> XrfResult<LtxProjectVerifyResult> {
     let mut result: LtxProjectVerifyResult = LtxProjectVerifyResult::new();
     let started_at: Instant = Instant::now();
 
@@ -67,10 +67,10 @@ impl LtxProject {
 
                 if let Some(error) = field_definition.validate_value(&ltx, value) {
                   match error {
-                    XRayError::LtxScheme { message, .. } => {
+                    XrfError::LtxScheme { message, .. } => {
                       section_has_error = true;
 
-                      result.errors.push(XRayError::new_scheme_error_at(
+                      result.errors.push(XrfError::new_scheme_error_at(
                         section_name,
                         field_name,
                         message,
@@ -83,7 +83,7 @@ impl LtxProject {
               } else if scheme_definition.is_strict {
                 section_has_error = true;
 
-                result.errors.push(XRayError::new_scheme_error_at(
+                result.errors.push(XrfError::new_scheme_error_at(
                   section_name,
                   field_name,
                   "Unexpected field, definition is required in strict mode",
@@ -97,7 +97,7 @@ impl LtxProject {
                 if !definition.is_optional && field_name != LTX_SYMBOL_ANY && !validated.contains(field_name) {
                   section_has_error = true;
 
-                  result.errors.push(XRayError::new_scheme_error_at(
+                  result.errors.push(XrfError::new_scheme_error_at(
                     section_name,
                     field_name,
                     "Required field was not provided",
@@ -109,7 +109,7 @@ impl LtxProject {
           } else {
             section_has_error = true;
 
-            result.errors.push(XRayError::new_scheme_error_at(
+            result.errors.push(XrfError::new_scheme_error_at(
               section_name,
               "*",
               format!("Required schema '{scheme_name}' definition is not found"),
@@ -155,12 +155,12 @@ impl LtxProject {
   }
 
   /// Verify all the section/field entries in current ltx project.
-  pub fn verify_entries(&self) -> XRayResult<LtxProjectVerifyResult> {
+  pub fn verify_entries(&self) -> XrfResult<LtxProjectVerifyResult> {
     self.verify_entries_opt(Default::default())
   }
 
   /// Format single LTX file by provided path
-  pub fn verify_file<P: AsRef<Path>>(path: P) -> XRayResult<()> {
+  pub fn verify_file<P: AsRef<Path>>(path: P) -> XrfResult<()> {
     Ltx::read_from_file_full(path)?;
 
     Ok(())
@@ -204,7 +204,7 @@ mod tests {
   }
 
   #[test]
-  fn skips_schema_less_sections() -> XRayResult {
+  fn skips_schema_less_sections() -> XrfResult {
     let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-project-verify-test-{}", std::process::id()));
     fs::create_dir_all(&root)?;
     fs::write(root.join("array_sections.ltx"), "[array@one]\nvalue = 1\n")?;
@@ -229,7 +229,7 @@ mod tests {
   }
 
   #[test]
-  fn skips_inheritance_for_entry_with_header_metadata() -> XRayResult {
+  fn skips_inheritance_for_entry_with_header_metadata() -> XrfResult {
     let root: PathBuf =
       std::env::temp_dir().join(format!("xrf-ltx-project-skip-inheritance-test-{}", std::process::id()));
     fs::create_dir_all(&root)?;

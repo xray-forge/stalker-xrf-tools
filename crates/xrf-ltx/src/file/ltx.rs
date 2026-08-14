@@ -1,7 +1,7 @@
 use std::ops::{Index, IndexMut};
 use std::path::PathBuf;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::file::file_section::section_entry::SectionEntry;
 use crate::file::file_section::section_setter::SectionSetter;
@@ -26,12 +26,12 @@ impl Ltx {
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_included(self) -> XRayResult<Self> {
+  pub fn into_included(self) -> XrfResult<Self> {
     LtxIncludeConvertor::convert(self)
   }
 
   /// Convert current instance of ltx file into full parsed one.
-  pub fn into_inherited(self) -> XRayResult<Self> {
+  pub fn into_inherited(self) -> XrfResult<Self> {
     LtxInheritConvertor::convert(self)
   }
 
@@ -210,7 +210,7 @@ impl<'q> IndexMut<&'q str> for Ltx {
 
 #[cfg(test)]
 mod test {
-  use xrf_error::{XRayError, XRayResult};
+  use xrf_error::{XrfError, XrfResult};
 
   use crate::file::ltx::Ltx;
   use crate::{ROOT_SECTION, Section};
@@ -218,7 +218,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_general_section() {
     let input = "[sec1]\nkey1=val1\n";
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -241,7 +241,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_input() {
     let input: &str = "";
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -254,7 +254,7 @@ mod test {
   #[test]
   fn load_from_str_with_empty_lines() {
     let input: &str = "\n\n\n";
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -267,7 +267,7 @@ mod test {
   #[test]
   fn load_from_str_with_valid_input() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar\n";
-    let opt: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let opt: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
 
@@ -291,7 +291,7 @@ mod test {
   #[test]
   fn load_from_str_without_ending_newline() {
     let input: &str = "[sec1]\nkey1=val1\nkey2=377\n[sec2]foo=bar";
-    let opt: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let opt: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(opt.is_ok());
   }
@@ -299,12 +299,12 @@ mod test {
   #[test]
   fn parse_error_numbers() {
     let invalid_input: &str = "\n\n[not_closed";
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(invalid_input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(invalid_input);
 
     assert!(ltx.is_err());
 
     match ltx.unwrap_err() {
-      XRayError::LtxParse { line, col, .. } => {
+      XrfError::LtxParse { line, col, .. } => {
         assert_eq!(line, 3);
         assert_eq!(col, 12);
       }
@@ -399,7 +399,7 @@ key = value ; comment
   }
 
   #[test]
-  fn includes_no_duplicates() -> XRayResult {
+  fn includes_no_duplicates() -> XrfResult {
     let input = "
 #include \"file1.ltx\"
 #include \"file1.ltx\"
@@ -420,7 +420,7 @@ name = hello
   }
 
   #[test]
-  fn includes_valid() -> XRayResult {
+  fn includes_valid() -> XrfResult {
     let input = "
 #include
 
@@ -428,7 +428,7 @@ name = hello
 name = hello
 ";
 
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -440,7 +440,7 @@ name = hello
   }
 
   #[test]
-  fn includes_only_ltx() -> XRayResult {
+  fn includes_only_ltx() -> XrfResult {
     let input = "
 #include \"file1.ini\"
 
@@ -448,7 +448,7 @@ name = hello
 name = hello
 ";
 
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -460,7 +460,7 @@ name = hello
   }
 
   #[test]
-  fn includes_empty() -> XRayResult {
+  fn includes_empty() -> XrfResult {
     let input = "
 #include \"\"
 
@@ -468,7 +468,7 @@ name = hello
 name = hello
 ";
 
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(
@@ -567,7 +567,7 @@ Key = 'Value   # This is not a comment ; at all'
   #[test]
   fn load_from_str_with_crlf() {
     let input: &str = "key1=val1\r\nkey2=val2\r\n";
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
@@ -684,7 +684,7 @@ a3 = n3
   }
 
   #[test]
-  fn duplicate_sections() -> XRayResult {
+  fn duplicate_sections() -> XrfResult {
     // https://github.com/zonyitoo/rust-ini/issues/49
 
     let input = r"
@@ -695,7 +695,7 @@ foo = a
 foo = c
 ";
 
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_err());
     assert_eq!(

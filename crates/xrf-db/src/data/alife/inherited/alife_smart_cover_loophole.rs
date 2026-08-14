@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -20,7 +20,7 @@ impl AlifeSmartCoverLoophole {
   }
 
   /// Read list of loopholes from string.
-  pub fn string_to_list(value: &str) -> XRayResult<Vec<Self>> {
+  pub fn string_to_list(value: &str) -> XrfResult<Vec<Self>> {
     let mut loopholes: Vec<Self> = Vec::new();
 
     for it in value.split(',').map(|it| it.trim()) {
@@ -32,12 +32,12 @@ impl AlifeSmartCoverLoophole {
           enabled: match partial.last().unwrap().parse::<u8>() {
             Ok(parsed) => parsed,
             Err(_) => {
-              return Err(XRayError::new_parsing_error("Failed to parse loophole enabled status"));
+              return Err(XrfError::new_parsing_error("Failed to parse loophole enabled status"));
             }
           },
         })
       } else {
-        return Err(XRayError::new_parsing_error(
+        return Err(XrfError::new_parsing_error(
           "Invalid value provided for loopholes parsing, ':' separated values expected",
         ));
       }

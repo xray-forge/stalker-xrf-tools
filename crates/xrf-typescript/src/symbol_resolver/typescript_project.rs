@@ -3,7 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 /// Resolves TypeScript modules using one project's compiler configuration.
 pub struct TypeScriptProject {
@@ -13,7 +13,7 @@ pub struct TypeScriptProject {
 
 impl TypeScriptProject {
   /// Discover the nearest TypeScript configuration from `source_root`.
-  pub fn discover(source_root: &Path) -> XRayResult<Self> {
+  pub fn discover(source_root: &Path) -> XrfResult<Self> {
     let config_path: Option<PathBuf> = source_root
       .ancestors()
       .map(|directory| directory.join("tsconfig.json"))
@@ -86,16 +86,16 @@ struct TypeScriptCompilerOptions {
 }
 
 /// Read the compiler options needed for native module resolution.
-fn read_typescript_config(path: &Path) -> XRayResult<TypeScriptConfig> {
+fn read_typescript_config(path: &Path) -> XrfResult<TypeScriptConfig> {
   let source: String = fs::read_to_string(path).map_err(|error| {
-    XRayError::new_invalid_error(format!(
+    XrfError::new_invalid_error(format!(
       "Failed to read TypeScript configuration '{}': {error}",
       path.display(),
     ))
   })?;
 
   serde_json::from_str(&source).map_err(|error| {
-    XRayError::new_invalid_error(format!(
+    XrfError::new_invalid_error(format!(
       "Failed to parse TypeScript configuration '{}': {error}",
       path.display(),
     ))

@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use image::{GenericImageView, RgbaImage};
 use image_dds::Mipmaps;
 use rayon::prelude::*;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::constants::DDS_EXTENSION;
 use crate::data::texture_file_descriptor::TextureFileDescriptor;
@@ -15,7 +15,7 @@ use crate::{PackDescriptionOptions, dds_to_image, read_dds_by_path, save_image_a
 pub struct UnpackDescriptionProcessor {}
 
 impl UnpackDescriptionProcessor {
-  pub fn unpack_xml_descriptions(options: PackDescriptionOptions) -> XRayResult<()> {
+  pub fn unpack_xml_descriptions(options: PackDescriptionOptions) -> XrfResult<()> {
     let description: XmlDescriptionCollection = XmlDescriptionCollection::get_descriptions(&options)?;
     let count: AtomicU32 = AtomicU32::new(0);
     let selected: Vec<&TextureFileDescriptor> = description.select_files(&options)?;
@@ -28,7 +28,7 @@ impl UnpackDescriptionProcessor {
           count.fetch_add(1, Ordering::Relaxed);
         }
 
-        Ok::<(), XRayError>(())
+        Ok::<(), XrfError>(())
       })?;
     } else {
       for file in selected {
@@ -43,13 +43,13 @@ impl UnpackDescriptionProcessor {
     Ok(())
   }
 
-  pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &TextureFileDescriptor) -> XRayResult<bool> {
+  pub fn unpack_xml_description(options: &PackDescriptionOptions, file: &TextureFileDescriptor) -> XrfResult<bool> {
     let full_name: PathBuf = options.base.join(format!("{}.{}", file.name, DDS_EXTENSION));
     let destination: PathBuf = options.output_path.join(&file.name);
 
     xrf_output::verbose!(options.output, "Unpacking {}", full_name.display());
 
-    let dds: XRayResult<RgbaImage> = read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
+    let dds: XrfResult<RgbaImage> = read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
 
     if let Ok(dds) = dds {
       if !destination.exists() {
@@ -63,7 +63,7 @@ impl UnpackDescriptionProcessor {
 
         if max_x > dds.width() || max_y > dds.height() {
           if options.is_strict {
-            return Err(XRayError::new_texture_processing_error(format!(
+            return Err(XrfError::new_texture_processing_error(format!(
               "Unexpected texture '{}' (x:{}, y:{}) boundaries are bigger than source DDS file ({}x{} - {})",
               sprite.id,
               max_x,
@@ -98,7 +98,7 @@ impl UnpackDescriptionProcessor {
 
       Ok(true)
     } else if options.is_strict {
-      Err(XRayError::new_texture_processing_error(format!(
+      Err(XrfError::new_texture_processing_error(format!(
         "Could not find file for texture unpacking: {}",
         full_name.display()
       )))

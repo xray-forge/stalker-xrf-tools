@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::data::generic::vector_3d::Vector3d;
@@ -20,7 +20,7 @@ pub struct ParticleActionDamping {
 }
 
 impl ChunkReadWrite for ParticleActionDamping {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       action_flags: reader.read_u32::<T>()?,
       action_type: reader.read_xr::<T, _>()?,
@@ -30,7 +30,7 @@ impl ChunkReadWrite for ParticleActionDamping {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.action_flags)?;
     writer.write_xr::<T, _>(&self.action_type)?;
     writer.write_xr::<T, _>(&self.damping)?;
@@ -42,9 +42,9 @@ impl ChunkReadWrite for ParticleActionDamping {
 }
 
 impl LtxImportExport for ParticleActionDamping {
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle action section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -60,7 +60,7 @@ impl LtxImportExport for ParticleActionDamping {
     })
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("action_flags", self.action_flags.to_string())
@@ -80,7 +80,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -95,7 +95,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -128,7 +128,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
@@ -152,7 +152,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: ParticleActionDamping = ParticleActionDamping {
       action_flags: 125,
       action_type: ParticleActionType::Damping,

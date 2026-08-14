@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use rayon::prelude::*;
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{OgfFile, OmfFile, ShaderLibraryFile, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::GamedataFindingFactory;
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
@@ -29,7 +29,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataMeshAssetsVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataMeshAssetsVerificationResult> {
     let options = self.options;
     let shader_library = self.shader_library;
     let mesh_paths: Vec<String> = self
@@ -40,7 +40,7 @@ impl<'a> MeshAssetsVerifier<'a> {
       .collect();
 
     let checked_meshes_count: u32 = u32::try_from(mesh_paths.len())
-      .map_err(|_| XRayError::new_verify_error("Mesh count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Mesh count exceeds the supported result range"))?;
 
     let mesh_findings: Vec<Vec<Finding>> = mesh_paths
       .par_iter()
@@ -99,7 +99,7 @@ impl<'a> MeshAssetsVerifier<'a> {
       .collect();
 
     let invalid_meshes_count: u32 = u32::try_from(mesh_findings.iter().filter(|findings| !findings.is_empty()).count())
-      .map_err(|_| XRayError::new_verify_error("Invalid mesh count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Invalid mesh count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = mesh_findings.into_iter().flatten().collect();
 
@@ -120,7 +120,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     ogf: &OgfFile,
     mesh_path: Option<&Path>,
     inherited_bones_count: Option<usize>,
-  ) -> XRayResult<Vec<Finding>> {
+  ) -> XrfResult<Vec<Finding>> {
     let bones_count: Option<usize> = ogf
       .bones
       .as_ref()
@@ -429,7 +429,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     ogf: &OgfFile,
     omf: &OmfFile,
     motion_path: Option<&Path>,
-  ) -> XRayResult<Vec<Finding>> {
+  ) -> XrfResult<Vec<Finding>> {
     let mut findings: Vec<Finding> = Vec::new();
 
     if let Some(bones) = &ogf.bones {

@@ -4,7 +4,7 @@ use std::path::Path;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_length, open_export_file};
 
@@ -27,7 +27,7 @@ impl SpawnArtefactSpawnsChunk {
 impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Reading artefacts spawns chunk: {} bytes", reader.read_bytes_remain());
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -46,7 +46,7 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
 
   /// Write artefact spawns into chunk writer.
   /// Writes artefact spawns data in binary format.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.nodes.len() as u32)?;
 
     for node in &self.nodes {
@@ -62,7 +62,7 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
 impl FileImportExport for SpawnArtefactSpawnsChunk {
   /// Import artefact spawns data from provided path.
   /// Parse ltx files and populate spawn file.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("artefact_spawns.ltx"))?;
     let mut nodes: Vec<ArtefactSpawnPoint> = Vec::with_capacity(ltx.sections.len());
 
@@ -76,7 +76,7 @@ impl FileImportExport for SpawnArtefactSpawnsChunk {
   }
 
   /// Export artefact spawns data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut ltx: Ltx = Ltx::new();
 
     for (index, spawn_point) in self.nodes.iter().enumerate() {
@@ -104,7 +104,7 @@ impl fmt::Debug for SpawnArtefactSpawnsChunk {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -116,7 +116,7 @@ mod tests {
   use crate::spawn::chunks::spawn_artefact_spawns_chunk::SpawnArtefactSpawnsChunk;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnArtefactSpawnsChunk = SpawnArtefactSpawnsChunk {

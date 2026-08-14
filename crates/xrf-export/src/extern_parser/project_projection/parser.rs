@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use super::{
   ExportContractDescriptor, ExportDescriptor, ExportParameterDescriptor, ExportReturnDescriptor,
@@ -20,7 +20,7 @@ impl ExportsProjectParser {
   }
 
   /// Scan one project and project every extern into its application-facing form.
-  pub fn parse_project_from_path<P: AsRef<Path>>(&self, path: P) -> XRayResult<ExportsProject> {
+  pub fn parse_project_from_path<P: AsRef<Path>>(&self, path: P) -> XrfResult<ExportsProject> {
     let root: &Path = path.as_ref();
     let parsed: ParsedExternManifest = ExternManifestParser::new().parse_directory(root)?;
 

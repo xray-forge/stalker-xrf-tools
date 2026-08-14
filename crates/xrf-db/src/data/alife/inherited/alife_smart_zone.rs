@@ -1,7 +1,7 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 
 use crate::data::alife::inherited::alife_object_space_restrictor::AlifeObjectSpaceRestrictor;
@@ -16,13 +16,13 @@ pub struct AlifeSmartZone {
 
 impl ChunkReadWrite for AlifeSmartZone {
   /// Read generic ALife smart zone object from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_xr::<T, _>(&self.base)?;
 
     Ok(())
@@ -31,14 +31,14 @@ impl ChunkReadWrite for AlifeSmartZone {
 
 impl LtxImportExport for AlifeSmartZone {
   /// Import generic ALife smart zone object from ltx config section.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     Ok(Self {
       base: AlifeObjectSpaceRestrictor::import(section_name, ltx)?,
     })
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     self.base.export(section_name, ltx)?;
 
     Ok(())
@@ -48,7 +48,7 @@ impl LtxImportExport for AlifeSmartZone {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -62,7 +62,7 @@ mod tests {
   use crate::data::generic::vector_3d::Vector3d;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

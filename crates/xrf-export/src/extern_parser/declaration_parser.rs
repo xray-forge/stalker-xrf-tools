@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_typescript::TypeScriptSymbolResolver;
 use xrf_typescript::ast::{expression_callee_name, expression_string_argument};
 use xrf_typescript::swc_common::{SourceMap, Spanned, comments::Comments};
@@ -40,7 +40,7 @@ impl<'a> ExternDeclarationParser<'a> {
   }
 
   /// Extract all supported top-level extern declarations from `program`.
-  pub fn parse(&self, program: &Program) -> XRayResult<Vec<ParsedExtern>> {
+  pub fn parse(&self, program: &Program) -> XrfResult<Vec<ParsedExtern>> {
     let Program::Module(module) = program else {
       return Ok(Vec::new());
     };
@@ -108,7 +108,7 @@ impl<'a> ExternDeclarationParser<'a> {
     documentation: Option<ExternDocumentation>,
     parameter_docs: &BTreeMap<String, String>,
     declarations: &mut Vec<ParsedExtern>,
-  ) -> XRayResult<()> {
+  ) -> XrfResult<()> {
     for property in &object.props {
       let Prop::KeyValue(property) = property
         .as_prop()

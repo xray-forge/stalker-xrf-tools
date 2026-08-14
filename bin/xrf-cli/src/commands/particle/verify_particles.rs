@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{ParticlesFile, XRayByteOrder};
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 
 use crate::generic_command::{CommandResult, GenericCommand};
 
@@ -66,7 +66,7 @@ impl GenericCommand for VerifyParticlesFileCommand {
       Err(error) => {
         log::error!("Provided particle file is invalid: {}", error);
 
-        Err(XRayError::new_parsing_error(format!("Verification of particle file failed: {}", error)).into())
+        Err(XrfError::new_parsing_error(format!("Verification of particle file failed: {}", error)).into())
       }
     }
   }

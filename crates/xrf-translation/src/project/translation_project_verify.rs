@@ -3,14 +3,14 @@ use std::path::{Display, Path};
 use std::time::Instant;
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::project::translation_project_verify_result::ProjectVerifyResult;
 use crate::types::TranslationJson;
 use crate::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
 
 impl TranslationProject {
-  pub fn verify_dir(dir: &Path, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {
+  pub fn verify_dir(dir: &Path, options: &ProjectVerifyOptions) -> XrfResult<ProjectVerifyResult> {
     log::info!("Verifying dir {}", dir.display());
     xrf_output::info!(options.output, "Verifying dir {}", dir.display());
 
@@ -46,7 +46,7 @@ impl TranslationProject {
     Ok(result)
   }
 
-  pub fn verify_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {
+  pub fn verify_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions) -> XrfResult<ProjectVerifyResult> {
     let extension: Option<&OsStr> = path.as_ref().extension();
 
     if let Some(extension) = extension {
@@ -61,7 +61,7 @@ impl TranslationProject {
     Ok(ProjectVerifyResult::new())
   }
 
-  pub fn verify_json_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions) -> XRayResult<ProjectVerifyResult> {
+  pub fn verify_json_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions) -> XrfResult<ProjectVerifyResult> {
     let path_display: Display = path.as_ref().display();
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
 

@@ -6,7 +6,7 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{assert_equal, open_export_file};
 
 use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
@@ -22,9 +22,9 @@ pub struct OmfFile {
 impl OmfFile {
   pub const SUPPORTED_VERSIONS: [u16; 2] = [3, 4];
 
-  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Self::read_from_file::<T>(File::open(path).map_err(|error| {
-      XRayError::new_not_found_error(format!(
+      XrfError::new_not_found_error(format!(
         "OMF file was not read: {}, error: {}",
         path.as_ref().display(),
         error
@@ -32,25 +32,25 @@ impl OmfFile {
     })?)
   }
 
-  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
 
     Self::read_from_chunks::<T>(&chunks)
   }
 
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
     assert_equal(chunks.len(), 2, "Unexpected chunks count in omf file, expected 2")?;
 
     let parameters: OmfParametersChunk = find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?
       .read_xr::<T, _>()
-      .map_err(|error| XRayError::new_read_error(format!("Failed to read OMF parameters: {error}")))?;
+      .map_err(|error| XrfError::new_read_error(format!("Failed to read OMF parameters: {error}")))?;
 
     let motions: OmfMotionsChunk = find_required_chunk_by_id(chunks, OmfMotionsChunk::CHUNK_ID)?
       .read_xr::<T, _>()
-      .map_err(|error| XRayError::new_read_error(format!("Failed to read OMF motions: {error}")))?;
+      .map_err(|error| XrfError::new_read_error(format!("Failed to read OMF motions: {error}")))?;
 
     if parameters.motions.len() != motions.motions.len() {
-      return Err(XRayError::new_parsing_error(format!(
+      return Err(XrfError::new_parsing_error(format!(
         "Unexpected data stored in OMF file, count of motions and motions definitions mismatch: {} got, {} expected",
         parameters.motions.len(),
         motions.motions.len()
@@ -63,7 +63,7 @@ impl OmfFile {
 
 impl OmfFile {
   /// Write omf file data into provided path.
-  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     if let Some(parent) = path.as_ref().parent() {
       fs::create_dir_all(parent)?;
     }
@@ -75,9 +75,9 @@ impl OmfFile {
   ///
   /// Chunks are emitted in the order used by the original game files - motions first,
   /// parameters second - so unmodified files round-trip byte for byte.
-  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XrfResult {
     if self.parameters.motions.len() != self.motions.motions.len() {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Cannot write OMF file, count of motions and motions definitions mismatch: {} definitions, {} motions",
         self.parameters.motions.len(),
         self.motions.motions.len()
@@ -98,11 +98,11 @@ impl OmfFile {
 
 impl OmfFile {
   /// Read only list of motions specifically and skip other data parts.
-  pub fn read_motions_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Vec<String>> {
+  pub fn read_motions_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XrfResult<Vec<String>> {
     Self::read_motions_from_file::<T>(File::open(path)?)
   }
 
-  pub fn read_motions_from_file<T: ByteOrder>(file: File) -> XRayResult<Vec<String>> {
+  pub fn read_motions_from_file<T: ByteOrder>(file: File) -> XrfResult<Vec<String>> {
     let mut reader: ChunkReader = ChunkReader::from_file(file)?;
     let chunks: Vec<ChunkReader> = reader.read_children()?;
 
@@ -151,7 +151,7 @@ impl OmfFile {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReader, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_absolute_generated_test_resource_path, get_relative_test_sample_file_path,
@@ -198,7 +198,7 @@ mod tests {
   }
 
   #[test]
-  fn test_write_read_file() -> XRayResult {
+  fn test_write_read_file() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "write_read.omf");
     let original: OmfFile = new_mock(4);
 

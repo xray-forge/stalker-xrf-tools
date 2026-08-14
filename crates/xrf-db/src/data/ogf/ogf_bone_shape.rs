@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::data::ogf::ogf_cylinder::OgfCylinder;
 use crate::data::ogf::ogf_obb::OgfObb;
@@ -28,7 +28,7 @@ impl OgfBoneShape {
 }
 
 impl ChunkReadWrite for OgfBoneShape {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       shape_type: reader.read_u16::<T>()?,
       flags: reader.read_u16::<T>()?,
@@ -38,7 +38,7 @@ impl ChunkReadWrite for OgfBoneShape {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u16::<T>(self.shape_type)?;
     writer.write_u16::<T>(self.flags)?;
     self.box_shape.write::<T>(writer)?;

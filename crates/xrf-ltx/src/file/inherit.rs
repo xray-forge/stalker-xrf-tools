@@ -1,4 +1,4 @@
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::file::file_section::section::Section;
 use crate::file::types::LtxSections;
@@ -14,16 +14,16 @@ impl LtxInheritConvertor {
   }
 
   /// Cast LTX file to fully parsed with include sections.
-  pub fn convert(ltx: Ltx) -> XRayResult<Ltx> {
+  pub fn convert(ltx: Ltx) -> XrfResult<Ltx> {
     Self::new().convert_ltx(ltx)
   }
 }
 
 impl LtxInheritConvertor {
   /// Convert ltx file with inclusion of inherited sections.
-  fn convert_ltx(&self, mut ltx: Ltx) -> XRayResult<Ltx> {
+  fn convert_ltx(&self, mut ltx: Ltx) -> XrfResult<Ltx> {
     if !ltx.includes.is_empty() {
-      return Err(XRayError::new_convert_error(
+      return Err(XrfError::new_convert_error(
         "Failed to equipment ltx file, not processed include statements detected on inheritance conversion",
       ));
     }
@@ -46,7 +46,7 @@ impl LtxInheritConvertor {
     Ok(ltx)
   }
 
-  fn inherit_sections(&self, ltx: &Ltx, destination: &mut LtxSections) -> XRayResult {
+  fn inherit_sections(&self, ltx: &Ltx, destination: &mut LtxSections) -> XrfResult {
     for (section_name, _) in &ltx.sections {
       Self::inherit_section(ltx, destination, section_name)?;
     }
@@ -54,10 +54,10 @@ impl LtxInheritConvertor {
     Ok(())
   }
 
-  fn inherit_section(ltx: &Ltx, destination: &mut LtxSections, section_name: &str) -> XRayResult {
+  fn inherit_section(ltx: &Ltx, destination: &mut LtxSections, section_name: &str) -> XrfResult {
     let section: &Section = match ltx.sections.get(section_name) {
       None => {
-        return Err(XRayError::new_convert_error(format!(
+        return Err(XrfError::new_convert_error(format!(
           "Failed to inherit unknown section [{section_name}] when reading ltx file ({})",
           ltx.path.as_ref().map_or("virtual", |path| path.to_str().unwrap())
         )));
@@ -75,7 +75,7 @@ impl LtxInheritConvertor {
     } else {
       for inherited in &section.inherited {
         if section_name == inherited {
-          return Err(XRayError::new_convert_error(format!(
+          return Err(XrfError::new_convert_error(format!(
             "Failed to inherit section '{inherited}' in '{section_name}', cannot inherit self"
           )));
         }
@@ -106,7 +106,7 @@ impl LtxInheritConvertor {
 
 #[cfg(test)]
 mod test {
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::Section;
   use crate::file::ltx::Ltx;
@@ -130,11 +130,11 @@ d = 20
 e = 100
 ";
 
-    let ltx: XRayResult<Ltx> = Ltx::read_from_str(input);
+    let ltx: XrfResult<Ltx> = Ltx::read_from_str(input);
 
     assert!(ltx.is_ok());
 
-    let ltx: XRayResult<Ltx> = ltx.unwrap().into_inherited();
+    let ltx: XrfResult<Ltx> = ltx.unwrap().into_inherited();
 
     assert!(ltx.is_ok());
 

@@ -1,4 +1,4 @@
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::project::levels::levels_verifier::LevelsVerifier;
 use crate::project::levels::verify_levels_result::GamedataLevelsVerificationResult;
@@ -9,7 +9,7 @@ impl GamedataProject {
   //   producer of asset usage data. Marking consumed assets is deliberately not done here - it is a
   //   whole suite concern that needs a usage marking API on the asset index and a policy for mods
   //   that ship spare assets, and deciding it from inside one check would fix the shape for all.
-  pub fn verify_levels(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataLevelsVerificationResult> {
+  pub fn verify_levels(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<GamedataLevelsVerificationResult> {
     LevelsVerifier::new(self, options).verify()
   }
 }

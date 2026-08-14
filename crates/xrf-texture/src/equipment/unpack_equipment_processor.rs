@@ -1,6 +1,6 @@
 use image::GenericImageView;
 use image_dds::Mipmaps;
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::constants::DDS_EXTENSION;
 use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
@@ -9,7 +9,7 @@ use crate::{UnpackEquipmentOptions, save_image_as_ui_dds};
 pub struct UnpackEquipmentProcessor {}
 
 impl UnpackEquipmentProcessor {
-  pub fn unpack_sprites(options: UnpackEquipmentOptions) -> XRayResult {
+  pub fn unpack_sprites(options: UnpackEquipmentOptions) -> XrfResult {
     let mut count: u32 = 0;
 
     for (section_name, section) in &options.ltx.sections {
@@ -25,7 +25,7 @@ impl UnpackEquipmentProcessor {
     Ok(())
   }
 
-  pub fn unpack_sprite(options: &UnpackEquipmentOptions, sprite: &InventorySpriteDescriptor) -> XRayResult<bool> {
+  pub fn unpack_sprite(options: &UnpackEquipmentOptions, sprite: &InventorySpriteDescriptor) -> XrfResult<bool> {
     let (x, y, w, h) = sprite.get_boundaries();
 
     xrf_output::verbose!(

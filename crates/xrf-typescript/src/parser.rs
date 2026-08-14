@@ -11,7 +11,7 @@ use swc_common::{
 };
 use swc_ecma_ast::Program;
 use swc_ecma_parser::{Parser, StringInput, Syntax, lexer::Lexer};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 /// A parsed TypeScript file together with the metadata needed for diagnostics.
 pub struct TypeScriptSource {
@@ -22,9 +22,9 @@ pub struct TypeScriptSource {
 
 /// Parse a TypeScript source file and collect its comments and source map.
 ///
-/// The parser uses SWC's TypeScript syntax and returns an `XRayError` when
+/// The parser uses SWC's TypeScript syntax and returns an `XrfError` when
 /// SWC reports parsing diagnostics before a program can be produced.
-pub fn parse_typescript_file(path: &Path) -> XRayResult<TypeScriptSource> {
+pub fn parse_typescript_file(path: &Path) -> XrfResult<TypeScriptSource> {
   let source_map: Lrc<SourceMap> = Default::default();
   let handler: Handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(source_map.clone()));
   let source_file: Rc<SourceFile> = source_map
@@ -50,7 +50,7 @@ pub fn parse_typescript_file(path: &Path) -> XRayResult<TypeScriptSource> {
   }
 
   if !diagnostics.is_empty() {
-    return Err(XRayError::new_parsing_error(format!(
+    return Err(XrfError::new_parsing_error(format!(
       "Failed to parse TypeScript file {}: {}",
       path.display(),
       diagnostics

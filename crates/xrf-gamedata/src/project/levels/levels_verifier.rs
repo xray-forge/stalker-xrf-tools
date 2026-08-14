@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::time::Instant;
 
 use xrf_db::ShaderLibraryFile;
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::GamedataFindingFactory;
 use crate::project::levels::level_binaries_verifier::{LevelBinariesOutcome, LevelBinariesVerifier};
@@ -24,7 +24,7 @@ impl<'a> LevelsVerifier<'a> {
     Self { options, project }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataLevelsVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataLevelsVerificationResult> {
     xrf_output::heading!(self.options.output, "Verify levels:");
 
     let started_at: Instant = Instant::now();

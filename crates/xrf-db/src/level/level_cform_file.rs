@@ -4,7 +4,7 @@ use std::path::Path;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::data::generic::vector_3d::Vector3d;
 
@@ -29,7 +29,7 @@ impl LevelCformHeader {
 
 impl ChunkReadWrite for LevelCformHeader {
   /// Read level collision form header from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       version: reader.read_u32::<T>()?,
       vertex_count: reader.read_u32::<T>()?,
@@ -40,7 +40,7 @@ impl ChunkReadWrite for LevelCformHeader {
   }
 
   /// Write level collision form header into the chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.version)?;
     writer.write_u32::<T>(self.vertex_count)?;
     writer.write_u32::<T>(self.face_count)?;
@@ -64,9 +64,9 @@ pub struct LevelCformFile {
 
 impl LevelCformFile {
   /// Read level collision form file from provided path.
-  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Self::read_from_file::<T>(File::open(path).map_err(|error| {
-      XRayError::new_not_found_error(format!(
+      XrfError::new_not_found_error(format!(
         "Level collision form file was not read: {}, error: {}",
         path.as_ref().display(),
         error
@@ -75,7 +75,7 @@ impl LevelCformFile {
   }
 
   /// Read level collision form file from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
     Ok(Self {
       header: ChunkReader::from_file(file)?.read_xr::<T, _>()?,
     })
@@ -87,7 +87,7 @@ mod tests {
   use std::io::Write;
 
   use xrf_chunk::{ChunkReadWrite, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_file, overwrite_generated_test_resource_as_file,
   };
@@ -106,7 +106,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.cform");
     let mut writer: ChunkWriter = ChunkWriter::new();
     let original: LevelCformHeader = sample();
@@ -129,7 +129,7 @@ mod tests {
   }
 
   #[test]
-  fn truncated_header_is_an_error_and_not_a_panic() -> XRayResult {
+  fn truncated_header_is_an_error_and_not_a_panic() -> XrfResult {
     let filename: String = String::from("truncated.cform");
     let mut writer: ChunkWriter = ChunkWriter::new();
 

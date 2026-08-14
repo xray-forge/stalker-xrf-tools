@@ -1,7 +1,7 @@
 use std::collections::{BTreeSet, HashSet};
 use std::path::Path;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, Section};
 
 use super::weather_definitions::WeatherDefinitions;
@@ -20,7 +20,7 @@ pub fn verify_weather_with_definitions(
   config_path: &Path,
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
-) -> XRayResult<bool> {
+) -> XrfResult<bool> {
   Ok(
     verify_weather_findings_with_definitions(project, options, config_path, definitions, definition_load_errors)?
       .is_empty(),
@@ -34,7 +34,7 @@ pub fn verify_weather_findings_with_definitions(
   config_path: &Path,
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
-) -> XRayResult<Vec<Finding>> {
+) -> XrfResult<Vec<Finding>> {
   let ltx: Ltx = match Ltx::read_from_file_full(config_path) {
     Ok(ltx) => ltx,
     Err(error) => {

@@ -2,7 +2,7 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_utils::read_as_string_from_w1251_encoded;
 
 use crate::Ltx;
@@ -11,7 +11,7 @@ use crate::file::file_configuration::line_separator::{DEFAULT_KV_SEPARATOR, Line
 
 impl Ltx {
   /// Format single LTX file by provided path
-  pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> XRayResult<bool> {
+  pub fn format_file<P: AsRef<Path>>(filename: P, write: bool) -> XrfResult<bool> {
     let formatted: String = Ltx::format_from_file(&filename)?;
     let existing: String =
       read_as_string_from_w1251_encoded(&mut fs::OpenOptions::new().read(true).open(filename.as_ref())?)?;
@@ -28,7 +28,7 @@ impl Ltx {
   }
 
   /// Write to a file
-  pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> XRayResult {
+  pub fn write_to_path<P: AsRef<Path>>(&self, filename: P) -> XrfResult {
     self.write_to(
       &mut fs::OpenOptions::new()
         .write(true)
@@ -39,7 +39,7 @@ impl Ltx {
   }
 
   /// Write to a writer with options
-  pub fn write_to<W: Write>(&self, writer: &mut W) -> XRayResult {
+  pub fn write_to<W: Write>(&self, writer: &mut W) -> XrfResult {
     let mut firstline: bool = true;
 
     // Write include statements.

@@ -1,5 +1,5 @@
 use specta::Types;
 
 pub fn typescript_bindings() -> Types {
-  Types::default().register::<crate::XRayError>()
+  Types::default().register::<crate::XrfError>()
 }

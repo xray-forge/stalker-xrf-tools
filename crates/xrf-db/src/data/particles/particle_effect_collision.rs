@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
 
@@ -23,7 +23,7 @@ impl ParticleEffectCollision {
 
 impl ChunkReadWrite for ParticleEffectCollision {
   /// Read particle effect collision data from chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let particle_collision: Self = Self {
       collide_one_minus_friction: reader.read_f32::<T>()?,
       collide_resilience: reader.read_f32::<T>()?,
@@ -36,7 +36,7 @@ impl ChunkReadWrite for ParticleEffectCollision {
   }
 
   /// Write particle effect collision data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_f32::<T>(self.collide_one_minus_friction)?;
     writer.write_f32::<T>(self.collide_resilience)?;
     writer.write_f32::<T>(self.collide_sqr_cutoff)?;
@@ -47,9 +47,9 @@ impl ChunkReadWrite for ParticleEffectCollision {
 
 impl LtxImportExport for ParticleEffectCollision {
   /// Import particle effect collision data from provided path.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle effect description section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -72,7 +72,7 @@ impl LtxImportExport for ParticleEffectCollision {
   }
 
   /// Export particle effect collision data into provided path.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)

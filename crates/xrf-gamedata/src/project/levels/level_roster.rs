@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use uuid::Uuid;
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{GraphCrossTable, GraphLevel, SpawnFile, SpawnGraphsChunk, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::GamedataFindingFactory;
 use crate::project::levels::level_engine_constants::SPAWNS_DIRECTORY;
@@ -39,7 +39,7 @@ impl LevelRoster {
   /// A spawn file that cannot be read at all is a checker error rather than a finding: the roster
   /// is unknown, and falling back to the directory listing would make every reconciliation rule
   /// vacuously pass.
-  pub(crate) fn read(project: &GamedataProject) -> XRayResult<Self> {
+  pub(crate) fn read(project: &GamedataProject) -> XrfResult<Self> {
     let mut roster: Self = Self {
       levels: Vec::new(),
       findings: Vec::new(),
@@ -55,13 +55,13 @@ impl LevelRoster {
 
     for source in &sources {
       let Some(path) = project.assets.absolute_path(source).ok().flatten() else {
-        return Err(XRayError::new_verify_error(format!(
+        return Err(XrfError::new_verify_error(format!(
           "Spawn path was not found in gamedata root while reading level roster: {source}"
         )));
       };
 
       let graphs: SpawnGraphsChunk = SpawnFile::read_graphs_from_path::<XRayByteOrder, _>(&path).map_err(|error| {
-        XRayError::new_verify_error(format!("Failed to read level roster from spawn file {source}: {error}"))
+        XrfError::new_verify_error(format!("Failed to read level roster from spawn file {source}: {error}"))
       })?;
 
       roster.sources_count += 1;

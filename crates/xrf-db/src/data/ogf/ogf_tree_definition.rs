@@ -1,7 +1,7 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::data::ogf::ogf_color::OgfColor;
 
@@ -14,11 +14,11 @@ pub struct OgfTreeDefinition {
 }
 
 impl ChunkReadWrite for OgfTreeDefinition {
-  fn read<T: ByteOrder>(_: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(_: &mut ChunkReader) -> XrfResult<Self> {
     todo!("Implement")
   }
 
-  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, _: &mut ChunkWriter) -> XrfResult {
     todo!("Implement")
   }
 }

@@ -1,7 +1,7 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::data::generic::vector_3d::Vector3d;
 
@@ -16,7 +16,7 @@ pub struct OgfBone {
 }
 
 impl ChunkReadWrite for OgfBone {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       name: reader.read_w1251_string()?,
       parent: reader.read_w1251_string()?,
@@ -30,7 +30,7 @@ impl ChunkReadWrite for OgfBone {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_w1251_string(&self.name)?;
     writer.write_w1251_string(&self.parent)?;
 

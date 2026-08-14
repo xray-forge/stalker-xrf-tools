@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use xrf_assets::XrayAssetType as AssetType;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_lua::verify_luajit_script;
 use xrf_utils::read_as_string_from_w1251_encoded;
 
@@ -15,10 +15,7 @@ use crate::project::scripts::verify_scripts_result::GamedataScriptsVerificationR
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
-  pub fn verify_scripts(
-    &self,
-    options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataScriptsVerificationResult> {
+  pub fn verify_scripts(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<GamedataScriptsVerificationResult> {
     xrf_output::heading!(options.output, "Verify scripts:");
 
     let started_at: Instant = Instant::now();
@@ -32,7 +29,7 @@ impl GamedataProject {
       .collect();
 
     let checked_scripts_count: u32 = u32::try_from(script_paths.len())
-      .map_err(|_| XRayError::new_verify_error("Script count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Script count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = script_paths
       .par_iter()
@@ -75,7 +72,7 @@ impl GamedataProject {
 
     let duration: Duration = started_at.elapsed();
     let invalid_scripts_count: u32 = u32::try_from(findings.len())
-      .map_err(|_| XRayError::new_verify_error("Invalid script count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Invalid script count exceeds the supported result range"))?;
 
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
@@ -103,7 +100,7 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_script(&self, _options: &GamedataProjectVerifyOptions, path: &Path) -> XRayResult<bool> {
+  pub fn verify_script(&self, _options: &GamedataProjectVerifyOptions, path: &Path) -> XrfResult<bool> {
     let code: String = read_as_string_from_w1251_encoded(&mut File::open(path)?)?;
 
     verify_luajit_script(&code, path)?;

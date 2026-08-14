@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::export::LtxImportExport;
@@ -25,7 +25,7 @@ pub struct AlifeObjectTraderAbstract {
 
 impl ChunkReadWrite for AlifeObjectTraderAbstract {
   /// Read trader data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       money: reader.read_u32::<T>()?,
       specific_character: reader.read_w1251_string()?,
@@ -41,7 +41,7 @@ impl ChunkReadWrite for AlifeObjectTraderAbstract {
   }
 
   /// Write trader data into the chunk.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.money)?;
     writer.write_w1251_string(&self.specific_character)?;
     writer.write_u32::<T>(self.trader_flags)?;
@@ -59,9 +59,9 @@ impl ChunkReadWrite for AlifeObjectTraderAbstract {
 
 impl LtxImportExport for AlifeObjectTraderAbstract {
   /// Import trader data from ltx config section.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "ALife object '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -83,7 +83,7 @@ impl LtxImportExport for AlifeObjectTraderAbstract {
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("trader.money", self.money.to_string())
@@ -104,7 +104,7 @@ impl LtxImportExport for AlifeObjectTraderAbstract {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -114,7 +114,7 @@ mod tests {
   use crate::data::alife::inherited::alife_object_trader_abstract::AlifeObjectTraderAbstract;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 

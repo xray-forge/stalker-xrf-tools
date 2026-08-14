@@ -4,7 +4,7 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert, open_export_file};
 
@@ -25,7 +25,7 @@ impl ParticlesEffectsChunk {
 impl ChunkReadWrite for ParticlesEffectsChunk {
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children()?;
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
@@ -47,7 +47,7 @@ impl ChunkReadWrite for ParticlesEffectsChunk {
   }
 
   /// Write particle effects data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     for (index, effect) in self.effects.iter().enumerate() {
       let mut effect_writer: ChunkWriter = ChunkWriter::new();
 
@@ -68,7 +68,7 @@ impl ChunkReadWrite for ParticlesEffectsChunk {
 
 impl FileImportExport for ParticlesEffectsChunk {
   /// Import particles effects data from provided path.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     log::info!("Importing particles effects: {}", path.as_ref().display());
 
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("effects.ltx"))?;
@@ -88,7 +88,7 @@ impl FileImportExport for ParticlesEffectsChunk {
   }
 
   /// Export particles effects data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut particles_effects_ltx: Ltx = Ltx::new();
 
     for effect in &self.effects {

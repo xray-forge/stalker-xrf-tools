@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 use xrf_output::OutputOptions;
 
@@ -59,7 +59,7 @@ impl GenericCommand for VerifyLtxCommand {
         "Expected configs root directory path for validation as --path parameter"
       );
 
-      return Err(XRayError::new_read_error("Failed to read provided path as directory").into());
+      return Err(XrfError::new_read_error("Failed to read provided path as directory").into());
     }
 
     log::info!("Verifying ltx folder: {}", path.display());
@@ -78,7 +78,7 @@ impl GenericCommand for VerifyLtxCommand {
       Ok(())
     } else {
       Err(
-        XRayError::new_verify_error(format!(
+        XrfError::new_verify_error(format!(
           "Failed to verify ltx files, got {} errors",
           result.errors.len()
         ))

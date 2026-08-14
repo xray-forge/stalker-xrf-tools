@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use derive_more::Display;
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 
 use crate::{GamedataCheckResult, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationCheckReport};
 
@@ -78,7 +78,7 @@ impl GamedataVerificationType {
     }
   }
 
-  fn check_report<T>(verification_type: Self, result: xrf_error::XRayResult<T>) -> GamedataVerificationCheckReport
+  fn check_report<T>(verification_type: Self, result: xrf_error::XrfResult<T>) -> GamedataVerificationCheckReport
   where
     T: GamedataCheckResult,
   {
@@ -87,14 +87,14 @@ impl GamedataVerificationType {
 }
 
 impl FromStr for GamedataVerificationType {
-  type Err = XRayError;
+  type Err = XrfError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
     Self::ALL
       .into_iter()
       .find(|verification_type| verification_type.to_string() == string)
       .ok_or_else(|| {
-        XRayError::new_unexpected_error(format!(
+        XrfError::new_unexpected_error(format!(
           "Unexpected verification type '{verification}' provided",
           verification = string
         ))

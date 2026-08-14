@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::time::Instant;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::Ltx;
 use crate::project::ltx_format_options::LtxFormatOptions;
@@ -12,29 +12,29 @@ pub struct LtxFilesFormatter {}
 
 impl LtxFilesFormatter {
   /// Format provided LTX files, rewriting the ones that are not formatted yet.
-  pub fn format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XRayResult<LtxProjectFormatResult> {
+  pub fn format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XrfResult<LtxProjectFormatResult> {
     Self::process(files, options, true)
   }
 
   /// Check format of provided LTX files without rewriting any of them.
-  pub fn check_format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XRayResult<LtxProjectFormatResult> {
+  pub fn check_format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XrfResult<LtxProjectFormatResult> {
     Self::process(files, options, false)
   }
 
   /// Format provided LTX files with default options.
-  pub fn format(files: &[PathBuf]) -> XRayResult<LtxProjectFormatResult> {
+  pub fn format(files: &[PathBuf]) -> XrfResult<LtxProjectFormatResult> {
     Self::format_opt(files, LtxFormatOptions::default())
   }
 
   /// Check format of provided LTX files with default options.
-  pub fn check_format(files: &[PathBuf]) -> XRayResult<LtxProjectFormatResult> {
+  pub fn check_format(files: &[PathBuf]) -> XrfResult<LtxProjectFormatResult> {
     Self::check_format_opt(files, LtxFormatOptions::default())
   }
 }
 
 impl LtxFilesFormatter {
   /// Format or check provided LTX files, writing the formatted output only when requested.
-  fn process(files: &[PathBuf], options: LtxFormatOptions, is_write: bool) -> XRayResult<LtxProjectFormatResult> {
+  fn process(files: &[PathBuf], options: LtxFormatOptions, is_write: bool) -> XrfResult<LtxProjectFormatResult> {
     let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
     let started_at: Instant = Instant::now();
 
@@ -105,12 +105,12 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::project::ltx_files_formatter::LtxFilesFormatter;
   use crate::project::ltx_project_format_result::LtxProjectFormatResult;
 
-  fn create_root(name: &str) -> XRayResult<PathBuf> {
+  fn create_root(name: &str) -> XrfResult<PathBuf> {
     let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-format-{name}-{}", std::process::id()));
 
     if root.exists() {
@@ -123,7 +123,7 @@ mod tests {
   }
 
   #[test]
-  fn formats_only_provided_files() -> XRayResult {
+  fn formats_only_provided_files() -> XrfResult {
     let root: PathBuf = create_root("provided")?;
     let first: PathBuf = root.join("first.ltx");
     let second: PathBuf = root.join("second.ltx");
@@ -146,7 +146,7 @@ mod tests {
   }
 
   #[test]
-  fn reports_already_formatted_files_as_valid() -> XRayResult {
+  fn reports_already_formatted_files_as_valid() -> XrfResult {
     let root: PathBuf = create_root("valid")?;
     let file: PathBuf = root.join("formatted.ltx");
 
@@ -165,7 +165,7 @@ mod tests {
   }
 
   #[test]
-  fn check_does_not_write_files() -> XRayResult {
+  fn check_does_not_write_files() -> XrfResult {
     let root: PathBuf = create_root("check")?;
     let file: PathBuf = root.join("unformatted.ltx");
 
@@ -184,7 +184,7 @@ mod tests {
   }
 
   #[test]
-  fn formats_file_with_unresolvable_inherit_and_include() -> XRayResult {
+  fn formats_file_with_unresolvable_inherit_and_include() -> XrfResult {
     let root: PathBuf = create_root("standalone")?;
     let file: PathBuf = root.join("standalone.ltx");
 
@@ -207,7 +207,7 @@ mod tests {
   }
 
   #[test]
-  fn handles_empty_file_list() -> XRayResult {
+  fn handles_empty_file_list() -> XrfResult {
     let result: LtxProjectFormatResult = LtxFilesFormatter::format(&[])?;
 
     assert_eq!(result.total_files, 0);

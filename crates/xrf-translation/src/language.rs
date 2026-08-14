@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use derive_more::Display;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, get_windows1252_encoder};
 
 pub const MULTILANGUAGE: &str = "multilang";
@@ -81,9 +81,9 @@ impl TranslationLanguage {
     Self::get_all().iter().map(|it| it.to_string()).collect()
   }
 
-  pub fn from_str_single(language: &str) -> XRayResult<Self> {
-    match Self::from_str(language).map_err(|it| XRayError::new_parsing_error(it.to_string()))? {
-      Self::All => Err(XRayError::new_unknown_language_error(String::from(
+  pub fn from_str_single(language: &str) -> XrfResult<Self> {
+    match Self::from_str(language).map_err(|it| XrfError::new_parsing_error(it.to_string()))? {
+      Self::All => Err(XrfError::new_unknown_language_error(String::from(
         "Unexpected language 'all' provided'",
       ))),
       language => Ok(language),

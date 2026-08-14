@@ -1,17 +1,15 @@
 use std::time::Instant;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationReport, GamedataVerificationType};
 
 impl GamedataProject {
-  pub fn verify(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataVerificationReport> {
+  pub fn verify(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<GamedataVerificationReport> {
     let checks: Vec<GamedataVerificationType> = options.selected_checks();
 
     if checks.is_empty() {
-      return Err(XRayError::new_unexpected_error(
-        "No gamedata checks to perform provided",
-      ));
+      return Err(XrfError::new_unexpected_error("No gamedata checks to perform provided"));
     }
 
     xrf_output::info!(options.output, "Verifying gamedata project: {}", self.root().display());

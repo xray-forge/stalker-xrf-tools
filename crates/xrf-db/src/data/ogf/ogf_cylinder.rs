@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::data::generic::vector_3d::Vector3d;
 
@@ -16,7 +16,7 @@ pub struct OgfCylinder {
 }
 
 impl ChunkReadWrite for OgfCylinder {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       center: reader.read_xr::<T, _>()?,
       direction: reader.read_xr::<T, _>()?,
@@ -25,7 +25,7 @@ impl ChunkReadWrite for OgfCylinder {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     self.center.write::<T>(writer)?;
     self.direction.write::<T>(writer)?;
     writer.write_f32::<T>(self.height)?;

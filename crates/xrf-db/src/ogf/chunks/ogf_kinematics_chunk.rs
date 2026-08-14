@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OgfKinematicsChunk {
@@ -18,7 +18,7 @@ impl OgfKinematicsChunk {
 // todo: Conditional read + implement chunk RW.
 // todo: Conditional read + implement chunk RW.
 impl OgfKinematicsChunk {
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, chunk_id: u32) -> XRayResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, chunk_id: u32) -> XrfResult<Self> {
     log::info!(
       "Reading motion refs chunk: {} bytes, chunk id {} ",
       reader.read_bytes_remain(),
@@ -43,7 +43,7 @@ impl OgfKinematicsChunk {
     })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     if self.source_chunk_id == OgfKinematicsChunk::CHUNK_ID {
       writer.write_u32::<T>(self.motion_refs.len() as u32)?;
 
@@ -52,7 +52,7 @@ impl OgfKinematicsChunk {
       }
     } else {
       if self.motion_refs.len() != 1 {
-        return Err(XRayError::new_unexpected_error(
+        return Err(XrfError::new_unexpected_error(
           "Motions ref chunk writing error, expected vector with 1 value",
         ));
       }

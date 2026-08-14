@@ -1,3 +1,3 @@
-use crate::error::XRayError;
+use crate::error::XrfError;
 
-pub type XRayResult<T = ()> = Result<T, XRayError>;
+pub type XrfResult<T = ()> = Result<T, XrfError>;

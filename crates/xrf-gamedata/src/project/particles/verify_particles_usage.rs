@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{ParticlesFile, SpawnFile, XRayByteOrder};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
 
 use crate::GamedataFindingFactory;
@@ -21,7 +21,7 @@ impl GamedataProject {
   pub fn verify_particles_usage(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataParticlesUsageVerificationResult> {
+  ) -> XrfResult<GamedataParticlesUsageVerificationResult> {
     xrf_output::heading!(options.output, "Verify particles usage:");
 
     let started_at: Instant = Instant::now();
@@ -52,7 +52,7 @@ impl GamedataProject {
   }
 
   /// Collect known particle effect and group names from all particle files in gamedata roots.
-  fn read_particle_names(&self) -> XRayResult<HashSet<String>> {
+  fn read_particle_names(&self) -> XrfResult<HashSet<String>> {
     let mut names: HashSet<String> = HashSet::new();
 
     for path in self

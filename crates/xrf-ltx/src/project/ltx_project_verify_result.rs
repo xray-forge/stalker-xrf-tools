@@ -1,5 +1,5 @@
 use serde::Serialize;
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Debug, Default, Serialize)]
@@ -8,7 +8,7 @@ pub struct LtxProjectVerifyResult {
   pub checked_fields: usize,
   pub checked_sections: usize,
   pub duration: u128,
-  pub errors: Vec<XRayError>,
+  pub errors: Vec<XrfError>,
   pub invalid_sections: usize,
   pub skipped_sections: usize,
   pub total_files: usize,

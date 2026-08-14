@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_utils::assert_length;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -12,7 +12,7 @@ pub struct OgfMotionMark {
 }
 
 impl ChunkReadWrite for OgfMotionMark {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let name: String = reader.read_w1251_rn_string()?;
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -31,7 +31,7 @@ impl ChunkReadWrite for OgfMotionMark {
     Ok(Self { name, intervals })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_w1251_rn_string(&self.name)?;
     writer.write_u32::<T>(self.intervals.len() as u32)?;
 
@@ -47,7 +47,7 @@ impl ChunkReadWrite for OgfMotionMark {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -57,7 +57,7 @@ mod tests {
   use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -82,7 +82,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_without_intervals() -> XRayResult {
+  fn test_read_write_without_intervals() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_without_intervals.chunk");
 

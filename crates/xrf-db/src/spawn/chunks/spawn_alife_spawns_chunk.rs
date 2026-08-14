@@ -5,7 +5,7 @@ use std::path::Path;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_equal, assert_length, open_export_file};
 
@@ -35,7 +35,7 @@ impl SpawnALifeSpawnsChunk {
 
 impl ChunkReadWrite for SpawnALifeSpawnsChunk {
   /// Read spawns chunk by position descriptor from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Reading ALife spawns chunk, {} bytes", reader.read_bytes_remain());
 
     let mut count_reader: ChunkReader = reader.read_child_by_index(Self::COUNT_CHUNK_ID)?;
@@ -77,7 +77,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
   }
 
   /// Write ALife chunk data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     let mut count_writer: ChunkWriter = ChunkWriter::new();
     let mut objects_writer: ChunkWriter = ChunkWriter::new();
     let mut vertex_writer: ChunkWriter = ChunkWriter::new();
@@ -130,7 +130,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
 
 impl FileImportExport for SpawnALifeSpawnsChunk {
   /// Import ALife spawns data from provided path.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("alife_spawns.ltx"))?;
     let mut objects: Vec<AlifeObject> = Vec::with_capacity(ltx.sections.len());
 
@@ -144,7 +144,7 @@ impl FileImportExport for SpawnALifeSpawnsChunk {
   }
 
   /// Export ALife spawns data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut ltx: Ltx = Ltx::new();
 
     for (index, object) in self.objects.iter().enumerate() {
@@ -172,7 +172,7 @@ impl fmt::Debug for SpawnALifeSpawnsChunk {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -191,7 +191,7 @@ mod tests {
   use crate::spawn::chunks::spawn_alife_spawns_chunk::SpawnALifeSpawnsChunk;
 
   #[test]
-  fn test_read_write_empty() -> XRayResult {
+  fn test_read_write_empty() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_empty.chunk");
 
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk { objects: vec![] };
@@ -223,7 +223,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk {

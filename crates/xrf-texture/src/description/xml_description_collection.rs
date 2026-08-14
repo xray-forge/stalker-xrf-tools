@@ -3,7 +3,7 @@ use std::fs;
 use std::fs::ReadDir;
 use std::path::{Path, PathBuf};
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_xml::{XmlDocument, XmlElement, XmlParseOptions};
 
 use crate::constants::{XML_ATTRIBUTE_ID, XML_ATTRIBUTE_NAME, XML_TAG_FILE, XML_TAG_TEXTURE, XML_TAG_WINDOW};
@@ -21,7 +21,7 @@ impl XmlDescriptionCollection {
   /// A description usually names several sheets, and packing rewrites every one of them. Selecting by
   /// name keeps a change to a single sheet from touching its neighbours. An unknown name is an error
   /// rather than a silently empty run, because that is almost always a typo.
-  pub fn select_files(&self, options: &PackDescriptionOptions) -> XRayResult<Vec<&TextureFileDescriptor>> {
+  pub fn select_files(&self, options: &PackDescriptionOptions) -> XrfResult<Vec<&TextureFileDescriptor>> {
     if options.files.is_empty() {
       return Ok(self.files.values().collect());
     }
@@ -40,7 +40,7 @@ impl XmlDescriptionCollection {
         1 => selected.push(matched[0]),
         0 => unknown.push(name),
         _ => {
-          return Err(XRayError::new_texture_processing_error(format!(
+          return Err(XrfError::new_texture_processing_error(format!(
             "Expected '{}' to name a single described file, it matches {}",
             name,
             matched
@@ -57,7 +57,7 @@ impl XmlDescriptionCollection {
       let mut available: Vec<&str> = self.files.values().map(|it| it.name.as_str()).collect();
       available.sort_unstable();
 
-      return Err(XRayError::new_texture_processing_error(format!(
+      return Err(XrfError::new_texture_processing_error(format!(
         "Expected requested files to be described in {}, not found: {}, available: {}",
         options.description.display(),
         unknown.join(", "),
@@ -83,7 +83,7 @@ impl XmlDescriptionCollection {
 
   /// Get descriptions from provided options.
   /// Handle both directory and single file as inputs.
-  pub fn get_descriptions(options: &PackDescriptionOptions) -> XRayResult<Self> {
+  pub fn get_descriptions(options: &PackDescriptionOptions) -> XrfResult<Self> {
     if options.description.is_dir() {
       xrf_output::info!(
         options.output,
@@ -129,7 +129,7 @@ impl XmlDescriptionCollection {
   pub fn get_description(
     options: &PackDescriptionOptions,
     path: &Path,
-  ) -> XRayResult<HashMap<String, TextureFileDescriptor>> {
+  ) -> XrfResult<HashMap<String, TextureFileDescriptor>> {
     xrf_output::verbose!(options.output, "Found texture description: {}", path.display());
 
     let mut descriptions: HashMap<String, TextureFileDescriptor> = HashMap::new();
@@ -139,7 +139,7 @@ impl XmlDescriptionCollection {
       Ok(doc) => doc,
       Err(error) => {
         if options.is_strict {
-          return Err(XRayError::new_parsing_error(format!(
+          return Err(XrfError::new_parsing_error(format!(
             "Failed to parse xml: {} - {}",
             path.display(),
             error

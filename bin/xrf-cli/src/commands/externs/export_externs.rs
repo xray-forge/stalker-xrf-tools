@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 use xrf_export::{
   ExternFormat, ExternManifest, ExternManifestParser, LineEndings, ParsedExternManifest, normalize_line_endings,
   render_extern_manifest,
@@ -83,7 +83,7 @@ impl GenericCommand for ExportExternsCommand {
     let check: Option<&PathBuf> = matches.get_one("check");
 
     if output_dir.is_none() && check.is_none() {
-      return Err(XRayError::new_invalid_error("Specify exactly one of --output or --check.").into());
+      return Err(XrfError::new_invalid_error("Specify exactly one of --output or --check.").into());
     }
 
     let line_endings: Option<LineEndings> = matches
@@ -132,7 +132,7 @@ impl ExportExternsCommand {
     matches: &ArgMatches,
     output: Option<&PathBuf>,
     check: Option<&PathBuf>,
-  ) -> Result<ExternFormat, XRayError> {
+  ) -> Result<ExternFormat, XrfError> {
     if let Some(value) = matches.get_one::<String>("format") {
       return ExternFormat::from_str(value);
     }
@@ -143,13 +143,13 @@ impl ExportExternsCommand {
 
     let path: &PathBuf = output.expect("Output is required after validation");
 
-    Err(XRayError::new_invalid_error(format!(
+    Err(XrfError::new_invalid_error(format!(
       "--format is required when writing '{}'.",
       path.display()
     )))
   }
 
-  fn write_output(path: &Path, content: &str) -> Result<(), XRayError> {
+  fn write_output(path: &Path, content: &str) -> Result<(), XrfError> {
     if let Some(parent) = path.parent() {
       fs::create_dir_all(parent)?;
     }
@@ -164,20 +164,20 @@ impl ExportExternsCommand {
     format: ExternFormat,
     manifest: &ExternManifest,
     line_endings: Option<LineEndings>,
-  ) -> Result<(), XRayError> {
+  ) -> Result<(), XrfError> {
     let existing: String = fs::read_to_string(path)?;
 
     match format {
       ExternFormat::Json => {
         let actual: ExternManifest = serde_json::from_str(&existing).map_err(|error| {
-          XRayError::new_invalid_error(format!(
+          XrfError::new_invalid_error(format!(
             "Cannot parse '{}' as an extern JSON manifest: {error}",
             path.display()
           ))
         })?;
 
         if actual != *manifest {
-          return Err(XRayError::new_verify_error(format!(
+          return Err(XrfError::new_verify_error(format!(
             "Extern JSON artifact '{}' does not match the parsed declaration manifest.",
             path.display()
           )));
@@ -188,7 +188,7 @@ impl ExportExternsCommand {
         let expected: String = render_extern_manifest(manifest, format, line_endings)?;
 
         if normalize_line_endings(&existing) != normalize_line_endings(&expected) {
-          return Err(XRayError::new_verify_error(format!(
+          return Err(XrfError::new_verify_error(format!(
             "Extern {} artifact '{}' does not match freshly rendered output.",
             match format {
               ExternFormat::Xml => "XML",

@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
 use xrf_xml::{XmlDocument, XmlParseOptions};
 
@@ -28,7 +28,7 @@ impl<'a> SoundReferencesVerifier<'a> {
     }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataSoundReferencesVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataSoundReferencesVerificationResult> {
     let sound_names: HashSet<String> = Self::read_sound_names(self.sound_paths);
     let sound_roots: HashSet<String> = Self::read_sound_roots(&sound_names);
     let mut result: GamedataSoundReferencesVerificationResult = Default::default();

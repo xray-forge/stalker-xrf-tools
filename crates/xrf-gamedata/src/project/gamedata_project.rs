@@ -3,7 +3,7 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
 use xrf_assets::{DirectoryAssetIndex, XrayAssetIndex};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
@@ -18,7 +18,7 @@ impl GamedataProject {
     self.assets.root()
   }
 
-  pub fn open(options: &GamedataProjectReadOptions) -> XRayResult<Self> {
+  pub fn open(options: &GamedataProjectReadOptions) -> XrfResult<Self> {
     if !Self::is_valid_gamedata_dir(&options.root) {
       return Err(
         io::Error::new(
@@ -56,7 +56,7 @@ impl GamedataProject {
           is_strict_check: false,
         },
       )
-      .map_err(|error| XRayError::new_asset_error(format!("Failed to open gamedata project ltx configs: {}", error)))?,
+      .map_err(|error| XrfError::new_asset_error(format!("Failed to open gamedata project ltx configs: {}", error)))?,
     })
   }
 }

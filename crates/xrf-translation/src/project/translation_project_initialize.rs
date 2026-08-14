@@ -4,7 +4,7 @@ use std::path::{Display, Path};
 use std::time::Instant;
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::types::TranslationJson;
 use crate::{ProjectInitializeOptions, ProjectInitializeResult, TranslationLanguage, TranslationProject};
@@ -13,7 +13,7 @@ impl TranslationProject {
   pub fn initialize_dir<P: AsRef<Path>>(
     dir: &P,
     options: &ProjectInitializeOptions,
-  ) -> XRayResult<ProjectInitializeResult> {
+  ) -> XrfResult<ProjectInitializeResult> {
     xrf_output::info!(options.output, "Initializing dir {}", dir.as_ref().display());
 
     let started_at: Instant = Instant::now();
@@ -22,7 +22,7 @@ impl TranslationProject {
     // Filter all the entries that are not accessed by other files and represent entry points.
     for entry in WalkDir::new(dir) {
       let entry: DirEntry =
-        entry.map_err(|error| XRayError::from(error.into_io_error().expect("WalkDir error transformed")))?;
+        entry.map_err(|error| XrfError::from(error.into_io_error().expect("WalkDir error transformed")))?;
 
       if entry.path().is_file() {
         Self::initialize_file(&entry.path(), options)?;
@@ -43,7 +43,7 @@ impl TranslationProject {
   pub fn initialize_file<P: AsRef<Path>>(
     path: &P,
     options: &ProjectInitializeOptions,
-  ) -> XRayResult<ProjectInitializeResult> {
+  ) -> XrfResult<ProjectInitializeResult> {
     let extension: Option<&OsStr> = path.as_ref().extension();
 
     if let Some(extension) = extension {
@@ -61,7 +61,7 @@ impl TranslationProject {
   pub fn initialize_json_file<P: AsRef<Path>>(
     path: &P,
     options: &ProjectInitializeOptions,
-  ) -> XRayResult<ProjectInitializeResult> {
+  ) -> XrfResult<ProjectInitializeResult> {
     let path_display: Display = path.as_ref().display();
 
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();

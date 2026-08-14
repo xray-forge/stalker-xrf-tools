@@ -1,6 +1,6 @@
 use std::cmp;
 
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 
 use crate::Ltx;
 use crate::condlist::Condlist;
@@ -79,7 +79,7 @@ impl LtxFieldScheme {
 impl LtxFieldScheme {
   // todo: Do not use ltx as parameter, split section check on higher level or impl 2 separate methods.
   /// Validate provided value based on current field schema definition.
-  pub fn validate_value(&self, ltx: &Ltx, field_data: &str) -> Option<XRayError> {
+  pub fn validate_value(&self, ltx: &Ltx, field_data: &str) -> Option<XrfError> {
     // Ltx-specific validation of section type.
     if self.data_type == LtxFieldDataType::TypeSection {
       if self.is_array {
@@ -88,7 +88,7 @@ impl LtxFieldScheme {
           let entry: &str = entry.trim();
 
           if !entry.is_empty() {
-            let validation_result: Option<XRayError> = self.validate_section_type_defined(ltx, entry);
+            let validation_result: Option<XrfError> = self.validate_section_type_defined(ltx, entry);
 
             if validation_result.is_some() {
               return validation_result;
@@ -117,7 +117,7 @@ impl LtxFieldScheme {
       }
 
       for entry in array_values {
-        let validation_result: Option<XRayError> = self.validate_data_entry_by_type(&self.data_type, entry);
+        let validation_result: Option<XrfError> = self.validate_data_entry_by_type(&self.data_type, entry);
 
         if validation_result.is_some() {
           return validation_result;
@@ -130,7 +130,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_data_entry_by_type(&self, field_type: &LtxFieldDataType, field_data: &str) -> Option<XRayError> {
+  fn validate_data_entry_by_type(&self, field_type: &LtxFieldDataType, field_data: &str) -> Option<XrfError> {
     match field_type {
       LtxFieldDataType::TypeAny => None,
       LtxFieldDataType::TypeBool => self.validate_bool_type(field_data),
@@ -154,8 +154,8 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validation_error(&self, message: &str) -> XRayError {
-    XRayError::new_ltx_scheme_error(&self.section, &self.name, message)
+  fn validation_error(&self, message: &str) -> XrfError {
+    XrfError::new_ltx_scheme_error(&self.section, &self.name, message)
   }
 }
 
@@ -167,7 +167,7 @@ impl LtxFieldScheme {
 }
 
 impl LtxFieldScheme {
-  fn validate_f32_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_f32_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<f32>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -176,7 +176,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_u32_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_u32_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<u32>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -185,7 +185,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_i32_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_i32_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<i32>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -194,7 +194,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_u16_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_u16_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<u16>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -203,7 +203,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_i16_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_i16_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<i16>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -212,7 +212,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_u8_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_u8_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<u8>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -221,7 +221,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_i8_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_i8_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<i8>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!(
@@ -230,7 +230,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_bool_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_bool_type(&self, value: &str) -> Option<XrfError> {
     match value.parse::<bool>() {
       Ok(_) => None,
       Err(_) => Some(self.validation_error(&format!("Invalid value, boolean is expected, got '{value}'"))),
@@ -239,24 +239,24 @@ impl LtxFieldScheme {
 
   /// Validate if provided value is correct comma separated vector.
   /// Expected value like `x,y,z` in f32 format.
-  fn validate_vector_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_vector_type(&self, value: &str) -> Option<XrfError> {
     self.validate_fixed_float_list_type(value, 3)
   }
 
   /// Validate if provided value is correct comma separated rgb.
   /// Expected value like `r,g,b` in f32 format.
-  fn validate_rgb_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_rgb_type(&self, value: &str) -> Option<XrfError> {
     self.validate_fixed_float_list_type(value, 3)
   }
 
   /// Validate if provided value is correct comma separated rgba.
   /// Expected value like `r,g,b,a` in f32 format.
-  fn validate_rgba_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_rgba_type(&self, value: &str) -> Option<XrfError> {
     self.validate_fixed_float_list_type(value, 4)
   }
 
   /// Validate if provided value is correct list of floats with defined len.
-  fn validate_fixed_float_list_type(&self, value: &str, len: usize) -> Option<XRayError> {
+  fn validate_fixed_float_list_type(&self, value: &str, len: usize) -> Option<XrfError> {
     let parsed_values: Vec<f32> = value.split(',').filter_map(|x| x.trim().parse::<f32>().ok()).collect();
 
     if parsed_values.len() != len {
@@ -269,7 +269,7 @@ impl LtxFieldScheme {
   }
 
   /// Validate if provided value is correct enumeration defined field.
-  fn validate_enum_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_enum_type(&self, value: &str) -> Option<XrfError> {
     match &self.data_type {
       LtxFieldDataType::TypeEnum(allowed_values) => {
         if allowed_values.is_empty() {
@@ -288,7 +288,7 @@ impl LtxFieldScheme {
   }
 
   /// Validate if provided value matches tuple description.
-  fn validate_tuple_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_tuple_type(&self, value: &str) -> Option<XrfError> {
     match &self.data_type {
       LtxFieldDataType::TypeTuple(types, types_raw, separator) => {
         if types.is_empty() {
@@ -342,7 +342,7 @@ impl LtxFieldScheme {
   }
 
   /// Validate if provided value matches const description.
-  fn validate_const(&self, value: &str) -> Option<XRayError> {
+  fn validate_const(&self, value: &str) -> Option<XrfError> {
     match &self.data_type {
       LtxFieldDataType::TypeConst(const_value) => {
         if const_value.is_empty() {
@@ -359,11 +359,11 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_section_type(&self, _: &str) -> Option<XRayError> {
+  fn validate_section_type(&self, _: &str) -> Option<XrfError> {
     None
   }
 
-  fn validate_section_type_defined(&self, ltx: &Ltx, value: &str) -> Option<XRayError> {
+  fn validate_section_type_defined(&self, ltx: &Ltx, value: &str) -> Option<XrfError> {
     if ltx.has_section(value) {
       None
     } else {
@@ -373,7 +373,7 @@ impl LtxFieldScheme {
     }
   }
 
-  fn validate_condlist_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_condlist_type(&self, value: &str) -> Option<XrfError> {
     if value.is_empty() && !self.is_optional {
       return Some(self.validation_error("Invalid value - condlist is expected, got empty field"));
     }
@@ -387,7 +387,7 @@ impl LtxFieldScheme {
       .map(|error| self.validation_error(&error.to_string()))
   }
 
-  fn validate_string_type(&self, value: &str) -> Option<XRayError> {
+  fn validate_string_type(&self, value: &str) -> Option<XrfError> {
     if value.is_empty() && !self.is_optional {
       Some(self.validation_error("Invalid value - string is expected, got empty field"))
     } else {

@@ -5,7 +5,7 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_length, open_export_file};
 
@@ -36,7 +36,7 @@ impl SpawnGraphsChunk {
 
 impl ChunkReadWrite for SpawnGraphsChunk {
   /// Read graphs chunk by position descriptor.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Reading graphs chunk, bytes {}", reader.read_bytes_remain());
 
     let header: GraphHeader = reader.read_xr::<T, _>()?;
@@ -102,7 +102,7 @@ impl ChunkReadWrite for SpawnGraphsChunk {
   }
 
   /// Write whole graphs chunk into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     self.header.write::<T>(writer)?;
 
     for level in &self.levels {
@@ -131,7 +131,7 @@ impl ChunkReadWrite for SpawnGraphsChunk {
 
 impl FileImportExport for SpawnGraphsChunk {
   /// Import graphs data from provided path.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     let header: GraphHeader =
       GraphHeader::import("header", &Ltx::read_from_path(path.as_ref().join("graphs_header.ltx"))?)?;
 
@@ -180,7 +180,7 @@ impl FileImportExport for SpawnGraphsChunk {
 
   /// Export graphs data into provided path.
   /// Constructs many files with contained data.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut graphs_header_ltx: Ltx = Ltx::new();
 
     self.header.export("header", &mut graphs_header_ltx)?;
@@ -256,7 +256,7 @@ impl fmt::Debug for SpawnGraphsChunk {
 mod tests {
   use uuid::uuid;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -273,7 +273,7 @@ mod tests {
   use crate::spawn::chunks::spawn_graphs_chunk::SpawnGraphsChunk;
 
   #[test]
-  fn test_read_write_empty() -> XRayResult {
+  fn test_read_write_empty() -> XrfResult {
     let filename: String = String::from("read_write_empty.chunk");
 
     let original: SpawnGraphsChunk = SpawnGraphsChunk {
@@ -320,7 +320,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
 
     let original: SpawnGraphsChunk = SpawnGraphsChunk {

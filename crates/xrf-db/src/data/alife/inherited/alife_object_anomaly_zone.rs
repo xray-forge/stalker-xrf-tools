@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::data::alife::inherited::alife_object_custom_zone::AlifeObjectCustomZone;
@@ -20,7 +20,7 @@ pub struct AlifeObjectAnomalyZone {
 
 impl ChunkReadWrite for AlifeObjectAnomalyZone {
   /// Read anomaly zone object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
       offline_interactive_radius: reader.read_f32::<T>()?,
@@ -30,7 +30,7 @@ impl ChunkReadWrite for AlifeObjectAnomalyZone {
   }
 
   /// Write anomaly zone object data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_xr::<T, _>(&self.base)?;
     writer.write_f32::<T>(self.offline_interactive_radius)?;
     writer.write_u16::<T>(self.artefact_spawn_count)?;
@@ -42,9 +42,9 @@ impl ChunkReadWrite for AlifeObjectAnomalyZone {
 
 impl LtxImportExport for AlifeObjectAnomalyZone {
   /// Import anomaly zone object data from ltx config section.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "ALife object '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -60,7 +60,7 @@ impl LtxImportExport for AlifeObjectAnomalyZone {
   }
 
   /// Export object data into ltx file.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     self.base.export(section_name, ltx)?;
 
     ltx
@@ -89,7 +89,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -107,7 +107,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -167,7 +167,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
@@ -218,7 +218,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: AlifeObjectAnomalyZone = AlifeObjectAnomalyZone {
       base: AlifeObjectCustomZone {
         base: AlifeObjectSpaceRestrictor {

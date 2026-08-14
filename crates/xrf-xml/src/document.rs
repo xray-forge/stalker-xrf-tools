@@ -1,4 +1,4 @@
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{
   XRayEncoding, decode_bytes_to_string, get_utf8_encoder, get_windows1250_encoder, get_windows1251_encoder,
   get_windows1252_encoder,
@@ -22,7 +22,7 @@ impl XmlDocument {
   /// # Errors
   ///
   /// Returns a parsing error when the input is not a well-formed XML document.
-  pub fn parse(input: &str, options: XmlParseOptions) -> XRayResult<Self> {
+  pub fn parse(input: &str, options: XmlParseOptions) -> XrfResult<Self> {
     let document: roxmltree::Document = roxmltree::Document::parse_with_options(
       input,
       roxmltree::ParsingOptions {
@@ -30,7 +30,7 @@ impl XmlDocument {
         ..roxmltree::ParsingOptions::default()
       },
     )
-    .map_err(|error| XRayError::new_parsing_error(format!("Failed to parse XML: {error}")))?;
+    .map_err(|error| XrfError::new_parsing_error(format!("Failed to parse XML: {error}")))?;
 
     Ok(Self {
       root: XmlElement::from_node(document.root_element()),
@@ -42,7 +42,7 @@ impl XmlDocument {
   /// # Errors
   ///
   /// Returns an encoding error for unsupported or invalid input encodings, or a parsing error for malformed XML.
-  pub fn parse_bytes(input: &[u8], options: XmlParseOptions) -> XRayResult<Self> {
+  pub fn parse_bytes(input: &[u8], options: XmlParseOptions) -> XrfResult<Self> {
     let encoding: XRayEncoding = detect_encoding(input)?;
     let decoded: String = decode_bytes_to_string(input, encoding)?;
 
@@ -152,7 +152,7 @@ impl<'a> Iterator for XmlDescendants<'a> {
   }
 }
 
-fn detect_encoding(input: &[u8]) -> XRayResult<XRayEncoding> {
+fn detect_encoding(input: &[u8]) -> XrfResult<XRayEncoding> {
   let Some(label) = declared_encoding(input) else {
     return Ok(get_utf8_encoder());
   };
@@ -167,7 +167,7 @@ fn detect_encoding(input: &[u8]) -> XRayResult<XRayEncoding> {
     "cp1250" | "windows1250" => Ok(get_windows1250_encoder()),
     "cp1251" | "windows1251" => Ok(get_windows1251_encoder()),
     "cp1252" | "windows1252" => Ok(get_windows1252_encoder()),
-    _ => Err(XRayError::new_encoding_error(format!(
+    _ => Err(XrfError::new_encoding_error(format!(
       "Unsupported XML encoding '{label}'"
     ))),
   }

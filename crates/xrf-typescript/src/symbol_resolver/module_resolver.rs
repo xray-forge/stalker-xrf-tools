@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use super::TypeScriptSymbol;
 use super::declaration_parser::{exported_symbol, local_symbol};
@@ -20,7 +20,7 @@ pub struct TypeScriptSymbolResolver {
 
 impl TypeScriptSymbolResolver {
   /// Create a resolver by discovering the nearest TypeScript project configuration.
-  pub fn discover(source_root: &Path) -> XRayResult<Self> {
+  pub fn discover(source_root: &Path) -> XrfResult<Self> {
     Ok(Self {
       project: TypeScriptProject::discover(source_root)?,
     })
@@ -36,7 +36,7 @@ impl TypeScriptSymbolResolver {
     source_map: &SourceMap,
     program: &Program,
     local_name: &str,
-  ) -> XRayResult<Option<TypeScriptSymbol>> {
+  ) -> XrfResult<Option<TypeScriptSymbol>> {
     if let Some(symbol) = local_symbol(program, local_name, source_map) {
       return Ok(Some(symbol));
     }
@@ -59,7 +59,7 @@ impl TypeScriptSymbolResolver {
     program: &Program,
     object_name: &str,
     property_name: &str,
-  ) -> XRayResult<Option<String>> {
+  ) -> XrfResult<Option<String>> {
     let Some(symbol) = self.resolve_symbol(source_file, source_map, program, object_name)? else {
       return Ok(None);
     };
@@ -73,7 +73,7 @@ impl TypeScriptSymbolResolver {
     module_path: &Path,
     export_name: &str,
     visited: &mut BTreeSet<PathBuf>,
-  ) -> XRayResult<Option<TypeScriptSymbol>> {
+  ) -> XrfResult<Option<TypeScriptSymbol>> {
     let normalized: PathBuf = module_path.to_path_buf();
 
     if !visited.insert(normalized.clone()) {

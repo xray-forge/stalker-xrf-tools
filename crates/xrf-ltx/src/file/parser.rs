@@ -1,6 +1,6 @@
 use std::str::Chars;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::file::file_configuration::constants::{
   LTX_SYMBOL_COMMENT, LTX_SYMBOL_INCLUDE, LTX_SYMBOL_INHERIT, LTX_SYMBOL_SECTION_CLOSE, LTX_SYMBOL_SECTION_OPEN,
@@ -46,7 +46,7 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse the whole LTX input.
-  pub fn parse(&mut self) -> XRayResult<Ltx> {
+  pub fn parse(&mut self) -> XrfResult<Ltx> {
     let mut current_section: String = ROOT_SECTION.to_string();
     let mut includes_processed: bool = false;
     let mut is_metadata_header: bool = true;
@@ -143,7 +143,7 @@ impl<'a> LtxParser<'a> {
     Ok(ltx)
   }
 
-  fn parse_metadata_directive(&self, comment: &str, ltx: &mut Ltx, line: usize, column: usize) -> XRayResult {
+  fn parse_metadata_directive(&self, comment: &str, ltx: &mut Ltx, line: usize, column: usize) -> XrfResult {
     let mut parts: std::str::SplitWhitespace<'_> = comment.split_whitespace();
 
     if parts.next() != Some("@xrf-ltx") {
@@ -151,7 +151,7 @@ impl<'a> LtxParser<'a> {
     }
 
     let Some(directive) = parts.next() else {
-      return Err(XRayError::new_ltx_parse_error(
+      return Err(XrfError::new_ltx_parse_error(
         line,
         column,
         "Expected an @xrf-ltx directive name",
@@ -159,7 +159,7 @@ impl<'a> LtxParser<'a> {
     };
 
     if parts.next().is_some() {
-      return Err(XRayError::new_ltx_parse_error(
+      return Err(XrfError::new_ltx_parse_error(
         line,
         column,
         "Expected exactly one @xrf-ltx directive",
@@ -167,7 +167,7 @@ impl<'a> LtxParser<'a> {
     }
 
     let Some(check) = LtxCheck::from_skip_directive(directive) else {
-      return Err(XRayError::new_ltx_parse_error(
+      return Err(XrfError::new_ltx_parse_error(
         line,
         column,
         format!("Unknown @xrf-ltx directive '{directive}'"),
@@ -180,7 +180,7 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse the whole LTX input and reformat as string.
-  pub fn parse_into_formatted(&mut self) -> XRayResult<String> {
+  pub fn parse_into_formatted(&mut self) -> XrfResult<String> {
     let mut formatted: String = String::new();
 
     self.skip_whitespaces();
@@ -223,7 +223,7 @@ impl<'a> LtxParser<'a> {
   }
 
   /// Parse only include sections from file and return list of included LTX files.
-  pub fn parse_includes(&mut self) -> XRayResult<Vec<String>> {
+  pub fn parse_includes(&mut self) -> XrfResult<Vec<String>> {
     let mut included: Vec<String> = Vec::new();
 
     self.skip_whitespaces();
@@ -277,8 +277,8 @@ impl LtxParser<'_> {
   }
 
   /// Create parsing error.
-  fn error<U, M: Into<String>>(&self, message: M) -> XRayResult<U> {
-    Err(XRayError::new_ltx_parse_error(self.line + 1, self.column + 1, message))
+  fn error<U, M: Into<String>>(&self, message: M) -> XrfResult<U> {
+    Err(XrfError::new_ltx_parse_error(self.line + 1, self.column + 1, message))
   }
 
   /// Consume all the white space until the end of the line or a tab.
@@ -303,7 +303,7 @@ impl LtxParser<'_> {
     }
   }
 
-  fn skip_comment(&mut self) -> XRayResult<String> {
+  fn skip_comment(&mut self) -> XrfResult<String> {
     self.bump();
 
     // Allow empty value.
@@ -315,7 +315,7 @@ impl LtxParser<'_> {
     }
   }
 
-  fn parse_until(&mut self, endpoint: &[Option<char>], check_inline_comment: bool) -> XRayResult<String> {
+  fn parse_until(&mut self, endpoint: &[Option<char>], check_inline_comment: bool) -> XrfResult<String> {
     let mut result: String = String::new();
 
     while !endpoint.contains(&self.char) {
@@ -352,7 +352,7 @@ impl LtxParser<'_> {
   }
 
   #[inline]
-  fn parse_until_eol(&mut self, strip_inline_comment: bool) -> XRayResult<String> {
+  fn parse_until_eol(&mut self, strip_inline_comment: bool) -> XrfResult<String> {
     let value: String = self.parse_until(&[Some('\n'), Some('\r'), None], strip_inline_comment)?;
 
     if strip_inline_comment && matches!(self.char, Some(LTX_SYMBOL_COMMENT)) {
@@ -365,7 +365,7 @@ impl LtxParser<'_> {
 
 impl LtxParser<'_> {
   /// Parse section name, inherited sections and comment from the line.
-  fn parse_section_from_line(&self, line: &str) -> XRayResult<(String, Option<Vec<String>>, Option<String>)> {
+  fn parse_section_from_line(&self, line: &str) -> XrfResult<(String, Option<Vec<String>>, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty section statement");
     }
@@ -415,7 +415,7 @@ impl LtxParser<'_> {
   /// Supported include variants are:
   /// - #include "file.ltx"
   /// - #include("file.ltx")
-  fn parse_include_from_line(&self, line: &str) -> XRayResult<(String, Option<String>)> {
+  fn parse_include_from_line(&self, line: &str) -> XrfResult<(String, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty include statement");
     }
@@ -462,7 +462,7 @@ impl LtxParser<'_> {
   }
 
   /// Parse line key, value and comment from provided line.
-  fn parse_key_value_from_line(&self, line: &str) -> XRayResult<(String, Option<String>, Option<String>)> {
+  fn parse_key_value_from_line(&self, line: &str) -> XrfResult<(String, Option<String>, Option<String>)> {
     if line.is_empty() {
       return self.error("Failed to parse empty value statement");
     }

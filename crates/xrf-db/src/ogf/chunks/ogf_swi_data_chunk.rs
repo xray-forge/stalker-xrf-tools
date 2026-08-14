@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::data::ogf::ogf_slide_window::OgfSlideWindow;
 
@@ -19,7 +19,7 @@ impl OgfSwiDataChunk {
 }
 
 impl ChunkReadWrite for OgfSwiDataChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let reserved: [u32; 4] = [
       reader.read_u32::<T>()?,
       reader.read_u32::<T>()?,
@@ -39,7 +39,7 @@ impl ChunkReadWrite for OgfSwiDataChunk {
     Ok(Self { reserved, windows })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     for value in &self.reserved {
       writer.write_u32::<T>(*value)?;
     }
@@ -59,7 +59,7 @@ mod tests {
   use std::io::Write;
 
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -69,7 +69,7 @@ mod tests {
   use super::OgfSwiDataChunk;
   use crate::data::ogf::ogf_slide_window::OgfSlideWindow;
 
-  fn write_then_read(name: &str, chunk: &OgfSwiDataChunk) -> XRayResult<OgfSwiDataChunk> {
+  fn write_then_read(name: &str, chunk: &OgfSwiDataChunk) -> XrfResult<OgfSwiDataChunk> {
     let filename: String = get_relative_test_sample_file_path(file!(), name);
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -92,7 +92,7 @@ mod tests {
   }
 
   #[test]
-  fn round_trips_windows_and_reserved_words() -> XRayResult {
+  fn round_trips_windows_and_reserved_words() -> XrfResult {
     let chunk: OgfSwiDataChunk = OgfSwiDataChunk {
       // Non zero so a writer that dropped them would be caught.
       reserved: [1, 2, 3, 4],
@@ -119,7 +119,7 @@ mod tests {
   }
 
   #[test]
-  fn round_trips_empty_window_list() -> XRayResult {
+  fn round_trips_empty_window_list() -> XrfResult {
     let chunk: OgfSwiDataChunk = OgfSwiDataChunk {
       reserved: [0; 4],
       windows: vec![],
@@ -133,7 +133,7 @@ mod tests {
   }
 
   #[test]
-  fn each_window_is_eight_bytes() -> XRayResult {
+  fn each_window_is_eight_bytes() -> XrfResult {
     // The engine reads the payload as a flat `count * sizeof(FSlideWindow)` block, so a record that
     // is not exactly 8 bytes would silently desynchronise every following one.
     let mut writer: ChunkWriter = ChunkWriter::new();

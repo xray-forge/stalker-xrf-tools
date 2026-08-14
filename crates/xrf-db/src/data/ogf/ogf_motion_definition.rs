@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_length;
 
 use crate::data::ogf::ogf_motion_mark::OgfMotionMark;
@@ -24,14 +24,14 @@ pub struct OgfMotionDefinition {
 // todo: Version based switcher?
 // todo: Version based switcher?
 impl OgfMotionDefinition {
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XRayResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XrfResult<Vec<Self>> {
     let count: u16 = reader.read_u16::<T>()?;
     let mut definitions: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       definitions.push(
         Self::read::<T>(reader, version)
-          .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf motion: {error}")))?,
+          .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf motion: {error}")))?,
       );
     }
 
@@ -44,7 +44,7 @@ impl OgfMotionDefinition {
     Ok(definitions)
   }
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XRayResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XrfResult<Self> {
     let name: String = reader.read_w1251_string()?;
     let flags: u32 = reader.read_u32::<T>()?;
     let bone_or_part: u16 = reader.read_u16::<T>()?;
@@ -61,7 +61,7 @@ impl OgfMotionDefinition {
       for _ in 0..count {
         marks.push(
           OgfMotionMark::read::<T>(reader)
-            .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf motion mark: {error}")))?,
+            .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf motion mark: {error}")))?,
         );
       }
 
@@ -91,19 +91,19 @@ impl OgfMotionDefinition {
     Ok(motion)
   }
 
-  pub fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, definitions: &[Self], version: u16) -> XRayResult {
+  pub fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, definitions: &[Self], version: u16) -> XrfResult {
     writer.write_u16::<T>(definitions.len() as u16)?;
 
     for definition in definitions {
       definition
         .write::<T>(writer, version)
-        .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf motion: {error}")))?;
+        .map_err(|error| XrfError::new_serialization_error(format!("Failed to write ogf motion: {error}")))?;
     }
 
     Ok(())
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter, version: u16) -> XRayResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter, version: u16) -> XrfResult {
     writer.write_w1251_string(&self.name)?;
     writer.write_u32::<T>(self.flags)?;
     writer.write_u16::<T>(self.bone_or_part)?;
@@ -119,10 +119,10 @@ impl OgfMotionDefinition {
       for mark in &self.marks {
         mark
           .write::<T>(writer)
-          .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf motion mark: {error}")))?;
+          .map_err(|error| XrfError::new_serialization_error(format!("Failed to write ogf motion mark: {error}")))?;
       }
     } else if !self.marks.is_empty() {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Cannot write {} ogf motion marks for '{}', marks are only supported in version 4, got {version}",
         self.marks.len(),
         self.name
@@ -153,7 +153,7 @@ impl OgfMotionDefinition {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -167,7 +167,7 @@ mod tests {
     filename: &str,
     definitions: &[OgfMotionDefinition],
     version: u16,
-  ) -> XRayResult<Vec<OgfMotionDefinition>> {
+  ) -> XrfResult<Vec<OgfMotionDefinition>> {
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     OgfMotionDefinition::write_list::<XRayByteOrder>(&mut writer, definitions, version)?;
@@ -181,7 +181,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list_v4_with_marks() -> XRayResult {
+  fn test_read_write_list_v4_with_marks() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_v4.chunk");
 
     let original: Vec<OgfMotionDefinition> = vec![
@@ -198,7 +198,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list_v3_without_marks() -> XRayResult {
+  fn test_read_write_list_v3_without_marks() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_v3.chunk");
 
     let original: Vec<OgfMotionDefinition> = vec![OgfMotionDefinition::new_mock(Vec::new())];

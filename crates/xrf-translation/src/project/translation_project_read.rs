@@ -4,7 +4,7 @@ use std::io::Read;
 use std::path::Path;
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_utils::{XRayEncoding, decode_bytes_to_string};
 use xrf_xml::deserialize_xml;
 
@@ -15,7 +15,7 @@ use crate::types::{TranslationCompiledXml, TranslationJson, TranslationProjectJs
 use crate::{TranslationEntry, TranslationLanguage};
 
 impl TranslationProject {
-  pub fn read_project<P: AsRef<Path>>(dir: P) -> XRayResult<TranslationProjectJson> {
+  pub fn read_project<P: AsRef<Path>>(dir: P) -> XrfResult<TranslationProjectJson> {
     let mut project_json: TranslationProjectJson = Default::default();
 
     // Filter all the entries that are not accessed by other files and represent entry points.
@@ -55,7 +55,7 @@ impl TranslationProject {
     Ok(project_json)
   }
 
-  pub fn read_translation_json_by_path<P: AsRef<Path>>(path: &P) -> XRayResult<TranslationJson> {
+  pub fn read_translation_json_by_path<P: AsRef<Path>>(path: &P) -> XrfResult<TranslationJson> {
     let mut data: Vec<u8> = Vec::new();
 
     File::open(path)?.read_to_end(&mut data)?;
@@ -63,7 +63,7 @@ impl TranslationProject {
     Ok(serde_json::from_slice(&data).expect("Expected valid JSON source file with standard format"))
   }
 
-  pub fn read_translation_xml_by_path<P: AsRef<Path>>(path: &P) -> XRayResult<TranslationJson> {
+  pub fn read_translation_xml_by_path<P: AsRef<Path>>(path: &P) -> XrfResult<TranslationJson> {
     let mut data: Vec<u8> = Vec::new();
 
     File::open(path)?.read_to_end(&mut data)?;

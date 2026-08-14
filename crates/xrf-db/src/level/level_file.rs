@@ -4,7 +4,7 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReader, find_optional_chunk_by_id, find_required_chunk_by_id};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::level::level_header_chunk::LevelHeaderChunk;
 use crate::level::level_shaders_chunk::LevelShadersChunk;
@@ -38,9 +38,9 @@ pub struct LevelFile {
 
 impl LevelFile {
   /// Read level file from provided path.
-  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Self::read_from_file::<T>(File::open(path).map_err(|error| {
-      XRayError::new_not_found_error(format!(
+      XrfError::new_not_found_error(format!(
         "Level file was not read: {}, error: {}",
         path.as_ref().display(),
         error
@@ -49,14 +49,14 @@ impl LevelFile {
   }
 
   /// Read level file from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
 
     Self::read_from_chunks::<T>(&chunks)
   }
 
   /// Read level file from chunks.
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
     Ok(Self {
       header: find_required_chunk_by_id(chunks, LevelHeaderChunk::CHUNK_ID)?.read_xr::<T, _>()?,
       shaders: match find_optional_chunk_by_id(chunks, LevelShadersChunk::CHUNK_ID) {

@@ -3,7 +3,7 @@ use std::ops::Deref;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::Ltx;
 
 use crate::data::alife::inherited::alife_actor::AlifeActor;
@@ -77,7 +77,7 @@ impl AlifeObjectInherited {
   /// Read custom save data based on serialized clsid.
   /// Represents STATE_Read of each separate object in xray implementation.
   /// Additionally, should respect script extension.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, alife_class: &AlifeClass) -> XRayResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, alife_class: &AlifeClass) -> XrfResult<Self> {
     Ok(match alife_class {
       AlifeClass::SeActor => Self::SeActor(Box::new(reader.read_xr::<T, _>()?)),
       AlifeClass::CseAlifeObjectBreakable => Self::CseAlifeObjectBreakable(Box::new(reader.read_xr::<T, _>()?)),
@@ -111,7 +111,7 @@ impl AlifeObjectInherited {
         Self::CseAlifeItemWeaponMagazinedWGl(Box::new(reader.read_xr::<T, _>()?))
       }
       _ => {
-        return Err(XRayError::new_parsing_error(format!(
+        return Err(XrfError::new_parsing_error(format!(
           "Not implemented parser for {}",
           alife_class
         )));
@@ -157,7 +157,7 @@ impl AlifeObjectInherited {
     }
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     match self {
       AlifeObjectInherited::SeActor(object) => writer.write_xr::<T, _>(object.deref())?,
       AlifeObjectInherited::CseAlifeObjectBreakable(object) => writer.write_xr::<T, _>(object.deref())?,
@@ -193,7 +193,7 @@ impl AlifeObjectInherited {
     Ok(())
   }
 
-  pub fn import(section_name: &str, ltx: &Ltx, alife_class: &AlifeClass) -> XRayResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx, alife_class: &AlifeClass) -> XrfResult<Self> {
     Ok(match alife_class {
       AlifeClass::SeActor => Self::SeActor(Box::new(AlifeActor::import(section_name, ltx)?)),
       AlifeClass::CseAlifeObjectBreakable => {
@@ -261,7 +261,7 @@ impl AlifeObjectInherited {
         Self::CseAlifeItemWeaponMagazinedWGl(Box::new(AlifeObjectItemWeaponMagazinedWgl::import(section_name, ltx)?))
       }
       _ => {
-        return Err(XRayError::new_parsing_error(format!(
+        return Err(XrfError::new_parsing_error(format!(
           "Not implemented parser for {}",
           alife_class
         )));
@@ -269,7 +269,7 @@ impl AlifeObjectInherited {
     })
   }
 
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     match self {
       AlifeObjectInherited::SeActor(object) => object.export(section_name, ltx),
       AlifeObjectInherited::CseAlifeObjectBreakable(object) => object.export(section_name, ltx),

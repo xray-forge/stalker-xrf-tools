@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkDataSource, ChunkReader};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::data::ogf::ogf_vertex::OgfVertex;
 use crate::data::ogf::ogf_vertices::OgfVertices;
@@ -36,7 +36,7 @@ impl OgfGeometry {
   const VERTEX_SIZE_3_LINK: usize = 70;
   const VERTEX_SIZE_4_LINK: usize = 76;
 
-  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(chunks: &[ChunkReader<D>]) -> XRayResult<Option<Self>> {
+  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(chunks: &[ChunkReader<D>]) -> XrfResult<Option<Self>> {
     let vertices: Option<OgfVertices> = match chunks.iter().find(|chunk| chunk.id == Self::VERTICES_CHUNK_ID) {
       Some(chunk) => Some(Self::read_vertices::<T, D>(&mut chunk.clone())?),
       None => None,
@@ -62,7 +62,7 @@ impl OgfGeometry {
     }
   }
 
-  fn read_vertices<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XRayResult<OgfVertices> {
+  fn read_vertices<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<OgfVertices> {
     let vertex_format: u32 = reader.read_u32::<T>()?;
     let vertex_count: u32 = reader.read_u32::<T>()?;
     let vertices: Vec<u8> = reader.read_remaining()?;
@@ -77,10 +77,10 @@ impl OgfGeometry {
 
     let expected_size: usize = (vertex_count as usize)
       .checked_mul(vertex_size)
-      .ok_or_else(|| XRayError::new_invalid_error("OGF skin vertex data size overflows"))?;
+      .ok_or_else(|| XrfError::new_invalid_error("OGF skin vertex data size overflows"))?;
 
     if vertices.len() != expected_size {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Invalid OGF skin vertex data size: expected {expected_size} bytes for {vertex_count} vertices, got {}",
         vertices.len()
       )));
@@ -99,7 +99,7 @@ impl OgfGeometry {
     })
   }
 
-  fn read_indices<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XRayResult<Vec<u16>> {
+  fn read_indices<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<u16>> {
     let indices: Vec<u16> = reader.read_u16_vector::<T>()?;
     reader.assert_read("Expect all data to be read from ogf indices")?;
 
@@ -123,7 +123,7 @@ mod tests {
 
   use byteorder::WriteBytesExt;
   use xrf_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -133,7 +133,7 @@ mod tests {
   use super::OgfGeometry;
 
   #[test]
-  fn test_read() -> XRayResult {
+  fn test_read() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read.chunk");
     let contents: Vec<u8> = geometry_contents()?;
     let mut file = overwrite_generated_test_resource_as_file(&filename)?;
@@ -155,7 +155,7 @@ mod tests {
     Ok(())
   }
 
-  fn geometry_contents() -> XRayResult<Vec<u8>> {
+  fn geometry_contents() -> XrfResult<Vec<u8>> {
     let mut vertices: ChunkWriter = ChunkWriter::new();
 
     vertices.write_u32::<XRayByteOrder>(2)?;

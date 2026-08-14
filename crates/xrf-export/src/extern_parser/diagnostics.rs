@@ -1,4 +1,4 @@
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 use xrf_typescript::swc_common::{BytePos, SourceMap, SourceMapper, Span, Spanned};
 use xrf_typescript::swc_ecma_ast::Expr;
 
@@ -25,10 +25,10 @@ pub fn source_span_location(source_map: &SourceMap, span: Span, source_path: &st
 }
 
 /// Create a location-aware invalid extern declaration error.
-pub fn invalid_at(source_map: &SourceMap, position: BytePos, source_path: &str, reason: &str) -> XRayError {
+pub fn invalid_at(source_map: &SourceMap, position: BytePos, source_path: &str, reason: &str) -> XrfError {
   let location: ExternSourceLocation = source_location(source_map, position, source_path);
 
-  XRayError::new_invalid_error(format!(
+  XrfError::new_invalid_error(format!(
     "Invalid extern declaration at {}:{}:{}: {}.",
     location.path, location.line, location.column, reason,
   ))

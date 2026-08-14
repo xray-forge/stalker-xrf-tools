@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use xrf_assets::XrayAssetType as AssetType;
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::project::sounds::sound_files_verifier::SoundFilesVerifier;
 use crate::project::sounds::sound_references_verifier::SoundReferencesVerifier;
@@ -18,7 +18,7 @@ impl<'a> SoundsVerifier<'a> {
     Self { options, project }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataSoundsVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataSoundsVerificationResult> {
     xrf_output::heading!(self.options.output, "Verify sounds:");
 
     let started_at: Instant = Instant::now();

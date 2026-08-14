@@ -3,7 +3,7 @@ use derive_more::{Display, FromStr};
 use enum_map::Enum;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::data::particles::particle_action::ParticleAction;
 
@@ -114,11 +114,11 @@ impl ParticleActionType {
 }
 
 impl ChunkReadWrite for ParticleActionType {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self::from(reader.read_u32::<T>()?))
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(*self as u32)?;
 
     Ok(())

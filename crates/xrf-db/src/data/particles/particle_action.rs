@@ -4,7 +4,7 @@ use std::str::FromStr;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, assert_length};
 
@@ -82,7 +82,7 @@ impl ParticleAction {
 
 impl ChunkReadWriteList for ParticleAction {
   /// Read list of particle action data from chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
     let count: u32 = reader.read_u32::<T>()?;
 
     let mut actions: Vec<Self> = Vec::with_capacity(count as usize);
@@ -91,7 +91,7 @@ impl ChunkReadWriteList for ParticleAction {
       actions.push(
         reader
           .read_xr::<T, _>()
-          .map_err(|error| XRayError::new_parsing_error(format!("Failed to read particle effect action: {}", error)))?,
+          .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle effect action: {}", error)))?,
       );
     }
 
@@ -106,7 +106,7 @@ impl ChunkReadWriteList for ParticleAction {
   }
 
   /// Write particle action data into chunk writer.
-  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, actions: &[Self]) -> XRayResult {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, actions: &[Self]) -> XrfResult {
     writer.write_u32::<T>(actions.len() as u32)?;
 
     for action in actions {
@@ -118,7 +118,7 @@ impl ChunkReadWriteList for ParticleAction {
 }
 
 impl ChunkReadWrite for ParticleAction {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let action_type: ParticleActionType = ParticleActionType::from(reader.read_u32::<T>()?);
 
     Ok(match action_type {
@@ -156,7 +156,7 @@ impl ChunkReadWrite for ParticleAction {
       ParticleActionType::Turbulence => Self::Turbulence(Box::new(reader.read_xr::<T, _>()?)),
       ParticleActionType::Scatter => Self::Scatter(Box::new(reader.read_xr::<T, _>()?)),
       ParticleActionType::Unknown | ParticleActionType::CallActionList => {
-        return Err(XRayError::new_unexpected_error(format!(
+        return Err(XrfError::new_unexpected_error(format!(
           "Unexpected action type provided for reading: {}",
           action_type
         )));
@@ -164,7 +164,7 @@ impl ChunkReadWrite for ParticleAction {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     // TargetRotate/TargetVelocity share variants with their D-derivatives, so the
     // dispatch type must come from the stored action type to survive round-trip.
     let action_type: ParticleActionType = match self {
@@ -210,9 +210,9 @@ impl ChunkReadWrite for ParticleAction {
 }
 
 impl LtxImportExport for ParticleAction {
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle action section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -229,7 +229,7 @@ impl LtxImportExport for ParticleAction {
 
     let action_type: ParticleActionType =
       ParticleActionType::from_str(read_ltx_field::<String>("action_type", section)?.as_str())
-        .map_err(|_| XRayError::new_parsing_error("Failed to parse particle action type from LTX field"))?;
+        .map_err(|_| XrfError::new_parsing_error("Failed to parse particle action type from LTX field"))?;
 
     Ok(match action_type {
       ParticleActionType::Avoid => Self::Avoid(Box::new(ParticleActionAvoid::import(section_name, ltx)?)),
@@ -288,7 +288,7 @@ impl LtxImportExport for ParticleAction {
       }
       ParticleActionType::Scatter => Self::Scatter(Box::new(ParticleActionScatter::import(section_name, ltx)?)),
       ParticleActionType::Unknown | ParticleActionType::CallActionList => {
-        return Err(XRayError::new_unexpected_error(format!(
+        return Err(XrfError::new_unexpected_error(format!(
           "Unexpected action type provided for reading: {}",
           action_type
         )));
@@ -296,7 +296,7 @@ impl LtxImportExport for ParticleAction {
     })
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx.with_section(section_name).set(META_TYPE_FIELD, Self::META_TYPE);
 
     match self {
@@ -337,7 +337,7 @@ impl LtxImportExport for ParticleAction {
 mod tests {
   use byteorder::ReadBytesExt;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -351,7 +351,7 @@ mod tests {
   use crate::data::particles::particle_action_type::ParticleActionType;
 
   #[test]
-  fn test_read_write_derivative_action_types() -> XRayResult {
+  fn test_read_write_derivative_action_types() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_derivative.chunk");
 

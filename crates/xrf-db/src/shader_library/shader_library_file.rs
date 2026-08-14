@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::Path;
 
 use xrf_chunk::{ChunkDataSource, ChunkReader, find_required_chunk_by_id};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::encode_w1251_bytes_to_string;
 
 /// Names of compiled blender definitions stored in `shaders.xr`.
@@ -21,27 +21,27 @@ impl ShaderLibraryFile {
   const BLENDER_CLASS_ID_SIZE: usize = 8;
   const BLENDER_NAME_SIZE: usize = 128;
 
-  pub fn read_from_path<P: AsRef<Path>>(path: P) -> XRayResult<Self> {
+  pub fn read_from_path<P: AsRef<Path>>(path: P) -> XrfResult<Self> {
     Self::read_from_file(File::open(path.as_ref()).map_err(|error| {
-      XRayError::new_not_found_error(format!(
+      XrfError::new_not_found_error(format!(
         "Shader library was not read: {}, error: {error}",
         path.as_ref().display()
       ))
     })?)
   }
 
-  pub fn read_from_file(file: File) -> XRayResult<Self> {
+  pub fn read_from_file(file: File) -> XrfResult<Self> {
     Self::read_from_chunk(&mut ChunkReader::from_file(file)?)
   }
 
-  pub fn read_from_chunk(reader: &mut ChunkReader) -> XRayResult<Self> {
+  pub fn read_from_chunk(reader: &mut ChunkReader) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children()?;
     let mut blenders: ChunkReader = find_required_chunk_by_id(&chunks, Self::BLENDERS_CHUNK_ID)?;
 
     Self::read_blender_names(&mut blenders)
   }
 
-  fn read_blender_names<T: ChunkDataSource>(blenders: &mut ChunkReader<T>) -> XRayResult<Self> {
+  fn read_blender_names<T: ChunkDataSource>(blenders: &mut ChunkReader<T>) -> XrfResult<Self> {
     let blender_chunks = blenders.read_children()?;
     let mut blender_names: HashSet<String> = HashSet::with_capacity(blender_chunks.len());
 
@@ -49,7 +49,7 @@ impl ShaderLibraryFile {
       blender.read_bytes(Self::BLENDER_CLASS_ID_SIZE)?;
       let name_bytes: Vec<u8> = blender.read_bytes(Self::BLENDER_NAME_SIZE)?;
       let Some(name_end) = name_bytes.iter().position(|byte| *byte == 0) else {
-        return Err(XRayError::new_no_terminator_error(
+        return Err(XrfError::new_no_terminator_error(
           "Blender name in shader library is not null terminated",
         ));
       };
@@ -57,7 +57,7 @@ impl ShaderLibraryFile {
       let name: String = encode_w1251_bytes_to_string(&name_bytes[..name_end])?;
 
       if !blender_names.insert(name.clone()) {
-        return Err(XRayError::new_invalid_error(format!(
+        return Err(XrfError::new_invalid_error(format!(
           "Shader library contains duplicate blender '{name}'"
         )));
       }
@@ -80,7 +80,7 @@ mod tests {
   use std::io::Write;
 
   use xrf_chunk::{ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_absolute_generated_test_sample_file_path, get_relative_test_sample_file_path,
@@ -90,7 +90,7 @@ mod tests {
   use super::ShaderLibraryFile;
 
   #[test]
-  fn test_read() -> XRayResult {
+  fn test_read() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read.chunk");
     let contents: Vec<u8> = shader_library_contents(&["models\\model", "models\\model_pn_hm"])?;
     let mut file = overwrite_generated_test_resource_as_file(&filename)?;
@@ -112,7 +112,7 @@ mod tests {
     Ok(())
   }
 
-  fn shader_library_contents(blender_names: &[&str]) -> XRayResult<Vec<u8>> {
+  fn shader_library_contents(blender_names: &[&str]) -> XrfResult<Vec<u8>> {
     let mut blenders: ChunkWriter = ChunkWriter::new();
 
     for (index, name) in blender_names.iter().enumerate() {

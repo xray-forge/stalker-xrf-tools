@@ -5,7 +5,7 @@ use std::path::Path;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_length, open_export_file};
 
@@ -27,7 +27,7 @@ impl SpawnPatrolsChunk {
 
 impl ChunkReadWrite for SpawnPatrolsChunk {
   /// Read patrols list from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Reading patrols chunk, bytes {}", reader.read_bytes_remain());
 
     let mut meta_reader: ChunkReader = reader.read_child_by_index(Self::META_NESTED_CHUNK_ID)?;
@@ -46,7 +46,7 @@ impl ChunkReadWrite for SpawnPatrolsChunk {
   }
 
   /// Write patrols data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -72,7 +72,7 @@ impl ChunkReadWrite for SpawnPatrolsChunk {
 
 impl FileImportExport for SpawnPatrolsChunk {
   /// Import patrols data from provided path.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     let patrols_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrols.ltx"))?;
     let patrol_points_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_points.ltx"))?;
     let patrol_links_ltx: Ltx = Ltx::read_from_path(path.as_ref().join("patrol_links.ltx"))?;
@@ -94,7 +94,7 @@ impl FileImportExport for SpawnPatrolsChunk {
   }
 
   /// Export patrols data into provided path.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut patrols_ltx: Ltx = Ltx::new();
     let mut patrol_points_ltx: Ltx = Ltx::new();
     let mut patrol_links_ltx: Ltx = Ltx::new();
@@ -127,7 +127,7 @@ impl fmt::Debug for SpawnPatrolsChunk {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -141,7 +141,7 @@ mod tests {
   use crate::spawn::chunks::spawn_patrols_chunk::SpawnPatrolsChunk;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnPatrolsChunk = SpawnPatrolsChunk {

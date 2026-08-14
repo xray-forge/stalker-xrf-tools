@@ -6,7 +6,7 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{assert_equal, assert_length, open_export_file};
 
 use crate::export::FileImportExport;
@@ -37,19 +37,19 @@ pub struct SpawnFile {
 
 impl SpawnFile {
   /// Read spawn file from provided path.
-  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read spawn file from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
 
     Self::read_from_chunks::<T>(&chunks)
   }
 
   /// Read spawn file from chunks.
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
     assert_length(chunks, 5, "Unexpected chunks count in spawn file root, expected 5")?;
 
     let spawn_file: Self = {
@@ -81,31 +81,31 @@ impl SpawnFile {
   /// Unlike [`Self::read_from_path`], ALife, artefact spawn and patrol chunks are not parsed at all.
   /// Consumers that only need the level roster stay readable on spawn files containing ALife object
   /// classes without a CLSID mapping, and skip the bulk of the file.
-  pub fn read_graphs_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<SpawnGraphsChunk> {
+  pub fn read_graphs_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XrfResult<SpawnGraphsChunk> {
     Self::read_graphs_from_file::<T>(File::open(path)?)
   }
 
   /// Read only the game graphs chunk of the spawn file from file.
-  pub fn read_graphs_from_file<T: ByteOrder>(file: File) -> XRayResult<SpawnGraphsChunk> {
+  pub fn read_graphs_from_file<T: ByteOrder>(file: File) -> XrfResult<SpawnGraphsChunk> {
     let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
 
     Self::read_graphs_from_chunks::<T>(&chunks)
   }
 
   /// Read only the game graphs chunk of the spawn file from chunks.
-  pub fn read_graphs_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<SpawnGraphsChunk> {
+  pub fn read_graphs_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<SpawnGraphsChunk> {
     find_required_chunk_by_id(chunks, SpawnGraphsChunk::CHUNK_ID)?.read_xr::<T, _>()
   }
 
   /// Write spawn file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let path_ref: &Path = path.as_ref();
 
     if let Some(parent) = path_ref.parent() {
       fs::create_dir_all(parent)?;
       self.write_to::<T>(&mut open_export_file(path)?)
     } else {
-      Err(XRayError::new_not_found_error(format!(
+      Err(XrfError::new_not_found_error(format!(
         "Spawn file parent directory was not found for {:?}",
         path_ref.to_str()
       )))
@@ -113,7 +113,7 @@ impl SpawnFile {
   }
 
   /// Write spawn file data to the writer.
-  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XrfResult {
     let mut header_chunk_writer: ChunkWriter = ChunkWriter::new();
     header_chunk_writer.write_xr::<T, _>(&self.header)?;
     header_chunk_writer.flush_chunk_into::<T>(writer, SpawnHeaderChunk::CHUNK_ID)?;
@@ -138,7 +138,7 @@ impl SpawnFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn import_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Ok(Self {
       header: SpawnHeaderChunk::import(path)?,
       alife_spawn: SpawnALifeSpawnsChunk::import(path)?,
@@ -149,7 +149,7 @@ impl SpawnFile {
   }
 
   /// Export unpacked ALife spawn file into provided path.
-  pub fn export_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  pub fn export_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     fs::create_dir_all(path)?;
 
     self.header.export(path)?;

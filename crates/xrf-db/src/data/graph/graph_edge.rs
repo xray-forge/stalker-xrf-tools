@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::export::LtxImportExport;
@@ -17,7 +17,7 @@ pub struct GraphEdge {
 
 impl ChunkReadWrite for GraphEdge {
   /// Read edge from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       game_vertex_id: reader.read_u16::<T>()?,
       distance: reader.read_f32::<T>()?,
@@ -25,7 +25,7 @@ impl ChunkReadWrite for GraphEdge {
   }
 
   /// Write graph edge data into the chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u16::<T>(self.game_vertex_id)?;
     writer.write_f32::<T>(self.distance)?;
 
@@ -35,9 +35,9 @@ impl ChunkReadWrite for GraphEdge {
 
 impl LtxImportExport for GraphEdge {
   /// Import graph edge from ltx file.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Graph section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -51,7 +51,7 @@ impl LtxImportExport for GraphEdge {
   }
 
   /// Export graph edge data into ltx.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("game_vertex_id", self.game_vertex_id.to_string())
@@ -69,7 +69,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -82,7 +82,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -117,7 +117,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let original: GraphEdge = GraphEdge {
       game_vertex_id: 352,
       distance: 2554.50,
@@ -140,7 +140,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: GraphEdge = GraphEdge {
       game_vertex_id: 713,
       distance: 400.50,

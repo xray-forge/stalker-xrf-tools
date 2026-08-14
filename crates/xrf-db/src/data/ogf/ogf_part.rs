@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_length;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -18,14 +18,14 @@ impl OgfPart {
 }
 
 impl ChunkReadWriteList for OgfPart {
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
     let count: u16 = reader.read_u16::<T>()?;
     let mut parts: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       parts.push(
         Self::read::<T>(reader)
-          .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf part: {error}")))?,
+          .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf part: {error}")))?,
       );
     }
 
@@ -34,13 +34,13 @@ impl ChunkReadWriteList for OgfPart {
     Ok(parts)
   }
 
-  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, parts: &[Self]) -> XRayResult {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, parts: &[Self]) -> XrfResult {
     writer.write_u16::<T>(parts.len() as u16)?;
 
     for part in parts {
       part
         .write::<T>(writer)
-        .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf part: {error}")))?;
+        .map_err(|error| XrfError::new_serialization_error(format!("Failed to write ogf part: {error}")))?;
     }
 
     Ok(())
@@ -48,7 +48,7 @@ impl ChunkReadWriteList for OgfPart {
 }
 
 impl ChunkReadWrite for OgfPart {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let name: String = reader.read_w1251_string()?;
     let count: u16 = reader.read_u16::<T>()?;
 
@@ -61,7 +61,7 @@ impl ChunkReadWrite for OgfPart {
     Ok(Self { name, bones })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_w1251_string(&self.name)?;
     writer.write_u16::<T>(self.bones.len() as u16)?;
 
@@ -77,7 +77,7 @@ impl ChunkReadWrite for OgfPart {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -87,7 +87,7 @@ mod tests {
   use crate::data::ogf::ogf_part::OgfPart;
 
   #[test]
-  fn test_read_write_list() -> XRayResult {
+  fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 

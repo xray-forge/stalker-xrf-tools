@@ -6,7 +6,7 @@ use base64::engine::{GeneralPurpose, general_purpose};
 use base64::{Engine, alphabet};
 use encoding_rs::{Encoding, UTF_8};
 use encoding_rs::{WINDOWS_1250, WINDOWS_1251, WINDOWS_1252};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 pub type XRayEncoding = &'static Encoding;
 
@@ -151,19 +151,19 @@ pub fn encode_bytes_to_standard_base64(bytes: &[u8]) -> String {
 
 /// Decode b64 as bytes.
 #[inline]
-pub fn decode_bytes_from_base64(string: &str) -> XRayResult<Vec<u8>> {
+pub fn decode_bytes_from_base64(string: &str) -> XrfResult<Vec<u8>> {
   CUSTOM_B64_ENGINE
     .decode(string)
-    .map_err(|error| XRayError::new_parsing_error(format!("Failed to decode bytes value from base 64: {}", error)))
+    .map_err(|error| XrfError::new_parsing_error(format!("Failed to decode bytes value from base 64: {}", error)))
 }
 
 /// Decode b64 as string.
 #[inline]
-pub fn decode_string_from_base64(string: &str) -> XRayResult<String> {
+pub fn decode_string_from_base64(string: &str) -> XrfResult<String> {
   Ok(match CUSTOM_B64_ENGINE.decode(string) {
     Ok(value) => String::from_utf8_lossy(&value).into_owned(),
     Err(error) => {
-      return Err(XRayError::new_parsing_error(format!(
+      return Err(XrfError::new_parsing_error(format!(
         "Failed to decode string value from base 64: {}",
         error
       )));

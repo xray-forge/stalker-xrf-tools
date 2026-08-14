@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use full_moon::{LuaVersion, ast::Ast, parse_fallible};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::XRayLuaMethodCall;
 use crate::lua_method_call_collector::LuaMethodCallCollector;
@@ -15,7 +15,7 @@ pub struct XRayLuaScript {
 
 impl XRayLuaScript {
   /// Parse LuaJIT source and retain the source path in any diagnostics.
-  pub fn parse<P>(path: P, source: &str) -> XRayResult<Self>
+  pub fn parse<P>(path: P, source: &str) -> XrfResult<Self>
   where
     P: AsRef<Path>,
   {
@@ -40,11 +40,11 @@ impl XRayLuaScript {
     &self.path
   }
 
-  fn parse_ast(path: &Path, source: &str) -> XRayResult<Ast> {
+  fn parse_ast(path: &Path, source: &str) -> XrfResult<Ast> {
     parse_fallible(source, LuaVersion::luajit())
       .into_result()
       .map_err(|errors| {
-        XRayError::new_verify_error(format!(
+        XrfError::new_verify_error(format!(
           "Failed to check LuaJIT script file: {}, errors: {}",
           path.display(),
           errors.iter().map(|it| it.to_string()).collect::<Vec<_>>().join(", ")
@@ -57,12 +57,12 @@ impl XRayLuaScript {
 mod tests {
   use std::path::Path;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use super::XRayLuaScript;
 
   #[test]
-  fn collects_literal_and_dynamic_method_calls() -> XRayResult {
+  fn collects_literal_and_dynamic_method_calls() -> XrfResult {
     let script: XRayLuaScript = XRayLuaScript::parse(
       Path::new("script.s"),
       r#"

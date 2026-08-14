@@ -2,7 +2,7 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 use walkdir::WalkDir;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::DirectoryAsset;
 
@@ -13,7 +13,7 @@ pub struct DirectoryAssetIndex {
 }
 
 impl DirectoryAssetIndex {
-  pub fn read(root: impl AsRef<Path>) -> XRayResult<Self> {
+  pub fn read(root: impl AsRef<Path>) -> XrfResult<Self> {
     let root: &Path = root.as_ref();
 
     log::debug!("reading directory assets from {}", root.display());
@@ -22,7 +22,7 @@ impl DirectoryAssetIndex {
 
     for entry in WalkDir::new(root).follow_links(false) {
       let entry =
-        entry.map_err(|error| XRayError::new_asset_error(format!("failed to read directory asset entry: {error}")))?;
+        entry.map_err(|error| XrfError::new_asset_error(format!("failed to read directory asset entry: {error}")))?;
 
       if !entry.file_type().is_file() {
         continue;
@@ -31,7 +31,7 @@ impl DirectoryAssetIndex {
       let relative_path = entry
         .path()
         .strip_prefix(root)
-        .map_err(|_| XRayError::new_unexpected_error("failed to strip directory asset root"))?
+        .map_err(|_| XrfError::new_unexpected_error("failed to strip directory asset root"))?
         .to_path_buf();
       assets.push(DirectoryAsset::new(relative_path));
     }

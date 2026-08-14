@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_typescript::swc_common::{SourceMap, Spanned};
 use xrf_typescript::swc_ecma_ast::{Expr, MemberExpr, MemberProp, Program, TsFnOrConstructorType, TsType};
 use xrf_typescript::{TypeScriptSymbol, TypeScriptSymbolResolver};
@@ -45,7 +45,7 @@ impl<'a> ExternValueParser<'a> {
     export_name: &str,
     documentation: Option<ExternDocumentation>,
     parameter_docs: &BTreeMap<String, String>,
-  ) -> XRayResult<ExternExport> {
+  ) -> XrfResult<ExternExport> {
     match value {
       Expr::Paren(parenthesized) => self.parse(
         program,
@@ -103,7 +103,7 @@ impl<'a> ExternValueParser<'a> {
     export_name: &str,
     documentation: Option<ExternDocumentation>,
     parameter_docs: &BTreeMap<String, String>,
-  ) -> XRayResult<ExternExport> {
+  ) -> XrfResult<ExternExport> {
     let symbol: TypeScriptSymbol = self
       .symbol_resolver
       .resolve_symbol(self.source_file, self.source_map, program, local_name)?
@@ -131,7 +131,7 @@ impl<'a> ExternValueParser<'a> {
     value: &Expr,
     export_name: &str,
     documentation: Option<ExternDocumentation>,
-  ) -> XRayResult<ExternExport> {
+  ) -> XrfResult<ExternExport> {
     let Expr::Ident(object) = member.obj.as_ref() else {
       return Err(self.invalid_value(value, export_name));
     };
@@ -157,7 +157,7 @@ impl<'a> ExternValueParser<'a> {
   }
 
   /// Build a location-aware diagnostic for an unsupported extern value.
-  fn invalid_value(&self, value: &Expr, export_name: &str) -> xrf_error::XRayError {
+  fn invalid_value(&self, value: &Expr, export_name: &str) -> xrf_error::XrfError {
     invalid_at(
       self.source_map,
       value.span().lo,

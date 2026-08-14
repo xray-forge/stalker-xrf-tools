@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
 
@@ -25,7 +25,7 @@ impl ParticleEffectFrame {
 
 impl ChunkReadWrite for ParticleEffectFrame {
   /// Read frame data from chunk redder.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let particle_frame: Self = Self {
       texture_size: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
       reserved: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
@@ -40,7 +40,7 @@ impl ChunkReadWrite for ParticleEffectFrame {
   }
 
   /// Write frame data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_f32::<T>(self.texture_size.0)?;
     writer.write_f32::<T>(self.texture_size.1)?;
     writer.write_f32::<T>(self.reserved.0)?;
@@ -55,9 +55,9 @@ impl ChunkReadWrite for ParticleEffectFrame {
 
 impl LtxImportExport for ParticleEffectFrame {
   /// Import particle effect frame data from provided path.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle group '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -86,25 +86,21 @@ impl LtxImportExport for ParticleEffectFrame {
         texture_size[0]
           .trim()
           .parse::<f32>()
-          .or(Err(XRayError::new_parsing_error(
-            "Failed to parse texture_size W value",
-          )))?,
+          .or(Err(XrfError::new_parsing_error("Failed to parse texture_size W value")))?,
         texture_size[1]
           .trim()
           .parse::<f32>()
-          .or(Err(XRayError::new_parsing_error(
-            "Failed to parse texture_size H value",
-          )))?,
+          .or(Err(XrfError::new_parsing_error("Failed to parse texture_size H value")))?,
       ),
       reserved: (
         reserved[0]
           .trim()
           .parse::<f32>()
-          .or(Err(XRayError::new_parsing_error("Failed to parse reserved X value")))?,
+          .or(Err(XrfError::new_parsing_error("Failed to parse reserved X value")))?,
         reserved[1]
           .trim()
           .parse::<f32>()
-          .or(Err(XRayError::new_parsing_error("Failed to parse reserved Y value")))?,
+          .or(Err(XrfError::new_parsing_error("Failed to parse reserved Y value")))?,
       ),
       frame_dimension_x: read_ltx_field("frame_dimension_x", section)?,
       frame_count: read_ltx_field("frame_count", section)?,
@@ -113,7 +109,7 @@ impl LtxImportExport for ParticleEffectFrame {
   }
 
   /// Export particle effect frame data into provided path.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -138,7 +134,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -152,7 +148,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -192,7 +188,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -227,7 +223,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: ParticleEffectFrame = ParticleEffectFrame {
       texture_size: (74.0, 236.5),
       reserved: (263.5, 5369.5),

@@ -4,7 +4,7 @@ use xrf_chunk::{
   ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
   read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
 };
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
 
@@ -47,7 +47,7 @@ impl ParticleGroup {
 
 impl ChunkReadWrite for ParticleGroup {
   /// Read group from chunk reader binary data.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = reader.read_children()?;
 
     let particle_group: Self = Self {
@@ -69,7 +69,7 @@ impl ChunkReadWrite for ParticleGroup {
   }
 
   /// Write particle group data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     let mut version_chunk_writer: ChunkWriter = ChunkWriter::new();
     version_chunk_writer.write_u16::<T>(self.version)?;
     version_chunk_writer.flush_chunk_into::<T>(writer, Self::VERSION_CHUNK_ID)?;
@@ -110,9 +110,9 @@ impl ChunkReadWrite for ParticleGroup {
 
 impl LtxImportExport for ParticleGroup {
   /// Import particles group data from provided path.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle group section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -145,7 +145,7 @@ impl LtxImportExport for ParticleGroup {
   }
 
   /// Export particles group data into provided path.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)

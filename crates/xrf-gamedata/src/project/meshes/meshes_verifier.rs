@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;
 use crate::project::meshes::mesh_assets_verifier::MeshAssetsVerifier;
@@ -18,7 +18,7 @@ impl<'a> MeshesVerifier<'a> {
     Self { options, project }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataMeshesVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataMeshesVerificationResult> {
     xrf_output::heading!(self.options.output, "Verify meshes:");
 
     let started_at: Instant = Instant::now();

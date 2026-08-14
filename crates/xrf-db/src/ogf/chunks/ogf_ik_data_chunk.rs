@@ -1,7 +1,7 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::data::ogf::ogf_bone_ik_data::OgfBoneIkData;
 
@@ -18,7 +18,7 @@ pub struct OgfIkDataChunk {
 impl OgfIkDataChunk {
   pub const CHUNK_ID: u32 = 16;
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, bones_count: usize) -> XRayResult<Self> {
+  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, bones_count: usize) -> XrfResult<Self> {
     let mut bones: Vec<OgfBoneIkData> = Vec::with_capacity(bones_count);
 
     for _ in 0..bones_count {
@@ -30,7 +30,7 @@ impl OgfIkDataChunk {
     Ok(Self { bones })
   }
 
-  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  pub fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     for bone in &self.bones {
       bone.write::<T>(writer)?;
     }
@@ -44,7 +44,7 @@ mod tests {
   use std::io::Write;
 
   use xrf_chunk::{ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -114,7 +114,7 @@ mod tests {
     }
   }
 
-  fn write_then_read(name: &str, chunk: &OgfIkDataChunk) -> XRayResult<OgfIkDataChunk> {
+  fn write_then_read(name: &str, chunk: &OgfIkDataChunk) -> XrfResult<OgfIkDataChunk> {
     let filename: String = get_relative_test_sample_file_path(file!(), name);
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -137,7 +137,7 @@ mod tests {
   }
 
   #[test]
-  fn round_trips_bones_with_friction() -> XRayResult {
+  fn round_trips_bones_with_friction() -> XrfResult {
     let chunk: OgfIkDataChunk = OgfIkDataChunk {
       bones: vec![bone(1), bone(1)],
     };
@@ -152,7 +152,7 @@ mod tests {
   }
 
   #[test]
-  fn round_trips_version_zero_bones_without_friction() -> XRayResult {
+  fn round_trips_version_zero_bones_without_friction() -> XrfResult {
     // Version 0 records stop before friction, so reading must not consume four bytes that are not there.
     let chunk: OgfIkDataChunk = OgfIkDataChunk { bones: vec![bone(0)] };
 

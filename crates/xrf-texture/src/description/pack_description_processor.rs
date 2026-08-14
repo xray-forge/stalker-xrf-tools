@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_equal;
 
 use crate::constants::{DDS_EXTENSION, UI_MIPMAP_LEVELS, UI_MIPMAPS};
@@ -15,7 +15,7 @@ pub struct PackDescriptionProcessor {}
 
 impl PackDescriptionProcessor {
   /// Pack list of xml files by options.
-  pub fn pack_xml_descriptions(options: &PackDescriptionOptions) -> XRayResult {
+  pub fn pack_xml_descriptions(options: &PackDescriptionOptions) -> XrfResult {
     let description: XmlDescriptionCollection = XmlDescriptionCollection::get_descriptions(options)?;
     let mut count: u32 = 0;
 
@@ -34,7 +34,7 @@ impl PackDescriptionProcessor {
     Ok(())
   }
 
-  pub fn pack_xml_description(options: &PackDescriptionOptions, file: &TextureFileDescriptor) -> XRayResult<bool> {
+  pub fn pack_xml_description(options: &PackDescriptionOptions, file: &TextureFileDescriptor) -> XrfResult<bool> {
     let full_name: PathBuf = options.base.join(format!("{}.{}", file.name, DDS_EXTENSION));
 
     let (width, height) = file.get_dimension_boundaries();
@@ -78,11 +78,11 @@ impl PackDescriptionProcessor {
 
           result
             .copy_from(&texture_dds, texture.x, texture.y)
-            .map_err(|error| XRayError::new_texture_processing_error(error.to_string()))?;
+            .map_err(|error| XrfError::new_texture_processing_error(error.to_string()))?;
         }
         Err(error) => {
           if options.is_strict {
-            return Err(XRayError::new_texture_processing_error(format!(
+            return Err(XrfError::new_texture_processing_error(format!(
               "Failed to read texture dds {} for {} ({}): {}",
               texture.id,
               file.name,

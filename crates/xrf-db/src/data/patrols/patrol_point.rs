@@ -3,7 +3,7 @@ use std::io::Write;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
 
@@ -30,7 +30,7 @@ impl PatrolPoint {
 
 impl ChunkReadWriteList for PatrolPoint {
   /// Read points from the chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
     let mut points: Vec<Self> = Vec::new();
 
     for (index, point_reader) in ChunkIterator::from_start(reader)?.enumerate() {
@@ -57,7 +57,7 @@ impl ChunkReadWriteList for PatrolPoint {
   }
 
   /// Write list of patrol points into chunk writer.
-  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XRayResult {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XrfResult {
     for (index, point) in list.iter().enumerate() {
       let mut point_chunk_writer: ChunkWriter = ChunkWriter::new();
 
@@ -79,7 +79,7 @@ impl ChunkReadWriteList for PatrolPoint {
 
 impl ChunkReadWrite for PatrolPoint {
   /// Read patrol point data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let point: Self = Self {
       name: reader.read_w1251_string()?,
       position: reader.read_xr::<T, _>()?,
@@ -94,7 +94,7 @@ impl ChunkReadWrite for PatrolPoint {
   }
 
   /// Write patrol point data into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_w1251_string(&self.name)?;
     writer.write_xr::<T, _>(&self.position)?;
     writer.write_u32::<T>(self.flags)?;
@@ -107,9 +107,9 @@ impl ChunkReadWrite for PatrolPoint {
 
 impl LtxImportExport for PatrolPoint {
   /// Import patrol point data from ltx config.
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Patrol point section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -126,7 +126,7 @@ impl LtxImportExport for PatrolPoint {
   }
 
   /// Export patrol point data into ltx.
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("name", &self.name)
@@ -147,7 +147,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -161,7 +161,7 @@ mod tests {
   use crate::export::LtxImportExport;
 
   #[test]
-  fn test_read_write_list() -> XRayResult {
+  fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -217,7 +217,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -250,7 +250,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -275,7 +275,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: PatrolPoint = PatrolPoint {
       name: String::from("patrol-point-serialized"),
       position: Vector3d::new(5.5, -2.3, 6.0),

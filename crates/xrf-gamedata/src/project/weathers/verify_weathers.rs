@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
@@ -20,7 +20,7 @@ impl GamedataProject {
   pub fn verify_weathers(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataWeathersVerificationResult> {
+  ) -> XrfResult<GamedataWeathersVerificationResult> {
     xrf_output::heading!(options.output, "Verify weathers:");
 
     let started_at: Instant = Instant::now();
@@ -38,7 +38,7 @@ impl GamedataProject {
       .collect();
 
     let checked_weather_files_count: u32 = u32::try_from(weather_configs.len())
-      .map_err(|_| XRayError::new_verify_error("Weather config count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Weather config count exceeds the supported result range"))?;
     let definitions: WeatherDefinitions = WeatherDefinitions::read(&self.ltx_project.root);
     let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();
     let mut findings: Vec<Finding> = Vec::new();

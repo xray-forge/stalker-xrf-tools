@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{OgfFile, OgfMotionRefsProcessor, OgfRefsPatchReport, XRayByteOrder};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -99,7 +99,7 @@ impl PatchOgfMotionRefsCommand {
     destination: &Path,
     motion_refs: &[String],
     is_dry_run: bool,
-  ) -> XRayResult {
+  ) -> XrfResult {
     let existing: Vec<String> = OgfFile::read_motion_refs_from_path::<XRayByteOrder, _>(&path)?;
 
     xrf_output::info!(

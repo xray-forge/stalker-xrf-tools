@@ -2,7 +2,7 @@ use std::io::SeekFrom;
 
 use byteorder::ReadBytesExt;
 use fileslice::FileSlice;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::reader::chunk_reader::ChunkReader;
 use crate::{ChunkDataSource, XRayByteOrder};
@@ -15,7 +15,7 @@ pub struct ChunkIterator<'a, T: ChunkDataSource = FileSlice> {
 }
 
 impl<T: ChunkDataSource> ChunkIterator<'_, T> {
-  pub fn from_start(reader: &mut ChunkReader<T>) -> XRayResult<ChunkIterator<'_, T>> {
+  pub fn from_start(reader: &mut ChunkReader<T>) -> XrfResult<ChunkIterator<'_, T>> {
     reader.reset_pos()?;
 
     Ok(ChunkIterator { reader, failed: false })
@@ -25,7 +25,7 @@ impl<T: ChunkDataSource> ChunkIterator<'_, T> {
     ChunkIterator { reader, failed: false }
   }
 
-  fn fail(&mut self, error: XRayError) -> Option<XRayResult<ChunkReader<T>>> {
+  fn fail(&mut self, error: XrfError) -> Option<XrfResult<ChunkReader<T>>> {
     self.failed = true;
 
     Some(Err(error))
@@ -34,7 +34,7 @@ impl<T: ChunkDataSource> ChunkIterator<'_, T> {
 
 /// Iterates over chunk and read child samples.
 impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
-  type Item = XRayResult<ChunkReader<T>>;
+  type Item = XrfResult<ChunkReader<T>>;
 
   fn next(&mut self) -> Option<Self::Item> {
     if self.failed || self.reader.is_ended() {
@@ -45,7 +45,7 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
     let remaining: u64 = self.reader.read_bytes_remain();
 
     if remaining < header_size {
-      return self.fail(XRayError::new_invalid_error(format!(
+      return self.fail(XrfError::new_invalid_error(format!(
         "Incomplete chunk header at position {}, expected {} bytes but only {} remain",
         self.reader.cursor_pos(),
         header_size,
@@ -70,7 +70,7 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
     };
 
     if id & (1 << 31) != 0 {
-      return self.fail(XRayError::new_not_implemented_error(format!(
+      return self.fail(XrfError::new_not_implemented_error(format!(
         "Compressed chunk {id:#010x} at position {position}"
       )));
     }
@@ -78,14 +78,14 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
     let end_position: u64 = match position.checked_add(size as u64) {
       Some(end_position) => end_position,
       None => {
-        return self.fail(XRayError::new_invalid_error(format!(
+        return self.fail(XrfError::new_invalid_error(format!(
           "Chunk {id:#010x} size {size} overflows its position {position}"
         )));
       }
     };
 
     if end_position > self.reader.end_pos() {
-      return self.fail(XRayError::new_invalid_error(format!(
+      return self.fail(XrfError::new_invalid_error(format!(
         "Chunk {id:#010x} at position {position} declares {size} bytes, beyond source end {}",
         self.reader.end_pos()
       )));
@@ -108,12 +108,12 @@ impl<T: ChunkDataSource> Iterator for ChunkIterator<'_, T> {
 mod tests {
   use std::io::SeekFrom;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::{ChunkDataSource, ChunkReader, InMemoryChunkDataSource};
 
   #[test]
-  fn rejects_incomplete_chunk_header() -> XRayResult {
+  fn rejects_incomplete_chunk_header() -> XrfResult {
     let mut reader: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 0, 0])?;
     let error: String = match reader.read_children() {
       Ok(_) => panic!("Expected incomplete chunk header to fail"),
@@ -126,7 +126,7 @@ mod tests {
   }
 
   #[test]
-  fn rejects_chunk_data_beyond_source_end() -> XRayResult {
+  fn rejects_chunk_data_beyond_source_end() -> XrfResult {
     let mut reader: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[1, 0, 0, 0, 10, 0, 0, 0, 0, 0])?;
     let error: String = match reader.read_children() {
       Ok(_) => panic!("Expected oversized chunk to fail"),
@@ -139,7 +139,7 @@ mod tests {
   }
 
   #[test]
-  fn rejects_cursor_position_beyond_source_end() -> XRayResult {
+  fn rejects_cursor_position_beyond_source_end() -> XrfResult {
     let mut reader: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 0, 0])?;
     reader.data.set_seek(SeekFrom::Start(4))?;
 

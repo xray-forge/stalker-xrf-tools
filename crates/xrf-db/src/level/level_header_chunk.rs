@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 /// `hdrLEVEL` in c++ codebase, stored in the `fsL_HEADER` chunk of the `level` file.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -17,7 +17,7 @@ impl LevelHeaderChunk {
 
 impl ChunkReadWrite for LevelHeaderChunk {
   /// Read level header data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       xrlc_version: reader.read_u16::<T>()?,
       xrlc_quality: reader.read_u16::<T>()?,
@@ -25,7 +25,7 @@ impl ChunkReadWrite for LevelHeaderChunk {
   }
 
   /// Write level header data into the chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u16::<T>(self.xrlc_version)?;
     writer.write_u16::<T>(self.xrlc_quality)?;
 
@@ -36,7 +36,7 @@ impl ChunkReadWrite for LevelHeaderChunk {
 #[cfg(test)]
 mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -46,7 +46,7 @@ mod tests {
   use crate::level::level_header_chunk::LevelHeaderChunk;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 

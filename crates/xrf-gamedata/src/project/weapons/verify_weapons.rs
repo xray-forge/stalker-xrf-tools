@@ -2,7 +2,7 @@ use std::path::Path;
 use std::time::{Duration, Instant};
 
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
 
 use crate::GamedataFindingFactory;
@@ -15,7 +15,7 @@ use crate::project::weapons::weapons_utils::{get_weapon_animation_name, is_weapo
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
 impl GamedataProject {
-  pub fn verify_weapons(&self, options: &GamedataProjectVerifyOptions) -> XRayResult<GamedataWeaponVerificationResult> {
+  pub fn verify_weapons(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<GamedataWeaponVerificationResult> {
     xrf_output::heading!(options.output, "Verify weapons:");
 
     let started_at: Instant = Instant::now();
@@ -88,7 +88,7 @@ impl GamedataProject {
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> XRayResult<bool> {
+  ) -> XrfResult<bool> {
     xrf_output::verbose!(options.output, "Verify weapon ltx config [{section_name}]");
 
     let mut is_weapon_valid: bool = true;
@@ -133,7 +133,7 @@ impl GamedataProject {
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> XRayResult<bool> {
+  ) -> XrfResult<bool> {
     // Only weapons that can carry a launcher ever reach the grenade launcher bore branch.
     if section.get("grenade_launcher_status").is_none_or(|it| it.trim() == "0") {
       return Ok(true);
@@ -170,7 +170,7 @@ impl GamedataProject {
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> XRayResult<bool> {
+  ) -> XrfResult<bool> {
     let mut is_valid: bool = true;
 
     if let Some(visual) = &section
@@ -305,7 +305,7 @@ impl GamedataProject {
     ltx: &Ltx,
     section_name: &str,
     section: &Section,
-  ) -> XRayResult<bool> {
+  ) -> XrfResult<bool> {
     let mut are_sounds_valid: bool = true;
 
     for sound_section in ["snd_draw", "snd_empty", "snd_holster", "snd_reload", "snd_shoot"] {
@@ -369,7 +369,7 @@ impl GamedataProject {
     options: &GamedataProjectVerifyOptions,
     section_name: &str,
     section: &Section,
-  ) -> XRayResult<bool> {
+  ) -> XrfResult<bool> {
     let issues: Vec<WeaponSoundLayerIssue> = weapon_sound_layer_issues(section);
     let mut is_valid: bool = issues.is_empty();
 
@@ -440,7 +440,7 @@ impl GamedataProject {
     section_name: &str,
     field_name: &str,
     field_value: &str,
-  ) -> XRayResult<bool> {
+  ) -> XrfResult<bool> {
     let mut is_valid: bool = true;
 
     // Sounds field is 1-3 comma separated values:

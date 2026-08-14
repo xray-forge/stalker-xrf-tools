@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::data::particles::particle_action_type::ParticleActionType;
@@ -17,7 +17,7 @@ pub struct ParticleActionCopyVertex {
 }
 
 impl ChunkReadWrite for ParticleActionCopyVertex {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       action_flags: reader.read_u32::<T>()?,
       action_type: reader.read_xr::<T, _>()?,
@@ -25,7 +25,7 @@ impl ChunkReadWrite for ParticleActionCopyVertex {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.action_flags)?;
     writer.write_xr::<T, _>(&self.action_type)?;
     writer.write_u32::<T>(self.copy_position)?;
@@ -35,9 +35,9 @@ impl ChunkReadWrite for ParticleActionCopyVertex {
 }
 
 impl LtxImportExport for ParticleActionCopyVertex {
-  fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle action section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -51,7 +51,7 @@ impl LtxImportExport for ParticleActionCopyVertex {
     })
   }
 
-  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set("action_flags", self.action_flags.to_string())

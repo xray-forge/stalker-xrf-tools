@@ -1,7 +1,7 @@
 use std::io::Read;
 
 use byteorder::{ByteOrder, ReadBytesExt};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::chunk_trait::ChunkReadWrite;
 use crate::source::chunk_data_source::ChunkDataSource;
@@ -9,24 +9,24 @@ use crate::{ChunkReadWriteList, ChunkReadWriteOptional, ChunkReader};
 
 impl ChunkReader {
   #[inline]
-  pub fn read_xr<T: ByteOrder, C: ChunkReadWrite>(&mut self) -> XRayResult<C> {
+  pub fn read_xr<T: ByteOrder, C: ChunkReadWrite>(&mut self) -> XrfResult<C> {
     C::read::<T>(self)
   }
 
   #[inline]
-  pub fn read_xr_optional<T: ByteOrder, C: ChunkReadWriteOptional>(&mut self) -> XRayResult<Option<C>> {
+  pub fn read_xr_optional<T: ByteOrder, C: ChunkReadWriteOptional>(&mut self) -> XrfResult<Option<C>> {
     C::read_optional::<T>(self)
   }
 
   #[inline]
-  pub fn read_xr_list<T: ByteOrder, C: ChunkReadWriteList>(&mut self) -> XRayResult<Vec<C>> {
+  pub fn read_xr_list<T: ByteOrder, C: ChunkReadWriteList>(&mut self) -> XrfResult<Vec<C>> {
     C::read_list::<T>(self)
   }
 }
 
 impl<D: ChunkDataSource> ChunkReader<D> {
   /// Read serialized vector from chunk, where u32 count N is followed by N u16 entries.
-  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> XRayResult<Vec<u16>> {
+  pub fn read_u16_vector<T: ByteOrder>(&mut self) -> XrfResult<Vec<u16>> {
     let count: u32 = self.read_u32::<T>()?;
     let mut vector: Vec<u16> = Vec::with_capacity(count as usize);
 
@@ -38,12 +38,12 @@ impl<D: ChunkDataSource> ChunkReader<D> {
   }
 
   /// Read raw bytes.
-  pub fn read_bytes(&mut self, count: usize) -> XRayResult<Vec<u8>> {
+  pub fn read_bytes(&mut self, count: usize) -> XrfResult<Vec<u8>> {
     Ok(self.data.read_bytes(count)?)
   }
 
   /// Read all remaining raw bytes.
-  pub fn read_remaining(&mut self) -> XRayResult<Vec<u8>> {
+  pub fn read_remaining(&mut self) -> XrfResult<Vec<u8>> {
     let mut buf: Vec<u8> = Vec::new();
 
     self.read_to_end(&mut buf)?;
@@ -54,14 +54,14 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
 #[cfg(test)]
 mod tests {
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::XRayByteOrder;
   use crate::reader::chunk_reader::ChunkReader;
   use crate::source::chunk_memory_source::InMemoryChunkDataSource;
 
   #[test]
-  fn test_read_u16_vector() -> XRayResult {
+  fn test_read_u16_vector() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> =
       ChunkReader::from_bytes(&[4, 0, 0, 0, 0, 0, 1, 0, 2, 0, 3, 0])?;
 
@@ -79,7 +79,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_bytes() -> XRayResult {
+  fn test_read_bytes() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])?;
 
     assert_eq!(chunk.read_bytes_remain(), 10, "Expect 10 bytes remaining");
@@ -96,7 +96,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_remaining() -> XRayResult {
+  fn test_read_remaining() -> XrfResult {
     assert_eq!(ChunkReader::from_bytes(&[0, 1, 2])?.read_remaining()?, vec![0, 1, 2]);
     assert_eq!(ChunkReader::from_bytes(&[0])?.read_remaining()?, vec![0]);
     assert_eq!(ChunkReader::from_bytes(&[])?.read_remaining()?, Vec::<u8>::new());

@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use rayon::prelude::*;
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
 use crate::GamedataFindingFactory;
@@ -22,7 +22,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     Self { options, project }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataPlayerHudAnimationsVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataPlayerHudAnimationsVerificationResult> {
     xrf_output::verbose!(self.options.output, "Verify player hud animations");
 
     let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
@@ -34,7 +34,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
       .collect();
 
     let checked_huds_count: u32 = u32::try_from(player_hud_sections.len())
-      .map_err(|_| XRayError::new_verify_error("Player HUD count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Player HUD count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = player_hud_sections
       .par_iter()
@@ -59,7 +59,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
       .collect();
 
     let invalid_huds_count: u32 = u32::try_from(findings.len())
-      .map_err(|_| XRayError::new_verify_error("Invalid player HUD count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Invalid player HUD count exceeds the supported result range"))?;
 
     xrf_output::info!(
       self.options.output,
@@ -77,7 +77,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     })
   }
 
-  fn verify_player_hud_animation(&self, system_ltx: &Ltx, section_name: &str, section: &Section) -> XRayResult<bool> {
+  fn verify_player_hud_animation(&self, system_ltx: &Ltx, section_name: &str, section: &Section) -> XrfResult<bool> {
     let mut is_valid: bool = true;
     let mut hud_motions: HashSet<String> = HashSet::new();
 
@@ -182,7 +182,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     system_ltx: &Ltx,
     section_name: &str,
     motions: &HashSet<String>,
-  ) -> XRayResult<bool> {
+  ) -> XrfResult<bool> {
     xrf_output::verbose!(self.options.output, "Verify weapons animations for [{section_name}]");
 
     let mut is_valid: bool = true;
@@ -227,7 +227,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     Ok(is_valid)
   }
 
-  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XRayResult<HashSet<PathBuf>> {
+  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XrfResult<HashSet<PathBuf>> {
     let motion_refs: Vec<String> = OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path)?;
     let mut assets: HashSet<PathBuf> = HashSet::new();
 

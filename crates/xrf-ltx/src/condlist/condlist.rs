@@ -1,4 +1,4 @@
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use super::branch::CondlistBranch;
 use super::span::SourceSpan;
@@ -10,7 +10,7 @@ pub struct Condlist {
 }
 
 impl Condlist {
-  pub fn parse(value: &str) -> XRayResult<Condlist> {
+  pub fn parse(value: &str) -> XrfResult<Condlist> {
     let mut branches: Vec<CondlistBranch> = Vec::new();
     let mut branch_start: usize = 0;
 

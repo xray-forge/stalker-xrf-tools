@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::XRayError;
+use xrf_error::XrfError;
 use xrf_shaders::{SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, XRayShaderScript, is_shader_source_path};
 
 use crate::GamedataFindingFactory;
@@ -186,12 +186,12 @@ impl<'a> ShadersVerifier<'a> {
       .is_some_and(|value| value.eq_ignore_ascii_case(extension))
   }
 
-  fn shader_error_rule_id(error: &XRayError) -> GamedataVerificationRule {
+  fn shader_error_rule_id(error: &XrfError) -> GamedataVerificationRule {
     match error {
-      XRayError::Invalid { .. } => GamedataVerificationRule::ShadersIncludeSyntax,
-      XRayError::NotFound { .. } => GamedataVerificationRule::ShadersIncludeMissing,
-      XRayError::Read { .. } | XRayError::Io { .. } => GamedataVerificationRule::ShadersSourceRead,
-      XRayError::Verify { .. } => GamedataVerificationRule::ShadersIncludeCycle,
+      XrfError::Invalid { .. } => GamedataVerificationRule::ShadersIncludeSyntax,
+      XrfError::NotFound { .. } => GamedataVerificationRule::ShadersIncludeMissing,
+      XrfError::Read { .. } | XrfError::Io { .. } => GamedataVerificationRule::ShadersSourceRead,
+      XrfError::Verify { .. } => GamedataVerificationRule::ShadersIncludeCycle,
       _ => GamedataVerificationRule::ShadersSourceInvalid,
     }
   }
@@ -218,13 +218,13 @@ mod tests {
   use std::fs;
   use std::path::{Path, PathBuf};
 
-  use xrf_error::{XRayError, XRayResult};
+  use xrf_error::{XrfError, XrfResult};
 
   use super::ShadersVerifier;
   use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
   #[test]
-  fn validates_d3d11_scripts_and_renderer_then_root_includes() -> XRayResult {
+  fn validates_d3d11_scripts_and_renderer_then_root_includes() -> XrfResult {
     let root: PathBuf = create_shader_root("d3d11")?;
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
       output: xrf_output::OutputOptions::default(),
@@ -252,7 +252,7 @@ mod tests {
   }
 
   #[test]
-  fn skips_a_missing_open_gl_renderer_root() -> XRayResult {
+  fn skips_a_missing_open_gl_renderer_root() -> XrfResult {
     let root: PathBuf = create_shader_root("missing-open-gl")?;
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
       output: xrf_output::OutputOptions::default(),
@@ -275,7 +275,7 @@ mod tests {
   }
 
   #[test]
-  fn reports_lua_include_and_cycle_problems_together() -> XRayResult {
+  fn reports_lua_include_and_cycle_problems_together() -> XrfResult {
     let root: PathBuf = create_shader_root("static-problems")?;
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
       output: xrf_output::OutputOptions::default(),
@@ -303,7 +303,7 @@ mod tests {
     Ok(())
   }
 
-  fn create_shader_root(test_name: &str) -> XRayResult<PathBuf> {
+  fn create_shader_root(test_name: &str) -> XrfResult<PathBuf> {
     let root: PathBuf = std::env::temp_dir().join("xrf-gamedata-shader-tests").join(test_name);
 
     if root.exists() {
@@ -316,10 +316,10 @@ mod tests {
     Ok(root)
   }
 
-  fn write_file(path: &Path, contents: &str) -> XRayResult {
+  fn write_file(path: &Path, contents: &str) -> XrfResult {
     let parent: &Path = path
       .parent()
-      .ok_or_else(|| XRayError::new_unexpected_error(format!("Shader test path has no parent: {}", path.display())))?;
+      .ok_or_else(|| XrfError::new_unexpected_error(format!("Shader test path has no parent: {}", path.display())))?;
 
     fs::create_dir_all(parent)?;
     fs::write(path, contents)?;

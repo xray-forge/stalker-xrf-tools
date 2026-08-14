@@ -3,7 +3,7 @@ use std::io::Write;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, encode_string_to_bytes, get_windows1251_encoder};
 
 /// Level of detail visual of a skeleton, `OGF_S_LODS` in the engine.
@@ -21,7 +21,7 @@ impl OgfLodsChunk {
 }
 
 impl ChunkReadWrite for OgfLodsChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let bytes: Vec<u8> = reader.read_remaining()?;
 
     Ok(Self {
@@ -29,7 +29,7 @@ impl ChunkReadWrite for OgfLodsChunk {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_all(&encode_string_to_bytes(&self.lods, get_windows1251_encoder())?)?;
 
     Ok(())
@@ -41,7 +41,7 @@ mod tests {
   use std::io::Write;
 
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
     get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
@@ -51,7 +51,7 @@ mod tests {
   use super::OgfLodsChunk;
 
   /// Round trip the given text through a real chunk, the way the reader sees it on disk.
-  fn write_then_read(name: &str, lods: &str) -> XRayResult<OgfLodsChunk> {
+  fn write_then_read(name: &str, lods: &str) -> XrfResult<OgfLodsChunk> {
     let filename: String = get_relative_test_sample_file_path(file!(), name);
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -77,7 +77,7 @@ mod tests {
   }
 
   #[test]
-  fn round_trips_text_without_a_null_terminator() -> XRayResult {
+  fn round_trips_text_without_a_null_terminator() -> XrfResult {
     // Real files store the visual path with no terminator, which a stringZ read cannot handle at all.
     let path: &str = r"dynamics\weapons\wpn_abakan\wpn_abakan_lod";
 
@@ -87,7 +87,7 @@ mod tests {
   }
 
   #[test]
-  fn round_trips_an_empty_payload() -> XRayResult {
+  fn round_trips_an_empty_payload() -> XrfResult {
     assert_eq!(write_then_read("empty.chunk", "")?.lods, "");
 
     Ok(())

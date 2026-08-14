@@ -4,10 +4,10 @@ use serde::Serialize;
 use thiserror::Error as ThisError;
 use xrf_error_derive::ErrorConstructors;
 
-/// Error while working with translation file
+/// Error produced by XRF tools and libraries.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(ThisError, Debug, ErrorConstructors, Serialize)]
-pub enum XRayError {
+pub enum XrfError {
   #[constructor]
   #[error("Assertion error: {message}")]
   Assertion { message: String },
@@ -65,7 +65,7 @@ pub enum XRayError {
   LtxParse { line: usize, col: usize, message: String },
   #[error(
   "Ltx scheme error{location} [{section}] {field} : {message}",
-  location = XRayError::format_ltx_scheme_location(at.as_deref())
+  location = XrfError::format_ltx_scheme_location(at.as_deref())
 )]
   LtxScheme {
     section: String,
@@ -89,7 +89,7 @@ pub enum XRayError {
   },
 }
 
-impl XRayError {
+impl XrfError {
   pub fn new_chunk_not_ended_error<T>(message: T, remaining: u64) -> Self
   where
     T: Into<String>,
@@ -151,7 +151,7 @@ impl XRayError {
   }
 }
 
-impl XRayError {
+impl XrfError {
   fn format_ltx_scheme_location(at: Option<&str>) -> String {
     at.map(|path| format!(" in '{path}'")).unwrap_or_default()
   }
@@ -159,17 +159,36 @@ impl XRayError {
 
 #[cfg(test)]
 mod tests {
-  use super::XRayError;
+  use serde_json::json;
+
+  use super::XrfError;
 
   #[test]
   fn formats_ltx_scheme_error_locations_readably() {
     assert_eq!(
-      XRayError::new_scheme_error_at("section", "field", "message", "configs/system.ltx").to_string(),
+      XrfError::new_scheme_error_at("section", "field", "message", "configs/system.ltx").to_string(),
       "Ltx scheme error in 'configs/system.ltx' [section] field : message"
     );
     assert_eq!(
-      XRayError::new_ltx_scheme_error("section", "field", "message").to_string(),
+      XrfError::new_ltx_scheme_error("section", "field", "message").to_string(),
       "Ltx scheme error [section] field : message"
+    );
+  }
+
+  #[test]
+  fn preserves_externally_tagged_serialization_contract() {
+    let error = XrfError::new_scheme_error_at("section", "field", "message", "configs/system.ltx");
+
+    assert_eq!(
+      serde_json::to_value(error).expect("XRF errors should serialize"),
+      json!({
+        "LtxScheme": {
+          "section": "section",
+          "field": "field",
+          "message": "message",
+          "at": "configs/system.ltx"
+        }
+      })
     );
   }
 }

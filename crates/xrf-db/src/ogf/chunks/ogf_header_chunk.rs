@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::data::ogf::ogf_box::OgfBox;
 use crate::data::ogf::ogf_sphere::OgfSphere;
@@ -20,13 +20,13 @@ impl OgfHeaderChunk {
 }
 
 impl ChunkReadWrite for OgfHeaderChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Reading header chunk: {} bytes", reader.read_bytes_remain());
 
     let version: u8 = reader.read_u8()?;
 
     if version != 4 {
-      return Err(XRayError::new_not_implemented_error(format!(
+      return Err(XrfError::new_not_implemented_error(format!(
         "Unexpected version '{}' of OGF file, only version 4 is supported",
         version
       )));
@@ -45,7 +45,7 @@ impl ChunkReadWrite for OgfHeaderChunk {
     Ok(header)
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u8(self.version)?;
     writer.write_u8(self.model_type)?;
     writer.write_u16::<T>(self.shader_id)?;

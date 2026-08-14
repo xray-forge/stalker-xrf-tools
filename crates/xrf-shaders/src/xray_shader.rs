@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::xray_shader_import_reference::XRayShaderImportReference;
 use crate::{ShaderRenderer, XRayShaderCompiler, XRayShaderImport, XRayShaderSourceLoader};
@@ -16,7 +16,7 @@ pub struct XRayShader {
 impl XRayShader {
   /// Load a shader and recursively resolve all of its renderer-specific
   /// imports through the provided source loader.
-  pub fn load<P, L>(path: P, renderer: ShaderRenderer, shaders_root: &Path, loader: &L) -> XRayResult<Self>
+  pub fn load<P, L>(path: P, renderer: ShaderRenderer, shaders_root: &Path, loader: &L) -> XrfResult<Self>
   where
     P: AsRef<Path>,
     L: XRayShaderSourceLoader,
@@ -27,7 +27,7 @@ impl XRayShader {
   }
 
   /// Compile this resolved shader through a renderer-specific compiler.
-  pub fn compile<C>(&self, renderer: ShaderRenderer, compiler: &C) -> XRayResult
+  pub fn compile<C>(&self, renderer: ShaderRenderer, compiler: &C) -> XrfResult
   where
     C: XRayShaderCompiler,
   {
@@ -52,12 +52,12 @@ impl XRayShader {
     shaders_root: &Path,
     loader: &L,
     active_paths: &mut Vec<PathBuf>,
-  ) -> XRayResult<Self>
+  ) -> XrfResult<Self>
   where
     L: XRayShaderSourceLoader,
   {
     let Some(source) = loader.load_source(path)? else {
-      return Err(XRayError::new_not_found_error(format!(
+      return Err(XrfError::new_not_found_error(format!(
         "Shader source was not found: {}",
         path.display()
       )));
@@ -73,12 +73,12 @@ impl XRayShader {
     shaders_root: &Path,
     loader: &L,
     active_paths: &mut Vec<PathBuf>,
-  ) -> XRayResult<Self>
+  ) -> XrfResult<Self>
   where
     L: XRayShaderSourceLoader,
   {
     if active_paths.iter().any(|active_path| active_path == path) {
-      return Err(XRayError::new_verify_error(format!(
+      return Err(XrfError::new_verify_error(format!(
         "Shader include cycle reaches {}",
         path.display()
       )));
@@ -111,7 +111,7 @@ impl XRayShader {
     shaders_root: &Path,
     loader: &L,
     active_paths: &mut Vec<PathBuf>,
-  ) -> XRayResult<Self>
+  ) -> XrfResult<Self>
   where
     L: XRayShaderSourceLoader,
   {
@@ -121,7 +121,7 @@ impl XRayShader {
       }
     }
 
-    Err(XRayError::new_not_found_error(format!(
+    Err(XrfError::new_not_found_error(format!(
       "Shader {} includes missing file '{}' on line {}",
       source_path.display(),
       import.path(),
@@ -135,7 +135,7 @@ mod tests {
   use std::collections::HashMap;
   use std::path::{Path, PathBuf};
 
-  use xrf_error::{XRayError, XRayResult};
+  use xrf_error::{XrfError, XrfResult};
 
   use super::XRayShader;
   use crate::{ShaderRenderer, XRayShaderPlaceholderCompiler, XRayShaderSourceLoader};
@@ -153,13 +153,13 @@ mod tests {
   }
 
   impl XRayShaderSourceLoader for TestSourceLoader {
-    fn load_source(&self, path: &Path) -> XRayResult<Option<Vec<u8>>> {
+    fn load_source(&self, path: &Path) -> XrfResult<Option<Vec<u8>>> {
       Ok(self.sources.get(path).cloned())
     }
   }
 
   #[test]
-  fn loads_nested_renderer_imports() -> XRayResult {
+  fn loads_nested_renderer_imports() -> XrfResult {
     let root: &Path = Path::new("shaders");
     let main_path: PathBuf = root.join("r3/main.ps");
     let common_path: PathBuf = root.join("r3/common.h");
@@ -179,7 +179,7 @@ mod tests {
   }
 
   #[test]
-  fn supports_directx_root_include_fallback() -> XRayResult {
+  fn supports_directx_root_include_fallback() -> XrfResult {
     let root: &Path = Path::new("shaders");
     let main_path: PathBuf = root.join("r3/main.ps");
     let common_path: PathBuf = root.join("shared/common.h");
@@ -196,7 +196,7 @@ mod tests {
   }
 
   #[test]
-  fn follows_renderer_specific_include_rules() -> XRayResult {
+  fn follows_renderer_specific_include_rules() -> XrfResult {
     let root: &Path = Path::new("shaders");
     let directx_path: PathBuf = root.join("r3/directx.ps");
     let directx_common_path: PathBuf = root.join("r3/common.h");
@@ -215,7 +215,7 @@ mod tests {
 
     assert_eq!(directx_shader.imports().len(), 1);
     assert_eq!(directx_shader.imports()[0].shader().path(), directx_common_path);
-    assert!(matches!(opengl_result, Err(XRayError::NotFound { .. })));
+    assert!(matches!(opengl_result, Err(XrfError::NotFound { .. })));
 
     Ok(())
   }
@@ -235,19 +235,19 @@ mod tests {
     let invalid_result = XRayShader::load(&invalid_path, ShaderRenderer::OpenGl, root, &loader);
     let cycle_result = XRayShader::load(&first_path, ShaderRenderer::OpenGl, root, &loader);
 
-    assert!(matches!(invalid_result, Err(XRayError::Invalid { .. })));
-    assert!(matches!(cycle_result, Err(XRayError::Verify { .. })));
+    assert!(matches!(invalid_result, Err(XrfError::Invalid { .. })));
+    assert!(matches!(cycle_result, Err(XrfError::Verify { .. })));
   }
 
   #[test]
-  fn compiler_placeholder_reports_that_compilation_is_not_implemented() -> XRayResult {
+  fn compiler_placeholder_reports_that_compilation_is_not_implemented() -> XrfResult {
     let root: &Path = Path::new("shaders");
     let path: PathBuf = root.join("r3/main.ps");
     let loader: TestSourceLoader = TestSourceLoader::with_sources([(path.clone(), b"float value;\n".to_vec())]);
     let shader: XRayShader = XRayShader::load(&path, ShaderRenderer::DirectX11, root, &loader)?;
     let result = shader.compile(ShaderRenderer::DirectX11, &XRayShaderPlaceholderCompiler);
 
-    assert!(matches!(result, Err(XRayError::NotImplemented { .. })));
+    assert!(matches!(result, Err(XrfError::NotImplemented { .. })));
 
     Ok(())
   }

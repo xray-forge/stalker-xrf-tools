@@ -3,7 +3,7 @@ use std::io::Write;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, assert_length};
 
@@ -43,7 +43,7 @@ impl Patrol {
 
 impl ChunkReadWriteList for Patrol {
   /// Read chunk as list of patrol samples.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
     let mut patrols: Vec<Self> = Vec::new();
 
     for patrol_reader in ChunkIterator::from_start(reader)? {
@@ -58,7 +58,7 @@ impl ChunkReadWriteList for Patrol {
   }
 
   /// Write list of patrols into chunk writer.
-  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XRayResult {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XrfResult {
     for (index, patrol) in list.iter().enumerate() {
       let mut patrol_writer: ChunkWriter = ChunkWriter::new();
 
@@ -73,7 +73,7 @@ impl ChunkReadWriteList for Patrol {
 
 impl ChunkReadWrite for Patrol {
   /// Read chunk as patrol.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let mut meta_reader: ChunkReader = reader.read_child_by_index(Self::META_CHUNK_ID)?;
     let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
 
@@ -104,7 +104,7 @@ impl ChunkReadWrite for Patrol {
   }
 
   /// Write single patrol entity into chunk writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     let mut meta_writer: ChunkWriter = ChunkWriter::new();
     let mut data_writer: ChunkWriter = ChunkWriter::new();
 
@@ -138,9 +138,9 @@ impl Patrol {
     patrols_ltx: &Ltx,
     patrol_points_ltx: &Ltx,
     patrol_links_ltx: &Ltx,
-  ) -> XRayResult<Self> {
+  ) -> XrfResult<Self> {
     let section: &Section = patrols_ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Patrol section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -178,7 +178,7 @@ impl Patrol {
     patrols_ltx: &mut Ltx,
     patrol_points_ltx: &mut Ltx,
     patrol_links_ltx: &mut Ltx,
-  ) -> XRayResult {
+  ) -> XrfResult {
     patrols_ltx
       .with_section(section_name)
       .set("name", &self.name)
@@ -213,7 +213,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -228,7 +228,7 @@ mod tests {
   use crate::data::patrols::patrol_point::PatrolPoint;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -277,7 +277,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_list() -> XRayResult {
+  fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
@@ -351,7 +351,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let original: Patrol = Patrol {
       name: String::from("patrol-name-exp"),
       points: vec![
@@ -415,7 +415,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: Patrol = Patrol {
       name: String::from("patrol-name-serde"),
       points: vec![

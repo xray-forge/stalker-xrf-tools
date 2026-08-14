@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use crate::project::animations::hud_item_animations_verification_result::GamedataHudItemAnimationsVerificationResult;
 use crate::project::animations::hud_item_animations_verifier::HudItemAnimationsVerifier;
@@ -15,7 +15,7 @@ impl GamedataProject {
   pub fn verify_animations(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataAnimationsVerificationResult> {
+  ) -> XrfResult<GamedataAnimationsVerificationResult> {
     xrf_output::heading!(options.output, "Verify animations:");
 
     let started_at: Instant = Instant::now();

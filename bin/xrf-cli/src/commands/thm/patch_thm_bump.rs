@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{ThmBumpPatchReport, ThmBumpProcessor, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -82,7 +82,7 @@ impl GenericCommand for PatchThmBumpCommand {
 
     if to.is_none() && !is_off {
       return Err(
-        XRayError::new_invalid_error("Expected either --to with a bump reference or --off to declare no bump").into(),
+        XrfError::new_invalid_error("Expected either --to with a bump reference or --off to declare no bump").into(),
       );
     }
 
@@ -112,7 +112,7 @@ impl PatchThmBumpCommand {
     destination: &Path,
     to: Option<&str>,
     is_dry_run: bool,
-  ) -> XRayResult {
+  ) -> XrfResult {
     let report: ThmBumpPatchReport = match to {
       Some(to) => ThmBumpProcessor::patch_bump_name_to_path::<XRayByteOrder>(path, destination, to, is_dry_run)?,
       None => ThmBumpProcessor::patch_bump_off_to_path::<XRayByteOrder>(path, destination, is_dry_run)?,

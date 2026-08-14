@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::ShaderRenderer;
 
@@ -11,14 +11,14 @@ pub struct XRayShaderImportReference {
 }
 
 impl XRayShaderImportReference {
-  pub fn parse_all(path: &Path, renderer: ShaderRenderer, source: &[u8]) -> XRayResult<Vec<Self>> {
+  pub fn parse_all(path: &Path, renderer: ShaderRenderer, source: &[u8]) -> XrfResult<Vec<Self>> {
     match renderer {
       ShaderRenderer::DirectX11 => Self::parse_directx11(path, source),
       ShaderRenderer::OpenGl => Self::parse_open_gl(path, source),
     }
   }
 
-  fn parse_directx11(path: &Path, source: &[u8]) -> XRayResult<Vec<Self>> {
+  fn parse_directx11(path: &Path, source: &[u8]) -> XrfResult<Vec<Self>> {
     let mut imports: Vec<Self> = Vec::new();
 
     for (index, line) in String::from_utf8_lossy(source).lines().enumerate() {
@@ -41,7 +41,7 @@ impl XRayShaderImportReference {
         Some('<') => Some((&include[1..], '>')),
         _ => None,
       }) else {
-        return Err(XRayError::new_invalid_error(format!(
+        return Err(XrfError::new_invalid_error(format!(
           "Shader {} has malformed #include on line {line_number}: expected a quoted or angle-bracket import path",
           path.display()
         )));
@@ -53,7 +53,7 @@ impl XRayShaderImportReference {
     Ok(imports)
   }
 
-  fn parse_open_gl(path: &Path, source: &[u8]) -> XRayResult<Vec<Self>> {
+  fn parse_open_gl(path: &Path, source: &[u8]) -> XrfResult<Vec<Self>> {
     let mut imports: Vec<Self> = Vec::new();
 
     for (index, line) in String::from_utf8_lossy(source).lines().enumerate() {
@@ -63,7 +63,7 @@ impl XRayShaderImportReference {
       while let Some(include_offset) = remainder.find("#include") {
         let include: &str = &remainder[include_offset + "#include".len()..];
         let Some(include) = include.trim_start().strip_prefix('"') else {
-          return Err(XRayError::new_invalid_error(format!(
+          return Err(XrfError::new_invalid_error(format!(
             "OpenGL shader {} has malformed #include on line {line_number}: expected a quoted import path",
             path.display()
           )));
@@ -84,9 +84,9 @@ impl XRayShaderImportReference {
     line_number: usize,
     include: &str,
     closing_delimiter: char,
-  ) -> XRayResult<Self> {
+  ) -> XrfResult<Self> {
     let Some(end) = include.find(closing_delimiter) else {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Shader {} has malformed #include on line {line_number}: expected a closing {closing_delimiter}",
         shader_path.display()
       )));
@@ -95,7 +95,7 @@ impl XRayShaderImportReference {
     let import_path: &str = &include[..end];
 
     if import_path.is_empty() {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Shader {} has malformed #include on line {line_number}: import path is empty",
         shader_path.display()
       )));

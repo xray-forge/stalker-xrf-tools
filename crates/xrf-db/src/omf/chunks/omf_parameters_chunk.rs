@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::OmfFile;
 use crate::data::ogf::ogf_motion_definition::OgfMotionDefinition;
@@ -23,11 +23,11 @@ impl OmfParametersChunk {
 }
 
 impl ChunkReadWrite for OmfParametersChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let version: u16 = reader.read_u16::<T>()?;
 
     if !OmfFile::SUPPORTED_VERSIONS.contains(&version) {
-      return Err(XRayError::new_not_implemented_error(format!(
+      return Err(XrfError::new_not_implemented_error(format!(
         "Unexpected parameters version {} on read, only versions {:?} are implemented",
         version,
         OmfFile::SUPPORTED_VERSIONS
@@ -36,10 +36,10 @@ impl ChunkReadWrite for OmfParametersChunk {
 
     let parts: Vec<OgfPart> = reader
       .read_xr_list::<T, _>()
-      .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf parts: {}", error)))?;
+      .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf parts: {}", error)))?;
 
     let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader, version)
-      .map_err(|error| XRayError::new_read_error(format!("Failed to read ogf motion definitions: {}", error)))?;
+      .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf motion definitions: {}", error)))?;
 
     reader.assert_read("Expect all data to be read from omf parameters chunk")?;
 
@@ -50,9 +50,9 @@ impl ChunkReadWrite for OmfParametersChunk {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     if !OmfFile::SUPPORTED_VERSIONS.contains(&self.version) {
-      return Err(XRayError::new_not_implemented_error(format!(
+      return Err(XrfError::new_not_implemented_error(format!(
         "Unexpected parameters version {} on write, only versions {:?} are implemented",
         self.version,
         OmfFile::SUPPORTED_VERSIONS
@@ -63,11 +63,10 @@ impl ChunkReadWrite for OmfParametersChunk {
 
     writer
       .write_xr_list::<T, _>(&self.parts)
-      .map_err(|error| XRayError::new_serialization_error(format!("Failed to write ogf parts: {error}")))?;
+      .map_err(|error| XrfError::new_serialization_error(format!("Failed to write ogf parts: {error}")))?;
 
-    OgfMotionDefinition::write_list::<T>(writer, &self.motions, self.version).map_err(|error| {
-      XRayError::new_serialization_error(format!("Failed to write ogf motion definitions: {error}"))
-    })?;
+    OgfMotionDefinition::write_list::<T>(writer, &self.motions, self.version)
+      .map_err(|error| XrfError::new_serialization_error(format!("Failed to write ogf motion definitions: {error}")))?;
 
     Ok(())
   }

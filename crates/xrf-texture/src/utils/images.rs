@@ -7,7 +7,7 @@ use image::codecs::png::PngEncoder;
 use image::imageops::FilterType;
 use image::{DynamicImage, ExtendedColorType, GenericImage, ImageBuffer, ImageEncoder, ImageFormat, Rgba, RgbaImage};
 use image_dds::{ImageFormat as DDSImageFormat, Mipmaps, dds_from_image};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_output::OutputOptions;
 use xrf_utils::assert;
 
@@ -15,7 +15,7 @@ use xrf_utils::assert;
 ///
 /// Scaling preserves the aspect ratio, so an image whose proportions differ from the bounds ends up
 /// letterboxed rather than distorted. An image that already matches the bounds is returned untouched.
-pub fn fit_image_into_bounds(image: DynamicImage, width: u32, height: u32, source: &Path) -> XRayResult<DynamicImage> {
+pub fn fit_image_into_bounds(image: DynamicImage, width: u32, height: u32, source: &Path) -> XrfResult<DynamicImage> {
   let image_width: u32 = image.width();
   let image_height: u32 = image.height();
 
@@ -69,9 +69,9 @@ pub fn fit_image_into_bounds(image: DynamicImage, width: u32, height: u32, sourc
   Ok(centered.into())
 }
 
-pub fn read_dds_by_path<P: AsRef<Path>>(path: P) -> XRayResult<Dds> {
+pub fn read_dds_by_path<P: AsRef<Path>>(path: P) -> XrfResult<Dds> {
   Dds::read(&mut File::open(path.as_ref())?).map_err(|error| {
-    XRayError::new_texture_processing_error(format!(
+    XrfError::new_texture_processing_error(format!(
       "Failed to read texture by path {}, error: {}",
       path.as_ref().display(),
       error,
@@ -79,9 +79,9 @@ pub fn read_dds_by_path<P: AsRef<Path>>(path: P) -> XRayResult<Dds> {
   })
 }
 
-pub fn dds_to_image(dds: &Dds) -> XRayResult<RgbaImage> {
+pub fn dds_to_image(dds: &Dds) -> XrfResult<RgbaImage> {
   image_dds::image_from_dds(dds, 0).map_err(|error| {
-    XRayError::new_texture_processing_error(format!("Failed to convert DDS to RGBA image: {}'", error,))
+    XrfError::new_texture_processing_error(format!("Failed to convert DDS to RGBA image: {}'", error,))
   })
 }
 
@@ -90,11 +90,11 @@ pub fn dds_to_image(dds: &Dds) -> XRayResult<RgbaImage> {
 /// Dimensions do not have to be multiples of 4. The block compressor pads every mip level out to whole
 /// 4x4 blocks itself and records the unpadded size in the header, so the file keeps the exact
 /// dimensions the image was built with.
-pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: DDSImageFormat, mipmaps: Mipmaps) -> XRayResult {
+pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: DDSImageFormat, mipmaps: Mipmaps) -> XrfResult {
   dds_from_image(image, format, image_dds::Quality::Slow, mipmaps)
-    .map_err(|it| XRayError::new_texture_processing_error(it.to_string()))?
+    .map_err(|it| XrfError::new_texture_processing_error(it.to_string()))?
     .write(&mut BufWriter::new(File::create(path)?))
-    .map_err(|it| XRayError::new_texture_processing_error(it.to_string()))?;
+    .map_err(|it| XrfError::new_texture_processing_error(it.to_string()))?;
 
   Ok(())
 }
@@ -143,7 +143,7 @@ pub fn warn_on_reshaped_ui_dds(output: &OutputOptions, path: &Path, width: u32, 
   }
 }
 
-pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> XRayResult {
+pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> XrfResult {
   Ok(image.save_with_format(path, ImageFormat::Png)?)
 }
 
@@ -151,9 +151,9 @@ pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> XRayResult {
 ///
 /// The path based variant cannot serve callers whose bytes live inside an archive, and writing them to
 /// a temporary file first only to read it back would be doing the same work twice.
-pub fn dds_bytes_as_png(bytes: &[u8]) -> XRayResult<(u32, u32, Vec<u8>)> {
+pub fn dds_bytes_as_png(bytes: &[u8]) -> XrfResult<(u32, u32, Vec<u8>)> {
   let dds: Dds = Dds::read(&mut Cursor::new(bytes))
-    .map_err(|error| XRayError::new_texture_processing_error(format!("Failed to read DDS from memory: {error}.")))?;
+    .map_err(|error| XrfError::new_texture_processing_error(format!("Failed to read DDS from memory: {error}.")))?;
 
   let image: RgbaImage = dds_to_image(&dds)?;
 
@@ -161,12 +161,12 @@ pub fn dds_bytes_as_png(bytes: &[u8]) -> XRayResult<(u32, u32, Vec<u8>)> {
 
   PngEncoder::new(buffer.by_ref())
     .write_image(image.as_raw(), image.width(), image.height(), ExtendedColorType::Rgba8)
-    .map_err(|error| XRayError::new_texture_processing_error(format!("Failed to encode DDS as PNG: {error}.")))?;
+    .map_err(|error| XrfError::new_texture_processing_error(format!("Failed to encode DDS as PNG: {error}.")))?;
 
   Ok((image.width(), image.height(), buffer))
 }
 
-pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XRayResult<(RgbaImage, Vec<u8>)> {
+pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XrfResult<(RgbaImage, Vec<u8>)> {
   let image: RgbaImage = read_dds_by_path(path).and_then(|dds| dds_to_image(&dds))?;
 
   let mut buffer: Vec<u8> = Vec::new();

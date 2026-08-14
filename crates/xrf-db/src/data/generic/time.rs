@@ -4,7 +4,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::constants::NIL;
 
@@ -24,7 +24,7 @@ pub struct Time {
 
 impl ChunkReadWriteOptional for Time {
   /// Read optional time object from the chunk.
-  fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Option<Self>> {
+  fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Option<Self>> {
     if reader.read_u8()? == 1 {
       Ok(Some(Self::read::<T>(reader)?))
     } else {
@@ -33,7 +33,7 @@ impl ChunkReadWriteOptional for Time {
   }
 
   /// Write optional time object into the writer.
-  fn write_optional<T: ByteOrder>(writer: &mut ChunkWriter, time: Option<&Self>) -> XRayResult {
+  fn write_optional<T: ByteOrder>(writer: &mut ChunkWriter, time: Option<&Self>) -> XrfResult {
     if let Some(time) = time {
       writer.write_u8(1)?;
 
@@ -48,7 +48,7 @@ impl ChunkReadWriteOptional for Time {
 
 impl ChunkReadWrite for Time {
   /// Read time object from chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let year: u8 = reader.read_u8()?;
     let month: u8 = reader.read_u8()?;
     let day: u8 = reader.read_u8()?;
@@ -69,7 +69,7 @@ impl ChunkReadWrite for Time {
   }
 
   /// Write time object into the chunk.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u8(self.year)?;
     writer.write_u8(self.month)?;
     writer.write_u8(self.day)?;
@@ -89,7 +89,7 @@ impl Time {
   }
 
   /// Import optional time from string value.
-  pub fn from_str_optional(value: &str) -> XRayResult<Option<Self>> {
+  pub fn from_str_optional(value: &str) -> XrfResult<Option<Self>> {
     if value.trim() == NIL {
       return Ok(None);
     }
@@ -99,37 +99,37 @@ impl Time {
 }
 
 impl FromStr for Time {
-  type Err = XRayError;
+  type Err = XrfError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = string.split(',').map(str::trim).collect();
 
     if parts.len() != 7 {
-      return Err(XRayError::new_parsing_error("Failed to parse time object from string"));
+      return Err(XrfError::new_parsing_error("Failed to parse time object from string"));
     }
 
     Ok(Self {
       year: parts[0]
         .parse()
-        .or(Err(XRayError::new_parsing_error("Failed to parse years value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse years value")))?,
       month: parts[1]
         .parse()
-        .or(Err(XRayError::new_parsing_error("Failed to parse months value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse months value")))?,
       day: parts[2]
         .parse()
-        .or(Err(XRayError::new_parsing_error("Failed to parse days value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse days value")))?,
       hour: parts[3]
         .parse()
-        .or(Err(XRayError::new_parsing_error("Failed to parse hours value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse hours value")))?,
       minute: parts[4]
         .parse()
-        .or(Err(XRayError::new_parsing_error("Failed to parse minutes value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse minutes value")))?,
       second: parts[5]
         .parse()
-        .or(Err(XRayError::new_parsing_error("Failed to parse seconds value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse seconds value")))?,
       millis: parts[6]
         .parse()
-        .or(Err(XRayError::new_parsing_error("Failed to parse millis value")))?,
+        .or(Err(XrfError::new_parsing_error("Failed to parse millis value")))?,
     })
   }
 }
@@ -157,7 +157,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
@@ -168,7 +168,7 @@ mod tests {
   use crate::data::generic::time::Time;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
@@ -203,7 +203,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_some() -> XRayResult {
+  fn test_read_write_optional_some() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
 
@@ -238,7 +238,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write_optional_none() -> XRayResult {
+  fn test_read_write_optional_none() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
 
@@ -263,7 +263,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_to_str() -> XRayResult {
+  fn test_import_export_to_str() -> XrfResult {
     let original: Time = Time {
       year: 20,
       month: 6,
@@ -283,7 +283,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> XRayResult {
+  fn test_from_to_str() -> XrfResult {
     let original: Time = Time {
       year: 22,
       month: 6,
@@ -301,7 +301,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: Time = Time {
       year: 22,
       month: 6,

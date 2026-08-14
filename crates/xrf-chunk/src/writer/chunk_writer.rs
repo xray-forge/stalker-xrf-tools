@@ -2,7 +2,7 @@ use std::io;
 use std::io::Write;
 
 use byteorder::{ByteOrder, WriteBytesExt};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 #[derive(Default)]
 pub struct ChunkWriter {
@@ -15,7 +15,7 @@ impl ChunkWriter {
   }
 
   /// Flush all the written data as chunk into the writable object.
-  pub fn flush_chunk_into<T: ByteOrder>(&mut self, destination: &mut dyn Write, id: u32) -> XRayResult<usize> {
+  pub fn flush_chunk_into<T: ByteOrder>(&mut self, destination: &mut dyn Write, id: u32) -> XrfResult<usize> {
     destination.write_u32::<T>(id)?;
     destination.write_u32::<T>(self.buffer.len() as u32)?;
 
@@ -23,12 +23,12 @@ impl ChunkWriter {
   }
 
   /// Flush all the written data as raw buffer into writable.
-  pub fn flush_raw_into(&mut self, file: &mut dyn Write) -> XRayResult {
+  pub fn flush_raw_into(&mut self, file: &mut dyn Write) -> XrfResult {
     Ok(file.write_all(&self.buffer)?)
   }
 
   /// Flush all the written data as chunk into the file.
-  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, id: u32) -> XRayResult<Vec<u8>> {
+  pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, id: u32) -> XrfResult<Vec<u8>> {
     let mut buffer: Vec<u8> = Vec::with_capacity(size_of::<u32>() * 2 + self.buffer.len());
 
     buffer.write_u32::<T>(id)?;
@@ -39,7 +39,7 @@ impl ChunkWriter {
   }
 
   /// Flush all the written data as chunk into the file.
-  pub fn flush_raw_into_buffer(&mut self) -> XRayResult<Vec<u8>> {
+  pub fn flush_raw_into_buffer(&mut self) -> XrfResult<Vec<u8>> {
     let mut buffer: Vec<u8> = Vec::with_capacity(self.buffer.len());
 
     buffer.write_all(&self.buffer)?;

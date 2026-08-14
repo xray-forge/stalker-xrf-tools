@@ -1,4 +1,4 @@
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 use super::span::SourceSpan;
 
@@ -32,7 +32,7 @@ pub enum CondlistCondition {
 }
 
 impl CondlistBranch {
-  pub fn parse(branch: &str, branch_offset: usize) -> XRayResult<CondlistBranch> {
+  pub fn parse(branch: &str, branch_offset: usize) -> XrfResult<CondlistBranch> {
     let (conditions, conditions_span): (Vec<CondlistCondition>, Option<SourceSpan>) =
       Self::parse_delimited_conditions(branch, branch_offset, b'{', b'}', "condition")?;
     let (effects, effects_span): (Vec<CondlistCondition>, Option<SourceSpan>) =
@@ -60,7 +60,7 @@ impl CondlistBranch {
     opening: u8,
     closing: u8,
     name: &str,
-  ) -> XRayResult<(Vec<CondlistCondition>, Option<SourceSpan>)> {
+  ) -> XrfResult<(Vec<CondlistCondition>, Option<SourceSpan>)> {
     let opening_index: Option<usize> = Self::find_delimiter(value, 0, opening);
     let closing_index: Option<usize> = Self::find_delimiter(value, 0, closing);
 
@@ -129,7 +129,7 @@ impl CondlistBranch {
     value: &str,
     conditions_span: Option<SourceSpan>,
     effects_span: Option<SourceSpan>,
-  ) -> XRayResult<Option<String>> {
+  ) -> XrfResult<Option<String>> {
     let mut spans: Vec<SourceSpan> = [conditions_span, effects_span].into_iter().flatten().collect();
     spans.sort_by_key(|span| span.start);
 
@@ -152,7 +152,7 @@ impl CondlistBranch {
     Ok(Some(String::from(result)))
   }
 
-  fn parse_conditions(value: &str, value_offset: usize) -> XRayResult<Vec<CondlistCondition>> {
+  fn parse_conditions(value: &str, value_offset: usize) -> XrfResult<Vec<CondlistCondition>> {
     let mut conditions: Vec<CondlistCondition> = Vec::new();
     let mut cursor: usize = 0;
 
@@ -169,7 +169,7 @@ impl CondlistBranch {
     Ok(conditions)
   }
 
-  fn parse_condition(value: &str, value_offset: usize, cursor: &mut usize) -> XRayResult<CondlistCondition> {
+  fn parse_condition(value: &str, value_offset: usize, cursor: &mut usize) -> XrfResult<CondlistCondition> {
     let token_start: usize = *cursor;
     let sign: u8 = Self::byte_at(value, *cursor).expect("Cursor should point to a condition token");
 
@@ -323,11 +323,7 @@ impl CondlistBranch {
       _ => unreachable!("Condition signs are checked above"),
     }
   }
-  fn parse_function_call(
-    value: &str,
-    open_parenthesis: usize,
-    value_offset: usize,
-  ) -> XRayResult<(usize, Vec<String>)> {
+  fn parse_function_call(value: &str, open_parenthesis: usize, value_offset: usize) -> XrfResult<(usize, Vec<String>)> {
     let mut cursor: usize = open_parenthesis + 1;
 
     while let Some(byte) = Self::byte_at(value, cursor) {

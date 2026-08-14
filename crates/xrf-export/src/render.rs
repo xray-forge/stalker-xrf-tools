@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_xml::escape_xml;
 
 use crate::extern_manifest::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
@@ -22,7 +22,7 @@ impl ExternFormat {
     }
   }
 
-  pub fn from_extension(path: &std::path::Path) -> XRayResult<Self> {
+  pub fn from_extension(path: &std::path::Path) -> XrfResult<Self> {
     let extension: String = path
       .extension()
       .and_then(|extension| extension.to_str())
@@ -33,7 +33,7 @@ impl ExternFormat {
       "json" => Ok(Self::Json),
       "xml" => Ok(Self::Xml),
       "html" | "htm" => Ok(Self::Html),
-      _ => Err(XRayError::new_invalid_error(format!(
+      _ => Err(XrfError::new_invalid_error(format!(
         "Cannot infer extern export format from '{}'; use --format.",
         path.display()
       ))),
@@ -42,14 +42,14 @@ impl ExternFormat {
 }
 
 impl FromStr for ExternFormat {
-  type Err = XRayError;
+  type Err = XrfError;
 
-  fn from_str(value: &str) -> XRayResult<Self> {
+  fn from_str(value: &str) -> XrfResult<Self> {
     match value {
       "json" => Ok(Self::Json),
       "xml" => Ok(Self::Xml),
       "html" => Ok(Self::Html),
-      _ => Err(XRayError::new_invalid_error(format!(
+      _ => Err(XrfError::new_invalid_error(format!(
         "Unsupported extern export format '{value}'. Expected json, xml, or html."
       ))),
     }
@@ -64,13 +64,13 @@ pub enum LineEndings {
 }
 
 impl FromStr for LineEndings {
-  type Err = XRayError;
+  type Err = XrfError;
 
-  fn from_str(value: &str) -> XRayResult<Self> {
+  fn from_str(value: &str) -> XrfResult<Self> {
     match value {
       "lf" => Ok(Self::Lf),
       "crlf" => Ok(Self::Crlf),
-      _ => Err(XRayError::new_invalid_error(format!(
+      _ => Err(XrfError::new_invalid_error(format!(
         "Unsupported line endings '{value}'. Expected lf or crlf."
       ))),
     }
@@ -82,7 +82,7 @@ pub fn render_extern_manifest(
   manifest: &ExternManifest,
   format: ExternFormat,
   line_endings: Option<LineEndings>,
-) -> XRayResult<String> {
+) -> XrfResult<String> {
   let content: String = match format {
     ExternFormat::Json => serde_json::to_string_pretty(manifest)?,
     ExternFormat::Xml => render_xml(manifest),

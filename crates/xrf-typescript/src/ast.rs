@@ -4,7 +4,7 @@ use swc_ecma_ast::{
   TsKeywordType, TsKeywordTypeKind, TsLit, TsLitType, TsType, TsTypeOperator, TsTypeOperatorOp,
   TsTypeParamInstantiation, TsTypeQuery, TsTypeQueryExpr, TsTypeRef, TsUnionOrIntersectionType,
 };
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 /// Return the unqualified identifier called by a call expression, if present.
 pub fn expression_callee_name(callee: &Callee) -> Option<String> {
@@ -70,7 +70,7 @@ pub fn ts_type_to_string(ts_type: &TsType) -> String {
 /// The AST renderer handles the supported type nodes directly. For complex
 /// source-dependent nodes, such as type literals, this uses their source
 /// snippet and normalizes whitespace instead of losing information.
-pub fn canonical_ts_type_to_string(ts_type: &TsType, source_map: &SourceMap) -> XRayResult<String> {
+pub fn canonical_ts_type_to_string(ts_type: &TsType, source_map: &SourceMap) -> XrfResult<String> {
   if matches!(ts_type, TsType::TsTypeLit(_) | TsType::TsImportType(_)) {
     return canonical_source_type(ts_type, source_map);
   }
@@ -106,11 +106,11 @@ fn ts_function_type_to_string(function_type: &TsFnType) -> String {
   format!("({params}) => {}", ts_type_to_string(&function_type.type_ann.type_ann))
 }
 
-fn canonical_source_type(ts_type: &TsType, source_map: &SourceMap) -> XRayResult<String> {
+fn canonical_source_type(ts_type: &TsType, source_map: &SourceMap) -> XrfResult<String> {
   source_map
     .span_to_snippet(ts_type.span())
     .map(|value| value.split_whitespace().collect::<Vec<&str>>().join(" "))
-    .map_err(|_| XRayError::new_invalid_error("Failed to render TypeScript type annotation."))
+    .map_err(|_| XrfError::new_invalid_error("Failed to render TypeScript type annotation."))
 }
 
 pub fn ts_literal_type_to_string(literal_type: &TsLitType) -> String {

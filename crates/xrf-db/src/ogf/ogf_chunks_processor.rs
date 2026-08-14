@@ -3,7 +3,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use xrf_chunk::ChunkReader;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::data::ogf::ogf_geometry::OgfGeometry;
 use crate::ogf::chunks::ogf_bones_chunk::OgfBonesChunk;
@@ -55,9 +55,9 @@ impl OgfChunksProcessor {
     OmfParametersChunk::CHUNK_ID,
   ];
 
-  pub fn collect_chunks_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Vec<OgfChunkEntry>> {
+  pub fn collect_chunks_from_path<T: ByteOrder, P: AsRef<Path>>(path: P) -> XrfResult<Vec<OgfChunkEntry>> {
     Self::collect_chunks::<T>(File::open(path.as_ref()).map_err(|error| {
-      XRayError::new_not_found_error(format!(
+      XrfError::new_not_found_error(format!(
         "OGF file was not read: {}, error: {}",
         path.as_ref().display(),
         error
@@ -65,7 +65,7 @@ impl OgfChunksProcessor {
     })?)
   }
 
-  pub fn collect_chunks<T: ByteOrder>(file: File) -> XRayResult<Vec<OgfChunkEntry>> {
+  pub fn collect_chunks<T: ByteOrder>(file: File) -> XrfResult<Vec<OgfChunkEntry>> {
     let mut chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
     let mut entries: Vec<OgfChunkEntry> = Vec::new();
 
@@ -75,7 +75,7 @@ impl OgfChunksProcessor {
   }
 
   /// Chunk ids present in the file that the reader does not understand, deduplicated and sorted.
-  pub fn find_unknown_chunk_ids<T: ByteOrder, P: AsRef<Path>>(path: P) -> XRayResult<Vec<u32>> {
+  pub fn find_unknown_chunk_ids<T: ByteOrder, P: AsRef<Path>>(path: P) -> XrfResult<Vec<u32>> {
     let mut unknown: Vec<u32> = Self::collect_chunks_from_path::<T, _>(path)?
       .into_iter()
       .map(|it| it.id)
@@ -92,7 +92,7 @@ impl OgfChunksProcessor {
   ///
   /// The immediate children of a children container are array slots numbered from zero, not chunk
   /// types, so they are stepped through rather than recorded.
-  fn walk(chunks: &mut [ChunkReader], depth: usize, entries: &mut Vec<OgfChunkEntry>) -> XRayResult {
+  fn walk(chunks: &mut [ChunkReader], depth: usize, entries: &mut Vec<OgfChunkEntry>) -> XrfResult {
     for chunk in chunks {
       entries.push(OgfChunkEntry {
         id: chunk.id,

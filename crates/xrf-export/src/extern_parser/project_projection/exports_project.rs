@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use super::{ExportDescriptor, ExportSourceDescriptor};
 
@@ -31,12 +31,12 @@ impl ExportsProject {
   ///
   /// Resolved from the name rather than from a path supplied by the caller: this Interface may only read
   /// what this project already parsed, so the surface cannot be used to read arbitrary files.
-  pub fn read_declaration_source(&self, name: &str) -> XRayResult<ExportSourceContent> {
+  pub fn read_declaration_source(&self, name: &str) -> XrfResult<ExportSourceContent> {
     let declaration: &ExportDescriptor = self
       .declarations
       .iter()
       .find(|declaration: &&ExportDescriptor| declaration.name == name)
-      .ok_or_else(|| XRayError::new_not_found_error(format!("Export '{}' is not part of this project.", name)))?;
+      .ok_or_else(|| XrfError::new_not_found_error(format!("Export '{}' is not part of this project.", name)))?;
 
     let source: &ExportSourceDescriptor = &declaration.source;
     // Stored with `/` separators regardless of platform, which `join` handles on both.

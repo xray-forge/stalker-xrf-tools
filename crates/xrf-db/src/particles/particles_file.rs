@@ -6,7 +6,7 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_utils::{assert, assert_length, open_export_file};
 
 use crate::export::FileImportExport;
@@ -25,19 +25,19 @@ pub struct ParticlesFile {
 
 impl ParticlesFile {
   /// Read particles from provided path.
-  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn read_from_path<T: ByteOrder, P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     Self::read_from_file::<T>(File::open(path)?)
   }
 
   /// Read particles from file.
-  pub fn read_from_file<T: ByteOrder>(file: File) -> XRayResult<Self> {
+  pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
 
     Self::read_from_chunks::<T>(&chunks)
   }
 
   /// Read particles from chunks.
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XRayResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
     assert(
       !chunks.iter().any(|it| it.id == ParticlesFirstgenChunk::CHUNK_ID),
       "Unexpected first-gen chunk in particles file, unpacking not implemented",
@@ -52,14 +52,14 @@ impl ParticlesFile {
   }
 
   /// Write particles file data to the file by provided path.
-  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  pub fn write_to_path<T: ByteOrder, P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     fs::create_dir_all(path.as_ref().parent().expect("Parent directory"))?;
 
     self.write_to::<T>(&mut open_export_file(path)?)
   }
 
   /// Write particles file data to the writer.
-  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XRayResult {
+  pub fn write_to<T: ByteOrder>(&self, writer: &mut dyn Write) -> XrfResult {
     log::info!(
       "Writing particles file: version {}, {} effects, {} groups",
       self.header.version,
@@ -83,7 +83,7 @@ impl ParticlesFile {
   }
 
   /// Read spawn file from provided path.
-  pub fn import_from_path<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  pub fn import_from_path<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     log::info!("Importing particles file: {}", path.as_ref().display());
 
     Ok(Self {
@@ -94,7 +94,7 @@ impl ParticlesFile {
   }
 
   /// Export unpacked ALife spawn file into provided path.
-  pub fn export_to_path<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  pub fn export_to_path<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     fs::create_dir_all(path)?;
 
     self.header.export(path)?;

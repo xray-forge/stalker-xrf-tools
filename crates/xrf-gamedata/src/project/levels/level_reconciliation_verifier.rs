@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::PathBuf;
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 
 use crate::GamedataFindingFactory;
@@ -27,7 +27,7 @@ impl<'a> LevelReconciliationVerifier<'a> {
   /// Collect level bundle directory names from indexed assets.
   ///
   /// Files stored directly under the levels root, such as `root.ltx`, are not bundles.
-  pub(crate) fn bundle_names(&self) -> XRayResult<BTreeSet<String>> {
+  pub(crate) fn bundle_names(&self) -> XrfResult<BTreeSet<String>> {
     let prefix: String = format!("{LEVELS_DIRECTORY}\\");
 
     Ok(
@@ -46,7 +46,7 @@ impl<'a> LevelReconciliationVerifier<'a> {
     )
   }
 
-  pub(crate) fn verify(&self, roster: &LevelRoster, bundles: &BTreeSet<String>) -> XRayResult<Vec<Finding>> {
+  pub(crate) fn verify(&self, roster: &LevelRoster, bundles: &BTreeSet<String>) -> XrfResult<Vec<Finding>> {
     let mut findings: Vec<Finding> = Vec::new();
     let declared_maps: BTreeSet<String> = self.declared_map_levels()?;
 
@@ -93,7 +93,7 @@ impl<'a> LevelReconciliationVerifier<'a> {
   ///
   /// A declaration without a bundle is legal and is deliberately not reported: shipped
   /// configurations declare maps for levels that were never built.
-  fn declared_map_levels(&self) -> XRayResult<BTreeSet<String>> {
+  fn declared_map_levels(&self) -> XrfResult<BTreeSet<String>> {
     let mut declared: BTreeSet<String> = BTreeSet::new();
 
     for (file, section_name) in [

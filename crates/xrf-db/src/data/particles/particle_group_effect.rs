@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, assert_length};
 
@@ -32,7 +32,7 @@ impl ParticleGroupEffect {
 
 impl ChunkReadWriteList for ParticleGroupEffect {
   /// Read list of effect groups data from chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Vec<Self>> {
+  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
     let count: u32 = reader.read_u32::<T>()?;
 
     let mut effects: Vec<Self> = Vec::with_capacity(count as usize);
@@ -52,7 +52,7 @@ impl ChunkReadWriteList for ParticleGroupEffect {
   }
 
   /// Write effects list data into the writer.
-  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XRayResult {
+  fn write_list<T: ByteOrder>(writer: &mut ChunkWriter, list: &[Self]) -> XrfResult {
     writer.write_u32::<T>(list.len() as u32)?;
 
     for effect in list {
@@ -65,7 +65,7 @@ impl ChunkReadWriteList for ParticleGroupEffect {
 
 impl ChunkReadWrite for ParticleGroupEffect {
   /// Read group effect from chunk reader binary data.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let particle_group = Self {
       name: reader.read_w1251_string()?,
       on_play_child_name: reader.read_w1251_string()?,
@@ -80,7 +80,7 @@ impl ChunkReadWrite for ParticleGroupEffect {
   }
 
   /// Write effect data into the writer.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_w1251_string(&self.name)?;
     writer.write_w1251_string(&self.on_play_child_name)?;
     writer.write_w1251_string(&self.on_birth_child_name)?;
@@ -95,7 +95,7 @@ impl ChunkReadWrite for ParticleGroupEffect {
 
 impl ParticleGroupEffect {
   /// Import list of particles group effect data from provided path.
-  pub fn import_list(section_name: &str, ltx: &Ltx) -> XRayResult<Vec<Self>> {
+  pub fn import_list(section_name: &str, ltx: &Ltx) -> XrfResult<Vec<Self>> {
     let mut effect_index: usize = 0;
     let mut effects: Vec<Self> = Vec::new();
 
@@ -110,7 +110,7 @@ impl ParticleGroupEffect {
       }
 
       if effect_index >= Self::EFFECT_ACTIONS_LIMIT {
-        return Err(XRayError::new_parsing_error(
+        return Err(XrfError::new_parsing_error(
           "Failed to parse particle effects - reached maximum nested actions limit",
         ));
       }
@@ -120,9 +120,9 @@ impl ParticleGroupEffect {
   }
 
   /// Import particles group effect data from provided path.
-  pub fn import(section_name: &str, ltx: &Ltx) -> XRayResult<Self> {
+  pub fn import(section_name: &str, ltx: &Ltx) -> XrfResult<Self> {
     let section: &Section = ltx.section(section_name).ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Particle group effect section '{}' should be defined in ltx file ({})",
         section_name,
         file!()
@@ -149,7 +149,7 @@ impl ParticleGroupEffect {
   }
 
   /// Export list of particles group effect data into provided path.
-  pub fn export_list(effects_old: &[Self], section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  pub fn export_list(effects_old: &[Self], section_name: &str, ltx: &mut Ltx) -> XrfResult {
     for (index, effect) in effects_old.iter().enumerate() {
       effect.export(&Self::get_effect_section(section_name, index), ltx)?
     }
@@ -158,7 +158,7 @@ impl ParticleGroupEffect {
   }
 
   /// Export particles group effect data into provided path.
-  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XRayResult {
+  pub fn export(&self, section_name: &str, ltx: &mut Ltx) -> XrfResult {
     ltx
       .with_section(section_name)
       .set(META_TYPE_FIELD, Self::META_TYPE)
@@ -182,7 +182,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_ltx::Ltx;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -194,7 +194,7 @@ mod tests {
   use crate::data::particles::particle_group_effect::ParticleGroupEffect;
 
   #[test]
-  fn test_read_write_list() -> XRayResult {
+  fn test_read_write_list() -> XrfResult {
     let filename: String = String::from("read_write_list.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -254,7 +254,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -294,7 +294,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -321,7 +321,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export_list() -> XRayResult {
+  fn test_import_export_list() -> XrfResult {
     let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "import_export_list.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
@@ -369,7 +369,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: ParticleGroupEffect = ParticleGroupEffect {
       name: String::from("effect_old_name_serialize"),
       on_play_child_name: String::from("effect_old_on_play_child_name_serialize"),

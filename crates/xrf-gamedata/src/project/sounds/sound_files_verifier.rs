@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use rayon::prelude::*;
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_sound::SoundFile;
 
 use crate::GamedataFindingFactory;
@@ -27,9 +27,9 @@ impl<'a> SoundFilesVerifier<'a> {
     }
   }
 
-  pub(crate) fn verify(&self) -> XRayResult<GamedataSoundFilesVerificationResult> {
+  pub(crate) fn verify(&self) -> XrfResult<GamedataSoundFilesVerificationResult> {
     let checked_sounds_count: u32 = u32::try_from(self.sound_paths.len())
-      .map_err(|_| XRayError::new_verify_error("Sound count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Sound count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = self
       .sound_paths
@@ -45,7 +45,7 @@ impl<'a> SoundFilesVerifier<'a> {
           ));
         };
 
-        let sound: XRayResult<SoundFile> = if self.options.is_strict {
+        let sound: XrfResult<SoundFile> = if self.options.is_strict {
           SoundFile::read_strictly_from_path(&path)
         } else {
           SoundFile::read_from_path(&path)
@@ -62,7 +62,7 @@ impl<'a> SoundFilesVerifier<'a> {
     findings.sort_by(GamedataFindingFactory::cmp_by_asset_path_and_message);
 
     let invalid_sounds_count: u32 = u32::try_from(findings.len())
-      .map_err(|_| XRayError::new_verify_error("Invalid sound count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Invalid sound count exceeds the supported result range"))?;
 
     Ok(GamedataSoundFilesVerificationResult {
       checked_sounds_count,

@@ -4,7 +4,7 @@ use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::open_export_file;
 
@@ -29,7 +29,7 @@ impl SpawnHeaderChunk {
 impl ChunkReadWrite for SpawnHeaderChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     log::info!("Parsing header chunk, {} bytes", reader.read_bytes_remain());
 
     let header: Self = Self {
@@ -47,7 +47,7 @@ impl ChunkReadWrite for SpawnHeaderChunk {
 
   /// Write header data into chunk writer.
   /// Writes header data in binary format.
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.version)?;
     writer.write_u128::<T>(self.guid.as_u128())?;
     writer.write_u128::<T>(self.graph_guid.as_u128())?;
@@ -63,7 +63,7 @@ impl ChunkReadWrite for SpawnHeaderChunk {
 impl FileImportExport for SpawnHeaderChunk {
   /// Import header data from provided path.
   /// Parse ltx files and populate spawn file.
-  fn import<P: AsRef<Path>>(path: &P) -> XRayResult<Self> {
+  fn import<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
     let ltx: Ltx = Ltx::read_from_path(path.as_ref().join("header.ltx"))?;
     let section: &Section = ltx
       .section("header")
@@ -80,7 +80,7 @@ impl FileImportExport for SpawnHeaderChunk {
 
   /// Export header data into provided path.
   /// Creates ltx file config with header chunk description.
-  fn export<P: AsRef<Path>>(&self, path: &P) -> XRayResult {
+  fn export<P: AsRef<Path>>(&self, path: &P) -> XrfResult {
     let mut ltx: Ltx = Ltx::new();
 
     ltx
@@ -108,7 +108,7 @@ mod tests {
   use serde_json::to_string_pretty;
   use uuid::{Uuid, uuid};
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
@@ -121,13 +121,13 @@ mod tests {
   use crate::spawn::chunks::spawn_header_chunk::SpawnHeaderChunk;
 
   #[test]
-  fn test_read_empty() -> XRayResult {
+  fn test_read_empty() -> XrfResult {
     let mut reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
       &get_relative_test_sample_file_path(file!(), "read_empty.chunk"),
     )?)?
     .read_child_by_index(0)?;
 
-    let original: XRayResult<SpawnHeaderChunk> = SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader);
+    let original: XrfResult<SpawnHeaderChunk> = SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader);
 
     assert!(original.is_err(), "Expected failure with empty chunk");
 
@@ -135,7 +135,7 @@ mod tests {
   }
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnHeaderChunk = SpawnHeaderChunk {
@@ -171,7 +171,7 @@ mod tests {
   }
 
   #[test]
-  fn test_import_export() -> XRayResult {
+  fn test_import_export() -> XrfResult {
     let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 10,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
@@ -192,7 +192,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 12,
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),

@@ -4,7 +4,7 @@ use std::str::FromStr;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::data::generic::vector_3d::Vector3d;
 
@@ -22,7 +22,7 @@ pub struct ParticleDomain {
 
 impl ChunkReadWrite for ParticleDomain {
   /// Read particle domain from chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       domain_type: reader.read_u32::<T>()?,
       coordinates: (reader.read_xr::<T, _>()?, reader.read_xr::<T, _>()?),
@@ -34,7 +34,7 @@ impl ChunkReadWrite for ParticleDomain {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<XRayByteOrder>(self.domain_type)?;
     writer.write_xr::<T, _>(&self.coordinates.0)?;
     writer.write_xr::<T, _>(&self.coordinates.1)?;
@@ -76,79 +76,79 @@ impl Display for ParticleDomain {
 }
 
 impl FromStr for ParticleDomain {
-  type Err = XRayError;
+  type Err = XrfError;
 
   fn from_str(string: &str) -> Result<Self, Self::Err> {
     let parts: Vec<&str> = string.split(',').map(str::trim).collect();
 
     if parts.len() != 17 {
-      return Err(XRayError::new_parsing_error(
+      return Err(XrfError::new_parsing_error(
         "Failed to parse particle domain from string, expected 17 numbers",
       ));
     }
 
     Ok(Self {
-      domain_type: parts[0].parse::<u32>().or(Err(XRayError::new_parsing_error(
+      domain_type: parts[0].parse::<u32>().or(Err(XrfError::new_parsing_error(
         "Failed to parse vector domain_type value",
       )))?,
       coordinates: (
         Vector3d {
-          x: parts[1].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          x: parts[1].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse coordinates 0 vector x value",
           )))?,
-          y: parts[2].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          y: parts[2].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse coordinates 0 vector y value",
           )))?,
-          z: parts[3].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          z: parts[3].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse coordinates 0 vector z value",
           )))?,
         },
         Vector3d {
-          x: parts[4].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          x: parts[4].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse coordinates 1 vector x value",
           )))?,
-          y: parts[5].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          y: parts[5].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse coordinates 1 vector y value",
           )))?,
-          z: parts[6].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          z: parts[6].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse coordinates 1 vector z value",
           )))?,
         },
       ),
       basis: (
         Vector3d {
-          x: parts[7].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          x: parts[7].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse basis 0 vector x value",
           )))?,
-          y: parts[8].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          y: parts[8].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse basis 0 vector y value",
           )))?,
-          z: parts[9].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          z: parts[9].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse basis 0 vector z value",
           )))?,
         },
         Vector3d {
-          x: parts[10].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          x: parts[10].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse basis 1 vector x value",
           )))?,
-          y: parts[11].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          y: parts[11].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse basis 1 vector y value",
           )))?,
-          z: parts[12].parse::<f32>().or(Err(XRayError::new_parsing_error(
+          z: parts[12].parse::<f32>().or(Err(XrfError::new_parsing_error(
             "Failed to parse basis 1 vector z value",
           )))?,
         },
       ),
-      radius1: parts[13].parse::<f32>().or(Err(XRayError::new_parsing_error(
-        "Failed to parse vector radius1 value",
-      )))?,
-      radius2: parts[14].parse::<f32>().or(Err(XRayError::new_parsing_error(
-        "Failed to parse vector radius2 value",
-      )))?,
-      radius1_sqr: parts[15].parse::<f32>().or(Err(XRayError::new_parsing_error(
+      radius1: parts[13]
+        .parse::<f32>()
+        .or(Err(XrfError::new_parsing_error("Failed to parse vector radius1 value")))?,
+      radius2: parts[14]
+        .parse::<f32>()
+        .or(Err(XrfError::new_parsing_error("Failed to parse vector radius2 value")))?,
+      radius1_sqr: parts[15].parse::<f32>().or(Err(XrfError::new_parsing_error(
         "Failed to parse vector radius1_sqr value",
       )))?,
-      radius2_sqr: parts[16].parse::<f32>().or(Err(XRayError::new_parsing_error(
+      radius2_sqr: parts[16].parse::<f32>().or(Err(XrfError::new_parsing_error(
         "Failed to parse vector radius2_sqr value",
       )))?,
     })
@@ -192,7 +192,7 @@ mod tests {
 
   use serde_json::to_string_pretty;
   use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
@@ -203,7 +203,7 @@ mod tests {
   use crate::data::particles::particle_domain::ParticleDomain;
 
   #[test]
-  fn test_read_write() -> XRayResult {
+  fn test_read_write() -> XrfResult {
     let filename: String = String::from("read_write.chunk");
     let mut writer: ChunkWriter = ChunkWriter::new();
 
@@ -235,7 +235,7 @@ mod tests {
   }
 
   #[test]
-  fn test_from_to_str() -> XRayResult {
+  fn test_from_to_str() -> XrfResult {
     let original: ParticleDomain = ParticleDomain::new_mock();
 
     assert_eq!(
@@ -251,7 +251,7 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize() -> XRayResult {
+  fn test_serialize_deserialize() -> XrfResult {
     let original: ParticleDomain = ParticleDomain::new_mock();
 
     let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(

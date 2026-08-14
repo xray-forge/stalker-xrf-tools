@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 /// ogf_desc c++ class
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,7 +20,7 @@ impl OgfDescriptionChunk {
 }
 
 impl ChunkReadWrite for OgfDescriptionChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     let description: Self = Self {
       source_file: reader.read_w1251_string()?,
       convertor: reader.read_w1251_string()?,
@@ -36,7 +36,7 @@ impl ChunkReadWrite for OgfDescriptionChunk {
     Ok(description)
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_w1251_string(&self.source_file)?;
     writer.write_w1251_string(&self.convertor)?;
     writer.write_u32::<T>(self.built_at)?;

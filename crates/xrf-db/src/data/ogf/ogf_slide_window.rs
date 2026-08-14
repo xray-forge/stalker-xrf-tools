@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 
 /// One progressive mesh level of detail, `FSlideWindow` in the engine (`FMesh.hpp:109`).
 ///
@@ -20,7 +20,7 @@ pub struct OgfSlideWindow {
 }
 
 impl ChunkReadWrite for OgfSlideWindow {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XRayResult<Self> {
+  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
     Ok(Self {
       offset: reader.read_u32::<T>()?,
       num_tris: reader.read_u16::<T>()?,
@@ -28,7 +28,7 @@ impl ChunkReadWrite for OgfSlideWindow {
     })
   }
 
-  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XRayResult {
+  fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
     writer.write_u32::<T>(self.offset)?;
     writer.write_u16::<T>(self.num_tris)?;
     writer.write_u16::<T>(self.num_verts)?;

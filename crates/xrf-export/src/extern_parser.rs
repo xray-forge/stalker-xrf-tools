@@ -15,7 +15,7 @@ pub use project_projection::{
   ExportSourceDescriptor, ExportsProject, ExportsProjectParser,
 };
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_typescript::{TypeScriptSymbolResolver, parse_typescript_file};
 
 use crate::extern_manifest::{ExternExport, ExternManifest, ParsedExternManifest};
@@ -33,10 +33,10 @@ impl ExternManifestParser {
   }
 
   /// Scan `declarations_root` and parse every eligible TypeScript declaration.
-  pub fn parse_directory(&self, declarations_root: &Path) -> XRayResult<ParsedExternManifest> {
+  pub fn parse_directory(&self, declarations_root: &Path) -> XrfResult<ParsedExternManifest> {
     // todo: Allow single file parsing?
     if !declarations_root.is_dir() {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Extern source root '{}' is not a directory.",
         declarations_root.display(),
       )));
@@ -47,7 +47,7 @@ impl ExternManifestParser {
     self.parse_files(&files, declarations_root)
   }
 
-  fn parse_files(&self, files: &[PathBuf], declarations_root: &Path) -> XRayResult<ParsedExternManifest> {
+  fn parse_files(&self, files: &[PathBuf], declarations_root: &Path) -> XrfResult<ParsedExternManifest> {
     let mut parsed = Vec::new();
 
     for path in files {
@@ -73,7 +73,7 @@ impl ExternManifestParser {
 
     for declaration in &parsed {
       if let Some(existing) = exports.insert(declaration.name.clone(), declaration.export.clone()) {
-        return Err(XRayError::new_invalid_error(format!(
+        return Err(XrfError::new_invalid_error(format!(
           "Duplicate extern '{}' declared in '{}' and '{}'.",
           declaration.name,
           existing.source(),
@@ -129,9 +129,9 @@ impl ExternManifestParser {
       )
   }
 
-  fn normalize_declaration_path(&self, path: &Path, declarations_root: &Path) -> XRayResult<String> {
+  fn normalize_declaration_path(&self, path: &Path, declarations_root: &Path) -> XrfResult<String> {
     let relative: &Path = path.strip_prefix(declarations_root).map_err(|_| {
-      XRayError::new_invalid_error(format!(
+      XrfError::new_invalid_error(format!(
         "Declaration '{}' is outside declarations root '{}'.",
         path.display(),
         declarations_root.display(),

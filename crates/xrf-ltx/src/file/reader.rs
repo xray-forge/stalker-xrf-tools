@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-use xrf_error::XRayResult;
+use xrf_error::XrfResult;
 use xrf_utils::read_as_string_from_w1251_encoded;
 
 use crate::Ltx;
@@ -11,22 +11,22 @@ use crate::file::types::LtxIncluded;
 
 impl Ltx {
   /// Read LTX from a string.
-  pub fn read_from_str(buf: &str) -> XRayResult<Self> {
+  pub fn read_from_str(buf: &str) -> XrfResult<Self> {
     LtxParser::new(buf.chars()).parse()
   }
 
   /// Read LTX from a file as full parsed file, inject included files.
-  pub fn read_from_file_included<P: AsRef<Path>>(filename: P) -> XRayResult<Self> {
+  pub fn read_from_file_included<P: AsRef<Path>>(filename: P) -> XrfResult<Self> {
     Self::read_from_path(filename)?.into_included()
   }
 
   /// Read LTX from a file, inject all includes and unwrap inherited sections.
-  pub fn read_from_file_full<P: AsRef<Path>>(filename: P) -> XRayResult<Self> {
+  pub fn read_from_file_full<P: AsRef<Path>>(filename: P) -> XrfResult<Self> {
     Self::read_from_path(filename)?.into_included()?.into_inherited()
   }
 
   /// Read from a file as generic ltx with LTX descriptor filled.
-  pub fn read_from_path<P: AsRef<Path>>(filename: P) -> XRayResult<Self> {
+  pub fn read_from_path<P: AsRef<Path>>(filename: P) -> XrfResult<Self> {
     let mut ltx: Self = Self::read_from(&mut File::open(filename.as_ref())?)?;
 
     ltx.path = Some(PathBuf::from(filename.as_ref()));
@@ -36,41 +36,41 @@ impl Ltx {
   }
 
   /// Read from a reader as generic ltx with LTX descriptor filled.
-  pub fn read_from<R: Read>(reader: &mut R) -> XRayResult<Self> {
+  pub fn read_from<R: Read>(reader: &mut R) -> XrfResult<Self> {
     LtxParser::new(read_as_string_from_w1251_encoded(reader)?.chars()).parse()
   }
 }
 
 impl Ltx {
   /// Load include statements from a string.
-  pub fn read_included_from_str(buf: &str) -> XRayResult<LtxIncluded> {
+  pub fn read_included_from_str(buf: &str) -> XrfResult<LtxIncluded> {
     LtxParser::new(buf.chars()).parse_includes()
   }
 
   /// Load include statements from a file with options.
-  pub fn read_included_from_file<P: AsRef<Path>>(filename: P) -> XRayResult<LtxIncluded> {
+  pub fn read_included_from_file<P: AsRef<Path>>(filename: P) -> XrfResult<LtxIncluded> {
     Self::read_included_from(&mut File::open(filename.as_ref())?)
   }
 
   /// Load include statements from a reader.
-  pub fn read_included_from<R: Read>(reader: &mut R) -> XRayResult<LtxIncluded> {
+  pub fn read_included_from<R: Read>(reader: &mut R) -> XrfResult<LtxIncluded> {
     LtxParser::new(read_as_string_from_w1251_encoded(reader)?.chars()).parse_includes()
   }
 }
 
 impl Ltx {
   /// Load formatted LTX as string from string.
-  pub fn format_from_str(buf: &str) -> XRayResult<String> {
+  pub fn format_from_str(buf: &str) -> XrfResult<String> {
     LtxParser::new(buf.chars()).parse_into_formatted()
   }
 
   /// Load formatted LTX as string from file.
-  pub fn format_from_file<P: AsRef<Path>>(filename: P) -> XRayResult<String> {
+  pub fn format_from_file<P: AsRef<Path>>(filename: P) -> XrfResult<String> {
     Self::format_from(&mut File::open(filename.as_ref())?)
   }
 
   /// Load formatted LTX as string from reader.
-  pub fn format_from<R: Read>(reader: &mut R) -> XRayResult<String> {
+  pub fn format_from<R: Read>(reader: &mut R) -> XrfResult<String> {
     LtxParser::new(read_as_string_from_w1251_encoded(reader)?.chars()).parse_into_formatted()
   }
 }

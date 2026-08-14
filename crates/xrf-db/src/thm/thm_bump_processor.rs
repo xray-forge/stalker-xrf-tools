@@ -5,7 +5,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 use xrf_utils::open_export_file;
 
 use crate::thm::chunks::thm_bump_chunk::ThmBumpChunk;
@@ -26,7 +26,7 @@ impl ThmBumpProcessor {
     destination: &Path,
     bump_name: &str,
     is_dry_run: bool,
-  ) -> XRayResult<ThmBumpPatchReport> {
+  ) -> XrfResult<ThmBumpPatchReport> {
     Self::patch_bump_to_path::<T>(source, destination, Some(bump_name), None, is_dry_run)
   }
 
@@ -39,7 +39,7 @@ impl ThmBumpProcessor {
     source: &Path,
     destination: &Path,
     is_dry_run: bool,
-  ) -> XRayResult<ThmBumpPatchReport> {
+  ) -> XrfResult<ThmBumpPatchReport> {
     Self::patch_bump_to_path::<T>(source, destination, Some(""), Some(ThmBumpChunk::MODE_NONE), is_dry_run)
   }
 
@@ -56,7 +56,7 @@ impl ThmBumpProcessor {
     bump_name: Option<&str>,
     mode: Option<u32>,
     is_dry_run: bool,
-  ) -> XRayResult<ThmBumpPatchReport> {
+  ) -> XrfResult<ThmBumpPatchReport> {
     let original: Vec<u8> = fs::read(source)?;
     let existing: ThmBumpChunk = Self::read_bump(source)?;
 
@@ -98,7 +98,7 @@ impl ThmBumpProcessor {
   }
 
   /// Rewrite the bump chunk of a thm file, copying every other chunk verbatim.
-  pub fn write_bump_name_to_buffer<T: ByteOrder>(file: File, bump: &ThmBumpChunk) -> XRayResult<Vec<u8>> {
+  pub fn write_bump_name_to_buffer<T: ByteOrder>(file: File, bump: &ThmBumpChunk) -> XrfResult<Vec<u8>> {
     let mut chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
     let mut buffer: Vec<u8> = Vec::new();
     let mut patched_count: u32 = 0;
@@ -124,7 +124,7 @@ impl ThmBumpProcessor {
     }
 
     if patched_count != 1 {
-      return Err(XRayError::new_invalid_error(format!(
+      return Err(XrfError::new_invalid_error(format!(
         "Expected exactly one thm bump chunk to rewrite, got {patched_count}"
       )));
     }
@@ -132,31 +132,27 @@ impl ThmBumpProcessor {
     Ok(buffer)
   }
 
-  fn open_source(source: &Path) -> XRayResult<File> {
+  fn open_source(source: &Path) -> XrfResult<File> {
     File::open(source).map_err(|error| {
-      XRayError::new_not_found_error(format!("THM file was not read: {}, error: {}", source.display(), error))
+      XrfError::new_not_found_error(format!("THM file was not read: {}, error: {}", source.display(), error))
     })
   }
 
-  fn read_bump(source: &Path) -> XRayResult<ThmBumpChunk> {
+  fn read_bump(source: &Path) -> XrfResult<ThmBumpChunk> {
     ThmFile::read_from_path::<xrf_chunk::XRayByteOrder, _>(&source)?
       .bump
-      .ok_or_else(|| XRayError::new_not_found_error(format!("THM file declares no bump chunk: {}", source.display())))
+      .ok_or_else(|| XrfError::new_not_found_error(format!("THM file declares no bump chunk: {}", source.display())))
   }
 
   /// Guard that rewriting the declaration a file already has reproduces that file byte for byte.
   ///
   /// A thm carries authoring chunks this crate does not parse, so this is what proves the chunk
   /// copy preserves everything outside the bump chunk.
-  fn assert_chunk_copy_is_lossless<T: ByteOrder>(
-    source: &Path,
-    original: &[u8],
-    existing: &ThmBumpChunk,
-  ) -> XRayResult {
+  fn assert_chunk_copy_is_lossless<T: ByteOrder>(source: &Path, original: &[u8], existing: &ThmBumpChunk) -> XrfResult {
     let reverted: Vec<u8> = Self::write_bump_name_to_buffer::<T>(Self::open_source(source)?, existing)?;
 
     if reverted != original {
-      return Err(XRayError::new_verify_error(format!(
+      return Err(XrfError::new_verify_error(format!(
         "Refused to patch {}, rewriting its existing bump declaration did not reproduce the source file, {} bytes original and {} bytes rewritten",
         source.display(),
         original.len(),
@@ -168,11 +164,11 @@ impl ThmBumpProcessor {
   }
 
   /// Guard that the written file reads back exactly the requested declaration.
-  fn assert_written_bump_matches(destination: &Path, expected: &ThmBumpChunk) -> XRayResult {
+  fn assert_written_bump_matches(destination: &Path, expected: &ThmBumpChunk) -> XrfResult {
     let read_back: ThmBumpChunk = Self::read_bump(destination)?;
 
     if &read_back != expected {
-      return Err(XRayError::new_verify_error(format!(
+      return Err(XrfError::new_verify_error(format!(
         "Patched {} reads back bump {:?} instead of {:?}",
         destination.display(),
         read_back,
@@ -184,7 +180,7 @@ impl ThmBumpProcessor {
   }
 
   /// Undo a failed write, leaving neither a corrupted source nor a partial destination behind.
-  fn revert_destination(source: &Path, destination: &Path, original: &[u8]) -> XRayResult {
+  fn revert_destination(source: &Path, destination: &Path, original: &[u8]) -> XrfResult {
     if destination == source {
       fs::write(destination, original)?;
     } else if destination.exists() {
@@ -203,7 +199,7 @@ mod tests {
   use std::path::PathBuf;
 
   use xrf_chunk::{ChunkReadWrite, ChunkWriter, XRayByteOrder};
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
   use xrf_test_utils::utils::{
     get_absolute_generated_test_resource_path, get_relative_test_sample_file_path,
     overwrite_generated_test_resource_as_file,
@@ -216,7 +212,7 @@ mod tests {
   /// Payload standing in for an authoring chunk the writer must copy verbatim.
   const OPAQUE_PAYLOAD: [u8; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
-  fn write_sample(filename: &str, bump: &ThmBumpChunk) -> XRayResult<PathBuf> {
+  fn write_sample(filename: &str, bump: &ThmBumpChunk) -> XrfResult<PathBuf> {
     let mut opaque_writer: ChunkWriter = ChunkWriter::new();
     opaque_writer.write_all(&OPAQUE_PAYLOAD)?;
 
@@ -240,7 +236,7 @@ mod tests {
   }
 
   #[test]
-  fn test_write_bump_reproduces_source_when_unchanged() -> XRayResult {
+  fn test_write_bump_reproduces_source_when_unchanged() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "unchanged.thm");
     let bump: ThmBumpChunk = used_bump("wpn\\pistols\\wpn_pm\\wpn_pm_bump");
     let path: PathBuf = write_sample(&filename, &bump)?;
@@ -255,7 +251,7 @@ mod tests {
   }
 
   #[test]
-  fn test_patch_bump_repoints_name_and_preserves_other_chunks() -> XRayResult {
+  fn test_patch_bump_repoints_name_and_preserves_other_chunks() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "repointed.thm");
     let path: PathBuf = write_sample(&filename, &used_bump("wpn\\pistols\\wpn_pm\\wpn_pm_bump"))?;
     let original: Vec<u8> = fs::read(&path)?;
@@ -284,7 +280,7 @@ mod tests {
   }
 
   #[test]
-  fn test_patch_bump_is_a_no_op_on_dry_run() -> XRayResult {
+  fn test_patch_bump_is_a_no_op_on_dry_run() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "dry_run.thm");
     let path: PathBuf = write_sample(&filename, &used_bump("wpn\\source\\name_bump"))?;
     let original: Vec<u8> = fs::read(&path)?;
@@ -298,7 +294,7 @@ mod tests {
   }
 
   #[test]
-  fn test_patch_bump_off_clears_mode_and_name() -> XRayResult {
+  fn test_patch_bump_off_clears_mode_and_name() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "turned_off.thm");
     let path: PathBuf = write_sample(&filename, &used_bump("tile\\tile_walls_red_01_bump"))?;
 
@@ -324,7 +320,7 @@ mod tests {
   }
 
   #[test]
-  fn test_patch_bump_keeps_omitted_fields() -> XRayResult {
+  fn test_patch_bump_keeps_omitted_fields() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "partial.thm");
     let path: PathBuf = write_sample(&filename, &used_bump("wpn\\source_bump"))?;
 
@@ -349,7 +345,7 @@ mod tests {
   }
 
   #[test]
-  fn test_patch_bump_requires_bump_chunk() -> XRayResult {
+  fn test_patch_bump_requires_bump_chunk() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "without_bump.thm");
     let mut opaque_writer: ChunkWriter = ChunkWriter::new();
 
@@ -368,7 +364,7 @@ mod tests {
   }
 
   #[test]
-  fn test_unused_modes_report_no_bump_name() -> XRayResult {
+  fn test_unused_modes_report_no_bump_name() -> XrfResult {
     let filename: String = get_relative_test_sample_file_path(file!(), "unused_mode.thm");
     let path: PathBuf = write_sample(
       &filename,

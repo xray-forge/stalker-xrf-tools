@@ -2,7 +2,7 @@ use std::fs;
 use std::io;
 use std::path::{MAIN_SEPARATOR_STR, Path, PathBuf};
 
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::Ltx;
 
@@ -16,7 +16,7 @@ impl LtxIncludeConvertor {
   }
 
   /// Cast LTX file to fully parsed with include sections.
-  pub fn convert(ltx: Ltx) -> XRayResult<Ltx> {
+  pub fn convert(ltx: Ltx) -> XrfResult<Ltx> {
     Self::new().convert_ltx(ltx)
   }
 
@@ -30,7 +30,7 @@ impl LtxIncludeConvertor {
   /// X-Ray extensions accepts `*` masks such as `w_*.ltx` and loads every matching file
   /// directly from the include directory. Matches are sorted so that section
   /// merging is deterministic across filesystems.
-  pub fn resolve_include_paths<P: AsRef<Path>>(directory: P, statement: &str) -> XRayResult<Vec<PathBuf>> {
+  pub fn resolve_include_paths<P: AsRef<Path>>(directory: P, statement: &str) -> XrfResult<Vec<PathBuf>> {
     let included_path: PathBuf = directory.as_ref().join(Self::statement_to_path(statement));
 
     if !statement.contains('*') {
@@ -38,13 +38,13 @@ impl LtxIncludeConvertor {
     }
 
     let Some(parent) = included_path.parent() else {
-      return Err(XRayError::new_convert_error(format!(
+      return Err(XrfError::new_convert_error(format!(
         "Failed to resolve parent directory for wildcard include {statement}"
       )));
     };
 
     let Some(mask) = included_path.file_name().and_then(|name| name.to_str()) else {
-      return Err(XRayError::new_convert_error(format!(
+      return Err(XrfError::new_convert_error(format!(
         "Failed to resolve wildcard file name for include {statement}"
       )));
     };
@@ -76,9 +76,9 @@ impl LtxIncludeConvertor {
 
 impl LtxIncludeConvertor {
   /// Convert ltx file with inclusion of nested files.
-  fn convert_ltx(&self, ltx: Ltx) -> XRayResult<Ltx> {
+  fn convert_ltx(&self, ltx: Ltx) -> XrfResult<Ltx> {
     if ltx.directory.is_none() {
-      return Err(XRayError::new_convert_error(
+      return Err(XrfError::new_convert_error(
         "Failed to parse ltx file, parent directory is not specified",
       ));
     }
@@ -114,7 +114,7 @@ impl LtxIncludeConvertor {
           if key.is_empty() {
             existing.merge(value);
           } else {
-            return Err(XRayError::new_convert_error(format!(
+            return Err(XrfError::new_convert_error(format!(
               "Failed to equipment ltx file, duplicate section {key} found",
             )));
           }
@@ -126,14 +126,14 @@ impl LtxIncludeConvertor {
   }
 
   /// Include children ltx into provided ltx.
-  fn include_children<P: AsRef<Path>>(&self, into: &mut Ltx, path: &P) -> XRayResult {
+  fn include_children<P: AsRef<Path>>(&self, into: &mut Ltx, path: &P) -> XrfResult {
     let ltx: Ltx = match self.parse_nested_file(path) {
       Ok(value) => match value {
         Some(ltx) => ltx,
         None => return Ok(()),
       },
       Err(error) => {
-        return Err(XRayError::new_convert_error(format!(
+        return Err(XrfError::new_convert_error(format!(
           "Failed to parse ltx file, nested file {} in {} error: {error}",
           path.as_ref().display(),
           into.path.as_ref().unwrap().display(),
@@ -151,7 +151,7 @@ impl LtxIncludeConvertor {
           if key.is_empty() {
             existing.merge(value);
           } else {
-            return Err(XRayError::new_convert_error(format!(
+            return Err(XrfError::new_convert_error(format!(
               "Failed to include ltx file '{}' in {}, duplicate section '{}' found",
               path.as_ref().display(),
               into.path.as_ref().unwrap().display(),
@@ -167,11 +167,11 @@ impl LtxIncludeConvertor {
 
   /// Open nested file for importing in current context.
   /// Skips '.ts' variant of configuration file as None.
-  fn parse_nested_file<P: AsRef<Path>>(&self, path: &P) -> XRayResult<Option<Ltx>> {
+  fn parse_nested_file<P: AsRef<Path>>(&self, path: &P) -> XrfResult<Option<Ltx>> {
     match Ltx::read_from_path(path.as_ref()) {
       Ok(ltx) => Ok(Some(ltx)),
       Err(error) => match error {
-        XRayError::Io { ref kind, message: _ } => {
+        XrfError::Io { ref kind, message: _ } => {
           if *kind == io::ErrorKind::NotFound {
             if self.is_raw_ts_variant_existing(path) {
               Ok(None)
@@ -222,12 +222,12 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use xrf_error::XRayResult;
+  use xrf_error::XrfResult;
 
   use crate::Ltx;
 
   #[test]
-  fn loads_each_file_matched_by_wildcard_include() -> XRayResult {
+  fn loads_each_file_matched_by_wildcard_include() -> XrfResult {
     let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-wildcard-include-{}", std::process::id()));
     let sections: PathBuf = root.join("sections");
     let root_ltx: PathBuf = root.join("root.ltx");

@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use enum_map::Enum;
 use serde::{Deserialize, Serialize};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::data::meta::map::SECTION_TO_CLS_ID;
 
@@ -109,9 +109,9 @@ pub enum ClsId {
 }
 
 impl ClsId {
-  pub fn from_section(section_name: &str) -> XRayResult<Self> {
+  pub fn from_section(section_name: &str) -> XrfResult<Self> {
     SECTION_TO_CLS_ID.get(section_name).cloned().ok_or_else(|| {
-      XRayError::new_parsing_error(format!(
+      XrfError::new_parsing_error(format!(
         "Unknown ALife object section '{section_name}', no CLSID mapping exists"
       ))
     })
@@ -120,7 +120,7 @@ impl ClsId {
 
 #[cfg(test)]
 mod tests {
-  use xrf_error::XRayError;
+  use xrf_error::XrfError;
 
   use super::ClsId;
 
@@ -131,7 +131,7 @@ mod tests {
 
   #[test]
   fn returns_error_for_unknown_section() {
-    let error: XRayError = ClsId::from_section("unknown_section").unwrap_err();
+    let error: XrfError = ClsId::from_section("unknown_section").unwrap_err();
 
     assert_eq!(
       error.to_string(),

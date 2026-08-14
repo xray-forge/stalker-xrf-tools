@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 
 use rayon::prelude::*;
 use xrf_db::{ParticlesFile, XRayByteOrder};
-use xrf_error::{XRayError, XRayResult};
+use xrf_error::{XrfError, XrfResult};
 
 use crate::GamedataFindingFactory;
 use crate::project::particles::verify_particles_result::GamedataParticlesVerificationResult;
@@ -13,7 +13,7 @@ impl GamedataProject {
   pub fn verify_particles(
     &self,
     options: &GamedataProjectVerifyOptions,
-  ) -> XRayResult<GamedataParticlesVerificationResult> {
+  ) -> XrfResult<GamedataParticlesVerificationResult> {
     xrf_output::heading!(options.output, "Verify particles:");
 
     let started_at: Instant = Instant::now();
@@ -24,7 +24,7 @@ impl GamedataProject {
       .collect();
 
     let checked_particle_files_count: u32 = u32::try_from(particle_paths.len())
-      .map_err(|_| XRayError::new_verify_error("Particle library count exceeds the supported result range"))?;
+      .map_err(|_| XrfError::new_verify_error("Particle library count exceeds the supported result range"))?;
 
     let particle_findings: Vec<Vec<Finding>> = particle_paths
       .par_iter()
@@ -61,9 +61,8 @@ impl GamedataProject {
 
     let duration: Duration = started_at.elapsed();
     let invalid_particle_files_count: u32 =
-      u32::try_from(particle_findings.iter().filter(|findings| !findings.is_empty()).count()).map_err(|_| {
-        XRayError::new_verify_error("Invalid particle library count exceeds the supported result range")
-      })?;
+      u32::try_from(particle_findings.iter().filter(|findings| !findings.is_empty()).count())
+        .map_err(|_| XrfError::new_verify_error("Invalid particle library count exceeds the supported result range"))?;
 
     let mut findings: Vec<Finding> = particle_findings.into_iter().flatten().collect();
 
