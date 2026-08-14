@@ -33,10 +33,7 @@ impl ProjectVerifyResult {
   }
 
   pub fn to_report(&self) -> Report {
-    let duration_millis: u64 = self
-      .duration
-      .try_into()
-      .expect("Translation verification duration is derived from Duration");
+    let duration_millis: u64 = self.duration.min(u128::from(u64::MAX)) as u64;
 
     Report::new(vec![CheckReport::new(
       CheckId::new("translations").expect("Expected a non-empty translation check ID"),

@@ -1,11 +1,11 @@
 use std::ffi::OsStr;
-use std::io::Write;
 use std::path::{Display, Path};
 use std::time::Instant;
 
 use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XrfError, XrfResult};
 
+use crate::project::staged_write::write_file_staged;
 use crate::types::TranslationJson;
 use crate::{ProjectInitializeOptions, ProjectInitializeResult, TranslationLanguage, TranslationProject};
 
@@ -20,9 +20,13 @@ impl TranslationProject {
     let mut result: ProjectInitializeResult = ProjectInitializeResult::new();
 
     // Filter all the entries that are not accessed by other files and represent entry points.
-    for entry in WalkDir::new(dir) {
-      let entry: DirEntry =
-        entry.map_err(|error| XrfError::from(error.into_io_error().expect("WalkDir error transformed")))?;
+    for entry in WalkDir::new(dir).sort_by_file_name() {
+      let entry: DirEntry = entry.map_err(|error| {
+        XrfError::new_read_error(format!(
+          "Failed to walk translation directory '{}': {error}",
+          dir.as_ref().display()
+        ))
+      })?;
 
       if entry.path().is_file() {
         Self::initialize_file(&entry.path(), options)?;
@@ -70,7 +74,7 @@ impl TranslationProject {
     log::info!("Initializing dynamic JSON file {}", path_display);
 
     let started_at: Instant = Instant::now();
-    let mut parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
+    let mut parsed: TranslationJson = Self::read_translation_json_by_path(path.as_ref())?;
 
     let all_languages: Vec<String> = TranslationLanguage::get_all_strings();
 
@@ -97,11 +101,14 @@ impl TranslationProject {
     }
 
     if initialized_count > 0 {
-      Self::prepare_target_json_translation_file(path)?.write_all(
-        serde_json::to_string_pretty(&Self::transform_translation_into_value(&parsed))
-          .expect("valid serializable JSON during init")
-          .as_bytes(),
-      )?;
+      let serialized = serde_json::to_vec_pretty(&parsed).map_err(|error| {
+        XrfError::new_serialization_error(format!(
+          "Failed to serialize initialized translation JSON '{}': {error}",
+          path_display
+        ))
+      })?;
+
+      write_file_staged(path.as_ref(), &serialized)?;
     }
 
     result.duration = started_at.elapsed().as_millis();
@@ -122,5 +129,47 @@ impl TranslationProject {
     }
 
     Ok(result)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::io::Write;
+
+  use xrf_error::XrfResult;
+  use xrf_test_utils::utils::{get_absolute_generated_test_resource_path, overwrite_generated_test_resource_as_file};
+
+  use crate::{ProjectInitializeOptions, TranslationLanguage, TranslationProject, TranslationVariant};
+
+  #[test]
+  fn initialization_replaces_json_only_after_writing_a_valid_document() -> XrfResult {
+    let relative_path = "translation_project_initialize/transactional.json";
+    let mut file = overwrite_generated_test_resource_as_file(relative_path)?;
+
+    file.write_all(br#"{"st_test":{"eng":"original"}}"#)?;
+
+    drop(file);
+
+    let path = get_absolute_generated_test_resource_path(relative_path);
+    let options = ProjectInitializeOptions {
+      output: xrf_output::OutputOptions::default(),
+      path: path.clone(),
+    };
+
+    TranslationProject::initialize_json_file(&path, &options)?;
+
+    let initialized = TranslationProject::read_translation_json_by_path(&path)?;
+
+    assert_eq!(
+      initialized["st_test"]["eng"],
+      Some(TranslationVariant::String(String::from("original")))
+    );
+    assert!(
+      TranslationLanguage::get_all_strings()
+        .iter()
+        .all(|language| initialized["st_test"].contains_key(language))
+    );
+
+    Ok(())
   }
 }

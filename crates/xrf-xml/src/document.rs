@@ -43,8 +43,7 @@ impl XmlDocument {
   ///
   /// Returns an encoding error for unsupported or invalid input encodings, or a parsing error for malformed XML.
   pub fn parse_bytes(input: &[u8], options: XmlParseOptions) -> XrfResult<Self> {
-    let encoding: XRayEncoding = detect_encoding(input)?;
-    let decoded: String = decode_bytes_to_string(input, encoding)?;
+    let decoded: String = decode_xml_bytes(input)?;
 
     Self::parse(&decoded, options)
   }
@@ -152,9 +151,10 @@ impl<'a> Iterator for XmlDescendants<'a> {
   }
 }
 
-fn detect_encoding(input: &[u8]) -> XrfResult<XRayEncoding> {
-  let Some(label) = declared_encoding(input) else {
-    return Ok(get_utf8_encoder());
+/// Return the encoding declared by an XML prolog, if present.
+pub fn declared_xml_encoding(input: &[u8]) -> XrfResult<Option<XRayEncoding>> {
+  let Some(label) = declared_encoding_label(input) else {
+    return Ok(None);
   };
   let normalized: String = label
     .chars()
@@ -162,18 +162,28 @@ fn detect_encoding(input: &[u8]) -> XrfResult<XRayEncoding> {
     .flat_map(char::to_lowercase)
     .collect();
 
-  match normalized.as_str() {
-    "utf8" => Ok(get_utf8_encoder()),
-    "cp1250" | "windows1250" => Ok(get_windows1250_encoder()),
-    "cp1251" | "windows1251" => Ok(get_windows1251_encoder()),
-    "cp1252" | "windows1252" => Ok(get_windows1252_encoder()),
+  let encoding = match normalized.as_str() {
+    "utf8" => get_utf8_encoder(),
+    "cp1250" | "windows1250" => get_windows1250_encoder(),
+    "cp1251" | "windows1251" => get_windows1251_encoder(),
+    "cp1252" | "windows1252" => get_windows1252_encoder(),
     _ => Err(XrfError::new_encoding_error(format!(
       "Unsupported XML encoding '{label}'"
-    ))),
-  }
+    )))?,
+  };
+
+  Ok(Some(encoding))
 }
 
-fn declared_encoding(input: &[u8]) -> Option<String> {
+/// Decode XML bytes from their declaration, defaulting to UTF-8 when no declaration is present.
+pub fn decode_xml_bytes(input: &[u8]) -> XrfResult<String> {
+  Ok(decode_bytes_to_string(
+    input,
+    declared_xml_encoding(input)?.unwrap_or_else(get_utf8_encoder),
+  )?)
+}
+
+fn declared_encoding_label(input: &[u8]) -> Option<String> {
   let prefix_length: usize = input.len().min(256);
   let prefix: String = String::from_utf8_lossy(&input[..prefix_length]).into_owned();
   let lowercase: String = prefix.to_ascii_lowercase();

@@ -3,7 +3,7 @@ use std::path::{Display, Path};
 use std::time::Instant;
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_error::XrfResult;
+use xrf_error::{XrfError, XrfResult};
 
 use crate::project::translation_project_verify_result::ProjectVerifyResult;
 use crate::types::TranslationJson;
@@ -18,13 +18,13 @@ impl TranslationProject {
     let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
 
     // Filter all the entries that are not accessed by other files and represent entry points.
-    for entry in WalkDir::new(dir) {
-      let entry: DirEntry = match entry {
-        Ok(entry) => entry,
-        Err(error) => {
-          return Err(error.into_io_error().expect("WalkDir error transformation").into());
-        }
-      };
+    for entry in WalkDir::new(dir).sort_by_file_name() {
+      let entry: DirEntry = entry.map_err(|error| {
+        XrfError::new_read_error(format!(
+          "Failed to walk translation directory '{}': {error}",
+          dir.display()
+        ))
+      })?;
 
       let entry_path: &Path = entry.path();
 
@@ -68,7 +68,7 @@ impl TranslationProject {
     log::info!("Verifying dynamic JSON file {}", path_display);
 
     let started_at: Instant = Instant::now();
-    let parsed: TranslationJson = Self::read_translation_json_by_path(path)?;
+    let parsed: TranslationJson = Self::read_translation_json_by_path(path.as_ref())?;
 
     let languages: Vec<String> = if options.language == TranslationLanguage::All {
       TranslationLanguage::get_all_strings()

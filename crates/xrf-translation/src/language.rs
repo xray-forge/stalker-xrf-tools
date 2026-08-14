@@ -6,7 +6,7 @@ use xrf_utils::{XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, 
 
 pub const MULTILANGUAGE: &str = "multilang";
 
-#[derive(Clone, Debug, PartialEq, Display)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Display)]
 pub enum TranslationLanguage {
   #[display("all")]
   All,

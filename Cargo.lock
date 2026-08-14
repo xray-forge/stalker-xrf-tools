@@ -4691,6 +4691,7 @@ version = "2.0.0-rc.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38f9a30cbcbb7011f1da7d73483983bf838af123883e45f2b36ed76328df9c50"
 dependencies = [
+ "indexmap 2.14.0",
  "paste",
  "rustc_version",
  "specta-macros",
@@ -7041,6 +7042,7 @@ name = "xrf-translation"
 version = "0.1.0"
 dependencies = [
  "derive_more 2.1.1",
+ "indexmap 2.14.0",
  "log",
  "serde",
  "serde_json",

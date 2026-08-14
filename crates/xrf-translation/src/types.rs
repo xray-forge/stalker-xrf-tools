@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -10,11 +9,11 @@ pub enum TranslationVariant {
   MultiString(Vec<String>),
 }
 
-pub type TranslationEntry = HashMap<String, Option<TranslationVariant>>;
+pub type TranslationEntry = IndexMap<String, Option<TranslationVariant>>;
 
-pub type TranslationJson = HashMap<String, TranslationEntry>;
+pub type TranslationJson = IndexMap<String, TranslationEntry>;
 
-pub type TranslationProjectJson = HashMap<String, TranslationJson>;
+pub type TranslationProjectJson = IndexMap<String, TranslationJson>;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename = "string")]

@@ -63,8 +63,8 @@ impl GenericCommand for BuildTranslationsCommand {
       )
       .arg(
         Arg::new("sort")
-          .help("Turn on sorting for dynamic translation files")
-          .long("sort")
+          .help("Preserve source order instead of sorting dynamic translation files")
+          .long("no-sort")
           .required(false)
           .action(ArgAction::SetFalse),
       )
@@ -118,5 +118,27 @@ impl GenericCommand for BuildTranslationsCommand {
     );
 
     Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use clap::ArgMatches;
+
+  use super::BuildTranslationsCommand;
+  use crate::generic_command::GenericCommand;
+
+  fn parse_matches(extra: &[&str]) -> ArgMatches {
+    let mut arguments = vec!["build-translation", "--path", "translations", "--output", "output"];
+
+    arguments.extend_from_slice(extra);
+
+    BuildTranslationsCommand.init().try_get_matches_from(arguments).unwrap()
+  }
+
+  #[test]
+  fn translations_are_sorted_unless_source_order_is_requested() {
+    assert!(parse_matches(&[]).get_flag("sort"));
+    assert!(!parse_matches(&["--no-sort"]).get_flag("sort"));
   }
 }
