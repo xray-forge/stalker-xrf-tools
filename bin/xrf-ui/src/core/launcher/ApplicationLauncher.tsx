@@ -141,7 +141,7 @@ export function ApplicationLauncher({ applications, groups }: IApplicationLaunch
   return (
     <EditorLayout toolbar={<EditorToolbar />}>
       <Box sx={{ width: "100%", height: "100%", overflowY: "auto", padding: 3 }}>
-        <Box sx={{ width: "100%", maxWidth: 1600, marginX: "auto" }}>
+        <Box sx={{ width: "100%", maxWidth: 1280 }}>
           <Box sx={{ marginBottom: 2 }}>
             <Typography component={"h1"} variant={"h5"}>
               Applications
