@@ -17,9 +17,9 @@ const APPLICATIONS: ReadonlyArray<IApplicationDescriptor> = [
     description: "Browse packed spawn files",
     group: EApplicationGroupId.SPAWNS,
     icon: <span />,
-    id: EApplicationId.SPAWN,
+    id: EApplicationId.SPAWN_EDITOR,
     label: "Spawn editor",
-    path: "/spawn",
+    path: "/spawn-editor",
     status: EApplicationStatus.READY,
   },
   {
@@ -27,9 +27,9 @@ const APPLICATIONS: ReadonlyArray<IApplicationDescriptor> = [
     description: "Browse database archives",
     group: EApplicationGroupId.ARCHIVES,
     icon: <span />,
-    id: EApplicationId.ARCHIVES,
+    id: EApplicationId.ARCHIVES_EXPLORER,
     label: "Archives editor",
-    path: "/archives",
+    path: "/archives-explorer",
     status: EApplicationStatus.READY,
   },
 ];

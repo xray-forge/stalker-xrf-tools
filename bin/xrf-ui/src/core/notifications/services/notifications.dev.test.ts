@@ -6,7 +6,7 @@ import { ENotificationSeverity, INotification } from "@/core/notifications/lib";
 import { NotificationsService } from "@/core/notifications/services/notifications.service";
 import { EApplicationId } from "@/core/routing/application";
 
-const SOURCE: EApplicationId = EApplicationId.EQUIPMENT_ICONS;
+const SOURCE: EApplicationId = EApplicationId.EQUIPMENT_ICONS_EDITOR;
 
 /**
  * Create an isolated notification service for developer trace tests.

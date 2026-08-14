@@ -17,9 +17,9 @@ function mockApplication(overrides: Partial<IApplicationDescriptor> = {}): IAppl
     description: "Browse and edit a packed spawn file",
     group: EApplicationGroupId.SPAWNS,
     icon: <span />,
-    id: EApplicationId.SPAWN,
+    id: EApplicationId.SPAWN_EDITOR,
     label: "Spawn editor",
-    path: "/spawn",
+    path: "/spawn-editor",
     status: EApplicationStatus.READY,
     ...overrides,
   };

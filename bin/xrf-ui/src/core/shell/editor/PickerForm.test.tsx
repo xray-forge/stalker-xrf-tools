@@ -6,7 +6,7 @@ import { renderWithProviders } from "@/fixtures/utils/render";
 describe("PickerForm", () => {
   it("carries the standard toolbar so the frame does not change between a form and a workspace", () => {
     const { getByText } = renderWithProviders(<PickerForm title={"Provide spawn file to open"} />, {
-      route: "/spawn",
+      route: "/spawn-editor",
     });
 
     expect(getByText("Spawn editor")).toBeInTheDocument();
@@ -15,7 +15,7 @@ describe("PickerForm", () => {
 
   it("leaves through the breadcrumb root, rather than carrying a back button of its own", () => {
     const { getByText, queryByLabelText } = renderWithProviders(<PickerForm title={"Open"} />, {
-      route: "/spawn",
+      route: "/spawn-editor",
     });
 
     expect(getByText("XRF")).toBeInTheDocument();
@@ -23,27 +23,27 @@ describe("PickerForm", () => {
   });
 
   it("stops the way out while an operation is in flight", () => {
-    const { getByText } = renderWithProviders(<PickerForm title={"Open"} isLoading />, { route: "/spawn" });
+    const { getByText } = renderWithProviders(<PickerForm title={"Open"} isLoading />, { route: "/spawn-editor" });
 
     // Disabled rather than removed: a control that vanishes mid-operation is harder to trust.
     expect(getByText("XRF")).toBeDisabled();
   });
 
   it("shows progress only while an operation is in flight", () => {
-    const idle = renderWithProviders(<PickerForm title={"Open"} />, { route: "/spawn" });
+    const idle = renderWithProviders(<PickerForm title={"Open"} />, { route: "/spawn-editor" });
 
     expect(idle.queryByRole("progressbar")).not.toBeInTheDocument();
 
     idle.unmount();
 
-    const busy = renderWithProviders(<PickerForm title={"Open"} isLoading />, { route: "/spawn" });
+    const busy = renderWithProviders(<PickerForm title={"Open"} isLoading />, { route: "/spawn-editor" });
 
     expect(busy.getByRole("progressbar")).toBeInTheDocument();
   });
 
   it("surfaces an error without hiding the form", () => {
     const { getByText } = renderWithProviders(<PickerForm title={"Open"} error={"Failed to read file"} />, {
-      route: "/spawn",
+      route: "/spawn-editor",
     });
 
     expect(getByText("Failed to read file")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("PickerForm", () => {
 
   it("renders a result alongside the form", () => {
     const { getByText } = renderWithProviders(<PickerForm title={"Unpack"} result={<div>unpacked 512 files</div>} />, {
-      route: "/archives-unpack",
+      route: "/archives-unpacker",
     });
 
     expect(getByText("unpacked 512 files")).toBeInTheDocument();

@@ -7,25 +7,25 @@ import { default as SwapHorizIcon } from "@mui/icons-material/SwapHoriz";
 import { default as TranslateIcon } from "@mui/icons-material/Translate";
 import { default as ViewInArIcon } from "@mui/icons-material/ViewInAr";
 
-import { ARCHIVES_APPLICATION } from "@/applications/archives/application";
-import { ARCHIVES_UNPACK_APPLICATION } from "@/applications/archives-unpack/application";
-import { CONFIGS_EXPLORER_APPLICATION } from "@/applications/configs-explorer/application";
-import { CONFIGS_FORMAT_APPLICATION } from "@/applications/configs-format/application";
-import { CONFIGS_VERIFY_APPLICATION } from "@/applications/configs-verify/application";
-import { DESCRIPTION_ICONS_APPLICATION } from "@/applications/description-icons/application";
-import { DESCRIPTION_ICONS_PACK_APPLICATION } from "@/applications/description-icons-pack/application";
-import { DESCRIPTION_ICONS_UNPACK_APPLICATION } from "@/applications/description-icons-unpack/application";
-import { DIALOGS_APPLICATION } from "@/applications/dialogs/application";
-import { EQUIPMENT_ICONS_APPLICATION } from "@/applications/equipment-icons/application";
-import { EQUIPMENT_ICONS_PACK_APPLICATION } from "@/applications/equipment-icons-pack/application";
-import { EQUIPMENT_ICONS_UNPACK_APPLICATION } from "@/applications/equipment-icons-unpack/application";
-import { EXPORTS_APPLICATION } from "@/applications/exports/application";
-import { PROJECT_VISUALS_APPLICATION } from "@/applications/project-visuals/application";
-import { SPAWN_APPLICATION } from "@/applications/spawn/application";
-import { SPAWN_PACK_APPLICATION } from "@/applications/spawn-pack/application";
-import { SPAWN_UNPACK_APPLICATION } from "@/applications/spawn-unpack/application";
-import { TRANSLATIONS_APPLICATION } from "@/applications/translations/application";
-import { VISUAL_PREVIEW_APPLICATION } from "@/applications/visual-preview/application";
+import { ARCHIVES_EXPLORER_APPLICATION } from "@/applications/archives-explorer";
+import { ARCHIVES_UNPACKER_APPLICATION } from "@/applications/archives-unpacker";
+import { CONFIGS_EXPLORER_APPLICATION } from "@/applications/configs-explorer";
+import { CONFIGS_FORMATTER_APPLICATION } from "@/applications/configs-formatter";
+import { CONFIGS_VERIFIER_APPLICATION } from "@/applications/configs-verifier";
+import { DESCRIPTION_ICONS_EDITOR_APPLICATION } from "@/applications/description-icons-editor";
+import { DESCRIPTION_ICONS_PACKER_APPLICATION } from "@/applications/description-icons-packer";
+import { DESCRIPTION_ICONS_UNPACKER_APPLICATION } from "@/applications/description-icons-unpacker";
+import { DIALOGS_EDITOR_APPLICATION } from "@/applications/dialogs-editor";
+import { EQUIPMENT_ICONS_EDITOR_APPLICATION } from "@/applications/equipment-icons-editor";
+import { EQUIPMENT_ICONS_PACKER_APPLICATION } from "@/applications/equipment-icons-packer";
+import { EQUIPMENT_ICONS_UNPACKER_APPLICATION } from "@/applications/equipment-icons-unpacker";
+import { EXPORTS_EXPLORER_APPLICATION } from "@/applications/exports-explorer";
+import { SPAWN_EDITOR_APPLICATION } from "@/applications/spawn-editor";
+import { SPAWN_PACKER_APPLICATION } from "@/applications/spawn-packer";
+import { SPAWN_UNPACKER_APPLICATION } from "@/applications/spawn-unpacker";
+import { TRANSLATIONS_EDITOR_APPLICATION } from "@/applications/translations-editor";
+import { VISUALS_EXPLORER_APPLICATION } from "@/applications/visuals-explorer";
+import { VISUALS_VIEWER_APPLICATION } from "@/applications/visuals-viewer";
 import { EApplicationGroupId, IApplicationDescriptor, IApplicationGroup } from "@/core/routing/application";
 import { Nullable } from "@/lib/types/general";
 
@@ -39,25 +39,25 @@ export interface IApplicationCatalog {
 
 export const APPLICATION_CATALOG: IApplicationCatalog = {
   applications: [
-    ARCHIVES_APPLICATION,
-    ARCHIVES_UNPACK_APPLICATION,
+    ARCHIVES_EXPLORER_APPLICATION,
+    ARCHIVES_UNPACKER_APPLICATION,
     CONFIGS_EXPLORER_APPLICATION,
-    CONFIGS_VERIFY_APPLICATION,
-    CONFIGS_FORMAT_APPLICATION,
-    DIALOGS_APPLICATION,
-    EXPORTS_APPLICATION,
-    EQUIPMENT_ICONS_APPLICATION,
-    EQUIPMENT_ICONS_PACK_APPLICATION,
-    EQUIPMENT_ICONS_UNPACK_APPLICATION,
-    DESCRIPTION_ICONS_APPLICATION,
-    DESCRIPTION_ICONS_PACK_APPLICATION,
-    DESCRIPTION_ICONS_UNPACK_APPLICATION,
-    SPAWN_APPLICATION,
-    SPAWN_PACK_APPLICATION,
-    SPAWN_UNPACK_APPLICATION,
-    TRANSLATIONS_APPLICATION,
-    VISUAL_PREVIEW_APPLICATION,
-    PROJECT_VISUALS_APPLICATION,
+    CONFIGS_VERIFIER_APPLICATION,
+    CONFIGS_FORMATTER_APPLICATION,
+    DIALOGS_EDITOR_APPLICATION,
+    EXPORTS_EXPLORER_APPLICATION,
+    EQUIPMENT_ICONS_EDITOR_APPLICATION,
+    EQUIPMENT_ICONS_PACKER_APPLICATION,
+    EQUIPMENT_ICONS_UNPACKER_APPLICATION,
+    DESCRIPTION_ICONS_EDITOR_APPLICATION,
+    DESCRIPTION_ICONS_PACKER_APPLICATION,
+    DESCRIPTION_ICONS_UNPACKER_APPLICATION,
+    SPAWN_EDITOR_APPLICATION,
+    SPAWN_PACKER_APPLICATION,
+    SPAWN_UNPACKER_APPLICATION,
+    TRANSLATIONS_EDITOR_APPLICATION,
+    VISUALS_VIEWER_APPLICATION,
+    VISUALS_EXPLORER_APPLICATION,
   ],
   groups: [
     { id: EApplicationGroupId.ARCHIVES, label: "Archives", icon: <ArchiveIcon /> },

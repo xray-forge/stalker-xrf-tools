@@ -1,1 +1,1 @@
-export * from "@/applications/configs-explorer/ConfigsExplorerApplication";
+export * from "@/applications/configs-explorer/application";

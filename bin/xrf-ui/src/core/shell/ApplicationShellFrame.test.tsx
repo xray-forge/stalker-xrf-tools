@@ -23,7 +23,7 @@ function EditorWithRouter(): ReactElement {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const name: string = pathname === "/archives" ? "Bones" : "Header";
+  const name: string = pathname === "/archives-explorer" ? "Bones" : "Header";
 
   useEditorPanels(
     () => [{ icon: <span>{name}</span>, id: name, label: name, render: () => <div>{name} panel</div> }],
@@ -33,7 +33,7 @@ function EditorWithRouter(): ReactElement {
   return (
     <>
       <div>{name} editor</div>
-      <button onClick={() => navigate("/exports")}>Open another tool</button>
+      <button onClick={() => navigate("/exports-explorer")}>Open another tool</button>
     </>
   );
 }
@@ -81,7 +81,7 @@ describe("ApplicationShellFrame", () => {
   });
 
   it("keeps notifications open when navigating to another tool", async () => {
-    const { getByLabelText, getByText, queryByText } = renderFrame(<EditorWithRouter />, "/archives");
+    const { getByLabelText, getByText, queryByText } = renderFrame(<EditorWithRouter />, "/archives-explorer");
 
     await userEvent.click(getByLabelText("Notifications"));
     await userEvent.click(getByText("Open another tool"));

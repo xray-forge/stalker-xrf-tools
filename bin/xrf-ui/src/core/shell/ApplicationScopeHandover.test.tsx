@@ -4,7 +4,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 import { NavigateFunction, Route, Routes, useNavigate } from "react-router-dom";
 
-import { ArchivesService } from "@/applications/archives/services/archives";
+import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { ApplicationShell } from "@/core/shell/ApplicationShell";
 import { useEditorPanels } from "@/core/shell/panel/context";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
@@ -35,7 +35,7 @@ function ArchivesLikeEditor(): ReactElement {
     []
   );
 
-  return <button onClick={() => navigate("/spawn", { replace: true })}>leave</button>;
+  return <button onClick={() => navigate("/spawn-editor", { replace: true })}>leave</button>;
 }
 
 describe("panel handover between applications", () => {
@@ -51,11 +51,11 @@ describe("panel handover between applications", () => {
     const { getByText, findByText, queryByText } = renderWithProviders(
       <ApplicationShell>
         <Routes>
-          <Route path={"/archives/*"} element={<ArchivesLikeEditor />} />
-          <Route path={"/spawn/*"} element={<div>spawn editor</div>} />
+          <Route path={"/archives-explorer/*"} element={<ArchivesLikeEditor />} />
+          <Route path={"/spawn-editor/*"} element={<div>spawn editor</div>} />
         </Routes>
       </ApplicationShell>,
-      { route: "/archives" }
+      { route: "/archives-explorer" }
     );
 
     expect(await findByText(/archives panel/)).toBeInTheDocument();

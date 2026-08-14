@@ -1,29 +1,27 @@
 import { ContainerConfig } from "@wirestate/core";
 import { ComponentType, ReactElement } from "react";
 
-/**
- * Stable identity of an application, independent of its route and its display name.
- */
+/** Canonical application identity shared by its directory, route, descriptor, and component stem. */
 export enum EApplicationId {
-  ARCHIVES = "archives",
-  ARCHIVES_UNPACK = "archives-unpack",
+  ARCHIVES_EXPLORER = "archives-explorer",
+  ARCHIVES_UNPACKER = "archives-unpacker",
   CONFIGS_EXPLORER = "configs-explorer",
-  CONFIGS_FORMAT = "configs-format",
-  CONFIGS_VERIFY = "configs-verify",
-  DESCRIPTION_ICONS = "description-icons",
-  DESCRIPTION_ICONS_PACK = "description-icons-pack",
-  DESCRIPTION_ICONS_UNPACK = "description-icons-unpack",
-  DIALOGS = "dialogs",
-  EQUIPMENT_ICONS = "equipment-icons",
-  EQUIPMENT_ICONS_PACK = "equipment-icons-pack",
-  EQUIPMENT_ICONS_UNPACK = "equipment-icons-unpack",
-  EXPORTS = "exports",
-  PROJECT_VISUALS = "project-visuals",
-  SPAWN = "spawn",
-  SPAWN_PACK = "spawn-pack",
-  SPAWN_UNPACK = "spawn-unpack",
-  TRANSLATIONS = "translations",
-  VISUAL_PREVIEW = "visual-preview",
+  CONFIGS_FORMATTER = "configs-formatter",
+  CONFIGS_VERIFIER = "configs-verifier",
+  DESCRIPTION_ICONS_EDITOR = "description-icons-editor",
+  DESCRIPTION_ICONS_PACKER = "description-icons-packer",
+  DESCRIPTION_ICONS_UNPACKER = "description-icons-unpacker",
+  DIALOGS_EDITOR = "dialogs-editor",
+  EQUIPMENT_ICONS_EDITOR = "equipment-icons-editor",
+  EQUIPMENT_ICONS_PACKER = "equipment-icons-packer",
+  EQUIPMENT_ICONS_UNPACKER = "equipment-icons-unpacker",
+  EXPORTS_EXPLORER = "exports-explorer",
+  SPAWN_EDITOR = "spawn-editor",
+  SPAWN_PACKER = "spawn-packer",
+  SPAWN_UNPACKER = "spawn-unpacker",
+  TRANSLATIONS_EDITOR = "translations-editor",
+  VISUALS_EXPLORER = "visuals-explorer",
+  VISUALS_VIEWER = "visuals-viewer",
 }
 
 /**

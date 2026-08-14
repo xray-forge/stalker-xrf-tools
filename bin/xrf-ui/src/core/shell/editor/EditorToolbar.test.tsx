@@ -9,18 +9,18 @@ import { renderWithProviders } from "@/fixtures/utils/render";
 
 describe("EditorToolbar", () => {
   it("resolves its title from the route rather than a caller supplied string", () => {
-    const { getByText } = renderWithProviders(<EditorToolbar />, { route: "/spawn/alife" });
+    const { getByText } = renderWithProviders(<EditorToolbar />, { route: "/spawn-editor/alife" });
 
     expect(getByText("Spawn editor")).toBeInTheDocument();
   });
 
   it("names every application the way the roster does, including nested routes", () => {
     const cases: Array<[string, string]> = [
-      ["/archives", "Archives"],
-      ["/archives-unpack", "Archives unpack"],
-      ["/equipment-icons", "Equipment icons"],
-      ["/project-visuals", "Project visuals"],
-      ["/translations", "Translations"],
+      ["/archives-explorer", "Archives explorer"],
+      ["/archives-unpacker", "Archives unpacker"],
+      ["/equipment-icons-editor", "Equipment icons editor"],
+      ["/visuals-explorer", "Visuals explorer"],
+      ["/translations-editor", "Translations editor"],
     ];
 
     for (const [route, expected] of cases) {
@@ -43,10 +43,10 @@ describe("EditorToolbar", () => {
   it("goes home from the breadcrumb root", async () => {
     const { getByText, findByText } = renderWithProviders(
       <Routes>
-        <Route path={"/spawn"} element={<EditorToolbar />} />
+        <Route path={"/spawn-editor"} element={<EditorToolbar />} />
         <Route path={"/"} element={<div>home</div>} />
       </Routes>,
-      { route: "/spawn" }
+      { route: "/spawn-editor" }
     );
 
     await userEvent.click(getByText("XRF"));
@@ -55,7 +55,7 @@ describe("EditorToolbar", () => {
   });
 
   it("leaves the application segment inert when nothing is open", () => {
-    const { getByText, queryByRole } = renderWithProviders(<EditorToolbar />, { route: "/spawn" });
+    const { getByText, queryByRole } = renderWithProviders(<EditorToolbar />, { route: "/spawn-editor" });
 
     // A segment you can follow means there is something to close. The one arrow that did both could
     // never say that.
@@ -66,7 +66,7 @@ describe("EditorToolbar", () => {
   it("closes through the application segment rather than through a button of its own", async () => {
     const onBack = jest.fn();
 
-    const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={onBack} />, { route: "/spawn" });
+    const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={onBack} />, { route: "/spawn-editor" });
 
     await userEvent.click(getByLabelText("Close Spawn editor"));
 
@@ -74,14 +74,14 @@ describe("EditorToolbar", () => {
   });
 
   it("names the closing segment so its spoken name still contains what is written on it", () => {
-    const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={() => {}} />, { route: "/spawn" });
+    const { getByLabelText } = renderWithProviders(<EditorToolbar onBack={() => {}} />, { route: "/spawn-editor" });
 
     // A control whose spoken name does not include the word on it is one a voice user cannot ask for.
     expect(getByLabelText("Close Spawn editor")).toHaveTextContent("Spawn editor");
   });
 
   it("divides its controls from the window's, and only when it has some", () => {
-    const bare = renderWithProviders(<EditorToolbar />, { route: "/spawn" });
+    const bare = renderWithProviders(<EditorToolbar />, { route: "/spawn-editor" });
 
     // With nothing to its left the rule was floating in empty space between the breadcrumb and the
     // window buttons, dividing nothing from nothing.
@@ -89,7 +89,10 @@ describe("EditorToolbar", () => {
 
     bare.unmount();
 
-    const acting = renderWithProviders(<EditorToolbar actions={<button>refresh</button>} />, { route: "/spawn" });
+    const acting = renderWithProviders(
+      <EditorToolbar actions={<button>refresh</button>} />,
+      { route: "/spawn-editor" }
+    );
 
     expect(acting.container.querySelectorAll('[aria-hidden="true"]')).toHaveLength(2);
   });
@@ -103,14 +106,16 @@ describe("EditorToolbar", () => {
           </IconButton>
         }
       />,
-      { route: "/spawn" }
+      { route: "/spawn-editor" }
     );
 
     expect(getComputedStyle(getByLabelText("Refresh")).height).toBe("24px");
   });
 
   it("sets the path smaller than the names it follows", () => {
-    const { getByText } = renderWithProviders(<EditorToolbar subtitle={"C:\\game\\all.spawn"} />, { route: "/spawn" });
+    const { getByText } = renderWithProviders(<EditorToolbar subtitle={"C:\\game\\all.spawn"} />, {
+      route: "/spawn-editor",
+    });
 
     const path: number = Number.parseFloat(getComputedStyle(getByText("C:\\game\\all.spawn")).fontSize);
     const name: number = Number.parseFloat(getComputedStyle(getByText("Spawn editor")).fontSize);
@@ -120,7 +125,9 @@ describe("EditorToolbar", () => {
   });
 
   it("renders the open document as the last breadcrumb segment", () => {
-    const { getByText } = renderWithProviders(<EditorToolbar subtitle={"C:\\game\\all.spawn"} />, { route: "/spawn" });
+    const { getByText } = renderWithProviders(<EditorToolbar subtitle={"C:\\game\\all.spawn"} />, {
+      route: "/spawn-editor",
+    });
 
     expect(getByText("C:\\game\\all.spawn")).toBeInTheDocument();
     expect(getByText("Spawn editor")).toBeInTheDocument();

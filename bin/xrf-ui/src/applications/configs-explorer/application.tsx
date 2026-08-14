@@ -10,11 +10,9 @@ import {
 
 export const CONFIGS_EXPLORER_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
-    import("@/applications/configs-explorer").then((it) => ({
-      default: it.ConfigsExplorerApplication,
-    }))
+    import("./ConfigsExplorerApplication").then((it) => ({ default: it.ConfigsExplorerApplication }))
   ),
-  preload: () => import("@/applications/configs-explorer"),
+  preload: () => import("./ConfigsExplorerApplication"),
   description: "Browse LTX configuration files",
   group: EApplicationGroupId.CONFIGS,
   icon: <FolderOpenIcon />,

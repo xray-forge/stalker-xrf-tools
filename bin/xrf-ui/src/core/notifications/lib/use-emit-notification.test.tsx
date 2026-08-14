@@ -32,7 +32,7 @@ function NotifyingPage(): ReactElement {
           notify({
             details: "C:\\configs",
             severity: ENotificationSeverity.WARNING,
-            source: EApplicationId.CONFIGS_VERIFY,
+            source: EApplicationId.CONFIGS_VERIFIER,
             title: "Configs did not pass validation",
           })
         }
@@ -58,7 +58,7 @@ describe("useNotify", () => {
     await userEvent.click(getByRole("button", { name: "Verify" }));
 
     expect(getByTestId("recorded")).toHaveTextContent(
-      "configs-verify/warning/Configs did not pass validation/C:\\configs"
+      "configs-verifier/warning/Configs did not pass validation/C:\\configs"
     );
   });
 

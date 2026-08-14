@@ -64,9 +64,9 @@ const APPLICATION: IApplicationDescriptor = {
   description: "",
   group: EApplicationGroupId.ARCHIVES,
   icon: <span>a</span>,
-  id: EApplicationId.ARCHIVES,
+  id: EApplicationId.ARCHIVES_EXPLORER,
   label: "Scoped application",
-  path: "/archives",
+  path: "/archives-explorer",
   status: EApplicationStatus.READY,
 };
 
