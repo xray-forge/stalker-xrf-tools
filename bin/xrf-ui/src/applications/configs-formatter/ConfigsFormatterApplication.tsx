@@ -27,7 +27,8 @@ export function ConfigsFormatterApplication(): ReactElement {
   const [result, setResult] = useState<Nullable<LtxProjectFormatResult>>(null);
 
   const configs: IPathField = usePathField({
-    id: "configs.format.directory",
+    application: EApplicationId.CONFIGS_FORMATTER,
+    id: "directory",
     title: "Select configs directory",
     isDirectory: true,
     isDisabled: isLoading,

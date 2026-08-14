@@ -2,6 +2,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
+import { EApplicationId } from "@/core/routing/application";
 import { getExistingProjectLinkedGamePath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
@@ -18,7 +19,8 @@ export function ArchivesEditorOpenForm(): ReactElement {
   const isLoading: boolean = archivesService.project.isLoading;
 
   const archives: IPathField = usePathField({
-    id: "archives.open.source",
+    application: EApplicationId.ARCHIVES_EXPLORER,
+    id: "source",
     title: "Select archives directory",
     isDirectory: true,
     isDisabled: isLoading,

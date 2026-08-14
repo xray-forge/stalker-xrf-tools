@@ -2,6 +2,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { TranslationsService } from "@/applications/translations-editor/store/translations";
+import { EApplicationId } from "@/core/routing/application";
 import { getPathIfExists, getProjectTranslationsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
@@ -18,7 +19,8 @@ export function TranslationsEditorOpenForm(): ReactElement {
   const isLoading: boolean = translationsService.project.isLoading;
 
   const translations: IPathField = usePathField({
-    id: "translations.open.directory",
+    application: EApplicationId.TRANSLATIONS_EDITOR,
+    id: "directory",
     title: "Select translations directory",
     isDirectory: true,
     isDisabled: isLoading,

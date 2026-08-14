@@ -26,7 +26,8 @@ export function ConfigsVerifierApplication(): ReactElement {
   const [result, setResult] = useState<Nullable<LtxProjectVerifyResult>>(null);
 
   const configs: IPathField = usePathField({
-    id: "configs.verify.directory",
+    application: EApplicationId.CONFIGS_VERIFIER,
+    id: "directory",
     title: "Select configs directory",
     isDirectory: true,
     isDisabled: isLoading,

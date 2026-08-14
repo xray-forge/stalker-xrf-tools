@@ -32,7 +32,8 @@ export function EquipmentIconsPackerApplication(): ReactElement {
   // dialogs used to be configured the other way round, so browsing either one offered the wrong kind of
   // thing entirely.
   const source: IPathField = usePathField({
-    id: "equipment.pack.source",
+    application: EApplicationId.EQUIPMENT_ICONS_PACKER,
+    id: "source",
     title: "Select source icons directory",
     isDirectory: true,
     isDisabled: result.isLoading,
@@ -43,7 +44,8 @@ export function EquipmentIconsPackerApplication(): ReactElement {
   });
 
   const output: IPathField = usePathField({
-    id: "equipment.pack.output",
+    application: EApplicationId.EQUIPMENT_ICONS_PACKER,
+    id: "output",
     title: "Select output sprite",
     filters: [{ name: "dds", extensions: ["dds"] }],
     isSave: true,
@@ -53,7 +55,8 @@ export function EquipmentIconsPackerApplication(): ReactElement {
   });
 
   const systemLtx: IPathField = usePathField({
-    id: "equipment.pack.system-ltx",
+    application: EApplicationId.EQUIPMENT_ICONS_PACKER,
+    id: "system-ltx",
     title: "Select system.ltx",
     filters: [{ name: "ltx", extensions: ["ltx"] }],
     isDisabled: result.isLoading,

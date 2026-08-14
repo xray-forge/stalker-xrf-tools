@@ -27,7 +27,8 @@ export function SpawnEditorPackForm(): ReactElement {
   const [packedTo, setPackedTo] = useState<Nullable<string>>(null);
 
   const source: IPathField = usePathField({
-    id: "spawn.pack.source",
+    application: EApplicationId.SPAWN_PACKER,
+    id: "source",
     title: "Select unpacked spawn directory",
     isDirectory: true,
     isDisabled: isLoading,
@@ -36,7 +37,8 @@ export function SpawnEditorPackForm(): ReactElement {
   });
 
   const destination: IPathField = usePathField({
-    id: "spawn.pack.destination",
+    application: EApplicationId.SPAWN_PACKER,
+    id: "destination",
     title: "Select spawn file output",
     filters: [{ name: "spawn", extensions: ["spawn"] }],
     isSave: true,

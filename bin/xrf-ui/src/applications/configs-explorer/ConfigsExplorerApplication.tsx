@@ -1,6 +1,7 @@
 import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
+import { EApplicationId } from "@/core/routing/application";
 import { getProjectConfigsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
@@ -11,7 +12,8 @@ export function ConfigsExplorerApplication(): ReactElement {
   const projectService: ProjectService = useInjection(ProjectService);
 
   const configs: IPathField = usePathField({
-    id: "configs.explore.directory",
+    application: EApplicationId.CONFIGS_EXPLORER,
+    id: "directory",
     title: "Select configs directory",
     isDirectory: true,
     seed: async () => (projectService.xrfProjectPath ? getProjectConfigsPath(projectService.xrfProjectPath) : null),

@@ -2,6 +2,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { ExportsService } from "@/applications/exports-explorer/store/exports";
+import { EApplicationId } from "@/core/routing/application";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
 import { PathFormRow } from "@/core/ui/form/PathFormRow";
@@ -17,7 +18,8 @@ export function ExportsOpenForm(): ReactElement {
   const isLoading: boolean = exportsService.project.isLoading;
 
   const project: IPathField = usePathField({
-    id: "exports.open.project",
+    application: EApplicationId.EXPORTS_EXPLORER,
+    id: "project",
     title: "Select project directory",
     isDirectory: true,
     isDisabled: isLoading,

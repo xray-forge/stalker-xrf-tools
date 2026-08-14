@@ -1,6 +1,7 @@
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
+import { EApplicationId } from "@/core/routing/application";
 import { getExistingProjectBuiltAllSpawnPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
@@ -18,7 +19,8 @@ export function SpawnEditorOpenForm(): ReactElement {
   const isLoading: boolean = spawnFileService.header.isLoading;
 
   const spawn: IPathField = usePathField({
-    id: "spawn.open.file",
+    application: EApplicationId.SPAWN_EDITOR,
+    id: "file",
     title: "Select spawn file",
     filters: [{ name: "spawn", extensions: ["spawn"] }],
     isDisabled: isLoading,

@@ -27,7 +27,8 @@ export function SpawnEditorUnpackForm(): ReactElement {
   const [unpackedTo, setUnpackedTo] = useState<Nullable<string>>(null);
 
   const source: IPathField = usePathField({
-    id: "spawn.unpack.source",
+    application: EApplicationId.SPAWN_UNPACKER,
+    id: "source",
     title: "Select spawn file",
     filters: [{ name: "spawn", extensions: ["spawn"] }],
     isDisabled: isLoading,
@@ -36,7 +37,8 @@ export function SpawnEditorUnpackForm(): ReactElement {
   });
 
   const destination: IPathField = usePathField({
-    id: "spawn.unpack.destination",
+    application: EApplicationId.SPAWN_UNPACKER,
+    id: "destination",
     title: "Select output directory",
     isDirectory: true,
     isDisabled: isLoading,

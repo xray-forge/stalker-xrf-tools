@@ -26,7 +26,8 @@ export function ArchivesUnpackerApplication(): ReactElement {
   const [result, setResult] = useState<Nullable<ArchiveUnpackResult>>(null);
 
   const source: IPathField = usePathField({
-    id: "archives.unpack.source",
+    application: EApplicationId.ARCHIVES_UNPACKER,
+    id: "source",
     title: "Select archives directory",
     isDirectory: true,
     isDisabled: isLoading,
@@ -35,7 +36,8 @@ export function ArchivesUnpackerApplication(): ReactElement {
   });
 
   const destination: IPathField = usePathField({
-    id: "archives.unpack.destination",
+    application: EApplicationId.ARCHIVES_UNPACKER,
+    id: "destination",
     title: "Select output directory",
     isDirectory: true,
     isSave: true,

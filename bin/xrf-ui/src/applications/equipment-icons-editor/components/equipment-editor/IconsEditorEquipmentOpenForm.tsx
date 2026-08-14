@@ -2,6 +2,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { EquipmentService } from "@/core/equipment-icons";
+import { EApplicationId } from "@/core/routing/application";
 import { getPathIfExists, getProjectEquipmentDDSPath, getProjectSystemLtxPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";
 import { PickerForm } from "@/core/shell/editor/PickerForm";
@@ -18,7 +19,8 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
   const isLoading: boolean = equipmentService.spriteImage.isLoading;
 
   const sprite: IPathField = usePathField({
-    id: "equipment.open.sprite",
+    application: EApplicationId.EQUIPMENT_ICONS_EDITOR,
+    id: "sprite",
     title: "Select equipment sprite",
     filters: [{ name: "dds", extensions: ["dds"] }],
     isDisabled: isLoading,
@@ -27,7 +29,8 @@ export function IconsEditorEquipmentOpenForm(): ReactElement {
   });
 
   const systemLtx: IPathField = usePathField({
-    id: "equipment.open.system-ltx",
+    application: EApplicationId.EQUIPMENT_ICONS_EDITOR,
+    id: "system-ltx",
     title: "Select system.ltx",
     filters: [{ name: "ltx", extensions: ["ltx"] }],
     isDisabled: isLoading,

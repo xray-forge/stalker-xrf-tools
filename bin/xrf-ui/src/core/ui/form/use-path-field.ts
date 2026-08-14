@@ -2,6 +2,7 @@ import { DialogFilter } from "@tauri-apps/plugin-dialog";
 import { exists } from "@tauri-apps/plugin-fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { EApplicationId } from "@/core/routing/application";
 import { usePathState } from "@/core/ui/form/file-picker/use-path-state";
 import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 import { Nullable } from "@/lib/types/general";
@@ -10,12 +11,9 @@ const STORAGE_PREFIX: string = "xrf.form.";
 const VALIDATE_DEBOUNCE_MS: number = 250;
 
 export interface IPathFieldOptions {
-  /**
-   * Stable identifier, for example `spawn.unpack.source`.
-   *
-   * Deliberately not derived from the route: routes and files have been renamed repeatedly here, and a
-   * key built from them discards the user's remembered paths silently every time.
-   */
+  /** The application that owns this field. */
+  application: EApplicationId;
+  /** Names the field inside its own form, for example `source`. Only unique within the application. */
   id: string;
   title?: string;
   filters?: Nullable<Array<DialogFilter>>;
@@ -36,15 +34,12 @@ export interface IPathField {
   setValue: (value: Nullable<string>) => void;
 }
 
-export function getPathFieldStorageKey(id: string): string {
-  return `${STORAGE_PREFIX}${id}`;
-}
-
 /**
  * Manages a remembered, validated filesystem path for one form field.
  *
  * @param options - Field identity, dialog behavior, and validation options.
- * @param options.id - Stable identifier used for persistence.
+ * @param options.application - Application the field belongs to, used to scope persistence.
+ * @param options.id - Field name within that application, used for persistence.
  * @param options.title - Path dialog title.
  * @param options.filters - File filters shown by the dialog.
  * @param options.isDirectory - Whether the dialog selects a directory.
@@ -55,6 +50,7 @@ export function getPathFieldStorageKey(id: string): string {
  * @returns The current path state, validation result, and field actions.
  */
 export function usePathField({
+  application,
   id,
   title,
   filters = null,
@@ -68,7 +64,7 @@ export function usePathField({
   const [error, setError] = useState<Nullable<string>>(null);
 
   const isSeeded = useRef<boolean>(false);
-  const storageKey: string = getPathFieldStorageKey(id);
+  const storageKey: string = `${STORAGE_PREFIX}${application}.${id}`;
 
   const clear = useCallback(() => setValue(null), [setValue]);
 
