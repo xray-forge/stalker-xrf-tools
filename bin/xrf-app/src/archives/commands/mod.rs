@@ -4,6 +4,7 @@ pub mod extract_file;
 pub mod get_project;
 pub mod has_project;
 pub mod open_project;
+pub mod pack_directory;
 pub mod read_audio;
 pub mod read_file;
 pub mod read_image;

@@ -10,4 +10,5 @@ pub fn typescript_bindings() -> Types {
     .register::<crate::ArchiveProjectReadPolicy>()
     .register::<crate::ProjectReadResult>()
     .register::<crate::ArchiveUnpackResult>()
+    .register::<crate::ArchivePackResult>()
 }

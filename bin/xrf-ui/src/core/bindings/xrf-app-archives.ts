@@ -26,6 +26,26 @@ export const commands = {
     } | null>("plugin:archives|get_project"),
   hasProject: () => __TAURI_INVOKE<boolean>("plugin:archives|has_project"),
   openProject: (path: string) => __TAURI_INVOKE<ArchiveProject>("plugin:archives|open_project", { path }),
+  /**
+   * Pack a directory into archive volumes.
+   *
+   * Layers the same way the command line does: defaults, then an optional configuration file, then the
+   * values the caller supplied, so a form and a command line produce the same archive from the same input.
+   */
+  packDirectory: (
+    sourcePath: string,
+    destinationPath: string,
+    name: string,
+    ltxPath: string | null,
+    isStore: boolean
+  ) =>
+    __TAURI_INVOKE<ArchivePackResult>("plugin:archives|pack_directory", {
+      sourcePath,
+      destinationPath,
+      name,
+      ltxPath,
+      isStore,
+    }),
   /** Hand an archived sound to the webview, along with whatever the engine would read from it. */
   readAudio: (path: string) => __TAURI_INVOKE<ArchiveAudioPreview>("plugin:archives|read_audio", { path }),
   readFile: (path: string) => __TAURI_INVOKE<ProjectReadResult>("plugin:archives|read_file", { path }),
@@ -68,6 +88,7 @@ export type ArchiveDescriptor = {
   path: string;
 };
 
+/** What extracting one archived directory produced. */
 export type ArchiveExtractDirectoryResult = {
   prefix: string;
   destination: string;
@@ -75,6 +96,7 @@ export type ArchiveExtractDirectoryResult = {
   size: number;
 };
 
+/** What extracting one archived file produced. */
 export type ArchiveExtractResult = {
   name: string;
   destination: string;
@@ -98,6 +120,22 @@ export type ArchiveImagePreview = {
   height: number;
   /** PNG bytes, base64 encoded so the webview can use them directly as an image source. */
   base64: string;
+};
+
+/** What one packing run produced. */
+export type ArchivePackResult = {
+  /** Volumes written, in mount order. */
+  volumes: Array<string>;
+  filesTotal: number;
+  /** Files the include, exclude, and skip rules left out. */
+  filesSkipped: number;
+  filesStored: number;
+  filesCompressed: number;
+  /** Files that shared an identical earlier payload and cost only a descriptor row. */
+  filesAliased: number;
+  sizeSource: number;
+  sizeWritten: number;
+  duration: number;
 };
 
 export type ArchiveProject = {

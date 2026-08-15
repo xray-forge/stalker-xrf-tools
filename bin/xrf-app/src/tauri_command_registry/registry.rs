@@ -10,6 +10,7 @@ macro_rules! for_each_tauri_command_domain {
         get_project => crate::archives::commands::get_project::archives_get_project,
         has_project => crate::archives::commands::has_project::archives_has_project,
         open_project => crate::archives::commands::open_project::archives_open_project,
+        pack_directory => crate::archives::commands::pack_directory::archives_pack_directory,
         read_audio => crate::archives::commands::read_audio::archives_read_audio,
         read_file => crate::archives::commands::read_file::archives_read_file,
         read_image => crate::archives::commands::read_image::archives_read_image,

@@ -5,12 +5,7 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 /** Commands */
 export const commands = {
   closeProject: () => __TAURI_INVOKE<null>("plugin:translations|close_project"),
-  /**
-   * Report which layout a directory looks like, for the open form to preselect.
-   *
-   * Advisory only. The mode a project is opened with is whatever the caller passes, because the two
-   * layouts write to different files and a heuristic must not be what decides that.
-   */
+  /** Report which layout a directory looks like, for the open form to preselect. */
   detectMode: (path: string) => __TAURI_INVOKE<TranslationProjectMode>("plugin:translations|detect_mode", { path }),
   getProject: () =>
     __TAURI_INVOKE<{

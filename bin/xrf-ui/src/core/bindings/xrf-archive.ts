@@ -8,6 +8,7 @@ export type ArchiveDescriptor = {
   path: string;
 };
 
+/** What extracting one archived directory produced. */
 export type ArchiveExtractDirectoryResult = {
   prefix: string;
   destination: string;
@@ -15,6 +16,7 @@ export type ArchiveExtractDirectoryResult = {
   size: number;
 };
 
+/** What extracting one archived file produced. */
 export type ArchiveExtractResult = {
   name: string;
   destination: string;
@@ -30,6 +32,22 @@ export type ArchiveFileDescriptor = {
   offset: number;
   sizeCompressed: number;
   sizeReal: number;
+};
+
+/** What one packing run produced. */
+export type ArchivePackResult = {
+  /** Volumes written, in mount order. */
+  volumes: Array<string>;
+  filesTotal: number;
+  /** Files the include, exclude, and skip rules left out. */
+  filesSkipped: number;
+  filesStored: number;
+  filesCompressed: number;
+  /** Files that shared an identical earlier payload and cost only a descriptor row. */
+  filesAliased: number;
+  sizeSource: number;
+  sizeWritten: number;
+  duration: number;
 };
 
 export type ArchiveProject = {
