@@ -1,5 +1,5 @@
 use tauri::State;
-use xrf_translation::{TranslationProject, TranslationProjectJson};
+use xrf_translation::{TranslationProjectDescriptor, TranslationProjectMode, read_gamedata, read_source};
 
 use crate::translations::state::TranslationProjectState;
 use crate::types::TauriResult;
@@ -9,12 +9,20 @@ use crate::utils::error_to_string;
 #[tauri::command(rename = "open_project")]
 pub async fn translations_open_project(
   path: &str,
+  mode: TranslationProjectMode,
   state: State<'_, TranslationProjectState>,
-) -> TauriResult<TranslationProjectJson> {
-  log::info!("Opening translations project: {}", path);
+) -> TauriResult<TranslationProjectDescriptor> {
+  log::info!("Opening translations project: {} ({:?})", path, mode);
 
-  let translation: TranslationProjectJson = TranslationProject::read_project(path).map_err(error_to_string)?;
-  *state.project.lock().unwrap() = Some(translation.clone());
+  // The caller's mode is obeyed, not re-derived: the two layouts save to different files, so a guess
+  // acted on here would decide what a later save overwrites.
+  let descriptor: TranslationProjectDescriptor = match mode {
+    TranslationProjectMode::Source => read_source(path),
+    TranslationProjectMode::Gamedata => read_gamedata(path),
+  }
+  .map_err(error_to_string)?;
 
-  Ok(translation)
+  *state.project.lock().unwrap() = Some(descriptor.clone());
+
+  Ok(descriptor)
 }

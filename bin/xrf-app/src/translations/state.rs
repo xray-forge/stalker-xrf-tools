@@ -1,9 +1,10 @@
 use std::sync::{Arc, Mutex};
 
-use xrf_translation::TranslationProjectJson;
+use xrf_translation::TranslationProjectDescriptor;
 
+/// The open translations root.
 pub struct TranslationProjectState {
-  pub project: Arc<Mutex<Option<TranslationProjectJson>>>,
+  pub project: Arc<Mutex<Option<TranslationProjectDescriptor>>>,
 }
 
 impl TranslationProjectState {

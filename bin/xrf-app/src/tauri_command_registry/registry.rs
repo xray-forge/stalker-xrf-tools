@@ -52,9 +52,11 @@ macro_rules! for_each_tauri_command_domain {
       }
       translations => "translations" {
         close_project => crate::translations::commands::close_project::translations_close_project,
+        detect_mode => crate::translations::commands::detect_mode::translations_detect_mode,
         get_project => crate::translations::commands::get_project::translations_get_project,
         open_project => crate::translations::commands::open_project::translations_open_project,
-        read_project => crate::translations::commands::read_project::translations_read_project,
+        save_file => crate::translations::commands::save_file::translations_save_file,
+        validate_text => crate::translations::commands::validate_text::translations_validate_text,
       }
     }
   };
