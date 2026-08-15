@@ -1,10 +1,9 @@
+use std::path::Path;
 use std::str::FromStr;
 
 use derive_more::Display;
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, get_windows1252_encoder};
-
-pub const MULTILANGUAGE: &str = "multilang";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Display)]
 pub enum TranslationLanguage {
@@ -89,49 +88,33 @@ impl TranslationLanguage {
       language => Ok(language),
     }
   }
+
+  /// Read the language off a `name.eng.xml` style filename, which is how sources carry it.
+  pub(crate) fn from_file_name(path: &Path) -> Option<Self> {
+    let file_name: &str = path.file_name()?.to_str()?;
+    let mut parts = file_name.rsplit('.');
+
+    parts.next()?;
+
+    Self::from_str_single(parts.next()?).ok()
+  }
+
+  /// Read the language off a `text/rus/st_dialogs.xml` parent directory, which is how gamedata
+  /// carries it.
+  pub(crate) fn from_parent_directory(path: &Path) -> Option<Self> {
+    Self::from_str_single(path.parent()?.file_name()?.to_str()?).ok()
+  }
+}
+
+/// Find the first character an encoding cannot represent.
+///
+/// Lives beside the languages because it answers a question about a code page, and every caller -
+/// the builder, both writers, and edit validation - is asking it about a language's own encoding.
+pub(crate) fn find_unencodable_character(value: &str, encoding: XRayEncoding) -> Option<char> {
+  value
+    .chars()
+    .find(|character| encoding.encode(&String::from(*character)).2)
 }
 
 #[cfg(test)]
-mod tests {
-  use std::str::FromStr;
-
-  use crate::TranslationLanguage;
-
-  #[test]
-  fn test_from_str() {
-    assert_eq!(
-      TranslationLanguage::from_str("eng").unwrap(),
-      TranslationLanguage::English
-    );
-    assert_eq!(
-      TranslationLanguage::from_str("ukr").unwrap(),
-      TranslationLanguage::Ukrainian
-    );
-    assert_eq!(TranslationLanguage::from_str("all").unwrap(), TranslationLanguage::All);
-  }
-
-  #[test]
-  fn test_from_str_single() {
-    assert!(TranslationLanguage::from_str_single("all").is_err());
-    assert_eq!(
-      TranslationLanguage::from_str_single("eng").unwrap(),
-      TranslationLanguage::English
-    );
-    assert_eq!(
-      TranslationLanguage::from_str_single("spa").unwrap(),
-      TranslationLanguage::Spanish
-    );
-  }
-
-  #[test]
-  fn selects_the_xray_encoding_for_each_language() {
-    assert_eq!(TranslationLanguage::English.get_language_encoding(), "windows-1252");
-    assert_eq!(TranslationLanguage::French.get_language_encoding(), "windows-1252");
-    assert_eq!(TranslationLanguage::Italian.get_language_encoding(), "windows-1252");
-    assert_eq!(TranslationLanguage::Spanish.get_language_encoding(), "windows-1252");
-    assert_eq!(TranslationLanguage::German.get_language_encoding(), "windows-1250");
-    assert_eq!(TranslationLanguage::Polish.get_language_encoding(), "windows-1250");
-    assert_eq!(TranslationLanguage::Russian.get_language_encoding(), "windows-1251");
-    assert_eq!(TranslationLanguage::Ukrainian.get_language_encoding(), "windows-1251");
-  }
-}
+mod tests;

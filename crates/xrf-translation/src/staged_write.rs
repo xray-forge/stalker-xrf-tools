@@ -85,28 +85,4 @@ fn replace_staged_file(staged_path: &Path, path: &Path, sequence: u64) -> XrfRes
 }
 
 #[cfg(test)]
-mod tests {
-  use std::fs;
-  use std::io::Write;
-
-  use xrf_error::XrfResult;
-  use xrf_test_utils::utils::{get_absolute_generated_test_resource_path, overwrite_generated_test_resource_as_file};
-
-  use super::write_file_staged;
-
-  #[test]
-  fn replaces_an_existing_file_after_staging_succeeds() -> XrfResult {
-    let relative_path = "staged_write/replaced.txt";
-    let mut file = overwrite_generated_test_resource_as_file(relative_path)?;
-
-    file.write_all(b"original")?;
-    drop(file);
-
-    let path = get_absolute_generated_test_resource_path(relative_path);
-    write_file_staged(&path, b"replacement")?;
-
-    assert_eq!(fs::read(path)?, b"replacement");
-
-    Ok(())
-  }
-}
+mod tests;

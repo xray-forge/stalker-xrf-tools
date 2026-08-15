@@ -1,0 +1,138 @@
+use xrf_test_utils::utils::{get_absolute_generated_test_resource_path, write_generated_test_resource};
+
+use super::table;
+use crate::constants::LANGUAGE_NEUTRAL;
+use crate::project::source_read::read_source;
+
+#[test]
+fn reads_a_json_map_as_one_file_carrying_every_language() {
+  let root: &str = "source_read/json";
+
+  write_generated_test_resource(
+    &format!("{root}/st_test.json"),
+    r#"{"st_hello":{"eng":"Hello","ukr":"Pryvit"}}"#,
+  )
+  .expect("Expected a written test file");
+
+  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+
+  assert_eq!(descriptor.languages, vec![String::from("eng"), String::from("ukr")]);
+
+  let file = descriptor.files.get("st_test.json").expect("Expected the file");
+
+  assert_eq!(file.entries.len(), 1);
+  // Both languages are written back to the same JSON, so both point at it.
+  assert_eq!(file.sources.len(), 2);
+}
+
+#[test]
+fn groups_language_suffixed_xml_under_one_entry() {
+  let root: &str = "source_read/suffixed";
+
+  write_generated_test_resource(&format!("{root}/dialogs.eng.xml"), table("st_hi", "Hi"))
+    .expect("Expected a written test file");
+  write_generated_test_resource(&format!("{root}/dialogs.ukr.xml"), table("st_hi", "Pryvit"))
+    .expect("Expected a written test file");
+
+  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let file = descriptor
+    .files
+    .get("dialogs.multilang.xml")
+    .expect("Expected the merged file");
+
+  assert_eq!(file.entries.get("st_hi").unwrap().len(), 2);
+  // Each language keeps its own path, which is the file an edit has to be written back to.
+  assert!(file.sources["eng"].ends_with("dialogs.eng.xml"));
+  assert!(file.sources["ukr"].ends_with("dialogs.ukr.xml"));
+}
+
+#[test]
+fn treats_an_unsuffixed_xml_as_language_neutral() {
+  let root: &str = "source_read/neutral";
+
+  write_generated_test_resource(&format!("{root}/example.xml"), table("st_example", "example"))
+    .expect("Expected a written test file");
+
+  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let file = descriptor.files.get("example.xml").expect("Expected the file");
+
+  // The build copies this to every language, so calling it English would misreport its reach.
+  assert!(file.entries["st_example"].contains_key(LANGUAGE_NEUTRAL));
+  assert!(!file.entries["st_example"].contains_key("eng"));
+  assert_eq!(descriptor.languages, vec![String::from(LANGUAGE_NEUTRAL)]);
+}
+
+#[test]
+fn sorts_neutral_text_last_rather_than_under_a() {
+  let root: &str = "source_read/neutral_order";
+
+  write_generated_test_resource(&format!("{root}/example.xml"), table("st_example", "example"))
+    .expect("Expected a written test file");
+  write_generated_test_resource(&format!("{root}/st_test.json"), r#"{"st_hello":{"eng":"Hello"}}"#)
+    .expect("Expected a written test file");
+
+  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+
+  assert_eq!(
+    descriptor.languages,
+    vec![String::from("eng"), String::from(LANGUAGE_NEUTRAL)]
+  );
+}
+
+#[test]
+fn opens_a_project_whose_json_is_broken_and_reports_it() {
+  let root: &str = "source_read/broken_json";
+
+  write_generated_test_resource(&format!("{root}/good.json"), r#"{"st_hello":{"eng":"Hello"}}"#)
+    .expect("Expected a written test file");
+  write_generated_test_resource(&format!("{root}/bad.json"), "{ not json").expect("Expected a written test file");
+
+  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+
+  assert!(descriptor.files.contains_key("good.json"));
+  assert!(
+    descriptor
+      .findings
+      .iter()
+      .any(|finding| finding.rule == "translations.unreadable")
+  );
+}
+
+#[test]
+fn reports_an_id_defined_in_two_files_instead_of_refusing_to_open() {
+  let root: &str = "source_read/cross_file";
+
+  write_generated_test_resource(&format!("{root}/first.json"), r#"{"st_same":{"eng":"first"}}"#)
+    .expect("Expected a written test file");
+  write_generated_test_resource(&format!("{root}/second.json"), r#"{"st_same":{"eng":"second"}}"#)
+    .expect("Expected a written test file");
+
+  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+
+  assert_eq!(descriptor.files.len(), 2);
+  assert!(
+    descriptor
+      .findings
+      .iter()
+      .any(|finding| finding.rule == "translations.duplicate-across-files")
+  );
+}
+
+#[test]
+fn records_the_code_page_each_language_will_be_built_in() {
+  let root: &str = "source_read/encodings";
+
+  write_generated_test_resource(&format!("{root}/st_test.json"), r#"{"st_hello":{"eng":"a","ukr":"b"}}"#)
+    .expect("Expected a written test file");
+
+  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+
+  assert_eq!(
+    descriptor.encodings.get("eng").map(String::as_str),
+    Some("windows-1252")
+  );
+  assert_eq!(
+    descriptor.encodings.get("ukr").map(String::as_str),
+    Some("windows-1251")
+  );
+}

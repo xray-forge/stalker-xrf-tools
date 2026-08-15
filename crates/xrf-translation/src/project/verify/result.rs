@@ -58,33 +58,3 @@ impl ProjectVerifyResult {
     ));
   }
 }
-
-#[cfg(test)]
-mod tests {
-  use std::path::Path;
-
-  use xrf_report::Status;
-
-  use super::ProjectVerifyResult;
-
-  #[test]
-  fn reports_missing_translations_as_findings() {
-    let mut result: ProjectVerifyResult = ProjectVerifyResult::new();
-
-    result.record_missing_translation(Path::new("translations/dialogs.json"), "st_dialog_hello", "ukr");
-
-    let report = result.to_report();
-
-    assert_eq!(result.status(), Status::Failed);
-    assert_eq!(report.status(), Status::Failed);
-    assert_eq!(report.checks()[0].id().as_str(), "translations");
-    assert_eq!(
-      report.checks()[0].findings()[0].rule_id().as_str(),
-      "translations.missing"
-    );
-    assert_eq!(
-      report.checks()[0].findings()[0].subject(),
-      Some("translations/dialogs.json")
-    );
-  }
-}

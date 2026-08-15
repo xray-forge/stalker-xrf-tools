@@ -1,15 +1,13 @@
-pub(crate) mod project_write;
-pub(crate) mod staged_write;
-pub(crate) mod translation_json_read;
-pub(crate) mod translation_project;
-pub(crate) mod translation_project_build;
-pub(crate) mod translation_project_build_options;
-pub(crate) mod translation_project_build_result;
-pub(crate) mod translation_project_initialize;
-pub(crate) mod translation_project_initialize_options;
-pub(crate) mod translation_project_initialize_result;
-pub(crate) mod translation_project_read;
-pub(crate) mod translation_project_verify;
-pub(crate) mod translation_project_verify_options;
-pub(crate) mod translation_project_verify_result;
-pub(crate) mod translation_xml_read;
+//! Whole translation roots: how a tree of files is discovered, described, edited, and built.
+
+pub(crate) mod build;
+pub(crate) mod descriptor;
+pub(crate) mod edit;
+pub(crate) mod gamedata_read;
+pub(crate) mod initialize;
+pub(crate) mod layout;
+pub(crate) mod source_read;
+pub(crate) mod verify;
+
+#[cfg(test)]
+mod tests;
