@@ -80,7 +80,7 @@ export class ArchivesService {
   }
 
   public constructor(
-    private readonly status: WireStatus = WireStatus.for(this, { initialize: true }),
+    private readonly status: WireStatus = WireStatus.track(this),
     private readonly eventBus: EventBus = inject(EventBus)
   ) {
     makeObservable(this);

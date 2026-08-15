@@ -1,6 +1,7 @@
 import * as path from "path";
 
 import { default as react } from "@vitejs/plugin-react";
+import { wirestate } from "@wirestate/dev/vite";
 import { default as observerPlugin } from "mobx-react-observer/vite-plugin";
 import { defineConfig, Plugin } from "vite";
 import { default as inlineSource } from "vite-plugin-inline-source";
@@ -46,7 +47,7 @@ function getInitialVendorChunk(id: string): string | null {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [inlineSource({ optimizeJs: true }), react(), reactObserverPlugin()],
+  plugins: [wirestate(), inlineSource({ optimizeJs: true }), react(), reactObserverPlugin()],
   build: {
     outDir: "target",
     rolldownOptions: {

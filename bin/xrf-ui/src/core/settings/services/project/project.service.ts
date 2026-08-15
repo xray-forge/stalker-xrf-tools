@@ -13,7 +13,7 @@ export class ProjectService {
   @Observable()
   public xrfProjectPath: Nullable<string> = null;
 
-  public constructor(private readonly status: WireStatus = WireStatus.for(this, { initialize: true })) {
+  public constructor(private readonly status: WireStatus = WireStatus.track(this)) {
     makeObservable(this);
   }
 
