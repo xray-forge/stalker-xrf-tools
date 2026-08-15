@@ -12,7 +12,6 @@ path = "src/lib.rs"
 bounded_join_set = "0.3.0"
 byteorder = { workspace = true }
 crc32fast = "1.5.0"
-delharc = { workspace = true, features = ["std", "lh1"] }
 log = { workspace = true }
 minilzo-rs = "0.6.1"
 regex = { workspace = true }
@@ -20,6 +19,7 @@ serde = { workspace = true }
 specta = { workspace = true, optional = true }
 walkdir = { workspace = true }
 xrf-error = { workspace = true }
+xrf-lzhuf = { workspace = true }
 xrf-utils = { workspace = true }
 
 [features]

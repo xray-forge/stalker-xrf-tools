@@ -811,12 +811,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "crc-any"
-version = "2.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a62ec9ff5f7965e4d7280bd5482acd20aadb50d632cf6c1d74493856b011fa73"
-
-[[package]]
 name = "crc32fast"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1018,17 +1012,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10d60334b3b2e7c9d91ef8150abfb6fa4c1c39ebbcf4a81c2e346aad939fee3e"
 dependencies = [
  "thiserror 2.0.20",
-]
-
-[[package]]
-name = "delharc"
-version = "0.6.1"
-dependencies = [
- "bitflags 2.10.0",
- "chrono",
- "crc-any",
- "memchr",
- "rand 0.8.5",
 ]
 
 [[package]]
@@ -6825,7 +6808,6 @@ dependencies = [
  "bounded_join_set",
  "byteorder",
  "crc32fast",
- "delharc",
  "log",
  "minilzo-rs",
  "regex",
@@ -6833,6 +6815,7 @@ dependencies = [
  "specta",
  "walkdir",
  "xrf-error",
+ "xrf-lzhuf",
  "xrf-utils",
 ]
 
@@ -6980,6 +6963,13 @@ name = "xrf-lua"
 version = "0.1.0"
 dependencies = [
  "full_moon",
+ "xrf-error",
+]
+
+[[package]]
+name = "xrf-lzhuf"
+version = "0.1.0"
+dependencies = [
  "xrf-error",
 ]
 

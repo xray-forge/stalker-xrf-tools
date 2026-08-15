@@ -6,9 +6,9 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use byteorder::ReadBytesExt;
-use delharc::decode::{Decoder, Lh1Decoder};
 use regex::Regex;
 use xrf_error::{XrfError, XrfResult};
+use xrf_lzhuf::decompress;
 use xrf_utils::{
   XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder, get_windows1251_encoder,
 };
@@ -179,19 +179,11 @@ impl ArchiveReader {
   fn read_chunk<T: Read>(file: &mut T, chunk_usize: usize, compressed: bool) -> XrfResult<Vec<u8>> {
     match compressed {
       true => {
-        let decoded_len: u32 = file.read_u32::<XRayByteOrder>()?;
-        let mut compressed_buf: Vec<u8> = vec![0u8; chunk_usize - 4usize];
+        let mut compressed_buf: Vec<u8> = vec![0u8; chunk_usize];
 
         file.read_exact(compressed_buf.as_mut_slice())?;
 
-        let mut res: Lh1Decoder<&[u8]> = Lh1Decoder::new(compressed_buf.as_slice());
-        let mut decompressed_buf: Vec<u8> = vec![0u8; decoded_len as usize];
-
-        res
-          .fill_buffer(&mut decompressed_buf)
-          .map_err(|error| XrfError::new_parsing_error(error.to_string()))?;
-
-        Ok(decompressed_buf)
+        decompress(&compressed_buf)
       }
       false => {
         let mut raw_buf: Vec<u8> = vec![0u8; chunk_usize];
