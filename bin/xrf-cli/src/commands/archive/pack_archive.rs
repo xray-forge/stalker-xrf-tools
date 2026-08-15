@@ -153,6 +153,16 @@ impl GenericCommand for PackArchiveCommand {
     xrf_output::info!(output, "Pack source: {}", path.display());
     xrf_output::info!(output, "Pack destination: {}", destination.display());
 
+    // A headerless archive is not neutral to the engine: unless it is named `xdb`, the loader assumes it
+    // is an encrypted Shadow of Chernobyl archive and decrypts it into nonsense.
+    if config.header.is_none() && config.volume_extension != ArchiveVolumeExtension::Xdb {
+      xrf_output::warning!(
+        output,
+        "No [header] section configured: the engine will read these volumes as encrypted ShoC archives. \
+         Supply --ltx with a [header] naming an entry_point, or pass --xdb."
+      );
+    }
+
     let result: ArchivePackResult = ArchivePacker::pack(&config)?;
 
     for volume in &result.volumes {
