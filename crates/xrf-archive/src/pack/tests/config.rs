@@ -90,6 +90,28 @@ fn an_empty_config_writes_nothing_to_mislead_a_reader() {
 }
 
 #[test]
+fn a_fresh_config_mounts_where_gamedata_belongs() {
+  let config: ArchivePackConfig = ArchivePackConfig::new("gamedata", "db", "configs");
+  let header: &str = config.header.as_deref().expect("a header by default");
+
+  // Defaulting to none would hand the engine an archive it reads as an encrypted ShoC one.
+  assert!(header.contains("entry_point = $fs_root$\\gamedata\\"));
+  assert!(header.contains("auto_load = true"));
+  assert!(write_config(&config).contains("entry_point"));
+}
+
+#[test]
+fn a_configured_header_replaces_the_default() {
+  let config: ArchivePackConfig = ArchivePackConfig::new("gamedata", "db", "configs")
+    .with_ltx(&Ltx::read_from_str("[header]\nentry_point = $fs_root$\\levels\\\n").expect("ltx parses"))
+    .expect("ltx applies");
+  let header: &str = config.header.as_deref().expect("header is carried");
+
+  assert!(header.contains("entry_point = $fs_root$\\levels\\"));
+  assert!(!header.contains("gamedata"), "the default is replaced, not merged");
+}
+
+#[test]
 fn a_second_round_trip_changes_nothing() {
   let once: ArchivePackConfig = round_trip(&populated());
   let twice: ArchivePackConfig = round_trip(&once);

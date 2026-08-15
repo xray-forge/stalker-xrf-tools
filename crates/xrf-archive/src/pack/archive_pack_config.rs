@@ -7,6 +7,19 @@ use xrf_ltx::Ltx;
 /// Largest volume the engine will open, and the default (`XRP_MAX_SIZE` in `xrCompress.h`).
 pub const VOLUME_SIZE_MAX: u64 = 1024 * 1024 * 1900;
 
+/// Where a packed `gamedata` tree mounts, which is what nearly every archive is.
+pub const DEFAULT_ENTRY_POINT: &str = "$fs_root$\\gamedata\\";
+
+/// Header written unless a configuration supplies its own.
+///
+/// An archive without a header is not merely unmounted: unless it is named `xdb`, the loader assumes it
+/// is an encrypted Shadow of Chernobyl archive and decrypts it into nonsense
+/// (`xray-16/src/xrCore/LocatorAPI.cpp`). Defaulting to a mountable header makes the harmless case the
+/// easy one, and a configuration that names a different entry point still replaces it.
+pub fn default_header() -> String {
+  format!("[header]\r\nauto_load = true\r\nentry_point = {DEFAULT_ENTRY_POINT}\r\n")
+}
+
 /// How file payloads are stored in the archive.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -89,7 +102,7 @@ impl ArchivePackConfig {
       exclude_folders: Vec::new(),
       exclude_extensions: Vec::new(),
       is_with_skip_list: true,
-      header: None,
+      header: Some(default_header()),
       mode: ArchivePackMode::default(),
       max_volume_size: VOLUME_SIZE_MAX,
       volume_extension: ArchiveVolumeExtension::default(),
