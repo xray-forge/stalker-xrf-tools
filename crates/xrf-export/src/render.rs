@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_xml::escape_xml;
+use xrf_xml::{escape_xml_attribute, escape_xml_text};
 
 use crate::extern_manifest::{ExternCallable, ExternExport, ExternManifest, ExternParameter};
 
@@ -109,7 +109,7 @@ fn render_xml(manifest: &ExternManifest) -> String {
   let mut result: String = String::from("<externs>\n  <exports>");
 
   for (name, export) in &manifest.exports {
-    result.push_str(&format!("\n    <export name=\"{}\">", escape_xml(name)));
+    result.push_str(&format!("\n    <export name=\"{}\">", escape_xml_attribute(name)));
     append_xml_export(&mut result, export, 6);
     result.push_str("\n    </export>");
   }
@@ -127,8 +127,8 @@ fn append_xml_export(result: &mut String, export: &ExternExport, indentation: us
         result.push_str(&format!(
           "\n{}<param name=\"{}\" type=\"{}\"{}>",
           " ".repeat(indentation + 2),
-          escape_xml(&parameter.name),
-          escape_xml(&parameter.type_name),
+          escape_xml_attribute(&parameter.name),
+          escape_xml_attribute(&parameter.type_name),
           if parameter.optional.is_some_and(|value| value) {
             " optional=\"true\""
           } else {
@@ -139,7 +139,7 @@ fn append_xml_export(result: &mut String, export: &ExternExport, indentation: us
           result.push_str(&format!(
             "\n{}<doc>{}</doc>",
             " ".repeat(indentation + 4),
-            escape_xml(doc)
+            escape_xml_text(doc)
           ));
           result.push_str(&format!("\n{}</param>", " ".repeat(indentation + 2)));
         } else {
@@ -150,12 +150,12 @@ fn append_xml_export(result: &mut String, export: &ExternExport, indentation: us
       result.push_str(&format!(
         "\n{}<returns>{}</returns>",
         " ".repeat(indentation),
-        escape_xml(&value.returns)
+        escape_xml_text(&value.returns)
       ));
       result.push_str(&format!(
         "\n{}<source>{}</source>",
         " ".repeat(indentation),
-        escape_xml(&value.source)
+        escape_xml_text(&value.source)
       ));
     }
     ExternExport::Value(value) => {
@@ -163,12 +163,12 @@ fn append_xml_export(result: &mut String, export: &ExternExport, indentation: us
       result.push_str(&format!(
         "\n{}<source>{}</source>",
         " ".repeat(indentation),
-        escape_xml(&value.source)
+        escape_xml_text(&value.source)
       ));
       result.push_str(&format!(
         "\n{}<type>{}</type>",
         " ".repeat(indentation),
-        escape_xml(&value.type_name)
+        escape_xml_text(&value.type_name)
       ));
     }
   }
@@ -187,14 +187,14 @@ fn append_xml_documentation(
     result.push_str(&format!(
       "\n{}<description>{}</description>",
       " ".repeat(indentation + 2),
-      escape_xml(description)
+      escape_xml_text(description)
     ));
   }
   if let Some(returns) = &documentation.returns {
     result.push_str(&format!(
       "\n{}<returns>{}</returns>",
       " ".repeat(indentation + 2),
-      escape_xml(returns)
+      escape_xml_text(returns)
     ));
   }
   result.push_str(&format!("\n{}</doc>", " ".repeat(indentation)));

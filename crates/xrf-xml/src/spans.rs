@@ -2,7 +2,55 @@ use std::ops::Range;
 
 use xrf_error::{XrfError, XrfResult};
 
-use crate::document::XmlParseOptions;
+use crate::options::XmlParseOptions;
+use crate::repair::repair_for_parsing;
+
+/// A parsed document together with the text it was parsed from.
+///
+/// The two travel together on purpose: every range an element reports is a byte offset into this
+/// exact string, and separating them would leave offsets pointing into whatever the caller still
+/// happened to be holding.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct XmlSourceDocument {
+  source: String,
+  root: XmlElementSpan,
+}
+
+impl XmlSourceDocument {
+  /// Parse a document, keeping every element's position and the text those positions address.
+  ///
+  /// A strict parse is tried first, so well-formed documents are unaffected. Only on failure is a
+  /// same-length repaired copy parsed instead - shipped game data contains comment banners and bare
+  /// ampersands that XML forbids and the engine's own reader accepts.
+  ///
+  /// # Errors
+  ///
+  /// Returns a parsing error when neither the input nor its repaired copy is well-formed.
+  pub fn parse(source: String, options: XmlParseOptions) -> XrfResult<Self> {
+    let root: XmlElementSpan = match XmlElementSpan::parse_exact(&source, &source, options) {
+      Ok(parsed) => parsed,
+      // The repaired attempt's error is reported, not the strict one: it names whatever is still
+      // wrong once the tolerated constructs are out of the way, which is what a caller has to act on.
+      Err(_) => XmlElementSpan::parse_exact(&source, &repair_for_parsing(&source), options)?,
+    };
+
+    Ok(Self { source, root })
+  }
+
+  /// The text every range in this document addresses.
+  pub fn source(&self) -> &str {
+    &self.source
+  }
+
+  pub fn root(&self) -> &XmlElementSpan {
+    &self.root
+  }
+
+  /// Take the source back, for a caller that is about to splice it.
+  pub fn into_source(self) -> String {
+    self.source
+  }
+}
 
 /// An element together with where it sits in the text it was parsed from.
 ///
@@ -20,14 +68,9 @@ pub struct XmlElementSpan {
 }
 
 impl XmlElementSpan {
-  /// Parse the root element of a document, keeping every element's position.
-  ///
-  /// # Errors
-  ///
-  /// Returns a parsing error when the input is not a well-formed XML document.
-  pub fn parse(input: &str, options: XmlParseOptions) -> XrfResult<Self> {
+  fn parse_exact(input: &str, parsable: &str, options: XmlParseOptions) -> XrfResult<Self> {
     let document: roxmltree::Document = roxmltree::Document::parse_with_options(
-      input,
+      parsable,
       roxmltree::ParsingOptions {
         allow_dtd: options.allow_dtd,
         ..roxmltree::ParsingOptions::default()
@@ -135,81 +178,4 @@ fn content_range(input: &str, element: &Range<usize>, name: &str) -> Option<Rang
 }
 
 #[cfg(test)]
-mod tests {
-  use super::*;
-
-  const OPTIONS: XmlParseOptions = XmlParseOptions { allow_dtd: false };
-
-  #[test]
-  fn locates_content_without_disturbing_the_rest_of_the_document() {
-    let input: &str = "<string_table>\n\t<!-- note -->\n\t<string id=\"a\">\n\t\t<text>first</text>\n\t</string>\n</string_table>";
-    let root: XmlElementSpan = XmlElementSpan::parse(input, OPTIONS).unwrap();
-    let text: &XmlElementSpan = root
-      .child_named("string")
-      .and_then(|string| string.child_named("text"))
-      .unwrap();
-
-    assert_eq!(&input[text.content_range().unwrap().clone()], "first");
-
-    let mut edited: String = input.to_owned();
-    edited.replace_range(text.content_range().unwrap().clone(), "second");
-
-    // The comment and every tab survive, which is the whole reason ranges are carried around.
-    assert_eq!(
-      edited,
-      "<string_table>\n\t<!-- note -->\n\t<string id=\"a\">\n\t\t<text>second</text>\n\t</string>\n</string_table>"
-    );
-  }
-
-  #[test]
-  fn gives_an_empty_content_range_for_an_empty_element() {
-    let input: &str = "<string_table><string id=\"a\"><text></text></string></string_table>";
-    let root: XmlElementSpan = XmlElementSpan::parse(input, OPTIONS).unwrap();
-    let text: &XmlElementSpan = root
-      .child_named("string")
-      .and_then(|string| string.child_named("text"))
-      .unwrap();
-    let range: Range<usize> = text.content_range().unwrap().clone();
-
-    assert!(range.is_empty());
-    assert_eq!(&input[range], "");
-  }
-
-  #[test]
-  fn reports_no_content_range_for_a_self_closing_element() {
-    let input: &str = "<string_table><string id=\"a\"><text/></string></string_table>";
-    let root: XmlElementSpan = XmlElementSpan::parse(input, OPTIONS).unwrap();
-    let text: &XmlElementSpan = root
-      .child_named("string")
-      .and_then(|string| string.child_named("text"))
-      .unwrap();
-
-    assert!(text.content_range().is_none());
-  }
-
-  #[test]
-  fn keeps_entities_in_the_range_while_resolving_them_in_the_text() {
-    let input: &str = "<string_table><string id=\"a\"><text>a &amp; b</text></string></string_table>";
-    let root: XmlElementSpan = XmlElementSpan::parse(input, OPTIONS).unwrap();
-    let text: &XmlElementSpan = root
-      .child_named("string")
-      .and_then(|string| string.child_named("text"))
-      .unwrap();
-
-    assert_eq!(text.text(), "a & b");
-    assert_eq!(&input[text.content_range().unwrap().clone()], "a &amp; b");
-  }
-
-  #[test]
-  fn carries_attributes_and_element_ranges() {
-    let input: &str = "<string_table><string id=\"a\"><text>x</text></string></string_table>";
-    let root: XmlElementSpan = XmlElementSpan::parse(input, OPTIONS).unwrap();
-    let string: &XmlElementSpan = root.child_named("string").unwrap();
-
-    assert_eq!(string.attribute("id"), Some("a"));
-    assert_eq!(
-      &input[string.element_range().clone()],
-      "<string id=\"a\"><text>x</text></string>"
-    );
-  }
-}
+mod tests;
