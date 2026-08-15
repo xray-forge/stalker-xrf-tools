@@ -23,7 +23,9 @@ import { EXPORTS_EXPLORER_APPLICATION } from "@/applications/exports-explorer";
 import { SPAWN_EDITOR_APPLICATION } from "@/applications/spawn-editor";
 import { SPAWN_PACKER_APPLICATION } from "@/applications/spawn-packer";
 import { SPAWN_UNPACKER_APPLICATION } from "@/applications/spawn-unpacker";
+import { TRANSLATIONS_BUILDER_APPLICATION } from "@/applications/translations-builder";
 import { TRANSLATIONS_EDITOR_APPLICATION } from "@/applications/translations-editor";
+import { TRANSLATIONS_VERIFIER_APPLICATION } from "@/applications/translations-verifier";
 import { VISUALS_EXPLORER_APPLICATION } from "@/applications/visuals-explorer";
 import { VISUALS_VIEWER_APPLICATION } from "@/applications/visuals-viewer";
 import { EApplicationGroupId, IApplicationDescriptor, IApplicationGroup } from "@/core/routing/application";
@@ -56,6 +58,8 @@ export const APPLICATION_CATALOG: IApplicationCatalog = {
     SPAWN_PACKER_APPLICATION,
     SPAWN_UNPACKER_APPLICATION,
     TRANSLATIONS_EDITOR_APPLICATION,
+    TRANSLATIONS_BUILDER_APPLICATION,
+    TRANSLATIONS_VERIFIER_APPLICATION,
     VISUALS_VIEWER_APPLICATION,
     VISUALS_EXPLORER_APPLICATION,
   ],

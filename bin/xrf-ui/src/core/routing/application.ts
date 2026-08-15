@@ -19,7 +19,9 @@ export enum EApplicationId {
   SPAWN_EDITOR = "spawn-editor",
   SPAWN_PACKER = "spawn-packer",
   SPAWN_UNPACKER = "spawn-unpacker",
+  TRANSLATIONS_BUILDER = "translations-builder",
   TRANSLATIONS_EDITOR = "translations-editor",
+  TRANSLATIONS_VERIFIER = "translations-verifier",
   VISUALS_EXPLORER = "visuals-explorer",
   VISUALS_VIEWER = "visuals-viewer",
 }
