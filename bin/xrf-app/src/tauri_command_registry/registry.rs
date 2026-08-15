@@ -54,6 +54,9 @@ macro_rules! for_each_tauri_command_domain {
         save_file => crate::spawn::commands::save_file::spawn_save_file,
         unpack_file => crate::spawn::commands::unpack_file::spawn_unpack_file,
       }
+      system => "system" {
+        reveal_path => crate::system::commands::reveal_path::system_reveal_path,
+      }
       translations => "translations" {
         close_project => crate::translations::commands::close_project::translations_close_project,
         detect_mode => crate::translations::commands::detect_mode::translations_detect_mode,

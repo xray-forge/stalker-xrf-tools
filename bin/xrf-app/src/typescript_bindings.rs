@@ -16,6 +16,7 @@ use crate::configs::plugin::ConfigsPlugin;
 use crate::equipment_icons::plugin::EquipmentIconsPlugin;
 use crate::exports::plugin::ExportsPlugin;
 use crate::spawn::plugin::SpawnPlugin;
+use crate::system::plugin::SystemPlugin;
 use crate::translations::plugin::TranslationsPlugin;
 
 const GENERATED_HEADER: &str = "// Auto-generated rust bindings. Do not edit it manually.\n";
@@ -141,6 +142,9 @@ mod tests {
     SpawnPlugin::specta_builder::<R>()
       .export(command_exporter(), output.join("xrf-app-spawn.ts"))
       .expect("Failed to export spawn commands");
+    SystemPlugin::specta_builder::<R>()
+      .export(command_exporter(), output.join("xrf-app-system.ts"))
+      .expect("Failed to export system commands");
     TranslationsPlugin::specta_builder::<R>()
       .export(command_exporter(), output.join("xrf-app-translations.ts"))
       .expect("Failed to export translations commands");

@@ -7,6 +7,7 @@ mod equipment_icons;
 mod exports;
 mod logging;
 mod spawn;
+mod system;
 mod tauri_command_registry;
 mod translations;
 mod types;
@@ -24,6 +25,7 @@ use crate::configs::plugin::ConfigsPlugin;
 use crate::equipment_icons::plugin::EquipmentIconsPlugin;
 use crate::exports::plugin::ExportsPlugin;
 use crate::spawn::plugin::SpawnPlugin;
+use crate::system::plugin::SystemPlugin;
 use crate::translations::plugin::TranslationsPlugin;
 
 fn main() {
@@ -39,6 +41,7 @@ fn main() {
     .plugin(SpawnPlugin::init())
     .plugin(ConfigsPlugin::init())
     .plugin(EquipmentIconsPlugin::init())
+    .plugin(SystemPlugin::init())
     .plugin(TranslationsPlugin::init())
     .run(tauri::generate_context!())
     .expect("Error while running tauri application")

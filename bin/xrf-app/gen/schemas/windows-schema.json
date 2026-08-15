@@ -6633,6 +6633,24 @@
           "markdownDescription": "Denies the unpack_file command without any pre-configured scope."
         },
         {
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-reveal-path`",
+          "type": "string",
+          "const": "system:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-reveal-path`"
+        },
+        {
+          "description": "Enables the reveal_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "system:allow-reveal-path",
+          "markdownDescription": "Enables the reveal_path command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the reveal_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "system:deny-reveal-path",
+          "markdownDescription": "Denies the reveal_path command without any pre-configured scope."
+        },
+        {
           "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-project`\n- `allow-detect-mode`\n- `allow-get-project`\n- `allow-open-project`\n- `allow-save-file`\n- `allow-validate-text`",
           "type": "string",
           "const": "translations:default",

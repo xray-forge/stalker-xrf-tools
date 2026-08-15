@@ -6,6 +6,13 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 export const commands = {
   closeProject: () => __TAURI_INVOKE<null>("plugin:archives|close_project"),
   /**
+   * Hand back a packing configuration with nothing chosen yet.
+   *
+   * The editor starts from this rather than from its own literals, so defaults that belong to the format
+   * - the volume ceiling, the skip list, the mode - have one definition, in the packer.
+   */
+  defaultPackConfig: () => __TAURI_INVOKE<ArchivePackConfig>("plugin:archives|default_pack_config"),
+  /**
    * Write the selection rules of a configuration out as an xrCompress configuration file.
    *
    * Only what such a file can carry is written, so a round trip through import returns what was exported.

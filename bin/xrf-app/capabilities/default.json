@@ -33,6 +33,7 @@
     "exports:default",
     "equipment-icons:default",
     "spawn:default",
+    "system:default",
     "translations:default"
   ]
 }
