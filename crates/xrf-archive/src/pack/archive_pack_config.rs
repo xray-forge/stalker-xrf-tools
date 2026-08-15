@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use serde::{Deserialize, Serialize};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::Ltx;
 
@@ -7,7 +8,8 @@ use xrf_ltx::Ltx;
 pub const VOLUME_SIZE_MAX: u64 = 1024 * 1024 * 1900;
 
 /// How file payloads are stored in the archive.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ArchivePackMode {
   /// Compress what the engine expects to be compressed and store the rest.
   #[default]
@@ -17,7 +19,8 @@ pub enum ArchivePackMode {
 }
 
 /// Extension the produced volumes carry, which also decides how the engine treats a missing header.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ArchiveVolumeExtension {
   #[default]
   Db,
@@ -37,7 +40,9 @@ impl ArchiveVolumeExtension {
 ///
 /// The boolean has a different meaning on each side, which is an xrCompress quirk worth stating: an
 /// included folder recurses into subfolders, while an excluded one matches by prefix rather than exactly.
-#[derive(Clone, Debug)]
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArchivePackFolder {
   pub path: String,
   pub is_recursive: bool,
@@ -47,7 +52,12 @@ pub struct ArchivePackFolder {
 ///
 /// Built from defaults, then optionally from an xrCompress LTX, then from explicit parameters, so a
 /// command line and a form can layer over the same config file in the same order.
-#[derive(Clone, Debug)]
+///
+/// Also the wire contract the desktop editor holds: it is read from a configuration file, edited in
+/// place, packed, and written back, so all three surfaces speak one shape.
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArchivePackConfig {
   /// Root the archived names are relative to, normally a `gamedata` directory.
   pub source: PathBuf,
