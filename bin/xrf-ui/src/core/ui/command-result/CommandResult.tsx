@@ -23,6 +23,8 @@ export interface ICommandResultProps extends BaseComponentProps {
   headline: string;
   tone: TCommandResultTone;
   stats: Array<ICommandResultStat>;
+  /** Ways to act on what was produced, shown beside the headline. */
+  actions?: ReactNode;
   children?: ReactNode;
 }
 
@@ -39,6 +41,7 @@ export function CommandResult({
   headline,
   tone,
   stats,
+  actions,
   children,
 }: ICommandResultProps): ReactElement {
   return (
@@ -48,9 +51,13 @@ export function CommandResult({
       className={className}
       sx={{ display: "flex", flexDirection: "column", width: "100%", flexGrow: 1, minHeight: 0 }}
     >
-      <Typography variant={"subtitle2"} sx={{ color: TONE_COLORS[tone] }}>
-        {headline}
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
+        <Typography variant={"subtitle2"} sx={{ color: TONE_COLORS[tone] }}>
+          {headline}
+        </Typography>
+
+        {actions ? <Box sx={{ display: "flex", flexShrink: 0, gap: 1 }}>{actions}</Box> : null}
+      </Box>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", columnGap: 3, rowGap: 0.5, marginTop: 1 }}>
         {stats.map((stat: ICommandResultStat) => (

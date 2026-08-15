@@ -77,9 +77,7 @@ describe("ArchivesService image preview", () => {
     await service.selectArchiveFile(TEXTURE);
     await service.retrySelectedFile();
 
-    const imageCalls = mockInvoke.mock.calls.filter(
-      ([command]) => command === "plugin:archives|read_image"
-    );
+    const imageCalls = mockInvoke.mock.calls.filter(([command]) => command === "plugin:archives|read_image");
 
     expect(imageCalls).toHaveLength(2);
     expect(mockInvoke).not.toHaveBeenCalledWith("plugin:archives|read_file", expect.anything());

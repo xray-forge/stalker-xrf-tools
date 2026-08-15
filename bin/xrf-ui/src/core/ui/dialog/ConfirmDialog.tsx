@@ -1,4 +1,12 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import {
+  Breakpoint,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
 export interface IConfirmDialogProps {
@@ -10,6 +18,8 @@ export interface IConfirmDialogProps {
   cancelLabel?: string;
   /** Paints the confirming button as destructive, for commands that overwrite or delete. */
   isDestructive?: boolean;
+  /** Widen it when the description is a summary to read rather than a sentence to acknowledge. */
+  maxWidth?: Breakpoint;
   onConfirm: () => void;
   onClose: () => void;
 }
@@ -27,11 +37,12 @@ export function ConfirmDialog({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   isDestructive,
+  maxWidth = "xs",
   onConfirm,
   onClose,
 }: IConfirmDialogProps): ReactElement {
   return (
-    <Dialog open={isOpen} maxWidth={"xs"} fullWidth={true} onClose={onClose}>
+    <Dialog open={isOpen} maxWidth={maxWidth} fullWidth={true} onClose={onClose}>
       <DialogTitle sx={{ paddingBottom: 1 }}>{title}</DialogTitle>
 
       <DialogContent>

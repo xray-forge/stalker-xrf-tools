@@ -45,10 +45,7 @@ export function EditorToolbar({
   const label: Nullable<string> = title ?? application?.label ?? null;
 
   // Asks first when the editor is holding unsaved work; goes straight home when it is not.
-  const onGoHome = useCallback(
-    () => requestLeave(() => navigate("/", { replace: true })),
-    [navigate, requestLeave]
-  );
+  const onGoHome = useCallback(() => requestLeave(() => navigate("/", { replace: true })), [navigate, requestLeave]);
 
   return (
     <Box

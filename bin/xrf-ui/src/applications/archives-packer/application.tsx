@@ -1,6 +1,7 @@
 import { default as ArchiveIcon } from "@mui/icons-material/Archive";
 import { lazy } from "react";
 
+import { PackerService } from "@/applications/archives-packer/store/packer";
 import {
   EApplicationGroupId,
   EApplicationId,
@@ -12,6 +13,7 @@ export const ARCHIVES_PACKER_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("./ArchivesPackerApplication").then((it) => ({ default: it.ArchivesPackerApplication }))
   ),
+  container: { bindings: [PackerService] },
   preload: () => import("./ArchivesPackerApplication"),
   description: "Pack a directory into game archives",
   group: EApplicationGroupId.ARCHIVES,

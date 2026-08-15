@@ -19,10 +19,7 @@ function renderSource(name: string) {
 describe("ExportSourceView", () => {
   beforeEach(() => {
     setMockInvokeResponses({
-      ["plugin:exports|get_source"]: mockSource(
-        "xr_effects.play",
-        'extern("xr_effects.play", () => {});'
-      ),
+      ["plugin:exports|get_source"]: mockSource("xr_effects.play", 'extern("xr_effects.play", () => {});'),
     });
   });
 

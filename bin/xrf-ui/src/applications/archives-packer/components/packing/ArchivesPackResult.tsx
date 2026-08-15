@@ -2,10 +2,12 @@ import { GridColDef } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { ArchivePackResult } from "@/core/bindings/xrf-archive";
+import { EApplicationId } from "@/core/routing/application";
 import { CommandResult, ICommandResultStat } from "@/core/ui/command-result/CommandResult";
 import { CommandResultFindings } from "@/core/ui/command-result/CommandResultFindings";
+import { RevealPathButton } from "@/core/ui/reveal/RevealPathButton";
 import { formatDuration } from "@/lib/format/duration";
-import { bytesToMegabytes } from "@/lib/format/memory";
+import { bytesToMegabytes } from "@/lib/memory/size";
 
 interface IArchivesPackResultProps {
   result: ArchivePackResult;
@@ -17,10 +19,7 @@ export function ArchivesPackResult({ result }: IArchivesPackResultProps): ReactE
     []
   );
 
-  const rows: Array<{ volume: string }> = useMemo(
-    () => result.volumes.map((volume) => ({ volume })),
-    [result.volumes]
-  );
+  const rows: Array<{ volume: string }> = useMemo(() => result.volumes.map((volume) => ({ volume })), [result.volumes]);
 
   const stats: Array<ICommandResultStat> = useMemo(
     () => [
@@ -43,6 +42,15 @@ export function ArchivesPackResult({ result }: IArchivesPackResultProps): ReactE
       headline={`Packed ${result.filesTotal} file(s) into ${result.volumes.length} volume(s)`}
       tone={"success"}
       stats={stats}
+      // The first volume rather than the output directory, so the file manager opens with something
+      // this run produced selected rather than with whatever else lives there.
+      actions={
+        <RevealPathButton
+          application={EApplicationId.ARCHIVES_PACKER}
+          path={result.volumes[0] ?? null}
+          label={"Show volumes"}
+        />
+      }
     >
       <CommandResultFindings<{ volume: string }>
         rows={rows}

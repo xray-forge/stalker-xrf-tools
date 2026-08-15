@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { formatBytes } from "@/lib/format/memory";
+import { formatBytes } from "@/lib/memory/format";
 
 describe("formatBytes", () => {
   it("uses adaptive binary units and compact precision", () => {

@@ -27,13 +27,7 @@ export function PathFormRow({
   const controlId: string = useId();
 
   return (
-    <FormRow
-      label={label}
-      description={description}
-      isRequired={isRequired}
-      error={field.error}
-      controlId={controlId}
-    >
+    <FormRow label={label} description={description} isRequired={isRequired} error={field.error} controlId={controlId}>
       <FilePickerInput
         id={controlId}
         placeholder={placeholder}

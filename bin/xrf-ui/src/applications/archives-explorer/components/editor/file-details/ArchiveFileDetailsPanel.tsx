@@ -6,7 +6,7 @@ import { ArchiveFileDetailRow } from "@/applications/archives-explorer/component
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { formatBytes } from "@/lib/format/memory";
+import { formatBytes } from "@/lib/memory/format";
 import { Nullable } from "@/lib/types/general";
 
 export interface IArchiveFileDetailsPanelProps extends BaseComponentProps {

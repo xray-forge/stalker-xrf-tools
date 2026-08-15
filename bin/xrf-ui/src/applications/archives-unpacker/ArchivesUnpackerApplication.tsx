@@ -61,10 +61,7 @@ export function ArchivesUnpackerApplication(): ReactElement {
 
       log.info("Unpacking:", archivesPath);
 
-      const result: ArchiveUnpackResult = await archivesCommands.unpackDirectory(
-        archivesPath,
-        archivesUnpackPath
-      );
+      const result: ArchiveUnpackResult = await archivesCommands.unpackDirectory(archivesPath, archivesUnpackPath);
 
       log.info("Unpacked:", archivesPath);
 

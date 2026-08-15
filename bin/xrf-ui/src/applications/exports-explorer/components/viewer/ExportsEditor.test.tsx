@@ -166,9 +166,7 @@ describe("opened exports editor", () => {
 
     expect(await findByText("Open script exports")).toBeInTheDocument();
     await waitFor(() => {
-      const closeCalls = mockInvoke.mock.calls.filter(
-        ([command]) => command === "plugin:exports|close_project"
-      );
+      const closeCalls = mockInvoke.mock.calls.filter(([command]) => command === "plugin:exports|close_project");
 
       expect(closeCalls.length).toBeGreaterThanOrEqual(2);
     });

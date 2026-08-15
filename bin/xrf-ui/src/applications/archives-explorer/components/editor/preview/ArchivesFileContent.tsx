@@ -14,8 +14,8 @@ import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archi
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
 import { BaseComponentProps } from "@/lib/dom/element-types";
-import { formatBytes } from "@/lib/format/memory";
 import { Loadable } from "@/lib/loadable";
+import { formatBytes } from "@/lib/memory/format";
 import { Nullable } from "@/lib/types/general";
 
 // Everything that renders its own preview leaves this union; what is left is a reason to explain.

@@ -14,7 +14,7 @@ import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { useEditorPanels } from "@/core/shell/panel/context";
-import { formatBytes } from "@/lib/format/memory";
+import { formatBytes } from "@/lib/memory/format";
 import { Nullable } from "@/lib/types/general";
 
 export function ArchivesEditor(): ReactElement {

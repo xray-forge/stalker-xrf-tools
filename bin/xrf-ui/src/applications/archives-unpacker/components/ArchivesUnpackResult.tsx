@@ -2,10 +2,12 @@ import { GridColDef } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { ArchiveUnpackResult } from "@/core/bindings/xrf-archive";
+import { EApplicationId } from "@/core/routing/application";
 import { CommandResult, ICommandResultStat } from "@/core/ui/command-result/CommandResult";
 import { CommandResultFindings } from "@/core/ui/command-result/CommandResultFindings";
+import { RevealPathButton } from "@/core/ui/reveal/RevealPathButton";
 import { formatDuration } from "@/lib/format/duration";
-import { bytesToMegabytes } from "@/lib/format/memory";
+import { bytesToMegabytes } from "@/lib/memory/size";
 
 interface IArchivesUnpackResultProps {
   result: ArchiveUnpackResult;
@@ -38,6 +40,13 @@ export function ArchivesUnpackResult({ result }: IArchivesUnpackResultProps): Re
       headline={`Unpacked ${result.archives.length} archive(s) to ${result.destination}`}
       tone={"success"}
       stats={stats}
+      actions={
+        <RevealPathButton
+          application={EApplicationId.ARCHIVES_UNPACKER}
+          path={result.destination}
+          label={"Show output"}
+        />
+      }
     >
       <CommandResultFindings<{ archive: string }>
         rows={rows}

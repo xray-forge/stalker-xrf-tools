@@ -89,10 +89,9 @@ describe("EditorToolbar", () => {
 
     bare.unmount();
 
-    const acting = renderWithProviders(
-      <EditorToolbar actions={<button>refresh</button>} />,
-      { route: "/spawn-editor" }
-    );
+    const acting = renderWithProviders(<EditorToolbar actions={<button>refresh</button>} />, {
+      route: "/spawn-editor",
+    });
 
     expect(acting.container.querySelectorAll('[aria-hidden="true"]')).toHaveLength(2);
   });

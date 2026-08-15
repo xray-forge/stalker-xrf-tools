@@ -89,9 +89,7 @@ describe("ArchivesService audio preview", () => {
     await service.selectArchiveFile(SOUND);
     await service.retrySelectedFile();
 
-    const audioCalls = mockInvoke.mock.calls.filter(
-      ([command]) => command === "plugin:archives|read_audio"
-    );
+    const audioCalls = mockInvoke.mock.calls.filter(([command]) => command === "plugin:archives|read_audio");
 
     expect(audioCalls).toHaveLength(2);
   });

@@ -10,9 +10,9 @@ import { ArchivesService } from "@/applications/archives-explorer/services/archi
 import { isUnderArchiveDirectory, TArchiveOperation } from "@/core/archive";
 import { ArchiveExtractDirectoryResult, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { CenteredColumn } from "@/core/ui/layout/CenteredColumn";
-import { formatBytes } from "@/lib/format/memory";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";
+import { formatBytes } from "@/lib/memory/format";
 import { Nullable } from "@/lib/types/general";
 
 export interface IArchiveDirectoryContentProps {

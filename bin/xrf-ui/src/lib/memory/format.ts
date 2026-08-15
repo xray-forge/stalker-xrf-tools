@@ -1,8 +1,6 @@
-const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
+import { BYTES_PER_KILOBYTE } from "@/lib/memory/size";
 
-export function bytesToMegabytes(bytes: number): number {
-  return bytes / 1024 / 1024;
-}
+const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
 
 /**
  * Formats a byte count with an adaptive binary unit.
@@ -13,12 +11,15 @@ export function bytesToMegabytes(bytes: number): number {
 export function formatBytes(bytes: number): string {
   const safeBytes: number = Math.max(0, bytes);
 
-  if (safeBytes < 1024) {
+  if (safeBytes < BYTES_PER_KILOBYTE) {
     return `${safeBytes} B`;
   }
 
-  const unitIndex: number = Math.min(Math.floor(Math.log(safeBytes) / Math.log(1024)), BYTE_UNITS.length - 1);
-  const value: number = safeBytes / 1024 ** unitIndex;
+  const unitIndex: number = Math.min(
+    Math.floor(Math.log(safeBytes) / Math.log(BYTES_PER_KILOBYTE)),
+    BYTE_UNITS.length - 1
+  );
+  const value: number = safeBytes / BYTES_PER_KILOBYTE ** unitIndex;
   const precision: number = value >= 100 ? 0 : value >= 10 ? 1 : 2;
 
   return `${Number(value.toFixed(precision))} ${BYTE_UNITS[unitIndex]}`;
