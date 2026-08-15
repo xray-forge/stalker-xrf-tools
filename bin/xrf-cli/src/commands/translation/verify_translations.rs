@@ -4,7 +4,7 @@ use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_output::OutputOptions;
-use xrf_translation::{ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, TranslationProject};
+use xrf_translation::{ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, verify_dir, verify_file};
 
 use super::translation_verification_report::TranslationVerificationReportWriter;
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -104,9 +104,9 @@ impl GenericCommand for VerifyTranslationsCommand {
     };
 
     let result: ProjectVerifyResult = if path.is_dir() {
-      TranslationProject::verify_dir(path, &options)?
+      verify_dir(path, &options)?
     } else {
-      TranslationProject::verify_file(path, &options)?
+      verify_file(path, &options)?
     };
 
     if let Some(report_path) = report_path {

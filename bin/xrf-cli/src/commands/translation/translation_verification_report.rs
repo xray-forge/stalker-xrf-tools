@@ -88,7 +88,7 @@ mod tests {
   use std::path::PathBuf;
   use std::sync::atomic::{AtomicU64, Ordering};
 
-  use xrf_translation::{ProjectVerifyOptions, TranslationLanguage, TranslationProject};
+  use xrf_translation::{ProjectVerifyOptions, TranslationLanguage, verify_file};
 
   use super::TranslationVerificationReportWriter;
 
@@ -113,7 +113,7 @@ mod tests {
     fs::create_dir_all(&root).unwrap();
     fs::write(&translation_path, r#"{"st_dialog_hello":{"ukr":null}}"#).unwrap();
 
-    let result = TranslationProject::verify_file(&translation_path, &options).unwrap();
+    let result = verify_file(&translation_path, &options).unwrap();
 
     TranslationVerificationReportWriter::new(&result)
       .write(&report_path)

@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_output::OutputOptions;
-use xrf_translation::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, TranslationProject};
+use xrf_translation::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, build_dir, build_file};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -106,9 +106,9 @@ impl GenericCommand for BuildTranslationsCommand {
     };
 
     let result: ProjectBuildResult = if path.is_dir() {
-      TranslationProject::build_dir(path, &options)?
+      build_dir(path, &options)?
     } else {
-      TranslationProject::build_file(path, &options)?
+      build_file(path, &options)?
     };
 
     xrf_output::info!(

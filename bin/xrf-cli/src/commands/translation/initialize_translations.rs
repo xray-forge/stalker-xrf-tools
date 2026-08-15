@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_output::OutputOptions;
-use xrf_translation::{ProjectInitializeOptions, ProjectInitializeResult, TranslationProject};
+use xrf_translation::{ProjectInitializeOptions, ProjectInitializeResult, initialize_dir, initialize_file};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -63,9 +63,9 @@ impl GenericCommand for InitializeTranslationsCommand {
     };
 
     let result: ProjectInitializeResult = if path.is_dir() {
-      TranslationProject::initialize_dir(path, &options)?
+      initialize_dir(path, &options)?
     } else {
-      TranslationProject::initialize_file(path, &options)?
+      initialize_file(path, &options)?
     };
 
     xrf_output::info!(
