@@ -5,6 +5,7 @@ macro_rules! for_each_tauri_command_domain {
     $consumer! {
       archives => "archives" {
         close_project => crate::archives::commands::close_project::archives_close_project,
+        default_pack_config => crate::archives::commands::default_pack_config::archives_default_pack_config,
         export_pack_config => crate::archives::commands::export_pack_config::archives_export_pack_config,
         import_pack_config => crate::archives::commands::import_pack_config::archives_import_pack_config,
         extract_file => crate::archives::commands::extract_file::archives_extract_file,
