@@ -10,14 +10,15 @@
 //! code.
 //!
 //! Streams arrive whole in memory, so the API takes and returns slices rather than readers.
-//!
-//! todo: Add the encoder. Archive packing needs `compress`, the mirror of [`decompress`], writing the
-//! same size header and reusing the tree and window in this crate.
 
 mod bit_reader;
+mod bit_writer;
 mod decode;
+mod encode;
 mod lzhuf_constants;
+mod match_distance;
 mod ring_buffer;
 mod tree;
 
 pub use crate::decode::lzhuf_decode::{decompress, decompress_into};
+pub use crate::encode::lzhuf_encode::compress;

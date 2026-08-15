@@ -2,6 +2,7 @@ use xrf_error::XrfResult;
 
 use crate::bit_reader::BitReader;
 use crate::lzhuf_constants::{MATCH_CODE_BASE, MATCH_LENGTH_THRESHOLD};
+use crate::match_distance::{LEADING_BIT_COUNT, split_match_distance};
 use crate::ring_buffer::RingBuffer;
 use crate::tree::dynamic_huffman_tree::DynamicHuffmanTree;
 
@@ -69,52 +70,9 @@ impl<'a> LzhufDecoder<'a> {
 
   /// Read a match distance: nine leading bits select a bucket, which names the remaining bits to read.
   fn read_match_distance(&mut self) -> XrfResult<u16> {
-    let leading: u16 = self.reader.read_bits(9)?;
+    let leading: u16 = self.reader.read_bits(LEADING_BIT_COUNT)?;
     let (distance, remaining_bits) = split_match_distance(leading);
 
     Ok(distance | self.reader.read_bits(remaining_bits)?)
-  }
-}
-
-/// Split the nine leading bits of a distance into its known high bits and the count still to be read.
-///
-/// The buckets encode near distances in fewer bits than far ones. Ranges are matched on the top four
-/// bits, so the low bits of `leading` pass through into the result untouched.
-fn split_match_distance(leading: u16) -> (u16, u32) {
-  match leading & 0b1_1110_0000 {
-    0b0_0000_0000..=0b0_0011_1111 => (leading, 0),
-    0b0_0100_0000..=0b0_1001_1111 => ((leading - 0b0_0010_0000) << 1, 1),
-    0b0_1010_0000..=0b1_0001_1111 => ((leading - 0b0_0110_0000) << 2, 2),
-    0b1_0010_0000..=0b1_0111_1111 => ((leading - 0b0_1100_0000) << 3, 3),
-    0b1_1000_0000..=0b1_1101_1111 => ((leading - 0b1_0010_0000) << 4, 4),
-    // `leading` never exceeds nine bits, so this is the final bucket rather than an open end.
-    _ => ((leading - 0b1_1000_0000) << 5, 5),
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::split_match_distance;
-  use crate::lzhuf_constants::RING_BUFFER_SIZE;
-
-  #[test]
-  fn spends_fewer_bits_on_near_distances() {
-    assert_eq!(split_match_distance(0b0_0000_0000), (0, 0));
-    assert_eq!(split_match_distance(0b0_0011_1111), (0b11_1111, 0));
-    assert_eq!(split_match_distance(0b0_1001_1111), (0b1111_1110, 1));
-    assert_eq!(split_match_distance(0b1_1111_1111), (0b1111_1110_0000, 5));
-  }
-
-  #[test]
-  fn keeps_every_bucket_inside_the_history_window() {
-    for leading in 0..0b10_0000_0000u16 {
-      let (distance, remaining_bits) = split_match_distance(leading);
-      let widest: usize = usize::from(distance) | ((1usize << remaining_bits) - 1);
-
-      assert!(
-        widest < RING_BUFFER_SIZE,
-        "distance {widest} from leading bits {leading:#011b} escapes the window"
-      );
-    }
   }
 }

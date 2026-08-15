@@ -1,6 +1,7 @@
 use xrf_error::{XrfError, XrfResult};
 
 use crate::bit_reader::BitReader;
+use crate::bit_writer::BitWriter;
 use crate::lzhuf_constants::{LEAF_COUNT, NODE_COUNT, REBUILD_FREQUENCY_LIMIT};
 use crate::tree::tree_entry::{NodeType, TreeEntry};
 
@@ -227,6 +228,45 @@ impl DynamicHuffmanTree {
         }
       }
     }
+  }
+
+  /// Write the path from the root down to `value`'s leaf, then account for the value written.
+  ///
+  /// The exact mirror of [`Self::read_code`]: the walk collects bits from the leaf upward, so they are
+  /// emitted in reverse to put the root's bit first, and the frequency update happens after coding on
+  /// both sides. That ordering is what keeps the two trees identical step for step.
+  pub(crate) fn write_code(&mut self, value: u16, writer: &mut BitWriter) -> XrfResult<()> {
+    let mut node_index: usize = self.leaf_index.node_index_of(value);
+    let mut code: u32 = 0;
+    let mut length: u32 = 0;
+
+    while node_index != 0 {
+      let parent_index: usize = self.node(node_index)?.parent as usize;
+
+      let NodeType::Branch(child_index) = self.node(parent_index)?.entry.as_type() else {
+        return Err(XrfError::new_encoding_error(format!(
+          "LZHUF tree node {parent_index} parents node {node_index} without being a branch"
+        )));
+      };
+
+      // Reading a bit steps from the named child down by that bit, so this node's bit is the distance.
+      let bit: u32 = match usize::from(child_index).checked_sub(node_index) {
+        Some(bit @ (0 | 1)) => bit as u32,
+        _ => {
+          return Err(XrfError::new_encoding_error(format!(
+            "LZHUF tree node {node_index} is not a child of branch {child_index}"
+          )));
+        }
+      };
+
+      code |= bit << length;
+      length += 1;
+      node_index = parent_index;
+    }
+
+    writer.write_bits(code, length)?;
+
+    self.increment_frequency_for(value)
   }
 
   /// Account for one occurrence of `value`, re-ordering the tree so frequencies stay descending.
