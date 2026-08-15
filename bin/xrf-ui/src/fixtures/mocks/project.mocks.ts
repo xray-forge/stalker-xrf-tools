@@ -1,8 +1,8 @@
+import { TranslationProjectDescriptor } from "@/core/bindings/xrf-app-translations";
 import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
 import { ExportDescriptor, ExportsProject } from "@/core/bindings/xrf-export";
 import { IEquipmentSectionDescriptor } from "@/core/equipment-icons";
 import { TCallableExportDescriptor } from "@/core/exports";
-import { ITranslationsProjectJson } from "@/core/translations";
 
 import { mockArchiveReadPolicy } from "./archive.mocks";
 
@@ -128,15 +128,32 @@ export function mockExportsProject(overrides: Partial<ExportsProject> = {}): Exp
  * @param overrides - Field values to override.
  * @returns A translations project fixture.
  */
-export function mockTranslationsProject(overrides: Partial<ITranslationsProjectJson> = {}): ITranslationsProjectJson {
+export function mockTranslationsProject(
+  overrides: Partial<TranslationProjectDescriptor> = {}
+): TranslationProjectDescriptor {
+  const root: string = "C:\\projects\\xrf\\src\\engine\\translations";
+
   return {
-    "st_dialogs.json": {
-      dialog_greeting: { eng: "Hello, stalker" },
+    mode: "source",
+    root,
+    languages: ["eng", "ukr"],
+    encodings: { eng: "windows-1252", ukr: "windows-1251" },
+    files: {
+      "st_dialogs.json": {
+        sources: { eng: `${root}/st_dialogs.json`, ukr: `${root}/st_dialogs.json` },
+        entries: {
+          dialog_greeting: { eng: "Hello, stalker", ukr: "Pryvit, stalker" },
+        },
+      },
+      "st_items.json": {
+        sources: { eng: `${root}/st_items.json`, ukr: `${root}/st_items.json` },
+        entries: {
+          wpn_ak74: { eng: "AK-74", ukr: "AK-74" },
+          wpn_ak74_descr: { eng: "Assault rifle", ukr: null },
+        },
+      },
     },
-    "st_items.json": {
-      wpn_ak74: { eng: "AK-74" },
-      wpn_ak74_descr: { eng: "Assault rifle" },
-    },
+    findings: [],
     ...overrides,
   };
 }

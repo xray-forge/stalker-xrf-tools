@@ -7,6 +7,7 @@ import { useCurrentApplication } from "@/core/routing/current-application.contex
 import { EditorToolbarCrumb } from "@/core/shell/editor/EditorToolbarCrumb";
 import { EditorToolbarPathSeparator } from "@/core/shell/editor/EditorToolbarPathSeparator";
 import { useIsEditorBusy } from "@/core/shell/EditorBusyContext";
+import { useRequestLeave } from "@/core/shell/EditorDirtyContext";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Nullable } from "@/lib/types/general";
 
@@ -39,10 +40,15 @@ export function EditorToolbar({
   const navigate: NavigateFunction = useNavigate();
 
   const isBusy: boolean = useIsEditorBusy();
+  const requestLeave: (leave: () => void) => void = useRequestLeave();
 
   const label: Nullable<string> = title ?? application?.label ?? null;
 
-  const onGoHome = useCallback(() => navigate("/", { replace: true }), [navigate]);
+  // Asks first when the editor is holding unsaved work; goes straight home when it is not.
+  const onGoHome = useCallback(
+    () => requestLeave(() => navigate("/", { replace: true })),
+    [navigate, requestLeave]
+  );
 
   return (
     <Box

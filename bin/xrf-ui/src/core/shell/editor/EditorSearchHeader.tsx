@@ -5,22 +5,33 @@ import { ChangeEvent, KeyboardEvent, ReactElement } from "react";
 
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
-export interface IExportsMenuHeaderProps extends BaseComponentProps {
-  exportCount: number;
+export interface IEditorSearchHeaderProps extends BaseComponentProps {
+  /** What the panel lists, as its heading. */
+  title: string;
+  count: number;
   query: string;
+  placeholder: string;
+  /** Names the field for a screen reader, which the placeholder alone does not. */
+  ariaLabel: string;
   onClear: () => void;
   /** Lets the search field drive the result list without losing focus. */
   onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
   onQueryChange: (query: string) => void;
 }
 
-export function ExportsMenuHeader({
-  exportCount,
+/**
+ * Heading and filter field for a side menu that lists more than fits on a screen.
+ */
+export function EditorSearchHeader({
+  title,
+  count,
   query,
+  placeholder,
+  ariaLabel,
   onClear,
   onKeyDown,
   onQueryChange,
-}: IExportsMenuHeaderProps): ReactElement {
+}: IEditorSearchHeaderProps): ReactElement {
   return (
     <Box
       sx={{
@@ -33,18 +44,18 @@ export function ExportsMenuHeader({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingX: 0.5 }}>
-        <Typography variant={"subtitle2"}>Exports</Typography>
+        <Typography variant={"subtitle2"}>{title}</Typography>
         <Typography variant={"caption"} sx={{ color: "text.secondary" }}>
-          {exportCount}
+          {count}
         </Typography>
       </Box>
 
       <TextField
         value={query}
-        placeholder={"Filter exports"}
+        placeholder={placeholder}
         slotProps={{
           htmlInput: {
-            "aria-label": "Filter exports",
+            "aria-label": ariaLabel,
           },
           input: {
             startAdornment: (
@@ -55,7 +66,7 @@ export function ExportsMenuHeader({
             endAdornment: query ? (
               <InputAdornment position={"end"}>
                 <Tooltip title={"Clear filter"}>
-                  <IconButton aria-label={"Clear export filter"} edge={"end"} onClick={onClear}>
+                  <IconButton aria-label={"Clear filter"} edge={"end"} onClick={onClear}>
                     <ClearIcon fontSize={"small"} />
                   </IconButton>
                 </Tooltip>

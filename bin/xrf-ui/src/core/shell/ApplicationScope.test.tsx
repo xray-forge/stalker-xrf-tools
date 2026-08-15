@@ -18,10 +18,24 @@ import {
   useEditorPanelsRegistry,
 } from "@/core/shell/panel/context";
 import { renderWithProviders } from "@/fixtures/utils/render";
+import { Nullable } from "@/lib/types/general";
 
 @Injectable()
 class ScopedService {
   public readonly label: string = "scoped service";
+}
+
+/** Stands in for `ScopedService` after a hot update re-executed its module. */
+@Injectable()
+class ReloadedScopedService {
+  public readonly label: string = "reloaded service";
+}
+
+let nextInstanceId: number = 0;
+
+@Injectable()
+class TrackedService {
+  public readonly id: number = ++nextInstanceId;
 }
 
 const PANEL: IEditorPanel = {
@@ -36,6 +50,18 @@ function ScopedPanel(): ReactElement {
   const service: ScopedService = useInjection(ScopedService);
 
   return <div>{service.label}</div>;
+}
+
+function ReloadedScopedPanel(): ReactElement {
+  const service: ReloadedScopedService = useInjection(ReloadedScopedService);
+
+  return <div>{service.label}</div>;
+}
+
+function TrackedPanel(): ReactElement {
+  const service: TrackedService = useInjection(TrackedService);
+
+  return <div>{`instance ${service.id}`}</div>;
 }
 
 /** Publishes a panel and nothing else, the way an editor does. */
@@ -86,6 +112,51 @@ describe("ApplicationScope", () => {
 
     expect(getByText("content")).toBeInTheDocument();
     expect(getByText("scoped service")).toBeInTheDocument();
+  });
+
+  it("rebuilds the container when the descriptor binds a replacement class", () => {
+    const { getByText, rerender } = renderWithProviders(
+      <ApplicationScope application={APPLICATION}>
+        <ScopedPanel />
+      </ApplicationScope>
+    );
+
+    expect(getByText("scoped service")).toBeInTheDocument();
+
+    rerender(
+      <>
+        <ApplicationScope application={{ ...APPLICATION, container: { bindings: [ReloadedScopedService] } }}>
+          <ReloadedScopedPanel />
+        </ApplicationScope>
+      </>
+    );
+
+    expect(getByText("reloaded service")).toBeInTheDocument();
+  });
+
+  it("keeps the container when a rebuilt descriptor binds the same classes", () => {
+    // The common hot update, where a module above the descriptor re-executed but the service did not.
+    // Rebuilding here would discard the live services and everything they hold open, so the same
+    // instance has to come back out.
+    const TRACKED: IApplicationDescriptor = { ...APPLICATION, container: { bindings: [TrackedService] } };
+
+    const { getByText, rerender } = renderWithProviders(
+      <ApplicationScope application={TRACKED}>
+        <TrackedPanel />
+      </ApplicationScope>
+    );
+
+    const instance: Nullable<string> = getByText(/instance /).textContent;
+
+    rerender(
+      <>
+        <ApplicationScope application={{ ...TRACKED, container: { bindings: [TrackedService] } }}>
+          <TrackedPanel />
+        </ApplicationScope>
+      </>
+    );
+
+    expect(getByText(/instance /).textContent).toBe(instance);
   });
 
   it("renders in the root container when no application owns the route", () => {

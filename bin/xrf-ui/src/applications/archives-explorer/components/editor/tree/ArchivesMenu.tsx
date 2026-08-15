@@ -6,12 +6,12 @@ import { RichTreeView } from "@mui/x-tree-view";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from "react";
 
-import { ArchivesMenuHeader } from "@/applications/archives-explorer/components/editor/tree/ArchivesMenuHeader";
 import { ArchiveTreeItem } from "@/applications/archives-explorer/components/editor/tree/ArchiveTreeItem";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/core/archive";
 import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/lib";
+import { EditorSearchHeader } from "@/core/shell/editor/EditorSearchHeader";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/shell/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/shell/editor/EditorSideMenu";
 import { Nullable, Optional } from "@/lib/types/general";
@@ -104,9 +104,12 @@ export function ArchivesMenu(): ReactElement {
   return (
     <EditorSideMenu
       header={
-        <ArchivesMenuHeader
-          fileCount={files.length}
+        <EditorSearchHeader
+          title={"Files"}
+          count={files.length}
           query={search.query}
+          placeholder={"Filter files"}
+          ariaLabel={"Filter archive files"}
           onClear={search.clear}
           onKeyDown={search.onInputKeyDown}
           onQueryChange={search.setQuery}

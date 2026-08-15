@@ -3,6 +3,7 @@ import { ContainerProvider, useContainer } from "@wirestate/react";
 import { Fragment, ReactElement, ReactNode, useMemo } from "react";
 
 import { IApplicationDescriptor } from "@/core/routing/application";
+import { useContainerGeneration } from "@/lib/react";
 import { Nullable } from "@/lib/types/general";
 
 export interface IApplicationScopeProps {
@@ -20,8 +21,10 @@ export function ApplicationScope({ application, children }: IApplicationScopePro
     [application, parent]
   );
 
+  const ket: number = useContainerGeneration(config);
+
   return config ? (
-    <ContainerProvider key={application?.id} config={config}>
+    <ContainerProvider key={`${application?.id}:${ket}`} config={config}>
       {children}
     </ContainerProvider>
   ) : (

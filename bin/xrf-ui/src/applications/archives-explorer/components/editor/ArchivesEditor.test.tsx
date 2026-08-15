@@ -123,7 +123,7 @@ describe("opened archives editor", () => {
     await waitFor(() => expect(queryByText("texture.dds")).not.toBeInTheDocument());
     expect(getByText("readme.ltx")).toBeInTheDocument();
 
-    await userEvent.click(getByLabelText("Clear file filter"));
+    await userEvent.click(getByLabelText("Clear filter"));
 
     expect(await findByText("texture.dds")).toBeInTheDocument();
   });
@@ -147,7 +147,7 @@ describe("opened archives editor", () => {
     fireEvent.change(search, { target: { value: "texture" } });
     await waitFor(() => expect(queryByText("system.ltx")).not.toBeInTheDocument());
 
-    await userEvent.click(getByLabelText("Clear file filter"));
+    await userEvent.click(getByLabelText("Clear filter"));
     expect(await findByText("system.ltx")).toBeInTheDocument();
     expect(await findByLabelText("Filter archive files")).toHaveValue("");
   });

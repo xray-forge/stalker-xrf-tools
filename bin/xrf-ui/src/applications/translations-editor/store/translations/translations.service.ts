@@ -1,25 +1,61 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { commands as translationsCommands } from "@/core/bindings/xrf-app-translations";
+import {
+  TranslationEdit,
+  TranslationProjectDescriptor,
+  TranslationProjectMode,
+  commands as translationsCommands,
+  TranslationVariant,
+} from "@/core/bindings/xrf-app-translations";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
-import { ITranslationsProjectJson } from "@/core/translations";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
-import { Nullable } from "@/lib/types/general";
+import { Nullable, Optional } from "@/lib/types/general";
+
+/**
+ * How the engine spells a line break inside a string table, and therefore how a multi-line entry is
+ * shown as one editable line and split back again.
+ */
+const LINE_BREAK: string = "\\n";
+
+/** Pending edits for one logical file, grouped by the language each belongs to. */
+export type TTranslationFileEdits = Record<string, Array<TranslationEdit>>;
+
+/** `null` marks an entry the user removed, which is not the same as one they blanked. */
+export type TPendingValue = Nullable<string>;
+
+/** Uncommitted work, keyed file to language to id. */
+export type TPendingEdits = Record<string, Record<string, Record<string, TPendingValue>>>;
 
 @Injectable()
 export class TranslationsService {
+  public readonly log: Logger = new Logger(this.constructor.name);
+
   @Observable()
   public isReady: boolean = false;
 
   @Observable()
-  public project: Loadable<Nullable<ITranslationsProjectJson>> = createLoadable(null);
+  public project: Loadable<Nullable<TranslationProjectDescriptor>> = createLoadable(null);
 
-  public readonly log: Logger = new Logger(this.constructor.name);
+  /**
+   * Edits made but not written.
+   */
+  @Observable()
+  public edits: TPendingEdits = {};
+
+  @Observable()
+  public savingFile: Nullable<string> = null;
+
+  /** Files holding edits that are not on disk. */
+  public get dirtyFiles(): Array<string> {
+    return Object.keys(this.edits).filter((file: string) =>
+      Object.values(this.edits[file]).some((byId: Record<string, TPendingValue>) => Object.keys(byId).length > 0)
+    );
+  }
 
   public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
     makeObservable(this);
@@ -27,7 +63,7 @@ export class TranslationsService {
 
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const response: Nullable<ITranslationsProjectJson> = await translationsCommands.getProject();
+    const response: Nullable<TranslationProjectDescriptor> = await translationsCommands.getProject();
 
     if (response) {
       this.log.info("Existing translations project detected");
@@ -53,18 +89,88 @@ export class TranslationsService {
     releaseEditorProject(translationsCommands.closeProject);
   }
 
+  /**
+   * Reports the layout a directory looks like, so the open form can preselect it.
+   */
+  public async detectMode(path: string): Promise<Nullable<TranslationProjectMode>> {
+    try {
+      return await translationsCommands.detectMode(path);
+    } catch (error) {
+      this.log.warn("Could not detect translations layout:", error);
+
+      return null;
+    }
+  }
+
+  /** The value to show for a cell: what is pending if anything is, otherwise what is on disk. */
+  public resolveValue(file: string, language: string, id: string): TPendingValue {
+    const pending: Optional<Record<string, TPendingValue>> = this.edits[file]?.[language];
+
+    if (pending && id in pending) {
+      return pending[id];
+    }
+
+    const committed: Nullable<TranslationVariant> = this.committedValue(file, language, id);
+
+    return typeof committed === "string" ? committed : Array.isArray(committed) ? committed.join(LINE_BREAK) : null;
+  }
+
   @BoundAction()
-  public async openProject(translationsPath: string): Promise<void> {
-    this.log.info("Opening translations project:", translationsPath);
+  public setEdit(file: string, language: string, id: string, value: TPendingValue): void {
+    this.edits = {
+      ...this.edits,
+      [file]: {
+        ...this.edits[file],
+        [language]: { ...this.edits[file]?.[language], [id]: value },
+      },
+    };
+  }
+
+  @BoundAction()
+  public discardFile(file: string): void {
+    const { [file]: _discarded, ...rest } = this.edits;
+
+    this.edits = rest;
+  }
+
+  /**
+   * Send an edited value back in the shape the entry already had.
+   */
+  private toVariant(file: string, language: string, id: string, value: string): TranslationVariant {
+    return Array.isArray(this.committedValue(file, language, id)) ? value.split(LINE_BREAK) : value;
+  }
+
+  /** What is on disk for a cell, before any pending edit is laid over it. */
+  private committedValue(file: string, language: string, id: string): Nullable<TranslationVariant> {
+    return this.project.value?.files[file]?.entries[id]?.[language] ?? null;
+  }
+
+  /** Report the first character a language cannot hold, or `null` when the value is writable. */
+  public async validateText(language: string, text: string): Promise<Nullable<string>> {
+    try {
+      return await translationsCommands.validateText(language, text);
+    } catch (error) {
+      this.log.warn("Could not validate translation text:", error);
+
+      return null;
+    }
+  }
+
+  @BoundAction()
+  public async openProject(translationsPath: string, mode: TranslationProjectMode): Promise<void> {
+    this.log.info("Opening translations project:", translationsPath, mode);
 
     try {
       this.project = createLoadable(null, true);
 
-      const response: ITranslationsProjectJson = await translationsCommands.openProject(translationsPath);
+      const response: TranslationProjectDescriptor = await translationsCommands.openProject(translationsPath, mode);
 
-      this.log.info("Translations project opened:", response);
+      this.log.info("Translations project opened:", Object.keys(response.files).length, "files");
 
-      runInAction(() => (this.project = createLoadable(response)));
+      runInAction(() => {
+        this.project = createLoadable(response);
+        this.edits = {};
+      });
     } catch (error) {
       this.log.error("Failed to open translations project:", error);
 
@@ -76,6 +182,65 @@ export class TranslationsService {
         source: EApplicationId.TRANSLATIONS_EDITOR,
         title: "Could not open translations project",
       });
+    }
+  }
+
+  /**
+   * Writes one logical file's pending edits and adopts the project as it is on disk afterwards.
+   *
+   * The refreshed descriptor comes back from the write rather than being patched in here: a save can
+   * add or drop entries, and what is on disk is the only version worth showing.
+   */
+  @BoundAction()
+  public async saveFile(file: string): Promise<boolean> {
+    const pending: Record<string, Record<string, TPendingValue>> | undefined = this.edits[file];
+
+    if (!pending) {
+      return true;
+    }
+
+    this.log.info("Saving translations file:", file);
+
+    const edits: TTranslationFileEdits = Object.fromEntries(
+      Object.entries(pending).map(([language, byId]: [string, Record<string, TPendingValue>]) => [
+        language,
+        Object.entries(byId).map(([id, value]: [string, TPendingValue]): TranslationEdit => {
+          if (value === null) {
+            return { kind: "remove", id };
+          }
+
+          return { kind: "set", id, value: this.toVariant(file, language, id, value) };
+        }),
+      ])
+    );
+
+    runInAction(() => (this.savingFile = file));
+
+    try {
+      const response: TranslationProjectDescriptor = await translationsCommands.saveFile(file, edits);
+
+      runInAction(() => {
+        this.project = createLoadable(response);
+        this.savingFile = null;
+      });
+
+      // Only cleared once the write came back: a failed save has to leave the work where it was.
+      this.discardFile(file);
+
+      return true;
+    } catch (error) {
+      this.log.error("Failed to save translations file:", error);
+
+      runInAction(() => (this.savingFile = null));
+
+      emitNotification(this.eventBus, {
+        details: `${file}\n${transformError(error).message}`,
+        severity: ENotificationSeverity.ERROR,
+        source: EApplicationId.TRANSLATIONS_EDITOR,
+        title: "Could not save translations",
+      });
+
+      return false;
     }
   }
 

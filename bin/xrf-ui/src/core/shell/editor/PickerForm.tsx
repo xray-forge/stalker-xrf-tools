@@ -7,6 +7,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
+import { Maybe } from "@/lib/types/general";
 
 /** Wide enough for a full windows path at the monospace size the picker rows use. */
 const PANEL_WIDTH: number = 560;
@@ -25,9 +26,9 @@ export interface IPickerFormProps {
   /** Follow-up actions shown beside the primary one, such as opening an output directory. */
   secondaryActions?: ReactNode;
   isLoading?: boolean;
-  error?: ReactNode;
-  status?: ReactNode;
-  result?: ReactNode;
+  error?: Maybe<ReactNode>;
+  status?: Maybe<ReactNode>;
+  result?: Maybe<ReactNode>;
   onSubmit?: () => void;
 }
 

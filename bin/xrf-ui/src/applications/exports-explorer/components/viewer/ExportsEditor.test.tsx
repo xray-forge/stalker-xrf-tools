@@ -107,7 +107,7 @@ describe("opened exports editor", () => {
     expect(await findByText("xr_effects")).toBeInTheDocument();
     expect(queryByText("settings")).not.toBeInTheDocument();
 
-    await userEvent.click(getByLabelText("Clear export filter"));
+    await userEvent.click(getByLabelText("Clear filter"));
 
     await waitFor(() => expect(queryByText("play_sound")).not.toBeInTheDocument());
     expect(search).toHaveValue("");

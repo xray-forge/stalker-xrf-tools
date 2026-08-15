@@ -13,9 +13,9 @@ import {
   IExportGroup,
   IExportTreeItem,
 } from "@/applications/exports-explorer/components/viewer/exports/exports-groups";
-import { ExportsMenuHeader } from "@/applications/exports-explorer/components/viewer/exports/ExportsMenuHeader";
 import { ExportDescriptor } from "@/core/bindings/xrf-export";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/lib";
+import { EditorSearchHeader } from "@/core/shell/editor/EditorSearchHeader";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/shell/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/shell/editor/EditorSideMenu";
 import { BaseComponentProps } from "@/lib/dom/element-types";
@@ -77,9 +77,12 @@ export function ExportsMenu({ declarations, selectedName, onSelect }: IExportsMe
   return (
     <EditorSideMenu
       header={
-        <ExportsMenuHeader
-          exportCount={declarations.length}
+        <EditorSearchHeader
+          title={"Exports"}
+          count={declarations.length}
           query={search.query}
+          placeholder={"Filter exports"}
+          ariaLabel={"Filter exports"}
           onClear={search.clear}
           onKeyDown={search.onInputKeyDown}
           onQueryChange={search.setQuery}
