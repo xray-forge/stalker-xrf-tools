@@ -6,6 +6,7 @@ use std::error::Error;
 use std::{env, process};
 
 use clap::Command;
+use commands::archive::pack_archive::PackArchiveCommand;
 use commands::archive::unpack_archive::UnpackArchiveCommand;
 use commands::externs::export_externs::ExportExternsCommand;
 use commands::ltx::verify_ltx::VerifyLtxCommand;
@@ -88,6 +89,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
   vec![
     // Archive:
+    PackArchiveCommand::new_box(),
     UnpackArchiveCommand::new_box(),
     // Externs:
     ExportExternsCommand::new_box(),

@@ -6815,7 +6815,9 @@ dependencies = [
  "specta",
  "walkdir",
  "xrf-error",
+ "xrf-ltx",
  "xrf-lzhuf",
+ "xrf-test-utils",
  "xrf-utils",
 ]
 

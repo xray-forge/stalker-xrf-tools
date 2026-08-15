@@ -8,7 +8,7 @@ use minilzo_rs::LZO;
 
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
-use crate::{ArchiveExtractDirectoryResult, ArchiveProject};
+use crate::{ArchiveExtractDirectoryResult, ArchiveProject, ArchiveUnpacker};
 
 struct Entry {
   name: &'static str,
@@ -107,7 +107,8 @@ fn extract_directory_writes_every_file_under_the_prefix() {
   );
 
   let out: PathBuf = directory.join("out");
-  let result: ArchiveExtractDirectoryResult = project.extract_directory("configs", &out).expect("extraction");
+  let result: ArchiveExtractDirectoryResult =
+    ArchiveUnpacker::extract_directory(&project, "configs", &out).expect("extraction");
 
   assert_eq!(result.extracted_count, 2);
   // The prefix is stripped: the user chose the destination for that directory already.
@@ -136,7 +137,8 @@ fn extract_directory_skips_entries_that_carry_no_bytes() {
   );
 
   let out: PathBuf = directory.join("out");
-  let result: ArchiveExtractDirectoryResult = project.extract_directory("configs", &out).expect("extraction");
+  let result: ArchiveExtractDirectoryResult =
+    ArchiveUnpacker::extract_directory(&project, "configs", &out).expect("extraction");
 
   assert_eq!(result.extracted_count, 1);
   assert!(out.join("gameplay").join("dialogs.xml").exists());
@@ -154,7 +156,8 @@ fn extract_directory_takes_the_whole_archive_for_an_empty_prefix() {
   );
 
   let out: PathBuf = directory.join("out");
-  let result: ArchiveExtractDirectoryResult = project.extract_directory("", &out).expect("extraction");
+  let result: ArchiveExtractDirectoryResult =
+    ArchiveUnpacker::extract_directory(&project, "", &out).expect("extraction");
 
   assert_eq!(result.extracted_count, 2);
   assert!(out.join("configs").join("system.ltx").exists());
@@ -168,9 +171,7 @@ fn extract_file_writes_to_the_exact_path_it_is_given() {
 
   let target: PathBuf = directory.join("chosen").join("renamed.ltx");
 
-  project
-    .extract_file("configs\\system.ltx", &target)
-    .expect("extraction");
+  ArchiveUnpacker::extract_file(&project, "configs\\system.ltx", &target).expect("extraction");
 
   assert_eq!(fs::read_to_string(&target).expect("written file"), "[section]");
 }
@@ -246,9 +247,7 @@ fn extract_file_writes_a_compressed_entry_decompressed() {
 
   let target: PathBuf = directory.join("out").join("system.ltx");
 
-  project
-    .extract_file("configs\\system.ltx", &target)
-    .expect("extraction");
+  ArchiveUnpacker::extract_file(&project, "configs\\system.ltx", &target).expect("extraction");
 
   // What lands on disk is the file, not the archive's compressed image of it.
   assert_eq!(fs::read(&target).expect("written file"), COMPRESSIBLE);
@@ -259,5 +258,5 @@ fn extract_directory_reports_a_prefix_that_matches_nothing() {
   let directory: PathBuf = create_temporary_directory("missing");
   let project: ArchiveProject = create_project(&directory, &[Entry::stored("configs\\system.ltx", b"[section]")]);
 
-  assert!(project.extract_directory("meshes", directory.join("out")).is_err());
+  assert!(ArchiveUnpacker::extract_directory(&project, "meshes", directory.join("out")).is_err());
 }

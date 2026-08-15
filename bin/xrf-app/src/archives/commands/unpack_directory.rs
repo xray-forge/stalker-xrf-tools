@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use xrf_archive::{ArchiveProject, ArchiveUnpackResult};
+use xrf_archive::{ArchiveProject, ArchiveUnpackResult, ArchiveUnpacker};
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
@@ -14,7 +14,7 @@ pub async fn archives_unpack_directory(from: &str, destination: &str) -> TauriRe
 
   log::info!("Unpacking archive to: {}", destination);
 
-  match project.unpack_parallel(destination, 32).await {
+  match ArchiveUnpacker::unpack_parallel(&project, destination, 32).await {
     Ok(result) => Ok(result),
     Err(error) => Err(error.to_string()),
   }

@@ -19,8 +19,12 @@ serde = { workspace = true }
 specta = { workspace = true, optional = true }
 walkdir = { workspace = true }
 xrf-error = { workspace = true }
+xrf-ltx = { workspace = true }
 xrf-lzhuf = { workspace = true }
 xrf-utils = { workspace = true }
+
+[dev-dependencies]
+xrf-test-utils = { workspace = true }
 
 [features]
 # Emits TypeScript mirrors of the serialized types. Nothing in a normal build turns this on.

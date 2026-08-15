@@ -1,0 +1,188 @@
+use std::env;
+use std::path::PathBuf;
+
+use clap::parser::ValueSource;
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_archive::{ArchivePackConfig, ArchivePackMode, ArchivePackResult, ArchivePacker, ArchiveVolumeExtension};
+use xrf_output::OutputOptions;
+
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
+
+/// Bytes in the megabytes `--max-size` is given in, matching the `-max_size` unit of xrCompress.
+const BYTES_PER_MEGABYTE: u64 = 1024 * 1024;
+
+#[derive(Default)]
+pub struct PackArchiveCommand;
+
+impl GenericCommand for PackArchiveCommand {
+  fn name(&self) -> &'static str {
+    "pack-archive"
+  }
+
+  /// Create command to pack a directory into archive volumes.
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("Command to pack provided directory into *.db archive volumes")
+      .arg(
+        Arg::new("path")
+          .help("Path to the directory to pack, normally a gamedata root")
+          .short('p')
+          .long("path")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("dest")
+          .help("Path to folder for writing the volumes")
+          .short('d')
+          .long("dest")
+          .default_value("packed")
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("name")
+          .help("Base name of the volumes, written as <name>.db0, <name>.db1 and so on")
+          .short('n')
+          .long("name")
+          .default_value("gamedata")
+          .value_parser(value_parser!(String)),
+      )
+      .arg(
+        Arg::new("ltx")
+          .help("Path to an xrCompress configuration LTX describing what to include")
+          .long("ltx")
+          .required(false)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("store")
+          .help("Store every file instead of compressing what the engine expects compressed")
+          .long("store")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("max-size")
+          .help("Maximum volume size in megabytes")
+          .long("max-size")
+          .required(false)
+          .value_parser(value_parser!(u64).range(1..)),
+      )
+      .arg(
+        Arg::new("xdb")
+          .help("Write volumes with the xdb extension")
+          .long("xdb")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("no-skip-list")
+          .help("Keep editor and source leftovers the engine build normally drops")
+          .long("no-skip-list")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("silent")
+          .help("Turn off logging")
+          .short('s')
+          .long("silent")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .required(false)
+          .action(ArgAction::SetTrue),
+      )
+  }
+
+  /// Pack a directory into xray engine database archives.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
+    let path: &PathBuf = matches
+      .get_one::<_>("path")
+      .expect("Expected valid source path to be provided");
+
+    let destination: &PathBuf = matches
+      .get_one::<_>("dest")
+      .expect("Expected valid output path to be provided");
+
+    let destination: PathBuf = if destination.is_relative() {
+      env::current_dir()?.join(destination)
+    } else {
+      destination.clone()
+    };
+
+    let name: &String = matches
+      .get_one::<_>("name")
+      .expect("Expected valid archive name to be provided");
+
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+
+    let mut config: ArchivePackConfig = ArchivePackConfig::new(path, &destination, name);
+
+    // The configuration file supplies defaults; anything named on the command line wins over it.
+    if let Some(ltx) = matches.get_one::<PathBuf>("ltx") {
+      xrf_output::info!(output, "Pack config: {}", ltx.display());
+
+      config = config.with_ltx_file(ltx)?;
+    }
+
+    if matches.get_flag("store") {
+      config.mode = ArchivePackMode::Store;
+    }
+
+    if matches.get_flag("xdb") {
+      config.volume_extension = ArchiveVolumeExtension::Xdb;
+    }
+
+    if matches.get_flag("no-skip-list") {
+      config.is_with_skip_list = false;
+    }
+
+    if matches.value_source("max-size") == Some(ValueSource::CommandLine)
+      && let Some(size) = matches.get_one::<u64>("max-size")
+    {
+      config = config.with_max_volume_size(size.saturating_mul(BYTES_PER_MEGABYTE))?;
+    }
+
+    xrf_output::info!(output, "Pack source: {}", path.display());
+    xrf_output::info!(output, "Pack destination: {}", destination.display());
+
+    let result: ArchivePackResult = ArchivePacker::pack(&config)?;
+
+    for volume in &result.volumes {
+      xrf_output::info!(output, "Wrote {}", volume.display());
+    }
+
+    xrf_output::info!(
+      output,
+      "Packed {} file(s) into {} volume(s), took {} sec",
+      result.files_total,
+      result.volumes.len(),
+      result.duration as f64 / 1000.0,
+    );
+
+    xrf_output::info!(
+      output,
+      "Summary: {} compressed, {} stored, {} aliased, {} skipped",
+      result.files_compressed,
+      result.files_stored,
+      result.files_aliased,
+      result.files_skipped,
+    );
+
+    xrf_output::info!(
+      output,
+      "Size: {:.3} MB source, {:.3} MB written",
+      (result.size_source as f64) / 1024.0 / 1024.0,
+      (result.size_written as f64) / 1024.0 / 1024.0,
+    );
+
+    Ok(())
+  }
+}

@@ -33,17 +33,19 @@ pub(crate) struct SourceMatch {
 pub(crate) struct MatchFinder<'a> {
   source: &'a [u8],
   /// Latest position holding each hash, stored as position + 1 so zero means empty.
-  head: Box<[u32; HASH_SIZE]>,
+  head: Box<[u32]>,
   /// Previous position sharing a hash, by window slot, stored as position + 1.
-  previous: Box<[u32; RING_BUFFER_SIZE]>,
+  previous: Box<[u32]>,
 }
 
 impl<'a> MatchFinder<'a> {
   pub(crate) fn new(source: &'a [u8]) -> Self {
     Self {
       source,
-      head: Box::new([0; HASH_SIZE]),
-      previous: Box::new([0; RING_BUFFER_SIZE]),
+      // Built through a vector rather than `Box::new([0; N])`, which would put a table of this size on
+      // the stack before moving it. Test threads have room for that; a program's main thread may not.
+      head: vec![0; HASH_SIZE].into_boxed_slice(),
+      previous: vec![0; RING_BUFFER_SIZE].into_boxed_slice(),
     }
   }
 

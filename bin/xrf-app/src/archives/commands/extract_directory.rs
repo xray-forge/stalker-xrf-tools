@@ -1,7 +1,7 @@
 use std::sync::MutexGuard;
 
 use tauri::State;
-use xrf_archive::{ArchiveExtractDirectoryResult, ArchiveProject};
+use xrf_archive::{ArchiveExtractDirectoryResult, ArchiveProject, ArchiveUnpacker};
 
 use crate::archives::state::ArchiveProjectState;
 use crate::types::TauriResult;
@@ -28,9 +28,8 @@ pub async fn archives_extract_directory(
 
   log::info!("Extracting archive directory '{}' to '{}'", prefix, destination);
 
-  let result: ArchiveExtractDirectoryResult = project
-    .extract_directory(prefix, destination)
-    .map_err(|error| error.to_string())?;
+  let result: ArchiveExtractDirectoryResult =
+    ArchiveUnpacker::extract_directory(project, prefix, destination).map_err(|error| error.to_string())?;
 
   Ok(result)
 }

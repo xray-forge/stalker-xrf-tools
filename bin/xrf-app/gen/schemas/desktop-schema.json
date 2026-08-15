@@ -6615,12 +6615,6 @@
           "markdownDescription": "Enables the open_project command without any pre-configured scope."
         },
         {
-          "description": "Enables the read_project command without any pre-configured scope.",
-          "type": "string",
-          "const": "translations:allow-read-project",
-          "markdownDescription": "Enables the read_project command without any pre-configured scope."
-        },
-        {
           "description": "Enables the save_file command without any pre-configured scope.",
           "type": "string",
           "const": "translations:allow-save-file",
@@ -6655,12 +6649,6 @@
           "type": "string",
           "const": "translations:deny-open-project",
           "markdownDescription": "Denies the open_project command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the read_project command without any pre-configured scope.",
-          "type": "string",
-          "const": "translations:deny-read-project",
-          "markdownDescription": "Denies the read_project command without any pre-configured scope."
         },
         {
           "description": "Denies the save_file command without any pre-configured scope.",

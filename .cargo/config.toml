@@ -4,3 +4,10 @@
 # x86_64-unknown-linux-gnu since Rust 1.90) keeps `.eh_frame` live and reports it as an error.
 [target.'cfg(all(target_os = "linux", target_env = "gnu"))']
 rustflags = ["-Clink-arg=-lstdc++"]
+
+# Windows reserves one megabyte of stack for a binary's main thread, where Linux reserves eight and Rust
+# gives a spawned thread two. Format work moves values that carry large buffers inline - `minilzo_rs::LZO`
+# holds 128 KB of work memory - and an unoptimized build copies such a value through the stack on every
+# move, which overruns that megabyte. Ask for the stack the other platforms already give.
+[target.'cfg(all(target_os = "windows", target_env = "msvc"))']
+rustflags = ["-Clink-arg=/STACK:8388608"]

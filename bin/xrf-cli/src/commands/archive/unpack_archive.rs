@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use tokio::runtime::Runtime;
-use xrf_archive::{ArchiveProject, ArchiveUnpackResult};
+use xrf_archive::{ArchiveProject, ArchiveUnpackResult, ArchiveUnpacker};
 use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -114,8 +114,11 @@ impl GenericCommand for UnpackArchiveCommand {
     xrf_output::info!(output, "Unpacking files, parallel {parallel}");
 
     if !is_dry {
-      let result: ArchiveUnpackResult =
-        Runtime::new()?.block_on(archive_project.unpack_parallel(&destination, parallel))?;
+      let result: ArchiveUnpackResult = Runtime::new()?.block_on(ArchiveUnpacker::unpack_parallel(
+        &archive_project,
+        &destination,
+        parallel,
+      ))?;
 
       xrf_output::info!(
         output,
