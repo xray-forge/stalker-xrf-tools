@@ -1,5 +1,5 @@
 use std::fs::{File, OpenOptions};
-use std::io::{Error as IoError, Result as IoResult};
+use std::io::{Error as IoError, Result as IoResult, Write};
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -189,6 +189,22 @@ pub fn overwrite_generated_test_resource_as_file(resource_path: &str) -> IoResul
   }
 }
 
+/// Write a generated test resource and return where it landed.
+///
+/// The common shape of a test that needs a file on disk: create it, fill it, close it, and get the
+/// path back to hand to the code under test. Closing before returning matters - a reader opening a
+/// file this still held would be racing the handle on Windows.
+///
+/// Takes anything byte-like, so a test can pass a string literal or an already-encoded buffer.
+pub fn write_generated_test_resource<C: AsRef<[u8]>>(resource_path: &str, contents: C) -> IoResult<PathBuf> {
+  let mut file: File = overwrite_generated_test_resource_as_file(resource_path)?;
+
+  file.write_all(contents.as_ref())?;
+  drop(file);
+
+  Ok(get_absolute_generated_test_resource_path(resource_path))
+}
+
 /// Create and open file by path, overwrite existing one.
 pub fn overwrite_file<P: AsRef<Path>>(path: P) -> IoResult<File> {
   std::fs::create_dir_all(path.as_ref().parent().expect("Parent directory"))?;
@@ -211,9 +227,48 @@ pub fn overwrite_file<P: AsRef<Path>>(path: P) -> IoResult<File> {
 #[cfg(test)]
 mod tests {
   use std::fs;
-  use std::io::Write;
 
   use super::*;
+
+  #[test]
+  fn writes_a_resource_and_reports_where_it_landed() -> IoResult<()> {
+    let path: PathBuf = write_generated_test_resource("utils/written.txt", "contents")?;
+
+    assert_eq!(fs::read(&path)?, b"contents");
+    assert_eq!(path, get_absolute_generated_test_resource_path("utils/written.txt"));
+
+    Ok(())
+  }
+
+  #[test]
+  fn writes_bytes_as_readily_as_text() -> IoResult<()> {
+    let path: PathBuf = write_generated_test_resource("utils/written.bin", [0xEF, 0xBB, 0xBF])?;
+
+    assert_eq!(fs::read(path)?, vec![0xEF, 0xBB, 0xBF]);
+
+    Ok(())
+  }
+
+  #[test]
+  fn replaces_whatever_was_there_before() -> IoResult<()> {
+    write_generated_test_resource("utils/replaced.txt", "first")?;
+
+    let path: PathBuf = write_generated_test_resource("utils/replaced.txt", "second")?;
+
+    // Truncating rather than appending, so a rerun does not read the previous run's tail.
+    assert_eq!(fs::read(path)?, b"second");
+
+    Ok(())
+  }
+
+  #[test]
+  fn creates_the_directories_above_the_resource() -> IoResult<()> {
+    let path: PathBuf = write_generated_test_resource("utils/nested/deeper/file.txt", "x")?;
+
+    assert!(path.is_file());
+
+    Ok(())
+  }
 
   #[test]
   fn generated_resources_stay_under_target() {
