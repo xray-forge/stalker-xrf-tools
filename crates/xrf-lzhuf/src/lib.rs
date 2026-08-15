@@ -18,6 +18,8 @@ mod encode;
 mod lzhuf_constants;
 mod match_distance;
 mod ring_buffer;
+#[cfg(test)]
+mod tests;
 mod tree;
 
 pub use crate::decode::lzhuf_decode::{decompress, decompress_into};

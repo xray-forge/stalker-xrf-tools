@@ -6971,6 +6971,7 @@ name = "xrf-lzhuf"
 version = "0.1.0"
 dependencies = [
  "xrf-error",
+ "xrf-test-utils",
 ]
 
 [[package]]
