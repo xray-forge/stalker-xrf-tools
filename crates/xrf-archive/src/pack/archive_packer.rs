@@ -99,6 +99,15 @@ impl ArchivePacker {
 
     let mut result: ArchivePackResult = state.result;
 
+    // Only now is the volume count known, so a set that stayed single drops its index.
+    if let [only] = result.volumes.as_slice() {
+      let renamed: PathBuf = config.destination.join(config.single_volume_name());
+
+      fs::rename(only, &renamed)?;
+
+      result.volumes = vec![renamed];
+    }
+
     result.duration = started_at.elapsed().as_millis();
 
     Ok(result)

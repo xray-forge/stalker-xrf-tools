@@ -198,6 +198,21 @@ fn refuses_a_name_it_cannot_encode() {
 }
 
 #[test]
+fn a_lone_volume_carries_no_index() {
+  let (result, destination) = pack(
+    "a_lone_volume_carries_no_index",
+    &[("configs\\system.ltx", CONFIG)],
+    |_| {},
+  );
+
+  // What the shipped games do: `configs.db`, not `configs.db0`, when there is only one.
+  assert_eq!(result.volumes[0].file_name().expect("name"), "packed.db");
+  assert!(destination.join("packed.db").is_file());
+  assert!(!destination.join("packed.db0").exists(), "the indexed name is gone");
+  assert_eq!(read(&open(&destination), "configs\\system.ltx"), CONFIG);
+}
+
+#[test]
 fn splits_volumes_at_the_configured_size() {
   // Distinct payloads, or the writer would rightly alias them all onto one copy and never split.
   let files: Vec<(String, Vec<u8>)> = (0..8u8)
@@ -215,6 +230,10 @@ fn splits_volumes_at_the_configured_size() {
 
   assert!(result.volumes.len() > 1, "the set spans several volumes");
   assert_eq!(project.archives.len(), result.volumes.len());
+
+  // A real set keeps its indices, starting at zero.
+  assert_eq!(result.volumes[0].file_name().expect("name"), "packed.db0");
+  assert_eq!(result.volumes[1].file_name().expect("name"), "packed.db1");
 
   for (name, contents) in &files {
     assert_eq!(read(&project, name), *contents, "'{name}' survives the split");

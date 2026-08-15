@@ -148,9 +148,18 @@ impl ArchivePackConfig {
     Ok(self)
   }
 
-  /// Name of one volume, matching the `<base>.db<index>` layout the engine mounts.
+  /// Name of one volume of a set, as `<base>.db<index>`.
   pub fn volume_name(&self, index: usize) -> String {
     format!("{}.{}{index}", self.name, self.volume_extension.as_str())
+  }
+
+  /// Name of a set that turned out to hold one volume, as `<base>.db`.
+  ///
+  /// The engine mounts by scanning for any extension starting with `db` or `xdb`, so the index is never
+  /// required. Dropping it for a lone volume is what the shipped games do, and it reads better than a
+  /// `0` that never has a sibling.
+  pub fn single_volume_name(&self) -> String {
+    format!("{}.{}", self.name, self.volume_extension.as_str())
   }
 
   fn folder_from_entry((path, value): (&str, &str)) -> ArchivePackFolder {
