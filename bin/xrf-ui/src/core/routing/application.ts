@@ -4,6 +4,7 @@ import { ComponentType, ReactElement } from "react";
 /** Canonical application identity shared by its directory, route, descriptor, and component stem. */
 export enum EApplicationId {
   ARCHIVES_EXPLORER = "archives-explorer",
+  ARCHIVES_PACKER = "archives-packer",
   ARCHIVES_UNPACKER = "archives-unpacker",
   CONFIGS_EXPLORER = "configs-explorer",
   CONFIGS_FORMATTER = "configs-formatter",

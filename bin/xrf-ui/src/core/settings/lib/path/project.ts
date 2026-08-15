@@ -27,6 +27,14 @@ export function getProjectArchivesUnpackPath(projectPath: string): Promise<strin
   return path.resolve(projectPath, "target", "unpacked_archives");
 }
 
+export function getProjectGamedataPath(projectPath: string): Promise<string> {
+  return path.resolve(projectPath, "target", "gamedata");
+}
+
+export function getProjectArchivesPackPath(projectPath: string): Promise<string> {
+  return path.resolve(projectPath, "target", "db");
+}
+
 export function getProjectEquipmentDDSPath(projectPath: string): Promise<string> {
   return path.resolve(projectPath, "src", "resources", "textures", "ui", "ui_icon_equipment.dds");
 }

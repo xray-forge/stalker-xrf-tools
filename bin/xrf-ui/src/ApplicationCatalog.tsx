@@ -8,6 +8,7 @@ import { default as TranslateIcon } from "@mui/icons-material/Translate";
 import { default as ViewInArIcon } from "@mui/icons-material/ViewInAr";
 
 import { ARCHIVES_EXPLORER_APPLICATION } from "@/applications/archives-explorer";
+import { ARCHIVES_PACKER_APPLICATION } from "@/applications/archives-packer";
 import { ARCHIVES_UNPACKER_APPLICATION } from "@/applications/archives-unpacker";
 import { CONFIGS_EXPLORER_APPLICATION } from "@/applications/configs-explorer";
 import { CONFIGS_FORMATTER_APPLICATION } from "@/applications/configs-formatter";
@@ -42,6 +43,7 @@ export interface IApplicationCatalog {
 export const APPLICATION_CATALOG: IApplicationCatalog = {
   applications: [
     ARCHIVES_EXPLORER_APPLICATION,
+    ARCHIVES_PACKER_APPLICATION,
     ARCHIVES_UNPACKER_APPLICATION,
     CONFIGS_EXPLORER_APPLICATION,
     CONFIGS_VERIFIER_APPLICATION,

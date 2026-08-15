@@ -5,6 +5,23 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 /** Commands */
 export const commands = {
   closeProject: () => __TAURI_INVOKE<null>("plugin:archives|close_project"),
+  /**
+   * Write the selection rules of a configuration out as an xrCompress configuration file.
+   *
+   * Only what such a file can carry is written, so a round trip through import returns what was exported.
+   * Paths, name, mode, and volume size belong to the run rather than to the file.
+   */
+  exportPackConfig: (path: string, config: ArchivePackConfig) =>
+    __TAURI_INVOKE<null>("plugin:archives|export_pack_config", { path, config }),
+  /**
+   * Read an xrCompress configuration file over the configuration the caller holds.
+   *
+   * Layers rather than replaces, matching how the command line applies `--ltx`: a configuration file
+   * carries selection rules and a header, never the source, destination, name, mode, or volume size, so
+   * those stay as the caller had them.
+   */
+  importPackConfig: (path: string, config: ArchivePackConfig) =>
+    __TAURI_INVOKE<ArchivePackConfig>("plugin:archives|import_pack_config", { path, config }),
   /** Write a single archived file to a path the user chose. */
   extractFile: (name: string, destination: string) =>
     __TAURI_INVOKE<ArchiveExtractResult>("plugin:archives|extract_file", { name, destination }),
@@ -27,25 +44,13 @@ export const commands = {
   hasProject: () => __TAURI_INVOKE<boolean>("plugin:archives|has_project"),
   openProject: (path: string) => __TAURI_INVOKE<ArchiveProject>("plugin:archives|open_project", { path }),
   /**
-   * Pack a directory into archive volumes.
+   * Pack a directory into archive volumes from a configuration held by the caller.
    *
-   * Layers the same way the command line does: defaults, then an optional configuration file, then the
-   * values the caller supplied, so a form and a command line produce the same archive from the same input.
+   * Takes the whole configuration rather than a file path, so the editor packs exactly what is on screen
+   * without having to save it first.
    */
-  packDirectory: (
-    sourcePath: string,
-    destinationPath: string,
-    name: string,
-    ltxPath: string | null,
-    isStore: boolean
-  ) =>
-    __TAURI_INVOKE<ArchivePackResult>("plugin:archives|pack_directory", {
-      sourcePath,
-      destinationPath,
-      name,
-      ltxPath,
-      isStore,
-    }),
+  packDirectory: (config: ArchivePackConfig) =>
+    __TAURI_INVOKE<ArchivePackResult>("plugin:archives|pack_directory", { config }),
   /** Hand an archived sound to the webview, along with whatever the engine would read from it. */
   readAudio: (path: string) => __TAURI_INVOKE<ArchiveAudioPreview>("plugin:archives|read_audio", { path }),
   readFile: (path: string) => __TAURI_INVOKE<ProjectReadResult>("plugin:archives|read_file", { path }),
@@ -122,6 +127,53 @@ export type ArchiveImagePreview = {
   base64: string;
 };
 
+/**
+ * Everything needed to pack one archive volume set.
+ *
+ * Built from defaults, then optionally from an xrCompress LTX, then from explicit parameters, so a
+ * command line and a form can layer over the same config file in the same order.
+ *
+ * Also the wire contract the desktop editor holds: it is read from a configuration file, edited in
+ * place, packed, and written back, so all three surfaces speak one shape.
+ */
+export type ArchivePackConfig = {
+  /** Root the archived names are relative to, normally a `gamedata` directory. */
+  source: string;
+  destination: string;
+  /** Base name of the volumes, which become `<name>.db0`, `<name>.db1` and so on. */
+  name: string;
+  includeFiles: Array<string>;
+  includeFolders: Array<ArchivePackFolder>;
+  excludeFolders: Array<ArchivePackFolder>;
+  /** Extension patterns from `[options] exclude_exts`, matched against the extension with its dot. */
+  excludeExtensions: Array<string>;
+  /** Apply the skip rules xrCompress hard-codes for editor and source leftovers. */
+  isWithSkipList: boolean;
+  /** Verbatim `[header]` text written as chunk 666. */
+  header: string | null;
+  mode: ArchivePackMode;
+  maxVolumeSize: number;
+  volumeExtension: ArchiveVolumeExtension;
+};
+
+/**
+ * One `[include_folders]` or `[exclude_folders]` entry.
+ *
+ * The boolean has a different meaning on each side, which is an xrCompress quirk worth stating: an
+ * included folder recurses into subfolders, while an excluded one matches by prefix rather than exactly.
+ */
+export type ArchivePackFolder = {
+  path: string;
+  isRecursive: boolean;
+};
+
+/** How file payloads are stored in the archive. */
+export type ArchivePackMode =
+  /** Compress what the engine expects to be compressed and store the rest. */
+  | "Compress"
+  /** Store everything, the `-store` flag of xrCompress. */
+  | "Store";
+
 /** What one packing run produced. */
 export type ArchivePackResult = {
   /** Volumes written, in mount order. */
@@ -165,6 +217,9 @@ export type ArchiveUnpackResult = {
   unpackedSize: number;
   unpackDuration: number;
 };
+
+/** Extension the produced volumes carry, which also decides how the engine treats a missing header. */
+export type ArchiveVolumeExtension = "Db" | "Xdb";
 
 export type ProjectReadResult = {
   name: string;
