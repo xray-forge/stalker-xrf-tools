@@ -4,7 +4,6 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use crc32fast::hash;
-use minilzo_rs::LZO;
 
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
@@ -42,15 +41,13 @@ fn create_project(directory: &Path, entries: &[Entry]) -> ArchiveProject {
   let mut payload: Vec<u8> = Vec::new();
   let mut files: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
 
-  let mut lzo: LZO = LZO::init().expect("lzo");
-
   for entry in entries {
     let offset: u32 = payload.len() as u32;
 
     // A compressed entry stores fewer bytes than it yields, which is exactly the case the reader used
     // to get wrong by copying `size_real` bytes straight out of the archive.
     let stored: Vec<u8> = if entry.is_compressed {
-      lzo.compress(entry.contents).expect("lzo compression")
+      lzokay::compress::compress(entry.contents).expect("lzo compression")
     } else {
       entry.contents.to_vec()
     };

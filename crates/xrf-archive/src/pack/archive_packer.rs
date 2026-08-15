@@ -5,7 +5,7 @@ use std::io::{BufWriter, Seek, SeekFrom, Write};
 use std::path::PathBuf;
 use std::time::Instant;
 
-use minilzo_rs::LZO;
+use lzokay::compress::Dict;
 use xrf_error::{XrfError, XrfResult};
 use xrf_lzhuf::compress;
 use xrf_utils::encode_string_to_w1251_bytes;
@@ -77,12 +77,9 @@ impl ArchivePacker {
     state.result.files_skipped = source.skipped;
     state.result.files_total = source.entries.len();
 
-    // Boxed because `LZO` carries its 128 KB work buffer inline, and an unoptimized build copies such a
-    // value through the stack on every move, which is why `xrf-cli` also runs commands on a sized thread.
-    let mut lzo: Box<LZO> = Box::new(
-      LZO::init()
-        .map_err(|error| XrfError::new_unexpected_error(format!("Failed to initialize LZO compression: {error:?}")))?,
-    );
+    // The coder's working state is large, so it is built once on the heap and reused for every entry
+    // rather than rebuilt per file.
+    let mut dict: Box<Dict> = Dict::new();
 
     for entry in &source.entries {
       // The engine opens a volume per file, so a volume is closed before the file that would overrun it
@@ -92,7 +89,7 @@ impl ArchivePacker {
         state.open_volume(config)?;
       }
 
-      state.write_entry(config, &mut lzo, entry)?;
+      state.write_entry(config, &mut dict, entry)?;
     }
 
     state.close_volume()?;
@@ -213,7 +210,7 @@ impl PackState {
     Ok(())
   }
 
-  fn write_entry(&mut self, config: &ArchivePackConfig, lzo: &mut LZO, entry: &ArchivePackEntry) -> XrfResult<()> {
+  fn write_entry(&mut self, config: &ArchivePackConfig, dict: &mut Dict, entry: &ArchivePackEntry) -> XrfResult<()> {
     let contents: Vec<u8> = fs::read(&entry.path)?;
     let size_real: u32 = u32::try_from(contents.len()).map_err(|_| {
       XrfError::new_invalid_error(format!(
@@ -242,7 +239,7 @@ impl PackState {
       ))
     })?;
 
-    let payload: Vec<u8> = self.compress_payload(config, lzo, entry, &contents)?;
+    let payload: Vec<u8> = self.compress_payload(config, dict, entry, &contents)?;
     let size_compressed: u32 = payload.len() as u32;
 
     if let Some(writer) = self.writer.as_mut() {
@@ -265,7 +262,7 @@ impl PackState {
   fn compress_payload(
     &mut self,
     config: &ArchivePackConfig,
-    lzo: &mut LZO,
+    dict: &mut Dict,
     entry: &ArchivePackEntry,
     contents: &[u8],
   ) -> XrfResult<Vec<u8>> {
@@ -282,9 +279,8 @@ impl PackState {
       return Ok(contents.to_vec());
     }
 
-    let compressed: Vec<u8> = lzo
-      .compress(contents)
-      .map_err(|error| XrfError::new_unexpected_error(format!("Failed to compress '{}': {error:?}", entry.name)))?;
+    let compressed: Vec<u8> = lzokay::compress::compress_with_dict(contents, dict)
+      .map_err(|error| XrfError::new_unexpected_error(format!("Failed to compress '{}': {error}", entry.name)))?;
 
     // A payload that barely shrinks costs more to decompress than it saves, so it reverts to stored.
     // The reader tells the two apart by the sizes alone, so this must stay a real size difference.

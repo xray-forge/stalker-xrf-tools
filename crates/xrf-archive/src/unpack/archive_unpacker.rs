@@ -6,12 +6,11 @@ use std::io::ErrorKind::AlreadyExists;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-use minilzo_rs::LZO;
 use xrf_error::{XrfError, XrfResult};
 
 use crate::ArchiveProject;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-use crate::archive::archive_file_io::{init_lzo, write_descriptor_contents};
+use crate::archive::archive_file_io::write_descriptor_contents;
 use crate::unpack::archive_extract_result::{ArchiveExtractDirectoryResult, ArchiveExtractResult};
 use crate::unpack::archive_unpack_result::ArchiveUnpackResult;
 
@@ -26,7 +25,6 @@ impl ArchiveUnpacker {
   /// Write every file in the project beneath a destination root.
   pub fn unpack<P: AsRef<Path>>(project: &ArchiveProject, destination: P) -> XrfResult<ArchiveUnpackResult> {
     let start: Instant = Instant::now();
-    let lzo: LZO = init_lzo()?;
 
     let mut unpacked_files_count: usize = 0;
     let unpacked_files_chunk: usize = max(project.files.len() / 100 * 5, 5);
@@ -37,7 +35,7 @@ impl ArchiveUnpacker {
 
     for file_descriptor in project.files.values() {
       if file_descriptor.size_real > 0 {
-        Self::unpack_file(&lzo, destination.as_ref(), file_descriptor)?;
+        Self::unpack_file(destination.as_ref(), file_descriptor)?;
       }
 
       unpacked_files_count += 1;
@@ -74,7 +72,7 @@ impl ArchiveUnpacker {
         let descriptor: ArchiveFileDescriptor = file_descriptor.clone();
         let destination: PathBuf = destination.as_ref().into();
 
-        tasks_set.spawn(async move { Self::unpack_file(&init_lzo()?, destination, &descriptor) });
+        tasks_set.spawn(async move { Self::unpack_file(destination, &descriptor) });
       }
     }
 
@@ -104,7 +102,6 @@ impl ArchiveUnpacker {
     destination: P,
   ) -> XrfResult<ArchiveExtractDirectoryResult> {
     let normalized: String = prefix.trim_end_matches(['\\', '/']).to_string();
-    let lzo: LZO = init_lzo()?;
 
     let mut extracted_count: usize = 0;
     let mut size: u64 = 0;
@@ -126,7 +123,7 @@ impl ArchiveUnpacker {
         fs::create_dir_all(parent)?;
       }
 
-      write_descriptor_contents(&lzo, &mut Self::create_target(&target_path)?, descriptor)?;
+      write_descriptor_contents(&mut Self::create_target(&target_path)?, descriptor)?;
 
       extracted_count += 1;
       size += descriptor.size_real as u64;
@@ -160,11 +157,7 @@ impl ArchiveUnpacker {
       fs::create_dir_all(parent)?;
     }
 
-    write_descriptor_contents(
-      &init_lzo()?,
-      &mut Self::create_target(destination.as_ref())?,
-      descriptor,
-    )?;
+    write_descriptor_contents(&mut Self::create_target(destination.as_ref())?, descriptor)?;
 
     Ok(ArchiveExtractResult {
       name: descriptor.name.clone(),
@@ -226,13 +219,13 @@ impl ArchiveUnpacker {
     )
   }
 
-  fn unpack_file<P: AsRef<Path>>(lzo: &LZO, destination: P, descriptor: &ArchiveFileDescriptor) -> XrfResult {
+  fn unpack_file<P: AsRef<Path>>(destination: P, descriptor: &ArchiveFileDescriptor) -> XrfResult {
     let mut file_path: PathBuf = destination.as_ref().into();
 
     file_path.push(&descriptor.destination);
     file_path.push(&descriptor.name);
 
-    write_descriptor_contents(lzo, &mut Self::create_target(&file_path)?, descriptor)
+    write_descriptor_contents(&mut Self::create_target(&file_path)?, descriptor)
   }
 
   fn unpack_dirs<P: AsRef<Path>>(project: &ArchiveProject, destination: P) -> XrfResult {

@@ -2,7 +2,6 @@ use std::cmp::min;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 
-use minilzo_rs::LZO;
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{assert, assert_equal, assert_not_equal};
 
@@ -10,11 +9,6 @@ use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 
 /// Bytes held in memory at a time while copying a stored entry out.
 const COPY_BUFFER_SIZE: usize = 256 * 1024;
-
-/// Build the decompressor, reporting a failure instead of taking the process down with it.
-pub(crate) fn init_lzo() -> XrfResult<LZO> {
-  LZO::init().map_err(|error| XrfError::new_unexpected_error(format!("Failed to initialize LZO: {error:?}.")))
-}
 
 /// Read one archived entry into memory, decompressing it when it is stored compressed.
 ///
@@ -31,21 +25,21 @@ pub(crate) fn read_descriptor_bytes(descriptor: &ArchiveFileDescriptor) -> XrfRe
     return Ok(raw);
   }
 
-  decompress_descriptor(&init_lzo()?, &raw, descriptor)
+  decompress_descriptor(&raw, descriptor)
 }
 
 /// Copy one archived entry into an already opened target, decompressing when it is stored compressed.
 ///
 /// Shared by whole-archive unpacking and single file extraction so the two cannot drift on CRC
 /// verification or on how stored entries are streamed.
-pub(crate) fn write_descriptor_contents(lzo: &LZO, target: &mut File, descriptor: &ArchiveFileDescriptor) -> XrfResult {
+pub(crate) fn write_descriptor_contents(target: &mut File, descriptor: &ArchiveFileDescriptor) -> XrfResult {
   let mut source: File = open_at_descriptor(descriptor)?;
 
   if descriptor.size_real != descriptor.size_compressed {
     let mut raw: Vec<u8> = vec![0u8; descriptor.size_compressed as usize];
 
     source.read_exact(raw.as_mut_slice())?;
-    target.write_all(&decompress_descriptor(lzo, &raw, descriptor)?)?;
+    target.write_all(&decompress_descriptor(&raw, descriptor)?)?;
   } else {
     // A stored entry can be arbitrarily large, so it goes through a fixed buffer rather than memory.
     let mut remaining: usize = descriptor.size_real as usize;
@@ -81,16 +75,25 @@ fn open_at_descriptor(descriptor: &ArchiveFileDescriptor) -> XrfResult<File> {
 }
 
 /// Decompress an entry's payload and verify it against the checksum the archive recorded.
-fn decompress_descriptor(lzo: &LZO, raw: &[u8], descriptor: &ArchiveFileDescriptor) -> XrfResult<Vec<u8>> {
-  let decompressed: Vec<u8> = lzo
-    .decompress_safe(raw, descriptor.size_real as usize)
-    .map_err(|error| {
-      XrfError::new_read_error(format!(
-        "Failed to decompress '{}' from '{}': {error:?}.",
-        descriptor.name,
-        descriptor.source.display()
-      ))
-    })?;
+///
+/// The decoder is bounds checked and writes into a buffer sized from the descriptor, so a corrupt entry
+/// is an error rather than a read past the end of it.
+fn decompress_descriptor(raw: &[u8], descriptor: &ArchiveFileDescriptor) -> XrfResult<Vec<u8>> {
+  let mut decompressed: Vec<u8> = vec![0u8; descriptor.size_real as usize];
+
+  let written: usize = lzokay::decompress::decompress(raw, &mut decompressed).map_err(|error| {
+    XrfError::new_read_error(format!(
+      "Failed to decompress '{}' from '{}': {error}.",
+      descriptor.name,
+      descriptor.source.display()
+    ))
+  })?;
+
+  assert_equal(
+    written,
+    decompressed.len(),
+    "Decompressed size must match the descriptor",
+  )?;
 
   assert_equal(
     descriptor.crc,
