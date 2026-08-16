@@ -8,8 +8,8 @@ use rayon::prelude::*;
 use xrf_error::{XrfError, XrfResult};
 
 use crate::constants::DDS_EXTENSION;
-use crate::data::texture_file_descriptor::TextureFileDescriptor;
-use crate::description::xml_description_collection::XmlDescriptionCollection;
+use crate::data::TextureFileDescriptor;
+use crate::description::XmlDescriptionCollection;
 use crate::{PackDescriptionOptions, dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 
 pub struct UnpackDescriptionProcessor {}
@@ -49,68 +49,124 @@ impl UnpackDescriptionProcessor {
 
     xrf_output::verbose!(options.output, "Unpacking {}", full_name.display());
 
-    let dds: XrfResult<RgbaImage> = read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds));
-
-    if let Ok(dds) = dds {
-      if !destination.exists() {
-        create_dir_all(&destination)?;
+    let dds: RgbaImage = match read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds)) {
+      Ok(dds) => dds,
+      Err(_) if options.is_strict => {
+        return Err(XrfError::new_texture_processing_error(format!(
+          "Could not find file for texture unpacking: {}",
+          full_name.display()
+        )));
       }
+      Err(error) => {
+        xrf_output::warning!(
+          options.output,
+          "Skip file {}, not able to read: {}",
+          full_name.display(),
+          error
+        );
 
-      for sprite in &file.sprites {
-        xrf_output::verbose!(options.output, "Unpacking {} -> {}", full_name.display(), sprite.id);
-
-        let (max_x, max_y) = sprite.get_dimension_boundaries();
-
-        if max_x > dds.width() || max_y > dds.height() {
-          if options.is_strict {
-            return Err(XrfError::new_texture_processing_error(format!(
-              "Unexpected texture '{}' (x:{}, y:{}) boundaries are bigger than source DDS file ({}x{} - {})",
-              sprite.id,
-              max_x,
-              max_y,
-              dds.width(),
-              dds.height(),
-              full_name.display()
-            )));
-          } else {
-            xrf_output::warning!(
-              options.output,
-              "[WARN] - exceeding sprite size '{}' (x:{}, y:{}) ({}x{} - {})",
-              sprite.id,
-              max_x,
-              max_y,
-              dds.width(),
-              dds.height(),
-              full_name.display()
-            );
-          }
-        } else {
-          // Unpacked sprites are packing input read at their base level, so a mip chain would only
-          // cost space.
-          save_image_as_ui_dds(
-            &destination.join(format!("{}.{}", sprite.id, DDS_EXTENSION)),
-            &dds.view(sprite.x, sprite.y, sprite.w, sprite.h).to_image(),
-            options.dds_compression_format,
-            Mipmaps::Disabled,
-          )?;
-        }
+        return Ok(false);
       }
+    };
 
-      Ok(true)
-    } else if options.is_strict {
-      Err(XrfError::new_texture_processing_error(format!(
-        "Could not find file for texture unpacking: {}",
-        full_name.display()
-      )))
-    } else {
-      xrf_output::warning!(
-        options.output,
-        "Skip file {}, not able to read: {}",
-        full_name.display(),
-        dds.unwrap_err()
-      );
-
-      Ok(false)
+    if !destination.exists() {
+      create_dir_all(&destination)?;
     }
+
+    for sprite in &file.sprites {
+      xrf_output::verbose!(options.output, "Unpacking {} -> {}", full_name.display(), sprite.id);
+
+      let (max_x, max_y) = sprite.get_dimension_boundaries();
+
+      if max_x > dds.width() || max_y > dds.height() {
+        if options.is_strict {
+          return Err(XrfError::new_texture_processing_error(format!(
+            "Unexpected texture '{}' (x:{}, y:{}) boundaries are bigger than source DDS file ({}x{} - {})",
+            sprite.id,
+            max_x,
+            max_y,
+            dds.width(),
+            dds.height(),
+            full_name.display()
+          )));
+        }
+
+        xrf_output::warning!(
+          options.output,
+          "[WARN] - exceeding sprite size '{}' (x:{}, y:{}) ({}x{} - {})",
+          sprite.id,
+          max_x,
+          max_y,
+          dds.width(),
+          dds.height(),
+          full_name.display()
+        );
+
+        continue;
+      }
+
+      // Unpacked sprites are packing input read at their base level, so a mip chain would only
+      // cost space.
+      save_image_as_ui_dds(
+        &destination.join(format!("{}.{}", sprite.id, DDS_EXTENSION)),
+        &dds.view(sprite.x, sprite.y, sprite.w, sprite.h).to_image(),
+        options.dds_compression_format,
+        Mipmaps::Disabled,
+      )?;
+    }
+
+    Ok(true)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::path::PathBuf;
+
+  use image_dds::ImageFormat;
+
+  use super::UnpackDescriptionProcessor;
+  use crate::{PackDescriptionOptions, TextureFileDescriptor};
+
+  fn options_for_missing_source(is_strict: bool) -> PackDescriptionOptions {
+    let root: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+      .parent()
+      .and_then(|path| path.parent())
+      .expect("xrf-texture to be inside the workspace crates directory")
+      .join("target")
+      .join("test-resources")
+      .join(format!("xrf-texture-missing-description-{}", std::process::id()));
+
+    PackDescriptionOptions {
+      description: root.join("description.xml"),
+      base: root.join("source"),
+      output: Default::default(),
+      output_path: root.join("output"),
+      dds_compression_format: ImageFormat::BC3RgbaUnorm,
+      files: Vec::new(),
+      is_strict,
+      is_parallel: false,
+    }
+  }
+
+  #[test]
+  fn skips_an_unreadable_sheet_in_non_strict_mode() {
+    let options: PackDescriptionOptions = options_for_missing_source(false);
+    let file: TextureFileDescriptor = TextureFileDescriptor::new(r"ui\missing");
+
+    assert!(
+      !UnpackDescriptionProcessor::unpack_xml_description(&options, &file)
+        .expect("non-strict unpacking to skip an unreadable sheet")
+    );
+    assert!(!options.output_path.join(&file.name).exists());
+  }
+
+  #[test]
+  fn rejects_an_unreadable_sheet_in_strict_mode() {
+    let options: PackDescriptionOptions = options_for_missing_source(true);
+    let file: TextureFileDescriptor = TextureFileDescriptor::new(r"ui\missing");
+
+    assert!(UnpackDescriptionProcessor::unpack_xml_description(&options, &file).is_err());
+    assert!(!options.output_path.join(&file.name).exists());
   }
 }

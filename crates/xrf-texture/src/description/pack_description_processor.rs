@@ -5,10 +5,9 @@ use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_equal;
 
 use crate::constants::{DDS_EXTENSION, UI_MIPMAP_LEVELS, UI_MIPMAPS};
-use crate::data::texture_file_descriptor::TextureFileDescriptor;
-use crate::description::pack_description_options::PackDescriptionOptions;
-use crate::description::xml_description_collection::XmlDescriptionCollection;
-use crate::utils::images::warn_on_reshaped_ui_dds;
+use crate::data::TextureFileDescriptor;
+use crate::description::{PackDescriptionOptions, XmlDescriptionCollection};
+use crate::utils::warn_on_reshaped_ui_dds;
 use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 
 pub struct PackDescriptionProcessor {}

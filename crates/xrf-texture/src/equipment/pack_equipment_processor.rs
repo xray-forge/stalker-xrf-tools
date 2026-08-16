@@ -11,8 +11,8 @@ use crate::constants::{
   LTX_PATH_GAMEDATA_MARKER, LTX_PATH_GAMEDATA_MARKER_PREFIX, PNG_EXTENSION, RESOURCES_DIRECTORY, TEXTURES_DIRECTORY,
   UI_MIPMAP_LEVELS, UI_MIPMAPS,
 };
-use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
-use crate::utils::images::{dds_to_image, fit_image_into_bounds, warn_on_reshaped_ui_dds};
+use crate::data::InventorySpriteDescriptor;
+use crate::utils::{dds_to_image, fit_image_into_bounds, warn_on_reshaped_ui_dds};
 use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_image_as_ui_dds};
 
 pub struct PackEquipmentProcessor {}

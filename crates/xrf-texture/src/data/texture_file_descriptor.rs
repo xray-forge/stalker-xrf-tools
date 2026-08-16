@@ -1,7 +1,7 @@
 use std::cmp::max;
 
 use crate::constants::DDS_BLOCK_ALIGNMENT;
-use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
+use crate::data::TextureSpriteDescriptor;
 
 pub struct TextureFileDescriptor {
   pub name: String,
@@ -47,8 +47,7 @@ impl TextureFileDescriptor {
 
 #[cfg(test)]
 mod tests {
-  use crate::data::texture_file_descriptor::TextureFileDescriptor;
-  use crate::data::texture_sprite_descriptor::TextureSpriteDescriptor;
+  use crate::data::{TextureFileDescriptor, TextureSpriteDescriptor};
 
   fn descriptor_of(sprites: &[(u32, u32, u32, u32)]) -> TextureFileDescriptor {
     let mut descriptor: TextureFileDescriptor = TextureFileDescriptor::new(r"ui\ui_actor_weapons");

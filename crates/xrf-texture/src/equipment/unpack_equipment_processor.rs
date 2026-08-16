@@ -3,7 +3,7 @@ use image_dds::Mipmaps;
 use xrf_error::XrfResult;
 
 use crate::constants::DDS_EXTENSION;
-use crate::data::inventory_sprite_descriptor::InventorySpriteDescriptor;
+use crate::data::InventorySpriteDescriptor;
 use crate::{UnpackEquipmentOptions, save_image_as_ui_dds};
 
 pub struct UnpackEquipmentProcessor {}
