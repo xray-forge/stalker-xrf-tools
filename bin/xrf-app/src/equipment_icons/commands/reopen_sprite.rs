@@ -1,8 +1,9 @@
 use std::sync::MutexGuard;
 
 use tauri::State;
+use xrf_dds::{DdsFile, DdsPng};
 use xrf_ltx::Ltx;
-use xrf_texture::{InventorySpriteDescriptor, open_dds_as_png};
+use xrf_texture::InventorySpriteDescriptor;
 
 use crate::equipment_icons::state::{EquipmentSpriteMetadata, EquipmentSpriteState};
 use crate::types::TauriResult;
@@ -29,8 +30,9 @@ pub async fn equipment_icons_reopen_sprite(
   let ltx_path: &String = ltx_path_lock.as_ref().unwrap();
   let dds_path: &String = dds_path_lock.as_ref().unwrap();
 
-  let (image, preview_buffer) =
-    open_dds_as_png(dds_path).map_err(|error| format!("Failed to open provided image file: {}", error))?;
+  let preview: DdsPng = DdsFile::read_from_path(dds_path)
+    .and_then(|dds| dds.to_png())
+    .map_err(|error| format!("Failed to open provided image file: {}", error))?;
 
   let descriptors: Vec<InventorySpriteDescriptor> =
     InventorySpriteDescriptor::new_list_from_ltx(&Ltx::read_from_file_full(ltx_path).map_err(error_to_string)?);
@@ -42,8 +44,7 @@ pub async fn equipment_icons_reopen_sprite(
     equipment_descriptors: descriptors.clone(),
   };
 
-  *state.equipment_sprite.lock().unwrap() = Some(image);
-  *state.equipment_sprite_preview.lock().unwrap() = Some(preview_buffer);
+  *state.equipment_sprite_preview.lock().unwrap() = Some(preview.bytes);
   *state.equipment_descriptors.lock().unwrap() = Some(descriptors);
 
   Ok(response)

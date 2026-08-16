@@ -3,14 +3,14 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use image::{GenericImageView, RgbaImage};
-use image_dds::Mipmaps;
 use rayon::prelude::*;
+use xrf_dds::{DdsFile, Mipmaps};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::constants::DDS_EXTENSION;
 use crate::data::TextureFileDescriptor;
 use crate::description::XmlDescriptionCollection;
-use crate::{PackDescriptionOptions, dds_to_image, read_dds_by_path, save_image_as_ui_dds};
+use crate::{PackDescriptionOptions, save_image_as_ui_dds};
 
 pub struct UnpackDescriptionProcessor {}
 
@@ -49,7 +49,7 @@ impl UnpackDescriptionProcessor {
 
     xrf_output::verbose!(options.output, "Unpacking {}", full_name.display());
 
-    let dds: RgbaImage = match read_dds_by_path(&full_name).and_then(|dds| dds_to_image(&dds)) {
+    let dds: RgbaImage = match DdsFile::read_from_path(&full_name).and_then(|dds| dds.decode_rgba(0)) {
       Ok(dds) => dds,
       Err(_) if options.is_strict => {
         return Err(XrfError::new_texture_processing_error(format!(
@@ -123,7 +123,7 @@ impl UnpackDescriptionProcessor {
 mod tests {
   use std::path::PathBuf;
 
-  use image_dds::ImageFormat;
+  use xrf_dds::ImageFormat;
 
   use super::UnpackDescriptionProcessor;
   use crate::{PackDescriptionOptions, TextureFileDescriptor};

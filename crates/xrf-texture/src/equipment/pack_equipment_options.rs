@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use image_dds::ImageFormat;
+use xrf_dds::ImageFormat;
 use xrf_ltx::Ltx;
 
 pub struct PackEquipmentOptions {

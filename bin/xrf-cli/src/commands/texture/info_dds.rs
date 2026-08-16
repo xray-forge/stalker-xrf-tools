@@ -1,8 +1,7 @@
-use std::fs::File;
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use ddsfile::Dds;
+use xrf_dds::{DdsFile, DdsFormat, DdsMetadata};
 use xrf_output::OutputOptions;
 
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -54,55 +53,61 @@ impl GenericCommand for InfoDdsCommand {
 
     xrf_output::info!(output, "Read dds file {}", path.display());
 
-    let mut dds_file: File = File::open(path)?;
-    let dds: Box<Dds> = Box::new(Dds::read(&mut dds_file)?);
+    let metadata: DdsMetadata = DdsFile::read_from_path(path)?.metadata();
 
-    let file_size: u64 = dds_file.metadata()?.len();
-    let data_size: usize = dds.data.len();
-
-    xrf_output::info!(output, "File size: {} ({}kb)", file_size, file_size / 1024);
-    xrf_output::info!(output, "Metadata size: {} ", file_size - data_size as u64);
-    xrf_output::info!(output, "Data size: {} ({}kb)", data_size, data_size / 1024);
-    xrf_output::info!(output, "Size: {} x {}", dds.header.width, dds.header.height,);
+    xrf_output::info!(
+      output,
+      "File size: {} ({}kb)",
+      metadata.file_size,
+      metadata.file_size / 1024
+    );
+    xrf_output::info!(output, "Metadata size: {} ", metadata.metadata_size);
+    xrf_output::info!(
+      output,
+      "Data size: {} ({}kb)",
+      metadata.data_size,
+      metadata.data_size / 1024
+    );
+    xrf_output::info!(output, "Size: {} x {}", metadata.width, metadata.height);
     xrf_output::info!(
       output,
       "Mipmap: {} - {}",
-      dds.get_num_mipmap_levels(),
-      dds.get_min_mipmap_size_in_bytes(),
+      metadata.mipmap_levels,
+      metadata.minimum_mipmap_size,
     );
 
-    if let Some(depth) = dds.header.depth {
+    if let Some(depth) = metadata.depth {
       xrf_output::info!(output, "Depth: {}", depth);
     }
 
-    if let Some(pitch) = dds.header.pitch {
+    if let Some(pitch) = metadata.pitch {
       xrf_output::info!(output, "Pitch: {}", pitch);
     }
 
-    if let Some(linear_size) = dds.header.linear_size {
+    if let Some(linear_size) = metadata.linear_size {
       xrf_output::info!(output, "Linear size: {}", linear_size);
     }
 
-    if let Some(format) = dds.get_format() {
-      if let Some(block_size) = format.get_block_size() {
-        xrf_output::info!(output, "Block size: {}", block_size);
-      }
+    if let Some(block_size) = metadata.block_size {
+      xrf_output::info!(output, "Block size: {}", block_size);
+    }
 
-      if let Some(bits_per_pixel) = format.get_bits_per_pixel() {
-        xrf_output::info!(output, "Bits per pixel: {}", bits_per_pixel);
-      }
+    if let Some(bits_per_pixel) = metadata.bits_per_pixel {
+      xrf_output::info!(output, "Bits per pixel: {}", bits_per_pixel);
+    }
 
-      if let Some(four_cc) = format.get_fourcc() {
-        xrf_output::info!(output, "Four CC: {}", four_cc.0);
-      }
-    } else {
+    if let Some(four_cc) = metadata.four_cc {
+      xrf_output::info!(output, "Four CC: {}", four_cc);
+    }
+
+    if !metadata.has_data_format {
       xrf_output::info!(output, "Format: unknown");
     }
 
-    if let Some(d3d_format) = dds.get_d3d_format() {
-      xrf_output::info!(output, "D3D format: {:?}", d3d_format);
-    } else if let Some(dxgi_format) = dds.get_dxgi_format() {
-      xrf_output::info!(output, "DXGI format: {:?}", dxgi_format);
+    match metadata.format {
+      DdsFormat::D3d(format) => xrf_output::info!(output, "D3D format: {:?}", format),
+      DdsFormat::Dxgi(format) => xrf_output::info!(output, "DXGI format: {:?}", format),
+      _ => {}
     }
 
     Ok(())

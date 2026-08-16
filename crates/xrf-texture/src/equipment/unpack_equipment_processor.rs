@@ -1,5 +1,5 @@
 use image::GenericImageView;
-use image_dds::Mipmaps;
+use xrf_dds::Mipmaps;
 use xrf_error::XrfResult;
 
 use crate::constants::DDS_EXTENSION;

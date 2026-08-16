@@ -1,11 +1,10 @@
-use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-use ddsfile::{Dds, DxgiFormat};
 use rayon::prelude::*;
 use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{ThmFile, XRayByteOrder};
+use xrf_dds::DdsFile;
 use xrf_error::{XrfError, XrfResult};
 
 use crate::GamedataFindingFactory;
@@ -173,117 +172,7 @@ impl GamedataProject {
     Ok((findings, checked_bumps_count))
   }
 
-  pub fn verify_texture_by_path(&self, options: &GamedataProjectVerifyOptions, path: &Path) -> XrfResult<bool> {
-    self.verify_texture(
-      options,
-      &Dds::read(&mut File::open(path)?).map_err(|error| {
-        XrfError::new_verify_error(format!(
-          "Failed to read texture by path {}, error: {}",
-          path.display(),
-          error
-        ))
-      })?,
-    )
-  }
-
-  pub fn verify_texture(&self, _options: &GamedataProjectVerifyOptions, dds: &Dds) -> XrfResult<bool> {
-    let mut is_valid: bool = true;
-
-    if let Some(header10) = &dds.header10 {
-      if !Self::is_supported_texture_format(header10.dxgi_format) {
-        is_valid = false;
-      }
-    } else if let Some(format) = DxgiFormat::try_from_pixel_format(&dds.header.spf) {
-      if !Self::is_supported_texture_format(format) {
-        is_valid = false;
-      }
-    } else {
-      // Unknown format:
-      // is_valid = false;
-    }
-
-    Ok(is_valid)
-  }
-}
-
-impl GamedataProject {
-  pub fn is_supported_texture_format(format: DxgiFormat) -> bool {
-    matches!(
-      format,
-      DxgiFormat::BC1_UNorm
-        | DxgiFormat::BC1_UNorm_sRGB
-        | DxgiFormat::BC2_UNorm
-        | DxgiFormat::BC2_UNorm_sRGB
-        | DxgiFormat::BC3_UNorm
-        | DxgiFormat::BC3_UNorm_sRGB
-    )
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use std::path::PathBuf;
-
-  use ddsfile::{AlphaMode, D3D10ResourceDimension, Dds, DxgiFormat, NewDxgiParams};
-  use xrf_assets::{DirectoryAssetIndex, XrayAssetIndex};
-  use xrf_ltx::LtxProject;
-
-  use super::GamedataProject;
-  use crate::GamedataProjectVerifyOptions;
-
-  fn empty_project() -> GamedataProject {
-    GamedataProject {
-      assets: XrayAssetIndex::new(
-        DirectoryAssetIndex::read(env!("CARGO_MANIFEST_DIR")).expect("read test assets"),
-        &[],
-      )
-      .expect("create test assets"),
-      ltx_project: LtxProject {
-        root: PathBuf::new(),
-        ltx_file_entries: Vec::new(),
-        ltx_files: Vec::new(),
-        ltx_scheme_files: Vec::new(),
-        ltx_scheme_file_entries: Vec::new(),
-        ltx_scheme_declarations: Default::default(),
-      },
-    }
-  }
-
-  fn dx10_texture(format: DxgiFormat) -> Dds {
-    Dds::new_dxgi(NewDxgiParams {
-      height: 4,
-      width: 4,
-      depth: None,
-      format,
-      mipmap_levels: None,
-      array_layers: None,
-      caps2: None,
-      is_cubemap: false,
-      resource_dimension: D3D10ResourceDimension::Texture2D,
-      alpha_mode: AlphaMode::Unknown,
-    })
-    .expect("Expected test DDS to be constructible")
-  }
-
-  #[test]
-  fn accepts_supported_dx10_formats_and_rejects_unsupported_formats() {
-    let project = empty_project();
-    let options = GamedataProjectVerifyOptions::default();
-
-    assert!(
-      project
-        .verify_texture(&options, &dx10_texture(DxgiFormat::BC1_UNorm_sRGB))
-        .unwrap()
-    );
-    assert!(
-      project
-        .verify_texture(&options, &dx10_texture(DxgiFormat::BC3_UNorm))
-        .unwrap()
-    );
-    assert!(
-      !project
-        .verify_texture(&options, &dx10_texture(DxgiFormat::BC4_UNorm))
-        .unwrap()
-    );
+  pub(crate) fn verify_texture_by_path(&self, _options: &GamedataProjectVerifyOptions, path: &Path) -> XrfResult<bool> {
+    Ok(DdsFile::read_from_path(path)?.is_xray_compatible())
   }
 }

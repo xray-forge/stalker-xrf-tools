@@ -3,7 +3,7 @@ use std::sync::MutexGuard;
 use serde::Serialize;
 use tauri::State;
 use xrf_archive::{ArchiveFileDescriptor, ArchiveProject};
-use xrf_texture::dds_bytes_as_png;
+use xrf_dds::{DdsFile, DdsPng};
 use xrf_utils::encode_bytes_to_standard_base64;
 
 use crate::archives::state::ArchiveProjectState;
@@ -59,12 +59,14 @@ pub async fn archives_read_image(
   }
 
   let bytes: Vec<u8> = project.read_file_bytes(path).map_err(|error| error.to_string())?;
-  let (width, height, png) = dds_bytes_as_png(&bytes).map_err(|error| error.to_string())?;
+  let png: DdsPng = DdsFile::read_from_bytes(&bytes)
+    .and_then(|dds| dds.to_png())
+    .map_err(|error| error.to_string())?;
 
   Ok(ArchiveImagePreview {
     name: descriptor.name.clone(),
-    width,
-    height,
-    base64: encode_bytes_to_standard_base64(&png),
+    width: png.width,
+    height: png.height,
+    base64: encode_bytes_to_standard_base64(&png.bytes),
   })
 }

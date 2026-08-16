@@ -220,7 +220,7 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use image_dds::ImageFormat;
+  use xrf_dds::ImageFormat;
 
   use super::XmlDescriptionCollection;
   use crate::PackDescriptionOptions;
@@ -256,7 +256,7 @@ mod select_files_tests {
   use std::collections::HashMap;
   use std::path::PathBuf;
 
-  use image_dds::ImageFormat;
+  use xrf_dds::ImageFormat;
 
   use super::XmlDescriptionCollection;
   use crate::data::TextureFileDescriptor;

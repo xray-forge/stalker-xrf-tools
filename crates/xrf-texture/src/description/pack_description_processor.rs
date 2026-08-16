@@ -1,14 +1,15 @@
 use std::path::PathBuf;
 
 use image::{GenericImage, ImageBuffer, Rgba, RgbaImage};
+use xrf_dds::DdsFile;
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_equal;
 
 use crate::constants::{DDS_EXTENSION, UI_MIPMAP_LEVELS, UI_MIPMAPS};
 use crate::data::TextureFileDescriptor;
 use crate::description::{PackDescriptionOptions, XmlDescriptionCollection};
+use crate::save_image_as_ui_dds;
 use crate::utils::warn_on_reshaped_ui_dds;
-use crate::{dds_to_image, read_dds_by_path, save_image_as_ui_dds};
 
 pub struct PackDescriptionProcessor {}
 
@@ -62,7 +63,7 @@ impl PackDescriptionProcessor {
         .join(&file.name)
         .join(format!("{}.{}", texture.id, DDS_EXTENSION));
 
-      match read_dds_by_path(&texture_path).and_then(|dds| dds_to_image(&dds)) {
+      match DdsFile::read_from_path(&texture_path).and_then(|dds| dds.decode_rgba(0)) {
         Ok(texture_dds) => {
           assert_equal(
             texture_dds.width(),

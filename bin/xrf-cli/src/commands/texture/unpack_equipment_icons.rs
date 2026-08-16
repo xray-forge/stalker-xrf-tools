@@ -3,11 +3,10 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_dds::{DdsFile, ImageFormat};
 use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
-use xrf_texture::{
-  ImageFormat, RgbaImage, UnpackEquipmentOptions, UnpackEquipmentProcessor, dds_to_image, read_dds_by_path,
-};
+use xrf_texture::{UnpackEquipmentOptions, UnpackEquipmentProcessor};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -82,19 +81,20 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
 
     xrf_output::info!(output_options, "Opening DDS file: {}", source.display());
 
-    let source_dds: RgbaImage = read_dds_by_path(source)
-      .and_then(|dds| {
-        xrf_output::info!(
-          output_options,
-          "Source DDS file details: {}x{}, mip-maps: {}, format: {:?}",
-          dds.header.width,
-          dds.header.height,
-          dds.header.mip_map_count.unwrap_or(0),
-          dds.header10.as_ref().map(|header| header.dxgi_format)
-        );
+    let source_file: DdsFile = DdsFile::read_from_path(source).expect("Expected path to valid DDS source file");
+    let metadata = source_file.metadata();
 
-        dds_to_image(&dds)
-      })
+    xrf_output::info!(
+      output_options,
+      "Source DDS file details: {}x{}, mip-maps: {}, format: {:?}",
+      metadata.width,
+      metadata.height,
+      metadata.declared_mipmap_levels.unwrap_or(0),
+      metadata.dx10_format
+    );
+
+    let source_dds = source_file
+      .decode_rgba(0)
       .expect("Expected path to valid DDS source file");
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
 

@@ -7,11 +7,11 @@ rust-version.workspace = true
 
 [dependencies]
 derive_more = { workspace = true, features = ["display"] }
-ddsfile = { workspace = true }
 rayon = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 walkdir = { workspace = true }
 xrf-db = { workspace = true }
+xrf-dds = { workspace = true }
 xrf-error = { workspace = true }
 xrf-ltx = { workspace = true }
 xrf-lua = { workspace = true }

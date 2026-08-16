@@ -7,6 +7,7 @@ members = [
   "crates/xrf-assets",
   "crates/xrf-chunk",
   "crates/xrf-db",
+  "crates/xrf-dds",
   "crates/xrf-error",
   "crates/xrf-error-derive",
   "crates/xrf-export",
@@ -36,6 +37,7 @@ derive_more = "2.1.1"
 env_logger = "0.11.11"
 fileslice = { version = "0.7.0", default-features = false }
 image = { version = "0.25.10", default-features = false }
+image_dds = "0.7.2"
 indexmap = { version = "2.14.0", features = ["serde"] }
 log = "0.4.33"
 lzokay = { version = "2.0.1", default-features = false, features = ["std", "compress", "decompress"] }
@@ -54,6 +56,7 @@ xrf-archive = { path = "crates/xrf-archive" }
 xrf-assets = { path = "crates/xrf-assets" }
 xrf-chunk = { path = "crates/xrf-chunk" }
 xrf-db = { path = "crates/xrf-db" }
+xrf-dds = { path = "crates/xrf-dds" }
 xrf-error = { path = "crates/xrf-error" }
 xrf-error-derive = { path = "crates/xrf-error-derive" }
 xrf-export = { path = "crates/xrf-export" }

@@ -1,13 +1,9 @@
-use std::fs::File;
-use std::io::{BufWriter, Cursor, Write};
 use std::path::Path;
 
-use ddsfile::Dds;
-use image::codecs::png::PngEncoder;
 use image::imageops::FilterType;
-use image::{DynamicImage, ExtendedColorType, GenericImage, ImageBuffer, ImageEncoder, ImageFormat, Rgba, RgbaImage};
-use image_dds::{ImageFormat as DDSImageFormat, Mipmaps, dds_from_image};
-use xrf_error::{XrfError, XrfResult};
+use image::{DynamicImage, GenericImage, ImageBuffer, ImageFormat, Rgba, RgbaImage};
+use xrf_dds::{DdsEncodeOptions, DdsFile, ImageFormat as DDSImageFormat, Mipmaps, Quality};
+use xrf_error::XrfResult;
 use xrf_output::OutputOptions;
 use xrf_utils::assert;
 
@@ -69,34 +65,13 @@ pub fn fit_image_into_bounds(image: DynamicImage, width: u32, height: u32, sourc
   Ok(centered.into())
 }
 
-pub fn read_dds_by_path<P: AsRef<Path>>(path: P) -> XrfResult<Dds> {
-  Dds::read(&mut File::open(path.as_ref())?).map_err(|error| {
-    XrfError::new_texture_processing_error(format!(
-      "Failed to read texture by path {}, error: {}",
-      path.as_ref().display(),
-      error,
-    ))
-  })
-}
-
-pub fn dds_to_image(dds: &Dds) -> XrfResult<RgbaImage> {
-  image_dds::image_from_dds(dds, 0).map_err(|error| {
-    XrfError::new_texture_processing_error(format!("Failed to convert DDS to RGBA image: {}'", error,))
-  })
-}
-
 /// Write an image as a dds file with the given format and mip chain.
 ///
 /// Dimensions do not have to be multiples of 4. The block compressor pads every mip level out to whole
 /// 4x4 blocks itself and records the unpadded size in the header, so the file keeps the exact
 /// dimensions the image was built with.
 pub fn save_image_as_ui_dds(path: &Path, image: &RgbaImage, format: DDSImageFormat, mipmaps: Mipmaps) -> XrfResult {
-  dds_from_image(image, format, image_dds::Quality::Slow, mipmaps)
-    .map_err(|it| XrfError::new_texture_processing_error(it.to_string()))?
-    .write(&mut BufWriter::new(File::create(path)?))
-    .map_err(|it| XrfError::new_texture_processing_error(it.to_string()))?;
-
-  Ok(())
+  DdsFile::encode_rgba(image, DdsEncodeOptions::new(format, Quality::Slow, mipmaps))?.write_to_path(path)
 }
 
 /// Warn when the sheet about to be written at `path` is shaped differently from the one it replaces.
@@ -111,7 +86,7 @@ pub fn warn_on_reshaped_ui_dds(output: &OutputOptions, path: &Path, width: u32, 
     return;
   }
 
-  let existing: Dds = match read_dds_by_path(path) {
+  let existing: DdsFile = match DdsFile::read_from_path(path) {
     Ok(existing) => existing,
     Err(error) => {
       xrf_output::warning!(
@@ -124,18 +99,16 @@ pub fn warn_on_reshaped_ui_dds(output: &OutputOptions, path: &Path, width: u32, 
       return;
     }
   };
+  let metadata = existing.metadata();
 
-  if existing.header.width != width
-    || existing.header.height != height
-    || existing.get_num_mipmap_levels() != mipmap_levels
-  {
+  if metadata.width != width || metadata.height != height || metadata.mipmap_levels != mipmap_levels {
     xrf_output::warning!(
       output,
       "Replacing {} of {}x{} with {} mipmap levels by {}x{} with {} mipmap levels",
       path.display(),
-      existing.header.width,
-      existing.header.height,
-      existing.get_num_mipmap_levels(),
+      metadata.width,
+      metadata.height,
+      metadata.mipmap_levels,
       width,
       height,
       mipmap_levels
@@ -145,92 +118,4 @@ pub fn warn_on_reshaped_ui_dds(output: &OutputOptions, path: &Path, width: u32, 
 
 pub fn save_image_as_ui_png(path: &Path, image: &RgbaImage) -> XrfResult {
   Ok(image.save_with_format(path, ImageFormat::Png)?)
-}
-
-/// Decode a DDS held in memory and re-encode it as PNG.
-///
-/// The path based variant cannot serve callers whose bytes live inside an archive, and writing them to
-/// a temporary file first only to read it back would be doing the same work twice.
-pub fn dds_bytes_as_png(bytes: &[u8]) -> XrfResult<(u32, u32, Vec<u8>)> {
-  let dds: Dds = Dds::read(&mut Cursor::new(bytes))
-    .map_err(|error| XrfError::new_texture_processing_error(format!("Failed to read DDS from memory: {error}.")))?;
-
-  let image: RgbaImage = dds_to_image(&dds)?;
-
-  let mut buffer: Vec<u8> = Vec::new();
-
-  PngEncoder::new(buffer.by_ref())
-    .write_image(image.as_raw(), image.width(), image.height(), ExtendedColorType::Rgba8)
-    .map_err(|error| XrfError::new_texture_processing_error(format!("Failed to encode DDS as PNG: {error}.")))?;
-
-  Ok((image.width(), image.height(), buffer))
-}
-
-pub fn open_dds_as_png<P: AsRef<Path>>(path: P) -> XrfResult<(RgbaImage, Vec<u8>)> {
-  let image: RgbaImage = read_dds_by_path(path).and_then(|dds| dds_to_image(&dds))?;
-
-  let mut buffer: Vec<u8> = Vec::new();
-
-  PngEncoder::new(buffer.by_ref())
-    .write_image(image.as_raw(), image.width(), image.height(), ExtendedColorType::Rgba8)
-    .expect("Error encoding pixels as PNG");
-
-  Ok((image, buffer))
-}
-
-#[cfg(test)]
-mod tests {
-  use std::fs;
-  use std::path::PathBuf;
-
-  use ddsfile::Dds;
-  use image::RgbaImage;
-  use image_dds::{ImageFormat as DDSImageFormat, Mipmaps};
-
-  use super::{read_dds_by_path, save_image_as_ui_dds};
-
-  fn temp_dds_path(name: &str) -> PathBuf {
-    std::env::temp_dir().join(format!("xrf-texture-{name}-{}.dds", std::process::id()))
-  }
-
-  fn write_and_read(name: &str, width: u32, height: u32, mipmaps: Mipmaps) -> Dds {
-    let path: PathBuf = temp_dds_path(name);
-
-    save_image_as_ui_dds(
-      &path,
-      &RgbaImage::new(width, height),
-      DDSImageFormat::BC3RgbaUnorm,
-      mipmaps,
-    )
-    .expect("expect the sheet to be written");
-
-    let dds: Dds = read_dds_by_path(&path).expect("expect the written sheet to be readable");
-
-    fs::remove_file(&path).expect("expect the written sheet to be removable");
-
-    dds
-  }
-
-  #[test]
-  fn keeps_dimensions_that_are_not_multiples_of_four() {
-    let dds: Dds = write_and_read("unaligned", 1023, 1020, Mipmaps::Disabled);
-
-    assert_eq!(
-      (dds.header.width, dds.header.height),
-      (1023, 1020),
-      "Expect block compression to pad internally rather than grow the stored size"
-    );
-  }
-
-  #[test]
-  fn writes_the_requested_mip_chain() {
-    let generated: Dds = write_and_read("mipped", 1023, 1020, Mipmaps::GeneratedAutomatic);
-
-    assert_eq!(generated.get_num_mipmap_levels(), 10);
-    assert_eq!((generated.header.width, generated.header.height), (1023, 1020));
-
-    let flat: Dds = write_and_read("flat", 1023, 1020, Mipmaps::Disabled);
-
-    assert_eq!(flat.get_num_mipmap_levels(), 1);
-  }
 }

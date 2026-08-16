@@ -6791,6 +6791,7 @@ dependencies = [
  "tauri-specta",
  "xrf-archive",
  "xrf-db",
+ "xrf-dds",
  "xrf-error",
  "xrf-export",
  "xrf-ltx",
@@ -6847,7 +6848,6 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "colored",
- "ddsfile",
  "env_logger",
  "log",
  "serde",
@@ -6856,6 +6856,7 @@ dependencies = [
  "walkdir",
  "xrf-archive",
  "xrf-db",
+ "xrf-dds",
  "xrf-error",
  "xrf-export",
  "xrf-gamedata",
@@ -6885,6 +6886,17 @@ dependencies = [
  "xrf-ltx",
  "xrf-test-utils",
  "xrf-utils",
+]
+
+[[package]]
+name = "xrf-dds"
+version = "0.1.0"
+dependencies = [
+ "ddsfile",
+ "image",
+ "image_dds",
+ "xrf-error",
+ "xrf-test-utils",
 ]
 
 [[package]]
@@ -6926,7 +6938,6 @@ dependencies = [
 name = "xrf-gamedata"
 version = "0.1.0"
 dependencies = [
- "ddsfile",
  "derive_more 2.1.1",
  "rayon",
  "uuid",
@@ -6934,6 +6945,7 @@ dependencies = [
  "xrf-assets",
  "xrf-chunk",
  "xrf-db",
+ "xrf-dds",
  "xrf-error",
  "xrf-ltx",
  "xrf-lua",
@@ -7015,17 +7027,17 @@ dependencies = [
 name = "xrf-texture"
 version = "0.1.0"
 dependencies = [
- "ddsfile",
  "image",
- "image_dds",
  "log",
  "path-absolutize",
  "rayon",
  "serde",
  "specta",
+ "xrf-dds",
  "xrf-error",
  "xrf-ltx",
  "xrf-output",
+ "xrf-test-utils",
  "xrf-utils",
  "xrf-xml",
 ]

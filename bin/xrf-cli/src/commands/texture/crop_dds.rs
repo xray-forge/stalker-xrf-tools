@@ -1,11 +1,9 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_dds::{ImageFormat, Mipmaps};
 use xrf_output::OutputOptions;
-use xrf_texture::{
-  DynamicImage, GenericImageView, ImageFormat, Mipmaps, PNG_EXTENSION, RgbaImage, dds_to_image, fit_image_into_bounds,
-  read_dds_by_path, save_image_as_ui_dds, save_image_as_ui_png,
-};
+use xrf_texture::{CropTextureOptions, CropTextureProcessor, CropTextureResult};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
@@ -110,63 +108,27 @@ impl GenericCommand for CropDdsCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    let image: RgbaImage = dds_to_image(&read_dds_by_path(source)?)?;
-
-    if x + width > image.width() || y + height > image.height() {
-      return Err(
-        format!(
-          "Region {x}:{y} {width}x{height} does not fit in source {} which is {}x{}",
-          source.display(),
-          image.width(),
-          image.height()
-        )
-        .into(),
-      );
-    }
-
-    let cropped: RgbaImage = image.view(x, y, width, height).to_image();
-
-    let result: RgbaImage = match (
-      matches.get_one::<u32>("fit-width"),
-      matches.get_one::<u32>("fit-height"),
-    ) {
-      (Some(fit_width), Some(fit_height)) => {
-        xrf_output::info!(
-          output,
-          "Fitting cropped {}x{} region into {}x{}",
-          width,
-          height,
-          fit_width,
-          fit_height
-        );
-
-        fit_image_into_bounds(DynamicImage::from(cropped), *fit_width, *fit_height, source)?.into()
-      }
-      _ => cropped,
-    };
-
-    // Writing png keeps the region lossless, which matters when it becomes a packing source.
-    if output_path
-      .extension()
-      .is_some_and(|extension| extension.eq(PNG_EXTENSION))
-    {
-      save_image_as_ui_png(output_path, &result)?;
-    } else {
-      save_image_as_ui_dds(
-        output_path,
-        &result,
-        ImageFormat::BC3RgbaUnorm,
-        // A cropped region is packing input read at its base level, so a mip chain would only cost
-        // space.
-        Mipmaps::Disabled,
-      )?;
-    }
+    let result: CropTextureResult = CropTextureProcessor::crop(&CropTextureOptions {
+      source: source.clone(),
+      output_path: output_path.clone(),
+      output: output.clone(),
+      x,
+      y,
+      width,
+      height,
+      fit_width: matches.get_one::<u32>("fit-width").copied(),
+      fit_height: matches.get_one::<u32>("fit-height").copied(),
+      dds_compression_format: ImageFormat::BC3RgbaUnorm,
+      // A cropped region is packing input read at its base level, so a mip chain would only cost
+      // space.
+      dds_mipmaps: Mipmaps::Disabled,
+    })?;
 
     xrf_output::info!(
       output,
       "Wrote {}x{} region from {}:{} of {} to {}",
-      result.width(),
-      result.height(),
+      result.width,
+      result.height,
       x,
       y,
       source.display(),

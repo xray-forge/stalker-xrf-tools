@@ -1,10 +1,12 @@
+use xrf_dds::Mipmaps;
+
 /// Mip chain written into a packed UI sprite sheet.
 ///
 /// None, following vanilla.
 /// The engine cannot use a chain here anyway, since the UI is authored on a 1024x768 canvas
 /// that is scaled up to the real resolution, so a sheet is magnified rather than minified
 /// and only level 0 is ever sampled.
-pub const UI_MIPMAPS: image_dds::Mipmaps = image_dds::Mipmaps::Disabled;
+pub const UI_MIPMAPS: Mipmaps = Mipmaps::Disabled;
 
 /// Number of mip levels [`UI_MIPMAPS`] produces, for comparing against an existing sheet.
 pub const UI_MIPMAP_LEVELS: u32 = 1;

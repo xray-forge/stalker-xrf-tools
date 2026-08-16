@@ -3,9 +3,10 @@ use std::process;
 use std::time::Instant;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_dds::ImageFormat;
 use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
-use xrf_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor};
+use xrf_texture::{PackEquipmentOptions, PackEquipmentProcessor};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;

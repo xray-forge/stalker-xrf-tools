@@ -4,6 +4,7 @@ use std::time::Instant;
 
 use image::{DynamicImage, GenericImage, ImageBuffer, ImageReader, Rgba};
 use path_absolutize::*;
+use xrf_dds::DdsFile;
 use xrf_error::{XrfError, XrfResult};
 
 use crate::constants::{
@@ -12,8 +13,8 @@ use crate::constants::{
   UI_MIPMAP_LEVELS, UI_MIPMAPS,
 };
 use crate::data::InventorySpriteDescriptor;
-use crate::utils::{dds_to_image, fit_image_into_bounds, warn_on_reshaped_ui_dds};
-use crate::{PackEquipmentOptions, PackEquipmentResult, read_dds_by_path, save_image_as_ui_dds};
+use crate::utils::{fit_image_into_bounds, warn_on_reshaped_ui_dds};
+use crate::{PackEquipmentOptions, PackEquipmentResult, save_image_as_ui_dds};
 
 pub struct PackEquipmentProcessor {}
 
@@ -172,7 +173,7 @@ impl PackEquipmentProcessor {
     let image: DynamicImage = if path.extension().is_some_and(|extension| extension.eq(PNG_EXTENSION)) {
       ImageReader::open(path)?.decode()?
     } else {
-      dds_to_image(&read_dds_by_path(path)?)?.into()
+      DdsFile::read_from_path(path)?.decode_rgba(0)?.into()
     };
 
     fit_image_into_bounds(image, width, height, path)

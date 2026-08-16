@@ -8,7 +8,6 @@ rust-version.workspace = true
 [dependencies]
 clap = { version = "4.6.6", features = ["derive", "default"] }
 colored = "3.1.1"
-ddsfile = { workspace = true }
 env_logger = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true }
@@ -17,6 +16,7 @@ tokio = { version = "1.53.1", features = ["rt-multi-thread"] }
 walkdir = { workspace = true }
 xrf-archive = { workspace = true }
 xrf-db = { workspace = true }
+xrf-dds = { workspace = true }
 xrf-gamedata = { workspace = true }
 xrf-ltx = { workspace = true }
 xrf-output = { workspace = true }

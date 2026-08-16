@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use image_dds::ImageFormat;
+use xrf_dds::ImageFormat;
 
 pub struct PackDescriptionOptions {
   pub description: PathBuf,

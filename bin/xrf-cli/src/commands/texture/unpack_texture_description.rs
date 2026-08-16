@@ -2,8 +2,9 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_dds::ImageFormat;
 use xrf_output::OutputOptions;
-use xrf_texture::{ImageFormat, PackDescriptionOptions, UnpackDescriptionProcessor};
+use xrf_texture::{PackDescriptionOptions, UnpackDescriptionProcessor};
 
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;

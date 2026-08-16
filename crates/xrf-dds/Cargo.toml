@@ -1,0 +1,18 @@
+[package]
+name = "xrf-dds"
+version = "0.1.0"
+publish = false
+edition = "2024"
+rust-version.workspace = true
+
+[dependencies]
+ddsfile = { workspace = true }
+image = { workspace = true, features = ["png"] }
+image_dds = { workspace = true }
+xrf-error = { workspace = true }
+
+[dev-dependencies]
+xrf-test-utils = { workspace = true }
+
+[lints]
+workspace = true

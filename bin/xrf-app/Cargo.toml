@@ -28,6 +28,7 @@ tauri-plugin-fs = "2.5.1"
 tauri-plugin-shell = "2.3.5"
 xrf-archive = { workspace = true }
 xrf-db = { workspace = true }
+xrf-dds = { workspace = true }
 xrf-error = { workspace = true }
 xrf-export = { workspace = true }
 xrf-ltx = { workspace = true }

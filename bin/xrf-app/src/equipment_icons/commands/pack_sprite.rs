@@ -1,6 +1,7 @@
+use xrf_dds::ImageFormat;
 use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
-use xrf_texture::{ImageFormat, PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult};
+use xrf_texture::{PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult};
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;
