@@ -2,14 +2,14 @@ use full_moon::ast::{Ast, Call, Expression, FunctionArgs, FunctionCall, Prefix, 
 use full_moon::tokenizer::TokenType;
 use full_moon::visitors::Visitor;
 
-use crate::XRayLuaMethodCall;
+use crate::xray_lua_method_call::XRayLuaMethodCall;
 
-pub struct LuaMethodCallCollector {
+pub(crate) struct LuaMethodCallCollector {
   method_calls: Vec<XRayLuaMethodCall>,
 }
 
 impl LuaMethodCallCollector {
-  pub fn collect(ast: &Ast) -> Vec<XRayLuaMethodCall> {
+  pub(crate) fn collect(ast: &Ast) -> Vec<XRayLuaMethodCall> {
     let mut collector: Self = Self {
       method_calls: Vec::new(),
     };

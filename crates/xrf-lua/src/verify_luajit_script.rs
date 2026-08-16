@@ -2,7 +2,7 @@ use std::path::Path;
 
 use xrf_error::XrfResult;
 
-use crate::XRayLuaScript;
+use crate::xray_lua_script::XRayLuaScript;
 
 /// Verify LuaJIT source syntax.
 pub fn verify_luajit_script(code: &str, path: &Path) -> XrfResult<()> {

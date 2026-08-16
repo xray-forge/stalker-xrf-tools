@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use full_moon::{LuaVersion, ast::Ast, parse_fallible};
 use xrf_error::{XrfError, XrfResult};
 
-use crate::XRayLuaMethodCall;
 use crate::lua_method_call_collector::LuaMethodCallCollector;
+use crate::xray_lua_method_call::XRayLuaMethodCall;
 
 /// A parsed LuaJIT script with normalized method calls.
 #[derive(Clone, Debug, Eq, PartialEq)]
