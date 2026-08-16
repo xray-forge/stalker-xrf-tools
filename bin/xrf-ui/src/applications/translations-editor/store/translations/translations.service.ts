@@ -1,5 +1,5 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
+import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import {
   TranslationEdit,
@@ -51,6 +51,7 @@ export class TranslationsService {
   public savingFile: Nullable<string> = null;
 
   /** Files holding edits that are not on disk. */
+  @Computed()
   public get dirtyFiles(): Array<string> {
     return Object.keys(this.edits).filter((file: string) =>
       Object.values(this.edits[file]).some((byId: Record<string, TPendingValue>) => Object.keys(byId).length > 0)

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
+import { isComputedProp } from "@wirestate/mobx";
 
 import { ArchivesService } from "@/applications/archives-explorer/services/archives/index";
 import { ArchiveFileDescriptor, ProjectReadResult } from "@/core/bindings/xrf-archive";
@@ -18,6 +19,14 @@ function mockArchivesService(files: Array<ArchiveFileDescriptor>): ArchivesServi
 }
 
 describe("ArchivesService file selection", () => {
+  it("registers derived state as MobX computed properties", () => {
+    const service: ArchivesService = mockArchivesService([]);
+
+    expect(isComputedProp(service, "selectedFile")).toBe(true);
+    expect(isComputedProp(service, "selectedDirectory")).toBe(true);
+    expect(isComputedProp(service, "isBusy")).toBe(true);
+  });
+
   it("loads supported selected files", async () => {
     const descriptor = mockArchiveFileDescriptor();
     const result: ProjectReadResult = { name: descriptor.name, content: "[system]", size: 8 };

@@ -8,7 +8,7 @@ import {
   ProvisionId,
   WireStatus,
 } from "@wirestate/core";
-import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
+import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import {
   getArchivePreviewSupport,
@@ -32,6 +32,8 @@ import { Nullable } from "@/lib/types/general";
 export class ArchivesService {
   public readonly log: Logger = new Logger(this.constructor.name);
 
+  private contentRequestId: number = 0;
+
   @Observable()
   public isReady: boolean = false;
 
@@ -50,13 +52,13 @@ export class ArchivesService {
   @Observable()
   public operation: Loadable<Nullable<TArchiveOperation>> = createLoadable(null);
 
-  private contentRequestId: number = 0;
 
   /**
    * Returns the selected file, or null when a directory or nothing is selected.
    *
    * @returns The selected file descriptor, or null.
    */
+  @Computed()
   public get selectedFile(): Nullable<ArchiveFileDescriptor> {
     return this.selection.kind === "file" ? this.selection.descriptor : null;
   }
@@ -66,6 +68,7 @@ export class ArchivesService {
    *
    * @returns The archive-relative directory path, with an empty string for the archive root, or null.
    */
+  @Computed()
   public get selectedDirectory(): Nullable<string> {
     return this.selection.kind === "directory" ? this.selection.path : null;
   }
@@ -75,6 +78,7 @@ export class ArchivesService {
    *
    * @returns Whether navigation or another command would race with the active operation.
    */
+  @Computed()
   public get isBusy(): boolean {
     return this.content.isLoading || this.operation.isLoading;
   }
