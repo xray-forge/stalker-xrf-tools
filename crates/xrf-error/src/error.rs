@@ -159,6 +159,8 @@ impl XrfError {
 
 #[cfg(test)]
 mod tests {
+  use std::io::{Error as IoError, ErrorKind};
+
   use serde_json::json;
 
   use super::XrfError;
@@ -187,6 +189,28 @@ mod tests {
           "field": "field",
           "message": "message",
           "at": "configs/system.ltx"
+        }
+      })
+    );
+  }
+
+  #[test]
+  fn io_conversion_preserves_kind_without_exposing_it_on_the_wire() {
+    let error: XrfError = IoError::new(ErrorKind::NotFound, "missing file").into();
+
+    assert!(matches!(
+      &error,
+      XrfError::Io {
+        message,
+        kind: ErrorKind::NotFound,
+      } if message == "missing file"
+    ));
+    assert_eq!(error.to_string(), "IO error: missing file");
+    assert_eq!(
+      serde_json::to_value(error).expect("XRF errors should serialize"),
+      json!({
+        "Io": {
+          "message": "missing file"
         }
       })
     );

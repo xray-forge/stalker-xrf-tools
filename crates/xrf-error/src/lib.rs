@@ -1,6 +1,6 @@
-pub(crate) mod error;
-pub(crate) mod from;
-pub(crate) mod types;
+mod error;
+mod from;
+mod types;
 #[cfg(feature = "typescript-bindings")]
 mod typescript_bindings;
 
