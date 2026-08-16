@@ -1,0 +1,5 @@
+error: #[constructor] requires exactly one named `message` field
+ --> tests/ui/fail/unsupported_variant.rs:6:3
+  |
+6 |   Invalid,
+  |   ^^^^^^^

@@ -14,5 +14,8 @@ proc-macro2 = "1.0.107"
 quote = "1.0.47"
 syn = "3.0.3"
 
+[dev-dependencies]
+trybuild = "1.0"
+
 [lints]
 workspace = true

@@ -1,0 +1,5 @@
+error: constructor name must be a valid Rust identifier
+ --> tests/ui/fail/invalid_name.rs:5:17
+  |
+5 |   #[constructor("not valid")]
+  |                 ^^^^^^^^^^^
