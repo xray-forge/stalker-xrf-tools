@@ -1,5 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
+import { act } from "@testing-library/react";
 import { Injectable } from "@wirestate/core";
+import { registerHotModule, requestHotSwap } from "@wirestate/core/hot";
 import { useInjection } from "@wirestate/react";
 import { Fragment, ReactElement } from "react";
 
@@ -114,7 +116,9 @@ describe("ApplicationScope", () => {
     expect(getByText("scoped service")).toBeInTheDocument();
   });
 
-  it("rebuilds the container when the descriptor binds a replacement class", () => {
+  it("rebuilds the container when hot reload replaces a bound class", async () => {
+    registerHotModule("ApplicationScope.test/ScopedService", { ScopedService });
+
     const { getByText, rerender } = renderWithProviders(
       <ApplicationScope application={APPLICATION}>
         <ScopedPanel />
@@ -123,9 +127,14 @@ describe("ApplicationScope", () => {
 
     expect(getByText("scoped service")).toBeInTheDocument();
 
+    await act(async () => {
+      registerHotModule("ApplicationScope.test/ScopedService", { ScopedService: ReloadedScopedService });
+      requestHotSwap();
+    });
+
     rerender(
       <>
-        <ApplicationScope application={{ ...APPLICATION, container: { bindings: [ReloadedScopedService] } }}>
+        <ApplicationScope application={APPLICATION}>
           <ReloadedScopedPanel />
         </ApplicationScope>
       </>
