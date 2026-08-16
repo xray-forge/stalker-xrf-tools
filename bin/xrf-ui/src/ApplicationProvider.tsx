@@ -12,13 +12,7 @@ import { ErrorCaptureService, NotificationsService } from "@/core/notifications/
 import { ProjectService } from "@/core/settings/services/project";
 import { SettingsService } from "@/core/settings/services/settings";
 import { createApplicationStyleCache, createApplicationTheme } from "@/core/theme";
-import { useContainerGeneration } from "@/lib/react";
-
-// todo: Verify and see whether we need better HMR support inside of wirestate.
-const ROOT_CONTAINER_CONFIG: ContainerConfig = {
-  bindings: [ProjectService, SettingsService, NotificationsService, ErrorCaptureService],
-  plugins: [new EventsPlugin()],
-};
+import { Nullable } from "@/lib/types/general";
 
 interface IApplicationProviderProps {
   router?: ComponentType<PropsWithChildren>;
@@ -32,10 +26,16 @@ export function ApplicationProvider({
   const theme: Theme = useMemo(() => createApplicationTheme(), []);
   const cache: EmotionCache = useMemo(() => createApplicationStyleCache(), []);
 
-  const generation: number = useContainerGeneration(ROOT_CONTAINER_CONFIG);
+  const config: Nullable<ContainerConfig> = useMemo(
+    () => ({
+      bindings: [ProjectService, SettingsService, NotificationsService, ErrorCaptureService],
+      plugins: [new EventsPlugin()],
+    }),
+    []
+  );
 
   return (
-    <ContainerProvider key={generation} config={ROOT_CONTAINER_CONFIG}>
+    <ContainerProvider config={config}>
       <CacheProvider value={cache}>
         <ThemeProvider
           defaultMode={"dark"}
