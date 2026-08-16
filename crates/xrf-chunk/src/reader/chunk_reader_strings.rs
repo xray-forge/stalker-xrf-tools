@@ -16,37 +16,11 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
   /// Read null terminated windows encoded string from file bytes with size limit.
   pub fn read_w1251_string_limited(&mut self, limit: usize) -> XrfResult<String> {
-    let mut buffer: [u8; STRING_READ_BUFFER_SIZE] = [0u8; STRING_READ_BUFFER_SIZE];
-    let mut collected: Vec<u8> = Vec::new();
-
-    loop {
-      let bytes_read: usize = self.read(&mut buffer)?;
-
-      if collected.len() + bytes_read > limit {
-        return Err(XrfError::new_parsing_error(
-          "Cannot parse string, reading data over buffer size limit",
-        ));
-      }
-
-      if bytes_read == 0 {
-        return Err(XrfError::new_no_terminator_error(
-          "Null terminator is not found in buffer, no data to be read",
-        ));
-      }
-
-      if let Some(position) = buffer[..bytes_read].iter().position(|&it| it == 0) {
-        let extra_bytes: i64 = (bytes_read - position - 1) as i64;
-
-        collected.extend_from_slice(&buffer[..position]);
-        self.data.set_seek(SeekFrom::Current(-extra_bytes))?;
-
-        break;
-      } else {
-        collected.extend_from_slice(&buffer[..bytes_read]);
-      }
-    }
-
-    Ok(encode_w1251_bytes_to_string(&collected)?)
+    self.read_w1251_terminated_limited(
+      b"\0",
+      limit,
+      "Null terminator is not found in buffer, no data to be read",
+    )
   }
 
   /// Read \r\n terminated windows encoded string from file bytes.
@@ -56,33 +30,57 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 
   /// Read \r\n terminated windows encoded string from file bytes.
   pub fn read_w1251_rn_string_limited(&mut self, limit: usize) -> XrfResult<String> {
+    self.read_w1251_terminated_limited(b"\r\n", limit, "RN sequence is not found in buffer, no data to be read")
+  }
+
+  fn read_w1251_terminated_limited(
+    &mut self,
+    terminator: &[u8],
+    limit: usize,
+    missing_terminator_message: &'static str,
+  ) -> XrfResult<String> {
     let mut buffer: [u8; STRING_READ_BUFFER_SIZE] = [0u8; STRING_READ_BUFFER_SIZE];
     let mut collected: Vec<u8> = Vec::new();
+    let maximum_unterminated_size: usize = limit.saturating_add(terminator.len().saturating_sub(1));
 
     loop {
       let bytes_read: usize = self.read(&mut buffer)?;
 
-      if collected.len() + bytes_read > limit {
+      if bytes_read == 0 {
+        return Err(XrfError::new_no_terminator_error(missing_terminator_message));
+      }
+
+      let previous_size: usize = collected.len();
+      collected.extend_from_slice(&buffer[..bytes_read]);
+      let search_start: usize = previous_size.saturating_sub(terminator.len().saturating_sub(1));
+
+      if let Some(relative_position) = collected[search_start..]
+        .windows(terminator.len())
+        .position(|candidate| candidate == terminator)
+      {
+        let position: usize = search_start + relative_position;
+
+        if position > limit {
+          return Err(XrfError::new_parsing_error(
+            "Cannot parse string, reading data over buffer size limit",
+          ));
+        }
+
+        let consumed_size: usize = position + terminator.len();
+        let extra_bytes: usize = collected.len() - consumed_size;
+        let extra_bytes: i64 = i64::try_from(extra_bytes)
+          .map_err(|_| XrfError::new_invalid_error("String read-ahead exceeds the supported seek range"))?;
+
+        self.data.set_seek(SeekFrom::Current(-extra_bytes))?;
+        collected.truncate(position);
+
+        break;
+      }
+
+      if collected.len() > maximum_unterminated_size {
         return Err(XrfError::new_parsing_error(
           "Cannot parse string, reading data over buffer size limit",
         ));
-      }
-
-      if bytes_read == 0 {
-        return Err(XrfError::new_no_terminator_error(
-          "RN sequence is not found in buffer, no data to be read",
-        ));
-      }
-
-      if let Some(position) = buffer[..bytes_read].windows(2).position(|it| it == b"\r\n") {
-        let extra_bytes: i64 = (bytes_read - (position + 2)) as i64;
-
-        collected.extend_from_slice(&buffer[..position]);
-        self.data.set_seek(SeekFrom::Current(-extra_bytes))?;
-
-        break;
-      } else {
-        collected.extend_from_slice(&buffer[..bytes_read]);
       }
     }
 
@@ -94,6 +92,7 @@ impl<D: ChunkDataSource> ChunkReader<D> {
 mod tests {
   use xrf_error::XrfResult;
 
+  use super::STRING_READ_BUFFER_SIZE;
   use crate::reader::chunk_reader::ChunkReader;
   use crate::source::chunk_memory_source::InMemoryChunkDataSource;
 
@@ -178,6 +177,19 @@ mod tests {
   }
 
   #[test]
+  fn accepts_null_terminated_content_at_the_exact_limit_despite_read_ahead() -> XrfResult {
+    let mut bytes: Vec<u8> = vec![b'a', 0];
+    bytes.extend_from_slice(&[b'x'; 254]);
+    let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&bytes)?;
+
+    assert_eq!(chunk.read_w1251_string_limited(1)?, "a");
+    assert_eq!(chunk.cursor_pos(), 2);
+    assert_eq!(chunk.read_bytes_remain(), 254);
+
+    Ok(())
+  }
+
+  #[test]
   fn test_read_w1251_rn_string_empty() -> XrfResult {
     let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&[])?;
 
@@ -236,6 +248,22 @@ mod tests {
     assert_eq!(chunk.read_w1251_rn_string()?, "cba", "Expect string read");
     assert_eq!(chunk.cursor_pos(), 10, "Expect 10 bytes read");
     assert_eq!(chunk.read_bytes_remain(), 0, "Expect 0 bytes remaining");
+
+    Ok(())
+  }
+
+  #[test]
+  fn reads_rn_terminator_split_across_internal_buffers() -> XrfResult {
+    let mut bytes: Vec<u8> = vec![b'a'; STRING_READ_BUFFER_SIZE - 1];
+    bytes.extend_from_slice(b"\r\nnext");
+    let mut chunk: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&bytes)?;
+
+    assert_eq!(
+      chunk.read_w1251_rn_string_limited(STRING_READ_BUFFER_SIZE - 1)?,
+      "a".repeat(STRING_READ_BUFFER_SIZE - 1)
+    );
+    assert_eq!(chunk.cursor_pos(), (STRING_READ_BUFFER_SIZE + 1) as u64);
+    assert_eq!(chunk.read_remaining()?, b"next");
 
     Ok(())
   }

@@ -5,7 +5,7 @@ use crate::source::chunk_data_source::ChunkDataSource;
 
 #[derive(Clone)]
 pub struct InMemoryChunkDataSource {
-  pub cursor: Cursor<Vec<u8>>,
+  cursor: Cursor<Vec<u8>>,
 }
 
 impl InMemoryChunkDataSource {
