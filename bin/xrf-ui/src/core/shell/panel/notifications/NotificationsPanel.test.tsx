@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { act, RenderResult } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { Binding, Container } from "@wirestate/core";
+import { Container, EventsPlugin } from "@wirestate/core";
 
 import { ENotificationSeverity, INotificationPayload } from "@/core/notifications/lib";
 import { NotificationsService } from "@/core/notifications/services";
@@ -23,7 +23,10 @@ interface IPanelRender {
  * @returns Render result and the notifications service used by the panel.
  */
 function renderPanel(seed: Array<INotificationPayload> = [], isDevModeEnabled: boolean = false): IPanelRender {
-  const container: Container = new Container({ bindings: [NotificationsService, SettingsService] });
+  const container: Container = new Container({
+    bindings: [NotificationsService, SettingsService],
+    plugins: [new EventsPlugin()],
+  });
   const service: NotificationsService = container.get(NotificationsService);
   const settingsService: SettingsService = container.get(SettingsService);
 
@@ -31,12 +34,7 @@ function renderPanel(seed: Array<INotificationPayload> = [], isDevModeEnabled: b
   seed.forEach((payload: INotificationPayload) => service.push(payload));
 
   return {
-    render: renderWithProviders(<NotificationsPanel />, {
-      bindings: [
-        { token: NotificationsService, value: service } as Binding,
-        { token: SettingsService, value: settingsService } as Binding,
-      ],
-    }),
+    render: renderWithProviders(<NotificationsPanel />, { container }),
     service,
   };
 }

@@ -52,7 +52,6 @@ export class ArchivesService {
   @Observable()
   public operation: Loadable<Nullable<TArchiveOperation>> = createLoadable(null);
 
-
   /**
    * Returns the selected file, or null when a directory or nothing is selected.
    *

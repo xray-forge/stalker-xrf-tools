@@ -1,5 +1,5 @@
 import { render, RenderResult } from "@testing-library/react";
-import { ContainerConfig, EventsPlugin } from "@wirestate/core";
+import { Container, ContainerConfig, EventsPlugin } from "@wirestate/core";
 import { ContainerProvider } from "@wirestate/react";
 import { Fragment, PropsWithChildren, ReactElement, ReactNode } from "react";
 import { MemoryRouter, useLocation } from "react-router-dom";
@@ -25,6 +25,8 @@ export interface IRenderOptions {
   route?: string;
   /** Services to provide, for components reading them through `useInjection`. */
   bindings?: ContainerConfig["bindings"];
+  /** Existing service container to provision and provide instead of creating one from `bindings`. */
+  container?: Container;
 }
 
 /**
@@ -49,9 +51,13 @@ function LeftPanelsOutlet(): ReactElement {
  * @param options - Initial route and container bindings.
  * @param options.route - Initial route for the memory router.
  * @param options.bindings - Service bindings added to the test container.
+ * @param options.container - Existing service container to provide instead of creating one from bindings.
  * @returns The Testing Library render result.
  */
-export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] }: IRenderOptions = {}): RenderResult {
+export function renderWithProviders(
+  ui: ReactNode,
+  { route = "/", bindings = [], container }: IRenderOptions = {}
+): RenderResult {
   const config: ContainerConfig = {
     bindings: [NotificationsService, SettingsService, ...bindings],
     plugins: [new EventsPlugin()],
@@ -68,11 +74,19 @@ export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] 
     return <CurrentApplicationProvider application={application}>{children}</CurrentApplicationProvider>;
   }
 
+  function TestContainer({ children }: PropsWithChildren): ReactElement {
+    return container ? (
+      <ContainerProvider container={container}>{children}</ContainerProvider>
+    ) : (
+      <ContainerProvider config={config}>{children}</ContainerProvider>
+    );
+  }
+
   function Wrapper({ children }: PropsWithChildren): ReactElement {
     return (
       <ApplicationProvider router={TestRouter}>
         <TestCurrentApplication>
-          <ContainerProvider config={config}>
+          <TestContainer>
             <EditorBusyProvider>
               <EditorStatusProvider>
                 <EditorPanelsProvider>
@@ -81,7 +95,7 @@ export function renderWithProviders(ui: ReactNode, { route = "/", bindings = [] 
                 </EditorPanelsProvider>
               </EditorStatusProvider>
             </EditorBusyProvider>
-          </ContainerProvider>
+          </TestContainer>
         </TestCurrentApplication>
       </ApplicationProvider>
     );
