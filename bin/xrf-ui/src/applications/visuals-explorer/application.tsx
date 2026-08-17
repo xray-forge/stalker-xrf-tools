@@ -19,5 +19,5 @@ export const VISUALS_EXPLORER_APPLICATION: IApplicationDescriptor = {
   id: EApplicationId.VISUALS_EXPLORER,
   label: "Visuals explorer",
   path: "/visuals-explorer",
-  status: EApplicationStatus.READY,
+  status: EApplicationStatus.PLANNED,
 };
