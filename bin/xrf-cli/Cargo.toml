@@ -25,6 +25,7 @@ xrf-error = { workspace = true }
 xrf-export = { workspace = true }
 xrf-texture = { workspace = true }
 xrf-translation = { workspace = true }
+xrf-visual = { workspace = true }
 
 [lints]
 workspace = true
