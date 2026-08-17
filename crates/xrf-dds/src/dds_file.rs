@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufWriter, Cursor, Write};
+use std::io::{BufWriter, Cursor, Read, Write};
 use std::path::Path;
 
 use ddsfile::{Dds, DxgiFormat};
@@ -9,6 +9,11 @@ use image_dds::{ImageFormat, Mipmaps, Quality, dds_from_image};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::{DdsMetadata, DdsPng};
+
+/// Bytes a DDS header occupies, with and without the DX10 extension.
+const HEADER_SIZE: u64 = 128;
+const DX10_HEADER_SIZE: u64 = 148;
+const MAXIMUM_HEADER_SIZE: u64 = DX10_HEADER_SIZE;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DdsEncodeOptions {
@@ -49,6 +54,38 @@ impl DdsFile {
     Self::from_parsed(dds, file_size)
   }
 
+  /// Read a texture's header without its payload.
+  ///
+  /// A DDS header is at most 148 bytes, and `Dds::read` reads the payload with `read_to_end` and validates no length
+  /// against it, so a reader limited to the header yields a complete header and an empty payload. That matters at scale:
+  /// surveying the reference trees means answering format questions about ten gigabytes of textures, and the answers all
+  /// live in the first 148 bytes of each file.
+  ///
+  /// The payload size is derived from the file length rather than measured, since the payload was never read.
+  pub fn read_metadata_from_path<P: AsRef<Path>>(path: P) -> XrfResult<DdsMetadata> {
+    let file: File = File::open(path.as_ref())?;
+    let file_size: u64 = file.metadata()?.len();
+    let dds: Dds = Dds::read(&mut file.take(MAXIMUM_HEADER_SIZE)).map_err(|error| {
+      XrfError::new_texture_processing_error(format!(
+        "Failed to read texture header by path {}, error: {}",
+        path.as_ref().display(),
+        error,
+      ))
+    })?;
+
+    let metadata_size: u64 = if dds.header10.is_some() {
+      DX10_HEADER_SIZE
+    } else {
+      HEADER_SIZE
+    };
+
+    Ok(DdsMetadata {
+      data_size: usize::try_from(file_size.saturating_sub(metadata_size))
+        .map_err(|_| XrfError::new_texture_processing_error("DDS payload exceeds the supported size range"))?,
+      ..DdsMetadata::from_dds(&dds, file_size, metadata_size)
+    })
+  }
+
   pub fn read_from_bytes(bytes: &[u8]) -> XrfResult<Self> {
     let file_size: u64 = u64::try_from(bytes.len())
       .map_err(|_| XrfError::new_texture_processing_error("DDS input exceeds the supported size range"))?;
@@ -63,7 +100,11 @@ impl DdsFile {
       .map_err(|error| XrfError::new_texture_processing_error(error.to_string()))?;
     let data_size: u64 = u64::try_from(dds.data.len())
       .map_err(|_| XrfError::new_texture_processing_error("Encoded DDS exceeds the supported size range"))?;
-    let metadata_size: u64 = if dds.header10.is_some() { 148 } else { 128 };
+    let metadata_size: u64 = if dds.header10.is_some() {
+      DX10_HEADER_SIZE
+    } else {
+      HEADER_SIZE
+    };
     let file_size: u64 = metadata_size
       .checked_add(data_size)
       .ok_or_else(|| XrfError::new_texture_processing_error("Encoded DDS size overflowed"))?;
@@ -209,6 +250,33 @@ mod tests {
 
     assert_eq!(generated.mipmap_levels, 10);
     assert_eq!(flat.mipmap_levels, 1);
+  }
+
+  #[test]
+  fn reads_the_same_metadata_from_the_header_alone() {
+    // The header-only read exists so a survey can answer format questions without reading gigabytes of payload. It is
+    // only worth having if it agrees with the full read, mip count and payload size included.
+    let encoded: DdsFile = encoded_file(256, 128, Mipmaps::GeneratedAutomatic);
+    let bytes: Vec<u8> = encoded.write_to_bytes().expect("expect DDS bytes");
+    let path = write_generated_test_resource("xrf-dds/header-only.dds", &bytes).expect("expect scratch DDS");
+
+    assert_eq!(
+      DdsFile::read_metadata_from_path(&path).expect("expect the header to parse"),
+      DdsFile::read_from_path(&path).expect("expect path to parse").metadata()
+    );
+  }
+
+  #[test]
+  fn reads_a_dx10_header_without_its_payload() {
+    // A DX10 header is twenty bytes longer, so the payload size derivation has to account for it.
+    let file: DdsFile = dx10_file(DxgiFormat::BC3_UNorm);
+    let bytes: Vec<u8> = file.write_to_bytes().expect("expect DDS bytes");
+    let path = write_generated_test_resource("xrf-dds/header-only-dx10.dds", &bytes).expect("expect scratch DDS");
+
+    let metadata = DdsFile::read_metadata_from_path(&path).expect("expect the header to parse");
+
+    assert_eq!(metadata.metadata_size, 148);
+    assert_eq!(metadata, file.metadata());
   }
 
   #[test]
