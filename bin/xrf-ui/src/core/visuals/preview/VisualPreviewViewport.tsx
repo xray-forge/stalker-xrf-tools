@@ -1,11 +1,12 @@
 import { Box } from "@mui/material";
 import { ReactElement, useEffect, useRef } from "react";
 
-import { IVisualMeshData, IVisualPreviewViewOptions, VisualPreviewScene } from "@/core/visuals";
+import { IVisualPreviewViewOptions, VisualPreviewScene } from "@/core/visuals";
+import { IVisualModelViews } from "@/core/visuals/lib/visual-views";
 import { Nullable } from "@/lib/types/general";
 
 interface IVisualPreviewViewportProps {
-  mesh: IVisualMeshData;
+  model: Nullable<IVisualModelViews>;
   options: IVisualPreviewViewOptions;
   cameraResetToken: number;
 }
@@ -16,21 +17,24 @@ interface IVisualPreviewViewportProps {
  * The scene is created per mount rather than kept in state, so react strict mode remounting rebuilds a
  * clean webgl context instead of leaking the previous one. View options are read through a ref on mount
  * so a remount restores whatever the toolbar currently shows.
+ *
+ * A new model replaces the geometry in place rather than recreating the scene, so opening one visual
+ * after another keeps the webgl context and the renderer alive.
  */
-export function VisualPreviewViewport({ mesh, options, cameraResetToken }: IVisualPreviewViewportProps): ReactElement {
+export function VisualPreviewViewport({ model, options, cameraResetToken }: IVisualPreviewViewportProps): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<Nullable<VisualPreviewScene>>(null);
   const optionsRef = useRef<IVisualPreviewViewOptions>(options);
-  const meshRef = useRef<IVisualMeshData>(mesh);
+  const modelRef = useRef<Nullable<IVisualModelViews>>(model);
 
-  meshRef.current = mesh;
+  modelRef.current = model;
 
   useEffect(() => {
     if (!containerRef.current) {
       return;
     }
 
-    const scene: VisualPreviewScene = new VisualPreviewScene(meshRef.current);
+    const scene: VisualPreviewScene = new VisualPreviewScene(modelRef.current);
 
     sceneRef.current = scene;
 
@@ -42,6 +46,11 @@ export function VisualPreviewViewport({ mesh, options, cameraResetToken }: IVisu
       scene.dispose();
     };
   }, []);
+
+  useEffect(() => {
+    sceneRef.current?.setModel(model);
+    sceneRef.current?.applyViewOptions(optionsRef.current);
+  }, [model]);
 
   useEffect(() => {
     optionsRef.current = options;

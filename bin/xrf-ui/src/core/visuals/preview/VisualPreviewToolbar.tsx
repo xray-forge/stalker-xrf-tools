@@ -2,6 +2,7 @@ import { default as CenterFocusStrongIcon } from "@mui/icons-material/CenterFocu
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { default as GridOnIcon } from "@mui/icons-material/GridOn";
 import { default as HexagonIcon } from "@mui/icons-material/Hexagon";
+import { default as TextureIcon } from "@mui/icons-material/Texture";
 import { default as ThreeDRotationIcon } from "@mui/icons-material/ThreeDRotation";
 import { default as TuneIcon } from "@mui/icons-material/Tune";
 import { Divider, IconButton, Tooltip } from "@mui/material";
@@ -11,19 +12,26 @@ import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { IVisualPreviewViewOptions } from "@/core/visuals";
 
 interface IVisualPreviewToolbarProps {
+  subtitle?: string;
   options: IVisualPreviewViewOptions;
+  isOpenEnabled: boolean;
   onChangeOptions: (options: IVisualPreviewViewOptions) => void;
   onResetCamera: () => void;
+  onOpen?: () => void;
 }
 
 /**
- * View toggles are live and drive the scene. Everything sourcing data - opening a visual, picking a
- * detail level - is present but disabled, because it needs the rust side that does not exist yet.
+ * View toggles are live and drive the scene. The detail level picker stays disabled: every detail level
+ * is already in the buffer, so it needs a range change rather than a backend, but choosing one is a
+ * later phase.
  */
 export function VisualPreviewToolbar({
+  subtitle,
   options,
+  isOpenEnabled,
   onChangeOptions,
   onResetCamera,
+  onOpen,
 }: IVisualPreviewToolbarProps): ReactElement {
   const onToggleWireframe = useCallback(() => {
     onChangeOptions({ ...options, isWireframe: !options.isWireframe });
@@ -37,22 +45,26 @@ export function VisualPreviewToolbar({
     onChangeOptions({ ...options, isAxesVisible: !options.isAxesVisible });
   }, [options, onChangeOptions]);
 
+  const onToggleChecker = useCallback(() => {
+    onChangeOptions({ ...options, isCheckerVisible: !options.isCheckerVisible });
+  }, [options, onChangeOptions]);
+
   return (
     <EditorToolbar
-      subtitle={"Stub visual"}
+      subtitle={subtitle}
       actions={
         <>
-          <Tooltip title={"Open visual (needs backend)"}>
+          <Tooltip title={isOpenEnabled ? "Open visual" : "Open visual (not available here)"}>
             <span>
-              <IconButton color={"inherit"} disabled>
+              <IconButton color={"inherit"} disabled={!isOpenEnabled} onClick={onOpen} aria-label={"Open visual"}>
                 <FolderOpenIcon />
               </IconButton>
             </span>
           </Tooltip>
 
-          <Tooltip title={"Detail level (needs backend)"}>
+          <Tooltip title={"Detail level (not implemented)"} describeChild>
             <span>
-              <IconButton color={"inherit"} disabled>
+              <IconButton color={"inherit"} disabled aria-label={"Detail level"}>
                 <TuneIcon />
               </IconButton>
             </span>
@@ -61,25 +73,51 @@ export function VisualPreviewToolbar({
           <Divider orientation={"vertical"} flexItem sx={{ marginX: 0.5, marginY: 1 }} />
 
           <Tooltip title={"Wireframe"}>
-            <IconButton color={"inherit"} sx={{ opacity: options.isWireframe ? 1 : 0.45 }} onClick={onToggleWireframe}>
+            <IconButton
+              color={"inherit"}
+              sx={{ opacity: options.isWireframe ? 1 : 0.45 }}
+              aria-label={"Wireframe"}
+              onClick={onToggleWireframe}
+            >
               <HexagonIcon />
             </IconButton>
           </Tooltip>
 
+          <Tooltip title={"Uv checkerboard"}>
+            <IconButton
+              color={"inherit"}
+              sx={{ opacity: options.isCheckerVisible ? 1 : 0.45 }}
+              aria-label={"Uv checkerboard"}
+              onClick={onToggleChecker}
+            >
+              <TextureIcon />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title={"Grid"}>
-            <IconButton color={"inherit"} sx={{ opacity: options.isGridVisible ? 1 : 0.45 }} onClick={onToggleGrid}>
+            <IconButton
+              color={"inherit"}
+              sx={{ opacity: options.isGridVisible ? 1 : 0.45 }}
+              aria-label={"Grid"}
+              onClick={onToggleGrid}
+            >
               <GridOnIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title={"Axes"}>
-            <IconButton color={"inherit"} sx={{ opacity: options.isAxesVisible ? 1 : 0.45 }} onClick={onToggleAxes}>
+            <IconButton
+              color={"inherit"}
+              sx={{ opacity: options.isAxesVisible ? 1 : 0.45 }}
+              aria-label={"Axes"}
+              onClick={onToggleAxes}
+            >
               <ThreeDRotationIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title={"Reset camera"}>
-            <IconButton color={"inherit"} onClick={onResetCamera}>
+            <IconButton color={"inherit"} aria-label={"Reset camera"} onClick={onResetCamera}>
               <CenterFocusStrongIcon />
             </IconButton>
           </Tooltip>
