@@ -55,6 +55,7 @@ CLI: `cargo make build-cli-release`
 
 ### Dev
 
+APP: `cargo tauri dev`\
 APP-BACKEND: `cargo make serve-backend`\
-APP-UI: `cargo make serve-ui`
+APP-UI: `cargo make serve-ui`\
 CLI: `cargo make build-cli`

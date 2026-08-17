@@ -14,11 +14,14 @@ mod types;
 #[cfg(all(test, feature = "typescript-bindings"))]
 mod typescript_bindings;
 mod utils;
+mod webview_extensions;
 
 use std::env;
 
 use env_logger::Builder;
 use log::LevelFilter;
+use tauri::utils::config::WindowConfig;
+use tauri::webview::WebviewWindowBuilder;
 
 use crate::archives::plugin::ArchivesPlugin;
 use crate::configs::plugin::ConfigsPlugin;
@@ -27,6 +30,7 @@ use crate::exports::plugin::ExportsPlugin;
 use crate::spawn::plugin::SpawnPlugin;
 use crate::system::plugin::SystemPlugin;
 use crate::translations::plugin::TranslationsPlugin;
+use crate::webview_extensions::DevExtensions;
 
 fn main() {
   setup_logger();
@@ -43,6 +47,23 @@ fn main() {
     .plugin(EquipmentIconsPlugin::init())
     .plugin(SystemPlugin::init())
     .plugin(TranslationsPlugin::init())
+    .setup(|app| {
+      // The window stays described by tauri.conf.json with `create: false` and is built here so a
+      // debug build can extend it with locally supplied extensions: their path reaches the webview
+      // through the builder only, the configuration has no field carrying it.
+      let window: &WindowConfig = app
+        .config()
+        .app
+        .windows
+        .first()
+        .expect("Main window has to be declared in tauri.conf.json");
+
+      WebviewWindowBuilder::from_config(app.handle(), window)?
+        .with_dev_extensions()
+        .build()?;
+
+      Ok(())
+    })
     .run(tauri::generate_context!())
     .expect("Error while running tauri application")
 }

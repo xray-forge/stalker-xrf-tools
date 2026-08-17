@@ -24,6 +24,7 @@
     "windows": [
       {
         "title": "XRF tools",
+        "create": false,
         "width": 1280,
         "height": 800,
         "minWidth": 900,
