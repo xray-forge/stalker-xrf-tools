@@ -147,7 +147,7 @@ fn mirrors_z_on_positions_and_normals() {
 }
 
 #[test]
-fn flips_the_v_coordinate_of_every_vertex() {
+fn keeps_the_texture_coordinates_of_every_vertex() {
   let child: OgfFile = OgfFile {
     geometry: Some(geometry(
       vec![
@@ -164,7 +164,7 @@ fn flips_the_v_coordinate_of_every_vertex() {
 
   assert_eq!(
     read_f32_section(&package.buffer, geometry.uvs),
-    vec![0.25, 0.25, 1.0, 1.0]
+    vec![0.25, 0.75, 1.0, 0.0]
   );
 }
 

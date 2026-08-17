@@ -16,11 +16,19 @@ pub fn convert_vector(vector: &Vector3d) -> Vector3d {
   }
 }
 
-/// Convert one texture coordinate pair, flipping V.
+/// Convert one texture coordinate pair, which is to leave it alone.
 ///
-/// OGF stores V running downwards, as Direct3D samples it; three.js samples upwards.
+/// OGF stores V running downwards, as Direct3D samples it, and the obvious conclusion is that three.js needs it flipped.
+/// That is true only of a texture three.js flipped on upload, and every texture here is a compressed DDS, which it cannot
+/// flip: `CompressedTexture` defaults `flipY` to false. The rows therefore reach the GPU in the order the file stores
+/// them - top first - so V=0 samples the top of the image exactly as Direct3D means it to, and a flip here would render
+/// every texture upside down.
+///
+/// Kept as a named conversion rather than dropped at the call site because the flip is the intuitive thing to do and
+/// somebody will reach for it again; this is where the reason not to lives. Proven on `wpn\wpn_ammo`, whose printed label
+/// reads the right way up only without it.
 pub fn convert_texture_coordinates(u: f32, v: f32) -> (f32, f32) {
-  (u, 1.0 - v)
+  (u, v)
 }
 
 /// Convert the extent an OGF header declares, so it compares against measured geometry.

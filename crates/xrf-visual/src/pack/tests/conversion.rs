@@ -13,8 +13,10 @@ fn mirrors_z_and_leaves_the_other_axes_alone() {
 }
 
 #[test]
-fn flips_v_and_leaves_u_alone() {
-  assert_eq!(convert_texture_coordinates(0.25, 0.75), (0.25, 0.25));
+fn leaves_texture_coordinates_as_the_file_stores_them() {
+  // A compressed texture cannot be flipped on upload, so its rows stay top first and Direct3D V already samples them
+  // correctly. Flipping here would render every texture upside down.
+  assert_eq!(convert_texture_coordinates(0.25, 0.75), (0.25, 0.75));
 }
 
 #[test]
