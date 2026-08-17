@@ -17,12 +17,19 @@
     -->
     <style>
       html {
-        background-color: #161719;
+        --preload-surface: #161719;
+        --preload-paper: #1e2023;
+        --preload-divider: rgba(220, 228, 235, 0.08);
+
+        background-color: var(--preload-surface);
         color-scheme: dark;
       }
 
       html[data-color-scheme="light"] {
-        background-color: #eef0f2;
+        --preload-surface: #eef0f2;
+        --preload-paper: #f7f8fa;
+        --preload-divider: rgba(20, 28, 35, 0.1);
+
         color-scheme: light;
       }
 
@@ -31,11 +38,71 @@
       }
     </style>
 
+    <style>
+      .preload {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      .preload-title-bar,
+      .preload-status-bar,
+      .preload-rail {
+        box-sizing: border-box;
+        flex-shrink: 0;
+        border: 0 solid var(--preload-divider);
+        background-color: var(--preload-paper);
+      }
+
+      .preload-title-bar {
+        height: 36px;
+        border-bottom-width: 1px;
+      }
+
+      .preload-middle {
+        display: flex;
+        flex-grow: 1;
+        min-height: 0;
+      }
+
+      .preload-rail {
+        width: 44px;
+        border-right-width: 1px;
+      }
+
+      .preload-rail-right {
+        border-right-width: 0;
+        border-left-width: 1px;
+      }
+
+      .preload-canvas {
+        flex-grow: 1;
+      }
+
+      .preload-status-bar {
+        height: 24px;
+        border-top-width: 1px;
+      }
+    </style>
+
     <title>XRF tools</title>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="preload">
+        <div class="preload-title-bar"></div>
+
+        <div class="preload-middle">
+          <div class="preload-rail"></div>
+          <div class="preload-canvas"></div>
+          <div class="preload-rail preload-rail-right"></div>
+        </div>
+
+        <div class="preload-status-bar"></div>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
