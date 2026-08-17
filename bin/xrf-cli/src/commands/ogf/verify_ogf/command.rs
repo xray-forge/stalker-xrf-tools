@@ -125,10 +125,28 @@ impl VerifyOgfCommand {
       census.bounds_disagreements
     );
 
+    xrf_output::info!(
+      output,
+      "Texture references: {} total, {} resolved, {} missing, {} unreadable, {} visuals with no root",
+      census.texture_references,
+      census.resolved_texture_references,
+      census.missing_texture_references,
+      census.unreadable_textures,
+      census.visuals_without_root
+    );
+    xrf_output::info!(
+      output,
+      "Distinct textures: {}, of which {} carry no mip chain",
+      census.distinct_textures,
+      census.textures_without_mipmaps
+    );
+
     Self::print_distribution(output, "Header versions", &census.versions);
     Self::print_distribution(output, "Root model types", &census.root_model_types);
     Self::print_distribution(output, "Submesh model types", &census.submesh_model_types);
     Self::print_distribution(output, "Vertex formats", &census.vertex_formats);
+    Self::print_distribution(output, "Texture formats", &census.texture_formats);
+    Self::print_distribution(output, "Texture sizes", &census.texture_sizes);
   }
 
   fn print_distribution<K: std::fmt::Display>(output: &OutputOptions, label: &str, counts: &BTreeMap<K, usize>) {

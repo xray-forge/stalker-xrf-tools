@@ -13,6 +13,8 @@ use xrf_db::{OgfFile, XRayByteOrder};
 use xrf_report::{CheckId, CheckReport, Finding, Report, RuleId, Status};
 use xrf_visual::{VisualBounds, VisualDescription, VisualPackage, VisualPacker, VisualSkipCause, VisualSubmesh};
 
+use crate::commands::ogf::verify_ogf::ogf_texture_resolver::{OgfTextureResolver, TextureResolution};
+
 const OGF_EXTENSION: &str = "ogf";
 
 /// Fraction of a declared bounding box's diagonal that geometry may exceed it by before it is worth
@@ -42,6 +44,15 @@ pub struct OgfVerificationCensus {
   pub root_model_types: BTreeMap<String, usize>,
   pub submesh_model_types: BTreeMap<String, usize>,
   pub vertex_formats: BTreeMap<String, usize>,
+  pub visuals_without_root: usize,
+  pub texture_references: usize,
+  pub resolved_texture_references: usize,
+  pub missing_texture_references: usize,
+  pub unreadable_textures: usize,
+  pub distinct_textures: usize,
+  pub textures_without_mipmaps: usize,
+  pub texture_formats: BTreeMap<String, usize>,
+  pub texture_sizes: BTreeMap<String, usize>,
 }
 
 impl OgfVerificationCensus {
@@ -74,6 +85,8 @@ impl<'a> OgfVerifier<'a> {
     let mut read_findings: Vec<Finding> = Vec::new();
     let mut geometry_findings: Vec<Finding> = Vec::new();
     let mut bounds_findings: Vec<Finding> = Vec::new();
+    let mut texture_findings: Vec<Finding> = Vec::new();
+    let mut textures: OgfTextureResolver = OgfTextureResolver::default();
 
     for path in self.visual_paths() {
       census.files += 1;
@@ -107,6 +120,8 @@ impl<'a> OgfVerifier<'a> {
         bounds_findings.push(finding);
       }
 
+      texture_findings.extend(self.texture_findings(&mut census, &mut textures, &path, &package.description));
+
       if package.description.submeshes.iter().all(|it| it.geometry().is_none()) {
         census.files_without_geometry += 1;
       }
@@ -128,6 +143,18 @@ impl<'a> OgfVerifier<'a> {
       false => Status::Incomplete,
     };
 
+    let texture_status: Status = if census.unreadable_textures > 0 {
+      Status::Failed
+    } else if census.missing_texture_references > 0 || census.visuals_without_root > 0 {
+      // A reference the engine would answer with its dummy, or a visual outside any root. Both are properties of the
+      // tree rather than of this tool, and both are the common case for an overlay tree.
+      Status::Incomplete
+    } else {
+      Status::Passed
+    };
+
+    census.distinct_textures = textures.distinct_textures();
+
     let duration: Duration = started_at.elapsed();
 
     OgfVerificationResult {
@@ -140,6 +167,12 @@ impl<'a> OgfVerifier<'a> {
           geometry_findings,
         ),
         CheckReport::new(Self::check("bounds"), bounds_status, Some(duration), bounds_findings),
+        CheckReport::new(
+          Self::check("textures"),
+          texture_status,
+          Some(duration),
+          texture_findings,
+        ),
       ]),
       census,
       duration,
@@ -210,6 +243,71 @@ impl<'a> OgfVerifier<'a> {
         },
       }
     }
+  }
+
+  /// Resolve every submesh's texture reference, counting formats and reporting what did not resolve.
+  ///
+  /// A miss is not a defect: the engine substitutes its own dummy for exactly this case, so the interesting output is the
+  /// distribution rather than a pass or fail. What would change the design is a format no renderer can upload.
+  fn texture_findings(
+    &self,
+    census: &mut OgfVerificationCensus,
+    textures: &mut OgfTextureResolver,
+    path: &Path,
+    description: &VisualDescription,
+  ) -> Vec<Finding> {
+    let mut findings: Vec<Finding> = Vec::new();
+
+    for submesh in &description.submeshes {
+      let Some(reference) = submesh.texture_name.as_deref() else {
+        continue;
+      };
+
+      census.texture_references += 1;
+
+      let subject: String = format!("{}#{}", self.subject(path), submesh.index);
+
+      match textures.resolve(path, reference) {
+        TextureResolution::NoRoot => {
+          census.visuals_without_root += 1;
+          findings.push(Finding::new(
+            Self::rule("visuals.textures.root_missing"),
+            Some(subject),
+            format!("No directory above the visual holds both meshes and textures, so '{reference}' cannot resolve"),
+          ));
+        }
+        TextureResolution::Missing { root } => {
+          census.missing_texture_references += 1;
+          findings.push(Finding::new(
+            Self::rule("visuals.textures.missing"),
+            Some(subject),
+            format!("'{reference}' does not resolve under {}", root.display()),
+          ));
+        }
+        TextureResolution::Unreadable { path: texture, reason } => {
+          census.unreadable_textures += 1;
+          findings.push(Finding::new(
+            Self::rule("visuals.textures.unreadable"),
+            Some(subject),
+            format!("'{}' would not parse: {reason}", texture.display()),
+          ));
+        }
+        TextureResolution::Resolved { format, metadata, .. } => {
+          census.resolved_texture_references += 1;
+          OgfVerificationCensus::count(&mut census.texture_formats, format);
+          OgfVerificationCensus::count(
+            &mut census.texture_sizes,
+            format!("{}x{}", metadata.width, metadata.height),
+          );
+
+          if metadata.mipmap_levels <= 1 {
+            census.textures_without_mipmaps += 1;
+          }
+        }
+      }
+    }
+
+    findings
   }
 
   fn geometry_findings(&self, path: &Path, description: &VisualDescription) -> Vec<Finding> {
