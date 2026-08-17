@@ -15,8 +15,11 @@ mod typescript_bindings;
 
 pub use xrf_chunk::XRayByteOrder;
 
+pub use crate::data::ogf::ogf_box::*;
 pub use crate::data::ogf::ogf_geometry::*;
+pub use crate::data::ogf::ogf_motion::*;
 pub use crate::data::ogf::ogf_slide_window::*;
+pub use crate::data::ogf::ogf_sphere::*;
 pub use crate::data::ogf::ogf_vertex::*;
 pub use crate::data::ogf::ogf_vertices::*;
 pub use crate::data::{
@@ -63,8 +66,15 @@ pub use crate::level::level_file::*;
 pub use crate::level::level_header_chunk::*;
 pub use crate::level::level_shader_entry::*;
 pub use crate::level::level_shaders_chunk::*;
+pub use crate::data::ogf::ogf_bone::OgfBone;
+pub use crate::ogf::chunks::{
+  ogf_bones_chunk::OgfBonesChunk, ogf_children_chunk::OgfChildrenChunk, ogf_description_chunk::OgfDescriptionChunk,
+  ogf_header_chunk::OgfHeaderChunk, ogf_kinematics_chunk::OgfKinematicsChunk, ogf_swi_data_chunk::OgfSwiDataChunk,
+  ogf_texture_chunk::OgfTextureChunk,
+};
 pub use crate::ogf::ogf_chunks_processor::*;
 pub use crate::ogf::ogf_file::*;
+pub use crate::omf::chunks::omf_motions_chunk::OmfMotionsChunk;
 pub use crate::ogf::ogf_motion_refs_processor::*;
 pub use crate::ogf::ogf_refs_patch_report::*;
 pub use crate::ogf::ogf_texture_refs_processor::*;

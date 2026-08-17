@@ -6821,6 +6821,7 @@ dependencies = [
  "xrf-texture",
  "xrf-translation",
  "xrf-utils",
+ "xrf-visual",
 ]
 
 [[package]]
@@ -6886,6 +6887,7 @@ dependencies = [
  "xrf-report",
  "xrf-texture",
  "xrf-translation",
+ "xrf-visual",
 ]
 
 [[package]]
@@ -7103,6 +7105,15 @@ dependencies = [
  "base64 0.23.1",
  "encoding_rs",
  "xrf-error",
+]
+
+[[package]]
+name = "xrf-visual"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "specta",
+ "xrf-db",
 ]
 
 [[package]]

@@ -24,6 +24,7 @@ members = [
   "crates/xrf-typescript",
   "crates/xrf-translation",
   "crates/xrf-utils",
+  "crates/xrf-visual",
   "crates/xrf-xml",
 ]
 
@@ -73,6 +74,7 @@ xrf-texture = { path = "crates/xrf-texture" }
 xrf-translation = { path = "crates/xrf-translation" }
 xrf-typescript = { path = "crates/xrf-typescript" }
 xrf-utils = { path = "crates/xrf-utils" }
+xrf-visual = { path = "crates/xrf-visual" }
 xrf-xml = { path = "crates/xrf-xml" }
 
 [profile.release]
