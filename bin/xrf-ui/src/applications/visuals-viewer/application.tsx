@@ -1,6 +1,7 @@
 import { default as ViewInArIcon } from "@mui/icons-material/ViewInAr";
 import { lazy } from "react";
 
+import { VisualsService } from "@/applications/visuals-viewer/store/visuals";
 import {
   EApplicationGroupId,
   EApplicationId,
@@ -10,6 +11,7 @@ import {
 
 export const VISUALS_VIEWER_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() => import("./VisualsViewerApplication").then((it) => ({ default: it.VisualsViewerApplication }))),
+  container: { bindings: [VisualsService] },
   preload: () => import("./VisualsViewerApplication"),
   description: "Preview a game visual in 3D",
   group: EApplicationGroupId.VISUALS,

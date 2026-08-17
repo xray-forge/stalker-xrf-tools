@@ -1,12 +1,24 @@
 import { default as ExpandLessIcon } from "@mui/icons-material/ExpandLess";
 import { default as ExpandMoreIcon } from "@mui/icons-material/ExpandMore";
-import { Alert, Box, Button, Card, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CircularProgress,
+  Divider,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { FormEvent, KeyboardEvent, ReactElement, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";
+import { DELAYED_REVEAL_SX } from "@/core/ui/layout/delayed-reveal";
 import { Maybe } from "@/lib/types/general";
 
 /** Wide enough for a full windows path at the monospace size the picker rows use. */
@@ -163,7 +175,13 @@ export function PickerForm({
               {secondaryActions}
 
               {submitLabel ? (
-                <Button type={"submit"} variant={"contained"} disabled={isSubmitDisabled || isLoading}>
+                <Button
+                  type={"submit"}
+                  variant={"contained"}
+                  startIcon={
+                    isLoading ? <CircularProgress size={16} color={"inherit"} sx={DELAYED_REVEAL_SX} /> : undefined
+                  }
+                >
                   {submitLabel}
                 </Button>
               ) : null}
