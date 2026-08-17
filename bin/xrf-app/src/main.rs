@@ -14,6 +14,7 @@ mod types;
 #[cfg(all(test, feature = "typescript-bindings"))]
 mod typescript_bindings;
 mod utils;
+mod visuals;
 mod webview_extensions;
 
 use std::env;
@@ -30,6 +31,7 @@ use crate::exports::plugin::ExportsPlugin;
 use crate::spawn::plugin::SpawnPlugin;
 use crate::system::plugin::SystemPlugin;
 use crate::translations::plugin::TranslationsPlugin;
+use crate::visuals::plugin::VisualsPlugin;
 use crate::webview_extensions::DevExtensions;
 
 fn main() {
@@ -47,6 +49,7 @@ fn main() {
     .plugin(EquipmentIconsPlugin::init())
     .plugin(SystemPlugin::init())
     .plugin(TranslationsPlugin::init())
+    .plugin(VisualsPlugin::init())
     .setup(|app| {
       // The window stays described by tauri.conf.json with `create: false` and is built here so a
       // debug build can extend it with locally supplied extensions: their path reaches the webview

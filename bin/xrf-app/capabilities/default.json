@@ -34,6 +34,7 @@
     "equipment-icons:default",
     "spawn:default",
     "system:default",
-    "translations:default"
+    "translations:default",
+    "visuals:default"
   ]
 }

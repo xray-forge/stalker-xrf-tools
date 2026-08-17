@@ -37,7 +37,9 @@ fn resolve_extensions_directory() -> Option<PathBuf> {
 
   let directory: PathBuf = match std::env::var_os(DIRECTORY_ENV) {
     Some(path) => PathBuf::from(path),
-    None => PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("extensions").join("unpacked"),
+    None => PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+      .join("extensions")
+      .join("unpacked"),
   };
 
   let entries: Vec<PathBuf> = std::fs::read_dir(&directory)

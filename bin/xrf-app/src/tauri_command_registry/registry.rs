@@ -57,6 +57,16 @@ macro_rules! for_each_tauri_command_domain {
       system => "system" {
         reveal_path => crate::system::commands::reveal_path::system_reveal_path,
       }
+      visuals => "visuals" {
+        close_model => crate::visuals::commands::close_model::visuals_close_model,
+        get_model => crate::visuals::commands::get_model::visuals_get_model,
+        open_model => crate::visuals::commands::open_model::visuals_open_model,
+      }
+      // Returns `tauri::ipc::Response`, so it is dispatched and permitted like any command but cannot join
+      // the Specta collection.
+      @raw {
+        read_geometry(source: "VisualSource") => crate::visuals::commands::read_geometry::visuals_read_geometry,
+      }
       translations => "translations" {
         close_project => crate::translations::commands::close_project::translations_close_project,
         detect_mode => crate::translations::commands::detect_mode::translations_detect_mode,

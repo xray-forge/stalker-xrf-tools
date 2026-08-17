@@ -6727,6 +6727,60 @@
           "type": "string",
           "const": "translations:deny-validate-text",
           "markdownDescription": "Denies the validate_text command without any pre-configured scope."
+        },
+        {
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`",
+          "type": "string",
+          "const": "visuals:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`"
+        },
+        {
+          "description": "Enables the close_model command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:allow-close-model",
+          "markdownDescription": "Enables the close_model command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_model command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:allow-get-model",
+          "markdownDescription": "Enables the get_model command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the open_model command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:allow-open-model",
+          "markdownDescription": "Enables the open_model command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the read_geometry command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:allow-read-geometry",
+          "markdownDescription": "Enables the read_geometry command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the close_model command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:deny-close-model",
+          "markdownDescription": "Denies the close_model command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_model command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:deny-get-model",
+          "markdownDescription": "Denies the get_model command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the open_model command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:deny-open-model",
+          "markdownDescription": "Denies the open_model command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the read_geometry command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:deny-read-geometry",
+          "markdownDescription": "Denies the read_geometry command without any pre-configured scope."
         }
       ]
     },

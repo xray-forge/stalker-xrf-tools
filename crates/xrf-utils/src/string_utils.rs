@@ -68,14 +68,49 @@ pub fn vector_from_string_sep_sized<T: FromStr>(string: &str, sep: &str, size: u
   }
 }
 
+/// Convert a snake or kebab case identifier to camel case.
+///
+/// Separators are dropped and the character after each is upper cased; nothing else is touched, so an already camel case
+/// string survives unchanged. Used where a wire name has to become a JavaScript identifier.
+pub fn to_camel_case(value: &str) -> String {
+  let mut camel: String = String::with_capacity(value.len());
+  let mut capitalize_next: bool = false;
+
+  for character in value.chars() {
+    match character {
+      '_' | '-' => capitalize_next = true,
+      _ if capitalize_next => {
+        camel.extend(character.to_uppercase());
+        capitalize_next = false;
+      }
+      _ => camel.push(character),
+    }
+  }
+
+  camel
+}
+
 #[cfg(test)]
 mod tests {
   use xrf_error::XrfResult;
 
   use crate::{
-    vector_from_string, vector_from_string_sep, vector_from_string_sep_sized, vector_from_string_sized,
+    to_camel_case, vector_from_string, vector_from_string_sep, vector_from_string_sep_sized, vector_from_string_sized,
     vector_to_string, vector_to_string_sep,
   };
+
+  #[test]
+  fn test_to_camel_case() {
+    assert_eq!(to_camel_case("read_geometry"), "readGeometry");
+    assert_eq!(to_camel_case("equipment-icons"), "equipmentIcons");
+    assert_eq!(to_camel_case("open"), "open");
+    assert_eq!(to_camel_case("alreadyCamel"), "alreadyCamel");
+    assert_eq!(to_camel_case("read_ogf_file"), "readOgfFile");
+    assert_eq!(to_camel_case(""), "");
+    // A trailing separator has nothing to raise, and must not panic or leave the separator behind.
+    assert_eq!(to_camel_case("trailing_"), "trailing");
+    assert_eq!(to_camel_case("__leading"), "Leading");
+  }
 
   #[test]
   fn test_vector_to_string() -> XrfResult {

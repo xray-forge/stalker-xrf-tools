@@ -37,6 +37,7 @@ xrf-sound = { workspace = true }
 xrf-texture = { workspace = true }
 xrf-utils = { workspace = true }
 xrf-translation = { workspace = true }
+xrf-visual = { workspace = true }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
@@ -55,6 +56,7 @@ typescript-bindings = [
     "xrf-ltx/typescript-bindings",
     "xrf-texture/typescript-bindings",
     "xrf-translation/typescript-bindings",
+    "xrf-visual/typescript-bindings",
 ]
 
 [lints]
