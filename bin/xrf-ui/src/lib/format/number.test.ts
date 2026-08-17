@@ -20,8 +20,29 @@ describe("formatNumber", () => {
     expect(formatNumber(Number.NEGATIVE_INFINITY, 3)).toBe(ABSENT_VALUE);
   });
 
-  it("accepts a caller's own placeholder", () => {
+  it("accepts a caller's own placeholder for every absent case", () => {
     expect(formatNumber(null, 3, "unknown")).toBe("unknown");
+    expect(formatNumber(Number.NaN, 3, "unknown")).toBe("unknown");
+    expect(formatNumber(Number.POSITIVE_INFINITY, 3, "unknown")).toBe("unknown");
+  });
+
+  it("ignores the placeholder when there is a number to render", () => {
     expect(formatNumber(1, 1, "unknown")).toBe("1.0");
+    expect(formatNumber(0, 0, "unknown")).toBe("0");
+  });
+
+  it("accepts an empty placeholder, for a surface that wants the value simply gone", () => {
+    // Distinct from the default: a table cell may prefer blank to a dash, and `""` must not fall back to it.
+    expect(formatNumber(null, 2, "")).toBe("");
+  });
+
+  it("defaults to the shared placeholder when a caller supplies none", () => {
+    expect(formatNumber(null, 2)).toBe(ABSENT_VALUE);
+  });
+
+  it("rounds rather than truncating, and keeps negative zero readable", () => {
+    expect(formatNumber(1.005, 2)).toBe("1.00");
+    expect(formatNumber(1.006, 2)).toBe("1.01");
+    expect(formatNumber(-0.0001, 2)).toBe("-0.00");
   });
 });
