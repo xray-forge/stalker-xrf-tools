@@ -178,6 +178,7 @@ export function PickerForm({
                 <Button
                   type={"submit"}
                   variant={"contained"}
+                  disabled={isSubmitDisabled || isLoading}
                   startIcon={
                     isLoading ? <CircularProgress size={16} color={"inherit"} sx={DELAYED_REVEAL_SX} /> : undefined
                   }
